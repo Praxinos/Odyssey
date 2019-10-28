@@ -17,26 +17,32 @@ class SOdysseySurfaceViewport;
 class UTexture2D;
 class FOdysseyMeshSelector;
 
-
-
-enum class eControlType
-{
-    kDrawing,
-    kRotating,
-    kZooming,
-    kPanning,
-    kPicking,
-    kNothing
-};
-
-
-enum class eActivationType
-{
-    kToggle, //We pressed a key and when we'll release it, and the control type is active until we release it
-    kOn, //We selected a controlType from a button in the tool selector. Left click or penButton1 triggers the control type
-    kOff
-};
-
+//
+//                                                                                                         MouseWheelUp/Down
+//                                                                                                            ┌────►────┐
+//                                                                                                            │         │
+//                                  ╔═════════════════════════════════════════════════════════════════════════╧═════════╧══════════════════╗
+//              ┌───────────────────╢                                             kIdle                                                    ╟───────┐
+//              │                   ╚═╤═══════════════════╤═══════════════════╤══════════════════╤═══════════════════╤════════════════╤════╝       │
+//              │                     │                   │                   │                  │                   │                │            │
+//  'P' pressed ▼        'P' released ▲       'R' pressed ▼      'R' released ▲    'Alt' pressed ▼    'Alt' released ▲    LMB pressed ▼            ▲ LMB released
+//              │                     │                   │                   │                  │                   │                │            │
+//      ╔═══════╧═══════════╗         │           ╔═══════╧═══════════╗       │          ╔═══════╧═══════════╗       │             ╔══╧════════════╧═══╗
+//      ║       kPan        ╟─────────┤           ║     kRotate       ╟───────┤          ║      kPick        ╟───────┤             ║     kDrawing      ║
+//      ╚═══════╤══╤════════╝         │           ╚═══════╤══╤════════╝       │          ╚═══════╤══╤════════╝       │             ╚════╤═════════╤════╝
+//              │  │                  │                   │  │                │                  │  │                │                  │         │
+//  LMB pressed ▼  ▲ LMB released     │       LMB pressed ▼  ▲ LMB released   │      LMB pressed ▼  ▲ LMB released   │                  └────►────┘
+//              │  │                  │                   │  │                │                  │  │                │                   LMB move  
+//      ╔═══════╧══╧════════╗         │           ╔═══════╧══╧════════╗       │          ╔═══════╧══╧════════╗       │
+//      ║     kPanning      ╟─────────┘           ║     kRotating     ╟───────┘          ║     kPicking      ╟───────┘
+//      ╚════╤═════════╤════╝                     ╚════╤═════════╤════╝                  ╚════╤═════════╤════╝
+//           │         │                               │         │                            │         │
+//           └────►────┘                               └────►────┘                            └────►────┘
+//            LMB move                                  LMB move                               LMB move
+//  
+//  
+//  https://unicode-table.com/fr/#2500 ──◄──
+//                         
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportClient
@@ -45,6 +51,19 @@ class FOdysseyPainterEditorViewportClient
     , public FGCObject
 {
 public:
+    enum class eState
+    {
+        kIdle,
+        kDrawing,
+        kRotate,
+        kRotating,
+        kPan,
+        kPanning,
+        kPick,
+        kPicking,
+    };
+
+public:
     // Construction / Destruction
     FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit > InTextureEditor, TWeakPtr< SOdysseySurfaceViewport > InTextureEditorViewport, FOdysseyMeshSelector* InMeshSelector );
     ~FOdysseyPainterEditorViewportClient();
@@ -52,14 +71,12 @@ public:
 public:
     // FViewportClient API
     virtual void  Draw( FViewport* Viewport, FCanvas* Canvas )  override;
+
     virtual bool  InputKey( FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed = 1.0f, bool bGamepad = false )  override;
     virtual void  CapturedMouseMove( FViewport* Viewport, int32 X, int32 Y )  override;
-    virtual EMouseCursor::Type  GetCursor( FViewport* Viewport,int32 X,int32 Y )  override;
+
+    virtual EMouseCursor::Type                  GetCursor( FViewport* Viewport,int32 X,int32 Y )  override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* Viewport, const FCursorReply& CursorReply ) override;
-    // Tablet API
-    //ODYSSEY: TABLET HANDLE BEGIN
-    //virtual void  TabletPenDataReceived( FViewport* Viewport, const FTabletEvent& TabletEvent )  override;
-    //ODYSSEY: TABLET HANDLE END
 
 public:
     // FGCObject API
@@ -75,10 +92,10 @@ private:
     void        UpdateScrollBars();
     FVector2D   GetViewportScrollBarPositions() const;
     void        DestroyCheckerboardTexture();
-    void        ZoomInInViewport( FViewport* Viewport );
-    void        ZoomOutInViewport( FViewport* Viewport );
+    void        ZoomInInViewport( const FVector2D& iPositionInViewport );
+    void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
     double      GetZoom() const;
-    FVector2D   GetLocalMousePosition( FViewport* Viewport )  const;
+    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport )  const;
     void DrawUVsOntoViewport(FViewport* InViewport, FCanvas* InCanvas, int32 UVChannel, FStaticMeshVertexBuffer& VertexBuffer, FIndexArrayView& Indices );
 
 private:
@@ -91,7 +108,6 @@ private:
     EMouseCursor::Type                      CurrentMouseCursor;
     float                                   RotationReference; // The reference from which we determine the new rotation
     FVector2D                               PanReference; //Where did we begin the pan ?
-    bool                                    bLeftMouseDown;
 
-    TPair< eControlType, eActivationType >  CurrentToolState;
+    eState                                  CurrentToolState;
 };

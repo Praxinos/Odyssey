@@ -39,14 +39,13 @@
 FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit >  InOdysseyPainterEditor,
                                                                           TWeakPtr< SOdysseySurfaceViewport >       InOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     InMeshSelector)
-    : OdysseyPainterEditorPtr(          InOdysseyPainterEditor )
-    , OdysseyPainterEditorViewportPtr(  InOdysseyPainterEditorViewport )
-    , MeshSelector(                     InMeshSelector )
-    , CheckerboardTexture(              NULL )
-    , RefEventStrokePoint(              FOdysseyStrokePoint() )
-    , CurrentMouseCursor(               EMouseCursor::Default )
-    , bLeftMouseDown( false )
-    , CurrentToolState(                 TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff ) )
+    : OdysseyPainterEditorPtr( InOdysseyPainterEditor )
+    , OdysseyPainterEditorViewportPtr( InOdysseyPainterEditorViewport )
+    , MeshSelector( InMeshSelector )
+    , CheckerboardTexture( NULL )
+    , RefEventStrokePoint( FOdysseyStrokePoint() )
+    , CurrentMouseCursor( EMouseCursor::Default )
+    , CurrentToolState( eState::kIdle )
 
 {
     check( OdysseyPainterEditorPtr.IsValid() &&
@@ -73,14 +72,14 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
     // Draw on tick or catch up
     auto paintengine = OdysseyPainterEditorPtr.Pin()->PaintEngine();
     FVector2D oldpoint = FVector2D( RefEventStrokePoint.x, RefEventStrokePoint.y );
-    FVector2D position = GetLocalMousePosition( Viewport );
-    if( bLeftMouseDown
-    &&  CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kDrawing, eActivationType::kToggle )
-    &&  ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position ) ) )
+    FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+    FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+    if( CurrentToolState == eState::kDrawing
+    &&  ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position_in_texture ) ) )
     {
         FOdysseyStrokePoint point = RefEventStrokePoint;
-        point.x = position.X;
-        point.y = position.Y;
+        point.x = position_in_texture.X;
+        point.y = position_in_texture.Y;
         paintengine->PushStroke( point );
     }
 
@@ -187,98 +186,161 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
 bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed, bool Gamepad )
 {
-    if( Key == EKeys::MouseScrollUp )
+    if( CurrentToolState == eState::kIdle )
     {
-        ZoomInInViewport(Viewport);
-        return true;
-    }
-    else if( Key == EKeys::MouseScrollDown )
-    {
-        ZoomOutInViewport(Viewport);
-        return true;
-    }
-    else if( ( Key == EKeys::MiddleMouseButton || Key == EKeys::R ) && Event == EInputEvent::IE_Pressed
-               && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff ) )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kRotating, eActivationType::kToggle );
+        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kDrawing;
 
-        FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
+            FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+            FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+            FOdysseyStrokePoint point = RefEventStrokePoint;
+            point.x = position_in_texture.X;
+            point.y = position_in_texture.Y;
+            OdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point );
 
-        FVector2D DeltaCenter = GetLocalMousePosition( Viewport ) - center;
-
-        RotationReference = FMath::Atan2( -DeltaCenter.Y, DeltaCenter.X );
-    }
-    else if( !bLeftMouseDown && ( Key == EKeys::Escape && Event == EInputEvent::IE_Pressed ) )
-    {
-        OdysseyPainterEditorPtr.Pin()->PaintEngine()->AbortStroke();
-    }
-    else if(  CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff )
-          &&  FSlateApplication::Get().GetModifierKeys().IsAltDown() )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle );
-    }
-    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ )
-         && Event == EInputEvent::IE_Pressed
-         &&  CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle ) )
-    {
-        FVector2D position = GetLocalMousePosition( Viewport );
-        OdysseyPainterEditorPtr.Pin()->SetColor( OdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position.X, position.Y ) );
-    }
-    else if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle )
-         &&  !(FSlateApplication::Get().GetModifierKeys().IsAltDown()) )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff );
-    }
-    else if( ( Key == EKeys::MiddleMouseButton || Key == EKeys::R ) && Event == EInputEvent::IE_Released
-               && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kRotating, eActivationType::kToggle ) )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff );
-    }
-    else if( Key == EKeys::P && Event == EInputEvent::IE_Pressed
-             && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff ) )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kPanning, eActivationType::kToggle );
-    }
-    else if( Key == EKeys::P && Event == EInputEvent::IE_Released
-             && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPanning, eActivationType::kToggle ) )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff );
-    }
-    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ ) && Event == EInputEvent::IE_Pressed
-               && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff ) )
-    {
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kDrawing, eActivationType::kToggle );
-
-        FVector2D position = GetLocalMousePosition( Viewport );
-        FOdysseyStrokePoint point = RefEventStrokePoint;
-        point.x = position.X;
-        point.y = position.Y;
-        OdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point );
-        bLeftMouseDown = true;
-    }
-    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/) && Event == EInputEvent::IE_Pressed
-               && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPanning, eActivationType::kToggle ) )
-    {
-        PanReference = FVector2D( Viewport->GetMouseX(), Viewport->GetMouseY() );
-    }
-    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ ) && Event == EInputEvent::IE_Pressed
-               && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kRotating, eActivationType::kToggle ) )
-    {
-        FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
-
-        FVector2D DeltaCenter = GetLocalMousePosition( Viewport ) - center;
-
-        RotationReference = FMath::Atan2( -DeltaCenter.Y, DeltaCenter.X );
-    }
-    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ ) && Event == EInputEvent::IE_Released
-               && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kDrawing, eActivationType::kToggle ) )
-    {
-        bLeftMouseDown = false;
-        CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff );
-        OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
-        RefEventStrokePoint = FOdysseyStrokePoint(0, 0, 0, 1, 0, 0, 0, 0, 0, 0);
+            return true;
+        }
+        else if( Key == EKeys::Escape && Event == EInputEvent::IE_Pressed )
+        {
+            OdysseyPainterEditorPtr.Pin()->PaintEngine()->AbortStroke();
+            return true;
+        }
+        else if( Key == EKeys::P && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kPan;
+            return true;
+        }
+        else if( Key == EKeys::R && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kRotate;
+            return true;
+        }
+        else if( Key == EKeys::LeftAlt && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kPick;
+            return true;
+        }
+        else if( Key == EKeys::MouseScrollUp )
+        {
+            FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+            ZoomInInViewport( position_in_viewport );
+            return true;
+        }
+        else if( Key == EKeys::MouseScrollDown )
+        {
+            FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+            ZoomOutInViewport( position_in_viewport );
+            return true;
+        }
     }
 
+    else if( CurrentToolState == eState::kDrawing )
+    {
+        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+
+            OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
+            RefEventStrokePoint = FOdysseyStrokePoint( 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ); // still useful ?
+            return true;
+        }
+    }
+
+    else if( CurrentToolState == eState::kRotate )
+    {
+        if( Key == EKeys::R && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+            return true;
+        }
+        else if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kRotating;
+
+            FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
+            FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+            FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+            FVector2D DeltaCenter = position_in_texture - center;
+            RotationReference = FMath::Atan2( -DeltaCenter.Y, DeltaCenter.X );
+
+            return true;
+        }
+    }
+    else if( CurrentToolState == eState::kRotating )
+    {
+        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kRotate;
+            return true;
+        }
+        else if( Key == EKeys::R && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+            return true;
+        }
+    }
+
+    else if( CurrentToolState == eState::kPan )
+    {
+        if( Key == EKeys::P && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+            return true;
+        }
+        else if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kPanning;
+
+            PanReference = FVector2D( Viewport->GetMouseX(), Viewport->GetMouseY() );
+            return true;
+        }
+    }
+    else if( CurrentToolState == eState::kPanning )
+    {
+        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kPan;
+            return true;
+        }
+        else if( Key == EKeys::P && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+            return true;
+        }
+    }
+
+    else if( CurrentToolState == eState::kPick )
+    {
+        if( Key == EKeys::LeftAlt && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+            return true;
+        }
+        else if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        {
+            CurrentToolState = eState::kPicking;
+
+            FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+            FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+            OdysseyPainterEditorPtr.Pin()->SetColor( OdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
+
+            return true;
+        }
+    }
+    else if( CurrentToolState == eState::kPicking )
+    {
+        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kPick;
+            return true;
+        }
+        else if( Key == EKeys::LeftAlt && Event == EInputEvent::IE_Released )
+        {
+            CurrentToolState = eState::kIdle;
+            return true;
+        }
+    }
 
     return  false;
 }
@@ -287,10 +349,31 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* Viewport, int32 X, int32 Y )
 {
-    if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kRotating, eActivationType::kToggle ) )
+    if( CurrentToolState == eState::kDrawing )
+    {
+        auto paintengine = OdysseyPainterEditorPtr.Pin()->PaintEngine();
+        if( paintengine->GetStokePaintOnTick() )
+            return;
+
+        FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+        FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+        FOdysseyStrokePoint point = RefEventStrokePoint;
+        point.x = position_in_texture.X;
+        point.y = position_in_texture.Y;
+        paintengine->PushStroke( point );
+    }
+    else if( CurrentToolState == eState::kPanning )
+    {
+        FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+        OdysseyPainterEditorViewportPtr.Pin()->AddPan( position_in_viewport - PanReference );
+        PanReference = position_in_viewport;
+    }
+    else if( CurrentToolState == eState::kRotating )
     {
         FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
-        FVector2D deltaCenter = GetLocalMousePosition( Viewport ) - center;
+        FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+        FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+        FVector2D deltaCenter = position_in_texture - center;
         float newRotation = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
         float deltaRotation = RotationReference - newRotation;
 
@@ -298,28 +381,11 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* Viewport, int
 
         RotationReference = newRotation + deltaRotation;
     }
-    else if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPanning, eActivationType::kToggle ) )
+    else if( CurrentToolState == eState::kPicking )
     {
-        FVector2D ViewportPosition = FVector2D( Viewport->GetMouseX(), Viewport->GetMouseY() );
-        OdysseyPainterEditorViewportPtr.Pin()->AddPan( ViewportPosition - PanReference );
-        PanReference = ViewportPosition;
-    }
-    else if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle ) )
-    {
-        FVector2D position = GetLocalMousePosition( Viewport );
-        OdysseyPainterEditorPtr.Pin()->SetColor( OdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position.X, position.Y ) );
-    }
-    else if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kDrawing, eActivationType::kToggle ) )
-    {
-        auto paintengine = OdysseyPainterEditorPtr.Pin()->PaintEngine();
-        if( paintengine->GetStokePaintOnTick() )
-            return;
-
-        FVector2D position = GetLocalMousePosition( Viewport );
-        FOdysseyStrokePoint point = RefEventStrokePoint;
-        point.x = position.X;
-        point.y = position.Y;
-        paintengine->PushStroke( point );
+        FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+        FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+        OdysseyPainterEditorPtr.Pin()->SetColor( OdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
     }
 }
 
@@ -327,9 +393,9 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* Viewport, int
 EMouseCursor::Type
 FOdysseyPainterEditorViewportClient::GetCursor( FViewport* Viewport,int32 X,int32 Y )
 {
-    if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPanning, eActivationType::kToggle ) )
+    if( CurrentToolState == eState::kPan || CurrentToolState == eState::kPanning )
         CurrentMouseCursor = EMouseCursor::GrabHand;
-    else if( CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle ) )
+    else if( CurrentToolState == eState::kPick || CurrentToolState == eState::kPicking )
         CurrentMouseCursor = EMouseCursor::EyeDropper;
     else
         CurrentMouseCursor = EMouseCursor::Crosshairs;
@@ -343,55 +409,6 @@ FOdysseyPainterEditorViewportClient::MapCursor( FViewport* Viewport, const FCurs
 {
     return  FViewportClient::MapCursor( Viewport, CursorReply );
 }
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------- Tablet API
-//ODYSSEY: TABLET HANDLE BEGIN
-/*
-void
-FOdysseyPainterEditorViewportClient::TabletPenDataReceived( FViewport* Viewport, const FTabletEvent& TabletEvent )
-{
-    if( TabletEvent.GetState() == TabletEventState::Pressed )
-    {
-        RefEventStrokePoint = FOdysseyStrokePoint( 0
-                                         , 0
-                                         , TabletEvent.GetZ()
-                                         , TabletEvent.GetNormalPressure()
-                                         , TabletEvent.GetAltitude()
-                                         , TabletEvent.GetAzimuth()
-                                         , TabletEvent.GetTwist()
-                                         , TabletEvent.GetPitch()
-                                         , TabletEvent.GetRoll()
-                                         , TabletEvent.GetYaw() );
-
-
-        InputKey( Viewport, 0, EKeys::PenButton1, EInputEvent::IE_Pressed, 0.f, false );
-    }
-    else if( TabletEvent.GetState() == TabletEventState::Moved )
-    {
-        if ( TabletEvent.GetNormalPressure() != 0.f)
-        {
-            RefEventStrokePoint = FOdysseyStrokePoint(0
-                , 0
-                , TabletEvent.GetZ()
-                , TabletEvent.GetNormalPressure()
-                , TabletEvent.GetAltitude()
-                , TabletEvent.GetAzimuth()
-                , TabletEvent.GetTwist()
-                , TabletEvent.GetPitch()
-                , TabletEvent.GetRoll()
-                , TabletEvent.GetYaw());
-
-            CapturedMouseMove(Viewport, TabletEvent.GetScreenSpacePosition().X, TabletEvent.GetScreenSpacePosition().Y);
-        }
-    }
-    else if( TabletEvent.GetState() == TabletEventState::Released )
-    {
-        InputKey( Viewport, 0, EKeys::PenButton1, EInputEvent::IE_Released, 0.f, false );
-    }
-}
-*/
-//ODYSSEY: TABLET HANDLE END
 
 
 //--------------------------------------------------------------------------------------
@@ -526,7 +543,7 @@ FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 
 
 void
-FOdysseyPainterEditorViewportClient::ZoomInInViewport(FViewport* Viewport)
+FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositionInViewport )
 {
     FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
@@ -548,10 +565,10 @@ FOdysseyPainterEditorViewportClient::ZoomInInViewport(FViewport* Viewport)
     float VDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
     float HDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
 
-    float xCursorOnViewport = Viewport->GetMouseX();
-    float yCursorOnViewport = Viewport->GetMouseY();
+    float xCursorOnViewport = iPositionInViewport.X;
+    float yCursorOnViewport = iPositionInViewport.Y;
 
-    FIntPoint size = Viewport->GetSizeXY();
+    FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
 
     float ratioX = (xCursorOnViewport - Pan.X) / FMath::Max(float(size.X), 1.f);
     float ratioY = (yCursorOnViewport - Pan.Y) / FMath::Max(float(size.Y), 1.f);
@@ -563,7 +580,7 @@ FOdysseyPainterEditorViewportClient::ZoomInInViewport(FViewport* Viewport)
 }
 
 void
-FOdysseyPainterEditorViewportClient::ZoomOutInViewport(FViewport* Viewport)
+FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositionInViewport )
 {
     FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
@@ -585,10 +602,10 @@ FOdysseyPainterEditorViewportClient::ZoomOutInViewport(FViewport* Viewport)
     float VDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
     float HDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
 
-    float xCursorOnViewport = Viewport->GetMouseX();
-    float yCursorOnViewport = Viewport->GetMouseY();
+    float xCursorOnViewport = iPositionInViewport.X;
+    float yCursorOnViewport = iPositionInViewport.Y;
 
-    FIntPoint size = Viewport->GetSizeXY();
+    FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
 
     float ratioX = (xCursorOnViewport - Pan.X) / FMath::Max(float(size.X), 1.f);
     float ratioY = (yCursorOnViewport - Pan.Y) / FMath::Max(float(size.Y), 1.f);
@@ -624,7 +641,7 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
 
 
 FVector2D
-FOdysseyPainterEditorViewportClient::GetLocalMousePosition( FViewport* Viewport )  const
+FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport )  const
 {
     double zoom = GetZoom();
     FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
@@ -633,7 +650,7 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( FViewport* Viewport 
     FVector2D ViewportSize = FVector2D(OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y);
     int32 YOffset = (Ratio.Y > 1.0f) ? ((ViewportSize.Y - (ViewportSize.Y / Ratio.Y)) * 0.5f) : 0;
     int32 XOffset = (Ratio.X > 1.0f) ? ((ViewportSize.X - (ViewportSize.X / Ratio.X)) * 0.5f) : 0;
-    FVector2D position = FVector2D ((Viewport->GetMouseX() + TextureViewportPosition.X - XOffset - Pan.X) / zoom, (Viewport->GetMouseY() + TextureViewportPosition.Y - YOffset - Pan.Y) / zoom);
+    FVector2D position = FVector2D (( iMouseInViewport.X + TextureViewportPosition.X - XOffset - Pan.X) / zoom, ( iMouseInViewport.Y + TextureViewportPosition.Y - YOffset - Pan.Y) / zoom);
 
     if( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
     {
