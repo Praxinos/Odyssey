@@ -1,0 +1,42 @@
+// Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/ObjectMacros.h"
+#include <ULIS_BLENDINGMODES>
+#include "OdysseyBrushBlending.generated.h"
+
+UENUM()
+enum class EOdysseyBlendingMode : uint8
+{
+      kNormal           UMETA( DisplayName = "Normal"           )
+    , kErase            UMETA( DisplayName = "Erase"            )
+    , kBehind           UMETA( DisplayName = "Behind"           )
+    , kDissolve         UMETA( DisplayName = "Dissolve"         )
+    , kDarken           UMETA( DisplayName = "Darken"           )
+    , kMultiply         UMETA( DisplayName = "Multiply"         )
+    , kColorBurn        UMETA( DisplayName = "ColorBurn"        )
+    , kLinearBurn       UMETA( DisplayName = "LinearBurn"       )
+    , kDarkerColor      UMETA( DisplayName = "DarkerColor"      )
+    , kLighten          UMETA( DisplayName = "Lighten"          )
+    , kScreen           UMETA( DisplayName = "Screen"           )
+    , kColorDodge       UMETA( DisplayName = "ColorDodge"       )
+    , kLinearDodge      UMETA( DisplayName = "LinearDodge"      )
+    , kLighterColor     UMETA( DisplayName = "LighterColor"     )
+    , kOverlay          UMETA( DisplayName = "Overlay"          )
+    , kSoftLight        UMETA( DisplayName = "SoftLight"        )
+    , kHardLight        UMETA( DisplayName = "HardLight"        )
+    , kVividLight       UMETA( DisplayName = "VividLight"       )
+    , kLinearLight      UMETA( DisplayName = "LinearLight"      )
+    , kPinLight         UMETA( DisplayName = "PinLight"         )
+    , kHardMix          UMETA( DisplayName = "HardMix"          )
+    , kDifference       UMETA( DisplayName = "Difference"       )
+    , kExclusion        UMETA( DisplayName = "Exclusion"        )
+    , kSubstract        UMETA( DisplayName = "Substract"        )
+    , kDivide           UMETA( DisplayName = "Divide"           )
+    , kHue              UMETA( DisplayName = "Hue"              )
+    , kSaturation       UMETA( DisplayName = "Saturation"       )
+    , kColor            UMETA( DisplayName = "Color"            )
+    , kLuminosity       UMETA( DisplayName = "Luminosity"       )
+};

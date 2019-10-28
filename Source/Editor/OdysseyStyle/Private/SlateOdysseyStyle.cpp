@@ -1,0 +1,326 @@
+// Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
+
+#include "SlateOdysseyStyle.h"
+#include "Misc/CommandLine.h"
+#include "Styling/CoreStyle.h"
+
+#if (WITH_EDITOR || (IS_PROGRAM && PLATFORM_DESKTOP))
+    #include "PlatformInfo.h"
+#endif
+
+#define IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define BOX_BRUSH( RelativePath, ... ) FSlateBoxBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define BORDER_BRUSH( RelativePath, ... ) FSlateBorderBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define DEFAULT_FONT(...) FCoreStyle::GetDefaultFontStyle(__VA_ARGS__)
+#define ICON_FONT(...) FSlateFontInfo(RootToContentDir("Fonts/FontAwesome", TEXT(".ttf")), __VA_ARGS__)
+
+
+/* FSlateOdysseyStyle static initialization
+ *****************************************************************************/
+
+TSharedPtr< FSlateOdysseyStyle::FStyle > FSlateOdysseyStyle::StyleInstance = NULL;
+
+bool IncludeOdysseyEditorSpecificStyles()
+{
+#if IS_PROGRAM
+    return true;
+#else
+    return GIsEditor;
+#endif
+}
+
+/* FSlateOdysseyStyle interface
+ *****************************************************************************/
+
+FSlateOdysseyStyle::FStyle::FStyle()
+    : FSlateStyleSet("OdysseyStyle")
+
+    // Note, these sizes are in Slate Units.
+    // Slate Units do NOT have to map to pixels.
+    , Icon7x16(7.0f, 16.0f)
+    , Icon8x4(8.0f, 4.0f)
+    , Icon16x4(16.0f, 4.0f)
+    , Icon8x8(8.0f, 8.0f)
+    , Icon10x10(10.0f, 10.0f)
+    , Icon12x12(12.0f, 12.0f)
+    , Icon12x16(12.0f, 16.0f)
+    , Icon14x14(14.0f, 14.0f)
+    , Icon16x16(16.0f, 16.0f)
+    , Icon16x20(16.0f, 20.0f)
+    , Icon20x20(20.0f, 20.0f)
+    , Icon22x22(22.0f, 22.0f)
+    , Icon24x24(24.0f, 24.0f)
+    , Icon25x25(25.0f, 25.0f)
+    , Icon32x32(32.0f, 32.0f)
+    , Icon40x40(40.0f, 40.0f)
+    , Icon48x48(48.0f, 48.0f)
+    , Icon64x64(64.0f, 64.0f)
+    , Icon36x24(36.0f, 24.0f)
+    , Icon128x128(128.0f, 128.0f)
+
+    , DefaultForeground_LinearRef( MakeShareable( new FLinearColor( 0.72f, 0.72f, 0.72f, 1.f ) ) )
+    , DefaultForeground( DefaultForeground_LinearRef )
+{
+}
+
+void FSlateOdysseyStyle::FStyle::Initialize()
+{
+    SetContentRoot( FPaths::EngineContentDir() / TEXT("OdysseyAssetResources") );
+    SetCoreContentRoot(FPaths::EngineContentDir() / TEXT("OdysseyAssetResources"));
+
+    // Avoid polluting the game texture atlas with non-core editor style items when not the editor (or a standalone application, like UFE)
+    if (!IncludeOdysseyEditorSpecificStyles())
+    {
+        return;
+    }
+
+    SetupGeneralStyles();
+    SetupClassIconsAndThumbnails();
+}
+
+void FSlateOdysseyStyle::FStyle::SetupGeneralStyles()
+{
+    NormalTableRowStyle = FTableRowStyle();
+}
+
+
+void FSlateOdysseyStyle::FStyle::SetupClassIconsAndThumbnails()
+{
+#if WITH_EDITOR
+    // Actor Classes Outliner
+    {
+        //OdysseyTexture
+        Set("ClassThumbnail.OdysseyTextureDummy", new IMAGE_BRUSH("OdysseyTexture/OdysseyTextureDummyDefaultThumbnail_64", Icon64x64));
+
+
+        // OdysseyBrush
+        Set("ClassIcon.OdysseyBrush", new IMAGE_BRUSH("Brush/OdysseyBrushDefaultThumbnail_16", Icon16x16));
+        Set("ClassThumbnail.OdysseyBrush", new IMAGE_BRUSH("Brush/OdysseyBrushDefaultThumbnail_64", Icon64x64));
+
+        Set("OdysseyBrush.EditBrush16", new IMAGE_BRUSH("Brush/edit_brush_16", Icon16x16));
+        Set("OdysseyBrush.EditBrush64", new IMAGE_BRUSH("Brush/edit_brush_64", Icon64x64));
+
+        // OdysseyWidgets - AdvancedColorWheel
+        FVector2D AdvancedColorWheelSize( 1024, 1024 );
+        Set("AdvancedColorWheel.WheelBG", new IMAGE_BRUSH("Color/AdvancedColorWheel/WheelBG", AdvancedColorWheelSize ));
+        Set("AdvancedColorWheel.InnerWheelBG", new IMAGE_BRUSH("Color/AdvancedColorWheel/InnerWheelBG", AdvancedColorWheelSize));
+        Set("AdvancedColorWheel.InnerWheelHue", new IMAGE_BRUSH("Color/AdvancedColorWheel/InnerWheelHue", AdvancedColorWheelSize));
+        Set("AdvancedColorWheel.InnerWheelDropShadow", new IMAGE_BRUSH("Color/AdvancedColorWheel/InnerWheelDropShadow", AdvancedColorWheelSize));
+        Set("AdvancedColorWheel.TriangleOverlay", new IMAGE_BRUSH("Color/AdvancedColorWheel/TriangleOverlay", AdvancedColorWheelSize));
+
+        Set("AdvancedColorWheel.HueCursor", new IMAGE_BRUSH("Color/AdvancedColorWheel/HueCursor", FVector2D( 66, 66 )));
+        Set("AdvancedColorWheel.HueCursorBG", new IMAGE_BRUSH("Color/AdvancedColorWheel/HueCursorBG", FVector2D( 66, 66 )));
+        Set("AdvancedColorWheel.TriangleCursor", new IMAGE_BRUSH("Color/AdvancedColorWheel/TriangleCursor", FVector2D( 54, 54 )));
+        Set("AdvancedColorWheel.TriangleCursorBG", new IMAGE_BRUSH("Color/AdvancedColorWheel/TriangleCursorBG", FVector2D( 54, 54 )));
+        Set("AdvancedColorWheel.CursorOverlay", new IMAGE_BRUSH("Color/AdvancedColorWheel/CursorOverlay", FVector2D( 406, 59 )));
+
+        Set("AdvancedColorWheel.HintColorA", new IMAGE_BRUSH("Color/AdvancedColorWheel/HintColorA", FVector2D( 223, 221 )));
+        Set("AdvancedColorWheel.HintColorB", new IMAGE_BRUSH("Color/AdvancedColorWheel/HintColorB", FVector2D( 100, 89 )));
+
+        //About
+        Set("About.Facebook", new IMAGE_BRUSH("About/facebook", FVector2D( 30, 30 )));
+        Set("About.LinkedIn", new IMAGE_BRUSH("About/linkedin", FVector2D( 30, 30 )));
+        Set("About.Youtube", new IMAGE_BRUSH("About/youtube", FVector2D( 30, 30 )));
+        Set("About.Twitter", new IMAGE_BRUSH("About/twitter", FVector2D( 30, 30 )));
+        Set("About.Instagram", new IMAGE_BRUSH("About/instagram", FVector2D( 30, 30 )));
+        Set("About.Praxinos", new IMAGE_BRUSH("About/praxinos", FVector2D( 128, 128 )));
+        Set("About.Iliad", new IMAGE_BRUSH("About/iliad", FVector2D( 128, 128 )));
+
+        //PainterEditor
+        Set("PainterEditor.OpenPaintEditor64", new IMAGE_BRUSH("PainterEditor/open_paint_editor_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.OpenPaintEditor16", new IMAGE_BRUSH("PainterEditor/open_paint_editor_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Notes64", new IMAGE_BRUSH("PainterEditor/notes_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Notes16", new IMAGE_BRUSH("PainterEditor/notes_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Tools64", new IMAGE_BRUSH("PainterEditor/tools_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Tools16", new IMAGE_BRUSH("PainterEditor/tools_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Layers64", new IMAGE_BRUSH("PainterEditor/layers_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Layers16", new IMAGE_BRUSH("PainterEditor/layers_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.ColorSliders64", new IMAGE_BRUSH("PainterEditor/color_sliders_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ColorSliders16", new IMAGE_BRUSH("PainterEditor/color_sliders_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ColorSliders_2_64", new IMAGE_BRUSH("PainterEditor/color_sliders_2_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ColorSliders_2_16", new IMAGE_BRUSH("PainterEditor/color_sliders_2_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.ColorSelector64", new IMAGE_BRUSH("PainterEditor/color_selector_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ColorSelector16", new IMAGE_BRUSH("PainterEditor/color_selector_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ColorSelectorBis64", new IMAGE_BRUSH("PainterEditor/color_selector_bis_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ColorSelectorBis16", new IMAGE_BRUSH("PainterEditor/color_selector_bis_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.StrokeOptions64", new IMAGE_BRUSH("PainterEditor/stroke_options_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.StrokeOptions16", new IMAGE_BRUSH("PainterEditor/stroke_options_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.BrushExposedParameters64", new IMAGE_BRUSH("PainterEditor/brush_exposed_parameters_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.BrushExposedParameters16", new IMAGE_BRUSH("PainterEditor/brush_exposed_parameters_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.BrushSelector64", new IMAGE_BRUSH("PainterEditor/brush_selector_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.BrushSelector16", new IMAGE_BRUSH("PainterEditor/brush_selector_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Navigator64", new IMAGE_BRUSH("PainterEditor/navigator_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Navigator16", new IMAGE_BRUSH("PainterEditor/navigator_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.BrushPreview64", new IMAGE_BRUSH("PainterEditor/brush_preview_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.BrushPreview16", new IMAGE_BRUSH("PainterEditor/brush_preview_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.PerformanceTools64", new IMAGE_BRUSH("PainterEditor/performance_tools_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.PerformanceTools16", new IMAGE_BRUSH("PainterEditor/performance_tools_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.TopBar64", new IMAGE_BRUSH("PainterEditor/top_bar_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.TopBar16", new IMAGE_BRUSH("PainterEditor/top_bar_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.BotBar64", new IMAGE_BRUSH("PainterEditor/bot_bar_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.BotBar16", new IMAGE_BRUSH("PainterEditor/bot_bar_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.PerformanceTools64", new IMAGE_BRUSH("PainterEditor/performance_tools_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.PerformanceTools16", new IMAGE_BRUSH("PainterEditor/performance_tools_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Trash64", new IMAGE_BRUSH("PainterEditor/trash_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Trash16", new IMAGE_BRUSH("PainterEditor/trash_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Trash_2_64", new IMAGE_BRUSH("PainterEditor/trash_2_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Trash_2_16", new IMAGE_BRUSH("PainterEditor/trash_2_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Viewport64", new IMAGE_BRUSH("PainterEditor/viewport_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Viewport16", new IMAGE_BRUSH("PainterEditor/viewport_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Draw64", new IMAGE_BRUSH("PainterEditor/draw_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Draw16", new IMAGE_BRUSH("PainterEditor/draw_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Mesh64", new IMAGE_BRUSH("PainterEditor/mesh_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Mesh16", new IMAGE_BRUSH("PainterEditor/mesh_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Pan64", new IMAGE_BRUSH("PainterEditor/pan_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Pan16", new IMAGE_BRUSH("PainterEditor/pan_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Rotate64", new IMAGE_BRUSH("PainterEditor/rotate_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Rotate16", new IMAGE_BRUSH("PainterEditor/rotate_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.Rotate_2_64", new IMAGE_BRUSH("PainterEditor/rotate_2_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Rotate_2_16", new IMAGE_BRUSH("PainterEditor/rotate_2_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.RotateLeft64", new IMAGE_BRUSH("PainterEditor/rotate_left_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.RotateLeft16", new IMAGE_BRUSH("PainterEditor/rotate_left_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.RotateRight64", new IMAGE_BRUSH("PainterEditor/rotate_right_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.RotateRight16", new IMAGE_BRUSH("PainterEditor/rotate_right_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.ArrowDown64", new IMAGE_BRUSH("PainterEditor/arrow_down_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ArrowDown16", new IMAGE_BRUSH("PainterEditor/arrow_down_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ArrowUp64", new IMAGE_BRUSH("PainterEditor/arrow_up_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ArrowUp16", new IMAGE_BRUSH("PainterEditor/arrow_up_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ArrowLeft64", new IMAGE_BRUSH("PainterEditor/arrow_left_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ArrowLeft16", new IMAGE_BRUSH("PainterEditor/arrow_left_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ArrowRight64", new IMAGE_BRUSH("PainterEditor/arrow_right_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ArrowRight16", new IMAGE_BRUSH("PainterEditor/arrow_right_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.ColorWheel64", new IMAGE_BRUSH("PainterEditor/color_wheel_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ColorWheel16", new IMAGE_BRUSH("PainterEditor/color_wheel_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.Trombone64", new IMAGE_BRUSH("PainterEditor/trombone_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.Trombone16", new IMAGE_BRUSH("PainterEditor/trombone_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.UndoHistory64", new IMAGE_BRUSH("PainterEditor/undo_history_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.UndoHistory16", new IMAGE_BRUSH("PainterEditor/undo_history_16", FVector2D( 16, 16 )));
+
+        Set("PainterEditor.RotateReset64", new IMAGE_BRUSH("PainterEditor/rotate_reset_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.RotateReset16", new IMAGE_BRUSH("PainterEditor/rotate_reset_16", FVector2D( 16, 16 )));
+
+        //PainterEditor - ToolsTab
+        Set("PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH("PainterEditor/ToolsTab/clear_layer_64", FVector2D( 64, 64 )));
+		Set("PainterEditor.ToolsTab.ClearLayer32", new IMAGE_BRUSH("PainterEditor/ToolsTab/clear_layer_32", FVector2D( 32, 32 )));
+		Set("PainterEditor.ToolsTab.ClearLayer16", new IMAGE_BRUSH("PainterEditor/ToolsTab/clear_layer_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.PaintBucket64", new IMAGE_BRUSH("PainterEditor/ToolsTab/paint_bucket_64", FVector2D( 64, 64 )));
+		Set("PainterEditor.ToolsTab.PaintBucket32", new IMAGE_BRUSH("PainterEditor/ToolsTab/paint_bucket_32", FVector2D( 32, 32 )));        
+		Set("PainterEditor.ToolsTab.PaintBucket16", new IMAGE_BRUSH("PainterEditor/ToolsTab/paint_bucket_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Shredder64", new IMAGE_BRUSH("PainterEditor/ToolsTab/shredder_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Shredder32", new IMAGE_BRUSH("PainterEditor/ToolsTab/shredder_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Shredder16", new IMAGE_BRUSH("PainterEditor/ToolsTab/shredder_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Ellipse64", new IMAGE_BRUSH("PainterEditor/ToolsTab/ellipse_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Ellipse32", new IMAGE_BRUSH("PainterEditor/ToolsTab/ellipse_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Ellipse16", new IMAGE_BRUSH("PainterEditor/ToolsTab/ellipse_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Circle64", new IMAGE_BRUSH("PainterEditor/ToolsTab/circle_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Circle32", new IMAGE_BRUSH("PainterEditor/ToolsTab/circle_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Circle16", new IMAGE_BRUSH("PainterEditor/ToolsTab/circle_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Square64", new IMAGE_BRUSH("PainterEditor/ToolsTab/square_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Square32", new IMAGE_BRUSH("PainterEditor/ToolsTab/square_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Square16", new IMAGE_BRUSH("PainterEditor/ToolsTab/square_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Line64", new IMAGE_BRUSH("PainterEditor/ToolsTab/line_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Line32", new IMAGE_BRUSH("PainterEditor/ToolsTab/line_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Line16", new IMAGE_BRUSH("PainterEditor/ToolsTab/line_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Bezier64", new IMAGE_BRUSH("PainterEditor/ToolsTab/bezier_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Bezier32", new IMAGE_BRUSH("PainterEditor/ToolsTab/bezier_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Bezier16", new IMAGE_BRUSH("PainterEditor/ToolsTab/bezier_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.Curve64", new IMAGE_BRUSH("PainterEditor/ToolsTab/curve_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.Curve32", new IMAGE_BRUSH("PainterEditor/ToolsTab/curve_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.Curve16", new IMAGE_BRUSH("PainterEditor/ToolsTab/curve_16", FVector2D( 16, 16 )));
+        Set("PainterEditor.ToolsTab.ColorPicker64", new IMAGE_BRUSH("PainterEditor/ToolsTab/color_picker_64", FVector2D( 64, 64 )));
+        Set("PainterEditor.ToolsTab.ColorPicker32", new IMAGE_BRUSH("PainterEditor/ToolsTab/color_picker_32", FVector2D( 32, 32 )));
+        Set("PainterEditor.ToolsTab.ColorPicker16", new IMAGE_BRUSH("PainterEditor/ToolsTab/color_picker_16", FVector2D( 16, 16 )));
+
+        //OdysseyLayerStack
+        Set("OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH("OdysseyLayerStack/image_layer_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH("OdysseyLayerStack/image_layer_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.NotVisible64", new IMAGE_BRUSH("OdysseyLayerStack/not_visible_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.NotVisible16", new IMAGE_BRUSH("OdysseyLayerStack/not_visible_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.Visible64", new IMAGE_BRUSH("OdysseyLayerStack/visible_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.Visible16", new IMAGE_BRUSH("OdysseyLayerStack/visible_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.Locked64", new IMAGE_BRUSH("OdysseyLayerStack/locked_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.Locked16", new IMAGE_BRUSH("OdysseyLayerStack/locked_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.Unlocked64", new IMAGE_BRUSH("OdysseyLayerStack/unlocked_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.Unlocked16", new IMAGE_BRUSH("OdysseyLayerStack/unlocked_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.Blend64", new IMAGE_BRUSH("OdysseyLayerStack/blend_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.Blend16", new IMAGE_BRUSH("OdysseyLayerStack/blend_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.Blend_2_64", new IMAGE_BRUSH("OdysseyLayerStack/blend_2_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.Blend_2_16", new IMAGE_BRUSH("OdysseyLayerStack/blend_2_16", FVector2D( 16, 16 )));
+        Set("OdysseyLayerStack.Merge64", new IMAGE_BRUSH("OdysseyLayerStack/merge_64", FVector2D( 64, 64 )));
+        Set("OdysseyLayerStack.Merge16", new IMAGE_BRUSH("OdysseyLayerStack/merge_16", FVector2D( 16, 16 )));
+
+        //TableRow
+        Set("TableRow.BaseColorRowHovered16", new IMAGE_BRUSH("TableRow/base_color_row_hovered_16", FVector2D( 16, 16 )));
+        Set("TableRow.BaseColorRow16", new IMAGE_BRUSH("TableRow/base_color_row_16", FVector2D( 16, 16 )));
+        Set("TableRow.Selection8", new IMAGE_BRUSH("TableRow/selection_8", FVector2D( 8, 8 )));
+        Set("TableRow.DropZoneIndicatorBelow16", new IMAGE_BRUSH("TableRow/drop_zone_indicator_below_16", FVector2D( 16, 16 )));
+        Set("TableRow.DropZoneIndicatorAbove16", new IMAGE_BRUSH("TableRow/drop_zone_indicator_above_16", FVector2D( 16, 16 )));
+        Set("TableRow.DropZoneIndicatorOnto16", new IMAGE_BRUSH("TableRow/drop_zone_indicator_onto_16", FVector2D( 16, 16 )));
+
+
+        Set( "OdysseyLayerStack.AlternatedRows", FTableRowStyle(NormalTableRowStyle)
+            .SetEvenRowBackgroundBrush(IMAGE_BRUSH("TableRow/base_color_row_hovered_16", FVector2D( 16, 16 ), FLinearColor(0.5f, 0.5f, 0.5f)))
+            .SetEvenRowBackgroundHoveredBrush(IMAGE_BRUSH("TableRow/base_color_row_16", FVector2D( 16, 16 ), FLinearColor(0.5f, 0.5f, 0.5f)))
+            .SetOddRowBackgroundBrush(IMAGE_BRUSH("TableRow/base_color_row_hovered_16", FVector2D( 16, 16 ), FLinearColor(0.2f, 0.2f, 0.2f)))
+            .SetOddRowBackgroundHoveredBrush(IMAGE_BRUSH("TableRow/base_color_row_16", FVector2D( 16, 16 ), FLinearColor(0.2f, 0.2f, 0.2f)))
+            .SetSelectorFocusedBrush( BORDER_BRUSH( "", FMargin(4.f/16.f), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            .SetActiveBrush( IMAGE_BRUSH("", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            .SetActiveHoveredBrush( IMAGE_BRUSH("", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            .SetInactiveBrush( IMAGE_BRUSH("", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            .SetInactiveHoveredBrush( IMAGE_BRUSH("", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            .SetTextColor( DefaultForeground )
+            .SetSelectedTextColor( DefaultForeground )
+            .SetDropIndicator_Above(BOX_BRUSH("TableRow/drop_zone_indicator_above_16", FMargin(10.0f / 16.0f, 10.0f / 16.0f, 0, 0), FLinearColor( 0.701f, 0.225f, 0.003f )))
+            .SetDropIndicator_Onto(BOX_BRUSH("TableRow/drop_zone_indicator_onto_16", FMargin(4.0f / 16.0f), FLinearColor( 0.701f, 0.225f, 0.003f )))
+            .SetDropIndicator_Below(BOX_BRUSH("TableRow/drop_zone_indicator_below_16", FMargin(10.0f / 16.0f, 0, 0, 10.0f / 16.0f), FLinearColor( 0.701f, 0.225f, 0.003f )))
+            );
+
+
+        /*
+        // Asset Type Classes
+        const TCHAR* AssetTypes[] = {
+            TEXT(""),
+        };
+
+        for (int32 TypeIndex = 0; TypeIndex < ARRAY_COUNT(AssetTypes); ++TypeIndex)
+        {
+            const TCHAR* Type = AssetTypes[TypeIndex];
+            Set( *FString::Printf(TEXT("ClassIcon.%s"), Type),        new IMAGE_BRUSH(FString::Printf(TEXT("Icons/AssetIcons/%s_%dx"), Type, 16), Icon16x16 ) );
+            Set( *FString::Printf(TEXT("ClassThumbnail.%s"), Type),    new IMAGE_BRUSH(FString::Printf(TEXT("Icons/AssetIcons/%s_%dx"), Type, 64), Icon64x64 ) );
+        }
+        */
+    }
+#endif
+}
+
+#undef IMAGE_BRUSH
+#undef BOX_BRUSH
+#undef BORDER_BRUSH
+#undef DEFAULT_FONT
+#undef ICON_FONT

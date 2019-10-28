@@ -1,0 +1,53 @@
+// Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
+
+#include "IOdysseyLayer.h"
+
+IOdysseyLayer::IOdysseyLayer()
+{
+}
+
+IOdysseyLayer::~IOdysseyLayer()
+{
+}
+
+FName
+IOdysseyLayer::GetName() const
+{
+    return mName;
+}
+
+FText
+IOdysseyLayer::GetNameAsText() const
+{
+    return FText::FromName(mName);
+}
+
+void
+IOdysseyLayer::SetName(FName iName)
+{
+    mName = iName;
+}
+
+bool
+IOdysseyLayer::IsLocked() const
+{
+    return mIsLocked;
+}
+
+void
+IOdysseyLayer::SetIsLocked( bool iIsLocked )
+{
+    mIsLocked = iIsLocked;
+}
+
+bool
+IOdysseyLayer::IsVisible() const
+{
+    return mIsVisible;
+}
+
+void
+IOdysseyLayer::SetIsVisible( bool iIsVisible )
+{
+    mIsVisible = iIsVisible;
+}
