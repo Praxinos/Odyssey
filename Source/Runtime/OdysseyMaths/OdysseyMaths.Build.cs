@@ -6,10 +6,11 @@ public class OdysseyMaths : ModuleRules
 {
     public OdysseyMaths(ReadOnlyTargetRules Target) : base(Target)
     {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
         PublicDependencyModuleNames.AddRange(
             new string[] {
                 "Core",
-                "OdysseyCore",
                 "Engine"
             }
         );

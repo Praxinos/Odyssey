@@ -2,7 +2,7 @@
 
 #include "SOdysseyBrushPreferencesOverrides.h"
 
-#include "OdysseyBrush.h"
+#include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"

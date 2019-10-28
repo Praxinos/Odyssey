@@ -6,6 +6,8 @@ public class OdysseyWidgets : ModuleRules
 {
     public OdysseyWidgets(ReadOnlyTargetRules Target) : base(Target)
     {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                 "AppFramework",

@@ -4,7 +4,7 @@
 
 #include "AssetTypeActions_Base.h"
 #include "CoreMinimal.h"
-#include "OdysseyBrush.h"
+#include "OdysseyBrushBlueprint.h"
 #include "Toolkits/IToolkitHost.h"
 
 class FMenuBuilder;

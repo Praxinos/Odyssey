@@ -3,7 +3,7 @@
 #include "OdysseyBrushFactory.h"
 #include "Modules/ModuleManager.h"
 #include "Engine/Blueprint.h"
-#include "OdysseyBrush.h"
+#include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
 #include "Kismet2/KismetEditorUtilities.h"
 

@@ -14,7 +14,6 @@
 #include "OdysseyTextureDummy/OdysseyTextureDummy_ContentBrowserExtensions.h"
 #include "AssetToolsModule.h"
 #include "OdysseyTextureDummy/OdysseyTextureDummy_AssetTypeActions.h"
-#include "OdysseyBaseTests.h"
 #include "LevelEditor.h"
 
 
@@ -59,9 +58,6 @@ public:
 
     virtual void StartupModule( ) override
     {
-        //TMP: Run Tests
-        FOdysseyBaseTests::RunTests();
-
         // Register asset types
 
         IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();

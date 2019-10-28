@@ -6,7 +6,7 @@ public class OdysseyBrushEditor : ModuleRules
 {
     public OdysseyBrushEditor(ReadOnlyTargetRules Target) : base(Target)
     {
-        PrivateIncludePaths.Add("Odyssey/OdysseyEditor/OdysseyBrushEditor/Private");
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PrivateIncludePathModuleNames.AddRange(
             new string[] {

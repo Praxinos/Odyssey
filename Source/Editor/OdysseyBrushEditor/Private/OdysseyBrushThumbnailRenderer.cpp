@@ -22,7 +22,7 @@ UOdysseyBrushThumbnailRenderer::DrawDefaultThumbnail( int32 X, int32 Y, uint32 W
 {
     static  UTexture2D* DefaultTexture = nullptr;
     if( DefaultTexture == nullptr )
-        DefaultTexture = LoadObject< UTexture2D >( nullptr, TEXT( "/Engine/OdysseyAssetResources/Brush/OdysseyBrushDefaultThumbnail_512.OdysseyBrushDefaultThumbnail_512" ), nullptr, LOAD_None, nullptr );
+        DefaultTexture = LoadObject< UTexture2D >( nullptr, TEXT( "/Iliad/BrushThumbnails/OdysseyBrushDefaultThumbnail_512.OdysseyBrushDefaultThumbnail_512" ), nullptr, LOAD_None, nullptr );
 
     Canvas->DrawTile(
         (float)X,

@@ -1,11 +1,14 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class OdysseyPainterEditor : ModuleRules
 {
     public OdysseyPainterEditor(ReadOnlyTargetRules Target) : base(Target)
     {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
         PrivateIncludePathModuleNames.AddRange(
             new string[] {
                 "Settings",
@@ -22,7 +25,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "Slate",
                 "SlateCore",
                 "UnrealEd",
-                "OdysseyCore",
                 "InputCore",
                 "Engine",
                 "RHI",
@@ -38,15 +40,12 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyStrokePipeline",
                 "OdysseyLayer",
                 "OdysseyTransaction",
-                "OdysseyBase",
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                "Odyssey/OdysseyEditor/OdysseyPainterEditor/Private",
-                "Odyssey/OdysseyEditor/OdysseyPainterEditor/Private/Models",
-                "Editor/PackagesDialog/Public",
+                Path.Combine(ModuleDirectory, "Private", "Models"),
             }
         );
 

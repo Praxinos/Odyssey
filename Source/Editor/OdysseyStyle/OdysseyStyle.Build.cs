@@ -6,23 +6,11 @@ public class OdysseyStyle : ModuleRules
 {
     public OdysseyStyle(ReadOnlyTargetRules Target) : base(Target)
     {
-
-        PrivateIncludePaths.AddRange(
-            new string[] {
-                "Odyssey/OdysseyEditor/OdysseyStyle/Private"
-            }
-        );
-
-        PublicIncludePaths.AddRange(
-            new string[] {
-                "Odyssey/OdysseyEditor/OdysseyStyle/Public"
-            }
-        );
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
                 "Core",
-                "OdysseyCore",
                 "CoreUObject",
                 "Slate",
             }
@@ -30,6 +18,7 @@ public class OdysseyStyle : ModuleRules
 
         PrivateDependencyModuleNames.AddRange(
             new string[] {
+                "Projects",
                 "SlateCore",
             }
         );

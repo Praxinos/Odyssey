@@ -37,7 +37,7 @@
 #include "Framework/Docking/TabManager.h"
 #include "K2Node_CallFunction.h"
 #include "Modules/ModuleManager.h"
-#include "OdysseyBrush.h"
+#include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushThumbnailRenderer.h"
 #include "PropertyEditorModule.h"
 #include "ThumbnailRendering/ThumbnailManager.h"

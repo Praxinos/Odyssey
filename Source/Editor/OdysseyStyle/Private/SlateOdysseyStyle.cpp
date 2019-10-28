@@ -3,6 +3,7 @@
 #include "SlateOdysseyStyle.h"
 #include "Misc/CommandLine.h"
 #include "Styling/CoreStyle.h"
+#include "Interfaces/IPluginManager.h"
 
 #if (WITH_EDITOR || (IS_PROGRAM && PLATFORM_DESKTOP))
     #include "PlatformInfo.h"
@@ -65,8 +66,8 @@ FSlateOdysseyStyle::FStyle::FStyle()
 
 void FSlateOdysseyStyle::FStyle::Initialize()
 {
-    SetContentRoot( FPaths::EngineContentDir() / TEXT("OdysseyAssetResources") );
-    SetCoreContentRoot(FPaths::EngineContentDir() / TEXT("OdysseyAssetResources"));
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Iliad" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
+    SetCoreContentRoot( IPluginManager::Get().FindPlugin( "Iliad" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     // Avoid polluting the game texture atlas with non-core editor style items when not the editor (or a standalone application, like UFE)
     if (!IncludeOdysseyEditorSpecificStyles())

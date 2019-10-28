@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Engine/Blueprint.h"
-#include "OdysseyBrush.generated.h"
+#include "OdysseyBrushBlueprint.generated.h"
 
 /**
  * Odyssey Brush

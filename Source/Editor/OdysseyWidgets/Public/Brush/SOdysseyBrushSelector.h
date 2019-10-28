@@ -8,7 +8,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "PropertyCustomizationHelpers.h"
 #include "AssetThumbnail.h"
-#include "OdysseyBrush.h"
+#include "OdysseyBrushBlueprint.h"
 
 /** Delegate used to set a generic object */
 DECLARE_DELEGATE_OneParam( FOnBrushChanged, UOdysseyBrush* );

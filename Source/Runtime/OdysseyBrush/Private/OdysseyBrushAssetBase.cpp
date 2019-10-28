@@ -2,7 +2,6 @@
 
 #include "OdysseyBrushAssetBase.h"
 #include "Engine/Texture2D.h"
-#include "ScopedTransaction.h"
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyBrushContext.h"

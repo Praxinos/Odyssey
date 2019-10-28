@@ -58,7 +58,7 @@ FOdysseyBrushPreviewViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas )
 
     static  UTexture2D* DefaultTexture = nullptr;
     if( DefaultTexture == nullptr )
-        DefaultTexture = LoadObject< UTexture2D >( nullptr, TEXT( "/Engine/OdysseyAssetResources/Brush/OdysseyBrushFakePreview_512_256.OdysseyBrushFakePreview_512_256" ), nullptr, LOAD_None, nullptr );
+        DefaultTexture = LoadObject< UTexture2D >( nullptr, TEXT( "/Iliad/BrushThumbnails/OdysseyBrushDefaultThumbnail_512.OdysseyBrushDefaultThumbnail_512" ), nullptr, LOAD_None, nullptr );
 
     FIntPoint size = Viewport->GetSizeXY();
 

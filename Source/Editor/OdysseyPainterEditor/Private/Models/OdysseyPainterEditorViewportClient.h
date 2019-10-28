@@ -58,7 +58,7 @@ public:
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* Viewport, const FCursorReply& CursorReply ) override;
     // Tablet API
     //ODYSSEY: TABLET HANDLE BEGIN
-    virtual void  TabletPenDataReceived( FViewport* Viewport, const FTabletEvent& TabletEvent )  override;
+    //virtual void  TabletPenDataReceived( FViewport* Viewport, const FTabletEvent& TabletEvent )  override;
     //ODYSSEY: TABLET HANDLE END
 
 public:

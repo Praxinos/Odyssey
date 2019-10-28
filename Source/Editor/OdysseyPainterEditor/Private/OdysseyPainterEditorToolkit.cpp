@@ -28,7 +28,7 @@
 #include "SOdysseySurfaceViewport.h"
 #include "OdysseyPainterEditorViewportClient.h"
 #include "OdysseyImageLayer.h"
-#include "OdysseyBrush.h"
+#include "OdysseyBrushBlueprint.h"
 #include "OdysseyBlock.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyAboutScreen.h"

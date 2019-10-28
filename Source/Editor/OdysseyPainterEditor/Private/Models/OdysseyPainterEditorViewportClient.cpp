@@ -217,7 +217,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
     {
         CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle );
     }
-    else if( ( Key == EKeys::LeftMouseButton || Key == EKeys::PenButton1 )
+    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ )
          && Event == EInputEvent::IE_Pressed
          &&  CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPicking, eActivationType::kToggle ) )
     {
@@ -244,7 +244,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
     {
         CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff );
     }
-    else if( ( Key == EKeys::LeftMouseButton || Key == EKeys::PenButton1 ) && Event == EInputEvent::IE_Pressed
+    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ ) && Event == EInputEvent::IE_Pressed
                && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kNothing, eActivationType::kOff ) )
     {
         CurrentToolState = TPair<eControlType, eActivationType>( eControlType::kDrawing, eActivationType::kToggle );
@@ -256,12 +256,12 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
         OdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point );
         bLeftMouseDown = true;
     }
-    else if( ( Key == EKeys::LeftMouseButton || Key == EKeys::PenButton1) && Event == EInputEvent::IE_Pressed
+    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/) && Event == EInputEvent::IE_Pressed
                && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kPanning, eActivationType::kToggle ) )
     {
         PanReference = FVector2D( Viewport->GetMouseX(), Viewport->GetMouseY() );
     }
-    else if( ( Key == EKeys::LeftMouseButton || Key == EKeys::PenButton1) && Event == EInputEvent::IE_Pressed
+    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ ) && Event == EInputEvent::IE_Pressed
                && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kRotating, eActivationType::kToggle ) )
     {
         FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
@@ -270,7 +270,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
 
         RotationReference = FMath::Atan2( -DeltaCenter.Y, DeltaCenter.X );
     }
-    else if( ( Key == EKeys::LeftMouseButton || Key == EKeys::PenButton1) && Event == EInputEvent::IE_Released
+    else if( ( Key == EKeys::LeftMouseButton /*|| Key == EKeys::PenButton1*/ ) && Event == EInputEvent::IE_Released
                && CurrentToolState == TPair<eControlType, eActivationType>( eControlType::kDrawing, eActivationType::kToggle ) )
     {
         bLeftMouseDown = false;
@@ -347,6 +347,7 @@ FOdysseyPainterEditorViewportClient::MapCursor( FViewport* Viewport, const FCurs
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Tablet API
 //ODYSSEY: TABLET HANDLE BEGIN
+/*
 void
 FOdysseyPainterEditorViewportClient::TabletPenDataReceived( FViewport* Viewport, const FTabletEvent& TabletEvent )
 {
@@ -389,6 +390,7 @@ FOdysseyPainterEditorViewportClient::TabletPenDataReceived( FViewport* Viewport,
         InputKey( Viewport, 0, EKeys::PenButton1, EInputEvent::IE_Released, 0.f, false );
     }
 }
+*/
 //ODYSSEY: TABLET HANDLE END
 
 

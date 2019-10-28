@@ -6,6 +6,8 @@ public class OdysseyPaintEngine : ModuleRules
 {
     public OdysseyPaintEngine(ReadOnlyTargetRules Target) : base(Target)
     {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
         PrivateDependencyModuleNames.AddRange(
              new string[] {
                 "Core",

@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Iliad
+Binaries/
+Intermediate/
+Source/ThirdParty/
+Content/*.uasset

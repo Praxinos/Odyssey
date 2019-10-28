@@ -6,11 +6,11 @@ public class OdysseyImaging : ModuleRules
 {
     public OdysseyImaging(ReadOnlyTargetRules Target) : base(Target)
     {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
         PrivateDependencyModuleNames.AddRange(
              new string[] {
                 "Core",
-                "OdysseyCore",
-                "OdysseyBase",
                 "CoreUObject",
                 "Engine",
              }
