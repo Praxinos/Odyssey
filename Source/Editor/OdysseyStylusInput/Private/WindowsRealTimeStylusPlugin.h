@@ -82,6 +82,7 @@ struct FTabletContextInfo : public IStylusInputDevice
 	int32 Index;
 
 	TABLET_CONTEXT_ID ID;
+    TabletDeviceKind mKind;
 	TArray<FPacketDescription> PacketDescriptions;
 	TArray<EWindowsPacketType> SupportedPackets;
 

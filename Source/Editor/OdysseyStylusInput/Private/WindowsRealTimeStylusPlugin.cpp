@@ -27,6 +27,9 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusDown(IRealTimeStylus* RealTimeStylus
 	if (TabletContext != nullptr)
 	{
 		TabletContext->WindowsState.IsTouching = true;
+
+        if( TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
+            TabletContext->WindowsState.NormalPressure = 1.0;
 	}
 	return S_OK;
 }
@@ -304,6 +307,18 @@ void FWindowsRealTimeStylusPlugin::AddTabletContext(IRealTimeStylus* RealTimeSty
 		int32 Created = TabletContexts.Emplace();
 		FoundContext = &TabletContexts[Created];
 		FoundContext->ID = TabletID;
+
+        IInkTablet* pInkTablet = NULL;
+        if( SUCCEEDED( RealTimeStylus->GetTabletFromTabletContextId( TabletID, &pInkTablet ) ) )
+        {
+            IInkTablet2* iInkTablet2 = 0;
+            pInkTablet->QueryInterface( __uuidof( IInkTablet2 ), (void**)&iInkTablet2 );
+            if( SUCCEEDED( iInkTablet2->get_DeviceKind( &FoundContext->mKind ) ) )
+            {
+                //UE_LOG( LogStylusInput, Log, TEXT( "AddTabletContext: kind %d" ), FoundContext->mKind );
+            }
+            iInkTablet2->Release();
+        }
 	}
 
 	SetupTabletSupportedPackets(RealTimeStylus, *FoundContext);
