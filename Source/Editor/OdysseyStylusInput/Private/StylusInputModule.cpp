@@ -112,7 +112,7 @@ void UStylusInputSubsystem::Tick(float DeltaTime)
 
 				for (IStylusMessageHandler* Handler : MessageHandlers)
 				{
-					Handler->OnStylusStateChanged(InputDevice->GetCurrentState(), DeviceIdx);
+					Handler->OnStylusStateChanged(InputInterface->Widget(), InputDevice->GetCurrentState(), DeviceIdx);
 				}
 			}
 		}

@@ -16,6 +16,9 @@ public:
 	virtual int32 NumInputDevices() const override;
 	virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
 
+    virtual TWeakPtr<SWindow> Window() const override;
+    virtual TWeakPtr<SWidget> Widget() const override;
+
 private:
 	// pImpl to avoid including Windows headers.
 	TUniquePtr<FWindowsStylusInputInterfaceImpl> Impl;

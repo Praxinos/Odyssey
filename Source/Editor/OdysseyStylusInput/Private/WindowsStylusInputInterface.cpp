@@ -16,6 +16,9 @@ public:
 	TComPtr<IRealTimeStylus> RealTimeStylus;
 	TSharedPtr<FWindowsRealTimeStylusPlugin> StylusPlugin;
 	void* DLLHandle { nullptr };
+
+    TWeakPtr<SWindow> Window;
+    TWeakPtr<SWidget> Widget;
 };
 
 FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsStylusInputInterfaceImpl> InImpl)
@@ -80,6 +83,9 @@ void FWindowsStylusInputInterface::Tick()
 				Impl->RealTimeStylus->put_HWND(reinterpret_cast<uint64>(Hwnd));
 				Impl->RealTimeStylus->put_Enabled(Windows::TRUE);
 			}
+
+            Impl->Window = Window;
+            Impl->Widget = WidgetPath.GetLastWidget();
 		}
 	}
 }
@@ -97,6 +103,16 @@ IStylusInputDevice* FWindowsStylusInputInterface::GetInputDevice(int32 Index) co
 	}
 
 	return &Impl->StylusPlugin->TabletContexts[Index];
+}
+
+TWeakPtr<SWindow> FWindowsStylusInputInterface::Window() const
+{
+    return Impl->Window;
+}
+
+TWeakPtr<SWidget> FWindowsStylusInputInterface::Widget() const
+{
+    return Impl->Widget;
 }
 
 FWindowsStylusInputInterfaceImpl::~FWindowsStylusInputInterfaceImpl()

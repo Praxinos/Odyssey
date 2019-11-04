@@ -163,5 +163,5 @@ protected:
 class IStylusMessageHandler
 {
 public:
-	virtual void OnStylusStateChanged(const FStylusState& NewState, int32 StylusIndex) = 0;
+	virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& NewState, int32 StylusIndex) = 0;
 };

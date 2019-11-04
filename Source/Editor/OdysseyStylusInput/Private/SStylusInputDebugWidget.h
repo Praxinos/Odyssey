@@ -19,7 +19,7 @@ public:
 	SLATE_END_ARGS();
 
 	void Construct(const FArguments& InArgs, UStylusInputSubsystem& InSubsystem);
-	void OnStylusStateChanged(const FStylusState& InState, int32 InIndex)
+	void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& InState, int32 InIndex)
 	{
 		State = InState;
 		LastIndex = InIndex;

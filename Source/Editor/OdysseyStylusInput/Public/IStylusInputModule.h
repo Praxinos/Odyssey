@@ -48,6 +48,9 @@ public:
 
 	virtual IStylusInputDevice* GetInputDevice(int32 Index) const = 0;
 	virtual int32 NumInputDevices() const = 0;
+
+    virtual TWeakPtr<SWindow> Window() const = 0;
+    virtual TWeakPtr<SWidget> Widget() const = 0;
 };
 
 
