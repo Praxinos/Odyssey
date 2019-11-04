@@ -28,6 +28,8 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusDown(IRealTimeStylus* RealTimeStylus
 	{
 		TabletContext->WindowsState.IsTouching = true;
 
+        HandlePacket( RealTimeStylus, StylusInfo, PacketSize, sizeof( LONG ), Packet );
+
         if( TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
             TabletContext->WindowsState.NormalPressure = 1.0;
 	}
@@ -41,6 +43,7 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusUp(IRealTimeStylus* RealTimeStylus, 
 	{
 		// we know this is not touching
 		TabletContext->WindowsState.IsTouching = false;
+        HandlePacket( RealTimeStylus, StylusInfo, PacketSize, sizeof( LONG ), Packet );
 		TabletContext->WindowsState.NormalPressure = 0;
 	}
 	return S_OK;
@@ -392,6 +395,31 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 	TabletContext->SetDirty();
 	TabletContext->WindowsState.IsInverted = StylusInfo->bIsInvertedCursor;
 
+    //TODO: find another place to get data, not for each packet, but be sure to update data when moving/resizing HWND
+    // can't be in AddTabletContext() because it is NOT called when moving HWND
+    HANDLE_PTR HCurrentWnd;
+    RealTimeStylus->get_HWND( &HCurrentWnd );
+    HWND Hwnd = reinterpret_cast<HWND>( HCurrentWnd );
+    HDC hdc = GetDC( Hwnd );
+
+    RECT rcClient;
+    GetClientRect( Hwnd, &rcClient );
+    POINT ptClientUL;              // client upper left corner 
+    POINT ptClientLR;              // client lower right corner 
+    ptClientUL.x = rcClient.left;
+    ptClientUL.y = rcClient.top;
+    ptClientLR.x = rcClient.right + 1;
+    ptClientLR.y = rcClient.bottom + 1;
+    ClientToScreen( Hwnd, &ptClientUL );
+    ClientToScreen( Hwnd, &ptClientLR );
+    //UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket: UL:%ld %ld LR:%ld %ld" ), ptClientUL.x, ptClientUL.y, ptClientLR.x, ptClientLR.y );
+
+    int dpix = GetDeviceCaps( hdc, LOGPIXELSX );
+    int dpiy = GetDeviceCaps( hdc, LOGPIXELSY );
+
+    ReleaseDC( Hwnd, hdc );
+    //---
+
 	ULONG PropertyCount = PacketBufferLength / PacketCount;
 
 	for (ULONG i = 0; i < PropertyCount; ++i)
@@ -403,11 +431,18 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 		switch (PacketDescription.Type)
 		{
 			case EWindowsPacketType::X:
-				TabletContext->WindowsState.Position.X = Packets[i];
-				break;
+            {
+                float x = Packets[i] / ( 1000.0 * 2.54 / dpix ); // http://code.rawlinson.us/2007/01/pixelspace-to-inkspace.html
+                //float x = Packets[i] / 11.76;
+                TabletContext->WindowsState.Position.X = x + ptClientUL.x;
+                break;
+            }
 			case EWindowsPacketType::Y:
-				TabletContext->WindowsState.Position.Y = Packets[i];
-				break;
+            {
+                float y = Packets[i] / ( 1000.0 * 2.54 / dpiy );
+                TabletContext->WindowsState.Position.Y = y + ptClientUL.y;
+                break;
+            }
 			case EWindowsPacketType::Status:
 				break;
 			case EWindowsPacketType::Z:
