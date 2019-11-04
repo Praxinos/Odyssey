@@ -2,11 +2,13 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class StylusInput : ModuleRules
-	{
-		public StylusInput(ReadOnlyTargetRules Target) : base(Target)
-		{
-			PublicIncludePaths.AddRange(
+	public class OdysseyStylusInput : ModuleRules
+    {
+		public OdysseyStylusInput(ReadOnlyTargetRules Target) : base(Target)
+        {
+            PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+            PublicIncludePaths.AddRange(
 				new string[] {
 					// ... add public include paths required here ...
 				}

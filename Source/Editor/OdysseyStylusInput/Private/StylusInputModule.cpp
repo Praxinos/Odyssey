@@ -17,11 +17,11 @@
 
 static const FName StylusInputDebugTabName = FName("StylusInputDebug");
 
-class FStylusInputModule : public IModuleInterface
+class FOdysseyStylusInputModule : public IModuleInterface
 {
 };
 
-IMPLEMENT_MODULE(FStylusInputModule, StylusInput)
+IMPLEMENT_MODULE(FOdysseyStylusInputModule, OdysseyStylusInput)
 
 // This is the function that all platform-specific implementations are required to implement.
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();

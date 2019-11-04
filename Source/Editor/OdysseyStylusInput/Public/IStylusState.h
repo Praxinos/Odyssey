@@ -7,7 +7,7 @@
 /**
  * The types of stylus inputs that can be potentially supported by a stylus.
  */
-enum class STYLUSINPUT_API EStylusInputType
+enum class ODYSSEYSTYLUSINPUT_API EStylusInputType
 {
 	Position,
 	Z,
@@ -22,7 +22,7 @@ enum class STYLUSINPUT_API EStylusInputType
 /**
  * The current state of a single stylus, as sent by IStylusMessageHandler. 
  */
-class STYLUSINPUT_API FStylusState
+class ODYSSEYSTYLUSINPUT_API FStylusState
 {
 public:
 
@@ -122,7 +122,7 @@ private:
 };
 
 /** An input device representing a stylus and its current state. */
-class STYLUSINPUT_API IStylusInputDevice
+class ODYSSEYSTYLUSINPUT_API IStylusInputDevice
 {
 public:
 

@@ -17,16 +17,16 @@ DEFINE_LOG_CATEGORY_STATIC(LogStylusInput, Log, All);
 /**
  * Module to handle Wacom-style tablet input using styluses.
  */
-class STYLUSINPUT_API IStylusInputModule : public IModuleInterface
+class ODYSSEYSTYLUSINPUT_API IOdysseyStylusInputModule : public IModuleInterface
 {
 public:
 
 	/**
 	 * Retrieve the module instance.
 	 */
-	static inline IStylusInputModule& Get()
+	static inline IOdysseyStylusInputModule& Get()
 	{
-		return FModuleManager::LoadModuleChecked<IStylusInputModule>("StylusInput");
+		return FModuleManager::LoadModuleChecked<IOdysseyStylusInputModule>("OdysseyStylusInput");
 	}
 
 	/**
@@ -36,7 +36,7 @@ public:
 	 */
 	static inline bool IsAvailable()
 	{
-		return FModuleManager::Get().IsModuleLoaded("StylusInput");
+		return FModuleManager::Get().IsModuleLoaded("OdysseyStylusInput");
 	}
 };
 
@@ -52,7 +52,7 @@ public:
 
 
 UCLASS()
-class STYLUSINPUT_API UStylusInputSubsystem : 
+class ODYSSEYSTYLUSINPUT_API UStylusInputSubsystem :
 	public UEditorSubsystem, 
 	public FTickableEditorObject
 {
