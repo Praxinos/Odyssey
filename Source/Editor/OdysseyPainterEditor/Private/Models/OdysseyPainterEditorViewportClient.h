@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
+#include "IStylusState.h"
 #include "RawIndexBuffer.h"
 #include "Rendering/StaticMeshVertexBuffer.h"
 #include "UnrealClient.h"
@@ -12,6 +13,7 @@
 
 #include "OdysseyStrokePoint.h"
 
+class UOdysseyStylusInputSubsystem;
 class FCanvas;
 class UTexture2D;
 
@@ -51,6 +53,7 @@ class SOdysseySurfaceViewport;
 class FOdysseyPainterEditorViewportClient
     : public FViewportClient
     , public FGCObject
+    , public IStylusMessageHandler
 {
 public:
     enum class eState
@@ -81,6 +84,9 @@ public:
 
     virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
+
+    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
+	
     virtual EMouseCaptureMode                   CaptureMouseOnClick() override;
     
 public:
@@ -109,6 +115,7 @@ private:
 
 private:
     // Private Data Members
+    UOdysseyStylusInputSubsystem*           InputSubsystem;
     EMouseCaptureMode                       mMouseCaptureMode;
     TWeakPtr<IOdysseyPainterEditorToolkit>  mOdysseyPainterEditorPtr;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;

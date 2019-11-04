@@ -20,7 +20,9 @@
 #include "UnrealEdGlobals.h"
 #include "VolumeTexturePreview.h"
 #include "Widgets/Layout/SScrollBar.h"
+#include "Widgets/SViewport.h"
 
+#include "IOdysseyStylusInputModule.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorSettings.h"
@@ -41,7 +43,8 @@
 FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit >  iOdysseyPainterEditor,
                                                                           TWeakPtr< SOdysseySurfaceViewport >       iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
-    : mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
+    : InputSubsystem( nullptr )
+    , mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
     , mOdysseyPainterEditorPtr( iOdysseyPainterEditor )
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
     , mMeshSelector( iMeshSelector )
@@ -53,11 +56,16 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     check( mOdysseyPainterEditorPtr.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
 
+    InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    InputSubsystem->AddMessageHandler( *this );
+
     ModifyCheckerboardTextureColors();
 }
 
 FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 {
+    InputSubsystem->RemoveMessageHandler( *this );
+
     DestroyCheckerboardTexture();
 }
 
@@ -458,6 +466,11 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
         return;
 
     mCurrentToolState = eState::kIdle;
+}
+
+void
+FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
+{
 }
 
 EMouseCursor::Type
