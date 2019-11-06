@@ -17,21 +17,22 @@ public:
     ~FOdysseyUndoHistory();
 
 public:
-    void Record(FName InName);
+    void Record( FName InName );
     void EndRecord();
+    bool IsRecording();
+
     FOdysseyTransaction* GetCurrentTransaction();
     int GetCurrentTransactionIndex();
-    bool IsRecording();
     TArray<TSharedPtr<FOdysseyTransaction>>* GetTransactionsList();
-    void SetCurrentTransactionIndex( int InIndex );
+    void SetCurrentTransactionIndex( int iIndex );
 
-    void DeleteTransactionsAfterIndex( int InIndex );
+    void DeleteTransactionsAfterIndex( int iIndex );
     void DeleteAllTransactions();
 
-    void TransactionBetweenIndexes( int InStartIndex, int InEndIndex );
+    void TransactionBetweenIndexes( int iStartIndex, int iEndIndex );
 
 private:
-    TArray<TSharedPtr<FOdysseyTransaction>> UndoTransactionsList;
-    bool bIsRecording;
-    int CurrentTransactionIndex;
+    TArray<TSharedPtr<FOdysseyTransaction>> mUndoTransactionsList;
+    bool mIsRecording;
+    int  mCurrentTransactionIndex;
 };

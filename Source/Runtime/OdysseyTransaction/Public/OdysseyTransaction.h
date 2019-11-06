@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FOdysseyModification.h"
+#include "OdysseyModification.h"
 
 /**
  * Describes a transaction by stocking a serie of states of items
@@ -12,11 +12,12 @@ class ODYSSEYTRANSACTION_API FOdysseyTransaction
 {
 public:
     // Construction / Destruction
-    FOdysseyTransaction(FName InName, int InQueueIndex);
+    FOdysseyTransaction(FName iName, int iQueueIndex);
     ~FOdysseyTransaction();
 
 public:
-    void AppendState( IOdysseyModification* InState );
+    void AppendState( IOdysseyModification* iState );
+
     FName GetName();
     int GetQueueIndex();
 
@@ -27,7 +28,7 @@ public:
     void Redo();
 
 private:
-    TArray<IOdysseyModification*> Modifications;
-    FName Name;
-    int QueueIndex;
+    TArray<IOdysseyModification*> mModifications;
+    FName mName;
+    int   mQueueIndex;
 };

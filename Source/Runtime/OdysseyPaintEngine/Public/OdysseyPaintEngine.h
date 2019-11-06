@@ -7,7 +7,7 @@
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
 #include "IOdysseyLayer.h"
-#include "FOdysseyTransactionnable.h"
+#include "OdysseyTransactionnable.h"
 #include <ULIS_CCOLOR>
 #include <ULIS_BLENDINGMODES>
 #include <queue>

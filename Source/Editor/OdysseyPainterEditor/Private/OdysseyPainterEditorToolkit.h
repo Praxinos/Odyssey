@@ -11,7 +11,7 @@
 #include "Interfaces/IOdysseyPainterEditorToolkit.h"
 #include "IDetailsView.h"
 #include "OdysseyPainterEditorSettings.h"
-#include "FOdysseyUndoHistory.h"
+#include "OdysseyUndoHistory.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include <memory>
 #include "ScopedTransaction.h"

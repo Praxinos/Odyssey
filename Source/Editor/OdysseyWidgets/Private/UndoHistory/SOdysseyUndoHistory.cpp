@@ -9,7 +9,7 @@
 #include "Widgets/Views/SListView.h"
 #include "UndoHistory/SOdysseyUndoHistoryTableRow.h"
 #include "Editor/TransBuffer.h"
-#include "FOdysseyTransaction.h"
+#include "OdysseyTransaction.h"
 
 
 #define LOCTEXT_NAMESPACE "SOdysseyUndoHistory"
