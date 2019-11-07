@@ -4,4 +4,4 @@
 #include "Modules/ModuleManager.h"
 #include "OdysseySurface.h"
 
-IMPLEMENT_MODULE(FDefaultModuleImpl, OdysseyImaging);
+IMPLEMENT_MODULE( FDefaultModuleImpl, OdysseyImaging );

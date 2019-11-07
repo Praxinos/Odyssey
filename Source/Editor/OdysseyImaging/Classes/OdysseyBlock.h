@@ -1,9 +1,10 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
+
 #pragma once
+
 #include "CoreMinimal.h"
 #include "Engine/Texture.h"
 #include <ULIS_FDECL>
-
 
 /////////////////////////////////////////////////////
 // FOdysseyBlock
@@ -15,32 +16,32 @@ public:
     ~FOdysseyBlock();
     FOdysseyBlock( int                          iWidth
                  , int                          iHeight
-                 , ETextureSourceFormat         iFmt        = ETextureSourceFormat::TSF_BGRA8
+                 , ETextureSourceFormat         iFormat     = ETextureSourceFormat::TSF_BGRA8
                  , ::ULIS::fpInvalidateFunction iInvFunc    = nullptr
                  , void*                        iInvInfo    = nullptr
                  , bool                         iInitializeData = false );
 
 private:
     // Forbid Copy / Move / Default
-    FOdysseyBlock()                                         = delete; // Default Constructor
-    FOdysseyBlock( const FOdysseyBlock& )                   = delete; // Copy Constructor
-    FOdysseyBlock( const FOdysseyBlock&& )                  = delete; // Move Constructor
-    FOdysseyBlock& operator=( const FOdysseyBlock& )        = delete; // Copy Assignement Operator
+    FOdysseyBlock()                                  = delete; // Default Constructor
+    FOdysseyBlock( const FOdysseyBlock& )            = delete; // Copy Constructor
+    FOdysseyBlock( const FOdysseyBlock&& )           = delete; // Move Constructor
+    FOdysseyBlock& operator=( const FOdysseyBlock& ) = delete; // Copy Assignement Operator
 
 public:
     // Public API
     TArray64< uint8 >&          GetArray();
-    const TArray64< uint8 >&    GetArray()                  const;
+    const TArray64< uint8 >&    GetArray() const;
     ::ULIS::IBlock*             GetIBlock();
-    const ::ULIS::IBlock*       GetIBlock()                  const;
-    int                         Width()                     const;
-    int                         Height()                    const;
-    FVector2D                   Size()                      const;
+    const ::ULIS::IBlock*       GetIBlock() const;
+    int                         Width() const;
+    int                         Height() const;
+    FVector2D                   Size() const;
     ETextureSourceFormat        GetUE4TextureSourceFormat() const;
-    uint32                      GetULISFormat()             const;
+    uint32                      GetULISFormat() const;
     void                        Reallocate( int                             iWidth
                                           , int                             iHeight
-                                          , ETextureSourceFormat            iFmt        = ETextureSourceFormat::TSF_BGRA8
+                                          , ETextureSourceFormat            iFormat     = ETextureSourceFormat::TSF_BGRA8
                                           , ::ULIS::fpInvalidateFunction    iInvFunc    = nullptr
                                           , void*                           iInvInfo    = nullptr );
 
@@ -50,6 +51,5 @@ private:
     uint32                  mULISFormat;
     ::ULIS::IBlock*         mIBlock;
     TArray64<uint8>         mArray;
-
 };
 
