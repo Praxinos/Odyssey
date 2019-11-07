@@ -4,7 +4,7 @@
 
 #include "Widgets/SCompoundWidget.h"
 
-#include "IStylusInputModule.h"
+#include "IOdysseyStylusInputModule.h"
 #include "IStylusState.h"
 
 class SStylusInputDebugWidget : public SCompoundWidget, 
@@ -18,7 +18,7 @@ public:
 	{}
 	SLATE_END_ARGS();
 
-	void Construct(const FArguments& InArgs, UStylusInputSubsystem& InSubsystem);
+	void Construct(const FArguments& InArgs, UOdysseyStylusInputSubsystem& InSubsystem);
 	void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& InState, int32 InIndex)
 	{
 		State = InState;
@@ -27,7 +27,7 @@ public:
 
 private:
 
-	UStylusInputSubsystem* InputSubsystem;
+    UOdysseyStylusInputSubsystem* InputSubsystem;
 	FStylusState State;
 	int32 LastIndex;
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IStylusInputModule.h"
+#include "IOdysseyStylusInputModule.h"
 
 class FWindowsStylusInputInterfaceImpl;
 

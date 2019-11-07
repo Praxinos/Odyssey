@@ -1,6 +1,6 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
-#include "IStylusInputModule.h"
+#include "IOdysseyStylusInputModule.h"
 #include "CoreMinimal.h"
 
 #include "Framework/Docking/TabManager.h"
@@ -12,7 +12,7 @@
 #include "WorkspaceMenuStructureModule.h"
 #include "SStylusInputDebugWidget.h"
 
-#define LOCTEXT_NAMESPACE "FStylusInputModule"
+#define LOCTEXT_NAMESPACE "FOdysseyStylusInputModule"
 
 
 static const FName StylusInputDebugTabName = FName("StylusInputDebug");
@@ -34,7 +34,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface() { return 
 
 // TODO: Other platforms
 
-void UStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
@@ -52,13 +52,13 @@ void UStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	const IWorkspaceMenuStructure& MenuStructure = WorkspaceMenu::GetMenuStructure();
 
 	TabManager->RegisterNomadTabSpawner(StylusInputDebugTabName,
-		FOnSpawnTab::CreateUObject(this, &UStylusInputSubsystem::OnSpawnPluginTab))
+		FOnSpawnTab::CreateUObject(this, &UOdysseyStylusInputSubsystem::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("DebugTabTitle", "Stylus Input Debug"))
 		.SetTooltipText(LOCTEXT("DebugTabTooltip", "Debug panel to display current values of stylus inputs."))
 		.SetGroup(MenuStructure.GetDeveloperToolsMiscCategory());
 }
 
-void UStylusInputSubsystem::Deinitialize()
+void UOdysseyStylusInputSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
@@ -69,7 +69,7 @@ void UStylusInputSubsystem::Deinitialize()
 	UE_LOG(LogStylusInput, Log, TEXT("Shutting down StylusInput subsystem."));
 }
 
-int32 UStylusInputSubsystem::NumInputDevices() const
+int32 UOdysseyStylusInputSubsystem::NumInputDevices() const
 {
 	if (InputInterface.IsValid())
 	{
@@ -78,7 +78,7 @@ int32 UStylusInputSubsystem::NumInputDevices() const
 	return 0;
 }
 
-const IStylusInputDevice* UStylusInputSubsystem::GetInputDevice(int32 Index) const
+const IStylusInputDevice* UOdysseyStylusInputSubsystem::GetInputDevice(int32 Index) const
 {
 	if (InputInterface.IsValid())
 	{
@@ -87,17 +87,17 @@ const IStylusInputDevice* UStylusInputSubsystem::GetInputDevice(int32 Index) con
 	return nullptr;
 }
 
-void UStylusInputSubsystem::AddMessageHandler(IStylusMessageHandler& InHandler)
+void UOdysseyStylusInputSubsystem::AddMessageHandler(IStylusMessageHandler& InHandler)
 {
 	MessageHandlers.AddUnique(&InHandler);
 }
 
-void UStylusInputSubsystem::RemoveMessageHandler(IStylusMessageHandler& InHandler)
+void UOdysseyStylusInputSubsystem::RemoveMessageHandler(IStylusMessageHandler& InHandler)
 {
 	MessageHandlers.Remove(&InHandler);
 }
 
-void UStylusInputSubsystem::Tick(float DeltaTime)
+void UOdysseyStylusInputSubsystem::Tick(float DeltaTime)
 {
 	if (InputInterface.IsValid())
 	{
@@ -119,7 +119,7 @@ void UStylusInputSubsystem::Tick(float DeltaTime)
 	}
 }
 
-TSharedRef<SDockTab> UStylusInputSubsystem::OnSpawnPluginTab(const FSpawnTabArgs& Args)
+TSharedRef<SDockTab> UOdysseyStylusInputSubsystem::OnSpawnPluginTab(const FSpawnTabArgs& Args)
 {
 	return SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)

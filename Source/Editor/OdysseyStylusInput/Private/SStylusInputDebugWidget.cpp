@@ -19,7 +19,7 @@ SStylusInputDebugWidget::~SStylusInputDebugWidget()
 	InputSubsystem->RemoveMessageHandler(*this);
 }
 
-void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UStylusInputSubsystem& InSubsystem)
+void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylusInputSubsystem& InSubsystem)
 {
 	InputSubsystem = &InSubsystem;
 	InputSubsystem->AddMessageHandler(*this);

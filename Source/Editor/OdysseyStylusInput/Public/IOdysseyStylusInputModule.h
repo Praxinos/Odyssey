@@ -10,7 +10,7 @@
 #include "Modules/ModuleManager.h"
 #include "Widgets/Docking/SDockTab.h"
 
-#include "IStylusInputModule.generated.h"
+#include "IOdysseyStylusInputModule.generated.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogStylusInput, Log, All);
 
@@ -55,7 +55,7 @@ public:
 
 
 UCLASS()
-class ODYSSEYSTYLUSINPUT_API UStylusInputSubsystem :
+class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSubsystem :
 	public UEditorSubsystem, 
 	public FTickableEditorObject
 {
@@ -79,7 +79,7 @@ public:
 
 	// FTickableEditorObject implementation
 	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UStylusInputSubsystem, STATGROUP_Tickables); }
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( UOdysseyStylusInputSubsystem, STATGROUP_Tickables); }
 
 private:
 	TSharedPtr<IStylusInputInterfaceInternal> InputInterface;
