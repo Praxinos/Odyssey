@@ -1,4 +1,5 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
+
 #include "OdysseyPaintEngine.h"
 #include "OdysseyMathUtils.h"
 #include "OdysseyInterpolationTypes.h"
@@ -9,105 +10,68 @@
 
 #define TILE_SIZE 64
 
-#define DEALLOC_TILE_MAP( iName )               \
-    if( iName ) {                               \
-        for( int i = 0; i < nTileY; ++i )       \
-                delete []  iName[i];            \
-        delete [] iName;                        \
-        iName = 0;                              \
-    }
-
-#define REALLOC_TILE_MAP( iName )               \
-    if( !iName ) {                              \
-        iName = new  bool*[ nTileY ];           \
-        for( int i = 0; i < nTileY; ++i ) {     \
-            iName[i] = new  bool[ nTileX ];     \
-            for( int j = 0; j < nTileX; ++j ) { \
-                iName[i][j] = false;            \
-    } } }
-
-#define TO_TILE_RECT( iRect )                                   \
-    { FMath::Max( 0, iRect.x / TILE_SIZE )                      \
-    , FMath::Max( 0, iRect.y / TILE_SIZE )                      \
-    , FMath::Min( nTileX - 1, int( ceil( float( iRect.x + iRect.width  ) / TILE_SIZE ) ) - ( iRect.x / TILE_SIZE ) ) \
-    , FMath::Min( nTileY - 1, int( ceil( float( iRect.y + iRect.height ) / TILE_SIZE ) ) - ( iRect.y / TILE_SIZE ) ) }
-
-#define SET_MAP_WITH_RECT( iMap, iRect, iValue )                \
-    for( int k = 0; k < iRect.h; ++k ) {                        \
-        for( int l = 0; l < iRect.w; ++l ) {                    \
-            iMap[k + iRect.y ][l + iRect.x ] = iValue; }}
-
-#define CLEAR_MAP( iMap )                                       \
-    for( int k = 0; k < nTileY; ++k ) {                         \
-        for( int l = 0; l < nTileX; ++l ) {                     \
-            iMap[k][l] = false; }}
-
-#define MAKE_TILE_RECT( x, y )  \
-    { x * TILE_SIZE, y * TILE_SIZE, FMath::Min( x * TILE_SIZE + TILE_SIZE, width ) - x * TILE_SIZE, FMath::Min( y * TILE_SIZE + TILE_SIZE, height ) - y * TILE_SIZE }
-
-
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPaintEngine::~FOdysseyPaintEngine()
 {
-    delete  smoother;
-    delete  interpolator;
-    delete  temp_buffer;
-    DEALLOC_TILE_MAP( tmpInvalidTileMap )
-    DEALLOC_TILE_MAP( strokeInvalidTileMap )
+    delete mSmoother;
+    delete mInterpolator;
+    delete mTempBuffer;
+    DeallocInvalidTileMap( mTmpInvalidTileMap );
+    DeallocInvalidTileMap( mStrokeInvalidTileMap );
 
     mTileThreadPool->WaitForCompletion();
-    delete  mTileThreadPool;
+    delete mTileThreadPool;
 }
 
-FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* InUndoHistoryPtr )
-    : FOdysseyTransactionnable    (   InUndoHistoryPtr )
-    , brush_instance              (   NULL             )
+FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
+    : FOdysseyTransactionnable( iUndoHistoryPtr )
+    , mBrushInstance( NULL )
 
-    , layer_stack                 (   NULL             )
-    , width                       (   0                )
-    , height                      (   0                )
-    , nTileX                      (   0                )
-    , nTileY                      (   0                )
+    , mLayerStack( NULL )
+    , mWidth( 0 )
+    , mHeight( 0 )
+    , mCountTileX( 0 )
+    , mCountTileY( 0 )
 
-    , temp_buffer                 (   NULL             )
-    , tmpInvalidTileMap           (   NULL             )
-    , strokeInvalidTileMap        (   NULL             )
+    , mTempBuffer( NULL )
+    , mTmpInvalidTileMap( NULL )
+    , mStrokeInvalidTileMap( NULL )
 
-    , color                       (   ::ULIS::CColor()  )
+    , mColor( ::ULIS::CColor() )
 
-    , size_modifier               (   20.f             )
-    , opacity_modifier            (   1.f              )
-    , flow_modifier               (   1.f              )
-    , mBlendingModeModifier       (   ::ULIS::eBlendingMode::kNormal )
-    , mStepValue                  (   20.f )
+    , mSizeModifier( 20.f )
+    , mOpacityModifier( 1.f )
+    , mFlowModifier( 1.f )
+    , mBlendingModeModifier( ::ULIS::eBlendingMode::kNormal )
+    , mStepValue( 20.f )
 
-    , interpolator                (   NULL             )
-    , smoother                    (   NULL             )
+    , mInterpolator( NULL )
+    , mSmoother( NULL )
 
-    , bSmoothingEnabled           (   true             )
-    , bRealTime                   (   true             )
-    , bCatchUp                    (   true             )
-    , bAdaptativeStep             (   true             )
-    , bPaintOnTick                (   false            )
-    , bPendingEndStroke           (   false            )
-    , mTileThreadPool             (   nullptr          )
-    , mDelayQueue                 (                    )
+    , mIsSmoothingEnabled( true )
+    , mIsRealTime( true )
+    , mIsCatchUp( true )
+    , mIsAdaptativeStep( true )
+    , mIsPaintOnTick( false )
+    , mIsPendingEndStroke( false )
+    , mTileThreadPool( nullptr )
+    , mDelayQueue()
 {
-    smoother        = new FOdysseySmoothingAverage();
-    interpolator    = new FOdysseyInterpolationBezier();
+    mSmoother = new FOdysseySmoothingAverage();
+    mInterpolator = new FOdysseyInterpolationBezier();
     mTileThreadPool = new ::ULIS::FThreadPool();
     int maxThreads = mTileThreadPool->GetMaxWorkers();
     mTileThreadPool->SetNumWorkers( maxThreads - 1 );
 }
-
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 void
 FOdysseyPaintEngine::InterruptDelay()
 {
-    while(!mDelayQueue.empty()) mDelayQueue.pop();
+    while( !mDelayQueue.empty() )
+        mDelayQueue.pop();
 }
 
 void
@@ -120,8 +84,8 @@ FOdysseyPaintEngine::Tick()
         std::function<void() >& f = mDelayQueue.front();
         f();
         mDelayQueue.pop();
-        auto end_time   = std::chrono::steady_clock::now();
-        auto delta      = std::chrono::duration_cast< std::chrono::milliseconds>(end_time - start_time ).count();
+        auto end_time = std::chrono::steady_clock::now();
+        auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - start_time ).count();
         if( delta > max_time )
             break;
     }
@@ -138,78 +102,91 @@ FOdysseyPaintEngine::Tick()
                        } );
     */
 
-    for( int k = 0; k < nTileY; ++k ) {
-        for( int l = 0; l < nTileX; ++l ) {
-            if( tmpInvalidTileMap[k][l] ) {
-                mTileThreadPool->ScheduleJob( [this,l,k]() {
-                    ::ULIS::FRect  tileRect = MAKE_TILE_RECT( l, k );
-                    layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier, mBlendingModeModifier );
+    for( int k = 0; k < mCountTileY; ++k )
+    {
+        for( int l = 0; l < mCountTileX; ++l )
+        {
+            if( mTmpInvalidTileMap[k][l] )
+            {
+                mTileThreadPool->ScheduleJob( [this, l, k]()
+                {
+                    ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                    mLayerStack->ComputeResultBlockWithTempBuffer( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier );
                 } );
-    } } }
+            }
+        }
+    }
     mTileThreadPool->WaitForCompletion();
 
-    CLEAR_MAP( tmpInvalidTileMap );
+    ClearInvalidTileMap( mTmpInvalidTileMap );
 
-    if( bPendingEndStroke && mDelayQueue.empty() )
+    if( mIsPendingEndStroke && mDelayQueue.empty() )
     {
-        for( int k = 0; k < nTileY; ++k ) {
-            for( int l = 0; l < nTileX; ++l ) {
-                if( strokeInvalidTileMap[k][l] ) {
-                    mTileThreadPool->ScheduleJob( [this,l,k]() {
-                        ::ULIS::FRect  tileRect = MAKE_TILE_RECT( l, k );
-                        layer_stack->BlendTempBufferOnCurrentBlock( tileRect, temp_buffer, opacity_modifier, mBlendingModeModifier );
+        for( int k = 0; k < mCountTileY; ++k )
+        {
+            for( int l = 0; l < mCountTileX; ++l )
+            {
+                if( mStrokeInvalidTileMap[k][l] )
+                {
+                    mTileThreadPool->ScheduleJob( [this, l, k]()
+                    {
+                        ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                        mLayerStack->BlendTempBufferOnCurrentBlock( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier );
                     } );
-        } } }
+                }
+            }
+        }
         mTileThreadPool->WaitForCompletion();
 
-        CLEAR_MAP( strokeInvalidTileMap );
-        ::ULIS::FClearFillContext::Clear( temp_buffer->GetIBlock() );
+        ClearInvalidTileMap( mStrokeInvalidTileMap );
+        ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
 
-        if( brush_instance )
-            brush_instance->CleansePool( ECacheLevel::kStroke );
+        if( mBrushInstance )
+            mBrushInstance->CleansePool( ECacheLevel::kStroke );
 
-        interpolator->Reset();
-        smoother->Reset();
-        raw_stroke.Empty();
-        result_stroke.Empty();
-        bPendingEndStroke = false;
+        mInterpolator->Reset();
+        mSmoother->Reset();
+        mRawStroke.Empty();
+        mResultStroke.Empty();
+        mIsPendingEndStroke = false;
     }
 }
 
 void
 FOdysseyPaintEngine::SetLayerStack( FOdysseyLayerStack* iLayerStack )
 {
-    layer_stack = iLayerStack;
+    mLayerStack = iLayerStack;
 
     CheckReallocTempBuffer();
+
     UpdateBrushInstance();
 }
-
 
 void
 FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 {
-    brush_instance = iBrushInstance;
+    mBrushInstance = iBrushInstance;
+
     UpdateBrushInstance();
 }
-
 
 void
 FOdysseyPaintEngine::SetColor( const ::ULIS::CColor& iColor )
 {
-    color = iColor;
+    mColor = iColor;
+
     UpdateBrushInstance();
 }
-
 
 void
 FOdysseyPaintEngine::SetSizeModifier( float iValue )
 {
-    if( iValue == 0 ) iValue = 1;
-    size_modifier = iValue;
+    if( iValue == 0 )
+        iValue = 1;
+    mSizeModifier = iValue;
 
-    float val = FMath::Max( 1.f, bAdaptativeStep ? ( mStepValue / 100.f ) * size_modifier : (float)mStepValue );
-    interpolator->SetStep( val );
+    float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
+    mInterpolator->SetStep( val );
 
     UpdateBrushInstance();
 }
@@ -217,65 +194,65 @@ FOdysseyPaintEngine::SetSizeModifier( float iValue )
 void
 FOdysseyPaintEngine::SetOpacityModifier( float iValue )
 {
-    opacity_modifier = iValue / 100.f;
+    mOpacityModifier = iValue / 100.f;
+
     UpdateBrushInstance();
 }
 
 void
 FOdysseyPaintEngine::SetFlowModifier( float iValue )
 {
-    flow_modifier = iValue / 100.f;
+    mFlowModifier = iValue / 100.f;
+
     UpdateBrushInstance();
 }
-
 
 void
 FOdysseyPaintEngine::SetBlendingModeModifier( ::ULIS::eBlendingMode iValue )
 {
     mBlendingModeModifier = iValue;
+
     UpdateBrushInstance();
 }
-
 
 void
 FOdysseyPaintEngine::SetStrokeStep( int32 iValue )
 {
     mStepValue = iValue;
-    float val = FMath::Max( 1.f, bAdaptativeStep ? ( mStepValue / 100.f ) * size_modifier : (float)mStepValue );
-    interpolator->SetStep( val );
+    float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
+    mInterpolator->SetStep( val );
+
     UpdateBrushInstance();
 }
 
-
 void
-FOdysseyPaintEngine::SetStrokeAdaptative( bool  iValue )
+FOdysseyPaintEngine::SetStrokeAdaptative( bool iValue )
 {
-    bAdaptativeStep = iValue;
-    float val = FMath::Max( 1.f, bAdaptativeStep ? ( mStepValue / 100.f ) * size_modifier : (float)mStepValue );
-    interpolator->SetStep( val );
+    mIsAdaptativeStep = iValue;
+    float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
+    mInterpolator->SetStep( val );
+
     UpdateBrushInstance();
 }
 
-
 void
-FOdysseyPaintEngine::SetStrokePaintOnTick( bool  iValue )
+FOdysseyPaintEngine::SetStrokePaintOnTick( bool iValue )
 {
-    bPaintOnTick = iValue;
+    mIsPaintOnTick = iValue;
 }
-
 
 void
 FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
 {
     switch( iValue )
     {
-        case  EOdysseyInterpolationType::kBezier:
+        case EOdysseyInterpolationType::kBezier:
         {
             // Nothing ATM
             break;
         }
 
-        case  EOdysseyInterpolationType::kLine:
+        case EOdysseyInterpolationType::kLine:
         {
             // Nothing ATM
             break;
@@ -283,100 +260,92 @@ FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
     }
 }
 
-
 void
-FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod   iValue )
+FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
 {
     switch( iValue )
     {
-        case  EOdysseySmoothingMethod::kAverage:
+        case EOdysseySmoothingMethod::kAverage:
         {
             // Nothing ATM
             break;
         }
 
-        case  EOdysseySmoothingMethod::kGravity:
+        case EOdysseySmoothingMethod::kGravity:
         {
             // Nothing ATM
             break;
         }
 
-        case  EOdysseySmoothingMethod::kPull:
+        case EOdysseySmoothingMethod::kPull:
         {
             // Nothing ATM
             break;
         }
     }
 }
-
 
 void
 FOdysseyPaintEngine::SetSmoothingStrength( int32 iValue )
 {
-    smoother->SetStrength( iValue );
+    mSmoother->SetStrength( iValue );
+
     UpdateBrushInstance();
 }
 
-
 void
-FOdysseyPaintEngine::SetSmoothingEnabled( bool  iValue )
+FOdysseyPaintEngine::SetSmoothingEnabled( bool iValue )
 {
-    bSmoothingEnabled = iValue;
+    mIsSmoothingEnabled = iValue;
 }
 
-
 void
-FOdysseyPaintEngine::SetSmoothingRealTime( bool  iValue )
+FOdysseyPaintEngine::SetSmoothingRealTime( bool iValue )
 {
-    bRealTime = iValue;
+    mIsRealTime = iValue;
 }
 
-
 void
-FOdysseyPaintEngine::SetSmoothingCatchUp( bool  iValue )
+FOdysseyPaintEngine::SetSmoothingCatchUp( bool iValue )
 {
-    Record( FName( TEXT( "CatchUp") ) );
-    ModifyAsState( bCatchUp, &bCatchUp );
-    bCatchUp = iValue;
+    Record( FName( TEXT( "CatchUp" ) ) );
+    ModifyAsState( mIsCatchUp, &mIsCatchUp );
+    mIsCatchUp = iValue;
     EndRecord();
 }
-
 
 bool
 FOdysseyPaintEngine::GetStokePaintOnTick() const
 {
-    return  bPaintOnTick;
+    return mIsPaintOnTick;
 }
-
 
 bool
 FOdysseyPaintEngine::GetSmoothingCatchUp() const
 {
-    return  bCatchUp;
+    return mIsCatchUp;
 }
 
-
 void
-FOdysseyPaintEngine::PushStroke( const  FOdysseyStrokePoint&  iPoint, bool first )
+FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst )
 {
-    if( !brush_instance ||
-        !layer_stack    ||
-        !temp_buffer    ||
-        bPendingEndStroke )
+    if( !mBrushInstance ||
+        !mLayerStack ||
+        !mTempBuffer ||
+        mIsPendingEndStroke )
         return;
 
     //If the layer is locked, we don't draw
-    if( layer_stack->GetCurrentLayer()->IsLocked() )
+    if( mLayerStack->GetCurrentLayer()->IsLocked() )
         return;
 
-
-    bool firstPoint = ( raw_stroke.Num() == 0 ) && ( first == false );
+    bool firstPoint = ( mRawStroke.Num() == 0 ) && ( iFirst == false );
 
     if( firstPoint )
     {
-        int duplicate_number = interpolator->MinimumRequiredPoints();
-        if( bRealTime && bSmoothingEnabled )
-            duplicate_number += smoother->MinimumRequiredPoints();
+        int duplicate_number = mInterpolator->MinimumRequiredPoints();
+        if( mIsRealTime && mIsSmoothingEnabled )
+            duplicate_number += mSmoother->MinimumRequiredPoints();
 
         for( int i = 0; i < duplicate_number; ++i )
             PushStroke( iPoint, true );
@@ -384,37 +353,39 @@ FOdysseyPaintEngine::PushStroke( const  FOdysseyStrokePoint&  iPoint, bool first
         return;
     }
 
-    raw_stroke.Add( iPoint );
+    mRawStroke.Add( iPoint );
 
-    if( bSmoothingEnabled )
+    if( mIsSmoothingEnabled )
     {
-        smoother->AddPoint( iPoint );
+        mSmoother->AddPoint( iPoint );
 
-        if( !smoother->IsReady() )
+        if( !mSmoother->IsReady() )
             return;
 
-        interpolator->AddPoint( smoother->ComputePoint() );
+        mInterpolator->AddPoint( mSmoother->ComputePoint() );
     }
     else
     {
-        interpolator->AddPoint( iPoint );
+        mInterpolator->AddPoint( iPoint );
     }
 
-    if( !interpolator->IsReady() )
+    if( !mInterpolator->IsReady() )
         return;
 
-    const  TArray< FOdysseyStrokePoint >&  tmp = interpolator->ComputePoints();
-    int currentIndexBasis = result_stroke.Num();
-    result_stroke.Append( tmp );
+    const TArray< FOdysseyStrokePoint >& tmp = mInterpolator->ComputePoints();
+    int currentIndexBasis = mResultStroke.Num();
+    mResultStroke.Append( tmp );
 
     if( !tmp.Num() )
         return;
 
-    for( int i = currentIndexBasis; i < result_stroke.Num(); ++i )
+    for( int i = currentIndexBasis; i < mResultStroke.Num(); ++i )
     {
-        if( i == 0 ) continue;
-        FOdysseyStrokePoint& previous_point = result_stroke[i - 1];
-        FOdysseyStrokePoint& current_point = result_stroke[i];
+        if( i == 0 )
+            continue;
+
+        FOdysseyStrokePoint& previous_point = mResultStroke[i - 1];
+        FOdysseyStrokePoint& current_point = mResultStroke[i];
         current_point.speed = FVector2D( current_point.x - previous_point.x, current_point.y - previous_point.y );
         current_point.acceleration = current_point.speed - previous_point.speed;
         current_point.jolt = current_point.acceleration - previous_point.acceleration;
@@ -425,39 +396,39 @@ FOdysseyPaintEngine::PushStroke( const  FOdysseyStrokePoint&  iPoint, bool first
         current_point.distance_travelled = previous_point.distance_travelled + current_point.speed.Size();
     }
 
-
     /*
     mDelayQueue.emplace( [&](){
 
     }
     */
-    for( int i = currentIndexBasis; i < result_stroke.Num(); i++ )
+    for( int i = currentIndexBasis; i < mResultStroke.Num(); i++ )
     {
-        auto point = result_stroke[ i ];
-        mDelayQueue.emplace( [this, i, point](){
-            FOdysseyBrushState& state = brush_instance->GetState();
+        auto point = mResultStroke[i];
+        mDelayQueue.emplace( [this, i, point]()
+        {
+            FOdysseyBrushState& state = mBrushInstance->GetState();
             state.point = point;
             state.currentPointIndex = i;
-            brush_instance->ExecuteStep();
-            brush_instance->CleansePool( ECacheLevel::kStep );
+            mBrushInstance->ExecuteStep();
+            mBrushInstance->CleansePool( ECacheLevel::kStep );
 
-            auto invalid_rects = brush_instance->GetInvalidRects();
+            auto invalid_rects = mBrushInstance->GetInvalidRects();
             for( int j = 0; j < invalid_rects.Num(); ++j )
             {
                 const ::ULIS::FRect& rect = invalid_rects[j];
                 float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
                 float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
-                float wf = float( rect.w  ) / TILE_SIZE;
+                float wf = float( rect.w ) / TILE_SIZE;
                 float hf = float( rect.h ) / TILE_SIZE;
                 int x = xf;
                 int y = yf;
-                int w = FMath::Min( nTileX, int( ceil( xf + wf ) ) ) - x;
-                int h = FMath::Min( nTileY, int( ceil( yf + hf ) ) ) - y;
+                int w = FMath::Min( mCountTileX, int( ceil( xf + wf ) ) ) - x;
+                int h = FMath::Min( mCountTileY, int( ceil( yf + hf ) ) ) - y;
                 ::ULIS::FRect tileRect = { x, y, w, h };
-                SET_MAP_WITH_RECT( tmpInvalidTileMap,       tileRect, true );
-                SET_MAP_WITH_RECT( strokeInvalidTileMap,    tileRect, true );
+                SetMapWithRect( mTmpInvalidTileMap, tileRect, true );
+                SetMapWithRect( mStrokeInvalidTileMap, tileRect, true );
             }
-            brush_instance->ClearInvalidRects();
+            mBrushInstance->ClearInvalidRects();
         } );
     }
 
@@ -527,32 +498,31 @@ FOdysseyPaintEngine::PushStroke( const  FOdysseyStrokePoint&  iPoint, bool first
 void
 FOdysseyPaintEngine::EndStroke()
 {
-    bPendingEndStroke = true;
+    mIsPendingEndStroke = true;
 }
-
 
 void
 FOdysseyPaintEngine::AbortStroke()
 {
-    bPendingEndStroke = false;
+    mIsPendingEndStroke = false;
     InterruptDelay();
-    layer_stack->ComputeResultBlock();
-    ::ULIS::FClearFillContext::Clear( temp_buffer->GetIBlock() );
-    CLEAR_MAP( tmpInvalidTileMap );
-    CLEAR_MAP( strokeInvalidTileMap );
-    if( brush_instance )
+    mLayerStack->ComputeResultBlock();
+    ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
+    ClearInvalidTileMap( mTmpInvalidTileMap );
+    ClearInvalidTileMap( mStrokeInvalidTileMap );
+
+    if( mBrushInstance )
     {
-        brush_instance->CleansePool( ECacheLevel::kStep );
-        brush_instance->CleansePool( ECacheLevel::kSubstroke );
-        brush_instance->CleansePool( ECacheLevel::kStroke );
+        mBrushInstance->CleansePool( ECacheLevel::kStep );
+        mBrushInstance->CleansePool( ECacheLevel::kSubstroke );
+        mBrushInstance->CleansePool( ECacheLevel::kStroke );
     }
 
-    interpolator->Reset();
-    smoother->Reset();
-    raw_stroke.Empty();
-    result_stroke.Empty();
+    mInterpolator->Reset();
+    mSmoother->Reset();
+    mRawStroke.Empty();
+    mResultStroke.Empty();
 }
-
 
 void
 FOdysseyPaintEngine::TriggerStateChanged()
@@ -560,68 +530,126 @@ FOdysseyPaintEngine::TriggerStateChanged()
     UpdateBrushInstance();
 }
 
-
-const  ::ULIS::CColor&
+const ::ULIS::CColor&
 FOdysseyPaintEngine::GetColor() const
 {
-    return  color;
+    return mColor;
 }
-
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
 void
 FOdysseyPaintEngine::CheckReallocTempBuffer()
 {
-    if( !layer_stack )
+    if( !mLayerStack )
         return;
 
-    width = layer_stack->Width();
-    height = layer_stack->Height();
+    mWidth = mLayerStack->Width();
+    mHeight = mLayerStack->Height();
 
-    bool realloc = !temp_buffer || ( temp_buffer && temp_buffer->Size() != layer_stack->Size() );
+    bool realloc = !mTempBuffer || ( mTempBuffer && mTempBuffer->Size() != mLayerStack->Size() );
 
     if( realloc )
     {
-        delete  temp_buffer;
-        temp_buffer = new FOdysseyBlock( width, height );
-        ::ULIS::FClearFillContext::Clear( temp_buffer->GetIBlock() );
+        delete mTempBuffer;
+        mTempBuffer = new FOdysseyBlock( mWidth, mHeight );
+        ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
         ReallocInvalidMaps();
     }
 }
 
-
 void
 FOdysseyPaintEngine::ReallocInvalidMaps()
 {
-    DEALLOC_TILE_MAP( tmpInvalidTileMap )
-    DEALLOC_TILE_MAP( strokeInvalidTileMap )
+    DeallocInvalidTileMap( mTmpInvalidTileMap );
+    DeallocInvalidTileMap( mStrokeInvalidTileMap );
 
-    nTileX = ceil( (float)width / TILE_SIZE );
-    nTileY = ceil( (float)height / TILE_SIZE );
+    mCountTileX = ceil( (float)mWidth / TILE_SIZE );
+    mCountTileY = ceil( (float)mHeight / TILE_SIZE );
 
-    REALLOC_TILE_MAP( tmpInvalidTileMap )
-    REALLOC_TILE_MAP( strokeInvalidTileMap )
+    ReallocInvalidTileMap( mTmpInvalidTileMap );
+    ReallocInvalidTileMap( mStrokeInvalidTileMap );
 }
-
 
 void
 FOdysseyPaintEngine::UpdateBrushInstance()
 {
-    if( !brush_instance )
+    if( !mBrushInstance )
         return;
 
-    FOdysseyBrushState& state   = brush_instance->GetState();
-    state.target_temp_buffer    = temp_buffer;
-    state.point                 = FOdysseyStrokePoint();
-    state.color                 = color;
-    state.size_modifier         = size_modifier;
-    state.opacity_modifier      = opacity_modifier;
-    state.flow_modifier         = flow_modifier;
+    FOdysseyBrushState& state = mBrushInstance->GetState();
+    state.target_temp_buffer = mTempBuffer;
+    state.point = FOdysseyStrokePoint();
+    state.color = mColor;
+    state.size_modifier = mSizeModifier;
+    state.opacity_modifier = mOpacityModifier;
+    state.flow_modifier = mFlowModifier;
     state.blendingMode_modifier = mBlendingModeModifier;
-    state.step                  = interpolator->GetStep();
-    state.smoothing_strength    = smoother->GetStrength();
-    state.currentPointIndex     = 0;
-    state.currentStroke         = &result_stroke;
-    brush_instance->CleansePool( ECacheLevel::kState );
+    state.step = mInterpolator->GetStep();
+    state.smoothing_strength = mSmoother->GetStrength();
+    state.currentPointIndex = 0;
+    state.currentStroke = &mResultStroke;
+    mBrushInstance->CleansePool( ECacheLevel::kState );
+}
+
+void
+FOdysseyPaintEngine::DeallocInvalidTileMap( InvalidTileMap& ioMap )
+{
+    if( !ioMap )
+        return;
+
+    for( int i = 0; i < mCountTileY; ++i )
+        delete[] ioMap[i];
+    delete[] ioMap;
+    ioMap = 0;
+}
+
+void
+FOdysseyPaintEngine::ReallocInvalidTileMap( InvalidTileMap& ioMap )
+{
+    if( ioMap )
+        return;
+
+    ioMap = new bool*[mCountTileY];
+    for( int i = 0; i < mCountTileY; ++i )
+    {
+        ioMap[i] = new bool[mCountTileX];
+        for( int j = 0; j < mCountTileX; ++j )
+        {
+            ioMap[i][j] = false;
+        }
+    }
+}
+
+void
+FOdysseyPaintEngine::ClearInvalidTileMap( InvalidTileMap ioMap )
+{
+    for( int k = 0; k < mCountTileY; ++k )
+    {
+        for( int l = 0; l < mCountTileX; ++l )
+        {
+            ioMap[k][l] = false;
+        }
+    }
+}
+
+::ULIS::FRect
+FOdysseyPaintEngine::MakeTileRect( int iTileX, int iTileY )
+{
+    return { iTileX * TILE_SIZE,
+             iTileY * TILE_SIZE,
+             FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, mWidth ) - iTileX * TILE_SIZE,
+             FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, mHeight ) - iTileY * TILE_SIZE };
+}
+
+void
+FOdysseyPaintEngine::SetMapWithRect( InvalidTileMap ioMap, const ::ULIS::FRect& iRect, bool iValue )
+{
+    for( int k = 0; k < iRect.h; ++k )
+    {
+        for( int l = 0; l < iRect.w; ++l )
+        {
+            ioMap[k + iRect.y][l + iRect.x] = iValue;
+        }
+    }
 }

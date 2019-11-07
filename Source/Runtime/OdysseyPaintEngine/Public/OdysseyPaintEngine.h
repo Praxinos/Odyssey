@@ -18,47 +18,48 @@ class UOdysseyBrushAssetBase;
 
 namespace ULIS { class FThreadPool; }
 
-class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine : public FOdysseyTransactionnable
+class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
+    : public FOdysseyTransactionnable
 {
+private:
     typedef bool** InvalidTileMap;
 
 public:
     // Construction / Destruction
     ~FOdysseyPaintEngine();
-    FOdysseyPaintEngine( FOdysseyUndoHistory* InUndoHistoryRef = 0 );
-
+    FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryRef = 0 );
 
 public:
     // Public API
     void InterruptDelay();
     void Tick();
-    void SetLayerStack(         FOdysseyLayerStack* iLayerStack );
-    void SetBrushInstance(      UOdysseyBrushAssetBase* iBrushInstance );
-    void SetColor(              const ::ULIS::CColor& iColor );
-    void SetSizeModifier(       float iValue );
-    void SetOpacityModifier(    float iValue );
-    void SetFlowModifier(       float iValue );
+    void SetLayerStack( FOdysseyLayerStack* iLayerStack );
+    void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
+    void SetColor( const ::ULIS::CColor& iColor );
+    void SetSizeModifier( float iValue );
+    void SetOpacityModifier( float iValue );
+    void SetFlowModifier( float iValue );
     void SetBlendingModeModifier( ::ULIS::eBlendingMode iValue );
 
-    void  SetStrokeStep         ( int32 iValue );
-    void  SetStrokeAdaptative   ( bool  iValue );
-    void  SetStrokePaintOnTick  ( bool  iValue );
-    void  SetInterpolationType  ( EOdysseyInterpolationType iValue );
-    void  SetSmoothingMethod    ( EOdysseySmoothingMethod   iValue );
-    void  SetSmoothingStrength  ( int32 iValue );
-    void  SetSmoothingEnabled   ( bool  iValue );
-    void  SetSmoothingRealTime  ( bool  iValue );
-    void  SetSmoothingCatchUp   ( bool  iValue );
+    void SetStrokeStep( int32 iValue );
+    void SetStrokeAdaptative( bool iValue );
+    void SetStrokePaintOnTick( bool iValue );
+    void SetInterpolationType( EOdysseyInterpolationType iValue );
+    void SetSmoothingMethod( EOdysseySmoothingMethod iValue );
+    void SetSmoothingStrength( int32 iValue );
+    void SetSmoothingEnabled( bool iValue );
+    void SetSmoothingRealTime( bool iValue );
+    void SetSmoothingCatchUp( bool iValue );
 
     bool GetStokePaintOnTick() const;
     bool GetSmoothingCatchUp() const;
 
-    void PushStroke(            const  FOdysseyStrokePoint&  iPoint, bool first = false );
+    void PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst = false );
     void EndStroke();
     void AbortStroke();
     void TriggerStateChanged();
 
-    const  ::ULIS::CColor&   GetColor() const;
+    const ::ULIS::CColor& GetColor() const;
 
 private:
     // Private API
@@ -66,42 +67,49 @@ private:
     void ReallocInvalidMaps();
     void UpdateBrushInstance();
 
+    void DeallocInvalidTileMap( InvalidTileMap& ioMap );
+    void ReallocInvalidTileMap( InvalidTileMap& ioMap );
+    void ClearInvalidTileMap( InvalidTileMap ioMap );
+
+    ::ULIS::FRect MakeTileRect( int iTileX, int iTileY );
+    void SetMapWithRect( InvalidTileMap ioMap, const ::ULIS::FRect& iRect, bool iValue );
+
 private:
     // Private Data Members
-    UOdysseyBrushAssetBase*                     brush_instance;
+    UOdysseyBrushAssetBase*             mBrushInstance;
 
-    FOdysseyLayerStack*                         layer_stack;
-    int width;
-    int height;
-    int nTileX;
-    int nTileY;
+    FOdysseyLayerStack*                 mLayerStack;
+    int                                 mWidth;
+    int                                 mHeight;
+    int                                 mCountTileX;
+    int                                 mCountTileY;
 
-    TArray< FOdysseyStrokePoint >               raw_stroke;
-    TArray< FOdysseyStrokePoint >               result_stroke;
+    TArray< FOdysseyStrokePoint >       mRawStroke;
+    TArray< FOdysseyStrokePoint >       mResultStroke;
 
-    FOdysseyBlock*                              temp_buffer;
-    InvalidTileMap                              tmpInvalidTileMap;
-    InvalidTileMap                              strokeInvalidTileMap;
+    FOdysseyBlock*                      mTempBuffer;
+    InvalidTileMap                      mTmpInvalidTileMap;
+    InvalidTileMap                      mStrokeInvalidTileMap;
 
-    ::ULIS::CColor                               color;
+    ::ULIS::CColor                      mColor;
 
-    float                                       size_modifier;
-    float                                       opacity_modifier;
-    float                                       flow_modifier;
-    ::ULIS::eBlendingMode                       mBlendingModeModifier;
-    float                                       mStepValue;
+    float                               mSizeModifier;
+    float                               mOpacityModifier;
+    float                               mFlowModifier;
+    ::ULIS::eBlendingMode               mBlendingModeModifier;
+    float                               mStepValue;
 
-    IOdysseyInterpolation*                      interpolator;
-    IOdysseySmoothing*                          smoother;
+    IOdysseyInterpolation*              mInterpolator;
+    IOdysseySmoothing*                  mSmoother;
 
-    bool                                        bSmoothingEnabled;
-    bool                                        bRealTime;
-    bool                                        bCatchUp;
-    bool                                        bAdaptativeStep;
-    bool                                        bPaintOnTick;
+    bool                                mIsSmoothingEnabled;
+    bool                                mIsRealTime;
+    bool                                mIsCatchUp;
+    bool                                mIsAdaptativeStep;
+    bool                                mIsPaintOnTick;
 
-    bool                                        bPendingEndStroke;
+    bool                                mIsPendingEndStroke;
 
-    ::ULIS::FThreadPool*                        mTileThreadPool;
-    std::queue< std::function<void() > >        mDelayQueue;
+    ::ULIS::FThreadPool*                mTileThreadPool;
+    std::queue<std::function<void()>>   mDelayQueue;
 };
