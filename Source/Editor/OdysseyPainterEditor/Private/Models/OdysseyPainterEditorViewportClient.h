@@ -116,6 +116,8 @@ private:
 private:
     // Private Data Members
     UOdysseyStylusInputSubsystem*           InputSubsystem;
+    FKey                                    mLastKey;
+    EInputEvent                             mLastEvent;
     EMouseCaptureMode                       mMouseCaptureMode;
     TWeakPtr<IOdysseyPainterEditorToolkit>  mOdysseyPainterEditorPtr;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;

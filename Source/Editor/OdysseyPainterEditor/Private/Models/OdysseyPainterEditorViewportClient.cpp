@@ -44,6 +44,8 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
                                                                           TWeakPtr< SOdysseySurfaceViewport >       iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
     : InputSubsystem( nullptr )
+    , mLastKey( EKeys::Invalid )
+    , mLastEvent( EInputEvent::IE_MAX )
     , mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
     , mOdysseyPainterEditorPtr( iOdysseyPainterEditor )
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
@@ -219,6 +221,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
+    //UE_LOG( LogStylusInput, Log, TEXT( "InputKey Key:%s Event:%d" ), *iKey.GetFName().ToString(), iEvent );
+
+    mLastKey = iKey;
+    mLastEvent = iEvent;
+
     if( mMouseCaptureMode == EMouseCaptureMode::NoCapture
         && ( iKey == EKeys::LeftMouseButton
              || iKey == EKeys::RightMouseButton ) )
@@ -259,7 +266,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 
     //---
 
-    //UE_LOG( LogStylusInputP, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d"), iIndex, iState.GetPosition().X, iState.GetPosition().Y, iState.GetPressure(), iState.IsStylusDown() );
+    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d"), iIndex, iState.GetPosition().X, iState.GetPosition().Y, iState.GetPressure(), iState.IsStylusDown() );
 
     //State = iState;
     //LastIndex = iIndex;
@@ -280,26 +287,46 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 
   //---
 
-  //---
+    //TODO: fix when down on viewport and up outside
+    //we don't have the InputKey of the up -_-
 
-    const IStylusInputDevice* input_device = InputSubsystem->GetInputDevice( iIndex );
-
-    if( !input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Pressed )
     {
-        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+        InputKeyWithStrokePoint( stroke_point, 0, mLastKey, mLastEvent );
     }
-    else if( input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    else if( iState.IsStylusDown() )
     {
         CapturedMouseMoveWithStrokePoint( stroke_point );
     }
-    else if( input_device->GetPreviousState().IsStylusDown() && !input_device->GetCurrentState().IsStylusDown() )
+    else if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Released )
     {
-        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+        InputKeyWithStrokePoint( stroke_point, 0, mLastKey, mLastEvent );
     }
     else
     {
-        //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged : %s" ), !input_device->GetCurrentState().IsStylusInverted() ? L"pen" : L"eraser" );
     }
+
+    mLastKey = EKeys::Invalid;
+    mLastEvent = EInputEvent::IE_MAX;
+
+    //const IStylusInputDevice* input_device = InputSubsystem->GetInputDevice( iIndex );
+
+    //if( !input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    //{
+    //    InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+    //}
+    //else if( input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    //{
+    //    CapturedMouseMoveWithStrokePoint( stroke_point );
+    //}
+    //else if( input_device->GetPreviousState().IsStylusDown() && !input_device->GetCurrentState().IsStylusDown() )
+    //{
+    //    InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+    //}
+    //else
+    //{
+    //    //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged : %s" ), !input_device->GetCurrentState().IsStylusInverted() ? L"pen" : L"eraser" );
+    //}
 }
 
 bool
