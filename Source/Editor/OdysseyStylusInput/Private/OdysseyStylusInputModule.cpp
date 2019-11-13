@@ -109,10 +109,14 @@ void UOdysseyStylusInputSubsystem::Tick(float DeltaTime)
 			if (InputDevice->IsDirty())
 			{
 				InputDevice->Tick();
+                TArray<FStylusState> tmp( InputDevice->GetCurrentState() );
 
 				for (IStylusMessageHandler* Handler : MessageHandlers)
 				{
-					Handler->OnStylusStateChanged(InputInterface->Widget(), InputDevice->GetCurrentState(), DeviceIdx);
+                    for( const FStylusState& stylus_state : tmp )
+                    {
+                        Handler->OnStylusStateChanged( InputInterface->Widget(), stylus_state, DeviceIdx );
+                    }
 				}
 			}
 		}

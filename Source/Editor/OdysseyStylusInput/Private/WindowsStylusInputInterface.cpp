@@ -56,7 +56,7 @@ void FWindowsStylusInputInterface::Tick()
 	for (const FTabletContextInfo& Context : Impl->StylusPlugin->TabletContexts)
 	{
 		// don't change focus if the stylus is down
-		if (Context.GetCurrentState().IsStylusDown())
+		if ( Context.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); }) )
 		{
 			return;
 		}

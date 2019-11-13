@@ -131,12 +131,12 @@ public:
 	/**
 	 * Get the current stylus state.
 	 */
-	const FStylusState& GetCurrentState() const { return CurrentState; }
+	const TArray<FStylusState>& GetCurrentState() const { return CurrentState; }
 
 	/**
 	 * Get the previous stylus state.
 	 */
-	const FStylusState& GetPreviousState() const { return PreviousState; }
+	const TArray<FStylusState>& GetPreviousState() const { return PreviousState; }
 
 	/**
 	 * Get the supported inputs of this tablet.
@@ -150,8 +150,8 @@ public:
 	bool IsDirty() const { return Dirty; }
 
 protected:
-	FStylusState CurrentState;
-	FStylusState PreviousState;
+    TArray<FStylusState> CurrentState;
+    TArray<FStylusState> PreviousState;
 	TArray<EStylusInputType> SupportedInputs;
 	bool Dirty : 1;
 };

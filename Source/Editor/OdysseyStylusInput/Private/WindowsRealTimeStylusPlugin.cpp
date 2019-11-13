@@ -1,6 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "WindowsRealTimeStylusPlugin.h"
+//#include "IOdysseyStylusInputModule.h" // for UE_LOG
 
 #if PLATFORM_WINDOWS
 
@@ -26,12 +27,12 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusDown(IRealTimeStylus* RealTimeStylus
 	FTabletContextInfo* TabletContext = FindTabletContext(StylusInfo->tcid);
 	if (TabletContext != nullptr)
 	{
-		TabletContext->WindowsState.IsTouching = true;
+        TabletContext->IsTouching = true;
 
-        HandlePacket( RealTimeStylus, StylusInfo, PacketSize, sizeof( LONG ), Packet );
+        HandlePacket( RealTimeStylus, StylusInfo, sizeof( LONG ), PacketSize * sizeof( LONG ), Packet ); // need to be done after IsTouching = true (HandlePacket uses it)
 
-        if( TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
-            TabletContext->WindowsState.NormalPressure = 1.0;
+        //if( TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
+        //    TabletContext->WindowsState.Last().NormalPressure = 1.0;
 	}
 	return S_OK;
 }
@@ -41,10 +42,11 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusUp(IRealTimeStylus* RealTimeStylus, 
 	FTabletContextInfo* TabletContext = FindTabletContext(StylusInfo->tcid);
 	if (TabletContext != nullptr)
 	{
-		// we know this is not touching
-		TabletContext->WindowsState.IsTouching = false;
-        HandlePacket( RealTimeStylus, StylusInfo, PacketSize, sizeof( LONG ), Packet );
-		TabletContext->WindowsState.NormalPressure = 0;
+        // we know this is not touching
+        TabletContext->IsTouching = false;
+		//TabletContext->WindowsState2.NormalPressure = 0;
+
+        HandlePacket( RealTimeStylus, StylusInfo, sizeof( LONG ), PacketSize * sizeof( LONG ), Packet );
 	}
 	return S_OK;
 }
@@ -384,6 +386,28 @@ static float ToDegrees(int Value, const FPacketDescription& Desc)
 	return Value / Desc.Resolution;
 }
 
+FCriticalSection sgMutex;
+
+void 
+FTabletContextInfo::Tick()
+{
+    PreviousState = CurrentState;
+    CurrentState.Empty();
+
+    sgMutex.Lock();
+    TArray<FWindowsStylusState> tmp( WindowsState );
+    WindowsState.Empty();
+    sgMutex.Unlock();
+
+    for( FWindowsStylusState& window_state : tmp )
+    {
+        window_state.IsTouching = IsTouching;
+        CurrentState.Push( window_state.ToPublicState() );
+    }
+
+    Dirty = false;
+}
+
 void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus, const StylusInfo* StylusInfo, ULONG PacketCount, ULONG PacketBufferLength, LONG* Packets)
 {
 	FTabletContextInfo* TabletContext = FindTabletContext(StylusInfo->tcid);
@@ -392,8 +416,8 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 		return;
 	}
 
-	TabletContext->SetDirty();
-	TabletContext->WindowsState.IsInverted = StylusInfo->bIsInvertedCursor;
+    FWindowsStylusState windows_state;
+    windows_state.IsInverted = StylusInfo->bIsInvertedCursor;
 
     //TODO: find another place to get data, not for each packet, but be sure to update data when moving/resizing HWND
     // can't be in AddTabletContext() because it is NOT called when moving HWND
@@ -421,6 +445,7 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
     //---
 
 	ULONG PropertyCount = PacketBufferLength / PacketCount;
+    //UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket" ) ); // also remove #include
 
 	for (ULONG i = 0; i < PropertyCount; ++i)
 	{
@@ -434,43 +459,53 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
             {
                 float x = Packets[i] / ( 1000.0 * 2.54 / dpix ); // http://code.rawlinson.us/2007/01/pixelspace-to-inkspace.html
                 //float x = Packets[i] / 11.76;
-                TabletContext->WindowsState.Position.X = x + ptClientUL.x;
+                windows_state.Position.X = x + ptClientUL.x;
                 break;
             }
 			case EWindowsPacketType::Y:
             {
                 float y = Packets[i] / ( 1000.0 * 2.54 / dpiy );
-                TabletContext->WindowsState.Position.Y = y + ptClientUL.y;
+                windows_state.Position.Y = y + ptClientUL.y;
                 break;
             }
 			case EWindowsPacketType::Status:
 				break;
 			case EWindowsPacketType::Z:
-				TabletContext->WindowsState.Z = Normalized;
+                windows_state.Z = Normalized;
 				break;
 			case EWindowsPacketType::NormalPressure:
-				TabletContext->WindowsState.NormalPressure = Normalized;
+                windows_state.NormalPressure = Normalized;
 				break;
 			case EWindowsPacketType::TangentPressure:
-				TabletContext->WindowsState.TangentPressure = Normalized;
+                windows_state.TangentPressure = Normalized;
 				break;
 			case EWindowsPacketType::Twist:
-				TabletContext->WindowsState.Twist = ToDegrees(Packets[i], PacketDescription);
+                windows_state.Twist = ToDegrees(Packets[i], PacketDescription);
 				break;
 			case EWindowsPacketType::XTilt:
-				TabletContext->WindowsState.Tilt.X = ToDegrees(Packets[i], PacketDescription);
+                windows_state.Tilt.X = ToDegrees(Packets[i], PacketDescription);
 				break;
 			case EWindowsPacketType::YTilt:
-				TabletContext->WindowsState.Tilt.Y = ToDegrees(Packets[i], PacketDescription);
+                windows_state.Tilt.Y = ToDegrees(Packets[i], PacketDescription);
 				break;
 			case EWindowsPacketType::Width:
-				TabletContext->WindowsState.Size.X = Normalized;
+                windows_state.Size.X = Normalized;
 				break;
 			case EWindowsPacketType::Height:
-				TabletContext->WindowsState.Size.Y = Normalized;
+                windows_state.Size.Y = Normalized;
 				break;
 		}
 	}
+
+    if( TabletContext->IsTouching && TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
+        windows_state.NormalPressure = 1.0;
+
+    //UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket x:%f y:%f" ), windows_state.Position.X, windows_state.Position.Y );
+
+    sgMutex.Lock();
+    TabletContext->SetDirty();
+    TabletContext->WindowsState.Push( windows_state );
+    sgMutex.Unlock();
 }
 
 HRESULT FWindowsRealTimeStylusPlugin::Packets(IRealTimeStylus* RealTimeStylus, const StylusInfo* StylusInfo,

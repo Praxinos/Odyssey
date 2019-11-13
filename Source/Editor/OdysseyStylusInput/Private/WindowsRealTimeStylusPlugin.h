@@ -86,17 +86,13 @@ struct FTabletContextInfo : public IStylusInputDevice
 	TArray<FPacketDescription> PacketDescriptions;
 	TArray<EWindowsPacketType> SupportedPackets;
 
-	FWindowsStylusState WindowsState;
+	TArray<FWindowsStylusState> WindowsState;
+    bool IsTouching;
 
 	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
 	void SetDirty() { Dirty = true; }
 
-	virtual void Tick() override
-	{
-		PreviousState = CurrentState;
-		CurrentState = WindowsState.ToPublicState();
-		Dirty = false;
-	}
+    virtual void Tick() override;
 };
 
 /**
