@@ -7,7 +7,6 @@
 
 class ODYSSEYSTROKEPIPELINE_API FOdysseySmoothingAverage : public IOdysseySmoothing
 {
-
 public:
     // Construction / Destruction
     virtual ~FOdysseySmoothingAverage();
@@ -19,4 +18,3 @@ public:
     virtual int MinimumRequiredPoints() const override;
     virtual FOdysseyStrokePoint ComputePoint() override;
 };
-

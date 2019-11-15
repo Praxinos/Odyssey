@@ -8,23 +8,21 @@
 #include "OdysseyInterpolationTypes.h"
 #include "OdysseyStrokeOptions.generated.h"
 
-/////////////////////////////////////////////////////
-// SOdysseyStrokeOptions
 USTRUCT()
 struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
 {
     GENERATED_BODY()
 
     FOdysseyStrokeOptions()
-        : Step          ( 20    )
-        , SizeAdaptative( true  )
+        : Step          ( 20 )
+        , SizeAdaptative( true )
         , PaintOnTick   ( false )
         , Type          ( EOdysseyInterpolationType::kBezier )
-        , Method        ( EOdysseySmoothingMethod::kAverage  )
-        , Strength      ( 10    )
-        , Enabled       ( true  )
-        , RealTime      ( true  )
-        , CatchUp       ( true  )
+        , Method        ( EOdysseySmoothingMethod::kAverage )
+        , Strength      ( 10 )
+        , Enabled       ( true )
+        , RealTime      ( true )
+        , CatchUp       ( true )
     {}
 
     /** Distance beetween two Stamps. */
@@ -41,11 +39,11 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
 
     /** The type of interpolation. */
     UPROPERTY( EditAnywhere, Category = "Interpolation" )
-    EOdysseyInterpolationType   Type;
+    EOdysseyInterpolationType Type;
 
     /** The method used for smoothing. */
     UPROPERTY( EditAnywhere, Category = "Smoothing" )
-    EOdysseySmoothingMethod   Method;
+    EOdysseySmoothingMethod Method;
 
     /** Distance for Smooting computation. */
     UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "3" ) )

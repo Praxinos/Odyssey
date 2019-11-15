@@ -9,67 +9,63 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyInterpolationBezier::FOdysseyInterpolationBezier()
-{
-}
-
-
 FOdysseyInterpolationBezier::~FOdysseyInterpolationBezier()
 {
 }
 
+FOdysseyInterpolationBezier::FOdysseyInterpolationBezier()
+{
+}
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 bool
-FOdysseyInterpolationBezier::IsReady()  const
+FOdysseyInterpolationBezier::IsReady() const
 {
-    return ( inputPoints.Num() >= MinimumRequiredPoints() );
+    return ( mInputPoints.Num() >= MinimumRequiredPoints() );
 }
-
 
 int
-FOdysseyInterpolationBezier::MinimumRequiredPoints()  const
+FOdysseyInterpolationBezier::MinimumRequiredPoints() const
 {
-    return  3;
+    return 3;
 }
-
 
 const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationBezier::ComputePoints()
 {
-    resultPoints.Empty();
+    mResultPoints.Empty();
 
     if( !IsReady() )
-        return  resultPoints;
+        return mResultPoints;
 
-    inputPoints[2] = ( inputPoints[1] + inputPoints[2] ) / 2;
+    mInputPoints[2] = ( mInputPoints[1] + mInputPoints[2] ) / 2;
     TArray< FOdysseyMathUtils::FOdysseyBezierLutElement > LUT;
-    FVector2D A( inputPoints[0].x, inputPoints[0].y );
-    FVector2D B( inputPoints[1].x, inputPoints[1].y );
-    FVector2D C( inputPoints[2].x, inputPoints[2].y );
-    float length = FOdysseyMathUtils::QuadraticBezierGenerateLinearLUT( &LUT, A, B, C, step );
-    float  previousStrokeLength = fTotalStrokeLength;
-    fTotalStrokeLength += length;
+    FVector2D A( mInputPoints[0].x, mInputPoints[0].y );
+    FVector2D B( mInputPoints[1].x, mInputPoints[1].y );
+    FVector2D C( mInputPoints[2].x, mInputPoints[2].y );
+    float length = FOdysseyMathUtils::QuadraticBezierGenerateLinearLUT( &LUT, A, B, C, mStep );
+    float previousStrokeLength = mTotalStrokeLength;
+    mTotalStrokeLength += length;
 
-    float remaining = fTotalStrokeLength - fLastDrawnLength;
-    float delta = remaining - step;
+    float remaining = mTotalStrokeLength - mLastDrawnLength;
+    float delta = remaining - mStep;
     float next = length - delta;
 
-    int     iLastSelectedLUTIndex = 0;
-    int     drawn_steps = 0;
+    int iLastSelectedLUTIndex = 0;
+    int drawn_steps = 0;
 
     bool point_in_substroke = next > 0;
 
     if( point_in_substroke )
     {
-        for( float i = next; i <= length; i+= step )
+        for( float i = next; i <= length; i += mStep )
         {
-            FOdysseyMathUtils::FOdysseyBezierLutElement  prevElement;
-            FOdysseyMathUtils::FOdysseyBezierLutElement  nextElement;
-            for( int j = iLastSelectedLUTIndex; j < LUT.Num()-1; ++j )
+            FOdysseyMathUtils::FOdysseyBezierLutElement prevElement;
+            FOdysseyMathUtils::FOdysseyBezierLutElement nextElement;
+            for( int j = iLastSelectedLUTIndex; j < LUT.Num() - 1; ++j )
             {
-                prevElement     = LUT[j];
-                nextElement     = LUT[j+1];
+                prevElement = LUT[j];
+                nextElement = LUT[j + 1];
                 if( i >= prevElement.length && i <= nextElement.length )
                 {
                     iLastSelectedLUTIndex = j;
@@ -81,30 +77,32 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationBezier::ComputePoints(
             float nextPosParam = nextElement.length / length;
             float currPosParam = i / length;
             float posParamDelta = nextPosParam - prevPosParam;
-            float currPosParamDelta = posParamDelta == 0 ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
+            float currPosParamDelta = ( posParamDelta == 0 ) ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
             FVector2D pos = prevElement.point + ( nextElement.point - prevElement.point ) * currPosParamDelta;
-            float propertyParam = currPosParam < 0.5 ? currPosParam * 2 : ( currPosParam - 0.5 ) * 2;
-            FOdysseyStrokePoint point = currPosParam < 0.5 ?
-                                        inputPoints[0] + ( inputPoints[1] - inputPoints[0] ) * propertyParam :
-                                        inputPoints[1] + ( inputPoints[2] - inputPoints[1] ) * propertyParam ;
+            float propertyParam = ( currPosParam < 0.5 ) ? currPosParam * 2 : ( currPosParam - 0.5 ) * 2;
+            FOdysseyStrokePoint point = ( currPosParam < 0.5 ) ?
+                mInputPoints[0] + ( mInputPoints[1] - mInputPoints[0] ) * propertyParam :
+                mInputPoints[1] + ( mInputPoints[2] - mInputPoints[1] ) * propertyParam;
             point.x = pos.X;
             point.y = pos.Y;
-            resultPoints.Add( point );
+            mResultPoints.Add( point );
             ++drawn_steps;
         }
 
-        fLastDrawnLength += (float)drawn_steps * step;
+        mLastDrawnLength += (float)drawn_steps * mStep;
     }
 
-    if( fTotalStrokeLength == 0.f )
+    if( mTotalStrokeLength == 0.f )
     {
-        fLastDrawnLength = 0.f;
-        resultPoints.Add( inputPoints[2] );
+        mLastDrawnLength = 0.f;
+        mResultPoints.Add( mInputPoints[2] );
     }
 
-    inputPoints.RemoveAt( 0, 2 );
-    return resultPoints;
+    mInputPoints.RemoveAt( 0, 2 );
+
+    return mResultPoints;
 }
 
+//---
 
 #undef LOCTEXT_NAMESPACE

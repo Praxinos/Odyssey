@@ -7,7 +7,6 @@
 
 class ODYSSEYSTROKEPIPELINE_API FOdysseyInterpolationBezier : public IOdysseyInterpolation
 {
-
 public:
     // Construction / Destruction
     virtual ~FOdysseyInterpolationBezier();
@@ -19,4 +18,3 @@ public:
     virtual int MinimumRequiredPoints() const override;
     virtual const TArray< FOdysseyStrokePoint >& ComputePoints() override;
 };
-

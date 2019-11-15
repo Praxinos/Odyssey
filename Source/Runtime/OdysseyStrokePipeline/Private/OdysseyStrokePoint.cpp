@@ -17,35 +17,34 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
                                         , float         iPitch
                                         , float         iRoll
                                         , float         iYaw
-                                        , float         iDistance_travelled
-                                        , FVector2D     iDirection_vector_tangent
-                                        , FVector2D     iDirection_vector_normal
-                                        , float         iDirection_angle_deg_tangent
-                                        , float         iDirection_angle_deg_normal
+                                        , float         iDistanceTravelled
+                                        , FVector2D     iDirectionVectorTangent
+                                        , FVector2D     iDirectionVectorNormal
+                                        , float         iDirectionAngleDegreesTangent
+                                        , float         iDirectionAngleDegreesNormal
                                         , FVector2D     iSpeed
                                         , FVector2D     iAcceleration
                                         , FVector2D     iJolt
                                         )
-    : x                             (   iX                              )
-    , y                             (   iY                              )
-    , z                             (   iZ                              )
-    , pressure                      (   iPressure                       )
-    , altitude                      (   iAltitude                       )
-    , azimuth                       (   iAzimuth                        )
-    , twist                         (   iTwist                          )
-    , pitch                         (   iPitch                          )
-    , roll                          (   iRoll                           )
-    , yaw                           (   iYaw                            )
-    , distance_travelled            (   iDistance_travelled             )
-    , direction_vector_tangent      (   iDirection_vector_tangent       )
-    , direction_vector_normal       (   iDirection_vector_normal        )
-    , direction_angle_deg_tangent   (   iDirection_angle_deg_tangent    )
-    , direction_angle_deg_normal    (   iDirection_angle_deg_normal     )
-    , speed                         (   iSpeed                          )
-    , acceleration                  (   iAcceleration                   )
-    , jolt                          (   iJolt                           )
+    : x                             ( iX )
+    , y                             ( iY )
+    , z                             ( iZ )
+    , pressure                      ( iPressure )
+    , altitude                      ( iAltitude )
+    , azimuth                       ( iAzimuth )
+    , twist                         ( iTwist )
+    , pitch                         ( iPitch )
+    , roll                          ( iRoll )
+    , yaw                           ( iYaw )
+    , distance_travelled            ( iDistanceTravelled )
+    , direction_vector_tangent      ( iDirectionVectorTangent )
+    , direction_vector_normal       ( iDirectionVectorNormal )
+    , direction_angle_deg_tangent   ( iDirectionAngleDegreesTangent )
+    , direction_angle_deg_normal    ( iDirectionAngleDegreesNormal )
+    , speed                         ( iSpeed )
+    , acceleration                  ( iAcceleration )
+    , jolt                          ( iJolt )
 {}
-
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Makers
@@ -53,138 +52,136 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
 FOdysseyStrokePoint
 FOdysseyStrokePoint::DefaultPoint()
 {
-    return  FOdysseyStrokePoint( 0, 0, 0, 1 );
+    return FOdysseyStrokePoint( 0, 0, 0, 1 );
 }
-
 
 //static
 FOdysseyStrokePoint
 FOdysseyStrokePoint::ZeroPoint()
 {
-    return  FOdysseyStrokePoint( 0, 0, 0, 0 );
+    return FOdysseyStrokePoint( 0, 0, 0, 0 );
 }
-
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Operators
 bool
-FOdysseyStrokePoint::operator==(  const  FOdysseyStrokePoint&  iRhs ) const
+FOdysseyStrokePoint::operator==( const FOdysseyStrokePoint& iRhs ) const
 {
-    return  x                           == iRhs.x                           &&
-            y                           == iRhs.y                           &&
-            z                           == iRhs.z                           &&
-            pressure                    == iRhs.pressure                    &&
-            altitude                    == iRhs.altitude                    &&
-            azimuth                     == iRhs.azimuth                     &&
-            twist                       == iRhs.twist                       &&
-            pitch                       == iRhs.pitch                       &&
-            roll                        == iRhs.roll                        &&
-            yaw                         == iRhs.yaw                         &&
-            distance_travelled          == iRhs.distance_travelled          &&
-            direction_vector_tangent    == iRhs.direction_vector_tangent    &&
-            direction_vector_normal     == iRhs.direction_vector_normal     &&
-            direction_angle_deg_tangent == iRhs.direction_angle_deg_tangent &&
-            direction_angle_deg_normal  == iRhs.direction_angle_deg_normal  &&
-            speed                       == iRhs.speed                       &&
-            acceleration                == iRhs.acceleration                &&
-            jolt                        == iRhs.jolt                        ;
+    return    x                           == iRhs.x
+           && y                           == iRhs.y
+           && z                           == iRhs.z
+           && pressure                    == iRhs.pressure
+           && altitude                    == iRhs.altitude
+           && azimuth                     == iRhs.azimuth
+           && twist                       == iRhs.twist
+           && pitch                       == iRhs.pitch
+           && roll                        == iRhs.roll
+           && yaw                         == iRhs.yaw
+           && distance_travelled          == iRhs.distance_travelled
+           && direction_vector_tangent    == iRhs.direction_vector_tangent
+           && direction_vector_normal     == iRhs.direction_vector_normal
+           && direction_angle_deg_tangent == iRhs.direction_angle_deg_tangent
+           && direction_angle_deg_normal  == iRhs.direction_angle_deg_normal
+           && speed                       == iRhs.speed
+           && acceleration                == iRhs.acceleration
+           && jolt                        == iRhs.jolt;
 }
-
 
 FOdysseyStrokePoint&
-FOdysseyStrokePoint::operator=(  const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint::operator=( const FOdysseyStrokePoint& iRhs )
 {
-    x                           = iRhs.x                            ;
-    y                           = iRhs.y                            ;
-    z                           = iRhs.z                            ;
-    pressure                    = iRhs.pressure                     ;
-    altitude                    = iRhs.altitude                     ;
-    azimuth                     = iRhs.azimuth                      ;
-    twist                       = iRhs.twist                        ;
-    pitch                       = iRhs.pitch                        ;
-    roll                        = iRhs.roll                         ;
-    yaw                         = iRhs.yaw                          ;
-    distance_travelled          = iRhs.distance_travelled           ;
-    direction_vector_tangent    = iRhs.direction_vector_tangent     ;
-    direction_vector_normal     = iRhs.direction_vector_normal      ;
-    direction_angle_deg_tangent = iRhs.direction_angle_deg_tangent  ;
-    direction_angle_deg_normal  = iRhs.direction_angle_deg_normal   ;
-    speed                       = iRhs.speed                        ;
-    acceleration                = iRhs.acceleration                 ;
-    jolt                        = iRhs.jolt                         ;
-    return  *this;
-}
+    x                           = iRhs.x;
+    y                           = iRhs.y;
+    z                           = iRhs.z;
+    pressure                    = iRhs.pressure;
+    altitude                    = iRhs.altitude;
+    azimuth                     = iRhs.azimuth;
+    twist                       = iRhs.twist;
+    pitch                       = iRhs.pitch;
+    roll                        = iRhs.roll;
+    yaw                         = iRhs.yaw;
+    distance_travelled          = iRhs.distance_travelled;
+    direction_vector_tangent    = iRhs.direction_vector_tangent;
+    direction_vector_normal     = iRhs.direction_vector_normal;
+    direction_angle_deg_tangent = iRhs.direction_angle_deg_tangent;
+    direction_angle_deg_normal  = iRhs.direction_angle_deg_normal;
+    speed                       = iRhs.speed;
+    acceleration                = iRhs.acceleration;
+    jolt                        = iRhs.jolt;
 
+    return *this;
+}
 
 FOdysseyStrokePoint&
-FOdysseyStrokePoint::operator+=( const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint::operator+=( const FOdysseyStrokePoint& iRhs )
 {
-    x                           += iRhs.x                            ;
-    y                           += iRhs.y                            ;
-    z                           += iRhs.z                            ;
-    pressure                    += iRhs.pressure                     ;
-    altitude                    += iRhs.altitude                     ;
-    azimuth                     += iRhs.azimuth                      ;
-    twist                       += iRhs.twist                        ;
-    pitch                       += iRhs.pitch                        ;
-    roll                        += iRhs.roll                         ;
-    yaw                         += iRhs.yaw                          ;
-    distance_travelled          += iRhs.distance_travelled           ;
-    direction_vector_tangent    += iRhs.direction_vector_tangent     ;
-    direction_vector_normal     += iRhs.direction_vector_normal      ;
-    direction_angle_deg_tangent += iRhs.direction_angle_deg_tangent  ;
-    direction_angle_deg_normal  += iRhs.direction_angle_deg_normal   ;
-    speed                       += iRhs.speed                        ;
-    acceleration                += iRhs.acceleration                 ;
-    jolt                        += iRhs.jolt                         ;
-    return  *this;
-}
+    x                           += iRhs.x;
+    y                           += iRhs.y;
+    z                           += iRhs.z;
+    pressure                    += iRhs.pressure;
+    altitude                    += iRhs.altitude;
+    azimuth                     += iRhs.azimuth;
+    twist                       += iRhs.twist;
+    pitch                       += iRhs.pitch;
+    roll                        += iRhs.roll;
+    yaw                         += iRhs.yaw;
+    distance_travelled          += iRhs.distance_travelled;
+    direction_vector_tangent    += iRhs.direction_vector_tangent;
+    direction_vector_normal     += iRhs.direction_vector_normal;
+    direction_angle_deg_tangent += iRhs.direction_angle_deg_tangent;
+    direction_angle_deg_normal  += iRhs.direction_angle_deg_normal;
+    speed                       += iRhs.speed;
+    acceleration                += iRhs.acceleration;
+    jolt                        += iRhs.jolt;
 
+    return *this;
+}
 
 FOdysseyStrokePoint&
-FOdysseyStrokePoint::operator-=( const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint::operator-=( const FOdysseyStrokePoint& iRhs )
 {
-    x                           -= iRhs.x                            ;
-    y                           -= iRhs.y                            ;
-    z                           -= iRhs.z                            ;
-    pressure                    -= iRhs.pressure                     ;
-    altitude                    -= iRhs.altitude                     ;
-    azimuth                     -= iRhs.azimuth                      ;
-    twist                       -= iRhs.twist                        ;
-    pitch                       -= iRhs.pitch                        ;
-    roll                        -= iRhs.roll                         ;
-    yaw                         -= iRhs.yaw                          ;
-    distance_travelled          -= iRhs.distance_travelled           ;
-    direction_vector_tangent    -= iRhs.direction_vector_tangent     ;
-    direction_vector_normal     -= iRhs.direction_vector_normal      ;
-    direction_angle_deg_tangent -= iRhs.direction_angle_deg_tangent  ;
-    direction_angle_deg_normal  -= iRhs.direction_angle_deg_normal   ;
-    speed                       -= iRhs.speed                        ;
-    acceleration                -= iRhs.acceleration                 ;
-    jolt                        -= iRhs.jolt                         ;
-    return  *this;
-}
+    x                           -= iRhs.x;
+    y                           -= iRhs.y;
+    z                           -= iRhs.z;
+    pressure                    -= iRhs.pressure;
+    altitude                    -= iRhs.altitude;
+    azimuth                     -= iRhs.azimuth;
+    twist                       -= iRhs.twist;
+    pitch                       -= iRhs.pitch;
+    roll                        -= iRhs.roll;
+    yaw                         -= iRhs.yaw;
+    distance_travelled          -= iRhs.distance_travelled;
+    direction_vector_tangent    -= iRhs.direction_vector_tangent;
+    direction_vector_normal     -= iRhs.direction_vector_normal;
+    direction_angle_deg_tangent -= iRhs.direction_angle_deg_tangent;
+    direction_angle_deg_normal  -= iRhs.direction_angle_deg_normal;
+    speed                       -= iRhs.speed;
+    acceleration                -= iRhs.acceleration;
+    jolt                        -= iRhs.jolt;
 
+    return *this;
+}
 
 FOdysseyStrokePoint
-FOdysseyStrokePoint::operator+( const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint::operator+( const FOdysseyStrokePoint& iRhs ) const
 {
     FOdysseyStrokePoint out = *this;
     out += iRhs;
-    return  out;
+
+    return out;
 }
 
-
 FOdysseyStrokePoint
-FOdysseyStrokePoint::operator-( const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint::operator-( const FOdysseyStrokePoint& iRhs ) const
 {
     FOdysseyStrokePoint out = *this;
     out -= iRhs;
-    return  out;
+
+    return out;
 }
 
 FOdysseyStrokePoint&
-FOdysseyStrokePoint::operator*=( float  iRhs )
+FOdysseyStrokePoint::operator*=( float iRhs )
 {
     x                           *= iRhs;
     y                           *= iRhs;
@@ -204,12 +201,12 @@ FOdysseyStrokePoint::operator*=( float  iRhs )
     speed                       *= iRhs;
     acceleration                *= iRhs;
     jolt                        *= iRhs;
-    return  *this;
+
+    return *this;
 }
 
-
 FOdysseyStrokePoint&
-FOdysseyStrokePoint::operator/=( float  iRhs )
+FOdysseyStrokePoint::operator/=( float iRhs )
 {
     x                           /= iRhs;
     y                           /= iRhs;
@@ -229,36 +226,36 @@ FOdysseyStrokePoint::operator/=( float  iRhs )
     speed                       /= iRhs;
     acceleration                /= iRhs;
     jolt                        /= iRhs;
-    return  *this;
+
+    return *this;
 }
 
-
 FOdysseyStrokePoint
-FOdysseyStrokePoint::operator*( float  iRhs )  const
+FOdysseyStrokePoint::operator*( float iRhs ) const
 {
     FOdysseyStrokePoint out = *this;
     out.operator*=( iRhs );
-    return  out;
+
+    return out;
 }
 
-
 FOdysseyStrokePoint
-FOdysseyStrokePoint::operator/( float  iRhs )  const
+FOdysseyStrokePoint::operator/( float iRhs ) const
 {
     FOdysseyStrokePoint out = *this;
     out.operator/=( iRhs );
-    return  out;
+
+    return out;
 }
 
-
-FOdysseyStrokePoint operator*( float iLhs, const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint 
+operator*( float iLhs, const FOdysseyStrokePoint& iRhs )
 {
-    return  iRhs.operator*( iLhs );
+    return iRhs.operator*( iLhs );
 }
 
-
-FOdysseyStrokePoint operator/( float iLhs, const  FOdysseyStrokePoint&  iRhs )
+FOdysseyStrokePoint 
+operator/( float iLhs, const FOdysseyStrokePoint& iRhs )
 {
-    return  iRhs.operator/( iLhs );
+    return iRhs.operator/( iLhs );
 }
-

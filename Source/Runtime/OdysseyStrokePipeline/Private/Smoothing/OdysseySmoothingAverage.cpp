@@ -9,15 +9,13 @@
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseySmoothingAverage::FOdysseySmoothingAverage()
-{
-}
-
-
 FOdysseySmoothingAverage::~FOdysseySmoothingAverage()
 {
 }
 
+FOdysseySmoothingAverage::FOdysseySmoothingAverage()
+{
+}
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
@@ -25,16 +23,14 @@ FOdysseySmoothingAverage::~FOdysseySmoothingAverage()
 bool
 FOdysseySmoothingAverage::IsReady() const
 {
-    return ( points.Num() > MinimumRequiredPoints() );
+    return ( mPoints.Num() > MinimumRequiredPoints() );
 }
-
 
 int
-FOdysseySmoothingAverage::MinimumRequiredPoints()  const
+FOdysseySmoothingAverage::MinimumRequiredPoints() const
 {
-    return  strength;
+    return mStrength;
 }
-
 
 FOdysseyStrokePoint
 FOdysseySmoothingAverage::ComputePoint()
@@ -43,14 +39,16 @@ FOdysseySmoothingAverage::ComputePoint()
         return FOdysseyStrokePoint();
 
     FOdysseyStrokePoint outPoint = FOdysseyStrokePoint::ZeroPoint();
-    for( int i = 0; i < points.Num(); ++i )
-        outPoint += points[i];
+    for( int i = 0; i < mPoints.Num(); ++i )
+        outPoint += mPoints[i];
 
-    outPoint /= points.Num();
+    outPoint /= mPoints.Num();
 
-    points.RemoveAt( 0 );
-    return  outPoint;
+    mPoints.RemoveAt( 0 );
+
+    return outPoint;
 }
 
+//---
 
 #undef LOCTEXT_NAMESPACE

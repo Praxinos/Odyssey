@@ -11,24 +11,21 @@
 class ODYSSEYSTROKEPIPELINE_API IOdysseySmoothing
 {
 public:
-    virtual ~IOdysseySmoothing() {}
-    IOdysseySmoothing()
-    : strength( 0 )
-    {}
+    virtual ~IOdysseySmoothing() = 0;
+    IOdysseySmoothing();
 
 public:
     virtual bool IsReady() const = 0;
     virtual int MinimumRequiredPoints() const = 0;
     virtual FOdysseyStrokePoint ComputePoint() = 0;
 
-    void Reset() { points.Empty(); }
-    void AddPoint( const FOdysseyStrokePoint& iPoint ) { points.Add( iPoint ); }
+    void Reset();
+    void AddPoint( const FOdysseyStrokePoint& iPoint );
 
-    int GetStrength() const { return strength; }
-    void SetStrength( int iValue ) { strength = iValue; }
+    int GetStrength() const;
+    void SetStrength( int iValue );
 
-protected :
-    TArray< FOdysseyStrokePoint> points;
-    int strength;
+protected:
+    TArray< FOdysseyStrokePoint> mPoints;
+    int mStrength;
 };
-
