@@ -45,6 +45,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     , MeshSelector( InMeshSelector )
     , CheckerboardTexture( NULL )
     , CurrentMouseCursor( EMouseCursor::Default )
+    , PivotPointRatio ( FVector2D( 0.5, 0.5 ) )
     , CurrentToolState( eState::kIdle )
 {
     check( OdysseyPainterEditorPtr.IsValid() &&
@@ -130,11 +131,15 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
         BatchedElementParameters = new FBatchedElementTexture2DPreviewParameters(MipLevel, LayerIndex, bIsNormalMap, bIsSingleChannel, bIsVirtual);
     }
 
+    FVector2D viewport_center( Viewport->GetSizeXY().X / 2, Viewport->GetSizeXY().Y / 2 );
+    FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
+    PivotPointRatio = FVector2D(position_in_texture.X / OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), position_in_texture.Y / OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() );
+
     // Draw background Checker
     {
         FCanvasTileItem TileItem( FVector2D(XPos, YPos), CheckerboardTexture->Resource, FVector2D(Width, Height), FVector2D(0.f, 0.f), FVector2D( Width / CheckerboardTexture->GetSizeX(), Height / CheckerboardTexture->GetSizeY()), FLinearColor::White);
         TileItem.BlendMode = SE_BLEND_Opaque;
-        TileItem.PivotPoint.Set(0.5, 0.5);
+        TileItem.PivotPoint.Set(PivotPointRatio.X, PivotPointRatio.Y);
         TileItem.Rotation.Add(0, Rotation, 0);
         Canvas->DrawItem(TileItem);
     }
@@ -150,7 +155,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
         Result += (1 << 2);
         Result += (1 << 3);
         TileItem.BlendMode = (ESimpleElementBlendMode)Result;
-        TileItem.PivotPoint.Set(0.5, 0.5);
+        TileItem.PivotPoint.Set(PivotPointRatio.X, PivotPointRatio.Y);
         TileItem.Rotation.Add(0, Rotation, 0 );
         Canvas->DrawItem( TileItem );
 
@@ -280,11 +285,11 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         {
             CurrentToolState = eState::kRotating;
 
-            FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
+            FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+            FVector2D center = FVector2D( size.X / 2, size.Y / 2);
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
-            FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-            FVector2D DeltaCenter = position_in_texture - center;
-            RotationReference = FMath::Atan2( -DeltaCenter.Y, DeltaCenter.X );
+            FVector2D deltaCenter = position_in_viewport - center;
+            RotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
 
             return true;
         }
@@ -384,22 +389,30 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     }
     else if( CurrentToolState == eState::kPanning )
     {
-        FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
-        OdysseyPainterEditorViewportPtr.Pin()->AddPan( position_in_viewport - PanReference );
-        PanReference = position_in_viewport;
+        FVector2D deltaReference( iPointInViewport.x - PanReference.X, iPointInViewport.y - PanReference.Y );
+        FVector2D delta_in_viewport = FVector2D();
+        
+        float rotation = FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
+
+        delta_in_viewport.X = deltaReference.X * FMath::Cos(rotation) + deltaReference.Y * FMath::Sin(rotation);
+        delta_in_viewport.Y = -deltaReference.X * FMath::Sin(rotation) + deltaReference.Y * FMath::Cos(rotation);
+        
+        OdysseyPainterEditorViewportPtr.Pin()->AddPan( delta_in_viewport );
+        PanReference = FVector2D( iPointInViewport.x, iPointInViewport.y);
     }
     else if( CurrentToolState == eState::kRotating )
     {
-        FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
+        FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+
+        FVector2D center = FVector2D( size.X / 2, size.Y / 2);
         FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
-        FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-        FVector2D deltaCenter = position_in_texture - center;
+        FVector2D deltaCenter = position_in_viewport - center;
         float newRotation = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
         float deltaRotation = RotationReference - newRotation;
 
         OdysseyPainterEditorViewportPtr.Pin()->SetRotationInDegrees( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() + FMath::RadiansToDegrees( deltaRotation ) );
 
-        RotationReference = newRotation + deltaRotation;
+        RotationReference = newRotation;
     }
     else if( CurrentToolState == eState::kPicking )
     {
@@ -668,7 +681,7 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
 
 
 FVector2D
-FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport )  const
+FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation )  const
 {
     double zoom = GetZoom();
     FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
@@ -677,18 +690,32 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     FVector2D ViewportSize = FVector2D(OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y);
     int32 YOffset = (Ratio.Y > 1.0f) ? ((ViewportSize.Y - (ViewportSize.Y / Ratio.Y)) * 0.5f) : 0;
     int32 XOffset = (Ratio.X > 1.0f) ? ((ViewportSize.X - (ViewportSize.X / Ratio.X)) * 0.5f) : 0;
-    FVector2D position = FVector2D (( iMouseInViewport.X + TextureViewportPosition.X - XOffset - Pan.X) / zoom, ( iMouseInViewport.Y + TextureViewportPosition.Y - YOffset - Pan.Y) / zoom);
+    
+    int textureWidth = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width();
+    int textureHeight = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height();
+    
+    FVector2D texturePanPivot = FVector2D(PivotPointRatio.X * textureWidth, PivotPointRatio.Y * textureHeight) - 0.5 * FVector2D( textureWidth, textureHeight );
+    
+    FVector2D position = FVector2D (( iMouseInViewport.X + TextureViewportPosition.X - XOffset - Pan.X ) / zoom, ( iMouseInViewport.Y + TextureViewportPosition.Y - YOffset - Pan.Y ) / zoom);
 
-    if( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
-    {
-        float rotation = FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
-        FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
-        position -= center;
+    if( iWithRotation )
+    {            
+        if( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0)
+        {
+            float rotation = FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
+            FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
+            position -= center;
 
-        float x = position.X * FMath::Cos(rotation) + position.Y * FMath::Sin(rotation) + center.X;
-        float y = -position.X * FMath::Sin(rotation) + position.Y * FMath::Cos(rotation) + center.Y;
-        position.X = x;
-        position.Y = y;
+            FVector2D pivotPan = texturePanPivot;
+            pivotPan.X = texturePanPivot.X * FMath::Cos(rotation) + texturePanPivot.Y * FMath::Sin(rotation) - texturePanPivot.X;
+            pivotPan.Y = -texturePanPivot.X * FMath::Sin(rotation) + texturePanPivot.Y * FMath::Cos(rotation) - texturePanPivot.Y;
+
+            float x = position.X * FMath::Cos(rotation) + position.Y * FMath::Sin(rotation) + center.X;
+            float y = -position.X * FMath::Sin(rotation) + position.Y * FMath::Cos(rotation) + center.Y;
+
+            position.X = x - pivotPan.X;
+            position.Y = y - pivotPan.Y;
+        }
     }
 
     return  position;

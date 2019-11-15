@@ -96,7 +96,7 @@ private:
     void        ZoomInInViewport( const FVector2D& iPositionInViewport );
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
     double      GetZoom() const;
-    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport )  const;
+    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation = true )  const;
     FOdysseyStrokePoint   GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport )  const;
     void DrawUVsOntoViewport(FViewport* InViewport, FCanvas* InCanvas, int32 UVChannel, FStaticMeshVertexBuffer& VertexBuffer, FIndexArrayView& Indices );
 
@@ -113,6 +113,7 @@ private:
     EMouseCursor::Type                      CurrentMouseCursor;
     float                                   RotationReference; // The reference from which we determine the new rotation
     FVector2D                               PanReference; //Where did we begin the pan ?
+    FVector2D                               PivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
 
     eState                                  CurrentToolState;
 };
