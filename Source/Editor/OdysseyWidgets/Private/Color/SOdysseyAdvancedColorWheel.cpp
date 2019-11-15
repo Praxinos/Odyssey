@@ -1,7 +1,7 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
 
 #include "Color/SOdysseyAdvancedColorWheel.h"
-#include "OdysseyStyle.h"
+#include "OdysseyStyleSet.h"
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include <ULIS_CORE>
@@ -128,18 +128,18 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
 {
     ODYSSEY_LEAF_WIDGET_FORWARD_CONSTRUCT_ARGS
 
-    WheelBG                 = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.WheelBG");
-    InnerWheelBG            = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.InnerWheelBG");
-    InnerWheelHue           = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.InnerWheelHue");
-    InnerWheelDropShadow    = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.InnerWheelDropShadow");
-    TriangleOverlay         = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.TriangleOverlay");
-    HintColorA              = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.HintColorA");
-    HintColorB              = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.HintColorB");
-    HueCursor               = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.HueCursor");
-    HueCursorBG             = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.HueCursorBG");
-    TriangleCursor          = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.TriangleCursor");
-    TriangleCursorBG        = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.TriangleCursorBG");
-    CursorOverlay           = FOdysseyStyle::Get().GetBrush("AdvancedColorWheel.CursorOverlay");
+    WheelBG                 = FOdysseyStyle::GetBrush("AdvancedColorWheel.WheelBG");
+    InnerWheelBG            = FOdysseyStyle::GetBrush("AdvancedColorWheel.InnerWheelBG");
+    InnerWheelHue           = FOdysseyStyle::GetBrush("AdvancedColorWheel.InnerWheelHue");
+    InnerWheelDropShadow    = FOdysseyStyle::GetBrush("AdvancedColorWheel.InnerWheelDropShadow");
+    TriangleOverlay         = FOdysseyStyle::GetBrush("AdvancedColorWheel.TriangleOverlay");
+    HintColorA              = FOdysseyStyle::GetBrush("AdvancedColorWheel.HintColorA");
+    HintColorB              = FOdysseyStyle::GetBrush("AdvancedColorWheel.HintColorB");
+    HueCursor               = FOdysseyStyle::GetBrush("AdvancedColorWheel.HueCursor");
+    HueCursorBG             = FOdysseyStyle::GetBrush("AdvancedColorWheel.HueCursorBG");
+    TriangleCursor          = FOdysseyStyle::GetBrush("AdvancedColorWheel.TriangleCursor");
+    TriangleCursorBG        = FOdysseyStyle::GetBrush("AdvancedColorWheel.TriangleCursorBG");
+    CursorOverlay           = FOdysseyStyle::GetBrush("AdvancedColorWheel.CursorOverlay");
 
     OnColorChangedCallback = InArgs._OnColorChanged;
 

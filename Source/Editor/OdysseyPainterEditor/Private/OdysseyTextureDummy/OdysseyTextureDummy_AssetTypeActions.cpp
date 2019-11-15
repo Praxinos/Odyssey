@@ -3,7 +3,6 @@
 #include "OdysseyTextureDummy/OdysseyTextureDummy_AssetTypeActions.h"
 #include "OdysseyTextureDummy/OdysseyTextureDummy.h"
 
-#include "OdysseyStyle.h"
 #include "IContentBrowserSingleton.h"
 #include "ContentBrowserModule.h"
 

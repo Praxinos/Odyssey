@@ -236,7 +236,7 @@ void SOdysseyLayerStackViewRow::Construct(const FArguments& InArgs, const TShare
 
     SMultiColumnTableRow::Construct(
                                     SMultiColumnTableRow::FArguments()
-                                    .Style(&FOdysseyStyle::Get().GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
+                                    .Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
                                     .OnDragDetected(this, &SOdysseyLayerStackViewRow::OnDragDetected)
                                     .OnCanAcceptDrop(this, &SOdysseyLayerStackViewRow::OnCanAcceptDrop)
                                     .OnAcceptDrop(this, &SOdysseyLayerStackViewRow::OnAcceptDrop)

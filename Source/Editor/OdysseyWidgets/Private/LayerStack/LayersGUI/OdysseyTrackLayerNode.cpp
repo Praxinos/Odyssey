@@ -56,7 +56,7 @@ void OdysseyTrackLayerNode::Drop(const TArray<TSharedRef<OdysseyBaseLayerNode>>&
 
 const FSlateBrush* OdysseyTrackLayerNode::GetIconBrush() const
 {
-    return FOdysseyStyle::Get().GetBrush( "OdysseyLayerStack.ImageLayer16");
+    return FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
 }
 
 TSharedRef<SWidget> OdysseyTrackLayerNode::GetCustomOutlinerContent()
@@ -121,7 +121,7 @@ TSharedRef<SWidget> OdysseyTrackLayerNode::GetCustomOutlinerContent()
 
 const FSlateBrush* OdysseyTrackLayerNode::GetVisibilityBrushForLayer() const
 {
-    return GetLayerDataPtr()->IsVisible() ? FOdysseyStyle::Get().GetBrush("OdysseyLayerStack.Visible16") : FOdysseyStyle::Get().GetBrush("OdysseyLayerStack.NotVisible16");
+    return GetLayerDataPtr()->IsVisible() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16");
 }
 
 FReply OdysseyTrackLayerNode::OnToggleVisibility()
@@ -133,7 +133,7 @@ FReply OdysseyTrackLayerNode::OnToggleVisibility()
 
 const FSlateBrush* OdysseyTrackLayerNode::GetLockedBrushForLayer() const
 {
-    return GetLayerDataPtr()->IsLocked() ? FOdysseyStyle::Get().GetBrush("OdysseyLayerStack.Locked16") : FOdysseyStyle::Get().GetBrush("OdysseyLayerStack.Unlocked16");
+    return GetLayerDataPtr()->IsLocked() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.Unlocked16");
 }
 
 FReply OdysseyTrackLayerNode::OnToggleLocked()

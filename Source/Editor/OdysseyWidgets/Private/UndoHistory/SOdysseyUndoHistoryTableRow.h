@@ -49,7 +49,7 @@ public:
         Title = FText::Format(LOCTEXT("UndoHistoryTableRowTitleF", "{0}"), FText::FromName( InArgs._TransactionName ) );
 
         SMultiColumnTableRow<TSharedPtr<int32> >::Construct(FSuperRowType::FArguments()
-                                                            .Style(&FOdysseyStyle::Get().GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows")),
+                                                            .Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows")),
                                                              InOwnerTableView);
     }
 

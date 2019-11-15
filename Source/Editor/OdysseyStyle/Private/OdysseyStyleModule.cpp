@@ -1,39 +1,21 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
 
+#include "OdysseyStyleModule.h"
+
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include "IOdysseyStyleModule.h"
 #include "SlateOdysseyStyle.h"
 
-
-/**
- * Implements the Editor style module, loaded by SlateApplication dynamically at startup.
- */
-class FOdysseyStyleModule
-    : public IOdysseyStyleModule
+void 
+FOdysseyStyleModule::StartupModule()
 {
-public:
+    FSlateOdysseyStyle::Initialize();
+}
 
-    // IEditorStyleModule interface
+void 
+FOdysseyStyleModule::ShutdownModule()
+{
+    FSlateOdysseyStyle::Shutdown();
+}
 
-    virtual void StartupModule( ) override
-    {
-        FSlateOdysseyStyle::Initialize();
-    }
-
-    virtual void ShutdownModule( ) override
-    {
-        FSlateOdysseyStyle::Shutdown();
-    }
-
-    virtual TSharedRef<class FSlateStyleSet> CreateOdysseyStyleInstance( ) const override
-    {
-        return FSlateOdysseyStyle::Create();
-    }
-
-    // End IModuleInterface interface
-};
-
-
-IMPLEMENT_MODULE(FOdysseyStyleModule, OdysseyStyle)
-
+IMPLEMENT_MODULE( FOdysseyStyleModule, OdysseyStyle )
