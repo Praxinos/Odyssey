@@ -4,25 +4,24 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyFolderLayer"
 
-FOdysseyFolderLayer::FOdysseyFolderLayer(FName InName)
-{
-    mName = InName;
-
-    mIsLocked = false;
-    mIsVisible = true;
-
-    mBlendingMode = ::ULIS::eBlendingMode::kNormal;
-
-    mLayersInFolder = TArray<TSharedPtr<IOdysseyLayer>>();
-}
+//---
 
 FOdysseyFolderLayer::~FOdysseyFolderLayer()
 {
-    for( int i = 0; i < mLayersInFolder.Num(); i++)
+    for( int i = 0; i < mLayersInFolder.Num(); i++ )
     {
         mLayersInFolder[i].Reset();
     }
 }
+
+FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
+    : IOdysseyLayer( iName )
+    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mLayersInFolder()
+{
+}
+
+//---
 
 IOdysseyLayer::eType
 FOdysseyFolderLayer::GetType() const
@@ -42,26 +41,37 @@ FOdysseyFolderLayer::SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode )
     mBlendingMode = iBlendingMode;
 }
 
+//---
+
 TSharedPtr<FOdysseyBlock>
 FOdysseyFolderLayer::GenerateBlockFromContent() const
 {
     return nullptr;
 }
 
+//---
+
 void
 FOdysseyFolderLayer::AppendLayer( TSharedPtr<IOdysseyLayer> iLayer )
 {
-    if( iLayer.IsValid() )
-        mLayersInFolder.Add( iLayer );
+    if( !iLayer.IsValid() )
+        return;
+
+    mLayersInFolder.Add( iLayer );
 }
 
 void
-FOdysseyFolderLayer::AddLayerAtIndex( TSharedPtr<IOdysseyLayer> InLayer, int InIndex )
+FOdysseyFolderLayer::AddLayerAtIndex( TSharedPtr<IOdysseyLayer> iLayer, int iIndex )
 {
-    if( InLayer.IsValid() )
-        if( InIndex < mLayersInFolder.Num() )
-            mLayersInFolder.Insert(InLayer, InIndex);
+    if( !iLayer.IsValid() )
+        return;
+
+    if( iIndex < mLayersInFolder.Num() )
+        mLayersInFolder.Insert( iLayer, iIndex );
+
+    //TODO: there is no way to know if it's really added outside this function ?!
 }
 
+//---
 
 #undef LOCTEXT_NAMESPACE

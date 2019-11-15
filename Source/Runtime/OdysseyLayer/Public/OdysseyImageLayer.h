@@ -17,29 +17,30 @@ class ODYSSEYLAYER_API FOdysseyImageLayer : public IOdysseyLayer
 public:
     // Construction / Destruction
     virtual ~FOdysseyImageLayer();
-    FOdysseyImageLayer( FName iName, FVector2D iSize );
-    FOdysseyImageLayer( FName iName, FOdysseyBlock* iBlock );
+    FOdysseyImageLayer( const FName& iName, FVector2D iSize );
+    FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock );
+
+public:
+    virtual eType GetType() const override;
 
 public:
     // Public API
-    virtual eType           GetType()           const override;
-    FOdysseyBlock*          GetBlock()          const;
-    ::ULIS::eBlendingMode   GetBlendingMode()   const;
+    FOdysseyBlock* GetBlock() const;
 
-    void            SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode );
-    void            SetBlendingMode( FText iBlendingMode );
+    ::ULIS::eBlendingMode GetBlendingMode() const;
+    FText                 GetBlendingModeAsText() const;
+    void                  SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode );
+    void                  SetBlendingMode( FText iBlendingMode );
 
-    FText           GetBlendingModeAsText() const;
+    float GetOpacity() const;
+    void  SetOpacity( float iOpacity );
 
-    float           GetOpacity() const;
-    void            SetOpacity( float iOpacity );
-
-    void            CopyPropertiesFrom( const FOdysseyImageLayer &iCopy );
+public:
+    void CopyPropertiesFrom( const FOdysseyImageLayer &iCopy ); // TODO: replace it by a Clone()/copy-ctor/...
 
 private:
     // Private Data Members
-    FOdysseyBlock*          mBlock;
-    ::ULIS::eBlendingMode   mBlendingMode;
-    float                   mOpacity;
+    FOdysseyBlock*        mBlock;
+    ::ULIS::eBlendingMode mBlendingMode;
+    float                 mOpacity;
 };
-

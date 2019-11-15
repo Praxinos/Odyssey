@@ -11,36 +11,27 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyImageLayer::~FOdysseyImageLayer()
 {
-    delete  mBlock;
+    delete mBlock;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( FName iName, FVector2D iSize )
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize )
+    : IOdysseyLayer( iName )
+    , mBlock( nullptr )
+    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mOpacity( 1.0f )
 {
-    mName = iName;
-
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y );
     ::ULIS::FClearFillContext::Clear( mBlock->GetIBlock() );
-    mBlendingMode = ::ULIS::eBlendingMode::kNormal;
-
-    mIsLocked = false;
-    mIsVisible = true;
-
-    mOpacity = 1.f;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( FName iName, FOdysseyBlock* iBlock )
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
+    : IOdysseyLayer( iName )
+    , mBlock( iBlock )
+    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mOpacity( 1.0f )
 {
-    mName = iName;
-
-    mBlock = iBlock;
-    mBlendingMode = ::ULIS::eBlendingMode::kNormal;
-
-    mIsLocked = false;
-    mIsVisible = true;
-
-    mOpacity = 1.f;
 }
 
 //--------------------------------------------------------------------------------------
@@ -53,15 +44,15 @@ FOdysseyImageLayer::GetType() const
 }
 
 FOdysseyBlock*
-FOdysseyImageLayer::GetBlock()  const
+FOdysseyImageLayer::GetBlock() const
 {
-    return  mBlock;
+    return mBlock;
 }
 
 ::ULIS::eBlendingMode
-FOdysseyImageLayer::GetBlendingMode()  const
+FOdysseyImageLayer::GetBlendingMode() const
 {
-    return  mBlendingMode;
+    return mBlendingMode;
 }
 
 void
@@ -75,7 +66,7 @@ FOdysseyImageLayer::SetBlendingMode( FText iBlendingMode )
 {
     for( uint8 i = 0; i < (int)::ULIS::eBlendingMode::kNumBlendingModes; ++i )
     {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[ i ] ) );
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[i] ) );
         if( iBlendingMode.EqualTo( entry ) )
         {
             SetBlendingMode( static_cast<::ULIS::eBlendingMode>( i ) );
@@ -87,7 +78,7 @@ FOdysseyImageLayer::SetBlendingMode( FText iBlendingMode )
 FText
 FOdysseyImageLayer::GetBlendingModeAsText() const
 {
-    return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[ static_cast< int >( mBlendingMode ) ] ) );
+    return FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
 }
 
 float
@@ -99,8 +90,10 @@ FOdysseyImageLayer::GetOpacity() const
 void
 FOdysseyImageLayer::SetOpacity( float iOpacity )
 {
-    if( iOpacity <= 1.f && iOpacity >= 0.f )
-        mOpacity = iOpacity;
+    if( iOpacity < 0.f || iOpacity > 1.f )
+        return;
+
+    mOpacity = iOpacity;
 }
 
 void
@@ -112,5 +105,6 @@ FOdysseyImageLayer::CopyPropertiesFrom( const FOdysseyImageLayer &iCopy )
     mIsVisible = iCopy.IsVisible();
 }
 
+//---
 
 #undef LOCTEXT_NAMESPACE

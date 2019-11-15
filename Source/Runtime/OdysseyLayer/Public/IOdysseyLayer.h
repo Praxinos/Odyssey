@@ -13,31 +13,34 @@ class FOdysseyBlock;
 class ODYSSEYLAYER_API IOdysseyLayer
 {
 public:
-enum class eType : char
-{
-    kInvalid,
-    kImage,
-    kFolder,
-};
+    enum class eType : char
+    {
+        kInvalid,
+        kImage,
+        kFolder,
+    };
 
 public:
-    IOdysseyLayer();
+    // Construction / Destruction
     virtual ~IOdysseyLayer() = 0;
+    IOdysseyLayer();
+    IOdysseyLayer( const FName& iName );
 
 public:
-    FName           GetName() const;
-    FText           GetNameAsText() const;
-    void            SetName(FName iName);
-    bool            IsLocked() const;
-    void            SetIsLocked(bool iIsLocked);
-    bool            IsVisible() const;
-    void            SetIsVisible(bool iIsVisible);
+    virtual eType GetType() const = 0;
 
-    virtual eType   GetType() const = 0;
+    virtual FName GetName() const;
+    virtual FText GetNameAsText() const;
+    virtual void  SetName( FName iName );
 
-protected :
-    FName           mName;
-    bool            mIsLocked;
-    bool            mIsVisible;
+    virtual bool  IsLocked() const;
+    virtual void  SetIsLocked( bool iIsLocked );
+
+    virtual bool  IsVisible() const;
+    virtual void  SetIsVisible( bool iIsVisible );
+
+protected:
+    FName         mName;
+    bool          mIsLocked;
+    bool          mIsVisible;
 };
-

@@ -34,18 +34,18 @@ public:
 
 public:
     // Public Array Tampon Methods
-    FOdysseyImageLayer*                     AddLayer( int iAtIndex = -1);
-    FOdysseyImageLayer*                     AddLayerFromData( FOdysseyBlock* iData, FName InName = FName(), int iAtIndex = -1 );
+    FOdysseyImageLayer*                     AddLayer( int iAtIndex = -1 );
+    FOdysseyImageLayer*                     AddLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
     TArray< TSharedPtr< IOdysseyLayer > >*  GetLayers();
 
     void                                    DeleteLayer( IOdysseyLayer* ILayerToDelete );
-    void                                    DeleteLayer( int IIndexLayerToDelete );
+    void                                    DeleteLayer( int iIndexLayerToDelete );
     void                                    MergeDownLayer( IOdysseyLayer* ILayerToMergeDown );
     void                                    DuplicateLayer( IOdysseyLayer* ILayerToDuplicate );
 
-    int                                     GetCurrentLayerIndex()  const;
+    int                                     GetCurrentLayerIndex() const;
     void                                    SetCurrentLayerIndex( int iIndex );
-    TSharedPtr< IOdysseyLayer >             GetCurrentLayer()  const;
+    TSharedPtr< IOdysseyLayer >             GetCurrentLayer() const;
     void                                    ClearCurrentLayer();
     void                                    FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
 

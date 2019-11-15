@@ -2,13 +2,27 @@
 
 #include "IOdysseyLayer.h"
 
-IOdysseyLayer::IOdysseyLayer()
-{
-}
+//---
 
 IOdysseyLayer::~IOdysseyLayer()
 {
 }
+
+IOdysseyLayer::IOdysseyLayer()
+    : mName()
+    , mIsLocked( false )
+    , mIsVisible( true )
+{
+}
+
+IOdysseyLayer::IOdysseyLayer( const FName& iName )
+    : mName( iName )
+    , mIsLocked( false )
+    , mIsVisible( true )
+{
+}
+
+//---
 
 FName
 IOdysseyLayer::GetName() const
@@ -19,11 +33,11 @@ IOdysseyLayer::GetName() const
 FText
 IOdysseyLayer::GetNameAsText() const
 {
-    return FText::FromName(mName);
+    return FText::FromName( mName );
 }
 
 void
-IOdysseyLayer::SetName(FName iName)
+IOdysseyLayer::SetName( FName iName )
 {
     mName = iName;
 }
