@@ -191,6 +191,8 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
         if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
         {
             CurrentToolState = eState::kDrawing;
+            OdysseyPainterEditorPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
+            OdysseyPainterEditorPtr.Pin()->MarkTransactionAsDirty();
 
             FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
             FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
@@ -242,6 +244,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
             CurrentToolState = eState::kIdle;
 
             OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
+            OdysseyPainterEditorPtr.Pin()->EndTransaction();
             RefEventStrokePoint = FOdysseyStrokePoint( 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ); // still useful ?
             return true;
         }

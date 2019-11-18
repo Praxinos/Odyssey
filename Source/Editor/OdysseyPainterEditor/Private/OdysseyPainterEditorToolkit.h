@@ -126,7 +126,7 @@ protected:
 
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;
 
-protected:
+public:
     // Transaction ( Undo / Redo ) methods overrides
     void BeginTransaction(const FText& SessionName) override;
     void MarkTransactionAsDirty() override;

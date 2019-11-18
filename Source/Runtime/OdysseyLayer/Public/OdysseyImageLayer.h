@@ -40,7 +40,11 @@ public:
 
 private:
     // Private Data Members
-    FOdysseyBlock*        mBlock;
-    ::ULIS::eBlendingMode mBlendingMode;
-    float                 mOpacity;
+    FOdysseyBlock*          mBlock;
+    ::ULIS::eBlendingMode   mBlendingMode;
+    float                   mOpacity;
+    
+public:
+    //Temporary Undo necessity
+    UTexture2D*             mTexture;
 };

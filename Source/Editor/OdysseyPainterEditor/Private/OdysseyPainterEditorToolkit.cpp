@@ -127,7 +127,8 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     displaySurface->Invalidate();
 
     // Support undo/redo
-    //GEditor->RegisterForUndo(this);
+    displaySurface->Texture()->SetFlags(RF_Transactional);
+    GEditor->RegisterForUndo(this);
 
     // Register our commands. This will only register them if not previously registered
     FOdysseyPainterEditorCommands::Register();
@@ -484,7 +485,33 @@ FOdysseyPainterEditorToolkit::GetWorldCentricTabPrefix( ) const
 void
 FOdysseyPainterEditorToolkit::PostUndo( bool bSuccess )
 {
-    //PostUndo( bSuccess );
+    TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
+    for( int i = 0; i < layers->Num(); i++ )
+    {
+        FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
+        CopyUTextureDataIntoBlock( imageLayer->GetBlock(), imageLayer->mTexture );
+    }
+    LayerStack()->ComputeResultBlock();
+    
+    /*UE_LOG(LogTemp, Display, TEXT("Texture: %p"), displaySurface->Texture() );
+    UE_LOG(LogTemp, Display, TEXT("block: %p"), displaySurface->Block() );
+
+    CopyUTextureDataIntoBlock( displaySurface->Block(), displaySurface->Texture() );
+    
+    displaySurface->Invalidate();*/
+
+    //layer_stack.ComputeResultBlock();
+    //displaySurface->Invalidate();
+    //CopyBlockDataIntoUTexture( displaySurface->Block(), texture );
+    //::ULIS::FMakeContext::CopyBlockInto( displaySurface->Block()->GetIBlock(), textureContentsBackup->GetIBlock() );
+    //InvalidateTextureFromData( displaySurface->Block(), texture );
+
+    //FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( displaySurface->Texture() );
+    //CopyBlockDataIntoUTexture( block, displaySurface->Texture() );
+    //InvalidateTextureFromData( block, displaySurface->Texture() );
+    // Invalidate all
+    //displaySurface->Invalidate();
+    //delete block;
 }
 
 
@@ -503,6 +530,10 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     // Commit changes permanently
     //displaySurface->CommitBlockChangesIntoTextureBulk();
     // Reload backup
+    
+    BeginTransaction( LOCTEXT("Save in ILIAD", "Save in ILIAD") );
+    MarkTransactionAsDirty();
+    
     CopyBlockDataIntoUTexture( displaySurface->Block(), texture );
     ::ULIS::FMakeContext::CopyBlockInto( displaySurface->Block()->GetIBlock(), textureContentsBackup->GetIBlock() );
     InvalidateTextureFromData( displaySurface->Block(), texture );
@@ -510,6 +541,8 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     displaySurface->Invalidate();
 
     FAssetEditorToolkit::SaveAsset_Execute();
+
+    EndTransaction();
 }
 
 
@@ -941,7 +974,12 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& SessionName )
     if( scopedTransaction == nullptr )
     {
         scopedTransaction = new FScopedTransaction( SessionName );
-        displaySurface->Texture()->Modify();
+        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
+        for( int i = 0; i < layers->Num(); i++ )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
+            imageLayer->mTexture->Modify();
+        }
     }
 }
 
@@ -958,7 +996,14 @@ FOdysseyPainterEditorToolkit::EndTransaction()
 {
     if( bManipulationDirtiedSomething )
     {
-        texture->PostEditChange();
+        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
+        for( int i = 0; i < layers->Num(); i++ )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
+            CopyBlockDataIntoUTexture( imageLayer->GetBlock(), imageLayer->mTexture );
+            imageLayer->mTexture->PostEditChange();
+        }
+        displaySurface->Invalidate();
     }
 
     bManipulationDirtiedSomething = false;

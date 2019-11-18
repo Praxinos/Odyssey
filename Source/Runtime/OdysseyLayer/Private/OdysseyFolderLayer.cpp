@@ -16,8 +16,8 @@ FOdysseyFolderLayer::~FOdysseyFolderLayer()
 
 FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
     : IOdysseyLayer( iName )
-    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mLayersInFolder()
+    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
 {
 }
 
