@@ -8,6 +8,7 @@
 #include <ULIS_BLENDINGMODES>
 
 class FOdysseyBlock;
+class UTexture2D;
 
 /**
  * Implements a layer which contains an image
