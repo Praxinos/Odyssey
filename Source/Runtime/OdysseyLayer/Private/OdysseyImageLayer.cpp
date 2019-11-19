@@ -5,7 +5,6 @@
 
 //Undo
 #include "OdysseySurface.h"
-
 #include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
@@ -32,6 +31,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize )
     //Undo
     mTexture = UTexture2D::CreateTransient( iSize.X, iSize.Y, PF_B8G8R8A8);
     mTexture->SetFlags( RF_Transactional );
+    mTexture->TemporarilyDisableStreaming();
     CopyBlockDataIntoUTexture( mBlock, mTexture );
 }
 
@@ -44,6 +44,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     //Undo
     mTexture = UTexture2D::CreateTransient( mBlock->Width(), mBlock->Height(), PF_B8G8R8A8);
     mTexture->SetFlags( RF_Transactional );
+    mTexture->TemporarilyDisableStreaming();
     CopyBlockDataIntoUTexture( mBlock, mTexture );
 }
 

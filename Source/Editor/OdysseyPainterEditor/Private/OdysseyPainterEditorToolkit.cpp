@@ -485,6 +485,7 @@ FOdysseyPainterEditorToolkit::GetWorldCentricTabPrefix( ) const
 void
 FOdysseyPainterEditorToolkit::PostUndo( bool bSuccess )
 {
+    /*
     TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
     for( int i = 0; i < layers->Num(); i++ )
     {
@@ -492,6 +493,8 @@ FOdysseyPainterEditorToolkit::PostUndo( bool bSuccess )
         CopyUTextureDataIntoBlock( imageLayer->GetBlock(), imageLayer->mTexture );
     }
     LayerStack()->ComputeResultBlock();
+
+    UE_LOG(LogTemp, Display, TEXT("Done Undo"));*/
     
     /*UE_LOG(LogTemp, Display, TEXT("Texture: %p"), displaySurface->Texture() );
     UE_LOG(LogTemp, Display, TEXT("block: %p"), displaySurface->Block() );
@@ -971,6 +974,7 @@ FOdysseyPainterEditorToolkit::OnMeshChanged( UBlueprint* iMesh )
 void
 FOdysseyPainterEditorToolkit::BeginTransaction( const FText& SessionName )
 {
+    /*
     if( scopedTransaction == nullptr )
     {
         scopedTransaction = new FScopedTransaction( SessionName );
@@ -980,20 +984,21 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& SessionName )
             FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
             imageLayer->mTexture->Modify();
         }
-    }
+    }*/
 }
 
 
 void
 FOdysseyPainterEditorToolkit::MarkTransactionAsDirty()
 {
-    bManipulationDirtiedSomething = true;
+   // bManipulationDirtiedSomething = true;
 }
 
 
 void
 FOdysseyPainterEditorToolkit::EndTransaction()
 {
+    /*
     if( bManipulationDirtiedSomething )
     {
         TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
@@ -1001,6 +1006,13 @@ FOdysseyPainterEditorToolkit::EndTransaction()
         {
             FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
             CopyBlockDataIntoUTexture( imageLayer->GetBlock(), imageLayer->mTexture );
+            /*std::unique_ptr<FUpdateTextureRegion2D> regionUpdate = std::unique_ptr<FUpdateTextureRegion2D>(new FUpdateTextureRegion2D(0, 0, 0, 0, imageLayer->GetBlock()->Width(), imageLayer->GetBlock()->Height() ) );
+            int canvasWidth = imageLayer->GetBlock()->Width();
+            int canvasHeight = imageLayer->GetBlock()->Height();
+            int32 bytesPerPixel = 4; // r g b a
+            int32 bufferPitch = canvasWidth * bytesPerPixel;
+            int32 bufferSize = canvasWidth * canvasHeight * bytesPerPixel;
+            imageLayer->mTexture->UpdateTextureRegions((int32)0, (uint32)1, regionUpdate.get(), (uint32)bufferPitch, (uint32)bytesPerPixel, imageLayer->GetBlock()->GetArray().GetData());
             imageLayer->mTexture->PostEditChange();
         }
         displaySurface->Invalidate();
@@ -1013,6 +1025,9 @@ FOdysseyPainterEditorToolkit::EndTransaction()
         delete scopedTransaction;
         scopedTransaction = nullptr;
     }
+
+    UE_LOG(LogTemp, Display, TEXT("Done transaction"));
+    */
 }
 
 
@@ -1020,7 +1035,7 @@ FOdysseyPainterEditorToolkit::EndTransaction()
 //----------------------------------------------------------------------- Brush Handlers
 void
 FOdysseyPainterEditorToolkit::HandleBrushParameterChanged()
-{
+{ 
     paintEngine.TriggerStateChanged();
 }
 
