@@ -204,14 +204,13 @@ UE4PixelFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
         case TSF_G8:        ret = PF_G8;                break;
         case TSF_BGRA8:     ret = PF_B8G8R8A8;          break;
         case TSF_BGRE8:     ret = PF_Unknown;           break;
-        case TSF_RGBA16:    ret = PF_R16G16B16A16_UINT; break;
+        case TSF_RGBA16:    ret = PF_A16B16G16R16; break;
         case TSF_RGBA16F:   ret = PF_FloatRGBA;         break;
         case TSF_RGBA8:     ret = PF_Unknown;           break;
         case TSF_RGBE8:     ret = PF_Unknown;           break;
         case TSF_MAX:       ret = PF_Unknown;           break;
         default:            ret = PF_Unknown;           break;
     }
-
     checkf( ret != PF_Unknown, TEXT( "Bad format" ) ); // Crash
     return ret;
 }
@@ -288,7 +287,7 @@ FOdysseySurface::FOdysseySurface( FOdysseyBlock* iBlock )
     checkf( iBlock, TEXT( "Cannot Initialize with Null borrowed block" ) );
     mBlock = iBlock;
 
-    mTexture = UTexture2D::CreateTransient( mBlock->Width(), mBlock->Height(), PF_B8G8R8A8 );
+    mTexture = UTexture2D::CreateTransient( mBlock->Width(), mBlock->Height(), ::detail::UE4PixelFormatForUE4TextureSourceFormat( iBlock->GetUE4TextureSourceFormat() ) );
 #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
 #endif

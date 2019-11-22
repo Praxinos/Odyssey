@@ -200,12 +200,12 @@ FOdysseyLayerStack::AddLayer( int iAtIndex )
 {
     if( iAtIndex >= 0 && iAtIndex < mLayers.Num() )
     {
-        FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(), FVector2D( mWidth, mHeight ) );
+        FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(), FVector2D( mWidth, mHeight ), mTextureSourceFormat );
         mLayers.EmplaceAt( iAtIndex, TSharedPtr< FOdysseyImageLayer >( layer ) );
         return layer;
     }
 
-    mLayers.Add( TSharedPtr< FOdysseyImageLayer >( new FOdysseyImageLayer( GetNextLayerName(), FVector2D( mWidth, mHeight ) ) ) );
+    mLayers.Add( TSharedPtr< FOdysseyImageLayer >( new FOdysseyImageLayer( GetNextLayerName(), FVector2D( mWidth, mHeight ), mTextureSourceFormat ) ) );
     return static_cast<FOdysseyImageLayer*>( mLayers.Last().Get() );
 }
 
@@ -381,8 +381,8 @@ FOdysseyLayerStack::InitResultAndTempBlock()
     if( !mIsInitialized )
         return;
 
-    mResultBlock = new FOdysseyBlock( mWidth, mHeight );
-    mTempBlock = new FOdysseyBlock( mWidth, mHeight );
+    mResultBlock = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
+    mTempBlock = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
     ::ULIS::FClearFillContext::Clear( mResultBlock->GetIBlock() );
     ::ULIS::FClearFillContext::Clear( mTempBlock->GetIBlock() );
 }

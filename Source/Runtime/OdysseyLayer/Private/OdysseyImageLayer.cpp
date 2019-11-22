@@ -17,7 +17,7 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
     delete mBlock;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize )
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
     : IOdysseyLayer( iName )
     , mBlock( nullptr )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
@@ -25,7 +25,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize )
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
-    mBlock = new FOdysseyBlock( iSize.X, iSize.Y );
+    mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
     ::ULIS::FClearFillContext::Clear( mBlock->GetIBlock() );
 
     //Undo

@@ -220,6 +220,8 @@ private:
     UTexture2D*                 texture;
     FOdysseySurface*            displaySurface;
     FOdysseyBlock*              textureContentsBackup;
+    TextureMipGenSettings       textureMipGenBackup;
+    TextureCompressionSettings  textureCompressionBackup;
     TextureGroup                textureGroupBackup;
     FOdysseyPaintEngine         paintEngine;        // Owned        // Used by SOdysseyLayerStack
     FOdysseyLayerStack          layer_stack;        // Owned        // Used by Viewport

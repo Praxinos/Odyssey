@@ -33,6 +33,7 @@ public:
     // Public API
     void InterruptDelay();
     void Tick();
+    void SetTextureSourceFormat( ETextureSourceFormat iTextureSourceFormat );
     void SetLayerStack( FOdysseyLayerStack* iLayerStack );
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
     void SetColor( const ::ULIS::CColor& iColor );
@@ -78,6 +79,7 @@ private:
     // Private Data Members
     UOdysseyBrushAssetBase*             mBrushInstance;
 
+    ETextureSourceFormat                mTextureSourceFormat;
     FOdysseyLayerStack*                 mLayerStack;
     int                                 mWidth;
     int                                 mHeight;

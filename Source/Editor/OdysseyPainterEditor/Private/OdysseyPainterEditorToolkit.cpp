@@ -83,6 +83,8 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
     , texture(                          NULL )
     , displaySurface(                   NULL )
     , textureContentsBackup(            NULL )
+    , textureMipGenBackup()
+    , textureCompressionBackup()
     , textureGroupBackup()
     , paintEngine(                      &UndoHistory )
     , layer_stack()
@@ -100,10 +102,14 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 {
     // Setup Texture
     texture = iTexture;
+    textureMipGenBackup             = texture->MipGenSettings;
+    textureCompressionBackup        = texture->CompressionSettings;
     textureGroupBackup              = texture->LODGroup;
+    /*
     texture->MipGenSettings         = TextureMipGenSettings::TMGS_NoMipmaps;
     texture->CompressionSettings    = TextureCompressionSettings::TC_VectorDisplacementmap;
     texture->LODGroup               = TextureGroup::TEXTUREGROUP_Pixels2D;
+    */
     texture->UpdateResource();
     textureContentsBackup = NewOdysseyBlockFromUTextureData( texture );
 
@@ -112,6 +118,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     layer_stack.ComputeResultBlock();
 
     // Setup Paint Engine
+    paintEngine.SetTextureSourceFormat( textureContentsBackup->GetUE4TextureSourceFormat() );
     paintEngine.SetLayerStack(         &layer_stack );
     paintEngine.SetBrushInstance(      NULL );
     paintEngine.SetColor(              ::ULIS::CColor() );

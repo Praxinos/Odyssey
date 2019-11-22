@@ -28,6 +28,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     : FOdysseyTransactionnable( iUndoHistoryPtr )
     , mBrushInstance( NULL )
 
+    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
     , mLayerStack( NULL )
     , mWidth( 0 )
     , mHeight( 0 )
@@ -151,6 +152,14 @@ FOdysseyPaintEngine::Tick()
         mIsPendingEndStroke = false;
     }
 }
+
+
+void
+FOdysseyPaintEngine::SetTextureSourceFormat( ETextureSourceFormat iTextureSourceFormat )
+{
+    mTextureSourceFormat = iTextureSourceFormat;
+}
+
 
 void
 FOdysseyPaintEngine::SetLayerStack( FOdysseyLayerStack* iLayerStack )
@@ -552,7 +561,7 @@ FOdysseyPaintEngine::CheckReallocTempBuffer()
     if( realloc )
     {
         delete mTempBuffer;
-        mTempBuffer = new FOdysseyBlock( mWidth, mHeight );
+        mTempBuffer = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
         ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
         ReallocInvalidMaps();
     }
