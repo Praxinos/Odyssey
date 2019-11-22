@@ -96,7 +96,7 @@ FOdysseyLayerStack::ComputeResultBlock()
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayers[i].Get() );
 
         if( imageLayer )
-            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), imageLayer->GetBlendingMode(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer->GetOpacity() );
+            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity() );
     }
 
     mResultBlock->GetIBlock()->Invalidate();
@@ -118,7 +118,7 @@ FOdysseyLayerStack::ComputeResultBlock( const ::ULIS::FRect& iRect )
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayers[i].Get() );
 
         if( imageLayer )
-            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), imageLayer->GetBlendingMode(), iRect, imageLayer->GetOpacity(), performanceOptions, false );
+            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
     }
 
     mResultBlock->GetIBlock()->Invalidate( iRect );
@@ -143,12 +143,12 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect
         {
             ::ULIS::FPoint pos( iRect.x, iRect.y );
             ::ULIS::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetIBlock(), mTempBlock->GetIBlock(), iRect, pos, performanceOptions );
-            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iMode, iRect, iOpacity, performanceOptions, false );
-            ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), mResultBlock->GetIBlock(), imageLayer->GetBlendingMode(), iRect, imageLayer->GetOpacity(), performanceOptions, false );
+            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, ::ULIS::eAlphaMode::kNormal, iOpacity, performanceOptions, false );
+            ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
         }
         else if( imageLayer )
         {
-            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), imageLayer->GetBlendingMode(), iRect, imageLayer->GetOpacity(), performanceOptions, false );
+            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
         }
     }
 
@@ -169,7 +169,7 @@ FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, F
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayers[mCurrentIndex].Get() );
 
     if( imageLayer && iTempBuffer )
-        ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), imageLayer->GetBlock()->GetIBlock(), iMode, iRect, iOpacity, performanceOptions, false );
+        ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), imageLayer->GetBlock()->GetIBlock(), iRect, iMode, ::ULIS::eAlphaMode::kNormal, iOpacity, performanceOptions, false );
 
     ComputeResultBlock( iRect );
 }
@@ -278,7 +278,7 @@ void FOdysseyLayerStack::MergeDownLayer( IOdysseyLayer* iLayerToMergeDown )
             if( imageLayer1 && imageLayer2 )
             {
                 //UE_LOG(LogTemp, Display, TEXT("Merging %s into %s"), *(imageLayer1->GetName()).ToString(), *(imageLayer2->GetName()).ToString())
-                ::ULIS::FBlendingContext::Blend( imageLayer1->GetBlock()->GetIBlock(), imageLayer2->GetBlock()->GetIBlock(), imageLayer1->GetBlendingMode(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), 1.f );
+                ::ULIS::FBlendingContext::Blend( imageLayer1->GetBlock()->GetIBlock(), imageLayer2->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer1->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, 1.f );
             }
             DeleteLayer( i );
             break;

@@ -44,9 +44,10 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     invalidRect.h = diameter;
     ::ULIS::FBlendingContext::Blend( round.GetIBlock()
                                    , brush->GetState().target_temp_buffer->GetIBlock()
-                                   , ::ULIS::eBlendingMode::kNormal
                                    , invalidRect.x
                                    , invalidRect.y
+                                   , ::ULIS::eBlendingMode::kNormal
+                                   , ::ULIS::eAlphaMode::kNormal
                                    , 1.f );
     brush->PushInvalidRect( invalidRect );
 }
@@ -144,9 +145,10 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
 
     ::ULIS::FBlendingContext::Blend( block->GetIBlock()
                                    , brush->GetState().target_temp_buffer->GetIBlock()
-                                   , ::ULIS::eBlendingMode::kNormal
                                    , invalidRect.x
                                    , invalidRect.y
+                                   , ::ULIS::eBlendingMode::kNormal
+                                   , ::ULIS::eAlphaMode::kNormal
                                    , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }
