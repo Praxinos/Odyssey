@@ -125,7 +125,7 @@ void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSV( const  FOdysseyBrushColor& Color, int& H, int& S, int& V, int& A )
 {
     FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
+    col.m = Color.m.ToHSV();
     H = col.m.HSVHue();
     S = col.m.HSVSaturation();
     V = col.m.Value();
@@ -138,7 +138,7 @@ void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSL( const  FOdysseyBrushColor& Color, int& H, int& S, int& L, int& A )
 {
     FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
+    col.m = Color.m.ToHSL();
     H = col.m.HSLHue();
     S = col.m.HSLSaturation();
     L = col.m.Lightness();
@@ -151,7 +151,7 @@ void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoCMYK( const  FOdysseyBrushColor& Color, int& C, int& M, int& Y, int& K, int& A )
 {
     FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
+    col.m = Color.m.ToCMYK();
     C = col.m.Cyan();
     M = col.m.Magenta();
     Y = col.m.Yellow();
@@ -181,7 +181,7 @@ void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSVF( const  FOdysseyBrushColor& Color, float& H, float& S, float& V, float& A )
 {
     FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
+    col.m = Color.m.ToHSV();
     H = col.m.HSVHueF();
     S = col.m.HSVSaturationF();
     V = col.m.ValueF();
@@ -194,7 +194,7 @@ void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSLF( const  FOdysseyBrushColor& Color, float& H, float& S, float& L, float& A )
 {
     FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
+    col.m = Color.m.ToHSL();
     H = col.m.HSLHueF();
     S = col.m.HSLSaturationF();
     L = col.m.LightnessF();
@@ -207,7 +207,7 @@ void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoCMYKF( const  FOdysseyBrushColor& Color, float& C, float& M, float& Y, float& K, float& A )
 {
     FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
+    col.m = Color.m.ToCMYK();
     C = col.m.CyanF();
     M = col.m.MagentaF();
     Y = col.m.YellowF();
