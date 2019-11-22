@@ -45,7 +45,7 @@ private:
     ::ULIS::eBlendingMode   mBlendingMode;
     float                   mOpacity;
     
-public:
+//public:
     //Temporary Undo necessity
-    UTexture2D*             mTexture;
+    //UTexture2D*             mTexture;
 };

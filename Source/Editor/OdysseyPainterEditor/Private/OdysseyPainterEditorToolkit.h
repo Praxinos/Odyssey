@@ -133,6 +133,9 @@ public:
     void EndTransaction() override;
 
 
+public: 
+    void SetTextureDirty( bool ibTextureDirty ); //Set bIsTextureDirty, prompting, or not, the option to save before closing the editor
+
 private:
     // Brush Handlers
     void  HandleBrushParameterChanged();
@@ -229,6 +232,8 @@ private:
     UOdysseyBrushAssetBase*     brush_instance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
     bool                        bLiveUpdateEnabled;
     FOdysseyLiveUpdateInfo      liveUpdateInfo;
+
+    bool                        bIsTextureDirty;
 
 private:
     /** Tabs IDs */

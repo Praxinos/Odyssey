@@ -4,7 +4,8 @@
 #include "OdysseyBlock.h"
 
 //Undo
-#include "OdysseySurface.h"
+//#include "OdysseySurface.h"
+
 #include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
@@ -29,10 +30,13 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     ::ULIS::FClearFillContext::Clear( mBlock->GetIBlock() );
 
     //Undo
+    /*
     mTexture = UTexture2D::CreateTransient( iSize.X, iSize.Y, PF_B8G8R8A8);
-    mTexture->SetFlags( RF_Transactional );
+    mTexture->SetFlags( RF_Transactional | RF_Transient );
     mTexture->TemporarilyDisableStreaming();
+    mTexture->CompressionNone = 1;
     CopyBlockDataIntoUTexture( mBlock, mTexture );
+    */
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
@@ -42,10 +46,13 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     , mOpacity( 1.0f )
 {
     //Undo
+    /*
     mTexture = UTexture2D::CreateTransient( mBlock->Width(), mBlock->Height(), PF_B8G8R8A8);
-    mTexture->SetFlags( RF_Transactional );
+    mTexture->SetFlags( RF_Transactional | RF_Transient );
     mTexture->TemporarilyDisableStreaming();
+    mTexture->CompressionNone = 1;
     CopyBlockDataIntoUTexture( mBlock, mTexture );
+    */
 }
 
 //--------------------------------------------------------------------------------------

@@ -90,6 +90,7 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
     , layer_stack()
     , brush(                            NULL )
     , brush_instance(                   NULL )
+    , bIsTextureDirty(                  false )
 {}
 
 
@@ -134,8 +135,8 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     displaySurface->Invalidate();
 
     // Support undo/redo
-    displaySurface->Texture()->SetFlags(RF_Transactional);
-    GEditor->RegisterForUndo(this);
+    //displaySurface->Texture()->SetFlags(RF_Transactional);
+    //GEditor->RegisterForUndo(this);
 
     // Register our commands. This will only register them if not previously registered
     FOdysseyPainterEditorCommands::Register();
@@ -492,6 +493,7 @@ FOdysseyPainterEditorToolkit::GetWorldCentricTabPrefix( ) const
 void
 FOdysseyPainterEditorToolkit::PostUndo( bool bSuccess )
 {
+    SetTextureDirty( true );
     /*
     TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
     for( int i = 0; i < layers->Num(); i++ )
@@ -553,13 +555,15 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     FAssetEditorToolkit::SaveAsset_Execute();
 
     EndTransaction();
+
+    SetTextureDirty( false );
 }
 
 
 bool
 FOdysseyPainterEditorToolkit::OnRequestClose()
 {
-    if( !bEditorMarkedAsClosed )
+    if( !bEditorMarkedAsClosed && ( bIsTextureDirty || layer_stack.GetLayers()->Num() > 1 ) )
     {
         EAppReturnType::Type returnType =
             OpenMsgDlgInt( EAppMsgType::YesNoCancel,
@@ -981,7 +985,7 @@ FOdysseyPainterEditorToolkit::OnMeshChanged( UBlueprint* iMesh )
 void
 FOdysseyPainterEditorToolkit::BeginTransaction( const FText& SessionName )
 {
-    /*
+/*
     if( scopedTransaction == nullptr )
     {
         scopedTransaction = new FScopedTransaction( SessionName );
@@ -991,14 +995,16 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& SessionName )
             FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
             imageLayer->mTexture->Modify();
         }
-    }*/
+    }
+    */
 }
 
 
 void
 FOdysseyPainterEditorToolkit::MarkTransactionAsDirty()
 {
-   // bManipulationDirtiedSomething = true;
+    SetTextureDirty( true );
+   //bManipulationDirtiedSomething = true;
 }
 
 
@@ -1013,15 +1019,15 @@ FOdysseyPainterEditorToolkit::EndTransaction()
         {
             FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
             CopyBlockDataIntoUTexture( imageLayer->GetBlock(), imageLayer->mTexture );
+            imageLayer->mTexture->PostEditChange();
             /*std::unique_ptr<FUpdateTextureRegion2D> regionUpdate = std::unique_ptr<FUpdateTextureRegion2D>(new FUpdateTextureRegion2D(0, 0, 0, 0, imageLayer->GetBlock()->Width(), imageLayer->GetBlock()->Height() ) );
             int canvasWidth = imageLayer->GetBlock()->Width();
             int canvasHeight = imageLayer->GetBlock()->Height();
             int32 bytesPerPixel = 4; // r g b a
             int32 bufferPitch = canvasWidth * bytesPerPixel;
             int32 bufferSize = canvasWidth * canvasHeight * bytesPerPixel;
-            imageLayer->mTexture->UpdateTextureRegions((int32)0, (uint32)1, regionUpdate.get(), (uint32)bufferPitch, (uint32)bytesPerPixel, imageLayer->GetBlock()->GetArray().GetData());
-            imageLayer->mTexture->PostEditChange();
-        }
+            imageLayer->mTexture->UpdateTextureRegions((int32)0, (uint32)1, regionUpdate.get(), (uint32)bufferPitch, (uint32)bytesPerPixel, imageLayer->GetBlock()->GetArray().GetData());*/
+       /* }
         displaySurface->Invalidate();
     }
 
@@ -1033,9 +1039,15 @@ FOdysseyPainterEditorToolkit::EndTransaction()
         scopedTransaction = nullptr;
     }
 
-    UE_LOG(LogTemp, Display, TEXT("Done transaction"));
-    */
+    UE_LOG(LogTemp, Display, TEXT("Done transaction"));*/
 }
+
+void 
+FOdysseyPainterEditorToolkit::SetTextureDirty( bool ibTextureDirty )
+{
+    bIsTextureDirty = ibTextureDirty;
+}
+
 
 
 //--------------------------------------------------------------------------------------
