@@ -1,7 +1,7 @@
 # Iliad
 
 # Building
-- Create a new Blank C++ project with official UE4 version (4.23+) `PROJECT_PATH` and create `Plugins` directory
+- Create a new 'Basic Code' C++ project with official UE4 version (4.23+) `PROJECT_PATH` and create `Plugins` directory
     ```
     cd $PROJECT_PATH
     mkdir Plugins
