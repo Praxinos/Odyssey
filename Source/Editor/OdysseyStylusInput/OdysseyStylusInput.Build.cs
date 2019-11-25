@@ -26,7 +26,8 @@ namespace UnrealBuildTool.Rules
 					"CoreUObject",
 					"EditorSubsystem",
 					"Engine",
-					"UnrealEd"
+					"UnrealEd",
+					"WinTab",
 					// ... add other public dependencies that you statically link with here ...
 				}
 				);
