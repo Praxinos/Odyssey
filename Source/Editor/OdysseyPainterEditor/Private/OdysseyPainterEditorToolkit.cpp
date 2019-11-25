@@ -844,7 +844,8 @@ FOdysseyPainterEditorToolkit::CreateTopTab()
         .OnSizeChanged(             this, &FOdysseyPainterEditorToolkit::HandleSizeModifierChanged )
         .OnOpacityChanged(          this, &FOdysseyPainterEditorToolkit::HandleOpacityModifierChanged )
         .OnFlowChanged(             this, &FOdysseyPainterEditorToolkit::HandleFlowModifierChanged )
-        .OnBlendingModeChanged(     this, &FOdysseyPainterEditorToolkit::HandleBlendingModeModifierChanged );
+        .OnBlendingModeChanged(     this, &FOdysseyPainterEditorToolkit::HandleBlendingModeModifierChanged )
+        .OnAlphaModeChanged(     this, &FOdysseyPainterEditorToolkit::HandleAlphaModeModifierChanged );
 }
 
 void
@@ -914,6 +915,7 @@ FOdysseyPainterEditorToolkit::OnBrushSelected( UOdysseyBrush* iBrush )
         if( overrides.bOverride_Opacity         )   TopTab->SetOpacity(         overrides.Opacity                               );
         if( overrides.bOverride_Flow            )   TopTab->SetFlow(            overrides.Flow                                  );
         if( overrides.bOverride_BlendingMode    )   TopTab->SetBlendingMode(    (::ULIS::eBlendingMode)overrides.BlendingMode   );
+        if( overrides.bOverride_AlphaMode       )   TopTab->SetAlphaMode(       (::ULIS::eAlphaMode)overrides.AlphaMode         );
     }
 }
 
@@ -1104,6 +1106,14 @@ void
 FOdysseyPainterEditorToolkit::HandleBlendingModeModifierChanged( int32 iValue )
 {
     paintEngine.SetBlendingModeModifier( static_cast<::ULIS::eBlendingMode>( iValue ) );
+}
+
+
+
+void
+FOdysseyPainterEditorToolkit::HandleAlphaModeModifierChanged( int32 iValue )
+{
+    paintEngine.SetAlphaModeModifier( static_cast<::ULIS::eAlphaMode>( iValue ) );
 }
 
 

@@ -125,7 +125,7 @@ FOdysseyLayerStack::ComputeResultBlock( const ::ULIS::FRect& iRect )
 }
 
 void
-FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ULIS::eBlendingMode iMode )
+FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ULIS::eBlendingMode iMode, ::ULIS::eAlphaMode iAlphaMode )
 {
     ::ULIS::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
@@ -143,7 +143,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect
         {
             ::ULIS::FPoint pos( iRect.x, iRect.y );
             ::ULIS::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetIBlock(), mTempBlock->GetIBlock(), iRect, pos, performanceOptions );
-            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, ::ULIS::eAlphaMode::kNormal, iOpacity, performanceOptions, false );
+            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, iAlphaMode, iOpacity, performanceOptions, false );
             ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
         }
         else if( imageLayer )
@@ -156,7 +156,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect
 }
 
 void
-FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ULIS::eBlendingMode iMode )
+FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ULIS::eBlendingMode iMode, ::ULIS::eAlphaMode iAlphaMode )
 {
     ::ULIS::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
@@ -169,7 +169,7 @@ FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, F
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayers[mCurrentIndex].Get() );
 
     if( imageLayer && iTempBuffer )
-        ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), imageLayer->GetBlock()->GetIBlock(), iRect, iMode, ::ULIS::eAlphaMode::kNormal, iOpacity, performanceOptions, false );
+        ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), imageLayer->GetBlock()->GetIBlock(), iRect, iMode, iAlphaMode, iOpacity, performanceOptions, false );
 
     ComputeResultBlock( iRect );
 }

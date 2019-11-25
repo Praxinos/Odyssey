@@ -32,6 +32,7 @@ struct  FOdysseyBrushState
     float                                   opacity_modifier;
     float                                   flow_modifier;
     ::ULIS::eBlendingMode                   blendingMode_modifier;
+    ::ULIS::eAlphaMode                      alphaMode_modifier;
     float                                   step;
     float                                   smoothing_strength;
     int                                     currentPointIndex;
@@ -74,7 +75,7 @@ public:
 public:
     // Public C++ API
     FOdysseyBrushState&             GetState();
-    const TArray< ::ULIS::FRect >&   GetInvalidRects() const;
+    const TArray< ::ULIS::FRect >&  GetInvalidRects() const;
     void                            PushInvalidRect( const  ::ULIS::FRect& iRect );
     void                            ClearInvalidRects();
 
@@ -233,19 +234,19 @@ public:
     void OnSelected();
 
     UFUNCTION(BlueprintNativeEvent)
-    void OnDeselected();
-
-    UFUNCTION(BlueprintNativeEvent)
     void OnTick();
 
     UFUNCTION(BlueprintNativeEvent)
-    void OnTickDown();
-
-    UFUNCTION(BlueprintNativeEvent)
-    void OnTickUp();
-
-    UFUNCTION(BlueprintNativeEvent)
     void OnStep();
+
+    UFUNCTION(BlueprintNativeEvent)
+    void OnStateChanged();
+
+    UFUNCTION(BlueprintNativeEvent)
+    void OnStrokeBegin();
+
+    UFUNCTION(BlueprintNativeEvent)
+    void OnStrokeEnd();
 
 public:
     // Odyssey Brush Public Driving Methods
@@ -253,19 +254,19 @@ public:
     void ExecuteSelected();
 
     /* Run the stamp action */
-    void ExecuteDeselected();
-
-    /* Run the stamp action */
     void ExecuteTick();
-
-    /* Run the stamp action */
-    void ExecuteTickDown();
-
-    /* Run the stamp action */
-    void ExecuteTickUp();
 
     /* Run the step action */
     void ExecuteStep();
+
+    /* Run the state change action */
+    void ExecuteStateChanged();
+
+    /* Run the stroke begin action */
+    void ExecuteStrokeBegin();
+
+    /* Run the stroke end action */
+    void ExecuteStrokeEnd();
 
 private:
     // Private Members Data

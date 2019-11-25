@@ -429,25 +429,7 @@ UOdysseyBrushAssetBase::OnSelected_Implementation()
 
 
 void
-UOdysseyBrushAssetBase::OnDeselected_Implementation()
-{
-}
-
-
-void
 UOdysseyBrushAssetBase::OnTick_Implementation()
-{
-}
-
-
-void
-UOdysseyBrushAssetBase::OnTickDown_Implementation()
-{
-}
-
-
-void
-UOdysseyBrushAssetBase::OnTickUp_Implementation()
 {
 }
 
@@ -457,46 +439,45 @@ UOdysseyBrushAssetBase::OnStep_Implementation()
 {
 }
 
+void
+UOdysseyBrushAssetBase::OnStateChanged_Implementation()
+{
+}
+
+void
+UOdysseyBrushAssetBase::OnStrokeBegin_Implementation()
+{
+}
+
+void
+UOdysseyBrushAssetBase::OnStrokeEnd_Implementation()
+{
+}
+
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------- Odyssey Brush Public Driving Methods
 void
 UOdysseyBrushAssetBase::ExecuteSelected()
 {
+    FOdysseyBrushContext::Instance()->SetContext( this );
+
     FEditorScriptExecutionGuard ScriptGuard;
     OnSelected();
-}
 
-
-void
-UOdysseyBrushAssetBase::ExecuteDeselected()
-{
-    FEditorScriptExecutionGuard ScriptGuard;
-    OnDeselected();
+    FOdysseyBrushContext::Instance()->ClearContext();
 }
 
 
 void
 UOdysseyBrushAssetBase::ExecuteTick()
 {
+    FOdysseyBrushContext::Instance()->SetContext( this );
+
     FEditorScriptExecutionGuard ScriptGuard;
     OnTick();
-}
 
-
-void
-UOdysseyBrushAssetBase::ExecuteTickDown()
-{
-    FEditorScriptExecutionGuard ScriptGuard;
-    OnTickDown();
-}
-
-
-void
-UOdysseyBrushAssetBase::ExecuteTickUp()
-{
-    FEditorScriptExecutionGuard ScriptGuard;
-    OnTickUp();
+    FOdysseyBrushContext::Instance()->ClearContext();
 }
 
 
@@ -507,6 +488,42 @@ UOdysseyBrushAssetBase::ExecuteStep()
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnStep();
+
+    FOdysseyBrushContext::Instance()->ClearContext();
+}
+
+
+void
+UOdysseyBrushAssetBase::ExecuteStateChanged()
+{
+    FOdysseyBrushContext::Instance()->SetContext( this );
+
+    FEditorScriptExecutionGuard ScriptGuard;
+    OnStateChanged();
+
+    FOdysseyBrushContext::Instance()->ClearContext();
+}
+
+
+void
+UOdysseyBrushAssetBase::ExecuteStrokeBegin()
+{
+    FOdysseyBrushContext::Instance()->SetContext( this );
+
+    FEditorScriptExecutionGuard ScriptGuard;
+    OnStrokeBegin();
+
+    FOdysseyBrushContext::Instance()->ClearContext();
+}
+
+
+void
+UOdysseyBrushAssetBase::ExecuteStrokeEnd()
+{
+    FOdysseyBrushContext::Instance()->SetContext( this );
+
+    FEditorScriptExecutionGuard ScriptGuard;
+    OnStrokeEnd();
 
     FOdysseyBrushContext::Instance()->ClearContext();
 }

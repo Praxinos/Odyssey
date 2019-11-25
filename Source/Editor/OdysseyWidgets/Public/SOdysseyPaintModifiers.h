@@ -32,6 +32,7 @@ public:
         SLATE_EVENT( FOnInt32ValueChanged, OnOpacityChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnFlowChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnBlendingModeChanged )
+        SLATE_EVENT( FOnInt32ValueChanged, OnAlphaModeChanged )
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
@@ -42,6 +43,7 @@ public:
     void  SetOpacity( int32 iValue );
     void  SetFlow( int32 iValue );
     void  SetBlendingMode( ::ULIS::eBlendingMode iValue );
+    void  SetAlphaMode( ::ULIS::eAlphaMode iValue );
 
 private:
     // Private Callbacks
@@ -59,6 +61,15 @@ private:
     void HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo );
     TArray< TSharedPtr< FText > > GetBlendingModesAsText();
     FText GetBlendingModeAsText() const;
+
+private:
+    // Alpha mode Callbacks
+    TSharedRef<SWidget> GenerateAlphaComboBoxItem( TSharedPtr<FText> InItem );
+    TSharedRef<SWidget> CreateAlphaModeTextWidget( TSharedPtr<FText> InItem );
+    void HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo );
+    TArray< TSharedPtr< FText > > GetAlphaModesAsText();
+    FText GetAlphaModeAsText() const;
+
 private:
     // Private Data Members
     TSharedPtr< SSlider >           mSizeSlider;
@@ -73,9 +84,15 @@ private:
     TArray< TSharedPtr<FText> >                 mBlendingModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mBlendingModeComboBox;
 
+    TSharedPtr<SComboBox<TSharedPtr<FText>>>    mAlphaBox;
+    ::ULIS::eAlphaMode                          mCurrentAlphaMode;
+    TArray< TSharedPtr<FText> >                 mAlphaModes;
+    TSharedPtr<SComboBox<TSharedPtr<FText> > >  mAlphaModeComboBox;
+
     FOnInt32ValueChanged            mOnSizeChangedCallback;
     FOnInt32ValueChanged            mOnOpacityChangedCallback;
     FOnInt32ValueChanged            mOnFlowChangedCallback;
     FOnInt32ValueChanged            mOnBlendingModeChangedCallback;
+    FOnInt32ValueChanged            mOnAlphaModeChangedCallback;
 };
 

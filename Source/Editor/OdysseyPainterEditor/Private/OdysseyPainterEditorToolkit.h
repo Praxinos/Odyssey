@@ -149,6 +149,7 @@ private:
     void  HandleOpacityModifierChanged( int32 iValue );
     void  HandleFlowModifierChanged( int32 iValue );
     void  HandleBlendingModeModifierChanged( int32 iValue );
+    void  HandleAlphaModeModifierChanged( int32 iValue );
 
     // Stroke Options Handlers
     void  HandleStrokeStepChanged           (   int32   iValue  );

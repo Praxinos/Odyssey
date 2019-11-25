@@ -16,13 +16,6 @@
 // UOdysseyBrushFunctionLibrary
 //--------------------------------------------------------------------------------------
 //--------------------------------------------- Odyssey Brush Blueprint Callable Methods
-//static
-void
-UOdysseyBrushFunctionLibrary::Stamp( FOdysseyBlockProxy Sample, const  FOdysseyBrushColor&  Color, float X, float Y, float Angle, float ScaleX, float ScaleY, float Opacity )
-{
-    ODYSSEY_BRUSH_CONTEXT_CHECK
-}
-
 
 //static
 void
@@ -53,6 +46,91 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
 }
 
 
+void
+ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY, ::ULIS::FRect* oRect )
+{
+    int width = iBlock->Width();
+    int height = iBlock->Height();
+    int width2 = width / 2;
+    int height2 = height / 2;
+
+    FVector2D computedOffset = iPivot.OffsetMode == EPivotOffsetMode::kAbsolute ? iPivot.Offset : iPivot.Offset * FVector2D( width, height );
+    oRect->x = iX;
+    oRect->y = iY;
+    oRect->w = width;
+    oRect->h = height;
+
+    switch( iPivot.Reference )
+    {
+        case EPivotReference::kTopLeft:
+        {
+            oRect->x = iX;
+            oRect->y = iY;
+            break;
+        }
+
+        case EPivotReference::kTopMiddle:
+        {
+            oRect->x = iX - width2;
+            oRect->y = iY;
+            break;
+        }
+
+        case EPivotReference::kTopRight:
+        {
+            oRect->x = iX - width;
+            oRect->y = iY;
+            break;
+        }
+
+        case EPivotReference::kMiddleLeft:
+        {
+            oRect->x = iX;
+            oRect->y = iY - height2;
+            break;
+        }
+
+        case EPivotReference::kCenter:
+        {
+            oRect->x = iX - width2;
+            oRect->y = iY - height2;
+            break;
+        }
+
+        case EPivotReference::kMiddleRight:
+        {
+            oRect->x = iX - width;
+            oRect->y = iY - height2;
+            break;
+        }
+
+        case EPivotReference::kBotLeft:
+        {
+            oRect->x = iX;
+            oRect->y = iY - height;
+            break;
+        }
+
+        case EPivotReference::kBotMiddle:
+        {
+            oRect->x = iX - width2;
+            oRect->y = iY - height;
+            break;
+        }
+
+        case EPivotReference::kBotRight:
+        {
+            oRect->x = iX - width;
+            oRect->y = iY - height;
+            break;
+        }
+    }
+
+    oRect->x += computedOffset.X;
+    oRect->y += computedOffset.Y;
+}
+
+
 //static
 void
 UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow )
@@ -60,6 +138,7 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
     ODYSSEY_BRUSH_CONTEXT_CHECK
     ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN
 
+    /*
     FOdysseyBlock* block = Sample.m;
     int width = block->Width();
     int height = block->Height();
@@ -67,8 +146,8 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
     int height2 = height / 2;
 
     FVector2D computedOffset = Pivot.OffsetMode == EPivotOffsetMode::kAbsolute ? Pivot.Offset : Pivot.Offset * FVector2D( width, height );
-
     ::ULIS::FRect invalidRect;
+
     invalidRect.x = X;
     invalidRect.y = Y;
     invalidRect.w = block->Width();
@@ -142,6 +221,11 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
 
     invalidRect.x += computedOffset.X;
     invalidRect.y += computedOffset.Y;
+    */
+
+    FOdysseyBlock* block = Sample.m;
+    ::ULIS::FRect invalidRect;
+    ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
     ::ULIS::FBlendingContext::Blend( block->GetIBlock()
                                    , brush->GetState().target_temp_buffer->GetIBlock()
@@ -149,6 +233,28 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
                                    , invalidRect.y
                                    , ::ULIS::eBlendingMode::kNormal
                                    , ::ULIS::eAlphaMode::kNormal
+                                   , FMath::Clamp( Flow, 0.f, 1.f ) );
+    brush->PushInvalidRect( invalidRect );
+}
+
+
+//static
+void
+UOdysseyBrushFunctionLibrary::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode )
+{
+    ODYSSEY_BRUSH_CONTEXT_CHECK
+    ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN
+
+    FOdysseyBlock* block = Sample.m;
+    ::ULIS::FRect invalidRect;
+    ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
+
+    ::ULIS::FBlendingContext::Blend( block->GetIBlock()
+                                   , brush->GetState().target_temp_buffer->GetIBlock()
+                                   , invalidRect.x
+                                   , invalidRect.y
+                                   , (::ULIS::eBlendingMode)BlendingMode
+                                   , (::ULIS::eAlphaMode)AlphaMode
                                    , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }

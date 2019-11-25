@@ -40,3 +40,33 @@ enum class EOdysseyBlendingMode : uint8
     , kColor            UMETA( DisplayName = "Color"            )
     , kLuminosity       UMETA( DisplayName = "Luminosity"       )
 };
+
+UENUM()
+enum class EOdysseyAlphaMode : uint8
+{
+      kNormal           UMETA( DisplayName = "Normal"   )
+    , kErase            UMETA( DisplayName = "Erase"    )
+    , kTop              UMETA( DisplayName = "Top"      )
+    , kBack             UMETA( DisplayName = "Back"     )
+    , kSub              UMETA( DisplayName = "Sub"      )
+    , kAdd              UMETA( DisplayName = "Add"      )
+    , kMul              UMETA( DisplayName = "Mul"      )
+    , kMin              UMETA( DisplayName = "Min"      )
+    , kMax              UMETA( DisplayName = "Max"      )
+};
+
+/////////////////////////////////////////////////////
+// eAlphaMode
+enum class eAlphaMode : uint8
+{
+      kNormal
+    , kErase
+    , kTop
+    , kBack
+    , kSub
+    , kAdd
+    , kMul
+    , kMin
+    , kMax
+    , kNumAlphaModes
+};

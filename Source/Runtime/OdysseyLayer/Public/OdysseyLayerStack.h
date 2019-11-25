@@ -26,8 +26,8 @@ public:
     FOdysseyBlock*     GetResultBlock();
     void               ComputeResultBlock();
     void               ComputeResultBlock( const ::ULIS::FRect& iRect );
-    void               ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ULIS::eBlendingMode iMode = ::ULIS::eBlendingMode::kNormal );
-    void               BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ULIS::eBlendingMode iMode = ::ULIS::eBlendingMode::kNormal );
+    void               ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ULIS::eBlendingMode iMode = ::ULIS::eBlendingMode::kNormal, ::ULIS::eAlphaMode iAlphaMode = ::ULIS::eAlphaMode::kNormal );
+    void               BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ULIS::eBlendingMode iMode = ::ULIS::eBlendingMode::kNormal, ::ULIS::eAlphaMode iAlphaMode = ::ULIS::eAlphaMode::kNormal );
     int                Width() const;
     int                Height() const;
     FVector2D          Size() const;

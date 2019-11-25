@@ -41,6 +41,7 @@ public:
     void SetOpacityModifier( float iValue );
     void SetFlowModifier( float iValue );
     void SetBlendingModeModifier( ::ULIS::eBlendingMode iValue );
+    void SetAlphaModeModifier( ::ULIS::eAlphaMode iValue );
 
     void SetStrokeStep( int32 iValue );
     void SetStrokeAdaptative( bool iValue );
@@ -62,6 +63,7 @@ public:
 
     const ::ULIS::CColor& GetColor() const;
 
+    void UpdateBrushCursorPreview();
 private:
     // Private API
     void CheckReallocTempBuffer();
@@ -99,6 +101,7 @@ private:
     float                               mOpacityModifier;
     float                               mFlowModifier;
     ::ULIS::eBlendingMode               mBlendingModeModifier;
+    ::ULIS::eAlphaMode                  mAlphaModeModifier;
     float                               mStepValue;
 
     IOdysseyInterpolation*              mInterpolator;

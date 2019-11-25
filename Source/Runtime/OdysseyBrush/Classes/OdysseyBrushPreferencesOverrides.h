@@ -29,6 +29,7 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
         , bOverride_Opacity     ( false                                 )
         , bOverride_Flow        ( false                                 )
         , bOverride_BlendingMode( false                                 )
+        , bOverride_AlphaMode   ( false                                 )
         , Step                  ( 20                                    )
         , SizeAdaptative        ( true                                  )
         , PaintOnTick           ( false                                 )
@@ -42,6 +43,7 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
         , Opacity               ( 100                                   )
         , Flow                  ( 100                                   )
         , BlendingMode          ( EOdysseyBlendingMode::kNormal         )
+        , AlphaMode             ( EOdysseyAlphaMode::kNormal            )
     {}
 
     /////////////////////////////////////////////////////
@@ -98,6 +100,10 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_BlendingMode;
 
+    /** Enable Modifier AlphaMode Override. */
+    UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
+    bool    bOverride_AlphaMode;
+
 
     /////////////////////////////////////////////////////
     // Overrides Values
@@ -152,6 +158,10 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     /** Modifier BlendingMode Override Value. */
     UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( editcondition = "bOverride_BlendingMode" ) )
     EOdysseyBlendingMode    BlendingMode;
+
+    /** Modifier AlphaMode Override Value. */
+    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( editcondition = "bOverride_AlphaMode" ) )
+    EOdysseyAlphaMode       AlphaMode;
 
 };
 

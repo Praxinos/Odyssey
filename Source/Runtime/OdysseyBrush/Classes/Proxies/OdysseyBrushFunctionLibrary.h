@@ -8,6 +8,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
+#include "Proxies/OdysseyBrushBlending.h"
 #include "OdysseyBrushFunctionLibrary.generated.h"
 
 UCLASS(meta=(ScriptName="OdysseyBrushLibrary"))
@@ -17,19 +18,19 @@ class ODYSSEYBRUSH_API UOdysseyBrushFunctionLibrary : public UBlueprintFunctionL
 
 public:
     // Odyssey Brush Blueprint Callable Methods
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
-    static  void  Stamp( FOdysseyBlockProxy Sample, const  FOdysseyBrushColor&  Color, float X, float Y, float Angle, float ScaleX = 1.f, float ScaleY = 1.f, float Flow = 1.f );
 
     /** Test of tooltip */
     UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
     static  void  DebugStamp();
 
-    /**
-     *  Test of
-     *  Long ToolTip
-     */
+    /** Simple Version of Stamp */
     UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
     static  void  SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f );
+
+    /** Stamp */
+    UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
+    static  void  Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
+
 
     UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
     static  void  GenerateOrbitDelta( float AngleRad, float  Radius, float& DeltaX, float& DeltaY );

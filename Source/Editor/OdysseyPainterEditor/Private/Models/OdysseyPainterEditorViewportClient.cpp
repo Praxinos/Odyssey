@@ -129,7 +129,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
         BatchedElementParameters = new FBatchedElementTexture2DPreviewParameters(MipLevel, LayerIndex, bIsNormalMap, bIsSingleChannel, bIsVirtual);
     }
 
-
     // Draw background Checker
     {
         FCanvasTileItem TileItem( FVector2D(XPos, YPos), CheckerboardTexture->Resource, FVector2D(Width, Height), FVector2D(0.f, 0.f), FVector2D( Width / CheckerboardTexture->GetSizeX(), Height / CheckerboardTexture->GetSizeY()), FLinearColor::White);
@@ -139,6 +138,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
         Canvas->DrawItem(TileItem);
     }
 
+    // Draw Drawing Surface
     if ( Texture->Resource != nullptr )
     {
         FCanvasTileItem TileItem( FVector2D( XPos, YPos ), Texture->Resource, FVector2D( Width, Height ), FLinearColor::White );
@@ -246,6 +246,9 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 Contro
             OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
             OdysseyPainterEditorPtr.Pin()->EndTransaction();
             RefEventStrokePoint = FOdysseyStrokePoint( 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ); // still useful ?
+
+            // Test:
+            OdysseyPainterEditorPtr.Pin()->PaintEngine()->UpdateBrushCursorPreview();
             return true;
         }
     }

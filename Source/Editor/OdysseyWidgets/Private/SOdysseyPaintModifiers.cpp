@@ -19,6 +19,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mCurrentBlendingMode = ::ULIS::eBlendingMode::kNormal;
     mBlendingModes = GetBlendingModesAsText();
 
+    mOnAlphaModeChangedCallback = InArgs._OnAlphaModeChanged;
+    mCurrentAlphaMode = ::ULIS::eAlphaMode::kNormal;
+    mAlphaModes = GetAlphaModesAsText();
+
     ChildSlot
     [
         SNew( SBox )
@@ -188,6 +192,45 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                     ]
                 ]
 
+
+                +SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew( SHorizontalBox )
+                    +SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding( 0.f, 2.f )
+                    .VAlign( VAlign_Center )
+                    [
+                        SNew( SBox )
+                        .WidthOverride( 50 )
+                        .HAlign( HAlign_Center )
+                        [
+                            SNew( STextBlock )
+                            .Text( LOCTEXT( "Alpha", "Alpha:" ) )
+                        ]
+                    ]
+                    +SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding( 0.f, 2.f )
+                    .VAlign( VAlign_Center )
+                    [
+                        SNew( SBox )
+                        .WidthOverride( 100 )
+                        .HAlign( HAlign_Fill )
+                        [
+                            SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
+                            .OptionsSource(&mAlphaModes)
+                            .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
+                            .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                            .Content()
+                            [
+                                CreateAlphaModeTextWidget( mAlphaModes[0] )
+                            ]
+                        ]
+                    ]
+                ]
+
             ]
     ];
 }
@@ -222,6 +265,14 @@ SOdysseyPaintModifiers::SetBlendingMode( ::ULIS::eBlendingMode iValue )
     mCurrentBlendingMode = iValue;
     TSharedPtr< FText > sel = MakeShared< FText >( GetBlendingModeAsText() );
     HandleOnBlendingModeChanged( sel, ESelectInfo::Direct );
+}
+
+void
+SOdysseyPaintModifiers::SetAlphaMode( ::ULIS::eAlphaMode iValue )
+{
+    mCurrentAlphaMode = iValue;
+    TSharedPtr< FText > sel = MakeShared< FText >( GetAlphaModeAsText() );
+    HandleOnAlphaModeChanged( sel, ESelectInfo::Direct );
 }
 
 
@@ -367,6 +418,69 @@ FText
 SOdysseyPaintModifiers::GetBlendingModeAsText() const
 {
     return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[ static_cast< int >( mCurrentBlendingMode ) ] ) );
+}
+
+
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------- Alpha mode Callbacks
+TSharedRef<SWidget>
+SOdysseyPaintModifiers::GenerateAlphaComboBoxItem( TSharedPtr<FText> InItem )
+{
+    return SNew(STextBlock)
+           .Text(*(InItem.Get()));
+}
+
+
+TSharedRef<SWidget>
+SOdysseyPaintModifiers::CreateAlphaModeTextWidget( TSharedPtr<FText> InItem )
+{
+    return SNew(STextBlock)
+           .Text(*(InItem.Get()));
+}
+
+
+void
+SOdysseyPaintModifiers::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
+{
+    mAlphaModeComboBox->SetContent(
+        SAssignNew( mAlphaBox, SComboBox<TSharedPtr<FText>> )
+                .OptionsSource(&mAlphaModes)
+                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
+                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                .Content()
+                [
+                    CreateAlphaModeTextWidget( NewSelection )
+                ]
+    );
+
+
+    for( uint8 i = 0; i < (int)::ULIS::eAlphaMode::kNumAlphaModes; ++i )
+    {
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[ i ] ) );
+        if( NewSelection.Get()->EqualTo( entry ) )
+        {
+            mCurrentAlphaMode = static_cast<::ULIS::eAlphaMode>( i );
+        }
+    }
+
+    mOnAlphaModeChangedCallback.ExecuteIfBound( (int32)mCurrentAlphaMode );
+}
+
+TArray< TSharedPtr< FText > >
+SOdysseyPaintModifiers::GetAlphaModesAsText()
+{
+    TArray< TSharedPtr< FText > > array;
+    for( int i = 0; i < (int)::ULIS::eAlphaMode::kNumAlphaModes; ++i )
+        array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[i] ) ) ) );
+    return array;
+}
+
+
+FText
+SOdysseyPaintModifiers::GetAlphaModeAsText() const
+{
+    return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[ static_cast< int >( mCurrentAlphaMode ) ] ) );
 }
 
 
