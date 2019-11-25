@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
+#include "Engine/Texture.h"
 #include "IOdysseyLayer.h"
 #include <ULIS_BLENDINGMODES>
 
