@@ -33,3 +33,14 @@
     ```
 - `'Generate Visual Studio project files'` by right-clicking on the *.uproject file inside `$PROJECT_PATH`
 - Open the solution (inside `$PROJECT_PATH`) with Visual Studio
+
+# Packaging
+```
+cd $PROJECT_PATH
+build-package.py
+```
+*Only windows  
+Must be run inside $PROJECT_PATH  
+No parameters  
+Create output folder $PROJECT_PATH/../Iliad-package  
+It will be improved...*
