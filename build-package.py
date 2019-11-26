@@ -49,6 +49,8 @@ if not uplugin_pathfile.is_file():
     
 print( f'Input uplugin file: {uplugin_pathfile}' )
 
+plugin_name = uplugin_pathfile.stem
+
 # Output package directory
 if args.output:
     output_path = Path( args.output ).resolve()
@@ -56,7 +58,7 @@ else:
     output_path = ( input_path / '..' / 'package' ).resolve()
 
 now = datetime.now()
-output_path = ( output_path / now.strftime( '%Y%m%d-%H%M%S-' + operating_system ) )
+output_path = ( output_path / now.strftime( '%Y%m%d-%H%M%S-' + operating_system ) / plugin_name )
 output_path.mkdir( parents=True, exist_ok=True )
 
 print( f'Output path: {output_path}' )
