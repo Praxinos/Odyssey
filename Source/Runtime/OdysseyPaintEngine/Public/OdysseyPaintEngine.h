@@ -60,6 +60,7 @@ public:
     void EndStroke();
     void AbortStroke();
     void TriggerStateChanged();
+    void InterruptStrokeAndStampInPlace();
 
     const ::ULIS::CColor& GetColor() const;
 

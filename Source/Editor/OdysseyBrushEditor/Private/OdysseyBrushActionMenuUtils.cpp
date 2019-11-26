@@ -462,7 +462,7 @@ void FOdysseyBrushActionMenuUtils::MakePaletteMenu(FBlueprintActionContext const
     if (FilterClass != nullptr)
     {
         // make sure we exclude global and static library actions
-        FilterFlags |= FBlueprintActionFilter::BPFILTER_RejectGlobalFields;
+        //FilterFlags |= FBlueprintActionFilter::BPFILTER_RejectGlobalFields;
     }
 
     FBlueprintActionFilter MenuFilter(FilterFlags);
@@ -495,7 +495,7 @@ void FOdysseyBrushActionMenuUtils::MakeContextMenu(FBlueprintActionContext const
     uint32 FilterFlags = 0x00;
     if ( bIsContextSensitive && ((ClassTargetMask & EOdysseyContextTargetFlags::TARGET_OdysseyBrushLibraries) == 0) )
     {
-        FilterFlags |= FBlueprintActionFilter::BPFILTER_RejectGlobalFields;
+        //FilterFlags |= FBlueprintActionFilter::BPFILTER_RejectGlobalFields;
     }
 
     FBlueprintActionFilter MainMenuFilter(FilterFlags);

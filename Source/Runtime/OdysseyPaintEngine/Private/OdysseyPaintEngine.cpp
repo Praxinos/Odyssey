@@ -82,7 +82,7 @@ FOdysseyPaintEngine::Tick()
     if( !mBrushInstance )
         return;
 
-    mBrushInstance->ExecuteTick();
+    //mBrushInstance->ExecuteTick();
 
     auto start_time = std::chrono::steady_clock::now();
     long long max_time = 1000 / 60;
@@ -148,7 +148,7 @@ FOdysseyPaintEngine::Tick()
         ClearInvalidTileMap( mStrokeInvalidTileMap );
         ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
 
-        mBrushInstance->ExecuteStrokeEnd();
+        //mBrushInstance->ExecuteStrokeEnd();
 
         if( mBrushInstance )
             mBrushInstance->CleansePool( ECacheLevel::kStroke );
@@ -182,8 +182,12 @@ FOdysseyPaintEngine::SetLayerStack( FOdysseyLayerStack* iLayerStack )
 void
 FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 {
+    //InterruptStrokeAndStampInPlace();
+
+    /*
     if( iBrushInstance != nullptr && mBrushInstance != iBrushInstance )
         iBrushInstance->ExecuteSelected();
+    */
 
     mBrushInstance = iBrushInstance;
     UpdateBrushInstance();
@@ -192,14 +196,16 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 void
 FOdysseyPaintEngine::SetColor( const ::ULIS::CColor& iColor )
 {
+    InterruptStrokeAndStampInPlace();
     mColor = iColor;
-
     UpdateBrushInstance();
 }
 
 void
 FOdysseyPaintEngine::SetSizeModifier( float iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     if( iValue == 0 )
         iValue = 1;
     mSizeModifier = iValue;
@@ -213,6 +219,8 @@ FOdysseyPaintEngine::SetSizeModifier( float iValue )
 void
 FOdysseyPaintEngine::SetOpacityModifier( float iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mOpacityModifier = iValue / 100.f;
 
     UpdateBrushInstance();
@@ -221,6 +229,8 @@ FOdysseyPaintEngine::SetOpacityModifier( float iValue )
 void
 FOdysseyPaintEngine::SetFlowModifier( float iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mFlowModifier = iValue / 100.f;
 
     UpdateBrushInstance();
@@ -229,6 +239,8 @@ FOdysseyPaintEngine::SetFlowModifier( float iValue )
 void
 FOdysseyPaintEngine::SetBlendingModeModifier( ::ULIS::eBlendingMode iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mBlendingModeModifier = iValue;
 
     UpdateBrushInstance();
@@ -237,6 +249,8 @@ FOdysseyPaintEngine::SetBlendingModeModifier( ::ULIS::eBlendingMode iValue )
 void
 FOdysseyPaintEngine::SetAlphaModeModifier( ::ULIS::eAlphaMode iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mAlphaModeModifier = iValue;
 
     UpdateBrushInstance();
@@ -246,6 +260,8 @@ FOdysseyPaintEngine::SetAlphaModeModifier( ::ULIS::eAlphaMode iValue )
 void
 FOdysseyPaintEngine::SetStrokeStep( int32 iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mStepValue = iValue;
     float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
     mInterpolator->SetStep( val );
@@ -256,6 +272,8 @@ FOdysseyPaintEngine::SetStrokeStep( int32 iValue )
 void
 FOdysseyPaintEngine::SetStrokeAdaptative( bool iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mIsAdaptativeStep = iValue;
     float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
     mInterpolator->SetStep( val );
@@ -266,12 +284,16 @@ FOdysseyPaintEngine::SetStrokeAdaptative( bool iValue )
 void
 FOdysseyPaintEngine::SetStrokePaintOnTick( bool iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mIsPaintOnTick = iValue;
 }
 
 void
 FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     switch( iValue )
     {
         case EOdysseyInterpolationType::kBezier:
@@ -291,6 +313,8 @@ FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
 void
 FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     switch( iValue )
     {
         case EOdysseySmoothingMethod::kAverage:
@@ -316,6 +340,8 @@ FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
 void
 FOdysseyPaintEngine::SetSmoothingStrength( int32 iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mSmoother->SetStrength( iValue );
 
     UpdateBrushInstance();
@@ -324,18 +350,24 @@ FOdysseyPaintEngine::SetSmoothingStrength( int32 iValue )
 void
 FOdysseyPaintEngine::SetSmoothingEnabled( bool iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mIsSmoothingEnabled = iValue;
 }
 
 void
 FOdysseyPaintEngine::SetSmoothingRealTime( bool iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     mIsRealTime = iValue;
 }
 
 void
 FOdysseyPaintEngine::SetSmoothingCatchUp( bool iValue )
 {
+    InterruptStrokeAndStampInPlace();
+
     Record( FName( TEXT( "CatchUp" ) ) );
     ModifyAsState( mIsCatchUp, &mIsCatchUp );
     mIsCatchUp = iValue;
@@ -558,8 +590,19 @@ FOdysseyPaintEngine::AbortStroke()
 void
 FOdysseyPaintEngine::TriggerStateChanged()
 {
+    InterruptStrokeAndStampInPlace();
     UpdateBrushInstance();
 }
+
+
+void
+FOdysseyPaintEngine::InterruptStrokeAndStampInPlace()
+{
+    EndStroke();
+    InterruptDelay();
+    Tick();
+}
+
 
 const ::ULIS::CColor&
 FOdysseyPaintEngine::GetColor() const
@@ -607,10 +650,6 @@ FOdysseyPaintEngine::UpdateBrushInstance()
 {
     if( !mBrushInstance )
         return;
-
-    // End delay stroke if property changed
-    EndStroke();
-    InterruptDelay();
 
     FOdysseyBrushState& state = mBrushInstance->GetState();
     state.target_temp_buffer = mTempBuffer;

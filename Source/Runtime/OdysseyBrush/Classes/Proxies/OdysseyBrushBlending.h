@@ -7,7 +7,7 @@
 #include <ULIS_BLENDINGMODES>
 #include "OdysseyBrushBlending.generated.h"
 
-UENUM()
+UENUM( BlueprintType )
 enum class EOdysseyBlendingMode : uint8
 {
       kNormal           UMETA( DisplayName = "Normal"           )
@@ -41,7 +41,7 @@ enum class EOdysseyBlendingMode : uint8
     , kLuminosity       UMETA( DisplayName = "Luminosity"       )
 };
 
-UENUM()
+UENUM( BlueprintType )
 enum class EOdysseyAlphaMode : uint8
 {
       kNormal           UMETA( DisplayName = "Normal"   )
