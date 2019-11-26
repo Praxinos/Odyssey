@@ -17,6 +17,11 @@ import sys
 
 #---
 
+parser = argparse.ArgumentParser( description='Build package.' )
+parser.add_argument( '-i', '--input', help='The input path' )
+parser.add_argument( '-o', '--output', help='The output path (it will create output/date-time/plugin-name)' )
+args = parser.parse_args()
+
 operating_system = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if operating_system != 'windows':
     print( f'This platform is not supported: {operating_system}' )
@@ -25,19 +30,33 @@ if operating_system != 'windows':
 #---
  
 # Input uplugin file
-input_path = Path.cwd()
-uplugin_pathfile = input_path / 'Iliad.uplugin'
+if args.input:
+    input_path = Path( args.input ).resolve()
+else:
+    input_path = Path.cwd().resolve()
 
+uplugin_pathfiles = list( input_path.glob( '*.uplugin' ) )
+if not uplugin_pathfiles:
+    print( '' )
+    print( f'uplugin file doesn\'t exist in: {input_path}' )
+    sys.exit( 10 )
+
+uplugin_pathfile = uplugin_pathfiles[0]
 if not uplugin_pathfile.is_file():
     print( '' )
-    print( f'uplugin file doesn\'t exist: {uplugin_pathfile}' )
-    sys.exit( 10 )
+    print( f'uplugin file is not a file: {uplugin_pathfile}' )
+    sys.exit( 12 )
     
 print( f'Input uplugin file: {uplugin_pathfile}' )
 
 # Output package directory
+if args.output:
+    output_path = Path( args.output ).resolve()
+else:
+    output_path = ( input_path / '..' / 'package' ).resolve()
+
 now = datetime.now()
-output_path = input_path / '..' / 'Iliad-package' / now.strftime( '%Y%m%d-%H%M%S-' + operating_system ) / 'Iliad'
+output_path = ( output_path / now.strftime( '%Y%m%d-%H%M%S-' + operating_system ) )
 output_path.mkdir( parents=True, exist_ok=True )
 
 print( f'Output path: {output_path}' )
@@ -45,8 +64,8 @@ print( f'Output path: {output_path}' )
 #---
 
 # Backup uplugin file
-uplugin_backup_pathfile = input_path / 'Iliad.uplugin.backup'
-if not uplugin_backup_pathfile.exists():
+uplugin_backup_pathfile = uplugin_pathfile.with_suffix( uplugin_pathfile.suffix + '.backup' )
+if not uplugin_backup_pathfile.exists(): # Otherwise, an already modified file will be copied
     shutil.copyfile( uplugin_pathfile, uplugin_backup_pathfile )
 
 # Add platform specification
@@ -68,11 +87,11 @@ with uplugin_pathfile.open( 'w' ) as outfile:
 #---
 
 if operating_system == 'windows':
-    uat = str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / 'UE_4.23' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' )
+    uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / 'UE_4.23' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
     args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
     
 # Run packaging script
-process = subprocess.run( [ uat ] + args )
+process = subprocess.run( uat + args )
 
 shutil.copyfile( uplugin_backup_pathfile, uplugin_pathfile )
 uplugin_backup_pathfile.unlink()
