@@ -77,6 +77,7 @@ public:
 
     virtual EMouseCursor::Type                  GetCursor( FViewport* Viewport,int32 X,int32 Y )  override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* Viewport, const FCursorReply& CursorReply ) override;
+    virtual EMouseCaptureMode                   CaptureMouseOnClick() override;
 
 public:
     // FGCObject API
@@ -96,15 +97,19 @@ private:
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
     double      GetZoom() const;
     FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport )  const;
+    FOdysseyStrokePoint   GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport )  const;
     void DrawUVsOntoViewport(FViewport* InViewport, FCanvas* InCanvas, int32 UVChannel, FStaticMeshVertexBuffer& VertexBuffer, FIndexArrayView& Indices );
+
+    bool        InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed = 1.0f, bool bGamepad = false );
+    void        CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport ) ;
 
 private:
     // Private Data Members
+    EMouseCaptureMode                       mMouseCaptureMode;
     TWeakPtr<IOdysseyPainterEditorToolkit>  OdysseyPainterEditorPtr;
     TWeakPtr<SOdysseySurfaceViewport>       OdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   MeshSelector;
     UTexture2D*                             CheckerboardTexture;
-    FOdysseyStrokePoint                     RefEventStrokePoint;
     EMouseCursor::Type                      CurrentMouseCursor;
     float                                   RotationReference; // The reference from which we determine the new rotation
     FVector2D                               PanReference; //Where did we begin the pan ?
