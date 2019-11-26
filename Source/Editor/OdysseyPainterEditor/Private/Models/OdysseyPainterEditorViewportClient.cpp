@@ -219,6 +219,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
+    if( mMouseCaptureMode == EMouseCaptureMode::NoCapture
+        && ( iKey == EKeys::LeftMouseButton
+             || iKey == EKeys::RightMouseButton ) )
+        return true;
+
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
@@ -232,6 +237,69 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
     CapturedMouseMoveWithStrokePoint( point_in_viewport );
+}
+
+void
+FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
+{
+    // check a preference ink or not before (or inside plugin to not call this CB)
+    // as it is now, if ink is available -> use it
+    mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+
+    //---
+
+    if( !iWidget.IsValid() )
+        return;
+
+    TSharedPtr< SViewport > viewport = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportWidget();
+    const SWidget* widget = viewport.Get();
+
+    if( iWidget.Pin().Get() != widget )
+        return;
+
+    //---
+
+    //UE_LOG( LogStylusInputP, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d"), iIndex, iState.GetPosition().X, iState.GetPosition().Y, iState.GetPressure(), iState.IsStylusDown() );
+
+    //State = iState;
+    //LastIndex = iIndex;
+
+    FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() );
+    //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), State.GetPosition().X, State.GetPosition().Y, local.X, local.Y );
+
+    FOdysseyStrokePoint stroke_point( position_in_viewport.X
+                                      , position_in_viewport.Y
+                                      , iState.GetZ()
+                                      , iState.GetPressure()
+                                      , 0 //iState.GetAltitude()
+                                      , 0 //iState.GetAzimuth()
+                                      , iState.GetTwist()
+                                      , 0 //iState.GetPitch()
+                                      , 0 // iState.GetRoll()
+                                      , 0 ); // iState.GetYaw() );
+
+  //---
+
+  //---
+
+    const IStylusInputDevice* input_device = InputSubsystem->GetInputDevice( iIndex );
+
+    if( !input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    {
+        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+    }
+    else if( input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    {
+        CapturedMouseMoveWithStrokePoint( stroke_point );
+    }
+    else if( input_device->GetPreviousState().IsStylusDown() && !input_device->GetCurrentState().IsStylusDown() )
+    {
+        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+    }
+    else
+    {
+        //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged : %s" ), !input_device->GetCurrentState().IsStylusInverted() ? L"pen" : L"eraser" );
+    }
 }
 
 bool
@@ -466,11 +534,6 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
         return;
 
     mCurrentToolState = eState::kIdle;
-}
-
-void
-FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
-{
 }
 
 EMouseCursor::Type
