@@ -49,7 +49,7 @@ const FName FOdysseyPainterEditorToolkit::BotBarTabId(                  TEXT( "O
 const FName FOdysseyPainterEditorToolkit::TopBarTabId(                  TEXT( "OdysseyPainterEditor_TopBar" ) );
 const FName FOdysseyPainterEditorToolkit::StrokeOptionsTabId(           TEXT( "OdysseyPainterEditor_StrokeOptions" ) );
 const FName FOdysseyPainterEditorToolkit::NotesTabId(                   TEXT( "OdysseyPainterEditor_Notes" ) );
-const FName FOdysseyPainterEditorToolkit::UndoHistoryTabId(             TEXT( "OdysseyPainterEditor_UndoHistory" ) );
+//const FName FOdysseyPainterEditorToolkit::UndoHistoryTabId(             TEXT( "OdysseyPainterEditor_UndoHistory" ) );
 const FName FOdysseyPainterEditorToolkit::PerformanceOptionsTabId(      TEXT( "OdysseyPainterEditor_PerformanceOptions" ) );
 const FName FOdysseyPainterEditorToolkit::ToolsTabId(                   TEXT( "OdysseyPainterEditor_Tools"));
 
@@ -106,11 +106,11 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     textureMipGenBackup             = texture->MipGenSettings;
     textureCompressionBackup        = texture->CompressionSettings;
     textureGroupBackup              = texture->LODGroup;
-    /*
+    
     texture->MipGenSettings         = TextureMipGenSettings::TMGS_NoMipmaps;
     texture->CompressionSettings    = TextureCompressionSettings::TC_VectorDisplacementmap;
     texture->LODGroup               = TextureGroup::TEXTUREGROUP_Pixels2D;
-    */
+    
     texture->UpdateResource();
     textureContentsBackup = NewOdysseyBlockFromUTextureData( texture );
 
@@ -155,7 +155,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     CreateTopTab();
     CreateStrokeOptionsTab();
     CreatePerformanceOptionsTab();
-    CreateUndoHistoryTab();
+    //CreateUndoHistoryTab();
 
 
     // Setup Properties with callbacks
@@ -231,11 +231,11 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
                         ->SetHideTabWell( false )
                         ->SetSizeCoefficient(0.3f)
                         // Performance Options
-                        ->AddTab( PerformanceOptionsTabId, ETabState::OpenedTab )
+                        ->AddTab( PerformanceOptionsTabId, ETabState::ClosedTab )
                         ->SetHideTabWell( false )
                         ->SetSizeCoefficient(0.3f)
                         // Mesh Selector
-                        ->AddTab( MeshSelectorTabId, ETabState::ClosedTab)
+                        ->AddTab( MeshSelectorTabId, ETabState::OpenedTab)
                         ->SetHideTabWell(false)
                         ->SetSizeCoefficient(0.3f)
                     )
@@ -310,9 +310,9 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
                     (
                         FTabManager::NewStack()
                         // Undo History
-                        ->AddTab( UndoHistoryTabId, ETabState::ClosedTab)
-                        ->SetHideTabWell(false)
-                        ->SetSizeCoefficient(0.6f)
+                        //->AddTab( UndoHistoryTabId, ETabState::ClosedTab)
+                        //->SetHideTabWell(false)
+                        //->SetSizeCoefficient(0.6f)
                         // Layer Stack
                         ->AddTab( LayerStackTabId, ETabState::OpenedTab)
                         ->SetHideTabWell(false)
@@ -424,10 +424,10 @@ FOdysseyPainterEditorToolkit::RegisterTabSpawners( const TSharedRef< class FTabM
         .SetIcon(FSlateIcon("OdysseyStyle", "PainterEditor.Notes16"));
 
     // Undo History
-    InTabManager->RegisterTabSpawner(UndoHistoryTabId, FOnSpawnTab::CreateSP(this, &FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnUndoHistory))
+    /*InTabManager->RegisterTabSpawner(UndoHistoryTabId, FOnSpawnTab::CreateSP(this, &FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnUndoHistory))
         .SetDisplayName(LOCTEXT("UndoHistoryTab", "UndoHistory") )
         .SetGroup(WorkspaceMenuCategoryRef)
-        .SetIcon(FSlateIcon("OdysseyStyle", "PainterEditor.UndoHistory16"));
+        .SetIcon(FSlateIcon("OdysseyStyle", "PainterEditor.UndoHistory16"));*/
 
     // Tools
     InTabManager->RegisterTabSpawner(ToolsTabId, FOnSpawnTab::CreateSP(this, &FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools))
@@ -453,7 +453,7 @@ FOdysseyPainterEditorToolkit::UnregisterTabSpawners( const TSharedRef< class FTa
     InTabManager->UnregisterTabSpawner( StrokeOptionsTabId );
     InTabManager->UnregisterTabSpawner( PerformanceOptionsTabId );
     InTabManager->UnregisterTabSpawner( NotesTabId );
-    InTabManager->UnregisterTabSpawner( UndoHistoryTabId );
+    //InTabManager->UnregisterTabSpawner( UndoHistoryTabId );
     InTabManager->UnregisterTabSpawner( ToolsTabId );
 }
 
@@ -542,10 +542,6 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     // Commit changes permanently
     //displaySurface->CommitBlockChangesIntoTextureBulk();
     // Reload backup
-    
-    BeginTransaction( LOCTEXT("Save in ILIAD", "Save in ILIAD") );
-    MarkTransactionAsDirty();
-    
     CopyBlockDataIntoUTexture( displaySurface->Block(), texture );
     ::ULIS::FMakeContext::CopyBlockInto( displaySurface->Block()->GetIBlock(), textureContentsBackup->GetIBlock() );
     InvalidateTextureFromData( displaySurface->Block(), texture );
@@ -553,17 +549,13 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     displaySurface->Invalidate();
 
     FAssetEditorToolkit::SaveAsset_Execute();
-
-    EndTransaction();
-
-    SetTextureDirty( false );
 }
 
 
 bool
 FOdysseyPainterEditorToolkit::OnRequestClose()
 {
-    if( !bEditorMarkedAsClosed && ( bIsTextureDirty || layer_stack.GetLayers()->Num() > 1 ) )
+    if( !bEditorMarkedAsClosed )
     {
         EAppReturnType::Type returnType =
             OpenMsgDlgInt( EAppMsgType::YesNoCancel,
@@ -870,11 +862,12 @@ FOdysseyPainterEditorToolkit::CreatePerformanceOptionsTab()
         .OnLiveUpdateChanged        (   this,   &FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged   );
 }
 
+/*
 void
 FOdysseyPainterEditorToolkit::CreateUndoHistoryTab()
 {
     UndoHistoryTab = SNew( SOdysseyUndoHistory, &UndoHistory );
-}
+}*/
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------- Paint engine driving methods
@@ -987,50 +980,28 @@ FOdysseyPainterEditorToolkit::OnMeshChanged( UBlueprint* iMesh )
 void
 FOdysseyPainterEditorToolkit::BeginTransaction( const FText& SessionName )
 {
-/*
     if( scopedTransaction == nullptr )
     {
         scopedTransaction = new FScopedTransaction( SessionName );
-        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
-        for( int i = 0; i < layers->Num(); i++ )
-        {
-            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
-            imageLayer->mTexture->Modify();
-        }
+        displaySurface->Texture()->Modify();
     }
-    */
 }
 
 
 void
 FOdysseyPainterEditorToolkit::MarkTransactionAsDirty()
 {
-    SetTextureDirty( true );
-   //bManipulationDirtiedSomething = true;
+    //SetTextureDirty( true );
+    bManipulationDirtiedSomething = true;
 }
 
 
 void
 FOdysseyPainterEditorToolkit::EndTransaction()
 {
-    /*
     if( bManipulationDirtiedSomething )
     {
-        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
-        for( int i = 0; i < layers->Num(); i++ )
-        {
-            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
-            CopyBlockDataIntoUTexture( imageLayer->GetBlock(), imageLayer->mTexture );
-            imageLayer->mTexture->PostEditChange();
-            /*std::unique_ptr<FUpdateTextureRegion2D> regionUpdate = std::unique_ptr<FUpdateTextureRegion2D>(new FUpdateTextureRegion2D(0, 0, 0, 0, imageLayer->GetBlock()->Width(), imageLayer->GetBlock()->Height() ) );
-            int canvasWidth = imageLayer->GetBlock()->Width();
-            int canvasHeight = imageLayer->GetBlock()->Height();
-            int32 bytesPerPixel = 4; // r g b a
-            int32 bufferPitch = canvasWidth * bytesPerPixel;
-            int32 bufferSize = canvasWidth * canvasHeight * bytesPerPixel;
-            imageLayer->mTexture->UpdateTextureRegions((int32)0, (uint32)1, regionUpdate.get(), (uint32)bufferPitch, (uint32)bytesPerPixel, imageLayer->GetBlock()->GetArray().GetData());*/
-       /* }
-        displaySurface->Invalidate();
+        texture->PostEditChange();
     }
 
     bManipulationDirtiedSomething = false;
@@ -1040,8 +1011,6 @@ FOdysseyPainterEditorToolkit::EndTransaction()
         delete scopedTransaction;
         scopedTransaction = nullptr;
     }
-
-    UE_LOG(LogTemp, Display, TEXT("Done transaction"));*/
 }
 
 void 
@@ -1353,7 +1322,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnNotes( const FSpawnTabArgs& A
         ];
 }
 
-
+/*
 TSharedRef< SDockTab >
 FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnUndoHistory( const FSpawnTabArgs& Args )
 {
@@ -1364,7 +1333,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnUndoHistory( const FSpawnTabA
         [
             UndoHistoryTab.ToSharedRef()
         ];
-}
+}*/
 
 
 TSharedRef< SDockTab >
@@ -1497,16 +1466,17 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& A
 FReply
 FOdysseyPainterEditorToolkit::OnClearCurrentLayer()
 {
+    bIsTextureDirty = true;
     paintEngine.AbortStroke();
     layer_stack.ClearCurrentLayer();
-    if( bLiveUpdateEnabled )
-        InvalidateTextureFromData( layer_stack.GetResultBlock(), texture );
+    InvalidateTextureFromData( layer_stack.GetResultBlock(), texture );
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolkit::OnFillCurrentLayer()
 {
+    bIsTextureDirty = true;
     paintEngine.AbortStroke();
     layer_stack.FillCurrentLayerWithColor( paintEngine.GetColor() );
     return FReply::Handled();

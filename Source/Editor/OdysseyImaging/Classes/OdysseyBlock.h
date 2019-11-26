@@ -32,6 +32,8 @@ public:
     // Public API
     TArray64< uint8 >&          GetArray();
     const TArray64< uint8 >&    GetArray() const;
+    void  SetArray( TArray64< uint8 >& iNewArray );
+
     ::ULIS::IBlock*             GetIBlock();
     const ::ULIS::IBlock*       GetIBlock() const;
     int                         Width() const;

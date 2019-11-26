@@ -422,6 +422,18 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     }
 }
 
+void
+FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* Viewport,int32 x, int32 y )
+{
+    CurrentToolState = eState::kIdle;
+}
+
+void
+FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* Viewport )
+{
+    CurrentToolState = eState::kIdle;
+}
+
 
 EMouseCursor::Type
 FOdysseyPainterEditorViewportClient::GetCursor( FViewport* Viewport,int32 X,int32 Y )

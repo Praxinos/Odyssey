@@ -105,7 +105,7 @@ protected:
     void CreateToolsTab();
     void CreateStrokeOptionsTab();
     void CreatePerformanceOptionsTab();
-    void CreateUndoHistoryTab();
+    //void CreateUndoHistoryTab();
 
 
 protected:
@@ -126,7 +126,7 @@ protected:
 
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;
 
-public:
+protected:
     // Transaction ( Undo / Redo ) methods overrides
     void BeginTransaction(const FText& SessionName) override;
     void MarkTransactionAsDirty() override;
@@ -192,7 +192,7 @@ private:
     // Callback for spawning the Notes tab.
     TSharedRef<SDockTab> HandleTabSpawnerSpawnNotes(const FSpawnTabArgs& Args);
     // Callback for spawning the Undo History tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnUndoHistory(const FSpawnTabArgs& Args);
+    //TSharedRef<SDockTab> HandleTabSpawnerSpawnUndoHistory(const FSpawnTabArgs& Args);
     // Callback for spawning the Tools tab.
     TSharedRef<SDockTab> HandleTabSpawnerSpawnTools(const FSpawnTabArgs& Args);
 
@@ -207,7 +207,7 @@ private:
     TSharedPtr<SOdysseyLayerStackView>          LayerStackTab;
     TSharedPtr<SOdysseyStrokeOptions>           StrokeOptionsTab;
     TSharedPtr<SOdysseyPerformanceOptions>      PerformanceOptionsTab;
-    TSharedPtr<SOdysseyUndoHistory>             UndoHistoryTab;
+    //TSharedPtr<SOdysseyUndoHistory>             UndoHistoryTab;
     TSharedPtr<SOdysseyPaintModifiers>          TopTab;
     TSharedPtr<SWidget>                         ToolsTab;
 
@@ -231,7 +231,6 @@ private:
     FOdysseyLayerStack          layer_stack;        // Owned        // Used by Viewport
     UOdysseyBrush*              brush;              // NOT Owned
     UOdysseyBrushAssetBase*     brush_instance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
-    bool                        bLiveUpdateEnabled;
     FOdysseyLiveUpdateInfo      liveUpdateInfo;
 
     bool                        bIsTextureDirty;
@@ -249,7 +248,7 @@ private:
     static const FName TopBarTabId;
     static const FName StrokeOptionsTabId;
     static const FName NotesTabId;
-    static const FName UndoHistoryTabId;
+    //static const FName UndoHistoryTabId;
     static const FName PerformanceOptionsTabId;
     static const FName ToolsTabId;
 };

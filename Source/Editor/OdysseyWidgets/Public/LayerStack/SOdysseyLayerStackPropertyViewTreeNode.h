@@ -35,7 +35,8 @@ private:
     TSharedRef<SWidget> ConstructPropertyViewForImageLayer( FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> trackNode );
 
     int GetLayerOpacityValue( FOdysseyImageLayer* ImageLayer ) const;
-    void SetLayerOpacityValue( int iOpacity, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> TrackNode );
+    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> TrackNode );
+    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> TrackNode );
 
 private:
     TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem );

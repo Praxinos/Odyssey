@@ -8,6 +8,8 @@
 #include "IOdysseyLayer.h"
 #include <ULIS_BLENDINGMODES>
 
+#include "OdysseyBlockUndoable.h"
+
 class FOdysseyBlock;
 class UTexture2D;
 
@@ -49,4 +51,6 @@ private:
 //public:
     //Temporary Undo necessity
     //UTexture2D*             mTexture;
+public:
+    UOdysseyBlockUndoable* mBlockUndoable;
 };

@@ -23,6 +23,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     , mBlock( nullptr )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
+    //, mBlockUndoable( new UOdysseyBlockUndoable() )
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
@@ -37,6 +38,8 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     mTexture->CompressionNone = 1;
     CopyBlockDataIntoUTexture( mBlock, mTexture );
     */
+    mBlockUndoable = UOdysseyBlockUndoable::CreateTransient();
+    mBlockUndoable->SetArray( mBlock->GetArray() );
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
@@ -44,6 +47,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     , mBlock( iBlock )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
+    //, mBlockUndoable( new UOdysseyBlockUndoable() )
 {
     //Undo
     /*
@@ -53,6 +57,8 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     mTexture->CompressionNone = 1;
     CopyBlockDataIntoUTexture( mBlock, mTexture );
     */
+    mBlockUndoable = UOdysseyBlockUndoable::CreateTransient();
+    mBlockUndoable->SetArray( mBlock->GetArray() );
 }
 
 //--------------------------------------------------------------------------------------

@@ -79,6 +79,12 @@ FOdysseyBlock::GetArray() const
     return mArray;
 }
 
+void
+FOdysseyBlock::SetArray( TArray64< uint8 >& iNewArray )
+{
+    mArray = iNewArray;
+}
+
 ::ULIS::IBlock*
 FOdysseyBlock::GetIBlock()
 {

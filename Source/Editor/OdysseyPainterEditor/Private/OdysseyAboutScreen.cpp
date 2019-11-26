@@ -31,9 +31,11 @@ SOdysseyAboutScreen::Construct(const FArguments& InArgs)
 #pragma warning(push)
 #pragma warning(disable : 4428)    // universal-character-name encountered in source
 #endif
-    AboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright1", "Copyright 2018-2019 Epic Games, Inc. All rights reserved" ), 11, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f ) ) ) );
-    AboutLines.Add(MakeShareable( new FLineDefinition( LOCTEXT( "Copyright2", "Epic, Epic Games, Unreal, and their respective logos are trademarks or registered trademarks of Epic Games, Inc.\nin the United States of America and elsewhere."), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
-
+    AboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright1", "Copyright 2018-2019 Praxinos SCOP arl. All rights reserved" ), 11, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f ) ) ) );
+    AboutLines.Add(MakeShareable( new FLineDefinition( LOCTEXT( "Copyright2", "Praxinos Team : Elodie Moog, Fabrice Debarge, Thomas Schmitt, Clément Berthaud, Naomiki Sato, Antoine Antin, Eric Scholl, Michael Schreiner"), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
+    AboutLines.Add(MakeShareable( new FLineDefinition( LOCTEXT( "Copyright3", "ILIAD : Intelligent Layered Imaging Architecture for Drawing"), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
+    AboutLines.Add(MakeShareable( new FLineDefinition( LOCTEXT( "Copyright4", "IDDN FR.001.250001.002.S.P.2019.000.00000"), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
+    
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

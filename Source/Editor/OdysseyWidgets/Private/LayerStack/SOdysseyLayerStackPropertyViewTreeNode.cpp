@@ -73,7 +73,8 @@ TSharedRef<SWidget> SOdysseyLayerStackPropertyViewTreeNode::ConstructPropertyVie
                 .MinValue(0)
                 .MaxValue(100)
                 .Delta(1)
-                .OnValueChanged(this, &SOdysseyLayerStackPropertyViewTreeNode::SetLayerOpacityValue, ImageLayer, LayerStack, trackNode )
+                .OnValueChanged(this, &SOdysseyLayerStackPropertyViewTreeNode::HandleLayerOpacityValueChanged, ImageLayer, LayerStack, trackNode )
+                .OnValueCommitted(this, &SOdysseyLayerStackPropertyViewTreeNode::SetLayerOpacityValue, ImageLayer, LayerStack, trackNode )
              ]
          ]
         + SVerticalBox::Slot()
@@ -116,7 +117,13 @@ int SOdysseyLayerStackPropertyViewTreeNode::GetLayerOpacityValue( FOdysseyImageL
 }
 
 
-void SOdysseyLayerStackPropertyViewTreeNode::SetLayerOpacityValue( int iOpacity, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> TrackNode  )
+void SOdysseyLayerStackPropertyViewTreeNode::HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> TrackNode  )
+{
+    ImageLayer->SetOpacity( iOpacity / 100.f );
+    TrackNode->RefreshOpacityText();
+}
+
+void SOdysseyLayerStackPropertyViewTreeNode::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyTrackLayerNode> TrackNode  )
 {
     ImageLayer->SetOpacity( iOpacity / 100.f );
     TrackNode->RefreshOpacityText();
