@@ -9,6 +9,10 @@
 #include "Windows/WindowsHWrapper.h"
 #include "WintabLibrary-Windows.h"
 
+#define PACKETDATA	(PK_X | PK_Y | PK_Z | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE | PK_CURSOR | PK_SERIAL_NUMBER | PK_TIME | PK_CHANGED | PK_STATUS | PK_ORIENTATION | PK_ROTATION )
+#define PACKETMODE	PK_BUTTONS
+#include "Windows/PKTDEF.H"
+
 #include "IStylusState.h"
 
 /**
@@ -77,6 +81,8 @@ struct FWTTabletContextInfo : public IStylusInputDevice
 
 	TArray<FWTPacketDescription> PacketDescriptions;
 	TArray<EWintabPacketType> SupportedPackets;
+
+    TArray< PACKET > mPacketsBuffer;
 
 	TArray<FWintabStylusState> WindowsState;
     bool IsTouching;
