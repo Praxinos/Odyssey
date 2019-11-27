@@ -198,7 +198,7 @@ UOdysseyTextureDummyFactory::FactoryCreateNew(  UClass* Class,
     Object->PostEditChange();
 
     // Init internal data
-    FOdysseyBlock block( textureWidth, textureHeight );
+    FOdysseyBlock block( textureWidth, textureHeight, ETextureSourceFormat::TSF_BGRA8, nullptr, nullptr, true );
     CopyBlockDataIntoUTexture( &block, Object );
 
     return  Object;
