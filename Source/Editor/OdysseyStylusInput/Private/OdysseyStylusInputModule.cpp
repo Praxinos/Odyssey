@@ -58,6 +58,18 @@ void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 		.SetGroup(MenuStructure.GetDeveloperToolsMiscCategory());
 }
 
+FOnStylusInputChanged& UOdysseyStylusInputSubsystem::OnStylusInputChanged()
+{
+    return OnStylusInputChangedCB;
+}
+
+void UOdysseyStylusInputSubsystem::SetStylusInputInterface( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
+{
+    InputInterface = iStylusInput;
+
+    OnStylusInputChangedCB.ExecuteIfBound( InputInterface );
+}
+
 void UOdysseyStylusInputSubsystem::Deinitialize()
 {
 	Super::Deinitialize();

@@ -54,6 +54,11 @@ public:
 };
 
 
+ODYSSEYSTYLUSINPUT_API TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
+
+
+DECLARE_DELEGATE_OneParam( FOnStylusInputChanged, TSharedPtr<IStylusInputInterfaceInternal> );
+
 UCLASS()
 class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSubsystem :
 	public UEditorSubsystem, 
@@ -64,6 +69,9 @@ public:
 	// UEditorSubsystem implementation
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+
+	void SetStylusInputInterface( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
+	FOnStylusInputChanged& OnStylusInputChanged();
 
 	/** Retrieve the input device that is at the given index, or nullptr if not found. Corresponds to the StylusIndex in IStylusMessageHandler. */
 	const IStylusInputDevice* GetInputDevice(int32 Index) const;
@@ -83,6 +91,7 @@ public:
 
 private:
 	TSharedPtr<IStylusInputInterfaceInternal> InputInterface;
+	FOnStylusInputChanged OnStylusInputChangedCB;
 	TArray<IStylusMessageHandler*> MessageHandlers;
 
 	TSharedRef<SDockTab> OnSpawnPluginTab(const FSpawnTabArgs& Args);
