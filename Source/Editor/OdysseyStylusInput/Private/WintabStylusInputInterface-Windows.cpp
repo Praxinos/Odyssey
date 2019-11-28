@@ -109,7 +109,7 @@ FWintabStylusInputInterface::Widget() const
 //---
 
 TSharedPtr<IStylusInputInterfaceInternal>
-CreateStylusInputInterface2()
+CreateStylusInputInterfaceWintab()
 {
     TUniquePtr<FWintabStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FWintabStylusInputInterfaceImpl>();
 
