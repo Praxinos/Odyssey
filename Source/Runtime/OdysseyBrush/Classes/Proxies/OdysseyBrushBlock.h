@@ -7,6 +7,7 @@
 #include "UObject/ObjectMacros.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushCache.h"
+#include "Proxies/OdysseyBrushBlending.h"
 #include "OdysseyBrushBlock.generated.h"
 
 class  FOdysseyBlock;
@@ -55,6 +56,9 @@ public:
 
     UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyBlockProxy")
     static FOdysseyBlockProxy FillPreserveAlpha( FOdysseyBlockProxy Sample, FOdysseyBrushColor Color, ECacheLevel Cache = ECacheLevel::kStep );
+
+    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyBlockProxy")
+    static FOdysseyBlockProxy Blend( FOdysseyBlockProxy SampleA, FOdysseyBlockProxy SampleB, float Opacity = 1.f, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal, ECacheLevel Cache = ECacheLevel::kState );
 
     UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
     static int GetWidth( FOdysseyBlockProxy Sample );
