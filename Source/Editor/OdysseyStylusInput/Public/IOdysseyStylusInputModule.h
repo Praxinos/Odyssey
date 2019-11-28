@@ -57,6 +57,7 @@ public:
 
 
 ODYSSEYSTYLUSINPUT_API TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
+ODYSSEYSTYLUSINPUT_API TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab();
 
 
 DECLARE_DELEGATE_OneParam( FOnStylusInputChanged, TSharedPtr<IStylusInputInterfaceInternal> );
