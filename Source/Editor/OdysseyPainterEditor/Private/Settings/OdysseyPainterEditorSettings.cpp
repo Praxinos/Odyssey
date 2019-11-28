@@ -3,6 +3,11 @@
 
 #include "OdysseyPainterEditorSettings.h"
 
+#include "Editor.h"
+#include "Editor/EditorEngine.h"
+
+#include "IOdysseyStylusInputModule.h"
+
 UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
     , Background( kOdysseyPainterEditorBackground_Checkered )
@@ -15,6 +20,50 @@ UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectIniti
     , PickColor( EKeys::LeftAlt )
     , FitToViewport( true )
     , TextureBorderColor( FColor::White )
+    , StylusInputDriver( OdysseyStylusInputDriver_Ink )
     , TextureBorderEnabled( false )
 {
+}
+
+void
+UOdysseyPainterEditorSettings::PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent )
+{
+    Super::PostEditChangeProperty( iPropertyChangedEvent );
+
+    //UE_LOG( LogIliad, Log, TEXT( "posteditchangeproperty: %s" ), *iPropertyChangedEvent.GetPropertyName().ToString() );
+
+    //Get the name of the property that was changed  
+    FName PropertyName = ( iPropertyChangedEvent.Property != nullptr ) ? iPropertyChangedEvent.Property->GetFName() : NAME_None;
+
+    // We test using GET_MEMBER_NAME_CHECKED so that if someone changes the property name  
+    // in the future this will fail to compile and we can update it.  
+    if( ( PropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorSettings, StylusInputDriver ) ) )
+    {
+        RefreshStylusInputDriver();
+    }
+}
+
+void
+UOdysseyPainterEditorSettings::RefreshStylusInputDriver()
+{
+    TSharedPtr<IStylusInputInterfaceInternal> stylus_input;
+    switch( StylusInputDriver )
+    {
+        case OdysseyStylusInputDriver_None:
+            stylus_input = nullptr;
+            break;
+        case OdysseyStylusInputDriver_Ink:
+            stylus_input = CreateStylusInputInterface();
+            break;
+        default:
+        case OdysseyStylusInputDriver_Wintab:
+            stylus_input = CreateStylusInputInterfaceWintab();
+            break;
+    }
+
+    if( !stylus_input.IsValid() )
+        StylusInputDriver = OdysseyStylusInputDriver_None;
+
+    UOdysseyStylusInputSubsystem* input_subsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    input_subsystem->SetStylusInputInterface( stylus_input );
 }

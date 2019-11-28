@@ -59,16 +59,32 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
            mOdysseyPainterEditorViewportPtr.IsValid() );
 
     InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    //PATCH: as I don't know how to initialize usubsystem inside settings ctor (as usubsystem are called after)
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault< UOdysseyPainterEditorSettings >();
+    settings->RefreshStylusInputDriver();
+    //PATCH
+
     InputSubsystem->AddMessageHandler( *this );
+    InputSubsystem->OnStylusInputChanged().BindRaw( this, &FOdysseyPainterEditorViewportClient::OnStylusInputChanged );
 
     ModifyCheckerboardTextureColors();
 }
 
 FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 {
+    InputSubsystem->OnStylusInputChanged().Unbind();
     InputSubsystem->RemoveMessageHandler( *this );
 
     DestroyCheckerboardTexture();
+}
+
+void
+FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
+{
+    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusInputChanged") );
+
+    mMouseCaptureMode = FViewportClient::CaptureMouseOnClick();
 }
 
 //--------------------------------------------------------------------------------------

@@ -28,6 +28,14 @@ enum EOdysseyPainterEditorVolumeViewMode
     kOdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume"),
 };
 
+UENUM()
+enum EOdysseyStylusInputDriver
+{
+    OdysseyStylusInputDriver_None   UMETA( DisplayName = "None" ),
+    OdysseyStylusInputDriver_Ink    UMETA( DisplayName = "Ink" ),
+    OdysseyStylusInputDriver_Wintab UMETA( DisplayName = "Wintab" ),
+};
+
 /**
  * Implements the Editor's user settings.
  */
@@ -36,6 +44,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorSettings
     : public UObject
 {
     GENERATED_UCLASS_BODY()
+
+public:
+    virtual void PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent ) override;
+    
+    void RefreshStylusInputDriver();
 
 public:
     /** The type of background to draw in the texture editor view port. */
@@ -79,6 +92,10 @@ public:
     /** Color to use for the texture border, if enabled. */
     UPROPERTY(config, EditAnywhere, Category=TextureBorder)
     FColor TextureBorderColor;
+    
+    /** Color to use for the texture border, if enabled. */
+    UPROPERTY(config, EditAnywhere, Category=StylusDriver )
+    TEnumAsByte<EOdysseyStylusInputDriver> StylusInputDriver;
 
     /** If true, displays a border around the texture. */
     UPROPERTY(config)

@@ -19,6 +19,7 @@ class UTexture2D;
 
 class FOdysseyMeshSelector;
 class IOdysseyPainterEditorToolkit;
+class IStylusInputInterfaceInternal;
 class SOdysseySurfaceViewport;
 
 //
@@ -75,7 +76,7 @@ public:
 
 public:
     // FViewportClient API
-    virtual void  Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
+    virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
 
     virtual bool InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
@@ -112,6 +113,8 @@ private:
 
     bool        InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
     void        CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport ) ;
+
+    void        OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
 
 private:
     // Private Data Members
