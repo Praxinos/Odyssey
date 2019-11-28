@@ -217,8 +217,8 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
         {
             CurrentToolState = eState::kDrawing;
-            OdysseyPainterEditorPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
-            OdysseyPainterEditorPtr.Pin()->MarkTransactionAsDirty();
+            //OdysseyPainterEditorPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
+            //OdysseyPainterEditorPtr.Pin()->MarkTransactionAsDirty();
 
             FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
             OdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
@@ -266,7 +266,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             CurrentToolState = eState::kIdle;
 
             OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
-            OdysseyPainterEditorPtr.Pin()->EndTransaction();
+            //OdysseyPainterEditorPtr.Pin()->EndTransaction();
 
             // Test:
             OdysseyPainterEditorPtr.Pin()->PaintEngine()->UpdateBrushCursorPreview();

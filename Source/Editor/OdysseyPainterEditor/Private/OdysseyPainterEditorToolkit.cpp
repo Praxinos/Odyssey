@@ -1001,7 +1001,7 @@ FOdysseyPainterEditorToolkit::EndTransaction()
 {
     if( bManipulationDirtiedSomething )
     {
-        texture->PostEditChange();
+        displaySurface->Texture()->PostEditChange();
     }
 
     bManipulationDirtiedSomething = false;
