@@ -35,12 +35,25 @@
 - Open the solution (inside `$PROJECT_PATH`) with Visual Studio
 
 # Packaging
+*Only windows (for the moment)*
+```
+usage: build-package.py [-h] [-i INPUT] [-o OUTPUT]
+
+Build package.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        The input path
+                        (default: *current working directory*)
+  -o OUTPUT, --output OUTPUT
+                        The output path
+                        'date-time/plugin-name' folders will be append to it
+                        (default: *current working directory*/../package)
+```
+
+Basic example:
 ```
 cd $PROJECT_PATH
 build-package.py
 ```
-*Only windows  
-Must be run inside $PROJECT_PATH  
-No parameters  
-Create output folder $PROJECT_PATH/../Iliad-package  
-It will be improved...*
