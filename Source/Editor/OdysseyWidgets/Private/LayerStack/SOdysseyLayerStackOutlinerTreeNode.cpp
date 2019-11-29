@@ -5,7 +5,6 @@
 #include "LayerStack/SOdysseyLayerStackTreeView.h"
 #include "LayerStack/LayersGUI/OdysseyBaseLayerNode.h"
 #include "ScopedTransaction.h"
-#include "Widgets/Input/SEditableLabel.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SSpacer.h"
 #include "Widgets/Images/SImage.h"
@@ -14,7 +13,7 @@
 #include "Widgets/Views/SExpanderArrow.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SBoxPanel.h"
-#include "Widgets/Input/SEditableLabel.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "Fonts/SlateFontInfo.h"
 #include "Types/SlateStructs.h"
 #include "EditorStyleSet.h"
@@ -97,14 +96,17 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
 
     FSlateFontInfo NodeFont = FEditorStyle::GetFontStyle("Sequencer.AnimationOutliner.RegularFont");
 
-    EditableLabel = SNew(SEditableLabel)
-    .CanEdit(this, &SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelCanEdit)
+    EditableLabel = SNew( SInlineEditableTextBlock )
+    .IsReadOnly(this, &SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelIsReadOnly )
     .Font(NodeFont)
     .ColorAndOpacity(this, &SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameColor)
-    .OnTextChanged(this, &SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged)
+    .OnTextCommitted(this, &SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged)
     .Text(this, &SOdysseyLayerStackOutlinerTreeNode::GetDisplayName)
     .ToolTipText(this, &SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameToolTipText)
-    .Clipping(EWidgetClipping::ClipToBounds);
+    .Clipping(EWidgetClipping::ClipToBounds)
+	.IsSelected(FIsSelected::CreateSP(InTableRow, &SOdysseyLayerStackViewRow::IsSelectedExclusively));
+
+    Node->OnRenameRequested().AddRaw( this, &SOdysseyLayerStackOutlinerTreeNode::EnterRenameMode );
 
     TSharedRef<SWidget>    FinalWidget =
         SNew( SBorder )
@@ -203,6 +205,7 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
 
 void SOdysseyLayerStackOutlinerTreeNode::EnterRenameMode()
 {
+    EditableLabel->EnterEditingMode();
 }
 
 
@@ -276,13 +279,13 @@ FText SOdysseyLayerStackOutlinerTreeNode::GetDisplayName() const
 }
 
 
-bool SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelCanEdit() const
+bool SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelIsReadOnly() const
 {
-    return LayerNode->CanRenameNode();
+    return !LayerNode->CanRenameNode();
 }
 
 
-void SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged(const FText& NewLabel)
+void SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged(const FText& NewLabel, ETextCommit::Type iType)
 {
     LayerNode->SetDisplayName(NewLabel);
 }

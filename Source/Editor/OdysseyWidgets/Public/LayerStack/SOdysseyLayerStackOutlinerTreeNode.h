@@ -11,7 +11,7 @@
 #include "LayerStack/LayersGUI/OdysseyBaseLayerNode.h"
 
 class SOdysseyLayerStackViewRow;
-class SEditableLabel;
+class SInlineEditableTextBlock;
 struct FSlateBrush;
 struct FTableRowStyle;
 
@@ -101,11 +101,11 @@ private:
      */
     FText GetDisplayName() const;
 
-    /** Callback for checking whether the node label can be edited. */
-    bool HandleNodeLabelCanEdit() const;
+    /** Callback for checking whether the node label is read only. */
+    bool HandleNodeLabelIsReadOnly() const;
 
     /** Callback for when the node label text has changed. */
-    void HandleNodeLabelTextChanged(const FText& NewLabel);
+    void HandleNodeLabelTextChanged(const FText& NewLabel, ETextCommit::Type iType);
 
     /** Get all descendant nodes from the given root node. */
     void GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> RootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& AllNodes);
@@ -119,7 +119,7 @@ private:
     TSharedPtr<OdysseyBaseLayerNode> LayerNode;
 
     /** Holds the editable text label widget. */
-    TSharedPtr<SEditableLabel> EditableLabel;
+    TSharedPtr<SInlineEditableTextBlock> EditableLabel;
 
     /** True if this node is a top level node, at the root of the tree, false otherwise */
     bool bIsOuterTopLevelNode;

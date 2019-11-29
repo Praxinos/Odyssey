@@ -1465,21 +1465,23 @@ void FFindInOdysseyBrushSearchManager::OnAssetAdded(const FAssetData& InAssetDat
     else if (Handler->AssetContainsOdysseyBrush(InAssetData))
     {
         // Check first for versioned FiB data (latest codepath)
-        if(const FString* FiBVersionedSearchData = InAssetData.TagsAndValues.Find(FBlueprintTags::FindInBlueprintsData))
+        if( InAssetData.TagsAndValues.FindTag( FBlueprintTags::FindInBlueprintsData ).IsSet() )
         {
-            if (FiBVersionedSearchData->Len() == 0)
+            const FString FiBVersionedSearchData = InAssetData.TagsAndValues.FindTag( FBlueprintTags::FindInBlueprintsData ).GetValue();
+            if (FiBVersionedSearchData.Len() == 0)
             {
                 UncachedAssets.Add(InAssetData.ObjectPath);
             }
             else
             {
-                ExtractUnloadedFiBData(InAssetData, *FiBVersionedSearchData, true);
+                ExtractUnloadedFiBData(InAssetData, FiBVersionedSearchData, true);
             }
         }
         // Check for legacy (unversioned) FiB data
-        else if(const FString* FiBSearchData = InAssetData.TagsAndValues.Find("FiB"))
+        else if(InAssetData.TagsAndValues.FindTag("FiB").IsSet())
         {
-            ExtractUnloadedFiBData(InAssetData, *FiBSearchData, false);
+            const FString& FiBSearchData = InAssetData.TagsAndValues.FindTag( "FiB" ).GetValue();
+            ExtractUnloadedFiBData(InAssetData, FiBSearchData, false);
         }
         // The asset has no FiB data, keep track of it so we can inform the user
         else
@@ -1972,9 +1974,11 @@ void FFindInOdysseyBrushSearchManager::CleanCache()
                 FAssetData AssetData = AssetRegistryModule->Get().GetAssetByObjectPath(SearchArray[SearchValuePair.Value].AssetPath);
                 if(AssetData.IsValid())
                 {
-                    if(const FString* FiBSearchData = AssetData.TagsAndValues.Find("FiB"))
+                    FAssetDataTagMapSharedView::FFindTagResult TagResult = AssetData.TagsAndValues.FindTag("FiB");
+                    if(TagResult.IsSet())
                     {
-                        SearchArray[SearchValuePair.Value].Value = *FiBSearchData;
+                        const FString& FiBSearchData = TagResult.GetValue();
+                        SearchArray[SearchValuePair.Value].Value = FiBSearchData;
                     }
                     // Build the new map/array
                     NewSearchMap.Add(SearchValuePair.Key, NewSearchArray.Add(SearchArray[SearchValuePair.Value]) );
@@ -2395,7 +2399,7 @@ void FFindInOdysseyBrushSearchManager::EnableGlobalFindResults(bool bEnable)
         for (int32 TabIdx = 0; TabIdx < ARRAY_COUNT(GlobalFindResultsTabIDs); TabIdx++)
         {
             const FName TabID = GlobalFindResultsTabIDs[TabIdx];
-            if (!GlobalTabManager->CanSpawnTab(TabID))
+            if (!GlobalTabManager->HasTabSpawner(TabID))
             {
                 const FText DisplayName = FText::Format(LOCTEXT("GlobalFindResultsDisplayName", "Find in Blueprints {0}"), FText::AsNumber(TabIdx + 1));
 
@@ -2430,7 +2434,7 @@ void FFindInOdysseyBrushSearchManager::EnableGlobalFindResults(bool bEnable)
         for (int32 TabIdx = 0; TabIdx < ARRAY_COUNT(GlobalFindResultsTabIDs); TabIdx++)
         {
             const FName TabID = GlobalFindResultsTabIDs[TabIdx];
-            if (GlobalTabManager->CanSpawnTab(TabID))
+            if (GlobalTabManager->HasTabSpawner(TabID))
             {
                 GlobalTabManager->UnregisterNomadTabSpawner(TabID);
             }
@@ -2451,7 +2455,7 @@ void FFindInOdysseyBrushSearchManager::CloseOrphanedGlobalFindResultsTabs(TShare
         for (int32 TabIdx = 0; TabIdx < ARRAY_COUNT(GlobalFindResultsTabIDs); TabIdx++)
         {
             const FName TabID = GlobalFindResultsTabIDs[TabIdx];
-            if (!FGlobalTabmanager::Get()->CanSpawnTab(TabID))
+            if (!FGlobalTabmanager::Get()->HasTabSpawner(TabID))
             {
                 TSharedPtr<SDockTab> OrphanedTab = TabManager->FindExistingLiveTab(FTabId(TabID));
                 if (OrphanedTab.IsValid())
