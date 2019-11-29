@@ -43,31 +43,32 @@ public:
     static void Unload();
 
 public:
-    static WTINFOW gpWTInfoW;
-    static WTOPENW gpWTOpenW;
-    static WTGETA gpWTGetA;
-    static WTSETA gpWTSetA;
-    static WTCLOSE gpWTClose;
-    static WTPACKET gpWTPacket;
-    static WTENABLE gpWTEnable;
-    static WTOVERLAP gpWTOverlap;
-    static WTSAVE gpWTSave;
-    static WTCONFIG gpWTConfig;
-    static WTRESTORE gpWTRestore;
-    static WTEXTSET gpWTExtSet;
-    static WTEXTGET gpWTExtGet;
-    static WTQUEUESIZEGET gpWTQueueSizeGet;
-    static WTQUEUESIZESET gpWTQueueSizeSet;
-    static WTDATAPEEK gpWTDataPeek;
-    static WTPACKETSGET gpWTPacketsGet;
-    static WTMGROPEN gpWTMgrOpen;
-    static WTMGRCLOSE gpWTMgrClose;
-    static WTMGRDEFCONTEXT gpWTMgrDefContext;
-    static WTMGRDEFCONTEXTEX gpWTMgrDefContextEx;
-    static WTMGRCSRPRESSUREBTNMARKSEX gpWTMgrCsrPressureBtnMarksEx;
+    static WTINFOW WTInfoW;
+    static WTOPENW WTOpenW;
+    static WTGETA WTGetA;
+    static WTSETA WTSetA;
+    static WTCLOSE WTClose;
+    static WTPACKET WTPacket;
+    static WTENABLE WTEnable;
+    static WTOVERLAP WTOverlap;
+    static WTSAVE WTSave;
+    static WTCONFIG WTConfig;
+    static WTRESTORE WTRestore;
+    static WTEXTSET WTExtSet;
+    static WTEXTGET WTExtGet;
+    static WTQUEUESIZEGET WTQueueSizeGet;
+    static WTQUEUESIZESET WTQueueSizeSet;
+    static WTDATAPEEK WTDataPeek;
+    static WTPACKETSGET WTPacketsGet;
+    static WTMGROPEN WTMgrOpen;
+    static WTMGRCLOSE WTMgrClose;
+    static WTMGRDEFCONTEXT WTMgrDefContext;
+    static WTMGRDEFCONTEXTEX WTMgrDefContextEx;
+    static WTMGRCSRPRESSUREBTNMARKSEX WTMgrCsrPressureBtnMarksEx;
 
 private:
     static void* DLLHandle;
+    static int mRefCount;
 
 private:
     FWintabLibrary(); // not implemented

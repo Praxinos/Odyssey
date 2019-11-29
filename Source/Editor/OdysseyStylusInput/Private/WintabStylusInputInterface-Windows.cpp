@@ -119,7 +119,7 @@ CreateStylusInputInterfaceWintab()
         return nullptr;
     }
 
-    if( !FWintabLibrary::gpWTInfoW( 0, 0, NULL ) )
+    if( !FWintabLibrary::WTInfoW( 0, 0, NULL ) )
     {
         UE_LOG( LogStylusInput, Warning, TEXT( "WinTab Services are unavailable" ) );
         return nullptr;

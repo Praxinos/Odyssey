@@ -67,6 +67,7 @@ FOnStylusInputChanged& UOdysseyStylusInputSubsystem::OnStylusInputChanged()
 
 void UOdysseyStylusInputSubsystem::SetStylusInputInterface( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
 {
+    InputInterface.Reset();
     InputInterface = iStylusInput;
 
     OnStylusInputChangedCB.ExecuteIfBound( InputInterface );

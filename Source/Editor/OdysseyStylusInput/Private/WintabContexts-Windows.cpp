@@ -35,7 +35,7 @@ FWTTabletContextInfo::Tick()
     if( !mPacketsBuffer.Num() )
         mPacketsBuffer.AddUninitialized( 50 );
 
-    int count = FWintabLibrary::gpWTPacketsGet( mTabletContext, mPacketsBuffer.Num(), mPacketsBuffer.GetData() );
+    int count = FWintabLibrary::WTPacketsGet( mTabletContext, mPacketsBuffer.Num(), mPacketsBuffer.GetData() );
 
     const FWTPacketDescription* packet_description_z = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Z );
     const FWTPacketDescription* packet_description_npressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::NormalPressure );
@@ -117,7 +117,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     FWTPacketDescription packet_description;
 
     AXIS tablet_x = { 0 };
-    UINT wWTInfoRetVal = FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_X, &tablet_x );
+    UINT wWTInfoRetVal = FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_X, &tablet_x );
     if( wWTInfoRetVal == sizeof( AXIS ) )
     {
         packet_description.Type = EWintabPacketType::X;
@@ -136,7 +136,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     }
 
     AXIS tablet_y = { 0 };
-    wWTInfoRetVal = FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_Y, &tablet_y );
+    wWTInfoRetVal = FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_Y, &tablet_y );
     if( wWTInfoRetVal == sizeof( AXIS ) )
     {
         packet_description.Type = EWintabPacketType::Y;
@@ -151,7 +151,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     }
 
     AXIS tablet_z = { 0 };
-    wWTInfoRetVal = FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_Z, &tablet_z );
+    wWTInfoRetVal = FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_Z, &tablet_z );
     if( wWTInfoRetVal == sizeof( AXIS ) )
     {
         packet_description.Type = EWintabPacketType::Z;
@@ -166,7 +166,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     }
 
     AXIS normal_pressure = { 0 };
-    FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_NPRESSURE, &normal_pressure );
+    FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_NPRESSURE, &normal_pressure );
     if( wWTInfoRetVal == sizeof( AXIS ) )
     {
         packet_description.Type = EWintabPacketType::NormalPressure;
@@ -181,7 +181,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     }
 
     AXIS tangent_pressure = { 0 };
-    FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_TPRESSURE, &tangent_pressure );
+    FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_TPRESSURE, &tangent_pressure );
     if( wWTInfoRetVal == sizeof( AXIS ) )
     {
         packet_description.Type = EWintabPacketType::TangentPressure;
@@ -196,7 +196,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     }
 
     AXIS orientation[3];
-    FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_ORIENTATION, &orientation );
+    FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_ORIENTATION, &orientation );
     if( wWTInfoRetVal )
     {
 #if 0 // from tilttest sample
@@ -254,7 +254,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     }
 
     //AXIS rotation[3];
-    //FWintabLibrary::gpWTInfoW( WTI_DEVICES + iIndexContext, DVC_ROTATION, &rotation );
+    //FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_ROTATION, &rotation );
     //if( wWTInfoRetVal )
     //{
     //    if( orientation[0].axResolution )
@@ -368,19 +368,19 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
     check( !mTabletContexts.Num() );
 
     int attached_devices = 0;
-    FWintabLibrary::gpWTInfoW( WTI_INTERFACE, IFC_NDEVICES, &attached_devices );
+    FWintabLibrary::WTInfoW( WTI_INTERFACE, IFC_NDEVICES, &attached_devices );
     UE_LOG( LogStylusInput, Log, TEXT( "Number of attached devices: %i" ), attached_devices );
 
     int ctxIndex = 0;
     // Open/save contexts until first failure to open a context.
-    // Note that gpWTInfoA(WTI_STATUS, STA_CONTEXTS, &nOpenContexts);
+    // Note that WTInfoA(WTI_STATUS, STA_CONTEXTS, &nOpenContexts);
     // will not always let you enumerate through all contexts.
     do
     {
         UE_LOG( LogStylusInput, Log, TEXT( "Getting info on contextIndex: %i ..." ), ctxIndex );
 
         LOGCONTEXT lcMine = { 0 };
-        int foundCtx = FWintabLibrary::gpWTInfoW( WTI_DDCTXS + ctxIndex, 0, &lcMine );
+        int foundCtx = FWintabLibrary::WTInfoW( WTI_DDCTXS + ctxIndex, 0, &lcMine );
 
         if( foundCtx > 0 )
         {
@@ -426,7 +426,7 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
             // lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
 
             // Open the context enabled.
-            HCTX context = FWintabLibrary::gpWTOpenW( iHwnd, &lcMine, Windows::TRUE );
+            HCTX context = FWintabLibrary::WTOpenW( iHwnd, &lcMine, Windows::TRUE );
 
             if( context )
             {
@@ -467,7 +467,7 @@ FWintabContexts::CloseTabletContexts()
     {
         UE_LOG( LogStylusInput, Log, TEXT( "Closing context: 0x%X" ), tablet_context_info.mTabletContext );
 
-        FWintabLibrary::gpWTClose( tablet_context_info.mTabletContext );
+        FWintabLibrary::WTClose( tablet_context_info.mTabletContext );
     }
 
     mTabletContexts.Empty();
