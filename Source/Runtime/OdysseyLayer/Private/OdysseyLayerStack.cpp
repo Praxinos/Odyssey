@@ -59,6 +59,8 @@ FOdysseyLayerStack::Init( int iWidth, int iHeight )
 
     InitResultAndTempBlock();
     AddLayer();
+    
+    mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
 
 void
@@ -76,6 +78,8 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
 
     InitResultAndTempBlock();
     AddLayerFromData( iData );
+    
+    mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
 
 FOdysseyBlock*
@@ -389,5 +393,83 @@ FOdysseyLayerStack::InitResultAndTempBlock()
 }
 
 //---
+
+
+//FODysseyDrawingUndo ---------
+FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
+{
+    mLayerStackPtr = iLayerStack;
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
+
+    
+    mData = TArray<uint8>();
+    mData.SetNumUninitialized( imageLayer->GetBlock()->GetIBlock()->BytesTotal() );
+    UE_LOG(LogTemp, Display, TEXT("total: %d"), mData.Num() );
+    
+    mSavePath = "/Users/praxinos/Documents/TestSave/MySave.save";
+
+    //SaveData();
+    //LoadData();
+}
+
+FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
+{
+    
+}
+
+bool
+FOdysseyDrawingUndo::Clear()
+{
+    FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*mSavePath);
+    return true;
+}
+
+bool
+FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, uint8 iSizeX, uint8 iSizeY )
+{
+    UE_LOG(LogTemp, Display, TEXT("SaveStart") );
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
+    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * iSizeX, iYTile * iSizeY, iSizeX, iSizeY ) );
+    
+    TArray<uint8> array = TArray<uint8>();
+    array.AddUninitialized(mTileData->BytesTotal());
+    
+    FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
+    
+    FBufferArchive mToBinary;
+    mToBinary << array;
+
+    FFileHelper::SaveArrayToFile( mToBinary, *mSavePath, &IFileManager::Get(), EFileWrite::FILEWRITE_Append );
+    UE_LOG(LogTemp, Display, TEXT("SaveEnd") );
+
+    return true;
+}
+
+bool
+FOdysseyDrawingUndo::LoadData()
+{
+    UE_LOG(LogTemp, Display, TEXT("LoadStart") );
+
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
+
+	TArray<uint8> TheBinaryArray;
+    FFileHelper::LoadFileToArray(TheBinaryArray, *mSavePath);
+    
+    for( int i = 0; i < TheBinaryArray.Num() - 4; i++)
+    {
+        *(mTileData->DataPtr() + i) = TheBinaryArray[i + 4];
+    }
+    
+    ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, 1023, 1023 ), ::ULIS::FPoint(0,0) );
+
+    UE_LOG(LogTemp, Display, TEXT("LoadEnd") );
+
+    return true;
+}
+
+
+
+
+
 
 #undef LOCTEXT_NAMESPACE

@@ -41,7 +41,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     CopyBlockDataIntoUTexture( mBlock, mTexture );
     */
     mBlockUndoable = UOdysseyBlockUndoable::CreateTransient();
-    mBlockUndoable->SetArray( mBlock->GetArray() );
+    mBlockUndoable->SetArray( mBlock->GetArray().GetData(), mBlock->GetArray().Num() );
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
@@ -61,7 +61,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     CopyBlockDataIntoUTexture( mBlock, mTexture );
     */
     mBlockUndoable = UOdysseyBlockUndoable::CreateTransient();
-    mBlockUndoable->SetArray( mBlock->GetArray() );
+    mBlockUndoable->SetArray( mBlock->GetArray().GetData(), mBlock->GetArray().Num() );
 }
 
 //--------------------------------------------------------------------------------------

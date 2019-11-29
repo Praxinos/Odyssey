@@ -494,6 +494,7 @@ FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
 
     UE_LOG(LogTemp, Display, TEXT("Done Undo"));*/
     
+<<<<<<< HEAD
     /*UE_LOG(LogTemp, Display, TEXT("Texture: %p"), mDisplaySurface->Texture() );
     UE_LOG(LogTemp, Display, TEXT("block: %p"), mDisplaySurface->Block() );
 
@@ -513,6 +514,9 @@ FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
     // Invalidate all
     //mDisplaySurface->Invalidate();
     //delete block;
+=======
+    displaySurface->Invalidate();
+>>>>>>> infeat: undo stock the right blocks at each stroke, now to use them...
 }
 
 void
@@ -972,8 +976,18 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& iSessionName )
 {
     if( mScopedTransaction == nullptr )
     {
+<<<<<<< HEAD
         mScopedTransaction = new FScopedTransaction( iSessionName );
         mDisplaySurface->Texture()->Modify();
+=======
+        scopedTransaction = new FScopedTransaction( SessionName );
+        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
+        for( int i = 0; i < layers->Num(); i++ )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
+            imageLayer->mBlockUndoable->Modify();
+        }
+>>>>>>> infeat: undo stock the right blocks at each stroke, now to use them...
     }
 }
 
@@ -989,7 +1003,18 @@ FOdysseyPainterEditorToolkit::EndTransaction()
 {
     if( mIsManipulationDirtiedSomething )
     {
+<<<<<<< HEAD
         mDisplaySurface->Texture()->PostEditChange();
+=======
+        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
+        for( int i = 0; i < layers->Num(); i++ )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
+            imageLayer->mBlockUndoable->SetArray( imageLayer->GetBlock()->GetArray().GetData(), imageLayer->GetBlock()->GetArray().Num() );
+            imageLayer->mBlockUndoable->PostEditChange();
+        }
+        displaySurface->Invalidate();
+>>>>>>> infeat: undo stock the right blocks at each stroke, now to use them...
     }
 
     mIsManipulationDirtiedSomething = false;
@@ -999,6 +1024,8 @@ FOdysseyPainterEditorToolkit::EndTransaction()
         delete mScopedTransaction;
         mScopedTransaction = nullptr;
     }
+
+    UE_LOG(LogTemp, Display, TEXT("Done transaction"));
 }
 
 void

@@ -21,7 +21,6 @@ class UOdysseyBrushAssetBase;
 namespace ULIS { class FThreadPool; }
 
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
-    : public FOdysseyTransactionnable
 {
 private:
     typedef bool** InvalidTileMap;

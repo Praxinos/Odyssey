@@ -4,12 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <ULIS_CORE>
 #include <ULIS_FDECL>
 #include <ULIS_BLENDINGMODES>
+
+#include "Serialization/BufferArchive.h"
+#include "Serialization/MemoryReader.h"
 
 class FOdysseyBlock;
 class IOdysseyLayer;
 class FOdysseyImageLayer;
+class FOdysseyDrawingUndo;
 
 
 class ODYSSEYLAYER_API FOdysseyLayerStack
@@ -67,4 +72,52 @@ private:
     int                                     mHeight;
     ETextureSourceFormat                    mTextureSourceFormat;
     bool                                    mIsInitialized;
+    
+public:
+    FOdysseyDrawingUndo*                    mDrawingUndo;
 };
+
+
+
+
+
+
+
+class ODYSSEYLAYER_API FOdysseyDrawingUndo
+{
+    
+public:
+    FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack );
+    ~FOdysseyDrawingUndo();
+    
+public:
+    bool Clear();
+    bool SaveData( uint8 iXTile, uint8 iYTile, uint8 iSizeX, uint8 iSizeY );
+    bool LoadData();
+    
+private:
+    FOdysseyLayerStack* mLayerStackPtr;
+    
+private:
+    FOdysseyImageLayer* mImagePtr;
+    int mTileX;
+    int mTileY;
+    
+    //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
+    TArray<uint8> mData;
+
+    ::ULIS::IBlock* mTileData;
+    
+    FString mSavePath;
+};
+
+/*
+    static  IBlock*  CopyBlockRect( IBlock* iBlock
+                                  , const FRect& iRect
+                                  , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
+
+    static  void  CopyBlockRectInto( IBlock* iSrc
+                                   , IBlock* iDst
+                                   , const FRect& iRect
+                                   , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
+*/

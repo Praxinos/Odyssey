@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Serialization/BufferArchive.h"
+#include "Serialization/MemoryReader.h"
+
 
 #include "OdysseyBlockUndoable.generated.h"
 
@@ -19,13 +22,18 @@ public:
 
 public:
     // Public API
-    TArray64< uint8 >&                    GetArray();
-    void                                  SetArray( TArray64< uint8 >& iNewArray);
+    TArray< uint8 >&                      GetArray();
+    void                                  SetArray( uint8* iStart, int iSize );
     static UOdysseyBlockUndoable*         CreateTransient();
 
 private:
-    //UPROPERTY()
-    TArray64<uint8>         mArray;
+    TArray<uint8>         mArray;
+    
+    int testSave;
+    int testLoad;
+    
+private:
+    FBufferArchive      mToBinary;
 
 };
 
