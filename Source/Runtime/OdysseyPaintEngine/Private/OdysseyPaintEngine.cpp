@@ -166,6 +166,7 @@ FOdysseyPaintEngine::Tick()
                 //UE_LOG(LogTemp, Display, TEXT("[%d][%d]: %d"), k, l, mStrokeInvalidTileMap[k][l] );
             }
         }
+        mLayerStack->mDrawingUndo->LoadData();
         UE_LOG(LogTemp, Display, TEXT("Stop"));
 
 
