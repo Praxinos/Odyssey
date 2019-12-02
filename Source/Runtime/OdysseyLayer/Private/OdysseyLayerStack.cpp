@@ -395,6 +395,9 @@ FOdysseyLayerStack::InitResultAndTempBlock()
 //---
 
 
+
+
+
 //FODysseyDrawingUndo ---------
 FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
 {
@@ -421,6 +424,20 @@ FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
     
 }
 
+void
+FOdysseyDrawingUndo::StartRecord()
+{
+    mToBinary.Empty();
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
+}
+
+void
+FOdysseyDrawingUndo::EndRecord()
+{
+    UE_LOG(LogTemp, Display, TEXT("Size: %d"), mToBinary.Num());
+}
+
+
 bool
 FOdysseyDrawingUndo::Clear()
 {
@@ -441,11 +458,14 @@ FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, uint8 iSizeX, uint8 i
     FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
     
     UPTRINT address = (UPTRINT)imageLayer;
-    
-    FBufferArchive mToBinary;
     mToBinary << address;
+    mToBinary << iXTile;
+    mToBinary << iYTile;
+    mToBinary << iSizeX;
+    mToBinary << iSizeY;
+    mToBinary << array;
 
-    FFileHelper::SaveArrayToFile( mToBinary, *mSavePath, &IFileManager::Get()/*, EFileWrite::FILEWRITE_Append */);
+    FFileHelper::SaveArrayToFile( mToBinary, *mSavePath, &IFileManager::Get(), EFileWrite::FILEWRITE_Append );
     UE_LOG(LogTemp, Display, TEXT("SaveEnd") );
 
     return true;
@@ -456,6 +476,11 @@ FOdysseyDrawingUndo::LoadData()
 {
     UE_LOG(LogTemp, Display, TEXT("LoadStart") );
     
+    uint8 tileX;
+    uint8 tileY;
+    uint8 sizeX;
+    uint8 sizeY;
+    
 	TArray<uint8> TheBinaryArray;
     FFileHelper::LoadFileToArray(TheBinaryArray, *mSavePath);
     
@@ -463,26 +488,34 @@ FOdysseyDrawingUndo::LoadData()
     Ar.Seek(0); //make sure we are at the beginning
     UPTRINT address;
     Ar << address;
+    Ar << tileX;
+    Ar << tileY;
+    Ar << sizeX;
+    Ar << sizeY;
+    Ar << mData;
     
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
     UPTRINT address2 = (UPTRINT)imageLayer;
 
     if(address == address2)
         UE_LOG(LogTemp, Display, TEXT("It works !") );
-
-    /*FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
-
-	TArray<uint8> TheBinaryArray;
-    FFileHelper::LoadFileToArray(TheBinaryArray, *mSavePath);
     
-    for( int i = 0; i < TheBinaryArray.Num() - 4; i++)
+    UE_LOG(LogTemp, Display, TEXT("TileX %d, TileY %d, SizeX %d, SizeY %d, SizeMData: %d "), tileX, tileY, sizeX, sizeY, mData.Num() );
+    
+    if( mData.Num() > 0 )
     {
-        *(mTileData->DataPtr() + i) = TheBinaryArray[i + 4];
+        for( int i = 0; i < mData.Num(); i++)
+        {
+            *(mTileData->DataPtr() + i) = mData[i];
+        }
+        
+        ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, sizeX, sizeY ), ::ULIS::FPoint( 0, 0 ) );
+        
+        mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( 0, 0, sizeX, sizeY ));
     }
     
-    ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, 1023, 1023 ), ::ULIS::FPoint(0,0) );
 
-    UE_LOG(LogTemp, Display, TEXT("LoadEnd") );*/
+    UE_LOG(LogTemp, Display, TEXT("LoadEnd") );
 
     return true;
 }

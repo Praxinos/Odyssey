@@ -91,6 +91,10 @@ public:
     ~FOdysseyDrawingUndo();
     
 public:
+    void StartRecord();
+    void EndRecord();
+
+public:
     bool Clear();
     bool SaveData( uint8 iXTile, uint8 iYTile, uint8 iSizeX, uint8 iSizeY );
     bool LoadData();
@@ -105,11 +109,26 @@ private:
     
     //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
     TArray<uint8> mData;
-
     ::ULIS::IBlock* mTileData;
-    
     FString mSavePath;
+    FBufferArchive mToBinary;
 };
+
+/*
+FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyDrawingUndo* SaveUndoData )
+{
+	if(!SaveUndoData) return Ar;
+	//~
+    
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( SaveUndoData->mLayerStackPtr->GetCurrentLayer().Get() );
+
+	
+	Ar << SaveGameData->NumGemsCollected;  //int32
+	Ar << SaveGameData->PlayerLocation;  //FVector
+	Ar << SaveGameData->ArrayOfRotationsOfTheStars; //TArray<FRotator>
+
+        return Ar;
+}*/
 
 /*
     static  IBlock*  CopyBlockRect( IBlock* iBlock
@@ -118,6 +137,7 @@ private:
 
     static  void  CopyBlockRectInto( IBlock* iSrc
                                    , IBlock* iDst
-                                   , const FRect& iRect
+                                   , const FRect& iSrcRect
+                                   , const FPoint& iDstPos
                                    , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
 */

@@ -154,6 +154,7 @@ FOdysseyPaintEngine::Tick()
         mTileThreadPool->WaitForCompletion();
         
         mLayerStack->mDrawingUndo->Clear();
+        mLayerStack->mDrawingUndo->StartRecord();
         for( int k = 0; k < mCountTileY; ++k )
         {
             for( int l = 0; l < mCountTileX; ++l )
@@ -163,11 +164,10 @@ FOdysseyPaintEngine::Tick()
                     ::ULIS::FRect tileRect = MakeTileRect( l, k );
                     mLayerStack->mDrawingUndo->SaveData( l, k, tileRect.w, tileRect.h );
                 }
-                //UE_LOG(LogTemp, Display, TEXT("[%d][%d]: %d"), k, l, mStrokeInvalidTileMap[k][l] );
             }
         }
+        mLayerStack->mDrawingUndo->EndRecord();
         mLayerStack->mDrawingUndo->LoadData();
-        UE_LOG(LogTemp, Display, TEXT("Stop"));
 
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
