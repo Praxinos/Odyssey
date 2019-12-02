@@ -170,6 +170,27 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
         */
     }
 
+    // Draw Cursor Preview
+    auto PE = OdysseyPainterEditorPtr.Pin()->PaintEngine();
+    PE->UpdateBrushCursorPreview();
+    if( PE->mBrushCursorPreviewSurface )
+    {
+        PE->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );
+        PE->mBrushCursorPreviewSurface->Texture()->WaitForStreaming();
+        FVector2D pos_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+        FVector2D shift = PE->mBrushCursorPreviewShift;
+        FVector2D pos = pos_in_viewport + shift * GetZoom();
+        FVector2D size = FVector2D( PE->mBrushCursorPreviewSurface->Block()->Width(), PE->mBrushCursorPreviewSurface->Block()->Height() ) * GetZoom();
+        FCanvasTileItem CursorItem( pos, PE->mBrushCursorPreviewSurface->Texture()->Resource, size, FLinearColor::White );
+        uint32 Result = (uint32)SE_BLEND_RGBA_MASK_START;
+        Result += (1 << 0);
+        Result += (1 << 1);
+        Result += (1 << 2);
+        Result += (1 << 3);
+        CursorItem.BlendMode = (ESimpleElementBlendMode)Result;
+        Canvas->DrawItem( CursorItem );
+    }
+
     if( MeshSelector->GetCurrentMesh() )
     {
         int currentLOD = MeshSelector->GetCurrentLOD();
@@ -268,8 +289,6 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
             //OdysseyPainterEditorPtr.Pin()->EndTransaction();
 
-            // Test:
-            OdysseyPainterEditorPtr.Pin()->PaintEngine()->UpdateBrushCursorPreview();
             return true;
         }
     }
@@ -702,16 +721,16 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     FVector2D ViewportSize = FVector2D(OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y);
     int32 YOffset = (Ratio.Y > 1.0f) ? ((ViewportSize.Y - (ViewportSize.Y / Ratio.Y)) * 0.5f) : 0;
     int32 XOffset = (Ratio.X > 1.0f) ? ((ViewportSize.X - (ViewportSize.X / Ratio.X)) * 0.5f) : 0;
-    
+
     int textureWidth = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width();
     int textureHeight = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height();
-    
+
     FVector2D texturePanPivot = FVector2D(PivotPointRatio.X * textureWidth, PivotPointRatio.Y * textureHeight) - 0.5 * FVector2D( textureWidth, textureHeight );
-    
+
     FVector2D position = FVector2D (( iMouseInViewport.X + TextureViewportPosition.X - XOffset - Pan.X ) / zoom, ( iMouseInViewport.Y + TextureViewportPosition.Y - YOffset - Pan.Y ) / zoom);
 
     if( iWithRotation )
-    {            
+    {
         if( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0)
         {
             float rotation = FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );

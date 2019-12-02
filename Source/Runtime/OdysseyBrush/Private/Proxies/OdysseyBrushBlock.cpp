@@ -37,15 +37,17 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Sample, FOdysseyBrushColor Color, ECacheLevel Cache )
+UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
+                                                    , FOdysseyBrushColor Color
+                                                    , ECacheLevel Cache )
 {
     ODYSSEY_BRUSH_CONTEXT_CHECK
-    ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN_VALUE( FOdysseyBlockProxy::MakeNullProxy() )
+    if( !Source.m ) return  FOdysseyBlockProxy::MakeNullProxy();
 
     FOdysseyBlockProxy prox;
-    FString op = "FillPreserveAlpha_" + FString::FromInt( Color.m.RGBHexValue() ) + "_" + Sample.id;
+    FString op = "FillPreserveAlpha_" + FString::FromInt( Color.m.RGBHexValue() ) + "_" + Source.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
-        FOdysseyBlock* src = Sample.m;
+        FOdysseyBlock* src = Source.m;
         FOdysseyBlock* dst = new  FOdysseyBlock( src->Width(), src->Height(), src->GetUE4TextureSourceFormat() );
         ::ULIS::FMakeContext::CopyBlockInto( src->GetIBlock(), dst->GetIBlock() );
 
@@ -70,20 +72,51 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Sample,
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy SampleA, FOdysseyBlockProxy SampleB, float Opacity, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode, ECacheLevel Cache )
+UOdysseyBlockProxyFunctionLibrary::CreateBlock( int Width
+                                              , int Height
+                                              , const FString& ID
+                                              , bool InitializeData
+                                              , ECacheLevel Cache )
 {
     ODYSSEY_BRUSH_CONTEXT_CHECK
-    if( !SampleA.m )  return  FOdysseyBlockProxy::MakeNullProxy();;
-    if( !SampleB.m )  return  FOdysseyBlockProxy::MakeNullProxy();;
+    if( Width < 1 || Height < 1 )
+        return  FOdysseyBlockProxy::MakeNullProxy();
 
     FOdysseyBlockProxy prox;
-    FString op = "Blend_" + SampleA.id + "_" + SampleB.id + "_" + FString::SanitizeFloat( Opacity ) + "_" + FString::FromInt( (int32)BlendingMode ) + "_" + FString::FromInt( (int32)AlphaMode );
+    FString op = "Create_" + ID + "_" + FString::FromInt( Width ) + "_" + FString::FromInt( Height );
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
-        ::ULIS::IBlock* source  = SampleA.m->GetIBlock();
-        ::ULIS::IBlock* back    = SampleB.m->GetIBlock();
-        FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), SampleB.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
+        FOdysseyBlock* tmp = new  FOdysseyBlock( Width, Height, brush->GetState().target_temp_buffer->GetUE4TextureSourceFormat(), nullptr, nullptr, InitializeData );
+        prox = FOdysseyBlockProxy( tmp, op );
+        brush->StoreInPool( Cache, op, prox );
+    ODYSSEY_BRUSH_CACHE_OPERATION_END
+
+    return  prox;
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
+                                        , FOdysseyBlockProxy Back
+                                        , int X
+                                        , int Y
+                                        , float Opacity
+                                        , EOdysseyBlendingMode BlendingMode
+                                        , EOdysseyAlphaMode AlphaMode
+                                        , ECacheLevel Cache )
+{
+    ODYSSEY_BRUSH_CONTEXT_CHECK
+    if( !Top.m )  return  FOdysseyBlockProxy::MakeNullProxy();;
+    if( !Back.m )  return  FOdysseyBlockProxy::MakeNullProxy();;
+
+    FOdysseyBlockProxy prox;
+    FString op = "Blend_" + Top.id + "_" + Back.id + "_" + FString::SanitizeFloat( Opacity ) + "_" + FString::FromInt( (int32)BlendingMode ) + "_" + FString::FromInt( (int32)AlphaMode );
+    ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
+        ::ULIS::IBlock* source  = Top.m->GetIBlock();
+        ::ULIS::IBlock* back    = Back.m->GetIBlock();
+        FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), Back.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
         ::ULIS::FMakeContext::CopyBlockInto( back, dst->GetIBlock() );
-        ::ULIS::FBlendingContext::Blend( source, dst->GetIBlock(), 0, 0, (::ULIS::eBlendingMode)BlendingMode, (::ULIS::eAlphaMode)AlphaMode, Opacity );
+        ::ULIS::FBlendingContext::Blend( source, dst->GetIBlock(), X, Y, (::ULIS::eBlendingMode)BlendingMode, (::ULIS::eAlphaMode)AlphaMode, Opacity );
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
     ODYSSEY_BRUSH_CACHE_OPERATION_END

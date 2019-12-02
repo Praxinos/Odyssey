@@ -55,10 +55,26 @@ public:
     static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture );
 
     UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyBlockProxy")
-    static FOdysseyBlockProxy FillPreserveAlpha( FOdysseyBlockProxy Sample, FOdysseyBrushColor Color, ECacheLevel Cache = ECacheLevel::kStep );
+    static FOdysseyBlockProxy FillPreserveAlpha( FOdysseyBlockProxy Sample
+                                               , FOdysseyBrushColor Color
+                                               , ECacheLevel Cache = ECacheLevel::kStep );
+
+    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="InitializeData, Cache" ), Category="OdysseyBlockProxy")
+    static FOdysseyBlockProxy CreateBlock( int Width = 256
+                                         , int Height = 256
+                                         , const FString& ID = "NewDynamicBlock"
+                                         , bool InitializeData = true
+                                         , ECacheLevel Cache = ECacheLevel::kStep );
 
     UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyBlockProxy")
-    static FOdysseyBlockProxy Blend( FOdysseyBlockProxy SampleA, FOdysseyBlockProxy SampleB, float Opacity = 1.f, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal, ECacheLevel Cache = ECacheLevel::kState );
+    static FOdysseyBlockProxy Blend( FOdysseyBlockProxy Top
+                                   , FOdysseyBlockProxy BacK
+                                   , int X = 0
+                                   , int Y = 0
+                                   , float Opacity = 1.f
+                                   , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
+                                   , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal
+                                   , ECacheLevel Cache = ECacheLevel::kState );
 
     UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
     static int GetWidth( FOdysseyBlockProxy Sample );

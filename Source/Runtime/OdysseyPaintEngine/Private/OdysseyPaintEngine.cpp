@@ -22,6 +22,9 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 
     mTileThreadPool->WaitForCompletion();
     delete mTileThreadPool;
+
+    if( mBrushCursorPreviewSurface )
+        delete  mBrushCursorPreviewSurface;
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
@@ -59,6 +62,11 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mIsPendingEndStroke( false )
     , mTileThreadPool( nullptr )
     , mDelayQueue()
+
+    , mBrushCursorPreviewSurface( nullptr )
+    , mBrushCursorPreviewShift( FVector2D() )
+    , mLastBrushCursorComputationTime( 0 )
+    , mBrushCursorInvalid( true )
 {
     mSmoother = new FOdysseySmoothingAverage();
     mInterpolator = new FOdysseyInterpolationBezier();
@@ -651,6 +659,8 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     if( !mBrushInstance )
         return;
 
+    mBrushCursorInvalid = true;
+
     FOdysseyBrushState& state = mBrushInstance->GetState();
     state.target_temp_buffer = mTempBuffer;
     state.point = FOdysseyStrokePoint();
@@ -673,21 +683,50 @@ FOdysseyPaintEngine::UpdateBrushInstance()
 void
 FOdysseyPaintEngine::UpdateBrushCursorPreview()
 {
-    // Temporary disable:
-    return;
+    auto current_time = std::chrono::system_clock::now();
+    auto duration = current_time.time_since_epoch();
+    auto current_millis = std::chrono::duration_cast< std::chrono::milliseconds >( duration ).count();
+
+    // TOPO:
+    // 1. Draw One Step in a dummy 1px brush: nothing is actually drawn but the invalid zone feedback is collected
+    // 2. Allocate a block big enough to hold everything, max size computed from previous invalid zone
+    // 3. Draw One Step in the big block.
+    // 4. Use a kernel to detect edge.
+    // 5. Make black version of the edge, gaussian blurred with radius 1px
+    // 6. Make light version of the edge
+    // 7. Blend Black shadow and light outline together in the display surface to make cursor
+
+    if( !mBrushCursorInvalid )
+        return;
+
+    if( current_millis - mLastBrushCursorComputationTime < 1000 )
+        return;
 
     if( !mBrushInstance )
         return;
 
+    // Collect Brush State
     FOdysseyBrushState& state = mBrushInstance->GetState();
-    FOdysseyBlock* onepx = new FOdysseyBlock( 1, 1, mTextureSourceFormat );
-    state.target_temp_buffer = onepx;
+    state.point.x = 0;
+    state.point.y = 0;
+
+    // Create a dummy 1px block to gather size information.
+    FOdysseyBlock* dummy1px = new FOdysseyBlock( 1, 1, mTextureSourceFormat );
+
+    // Set the dummy 1px block as target for brush
+    state.target_temp_buffer = dummy1px;
+
+    // Execute Brush into dummy 1px target
     mBrushInstance->ExecuteStep();
+
+    // Gather size and invalid information
     auto invalid_rects = mBrushInstance->GetInvalidRects();
     int xmin = INT_MAX;
     int ymin = INT_MAX;
     int xmax = INT_MIN;
     int ymax = INT_MIN;
+
+    // Compute max invalid geometry
     for( int j = 0; j < invalid_rects.Num(); ++j )
     {
         const ::ULIS::FRect& rect = invalid_rects[j];
@@ -700,28 +739,80 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
         xmax = x2 > xmax ? x2 : xmax;
         ymax = y2 > ymax ? y2 : ymax;
     }
-    mBrushInstance->ClearInvalidRects();
-    state.target_temp_buffer = mTempBuffer;
 
-    delete  onepx;
+    // Clear invalid rects in brush instance
+    mBrushInstance->ClearInvalidRects();
+    // Get rid of the dummy 1px block
+    delete  dummy1px;
+
+    // Compute preview width / height geometry
     int preview_w = FMath::Max( 1, xmax - xmin );
     int preview_h = FMath::Max( 1, ymax - ymin );
-    FOdysseyBlock* sample = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat );
-    FOdysseyBlock* preview = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat );
-    state.target_temp_buffer = sample;
+
+    // Allocate preview_color & preview_outline to draw on step in
+    FOdysseyBlock* preview_color = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, true );
+
+    // Set the preview_color block as target for brush
+    state.target_temp_buffer = preview_color;
+    state.point.x = -xmin;
+    state.point.y = -ymin;
+
+    // Execute Brush into preview_color target
     mBrushInstance->ExecuteStep();
+
+    // Clear invalid rects in brush instance
     mBrushInstance->ClearInvalidRects();
+
+    // Reset brush state target to mTempBuffer
     state.target_temp_buffer = mTempBuffer;
-    int shiftx = state.point.x - xmin;
-    int shifty = state.point.y - ymin;
-    ::ULIS::FKernel kernel( ::ULIS::FSize( 3, 3 )
+
+    // Compute Brush Shift
+    int shiftx = xmin;
+    int shifty = ymin;
+    mBrushCursorPreviewShift = FVector2D( shiftx, shifty );
+
+    // Create Outline kernel for convolution
+    ::ULIS::FKernel edge_kernel( ::ULIS::FSize( 3, 3 )
                           , {  255,   255,  255
                             ,  255, -4080,  255
                             ,  255,   255,  255 } );
-    ::ULIS::FFXContext::Convolution( sample->GetIBlock(), preview->GetIBlock(), kernel, true );
-    ::ULIS::FClearFillContext::FillPreserveAlpha( preview->GetIBlock(), ::ULIS::CColor( 127, 127, 127 ) );
-    delete sample;
-    delete preview;
+    ::ULIS::FKernel gaussian_kernel( ::ULIS::FSize( 3, 3 )
+                               , {  8, 16,  8
+                               ,   16, 32, 16
+                               ,    8, 16,  8 } );
+    gaussian_kernel.Normalize();
+    /*
+    ::ULIS::FKernel kernel( ::ULIS::FSize( 3, 3 )
+                          , {  0,   0,  0
+                            ,  0,   1,  0
+                            ,  0,   0,  0 } );
+    */
+
+    // Dealloc Cursor Preview Surface
+    if( mBrushCursorPreviewSurface )
+        delete  mBrushCursorPreviewSurface;
+
+    // Realloc
+    mBrushCursorPreviewSurface = new FOdysseySurface( preview_w, preview_h, mTextureSourceFormat );
+
+    // Compute Outline in surface
+    FOdysseyBlock* preview_outline = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
+    FOdysseyBlock* preview_shadow = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
+    ::ULIS::FFXContext::Convolution( preview_color->GetIBlock(), preview_outline->GetIBlock(), edge_kernel, true );
+    ::ULIS::FClearFillContext::FillPreserveAlpha( preview_outline->GetIBlock(), ::ULIS::CColor( 0, 0, 0 ) );
+    ::ULIS::FFXContext::Convolution( preview_outline->GetIBlock(), preview_shadow->GetIBlock(), gaussian_kernel, true );
+    ::ULIS::FMakeContext::CopyBlockInto( preview_shadow->GetIBlock(), mBrushCursorPreviewSurface->Block()->GetIBlock() );
+
+    ::ULIS::FClearFillContext::FillPreserveAlpha( preview_outline->GetIBlock(), ::ULIS::CColor( 220, 220, 220 ) );
+    ::ULIS::FBlendingContext::Blend( preview_outline->GetIBlock(), mBrushCursorPreviewSurface->Block()->GetIBlock(), 0, 0, ::ULIS::eBlendingMode::kNormal, ::ULIS::eAlphaMode::kNormal, 1.f );
+
+    mBrushCursorPreviewSurface->Block()->GetIBlock()->Invalidate();
+    mLastBrushCursorComputationTime = current_millis;
+
+    delete preview_color;
+    delete preview_outline;
+    delete preview_shadow;
+    mBrushCursorInvalid = false;
 }
 
 

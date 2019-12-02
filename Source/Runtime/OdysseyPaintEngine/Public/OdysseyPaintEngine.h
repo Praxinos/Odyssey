@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyBlock.h"
+#include "OdysseySurface.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
 #include "IOdysseyLayer.h"
@@ -118,4 +119,10 @@ private:
 
     ::ULIS::FThreadPool*                mTileThreadPool;
     std::queue<std::function<void()>>   mDelayQueue;
+
+public:
+    FOdysseySurface*                    mBrushCursorPreviewSurface;
+    FVector2D                           mBrushCursorPreviewShift;
+    long long                           mLastBrushCursorComputationTime;
+    bool                                mBrushCursorInvalid;
 };
