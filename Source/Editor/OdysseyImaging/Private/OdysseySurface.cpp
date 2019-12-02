@@ -136,7 +136,7 @@ InvalidateTextureFromData( ::ULIS::IBlock* iData, UTexture2D* iTexture, const ::
     int w = iRect.w;
     int h = iRect.h;
     checkf( x >= 0 &&
-            x >= 0 &&
+            y >= 0 &&
             w > 0  &&
             h > 0
             , TEXT( "Error" ) );

@@ -494,7 +494,6 @@ FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
 
     UE_LOG(LogTemp, Display, TEXT("Done Undo"));*/
     
-<<<<<<< HEAD
     /*UE_LOG(LogTemp, Display, TEXT("Texture: %p"), mDisplaySurface->Texture() );
     UE_LOG(LogTemp, Display, TEXT("block: %p"), mDisplaySurface->Block() );
 
@@ -514,9 +513,7 @@ FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
     // Invalidate all
     //mDisplaySurface->Invalidate();
     //delete block;
-=======
     displaySurface->Invalidate();
->>>>>>> infeat: undo stock the right blocks at each stroke, now to use them...
 }
 
 void
@@ -976,10 +973,6 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& iSessionName )
 {
     if( mScopedTransaction == nullptr )
     {
-<<<<<<< HEAD
-        mScopedTransaction = new FScopedTransaction( iSessionName );
-        mDisplaySurface->Texture()->Modify();
-=======
         scopedTransaction = new FScopedTransaction( SessionName );
         TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
         for( int i = 0; i < layers->Num(); i++ )
@@ -987,7 +980,6 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& iSessionName )
             FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
             imageLayer->mBlockUndoable->Modify();
         }
->>>>>>> infeat: undo stock the right blocks at each stroke, now to use them...
     }
 }
 
@@ -1003,9 +995,6 @@ FOdysseyPainterEditorToolkit::EndTransaction()
 {
     if( mIsManipulationDirtiedSomething )
     {
-<<<<<<< HEAD
-        mDisplaySurface->Texture()->PostEditChange();
-=======
         TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
         for( int i = 0; i < layers->Num(); i++ )
         {
@@ -1014,7 +1003,6 @@ FOdysseyPainterEditorToolkit::EndTransaction()
             imageLayer->mBlockUndoable->PostEditChange();
         }
         displaySurface->Invalidate();
->>>>>>> infeat: undo stock the right blocks at each stroke, now to use them...
     }
 
     mIsManipulationDirtiedSomething = false;
@@ -1382,6 +1370,15 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ColorPicker32" ) )
                         ]
                     ]
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnUndo)
+                        [
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo"))
+                        ]
+                    ]
                 ]
             ]
             +SScrollBox::Slot()
@@ -1481,6 +1478,20 @@ FOdysseyPainterEditorToolkit::OnFillCurrentLayer()
     mPaintEngine.AbortStroke();
     mLayerStack.FillCurrentLayerWithColor( mPaintEngine.GetColor() );
 
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorToolkit::OnClearUndo()
+{
+    layer_stack.mDrawingUndo->Clear();
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorToolkit::OnUndo()
+{
+    layer_stack.mDrawingUndo->LoadData();
     return FReply::Handled();
 }
 

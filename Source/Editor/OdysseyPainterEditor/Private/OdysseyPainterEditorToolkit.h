@@ -124,6 +124,9 @@ protected:
     //TODO: Get rid of this when we'll have a toolbox widget
     FReply OnClearCurrentLayer();
     FReply OnFillCurrentLayer();
+    FReply OnUndo();
+    FReply OnClearUndo();
+
 
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;
 

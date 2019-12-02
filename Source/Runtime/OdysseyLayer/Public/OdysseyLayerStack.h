@@ -104,14 +104,12 @@ private:
     
 private:
     FOdysseyImageLayer* mImagePtr;
-    int mTileX;
-    int mTileY;
+    int64 mPosition;
     
     //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
     TArray<uint8> mData;
     ::ULIS::IBlock* mTileData;
     FString mSavePath;
-    FBufferArchive mToBinary;
 };
 
 /*

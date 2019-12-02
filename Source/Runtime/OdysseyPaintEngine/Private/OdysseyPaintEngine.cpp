@@ -153,7 +153,7 @@ FOdysseyPaintEngine::Tick()
         }
         mTileThreadPool->WaitForCompletion();
         
-        mLayerStack->mDrawingUndo->Clear();
+        //mLayerStack->mDrawingUndo->Clear();
         mLayerStack->mDrawingUndo->StartRecord();
         for( int k = 0; k < mCountTileY; ++k )
         {
@@ -167,7 +167,6 @@ FOdysseyPaintEngine::Tick()
             }
         }
         mLayerStack->mDrawingUndo->EndRecord();
-        mLayerStack->mDrawingUndo->LoadData();
 
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );

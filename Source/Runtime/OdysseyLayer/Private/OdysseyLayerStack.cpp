@@ -414,6 +414,8 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
     UE_LOG(LogTemp, Display, TEXT("totalMemory: %d"), mData.GetAllocatedSize() );
 
     mSavePath = "/Users/praxinos/Documents/TestSave/MySave.save";
+    
+    mPosition = 0;
 
     //SaveData();
     //LoadData();
@@ -427,14 +429,12 @@ FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
 void
 FOdysseyDrawingUndo::StartRecord()
 {
-    mToBinary.Empty();
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
 }
 
 void
 FOdysseyDrawingUndo::EndRecord()
 {
-    UE_LOG(LogTemp, Display, TEXT("Size: %d"), mToBinary.Num());
 }
 
 
@@ -442,6 +442,7 @@ bool
 FOdysseyDrawingUndo::Clear()
 {
     FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*mSavePath);
+    mPosition = 0;
     return true;
 }
 
@@ -457,15 +458,17 @@ FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, uint8 iSizeX, uint8 i
     
     FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
     
-    UPTRINT address = (UPTRINT)imageLayer;
-    mToBinary << address;
-    mToBinary << iXTile;
-    mToBinary << iYTile;
-    mToBinary << iSizeX;
-    mToBinary << iSizeY;
-    mToBinary << array;
+    FBufferArchive toBinary;
 
-    FFileHelper::SaveArrayToFile( mToBinary, *mSavePath, &IFileManager::Get(), EFileWrite::FILEWRITE_Append );
+    UPTRINT address = (UPTRINT)imageLayer;
+    toBinary << address;
+    toBinary << iXTile;
+    toBinary << iYTile;
+    toBinary << iSizeX;
+    toBinary << iSizeY;
+    toBinary << array;
+
+    FFileHelper::SaveArrayToFile( toBinary, *mSavePath, &IFileManager::Get(), EFileWrite::FILEWRITE_Append );
     UE_LOG(LogTemp, Display, TEXT("SaveEnd") );
 
     return true;
@@ -485,7 +488,7 @@ FOdysseyDrawingUndo::LoadData()
     FFileHelper::LoadFileToArray(TheBinaryArray, *mSavePath);
     
     FMemoryReader Ar = FMemoryReader(TheBinaryArray, true); //true, free data after done
-    Ar.Seek(0); //make sure we are at the beginning
+    Ar.Seek(mPosition); //make sure we are at the beginning
     UPTRINT address;
     Ar << address;
     Ar << tileX;
@@ -493,6 +496,8 @@ FOdysseyDrawingUndo::LoadData()
     Ar << sizeX;
     Ar << sizeY;
     Ar << mData;
+    
+    mPosition = Ar.Tell();
     
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
     UPTRINT address2 = (UPTRINT)imageLayer;
@@ -502,7 +507,7 @@ FOdysseyDrawingUndo::LoadData()
     
     UE_LOG(LogTemp, Display, TEXT("TileX %d, TileY %d, SizeX %d, SizeY %d, SizeMData: %d "), tileX, tileY, sizeX, sizeY, mData.Num() );
     
-    if( mData.Num() > 0 )
+    if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
     {
         for( int i = 0; i < mData.Num(); i++)
         {
@@ -514,7 +519,7 @@ FOdysseyDrawingUndo::LoadData()
         mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( 0, 0, sizeX, sizeY ));
     }
     
-
+    UE_LOG(LogTemp, Display, TEXT("Position = %lld"), mPosition );
     UE_LOG(LogTemp, Display, TEXT("LoadEnd") );
 
     return true;
