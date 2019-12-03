@@ -442,20 +442,32 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 }
 
 void
-FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* Viewport,int32 x, int32 y )
+FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* Viewport, int32 X, int32 Y )
 {
+    if( CurrentToolState == eState::kDrawing
+        || CurrentToolState == eState::kPanning
+        || CurrentToolState == eState::kRotating
+        || CurrentToolState == eState::kPicking )
+        return;
+
     CurrentToolState = eState::kIdle;
 }
 
 void
 FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* Viewport )
 {
+    if( CurrentToolState == eState::kDrawing
+        || CurrentToolState == eState::kPanning
+        || CurrentToolState == eState::kRotating
+        || CurrentToolState == eState::kPicking )
+        return;
+
     CurrentToolState = eState::kIdle;
 }
 
 
 EMouseCursor::Type
-FOdysseyPainterEditorViewportClient::GetCursor( FViewport* Viewport,int32 X,int32 Y )
+FOdysseyPainterEditorViewportClient::GetCursor( FViewport* Viewport, int32 X, int32 Y )
 {
     if( CurrentToolState == eState::kPan || CurrentToolState == eState::kPanning )
         CurrentMouseCursor = EMouseCursor::GrabHand;

@@ -72,12 +72,12 @@ public:
     // FViewportClient API
     virtual void  Draw( FViewport* Viewport, FCanvas* Canvas )  override;
 
-    virtual bool  InputKey( FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed = 1.0f, bool bGamepad = false )  override;
-    virtual void  CapturedMouseMove( FViewport* Viewport, int32 X, int32 Y )  override;
-    virtual void MouseEnter( FViewport* Viewport,int32 x, int32 y ) override;
+    virtual bool InputKey( FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed = 1.0f, bool bGamepad = false ) override;
+    virtual void CapturedMouseMove( FViewport* Viewport, int32 X, int32 Y ) override;
+    virtual void MouseEnter( FViewport* Viewport, int32 X, int32 Y ) override;
     virtual void MouseLeave( FViewport* Viewport ) override;
 
-    virtual EMouseCursor::Type                  GetCursor( FViewport* Viewport,int32 X,int32 Y )  override;
+    virtual EMouseCursor::Type                  GetCursor( FViewport* Viewport, int32 X, int32 Y ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* Viewport, const FCursorReply& CursorReply ) override;
     virtual EMouseCaptureMode                   CaptureMouseOnClick() override;
     
