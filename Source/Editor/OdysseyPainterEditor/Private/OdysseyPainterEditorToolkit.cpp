@@ -551,6 +551,22 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     FAssetEditorToolkit::SaveAsset_Execute();
 }
 
+void
+FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
+{
+    CopyBlockDataIntoUTexture( displaySurface->Block(), texture );
+    //::ULIS::FMakeContext::CopyBlockInto( displaySurface->Block()->GetIBlock(), textureContentsBackup->GetIBlock() );
+    InvalidateTextureFromData( displaySurface->Block(), texture );
+    // Invalidate all
+    displaySurface->Invalidate();
+
+    FAssetEditorToolkit::SaveAssetAs_Execute();
+
+    CopyBlockDataIntoUTexture( textureContentsBackup, texture );
+
+    InvalidateTextureFromData( textureContentsBackup, texture );
+    InvalidateSurfaceFromData( textureContentsBackup, displaySurface );
+}
 
 bool
 FOdysseyPainterEditorToolkit::OnRequestClose()

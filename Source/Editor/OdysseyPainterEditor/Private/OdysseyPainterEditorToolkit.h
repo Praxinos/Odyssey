@@ -75,6 +75,7 @@ protected:
 protected:
     //FAssetEditorToolkit override
     virtual void SaveAsset_Execute() override;
+    virtual void SaveAssetAs_Execute() override;
     virtual bool OnRequestClose() override;
 
 protected:
