@@ -6,11 +6,8 @@
 #include "SceneTypes.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-class UTexture;
-class FOdysseyPaintEngine;
-
-class FOdysseyPaintEngine;
 class FOdysseyLayerStack;
+class FOdysseyPaintEngine;
 namespace ULIS { class CColor; }
 
 /**
@@ -20,9 +17,9 @@ class IOdysseyPainterEditorToolkit
     : public FAssetEditorToolkit
 {
 public:
-    virtual void BeginTransaction(const FText& SessionName) = 0;
+    virtual void BeginTransaction( const FText& iSessionName ) = 0;
     virtual void MarkTransactionAsDirty() = 0;
-    virtual void EndTransaction()  = 0;
+    virtual void EndTransaction() = 0;
 
     virtual FOdysseyPaintEngine* PaintEngine() = 0;
     virtual FOdysseyLayerStack* LayerStack() = 0;

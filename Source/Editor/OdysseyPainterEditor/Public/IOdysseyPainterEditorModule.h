@@ -3,11 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Toolkits/AssetEditorToolkit.h"
-#include "Interfaces/IOdysseyPainterEditorToolkit.h"
 #include "Modules/ModuleInterface.h"
+#include "Toolkits/AssetEditorToolkit.h"
 
-class UTexture;
+class IOdysseyPainterEditorToolkit;
 
 /**
  * Interface for texture editor modules.
@@ -17,5 +16,5 @@ class IOdysseyPainterEditorModule
     , public IHasMenuExtensibility
 {
 public:
-    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor(const EToolkitMode::Type Mode, const TSharedPtr< IToolkitHost >& InitToolkitHost, UTexture2D* InTexture ) = 0;
+    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UTexture2D* iTexture ) = 0;
 };

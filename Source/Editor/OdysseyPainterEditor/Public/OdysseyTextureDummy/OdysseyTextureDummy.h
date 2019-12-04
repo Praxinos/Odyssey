@@ -3,6 +3,7 @@
 #pragma once
 
 #include "UObject/Object.h"
+
 #include "OdysseyTextureDummy.generated.h"
 
 /**
@@ -11,8 +12,8 @@
  * Create a 2D texture asset directly from content browser.
  */
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyTextureDummy : public UObject
+class ODYSSEYPAINTEREDITOR_API UOdysseyTextureDummy
+    : public UObject
 {
     GENERATED_BODY()
 };
-

@@ -1,221 +1,237 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
 
 #include "OdysseyTextureDummy/OdysseyTextureDummyFactory.h"
-#include "OdysseyTextureDummy/OdysseyTextureDummy.h"
 
 #include "Editor.h"
 #include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
-
-#include "Widgets/SWindow.h"
-#include "Widgets/Layout/SBorder.h"
-#include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
+#include "Widgets/SWindow.h"
 
-#include "OdysseySurface.h"
 #include "OdysseyBlock.h"
+#include "OdysseySurface.h"
+#include "OdysseyTextureDummy/OdysseyTextureDummy.h"
 
+//---
 
 /////////////////////////////////////////////////////
 // Defines
 #define LOCTEXT_NAMESPACE "OdysseyTextureDummyFactory"
+
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
 #define DEFAULT_CANVAS_SIZE 1024
 
-
 /////////////////////////////////////////////////////
 // SOdysseyTextureConfigureWindow
-class SOdysseyTextureConfigureWindow : public SWindow
+class SOdysseyTextureConfigureWindow 
+    : public SWindow
 {
 public:
-    void Construct(const FArguments& InArgs)
-    {
-        Width = DEFAULT_CANVAS_SIZE;
-        Height = DEFAULT_CANVAS_SIZE;
-        WindowAnswer = false;
+    void Construct( const FArguments& iArgs );
 
-        SWindow::Construct(SWindow::FArguments()
-            .Title(LOCTEXT("CreateOdysseyTextureAssetOptions", "Create Texture Asset"))
-            .SizingRule(ESizingRule::Autosized)
-            .SupportsMinimize(false)
-            .SupportsMaximize(false)
+    bool GetWindowAnswer();
+
+public:
+    TOptional<int32> GetWidth() const;
+    TOptional<int32> GetHeight() const;
+
+    void OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo );
+    void OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo );
+    FReply OnAccept();
+    FReply OnCancel();
+
+private:
+    int mWidth;
+    int mHeight;
+    bool mWindowAnswer;
+};
+
+//---
+
+void 
+SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
+{
+    mWidth = DEFAULT_CANVAS_SIZE;
+    mHeight = DEFAULT_CANVAS_SIZE;
+    mWindowAnswer = false;
+
+    SWindow::Construct( SWindow::FArguments()
+        .Title( LOCTEXT( "CreateOdysseyTextureAssetOptions", "Create Texture Asset" ) )
+        .SizingRule( ESizingRule::Autosized )
+        .SupportsMinimize( false )
+        .SupportsMaximize( false )
         [
-            SNew(SBorder)
-            .BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+            SNew( SBorder )
+            .BorderImage( FEditorStyle::GetBrush( "Menu.Background" ) )
             [
-                SNew(SVerticalBox)
-                + SVerticalBox::Slot()
+                SNew( SVerticalBox )
+                +SVerticalBox::Slot()
                 .AutoHeight()
                 .Padding( 2, 2 )
                 [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
+                    SNew( SHorizontalBox )
+                    +SHorizontalBox::Slot()
                     [
-                        SNew(STextBlock)
-                        .Text(FText::FromString(TEXT("Texture Width")))
+                        SNew( STextBlock )
+                        .Text( FText::FromString( TEXT( "Texture Width" ) ) )
                     ]
-                    + SHorizontalBox::Slot()
+                    +SHorizontalBox::Slot()
                     [
-                        SNew(SNumericEntryBox<int32>)
-                        .LabelVAlign(VAlign_Center)
-                        .Value(this, &SOdysseyTextureConfigureWindow::GetWidth)
-                        .MinValue(1)
-                        .MaxValue(8192)
+                        SNew( SNumericEntryBox<int32> )
+                        .LabelVAlign( VAlign_Center )
+                        .Value( this, &SOdysseyTextureConfigureWindow::GetWidth )
+                        .MinValue( MIN_CANVAS_SIZE )
+                        .MaxValue( MAX_CANVAS_SIZE )
                         .OnValueCommitted( this, &SOdysseyTextureConfigureWindow::OnSetWidth )
                     ]
-
                 ]
 
-                + SVerticalBox::Slot()
+                +SVerticalBox::Slot()
                 .AutoHeight()
-                .Padding(2, 2)
+                .Padding( 2, 2 )
                 [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
+                    SNew( SHorizontalBox )
+                    +SHorizontalBox::Slot()
                     [
-                        SNew(STextBlock)
-                        .Text(FText::FromString(TEXT("Texture Height")))
+                        SNew( STextBlock )
+                        .Text( FText::FromString( TEXT( "Texture Height" ) ) )
                     ]
-                    + SHorizontalBox::Slot()
+                    +SHorizontalBox::Slot()
                     [
-                        SNew(SNumericEntryBox<int32>)
-                        .LabelVAlign(VAlign_Center)
-                        .Value(this, &SOdysseyTextureConfigureWindow::GetHeight)
-                        .MinValue(1)
-                        .MaxValue(8192)
+                        SNew( SNumericEntryBox<int32> )
+                        .LabelVAlign( VAlign_Center )
+                        .Value( this, &SOdysseyTextureConfigureWindow::GetHeight )
+                        .MinValue( MIN_CANVAS_SIZE )
+                        .MaxValue( MAX_CANVAS_SIZE )
                         .OnValueCommitted( this, &SOdysseyTextureConfigureWindow::OnSetHeight )
                     ]
-
                 ]
 
                 +SVerticalBox::Slot()
                 .AutoHeight()
                 [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
+                    SNew( SHorizontalBox )
+                    +SHorizontalBox::Slot()
                     [
-                        SNew(SButton)
-                        .Text(LOCTEXT("Create Asset", "Create Asset"))
-                        .HAlign(HAlign_Center)
-                        .OnClicked_Raw(this, &SOdysseyTextureConfigureWindow::OnAccept)
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Create Asset", "Create Asset" ) )
+                        .HAlign( HAlign_Center )
+                        .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnAccept )
                     ]
-                    + SHorizontalBox::Slot()
+                    +SHorizontalBox::Slot()
                     [
-                        SNew(SButton)
-                        .Text(LOCTEXT("Cancel", "Cancel"))
-                        .HAlign(HAlign_Center)
-                        .OnClicked_Raw(this, &SOdysseyTextureConfigureWindow::OnCancel)
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Cancel", "Cancel" ) )
+                        .HAlign( HAlign_Center )
+                        .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnCancel )
                     ]
                 ]
             ]
-        ]);
-    }
+        ]
+    );
+}
 
-    bool GetWindowAnswer()
-    {
-        return WindowAnswer;
-    }
+bool
+SOdysseyTextureConfigureWindow::GetWindowAnswer()
+{
+    return mWindowAnswer;
+}
 
-    TOptional<int32> GetWidth() const
-    {
-        return Width;
-    }
+TOptional<int32>
+SOdysseyTextureConfigureWindow::GetWidth() const
+{
+    return mWidth;
+}
 
-    TOptional<int32> GetHeight() const
-    {
-        return Height;
-    }
+TOptional<int32>
+SOdysseyTextureConfigureWindow::GetHeight() const
+{
+    return mHeight;
+}
 
-    void OnSetHeight( int32 NewHeightValue, ETextCommit::Type CommitInfo)
-    {
-        Height = NewHeightValue;
+void
+SOdysseyTextureConfigureWindow::OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo)
+{
+    mHeight = iNewHeightValue;
 
-        if (Height > MAX_CANVAS_SIZE)
-            Height = MAX_CANVAS_SIZE;
-        if (Height < MIN_CANVAS_SIZE)
-            Height = MIN_CANVAS_SIZE;
-    }
+    if( mHeight > MAX_CANVAS_SIZE )
+        mHeight = MAX_CANVAS_SIZE;
+    if( mHeight < MIN_CANVAS_SIZE )
+        mHeight = MIN_CANVAS_SIZE;
+}
 
-    void OnSetWidth( int32 NewWidthValue, ETextCommit::Type CommitInfo)
-    {
-        Width = NewWidthValue;
+void
+SOdysseyTextureConfigureWindow::OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo)
+{
+    mWidth = iNewWidthValue;
 
-        if (Width > MAX_CANVAS_SIZE)
-            Width = MAX_CANVAS_SIZE;
-        if (Width < MIN_CANVAS_SIZE)
-            Width = MIN_CANVAS_SIZE;
-    }
+    if( mWidth > MAX_CANVAS_SIZE )
+        mWidth = MAX_CANVAS_SIZE;
+    if( mWidth < MIN_CANVAS_SIZE )
+        mWidth = MIN_CANVAS_SIZE;
+}
 
-    FReply OnAccept()
-    {
-        WindowAnswer = true;
-        RequestDestroyWindow();
-        return FReply::Handled();
-    }
+FReply
+SOdysseyTextureConfigureWindow::OnAccept()
+{
+    mWindowAnswer = true;
+    RequestDestroyWindow();
 
-    FReply OnCancel()
-    {
-        WindowAnswer = false;
-        RequestDestroyWindow();
-        return FReply::Handled();
-    }
+    return FReply::Handled();
+}
 
-private:
-    int Width;
-    int Height;
-    bool WindowAnswer;
+FReply
+SOdysseyTextureConfigureWindow::OnCancel()
+{
+    mWindowAnswer = false;
+    RequestDestroyWindow();
 
-};
-
-
+    return FReply::Handled();
+}
 
 /////////////////////////////////////////////////////
 // UOdysseyTextureDummyFactory
-UOdysseyTextureDummyFactory::UOdysseyTextureDummyFactory( const  FObjectInitializer&  ObjectInitializer )
-    : Super( ObjectInitializer )
+UOdysseyTextureDummyFactory::UOdysseyTextureDummyFactory( const FObjectInitializer& iObjectInitializer )
+    : Super( iObjectInitializer )
 {
+    // From UFactory
     bCreateNew = true;
     bEditAfterNew = true;
     SupportedClass = UOdysseyTextureDummy::StaticClass();
 }
 
-
 UObject*
-UOdysseyTextureDummyFactory::FactoryCreateNew(  UClass* Class,
-                                                UObject* InParent,
-                                                FName Name,
-                                                EObjectFlags Flags,
-                                                UObject* Context,
-                                                FFeedbackContext* Warn )
+UOdysseyTextureDummyFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
     // Make sure we are trying to factory a UOdysseyTextureDummy, then create and init a UTexture2D instead.
-    check( Class->IsChildOf(UOdysseyTextureDummy::StaticClass() ) );
+    check( iClass->IsChildOf( UOdysseyTextureDummy::StaticClass() ) );
 
-    UTexture2D* Object = NewObject<UTexture2D>(InParent, Name, Flags | RF_Transactional);
-    Object->Source.Init( textureWidth, textureHeight, 1, 1, TSF_BGRA8 );
-    Object->PostEditChange();
+    UTexture2D* object = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
+    object->Source.Init( mTextureWidth, mTextureHeight, 1, 1, TSF_BGRA8 );
+    object->PostEditChange();
 
     // Init internal data
-    FOdysseyBlock block( textureWidth, textureHeight, ETextureSourceFormat::TSF_BGRA8, nullptr, nullptr, true );
-    CopyBlockDataIntoUTexture( &block, Object );
+    FOdysseyBlock block( mTextureWidth, mTextureHeight, ETextureSourceFormat::TSF_BGRA8, nullptr, nullptr, true );
+    CopyBlockDataIntoUTexture( &block, object );
 
-    return  Object;
+    return object;
 }
 
 bool UOdysseyTextureDummyFactory::ConfigureProperties()
 {
     //We go in here before creating the texture: Meaning we can have any modal window here.
     //If return false, we don't create the object, if true, we create it
-    TSharedPtr<SOdysseyTextureConfigureWindow> TextureConfigurationWindow = SNew(SOdysseyTextureConfigureWindow);
+    TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow );
 
-    GEditor->EditorAddModalWindow(TextureConfigurationWindow.ToSharedRef());
-    textureWidth = TextureConfigurationWindow->GetWidth().GetValue();
-    textureHeight = TextureConfigurationWindow->GetHeight().GetValue();
+    GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
+    mTextureWidth = textureConfigurationWindow->GetWidth().GetValue();
+    mTextureHeight = textureConfigurationWindow->GetHeight().GetValue();
 
-    return TextureConfigurationWindow->GetWindowAnswer();
+    return textureConfigurationWindow->GetWindowAnswer();
 }
 
 #undef LOCTEXT_NAMESPACE
-

@@ -2,14 +2,15 @@
 
 #pragma once
 
+#include "AssetTypeActions_Base.h"
 #include "CoreMinimal.h"
 #include "Toolkits/IToolkitHost.h"
-#include "AssetTypeActions_Base.h"
 
-class FOdysseyTextureAssetTypeActions : public FAssetTypeActions_Base
+class FOdysseyTextureAssetTypeActions
+    : public FAssetTypeActions_Base
 {
 public:
-    FOdysseyTextureAssetTypeActions(EAssetTypeCategories::Type InAssetCategory);
+    FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory );
 
     // IAssetTypeActions interface
     virtual FText GetName() const override;
@@ -19,5 +20,5 @@ public:
     // End of IAssetTypeActions interface
 
 private:
-    EAssetTypeCategories::Type MyAssetCategory;
+    EAssetTypeCategories::Type mMyAssetCategory;
 };

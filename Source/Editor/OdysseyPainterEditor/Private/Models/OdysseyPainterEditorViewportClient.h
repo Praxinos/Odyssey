@@ -4,18 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
-#include "UObject/GCObject.h"
-#include "UnrealClient.h"
-#include "OdysseyStrokePoint.h"
-#include "Rendering/StaticMeshVertexBuffer.h"
 #include "RawIndexBuffer.h"
+#include "Rendering/StaticMeshVertexBuffer.h"
+#include "UnrealClient.h"
+#include "UObject/GCObject.h"
 
+#include "OdysseyStrokePoint.h"
 
 class FCanvas;
+class UTexture2D;
+
+class FOdysseyMeshSelector;
 class IOdysseyPainterEditorToolkit;
 class SOdysseySurfaceViewport;
-class UTexture2D;
-class FOdysseyMeshSelector;
 
 //
 //                                                                                                         MouseWheelUp/Down
@@ -65,25 +66,25 @@ public:
 
 public:
     // Construction / Destruction
-    FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit > InTextureEditor, TWeakPtr< SOdysseySurfaceViewport > InTextureEditorViewport, FOdysseyMeshSelector* InMeshSelector );
+    FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit > iTextureEditor, TWeakPtr< SOdysseySurfaceViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector );
     ~FOdysseyPainterEditorViewportClient();
 
 public:
     // FViewportClient API
-    virtual void  Draw( FViewport* Viewport, FCanvas* Canvas )  override;
+    virtual void  Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
 
-    virtual bool InputKey( FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed = 1.0f, bool bGamepad = false ) override;
-    virtual void CapturedMouseMove( FViewport* Viewport, int32 X, int32 Y ) override;
-    virtual void MouseEnter( FViewport* Viewport, int32 X, int32 Y ) override;
-    virtual void MouseLeave( FViewport* Viewport ) override;
+    virtual bool InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false ) override;
+    virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
+    virtual void MouseEnter( FViewport* iViewport, int32 iX, int32 iY ) override;
+    virtual void MouseLeave( FViewport* iViewport ) override;
 
-    virtual EMouseCursor::Type                  GetCursor( FViewport* Viewport, int32 X, int32 Y ) override;
-    virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* Viewport, const FCursorReply& CursorReply ) override;
+    virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
+    virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
     virtual EMouseCaptureMode                   CaptureMouseOnClick() override;
     
 public:
     // FGCObject API
-    virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+    virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
 
 public:
     // Public API
@@ -98,24 +99,24 @@ private:
     void        ZoomInInViewport( const FVector2D& iPositionInViewport );
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
     double      GetZoom() const;
-    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation = true )  const;
-    FOdysseyStrokePoint   GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport )  const;
-    void DrawUVsOntoViewport(FViewport* InViewport, FCanvas* InCanvas, int32 UVChannel, FStaticMeshVertexBuffer& VertexBuffer, FIndexArrayView& Indices );
+    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation = true ) const;
+    FOdysseyStrokePoint   GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport ) const;
+    void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
 
-    bool        InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed = 1.0f, bool bGamepad = false );
+    bool        InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
     void        CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport ) ;
 
 private:
     // Private Data Members
     EMouseCaptureMode                       mMouseCaptureMode;
-    TWeakPtr<IOdysseyPainterEditorToolkit>  OdysseyPainterEditorPtr;
-    TWeakPtr<SOdysseySurfaceViewport>       OdysseyPainterEditorViewportPtr;
-    FOdysseyMeshSelector*                   MeshSelector;
-    UTexture2D*                             CheckerboardTexture;
-    EMouseCursor::Type                      CurrentMouseCursor;
-    float                                   RotationReference; // The reference from which we determine the new rotation
-    FVector2D                               PanReference; //Where did we begin the pan ?
-    FVector2D                               PivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
+    TWeakPtr<IOdysseyPainterEditorToolkit>  mOdysseyPainterEditorPtr;
+    TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;
+    FOdysseyMeshSelector*                   mMeshSelector;
+    UTexture2D*                             mCheckerboardTexture;
+    EMouseCursor::Type                      mCurrentMouseCursor;
+    float                                   mRotationReference; // The reference from which we determine the new rotation
+    FVector2D                               mPanReference; //Where did we begin the pan ?
+    FVector2D                               mPivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
 
-    eState                                  CurrentToolState;
+    eState                                  mCurrentToolState;
 };

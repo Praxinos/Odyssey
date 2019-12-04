@@ -2,12 +2,12 @@
 
 #pragma once
 
-
 #include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
+#include "InputCoreTypes.h"
 #include "UObject/Object.h"
-#include "OdysseyPainterEditorSettings.generated.h"
+#include "UObject/ObjectMacros.h"
 
+#include "OdysseyPainterEditorSettings.generated.h"
 
 /**
  * Enumerates background for the texture editor view port.
@@ -15,16 +15,16 @@
 UENUM()
 enum EOdysseyPainterEditorBackgrounds
 {
-    OdysseyPainterEditorBackground_SolidColor UMETA(DisplayName="Solid Color"),
-    OdysseyPainterEditorBackground_Checkered UMETA(DisplayName="Checkered"),
-    OdysseyPainterEditorBackground_CheckeredFill UMETA(DisplayName="Checkered (Fill)")
+    kOdysseyPainterEditorBackground_SolidColor    UMETA(DisplayName="Solid Color"),
+    kOdysseyPainterEditorBackground_Checkered     UMETA(DisplayName="Checkered"),
+    kOdysseyPainterEditorBackground_CheckeredFill UMETA(DisplayName="Checkered (Fill)")
 };
 
 UENUM()
 enum EOdysseyPainterEditorVolumeViewMode
 {
-    OdysseyPainterEditorVolumeViewMode_DepthSlices UMETA(DisplayName="Depth Slices"),
-    OdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume"),
+    kOdysseyPainterEditorVolumeViewMode_DepthSlices UMETA(DisplayName="Depth Slices"),
+    kOdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume"),
 };
 
 /**
@@ -37,7 +37,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorSettings
     GENERATED_UCLASS_BODY()
 
 public:
-
     /** The type of background to draw in the texture editor view port. */
     UPROPERTY(config)
     TEnumAsByte<EOdysseyPainterEditorBackgrounds> Background;
@@ -72,7 +71,6 @@ public:
     FKey PickColor;
 
 public:
-
     /** Whether the texture should scale to fit the view port. */
     UPROPERTY(config)
     bool FitToViewport;

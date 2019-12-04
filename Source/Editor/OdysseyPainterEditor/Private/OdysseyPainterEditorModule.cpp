@@ -1,26 +1,22 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
 
-
+#include "AssetToolsModule.h"
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 #include "Engine/Texture.h"
-#include "Toolkits/AssetEditorToolkit.h"
-#include "Interfaces/IOdysseyPainterEditorToolkit.h"
-#include "Interfaces/IOdysseyPainterEditorModule.h"
+#include "ISettingsModule.h"
+#include "LevelEditor.h"
+#include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
+#include "Toolkits/AssetEditorToolkit.h"
+
+#include "IOdysseyPainterEditorModule.h"
+#include "IOdysseyPainterEditorToolkit.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyPainterEditorToolkit.h"
-#include "ISettingsModule.h"
-#include "OdysseyTextureDummy/OdysseyTextureDummy_ContentBrowserExtensions.h"
-#include "AssetToolsModule.h"
 #include "OdysseyTextureDummy/OdysseyTextureDummy_AssetTypeActions.h"
-#include "LevelEditor.h"
-
+#include "OdysseyTextureDummy/OdysseyTextureDummy_ContentBrowserExtensions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
-
-
-
 
 /*-----------------------------------------------------------------------------
    FOdysseyPainterEditorModule
@@ -32,99 +28,91 @@ class FOdysseyPainterEditorModule
 public:
 
     // IOdysseyPainterEditorModule interface
-    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor(const EToolkitMode::Type Mode, const TSharedPtr< IToolkitHost >& InitToolkitHost, UTexture2D* InTexture ) override
+    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UTexture2D* iTexture ) override
     {
-        TSharedRef<FOdysseyPainterEditorToolkit> NewOdysseyPainterEditor(new FOdysseyPainterEditorToolkit());
-        NewOdysseyPainterEditor->InitOdysseyPainterEditor( Mode, InitToolkitHost, InTexture );
+        TSharedRef<FOdysseyPainterEditorToolkit> newOdysseyPainterEditor( new FOdysseyPainterEditorToolkit() );
+        newOdysseyPainterEditor->InitOdysseyPainterEditor( iMode, iInitToolkitHost, iTexture );
 
-        return NewOdysseyPainterEditor;
+        return newOdysseyPainterEditor;
     }
 
-    virtual TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager( ) override
+    virtual TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override
     {
-        return MenuExtensibilityManager;
+        return mMenuExtensibilityManager;
     }
 
 private:
-    void RegisterAssetTypeAction(IAssetTools& AssetTools, TSharedRef<IAssetTypeActions> Action)
+    void RegisterAssetTypeAction( IAssetTools& ioAssetTools, TSharedRef<IAssetTypeActions> iAction )
     {
-        AssetTools.RegisterAssetTypeActions(Action);
-        CreatedAssetTypeActions.Add(Action);
+        ioAssetTools.RegisterAssetTypeActions( iAction );
+        mCreatedAssetTypeActions.Add( iAction );
     }
 
 public:
-
     // IModuleInterface interface
 
-    virtual void StartupModule( ) override
+    virtual void StartupModule() override
     {
         // Register asset types
 
-        IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-
-        OdysseyPainterCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
-
-        RegisterAssetTypeAction(AssetTools, MakeShareable(new FOdysseyTextureAssetTypeActions(OdysseyPainterCategory)));
-
+        IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+        mOdysseyPainterCategory = assetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "IliadPainterAssetCategory", "ILIAD" ) );
+        RegisterAssetTypeAction( assetTools, MakeShareable( new FOdysseyTextureAssetTypeActions( mOdysseyPainterCategory ) ) );
 
         // register menu extensions
-        MenuExtensibilityManager = MakeShareable(new FExtensibilityManager);
+        mMenuExtensibilityManager = MakeShareable( new FExtensibilityManager );
 
         // register settings
-        ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
+        ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
-        if (SettingsModule != nullptr)
+        if( settingsModule )
         {
-            SettingsModule->RegisterSettings("Editor", "ContentEditors", "ILIADPainterEditor",
-                LOCTEXT("OdysseyPainterEditorSettingsName", "ILIAD Painter Editor"),
-                LOCTEXT("OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor."),
-                GetMutableDefault<UOdysseyPainterEditorSettings>()
-            );
+            settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADPainterEditor"
+                                              , LOCTEXT( "OdysseyPainterEditorSettingsName", "ILIAD Painter Editor" )
+                                              , LOCTEXT( "OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+                                              , GetMutableDefault<UOdysseyPainterEditorSettings>() );
         }
 
-        if (!IsRunningCommandlet())
+        if( !IsRunningCommandlet() )
         {
             FOdysseyPainterContentBrowserExtensions::InstallHooks();
         }
     }
 
-    virtual void ShutdownModule( ) override
+    virtual void ShutdownModule() override
     {
         // unregister settings
-        ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
+        ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
-        if (SettingsModule != nullptr)
+        if( settingsModule )
         {
-            SettingsModule->UnregisterSettings("Editor", "ContentEditors", "OdysseyPainterEditor");
+            settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyPainterEditor" );
         }
 
         // unregister menu extensions
-        MenuExtensibilityManager.Reset();
+        mMenuExtensibilityManager.Reset();
 
         // Unregister all the asset types that we registered
-        if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+        if( FModuleManager::Get().IsModuleLoaded( "AssetTools" ) )
         {
-            IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-            for (int32 Index = 0; Index < CreatedAssetTypeActions.Num(); ++Index)
+            IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+            for( int32 index = 0; index < mCreatedAssetTypeActions.Num(); ++index )
             {
-                AssetTools.UnregisterAssetTypeActions(CreatedAssetTypeActions[Index].ToSharedRef());
+                assetTools.UnregisterAssetTypeActions( mCreatedAssetTypeActions[index].ToSharedRef() );
             }
         }
     }
 
 private:
+    /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
+    TArray< TSharedPtr<IAssetTypeActions> > mCreatedAssetTypeActions;
 
-    /** All created asset type actions.  Cached here so that we can unregister them during shutdown. */
-    TArray< TSharedPtr<IAssetTypeActions> > CreatedAssetTypeActions;
-
-    EAssetTypeCategories::Type OdysseyPainterCategory;
+    EAssetTypeCategories::Type mOdysseyPainterCategory;
 
     // Holds the menu extensibility manager.
-    TSharedPtr<FExtensibilityManager> MenuExtensibilityManager;
+    TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;
 };
 
-
-IMPLEMENT_MODULE(FOdysseyPainterEditorModule, OdysseyPainterEditor);
-
+IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );
 
 #undef LOCTEXT_NAMESPACE

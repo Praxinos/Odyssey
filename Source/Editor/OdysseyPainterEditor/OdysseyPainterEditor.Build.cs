@@ -46,6 +46,13 @@ public class OdysseyPainterEditor : ModuleRules
         PrivateIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Private", "Models"),
+                Path.Combine(ModuleDirectory, "Private", "Settings"),
+            }
+        );
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public", "Settings"),
             }
         );
 

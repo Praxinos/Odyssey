@@ -1,82 +1,81 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
 
 #include "Models/OdysseyPainterEditorViewportClient.h"
-#include "Widgets/Layout/SScrollBar.h"
+
 #include "CanvasItem.h"
+#include "CanvasTypes.h"
+#include "CubemapUnwrapUtils.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Engine/Texture2D.h"
-#include "ThumbnailRendering/ThumbnailManager.h"
 #include "Engine/TextureCube.h"
-#include "Engine/VolumeTexture.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/TextureRenderTargetCube.h"
-#include "UnrealEdGlobals.h"
-#include "CubemapUnwrapUtils.h"
+#include "Engine/VolumeTexture.h"
+#include "ImageUtils.h"
+#include "RawMesh.h"
 #include "Slate/SceneViewport.h"
 #include "Texture2DPreview.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
+#include "UnrealEdGlobals.h"
 #include "VolumeTexturePreview.h"
-#include "OdysseyPainterEditorSettings.h"
-#include "SOdysseySurfaceViewport.h"
-#include "OdysseyPainterEditorToolkit.h"
-#include "CanvasTypes.h"
-#include "ImageUtils.h"
-#include "OdysseyPaintEngine.h"
+#include "Widgets/Layout/SScrollBar.h"
+
 #include "OdysseyLayerStack.h"
+#include "OdysseyPaintEngine.h"
+#include "OdysseyPainterEditorSettings.h"
+#include "OdysseyPainterEditorToolkit.h"
 #include "OdysseySurface.h"
 #include "SOdysseyCursorWidget.h"
-#include "RawMesh.h"
+#include "SOdysseySurfaceViewport.h"
 
 #include <memory>
 #include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportClientt"
 
-
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportClient
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit >  InOdysseyPainterEditor,
-                                                                          TWeakPtr< SOdysseySurfaceViewport >       InOdysseyPainterEditorViewport,
-                                                                          FOdysseyMeshSelector*                     InMeshSelector)
+FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit >  iOdysseyPainterEditor,
+                                                                          TWeakPtr< SOdysseySurfaceViewport >       iOdysseyPainterEditorViewport,
+                                                                          FOdysseyMeshSelector*                     iMeshSelector)
     : mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
-    , OdysseyPainterEditorPtr( InOdysseyPainterEditor )
-    , OdysseyPainterEditorViewportPtr( InOdysseyPainterEditorViewport )
-    , MeshSelector( InMeshSelector )
-    , CheckerboardTexture( NULL )
-    , CurrentMouseCursor( EMouseCursor::Default )
-    , PivotPointRatio ( FVector2D( 0.5, 0.5 ) )
-    , CurrentToolState( eState::kIdle )
+    , mOdysseyPainterEditorPtr( iOdysseyPainterEditor )
+    , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
+    , mMeshSelector( iMeshSelector )
+    , mCheckerboardTexture( NULL )
+    , mCurrentMouseCursor( EMouseCursor::Default )
+    , mPivotPointRatio( FVector2D( 0.5, 0.5 ) )
+    , mCurrentToolState( eState::kIdle )
 {
-    check( OdysseyPainterEditorPtr.IsValid() &&
-           OdysseyPainterEditorViewportPtr.IsValid() );
+    check( mOdysseyPainterEditorPtr.IsValid() &&
+           mOdysseyPainterEditorViewportPtr.IsValid() );
 
     ModifyCheckerboardTextureColors();
 }
-
 
 FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 {
     DestroyCheckerboardTexture();
 }
 
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ FViewportClient API
 void
-FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas )
+FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    if( !OdysseyPainterEditorPtr.IsValid() )
+    if( !mOdysseyPainterEditorPtr.IsValid() )
         return;
 
     // Draw on tick or catch up
     /*
-    auto paintengine = OdysseyPainterEditorPtr.Pin()->PaintEngine();
+    auto paintengine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
     FVector2D oldpoint = FVector2D( RefEventStrokePoint.x, RefEventStrokePoint.y );
     FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
     FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-    if( CurrentToolState == eState::kDrawing
-    &&  ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position_in_texture ) ) )
+    if( mCurrentToolState == eState::kDrawing
+    && ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position_in_texture ) ) )
     {
         FOdysseyStrokePoint point = RefEventStrokePoint;
         point.x = position_in_texture.X;
@@ -86,193 +85,189 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* Viewport, FCanvas* Canvas 
     */
 
     // Send Tick to PaintEngine
-    OdysseyPainterEditorPtr.Pin()->PaintEngine()->Tick();
+    mOdysseyPainterEditorPtr.Pin()->PaintEngine()->Tick();
 
-    double Rotation         = OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees();
-    FVector2D Pan           = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    double rotation         = mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees();
+    FVector2D pan           = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
-    UTexture* Texture       = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture();
-    FVector2D Ratio         = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(),
-                                         OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
-    FVector2D ViewportSize  = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X,
-                                         OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
-    FVector2D ScrollBarPos  = GetViewportScrollBarPositions();
-    int32 YOffset           = ( Ratio.Y > 1.0f ) ? ( ( ViewportSize.Y - ( ViewportSize.Y / Ratio.Y ) ) * 0.5f ) + Pan.Y: Pan.Y;
-    int32 YPos              = YOffset - ScrollBarPos.Y;
-    int32 XOffset           = ( Ratio.X > 1.0f ) ? ( ( ViewportSize.X - ( ViewportSize.X / Ratio.X ) ) * 0.5f ) + Pan.X: Pan.X;
-    int32 XPos              = XOffset - ScrollBarPos.X;
+    UTexture* texture       = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture();
+    FVector2D ratio         = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(),
+                                         mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
+    FVector2D viewportSize  = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X,
+                                         mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
+    FVector2D scrollBarPos  = GetViewportScrollBarPositions();
+    int32 yOffset           = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) + pan.Y: pan.Y;
+    int32 yPos              = yOffset - scrollBarPos.Y;
+    int32 xOffset           = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) + pan.X: pan.X;
+    int32 xPos              = xOffset - scrollBarPos.X;
 
     UpdateScrollBars();
-    const UOdysseyPainterEditorSettings& Settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    Canvas->Clear( Settings.BackgroundColor );
-    UTexture2D* Texture2D = Cast< UTexture2D >( Texture );
+    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    ioCanvas->Clear( settings.BackgroundColor );
+    UTexture2D* texture2D = Cast< UTexture2D >( texture );
 
     // Fully stream in the texture before drawing it.
-    if (Texture2D)
+    if( texture2D )
     {
-        Texture2D->SetForceMipLevelsToBeResident( 30.0f );
-        Texture2D->WaitForStreaming();
+        texture2D->SetForceMipLevelsToBeResident( 30.0f );
+        texture2D->WaitForStreaming();
     }
 
     // Figure out the size we need
-    uint32 Width, Height;
-    OdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( Width, Height );
-    const float MipLevel = 1;
+    uint32 width, height;
+    mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
+    const float mipLevel = 1;
 
-    TRefCountPtr<FBatchedElementParameters> BatchedElementParameters;
+    TRefCountPtr<FBatchedElementParameters> batchedElementParameters;
 
-    if (GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM4)
+    if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM4 )
     {
         //ODYSSEY: PATCH
-        bool bIsNormalMap = Texture2D->IsNormalMap();
-        bool bIsSingleChannel = Texture2D->CompressionSettings == TC_Grayscale || Texture2D->CompressionSettings == TC_Alpha;
-        bool bIsVirtual = Texture2D->IsCurrentlyVirtualTextured();
-        float LayerIndex = 0.f;
-        BatchedElementParameters = new FBatchedElementTexture2DPreviewParameters(MipLevel, LayerIndex, bIsNormalMap, bIsSingleChannel, bIsVirtual);
+        bool isNormalMap = texture2D->IsNormalMap();
+        bool isSingleChannel = texture2D->CompressionSettings == TC_Grayscale || texture2D->CompressionSettings == TC_Alpha;
+        bool isVirtual = texture2D->IsCurrentlyVirtualTextured();
+        float layerIndex = 0.f;
+        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVirtual );
     }
 
-    FVector2D viewport_center( Viewport->GetSizeXY().X / 2, Viewport->GetSizeXY().Y / 2 );
+    FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );
     FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
-    PivotPointRatio = FVector2D(position_in_texture.X / OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), position_in_texture.Y / OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() );
+    mPivotPointRatio = FVector2D( position_in_texture.X / mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), position_in_texture.Y / mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() );
 
     // Draw background Checker
     {
-        FCanvasTileItem TileItem( FVector2D(XPos, YPos), CheckerboardTexture->Resource, FVector2D(Width, Height), FVector2D(0.f, 0.f), FVector2D( Width / CheckerboardTexture->GetSizeX(), Height / CheckerboardTexture->GetSizeY()), FLinearColor::White);
-        TileItem.BlendMode = SE_BLEND_Opaque;
-        TileItem.PivotPoint.Set(PivotPointRatio.X, PivotPointRatio.Y);
-        TileItem.Rotation.Add(0, Rotation, 0);
-        Canvas->DrawItem(TileItem);
+        FCanvasTileItem tileItem( FVector2D( xPos, yPos ), mCheckerboardTexture->Resource, FVector2D( width, height ), FVector2D( 0.f, 0.f ), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
+        tileItem.BlendMode = SE_BLEND_Opaque;
+        tileItem.PivotPoint.Set( mPivotPointRatio.X, mPivotPointRatio.Y );
+        tileItem.Rotation.Add( 0, rotation, 0 );
+        ioCanvas->DrawItem( tileItem );
     }
 
     // Draw Drawing Surface
-    if ( Texture->Resource != nullptr )
+    if( texture->Resource != nullptr )
     {
-        FCanvasTileItem TileItem( FVector2D( XPos, YPos ), Texture->Resource, FVector2D( Width, Height ), FLinearColor::White );
-        TileItem.BatchedElementParameters = BatchedElementParameters;
-        uint32 Result = (uint32)SE_BLEND_RGBA_MASK_START;
-        Result += (1 << 0);
-        Result += (1 << 1);
-        Result += (1 << 2);
-        Result += (1 << 3);
-        TileItem.BlendMode = (ESimpleElementBlendMode)Result;
-        TileItem.PivotPoint.Set(PivotPointRatio.X, PivotPointRatio.Y);
-        TileItem.Rotation.Add(0, Rotation, 0 );
-        Canvas->DrawItem( TileItem );
+        FCanvasTileItem tileItem( FVector2D( xPos, yPos ), texture->Resource, FVector2D( width, height ), FLinearColor::White );
+        tileItem.BatchedElementParameters = batchedElementParameters;
+        uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
+        result += ( 1 << 0 );
+        result += ( 1 << 1 );
+        result += ( 1 << 2 );
+        result += ( 1 << 3 );
+        tileItem.BlendMode = (ESimpleElementBlendMode)result;
+        tileItem.PivotPoint.Set( mPivotPointRatio.X, mPivotPointRatio.Y );
+        tileItem.Rotation.Add( 0, rotation, 0 );
+        ioCanvas->DrawItem( tileItem );
 
         /* TODO: Unreal BoxItem doesn't support rotation, so we can't draw it properly. We'll have to come up with our own HUD
         // Draw a white border around the texture to show its extents
-        if (Settings.TextureBorderEnabled)
+        if( settings.TextureBorderEnabled )
         {
-            FCanvasBoxItem BoxItem( FVector2D(XPos, YPos), FVector2D(Width , Height ) );
-            BoxItem.SetColor( Settings.TextureBorderColor );
-            Canvas->DrawItem( BoxItem );
+            FCanvasBoxItem boxItem( FVector2D( xPos, yPos ), FVector2D( width , height ) );
+            boxItem.SetColor( Settings.TextureBorderColor );
+            Canvas->DrawItem( boxItem );
         }
         */
     }
 
     // Draw Cursor Preview
-    auto PE = OdysseyPainterEditorPtr.Pin()->PaintEngine();
-    PE->UpdateBrushCursorPreview();
-    if( PE->mBrushCursorPreviewSurface )
+    auto paintEngine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
+    paintEngine->UpdateBrushCursorPreview();
+    if( paintEngine->mBrushCursorPreviewSurface )
     {
-        PE->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );
-        PE->mBrushCursorPreviewSurface->Texture()->WaitForStreaming();
-        FVector2D pos_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
-        FVector2D shift = PE->mBrushCursorPreviewShift;
+        paintEngine->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );
+        paintEngine->mBrushCursorPreviewSurface->Texture()->WaitForStreaming();
+        FVector2D pos_in_viewport( iViewport->GetMouseX(), iViewport->GetMouseY() );
+        FVector2D shift = paintEngine->mBrushCursorPreviewShift;
         FVector2D pos = pos_in_viewport + shift * GetZoom();
-        FVector2D size = FVector2D( PE->mBrushCursorPreviewSurface->Block()->Width(), PE->mBrushCursorPreviewSurface->Block()->Height() ) * GetZoom();
-        FCanvasTileItem CursorItem( pos, PE->mBrushCursorPreviewSurface->Texture()->Resource, size, FLinearColor::White );
-        uint32 Result = (uint32)SE_BLEND_RGBA_MASK_START;
-        Result += (1 << 0);
-        Result += (1 << 1);
-        Result += (1 << 2);
-        Result += (1 << 3);
-        CursorItem.BlendMode = (ESimpleElementBlendMode)Result;
-        Canvas->DrawItem( CursorItem );
+        FVector2D size = FVector2D( paintEngine->mBrushCursorPreviewSurface->Block()->Width(), paintEngine->mBrushCursorPreviewSurface->Block()->Height() ) * GetZoom();
+        FCanvasTileItem cursorItem( pos, paintEngine->mBrushCursorPreviewSurface->Texture()->Resource, size, FLinearColor::White );
+        uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
+        result += ( 1 << 0 );
+        result += ( 1 << 1 );
+        result += ( 1 << 2 );
+        result += ( 1 << 3 );
+        cursorItem.BlendMode = (ESimpleElementBlendMode)result;
+        ioCanvas->DrawItem( cursorItem );
     }
 
-    if( MeshSelector->GetCurrentMesh() )
+    if( mMeshSelector->GetCurrentMesh() )
     {
-        int currentLOD = MeshSelector->GetCurrentLOD();
-        int currentUV = MeshSelector->GetCurrentUVChannel();
+        int currentLOD = mMeshSelector->GetCurrentLOD();
+        int currentUV = mMeshSelector->GetCurrentUVChannel();
         if( currentLOD >= 0 && currentUV >= 0 )
         {
-            FRawMesh RawMesh;
+            FRawMesh rawMesh;
             //ODYSSEY: PATCH
-            //MeshSelector->GetCurrentMesh()->SourceModels[currentLOD].LoadRawMesh(RawMesh);
-            MeshSelector->GetCurrentMesh()->GetSourceModel(currentLOD).LoadRawMesh(RawMesh);
+            //mMeshSelector->GetCurrentMesh()->SourceModels[currentLOD].LoadRawMesh(RawMesh);
+            mMeshSelector->GetCurrentMesh()->GetSourceModel( currentLOD ).LoadRawMesh( rawMesh );
 
-            FIndexArrayView IndexBuffer = MeshSelector->GetCurrentMesh()->RenderData.Get()->LODResources[currentLOD].IndexBuffer.GetArrayView();
-            DrawUVsOntoViewport(Viewport, Canvas, currentUV, MeshSelector->GetCurrentMesh()->RenderData.Get()->LODResources[0].VertexBuffers.StaticMeshVertexBuffer, IndexBuffer );
+            FIndexArrayView indexBuffer = mMeshSelector->GetCurrentMesh()->RenderData.Get()->LODResources[currentLOD].IndexBuffer.GetArrayView();
+            DrawUVsOntoViewport( iViewport, ioCanvas, currentUV, mMeshSelector->GetCurrentMesh()->RenderData.Get()->LODResources[0].VertexBuffers.StaticMeshVertexBuffer, indexBuffer );
         }
     }
-
 }
-
 
 bool
-FOdysseyPainterEditorViewportClient::InputKey( FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed, bool Gamepad )
+FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
-    point_in_viewport.x = Viewport->GetMouseX();
-    point_in_viewport.y = Viewport->GetMouseY();
-    return InputKeyWithStrokePoint( point_in_viewport, ControllerId, Key, Event, AmountDepressed, Gamepad );
+    point_in_viewport.x = iViewport->GetMouseX();
+    point_in_viewport.y = iViewport->GetMouseY();
+    return InputKeyWithStrokePoint( point_in_viewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad );
 }
 
-
 void
-FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* Viewport, int32 X, int32 Y )
+FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
-    point_in_viewport.x = X;
-    point_in_viewport.y = Y;
+    point_in_viewport.x = iX;
+    point_in_viewport.y = iY;
     CapturedMouseMoveWithStrokePoint( point_in_viewport );
 }
 
-
 bool
-FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 ControllerId, FKey Key, EInputEvent Event, float AmountDepressed, bool bGamepad )
+FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
-    if( CurrentToolState == eState::kIdle )
+    if( mCurrentToolState == eState::kIdle )
     {
-        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kDrawing;
-            //OdysseyPainterEditorPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
-            //OdysseyPainterEditorPtr.Pin()->MarkTransactionAsDirty();
+            mCurrentToolState = eState::kDrawing;
+            //mOdysseyPainterEditorPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
+            //mOdysseyPainterEditorPtr.Pin()->MarkTransactionAsDirty();
 
             FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
-            OdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
+            mOdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
 
             return true;
         }
-        else if( Key == EKeys::Escape && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::Escape && iEvent == EInputEvent::IE_Pressed )
         {
-            OdysseyPainterEditorPtr.Pin()->PaintEngine()->AbortStroke();
+            mOdysseyPainterEditorPtr.Pin()->PaintEngine()->AbortStroke();
             return true;
         }
-        else if( Key == EKeys::P && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::P && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kPan;
+            mCurrentToolState = eState::kPan;
             return true;
         }
-        else if( Key == EKeys::R && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::R && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kRotate;
+            mCurrentToolState = eState::kRotate;
             return true;
         }
-        else if( Key == EKeys::LeftAlt && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kPick;
+            mCurrentToolState = eState::kPick;
             return true;
         }
-        else if( Key == EKeys::MouseScrollUp )
+        else if( iKey == EKeys::MouseScrollUp )
         {
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             ZoomInInViewport( position_in_viewport );
             return true;
         }
-        else if( Key == EKeys::MouseScrollDown )
+        else if( iKey == EKeys::MouseScrollDown )
         {
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             ZoomOutInViewport( position_in_viewport );
@@ -280,124 +275,123 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         }
     }
 
-    else if( CurrentToolState == eState::kDrawing )
+    else if( mCurrentToolState == eState::kDrawing )
     {
-        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
 
-            OdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
-            //OdysseyPainterEditorPtr.Pin()->EndTransaction();
+            mOdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
+            //mOdysseyPainterEditorPtr.Pin()->EndTransaction();
 
             return true;
         }
     }
 
-    else if( CurrentToolState == eState::kRotate )
+    else if( mCurrentToolState == eState::kRotate )
     {
-        if( Key == EKeys::R && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::R && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
             return true;
         }
-        else if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kRotating;
+            mCurrentToolState = eState::kRotating;
 
-            FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
-            FVector2D center = FVector2D( size.X / 2, size.Y / 2);
+            FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+            FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D deltaCenter = position_in_viewport - center;
-            RotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+            mRotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
 
             return true;
         }
     }
-    else if( CurrentToolState == eState::kRotating )
+    else if( mCurrentToolState == eState::kRotating )
     {
-        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kRotate;
+            mCurrentToolState = eState::kRotate;
             return true;
         }
-        else if( Key == EKeys::R && Event == EInputEvent::IE_Released )
+        else if( iKey == EKeys::R && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
             return true;
         }
     }
 
-    else if( CurrentToolState == eState::kPan )
+    else if( mCurrentToolState == eState::kPan )
     {
-        if( Key == EKeys::P && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::P && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
             return true;
         }
-        else if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kPanning;
+            mCurrentToolState = eState::kPanning;
 
-            PanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
+            mPanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
             return true;
         }
     }
-    else if( CurrentToolState == eState::kPanning )
+    else if( mCurrentToolState == eState::kPanning )
     {
-        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kPan;
+            mCurrentToolState = eState::kPan;
             return true;
         }
-        else if( Key == EKeys::P && Event == EInputEvent::IE_Released )
+        else if( iKey == EKeys::P && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
             return true;
         }
     }
 
-    else if( CurrentToolState == eState::kPick )
+    else if( mCurrentToolState == eState::kPick )
     {
-        if( Key == EKeys::LeftAlt && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
             return true;
         }
-        else if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Pressed )
+        else if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
-            CurrentToolState = eState::kPicking;
+            mCurrentToolState = eState::kPicking;
 
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-            OdysseyPainterEditorPtr.Pin()->SetColor( OdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
+            mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
 
             return true;
         }
     }
-    else if( CurrentToolState == eState::kPicking )
+    else if( mCurrentToolState == eState::kPicking )
     {
-        if( Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kPick;
+            mCurrentToolState = eState::kPick;
             return true;
         }
-        else if( Key == EKeys::LeftAlt && Event == EInputEvent::IE_Released )
+        else if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Released )
         {
-            CurrentToolState = eState::kIdle;
+            mCurrentToolState = eState::kIdle;
             return true;
         }
     }
 
-    return  false;
+    return false;
 }
-
 
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport )
 {
-    if( CurrentToolState == eState::kDrawing )
+    if( mCurrentToolState == eState::kDrawing )
     {
-        auto paintengine = OdysseyPainterEditorPtr.Pin()->PaintEngine();
+        auto paintengine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
         /*
         if( paintengine->GetStokePaintOnTick() )
             return;
@@ -406,86 +400,83 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
         paintengine->PushStroke( point_in_texture );
     }
-    else if( CurrentToolState == eState::kPanning )
+    else if( mCurrentToolState == eState::kPanning )
     {
-        FVector2D deltaReference( iPointInViewport.x - PanReference.X, iPointInViewport.y - PanReference.Y );
+        FVector2D deltaReference( iPointInViewport.x - mPanReference.X, iPointInViewport.y - mPanReference.Y );
         FVector2D delta_in_viewport = FVector2D();
-        
-        float rotation = FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
 
-        delta_in_viewport.X = deltaReference.X * FMath::Cos(rotation) + deltaReference.Y * FMath::Sin(rotation);
-        delta_in_viewport.Y = -deltaReference.X * FMath::Sin(rotation) + deltaReference.Y * FMath::Cos(rotation);
-        
-        OdysseyPainterEditorViewportPtr.Pin()->AddPan( delta_in_viewport );
-        PanReference = FVector2D( iPointInViewport.x, iPointInViewport.y);
+        float rotation = FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
+
+        delta_in_viewport.X = deltaReference.X * FMath::Cos( rotation ) + deltaReference.Y * FMath::Sin( rotation );
+        delta_in_viewport.Y = -deltaReference.X * FMath::Sin( rotation ) + deltaReference.Y * FMath::Cos( rotation );
+
+        mOdysseyPainterEditorViewportPtr.Pin()->AddPan( delta_in_viewport );
+        mPanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
     }
-    else if( CurrentToolState == eState::kRotating )
+    else if( mCurrentToolState == eState::kRotating )
     {
-        FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+        FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
 
-        FVector2D center = FVector2D( size.X / 2, size.Y / 2);
+        FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
         FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
         FVector2D deltaCenter = position_in_viewport - center;
         float newRotation = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
-        float deltaRotation = RotationReference - newRotation;
+        float deltaRotation = mRotationReference - newRotation;
 
-        OdysseyPainterEditorViewportPtr.Pin()->SetRotationInDegrees( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() + FMath::RadiansToDegrees( deltaRotation ) );
+        mOdysseyPainterEditorViewportPtr.Pin()->SetRotationInDegrees( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() + FMath::RadiansToDegrees( deltaRotation ) );
 
-        RotationReference = newRotation;
+        mRotationReference = newRotation;
     }
-    else if( CurrentToolState == eState::kPicking )
+    else if( mCurrentToolState == eState::kPicking )
     {
         FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
         FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-        OdysseyPainterEditorPtr.Pin()->SetColor( OdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
+        mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
     }
 }
 
 void
-FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* Viewport, int32 X, int32 Y )
+FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX, int32 iY )
 {
-    if( CurrentToolState == eState::kDrawing
-        || CurrentToolState == eState::kPanning
-        || CurrentToolState == eState::kRotating
-        || CurrentToolState == eState::kPicking )
+    if( mCurrentToolState == eState::kDrawing
+        || mCurrentToolState == eState::kPanning
+        || mCurrentToolState == eState::kRotating
+        || mCurrentToolState == eState::kPicking )
         return;
 
-    CurrentToolState = eState::kIdle;
+    mCurrentToolState = eState::kIdle;
 }
 
 void
-FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* Viewport )
+FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
 {
-    if( CurrentToolState == eState::kDrawing
-        || CurrentToolState == eState::kPanning
-        || CurrentToolState == eState::kRotating
-        || CurrentToolState == eState::kPicking )
+    if( mCurrentToolState == eState::kDrawing
+        || mCurrentToolState == eState::kPanning
+        || mCurrentToolState == eState::kRotating
+        || mCurrentToolState == eState::kPicking )
         return;
 
-    CurrentToolState = eState::kIdle;
+    mCurrentToolState = eState::kIdle;
 }
-
 
 EMouseCursor::Type
-FOdysseyPainterEditorViewportClient::GetCursor( FViewport* Viewport, int32 X, int32 Y )
+FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, int32 iY )
 {
-    if( CurrentToolState == eState::kPan || CurrentToolState == eState::kPanning )
-        CurrentMouseCursor = EMouseCursor::GrabHand;
-    else if( CurrentToolState == eState::kPick || CurrentToolState == eState::kPicking )
-        CurrentMouseCursor = EMouseCursor::EyeDropper;
+    if( mCurrentToolState == eState::kPan || mCurrentToolState == eState::kPanning )
+        mCurrentMouseCursor = EMouseCursor::GrabHand;
+    else if( mCurrentToolState == eState::kPick || mCurrentToolState == eState::kPicking )
+        mCurrentMouseCursor = EMouseCursor::EyeDropper;
     else
-        CurrentMouseCursor = EMouseCursor::Crosshairs;
+        mCurrentMouseCursor = EMouseCursor::Crosshairs;
 
-    return  CurrentMouseCursor;
+    return mCurrentMouseCursor;
 }
-
 
 TOptional< TSharedRef< SWidget > >
-FOdysseyPainterEditorViewportClient::MapCursor( FViewport* Viewport, const FCursorReply& CursorReply )
+FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply )
 {
-    return  FViewportClient::MapCursor( Viewport, CursorReply );
+    return FViewportClient::MapCursor( iViewport, iCursorReply );
 }
-
 
 EMouseCaptureMode
 FOdysseyPainterEditorViewportClient::CaptureMouseOnClick()
@@ -493,15 +484,13 @@ FOdysseyPainterEditorViewportClient::CaptureMouseOnClick()
     return mMouseCaptureMode;
 }
 
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------ FGCObject API
 void
-FOdysseyPainterEditorViewportClient::AddReferencedObjects( FReferenceCollector& Collector )
+FOdysseyPainterEditorViewportClient::AddReferencedObjects( FReferenceCollector& ioCollector )
 {
-    Collector.AddReferencedObject(CheckerboardTexture);
+    ioCollector.AddReferencedObject( mCheckerboardTexture );
 }
-
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
@@ -510,263 +499,252 @@ FOdysseyPainterEditorViewportClient::ModifyCheckerboardTextureColors()
 {
     DestroyCheckerboardTexture();
 
-    const UOdysseyPainterEditorSettings& Settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    CheckerboardTexture = FImageUtils::CreateCheckerboardTexture( Settings.CheckerColorOne, Settings.CheckerColorTwo, Settings.CheckerSize );
+    const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
+    mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
 }
-
 
 FText
 FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
 {
-    uint32 Height = 1;
-    uint32 Width = 1;
-    OdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions(Width, Height);
-    return  FText::Format( NSLOCTEXT( "OdysseyPainterEditor",
+    uint32 height = 1;
+    uint32 width = 1;
+    mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
+    return FText::Format( NSLOCTEXT( "OdysseyPainterEditor",
                                       "DisplayedResolution",
                                       "Displayed: {0}x{1}" ),
-                           FText::AsNumber( FMath::Max( ( uint32 )1, Width ) ),
-                           FText::AsNumber( FMath::Max( ( uint32 )1, Height ) ) );
+                           FText::AsNumber( FMath::Max( uint32( 1 ), width ) ),
+                           FText::AsNumber( FMath::Max( uint32( 1 ), height ) ) );
 }
-
-
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
 void
 FOdysseyPainterEditorViewportClient::UpdateScrollBars()
 {
-    TSharedPtr<SOdysseySurfaceViewport> Viewport = OdysseyPainterEditorViewportPtr.Pin();
+    TSharedPtr<SOdysseySurfaceViewport> viewport = mOdysseyPainterEditorViewportPtr.Pin();
 
-    if (!Viewport.IsValid() || !Viewport->GetVerticalScrollBar().IsValid() || !Viewport->GetHorizontalScrollBar().IsValid())
-    {
+    if( !viewport.IsValid() || !viewport->GetVerticalScrollBar().IsValid() || !viewport->GetHorizontalScrollBar().IsValid() )
         return;
-    }
 
-    float VRatio = OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
-    float HRatio = OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float VDistFromBottom = Viewport->GetVerticalScrollBar()->DistanceFromBottom();
-    float HDistFromBottom = Viewport->GetHorizontalScrollBar()->DistanceFromBottom();
+    float vRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    float hRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
+    float vDistFromBottom = viewport->GetVerticalScrollBar()->DistanceFromBottom();
+    float hDistFromBottom = viewport->GetHorizontalScrollBar()->DistanceFromBottom();
 
-    if (VRatio < 1.0f)
+    if( vRatio < 1.0f )
     {
-        if (VDistFromBottom < 1.0f)
+        if( vDistFromBottom < 1.0f )
         {
-            Viewport->GetVerticalScrollBar()->SetState(FMath::Clamp(1.0f - VRatio - VDistFromBottom, 0.0f, 1.0f), VRatio);
+            viewport->GetVerticalScrollBar()->SetState( FMath::Clamp( 1.0f - vRatio - vDistFromBottom, 0.0f, 1.0f ), vRatio );
         }
         else
         {
-            Viewport->GetVerticalScrollBar()->SetState(0.0f, VRatio);
+            viewport->GetVerticalScrollBar()->SetState( 0.0f, vRatio );
         }
     }
 
-    if (HRatio < 1.0f)
+    if( hRatio < 1.0f )
     {
-        if (HDistFromBottom < 1.0f)
+        if( hDistFromBottom < 1.0f )
         {
-            Viewport->GetHorizontalScrollBar()->SetState(FMath::Clamp(1.0f - HRatio - HDistFromBottom, 0.0f, 1.0f), HRatio);
+            viewport->GetHorizontalScrollBar()->SetState( FMath::Clamp( 1.0f - hRatio - hDistFromBottom, 0.0f, 1.0f ), hRatio );
         }
         else
         {
-            Viewport->GetHorizontalScrollBar()->SetState(0.0f, HRatio);
+            viewport->GetHorizontalScrollBar()->SetState( 0.0f, hRatio );
         }
     }
 }
 
-
 FVector2D
 FOdysseyPainterEditorViewportClient::GetViewportScrollBarPositions() const
 {
-    FVector2D Positions = FVector2D::ZeroVector;
-    if (OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar().IsValid() && OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar().IsValid())
+    FVector2D positions = FVector2D::ZeroVector;
+    if( mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar().IsValid() && mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar().IsValid() )
     {
-        uint32 Width, Height;
-        UTexture* Texture = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture();
-        float VRatio = OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
-        float HRatio = OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-        float VDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
-        float HDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
+        uint32 width, height;
+        float vRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+        float hRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
+        float vDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
+        float hDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
 
-        OdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions(Width, Height);
+        mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
 
-        if ((OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->GetVisibility() == EVisibility::Visible) && VDistFromBottom < 1.0f)
+        if( ( mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->GetVisibility() == EVisibility::Visible ) && vDistFromBottom < 1.0f )
         {
-            Positions.Y = FMath::Clamp(1.0f - VRatio - VDistFromBottom, 0.0f, 1.0f) * Height;
+            positions.Y = FMath::Clamp( 1.0f - vRatio - vDistFromBottom, 0.0f, 1.0f ) * height;
         }
         else
         {
-            Positions.Y = 0.0f;
+            positions.Y = 0.0f;
         }
 
-        if ((OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->GetVisibility() == EVisibility::Visible) && HDistFromBottom < 1.0f)
+        if( ( mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->GetVisibility() == EVisibility::Visible ) && hDistFromBottom < 1.0f )
         {
-            Positions.X = FMath::Clamp(1.0f - HRatio - HDistFromBottom, 0.0f, 1.0f) * Width;
+            positions.X = FMath::Clamp( 1.0f - hRatio - hDistFromBottom, 0.0f, 1.0f ) * width;
         }
         else
         {
-            Positions.X = 0.0f;
+            positions.X = 0.0f;
         }
     }
 
-    return Positions;
+    return positions;
 }
 
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 {
-    if (CheckerboardTexture)
+    if( mCheckerboardTexture )
     {
-        if (CheckerboardTexture->Resource)
+        if( mCheckerboardTexture->Resource )
         {
-            CheckerboardTexture->ReleaseResource();
+            mCheckerboardTexture->ReleaseResource();
         }
-        CheckerboardTexture->MarkPendingKill();
-        CheckerboardTexture = NULL;
+        mCheckerboardTexture->MarkPendingKill();
+        mCheckerboardTexture = NULL;
     }
 }
-
 
 void
 FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositionInViewport )
 {
-    FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
     // Diff between before and after the zoom
-    float oldHScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float oldVScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    float oldHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
+    float oldVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
 
-    OdysseyPainterEditorViewportPtr.Pin()->ZoomIn();
+    mOdysseyPainterEditorViewportPtr.Pin()->ZoomIn();
 
-    float newHScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float newVScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    float newHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
+    float newVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
 
 
-    float HScrollSizeDiff = newHScrollSize - oldHScrollSize;
-    float VScrollSizeDiff = newVScrollSize - oldVScrollSize;
+    float hScrollSizeDiff = newHScrollSize - oldHScrollSize;
+    float vScrollSizeDiff = newVScrollSize - oldVScrollSize;
     //-------
 
     //Useful variables to determine the new position of the scrollbars
-    float VDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
-    float HDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
+    float vDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
+    float hDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
 
     float xCursorOnViewport = iPositionInViewport.X;
     float yCursorOnViewport = iPositionInViewport.Y;
 
-    FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+    FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
 
-    float ratioX = (xCursorOnViewport - Pan.X) / FMath::Max(float(size.X), 1.f);
-    float ratioY = (yCursorOnViewport - Pan.Y) / FMath::Max(float(size.Y), 1.f);
+    float ratioX = ( xCursorOnViewport - pan.X ) / FMath::Max( float( size.X ), 1.f );
+    float ratioY = ( yCursorOnViewport - pan.Y ) / FMath::Max( float( size.Y ), 1.f );
     //------
 
     //Set the scrollbars
-    OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->SetState(FMath::Clamp(1 - (HDistFromBottom + newHScrollSize - HScrollSizeDiff * (1 - ratioX)), 0.0f, 1.0f - newHScrollSize), newHScrollSize);
-    OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->SetState(FMath::Clamp(1 - (VDistFromBottom + newVScrollSize - VScrollSizeDiff * (1 - ratioY)), 0.0f, 1.0f - newVScrollSize), newVScrollSize);
+    mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->SetState( FMath::Clamp( 1 - ( hDistFromBottom + newHScrollSize - hScrollSizeDiff * ( 1 - ratioX ) ), 0.0f, 1.0f - newHScrollSize ), newHScrollSize );
+    mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->SetState( FMath::Clamp( 1 - ( vDistFromBottom + newVScrollSize - vScrollSizeDiff * ( 1 - ratioY ) ), 0.0f, 1.0f - newVScrollSize ), newVScrollSize );
 }
 
 void
 FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositionInViewport )
 {
-    FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
     // Diff between before and after the zoom
-    float oldHScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float oldVScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    float oldHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
+    float oldVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
 
-    OdysseyPainterEditorViewportPtr.Pin()->ZoomOut();
+    mOdysseyPainterEditorViewportPtr.Pin()->ZoomOut();
 
-    float newHScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float newVScrollSize = OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    float newHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
+    float newVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
 
 
-    float HScrollSizeDiff = newHScrollSize - oldHScrollSize;
-    float VScrollSizeDiff = newVScrollSize - oldVScrollSize;
+    float hScrollSizeDiff = newHScrollSize - oldHScrollSize;
+    float vScrollSizeDiff = newVScrollSize - oldVScrollSize;
     //-------
 
     //Useful variables to determine the new position of the scrollbars
-    float VDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
-    float HDistFromBottom = OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
+    float vDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
+    float hDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
 
     float xCursorOnViewport = iPositionInViewport.X;
     float yCursorOnViewport = iPositionInViewport.Y;
 
-    FIntPoint size = OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
+    FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
 
-    float ratioX = (xCursorOnViewport - Pan.X) / FMath::Max(float(size.X), 1.f);
-    float ratioY = (yCursorOnViewport - Pan.Y) / FMath::Max(float(size.Y), 1.f);
+    float ratioX = ( xCursorOnViewport - pan.X ) / FMath::Max( float( size.X ), 1.f );
+    float ratioY = ( yCursorOnViewport - pan.Y ) / FMath::Max( float( size.Y ), 1.f );
     //------
 
     //Set the scrollbars
-    OdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->SetState(FMath::Clamp(1 - (HDistFromBottom + newHScrollSize - HScrollSizeDiff * (1 - ratioX)), 0.0f, 1.0f - newHScrollSize), newHScrollSize);
-    OdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->SetState(FMath::Clamp(1 - (VDistFromBottom + newVScrollSize - VScrollSizeDiff * (1 - ratioY)), 0.0f, 1.0f - newVScrollSize), newVScrollSize);
+    mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->SetState( FMath::Clamp( 1 - ( hDistFromBottom + newHScrollSize - hScrollSizeDiff * ( 1 - ratioX ) ), 0.0f, 1.0f - newHScrollSize ), newHScrollSize );
+    mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->SetState( FMath::Clamp( 1 - ( vDistFromBottom + newVScrollSize - vScrollSizeDiff * ( 1 - ratioY ) ), 0.0f, 1.0f - newVScrollSize ), newVScrollSize );
 }
-
 
 double
 FOdysseyPainterEditorViewportClient::GetZoom() const
 {
     double zoom = 1.0;
-    bool fitToViewport = OdysseyPainterEditorViewportPtr.Pin()->GetFitToViewport();
+    bool fitToViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetFitToViewport();
 
     if( fitToViewport )
     {
         //The member zoom is overriden by the fit to viewport. The drawing function uses another way to calculate the effective zoom, and we do the same here
-        uint32 Width, Height;
-        OdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions(Width, Height);
-        zoom = static_cast<double> (Width) / static_cast<double> (OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width());
+        uint32 width, height;
+        mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
+        zoom = static_cast<double>( width ) / static_cast<double>( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() );
     }
     else
     {
         //The member zoom is used to draw the viewport, we can use it
-        zoom = OdysseyPainterEditorViewportPtr.Pin()->GetZoom();
+        zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
     }
 
-    return  zoom;
+    return zoom;
 }
 
-
 FVector2D
-FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation )  const
+FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation ) const
 {
     double zoom = GetZoom();
-    FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
-    FVector2D TextureViewportPosition = GetViewportScrollBarPositions();
-    FVector2D Ratio = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(), OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
-    FVector2D ViewportSize = FVector2D(OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y);
-    int32 YOffset = (Ratio.Y > 1.0f) ? ((ViewportSize.Y - (ViewportSize.Y / Ratio.Y)) * 0.5f) : 0;
-    int32 XOffset = (Ratio.X > 1.0f) ? ((ViewportSize.X - (ViewportSize.X / Ratio.X)) * 0.5f) : 0;
+    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    FVector2D textureViewportPosition = GetViewportScrollBarPositions();
+    FVector2D ratio = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(), mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
+    FVector2D viewportSize = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
+    int32 yOffset = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) : 0;
+    int32 xOffset = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) : 0;
 
-    int textureWidth = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width();
-    int textureHeight = OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height();
+    int textureWidth = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width();
+    int textureHeight = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height();
 
-    FVector2D texturePanPivot = FVector2D(PivotPointRatio.X * textureWidth, PivotPointRatio.Y * textureHeight) - 0.5 * FVector2D( textureWidth, textureHeight );
+    FVector2D texturePanPivot = FVector2D( mPivotPointRatio.X * textureWidth, mPivotPointRatio.Y * textureHeight ) - 0.5 * FVector2D( textureWidth, textureHeight );
 
-    FVector2D position = FVector2D (( iMouseInViewport.X + TextureViewportPosition.X - XOffset - Pan.X ) / zoom, ( iMouseInViewport.Y + TextureViewportPosition.Y - YOffset - Pan.Y ) / zoom);
+    FVector2D position = FVector2D( ( iMouseInViewport.X + textureViewportPosition.X - xOffset - pan.X ) / zoom, ( iMouseInViewport.Y + textureViewportPosition.Y - yOffset - pan.Y ) / zoom );
 
     if( iWithRotation )
     {
-        if( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0)
+        if( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
         {
-            float rotation = FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
-            FVector2D center = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
+            float rotation = FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
+            FVector2D center = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width(), mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() ) / 2;
             position -= center;
 
             FVector2D pivotPan = texturePanPivot;
-            pivotPan.X = texturePanPivot.X * FMath::Cos(rotation) + texturePanPivot.Y * FMath::Sin(rotation) - texturePanPivot.X;
-            pivotPan.Y = -texturePanPivot.X * FMath::Sin(rotation) + texturePanPivot.Y * FMath::Cos(rotation) - texturePanPivot.Y;
+            pivotPan.X = texturePanPivot.X * FMath::Cos( rotation ) + texturePanPivot.Y * FMath::Sin( rotation ) - texturePanPivot.X;
+            pivotPan.Y = -texturePanPivot.X * FMath::Sin( rotation ) + texturePanPivot.Y * FMath::Cos( rotation ) - texturePanPivot.Y;
 
-            float x = position.X * FMath::Cos(rotation) + position.Y * FMath::Sin(rotation) + center.X;
-            float y = -position.X * FMath::Sin(rotation) + position.Y * FMath::Cos(rotation) + center.Y;
+            float x = position.X * FMath::Cos( rotation ) + position.Y * FMath::Sin( rotation ) + center.X;
+            float y = -position.X * FMath::Sin( rotation ) + position.Y * FMath::Cos( rotation ) + center.Y;
 
             position.X = x - pivotPan.X;
             position.Y = y - pivotPan.Y;
         }
     }
 
-    return  position;
+    return position;
 }
 
-
-FOdysseyStrokePoint   
-FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport )  const
+FOdysseyStrokePoint
+FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport ) const
 {
     FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
     FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
@@ -777,104 +755,103 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStroke
     return point_in_texture;
 }
 
-
-void FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport(FViewport* InViewport, FCanvas* InCanvas, int32 UVChannel, FStaticMeshVertexBuffer& VertexBuffer, FIndexArrayView& Indices )
+void 
+FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices )
 {
-    FVector2D Pan = OdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
-    uint32 Width, Height;
-    OdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( Width, Height );
-    float rotation = -FMath::DegreesToRadians( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
+    uint32 width, height;
+    mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
+    float rotation = -FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
 
     double zoom = GetZoom();
-    FVector2D TextureViewportPosition = GetViewportScrollBarPositions();
-    FVector2D Ratio = FVector2D( OdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(), OdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
-    FVector2D ViewportSize = FVector2D(OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, OdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y);
-    int32 YOffset = (Ratio.Y > 1.0f) ? ((ViewportSize.Y - (ViewportSize.Y / Ratio.Y)) * 0.5f) : 0;
-    int32 XOffset = (Ratio.X > 1.0f) ? ((ViewportSize.X - (ViewportSize.X / Ratio.X)) * 0.5f) : 0;
+    FVector2D ratio = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(), mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
+    FVector2D viewportSize = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
+    int32 YOffset = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) : 0;
+    int32 XOffset = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) : 0;
 
-    FVector2D ScrollBarPos  = GetViewportScrollBarPositions();
-    int32 YPos              = FMath::Min( int(YOffset - ScrollBarPos.Y), 0 );
-    int32 XPos              = FMath::Min( int(XOffset - ScrollBarPos.X), 0 );
+    FVector2D scrollBarPos = GetViewportScrollBarPositions();
+    int32 yPos = FMath::Min( int( YOffset - scrollBarPos.Y ), 0 );
+    int32 xPos = FMath::Min( int( XOffset - scrollBarPos.X ), 0 );
 
-    if( ( ( uint32 )UVChannel < VertexBuffer.GetNumTexCoords() ) )
+    if( ( (uint32)iUVChannel < iVertexBuffer.GetNumTexCoords() ) )
     {
         //calculate scaling
-        const int32 MinY = YOffset;
-        const int32 MinX = XOffset;
-        const FVector2D UVBoxOrigin(MinX + XPos + Pan.X, MinY + YPos + Pan.Y);
+        const int32 minY = YOffset;
+        const int32 minX = XOffset;
+        const FVector2D uvBoxOrigin( minX + xPos + pan.X, minY + yPos + pan.Y );
 
         /* If we want to draw a bounding box to the UV
-        FCanvasTileItem BoxBackgroundTileItem(UVBoxOrigin, GWhiteTexture, FVector2D(Width, Height), FLinearColor(0, 0, 0, 0.0f));
+        FCanvasTileItem BoxBackgroundTileItem(uvBoxOrigin, GWhiteTexture, FVector2D(Width, Height), FLinearColor(0, 0, 0, 0.0f));
         BoxBackgroundTileItem.PivotPoint = FVector2D( 0.5, 0.5 );
-        BoxBackgroundTileItem.Rotation.Add(0, OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees(), 0 );
+        BoxBackgroundTileItem.Rotation.Add(0, mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees(), 0 );
         BoxBackgroundTileItem.BlendMode = SE_BLEND_AlphaComposite;
         InCanvas->DrawItem(BoxBackgroundTileItem);
         */
 
         //draw triangles
-        uint32 NumIndices = Indices.Num();
-        FCanvasLineItem LineItem;
-        for (uint32 i = 0; i < NumIndices - 2; i += 3)
+        uint32 numIndices = iIndices.Num();
+        FCanvasLineItem lineItem; // still useful ?!
+        for( uint32 i = 0; i < numIndices - 2; i += 3 )
         {
             FVector2D UVs[3];
-            bool bOutOfBounds[3];
+            bool isOutOfBounds[3];
 
-            float FudgeFactor = 1.0f/1024.0f;
-            for (int32 Corner = 0; Corner < 3; Corner++)
+            float fudgeFactor = 1.0f / 1024.0f;
+            for( int32 Corner = 0; Corner < 3; Corner++ )
             {
-                UVs[Corner] = (VertexBuffer.GetVertexUV(Indices[i + Corner], UVChannel));
+                UVs[Corner] = ( iVertexBuffer.GetVertexUV( iIndices[i + Corner], iUVChannel ) );
 
-                bOutOfBounds[Corner] = (UVs[Corner].X < -FudgeFactor || UVs[Corner].X > (1.0f+FudgeFactor)) || (UVs[Corner].Y < -FudgeFactor || UVs[Corner].Y > (1.0f+FudgeFactor));
+                isOutOfBounds[Corner] = ( UVs[Corner].X < -fudgeFactor || UVs[Corner].X >( 1.0f + fudgeFactor ) ) || ( UVs[Corner].Y < -fudgeFactor || UVs[Corner].Y >( 1.0f + fudgeFactor ) );
             }
 
             // Clamp the UV triangle to the [0,1] range (with some fudge).
-            int32 NumUVs = 3;
-            FudgeFactor = 0.1f;
-            FVector2D Bias(0.0f,0.0f);
+            int32 numUVs = 3;
+            fudgeFactor = 0.1f;
+            FVector2D bias( 0.0f, 0.0f );
 
-            float MinU = UVs[0].X;
-            float MinV = UVs[0].Y;
-            for (int32 j = 1; j < NumUVs; ++j)
+            float minU = UVs[0].X;
+            float minV = UVs[0].Y;
+            for( int32 j = 1; j < numUVs; ++j )
             {
-                MinU = FMath::Min(MinU,UVs[j].X);
-                MinV = FMath::Min(MinU,UVs[j].Y);
+                minU = FMath::Min( minU, UVs[j].X );
+                minV = FMath::Min( minU, UVs[j].Y );
             }
 
-            if (MinU < -FudgeFactor || MinU > (1.0f+FudgeFactor))
+            if( minU < -fudgeFactor || minU >( 1.0f + fudgeFactor ) )
             {
-                Bias.X = FMath::FloorToFloat(MinU);
+                bias.X = FMath::FloorToFloat( minU );
             }
-            if (MinV < -FudgeFactor || MinV > (1.0f+FudgeFactor))
+            if( minV < -fudgeFactor || minV >( 1.0f + fudgeFactor ) )
             {
-                Bias.Y = FMath::FloorToFloat(MinV);
-            }
-
-            for (int32 j = 0; j < NumUVs; j++)
-            {
-                UVs[j] += Bias;
+                bias.Y = FMath::FloorToFloat( minV );
             }
 
-            int maxX = InViewport->GetSizeXY().X;
-            int maxY = InViewport->GetSizeXY().Y;
-            float distSquared = (maxX * maxX / 2 + maxY * maxY / 2 );
-
-            for (int32 Edge = 0; Edge < 3; Edge++)
+            for( int32 j = 0; j < numUVs; j++ )
             {
-                int32 Corner1 = Edge;
-                int32 Corner2 = (Edge + 1) % 3;
-                FLinearColor lc = MeshSelector->GetMeshColor();
+                UVs[j] += bias;
+            }
+
+            int maxX = iViewport->GetSizeXY().X;
+            int maxY = iViewport->GetSizeXY().Y;
+            float distSquared = ( maxX * maxX / 2 + maxY * maxY / 2 );
+
+            for( int32 edge = 0; edge < 3; edge++ )
+            {
+                int32 corner1 = edge;
+                int32 corner2 = ( edge + 1 ) % 3;
+                FLinearColor lc = mMeshSelector->GetMeshColor();
                 ::ULIS::CColor c = ::ULIS::CColor::FromRGBF( lc.R, lc.G, lc.B, lc.A );
 
-                FLinearColor Color = (bOutOfBounds[Corner1] || bOutOfBounds[Corner2]) ? FLinearColor(0.6f, 0.0f, 0.0f) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
-                LineItem.SetColor(Color);
+                FLinearColor color = ( isOutOfBounds[corner1] || isOutOfBounds[corner2] ) ? FLinearColor( 0.6f, 0.0f, 0.0f ) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
+                lineItem.SetColor( color );
 
-                if( OdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
+                if( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
                 {
-                    FVector2D center = FVector2D( UVBoxOrigin.X + ( ( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() * zoom ) / 2 ), UVBoxOrigin.Y + ( ( OdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() * zoom ) / 2 ) );
+                    FVector2D center = FVector2D( uvBoxOrigin.X + ( ( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() * zoom ) / 2 ), uvBoxOrigin.Y + ( ( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() * zoom ) / 2 ) );
 
-                    FVector2D positionP1( UVs[Corner1] * FVector2D(Width, Height) + UVBoxOrigin );
-                    FVector2D positionP2( UVs[Corner2] * FVector2D(Width, Height) + UVBoxOrigin );
+                    FVector2D positionP1( UVs[corner1] * FVector2D( width, height ) + uvBoxOrigin );
+                    FVector2D positionP2( UVs[corner2] * FVector2D( width, height ) + uvBoxOrigin );
                     positionP1 -= center;
                     positionP2 -= center;
 
@@ -884,50 +861,50 @@ void FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport(FViewport* InViewp
                         continue;
                     }
 
-                    float x1 = positionP1.X * FMath::Cos(rotation) + positionP1.Y * FMath::Sin(rotation) + center.X;
-                    float y1 = -positionP1.X * FMath::Sin(rotation) + positionP1.Y * FMath::Cos(rotation) + center.Y;
+                    float x1 = positionP1.X * FMath::Cos( rotation ) + positionP1.Y * FMath::Sin( rotation ) + center.X;
+                    float y1 = -positionP1.X * FMath::Sin( rotation ) + positionP1.Y * FMath::Cos( rotation ) + center.Y;
 
-                    float x2 = positionP2.X * FMath::Cos(rotation) + positionP2.Y * FMath::Sin(rotation) + center.X;
-                    float y2 = -positionP2.X * FMath::Sin(rotation) + positionP2.Y * FMath::Cos(rotation) + center.Y;
+                    float x2 = positionP2.X * FMath::Cos( rotation ) + positionP2.Y * FMath::Sin( rotation ) + center.X;
+                    float y2 = -positionP2.X * FMath::Sin( rotation ) + positionP2.Y * FMath::Cos( rotation ) + center.Y;
 
-                    FVector Origin = FVector();
-                    FVector EndPos = FVector();
+                    FVector origin = FVector();
+                    FVector endPos = FVector();
 
-                    Origin.X = x1;
-                    Origin.Y = y1;
-                    Origin.Z = 0;
-                    EndPos.X = x2;
-                    EndPos.Y = y2;
-                    EndPos.Z = 0;
+                    origin.X = x1;
+                    origin.Y = y1;
+                    origin.Z = 0;
+                    endPos.X = x2;
+                    endPos.Y = y2;
+                    endPos.Z = 0;
 
-                    FBatchedElements* BatchedElements = InCanvas->GetBatchedElements( FCanvas::ET_Line );
-                    FHitProxyId HitProxyId = InCanvas->GetHitProxyId();
-                    BatchedElements->AddTranslucentLine( Origin, EndPos, Color, HitProxyId, 1.f );
+                    FBatchedElements* batchedElements = ioCanvas->GetBatchedElements( FCanvas::ET_Line );
+                    FHitProxyId hitProxyId = ioCanvas->GetHitProxyId();
+                    batchedElements->AddTranslucentLine( origin, endPos, color, hitProxyId, 1.f );
                 }
                 else
                 {
-                    FVector2D Origin2D = FVector2D( UVs[Corner1] * FVector2D(Width, Height) + UVBoxOrigin );
-                    FVector2D EndPos2D = FVector2D( UVs[Corner2] * FVector2D(Width, Height) + UVBoxOrigin );
+                    FVector2D origin2D = FVector2D( UVs[corner1] * FVector2D( width, height ) + uvBoxOrigin );
+                    FVector2D endPos2D = FVector2D( UVs[corner2] * FVector2D( width, height ) + uvBoxOrigin );
 
-                    FVector Origin = FVector();
-                    FVector EndPos = FVector();
+                    FVector origin = FVector();
+                    FVector endPos = FVector();
 
-                    Origin.X = Origin2D.X;
-                    Origin.Y = Origin2D.Y;
-                    Origin.Z = 0;
-                    EndPos.X = EndPos2D.X;
-                    EndPos.Y = EndPos2D.Y;
-                    EndPos.Z = 0;
+                    origin.X = origin2D.X;
+                    origin.Y = origin2D.Y;
+                    origin.Z = 0;
+                    endPos.X = endPos2D.X;
+                    endPos.Y = endPos2D.Y;
+                    endPos.Z = 0;
 
                     //Clipping. We don't even begin to calculate the coordinates of points we know won't be visible in the viewport
-                    if( ( Origin.X < 0 && EndPos.X < 0 ) || ( Origin.X > maxX && EndPos.X > maxX ) || ( Origin.Y < 0 && EndPos.Y < 0 ) || ( Origin.Y > maxY && EndPos.Y > maxY ) )
+                    if( ( origin.X < 0 && endPos.X < 0 ) || ( origin.X > maxX && endPos.X > maxX ) || ( origin.Y < 0 && endPos.Y < 0 ) || ( origin.Y > maxY && endPos.Y > maxY ) )
                     {
                         continue;
                     }
 
-                    FBatchedElements* BatchedElements = InCanvas->GetBatchedElements( FCanvas::ET_Line );
-                    FHitProxyId HitProxyId = InCanvas->GetHitProxyId();
-                    BatchedElements->AddTranslucentLine( Origin, EndPos, Color, HitProxyId, 1.f );
+                    FBatchedElements* batchedElements = ioCanvas->GetBatchedElements( FCanvas::ET_Line );
+                    FHitProxyId hitProxyId = ioCanvas->GetHitProxyId();
+                    batchedElements->AddTranslucentLine( origin, endPos, color, hitProxyId, 1.f );
                 }
             }
         }
@@ -935,4 +912,3 @@ void FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport(FViewport* InViewp
 }
 
 #undef LOCTEXT_NAMESPACE
-

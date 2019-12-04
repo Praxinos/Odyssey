@@ -3,32 +3,34 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/GCObject.h"
-#include "Input/Reply.h"
-#include "Widgets/SWidget.h"
 #include "EditorUndoClient.h"
-#include "Toolkits/IToolkitHost.h"
-#include "Interfaces/IOdysseyPainterEditorToolkit.h"
 #include "IDetailsView.h"
-#include "OdysseyPainterEditorSettings.h"
-#include "OdysseyUndoHistory.h"
-#include "Widgets/Colors/SColorPicker.h"
-#include <memory>
+#include "Input/Reply.h"
 #include "ScopedTransaction.h"
-#include "OdysseySurface.h"
-#include "Mesh/SOdysseyMeshSelector.h"
-#include "Brush/SOdysseyBrushSelector.h"
+#include "Toolkits/IToolkitHost.h"
+#include "UObject/GCObject.h"
+#include "Widgets/Colors/SColorPicker.h"
+#include "Widgets/SWidget.h"
+#include "Widgets/Text/SMultiLineEditableText.h"
+
 #include "Brush/SOdysseyBrushExposedParameters.h"
+#include "Brush/SOdysseyBrushSelector.h"
 #include "Color/SOdysseyColorSelector.h"
 #include "Color/SOdysseyColorSliders.h"
-#include "UndoHistory/SOdysseyUndoHistory.h"
-#include "SOdysseyStrokeOptions.h"
-#include "SOdysseyPerformanceOptions.h"
-#include "SOdysseyPaintModifiers.h"
-#include "OdysseyPaintEngine.h"
-#include "OdysseyLayerStack.h"
-#include "Widgets/Text/SMultiLineEditableText.h"
+#include "IOdysseyPainterEditorToolkit.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
+#include "Mesh/SOdysseyMeshSelector.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyPaintEngine.h"
+#include "OdysseyPainterEditorSettings.h"
+#include "OdysseySurface.h"
+#include "OdysseyUndoHistory.h"
+#include "SOdysseyPaintModifiers.h"
+#include "SOdysseyPerformanceOptions.h"
+#include "SOdysseyStrokeOptions.h"
+#include "UndoHistory/SOdysseyUndoHistory.h"
+
+#include <memory>
 #include <ULIS_CCOLOR>
 
 class UOdysseyBrush;
@@ -48,17 +50,17 @@ class FOdysseyPainterEditorToolkit
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyPainterEditorToolkit( );
+    virtual ~FOdysseyPainterEditorToolkit();
     FOdysseyPainterEditorToolkit();
 
 public:
     // Initialization
-    void InitOdysseyPainterEditor( const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost, UTexture2D* iTexture );
+    void InitOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr<class IToolkitHost>& iInitToolkitHost, UTexture2D* iTexture );
 
 public:
     // FAssetEditorToolkit interface
-    virtual void RegisterTabSpawners( const TSharedRef<class FTabManager>& TabManager ) override;
-    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& TabManager ) override;
+    virtual void RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
+    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
 public:
     // IToolkit interface
@@ -69,8 +71,8 @@ public:
 
 protected:
     // FEditorUndoClient interface
-    virtual void PostUndo( bool bSuccess ) override;
-    virtual void PostRedo( bool bSuccess ) override;
+    virtual void PostUndo( bool iSuccess ) override;
+    virtual void PostRedo( bool iSuccess ) override;
 
 protected:
     //FAssetEditorToolkit override
@@ -80,13 +82,11 @@ protected:
 
 protected:
     // Commands building
-    void BindCommands( );
+    void BindCommands();
     void InitializeExtenders();
-    void SetupOdysseyPainterEditorMenu( TSharedPtr< FExtender > Extender, FOdysseyPainterEditorToolkit& OdysseyPainterEditor);
-    static void FillImportExportMenu( FMenuBuilder& MenuBuilder, FOdysseyPainterEditorToolkit& Kismet );
-    static void FillAboutMenu( FMenuBuilder& MenuBuilder, FOdysseyPainterEditorToolkit& Kismet );
-    void AddMenuEntry(FMenuBarBuilder& MenuBuilder);
-    void FillSubmenu(FMenuBuilder& MenuBuilder);
+    void SetupOdysseyPainterEditorMenu( TSharedPtr< FExtender > ioExtender, FOdysseyPainterEditorToolkit& iOdysseyPainterEditor );
+    static void FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorToolkit& iOdysseyPainterEditor );
+    static void FillAboutMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorToolkit& iOdysseyPainterEditor );
     void OnExportLayersAsTextures();
     void OnImportTexturesAsLayers();
     void OnAboutIliad();
@@ -108,7 +108,6 @@ protected:
     void CreatePerformanceOptionsTab();
     //void CreateUndoHistoryTab();
 
-
 protected:
     // Paint engine driving methods
     void OnBrushSelected( UOdysseyBrush* iBrush );
@@ -129,128 +128,126 @@ protected:
 
 protected:
     // Transaction ( Undo / Redo ) methods overrides
-    void BeginTransaction(const FText& SessionName) override;
+    void BeginTransaction( const FText& iSessionName ) override;
     void MarkTransactionAsDirty() override;
     void EndTransaction() override;
 
-
-public: 
-    void SetTextureDirty( bool ibTextureDirty ); //Set bIsTextureDirty, prompting, or not, the option to save before closing the editor
+public:
+    void SetTextureDirty( bool iTextureDirty ); //Set bIsTextureDirty, prompting, or not, the option to save before closing the editor
 
 private:
     // Brush Handlers
-    void  HandleBrushParameterChanged();
+    void HandleBrushParameterChanged();
 
     // Color Handlers
-    void  HandleSelectorColorChanged( const ::ULIS::CColor& iColor );
-    void  HandleSlidersColorChanged( const ::ULIS::CColor& iColor );
+    void HandleSelectorColorChanged( const ::ULIS::CColor& iColor );
+    void HandleSlidersColorChanged( const ::ULIS::CColor& iColor );
 
     // Modifiers Handlers
-    void  HandleSizeModifierChanged( int32 iValue );
-    void  HandleOpacityModifierChanged( int32 iValue );
-    void  HandleFlowModifierChanged( int32 iValue );
-    void  HandleBlendingModeModifierChanged( int32 iValue );
-    void  HandleAlphaModeModifierChanged( int32 iValue );
+    void HandleSizeModifierChanged( int32 iValue );
+    void HandleOpacityModifierChanged( int32 iValue );
+    void HandleFlowModifierChanged( int32 iValue );
+    void HandleBlendingModeModifierChanged( int32 iValue );
+    void HandleAlphaModeModifierChanged( int32 iValue );
 
     // Stroke Options Handlers
-    void  HandleStrokeStepChanged           (   int32   iValue  );
-    void  HandleStrokeAdaptativeChanged     (   bool    iValue  );
-    void  HandleStrokePaintOnTickChanged    (   bool    iValue  );
-    void  HandleInterpolationTypeChanged    (   int32   iValue  );
-    void  HandleSmoothingMethodChanged      (   int32   iValue  );
-    void  HandleSmoothingStrengthChanged    (   int32   iValue  );
-    void  HandleSmoothingEnabledChanged     (   bool    iValue  );
-    void  HandleSmoothingRealTimeChanged    (   bool    iValue  );
-    void  HandleSmoothingCatchUpChanged     (   bool    iValue  );
+    void HandleStrokeStepChanged( int32 iValue );
+    void HandleStrokeAdaptativeChanged( bool iValue );
+    void HandleStrokePaintOnTickChanged( bool iValue );
+    void HandleInterpolationTypeChanged( int32 iValue );
+    void HandleSmoothingMethodChanged( int32 iValue );
+    void HandleSmoothingStrengthChanged( int32 iValue );
+    void HandleSmoothingEnabledChanged( bool iValue );
+    void HandleSmoothingRealTimeChanged( bool iValue );
+    void HandleSmoothingCatchUpChanged( bool iValue );
 
     // Performance Handlers
-    void  HandlePerformanceLiveUpdateChanged(   bool    iValue  );
+    void HandlePerformanceLiveUpdateChanged( bool iValue );
 
 private:
     // Spawner callbacks
     // Callback for spawning the Brush Selector tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushSelector( const FSpawnTabArgs& Args );
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushSelector( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Mesh Selector tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnMeshSelector( const FSpawnTabArgs& Args );
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnMeshSelector( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Brush Exposed Parameters tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushExposedParameters( const FSpawnTabArgs& Args );
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushExposedParameters( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Viewport tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnViewport( const FSpawnTabArgs& Args );
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnViewport( const FSpawnTabArgs& iArgs );
     // Callback for spawning the ColorSelector tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSelector(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSelector( const FSpawnTabArgs& iArgs );
     // Callback for spawning the ColorSelector tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSliders(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSliders( const FSpawnTabArgs& iArgs );
     // Callback for spawning the LayerStack tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack( const FSpawnTabArgs& iArgs );
     // Callback for spawning the BotBar tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnBotBar(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnBotBar( const FSpawnTabArgs& iArgs );
     // Callback for spawning the BotBar tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnTopBar(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnTopBar( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Smoothing Options tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnStrokeOptions(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnStrokeOptions( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Smoothing Options tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnPerformanceOptions(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnPerformanceOptions( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Notes tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnNotes(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnNotes( const FSpawnTabArgs& iArgs );
     // Callback for spawning the Undo History tab.
-    //TSharedRef<SDockTab> HandleTabSpawnerSpawnUndoHistory(const FSpawnTabArgs& Args);
+    //TSharedRef<SDockTab> HandleTabSpawnerSpawnUndoHistory(const FSpawnTabArgs& iArgs);
     // Callback for spawning the Tools tab.
-    TSharedRef<SDockTab> HandleTabSpawnerSpawnTools(const FSpawnTabArgs& Args);
+    TSharedRef<SDockTab> HandleTabSpawnerSpawnTools( const FSpawnTabArgs& iArgs );
 
 private:
     /** List of open tool panels; used to ensure only one exists at any one time */
-    TSharedPtr<SOdysseySurfaceViewport>         ViewportTab;
-    TSharedPtr<SOdysseyBrushSelector>           BrushSelectorTab;
-    TSharedPtr<SOdysseyMeshSelector>            MeshSelectorTab;
-    TSharedPtr<SOdysseyBrushExposedParameters>  BrushExposedParametersTab;
-    TSharedPtr<SOdysseyColorSelector>           ColorSelectorTab;
-    TSharedPtr<SOdysseyColorSliders>            ColorSlidersTab;
-    TSharedPtr<SOdysseyLayerStackView>          LayerStackTab;
-    TSharedPtr<SOdysseyStrokeOptions>           StrokeOptionsTab;
-    TSharedPtr<SOdysseyPerformanceOptions>      PerformanceOptionsTab;
-    //TSharedPtr<SOdysseyUndoHistory>             UndoHistoryTab;
-    TSharedPtr<SOdysseyPaintModifiers>          TopTab;
-    TSharedPtr<SWidget>                         ToolsTab;
-
+    TSharedPtr<SOdysseySurfaceViewport>         mViewportTab;
+    TSharedPtr<SOdysseyBrushSelector>           mBrushSelectorTab;
+    TSharedPtr<SOdysseyMeshSelector>            mMeshSelectorTab;
+    TSharedPtr<SOdysseyBrushExposedParameters>  mBrushExposedParametersTab;
+    TSharedPtr<SOdysseyColorSelector>           mColorSelectorTab;
+    TSharedPtr<SOdysseyColorSliders>            mColorSlidersTab;
+    TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
+    TSharedPtr<SOdysseyStrokeOptions>           mStrokeOptionsTab;
+    TSharedPtr<SOdysseyPerformanceOptions>      mPerformanceOptionsTab;
+    //TSharedPtr<SOdysseyUndoHistory>             mUndoHistoryTab;
+    TSharedPtr<SOdysseyPaintModifiers>          mTopTab;
+    TSharedPtr<SWidget>                         mToolsTab;
 
     /** The current transaction for undo/redo */
-    FScopedTransaction* scopedTransaction;
-    FOdysseyUndoHistory UndoHistory;
-    bool bManipulationDirtiedSomething;
+    FScopedTransaction* mScopedTransaction;
+    FOdysseyUndoHistory mUndoHistory;
+    bool                mIsManipulationDirtiedSomething;
 
     /** Marker for closed state, avoid multiple prompting */
-    bool bEditorMarkedAsClosed;
+    bool                mIsEditorMarkedAsClosed;
 
     /** Painting */
-    UTexture2D*                 texture;
-    FOdysseySurface*            displaySurface;
-    FOdysseyBlock*              textureContentsBackup;
-    TextureMipGenSettings       textureMipGenBackup;
-    TextureCompressionSettings  textureCompressionBackup;
-    TextureGroup                textureGroupBackup;
-    FOdysseyPaintEngine         paintEngine;        // Owned        // Used by SOdysseyLayerStack
-    FOdysseyLayerStack          layer_stack;        // Owned        // Used by Viewport
-    UOdysseyBrush*              brush;              // NOT Owned
-    UOdysseyBrushAssetBase*     brush_instance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
-    FOdysseyLiveUpdateInfo      liveUpdateInfo;
+    UTexture2D*                 mTexture;
+    FOdysseySurface*            mDisplaySurface;
+    FOdysseyBlock*              mTextureContentsBackup;
+    TextureMipGenSettings       mTextureMipGenBackup;
+    TextureCompressionSettings  mTextureCompressionBackup;
+    TextureGroup                mTextureGroupBackup;
+    FOdysseyPaintEngine         mPaintEngine;        // Owned        // Used by SOdysseyLayerStack
+    FOdysseyLayerStack          mLayerStack;        // Owned        // Used by Viewport
+    UOdysseyBrush*              mBrush;              // NOT Owned
+    UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
+    FOdysseyLiveUpdateInfo      mLiveUpdateInfo;
 
-    bool                        bIsTextureDirty;
+    bool                        mIsTextureDirty;
 
 private:
     /** Tabs IDs */
-    static const FName ViewportTabId;
-    static const FName BrushSelectorTabId;
-    static const FName MeshSelectorTabId;
-    static const FName BrushExposedParametersTabId;
-    static const FName ColorSelectorTabId;
-    static const FName ColorSlidersTabId;
-    static const FName LayerStackTabId;
-    static const FName BotBarTabId;
-    static const FName TopBarTabId;
-    static const FName StrokeOptionsTabId;
-    static const FName NotesTabId;
-    //static const FName UndoHistoryTabId;
-    static const FName PerformanceOptionsTabId;
-    static const FName ToolsTabId;
+    static const FName smViewportTabId;
+    static const FName smBrushSelectorTabId;
+    static const FName smMeshSelectorTabId;
+    static const FName smBrushExposedParametersTabId;
+    static const FName smColorSelectorTabId;
+    static const FName smColorSlidersTabId;
+    static const FName smLayerStackTabId;
+    static const FName smBotBarTabId;
+    static const FName smTopBarTabId;
+    static const FName smStrokeOptionsTabId;
+    static const FName smNotesTabId;
+    //static const FName smUndoHistoryTabId;
+    static const FName smPerformanceOptionsTabId;
+    static const FName smToolsTabId;
 };
 

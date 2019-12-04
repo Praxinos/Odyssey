@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Framework/Commands/Commands.h"
 #include "EditorStyleSet.h"
+#include "Framework/Commands/Commands.h"
 
 /**
  * Holds the UI commands for the OdysseyPainterEditorToolkit widget.
@@ -13,18 +13,13 @@ class FOdysseyPainterEditorCommands
     : public TCommands<FOdysseyPainterEditorCommands>
 {
 public:
-
     /**
      * Default constructor.
      */
-    FOdysseyPainterEditorCommands( )
-        : TCommands<FOdysseyPainterEditorCommands>("OdysseyPainterEditor", NSLOCTEXT("Contexts", "OdysseyPainterEditor", "Odyssey Painter Editor"), NAME_None, FEditorStyle::GetStyleSetName())
-    { }
+    FOdysseyPainterEditorCommands();
 
 public:
-
     // TCommands interface
-
     virtual void RegisterCommands() override;
 
 public:
@@ -60,5 +55,4 @@ public:
 
     /** Action to go to praxinos' forum */
     TSharedPtr<FUICommandInfo> VisitPraxinosForums;
-
 };

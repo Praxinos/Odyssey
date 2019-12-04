@@ -1,11 +1,10 @@
 // Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Layout/Margin.h"
 #include "Input/Reply.h"
+#include "Layout/Margin.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
@@ -17,61 +16,29 @@ struct FSlateBrush;
 /**
  * About screen contents widget
  */
-class SOdysseyAboutScreen : public SCompoundWidget
+class SOdysseyAboutScreen
+    : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS( SOdysseyAboutScreen )
-        {}
+    {
+    }
     SLATE_END_ARGS()
 
     /**
      * Constructs the about screen widgets
      */
-    void Construct(const FArguments& InArgs);
+    void Construct( const FArguments& iArgs );
 
 private:
-
-    struct FLineDefinition
-    {
-    public:
-        FText Text;
-        int32 FontSize;
-        FLinearColor TextColor;
-        FMargin Margin;
-
-        FLineDefinition( const FText& InText )
-            : Text( InText )
-            , FontSize( 9 )
-            , TextColor( FLinearColor(0.5f, 0.5f, 0.5f) )
-            , Margin( FMargin(6.f, 0.f, 0.f, 0.f) )
-        {
-
-        }
-
-        FLineDefinition( const FText& InText, int32 InFontSize, const FLinearColor& InTextColor, const FMargin& InMargin )
-            : Text( InText )
-            , FontSize( InFontSize )
-            , TextColor( InTextColor )
-            , Margin( InMargin )
-        {
-
-        }
-    };
-
-    TArray< TSharedRef< FLineDefinition > > AboutLines;
-    TSharedPtr<SButton> IliadButton;
-    TSharedPtr<SButton> PraxinosButton;
-    TSharedPtr<SButton> TwitterButton;
-    TSharedPtr<SButton> FacebookButton;
-    TSharedPtr<SButton> LinkedInButton;
-    TSharedPtr<SButton> InstagramButton;
-    TSharedPtr<SButton> YoutubeButton;
+    struct FLineDefinition;
 
     /**
      * Makes the widget for the checkbox items in the list view
      */
-    TSharedRef<ITableRow> MakeAboutTextItemWidget(TSharedRef<FLineDefinition> Item, const TSharedRef<STableViewBase>& OwnerTable);
+    TSharedRef<ITableRow> MakeAboutTextItemWidget( TSharedRef<FLineDefinition> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
+private:
     const FSlateBrush* GetIliadButtonBrush() const;
     const FSlateBrush* GetPraxinosButtonBrush() const;
     const FSlateBrush* GetTwitterButtonBrush() const;
@@ -79,7 +46,6 @@ private:
     const FSlateBrush* GetLinkedInButtonBrush() const;
     const FSlateBrush* GetInstagramButtonBrush() const;
     const FSlateBrush* GetYoutubeButtonBrush() const;
-
 
     FReply OnIliadButtonClicked();
     FReply OnPraxinosButtonClicked();
@@ -89,5 +55,14 @@ private:
     FReply OnInstagramButtonClicked();
     FReply OnYoutubeButtonClicked();
     FReply OnClose();
-};
 
+private:
+    TArray< TSharedRef< FLineDefinition > > mAboutLines;
+    TSharedPtr<SButton> mIliadButton;
+    TSharedPtr<SButton> mPraxinosButton;
+    TSharedPtr<SButton> mTwitterButton;
+    TSharedPtr<SButton> mFacebookButton;
+    TSharedPtr<SButton> mLinkedInButton;
+    TSharedPtr<SButton> mInstagramButton;
+    TSharedPtr<SButton> mYoutubeButton;
+};
