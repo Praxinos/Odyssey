@@ -137,24 +137,8 @@ FOdysseyPaintEngine::Tick()
 
     if( mIsPendingEndStroke && mDelayQueue.empty() )
     {
-        for( int k = 0; k < mCountTileY; ++k )
-        {
-            for( int l = 0; l < mCountTileX; ++l )
-            {
-                if( mStrokeInvalidTileMap[k][l] )
-                {
-                    mTileThreadPool->ScheduleJob( [this, l, k]()
-                    {
-                        ::ULIS::FRect tileRect = MakeTileRect( l, k );
-                        mLayerStack->BlendTempBufferOnCurrentBlock( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
-                    } );
-                }
-            }
-        }
-        mTileThreadPool->WaitForCompletion();
-        
-        //mLayerStack->mDrawingUndo->Clear();
         mLayerStack->mDrawingUndo->StartRecord();
+
         for( int k = 0; k < mCountTileY; ++k )
         {
             for( int l = 0; l < mCountTileX; ++l )
@@ -163,11 +147,18 @@ FOdysseyPaintEngine::Tick()
                 {
                     ::ULIS::FRect tileRect = MakeTileRect( l, k );
                     mLayerStack->mDrawingUndo->SaveData( l, k, tileRect.w, tileRect.h );
+                    mTileThreadPool->ScheduleJob( [this, l, k]()
+                    {
+                        ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                        mLayerStack->BlendTempBufferOnCurrentBlock( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
+                    } );
                 }
             }
         }
+
         mLayerStack->mDrawingUndo->EndRecord();
 
+        mTileThreadPool->WaitForCompletion();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
         ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );

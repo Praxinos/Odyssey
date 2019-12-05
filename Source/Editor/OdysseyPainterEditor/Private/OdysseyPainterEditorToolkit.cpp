@@ -1379,6 +1379,15 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo"))
                         ]
                     ]
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnClearUndo)
+                        [
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo"))
+                        ]
+                    ]
                 ]
             ]
             +SScrollBox::Slot()
@@ -1463,21 +1472,29 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
 FReply
 FOdysseyPainterEditorToolkit::OnClearCurrentLayer()
 {
+    //Record
+    mLayerStack.mDrawingUndo->StartRecord();
+    mLayerStack.mDrawingUndo->SaveData( 0, 0, mLayerStack.Width(), mLayerStack.Height() );
+    mLayerStack.mDrawingUndo->EndRecord();
+    //EndRecord
     mIsTextureDirty = true;
     mPaintEngine.AbortStroke();
     mLayerStack.ClearCurrentLayer();
     InvalidateTextureFromData( mLayerStack.GetResultBlock(), mTexture );
-
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolkit::OnFillCurrentLayer()
 {
+    //Record
+    mLayerStack.mDrawingUndo->StartRecord();
+    mLayerStack.mDrawingUndo->SaveData( 0, 0, mLayerStack.Width(), mLayerStack.Height() );
+    mLayerStack.mDrawingUndo->EndRecord();
+    //EndRecord
     mIsTextureDirty = true;
     mPaintEngine.AbortStroke();
     mLayerStack.FillCurrentLayerWithColor( mPaintEngine.GetColor() );
-
     return FReply::Handled();
 }
 

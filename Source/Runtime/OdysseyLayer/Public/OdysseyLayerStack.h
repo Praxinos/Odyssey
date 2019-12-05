@@ -96,7 +96,7 @@ public:
 
 public:
     bool Clear();
-    bool SaveData( uint8 iXTile, uint8 iYTile, uint8 iSizeX, uint8 iSizeY );
+    bool SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
     bool LoadData();
     
 private:
@@ -104,7 +104,11 @@ private:
     
 private:
     FOdysseyImageLayer* mImagePtr;
-    int64 mPosition;
+    int mCurrentUndoIndex;
+    TArray<int64> mUndosPositions;
+    TArray<int> mNumberBlocksSaved;
+    FBufferArchive mToBinary;
+
     
     //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
     TArray<uint8> mData;
