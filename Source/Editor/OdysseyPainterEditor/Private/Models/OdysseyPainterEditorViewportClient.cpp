@@ -456,7 +456,6 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
         || mCurrentToolState == eState::kRotating
         || mCurrentToolState == eState::kPicking )
         return;
-}
 
     mCurrentToolState = eState::kIdle;
 }

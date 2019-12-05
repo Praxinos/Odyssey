@@ -513,7 +513,7 @@ FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
     // Invalidate all
     //mDisplaySurface->Invalidate();
     //delete block;
-    displaySurface->Invalidate();
+    mDisplaySurface->Invalidate();
 }
 
 void
@@ -973,7 +973,7 @@ FOdysseyPainterEditorToolkit::BeginTransaction( const FText& iSessionName )
 {
     if( mScopedTransaction == nullptr )
     {
-        scopedTransaction = new FScopedTransaction( SessionName );
+        mScopedTransaction = new FScopedTransaction( iSessionName );
         TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
         for( int i = 0; i < layers->Num(); i++ )
         {
@@ -1002,7 +1002,7 @@ FOdysseyPainterEditorToolkit::EndTransaction()
             imageLayer->mBlockUndoable->SetArray( imageLayer->GetBlock()->GetArray().GetData(), imageLayer->GetBlock()->GetArray().Num() );
             imageLayer->mBlockUndoable->PostEditChange();
         }
-        displaySurface->Invalidate();
+        mDisplaySurface->Invalidate();
     }
 
     mIsManipulationDirtiedSomething = false;
@@ -1501,14 +1501,14 @@ FOdysseyPainterEditorToolkit::OnFillCurrentLayer()
 FReply
 FOdysseyPainterEditorToolkit::OnClearUndo()
 {
-    layer_stack.mDrawingUndo->Clear();
+    mLayerStack.mDrawingUndo->Clear();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolkit::OnUndo()
 {
-    layer_stack.mDrawingUndo->LoadData();
+    mLayerStack.mDrawingUndo->LoadData();
     return FReply::Handled();
 }
 
