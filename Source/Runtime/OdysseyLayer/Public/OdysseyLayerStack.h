@@ -93,27 +93,39 @@ public:
 public:
     void StartRecord();
     void EndRecord();
+    
+/*
+private:
+    void StartRecordRedo();
+    void EndRecordRedo();
+    bool SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );*/
+
 
 public:
     bool Clear();
     bool SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
     bool LoadData();
+    //bool Redo();
+    void Check();
+
     
 private:
     FOdysseyLayerStack* mLayerStackPtr;
     
 private:
     FOdysseyImageLayer* mImagePtr;
-    int mCurrentUndoIndex;
+    int mCurrentIndex;
     TArray<int64> mUndosPositions;
-    TArray<int> mNumberBlocksSaved;
+    TArray<int> mNumberBlocksUndo;
+    TArray<int> mNumberBlocksRedo;
     FBufferArchive mToBinary;
 
     
     //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
     TArray<uint8> mData;
     ::ULIS::IBlock* mTileData;
-    FString mSavePath;
+    FString mUndoPath;
+    FString mRedoPath;
 };
 
 /*

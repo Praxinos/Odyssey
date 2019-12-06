@@ -125,7 +125,10 @@ protected:
     FReply OnClearCurrentLayer();
     FReply OnFillCurrentLayer();
     FReply OnUndo();
+    //FReply OnRedo();
     FReply OnClearUndo();
+    FReply OnCheck();
+
 
 
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;

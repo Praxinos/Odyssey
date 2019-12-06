@@ -542,6 +542,7 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
 void
 FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 {
+    /*
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
     //::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
     InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
@@ -554,6 +555,7 @@ FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 
     InvalidateTextureFromData( mTextureContentsBackup, mTexture );
     InvalidateSurfaceFromData( mTextureContentsBackup, mDisplaySurface );
+     */
 }
 
 bool
@@ -585,6 +587,7 @@ FOdysseyPainterEditorToolkit::OnRequestClose()
     }
     mTexture->LODGroup = mTextureGroupBackup;
     mIsEditorMarkedAsClosed = true;
+    mLayerStack.mDrawingUndo->Clear();
     return true;
 }
 
@@ -1370,24 +1373,6 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ColorPicker32" ) )
                         ]
                     ]
-                    +SWrapBox::Slot()
-                    [
-                        SNew( SButton )
-                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnUndo)
-                        [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo"))
-                        ]
-                    ]
-                    +SWrapBox::Slot()
-                    [
-                        SNew( SButton )
-                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnClearUndo)
-                        [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo"))
-                        ]
-                    ]
                 ]
             ]
             +SScrollBox::Slot()
@@ -1466,6 +1451,53 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                     ]
                 ]
             ]
+            +SScrollBox::Slot()
+            [
+                SNew( SExpandableArea )
+                .HeaderContent()
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "UndoRedo  (Experimental)", "UndoRedo  (Experimental)" ) )
+                    .Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
+                    .ShadowOffset( FVector2D( 1.0f, 1.0f ) )
+                ]
+                .BodyContent()
+                [
+                    SNew( SWrapBox )
+                    .UseAllottedWidth( true )
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnUndo)
+                        [
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo32"))
+                        ]
+                    ]
+                    /*+SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnRedo)
+                        [
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
+                        ]
+                    ]*/
+                    /*+SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Check", "Check" ) )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnCheck)
+                    ]*/
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Clear Undos", "Clear Undos" ) )
+                        .ToolTipText( LOCTEXT( "Clear Undos tooltip", "If the undo is slow, clear the cache by clicking this button" ))
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnClearUndo)
+                    ]
+                 ]
+             ]
         ];
 }
 
@@ -1509,6 +1541,21 @@ FReply
 FOdysseyPainterEditorToolkit::OnUndo()
 {
     mLayerStack.mDrawingUndo->LoadData();
+    return FReply::Handled();
+}
+
+/*
+FReply
+FOdysseyPainterEditorToolkit::OnRedo()
+{
+    mLayerStack.mDrawingUndo->Redo();
+    return FReply::Handled();
+}*/
+
+FReply
+FOdysseyPainterEditorToolkit::OnCheck()
+{
+    mLayerStack.mDrawingUndo->Check();
     return FReply::Handled();
 }
 
