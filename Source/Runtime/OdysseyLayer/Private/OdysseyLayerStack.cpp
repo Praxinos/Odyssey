@@ -1,15 +1,18 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
-
 #include "OdysseyLayerStack.h"
-#include "OdysseyImageLayer.h"
-#include "OdysseyBlock.h"
+
+#include "HAL/PlatformFilemanager.h"
+#include "Misc/FileHelper.h"
 #include "UObject/UObjectGlobals.h"
+
+#include "OdysseyBlock.h"
+#include "OdysseyImageLayer.h"
+
 #include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStack"
-
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
