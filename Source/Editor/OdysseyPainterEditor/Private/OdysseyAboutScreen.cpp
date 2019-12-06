@@ -32,6 +32,7 @@ struct SOdysseyAboutScreen::FLineDefinition
 public:
     FLineDefinition( const FText& iText )
         : mText( iText )
+        , mUrl()
         , mFontSize( 9 )
         , mTextColor( FLinearColor( 0.5f, 0.5f, 0.5f ) )
         , mMargin( FMargin( 6.f, 0.f, 0.f, 0.f ) )
@@ -40,6 +41,16 @@ public:
 
     FLineDefinition( const FText& iText, int32 iFontSize, const FLinearColor& iTextColor, const FMargin& iMargin )
         : mText( iText )
+        , mUrl()
+        , mFontSize( iFontSize )
+        , mTextColor( iTextColor )
+        , mMargin( iMargin )
+    {
+    }
+
+    FLineDefinition( const FText& iText, const FText& iUrl, int32 iFontSize, const FLinearColor& iTextColor, const FMargin& iMargin )
+        : mText( iText )
+        , mUrl( iUrl )
         , mFontSize( iFontSize )
         , mTextColor( iTextColor )
         , mMargin( iMargin )
@@ -48,6 +59,7 @@ public:
 
 public:
     FText mText;
+    FText mUrl;
     int32 mFontSize;
     FLinearColor mTextColor;
     FMargin mMargin;
@@ -55,15 +67,51 @@ public:
 
 //---
 
+SOdysseyAboutScreen::SOdysseyAboutScreen()
+    : mAboutLines()
+    , mIliadButton()
+    , mPraxinosButton()
+    , mTwitterButton()
+    , mFacebookButton()
+    , mLinkedInButton()
+    , mInstagramButton()
+    , mYoutubeButton()
+    , mPraxinosUrl( LOCTEXT( "url.praxinos", "https://praxinos.coop/" ) )
+    , mForumUrl( LOCTEXT( "url.forum", "https://praxinos.coop/forum/" ) )
+    , mIliadUrl( LOCTEXT( "url.iliad", "https://praxinos.coop/iliad.php" ) )
+    , mContactUsUrl( LOCTEXT( "url.contact-us", "https://praxinos.coop/contact.php" ) )
+    , mExternalLibsLittleCMSUrl( LOCTEXT( "url.external-libs.littlecms", "http://www.littlecms.com/" ) )
+    , mExternalLibsGLMUrl( LOCTEXT( "url.external-libs.glm", "https://www.opengl.org/sdk/libs/GLM/" ) )
+    , mExternalLibsBoostPreprocessorUrl( LOCTEXT( "url.external-libs.boost-preprocessor", "https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
+    , mExternalLibsFontAwsomeUrl( LOCTEXT( "url.external-libs.font-awsome", "https://fontawesome.com/license" ) )
+    , mTwitterUrl( LOCTEXT( "url.social.twitter", "https://twitter.com/praxinos" ) )
+    , mFacebookUrl( LOCTEXT( "url.social.facebook", "https://www.facebook.com/Praxinos" ) )
+    , mLinkedInUrl( LOCTEXT( "url.social.linkedin", "https://www.linkedin.com/company/praxinos" ) )
+    , mInstagramUrl( LOCTEXT( "url.social.instagram", "https://www.instagram.com/praxinos/" ) )
+    , mYoutubeUrl( LOCTEXT( "url.social.youtube", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) )
+{
+}
+
 void
 SOdysseyAboutScreen::Construct( const FArguments& iArgs )
 {
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright1", "Copyright 2018-2019 Praxinos SCOP arl. All rights reserved" ), 11, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f ) ) ) );
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright2", "Praxinos Team : Elodie Moog, Fabrice Debarge, Thomas Schmitt, Clément Berthaud," ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.iliad", "ILIAD : Intelligent Layered Imaging Architecture for Drawing" ), 15, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
+
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.copyright", "Copyright 2018-2019 Praxinos SCOP arl. All rights reserved" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.iddn", "IDDN FR.001.250001.002.S.P.2019.000.00000" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
+
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.team-1", "Praxinos Team : Elodie Moog, Fabrice Debarge, Thomas Schmitt, Clément Berthaud," ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
                                                                                 // This spaces are here to match the start of the first person name in the first line
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright3", "                             Naomiki Sato, Antoine Antin, Eric Scholl, Michael Schreiner" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright4", "ILIAD : Intelligent Layered Imaging Architecture for Drawing" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "Copyright5", "IDDN FR.001.250001.002.S.P.2019.000.00000" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.0f, 2.0f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.team-2", "                             Naomiki Sato, Antoine Antin, Eric Scholl, Michael Schreiner" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
+
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.forum", "Praxinos tech support forum" ), mForumUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.contact-us", "Contact us" ), mContactUsUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
+
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs", "External libraries:" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.little-cms", "- littleCMS" ), mExternalLibsLittleCMSUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.glm", "- glm" ), mExternalLibsGLMUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.boost-preprocessor", "- boost.preprocessor" ), mExternalLibsBoostPreprocessorUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.font-awsome", "- FontAwsome" ), mExternalLibsFontAwsomeUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
 
     FText Version = LOCTEXT( "VersionLabel", "Version: Alpha 0.1" );
 
@@ -84,6 +132,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                 [
                     SAssignNew( mPraxinosButton, SButton )
                     .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                    .Cursor( EMouseCursor::Hand )
                     .OnClicked( this, &SOdysseyAboutScreen::OnPraxinosButtonClicked )
                     [
                         SNew( SImage ).Image( this, &SOdysseyAboutScreen::GetPraxinosButtonBrush )
@@ -100,6 +149,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                     [
                         SAssignNew( mIliadButton, SButton )
                         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
                         .OnClicked( this, &SOdysseyAboutScreen::OnIliadButtonClicked )
                         [
                             SNew( SImage ).Image( this, &SOdysseyAboutScreen::GetIliadButtonBrush )
@@ -122,6 +172,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                 SNew( SListView<TSharedRef<FLineDefinition>> )
                 .ListItemsSource( &mAboutLines )
                 .OnGenerateRow( this, &SOdysseyAboutScreen::MakeAboutTextItemWidget )
+                //.OnMouseButtonClick( this, &SOdysseyAboutScreen::OnListViewButtonClicked )
                 .SelectionMode( ESelectionMode::None )
             ]
             +SVerticalBox::Slot()
@@ -139,6 +190,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                     [
                         SAssignNew( mTwitterButton, SButton )
                         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
                         .ToolTipText( LOCTEXT( "TwitterToolTip", "Praxinos on Twitter" ) )
                         .OnClicked( this, &SOdysseyAboutScreen::OnTwitterButtonClicked )
                         [
@@ -151,6 +203,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                     [
                         SAssignNew( mFacebookButton, SButton )
                         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
                         .ToolTipText( LOCTEXT( "FacebookToolTip", "Praxinos on Facebook" ) )
                         .OnClicked( this, &SOdysseyAboutScreen::OnFacebookButtonClicked )
                         [
@@ -163,6 +216,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                     [
                         SAssignNew( mLinkedInButton, SButton )
                         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
                         .ToolTipText( LOCTEXT( "LinkedInToolTip", "Praxinos on LinkedIn" ) )
                         .OnClicked( this, &SOdysseyAboutScreen::OnLinkedInButtonClicked )
                         [
@@ -175,6 +229,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                     [
                         SAssignNew( mInstagramButton, SButton )
                         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
                         .ToolTipText( LOCTEXT( "InstagramToolTip", "Praxinos on Instagram" ) )
                         .OnClicked( this, &SOdysseyAboutScreen::OnInstagramButtonClicked )
                         [
@@ -187,6 +242,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                     [
                         SAssignNew( mYoutubeButton, SButton )
                         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
                         .ToolTipText( LOCTEXT( "YoutubeToolTip", "Praxinos on Youtube" ) )
                         .OnClicked( this, &SOdysseyAboutScreen::OnYoutubeButtonClicked )
                         [
@@ -230,19 +286,41 @@ SOdysseyAboutScreen::MakeAboutTextItemWidget( TSharedRef<FLineDefinition> iItem,
                 SNew( SSpacer )
             ];
     }
-    else
-    {
-        return
-            SNew( STableRow< TSharedPtr<FString> >, iOwnerTable )
-            .Padding( iItem->mMargin )
-            [
+
+    FText text = iItem->mText;
+    if( !iItem->mUrl.IsEmpty() )
+        text = FText::Format( LOCTEXT( "about.list", "{0}: {1}" ), iItem->mText, iItem->mUrl );
+
+    return 
+        SNew( STableRow< TSharedPtr<FString> >, iOwnerTable )
+        .Padding( iItem->mMargin )
+        [
+            //SNew( SButton )
+            //.ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+            //.ContentPadding( FMargin( 0.0 ) )
+            //.Cursor( !iItem->mUrl.IsEmpty() ? EMouseCursor::Hand : EMouseCursor::Default )
+            //.ButtonColorAndOpacity( iItem->mTextColor )
+            //.TextStyle( FCoreStyle::GetDefaultFontStyle( "Regular", iItem->mFontSize ) )
+            //.Text( text )
+            //[
                 SNew( STextBlock )
                 .ColorAndOpacity( iItem->mTextColor )
                 .Font( FCoreStyle::GetDefaultFontStyle( "Regular", iItem->mFontSize ) )
-                .Text( iItem->mText )
-            ];
-    }
+                .Text( text )
+            //]
+        ];
 }
+
+//void
+//SOdysseyAboutScreen::OnListViewButtonClicked( TSharedRef<FLineDefinition> iItem )
+//{
+//    // This CB is never called -_-
+//    if( iItem->mUrl.IsEmpty() )
+//        return;
+//
+//    FString iliadURL = iItem->mUrl.ToString();
+//    FPlatformProcess::LaunchURL( *iliadURL, NULL, NULL );
+//}
 
 const FSlateBrush*
 SOdysseyAboutScreen::GetIliadButtonBrush() const
@@ -289,7 +367,7 @@ SOdysseyAboutScreen::GetYoutubeButtonBrush() const
 FReply
 SOdysseyAboutScreen::OnIliadButtonClicked()
 {
-    FString iliadURL = "https://praxinos.coop/";
+    FString iliadURL = mIliadUrl.ToString();
     FPlatformProcess::LaunchURL( *iliadURL, NULL, NULL );
 
     return FReply::Handled();
@@ -298,7 +376,7 @@ SOdysseyAboutScreen::OnIliadButtonClicked()
 FReply
 SOdysseyAboutScreen::OnPraxinosButtonClicked()
 {
-    FString praxinosURL = "https://praxinos.coop/";
+    FString praxinosURL = mPraxinosUrl.ToString();
     FPlatformProcess::LaunchURL( *praxinosURL, NULL, NULL );
 
     return FReply::Handled();
@@ -307,7 +385,7 @@ SOdysseyAboutScreen::OnPraxinosButtonClicked()
 FReply
 SOdysseyAboutScreen::OnTwitterButtonClicked()
 {
-    FString twitterURL = "https://twitter.com/praxinos";
+    FString twitterURL = mTwitterUrl.ToString();
     FPlatformProcess::LaunchURL( *twitterURL, NULL, NULL );
 
     return FReply::Handled();
@@ -317,7 +395,7 @@ SOdysseyAboutScreen::OnTwitterButtonClicked()
 FReply
 SOdysseyAboutScreen::OnFacebookButtonClicked()
 {
-    FString FacebookURL = "https://www.facebook.com/Praxinos";
+    FString FacebookURL = mFacebookUrl.ToString();
     FPlatformProcess::LaunchURL( *FacebookURL, NULL, NULL );
 
     return FReply::Handled();
@@ -326,7 +404,7 @@ SOdysseyAboutScreen::OnFacebookButtonClicked()
 FReply
 SOdysseyAboutScreen::OnLinkedInButtonClicked()
 {
-    FString linkedInURL = "https://www.linkedin.com/company/praxinos";
+    FString linkedInURL = mLinkedInUrl.ToString();
     FPlatformProcess::LaunchURL( *linkedInURL, NULL, NULL );
 
     return FReply::Handled();
@@ -335,7 +413,7 @@ SOdysseyAboutScreen::OnLinkedInButtonClicked()
 FReply
 SOdysseyAboutScreen::OnInstagramButtonClicked()
 {
-    FString instagramURL = "https://www.instagram.com/praxinos/";
+    FString instagramURL = mInstagramUrl.ToString();
     FPlatformProcess::LaunchURL( *instagramURL, NULL, NULL );
 
     return FReply::Handled();
@@ -344,7 +422,7 @@ SOdysseyAboutScreen::OnInstagramButtonClicked()
 FReply
 SOdysseyAboutScreen::OnYoutubeButtonClicked()
 {
-    FString youtubeURL = "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ";
+    FString youtubeURL = mYoutubeUrl.ToString();
     FPlatformProcess::LaunchURL( *youtubeURL, NULL, NULL );
 
     return FReply::Handled();
@@ -356,6 +434,7 @@ SOdysseyAboutScreen::OnClose()
 {
     TSharedRef<SWindow> ParentWindow = FSlateApplication::Get().FindWidgetWindow( AsShared() ).ToSharedRef();
     FSlateApplication::Get().RequestDestroyWindow( ParentWindow );
+
     return FReply::Handled();
 }
 

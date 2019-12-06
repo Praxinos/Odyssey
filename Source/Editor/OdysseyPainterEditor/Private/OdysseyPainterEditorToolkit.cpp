@@ -743,7 +743,7 @@ FOdysseyPainterEditorToolkit::OnAboutIliad()
     TSharedPtr<SWindow> aboutWindow =
         SNew( SWindow )
         .Title( aboutWindowTitle )
-        .ClientSize( FVector2D( 600.f, 300.f ) )
+        .ClientSize( FVector2D( 600.f, 480.f ) )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
         .SizingRule( ESizingRule::FixedSize )

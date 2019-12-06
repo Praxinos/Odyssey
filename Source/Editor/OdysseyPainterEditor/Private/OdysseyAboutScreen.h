@@ -30,6 +30,8 @@ public:
      */
     void Construct( const FArguments& iArgs );
 
+    SOdysseyAboutScreen();
+
 private:
     struct FLineDefinition;
 
@@ -37,6 +39,7 @@ private:
      * Makes the widget for the checkbox items in the list view
      */
     TSharedRef<ITableRow> MakeAboutTextItemWidget( TSharedRef<FLineDefinition> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+    //void OnListViewButtonClicked( TSharedRef<FLineDefinition> iItem );
 
 private:
     const FSlateBrush* GetIliadButtonBrush() const;
@@ -65,4 +68,18 @@ private:
     TSharedPtr<SButton> mLinkedInButton;
     TSharedPtr<SButton> mInstagramButton;
     TSharedPtr<SButton> mYoutubeButton;
+
+    FText mPraxinosUrl;
+    FText mForumUrl;
+    FText mIliadUrl;
+    FText mContactUsUrl;
+    FText mExternalLibsLittleCMSUrl;
+    FText mExternalLibsGLMUrl;
+    FText mExternalLibsBoostPreprocessorUrl;
+    FText mExternalLibsFontAwsomeUrl;
+    FText mTwitterUrl;
+    FText mFacebookUrl;
+    FText mLinkedInUrl;
+    FText mInstagramUrl;
+    FText mYoutubeUrl;
 };
