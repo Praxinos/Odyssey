@@ -1,10 +1,12 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "WindowsStylusInputInterface.h"
-#include "WindowsRealTimeStylusPlugin.h"
+
+#include "GenericPlatform/GenericPlatformProcess.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Interfaces/IMainFrameModule.h"
 
-#include "Framework/Application/SlateApplication.h"
+#include "WindowsRealTimeStylusPlugin.h"
 
 #if PLATFORM_WINDOWS
 
@@ -79,9 +81,12 @@ void FWindowsStylusInputInterface::Tick()
 			if (reinterpret_cast<HWND>(HCurrentWnd) != Hwnd)
 			{
 				// changing the HWND isn't supported when the plugin is enabled
-				Impl->RealTimeStylus->put_Enabled(Windows::FALSE); 
+				Impl->RealTimeStylus->put_Enabled(Windows::FALSE);
+                FPlatformProcess::Sleep( 0.03 );
 				Impl->RealTimeStylus->put_HWND(reinterpret_cast<uint64>(Hwnd));
+                FPlatformProcess::Sleep( 0.03 );
 				Impl->RealTimeStylus->put_Enabled(Windows::TRUE);
+                FPlatformProcess::Sleep( 0.03 );
 			}
 
             Impl->Window = Window;
