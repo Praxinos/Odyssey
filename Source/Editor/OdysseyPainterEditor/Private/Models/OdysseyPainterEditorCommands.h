@@ -56,4 +56,11 @@ public:
 
     /** Action to go to praxinos' forum */
     TSharedPtr<FUICommandInfo> VisitPraxinosForums;
+    
+    /** Action for undoing a stroke in ILIAD*/
+    TSharedPtr<FUICommandInfo> Undo;
+    
+    /** Action for redoing a stroke in ILIAD*/
+    TSharedPtr<FUICommandInfo> Redo;
+
 };

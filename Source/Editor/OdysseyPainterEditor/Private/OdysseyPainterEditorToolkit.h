@@ -129,6 +129,10 @@ protected:
     FReply OnClearUndo();
 
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;
+    
+private:
+    void UndoIliad();
+    void RedoIliad();
 
 protected:
     // Transaction ( Undo / Redo ) methods overrides

@@ -610,6 +610,16 @@ FOdysseyPainterEditorToolkit::BindCommands()
         FOdysseyPainterEditorCommands::Get().AboutIliad,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolkit::OnAboutIliad ),
         FCanExecuteAction() );
+    
+    ToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().Undo,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolkit::UndoIliad ),
+        FCanExecuteAction() );
+    
+    ToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().Redo,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolkit::RedoIliad ),
+        FCanExecuteAction() );
 
     ToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite,
@@ -1534,7 +1544,7 @@ FOdysseyPainterEditorToolkit::OnClearUndo()
 FReply
 FOdysseyPainterEditorToolkit::OnUndo()
 {
-    mLayerStack.mDrawingUndo->LoadData();
+    UndoIliad();
     return FReply::Handled();
 }
 
@@ -1542,7 +1552,7 @@ FOdysseyPainterEditorToolkit::OnUndo()
 FReply
 FOdysseyPainterEditorToolkit::OnRedo()
 {
-    mLayerStack.mDrawingUndo->Redo();
+    RedoIliad();
     return FReply::Handled();
 }
 
@@ -1551,6 +1561,19 @@ FOdysseyPainterEditorToolkit::SetColor( const ::ULIS::CColor& iColor )
 {
     if( mColorSelectorTab ) 
         mColorSelectorTab->SetColor( iColor );
+}
+
+void
+FOdysseyPainterEditorToolkit::UndoIliad()
+{
+    mLayerStack.mDrawingUndo->LoadData();
+}
+
+
+void
+FOdysseyPainterEditorToolkit::RedoIliad()
+{
+    mLayerStack.mDrawingUndo->Redo();
 }
 
 #undef LOCTEXT_NAMESPACE
