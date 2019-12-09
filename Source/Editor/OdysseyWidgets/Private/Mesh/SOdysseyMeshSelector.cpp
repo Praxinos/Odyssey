@@ -28,60 +28,66 @@ void SOdysseyMeshSelector::Construct(const FArguments& InArgs)
 
     ChildSlot
     [
-        SNew( SVerticalBox )
-            + SVerticalBox::Slot()
-            .Padding( 2 )
-            .AutoHeight()
+        SNew(SScrollBox)
+			.Orientation(Orient_Vertical)
+			.ScrollBarAlwaysVisible(false)
+			+SScrollBox::Slot()
             [
-                SNew( SHorizontalBox )
-             + SHorizontalBox::Slot()
-             .HAlign(HAlign_Left)
-             .Padding( FMargin( 0.f, 0.f, 4.f, 0.f ) )
-             .AutoWidth()
-             [
-                SNew( STextBlock )
-                .Text( FText::FromString("Mesh Color"))
-             ]
-             + SHorizontalBox::Slot()
-             .HAlign(HAlign_Fill)
-             [
-                SAssignNew( ColorBlockWidget, SColorBlock )
-                .Color( this, &SOdysseyMeshSelector::GetMeshColor )
-                .OnMouseButtonDown(this, &SOdysseyMeshSelector::HandleMeshColorBlockMouseButtonDown )
-             ]
+                SNew( SVerticalBox )
+                    + SVerticalBox::Slot()
+                    .Padding( 2 )
+                    .AutoHeight()
+                    [
+                        SNew( SHorizontalBox )
+                         + SHorizontalBox::Slot()
+                         .HAlign(HAlign_Left)
+                         .Padding( FMargin( 0.f, 0.f, 4.f, 0.f ) )
+                         .AutoWidth()
+                         [
+                            SNew( STextBlock )
+                            .Text( FText::FromString("Mesh Color"))
+                         ]
+                         + SHorizontalBox::Slot()
+                         .HAlign(HAlign_Fill)
+                         [
+                            SAssignNew( ColorBlockWidget, SColorBlock )
+                            .Color( this, &SOdysseyMeshSelector::GetMeshColor )
+                            .OnMouseButtonDown(this, &SOdysseyMeshSelector::HandleMeshColorBlockMouseButtonDown )
+                         ]
 
-            ]
-            + SVerticalBox::Slot()
-            .Padding( 2 )
-            .AutoHeight()
-            [
-                SNew(SObjectPropertyEntryBox)
-                    .AllowedClass(          UStaticMesh::StaticClass() )
-                    .ObjectPath(            this, &SOdysseyMeshSelector::ObjectPath )
-                    .ThumbnailPool(         AssetThumbnailPool )
-                    .OnObjectChanged(       this, &SOdysseyMeshSelector::OnObjectChanged )
-                    .AllowClear(            false )
-                    .DisplayUseSelected(    true )
-                    .DisplayBrowse(         true )
-                    .EnableContentPicker(   true )
-                    .DisplayCompactSize(    true )
-                    .DisplayThumbnail(      true )
-                    .ThumbnailSizeOverride( FIntPoint( 30, 30 ) )
-            ]
-            + SVerticalBox::Slot()
-            .Padding( 5 )
-            .AutoHeight()
-            .Expose(LODSelectionMenu)
-            [
-                SNullWidget::NullWidget
-            ]
-            + SVerticalBox::Slot()
-            .Padding( 2 )
-            .AutoHeight()
-            .Expose(UVSelectionMenu)
-            [
-                SNullWidget::NullWidget
-            ]
+                    ]
+                    + SVerticalBox::Slot()
+                    .Padding( 2 )
+                    .AutoHeight()
+                    [
+                        SNew(SObjectPropertyEntryBox)
+                            .AllowedClass(          UStaticMesh::StaticClass() )
+                            .ObjectPath(            this, &SOdysseyMeshSelector::ObjectPath )
+                            .ThumbnailPool(         AssetThumbnailPool )
+                            .OnObjectChanged(       this, &SOdysseyMeshSelector::OnObjectChanged )
+                            .AllowClear(            false )
+                            .DisplayUseSelected(    true )
+                            .DisplayBrowse(         true )
+                            .EnableContentPicker(   true )
+                            .DisplayCompactSize(    true )
+                            .DisplayThumbnail(      true )
+                            .ThumbnailSizeOverride( FIntPoint( 30, 30 ) )
+                    ]
+                    + SVerticalBox::Slot()
+                    .Padding( 5 )
+                    .AutoHeight()
+                    .Expose(LODSelectionMenu)
+                    [
+                        SNullWidget::NullWidget
+                    ]
+                    + SVerticalBox::Slot()
+                    .Padding( 2 )
+                    .AutoHeight()
+                    .Expose(UVSelectionMenu)
+                    [
+                        SNullWidget::NullWidget
+                    ]
+             ]
     ];
 }
 
