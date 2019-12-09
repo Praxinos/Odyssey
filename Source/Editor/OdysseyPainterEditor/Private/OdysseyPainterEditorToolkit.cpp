@@ -1566,6 +1566,7 @@ FOdysseyPainterEditorToolkit::SetColor( const ::ULIS::CColor& iColor )
 void
 FOdysseyPainterEditorToolkit::UndoIliad()
 {
+    mPaintEngine.InterruptStrokeAndStampInPlace();
     mLayerStack.mDrawingUndo->LoadData();
 }
 
@@ -1573,6 +1574,7 @@ FOdysseyPainterEditorToolkit::UndoIliad()
 void
 FOdysseyPainterEditorToolkit::RedoIliad()
 {
+    mPaintEngine.InterruptStrokeAndStampInPlace();
     mLayerStack.mDrawingUndo->Redo();
 }
 

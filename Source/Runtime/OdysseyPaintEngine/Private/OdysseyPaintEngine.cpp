@@ -137,7 +137,7 @@ FOdysseyPaintEngine::Tick()
 
     if( mIsPendingEndStroke && mDelayQueue.empty() )
     {
-        mLayerStack->mDrawingUndo->StartRecord();
+        bool IsRecordStarted = false;
 
         for( int k = 0; k < mCountTileY; ++k )
         {
@@ -145,6 +145,12 @@ FOdysseyPaintEngine::Tick()
             {
                 if( mStrokeInvalidTileMap[k][l] )
                 {
+                    if( !IsRecordStarted )
+                    {
+                        mLayerStack->mDrawingUndo->StartRecord();
+                        IsRecordStarted = true;
+                    }
+
                     ::ULIS::FRect tileRect = MakeTileRect( l, k );
                     mLayerStack->mDrawingUndo->SaveData( l, k, tileRect.w, tileRect.h );
                     mTileThreadPool->ScheduleJob( [this, l, k]()
@@ -156,7 +162,8 @@ FOdysseyPaintEngine::Tick()
             }
         }
 
-        mLayerStack->mDrawingUndo->EndRecord();
+        if( IsRecordStarted )
+            mLayerStack->mDrawingUndo->EndRecord();
 
         mTileThreadPool->WaitForCompletion();
 
