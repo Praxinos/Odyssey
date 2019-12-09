@@ -422,9 +422,9 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
     //UE_LOG(LogTemp, Display, TEXT("total: %d"), mData.Num() );
     //UE_LOG(LogTemp, Display, TEXT("totalMemory: %d"), mData.GetAllocatedSize() );
 
-    mUndoPath = FPaths::Combine( FPaths::EngineSavedDir(), "Undos.save" );
-    mRedoPath = FPaths::Combine( FPaths::EngineSavedDir(), "Redos.save" );
-
+    mUndoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("undos.save") );
+    mRedoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("redos.save") );
+    
     Clear();
 }
 
