@@ -37,23 +37,29 @@
 # Packaging
 *Only windows (for the moment)*
 ```
-usage: build-package.py [-h] [-i INPUT] [-o OUTPUT]
+usage: build-package.py [-h] [-i INPUT_DIR] [-o OUTPUT_DIR] [-u] [-p UPLOAD_DIR]
 
 Build package.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT, --input INPUT
-                        The input path
+  -i INPUT_DIR, --input-dir INPUT_DIR
+                        the input path
+                        it must contains a uplugin file
                         (default: *current working directory*)
-  -o OUTPUT, --output OUTPUT
-                        The output path
+  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+                        the output path
                         'date-time/plugin-name' folders will be append to it
                         (default: *current working directory*/../package)
+  -u, --upload          start uploading after building
+                        (default: False)
+  -p UPLOAD_DIR, --upload-dir UPLOAD_DIR
+                        the upload path
+                        (default: *pcloud*/Praxinos/Developpement/Package/Iliad)
 ```
 
 Basic example:
 ```
-cd $PROJECT_PATH
+cd $ILIAD_PATH
 build-package.py
 ```

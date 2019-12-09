@@ -35,24 +35,27 @@ class CustomArgumentDefaultsHelpFormatter( argparse.RawTextHelpFormatter ):
         
 #---
 
-input_path = Path.cwd().resolve()
-output_path = ( input_path / '..' / 'package' ).resolve()
-   
-parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
-parser.add_argument( '-i', '--input', default=f'{input_path}', help=f'The input path' )
-parser.add_argument( '-o', '--output', default=f'{output_path}', help=f'The output path\n\'date-time/plugin-name\' folders will be append to it' )
-args = parser.parse_args()
-
 operating_system = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if operating_system != 'windows':
     print( Fore.RED + f'This platform is not supported: {operating_system}' )
     sys.exit( 5 )
+
+input_path = Path.cwd().resolve()
+output_path = ( input_path / '..' / 'package' ).resolve()
+upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package' / 'Iliad'
    
+parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
+parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
+parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\n\'date-time/plugin-name\' folders will be append to it' )
+parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
+parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path' )
+args = parser.parse_args()
+
 #---
  
 # Input uplugin file
-if args.input:
-    input_path = Path( args.input ).resolve()
+if args.input_dir:
+    input_path = Path( args.input_dir ).resolve()
 
 uplugin_pathfiles = list( input_path.glob( '*.uplugin' ) )
 if not uplugin_pathfiles:
@@ -69,14 +72,26 @@ print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
 plugin_name = uplugin_pathfile.stem
 
 # Output package directory
-if args.output:
-    output_path = Path( args.output ).resolve()
+if args.output_dir:
+    output_path = Path( args.output_dir ).resolve()
 
 now = datetime.now()
-output_path = ( output_path / now.strftime( '%Y%m%d-%H%M%S-' + operating_system ) / plugin_name )
+date_folder = now.strftime( '%Y%m%d-%H%M%S-' + operating_system )
+output_path = ( output_path / date_folder / plugin_name )
 output_path.mkdir( parents=True, exist_ok=True )
 
 print( Fore.GREEN + f'Output path: {output_path}' )
+
+# Upload package directory
+if args.upload:
+    if args.upload_dir:
+        upload_path = Path( args.upload_dir ).resolve()
+        
+    upload_path.mkdir( parents=True, exist_ok=True )
+
+    print( Fore.GREEN + f'Upload path: {upload_path}' )
+else:
+    print( Fore.GREEN + f'NO upload' )
 
 #---
 
@@ -104,10 +119,10 @@ with uplugin_pathfile.open( 'w' ) as outfile:
 
 if operating_system == 'windows':
     uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / 'UE_4.23' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
-    args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
+    uat_args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
     
 # Run packaging script
-process = subprocess.run( uat + args )
+process = subprocess.run( uat + uat_args )
 
 shutil.copyfile( uplugin_backup_pathfile, uplugin_pathfile )
 uplugin_backup_pathfile.unlink()
@@ -127,27 +142,11 @@ source = output_path / 'Source'
 print( Fore.GREEN + f'Removing: {source}' )
 shutil.rmtree( source, ignore_errors=True )
 
-# thirdparty = output_path / 'Source' / 'ThirdParty'
-# for entry in thirdparty.rglob( '*' ):
-    # if entry.is_dir() and entry.name == 'Debug':
-        # print( f'Removing: {entry}' )
-        # shutil.rmtree( entry, ignore_errors=True )
+#---
 
-# glm = output_path / 'Source' / 'ThirdParty' / 'ULIS' / 'Redist' / 'Include' / 'glm'
-# print( f'Removing: {glm}/*' )
-# shutil.rmtree( glm / '.git', ignore_errors=True )
-# shutil.rmtree( glm / 'doc', ignore_errors=True )
-# shutil.rmtree( glm / 'test', ignore_errors=True )
-# shutil.rmtree( glm / 'util', ignore_errors=True )
-# for entry in glm.glob( '*' ):
-    # if entry.is_file():
-        # print( f'Removing: {entry}' )
-        # entry.unlink()
-
-# runtime = output_path / 'Source' / 'Runtime'
-# editor = output_path / 'Source' / 'Editor'
-# for entry in itertools.chain( runtime.rglob( '*' ), editor.rglob( '*' ) ):
-    # if entry.is_dir() and entry.name == 'Private':
-        # print( f'Removing: {entry}' )
-        # shutil.rmtree( entry, ignore_errors=True )
-
+# Uploading
+if args.upload:
+    src_path = ( output_path / '..' ).resolve() # '..' to move to the directory with the date
+    dst_path = ( upload_path / date_folder ).resolve()
+    print( Fore.GREEN + f'Copying/Uploading: {src_path} -> {dst_path}' )
+    shutil.copytree( src_path, dst_path )
