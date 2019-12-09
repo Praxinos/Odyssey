@@ -483,7 +483,7 @@ FOdysseyDrawingUndo::EndRecord()
     }
 }
 
-/*
+
 void
 FOdysseyDrawingUndo::StartRecordRedo()
 {
@@ -502,12 +502,12 @@ FOdysseyDrawingUndo::EndRecordRedo()
         fileHandle->Seek( mUndosPositions[mCurrentIndex] );
         fileHandle->Write( mToBinary.GetData(), mToBinary.Num() );
         
-        UE_LOG(LogTemp, Display, TEXT("RecoRecord mUndosPositions[%d]: %lld"), mCurrentIndex, mUndosPositions[mCurrentIndex]);
+        //UE_LOG(LogTemp, Display, TEXT("RecoRecord mUndosPositions[%d]: %lld"), mCurrentIndex, mUndosPositions[mCurrentIndex]);
 
         
         delete fileHandle;
     }
-}*/
+}
 
 bool
 FOdysseyDrawingUndo::Clear()
@@ -547,7 +547,7 @@ void FOdysseyDrawingUndo::Check()
     }
 }
 
-/*
+
 bool
 FOdysseyDrawingUndo::SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY )
 {
@@ -584,7 +584,7 @@ FOdysseyDrawingUndo::SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile,
     mNumberBlocksRedo[mCurrentIndex]++;
     
     return true;
-}*/
+}
 
 bool
 FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY )
@@ -624,12 +624,12 @@ FOdysseyDrawingUndo::LoadData()
     if( mCurrentIndex > 0 )
         mCurrentIndex--;
     
-    /*bool bSaveForRedo = mNumberBlocksRedo[mCurrentIndex] == 0;
+    bool bSaveForRedo = mNumberBlocksRedo[mCurrentIndex] == 0;
         
     if( bSaveForRedo )
     {
         StartRecordRedo();
-    }*/
+    }
 
     UPTRINT address;
     uint8 tileX;
@@ -656,10 +656,10 @@ FOdysseyDrawingUndo::LoadData()
         Ar << sizeY;
         Ar << mData;
 
-        /*if( bSaveForRedo )
+        if( bSaveForRedo )
         {
             SaveDataRedo( address, tileX, tileY, sizeX, sizeY );
-        }*/
+        }
         
         //UE_LOG(LogTemp, Display, TEXT("Tilex: %d, Tiley: %d, sizeX: %d, sizeY: %d, mDataNum: %d"), tileX, tileY, sizeX, sizeY, mData.Num());
         
@@ -700,10 +700,10 @@ FOdysseyDrawingUndo::LoadData()
         }
     }
     
-    /*if( bSaveForRedo )
+    if( bSaveForRedo )
     {
         EndRecordRedo();
-    }*/
+    }
        
     //UE_LOG(LogTemp, Display, TEXT("index = %d"), mCurrentIndex );
     //UE_LOG(LogTemp, Display, TEXT("LoadEnd") );
@@ -711,7 +711,7 @@ FOdysseyDrawingUndo::LoadData()
     return true;
 }
 
-/*
+
 bool
 FOdysseyDrawingUndo::Redo()
 {
@@ -785,7 +785,7 @@ FOdysseyDrawingUndo::Redo()
     //UE_LOG(LogTemp, Display, TEXT("LoadStart") );
 
     return true;
-}*/
+}
 
 
 

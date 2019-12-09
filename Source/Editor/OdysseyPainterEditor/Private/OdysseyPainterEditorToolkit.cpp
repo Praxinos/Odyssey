@@ -1474,7 +1474,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo32"))
                         ]
                     ]
-                    /*+SWrapBox::Slot()
+                    +SWrapBox::Slot()
                     [
                         SNew( SButton )
                         .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -1482,18 +1482,12 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                         [
                             SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
                         ]
-                    ]*/
-                    /*+SWrapBox::Slot()
-                    [
-                        SNew( SButton )
-                        .Text( LOCTEXT( "Check", "Check" ) )
-                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnCheck)
-                    ]*/
+                    ]
                     +SWrapBox::Slot()
                     [
                         SNew( SButton )
-                        .Text( LOCTEXT( "Clear Undos", "Clear Undos" ) )
-                        .ToolTipText( LOCTEXT( "Clear Undos tooltip", "If the undo is slow, clear the cache by clicking this button" ))
+                        .Text( LOCTEXT( "Clear Undo History", "Clear Undo History" ) )
+                        .ToolTipText( LOCTEXT( "Clear Undos tooltip", "If the undo/redo is slow, clear the cache by clicking this button" ))
                         .OnClicked(this, &FOdysseyPainterEditorToolkit::OnClearUndo)
                     ]
                  ]
@@ -1544,18 +1538,11 @@ FOdysseyPainterEditorToolkit::OnUndo()
     return FReply::Handled();
 }
 
-/*
+
 FReply
 FOdysseyPainterEditorToolkit::OnRedo()
 {
     mLayerStack.mDrawingUndo->Redo();
-    return FReply::Handled();
-}*/
-
-FReply
-FOdysseyPainterEditorToolkit::OnCheck()
-{
-    mLayerStack.mDrawingUndo->Check();
     return FReply::Handled();
 }
 

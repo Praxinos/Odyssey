@@ -94,18 +94,18 @@ public:
     void StartRecord();
     void EndRecord();
     
-/*
+
 private:
     void StartRecordRedo();
     void EndRecordRedo();
-    bool SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );*/
+    bool SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
 
 
 public:
     bool Clear();
     bool SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
     bool LoadData();
-    //bool Redo();
+    bool Redo();
     void Check();
 
     
