@@ -109,8 +109,9 @@ if not uplugin_data:
     print( Fore.RED + f'Empty uplugin_data: {uplugin_pathfile}' )
     sys.exit( 20 )
 
-if operating_system == 'windows':
-    uplugin_data['SupportedTargetPlatforms'] = [ 'Win64' ]
+for module in uplugin_data['Modules']:
+    if operating_system == 'windows':
+        module['WhitelistPlatforms'] = [ 'Win64' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
 
 with uplugin_pathfile.open( 'w' ) as outfile:
     json.dump( uplugin_data, outfile )
