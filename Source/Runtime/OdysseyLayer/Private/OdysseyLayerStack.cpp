@@ -425,6 +425,10 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
     mUndoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("undos.save") );
     mRedoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("redos.save") );
     
+    /*UE_LOG(LogTemp, Display, TEXT("%s"), *mUndoPath );
+    UE_LOG(LogTemp, Display, TEXT("%s"), *mRedoPath );*/
+
+    
     Clear();
 }
 
@@ -768,8 +772,10 @@ FOdysseyDrawingUndo::Redo()
             {
                 *(mTileData->DataPtr() + j) = mData[j];
             }
-            
-            //UE_LOG(LogTemp, Display, TEXT("mTileDataSize: %d"), mTileData->BytesTotal());
+    
+            /*UE_LOG(LogTemp, Display, TEXT("i: : %d"), i);
+            UE_LOG(LogTemp, Display, TEXT("mTileDataSize: %d"), mTileData->BytesTotal());
+            UE_LOG(LogTemp, Display, TEXT("TileX: %d, TileY: %d"), tileX, tileY);*/
 
         
             ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect(0, 0, sizeX, sizeY ), ::ULIS::FPoint( tileX * sizeX, tileY * sizeY ) );

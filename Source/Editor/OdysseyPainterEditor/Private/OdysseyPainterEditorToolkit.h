@@ -128,6 +128,10 @@ protected:
     FReply OnRedo();
     FReply OnClearUndo();
 
+    // debug purposes
+    //FReply OnCheck();
+    
+
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;
     
 private:

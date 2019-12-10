@@ -1493,6 +1493,13 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
                         ]
                     ]
+                    //Debug Purposes
+                    /*+SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Check", "Check" ) )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnCheck)
+                    ]*/
                     +SWrapBox::Slot()
                     [
                         SNew( SButton )
@@ -1555,6 +1562,14 @@ FOdysseyPainterEditorToolkit::OnRedo()
     RedoIliad();
     return FReply::Handled();
 }
+
+//Debug purposes
+/*FReply
+FOdysseyPainterEditorToolkit::OnCheck()
+{
+    mLayerStack.mDrawingUndo->Check();
+    return FReply::Handled();
+}*/
 
 void
 FOdysseyPainterEditorToolkit::SetColor( const ::ULIS::CColor& iColor )
