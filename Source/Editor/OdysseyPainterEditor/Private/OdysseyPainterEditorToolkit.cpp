@@ -482,38 +482,6 @@ FOdysseyPainterEditorToolkit::GetWorldCentricTabPrefix() const
 void
 FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
 {
-    SetTextureDirty( true );
-    /*
-    TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
-    for( int i = 0; i < layers->Num(); i++ )
-    {
-        FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
-        CopyUTextureDataIntoBlock( imageLayer->GetBlock(), imageLayer->mTexture );
-    }
-    LayerStack()->ComputeResultBlock();
-
-    UE_LOG(LogTemp, Display, TEXT("Done Undo"));*/
-    
-    /*UE_LOG(LogTemp, Display, TEXT("Texture: %p"), mDisplaySurface->Texture() );
-    UE_LOG(LogTemp, Display, TEXT("block: %p"), mDisplaySurface->Block() );
-
-    CopyUTextureDataIntoBlock( mDisplaySurface->Block(), mDisplaySurface->Texture() );
-    
-    mDisplaySurface->Invalidate();*/
-
-    //mLayerStack.ComputeResultBlock();
-    //mDisplaySurface->Invalidate();
-    //CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    //::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), textureContentsBackup->GetIBlock() );
-    //InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
-
-    //FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( mDisplaySurface->Texture() );
-    //CopyBlockDataIntoUTexture( block, mDisplaySurface->Texture() );
-    //InvalidateTextureFromData( block, mDisplaySurface->Texture() );
-    // Invalidate all
-    //mDisplaySurface->Invalidate();
-    //delete block;
-    mDisplaySurface->Invalidate();
 }
 
 void
@@ -984,49 +952,16 @@ FOdysseyPainterEditorToolkit::OnMeshChanged( UBlueprint* iMesh )
 void
 FOdysseyPainterEditorToolkit::BeginTransaction( const FText& iSessionName )
 {
-    if( mScopedTransaction == nullptr )
-    {
-        mScopedTransaction = new FScopedTransaction( iSessionName );
-        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
-        for( int i = 0; i < layers->Num(); i++ )
-        {
-            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
-            imageLayer->mBlockUndoable->Modify();
-        }
-    }
 }
 
 void
 FOdysseyPainterEditorToolkit::MarkTransactionAsDirty()
 {
-    //SetTextureDirty( true );
-    mIsManipulationDirtiedSomething = true;
 }
 
 void
 FOdysseyPainterEditorToolkit::EndTransaction()
 {
-    if( mIsManipulationDirtiedSomething )
-    {
-        TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
-        for( int i = 0; i < layers->Num(); i++ )
-        {
-            FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
-            imageLayer->mBlockUndoable->SetArray( imageLayer->GetBlock()->GetArray().GetData(), imageLayer->GetBlock()->GetArray().Num() );
-            imageLayer->mBlockUndoable->PostEditChange();
-        }
-        mDisplaySurface->Invalidate();
-    }
-
-    mIsManipulationDirtiedSomething = false;
-
-    if( mScopedTransaction != nullptr )
-    {
-        delete mScopedTransaction;
-        mScopedTransaction = nullptr;
-    }
-
-    UE_LOG(LogTemp, Display, TEXT("Done transaction"));
 }
 
 void
