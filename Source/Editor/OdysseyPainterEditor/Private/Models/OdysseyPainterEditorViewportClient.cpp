@@ -265,8 +265,6 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
-    // check a preference ink or not before (or inside plugin to not call this CB)
-    // as it is now, if ink is available -> use it
     mMouseCaptureMode = EMouseCaptureMode::NoCapture;
 
     //---
@@ -282,10 +280,11 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 
     //---
 
-    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d"), iIndex, iState.GetPosition().X, iState.GetPosition().Y, iState.GetPressure(), iState.IsStylusDown() );
-
-    //State = iState;
-    //LastIndex = iIndex;
+    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f"), iIndex, 
+    //        iState.GetPosition().X, iState.GetPosition().Y, 
+    //        iState.GetPressure(), iState.IsStylusDown(), 
+    //        iState.GetTilt().X, iState.GetTilt().Y, 
+    //        iState.GetAzimuth(), iState.GetAltitude() );
 
     float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
@@ -296,17 +295,22 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
                                       , position_in_viewport.Y
                                       , iState.GetZ()
                                       , iState.GetPressure()
-                                      , 0 //iState.GetAltitude()
-                                      , 0 //iState.GetAzimuth()
+                                      , iState.GetAltitude()
+                                      , iState.GetAzimuth()
                                       , iState.GetTwist()
                                       , 0 //iState.GetPitch()
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
 
   //---
-
-    //TODO: fix when down on viewport and up outside
-    //we don't have the InputKey of the up -_-
+    if( iState.IsStylusDown() )
+    {
+        UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f" ), iIndex,
+                iState.GetPosition().X, iState.GetPosition().Y,
+                iState.GetPressure(), iState.IsStylusDown(),
+                iState.GetTilt().X, iState.GetTilt().Y,
+                iState.GetAzimuth(), iState.GetAltitude() );
+    }
 
     if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Pressed )
     {
