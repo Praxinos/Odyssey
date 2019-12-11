@@ -31,8 +31,6 @@ enum class EWintabPacketType
 	Azimuth,
 	Altitude,
 	Twist,
-	XTilt,
-	YTilt,
 	Width,
 	Height,
 };
@@ -44,7 +42,8 @@ struct FWintabStylusState
 {
 	FVector2D Position;
 	float Z;
-	FVector2D Tilt;
+    float Azimuth;
+    float Altitude;
 	float Twist;
 	float NormalPressure;
 	float TangentPressure;
@@ -53,14 +52,49 @@ struct FWintabStylusState
 	bool IsInverted : 1;
 
     FWintabStylusState() :
-		Position(0, 0), Z(0), Tilt(0, 0), Twist(0), NormalPressure(0), TangentPressure(0),
+		Position(0, 0), Z(0), Azimuth(0), Altitude(0), Twist(0), NormalPressure(0), TangentPressure(0),
 		Size(0, 0), IsTouching(false), IsInverted(false)
 	{
 	}
 
+    FVector2D OrientationToTilt() const
+    {
+        return FVector2D( 0, 0 );
+
+    //    // https://gist.github.com/telegraphic/841212e8ab3252f5cffe
+    //    // https://www.mathworks.com/help/phased/ref/azel2phitheta.html
+
+    //    float cos_theta = FMath::Cos( Altitude ) * FMath::Cos( Azimuth );
+    //    float theta /*tilt.X*/ = FMath::Acos( cos_theta );
+
+    //    //float tan_phi = FMath::Tan( Altitude ) / FMath::Sin( Azimuth );
+    //    float phi /*tilt.Y*/ = FMath::Atan2( FMath::Tan( Altitude ), FMath::Sin( Azimuth ) );
+    //    phi = FMath::Fmod( phi + 2 * PI, 2 * PI );
+
+    //    return FVector2D( theta, phi );
+
+        // https://code.woboq.org/qt5/qtbase/src/plugins/platforms/windows/qwindowstabletsupport.cpp.html#590
+        //// Convert from azimuth and altitude to x tilt and y tilt. What
+        //// follows is the optimized version. Here are the equations used:
+        //// X = sin(azimuth) * cos(altitude)
+        //// Y = cos(azimuth) * cos(altitude)
+        //// Z = sin(altitude)
+        //// X Tilt = arctan(X / Z)
+        //// Y Tilt = arctan(Y / Z)
+        ////TOTEST
+        //const float radAzim = FMath::DegreesToRadians( Azimuth / 10.0 );
+        //const float tanAlt = FMath::Tan( FMath::DegreesToRadians( std::abs( Altitude / 10.0 ) ) );
+        //const float radX = FMath::Tan( FMath::Sin( radAzim ) / tanAlt );
+        //const float radY = FMath::Tan( FMath::Cos( radAzim ) / tanAlt );
+        //float tiltX = FMath::RadiansToDegrees( radX );
+        //float tiltY = FMath::RadiansToDegrees( -radY );
+
+        //return FVector2D( tiltX, tiltY );
+    }
+
 	FStylusState ToPublicState() const
 	{
-		return FStylusState(Position, Z, Tilt, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
+		return FStylusState(Position, Z, OrientationToTilt(), Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
 	}
 };
 

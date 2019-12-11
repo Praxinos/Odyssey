@@ -41,6 +41,8 @@ FWTTabletContextInfo::Tick()
     const FWTPacketDescription* packet_description_npressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::NormalPressure );
     const FWTPacketDescription* packet_description_tpressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::TangentPressure );
     const FWTPacketDescription* packet_description_twist = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Twist );
+    const FWTPacketDescription* packet_description_azimuth = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Azimuth );
+    const FWTPacketDescription* packet_description_altitude = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Altitude );
 
     for( int i = 0; i < count; i++ )
     {
@@ -54,6 +56,8 @@ FWTTabletContextInfo::Tick()
         state.TangentPressure = packet_description_tpressure ? Normalize( packet.pkTangentPressure, *packet_description_tpressure ) : 0.0;
 
         state.Twist = packet_description_twist ? ToDegrees( packet.pkOrientation.orTwist, *packet_description_twist ) : 0.0;
+        state.Azimuth = packet_description_azimuth ? ToDegrees( packet.pkOrientation.orAzimuth, *packet_description_azimuth ) : 0.0;
+        state.Altitude = packet_description_altitude ? ToDegrees( packet.pkOrientation.orAltitude, *packet_description_altitude ) : 0.0;
 
         //---
 
@@ -329,16 +333,16 @@ SetupTabletSupportedPackets( FWTTabletContextInfo* ioTabletContext )
         ioTabletContext->AddSupportedInput( EStylusInputType::TangentPressure );
     }
 
-    //if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Azimuth ) )
-    //{
-    //    ioTabletContext->SupportedPackets.Add( EWintabPacketType::Azimuth );
-    //    ioTabletContext->AddSupportedInput( EStylusInputType::xxxx );
-    //}
-    //if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Altitude ) )
-    //{
-    //    ioTabletContext->SupportedPackets.Add( EWintabPacketType::Altitude );
-    //    ioTabletContext->AddSupportedInput( EStylusInputType::xxxx );
-    //}
+    if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Azimuth ) )
+    {
+        ioTabletContext->SupportedPackets.Add( EWintabPacketType::Azimuth );
+        ioTabletContext->AddSupportedInput( EStylusInputType::Azimuth );
+    }
+    if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Altitude ) )
+    {
+        ioTabletContext->SupportedPackets.Add( EWintabPacketType::Altitude );
+        ioTabletContext->AddSupportedInput( EStylusInputType::Altitude );
+    }
     if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Twist ) )
     {
         ioTabletContext->SupportedPackets.Add( EWintabPacketType::Twist );
