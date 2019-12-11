@@ -214,6 +214,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 	if (Supported)
 	{
 		TabletContext.SupportedPackets.Add(EWindowsPacketType::Azimuth);
+        TabletContext.AddSupportedInput(EStylusInputType::Azimuth);
 	}
 
 	SysFreeString(GuidBSTR);
@@ -223,6 +224,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 	if (Supported)
 	{
 		TabletContext.SupportedPackets.Add(EWindowsPacketType::Altitude);
+        TabletContext.AddSupportedInput(EStylusInputType::Altitude);
 	}
 
 	SysFreeString(GuidBSTR);
@@ -488,6 +490,12 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 			case EWindowsPacketType::YTilt:
                 windows_state.Tilt.Y = ToDegrees(Packets[i], PacketDescription);
 				break;
+            case EWindowsPacketType::Azimuth:
+                windows_state.Azimuth = ToDegrees( Packets[i], PacketDescription );
+                break;
+            case EWindowsPacketType::Altitude:
+                windows_state.Altitude = ToDegrees( Packets[i], PacketDescription );
+                break;
 			case EWindowsPacketType::Width:
                 windows_state.Size.X = Normalized;
 				break;

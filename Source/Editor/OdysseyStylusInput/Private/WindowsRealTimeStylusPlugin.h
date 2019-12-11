@@ -47,6 +47,8 @@ struct FWindowsStylusState
 	FVector2D Position;
 	float Z;
 	FVector2D Tilt;
+	float Azimuth;
+	float Altitude;
 	float Twist;
 	float NormalPressure;
 	float TangentPressure;
@@ -55,14 +57,14 @@ struct FWindowsStylusState
 	bool IsInverted : 1;
 
 	FWindowsStylusState() :
-		Position(0, 0), Z(0), Tilt(0, 0), Twist(0), NormalPressure(0), TangentPressure(0),
+		Position(0, 0), Z(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0), NormalPressure(0), TangentPressure(0),
 		Size(0, 0), IsTouching(false), IsInverted(false)
 	{
 	}
 
 	FStylusState ToPublicState() const
 	{
-		return FStylusState(Position, Z, Tilt, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
+		return FStylusState(Position, Z, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
 	}
 };
 

@@ -2,8 +2,8 @@
 
 #include "WindowsStylusInputInterface.h"
 
-#include "GenericPlatform/GenericPlatformProcess.h"
 #include "Framework/Application/SlateApplication.h"
+#include "GenericPlatform/GenericPlatformProcess.h"
 #include "Interfaces/IMainFrameModule.h"
 
 #include "WindowsRealTimeStylusPlugin.h"
@@ -37,6 +37,8 @@ FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsSt
 		GUID_PACKETPROPERTY_GUID_PACKET_STATUS,
 		GUID_PACKETPROPERTY_GUID_NORMAL_PRESSURE,
 		GUID_PACKETPROPERTY_GUID_TANGENT_PRESSURE,
+		GUID_PACKETPROPERTY_GUID_AZIMUTH_ORIENTATION,
+		GUID_PACKETPROPERTY_GUID_ALTITUDE_ORIENTATION,
 		GUID_PACKETPROPERTY_GUID_X_TILT_ORIENTATION,
 		GUID_PACKETPROPERTY_GUID_Y_TILT_ORIENTATION,
 		GUID_PACKETPROPERTY_GUID_TWIST_ORIENTATION,
@@ -44,8 +46,6 @@ FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsSt
 		GUID_PACKETPROPERTY_GUID_HEIGHT,
 		// Currently not needed.
 		//GUID_PACKETPROPERTY_GUID_BUTTON_PRESSURE,
-		//GUID_PACKETPROPERTY_GUID_AZIMUTH_ORIENTATION,
-		//GUID_PACKETPROPERTY_GUID_ALTITUDE_ORIENTATION,
 	};
 
 	Impl->RealTimeStylus->SetDesiredPacketDescription(DesiredPackets.Num(), DesiredPackets.GetData());
