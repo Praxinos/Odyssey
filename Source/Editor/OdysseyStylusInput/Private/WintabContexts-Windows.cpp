@@ -49,7 +49,7 @@ FWTTabletContextInfo::Tick()
         const PACKET& packet = mPacketsBuffer[i];
 
         FWintabStylusState state;
-        state.Position = FVector2D( packet.pkX, packet.pkY );
+        state.Position = FVector2D( packet.pkX / 1000.f, packet.pkY / 1000.f );
         state.Z = packet_description_z ? packet.pkZ : 0.0;
 
         state.NormalPressure = packet_description_npressure ? Normalize( packet.pkNormalPressure, *packet_description_npressure ) : 0.0;
@@ -418,13 +418,11 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
             lcMine.lcInExtY = packet_description_y->Maximum;
 
             // Guarantee the output coordinate space to be in screen coordinates.  
-            lcMine.lcOutOrgX = GetSystemMetrics( SM_XVIRTUALSCREEN );
-            lcMine.lcOutOrgY = GetSystemMetrics( SM_YVIRTUALSCREEN );
-            lcMine.lcOutExtX = GetSystemMetrics( SM_CXVIRTUALSCREEN );
-
-            // In Wintab, the tablet origin is lower left.  Move origin to upper left
-            // so that it coincides with screen origin.
-            lcMine.lcOutExtY = -GetSystemMetrics( SM_CYVIRTUALSCREEN );
+            lcMine.lcOutOrgX = GetSystemMetrics( SM_XVIRTUALSCREEN ) * 1000.f; // Scaled to have subpixel with packet.pkX / 1000.f
+            lcMine.lcOutOrgY = GetSystemMetrics( SM_YVIRTUALSCREEN ) * 1000.f;
+            lcMine.lcOutExtX = GetSystemMetrics( SM_CXVIRTUALSCREEN ) * 1000.f;
+            // In Wintab, the tablet origin is lower left. Move origin to upper left so that it coincides with screen origin.
+            lcMine.lcOutExtY = -GetSystemMetrics( SM_CYVIRTUALSCREEN ) * 1000.f;
 
             // Leave the system origin and extents as received:
             // lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
