@@ -220,6 +220,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                         .HAlign( HAlign_Fill )
                         [
                             SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
+                            .IsFocusable( false )
                             .OptionsSource(&mAlphaModes)
                             .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
                             .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )

@@ -38,6 +38,9 @@ public:
 
     float GetOpacity() const;
     void  SetOpacity( float iOpacity );
+    
+    bool  IsAlphaLocked() const;
+    void  SetIsAlphaLocked( bool iIsAlphaLocked );
 
 public:
     void CopyPropertiesFrom( const FOdysseyImageLayer &iCopy ); // TODO: replace it by a Clone()/copy-ctor/...
@@ -47,6 +50,7 @@ private:
     FOdysseyBlock*          mBlock;
     ::ULIS::eBlendingMode   mBlendingMode;
     float                   mOpacity;
+    bool                    mIsAlphaLocked;
     
 //public:
     //Temporary Undo necessity

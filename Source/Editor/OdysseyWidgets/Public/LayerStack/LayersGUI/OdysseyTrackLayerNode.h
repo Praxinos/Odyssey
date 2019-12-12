@@ -37,6 +37,8 @@ protected:
     FReply OnToggleVisibility();
     const FSlateBrush* GetLockedBrushForLayer() const;
     FReply OnToggleLocked();
+    const FSlateBrush* GetAlphaLockedBrushForLayer() const;
+    FReply OnToggleAlphaLocked();
     void RefreshOpacityText() const;
     void RefreshBlendingModeText() const;
 

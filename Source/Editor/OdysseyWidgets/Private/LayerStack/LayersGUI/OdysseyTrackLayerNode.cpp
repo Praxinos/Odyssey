@@ -112,6 +112,22 @@ TSharedRef<SWidget> OdysseyTrackLayerNode::GetCustomOutlinerContent()
                     SNew(SImage)
                     .Image(this, &OdysseyTrackLayerNode::GetLockedBrushForLayer)
                 ]
+        ]
+        +SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SNew(SButton)
+                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .OnClicked( this, &OdysseyTrackLayerNode::OnToggleAlphaLocked )
+                .ToolTipText( LOCTEXT("OdysseyLayerLockedButtonToolTip", "Toggle Layer Alpha Locked State") )
+                .ForegroundColor( FSlateColor::UseForeground() )
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
+                .Content()
+                [
+                    SNew(SImage)
+                    .Image(this, &OdysseyTrackLayerNode::GetAlphaLockedBrushForLayer)
+                ]
         ];
 }
 
@@ -139,6 +155,21 @@ const FSlateBrush* OdysseyTrackLayerNode::GetLockedBrushForLayer() const
 FReply OdysseyTrackLayerNode::OnToggleLocked()
 {
     GetLayerDataPtr()->SetIsLocked( !GetLayerDataPtr()->IsLocked() );
+    return FReply::Handled();
+}
+
+const FSlateBrush* OdysseyTrackLayerNode::GetAlphaLockedBrushForLayer() const
+{
+    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*> (GetLayerDataPtr());
+    
+    return layer->IsAlphaLocked() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16");
+}
+
+FReply OdysseyTrackLayerNode::OnToggleAlphaLocked()
+{
+    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*> (GetLayerDataPtr());
+
+    layer->SetIsAlphaLocked( !layer->IsAlphaLocked() );
     return FReply::Handled();
 }
 

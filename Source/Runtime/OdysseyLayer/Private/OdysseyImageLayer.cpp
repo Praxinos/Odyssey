@@ -23,6 +23,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     , mBlock( nullptr )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
+    , mIsAlphaLocked( false )
     //, mBlockUndoable( new UOdysseyBlockUndoable() )
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
@@ -47,6 +48,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     , mBlock( iBlock )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
+    , mIsAlphaLocked( false )
     //, mBlockUndoable( new UOdysseyBlockUndoable() )
 {
     //Undo
@@ -123,6 +125,19 @@ FOdysseyImageLayer::SetOpacity( float iOpacity )
     mOpacity = iOpacity;
 }
 
+bool
+FOdysseyImageLayer::IsAlphaLocked() const
+{
+    return mIsAlphaLocked;
+}
+
+void
+FOdysseyImageLayer::SetIsAlphaLocked( bool iIsAlphaLocked )
+{
+    mIsAlphaLocked = iIsAlphaLocked;
+}
+
+
 void
 FOdysseyImageLayer::CopyPropertiesFrom( const FOdysseyImageLayer &iCopy )
 {
@@ -130,6 +145,7 @@ FOdysseyImageLayer::CopyPropertiesFrom( const FOdysseyImageLayer &iCopy )
     mBlendingMode = iCopy.GetBlendingMode();
     mIsLocked = iCopy.IsLocked();
     mIsVisible = iCopy.IsVisible();
+    mIsAlphaLocked = iCopy.IsAlphaLocked();
 }
 
 //---

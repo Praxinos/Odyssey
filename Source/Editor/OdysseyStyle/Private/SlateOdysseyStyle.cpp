@@ -319,6 +319,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.Blend_2_16", new IMAGE_BRUSH( "OdysseyLayerStack/blend_2_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Merge64", new IMAGE_BRUSH( "OdysseyLayerStack/merge_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.Merge16", new IMAGE_BRUSH( "OdysseyLayerStack/merge_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.AlphaLocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_locked_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.AlphaUnlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_unlocked_16", mIcon16x16 ) );
 
     //TableRow
     Set( "TableRow.BaseColorRowHovered16", new IMAGE_BRUSH( "TableRow/base_color_row_hovered_16", mIcon16x16 ) );
