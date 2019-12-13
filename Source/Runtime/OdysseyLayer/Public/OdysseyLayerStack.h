@@ -113,7 +113,6 @@ private:
     FOdysseyLayerStack* mLayerStackPtr;
     
 private:
-    FOdysseyImageLayer* mImagePtr;
     int mCurrentIndex;
     TArray<int64> mUndosPositions;
     TArray<int> mNumberBlocksUndo;
