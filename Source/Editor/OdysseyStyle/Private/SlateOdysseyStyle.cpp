@@ -303,6 +303,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.ColorPicker32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.ColorPicker16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_16", mIcon16x16 ) );
 
+    Set( "PainterEditor.ToolsTab.Undo32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/undo_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.Redo32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/redo_32", mIcon32x32 ) );
+
+
     //OdysseyLayerStack
     Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) );
     Set( "OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_16", mIcon16x16 ) );

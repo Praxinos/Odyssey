@@ -482,37 +482,6 @@ FOdysseyPainterEditorToolkit::GetWorldCentricTabPrefix() const
 void
 FOdysseyPainterEditorToolkit::PostUndo( bool iSuccess )
 {
-    SetTextureDirty( true );
-    /*
-    TArray< TSharedPtr< IOdysseyLayer > >* layers = LayerStack()->GetLayers();
-    for( int i = 0; i < layers->Num(); i++ )
-    {
-        FOdysseyImageLayer* imageLayer = static_cast< FOdysseyImageLayer* >( (*layers)[i].Get() );
-        CopyUTextureDataIntoBlock( imageLayer->GetBlock(), imageLayer->mTexture );
-    }
-    LayerStack()->ComputeResultBlock();
-
-    UE_LOG(LogTemp, Display, TEXT("Done Undo"));*/
-    
-    /*UE_LOG(LogTemp, Display, TEXT("Texture: %p"), mDisplaySurface->Texture() );
-    UE_LOG(LogTemp, Display, TEXT("block: %p"), mDisplaySurface->Block() );
-
-    CopyUTextureDataIntoBlock( mDisplaySurface->Block(), mDisplaySurface->Texture() );
-    
-    mDisplaySurface->Invalidate();*/
-
-    //mLayerStack.ComputeResultBlock();
-    //mDisplaySurface->Invalidate();
-    //CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    //::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), textureContentsBackup->GetIBlock() );
-    //InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
-
-    //FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( mDisplaySurface->Texture() );
-    //CopyBlockDataIntoUTexture( block, mDisplaySurface->Texture() );
-    //InvalidateTextureFromData( block, mDisplaySurface->Texture() );
-    // Invalidate all
-    //mDisplaySurface->Invalidate();
-    //delete block;
 }
 
 void
@@ -541,6 +510,7 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
 void
 FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 {
+    /*
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
     //::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
     InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
@@ -553,6 +523,7 @@ FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 
     InvalidateTextureFromData( mTextureContentsBackup, mTexture );
     InvalidateSurfaceFromData( mTextureContentsBackup, mDisplaySurface );
+     */
 }
 
 bool
@@ -584,6 +555,7 @@ FOdysseyPainterEditorToolkit::OnRequestClose()
     }
     mTexture->LODGroup = mTextureGroupBackup;
     mIsEditorMarkedAsClosed = true;
+    mLayerStack.mDrawingUndo->Clear();
     return true;
 }
 
@@ -605,6 +577,16 @@ FOdysseyPainterEditorToolkit::BindCommands()
     ToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().AboutIliad,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolkit::OnAboutIliad ),
+        FCanExecuteAction() );
+    
+    ToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().Undo,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolkit::UndoIliad ),
+        FCanExecuteAction() );
+    
+    ToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().Redo,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolkit::RedoIliad ),
         FCanExecuteAction() );
 
     ToolkitCommands->MapAction(
@@ -970,35 +952,16 @@ FOdysseyPainterEditorToolkit::OnMeshChanged( UBlueprint* iMesh )
 void
 FOdysseyPainterEditorToolkit::BeginTransaction( const FText& iSessionName )
 {
-    if( mScopedTransaction == nullptr )
-    {
-        mScopedTransaction = new FScopedTransaction( iSessionName );
-        mDisplaySurface->Texture()->Modify();
-    }
 }
 
 void
 FOdysseyPainterEditorToolkit::MarkTransactionAsDirty()
 {
-    //SetTextureDirty( true );
-    mIsManipulationDirtiedSomething = true;
 }
 
 void
 FOdysseyPainterEditorToolkit::EndTransaction()
 {
-    if( mIsManipulationDirtiedSomething )
-    {
-        mDisplaySurface->Texture()->PostEditChange();
-    }
-
-    mIsManipulationDirtiedSomething = false;
-
-    if( mScopedTransaction != nullptr )
-    {
-        delete mScopedTransaction;
-        mScopedTransaction = nullptr;
-    }
 }
 
 void
@@ -1433,35 +1396,136 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                     ]
                 ]
             ]
+            +SScrollBox::Slot()
+            [
+                SNew( SExpandableArea )
+                .HeaderContent()
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "UndoRedo  (Experimental)", "UndoRedo  (Experimental)" ) )
+                    .Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
+                    .ShadowOffset( FVector2D( 1.0f, 1.0f ) )
+                ]
+                .BodyContent()
+                [
+                    SNew( SWrapBox )
+                    .UseAllottedWidth( true )
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnUndo)
+                        [
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo32"))
+                        ]
+                    ]
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnRedo)
+                        [
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
+                        ]
+                    ]
+                    //Debug Purposes
+                    /*+SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Check", "Check" ) )
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnCheck)
+                    ]*/
+                    +SWrapBox::Slot()
+                    [
+                        SNew( SButton )
+                        .Text( LOCTEXT( "Clear Undo History", "Clear Undo History" ) )
+                        .ToolTipText( LOCTEXT( "Clear Undos tooltip", "If the undo/redo is slow, clear the cache by clicking this button" ))
+                        .OnClicked(this, &FOdysseyPainterEditorToolkit::OnClearUndo)
+                    ]
+                 ]
+             ]
         ];
 }
 
 FReply
 FOdysseyPainterEditorToolkit::OnClearCurrentLayer()
 {
+    //Record
+    mLayerStack.mDrawingUndo->StartRecord();
+    mLayerStack.mDrawingUndo->SaveData( 0, 0, mLayerStack.Width(), mLayerStack.Height() );
+    mLayerStack.mDrawingUndo->EndRecord();
+    //EndRecord
     mIsTextureDirty = true;
     mPaintEngine.AbortStroke();
     mLayerStack.ClearCurrentLayer();
     InvalidateTextureFromData( mLayerStack.GetResultBlock(), mTexture );
-
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolkit::OnFillCurrentLayer()
 {
+    //Record
+    mLayerStack.mDrawingUndo->StartRecord();
+    mLayerStack.mDrawingUndo->SaveData( 0, 0, mLayerStack.Width(), mLayerStack.Height() );
+    mLayerStack.mDrawingUndo->EndRecord();
+    //EndRecord
     mIsTextureDirty = true;
     mPaintEngine.AbortStroke();
     mLayerStack.FillCurrentLayerWithColor( mPaintEngine.GetColor() );
-
     return FReply::Handled();
 }
+
+FReply
+FOdysseyPainterEditorToolkit::OnClearUndo()
+{
+    mLayerStack.mDrawingUndo->Clear();
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorToolkit::OnUndo()
+{
+    UndoIliad();
+    return FReply::Handled();
+}
+
+
+FReply
+FOdysseyPainterEditorToolkit::OnRedo()
+{
+    RedoIliad();
+    return FReply::Handled();
+}
+
+//Debug purposes
+/*FReply
+FOdysseyPainterEditorToolkit::OnCheck()
+{
+    mLayerStack.mDrawingUndo->Check();
+    return FReply::Handled();
+}*/
 
 void
 FOdysseyPainterEditorToolkit::SetColor( const ::ULIS::CColor& iColor )
 {
     if( mColorSelectorTab ) 
         mColorSelectorTab->SetColor( iColor );
+}
+
+void
+FOdysseyPainterEditorToolkit::UndoIliad()
+{
+    mPaintEngine.InterruptStrokeAndStampInPlace();
+    mLayerStack.mDrawingUndo->LoadData();
+}
+
+
+void
+FOdysseyPainterEditorToolkit::RedoIliad()
+{
+    mPaintEngine.InterruptStrokeAndStampInPlace();
+    mLayerStack.mDrawingUndo->Redo();
 }
 
 #undef LOCTEXT_NAMESPACE

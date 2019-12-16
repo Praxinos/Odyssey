@@ -29,8 +29,7 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
-    : FOdysseyTransactionnable( iUndoHistoryPtr )
-    , mBrushInstance( NULL )
+    : mBrushInstance( NULL )
 
     , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
     , mLayerStack( NULL )
@@ -138,12 +137,22 @@ FOdysseyPaintEngine::Tick()
 
     if( mIsPendingEndStroke && mDelayQueue.empty() )
     {
+        bool IsRecordStarted = false;
+
         for( int k = 0; k < mCountTileY; ++k )
         {
             for( int l = 0; l < mCountTileX; ++l )
             {
                 if( mStrokeInvalidTileMap[k][l] )
                 {
+                    if( !IsRecordStarted )
+                    {
+                        mLayerStack->mDrawingUndo->StartRecord();
+                        IsRecordStarted = true;
+                    }
+
+                    ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                    mLayerStack->mDrawingUndo->SaveData( l, k, tileRect.w, tileRect.h );
                     mTileThreadPool->ScheduleJob( [this, l, k]()
                     {
                         ::ULIS::FRect tileRect = MakeTileRect( l, k );
@@ -152,6 +161,10 @@ FOdysseyPaintEngine::Tick()
                 }
             }
         }
+
+        if( IsRecordStarted )
+            mLayerStack->mDrawingUndo->EndRecord();
+
         mTileThreadPool->WaitForCompletion();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
@@ -377,10 +390,7 @@ FOdysseyPaintEngine::SetSmoothingCatchUp( bool iValue )
 {
     InterruptStrokeAndStampInPlace();
 
-    Record( FName( TEXT( "CatchUp" ) ) );
-    ModifyAsState( mIsCatchUp, &mIsCatchUp );
     mIsCatchUp = iValue;
-    EndRecord();
 }
 
 bool

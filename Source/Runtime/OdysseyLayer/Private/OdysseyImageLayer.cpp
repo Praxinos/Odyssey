@@ -25,23 +25,11 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
     , mIsAlphaLocked( false )
-    //, mBlockUndoable( new UOdysseyBlockUndoable() )
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
     ::ULIS::FClearFillContext::Clear( mBlock->GetIBlock() );
-
-    //Undo
-    /*
-    mTexture = UTexture2D::CreateTransient( iSize.X, iSize.Y, PF_B8G8R8A8);
-    mTexture->SetFlags( RF_Transactional | RF_Transient );
-    mTexture->TemporarilyDisableStreaming();
-    mTexture->CompressionNone = 1;
-    CopyBlockDataIntoUTexture( mBlock, mTexture );
-    */
-    mBlockUndoable = UOdysseyBlockUndoable::CreateTransient();
-    mBlockUndoable->SetArray( mBlock->GetArray() );
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
@@ -50,18 +38,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
     , mIsAlphaLocked( false )
-    //, mBlockUndoable( new UOdysseyBlockUndoable() )
 {
-    //Undo
-    /*
-    mTexture = UTexture2D::CreateTransient( mBlock->Width(), mBlock->Height(), PF_B8G8R8A8);
-    mTexture->SetFlags( RF_Transactional | RF_Transient );
-    mTexture->TemporarilyDisableStreaming();
-    mTexture->CompressionNone = 1;
-    CopyBlockDataIntoUTexture( mBlock, mTexture );
-    */
-    mBlockUndoable = UOdysseyBlockUndoable::CreateTransient();
-    mBlockUndoable->SetArray( mBlock->GetArray() );
 }
 
 //--------------------------------------------------------------------------------------

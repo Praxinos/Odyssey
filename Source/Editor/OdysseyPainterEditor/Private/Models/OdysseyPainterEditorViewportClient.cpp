@@ -780,7 +780,13 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
         //calculate scaling
         const int32 minY = YOffset;
         const int32 minX = XOffset;
-        const FVector2D uvBoxOrigin( minX + xPos + pan.X, minY + yPos + pan.Y );
+        
+        FVector2D pivotPan;
+        
+        pivotPan.X = pan.X * FMath::Cos( rotation ) + pan.Y * FMath::Sin( rotation );
+        pivotPan.Y = -pan.X * FMath::Sin( rotation ) + pan.Y * FMath::Cos( rotation );
+        
+        const FVector2D uvBoxOrigin( minX + xPos + pivotPan.X, minY + yPos + pivotPan.Y );
 
         /* If we want to draw a bounding box to the UV
         FCanvasTileItem BoxBackgroundTileItem(uvBoxOrigin, GWhiteTexture, FVector2D(Width, Height), FLinearColor(0, 0, 0, 0.0f));

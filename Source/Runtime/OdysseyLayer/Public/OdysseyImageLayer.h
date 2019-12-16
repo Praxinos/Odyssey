@@ -52,10 +52,4 @@ private:
     ::ULIS::eBlendingMode   mBlendingMode;
     float                   mOpacity;
     bool                    mIsAlphaLocked;
-    
-//public:
-    //Temporary Undo necessity
-    //UTexture2D*             mTexture;
-public:
-    UOdysseyBlockUndoable* mBlockUndoable;
 };

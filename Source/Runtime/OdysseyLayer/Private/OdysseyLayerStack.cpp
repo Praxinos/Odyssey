@@ -1,15 +1,18 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
-
 #include "OdysseyLayerStack.h"
-#include "OdysseyImageLayer.h"
-#include "OdysseyBlock.h"
+
+#include "HAL/PlatformFilemanager.h"
+#include "Misc/FileHelper.h"
 #include "UObject/UObjectGlobals.h"
+
+#include "OdysseyBlock.h"
+#include "OdysseyImageLayer.h"
+
 #include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStack"
-
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -59,6 +62,8 @@ FOdysseyLayerStack::Init( int iWidth, int iHeight )
 
     InitResultAndTempBlock();
     AddLayer();
+    
+    mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
 
 void
@@ -76,6 +81,8 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
 
     InitResultAndTempBlock();
     AddLayerFromData( iData );
+    
+    mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
 
 FOdysseyBlock*
@@ -278,7 +285,6 @@ void FOdysseyLayerStack::MergeDownLayer( IOdysseyLayer* iLayerToMergeDown )
 
             if( imageLayer1 && imageLayer2 )
             {
-                //UE_LOG(LogTemp, Display, TEXT("Merging %s into %s"), *(imageLayer1->GetName()).ToString(), *(imageLayer2->GetName()).ToString())
                 ::ULIS::FBlendingContext::Blend( imageLayer1->GetBlock()->GetIBlock(), imageLayer2->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer1->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, 1.f );
             }
             DeleteLayer( i );
@@ -301,16 +307,12 @@ void FOdysseyLayerStack::DuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
 
             copiedLayer->CopyPropertiesFrom( *imageLayer );
 
-            //UE_LOG(LogTemp, Display, TEXT("opacity %lf, blendingMode %s, locked %i, visible %i"), copiedLayer->GetOpacity(), *(copiedLayer->GetBlendingModeAsText().ToString()), copiedLayer->IsLocked(), copiedLayer->IsVisible() );
-
             break;
         }
     }
     for( int i = mLayers.Num() - 1; i >= 0; i-- )
     {
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayers[i].Get() );
-
-        //UE_LOG(LogTemp, Display, TEXT("2 opacity %lf, blendingMode %s, locked %i, visible %i"), imageLayer->GetOpacity(), *(imageLayer->GetBlendingModeAsText().ToString()), imageLayer->IsLocked(), imageLayer->IsVisible() );
     }
     ComputeResultBlock();
 }
@@ -389,5 +391,358 @@ FOdysseyLayerStack::InitResultAndTempBlock()
 }
 
 //---
+
+
+
+
+
+
+
+
+
+
+
+//FODysseyDrawingUndo ---------
+FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
+{
+    mLayerStackPtr = iLayerStack;
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
+
+    mData = TArray<uint8>();
+    
+    //We reserve the maximum memory needed for a undo
+    mData.Reserve( imageLayer->GetBlock()->GetIBlock()->BytesTotal() );
+
+    mUndoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("undos.save") );
+    mRedoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("redos.save") );
+    
+    Clear();
+}
+
+FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
+{
+    
+}
+
+void
+FOdysseyDrawingUndo::StartRecord()
+{
+    mToBinary.Seek(0);
+    mToBinary.Empty();
+    mToBinary.FArchive::Reset();
+
+    //If we make a record while we're not at the end of the stack, we delete all records after this one
+    if( mCurrentIndex == 0 )
+    {
+        Clear();
+    }
+    else if( mCurrentIndex < mUndosPositions.Num() - 1 )
+    {
+        mUndosPositions.SetNum( mCurrentIndex + 1 );
+        mNumberBlocksUndo.SetNum( mCurrentIndex + 1 );
+        mNumberBlocksUndo[ mCurrentIndex ] = 0;
+        mNumberBlocksRedo.SetNum( mCurrentIndex + 1 );
+        mNumberBlocksRedo[ mCurrentIndex ] = 0;
+    }
+}
+
+    
+void
+FOdysseyDrawingUndo::EndRecord()
+{
+    if( mNumberBlocksUndo[mCurrentIndex] != 0 )
+    {
+        IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+        IFileHandle* fileHandle = platformFile.OpenWrite(*mUndoPath, true);
+        fileHandle->Seek( mUndosPositions[mCurrentIndex] );
+        fileHandle->Write( mToBinary.GetData(), mToBinary.Num() );
+        fileHandle->Flush( true );
+
+        
+        mUndosPositions.Add( mUndosPositions[mCurrentIndex] + mToBinary.Num() );
+        mNumberBlocksUndo.Add(0);
+        mNumberBlocksRedo.Add(0);
+        mCurrentIndex++;
+
+        delete fileHandle;
+    }
+}
+
+
+void
+FOdysseyDrawingUndo::StartRecordRedo()
+{
+    mToBinary.Seek(0);
+    mToBinary.Empty();
+    mToBinary.FArchive::Reset();
+}
+
+
+void
+FOdysseyDrawingUndo::EndRecordRedo()
+{
+    if( mNumberBlocksRedo[mCurrentIndex] != 0 )
+    {
+        IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+        IFileHandle* fileHandle = platformFile.OpenWrite(*mRedoPath, true);
+        fileHandle->Seek( mUndosPositions[mCurrentIndex] );
+        fileHandle->Write( mToBinary.GetData(), mToBinary.Num() );
+        fileHandle->Flush(true);
+        
+        delete fileHandle;
+    }
+}
+
+bool
+FOdysseyDrawingUndo::Clear()
+{
+    mToBinary.FArchive::Reset();
+    mToBinary.Seek(0);
+    FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*mUndoPath);
+    FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*mRedoPath);
+    mCurrentIndex = 0;
+    mUndosPositions.Empty();
+    mUndosPositions.Add(0);
+    mNumberBlocksUndo.Empty();
+    mNumberBlocksUndo.Add(0);
+    mNumberBlocksRedo.Empty();
+    mNumberBlocksRedo.Add(0);
+    return true;
+}
+
+void FOdysseyDrawingUndo::Check()
+{
+    UE_LOG( LogTemp, Display, TEXT("Global:"));
+    UE_LOG( LogTemp, Display, TEXT("mCurrentIndex: %d"), mCurrentIndex );
+    for( int i = 0; i < mUndosPositions.Num(); i++ )
+    {
+        UE_LOG( LogTemp, Display, TEXT("mUndosPositions[%d]: %lld"), i, mUndosPositions[i] );
+    }
+
+
+    UE_LOG( LogTemp, Display, TEXT("Undo:"));
+    for( int i = 0; i < mNumberBlocksUndo.Num(); i++ )
+    {
+        UE_LOG( LogTemp, Display, TEXT("mNumberBlocksUndo[%d]: %d"), i, mNumberBlocksUndo[i] );
+    }
+    
+    UE_LOG( LogTemp, Display, TEXT("Redo:"));
+    for( int i = 0; i < mNumberBlocksRedo.Num(); i++ )
+    {
+        UE_LOG( LogTemp, Display, TEXT("mNumberBlocksRedo[%d]: %d"), i, mNumberBlocksRedo[i] );
+    }
+}
+
+
+bool
+FOdysseyDrawingUndo::SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY )
+{
+    FOdysseyImageLayer* imageLayer = nullptr;
+    for( int j = 0; j < mLayerStackPtr->GetLayers()->Num(); j++)
+    {
+        TArray<TSharedPtr<IOdysseyLayer>>* layers = mLayerStackPtr->GetLayers();
+
+        if( iAddress == (UPTRINT) (*layers)[j].Get() )
+        {
+            imageLayer = static_cast<FOdysseyImageLayer*> ((*layers)[j].Get());
+            break;
+        }
+    }
+    
+    if( imageLayer == nullptr )
+        return false;
+
+    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * iSizeX, iYTile * iSizeY, iSizeX, iSizeY ) );
+           
+    TArray<uint8> array = TArray<uint8>();
+    array.AddUninitialized(mTileData->BytesTotal());
+    
+    FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
+
+    UPTRINT address = (UPTRINT)imageLayer;
+    mToBinary << address;
+    mToBinary << iXTile;
+    mToBinary << iYTile;
+    mToBinary << iSizeX;
+    mToBinary << iSizeY;
+    mToBinary << array;
+        
+    mNumberBlocksRedo[mCurrentIndex]++;
+    
+    return true;
+}
+
+bool
+FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY )
+{
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer().Get() );
+    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * iSizeX, iYTile * iSizeY, iSizeX, iSizeY ) );
+    
+    TArray<uint8> array = TArray<uint8>();
+    array.AddUninitialized(mTileData->BytesTotal());
+
+    FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
+    
+    UPTRINT address = (UPTRINT)imageLayer;
+    mToBinary << address;
+    mToBinary << iXTile;
+    mToBinary << iYTile;
+    mToBinary << iSizeX;
+    mToBinary << iSizeY;
+    mToBinary << array;
+
+    mNumberBlocksUndo[mCurrentIndex]++;
+    
+    return true;
+}
+
+bool
+FOdysseyDrawingUndo::LoadData()
+{
+    if( mCurrentIndex > 0 )
+        mCurrentIndex--;
+    
+    bool bSaveForRedo = mNumberBlocksRedo[mCurrentIndex] == 0;
+        
+    if( bSaveForRedo )
+    {
+        StartRecordRedo();
+    }
+
+    UPTRINT address;
+    uint8 tileX = 0;
+    uint8 tileY = 0;
+    unsigned int sizeX;
+    unsigned int sizeY;
+    
+	TArray<uint8> TheBinaryArray;
+    FFileHelper::LoadFileToArray(TheBinaryArray, *mUndoPath);
+    
+    FMemoryReader Ar = FMemoryReader(TheBinaryArray );
+    Ar.Seek(mUndosPositions[mCurrentIndex]);
+    
+    for( int i = 0; i < mNumberBlocksUndo[mCurrentIndex]; i++)
+    {
+        Ar << address;
+        Ar << tileX;
+        Ar << tileY;
+        Ar << sizeX;
+        Ar << sizeY;
+
+        if( bSaveForRedo )
+        {
+            SaveDataRedo( address, tileX, tileY, sizeX, sizeY );
+        }
+        
+        Ar << mData;
+
+        //Should be out of this loop
+        FOdysseyImageLayer* imageLayer = nullptr;
+        for( int j = 0; j < mLayerStackPtr->GetLayers()->Num(); j++)
+        {
+            TArray<TSharedPtr<IOdysseyLayer>>* layers = mLayerStackPtr->GetLayers();
+
+            if( address == (UPTRINT) (*layers)[j].Get() )
+            {
+                imageLayer = static_cast<FOdysseyImageLayer*> ((*layers)[j].Get());
+                break;
+            }
+        }
+
+        if( imageLayer == nullptr )
+            return false;
+        //---
+
+        
+        //Useless, I just want mTileData at the right size for the next undo, to change
+        if( i == 0 )
+            mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ) );
+
+        if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
+        {
+            for( int j = 0; j < mData.Num(); j++)
+            {
+                *(mTileData->DataPtr() + j) = mData[j];
+            }
+    
+            ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect(0, 0, sizeX, sizeY ), ::ULIS::FPoint( tileX * sizeX, tileY * sizeY ) );
+            mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ));
+        }
+    }
+    
+    if( bSaveForRedo )
+    {
+        EndRecordRedo();
+    }
+
+    return true;
+}
+
+
+bool
+FOdysseyDrawingUndo::Redo()
+{
+    UPTRINT address;
+    uint8 tileX;
+    uint8 tileY;
+    unsigned int sizeX;
+    unsigned int sizeY;
+    
+	TArray<uint8> TheBinaryArray;
+    FFileHelper::LoadFileToArray(TheBinaryArray, *mRedoPath);
+    
+    FMemoryReader Ar = FMemoryReader(TheBinaryArray );
+    Ar.Seek(mUndosPositions[mCurrentIndex]);
+    
+    for( int i = 0; i < mNumberBlocksRedo[mCurrentIndex]; i++)
+    {
+        Ar << address;
+        Ar << tileX;
+        Ar << tileY;
+        Ar << sizeX;
+        Ar << sizeY;
+        Ar << mData;
+        
+        //Should be out of this loop
+        FOdysseyImageLayer* imageLayer = nullptr;
+        for( int j = 0; j < mLayerStackPtr->GetLayers()->Num(); j++)
+        {
+            TArray<TSharedPtr<IOdysseyLayer>>* layers = mLayerStackPtr->GetLayers();
+
+            if( address == (UPTRINT) (*layers)[j].Get() )
+            {
+                imageLayer = static_cast<FOdysseyImageLayer*> ((*layers)[j].Get());
+                break;
+            }
+        }
+
+        if( imageLayer == nullptr )
+            return false;
+        //---
+
+        
+        //Useless, I just want mTileData at the right size for the next undo, to change
+        if( i == 0 )
+            mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ) );
+
+        if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
+        {
+            for( int j = 0; j < mData.Num(); j++)
+            {
+                *(mTileData->DataPtr() + j) = mData[j];
+            }
+        
+            ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect(0, 0, sizeX, sizeY ), ::ULIS::FPoint( tileX * sizeX, tileY * sizeY ) );
+            mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ));
+        }
+    }
+    
+    if( mCurrentIndex < (mUndosPositions.Num() - 1) )
+        mCurrentIndex++;
+
+    return true;
+}
+
+
 
 #undef LOCTEXT_NAMESPACE

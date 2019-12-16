@@ -124,8 +124,19 @@ protected:
     //TODO: Get rid of this when we'll have a toolbox widget
     FReply OnClearCurrentLayer();
     FReply OnFillCurrentLayer();
+    FReply OnUndo();
+    FReply OnRedo();
+    FReply OnClearUndo();
+
+    // debug purposes
+    //FReply OnCheck();
+    
 
     virtual void SetColor( const ::ULIS::CColor& iColor ) override;
+    
+private:
+    void UndoIliad();
+    void RedoIliad();
 
 protected:
     // Transaction ( Undo / Redo ) methods overrides

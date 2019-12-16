@@ -26,6 +26,15 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( VisitPraxinosForums, "Praxinos Forums...", "Praxinos Forums...", EUserInterfaceActionType::Button, FInputChord() );
+    
+#if PLATFORM_MAC
+    UI_COMMAND( Undo, "Undo Iliad", "Undo Iliad", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Z ) );
+    UI_COMMAND( Redo, "Redo Iliad", "Redo Iliad", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Y ) );
+#else
+    UI_COMMAND( Undo, "Undo Iliad", "Undo Iliad", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Z ) );
+    UI_COMMAND( Redo, "Redo Iliad", "Redo Iliad", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Y ) );
+#endif
+    
 }
 
 #undef LOCTEXT_NAMESPACE

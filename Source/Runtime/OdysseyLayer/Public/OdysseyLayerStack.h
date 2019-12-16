@@ -4,12 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <ULIS_CORE>
 #include <ULIS_FDECL>
 #include <ULIS_BLENDINGMODES>
+
+#include "Serialization/BufferArchive.h"
+#include "Serialization/MemoryReader.h"
 
 class FOdysseyBlock;
 class IOdysseyLayer;
 class FOdysseyImageLayer;
+class FOdysseyDrawingUndo;
 
 
 class ODYSSEYLAYER_API FOdysseyLayerStack
@@ -67,4 +72,85 @@ private:
     int                                     mHeight;
     ETextureSourceFormat                    mTextureSourceFormat;
     bool                                    mIsInitialized;
+    
+public:
+    FOdysseyDrawingUndo*                    mDrawingUndo;
 };
+
+
+
+
+
+
+
+class ODYSSEYLAYER_API FOdysseyDrawingUndo
+{
+    
+public:
+    FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack );
+    ~FOdysseyDrawingUndo();
+    
+public:
+    void StartRecord();
+    void EndRecord();
+    
+
+private:
+    void StartRecordRedo();
+    void EndRecordRedo();
+    bool SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
+
+
+public:
+    bool Clear();
+    bool SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
+    bool LoadData();
+    bool Redo();
+    void Check();
+
+    
+private:
+    FOdysseyLayerStack* mLayerStackPtr;
+    
+private:
+    int mCurrentIndex;
+    TArray<int64> mUndosPositions;
+    TArray<int> mNumberBlocksUndo;
+    TArray<int> mNumberBlocksRedo;
+    FBufferArchive mToBinary;
+
+    
+    //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
+    TArray<uint8> mData;
+    ::ULIS::IBlock* mTileData;
+    FString mUndoPath;
+    FString mRedoPath;
+};
+
+/*
+FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyDrawingUndo* SaveUndoData )
+{
+	if(!SaveUndoData) return Ar;
+	//~
+    
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( SaveUndoData->mLayerStackPtr->GetCurrentLayer().Get() );
+
+	
+	Ar << SaveGameData->NumGemsCollected;  //int32
+	Ar << SaveGameData->PlayerLocation;  //FVector
+	Ar << SaveGameData->ArrayOfRotationsOfTheStars; //TArray<FRotator>
+
+        return Ar;
+}*/
+
+/*
+    static  IBlock*  CopyBlockRect( IBlock* iBlock
+                                  , const FRect& iRect
+                                  , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
+
+    static  void  CopyBlockRectInto( IBlock* iSrc
+                                   , IBlock* iDst
+                                   , const FRect& iSrcRect
+                                   , const FPoint& iDstPos
+                                   , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
+*/
