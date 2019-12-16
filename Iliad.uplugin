@@ -69,6 +69,11 @@
       "Name": "OdysseyPainterEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyStylusInput",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
     }
   ]
 }

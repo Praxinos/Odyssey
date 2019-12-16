@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
+#include "IStylusState.h"
 #include "RawIndexBuffer.h"
 #include "Rendering/StaticMeshVertexBuffer.h"
 #include "UnrealClient.h"
@@ -12,11 +13,13 @@
 
 #include "OdysseyStrokePoint.h"
 
+class UOdysseyStylusInputSubsystem;
 class FCanvas;
 class UTexture2D;
 
 class FOdysseyMeshSelector;
 class IOdysseyPainterEditorToolkit;
+class IStylusInputInterfaceInternal;
 class SOdysseySurfaceViewport;
 
 //
@@ -51,6 +54,7 @@ class SOdysseySurfaceViewport;
 class FOdysseyPainterEditorViewportClient
     : public FViewportClient
     , public FGCObject
+    , public IStylusMessageHandler
 {
 public:
     enum class eState
@@ -72,7 +76,7 @@ public:
 
 public:
     // FViewportClient API
-    virtual void  Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
+    virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
 
     virtual bool InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
@@ -81,6 +85,9 @@ public:
 
     virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
+
+    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
+	
     virtual EMouseCaptureMode                   CaptureMouseOnClick() override;
     
 public:
@@ -107,8 +114,13 @@ private:
     bool        InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false );
     void        CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport ) ;
 
+    void        OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
+
 private:
     // Private Data Members
+    UOdysseyStylusInputSubsystem*           InputSubsystem;
+    FKey                                    mLastKey;
+    EInputEvent                             mLastEvent;
     EMouseCaptureMode                       mMouseCaptureMode;
     TWeakPtr<IOdysseyPainterEditorToolkit>  mOdysseyPainterEditorPtr;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;

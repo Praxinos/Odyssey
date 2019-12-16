@@ -33,6 +33,6 @@
 
 # Iliad
 Binaries/
-Intermediate/
-Source/ThirdParty/
 Content/*.uasset
+Intermediate/
+Source/ThirdParty/ULIS

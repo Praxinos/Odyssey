@@ -20,7 +20,9 @@
 #include "UnrealEdGlobals.h"
 #include "VolumeTexturePreview.h"
 #include "Widgets/Layout/SScrollBar.h"
+#include "Widgets/SViewport.h"
 
+#include "IOdysseyStylusInputModule.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorSettings.h"
@@ -41,7 +43,10 @@
 FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit >  iOdysseyPainterEditor,
                                                                           TWeakPtr< SOdysseySurfaceViewport >       iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
-    : mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
+    : InputSubsystem( nullptr )
+    , mLastKey( EKeys::Invalid )
+    , mLastEvent( EInputEvent::IE_MAX )
+    , mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
     , mOdysseyPainterEditorPtr( iOdysseyPainterEditor )
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
     , mMeshSelector( iMeshSelector )
@@ -53,12 +58,33 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     check( mOdysseyPainterEditorPtr.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
 
+    InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    //PATCH: as I don't know how to initialize usubsystem inside settings ctor (as usubsystem are called after)
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault< UOdysseyPainterEditorSettings >();
+    settings->RefreshStylusInputDriver();
+    //PATCH
+
+    InputSubsystem->AddMessageHandler( *this );
+    InputSubsystem->OnStylusInputChanged().BindRaw( this, &FOdysseyPainterEditorViewportClient::OnStylusInputChanged );
+
     ModifyCheckerboardTextureColors();
 }
 
 FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 {
+    InputSubsystem->OnStylusInputChanged().Unbind();
+    InputSubsystem->RemoveMessageHandler( *this );
+
     DestroyCheckerboardTexture();
+}
+
+void
+FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
+{
+    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusInputChanged") );
+
+    mMouseCaptureMode = FViewportClient::CaptureMouseOnClick();
 }
 
 //--------------------------------------------------------------------------------------
@@ -211,6 +237,16 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 bool
 FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
+    //UE_LOG( LogStylusInput, Log, TEXT( "InputKey Key:%s Event:%d" ), *iKey.GetFName().ToString(), iEvent );
+
+    mLastKey = iKey;
+    mLastEvent = iEvent;
+
+    if( mMouseCaptureMode == EMouseCaptureMode::NoCapture
+        && ( iKey == EKeys::LeftMouseButton
+             || iKey == EKeys::RightMouseButton ) )
+        return true;
+
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
@@ -224,6 +260,95 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
     CapturedMouseMoveWithStrokePoint( point_in_viewport );
+}
+
+void
+FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
+{
+    mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+
+    //---
+
+    if( !iWidget.IsValid() )
+        return;
+
+    TSharedPtr< SViewport > viewport = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportWidget();
+    const SWidget* widget = viewport.Get();
+
+    if( iWidget.Pin().Get() != widget )
+        return;
+
+    //---
+
+    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f"), iIndex, 
+    //        iState.GetPosition().X, iState.GetPosition().Y, 
+    //        iState.GetPressure(), iState.IsStylusDown(), 
+    //        iState.GetTilt().X, iState.GetTilt().Y, 
+    //        iState.GetAzimuth(), iState.GetAltitude() );
+
+    float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
+	
+    //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), State.GetPosition().X, State.GetPosition().Y, local.X, local.Y );
+
+    FOdysseyStrokePoint stroke_point( position_in_viewport.X
+                                      , position_in_viewport.Y
+                                      , iState.GetZ()
+                                      , iState.GetPressure()
+                                      , iState.GetAltitude()
+                                      , iState.GetAzimuth()
+                                      , iState.GetTwist()
+                                      , 0 //iState.GetPitch()
+                                      , 0 // iState.GetRoll()
+                                      , 0 ); // iState.GetYaw() );
+
+  //---
+    if( iState.IsStylusDown() )
+    {
+        UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f" ), iIndex,
+                iState.GetPosition().X, iState.GetPosition().Y,
+                iState.GetPressure(), iState.IsStylusDown(),
+                iState.GetTilt().X, iState.GetTilt().Y,
+                iState.GetAzimuth(), iState.GetAltitude() );
+    }
+
+    if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Pressed )
+    {
+        InputKeyWithStrokePoint( stroke_point, 0, mLastKey, mLastEvent );
+    }
+    else if( iState.IsStylusDown() )
+    {
+        CapturedMouseMoveWithStrokePoint( stroke_point );
+    }
+    else if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Released )
+    {
+        InputKeyWithStrokePoint( stroke_point, 0, mLastKey, mLastEvent );
+    }
+    else
+    {
+    }
+
+    mLastKey = EKeys::Invalid;
+    mLastEvent = EInputEvent::IE_MAX;
+
+    //const IStylusInputDevice* input_device = InputSubsystem->GetInputDevice( iIndex );
+
+    //if( !input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    //{
+    //    InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+    //}
+    //else if( input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
+    //{
+    //    CapturedMouseMoveWithStrokePoint( stroke_point );
+    //}
+    //else if( input_device->GetPreviousState().IsStylusDown() && !input_device->GetCurrentState().IsStylusDown() )
+    //{
+    //    InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+    //}
+    //else
+    //{
+    //    //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged : %s" ), !input_device->GetCurrentState().IsStylusInverted() ? L"pen" : L"eraser" );
+    //}
 }
 
 bool
