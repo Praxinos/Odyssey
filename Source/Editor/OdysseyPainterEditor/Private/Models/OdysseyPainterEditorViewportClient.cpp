@@ -147,14 +147,16 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     TRefCountPtr<FBatchedElementParameters> batchedElementParameters;
 
-    if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM4 )
+    if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5 )
     {
         //ODYSSEY: PATCH
         bool isNormalMap = texture2D->IsNormalMap();
         bool isSingleChannel = texture2D->CompressionSettings == TC_Grayscale || texture2D->CompressionSettings == TC_Alpha;
         bool isVirtual = texture2D->IsCurrentlyVirtualTextured();
+        bool isVTSPS = texture2D->IsVirtualTexturedWithSinglePhysicalSpace();
+        bool isTextureArray = false;
         float layerIndex = 0.f;
-        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVirtual );
+        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray );
     }
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );

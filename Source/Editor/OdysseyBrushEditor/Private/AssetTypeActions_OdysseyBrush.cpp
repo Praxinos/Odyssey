@@ -6,6 +6,7 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "IContentBrowserSingleton.h"
 #include "OdysseyBrushEditorModule.h"
+#include "BlueprintEditorModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/MessageDialog.h"
 #include "Misc/PackageName.h"
@@ -56,9 +57,10 @@ FAssetTypeActions_OdysseyBrush::HasActions( const  TArray< UObject* >&  InObject
 void
 FAssetTypeActions_OdysseyBrush::GetActions( const  TArray< UObject* >& InObjects, FMenuBuilder& MenuBuilder )
 {
+    /*
     auto Blueprints = GetTypedWeakObjectPtrs< UOdysseyBrush >( InObjects );
 
-    /*MenuBuilder.AddMenuEntry(
+    MenuBuilder.AddMenuEntry(
         LOCTEXT( "OdysseyBrush_Edit", "Edit" ),
         LOCTEXT( "OdysseyBrush_EditTooltip", "Opens the selected brush in the graph editor." ),
         FSlateIcon( "OdysseyStyle", "OdysseyBrush.EditBrush16" ),
@@ -73,14 +75,12 @@ FAssetTypeActions_OdysseyBrush::GetActions( const  TArray< UObject* >& InObjects
 void
 FAssetTypeActions_OdysseyBrush::OpenAssetEditor( const  TArray< UObject* >&  InObjects, TSharedPtr< class  IToolkitHost > EditWithinLevelEditor )
 {
-    EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-
     for( auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt )
     {
         if( UOdysseyBrush* Brush = Cast< UOdysseyBrush >( *ObjIt ) )
         {
-            FOdysseyBrushEditorModule& OdysseyBrushEditorModule = FModuleManager::LoadModuleChecked< FOdysseyBrushEditorModule >( "OdysseyBrushEditor" );
-            TSharedRef< IOdysseyBrushEditor > NewOdyseyBrushEditor = OdysseyBrushEditorModule.CreateOdysseyBrushEditor( Mode, EditWithinLevelEditor, Brush );
+            FBlueprintEditorModule& BlueprintEditorModule = FModuleManager::LoadModuleChecked<FBlueprintEditorModule>( "Kismet" );
+            TSharedRef< IBlueprintEditor > NewBlueprintEditor = BlueprintEditorModule.CreateBlueprintEditor(  EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), Brush );
         }
     }
 }
@@ -100,8 +100,8 @@ FAssetTypeActions_OdysseyBrush::ExecuteEdit( FWeakBlueprintPointerArray Objects 
     {
         if( auto Object = ( *ObjIt ).Get() )
         {
-            FOdysseyBrushEditorModule& OdysseyBrushEditorModule = FModuleManager::LoadModuleChecked< FOdysseyBrushEditorModule >( "OdysseyBrushEditor" );
-            TSharedRef< IOdysseyBrushEditor > NewOdyseyBrushEditor = OdysseyBrushEditorModule.CreateOdysseyBrushEditor( EToolkitMode::Standalone, TSharedPtr< IToolkitHost >(), Object );
+            FBlueprintEditorModule& BlueprintEditorModule = FModuleManager::LoadModuleChecked<FBlueprintEditorModule>( "Kismet" );
+            TSharedRef< IBlueprintEditor > NewBlueprintEditor = BlueprintEditorModule.CreateBlueprintEditor(  EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), Object );
         }
     }
 }
