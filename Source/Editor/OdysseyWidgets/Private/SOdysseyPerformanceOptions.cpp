@@ -164,7 +164,7 @@ void
 SOdysseyPerformanceOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, UProperty* PropertyThatChanged )
 {
     FString PropertyName = PropertyThatChanged->GetName();
-    if( PropertyName == FString( L"LiveUpdate" ) ) {
+    if( PropertyName == FString( TEXT("LiveUpdate") ) ) {
         OnLiveUpdateChangedChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
     }
 

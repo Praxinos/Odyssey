@@ -246,7 +246,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
                         ->SetSizeCoefficient( 0.2f )
                     )
                     // Navigator
-                    ->Split
+                    /*->Split
                     (
                         FTabManager::NewStack()
                         ->AddTab( FName( "Navigator" ), ETabState::OpenedTab )
@@ -257,7 +257,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
                         ->AddTab( smNotesTabId, ETabState::OpenedTab )
                         ->SetHideTabWell( false )
                         ->SetSizeCoefficient( 0.3f )
-                    )
+                    )*/
                 )
                 // Middle bar
                 ->Split

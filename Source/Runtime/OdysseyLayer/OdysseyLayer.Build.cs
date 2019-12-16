@@ -18,6 +18,5 @@ public class OdysseyLayer : ModuleRules
                 "ULIS"
             }
         );
-
     }
 }

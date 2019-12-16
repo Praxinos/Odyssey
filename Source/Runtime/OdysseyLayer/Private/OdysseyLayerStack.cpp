@@ -72,7 +72,7 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
     if( mIsInitialized )
         return;
 
-    checkf( iData, L"Cannot Initialize Layer Stack from NULL data" );
+    checkf( iData, TEXT("Cannot Initialize Layer Stack from NULL data") );
 
     mWidth = iData->Width();
     mHeight = iData->Height();
@@ -742,6 +742,17 @@ FOdysseyDrawingUndo::Redo()
 
     return true;
 }
+
+
+
+void
+FOdysseyDrawingUndo::SaveSettingSelectorColorChanged( void (*iSetColor)( const ::ULIS::CColor iColor ), ::ULIS::CColor& iColor )
+{
+    //UPTRINT adressSetColor = iSetColor;
+    mToBinary;
+
+}
+
 
 
 

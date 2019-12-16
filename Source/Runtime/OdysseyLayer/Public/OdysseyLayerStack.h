@@ -107,6 +107,10 @@ public:
     bool LoadData();
     bool Redo();
     void Check();
+    
+//test generalization
+public:
+    void SaveSettingSelectorColorChanged( void (*iSetColor)( const ::ULIS::CColor iColor ), ::ULIS::CColor& iColor );
 
     
 private:
@@ -128,19 +132,16 @@ private:
 };
 
 /*
-FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyDrawingUndo* SaveUndoData )
+FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveData )
 {
-	if(!SaveUndoData) return Ar;
+	if(!SaveData) return Ar;
 	//~
-    
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( SaveUndoData->mLayerStackPtr->GetCurrentLayer().Get() );
-
 	
-	Ar << SaveGameData->NumGemsCollected;  //int32
-	Ar << SaveGameData->PlayerLocation;  //FVector
-	Ar << SaveGameData->ArrayOfRotationsOfTheStars; //TArray<FRotator>
+	Ar << SaveData->mWidth;  //int32
+	Ar << SaveData->mHeight;  //FVector
+	Ar << SaveData->mIsInitialized; //TArray<FRotator>
 
-        return Ar;
+    return Ar;
 }*/
 
 /*
