@@ -30,10 +30,13 @@ class CustomArgumentDefaultsHelpFormatter( argparse.RawTextHelpFormatter ):
             if action.default is not argparse.SUPPRESS:
                 defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
-                    help += '\n(default: %(default)s)'
+                    help += '\n' + Fore.BLACK + Style.BRIGHT + '(default: %(default)s)' + Style.RESET_ALL
         return help
         
 #---
+
+version_ue = '4.24'
+now = datetime.now()
 
 operating_system = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if operating_system != 'windows':
@@ -46,9 +49,10 @@ upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package' / 'Iliad
    
 parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
 parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
-parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\n\'date-time/plugin-name\' folders will be append to it' )
+parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\n\'ue-version/date-time/plugin-name\' folders will be append to it' )
 parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
-parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path' )
+parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path\n\'ue-version/date-time/plugin-name\' folders will be append to it' )
+parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
 args = parser.parse_args()
 
 #---
@@ -71,13 +75,29 @@ print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
 
 plugin_name = uplugin_pathfile.stem
 
+#
+
+uplugin_data = {}
+with uplugin_pathfile.open() as infile:
+    uplugin_data = json.load( infile )
+
+date_folder = []
+date_folder.append( now.strftime( '%Y%m%d.%H%M%S' ) )
+date_folder.append( version_ue )
+date_folder.append( uplugin_data["VersionName"] )
+date_folder.append( 'beta' if uplugin_data['IsBetaVersion'] else '' )
+date_folder.append( operating_system )
+date_folder.append( args.suffix )
+date_folder = list( filter( None, date_folder ) )
+date_folder = '-'.join( date_folder )
+
+intermediate_folders = Path( version_ue ) / date_folder / plugin_name
+
 # Output package directory
 if args.output_dir:
     output_path = Path( args.output_dir ).resolve()
 
-now = datetime.now()
-date_folder = now.strftime( '%Y%m%d-%H%M%S-' + operating_system )
-output_path = ( output_path / date_folder / plugin_name )
+output_path = ( output_path / intermediate_folders )
 output_path.mkdir( parents=True, exist_ok=True )
 
 print( Fore.GREEN + f'Output path: {output_path}' )
@@ -88,6 +108,7 @@ if args.upload:
         upload_path = Path( args.upload_dir ).resolve()
         
     upload_path.mkdir( parents=True, exist_ok=True )
+    upload_path = upload_path / intermediate_folders
 
     print( Fore.GREEN + f'Upload path: {upload_path}' )
 else:
@@ -119,7 +140,7 @@ with uplugin_pathfile.open( 'w' ) as outfile:
 #---
 
 if operating_system == 'windows':
-    uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / 'UE_4.23' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
+    uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / f'UE_{version_ue}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
     uat_args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
     
 # Run packaging script
@@ -135,19 +156,25 @@ if process.returncode != 0:
 #---
 
 # Cleaning
+binaries = output_path / 'Binaries'
+print( Fore.GREEN + f'Removing: {binaries}' )
+shutil.rmtree( binaries, ignore_errors=True )
+
 intermediate = output_path / 'Intermediate'
 print( Fore.GREEN + f'Removing: {intermediate}' )
 shutil.rmtree( intermediate, ignore_errors=True )
 
-source = output_path / 'Source'
-print( Fore.GREEN + f'Removing: {source}' )
-shutil.rmtree( source, ignore_errors=True )
+thirdparty = output_path / 'Source' / 'ThirdParty'
+for entry in thirdparty.rglob( '*' ):
+    if entry.is_dir() and entry.name == 'Debug':
+        print( Fore.GREEN + f'Removing: {entry}' )
+        shutil.rmtree( entry, ignore_errors=True )
 
 #---
 
 # Uploading
 if args.upload:
-    src_path = ( output_path / '..' ).resolve() # '..' to move to the directory with the date
-    dst_path = ( upload_path / date_folder ).resolve()
+    src_path = output_path
+    dst_path = upload_path
     print( Fore.GREEN + f'Copying/Uploading: {src_path} -> {dst_path}' )
     shutil.copytree( src_path, dst_path )
