@@ -84,7 +84,6 @@ SOdysseyAboutScreen::SOdysseyAboutScreen()
     , mExternalLibsLittleCMSUrl( LOCTEXT( "url.external-libs.littlecms", "http://www.littlecms.com/" ) )
     , mExternalLibsGLMUrl( LOCTEXT( "url.external-libs.glm", "https://www.opengl.org/sdk/libs/GLM/" ) )
     , mExternalLibsBoostPreprocessorUrl( LOCTEXT( "url.external-libs.boost-preprocessor", "https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
-    , mExternalLibsFontAwsomeUrl( LOCTEXT( "url.external-libs.font-awsome", "https://fontawesome.com/license/free" ) )
     , mTwitterUrl( LOCTEXT( "url.social.twitter", "https://twitter.com/praxinos" ) )
     , mFacebookUrl( LOCTEXT( "url.social.facebook", "https://www.facebook.com/Praxinos" ) )
     , mLinkedInUrl( LOCTEXT( "url.social.linkedin", "https://www.linkedin.com/company/praxinos" ) )
@@ -112,7 +111,6 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.little-cms", "- littleCMS" ), mExternalLibsLittleCMSUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.glm", "- glm" ), mExternalLibsGLMUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.boost-preprocessor", "- boost.preprocessor" ), mExternalLibsBoostPreprocessorUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.font-awsome", "- FontAwsome" ), mExternalLibsFontAwsomeUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
 
     FText Version = LOCTEXT( "VersionLabel", "Version: Alpha 0.1" );
 
