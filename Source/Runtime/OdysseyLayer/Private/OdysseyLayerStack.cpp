@@ -745,15 +745,5 @@ FOdysseyDrawingUndo::Redo()
 
 
 
-void
-FOdysseyDrawingUndo::SaveSettingSelectorColorChanged( void (*iSetColor)( const ::ULIS::CColor iColor ), ::ULIS::CColor& iColor )
-{
-    //UPTRINT adressSetColor = iSetColor;
-    mToBinary;
-
-}
-
-
-
 
 #undef LOCTEXT_NAMESPACE

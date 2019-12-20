@@ -6,9 +6,9 @@
 
 #include "Framework/Application/SlateApplication.h"
 
-#if PLATFORM_WINDOWS
+#if PLATFORM_MAC
 
-#include "WintabContexts-Windows.h"
+#include "WintabContexts-Mac.h"
 
 class FWintabStylusInputInterfaceImpl
 {
@@ -17,16 +17,16 @@ public:
 
     TSharedPtr<FWintabContexts> mContexts;
 
-    HWND mHwnd{ 0 };
+    //HWND mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
     TWeakPtr<SWidget> Widget;
 };
 
 FWintabStylusInputInterfaceImpl::~FWintabStylusInputInterfaceImpl()
 {
-    mContexts.Reset();
+    //mContexts.Reset();
 
-    FWintabLibrary::Unload();
+    //FWintabLibrary::Unload();
 }
 
 //---
@@ -53,7 +53,7 @@ FWintabStylusInputInterface::Tick()
             return;
         }
     }
-
+    
     FSlateApplication& Application = FSlateApplication::Get();
 
     FWidgetPath WidgetPath = Application.LocateWindowUnderMouse( Application.GetCursorPos(), Application.GetInteractiveTopLevelWindows() );
@@ -63,14 +63,14 @@ FWintabStylusInputInterface::Tick()
         if( Window.IsValid() )
         {
             TSharedPtr<FGenericWindow> NativeWindow = Window->GetNativeWindow();
-            HWND Hwnd = reinterpret_cast<HWND>( NativeWindow->GetOSWindowHandle() );
+            /*HWND Hwnd = reinterpret_cast<HWND>( NativeWindow->GetOSWindowHandle() );
 
             if( Hwnd != Impl->mHwnd )
             {
                 Impl->mContexts->CloseTabletContexts();
                 Impl->mHwnd = Hwnd;
                 Impl->mContexts->OpenTabletContexts( Impl->mHwnd );
-            }
+            }*/
 
             Impl->Window = Window;
             Impl->Widget = WidgetPath.GetLastWidget();
@@ -81,18 +81,20 @@ FWintabStylusInputInterface::Tick()
 int32
 FWintabStylusInputInterface::NumInputDevices() const
 {
-    return Impl->mContexts->mTabletContexts.Num();
+    //return Impl->mContexts->mTabletContexts.Num();
+    return 0;
 }
 
 IStylusInputDevice*
 FWintabStylusInputInterface::GetInputDevice( int32 Index ) const
 {
-    if( Index < 0 || Index >= Impl->mContexts->mTabletContexts.Num() )
+    /*if( Index < 0 || Index >= Impl->mContexts->mTabletContexts.Num() )
     {
         return nullptr;
     }
 
-    return &Impl->mContexts->mTabletContexts[Index];
+    return &Impl->mContexts->mTabletContexts[Index];*/
+    return nullptr;
 }
 
 TWeakPtr<SWindow>
@@ -114,7 +116,7 @@ CreateStylusInputInterfaceWintab()
 {
     TUniquePtr<FWintabStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FWintabStylusInputInterfaceImpl>();
 
-    if( !FWintabLibrary::Load() )
+ /*   if( !FWintabLibrary::Load() )
     {
         UE_LOG( LogStylusInput, Error, TEXT( "Could not load Wintab32.dll!" ) );
         return nullptr;
@@ -124,11 +126,11 @@ CreateStylusInputInterfaceWintab()
     {
         UE_LOG( LogStylusInput, Warning, TEXT( "WinTab Services are unavailable" ) );
         return nullptr;
-    }
+    }*/
 
     WindowsImpl->mContexts = MakeShareable( new FWintabContexts() );
 
     return MakeShared<FWintabStylusInputInterface>( MoveTemp( WindowsImpl ) );
 }
 
-#endif // PLATFORM_WINDOWS
+#endif // PLATFORM_MAC

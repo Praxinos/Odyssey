@@ -108,11 +108,6 @@ public:
     bool Redo();
     void Check();
     
-//test generalization
-public:
-    void SaveSettingSelectorColorChanged( void (*iSetColor)( const ::ULIS::CColor iColor ), ::ULIS::CColor& iColor );
-
-    
 private:
     FOdysseyLayerStack* mLayerStackPtr;
     
@@ -130,28 +125,3 @@ private:
     FString mUndoPath;
     FString mRedoPath;
 };
-
-/*
-FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveData )
-{
-	if(!SaveData) return Ar;
-	//~
-	
-	Ar << SaveData->mWidth;  //int32
-	Ar << SaveData->mHeight;  //FVector
-	Ar << SaveData->mIsInitialized; //TArray<FRotator>
-
-    return Ar;
-}*/
-
-/*
-    static  IBlock*  CopyBlockRect( IBlock* iBlock
-                                  , const FRect& iRect
-                                  , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
-
-    static  void  CopyBlockRectInto( IBlock* iSrc
-                                   , IBlock* iDst
-                                   , const FRect& iSrcRect
-                                   , const FPoint& iDstPos
-                                   , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
-*/

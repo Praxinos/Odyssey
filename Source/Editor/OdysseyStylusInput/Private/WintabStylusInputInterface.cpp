@@ -7,6 +7,10 @@
 
 // Done in its own file
 
+#elif PLATFORM_MAC
+
+// Done in its own file too
+
 #else
 
 TSharedPtr<IStylusInputInterfaceInternal>

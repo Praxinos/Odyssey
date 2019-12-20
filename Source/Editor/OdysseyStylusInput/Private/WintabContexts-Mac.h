@@ -5,16 +5,18 @@
 
 #include "CoreMinimal.h"
 
-#if PLATFORM_WINDOWS
-
-#include "Windows/WindowsHWrapper.h"
-#include "WintabLibrary-Windows.h"
-
-#define PACKETDATA	(PK_X | PK_Y | PK_Z | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE | PK_CURSOR | PK_SERIAL_NUMBER | PK_TIME | PK_CHANGED | PK_STATUS | PK_ORIENTATION | PK_ROTATION )
-#define PACKETMODE	PK_BUTTONS
-#include "Windows/PKTDEF.H"
+#if PLATFORM_MAC
 
 #include "IStylusState.h"
+#include "WintabContexts-Cocoa.h"
+
+#if __LP64__
+typedef unsigned int                    UInt32;
+typedef signed int                      SInt32;
+#else
+typedef unsigned long                   UInt32;
+typedef signed long                     SInt32;
+#endif
 
 /**
  * Packet types as derived from IRealTimeStylus::GetPacketDescriptionData.
@@ -51,7 +53,7 @@ struct FWintabStylusState
 	FVector2D Size;
 	bool IsTouching : 1;
 	bool IsInverted : 1;
-
+    
     FWintabStylusState() :
 		Position(0, 0), Z(0), Azimuth(0), Altitude(0), Twist(0), NormalPressure(0), TangentPressure(0),
 		Size(0, 0), IsTouching(false), IsInverted(false)
@@ -61,36 +63,6 @@ struct FWintabStylusState
     FVector2D OrientationToTilt() const
     {
         return FVector2D( 0, 0 );
-
-    //    // https://gist.github.com/telegraphic/841212e8ab3252f5cffe
-    //    // https://www.mathworks.com/help/phased/ref/azel2phitheta.html
-
-    //    float cos_theta = FMath::Cos( Altitude ) * FMath::Cos( Azimuth );
-    //    float theta /*tilt.X*/ = FMath::Acos( cos_theta );
-
-    //    //float tan_phi = FMath::Tan( Altitude ) / FMath::Sin( Azimuth );
-    //    float phi /*tilt.Y*/ = FMath::Atan2( FMath::Tan( Altitude ), FMath::Sin( Azimuth ) );
-    //    phi = FMath::Fmod( phi + 2 * PI, 2 * PI );
-
-    //    return FVector2D( theta, phi );
-
-        // https://code.woboq.org/qt5/qtbase/src/plugins/platforms/windows/qwindowstabletsupport.cpp.html#590
-        //// Convert from azimuth and altitude to x tilt and y tilt. What
-        //// follows is the optimized version. Here are the equations used:
-        //// X = sin(azimuth) * cos(altitude)
-        //// Y = cos(azimuth) * cos(altitude)
-        //// Z = sin(altitude)
-        //// X Tilt = arctan(X / Z)
-        //// Y Tilt = arctan(Y / Z)
-        ////TOTEST
-        //const float radAzim = FMath::DegreesToRadians( Azimuth / 10.0 );
-        //const float tanAlt = FMath::Tan( FMath::DegreesToRadians( std::abs( Altitude / 10.0 ) ) );
-        //const float radX = FMath::Tan( FMath::Sin( radAzim ) / tanAlt );
-        //const float radY = FMath::Tan( FMath::Cos( radAzim ) / tanAlt );
-        //float tiltX = FMath::RadiansToDegrees( radX );
-        //float tiltY = FMath::RadiansToDegrees( -radY );
-
-        //return FVector2D( tiltX, tiltY );
     }
 
 	FStylusState ToPublicState() const
@@ -112,21 +84,26 @@ struct FWTPacketDescription
 
 struct FWTTabletContextInfo : public IStylusInputDevice
 {
-    HCTX mTabletContext;
-
+    UInt32 mContextID;
+	UInt32 mTabletOfContext;
+    
+	TArray<FWintabStylusState> WindowsState;
+    
+    /*
 	TArray<FWTPacketDescription> PacketDescriptions;
 	TArray<EWintabPacketType> SupportedPackets;
 
     TArray< PACKET > mPacketsBuffer;
 
 	TArray<FWintabStylusState> WindowsState;
+    
     bool IsTouching;
 
 	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
 	void CleanSupportedInput() { SupportedInputs.Empty(); }
 
-	void SetDirty() { Dirty = true; }
-
+	void SetDirty() { Dirty = true; }*/
+  
     virtual void Tick() override;
 };
 
@@ -138,8 +115,10 @@ class FWintabContexts
 public:
     FWintabContexts();
     ~FWintabContexts();
-
-    bool OpenTabletContexts( HWND iHwnd );
+    
+    WintabContextCocoa* mWindow;
+    
+    bool OpenTabletContexts();
     void CloseTabletContexts();
 
 public:
