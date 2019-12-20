@@ -10,6 +10,7 @@
 
 #include "WintabContexts-Mac.h"
 
+
 class FWintabStylusInputInterfaceImpl
 {
 public:
@@ -17,14 +18,14 @@ public:
 
     TSharedPtr<FWintabContexts> mContexts;
 
-    //HWND mHwnd{ 0 };
+    FCocoaWindow* mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
     TWeakPtr<SWidget> Widget;
 };
 
 FWintabStylusInputInterfaceImpl::~FWintabStylusInputInterfaceImpl()
 {
-    //mContexts.Reset();
+    mContexts.Reset();
 
     //FWintabLibrary::Unload();
 }
@@ -63,14 +64,14 @@ FWintabStylusInputInterface::Tick()
         if( Window.IsValid() )
         {
             TSharedPtr<FGenericWindow> NativeWindow = Window->GetNativeWindow();
-            /*HWND Hwnd = reinterpret_cast<HWND>( NativeWindow->GetOSWindowHandle() );
+            FCocoaWindow* Hwnd = reinterpret_cast<FCocoaWindow*>( NativeWindow->GetOSWindowHandle() );
 
             if( Hwnd != Impl->mHwnd )
             {
                 Impl->mContexts->CloseTabletContexts();
                 Impl->mHwnd = Hwnd;
                 Impl->mContexts->OpenTabletContexts( Impl->mHwnd );
-            }*/
+            }
 
             Impl->Window = Window;
             Impl->Widget = WidgetPath.GetLastWidget();
@@ -81,20 +82,18 @@ FWintabStylusInputInterface::Tick()
 int32
 FWintabStylusInputInterface::NumInputDevices() const
 {
-    //return Impl->mContexts->mTabletContexts.Num();
-    return 0;
+    return Impl->mContexts->mTabletContexts.Num();
 }
 
 IStylusInputDevice*
 FWintabStylusInputInterface::GetInputDevice( int32 Index ) const
 {
-    /*if( Index < 0 || Index >= Impl->mContexts->mTabletContexts.Num() )
+    if( Index < 0 || Index >= Impl->mContexts->mTabletContexts.Num() )
     {
         return nullptr;
     }
 
-    return &Impl->mContexts->mTabletContexts[Index];*/
-    return nullptr;
+    return &Impl->mContexts->mTabletContexts[Index];
 }
 
 TWeakPtr<SWindow>

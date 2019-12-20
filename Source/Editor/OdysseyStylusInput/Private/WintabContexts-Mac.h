@@ -9,6 +9,7 @@
 
 #include "IStylusState.h"
 #include "WintabContexts-Cocoa.h"
+#include "Mac/CocoaWindow.h"
 
 #if __LP64__
 typedef unsigned int                    UInt32;
@@ -89,6 +90,13 @@ struct FWTTabletContextInfo : public IStylusInputDevice
     
 	TArray<FWintabStylusState> WindowsState;
     
+    WintabContextCocoa* mContext;
+        
+    bool IsTouching;
+
+    void SetDirty() { Dirty = true; }
+
+
     /*
 	TArray<FWTPacketDescription> PacketDescriptions;
 	TArray<EWintabPacketType> SupportedPackets;
@@ -97,13 +105,13 @@ struct FWTTabletContextInfo : public IStylusInputDevice
 
 	TArray<FWintabStylusState> WindowsState;
     
-    bool IsTouching;
 
 	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
 	void CleanSupportedInput() { SupportedInputs.Empty(); }
-
-	void SetDirty() { Dirty = true; }*/
+     */
   
+    
+    
     virtual void Tick() override;
 };
 
@@ -116,13 +124,18 @@ public:
     FWintabContexts();
     ~FWintabContexts();
     
-    WintabContextCocoa* mWindow;
-    
-    bool OpenTabletContexts();
+    bool OpenTabletContexts( FCocoaWindow* iHwnd );
     void CloseTabletContexts();
-
+    
 public:
 	TArray<FWTTabletContextInfo> mTabletContexts;
+
+private:
+    id mEventMonitor;
+    
+    NSEvent* HandleNSEvent(NSEvent* Event);
+
+
 };
 
-#endif // PLATFORM_WINDOWS
+#endif // PLATFORM_MAC
