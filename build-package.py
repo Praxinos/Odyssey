@@ -45,21 +45,21 @@ if operating_system != 'windows':
 
 input_path = Path.cwd().resolve()
 output_path = ( input_path / '..' / 'package' ).resolve()
-upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package' / 'Iliad'
-   
+upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
+
 parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
 parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
-parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\n\'ue-version/date-time/plugin-name\' folders will be append to it' )
+parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\nsuffix folders will be append to it' )
 parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
-parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path\n\'ue-version/date-time/plugin-name\' folders will be append to it' )
+parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path\nsuffix folders will be append to it' )
 parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
+parser.add_argument( '-m', '--marketplace', action="store_true", help=f'package for the marketplace (without binaries)' )
 args = parser.parse_args()
 
 #---
- 
+
 # Input uplugin file
-if args.input_dir:
-    input_path = Path( args.input_dir ).resolve()
+input_path = Path( args.input_dir ).resolve()
 
 uplugin_pathfiles = list( input_path.glob( '*.uplugin' ) )
 if not uplugin_pathfiles:
@@ -91,11 +91,17 @@ date_folder.append( args.suffix )
 date_folder = list( filter( None, date_folder ) )
 date_folder = '-'.join( date_folder )
 
-intermediate_folders = Path( version_ue ) / date_folder / plugin_name
+main_folder = []
+main_folder.append( plugin_name )
+main_folder.append( version_ue )
+main_folder.append( 'marketplace' if args.marketplace else '' )
+main_folder = list( filter( None, main_folder ) )
+main_folder = '-'.join( main_folder )
+
+intermediate_folders = Path( main_folder ) / date_folder / plugin_name
 
 # Output package directory
-if args.output_dir:
-    output_path = Path( args.output_dir ).resolve()
+output_path = Path( args.output_dir ).resolve()
 
 output_path = ( output_path / intermediate_folders )
 output_path.mkdir( parents=True, exist_ok=True )
@@ -104,8 +110,7 @@ print( Fore.GREEN + f'Output path: {output_path}' )
 
 # Upload package directory
 if args.upload:
-    if args.upload_dir:
-        upload_path = Path( args.upload_dir ).resolve()
+    upload_path = Path( args.upload_dir ).resolve()
         
     upload_path.mkdir( parents=True, exist_ok=True )
     upload_path = upload_path / intermediate_folders
@@ -156,9 +161,11 @@ if process.returncode != 0:
 #---
 
 # Cleaning
-binaries = output_path / 'Binaries'
-print( Fore.GREEN + f'Removing: {binaries}' )
-shutil.rmtree( binaries, ignore_errors=True )
+# Remove binaries only for marketplace, otherwise it's for internal testing and binaries are needed to not have to compile the plugin again
+if args.marketplace:
+    binaries = output_path / 'Binaries'
+    print( Fore.GREEN + f'Removing: {binaries}' )
+    shutil.rmtree( binaries, ignore_errors=True )
 
 intermediate = output_path / 'Intermediate'
 print( Fore.GREEN + f'Removing: {intermediate}' )
