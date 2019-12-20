@@ -33,6 +33,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "RawMesh",
                 "EditorStyle",
                 "PropertyEditor",
+                "Projects",
                 "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyWidgets",

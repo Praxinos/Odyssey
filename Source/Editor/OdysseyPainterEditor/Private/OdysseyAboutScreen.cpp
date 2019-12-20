@@ -6,6 +6,7 @@
 #include "EditorStyleSet.h"
 #include "Fonts/SlateFontInfo.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
 #include "Misc/EngineVersion.h"
 #include "Styling/CoreStyle.h"
@@ -112,7 +113,13 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.glm", "- glm" ), mExternalLibsGLMUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.boost-preprocessor", "- boost.preprocessor" ), mExternalLibsBoostPreprocessorUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
 
-    FText Version = LOCTEXT( "VersionLabel", "Version: Alpha 0.1" );
+    TSharedPtr<IPlugin> plugin = IPluginManager::Get().FindPlugin( FString( "Iliad" ) );
+    const FPluginDescriptor& pluginDescriptor = plugin->GetDescriptor();
+    FString version = pluginDescriptor.VersionName;
+    if( pluginDescriptor.bIsBetaVersion )
+        version += L"-beta";
+
+    FText VersionFull = FText::Format( LOCTEXT( "VersionLabel", "Version: {0}" ), FText::FromString( version ) );
 
     ChildSlot
     [
@@ -160,7 +167,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                         SNew( SEditableText )
                         .ColorAndOpacity( FLinearColor( 0.7f, 0.7f, 0.7f ) )
                         .IsReadOnly( true )
-                        .Text( Version )
+                        .Text( VersionFull )
                     ]
                 ]
             ]
