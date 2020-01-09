@@ -4,28 +4,29 @@
 #if PLATFORM_MAC
 
 #import "WintabContexts-Mac.h"
-#include "WintabContexts-CocoaMacInterface.h"
 
-
-NSString *kProximityNotification = @"kProximityNotification";
-NSString *kProximityEventKey = @"kProximityEventKey";
+//For coordinates conversion purposes
+#include "MacApplication.h"
 
 void
 FWTTabletContextInfo::Tick()
-{
-    //if( mContext )
-      //  UE_LOG(LogTemp, Display, TEXT("%lf"), mContext.mMouseX );
-    //float NormalPressure = mContext->Pressure();
-    //float NormalPressure = GetPressure( mContext );
+{    
+    PreviousState = CurrentState;
+    CurrentState.Empty();
+        
+    for( int i = 0; i < mPacketsBuffer.Num(); i++ )
+    {
+        CurrentState.Push( mPacketsBuffer[i].ToPublicState() );
+    }
+    
+    mPacketsBuffer.Empty();
 }
-
-
-
-
 
 
 FWintabContexts::FWintabContexts()
 {
+    mEventMonitor = 0;
+    mTabletContext = FWTTabletContextInfo();
 }
 
 FWintabContexts::~FWintabContexts()
@@ -33,21 +34,23 @@ FWintabContexts::~FWintabContexts()
     CloseTabletContexts();
 }
 
+
+//Register the window to get NSEvents, enabling the window to get tablet events
 bool
 FWintabContexts::OpenTabletContexts( FCocoaWindow* iHwnd )
 {
-    check( !mTabletContexts.Num() );
+    mTabletContext.mIsInverted = false;
+    if( mTabletContext.IsDirty() )
+        return true;
+        
+    mTabletContext.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
     
-    [iHwnd setAcceptsInput:YES];
-    
-    mEventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskAny handler:^(NSEvent* Event) { return HandleNSEvent(Event); }];
-
-    FWTTabletContextInfo tablet_context_info;
-    tablet_context_info.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
-    
-    mTabletContexts.Add( tablet_context_info );
-    
-    mTabletContexts[0].mContext = iHwnd.contentView;
+    //We listen to the NSEvents
+    if( !mEventMonitor )
+    {
+        mEventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskAny handler:^(NSEvent* Event) {
+            return HandleNSEvent(Event); }];
+    }
 
     return true;
 }
@@ -56,23 +59,47 @@ FWintabContexts::OpenTabletContexts( FCocoaWindow* iHwnd )
 void
 FWintabContexts::CloseTabletContexts()
 {
-    mTabletContexts.Empty();
-
-    if ( mEventMonitor ) {
-
-        [NSEvent removeMonitor:mEventMonitor];
-
-        mEventMonitor = nil;
-
-    }
+    //Nothing to do, the listener will be cleaned when UE close in FMacApplication
 }
 
 
 NSEvent* FWintabContexts::HandleNSEvent(NSEvent* Event)
 {
-   if([Event type] == NSEventTypeTabletProximity)
-       UE_LOG(LogTemp, Display, TEXT("Proximity tablet"));
+    FWintabStylusState state;
+    
+    NSPoint cursorPosition = NSEvent.mouseLocation;
+    state.Position = FMacApplication::ConvertCocoaPositionToSlate( cursorPosition.x, cursorPosition.y );
+        
+    //Tablet and mouse events are under the same main type of event. To distinguish them, we can check the subtype of the event received
+    if( [Event type] == NSEventTypeLeftMouseDown || [Event type] == NSEventTypeLeftMouseDragged )
+    {
+        state.NormalPressure = Event.pressure;
+        state.IsTouching = true;
+        
+        if( [Event subtype] == NSEventSubtype::NSEventSubtypeTabletPoint )
+        {
+            state.TangentPressure = Event.tangentialPressure;
 
+            NSPoint tilt = Event.tilt;
+            state.Tilt = FVector2D( tilt.x, tilt.y );
+            //Set Azimuth and Altitude with the content of Tilt
+            state.TiltToOrientation();
+            
+            state.Z = Event.absoluteZ;
+            state.Twist = Event.rotation;
+        }
+    }
+    else if( [Event type ] == NSEventTypeTabletProximity )
+    {
+        if( Event.pointingDeviceType == NSPointingDeviceType::NSPointingDeviceTypeEraser && Event.isEnteringProximity )
+            mTabletContext.mIsInverted = true;
+        else
+            mTabletContext.mIsInverted = false;
+    }
+            
+    state.IsInverted = mTabletContext.mIsInverted;
+    mTabletContext.mPacketsBuffer.Push( state );
+    
     return Event;
 }
 

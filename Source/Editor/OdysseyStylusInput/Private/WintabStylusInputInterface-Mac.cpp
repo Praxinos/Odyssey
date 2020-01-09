@@ -16,7 +16,7 @@ class FWintabStylusInputInterfaceImpl
 public:
     ~FWintabStylusInputInterfaceImpl();
 
-    TSharedPtr<FWintabContexts> mContexts;
+    TSharedPtr<FWintabContexts> mContext;
 
     FCocoaWindow* mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
@@ -25,9 +25,7 @@ public:
 
 FWintabStylusInputInterfaceImpl::~FWintabStylusInputInterfaceImpl()
 {
-    mContexts.Reset();
-
-    //FWintabLibrary::Unload();
+    mContext.Reset();
 }
 
 //---
@@ -46,10 +44,10 @@ FWintabStylusInputInterface::~FWintabStylusInputInterface() = default;
 void
 FWintabStylusInputInterface::Tick()
 {
-    for( const FWTTabletContextInfo& Context : Impl->mContexts->mTabletContexts )
+    if( Impl->mContext->mTabletContext.IsDirty() )
     {
         // don't change focus if the stylus is down
-        if( Context.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
+        if( Impl->mContext->mTabletContext.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
         {
             return;
         }
@@ -68,9 +66,9 @@ FWintabStylusInputInterface::Tick()
 
             if( Hwnd != Impl->mHwnd )
             {
-                Impl->mContexts->CloseTabletContexts();
+                Impl->mContext->CloseTabletContexts();
                 Impl->mHwnd = Hwnd;
-                Impl->mContexts->OpenTabletContexts( Impl->mHwnd );
+                Impl->mContext->OpenTabletContexts( Impl->mHwnd );
             }
 
             Impl->Window = Window;
@@ -82,18 +80,13 @@ FWintabStylusInputInterface::Tick()
 int32
 FWintabStylusInputInterface::NumInputDevices() const
 {
-    return Impl->mContexts->mTabletContexts.Num();
+    return 1;
 }
 
 IStylusInputDevice*
 FWintabStylusInputInterface::GetInputDevice( int32 Index ) const
 {
-    if( Index < 0 || Index >= Impl->mContexts->mTabletContexts.Num() )
-    {
-        return nullptr;
-    }
-
-    return &Impl->mContexts->mTabletContexts[Index];
+    return &Impl->mContext->mTabletContext;
 }
 
 TWeakPtr<SWindow>
@@ -115,19 +108,7 @@ CreateStylusInputInterfaceWintab()
 {
     TUniquePtr<FWintabStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FWintabStylusInputInterfaceImpl>();
 
- /*   if( !FWintabLibrary::Load() )
-    {
-        UE_LOG( LogStylusInput, Error, TEXT( "Could not load Wintab32.dll!" ) );
-        return nullptr;
-    }
-
-    if( !FWintabLibrary::WTInfoW( 0, 0, NULL ) )
-    {
-        UE_LOG( LogStylusInput, Warning, TEXT( "WinTab Services are unavailable" ) );
-        return nullptr;
-    }*/
-
-    WindowsImpl->mContexts = MakeShareable( new FWintabContexts() );
+    WindowsImpl->mContext = MakeShareable( new FWintabContexts() );
 
     return MakeShared<FWintabStylusInputInterface>( MoveTemp( WindowsImpl ) );
 }

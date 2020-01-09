@@ -32,6 +32,17 @@ namespace UnrealBuildTool.Rules
 				}
 				);
 
+            //We need ApplicationCore for Mac for this module
+            if( Target.Platform == UnrealTargetPlatform.Mac )
+            {
+                PrivateDependencyModuleNames.AddRange(
+                new string[]
+				{
+                    "ApplicationCore"
+                }
+                );
+            }
+                
 			PrivateDependencyModuleNames.AddRange(
 				new string[]
 				{

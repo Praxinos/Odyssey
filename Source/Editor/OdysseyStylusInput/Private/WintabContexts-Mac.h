@@ -8,15 +8,12 @@
 #if PLATFORM_MAC
 
 #include "IStylusState.h"
-#include "WintabContexts-Cocoa.h"
 #include "Mac/CocoaWindow.h"
 
 #if __LP64__
 typedef unsigned int                    UInt32;
-typedef signed int                      SInt32;
 #else
 typedef unsigned long                   UInt32;
-typedef signed long                     SInt32;
 #endif
 
 /**
@@ -49,6 +46,7 @@ struct FWintabStylusState
     float Azimuth;
     float Altitude;
 	float Twist;
+    FVector2D Tilt;
 	float NormalPressure;
 	float TangentPressure;
 	FVector2D Size;
@@ -56,61 +54,41 @@ struct FWintabStylusState
 	bool IsInverted : 1;
     
     FWintabStylusState() :
-		Position(0, 0), Z(0), Azimuth(0), Altitude(0), Twist(0), NormalPressure(0), TangentPressure(0),
+		Position(0, 0), Z(0), Azimuth(0), Altitude(0), Twist(0), Tilt(0, 0), NormalPressure(0), TangentPressure(0),
 		Size(0, 0), IsTouching(false), IsInverted(false)
 	{
 	}
 
-    FVector2D OrientationToTilt() const
+    //Set the Altitude and Azimuth fields based on what is currently inside Tilt
+    void TiltToOrientation()
     {
-        return FVector2D( 0, 0 );
+        Azimuth = 0;
+        if( Tilt.X != 0 )
+        {
+            Azimuth = PI/2 - FMath::Atan2(- FMath::Cos( Tilt.X ) * FMath::Sin( Tilt.Y ), FMath::Cos( Tilt.Y ) * FMath::Sin( Tilt.X ) );
+            if( Azimuth < 0 )
+                Azimuth+= 2 * PI;
+        }
+        
+        Altitude = PI / 2 - FMath::Acos(FMath::Cos( Tilt.X ) * FMath::Cos( Tilt.Y ) );
+        
+        Altitude = FMath::RadiansToDegrees( Altitude );
+        Azimuth = FMath::RadiansToDegrees( Azimuth );
     }
 
 	FStylusState ToPublicState() const
 	{
-		return FStylusState(Position, Z, OrientationToTilt(), Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
+		return FStylusState(Position, Z, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
 	}
-};
-
-/**
- * Description of a packet's information, as derived from IRealTimeStylus::GetPacketDescriptionData.
- */
-struct FWTPacketDescription
-{
-	EWintabPacketType Type { EWintabPacketType::None };
-	int32 Minimum { 0 };
-	int32 Maximum { 0 };
-	float Resolution { 0 };
 };
 
 struct FWTTabletContextInfo : public IStylusInputDevice
 {
-    UInt32 mContextID;
-	UInt32 mTabletOfContext;
-    
-	TArray<FWintabStylusState> WindowsState;
-    
-    WintabContextCocoa* mContext;
-        
-    bool IsTouching;
-
+    bool mIsInverted;
     void SetDirty() { Dirty = true; }
+    bool IsDirty() { return Dirty; }
 
-
-    /*
-	TArray<FWTPacketDescription> PacketDescriptions;
-	TArray<EWintabPacketType> SupportedPackets;
-
-    TArray< PACKET > mPacketsBuffer;
-
-	TArray<FWintabStylusState> WindowsState;
-    
-
-	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
-	void CleanSupportedInput() { SupportedInputs.Empty(); }
-     */
-  
-    
+    TArray< FWintabStylusState > mPacketsBuffer;
     
     virtual void Tick() override;
 };
@@ -128,14 +106,12 @@ public:
     void CloseTabletContexts();
     
 public:
-	TArray<FWTTabletContextInfo> mTabletContexts;
+	FWTTabletContextInfo mTabletContext;
 
 private:
     id mEventMonitor;
     
     NSEvent* HandleNSEvent(NSEvent* Event);
-
-
 };
 
 #endif // PLATFORM_MAC
