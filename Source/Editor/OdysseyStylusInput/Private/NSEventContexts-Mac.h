@@ -39,7 +39,7 @@ enum class EWintabPacketType
 /**
  * Stylus state for a single frame.
  */
-struct FWintabStylusState
+struct FNSEventStylusState
 {
 	FVector2D Position;
 	float Z;
@@ -53,7 +53,7 @@ struct FWintabStylusState
 	bool IsTouching : 1;
 	bool IsInverted : 1;
     
-    FWintabStylusState() :
+    FNSEventStylusState() :
 		Position(0, 0), Z(0), Azimuth(0), Altitude(0), Twist(0), Tilt(0, 0), NormalPressure(0), TangentPressure(0),
 		Size(0, 0), IsTouching(false), IsInverted(false)
 	{
@@ -88,7 +88,7 @@ struct FWTTabletContextInfo : public IStylusInputDevice
     void SetDirty() { Dirty = true; }
     bool IsDirty() { return Dirty; }
 
-    TArray< FWintabStylusState > mPacketsBuffer;
+    TArray< FNSEventStylusState > mPacketsBuffer;
     
     virtual void Tick() override;
 };
@@ -96,14 +96,14 @@ struct FWTTabletContextInfo : public IStylusInputDevice
 /**
  * An implementation of an IStylusSyncPlugin for use with the RealTimeStylus API.
  */
-class FWintabContexts
+class FNSEventContexts
 {
 public:
-    FWintabContexts();
-    ~FWintabContexts();
+    FNSEventContexts();
+    ~FNSEventContexts();
     
-    bool OpenTabletContexts( FCocoaWindow* iHwnd );
-    void CloseTabletContexts();
+    bool OpenContext( FCocoaWindow* iHwnd );
+    void CloseContext();
     
 public:
 	FWTTabletContextInfo mTabletContext;

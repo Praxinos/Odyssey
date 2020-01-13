@@ -3,7 +3,7 @@
 
 #if PLATFORM_MAC
 
-#import "WintabContexts-Mac.h"
+#import "NSEventContexts-Mac.h"
 
 //For coordinates conversion purposes
 #include "MacApplication.h"
@@ -23,21 +23,21 @@ FWTTabletContextInfo::Tick()
 }
 
 
-FWintabContexts::FWintabContexts()
+FNSEventContexts::FNSEventContexts()
 {
     mEventMonitor = 0;
     mTabletContext = FWTTabletContextInfo();
 }
 
-FWintabContexts::~FWintabContexts()
+FNSEventContexts::~FNSEventContexts()
 {
-    CloseTabletContexts();
+    CloseContext();
 }
 
 
 //Register the window to get NSEvents, enabling the window to get tablet events
 bool
-FWintabContexts::OpenTabletContexts( FCocoaWindow* iHwnd )
+FNSEventContexts::OpenContext( FCocoaWindow* iHwnd )
 {
     mTabletContext.mIsInverted = false;
     if( mTabletContext.IsDirty() )
@@ -57,15 +57,15 @@ FWintabContexts::OpenTabletContexts( FCocoaWindow* iHwnd )
 
 
 void
-FWintabContexts::CloseTabletContexts()
+FNSEventContexts::CloseContext()
 {
     //Nothing to do, the listener will be cleaned when UE close in FMacApplication
 }
 
 
-NSEvent* FWintabContexts::HandleNSEvent(NSEvent* Event)
+NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
 {
-    FWintabStylusState state;
+    FNSEventStylusState state;
     
     NSPoint cursorPosition = NSEvent.mouseLocation;
     state.Position = FMacApplication::ConvertCocoaPositionToSlate( cursorPosition.x, cursorPosition.y );

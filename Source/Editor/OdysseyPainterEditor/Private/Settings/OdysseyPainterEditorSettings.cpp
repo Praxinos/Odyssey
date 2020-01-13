@@ -8,6 +8,14 @@
 
 #include "IOdysseyStylusInputModule.h"
 
+#if PLATFORM_WINDOWS
+    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_Ink
+#elif PLATFORM_MAC
+    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_NSEvent
+#else
+    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_None
+#endif
+
 UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
     , Background( kOdysseyPainterEditorBackground_Checkered )
@@ -20,7 +28,7 @@ UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectIniti
     , PickColor( EKeys::LeftAlt )
     , FitToViewport( true )
     , TextureBorderColor( FColor::White )
-    , StylusInputDriver( OdysseyStylusInputDriver_Ink )
+    , StylusInputDriver( OdysseyStylusInputDriver_Default )
     , TextureBorderEnabled( false )
 {
 }
@@ -47,19 +55,28 @@ void
 UOdysseyPainterEditorSettings::RefreshStylusInputDriver()
 {
     TSharedPtr<IStylusInputInterfaceInternal> stylus_input;
+    
     switch( StylusInputDriver )
     {
         case OdysseyStylusInputDriver_None:
             stylus_input = nullptr;
             break;
+    #if PLATFORM_WINDOWS
         case OdysseyStylusInputDriver_Ink:
             stylus_input = CreateStylusInputInterface();
             break;
-        default:
         case OdysseyStylusInputDriver_Wintab:
             stylus_input = CreateStylusInputInterfaceWintab();
             break;
+    #elif PLATFORM_MAC
+        case OdysseyStylusInputDriver_NSEvent:
+            stylus_input = CreateStylusInputInterfaceNSEvent();
+            break;
+    #endif
+        default:
+            stylus_input = nullptr;
     }
+    
 
     if( !stylus_input.IsValid() )
         StylusInputDriver = OdysseyStylusInputDriver_None;

@@ -1,53 +1,53 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
-#include "WintabStylusInputInterface.h"
+#include "NSEventStylusInputInterface.h"
 #include "Interfaces/IMainFrameModule.h"
 
 #include "Framework/Application/SlateApplication.h"
 
 #if PLATFORM_MAC
 
-#include "WintabContexts-Mac.h"
+#include "NSEventContexts-Mac.h"
 
 
-class FWintabStylusInputInterfaceImpl
+class FNSEventStylusInputInterfaceImpl
 {
 public:
-    ~FWintabStylusInputInterfaceImpl();
+    ~FNSEventStylusInputInterfaceImpl();
 
-    TSharedPtr<FWintabContexts> mContext;
+    TSharedPtr<FNSEventContexts> mContexts;
 
     FCocoaWindow* mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
     TWeakPtr<SWidget> Widget;
 };
 
-FWintabStylusInputInterfaceImpl::~FWintabStylusInputInterfaceImpl()
+FNSEventStylusInputInterfaceImpl::~FNSEventStylusInputInterfaceImpl()
 {
-    mContext.Reset();
+    mContexts.Reset();
 }
 
 //---
 
-FWintabStylusInputInterface::FWintabStylusInputInterface( TUniquePtr<FWintabStylusInputInterfaceImpl> InImpl )
+FNSEventStylusInputInterface::FNSEventStylusInputInterface( TUniquePtr<FNSEventStylusInputInterfaceImpl> InImpl )
 {
     check( InImpl.IsValid() );
 
     Impl = MoveTemp( InImpl );
 }
 
-FWintabStylusInputInterface::~FWintabStylusInputInterface() = default;
+FNSEventStylusInputInterface::~FNSEventStylusInputInterface() = default;
 
 //---
 
 void
-FWintabStylusInputInterface::Tick()
+FNSEventStylusInputInterface::Tick()
 {
-    if( Impl->mContext->mTabletContext.IsDirty() )
+    if( Impl->mContexts->mTabletContext.IsDirty() )
     {
         // don't change focus if the stylus is down
-        if( Impl->mContext->mTabletContext.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
+        if( Impl->mContexts->mTabletContext.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
         {
             return;
         }
@@ -66,9 +66,9 @@ FWintabStylusInputInterface::Tick()
 
             if( Hwnd != Impl->mHwnd )
             {
-                Impl->mContext->CloseTabletContexts();
+                Impl->mContexts->CloseContext();
                 Impl->mHwnd = Hwnd;
-                Impl->mContext->OpenTabletContexts( Impl->mHwnd );
+                Impl->mContexts->OpenContext( Impl->mHwnd );
             }
 
             Impl->Window = Window;
@@ -78,25 +78,25 @@ FWintabStylusInputInterface::Tick()
 }
 
 int32
-FWintabStylusInputInterface::NumInputDevices() const
+FNSEventStylusInputInterface::NumInputDevices() const
 {
     return 1;
 }
 
 IStylusInputDevice*
-FWintabStylusInputInterface::GetInputDevice( int32 Index ) const
+FNSEventStylusInputInterface::GetInputDevice( int32 Index ) const
 {
-    return &Impl->mContext->mTabletContext;
+    return &Impl->mContexts->mTabletContext;
 }
 
 TWeakPtr<SWindow>
-FWintabStylusInputInterface::Window() const
+FNSEventStylusInputInterface::Window() const
 {
     return Impl->Window;
 }
 
 TWeakPtr<SWidget>
-FWintabStylusInputInterface::Widget() const
+FNSEventStylusInputInterface::Widget() const
 {
     return Impl->Widget;
 }
@@ -104,13 +104,13 @@ FWintabStylusInputInterface::Widget() const
 //---
 
 TSharedPtr<IStylusInputInterfaceInternal>
-CreateStylusInputInterfaceWintab()
+CreateStylusInputInterfaceNSEvent()
 {
-    TUniquePtr<FWintabStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FWintabStylusInputInterfaceImpl>();
+    TUniquePtr<FNSEventStylusInputInterfaceImpl> impl = MakeUnique<FNSEventStylusInputInterfaceImpl>();
 
-    WindowsImpl->mContext = MakeShareable( new FWintabContexts() );
+    impl->mContexts = MakeShareable( new FNSEventContexts() );
 
-    return MakeShared<FWintabStylusInputInterface>( MoveTemp( WindowsImpl ) );
+    return MakeShared<FNSEventStylusInputInterface>( MoveTemp( impl ) );
 }
 
 #endif // PLATFORM_MAC
