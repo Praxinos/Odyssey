@@ -68,6 +68,9 @@ FNSEventContexts::CloseContext()
 
 NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
 {
+    if( !Event )
+        return NULL;
+    
     FNSEventStylusState state;
     
     NSPoint cursorPosition = NSEvent.mouseLocation;
