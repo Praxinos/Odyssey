@@ -65,7 +65,7 @@ struct FNSEventStylusState
         Azimuth = 0;
         if( Tilt.X != 0 )
         {
-            Azimuth = PI/2 - FMath::Atan2(- FMath::Cos( Tilt.X ) * FMath::Sin( Tilt.Y ), FMath::Cos( Tilt.Y ) * FMath::Sin( Tilt.X ) );
+            Azimuth = PI/2 - FMath::Atan2( FMath::Cos( Tilt.X ) * FMath::Sin( Tilt.Y ), FMath::Cos( Tilt.Y ) * FMath::Sin( Tilt.X ) );
             if( Azimuth < 0 )
                 Azimuth+= 2 * PI;
         }
