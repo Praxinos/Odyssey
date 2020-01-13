@@ -87,6 +87,7 @@ struct FWTTabletContextInfo : public IStylusInputDevice
     bool mIsInverted;
     void SetDirty() { Dirty = true; }
     bool IsDirty() { return Dirty; }
+    void Clear() { CurrentState.Empty(); PreviousState.Empty(); }
 
     TArray< FNSEventStylusState > mPacketsBuffer;
     

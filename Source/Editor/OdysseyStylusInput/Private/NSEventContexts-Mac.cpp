@@ -40,8 +40,6 @@ bool
 FNSEventContexts::OpenContext( FCocoaWindow* iHwnd )
 {
     mTabletContext.mIsInverted = false;
-    if( mTabletContext.IsDirty() )
-        return true;
         
     mTabletContext.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
     
@@ -59,7 +57,12 @@ FNSEventContexts::OpenContext( FCocoaWindow* iHwnd )
 void
 FNSEventContexts::CloseContext()
 {
-    //Nothing to do, the listener will be cleaned when UE close in FMacApplication
+    if( mEventMonitor )
+    {
+        [NSEvent removeMonitor:mEventMonitor];
+        mEventMonitor = 0;
+        mTabletContext.Clear();
+    }
 }
 
 
