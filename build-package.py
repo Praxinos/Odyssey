@@ -39,13 +39,15 @@ version_ue = '4.24'
 now = datetime.now()
 
 operating_system = platform.system().lower() # 'windows', 'darwin', 'linux', ...
-if operating_system != 'windows':
+if operating_system != 'windows' and operating_system != 'darwin':
     print( Fore.RED + f'This platform is not supported: {operating_system}' )
     sys.exit( 5 )
 
 input_path = Path.cwd().resolve()
 output_path = ( input_path / '..' / 'package' ).resolve()
 upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
+if operating_system == 'darwin':
+    upload_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
 
 parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
 parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
@@ -138,6 +140,8 @@ if not uplugin_data:
 for module in uplugin_data['Modules']:
     if operating_system == 'windows':
         module['WhitelistPlatforms'] = [ 'Win64' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+    elif operating_system == 'darwin':
+        module['WhitelistPlatforms'] = [ 'Mac' ]
 
 with uplugin_pathfile.open( 'w' ) as outfile:
     json.dump( uplugin_data, outfile )
@@ -146,7 +150,9 @@ with uplugin_pathfile.open( 'w' ) as outfile:
 
 if operating_system == 'windows':
     uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / f'UE_{version_ue}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
-    uat_args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
+elif operating_system == 'darwin':
+    uat = [ str( Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{version_ue}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh' ) ]
+uat_args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
     
 # Run packaging script
 process = subprocess.run( uat + uat_args )
