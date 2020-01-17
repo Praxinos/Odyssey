@@ -6,7 +6,7 @@
 #import "NSEventContexts-Mac.h"
 
 //For coordinates conversion purposes
-#include "MacApplication.h"
+#include "Mac/MacApplication.h"
 
 void
 FWTTabletContextInfo::Tick()
