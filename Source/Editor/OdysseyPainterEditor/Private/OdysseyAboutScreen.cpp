@@ -117,7 +117,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
     const FPluginDescriptor& pluginDescriptor = plugin->GetDescriptor();
     FString version = pluginDescriptor.VersionName;
     if( pluginDescriptor.bIsBetaVersion )
-        version += L"-beta";
+        version += "-beta";
 
     FText VersionFull = FText::Format( LOCTEXT( "VersionLabel", "Version: {0}" ), FText::FromString( version ) );
 
