@@ -11,32 +11,32 @@
 #define LOCTEXT_NAMESPACE "OdysseyTextureDummy_AssetTypeActions"
 
 //////////////////////////////////////////////////////////////////////////
-// FOdysseyTextureAssetTypeActions
-FOdysseyTextureAssetTypeActions::FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
+// FOdysseyTextureDummyAssetTypeActions
+FOdysseyTextureDummyAssetTypeActions::FOdysseyTextureDummyAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
     : mMyAssetCategory( iAssetCategory )
 {
 }
 
 FText
-FOdysseyTextureAssetTypeActions::GetName() const
+FOdysseyTextureDummyAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "FOdysseyTextureTypeActionsName", "Texture" );
+    return LOCTEXT( "FOdysseyTextureDummyTypeActionsName", "Texture" );
 }
 
 FColor
-FOdysseyTextureAssetTypeActions::GetTypeColor() const
+FOdysseyTextureDummyAssetTypeActions::GetTypeColor() const
 {
     return FColor( 39, 52, 106 );
 }
 
 UClass*
-FOdysseyTextureAssetTypeActions::GetSupportedClass() const
+FOdysseyTextureDummyAssetTypeActions::GetSupportedClass() const
 {
     return UOdysseyTextureDummy::StaticClass();
 }
 
 uint32
-FOdysseyTextureAssetTypeActions::GetCategories()
+FOdysseyTextureDummyAssetTypeActions::GetCategories()
 {
     return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
 }

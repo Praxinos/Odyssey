@@ -18,6 +18,7 @@
 #include "OdysseyPainterEditorToolkit.h"
 #include "OdysseyTextureDummy/OdysseyTextureDummy_AssetTypeActions.h"
 #include "OdysseyTextureDummy/OdysseyTextureDummy_ContentBrowserExtensions.h"
+#include "OdysseyTexture_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
 
@@ -82,6 +83,7 @@ public:
 
         IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
         mOdysseyPainterCategory = assetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "IliadPainterAssetCategory", "ILIAD" ) );
+        RegisterAssetTypeAction( assetTools, MakeShareable( new FOdysseyTextureDummyAssetTypeActions( mOdysseyPainterCategory ) ) );
         RegisterAssetTypeAction( assetTools, MakeShareable( new FOdysseyTextureAssetTypeActions( mOdysseyPainterCategory ) ) );
 
         // register menu extensions

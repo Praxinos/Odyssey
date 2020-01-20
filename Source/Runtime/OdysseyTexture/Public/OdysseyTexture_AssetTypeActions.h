@@ -7,11 +7,11 @@
 #include "CoreMinimal.h"
 #include "Toolkits/IToolkitHost.h"
 
-class FOdysseyTextureDummyAssetTypeActions
+class ODYSSEYTEXTURE_API FOdysseyTextureAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:
-    FOdysseyTextureDummyAssetTypeActions( EAssetTypeCategories::Type iAssetCategory );
+    FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory );
 
     // IAssetTypeActions interface
     virtual FText GetName() const override;
