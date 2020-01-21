@@ -35,9 +35,8 @@
 - Open the solution (inside `$PROJECT_PATH`) with Visual Studio
 
 # Packaging
-*Only windows (for the moment)*
 ```
-usage: build-package.py [-h] [-i INPUT_DIR] [-o OUTPUT_DIR] [-u] [-p UPLOAD_DIR] [-s SUFFIX] [-m]
+usage: build-package.py [-h] [-i INPUT_DIR] [-o OUTPUT_DIR] [-u] [-p UPLOAD_DIR] [-s SUFFIX] [-l ULIS_BINARIES] [-m]
 
 Build package.
 
@@ -60,6 +59,9 @@ optional arguments:
   -s SUFFIX, --suffix SUFFIX
                         a suffix to the output directory name
                         (default: None)
+  -l ULIS_BINARIES, --ulis-binaries ULIS_BINARIES
+                        the path where ALL ulis binaries (win64/mac) are on pcloud
+                        (default: P:/Praxinos/Developpement/Ulis/Binaries)
   -m, --marketplace     package for the marketplace (without binaries)
                         (default: False)
 ```
