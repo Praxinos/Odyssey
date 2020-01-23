@@ -1,9 +1,9 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
-#if PLATFORM_MAC
+#include "NSEventContexts-Mac.h"
 
-#import "NSEventContexts-Mac.h"
+#if PLATFORM_MAC
 
 //For coordinates conversion purposes
 #include "Mac/MacApplication.h"
