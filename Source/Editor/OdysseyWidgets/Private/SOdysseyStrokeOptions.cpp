@@ -179,23 +179,23 @@ void
 SOdysseyStrokeOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, UProperty* PropertyThatChanged )
 {
     FString PropertyName = PropertyThatChanged->GetName();
-    if( PropertyName == FString( L"Step" ) ) {
+    if( PropertyName == FString( TEXT("Step") ) ) {
         OnStrokeStepChangedCallback.ExecuteIfBound( StructData.Step );
-    } else if( PropertyName == FString( L"SizeAdaptative" ) ) {
+    } else if( PropertyName == FString( TEXT("SizeAdaptative") ) ) {
         OnStrokeAdaptativeChangedCallback.ExecuteIfBound( StructData.SizeAdaptative );
-    } else if( PropertyName == FString( L"PaintOnTick" ) ) {
+    } else if( PropertyName == FString( TEXT("PaintOnTick" ) ) ) {
         OnStrokePaintOnTickChangedCallback.ExecuteIfBound( StructData.PaintOnTick );
-    } else if( PropertyName == FString( L"Type" ) ) {
+    } else if( PropertyName == FString( TEXT("Type" ) ) ) {
         OnInterpolationTypeChangedCallback.ExecuteIfBound( static_cast< int32 >( StructData.Type ) );
-    } else if( PropertyName == FString( L"Method" ) ) {
+    } else if( PropertyName == FString( TEXT("Method" ) ) ) {
         OnSmoothingMethodChangedCallback.ExecuteIfBound( static_cast< int32 >( StructData.Method ) );
-    } else if( PropertyName == FString( L"Strength" ) ) {
+    } else if( PropertyName == FString( TEXT("Strength" ) ) ) {
         OnSmoothingStrengthChangedCallback.ExecuteIfBound( StructData.Strength );
-    } else if( PropertyName == FString( L"Enabled" ) ) {
+    } else if( PropertyName == FString( TEXT("Enabled" ) ) ) {
         OnSmoothingEnabledChangedCallback.ExecuteIfBound( StructData.Enabled );
-    } else if( PropertyName == FString( L"RealTime" ) ) {
+    } else if( PropertyName == FString( TEXT("RealTime" ) ) ) {
         OnSmoothingRealTimeChangedCallback.ExecuteIfBound( StructData.RealTime );
-    } else if( PropertyName == FString( L"CatchUp" ) ) {
+    } else if( PropertyName == FString( TEXT("CatchUp" ) ) ) {
         OnSmoothingCatchUpChangedCallback.ExecuteIfBound( StructData.CatchUp );
     }
 

@@ -77,7 +77,6 @@ private:
     FText mExternalLibsLittleCMSUrl;
     FText mExternalLibsGLMUrl;
     FText mExternalLibsBoostPreprocessorUrl;
-    FText mExternalLibsFontAwsomeUrl;
     FText mTwitterUrl;
     FText mFacebookUrl;
     FText mLinkedInUrl;

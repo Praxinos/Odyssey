@@ -33,6 +33,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "RawMesh",
                 "EditorStyle",
                 "PropertyEditor",
+                "Projects",
                 "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyWidgets",
@@ -57,6 +58,33 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
             }
         );
+        
+        if( Target.Platform == UnrealTargetPlatform.Win64 || Target.Platform == UnrealTargetPlatform.Win32 )
+        {
+            PublicIncludePaths.AddRange(
+                new string[] {
+                    Path.Combine(ModuleDirectory, "Public", "Settings", "Windows" )
+                }
+            );
+        }
+    	else if ( Target.Platform == UnrealTargetPlatform.Mac )
+		{
+            PublicIncludePaths.AddRange(
+                new string[] {
+                    Path.Combine(ModuleDirectory, "Public", "Settings", "Mac" )
+                }
+            );
+        }
+        else
+        {
+            PublicIncludePaths.AddRange(
+                new string[] {
+                    Path.Combine(ModuleDirectory, "Public", "Settings", "Generic" )
+                }
+            );
+        }
+            
+
 
         PublicDependencyModuleNames.AddRange(
              new string[] {

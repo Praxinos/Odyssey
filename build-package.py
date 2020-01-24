@@ -30,68 +30,121 @@ class CustomArgumentDefaultsHelpFormatter( argparse.RawTextHelpFormatter ):
             if action.default is not argparse.SUPPRESS:
                 defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
-                    help += '\n(default: %(default)s)'
+                    help += '\n' + Fore.BLACK + Style.BRIGHT + '(default: %(default)s)' + Style.RESET_ALL
         return help
         
 #---
 
+version_ue = '4.24'
+now = datetime.now()
+
 operating_system = platform.system().lower() # 'windows', 'darwin', 'linux', ...
-if operating_system != 'windows':
+if operating_system != 'windows' and operating_system != 'darwin':
     print( Fore.RED + f'This platform is not supported: {operating_system}' )
     sys.exit( 5 )
 
 input_path = Path.cwd().resolve()
 output_path = ( input_path / '..' / 'package' ).resolve()
-upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package' / 'Iliad'
-   
+upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
+if operating_system == 'darwin':
+    upload_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
+ulis_binaries_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
+if operating_system == 'darwin':
+    ulis_binaries_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
+
 parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
 parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
-parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\n\'date-time/plugin-name\' folders will be append to it' )
+parser.add_argument( '-o', '--output-dir', default=f'{output_path}', help=f'the output path\nsuffix folders will be append to it' )
 parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
-parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path' )
+parser.add_argument( '-p', '--upload-dir', default=f'{upload_path}', help=f'the upload path\nsuffix folders will be append to it' )
+parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
+parser.add_argument( '-l', '--ulis-binaries', default=f'{ulis_binaries_path}', help=f'the path where ALL ulis binaries (win64/mac) are on pcloud' )
+parser.add_argument( '-m', '--marketplace', action="store_true", help=f'package for the marketplace (without binaries)' )
 args = parser.parse_args()
 
 #---
- 
+
 # Input uplugin file
-if args.input_dir:
-    input_path = Path( args.input_dir ).resolve()
+input_path = Path( args.input_dir ).resolve()
 
-uplugin_pathfiles = list( input_path.glob( '*.uplugin' ) )
+uplugin_pathfiles = [ entry for entry in input_path.glob( '*.uplugin' ) if entry.is_file() ]
 if not uplugin_pathfiles:
-    print( Fore.RED + f'uplugin file doesn\'t exist in: {input_path}' )
+    print( Fore.RED + f'no uplugin file in: {input_path}' )
     sys.exit( 10 )
-
-uplugin_pathfile = uplugin_pathfiles[0]
-if not uplugin_pathfile.is_file():
-    print( Fore.RED + f'uplugin file is not a file: {uplugin_pathfile}' )
-    sys.exit( 12 )
     
+uplugin_pathfile = uplugin_pathfiles[0]
 print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
 
 plugin_name = uplugin_pathfile.stem
 
-# Output package directory
-if args.output_dir:
-    output_path = Path( args.output_dir ).resolve()
+#
 
-now = datetime.now()
-date_folder = now.strftime( '%Y%m%d-%H%M%S-' + operating_system )
-output_path = ( output_path / date_folder / plugin_name )
+uplugin_data = {}
+with uplugin_pathfile.open() as infile:
+    uplugin_data = json.load( infile )
+
+date_folder = []
+date_folder.append( now.strftime( '%Y%m%d.%H%M%S' ) )
+date_folder.append( version_ue )
+date_folder.append( uplugin_data["VersionName"] )
+date_folder.append( 'beta' if uplugin_data['IsBetaVersion'] else '' )
+if not args.marketplace:
+    date_folder.append( operating_system )
+date_folder.append( args.suffix )
+date_folder = list( filter( None, date_folder ) )
+date_folder = '-'.join( date_folder )
+
+main_folder = []
+main_folder.append( plugin_name )
+main_folder.append( version_ue )
+main_folder.append( 'marketplace' if args.marketplace else '' )
+main_folder = list( filter( None, main_folder ) )
+main_folder = '-'.join( main_folder )
+
+intermediate_folders = Path( main_folder ) / date_folder / plugin_name
+
+# Output package directory
+output_path = Path( args.output_dir ).resolve()
+
+output_path = ( output_path / intermediate_folders )
 output_path.mkdir( parents=True, exist_ok=True )
 
 print( Fore.GREEN + f'Output path: {output_path}' )
 
+# Ulis binaries directory
+ulis_binaries_path = Path( args.ulis_binaries ).resolve()
+
+cs_pathfiles = [ entry for entry in ulis_binaries_path.glob( 'ULIS.Build.cs' ) if entry.is_file() ]
+if not cs_pathfiles:
+    date_pathfiles = sorted( [ entry for entry in ulis_binaries_path.glob( '*-ULIS' ) if entry.is_dir() ] )
+    if not date_pathfiles:
+        print( Fore.RED + f'no ulis version (with date) path in: {ulis_binaries_path}' )
+        sys.exit( 15 )
+    ulis_binaries_path = ulis_binaries_path / date_pathfiles[-1] / 'ULIS'
+    if not ulis_binaries_path.is_dir():
+        print( Fore.RED + f'ULIS is not a directory: {ulis_binaries_path}' )
+        sys.exit( 16 )
+    cs_pathfiles = [ entry for entry in ulis_binaries_path.glob( 'ULIS.Build.cs' ) if entry.is_file() ]
+    if not cs_pathfiles:
+        print( Fore.RED + f'no cs file in: {ulis_binaries_path}' )
+        sys.exit( 17 )
+
+print( Fore.GREEN + f'Ulis binaries path: {ulis_binaries_path}' )
+
 # Upload package directory
 if args.upload:
-    if args.upload_dir:
-        upload_path = Path( args.upload_dir ).resolve()
+    upload_path = Path( args.upload_dir ).resolve()
         
     upload_path.mkdir( parents=True, exist_ok=True )
+    upload_path = upload_path / intermediate_folders
 
     print( Fore.GREEN + f'Upload path: {upload_path}' )
 else:
     print( Fore.GREEN + f'NO upload' )
+
+
+if args.marketplace:
+    print( Fore.GREEN + f'Build for marketplace' )
 
 #---
 
@@ -112,6 +165,8 @@ if not uplugin_data:
 for module in uplugin_data['Modules']:
     if operating_system == 'windows':
         module['WhitelistPlatforms'] = [ 'Win64' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+    elif operating_system == 'darwin':
+        module['WhitelistPlatforms'] = [ 'Mac' ]
 
 with uplugin_pathfile.open( 'w' ) as outfile:
     json.dump( uplugin_data, outfile )
@@ -119,8 +174,10 @@ with uplugin_pathfile.open( 'w' ) as outfile:
 #---
 
 if operating_system == 'windows':
-    uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / 'UE_4.23' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
-    uat_args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
+    uat = [ str( Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / f'UE_{version_ue}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat' ) ]
+elif operating_system == 'darwin':
+    uat = [ str( Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{version_ue}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh' ) ]
+uat_args = [ 'BuildPlugin', '-Plugin=' + str( uplugin_pathfile ) + '', '-Package=' + str( output_path ) + '', '-CreateSubFolder', '-Rocket' ]
     
 # Run packaging script
 process = subprocess.run( uat + uat_args )
@@ -134,20 +191,53 @@ if process.returncode != 0:
 
 #---
 
+# Add platform specification (all platforms) for marketplace
+if args.marketplace:
+    uplugin_pathfiles = list( output_path.glob( '*.uplugin' ) )
+    if not uplugin_pathfiles:
+        print( Fore.RED + f'uplugin file doesn\'t exist in: {output_path}' )
+        sys.exit( 40 )
+
+    uplugin_pathfile = uplugin_pathfiles[0]
+    if not uplugin_pathfile.is_file():
+        print( Fore.RED + f'uplugin file is not a file: {uplugin_pathfile}' )
+        sys.exit( 42 )
+        
+    uplugin_data = {}
+    with uplugin_pathfile.open() as infile:
+        uplugin_data = json.load( infile )
+        
+    for module in uplugin_data['Modules']:
+        module['WhitelistPlatforms'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+
+    with uplugin_pathfile.open( 'w' ) as outfile:
+        json.dump( uplugin_data, outfile )
+
 # Cleaning
+# Remove binaries only for marketplace, otherwise it's for internal testing and binaries are needed to not have to compile the plugin again
+if args.marketplace:
+    binaries = output_path / 'Binaries'
+    print( Fore.GREEN + f'Removing: {binaries}' )
+    shutil.rmtree( binaries, ignore_errors=True )
+
 intermediate = output_path / 'Intermediate'
 print( Fore.GREEN + f'Removing: {intermediate}' )
 shutil.rmtree( intermediate, ignore_errors=True )
 
-source = output_path / 'Source'
-print( Fore.GREEN + f'Removing: {source}' )
-shutil.rmtree( source, ignore_errors=True )
+thirdparty_ulis = output_path / 'Source' / 'ThirdParty' / 'ULIS'
+shutil.rmtree( thirdparty_ulis, ignore_errors=True )
+shutil.copytree( ulis_binaries_path, thirdparty_ulis )
+
+for entry in thirdparty_ulis.rglob( '*' ):
+    if entry.is_dir() and entry.name == 'Debug':
+        print( Fore.RED + f'There is Debug folder in: {ulis_binaries_path}' )
+        sys.exit( 50 )
 
 #---
 
 # Uploading
 if args.upload:
-    src_path = ( output_path / '..' ).resolve() # '..' to move to the directory with the date
-    dst_path = ( upload_path / date_folder ).resolve()
+    src_path = output_path
+    dst_path = upload_path
     print( Fore.GREEN + f'Copying/Uploading: {src_path} -> {dst_path}' )
     shutil.copytree( src_path, dst_path )

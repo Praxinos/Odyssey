@@ -147,14 +147,16 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     TRefCountPtr<FBatchedElementParameters> batchedElementParameters;
 
-    if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM4 )
+    if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5 )
     {
         //ODYSSEY: PATCH
         bool isNormalMap = texture2D->IsNormalMap();
         bool isSingleChannel = texture2D->CompressionSettings == TC_Grayscale || texture2D->CompressionSettings == TC_Alpha;
         bool isVirtual = texture2D->IsCurrentlyVirtualTextured();
+        bool isVTSPS = texture2D->IsVirtualTexturedWithSinglePhysicalSpace();
+        bool isTextureArray = false;
         float layerIndex = 0.f;
-        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVirtual );
+        batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray );
     }
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );
@@ -289,7 +291,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
 	
-    //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), State.GetPosition().X, State.GetPosition().Y, local.X, local.Y );
+    //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), State.GetPosition().X, State.GetPosition().Y, local.X, local.Y );
 
     FOdysseyStrokePoint stroke_point( position_in_viewport.X
                                       , position_in_viewport.Y
@@ -303,52 +305,40 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
                                       , 0 ); // iState.GetYaw() );
 
   //---
-    if( iState.IsStylusDown() )
-    {
-        UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f" ), iIndex,
-                iState.GetPosition().X, iState.GetPosition().Y,
-                iState.GetPressure(), iState.IsStylusDown(),
-                iState.GetTilt().X, iState.GetTilt().Y,
-                iState.GetAzimuth(), iState.GetAltitude() );
-    }
 
+    static TQueue< FOdysseyStrokePoint > queue;
+
+    if( iState.IsStylusDown() )
+        queue.Enqueue( stroke_point );
+    else
+        queue.Empty();
+
+    static bool is_dragging = false;
     if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Pressed )
     {
-        InputKeyWithStrokePoint( stroke_point, 0, mLastKey, mLastEvent );
-    }
-    else if( iState.IsStylusDown() )
-    {
-        CapturedMouseMoveWithStrokePoint( stroke_point );
+        is_dragging = true;
+
+        FOdysseyStrokePoint first;
+        queue.Dequeue( first );
+        InputKeyWithStrokePoint( first, 0, mLastKey, mLastEvent );
     }
     else if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Released )
     {
-        InputKeyWithStrokePoint( stroke_point, 0, mLastKey, mLastEvent );
+        FOdysseyStrokePoint last;
+        queue.Dequeue( last );
+        InputKeyWithStrokePoint( last, 0, mLastKey, mLastEvent );
+
+        is_dragging = false;
     }
-    else
+    else if( is_dragging ) // MUSTY BE the last, or at least after "is_dragging = false;"
     {
+        FOdysseyStrokePoint point;
+        while( queue.Dequeue( point ) ) // Process all the down'd points which occur before having the ue pressed event
+            CapturedMouseMoveWithStrokePoint( point );
     }
 
     mLastKey = EKeys::Invalid;
     mLastEvent = EInputEvent::IE_MAX;
-
-    //const IStylusInputDevice* input_device = InputSubsystem->GetInputDevice( iIndex );
-
-    //if( !input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
-    //{
-    //    InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
-    //}
-    //else if( input_device->GetPreviousState().IsStylusDown() && input_device->GetCurrentState().IsStylusDown() )
-    //{
-    //    CapturedMouseMoveWithStrokePoint( stroke_point );
-    //}
-    //else if( input_device->GetPreviousState().IsStylusDown() && !input_device->GetCurrentState().IsStylusDown() )
-    //{
-    //    InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
-    //}
-    //else
-    //{
-    //    //UE_LOG( LogStylusInputP, Log, TEXT( "OnStylusStateChanged : %s" ), !input_device->GetCurrentState().IsStylusInverted() ? L"pen" : L"eraser" );
-    //}
 }
 
 bool

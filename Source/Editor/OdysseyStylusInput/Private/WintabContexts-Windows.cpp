@@ -74,7 +74,7 @@ FWTTabletContextInfo::Tick()
         }
 
         //if( packet->pkButtons )
-        //    UE_LOG( LogStylusInput, Log, TEXT( "packet->pkButtons: 0x%X\n" ), packet->pkButtons );
+            //UE_LOG( LogStylusInput, Log, TEXT( "packet->pkButtons: 0x%X\n" ), packet->pkButtons );
 
         state.IsInverted = ( packet.pkStatus & TPS_INVERT );
 
@@ -399,6 +399,7 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
             //---
 
             FWTTabletContextInfo tablet_context_info;
+            tablet_context_info.IsTouching = false;
             tablet_context_info.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
 
             if( !SetupPacketDescriptions( ctxIndex, &tablet_context_info ) )
@@ -407,7 +408,7 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
                 continue;
             }
             SetupTabletSupportedPackets( &tablet_context_info );
-            
+
             const FWTPacketDescription* packet_description_x = tablet_context_info.PacketDescriptions.FindByPredicate( []( const FWTPacketDescription& iDescription ) { return iDescription.Type == EWintabPacketType::X; } );
             const FWTPacketDescription* packet_description_y = tablet_context_info.PacketDescriptions.FindByPredicate( []( const FWTPacketDescription& iDescription ) { return iDescription.Type == EWintabPacketType::Y; } );
 
@@ -415,8 +416,8 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
 
             lcMine.lcInOrgX = 0;
             lcMine.lcInOrgY = 0;
-            lcMine.lcInExtX = packet_description_x->Maximum;
-            lcMine.lcInExtY = packet_description_y->Maximum;
+            lcMine.lcInExtX = packet_description_x->Maximum + 1;
+            lcMine.lcInExtY = packet_description_y->Maximum + 1;
 
             // Guarantee the output coordinate space to be in screen coordinates.  
             lcMine.lcOutOrgX = GetSystemMetrics( SM_XVIRTUALSCREEN ) * 1000.f; // Scaled to have subpixel with packet.pkX / 1000.f

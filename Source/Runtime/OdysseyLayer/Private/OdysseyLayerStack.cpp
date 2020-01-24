@@ -72,7 +72,7 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
     if( mIsInitialized )
         return;
 
-    checkf( iData, L"Cannot Initialize Layer Stack from NULL data" );
+    checkf( iData, TEXT("Cannot Initialize Layer Stack from NULL data") );
 
     mWidth = iData->Width();
     mHeight = iData->Height();
@@ -742,6 +742,7 @@ FOdysseyDrawingUndo::Redo()
 
     return true;
 }
+
 
 
 

@@ -8,6 +8,8 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
+#include "OdysseyStylusInputDriver.h"
+
 #include "OdysseyPainterEditorSettings.generated.h"
 
 /**
@@ -26,14 +28,6 @@ enum EOdysseyPainterEditorVolumeViewMode
 {
     kOdysseyPainterEditorVolumeViewMode_DepthSlices UMETA(DisplayName="Depth Slices"),
     kOdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume"),
-};
-
-UENUM()
-enum EOdysseyStylusInputDriver
-{
-    OdysseyStylusInputDriver_None   UMETA( DisplayName = "None" ),
-    OdysseyStylusInputDriver_Ink    UMETA( DisplayName = "Ink" ),
-    OdysseyStylusInputDriver_Wintab UMETA( DisplayName = "Wintab" ),
 };
 
 /**

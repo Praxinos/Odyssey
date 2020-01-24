@@ -211,7 +211,7 @@ SOdysseyAdvancedColorWheel::SetColor( const ::ULIS::CColor& iColor )
     w = 1 - ( u + v );
 
     float sum = u + v + w;
-    checkf( sum == 1.f, L"Bad Conversion Occured" );
+    checkf( sum == 1.f, TEXT("Bad Conversion Occured") );
 
     hue_deg = hue * 360;
     hue_rad = -hue_deg * PI / 180.f;

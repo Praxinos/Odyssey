@@ -107,7 +107,6 @@ public:
     bool LoadData();
     bool Redo();
     void Check();
-
     
 private:
     FOdysseyLayerStack* mLayerStackPtr;
@@ -126,31 +125,3 @@ private:
     FString mUndoPath;
     FString mRedoPath;
 };
-
-/*
-FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyDrawingUndo* SaveUndoData )
-{
-	if(!SaveUndoData) return Ar;
-	//~
-    
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( SaveUndoData->mLayerStackPtr->GetCurrentLayer().Get() );
-
-	
-	Ar << SaveGameData->NumGemsCollected;  //int32
-	Ar << SaveGameData->PlayerLocation;  //FVector
-	Ar << SaveGameData->ArrayOfRotationsOfTheStars; //TArray<FRotator>
-
-        return Ar;
-}*/
-
-/*
-    static  IBlock*  CopyBlockRect( IBlock* iBlock
-                                  , const FRect& iRect
-                                  , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
-
-    static  void  CopyBlockRectInto( IBlock* iSrc
-                                   , IBlock* iDst
-                                   , const FRect& iSrcRect
-                                   , const FPoint& iDstPos
-                                   , const FPerformanceOptions& iPerformanceOptions = FPerformanceOptions() );
-*/

@@ -69,13 +69,5 @@ public class OdysseyBrushEditor : ModuleRules
                 "BlueprintCompilerCppBackend",
             }
             );
-
-        /*
-        CircularlyReferencedDependentModules.AddRange(
-            new string[] {
-                "BlueprintGraph",
-            }
-        );
-        */
     }
 }

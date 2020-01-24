@@ -35,9 +35,8 @@
 - Open the solution (inside `$PROJECT_PATH`) with Visual Studio
 
 # Packaging
-*Only windows (for the moment)*
 ```
-usage: build-package.py [-h] [-i INPUT_DIR] [-o OUTPUT_DIR] [-u] [-p UPLOAD_DIR]
+usage: build-package.py [-h] [-i INPUT_DIR] [-o OUTPUT_DIR] [-u] [-p UPLOAD_DIR] [-s SUFFIX] [-l ULIS_BINARIES] [-m]
 
 Build package.
 
@@ -49,13 +48,22 @@ optional arguments:
                         (default: *current working directory*)
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         the output path
-                        'date-time/plugin-name' folders will be append to it
+                        suffix folders will be append to it
                         (default: *current working directory*/../package)
   -u, --upload          start uploading after building
                         (default: False)
   -p UPLOAD_DIR, --upload-dir UPLOAD_DIR
                         the upload path
-                        (default: *pcloud*/Praxinos/Developpement/Package/Iliad)
+                        suffix folders will be append to it
+                        (default: P:/Praxinos/Developpement/Package/Iliad)
+  -s SUFFIX, --suffix SUFFIX
+                        a suffix to the output directory name
+                        (default: None)
+  -l ULIS_BINARIES, --ulis-binaries ULIS_BINARIES
+                        the path where ALL ulis binaries (win64/mac) are on pcloud
+                        (default: P:/Praxinos/Developpement/Ulis/Binaries)
+  -m, --marketplace     package for the marketplace (without binaries)
+                        (default: False)
 ```
 
 Basic example:
