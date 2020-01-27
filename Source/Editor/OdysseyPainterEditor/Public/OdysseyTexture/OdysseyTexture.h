@@ -8,6 +8,7 @@
 #include "UObject/ScriptMacros.h"
 #include "Engine/Texture.h"
 #include "TextureResource.h"
+#include "OdysseyLayerStack.h"
 
 #include "OdysseyTexture.generated.h"
 
@@ -53,4 +54,14 @@ public:
 	virtual void GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize) override;
 	virtual void PostEditUndo() override;
     virtual bool IsCurrentlyVirtualTextured() const override;
+    
+public:
+    UTexture2D* GetResultTexture2D();
+    void SetResultTexture2D( UTexture2D* iTexture );
+    
+private:
+    FOdysseyLayerStack* LayerStack;
+    
+    UPROPERTY(EditAnywhere)
+    UTexture2D* ResultTexture;
 };

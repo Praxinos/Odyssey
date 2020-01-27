@@ -11,7 +11,7 @@
 #include "OdysseyTextureFactory.generated.h"
 
 UCLASS()
-class ODYSSEYTEXTURE_API UOdysseyTextureFactory : public UFactory
+class UOdysseyTextureFactory : public UFactory
 {
     GENERATED_UCLASS_BODY()
 

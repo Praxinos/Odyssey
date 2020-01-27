@@ -217,7 +217,15 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     // Init internal data
     FOdysseyBlock block( mTextureWidth, mTextureHeight, ETextureSourceFormat::TSF_BGRA8, nullptr, nullptr, true );
     //CopyBlockDataIntoUTexture( &block, object );
+    
+    UTexture2D* texture = NewObject<UTexture2D>( object, TEXT("TextureResult") );
+    texture->Source.Init( mTextureWidth, mTextureHeight, 1, 1, TSF_BGRA8 );
+    texture->PostEditChange();
+    
+    CopyBlockDataIntoUTexture( &block, texture );
 
+    object->SetResultTexture2D( texture );
+    
     return object;
 }
 

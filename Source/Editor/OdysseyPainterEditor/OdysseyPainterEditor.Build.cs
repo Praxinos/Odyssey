@@ -42,8 +42,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyStrokePipeline",
                 "OdysseyLayer",
                 "OdysseyTransaction",
-                "OdysseyStylusInput",
-                "OdysseyTexture"
+                "OdysseyStylusInput"
             }
         );
 

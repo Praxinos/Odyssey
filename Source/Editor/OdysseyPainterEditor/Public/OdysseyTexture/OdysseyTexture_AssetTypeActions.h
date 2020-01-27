@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Toolkits/IToolkitHost.h"
 
-class ODYSSEYTEXTURE_API FOdysseyTextureAssetTypeActions
+class FOdysseyTextureAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:
@@ -18,6 +18,7 @@ public:
     virtual FColor GetTypeColor() const override;
     virtual UClass* GetSupportedClass() const override;
     virtual uint32 GetCategories() override;
+	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
     // End of IAssetTypeActions interface
 
 private:

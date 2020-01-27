@@ -38,6 +38,11 @@ void UOdysseyTexture::Serialize(FArchive& Ar)
 		}
 	}
 #endif // #if WITH_EDITOR
+    
+    Ar << LayerStack;
+    Ar << ResultTexture;
+    
+    
 }
 
 #if WITH_EDITOR
@@ -187,5 +192,15 @@ void UOdysseyTexture::PostEditUndo()
 bool UOdysseyTexture::IsCurrentlyVirtualTextured() const
 {
     return false;
+}
+
+UTexture2D* UOdysseyTexture::GetResultTexture2D()
+{
+    return ResultTexture;
+}
+
+void UOdysseyTexture::SetResultTexture2D( UTexture2D* iTexture )
+{
+    ResultTexture = iTexture;
 }
 

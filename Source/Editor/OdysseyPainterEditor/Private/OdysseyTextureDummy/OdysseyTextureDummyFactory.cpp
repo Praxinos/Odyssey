@@ -27,8 +27,8 @@
 #define DEFAULT_CANVAS_SIZE 1024
 
 /////////////////////////////////////////////////////
-// SOdysseyTextureConfigureWindow
-class SOdysseyTextureConfigureWindow 
+// SOdysseyTextureDummyConfigureWindow
+class SOdysseyTextureDummyConfigureWindow
     : public SWindow
 {
 public:
@@ -54,7 +54,7 @@ private:
 //---
 
 void 
-SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
+SOdysseyTextureDummyConfigureWindow::Construct( const FArguments& iArgs )
 {
     mWidth = DEFAULT_CANVAS_SIZE;
     mHeight = DEFAULT_CANVAS_SIZE;
@@ -84,10 +84,10 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
                     [
                         SNew( SNumericEntryBox<int32> )
                         .LabelVAlign( VAlign_Center )
-                        .Value( this, &SOdysseyTextureConfigureWindow::GetWidth )
+                        .Value( this, &SOdysseyTextureDummyConfigureWindow::GetWidth )
                         .MinValue( MIN_CANVAS_SIZE )
                         .MaxValue( MAX_CANVAS_SIZE )
-                        .OnValueCommitted( this, &SOdysseyTextureConfigureWindow::OnSetWidth )
+                        .OnValueCommitted( this, &SOdysseyTextureDummyConfigureWindow::OnSetWidth )
                     ]
                 ]
 
@@ -105,10 +105,10 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
                     [
                         SNew( SNumericEntryBox<int32> )
                         .LabelVAlign( VAlign_Center )
-                        .Value( this, &SOdysseyTextureConfigureWindow::GetHeight )
+                        .Value( this, &SOdysseyTextureDummyConfigureWindow::GetHeight )
                         .MinValue( MIN_CANVAS_SIZE )
                         .MaxValue( MAX_CANVAS_SIZE )
-                        .OnValueCommitted( this, &SOdysseyTextureConfigureWindow::OnSetHeight )
+                        .OnValueCommitted( this, &SOdysseyTextureDummyConfigureWindow::OnSetHeight )
                     ]
                 ]
 
@@ -121,14 +121,14 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
                         SNew( SButton )
                         .Text( LOCTEXT( "Create Asset", "Create Asset" ) )
                         .HAlign( HAlign_Center )
-                        .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnAccept )
+                        .OnClicked_Raw( this, &SOdysseyTextureDummyConfigureWindow::OnAccept )
                     ]
                     +SHorizontalBox::Slot()
                     [
                         SNew( SButton )
                         .Text( LOCTEXT( "Cancel", "Cancel" ) )
                         .HAlign( HAlign_Center )
-                        .OnClicked_Raw( this, &SOdysseyTextureConfigureWindow::OnCancel )
+                        .OnClicked_Raw( this, &SOdysseyTextureDummyConfigureWindow::OnCancel )
                     ]
                 ]
             ]
@@ -137,25 +137,25 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
 }
 
 bool
-SOdysseyTextureConfigureWindow::GetWindowAnswer()
+SOdysseyTextureDummyConfigureWindow::GetWindowAnswer()
 {
     return mWindowAnswer;
 }
 
 TOptional<int32>
-SOdysseyTextureConfigureWindow::GetWidth() const
+SOdysseyTextureDummyConfigureWindow::GetWidth() const
 {
     return mWidth;
 }
 
 TOptional<int32>
-SOdysseyTextureConfigureWindow::GetHeight() const
+SOdysseyTextureDummyConfigureWindow::GetHeight() const
 {
     return mHeight;
 }
 
 void
-SOdysseyTextureConfigureWindow::OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo)
+SOdysseyTextureDummyConfigureWindow::OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo)
 {
     mHeight = iNewHeightValue;
 
@@ -166,7 +166,7 @@ SOdysseyTextureConfigureWindow::OnSetHeight( int32 iNewHeightValue, ETextCommit:
 }
 
 void
-SOdysseyTextureConfigureWindow::OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo)
+SOdysseyTextureDummyConfigureWindow::OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo)
 {
     mWidth = iNewWidthValue;
 
@@ -177,7 +177,7 @@ SOdysseyTextureConfigureWindow::OnSetWidth( int32 iNewWidthValue, ETextCommit::T
 }
 
 FReply
-SOdysseyTextureConfigureWindow::OnAccept()
+SOdysseyTextureDummyConfigureWindow::OnAccept()
 {
     mWindowAnswer = true;
     RequestDestroyWindow();
@@ -186,7 +186,7 @@ SOdysseyTextureConfigureWindow::OnAccept()
 }
 
 FReply
-SOdysseyTextureConfigureWindow::OnCancel()
+SOdysseyTextureDummyConfigureWindow::OnCancel()
 {
     mWindowAnswer = false;
     RequestDestroyWindow();
@@ -226,7 +226,7 @@ bool UOdysseyTextureDummyFactory::ConfigureProperties()
 {
     //We go in here before creating the texture: Meaning we can have any modal window here.
     //If return false, we don't create the object, if true, we create it
-    TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow );
+    TSharedPtr<SOdysseyTextureDummyConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureDummyConfigureWindow );
 
     GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
     mTextureWidth = textureConfigurationWindow->GetWidth().GetValue();

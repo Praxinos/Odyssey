@@ -80,6 +80,15 @@ public:
 
 
 
+//Make as many Unique Overloads as you want!
+FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack )
+{
+	if(!SaveLayerStack) return Ar;
+
+    return Ar;
+}
+
+
 
 
 

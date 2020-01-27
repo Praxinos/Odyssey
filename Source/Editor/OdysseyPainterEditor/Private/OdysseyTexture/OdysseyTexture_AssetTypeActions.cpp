@@ -5,6 +5,7 @@
 
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
+#include "IOdysseyPainterEditorModule.h"
 
 #include "OdysseyTexture.h"
 
@@ -39,6 +40,22 @@ uint32
 FOdysseyTextureAssetTypeActions::GetCategories()
 {
     return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
+}
+
+
+void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
+{
+	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
+
+	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+	{
+		auto odysseyTexture = Cast<UOdysseyTexture>(*ObjIt);
+		if (odysseyTexture != NULL)
+		{
+			IOdysseyPainterEditorModule* odysseyPainterModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            odysseyPainterModule->CreateOdysseyPainterEditor(Mode, EditWithinLevelEditor, odysseyTexture->GetResultTexture2D());
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
