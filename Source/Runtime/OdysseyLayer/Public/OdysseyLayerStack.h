@@ -59,6 +59,8 @@ public:
     void                                    FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
 
     TArray< TSharedPtr< FText > >           GetBlendingModesAsText();
+    
+    ETextureSourceFormat                    GetTextureSourceFormat();
 
 private:
     // Private API
@@ -138,7 +140,7 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack )
             }
         }
     }
-    else if (Ar.IsLoading() )
+    else if ( Ar.IsLoading() )
     {
         SaveLayerStack->mResultBlock = new FOdysseyBlock( SaveLayerStack->mWidth, SaveLayerStack->mHeight, SaveLayerStack->mTextureSourceFormat );
         SaveLayerStack->mTempBlock = new FOdysseyBlock( SaveLayerStack->mWidth, SaveLayerStack->mHeight, SaveLayerStack->mTextureSourceFormat );

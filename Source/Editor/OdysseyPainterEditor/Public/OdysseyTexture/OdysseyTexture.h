@@ -13,7 +13,7 @@
 #include "OdysseyTexture.generated.h"
 
 
-UCLASS(hidecategories=Object, MinimalAPI, BlueprintType)
+UCLASS()
 class UOdysseyTexture : public UObject
 {
 	GENERATED_UCLASS_BODY()
@@ -33,6 +33,5 @@ public:
 private:
     FOdysseyLayerStack* mLayerStack;
     
-    UPROPERTY()
     UTexture2D* mResultTexture;
 };

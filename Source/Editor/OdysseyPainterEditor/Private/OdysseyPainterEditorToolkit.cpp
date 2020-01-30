@@ -76,13 +76,8 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
     : mScopedTransaction( NULL )
     , mUndoHistory()
     , mIsManipulationDirtiedSomething( false )
-    , mIsEditorMarkedAsClosed( false )
     , mOdysseyTexture( NULL )
     , mDisplaySurface( NULL )
-    , mTextureContentsBackup( NULL )
-    , mTextureMipGenBackup()
-    , mTextureCompressionBackup()
-    , mTextureGroupBackup()
     , mPaintEngine( &mUndoHistory )
     , mBrush( NULL )
     , mBrushInstance( NULL )
@@ -101,23 +96,13 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 {
     // Setup Texture
     mOdysseyTexture = iTexture;
-    mTextureMipGenBackup = mOdysseyTexture->GetResultTexture2D()->MipGenSettings;
-    mTextureCompressionBackup = mOdysseyTexture->GetResultTexture2D()->CompressionSettings;
-    mTextureGroupBackup = mOdysseyTexture->GetResultTexture2D()->LODGroup;
 
-    mOdysseyTexture->GetResultTexture2D()->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    mOdysseyTexture->GetResultTexture2D()->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    mOdysseyTexture->GetResultTexture2D()->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-
-    mOdysseyTexture->GetResultTexture2D()->UpdateResource();
-    mTextureContentsBackup = NewOdysseyBlockFromUTextureData( mOdysseyTexture->GetResultTexture2D() );
-
-    // Setup Layers
-    mOdysseyTexture->GetLayerStack()->InitFromData( mTextureContentsBackup );
+    // Setup Layers and undoHistory
+    mOdysseyTexture->GetLayerStack()->InitFromData( NewOdysseyBlockFromUTextureData( mOdysseyTexture->GetResultTexture2D() ) );
     mOdysseyTexture->GetLayerStack()->ComputeResultBlock();
 
     // Setup Paint Engine
-    mPaintEngine.SetTextureSourceFormat( mTextureContentsBackup->GetUE4TextureSourceFormat() );
+    mPaintEngine.SetTextureSourceFormat( mOdysseyTexture->GetLayerStack()->GetTextureSourceFormat() );
     mPaintEngine.SetLayerStack( mOdysseyTexture->GetLayerStack() );
     mPaintEngine.SetBrushInstance( NULL );
     mPaintEngine.SetColor( ::ULIS::CColor() );
@@ -329,7 +314,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 
     IOdysseyPainterEditorModule* odysseyPainterEditorModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>( "OdysseyPainterEditor" );
 
-    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, OdysseyPainterEditorAppIdentifier, StandaloneDefaultLayout, true, false, mOdysseyTexture->GetResultTexture2D() );
+    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, OdysseyPainterEditorAppIdentifier, StandaloneDefaultLayout, true, false, mOdysseyTexture );
 
     InitializeExtenders();
 
@@ -491,20 +476,6 @@ FOdysseyPainterEditorToolkit::PostRedo( bool iSuccess )
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------- FAssetEditorToolkit override
-void
-FOdysseyPainterEditorToolkit::SaveAsset_Execute()
-{
-    // Commit changes permanently
-    //mDisplaySurface->CommitBlockChangesIntoTextureBulk();
-    // Reload backup
-    CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mOdysseyTexture->GetResultTexture2D() );
-    ::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
-    InvalidateTextureFromData( mDisplaySurface->Block(), mOdysseyTexture->GetResultTexture2D() );
-    // Invalidate all
-    mDisplaySurface->Invalidate();
-
-    FAssetEditorToolkit::SaveAsset_Execute();
-}
 
 void
 FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
@@ -528,33 +499,11 @@ FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 bool
 FOdysseyPainterEditorToolkit::OnRequestClose()
 {
-    if( !mIsEditorMarkedAsClosed )
-    {
-        EAppReturnType::Type returnType = OpenMsgDlgInt( EAppMsgType::YesNoCancel
-                                                        , FText::Format( LOCTEXT( "Save Texture Prompt"
-                                                                                , "Save the texture {0} before exiting ?"
-                                                                                  "\n"
-                                                                                  "\n"
-                                                                                  "Warning: when closing the texture, layers will be merged, "
-                                                                                  "export them first if you want to keep them ! (File/Export Layers)" )
-                                                                                , FText::FromString( mOdysseyTexture->GetFName().ToString() ) )
-                                                        , LOCTEXT( "Save Texture Title", "Save Texture" ) );
-
-        if( returnType == EAppReturnType::Cancel )
-            return false;
-
-        if( returnType == EAppReturnType::Yes )
-            SaveAsset_Execute();
-
-        // Invalidate All from backup data
-        // If saved, no change
-        // If unsaved, revert display to last saved data
-        InvalidateTextureFromData( mTextureContentsBackup, mOdysseyTexture->GetResultTexture2D() );
-        InvalidateSurfaceFromData( mTextureContentsBackup, mDisplaySurface );
-    }
-    mOdysseyTexture->GetResultTexture2D()->LODGroup = mTextureGroupBackup;
-    mIsEditorMarkedAsClosed = true;
+    //To do: naive dirtying of package. It should be dirtied only when we change some members values in OdysseyTexture and never elsewhere. But good enough for now
+    mOdysseyTexture->MarkPackageDirty();
+    
     mOdysseyTexture->GetLayerStack()->mDrawingUndo->Clear();
+    
     return true;
 }
 
@@ -686,9 +635,11 @@ FOdysseyPainterEditorToolkit::OnExportLayersAsTextures()
             object->UpdateResource();
 
             FAssetRegistryModule::AssetCreated( object );
-            object->MarkPackageDirty();
 
-            bool success = UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
+            UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
+            
+            package->MarkAsFullyLoaded();
+            object->MarkPackageDirty();
         }
     }
 }
@@ -962,12 +913,6 @@ FOdysseyPainterEditorToolkit::MarkTransactionAsDirty()
 void
 FOdysseyPainterEditorToolkit::EndTransaction()
 {
-}
-
-void
-FOdysseyPainterEditorToolkit::SetTextureDirty( bool iIsTextureDirty )
-{
-    mIsTextureDirty = iIsTextureDirty;
 }
 
 bool

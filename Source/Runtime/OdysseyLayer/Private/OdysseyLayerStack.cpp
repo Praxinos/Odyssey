@@ -373,6 +373,12 @@ FOdysseyLayerStack::GetBlendingModesAsText()
     return array;
 }
 
+ETextureSourceFormat
+FOdysseyLayerStack::GetTextureSourceFormat()
+{
+    return mTextureSourceFormat;
+}
+
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
 FName

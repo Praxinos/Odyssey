@@ -80,7 +80,6 @@ protected:
 
 protected:
     //FAssetEditorToolkit override
-    virtual void SaveAsset_Execute() override;
     virtual void SaveAssetAs_Execute() override;
     virtual bool OnRequestClose() override;
 
@@ -148,7 +147,6 @@ protected:
     void EndTransaction() override;
 
 public:
-    void SetTextureDirty( bool iTextureDirty ); //Set bIsTextureDirty, prompting, or not, the option to save before closing the editor
     bool DoesDrawBrushPreview() const;
 
 private:
@@ -232,16 +230,9 @@ private:
     FOdysseyUndoHistory mUndoHistory;
     bool                mIsManipulationDirtiedSomething;
 
-    /** Marker for closed state, avoid multiple prompting */
-    bool                mIsEditorMarkedAsClosed;
-
     /** Painting */
     UOdysseyTexture*            mOdysseyTexture;
     FOdysseySurface*            mDisplaySurface;
-    FOdysseyBlock*              mTextureContentsBackup;
-    TextureMipGenSettings       mTextureMipGenBackup;
-    TextureCompressionSettings  mTextureCompressionBackup;
-    TextureGroup                mTextureGroupBackup;
     FOdysseyPaintEngine         mPaintEngine;        // Owned        // Used by SOdysseyLayerStack
     UOdysseyBrush*              mBrush;              // NOT Owned
     UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
