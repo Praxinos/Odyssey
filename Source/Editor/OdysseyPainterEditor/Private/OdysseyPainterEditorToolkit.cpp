@@ -103,6 +103,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 
     // Setup Paint Engine
     mPaintEngine.SetTextureSourceFormat( mOdysseyTexture->GetLayerStack()->GetTextureSourceFormat() );
+
     mPaintEngine.SetLayerStack( mOdysseyTexture->GetLayerStack() );
     mPaintEngine.SetBrushInstance( NULL );
     mPaintEngine.SetColor( ::ULIS::CColor() );

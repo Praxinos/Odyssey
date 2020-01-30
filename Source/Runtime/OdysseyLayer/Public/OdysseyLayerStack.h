@@ -10,7 +10,6 @@
 
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
-#include "IOdysseySerializable.h"
 #include "IOdysseyLayer.h"
 #include "OdysseyImageLayer.h"
 
@@ -71,6 +70,9 @@ private:
     FName                                   GetNextLayerName();
     void                                    InitResultAndTempBlock();
     
+public:
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack );
 
 private:
     // Private Data Members
@@ -91,7 +93,6 @@ public:
         
 //Serialization of item
 #include "OdysseyLayerStack.inl"
-        
 
 
 class ODYSSEYLAYER_API FOdysseyDrawingUndo

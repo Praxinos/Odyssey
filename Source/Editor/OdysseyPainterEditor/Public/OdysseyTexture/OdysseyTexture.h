@@ -12,7 +12,6 @@
 
 #include "OdysseyTexture.generated.h"
 
-
 UCLASS()
 class UOdysseyTexture : public UTexture
 {
