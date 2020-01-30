@@ -100,9 +100,9 @@ public:
 };
 
         
-        
 //Serialization of item
 #include "OdysseyLayerStack.inl"
+
 
 class ODYSSEYLAYER_API FOdysseyDrawingUndo
 {
