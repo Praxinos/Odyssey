@@ -39,6 +39,5 @@ public:
 private:
     FOdysseyLayerStack* mLayerStack;
     
-    UPROPERTY()
     UTexture2D* mResultTexture;
 };
