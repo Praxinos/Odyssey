@@ -7,9 +7,6 @@
 #include "Misc/FileHelper.h"
 #include "UObject/UObjectGlobals.h"
 
-#include "OdysseyBlock.h"
-#include "OdysseyImageLayer.h"
-
 #include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStack"
@@ -61,7 +58,10 @@ FOdysseyLayerStack::Init( int iWidth, int iHeight )
     mIsInitialized = true;
 
     InitResultAndTempBlock();
-    AddLayer();
+    
+    //Is not 0 if it comes from an existing OdysseyTexture
+    if( GetLayers()->Num() == 0 )
+        AddLayer();
     
     mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
@@ -80,7 +80,10 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
     mIsInitialized = true;
 
     InitResultAndTempBlock();
-    AddLayerFromData( iData );
+    
+    //Is not 0 if it comes from an existing OdysseyTexture
+    if( GetLayers()->Num() == 0 )
+        AddLayerFromData( iData );
     
     mDrawingUndo = new FOdysseyDrawingUndo(this);
 }

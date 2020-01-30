@@ -31,6 +31,8 @@
 #include "SOdysseyStrokeOptions.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 
+#include "OdysseyTexture.h"
+
 #include <memory>
 #include <ULIS_CCOLOR>
 
@@ -55,8 +57,9 @@ public:
     FOdysseyPainterEditorToolkit();
 
 public:
-    // Initialization
-    void InitOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr<class IToolkitHost>& iInitToolkitHost, UTexture2D* iTexture );
+    void InitOdysseyPainterEditor( const EToolkitMode::Type iMode,
+                                   const TSharedPtr< class IToolkitHost >& iInitToolkitHost,
+                                   UOdysseyTexture* iTexture );
 
 public:
     // FAssetEditorToolkit interface
@@ -233,14 +236,13 @@ private:
     bool                mIsEditorMarkedAsClosed;
 
     /** Painting */
-    UTexture2D*                 mTexture;
+    UOdysseyTexture*            mOdysseyTexture;
     FOdysseySurface*            mDisplaySurface;
     FOdysseyBlock*              mTextureContentsBackup;
     TextureMipGenSettings       mTextureMipGenBackup;
     TextureCompressionSettings  mTextureCompressionBackup;
     TextureGroup                mTextureGroupBackup;
     FOdysseyPaintEngine         mPaintEngine;        // Owned        // Used by SOdysseyLayerStack
-    FOdysseyLayerStack          mLayerStack;        // Owned        // Used by Viewport
     UOdysseyBrush*              mBrush;              // NOT Owned
     UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
     FOdysseyLiveUpdateInfo      mLiveUpdateInfo;

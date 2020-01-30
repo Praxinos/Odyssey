@@ -211,12 +211,9 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     check( iClass->IsChildOf( UOdysseyTexture::StaticClass() ) );
 
     UOdysseyTexture* object = NewObject<UOdysseyTexture>( iParent, iName, iFlags | RF_Transactional );
-    object->Source.Init( mTextureWidth, mTextureHeight, 1, 1, TSF_BGRA8 );
-    object->PostEditChange();
 
     // Init internal data
     FOdysseyBlock block( mTextureWidth, mTextureHeight, ETextureSourceFormat::TSF_BGRA8, nullptr, nullptr, true );
-    //CopyBlockDataIntoUTexture( &block, object );
     
     UTexture2D* texture = NewObject<UTexture2D>( object, TEXT("TextureResult") );
     texture->Source.Init( mTextureWidth, mTextureHeight, 1, 1, TSF_BGRA8 );

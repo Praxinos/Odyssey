@@ -10,8 +10,11 @@
 
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
+#include "IOdysseyLayer.h"
+#include "OdysseyImageLayer.h"
 
-class FOdysseyBlock;
+#include "OdysseyBlock.h"
+
 class IOdysseyLayer;
 class FOdysseyImageLayer;
 class FOdysseyDrawingUndo;
@@ -61,6 +64,10 @@ private:
     // Private API
     FName                                   GetNextLayerName();
     void                                    InitResultAndTempBlock();
+    
+public:
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack );
 
 private:
     // Private Data Members
@@ -77,17 +84,114 @@ public:
     FOdysseyDrawingUndo*                    mDrawingUndo;
 };
 
+        
+        
 
 
 
-//Make as many Unique Overloads as you want!
-FORCEINLINE FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack )
+//The actual function to load and save a FOdysseyLayerStack to disk
+inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack )
 {
-	if(!SaveLayerStack) return Ar;
+    if(!SaveLayerStack) return Ar;
+    
+    Ar << SaveLayerStack->mWidth;
+    Ar << SaveLayerStack->mHeight;
+    SaveLayerStack->mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
+            
+    if( Ar.IsSaving() )
+    {
+        int numLayers = SaveLayerStack->mLayers.Num();
+        Ar << numLayers;
+        
+        TArray<TSharedPtr<IOdysseyLayer>>* layers = SaveLayerStack->GetLayers();
+
+        for( int i = 0; i < numLayers; i++)
+        {
+            FOdysseyImageLayer* imageLayer = nullptr;
+            imageLayer = static_cast<FOdysseyImageLayer*> ((*layers)[i].Get());
+
+            if( imageLayer )
+            {
+                FName layerName = imageLayer->GetName();
+                Ar << layerName;
+                
+                bool isLocked = imageLayer->IsLocked();
+                Ar << isLocked;
+                
+                bool isVisible = imageLayer->IsVisible();
+                Ar << isVisible;
+                
+                bool isAlphaLocked = imageLayer->IsAlphaLocked();
+                Ar << isAlphaLocked;
+                
+                ::ULIS::eBlendingMode blendingMode = imageLayer->GetBlendingMode();
+                Ar << blendingMode;
+                
+                float opacity = imageLayer->GetOpacity();
+                Ar << opacity;
+
+                ::ULIS::IBlock* blockLayerData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, SaveLayerStack->mWidth, SaveLayerStack->mHeight ) );
+                TArray<uint8> layerData = TArray<uint8>();
+                layerData.AddUninitialized(blockLayerData->BytesTotal());
+                FMemory::Memcpy(layerData.GetData(), blockLayerData->DataPtr(), blockLayerData->BytesTotal());
+                Ar << layerData;
+            }
+        }
+    }
+    else if (Ar.IsLoading() )
+    {
+        SaveLayerStack->mResultBlock = new FOdysseyBlock( SaveLayerStack->mWidth, SaveLayerStack->mHeight, SaveLayerStack->mTextureSourceFormat );
+        SaveLayerStack->mTempBlock = new FOdysseyBlock( SaveLayerStack->mWidth, SaveLayerStack->mHeight, SaveLayerStack->mTextureSourceFormat );
+        ::ULIS::FClearFillContext::Clear( SaveLayerStack->mResultBlock->GetIBlock() );
+        ::ULIS::FClearFillContext::Clear( SaveLayerStack->mTempBlock->GetIBlock() );
+        
+        int numLayers;
+        Ar << numLayers;
+        for (int i = 0; i < numLayers; i++)
+        {
+            FOdysseyImageLayer* imageLayer = SaveLayerStack->AddLayer();
+            
+            TArray<uint8> layerData = TArray<uint8>();
+            layerData.AddUninitialized(imageLayer->GetBlock()->GetIBlock()->BytesTotal());
+            
+            FName layerName;
+            Ar << layerName;
+            imageLayer->SetName( layerName );
+            
+            bool isLocked = imageLayer->IsLocked();
+            Ar << isLocked;
+            imageLayer->SetIsLocked( isLocked );
+
+            bool isVisible = imageLayer->IsVisible();
+            Ar << isVisible;
+            imageLayer->SetIsVisible( isVisible );
+            
+            bool isAlphaLocked = imageLayer->IsAlphaLocked();
+            Ar << isAlphaLocked;
+            imageLayer->SetIsAlphaLocked( isAlphaLocked );
+            
+            ::ULIS::eBlendingMode blendingMode = imageLayer->GetBlendingMode();
+            Ar << blendingMode;
+            imageLayer->SetBlendingMode( blendingMode );
+            
+            float opacity = imageLayer->GetOpacity();
+            Ar << opacity;
+            imageLayer->SetOpacity( opacity );
+
+            Ar << layerData;
+            
+            for( int j = 0; j < layerData.Num(); j++ )
+            {
+                *(imageLayer->GetBlock()->GetIBlock()->DataPtr() + j) = layerData[j];
+            }
+        }
+        SaveLayerStack->ComputeResultBlock();
+    }
 
     return Ar;
 }
-
+        
+        
 
 
 

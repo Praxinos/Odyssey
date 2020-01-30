@@ -3,7 +3,7 @@
 
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
-#include "Engine/Texture.h"
+#include "OdysseyTexture.h"
 #include "ISettingsModule.h"
 #include "LevelEditor.h"
 #include "Modules/ModuleManager.h"
@@ -16,8 +16,6 @@
 #include "IOdysseyPainterEditorToolkit.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyPainterEditorToolkit.h"
-#include "OdysseyTextureDummy/OdysseyTextureDummy_AssetTypeActions.h"
-#include "OdysseyTextureDummy/OdysseyTextureDummy_ContentBrowserExtensions.h"
 #include "OdysseyTexture_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
@@ -32,7 +30,7 @@ class FOdysseyPainterEditorModule
 public:
 
     // IOdysseyPainterEditorModule interface
-    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UTexture2D* iTexture ) override
+    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UOdysseyTexture* iTexture ) override
     {
         TSharedRef<FOdysseyPainterEditorToolkit> newOdysseyPainterEditor( new FOdysseyPainterEditorToolkit() );
         newOdysseyPainterEditor->InitOdysseyPainterEditor( iMode, iInitToolkitHost, iTexture );
@@ -83,7 +81,6 @@ public:
 
         IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
         mOdysseyPainterCategory = assetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "IliadPainterAssetCategory", "ILIAD" ) );
-        RegisterAssetTypeAction( assetTools, MakeShareable( new FOdysseyTextureDummyAssetTypeActions( mOdysseyPainterCategory ) ) );
         RegisterAssetTypeAction( assetTools, MakeShareable( new FOdysseyTextureAssetTypeActions( mOdysseyPainterCategory ) ) );
 
         // register menu extensions
@@ -98,11 +95,6 @@ public:
                                               , LOCTEXT( "OdysseyPainterEditorSettingsName", "ILIAD Painter Editor" )
                                               , LOCTEXT( "OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
                                               , GetMutableDefault<UOdysseyPainterEditorSettings>() );
-        }
-
-        if( !IsRunningCommandlet() )
-        {
-            FOdysseyPainterContentBrowserExtensions::InstallHooks();
         }
 
         //---
