@@ -31,7 +31,7 @@ class FOdysseyPainterEditorModule
 public:
 
     // IOdysseyPainterEditorModule interface
-    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UTexture2D* iTexture ) override
+    virtual TSharedRef<IOdysseyPainterEditorToolkit> CreateOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UOdysseyTexture* iTexture ) override
     {
         TSharedRef<FOdysseyPainterEditorToolkit> newOdysseyPainterEditor( new FOdysseyPainterEditorToolkit() );
         newOdysseyPainterEditor->InitOdysseyPainterEditor( iMode, iInitToolkitHost, iTexture );
