@@ -27,6 +27,30 @@ void UOdysseyTexture::Serialize(FArchive& Ar)
 //End UObject Interface----
 //-------------------------
 
+//UTexture Interface-------
+//-------------------------
+float UOdysseyTexture::GetSurfaceWidth() const
+{
+    return 0.f;
+}
+
+float UOdysseyTexture::GetSurfaceHeight() const
+{
+    return 0.f;
+}
+
+FTextureResource* UOdysseyTexture::CreateResource()
+{
+    return NULL;
+}
+
+EMaterialValueType UOdysseyTexture::GetMaterialType() const
+{
+    return EMaterialValueType::MCT_Texture2D;
+}
+
+//End UTexture Interface---
+//-------------------------
 
 UTexture2D* UOdysseyTexture::GetResultTexture2D()
 {

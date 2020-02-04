@@ -217,6 +217,9 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     
     UTexture2D* texture = NewObject<UTexture2D>( object, TEXT("TextureResult") );
     texture->Source.Init( mTextureWidth, mTextureHeight, 1, 1, TSF_BGRA8 );
+    texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
     texture->PostEditChange();
     
     CopyBlockDataIntoUTexture( &block, texture );

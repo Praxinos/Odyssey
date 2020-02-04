@@ -14,7 +14,7 @@
 
 
 UCLASS()
-class UOdysseyTexture : public UObject
+class UOdysseyTexture : public UTexture
 {
 	GENERATED_UCLASS_BODY()
 
@@ -24,6 +24,13 @@ public:
 	virtual void Serialize(FArchive& Ar) override;
 	//~ End UObject Interface.
     
+	//~ Begin UTexture Interface.
+	virtual float GetSurfaceWidth() const override;
+	virtual float GetSurfaceHeight() const override;
+	virtual FTextureResource* CreateResource() override;
+	virtual EMaterialValueType GetMaterialType() const override;
+	//~ End UTexture Interface.
+
 public:
     UTexture2D* GetResultTexture2D();
     void SetResultTexture2D( UTexture2D* iTexture );
@@ -33,5 +40,6 @@ public:
 private:
     FOdysseyLayerStack* mLayerStack;
     
+    UPROPERTY()
     UTexture2D* mResultTexture;
 };
