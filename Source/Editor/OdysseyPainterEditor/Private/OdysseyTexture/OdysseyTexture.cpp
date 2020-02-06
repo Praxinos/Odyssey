@@ -20,7 +20,6 @@ void UOdysseyTexture::Serialize(FArchive& Ar)
 	Super::Serialize(Ar);
         
     Ar << mLayerStack;
-    Ar << mResultTexture;
 }
 
 //End UObject Interface----
