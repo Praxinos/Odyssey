@@ -50,12 +50,14 @@ public class OdysseyPainterEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
+                Path.Combine(ModuleDirectory, "Private", "OdysseyTexture"),
             }
         );
 
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
+                Path.Combine(ModuleDirectory, "Public", "OdysseyTexture"),
             }
         );
         
