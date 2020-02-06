@@ -137,7 +137,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 {
 #if WITH_EDITOR
     //OdysseyTexture
-    Set( "ClassThumbnail.OdysseyTextureDummy", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDummyDefaultThumbnail_64", mIcon64x64 ) );
+    Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
 
     // OdysseyBrush
     Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
