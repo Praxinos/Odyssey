@@ -7,9 +7,12 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Engine/Texture.h"
 #include "IOdysseyLayer.h"
-#include <ULIS_BLENDINGMODES>
+#include "OdysseyBlock.h"
+#include "IOdysseySerializable.h"
 
-#include "OdysseyBlockUndoable.h"
+#include <ULIS_BLENDINGMODES>
+#include <ULIS_CORE>
+
 
 class FOdysseyBlock;
 class UTexture2D;
@@ -17,7 +20,7 @@ class UTexture2D;
 /**
  * Implements a layer which contains an image
  */
-class ODYSSEYLAYER_API FOdysseyImageLayer : public IOdysseyLayer
+class ODYSSEYLAYER_API FOdysseyImageLayer : public IOdysseyLayer, IOdysseySerializable
 {
 public:
     // Construction / Destruction
@@ -42,6 +45,9 @@ public:
     
     bool  IsAlphaLocked() const;
     void  SetIsAlphaLocked( bool iIsAlphaLocked );
+    
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer );
 
 public:
     void CopyPropertiesFrom( const FOdysseyImageLayer &iCopy ); // TODO: replace it by a Clone()/copy-ctor/...
@@ -53,3 +59,6 @@ private:
     float                   mOpacity;
     bool                    mIsAlphaLocked;
 };
+
+//Serialization of item
+#include "OdysseyImageLayer.inl"

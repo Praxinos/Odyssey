@@ -3,9 +3,9 @@
 
 using UnrealBuildTool;
 
-public class OdysseyLayer : ModuleRules
+public class OdysseySerializable : ModuleRules
 {
-    public OdysseyLayer(ReadOnlyTargetRules Target) : base(Target)
+    public OdysseySerializable(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -13,10 +13,6 @@ public class OdysseyLayer : ModuleRules
             new string[] {
                 "Core",
                 "Engine",
-                "OdysseyImaging",
-                "OdysseyTransaction",
-                "ULIS",
-                "OdysseySerializable"
             }
         );
     }

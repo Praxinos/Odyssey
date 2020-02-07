@@ -2,12 +2,6 @@
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
 #include "OdysseyImageLayer.h"
-#include "OdysseyBlock.h"
-
-//Undo
-//#include "OdysseySurface.h"
-
-#include <ULIS_CORE>
 
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
 
@@ -21,6 +15,7 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
     : IOdysseyLayer( iName )
+    , IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
     , mBlock( nullptr )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
@@ -34,6 +29,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
     : IOdysseyLayer( iName )
+    , IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
     , mBlock( iBlock )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )

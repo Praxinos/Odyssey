@@ -21,7 +21,8 @@ FOdysseyLayerStack::~FOdysseyLayerStack()
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack()
-    : mResultBlock( NULL )
+    : IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    , mResultBlock( NULL )
     , mTempBlock( NULL )
     , mCurrentIndex( 0 )
     , mWidth( -1 )
@@ -32,7 +33,8 @@ FOdysseyLayerStack::FOdysseyLayerStack()
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack( int iWidth, int iHeight )
-    : mResultBlock( NULL )
+    : IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    , mResultBlock( NULL )
     , mTempBlock( NULL )
     , mCurrentIndex( 0 )
     , mWidth( iWidth )
