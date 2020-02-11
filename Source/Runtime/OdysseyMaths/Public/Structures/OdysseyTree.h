@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+class IOdysseyLayer;
 
 enum class ePosition : char
 {
@@ -14,8 +15,9 @@ enum class ePosition : char
     kInvalid
 };
 
-template< typename T > class ODYSSEYMATHS_API FOdysseyNTree {
-
+template< typename T >
+class ODYSSEYMATHS_API FOdysseyNTree
+{
 //Construction Destruction
 public:
     FOdysseyNTree( T iNodeContent );
@@ -35,7 +37,10 @@ public:
     TArray<FOdysseyNTree*> GetNodes();
     
     void DepthFirstSearchTree( TArray<T>* ioContents );
-    
+    void BreadthFirstSearchTree( TArray<T>* ioContents );
+
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree );
     
 private:
     T mNodeContent;

@@ -179,3 +179,52 @@ FOdysseyNTree<T>::DepthFirstSearchTree( TArray<T>* ioContents )
         mNodes[i]->DepthFirstSearchTree( ioContents );
     }
 }
+
+
+template< typename T >
+void
+FOdysseyNTree<T>::BreadthFirstSearchTree( TArray<T>* ioContents )
+{
+    if( mParent == NULL )
+    ioContents->Add( mNodeContent );
+    
+    if( GetNodes().Num() == 0 )
+        return;
+    
+    for( int i = 0; i < mNodes.Num(); i++ )
+    {
+        ioContents->Add( mNodes[i]->mNodeContent );
+    }
+    
+    for( int i = 0; i < mNodes.Num(); i++ )
+    {
+        mNodes[i]->BreadthFirstSearchTree( ioContents );
+    }
+}
+
+
+inline FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree )
+{
+    if( Ar.IsSaving() )
+    {
+        int numNodes = ioSaveNTree.mNodes.Num();
+        Ar << ioSaveNTree.mNodeContent;
+        Ar << numNodes;
+        for( int i = 0; i < numNodes; i++ )
+            Ar << (*ioSaveNTree.mNodes[i]);
+    }
+    else if( Ar.IsLoading() )
+    {
+        int numNodes;
+        Ar << ioSaveNTree.mNodeContent;
+        Ar << numNodes;
+        for( int i = 0; i < numNodes; i++ )
+        {
+            FOdysseyNTree<IOdysseyLayer*>* newNode = new FOdysseyNTree<IOdysseyLayer*>(NULL);
+            Ar << *newNode;
+            ioSaveNTree.AddNode( newNode );
+        }
+    }
+    
+    return Ar;
+}
