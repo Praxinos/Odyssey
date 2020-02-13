@@ -8,7 +8,9 @@
 #include "LevelEditor.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
+#include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
+#include "UObject/UnrealType.h"
 
 #include "IOdysseyPainterEditorModule.h"
 #include "IOdysseyPainterEditorToolkit.h"
@@ -49,6 +51,28 @@ private:
         mCreatedAssetTypeActions.Add( iAction );
     }
 
+    // From ...\UnrealEngine\Engine\Source\Editor\ContentBrowser\Private\SAssetView.cpp#3543
+    void ShowPluginContentInContentBrowser()
+    {
+        if( GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders() )
+            return;
+
+        bool bDisplayPlugins = GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders();
+        bool bRawDisplayPlugins = GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders( true );
+
+        // Only if both these flags are false when toggling we want to enable the flag, otherwise we're toggling off
+        if( !bDisplayPlugins && !bRawDisplayPlugins )
+        {
+            GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders( true );
+        }
+        else
+        {
+            GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders( false );
+            GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders( false, true );
+        }
+        GetMutableDefault<UContentBrowserSettings>()->PostEditChange();
+    }
+
 public:
     // IModuleInterface interface
 
@@ -78,6 +102,10 @@ public:
         {
             FOdysseyPainterContentBrowserExtensions::InstallHooks();
         }
+
+        //---
+
+        ShowPluginContentInContentBrowser();
     }
 
     virtual void ShutdownModule() override
