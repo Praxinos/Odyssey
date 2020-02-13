@@ -69,7 +69,7 @@ void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<OdysseyBaseLayerN
     if( InSelectedNode )
     {
         int index = (RootNodes.Num() - 1) - RootNodes.Find(InSelectedNode.ToSharedRef()); //We have the nodes in the inverse order than the odysseyLayerStackData for GUI purposes
-        LayerStackNodeTree->GetLayerStack().GetLayerStackData()->SetCurrentLayerIndex( index );
+        LayerStackNodeTree->GetLayerStack().GetLayerStackData()->SetCurrentLayer( InSelectedNode->GetLayerDataPtr() );
         SelectedNode = InSelectedNode;
         this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
     }

@@ -11,8 +11,11 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
         
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;
+    Ar << *(ioSaveLayerStack->mLayers);
+    
     ioSaveLayerStack->mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
-            
+      
+    /*
     if( Ar.IsSaving() )
     {
         int numLayers = ioSaveLayerStack->mLayers.Num();
@@ -28,40 +31,27 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
             if( imageLayer )
             {
                 Ar << imageLayer;
-
-                ::ULIS::IBlock* blockLayerData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight ) );
-                TArray<uint8> layerData = TArray<uint8>();
-                layerData.AddUninitialized(blockLayerData->BytesTotal());
-                FMemory::Memcpy(layerData.GetData(), blockLayerData->DataPtr(), blockLayerData->BytesTotal());
-                Ar << layerData;
             }
         }
     }
-    else if ( Ar.IsLoading() )
+    else*/ if ( Ar.IsLoading() )
     {
+        
         ioSaveLayerStack->mResultBlock = new FOdysseyBlock( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mTextureSourceFormat );
         ioSaveLayerStack->mTempBlock = new FOdysseyBlock( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mTextureSourceFormat );
         ::ULIS::FClearFillContext::Clear( ioSaveLayerStack->mResultBlock->GetIBlock() );
         ::ULIS::FClearFillContext::Clear( ioSaveLayerStack->mTempBlock->GetIBlock() );
         
+        /*
         int numLayers;
         Ar << numLayers;
         for (int i = 0; i < numLayers; i++)
         {
             FOdysseyImageLayer* imageLayer = ioSaveLayerStack->AddLayer();
             
-            TArray<uint8> layerData = TArray<uint8>();
-            layerData.AddUninitialized(imageLayer->GetBlock()->GetIBlock()->BytesTotal());
-            
             Ar << imageLayer;
-
-            Ar << layerData;
-            
-            for( int j = 0; j < layerData.Num(); j++ )
-            {
-                *(imageLayer->GetBlock()->GetIBlock()->DataPtr() + j) = layerData[j];
-            }
         }
+     */
         ioSaveLayerStack->ComputeResultBlock();
     }
 

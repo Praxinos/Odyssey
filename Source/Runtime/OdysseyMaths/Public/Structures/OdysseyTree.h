@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 
-class IOdysseyLayer;
-
 enum class ePosition : char
 {
     kIn,
@@ -28,16 +26,20 @@ public:
     FOdysseyNTree<T>* AddNode( FOdysseyNTree<T>* iNode, int iIndexEmplace = -1 );
 
     void DeleteNode( int iIndex );
+    void DeleteNodeIfExist( T* iNodeToDelete );
     FOdysseyNTree<T>* MoveNodeTo( FOdysseyNTree* iNewPositionInTree, ePosition iPosition = ePosition::kAfter );
     
-    T GetNodeContent();
-    T* GetNodeContentPtr();
+    //Find the first node (depthSearch) which content is iToFind
+    FOdysseyNTree<T>* FindNode( T iToFind );
+    
+    T GetNodeContent() const;
+    T* GetNodeContentPtr() const;
     void SetNodeContent( T& iNodeContent );
     
-    TArray<FOdysseyNTree*> GetNodes();
+    const TArray<FOdysseyNTree*>* GetNodes() const;
     
-    void DepthFirstSearchTree( TArray<T>* ioContents );
-    void BreadthFirstSearchTree( TArray<T>* ioContents );
+    void DepthFirstSearchTree( TArray<T>* ioContents ) const;
+    void BreadthFirstSearchTree( TArray<T>* ioContents ) const;
 
     // Overloads for save in archive
     friend FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree );

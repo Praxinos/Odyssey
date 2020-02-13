@@ -12,6 +12,7 @@
 #include "Serialization/MemoryReader.h"
 #include "IOdysseyLayer.h"
 #include "OdysseyImageLayer.h"
+#include "OdysseyTree.h"
 
 #include "OdysseyBlock.h"
 
@@ -43,32 +44,36 @@ public:
 
 public:
     // Public Array Tampon Methods
-    FOdysseyImageLayer*                     AddLayer( int iAtIndex = -1 );
-    FOdysseyImageLayer*                     AddLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
-    TArray< TSharedPtr< IOdysseyLayer > >*  GetLayers();
+    FOdysseyImageLayer*                             AddLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddLayer( int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
 
-    void                                    DeleteLayer( IOdysseyLayer* ILayerToDelete );
-    void                                    DeleteLayer( int iIndexLayerToDelete );
-    void                                    MergeDownLayer( IOdysseyLayer* ILayerToMergeDown );
-    void                                    DuplicateLayer( IOdysseyLayer* ILayerToDuplicate );
+    FOdysseyNTree< IOdysseyLayer* >*                GetLayers();
 
-    int                                     GetCurrentLayerIndex() const;
-    void                                    SetCurrentLayerIndex( int iIndex );
-    TSharedPtr< IOdysseyLayer >             GetCurrentLayer() const;
-    void                                    ClearCurrentLayer();
-    void                                    FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
-
-    TArray< TSharedPtr< FText > >           GetBlendingModesAsText();
-    
-    ETextureSourceFormat                    GetTextureSourceFormat();
+    void                                            DeleteLayer( IOdysseyLayer* ILayerToDelete );
+    //void                                            DeleteLayer( int iIndexLayerToDelete );
+    void                                            MergeDownLayer( IOdysseyLayer* ILayerToMergeDown );
+    void                                            DuplicateLayer( IOdysseyLayer* ILayerToDuplicate );
+        
+    int                                             GetCurrentLayerAsIndex() const;
+    void                                            SetCurrentLayer( IOdysseyLayer* iLayer );
+    void                                            SetCurrentLayer( FOdysseyNTree< IOdysseyLayer* >* iLayer );
+    FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayer() const;
+    void                                            ClearCurrentLayer();
+    void                                            FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
+        
+    TArray< TSharedPtr< FText > >                   GetBlendingModesAsText();
+            
+    ETextureSourceFormat                            GetTextureSourceFormat();
 
     // Overloads for save in archive
     friend FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack );
     
 private:
     // Private API
-    FName                                   GetNextLayerName();
-    void                                    InitResultAndTempBlock();
+    FName                                           GetNextLayerName();
+    void                                            InitResultAndTempBlock();
     
 public:
     // Overloads for save in archive
@@ -76,17 +81,17 @@ public:
 
 private:
     // Private Data Members
-    FOdysseyBlock*                          mResultBlock;
-    FOdysseyBlock*                          mTempBlock; // Temporary block for the blend of the tempBuffer into the image
-    TArray< TSharedPtr< IOdysseyLayer > >   mLayers;
-    int                                     mCurrentIndex;
-    int                                     mWidth;
-    int                                     mHeight;
-    ETextureSourceFormat                    mTextureSourceFormat;
-    bool                                    mIsInitialized;
-    
+    FOdysseyBlock*                                  mResultBlock;
+    FOdysseyBlock*                                  mTempBlock; // Temporary block for the blend of the tempBuffer into the image
+    FOdysseyNTree< IOdysseyLayer* >*                mLayers;
+    FOdysseyNTree< IOdysseyLayer* >*                mCurrentLayer;
+    int                                             mWidth;
+    int                                             mHeight;
+    ETextureSourceFormat                            mTextureSourceFormat;
+    bool                                            mIsInitialized;
+            
 public:
-    FOdysseyDrawingUndo*                    mDrawingUndo;
+    FOdysseyDrawingUndo*                            mDrawingUndo;
 };
 
         

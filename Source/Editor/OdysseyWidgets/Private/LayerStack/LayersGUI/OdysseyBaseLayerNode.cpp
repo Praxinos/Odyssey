@@ -188,8 +188,9 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
         return;
 
     //TODO: make the same thing with callbacks so we don't have to manipulate the layer stack manually here
-    TArray< TSharedPtr< IOdysseyLayer > >* LayersData = ParentTree.GetLayerStack().GetLayerStackData()->GetLayers();
-
+    TArray< IOdysseyLayer* > LayersData = TArray<IOdysseyLayer*>();
+    ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &LayersData );
+    
     int indexBase = -1;
     for( int i = 0; i < ParentTree.GetRootNodes().Num(); i++)
     {
@@ -216,10 +217,11 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
     if( indexBase == indexTarget )
         return;
 
-    TSharedPtr<IOdysseyLayer> Layer = (*LayersData)[indexBase];
+    //TO DOO
+    /*TSharedPtr<IOdysseyLayer> Layer = (*LayersData)[indexBase];
 
     LayersData->Remove(Layer);
-    LayersData->Insert( Layer, indexTarget );
+    LayersData->Insert( Layer, indexTarget );*/
 
     ParentTree.OnUpdated().Broadcast();
     ParentTree.GetLayerStack().GetLayerStackData()->ComputeResultBlock();
@@ -254,7 +256,7 @@ bool OdysseyBaseLayerNode::HandleDeleteLayerCanExecute() const
 
 bool OdysseyBaseLayerNode::HandleMergeLayerDownCanExecute() const
 {
-    return (ParentTree.GetLayerStack().GetLayerStackData()->GetCurrentLayerIndex() != 0);
+    return (ParentTree.GetLayerStack().GetLayerStackData()->GetCurrentLayerAsIndex() != 0);
 }
 
 bool OdysseyBaseLayerNode::HandleDuplicateLayerCanExecute() const

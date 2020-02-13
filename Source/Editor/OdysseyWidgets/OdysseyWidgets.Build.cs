@@ -30,6 +30,7 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyStyle",
                 "OdysseyStrokePipeline",
                 "OdysseyTransaction",
+                "OdysseyMaths"
             }
         );
 

@@ -4,6 +4,7 @@
 //The actual function to load and save a OdysseyImageLayer to disk
 inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
 {
+    UE_LOG(LogTemp, Display, TEXT("Save Image Layer"));
     if(!ioSaveImageLayer) return Ar;
     
     IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
@@ -20,6 +21,27 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
     Ar << ioSaveImageLayer->mBlendingMode;
     
     Ar << ioSaveImageLayer->mOpacity;
+
+    if( Ar.IsSaving() )
+    {
+        ::ULIS::IBlock* blockLayerData = ::ULIS::FMakeContext::CopyBlockRect( ioSaveImageLayer->mBlock->GetIBlock(), ::ULIS::FRect( 0, 0, ioSaveImageLayer->mBlock->Width(), ioSaveImageLayer->mBlock->Height() ) );
+        TArray<uint8> layerData = TArray<uint8>();
+        layerData.AddUninitialized(blockLayerData->BytesTotal());
+        FMemory::Memcpy(layerData.GetData(), blockLayerData->DataPtr(), blockLayerData->BytesTotal());
+        Ar << layerData;
+    }
+    else if( Ar.IsLoading() )
+    {
+        TArray<uint8> layerData = TArray<uint8>();
+        layerData.AddUninitialized(ioSaveImageLayer->mBlock->GetIBlock()->BytesTotal());
+        
+        Ar << layerData;
+
+        for( int j = 0; j < layerData.Num(); j++ )
+        {
+            *(ioSaveImageLayer->mBlock->GetIBlock()->DataPtr() + j) = layerData[j];
+        }
+    }
            
     return Ar;
 }

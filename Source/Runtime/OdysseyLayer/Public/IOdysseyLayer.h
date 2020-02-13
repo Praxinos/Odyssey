@@ -40,8 +40,21 @@ public:
     virtual bool  IsVisible() const;
     virtual void  SetIsVisible( bool iIsVisible );
 
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, IOdysseyLayer* ioSaveImageLayer );
+    
 protected:
     FName         mName;
     bool          mIsLocked;
     bool          mIsVisible;
 };
+
+
+inline FArchive& operator<<(FArchive &Ar, IOdysseyLayer* ioSaveImageLayer )
+{
+    if(!ioSaveImageLayer) return Ar;
+            
+    UE_LOG(LogTemp, Display, TEXT("Save virtual Layer"));
+
+    return Ar;
+}

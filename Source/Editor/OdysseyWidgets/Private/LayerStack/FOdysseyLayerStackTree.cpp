@@ -8,6 +8,7 @@
 #include "OdysseyLayerStack.h"
 #include "LayerStack/LayersGUI/OdysseyFolderLayerNode.h"
 #include "LayerStack/LayersGUI/OdysseyTrackLayerNode.h"
+#include "OdysseyTree.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStackTree"
 
@@ -23,17 +24,19 @@ void FOdysseyLayerStackTree::Empty()
 
 int FOdysseyLayerStackTree::Update()
 {
-    TArray< TSharedPtr< IOdysseyLayer > >* layersData = LayerStack.GetLayerStackData()->GetLayers();
+    TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
+    LayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData );
+    
     TArray< TSharedRef<OdysseyBaseLayerNode> > rootNodesCopy = RootNodes;
     bool found;
     int newIndex = -1;
-
+    FOdysseyImageLayer* imageLayer;
     Empty();
 
-    for( int i = layersData->Num() - 1; i >= 0; i-- )
+    for( int i = layersData.Num() - 1; i >= 0; i-- )
     {
         found = false;
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( (*layersData)[i].Get() );
+        imageLayer = static_cast<FOdysseyImageLayer*>( layersData[i] );
 
         for( int j = 0; j < rootNodesCopy.Num(); j++)
         {
@@ -53,13 +56,13 @@ int FOdysseyLayerStackTree::Update()
     }
     if( newIndex != -1 )
     {
-        LayerStack.GetLayerStackData()->SetCurrentLayerIndex( newIndex );
+        LayerStack.GetLayerStackData()->SetCurrentLayer( imageLayer );
         return newIndex;
     }
 
 
     //UE_LOG(LogTemp, Display, TEXT("LayerSelected: %d"), LayerStack.GetLayerStackData()->GetCurrentLayerIndex());
-    return LayerStack.GetLayerStackData()->GetCurrentLayerIndex();
+    return LayerStack.GetLayerStackData()->GetCurrentLayerAsIndex();
 }
 
 const TArray< TSharedRef<OdysseyBaseLayerNode> >& FOdysseyLayerStackTree::GetRootNodes() const

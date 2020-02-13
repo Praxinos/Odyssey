@@ -68,6 +68,22 @@ FOdysseyNTree<T>::DeleteNode( int iIndex )
 }
 
 template< typename T >
+void
+FOdysseyNTree<T>::DeleteNodeIfExist( T* iNodeToDelete )
+{
+    //Can't delete the root of the tree, so we never check mNodeContent
+    
+    for( int i = 0; i < mNodes.Num(); i++ )
+    {
+        if( &(mNodes[i]->mNodeContent ) == iNodeToDelete )
+            DeleteNode( i );
+        else
+            mNodes[i]->DeleteNodeIfExist( iNodeToDelete );
+    }
+}
+
+
+template< typename T >
 FOdysseyNTree<T>*
 FOdysseyNTree<T>::MoveNodeTo( FOdysseyNTree* iNewPositionInTree, ePosition iPosition )
 {
@@ -134,18 +150,33 @@ FOdysseyNTree<T>::MoveNodeTo( FOdysseyNTree* iNewPositionInTree, ePosition iPosi
     return NULL;
 }
 
+template< typename T >
+FOdysseyNTree<T>*
+FOdysseyNTree<T>::FindNode( T iToFind )
+{
+    for( int i = 0; i < mNodes.Num(); i++ )
+    {
+        if( iToFind == mNodes[i]->mNodeContent )
+            return mNodes[i];
+        else
+            return mNodes[i]->FindNode( iToFind );
+    }
+    return NULL;
+}
+
+
 
 
 template< typename T >
 T
-FOdysseyNTree<T>::GetNodeContent()
+FOdysseyNTree<T>::GetNodeContent() const
 {
     return mNodeContent;
 }
 
 template< typename T >
 T*
-FOdysseyNTree<T>::GetNodeContentPtr()
+FOdysseyNTree<T>::GetNodeContentPtr() const
 {
     return &mNodeContent;
 }
@@ -159,19 +190,20 @@ FOdysseyNTree<T>::SetNodeContent( T& iNodeContent )
 
 
 template< typename T >
-TArray<FOdysseyNTree<T>*>
-FOdysseyNTree<T>::GetNodes()
+const TArray<FOdysseyNTree<T>*>*
+FOdysseyNTree<T>::GetNodes() const
 {
-    return mNodes;
+    return &mNodes;
 }
 
 template< typename T >
 void
-FOdysseyNTree<T>::DepthFirstSearchTree( TArray<T>* ioContents )
+FOdysseyNTree<T>::DepthFirstSearchTree( TArray<T>* ioContents ) const
 {
-    ioContents->Add( mNodeContent );
+    if( mParent )
+        ioContents->Add( mNodeContent );
     
-    if( GetNodes().Num() == 0 )
+    if( GetNodes()->Num() == 0 )
         return;
     
     for( int i = 0; i < mNodes.Num(); i++ )
@@ -183,10 +215,10 @@ FOdysseyNTree<T>::DepthFirstSearchTree( TArray<T>* ioContents )
 
 template< typename T >
 void
-FOdysseyNTree<T>::BreadthFirstSearchTree( TArray<T>* ioContents )
+FOdysseyNTree<T>::BreadthFirstSearchTree( TArray<T>* ioContents ) const
 {
-    if( mParent == NULL )
-    ioContents->Add( mNodeContent );
+    /*if( mParent == NULL )
+    ioContents->Add( mNodeContent );*/
     
     if( GetNodes().Num() == 0 )
         return;
@@ -203,12 +235,19 @@ FOdysseyNTree<T>::BreadthFirstSearchTree( TArray<T>* ioContents )
 }
 
 
+
+class IOdysseyLayer;
+class OdysseyImageLayer;
+class OdysseyFolderLayer;
+
 inline FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree )
 {
     if( Ar.IsSaving() )
     {
         int numNodes = ioSaveNTree.mNodes.Num();
+        
         Ar << ioSaveNTree.mNodeContent;
+        
         Ar << numNodes;
         for( int i = 0; i < numNodes; i++ )
             Ar << (*ioSaveNTree.mNodes[i]);

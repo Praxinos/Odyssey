@@ -614,14 +614,15 @@ FOdysseyPainterEditorToolkit::OnExportLayersAsTextures()
 
     if( saveObjectPath != "" )
     {
-        TArray<TSharedPtr<IOdysseyLayer>>* layers = mOdysseyTexture->GetLayerStack()->GetLayers();
+        TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
+        mOdysseyTexture->GetLayerStack()->GetLayers()->DepthFirstSearchTree( &layers );
 
-        for( int i = 0; i < layers->Num(); i++ )
+        for( int i = 0; i < layers.Num(); i++ )
         {
-            if( !( ( *layers )[i].Get()->GetType() == IOdysseyLayer::eType::kImage ) )
+            if( !( layers[i]->GetType() == IOdysseyLayer::eType::kImage ) )
                 continue;
 
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> ( ( *layers )[i].Get() );
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> ( layers[i] );
 
             FString assetPath = FPaths::GetPath( saveObjectPath ) + "/";
             FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
