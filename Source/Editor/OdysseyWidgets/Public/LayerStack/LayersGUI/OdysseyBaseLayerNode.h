@@ -20,34 +20,30 @@ enum class EItemDropZone;
  */
 struct FNodePadding
 {
-    FNodePadding(float InUniform) : Top(InUniform), Bottom(InUniform) { }
-    FNodePadding(float InTop, float InBottom) : Top(InTop), Bottom(InBottom) { }
+    FNodePadding(float iLeft, float iTop, float iBottom)
+    : mLeft( iLeft )
+    , mTop( iTop )
+    , mBottom( iBottom )
+    {}
 
     /** @return The sum total of the separate padding values */
-    float Combined() const
+    float CombinedTopLeft() const
     {
-        return Top + Bottom;
+        return mTop + mBottom;
     }
 
+    /** Padding to be applied to the left of the node */
+    float mLeft;
+    
     /** Padding to be applied to the top of the node */
-    float Top;
+    float mTop;
 
     /** Padding to be applied to the bottom of the node */
-    float Bottom;
+    float mBottom;
 };
 
 
-namespace ELayerStackNode
-{
-    enum Type
-    {
-        Image,
-        /* Benign spacer node */
-        Spacer,
-        /* Folder node */
-        Folder
-    };
-}
+
 
 /**
  * Base node GUI for a layer node in the layerStack
@@ -98,7 +94,7 @@ public: // PUBLIC API
      *
      * @return true if this node can be renamed, false otherwise.
      */
-    virtual bool CanRenameNode() const = 0;
+    virtual bool CanRenameNode() const;
 
     /**
      * @return The localized display name of this node
@@ -143,7 +139,7 @@ public: // PUBLIC API
      *
      * @return Generated Property View widget
      */
-    virtual TSharedRef<SWidget> GenerateContainerWidgetForPropertyView();
+    virtual TSharedRef<SWidget> GenerateContainerWidgetForPropertyView() = 0;
 
     /**
      * Generates a widget for display in the LayerStack section
@@ -154,11 +150,18 @@ public: // PUBLIC API
 
 
     /**
+     * Customizes the icon widget of the node
+     *
+     * @return Content to display on the outliner node
+     */
+    virtual TSharedRef<SWidget> GetCustomIconContent() = 0;
+    
+    /**
      * Customizes an outliner widget that is to represent this node
      *
      * @return Content to display on the outliner node
      */
-    virtual TSharedRef<SWidget> GetCustomOutlinerContent();
+    virtual TSharedRef<SWidget> GetCustomOutlinerContent() = 0;
 
 
     /**
@@ -167,13 +170,6 @@ public: // PUBLIC API
      * @return This node's representative icon
      */
     virtual const FSlateBrush* GetIconBrush() const;
-
-    /**
-     * Get a brush to overlay on top of the icon for this node
-     *
-     * @return An overlay brush, or nullptr
-     */
-    virtual const FSlateBrush* GetIconOverlayBrush() const;
 
     /**
      * Gets the color for the icon brush
@@ -198,7 +194,7 @@ public: // PUBLIC API
     TSharedPtr<SWidget> OnSummonContextMenu();
 
     /** What sort of context menu this node summons */
-    virtual void BuildContextMenu(FMenuBuilder& MenuBuilder);
+    virtual void BuildContextMenu(FMenuBuilder& MenuBuilder) = 0;
 
     /**
      * @return The name of the node (for identification purposes)
@@ -271,7 +267,7 @@ public: // PUBLIC API
     /**
      * @return Whether this node is explicitly hidden from the view or not
      */
-    bool IsHidden() const;
+    virtual bool IsHidden() const = 0;
 
     /**
      * Check whether the node's tree view or track area widgets are hovered by the user's mouse.
@@ -328,13 +324,6 @@ private: // HANDLES
 
     /** Callback for determining whether a "Rename Node" context menu action can execute. */
     bool HandleContextMenuRenameNodeCanExecute() const;
-
-    bool HandleDeleteLayerCanExecute() const;
-
-    bool HandleMergeLayerDownCanExecute() const;
-    
-    bool HandleDuplicateLayerCanExecute() const;
-
 
 protected:
 

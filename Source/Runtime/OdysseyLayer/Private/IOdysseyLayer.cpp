@@ -9,21 +9,30 @@ IOdysseyLayer::~IOdysseyLayer()
 {
 }
 
-IOdysseyLayer::IOdysseyLayer()
+IOdysseyLayer::IOdysseyLayer( const eType type )
     : mName()
     , mIsLocked( false )
     , mIsVisible( true )
+    , mType( type )
 {
 }
 
-IOdysseyLayer::IOdysseyLayer( const FName& iName )
+IOdysseyLayer::IOdysseyLayer( const FName& iName, const eType type )
     : mName( iName )
     , mIsLocked( false )
     , mIsVisible( true )
+    , mType( type )
 {
 }
 
 //---
+
+IOdysseyLayer::eType
+IOdysseyLayer::GetType() const
+{
+    return mType;
+}
+
 
 FName
 IOdysseyLayer::GetName() const

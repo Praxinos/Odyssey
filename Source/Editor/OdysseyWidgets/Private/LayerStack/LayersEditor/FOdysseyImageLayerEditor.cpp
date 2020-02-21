@@ -37,8 +37,16 @@ void FOdysseyImageLayerEditor::BuildAddLayerMenu(FMenuBuilder& MenuBuilder)
         LOCTEXT("AddImageLayerTooltip", "Adds a new image layer"),
         FSlateIcon(FEditorStyle::GetStyleSetName(), ""),
         FUIAction(
-            FExecuteAction::CreateRaw(this, &FOdysseyImageLayerEditor::HandleAddImageLayerMenuEntryExecute),
-            FCanExecuteAction::CreateRaw(this, &FOdysseyImageLayerEditor::HandleAddImageLayerMenuEntryCanExecute)
+            FExecuteAction::CreateRaw(this, &FOdysseyImageLayerEditor::HandleAddImageLayerMenuEntryExecute)
+        )
+    );
+    
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT("AddFolder", "Add Folder"),
+        LOCTEXT("AddFolderTooltip", "Adds a new folder"),
+        FSlateIcon(FEditorStyle::GetStyleSetName(), ""),
+        FUIAction(
+            FExecuteAction::CreateRaw(this, &FOdysseyImageLayerEditor::HandleAddFolderLayerMenuEntryExecute)
         )
     );
 }
@@ -68,11 +76,31 @@ bool FOdysseyImageLayerEditor::GetDefaultExpansionState(FOdysseyImageLayer* InTr
 void FOdysseyImageLayerEditor::HandleAddImageLayerMenuEntryExecute()
 {
     FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&LayerStackRef.Get());
-    model->GetLayerStackData()->AddLayer();
+    
+    if( model->GetLayerStackData()->GetCurrentLayer() )
+        model->GetLayerStackData()->AddImageLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() + 1 );
+    else
+        model->GetLayerStackData()->AddImageLayer();
     model->GetLayerStackWidget()->GetTreeView()->Refresh();
 }
 
 bool FOdysseyImageLayerEditor::HandleAddImageLayerMenuEntryCanExecute() const
+{
+    return true;
+}
+
+void FOdysseyImageLayerEditor::HandleAddFolderLayerMenuEntryExecute()
+{
+    FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&LayerStackRef.Get());
+    
+    if( model->GetLayerStackData()->GetCurrentLayer() )
+        model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() + 1 );
+    else
+        model->GetLayerStackData()->AddFolderLayer();
+    model->GetLayerStackWidget()->GetTreeView()->Refresh();
+}
+
+bool FOdysseyImageLayerEditor::HandleAddFolderLayerMenuEntryCanExecute() const
 {
     return true;
 }

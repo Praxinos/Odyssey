@@ -24,11 +24,11 @@ public:
 public:
     // Construction / Destruction
     virtual ~IOdysseyLayer() = 0;
-    IOdysseyLayer();
-    IOdysseyLayer( const FName& iName );
+    IOdysseyLayer( const eType type );
+    IOdysseyLayer( const FName& iName, const eType type );
 
 public:
-    virtual eType GetType() const = 0;
+    virtual eType GetType() const;
 
     virtual FName GetName() const;
     virtual FText GetNameAsText() const;
@@ -47,6 +47,7 @@ protected:
     FName         mName;
     bool          mIsLocked;
     bool          mIsVisible;
+    eType         mType;
 };
 
 

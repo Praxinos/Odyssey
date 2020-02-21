@@ -12,6 +12,7 @@
 #include "Serialization/MemoryReader.h"
 #include "IOdysseyLayer.h"
 #include "OdysseyImageLayer.h"
+#include "OdysseyFolderLayer.h"
 #include "OdysseyTree.h"
 
 #include "OdysseyBlock.h"
@@ -44,22 +45,27 @@ public:
 
 public:
     // Public Array Tampon Methods
-    FOdysseyImageLayer*                             AddLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
-    FOdysseyImageLayer*                             AddLayer( int iAtIndex = -1 );
-    FOdysseyImageLayer*                             AddLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
-    FOdysseyImageLayer*                             AddLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayer( int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
+       
+    FOdysseyFolderLayer*                            AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
+    FOdysseyFolderLayer*                            AddFolderLayer( int iAtIndex = -1 );
 
     FOdysseyNTree< IOdysseyLayer* >*                GetLayers();
-
-    void                                            DeleteLayer( IOdysseyLayer* ILayerToDelete );
-    //void                                            DeleteLayer( int iIndexLayerToDelete );
-    void                                            MergeDownLayer( IOdysseyLayer* ILayerToMergeDown );
-    void                                            DuplicateLayer( IOdysseyLayer* ILayerToDuplicate );
-        
+    FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayer() const;
     int                                             GetCurrentLayerAsIndex() const;
+    FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayerFromIndex( int iIndex) const;
+
     void                                            SetCurrentLayer( IOdysseyLayer* iLayer );
     void                                            SetCurrentLayer( FOdysseyNTree< IOdysseyLayer* >* iLayer );
-    FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayer() const;
+    
+    void                                            DeleteLayer( IOdysseyLayer* iLayerToDelete );
+
+    void                                            MergeDownLayer( IOdysseyLayer* iLayerToMergeDown );
+    void                                            FlattenLayer( IOdysseyLayer* iLayerToFlatten );
+    void                                            DuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
     void                                            ClearCurrentLayer();
     void                                            FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
         
@@ -74,6 +80,8 @@ private:
     // Private API
     FName                                           GetNextLayerName();
     void                                            InitResultAndTempBlock();
+    FOdysseyBlock*                                  ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLayers );
+
     
 public:
     // Overloads for save in archive

@@ -30,6 +30,10 @@ private: //Callbacks
     /** Callback for executing the "Add Image Layer" menu entry. */
     void HandleAddImageLayerMenuEntryExecute();
     bool HandleAddImageLayerMenuEntryCanExecute() const;
+    
+    /** Callback for executing the "Add folderr" menu entry. */
+    void HandleAddFolderLayerMenuEntryExecute();
+    bool HandleAddFolderLayerMenuEntryCanExecute() const;
 
 };
 

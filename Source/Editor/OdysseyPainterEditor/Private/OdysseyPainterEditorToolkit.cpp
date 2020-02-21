@@ -615,7 +615,7 @@ FOdysseyPainterEditorToolkit::OnExportLayersAsTextures()
     if( saveObjectPath != "" )
     {
         TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-        mOdysseyTexture->GetLayerStack()->GetLayers()->DepthFirstSearchTree( &layers );
+        mOdysseyTexture->GetLayerStack()->GetLayers()->DepthFirstSearchTree( &layers, false );
 
         for( int i = 0; i < layers.Num(); i++ )
         {
@@ -662,7 +662,7 @@ FOdysseyPainterEditorToolkit::OnImportTexturesAsLayers()
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
         FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture );
-        mOdysseyTexture->GetLayerStack()->AddLayerFromData( textureBlock, FName( *( openedTexture->GetName() ) ) );
+        mOdysseyTexture->GetLayerStack()->AddImageLayerFromData( textureBlock, FName( *( openedTexture->GetName() ) ) );
         delete textureBlock;
     }
 

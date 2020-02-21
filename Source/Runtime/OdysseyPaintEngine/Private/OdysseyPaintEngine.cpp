@@ -414,6 +414,10 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
         mIsPendingEndStroke )
         return;
 
+    //If the layerStack is empty, we don't draw
+    if( !mLayerStack->GetCurrentLayer() )
+        return;
+    
     //If the layer is locked, we don't draw
     if( mLayerStack->GetCurrentLayer()->GetNodeContent()->IsLocked() )
         return;

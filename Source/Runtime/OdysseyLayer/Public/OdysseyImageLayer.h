@@ -29,9 +29,6 @@ public:
     FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock );
 
 public:
-    virtual eType GetType() const override;
-
-public:
     // Public API
     FOdysseyBlock* GetBlock() const;
 

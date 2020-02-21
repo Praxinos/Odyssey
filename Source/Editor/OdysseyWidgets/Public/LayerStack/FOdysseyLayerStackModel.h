@@ -60,15 +60,11 @@ public:
 
     TSharedRef<SOdysseyLayerStackView> GetLayerStackWidget() const;
 
-    /** Handles adding a new folder to the outliner tree. */
-    void OnAddFolder();
-
-    /** Handles adding a newly created layer to the outliner tree */
-    void OnAddLayer(const IOdysseyLayer& InLayer);
-
     void OnDeleteLayer( IOdysseyLayer* InLayerToDelete );
 
     void OnMergeLayerDown( IOdysseyLayer* InLayerToMergeDown );
+    
+    void OnFlattenLayer( IOdysseyLayer* InLayerToMergeDown );
     
     void OnDuplicateLayer( IOdysseyLayer* InLayerToDuplicate );
 

@@ -7,7 +7,7 @@
 #include "OdysseyImageLayer.h"
 #include "OdysseyLayerStack.h"
 #include "LayerStack/LayersGUI/OdysseyFolderLayerNode.h"
-#include "LayerStack/LayersGUI/OdysseyTrackLayerNode.h"
+#include "LayerStack/LayersGUI/OdysseyImageLayerNode.h"
 #include "OdysseyTree.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStackTree"
@@ -25,43 +25,19 @@ void FOdysseyLayerStackTree::Empty()
 int FOdysseyLayerStackTree::Update()
 {
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    LayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData );
+    LayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
     
     TArray< TSharedRef<OdysseyBaseLayerNode> > rootNodesCopy = RootNodes;
-    bool found;
-    int newIndex = -1;
-    FOdysseyImageLayer* imageLayer;
     Empty();
 
-    for( int i = layersData.Num() - 1; i >= 0; i-- )
+    for( int i = 0; i < layersData.Num(); i++ )
     {
-        found = false;
-        imageLayer = static_cast<FOdysseyImageLayer*>( layersData[i] );
-
-        for( int j = 0; j < rootNodesCopy.Num(); j++)
-        {
-            if( rootNodesCopy[j]->GetLayerDataPtr() == imageLayer )
-            {
-                RootNodes.Add( rootNodesCopy[j] );
-                found = true;
-                break; //We found the node linked to this data, we don't have anything more to do
-            }
-        }
-
-        if (!found)
-        {
-            RootNodes.Add( MakeShareable(new OdysseyTrackLayerNode( *imageLayer, nullptr, *this )) );
-            newIndex = i;
-        }
+        if( layersData[i]->GetType() == IOdysseyLayer::eType::kImage )
+            RootNodes.Add( MakeShareable(new OdysseyImageLayerNode( *(static_cast<FOdysseyImageLayer*> (layersData[i])), nullptr, *this )) );
+        else if( layersData[i]->GetType() == IOdysseyLayer::eType::kFolder )
+            RootNodes.Add( MakeShareable(new OdysseyFolderLayerNode( *(static_cast<FOdysseyFolderLayer*> (layersData[i])), nullptr, *this )) );
     }
-    if( newIndex != -1 )
-    {
-        LayerStack.GetLayerStackData()->SetCurrentLayer( imageLayer );
-        return newIndex;
-    }
-
-
-    //UE_LOG(LogTemp, Display, TEXT("LayerSelected: %d"), LayerStack.GetLayerStackData()->GetCurrentLayerIndex());
+    
     return LayerStack.GetLayerStackData()->GetCurrentLayerAsIndex();
 }
 
@@ -85,13 +61,6 @@ const TSharedPtr<OdysseyBaseLayerNode>& FOdysseyLayerStackTree::GetHoveredNode()
 
 
 //---------------------------------------------
-
-TSharedRef<OdysseyBaseLayerNode> CreateFolderNode( FOdysseyFolderLayer& FolderLayer, FOdysseyLayerStackTree& NodeTree )
-{
-    TSharedRef<OdysseyFolderLayerNode> FolderNode( new OdysseyFolderLayerNode( FolderLayer, TSharedPtr<OdysseyBaseLayerNode>(), NodeTree ) );
-
-    return FolderNode;
-}
 
 
 #undef LOCTEXT_NAMESPACE

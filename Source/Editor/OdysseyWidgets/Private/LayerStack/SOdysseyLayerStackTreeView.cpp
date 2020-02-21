@@ -118,7 +118,7 @@ void SOdysseyLayerStackTreeView::OnGetChildren(OdysseyBaseLayerNodeRef InParent,
 
 //PUBLIC API
 
-void SOdysseyLayerStackTreeView::Refresh( int OverrideNewSelectedNodeIndex /** = -1*/ )
+void SOdysseyLayerStackTreeView::Refresh( int OverrideNewSelectedNodeIndex /* = -1*/ )
 {
     int NumberOfNodes = LayerStackNodeTree->GetRootNodes().Num();
 
@@ -133,14 +133,14 @@ void SOdysseyLayerStackTreeView::Refresh( int OverrideNewSelectedNodeIndex /** =
         if( LayerStackNodeTree->GetRootNodes().Num() > 0 )
         {
             this->Private_ClearSelection();
-            SelectedNode = LayerStackNodeTree->GetRootNodes()[LayerStackNodeTree->GetRootNodes().Num() - 1 - indexCurrentNode];
+            SelectedNode = LayerStackNodeTree->GetRootNodes()[indexCurrentNode];
             this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
         }
     }
     else if( OverrideNewSelectedNodeIndex >= 0 && OverrideNewSelectedNodeIndex < LayerStackNodeTree->GetRootNodes().Num() )
     {
         this->Private_ClearSelection();
-        SelectedNode = LayerStackNodeTree->GetRootNodes()[LayerStackNodeTree->GetRootNodes().Num() - 1 - OverrideNewSelectedNodeIndex];
+        SelectedNode = LayerStackNodeTree->GetRootNodes()[OverrideNewSelectedNodeIndex];
         this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
     }
 
@@ -174,13 +174,6 @@ SOdysseyLayerStackTreeView::GetSelectedNode()
 {
     return SelectedNode;
 }
-
-void
-SOdysseyLayerStackTreeView::SetSelectedNode( TSharedPtr<OdysseyBaseLayerNode> iNode )
-{
-    SelectedNode = iNode;
-}
-
 
 SVerticalBox::FSlot*& SOdysseyLayerStackTreeView::GetPropertyView()
 {
@@ -263,7 +256,6 @@ FReply SOdysseyLayerStackViewRow::OnDragDetected( const FGeometry& InGeometry, c
 {
     TSharedPtr<OdysseyBaseLayerNode> DisplayNode = Node.Pin();
     TreeView->OnSelectionChanged( DisplayNode );
-    TreeView->Refresh();
 
     if ( DisplayNode.IsValid() )
     {

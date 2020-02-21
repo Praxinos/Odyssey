@@ -9,16 +9,13 @@
 
 FOdysseyFolderLayer::~FOdysseyFolderLayer()
 {
-    for( int i = 0; i < mLayersInFolder.Num(); i++ )
-    {
-        mLayersInFolder[i].Reset();
-    }
 }
 
 FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
-    : IOdysseyLayer( iName )
-    , mLayersInFolder()
+    : IOdysseyLayer( iName, IOdysseyLayer::eType::kFolder )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mOpacity( 1.0f )
+    , mIsOpen( true )
 {
 }
 
@@ -42,35 +39,51 @@ FOdysseyFolderLayer::SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode )
     mBlendingMode = iBlendingMode;
 }
 
-//---
-
-TSharedPtr<FOdysseyBlock>
-FOdysseyFolderLayer::GenerateBlockFromContent() const
+void
+FOdysseyFolderLayer::SetBlendingMode( FText iBlendingMode )
 {
-    return nullptr;
+    for( uint8 i = 0; i < (int)::ULIS::eBlendingMode::kNumBlendingModes; ++i )
+    {
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[i] ) );
+        if( iBlendingMode.EqualTo( entry ) )
+        {
+            SetBlendingMode( static_cast<::ULIS::eBlendingMode>( i ) );
+            return;
+        }
+    }
 }
 
-//---
-
-void
-FOdysseyFolderLayer::AppendLayer( TSharedPtr<IOdysseyLayer> iLayer )
+FText
+FOdysseyFolderLayer::GetBlendingModeAsText() const
 {
-    if( !iLayer.IsValid() )
-        return;
+    return FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
+}
 
-    mLayersInFolder.Add( iLayer );
+float
+FOdysseyFolderLayer::GetOpacity() const
+{
+    return mOpacity;
 }
 
 void
-FOdysseyFolderLayer::AddLayerAtIndex( TSharedPtr<IOdysseyLayer> iLayer, int iIndex )
+FOdysseyFolderLayer::SetOpacity( float iOpacity )
 {
-    if( !iLayer.IsValid() )
+    if( iOpacity < 0.f || iOpacity > 1.f )
         return;
 
-    if( iIndex < mLayersInFolder.Num() )
-        mLayersInFolder.Insert( iLayer, iIndex );
+    mOpacity = iOpacity;
+}
 
-    //TODO: there is no way to know if it's really added outside this function ?!
+bool
+FOdysseyFolderLayer::IsOpen() const
+{
+    return mIsOpen;
+}
+
+void
+FOdysseyFolderLayer::SetIsOpen( bool iIsOpen )
+{
+    mIsOpen = iIsOpen;
 }
 
 //---

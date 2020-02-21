@@ -351,6 +351,15 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
             .SetDropIndicator_Onto( BOX_BRUSH( "TableRow/drop_zone_indicator_onto_16", FMargin( 4.0f / 16.0f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
             .SetDropIndicator_Below( BOX_BRUSH( "TableRow/drop_zone_indicator_below_16", FMargin( 10.0f / 16.0f, 0, 0, 10.0f / 16.0f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
     );
+    
+    Set( "OdysseyLayerStack.Motionless", FButtonStyle()
+        .SetNormal ( FSlateNoResource() )
+        .SetPressed( FSlateNoResource() )
+        .SetHovered( FSlateNoResource() )
+        .SetNormalPadding( FMargin(0,0) )
+        .SetPressedPadding( FMargin(0,0) )
+        );
+
 #endif
 }
 

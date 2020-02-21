@@ -99,14 +99,6 @@ void FOdysseyLayerStackModel::TestOption()
 
 }
 
-void FOdysseyLayerStackModel::OnAddFolder()
-{
-}
-
-void FOdysseyLayerStackModel::OnAddLayer(const IOdysseyLayer& InLayer)
-{
-}
-
 
 void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* InLayerToDelete )
 {
@@ -118,6 +110,12 @@ void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* InLayerToDelete )
 void FOdysseyLayerStackModel::OnMergeLayerDown( IOdysseyLayer* InLayerToMergeDown )
 {
     GetLayerStackData()->MergeDownLayer( InLayerToMergeDown );
+    LayerStackWidget->RefreshView();
+}
+
+void FOdysseyLayerStackModel::OnFlattenLayer( IOdysseyLayer* InLayerToMergeDown )
+{
+    GetLayerStackData()->FlattenLayer( InLayerToMergeDown );
     LayerStackWidget->RefreshView();
 }
 

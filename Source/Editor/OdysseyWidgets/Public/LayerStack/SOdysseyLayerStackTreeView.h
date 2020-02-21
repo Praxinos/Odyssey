@@ -69,8 +69,6 @@ public:
 
     TSharedPtr<OdysseyBaseLayerNode> GetSelectedNode();
 
-    void SetSelectedNode( TSharedPtr<OdysseyBaseLayerNode> iNode );
-
     SVerticalBox::FSlot*& GetPropertyView();
 
     /** Handles a change of selected layer in the layer stack  */

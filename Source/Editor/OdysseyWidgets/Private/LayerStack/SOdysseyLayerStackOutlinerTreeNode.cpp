@@ -18,52 +18,12 @@
 #include "Fonts/SlateFontInfo.h"
 #include "Types/SlateStructs.h"
 #include "EditorStyleSet.h"
+#include "OdysseyStyleSet.h"
 #include "Styling/SlateTypes.h"
 
 
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStackOutlinerTreeNode"
-
-/*
-class SLayerColorPicker : public SCompoundWidget
-{
-public:
-    static void OnOpen()
-    {
-
-    }
-
-    static void OnClose()
-    {
-
-    }
-
-    SLATE_BEGIN_ARGS(SLayerColorPicker){}
-    SLATE_END_ARGS()
-
-    void Construct(const FArguments& InArgs)
-    {
-    }
-
-    FLinearColor GetTrackColor() const
-    {
-    }
-
-    void SetTrackColor(FLinearColor NewColor)
-    {
-
-    }
-
-private:
-    static TUniquePtr<FScopedTransaction> Transaction;
-    static bool bMadeChanges;
-};
-
-TUniquePtr<FScopedTransaction> SLayerColorPicker::Transaction;
-bool SLayerColorPicker::bMadeChanges = false;
-
-*/
-
 
 
 //SODYSSEYLAYERSTACKOUTLINERTREENODE----------------------------
@@ -114,7 +74,7 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
         .VAlign( VAlign_Center )
         .BorderImage( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeBorderImage )
         .BorderBackgroundColor( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeBackgroundTint )
-        .Padding(FMargin(0, Node->GetNodePadding().Combined() / 2))
+        .Padding(FMargin(Node->GetNodePadding().mLeft, Node->GetNodePadding().mTop, 0, Node->GetNodePadding().mBottom ))
         [
             SNew( SHorizontalBox )
 
@@ -126,75 +86,50 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
                 [
                     SNew( SHorizontalBox )
 
-                    // Expand track lanes button
-                    + SHorizontalBox::Slot()
-                    .Padding(FMargin(2.f, 0.f, 2.f, 0.f))
-                    .VAlign( VAlign_Center )
-                    .AutoWidth()
-                    /*[
-                        SNew(SExpanderArrow, InTableRow).IndentAmount(10)
-                    ]*/
-                 + SHorizontalBox::Slot()
-                    .Padding( InnerNodePadding )
-                    [
-                        SNew( SBorder )
-                        .BorderImage( FEditorStyle::GetBrush( "LayerStack.NodeOutliner.TopLevelBorder_Collapsed" ) )
-                        .BorderBackgroundColor( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeInnerBackgroundTint )
-                        .Padding( FMargin(0) )
+                     + SHorizontalBox::Slot()
+                        .Padding( InnerNodePadding )
                         [
-                            SNew( SHorizontalBox )
-
-                            // Icon
-                            + SHorizontalBox::Slot()
-                            .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
-                            .VAlign(VAlign_Center)
-                            .AutoWidth()
+                            SNew( SBorder )
+                            .BorderImage( FEditorStyle::GetBrush( "LayerStack.NodeOutliner.TopLevelBorder_Collapsed" ) )
+                            .BorderBackgroundColor( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeInnerBackgroundTint )
+                            .Padding( FMargin(0) )
                             [
-                                SNew(SOverlay)
+                                SNew( SHorizontalBox )
 
-                                + SOverlay::Slot()
+                                // Icon
+                                + SHorizontalBox::Slot()
+                                .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
+                                .VAlign(VAlign_Center)
+                                .AutoWidth()
                                 [
-                                    SNew(SImage)
-                                    .Image(InArgs._IconBrush)
-                                    .ColorAndOpacity(InArgs._IconColor)
+                                    SNew(SOverlay)
+
+                                    + SOverlay::Slot()
+                                    [
+                                        //This can be an image or something else, depending of the type of layer ---
+                                        InArgs._IconContent.Widget
+                                    ]
                                 ]
 
-                                + SOverlay::Slot()
-                                .VAlign(VAlign_Top)
-                                .HAlign(HAlign_Right)
+                                // Label Slot
+                                + SHorizontalBox::Slot()
+                                .VAlign(VAlign_Center)
+                                .AutoWidth()
+                                .Padding(FMargin(0.f, 0.f, 20.f, 0.f))
                                 [
-                                    SNew(SImage)
-                                    .Image(InArgs._IconOverlayBrush)
+                                    EditableLabel.ToSharedRef()
                                 ]
-
-                                + SOverlay::Slot()
+                                // Arbitrary customization slot
+                                + SHorizontalBox::Slot()
+                                .HAlign(HAlign_Fill)
                                 [
-                                    SNew(SSpacer)
-                                    .Visibility(EVisibility::Visible)
-                                    .ToolTipText(InArgs._IconToolTipText)
+                                    InArgs._CustomContent.Widget
                                 ]
-                            ]
-
-                            // Label Slot
-                            + SHorizontalBox::Slot()
-                            .VAlign(VAlign_Center)
-                            .AutoWidth()
-                            .Padding(FMargin(0.f, 0.f, 20.f, 0.f))
-                            [
-                                EditableLabel.ToSharedRef()
-                            ]
-
-                            // Arbitrary customization slot
-                            + SHorizontalBox::Slot()
-                            .HAlign(HAlign_Fill)
-                            [
-                                InArgs._CustomContent.Widget
-                            ]
-                        ]
+                             ]
+                         ]
                     ]
                 ]
-            ]
-        ];
+            ];
 
     ChildSlot
     [
