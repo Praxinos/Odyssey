@@ -516,7 +516,6 @@ FOdysseyLayerStack::SetCurrentLayer( FOdysseyNTree< IOdysseyLayer* >* iLayer )
     mCurrentLayer = iLayer;
 }
 
-/*
 void
 FOdysseyLayerStack::DeleteLayer( IOdysseyLayer* iLayerToDelete )
 {
