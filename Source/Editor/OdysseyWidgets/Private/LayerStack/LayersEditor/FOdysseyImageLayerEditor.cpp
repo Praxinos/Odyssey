@@ -94,7 +94,7 @@ void FOdysseyImageLayerEditor::HandleAddFolderLayerMenuEntryExecute()
     FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&LayerStackRef.Get());
     
     if( model->GetLayerStackData()->GetCurrentLayer() )
-        model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() + 1 );
+        model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), FName(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() + 1 );
     else
         model->GetLayerStackData()->AddFolderLayer();
     model->GetLayerStackWidget()->GetTreeView()->Refresh();

@@ -283,17 +283,23 @@ FOdysseyLayerStack::AddImageLayerFromData( FOdysseyBlock* iData, FName iName, in
 }
 
 FOdysseyFolderLayer*
-FOdysseyLayerStack::AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex )
+FOdysseyLayerStack::AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName, int iAtIndex )
 {
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( GetNextLayerName() );
+    if( iName == FName() )
+        iName = GetNextLayerName();
+    
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName );
     mCurrentLayer = iPosition->AddNode( layer, iAtIndex );
     return layer;
 }
 
 FOdysseyFolderLayer*
-FOdysseyLayerStack::AddFolderLayer( int iAtIndex )
+FOdysseyLayerStack::AddFolderLayer( FName iName, int iAtIndex )
 {
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( GetNextLayerName() );
+    if( iName == FName() )
+        iName = GetNextLayerName();
+    
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName );
     mCurrentLayer = mLayers->AddNode( layer, iAtIndex );
     return layer;
 }
@@ -438,8 +444,8 @@ void FOdysseyLayerStack::DuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
     else if( nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kFolder )
     {
         // we need to duplicate the content of the folder as well as the folder
-        static_cast<FOdysseyFolderLayer*>( nodeToDuplicate->GetNodeContent() );
-        FOdysseyFolderLayer* currentFolderLayer = AddFolderLayer( nodeToDuplicate->GetParent(), nodeToDuplicate->GetIndexInParent() + 1 );
+        FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( nodeToDuplicate->GetNodeContent() );
+        FOdysseyFolderLayer* currentFolderLayer = AddFolderLayer( nodeToDuplicate->GetParent(), FName( *( folderLayer->GetName().ToString() + FString( "_Copy" ) ) ), nodeToDuplicate->GetIndexInParent() + 1 );
         
         FOdysseyNTree<IOdysseyLayer*>* currentNode = mLayers->FindNode( currentFolderLayer );
         TArray<IOdysseyLayer*> layersInFolder = TArray<IOdysseyLayer*>();
@@ -450,12 +456,12 @@ void FOdysseyLayerStack::DuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
         {
             if( indexesFolder.Num() != 0 )
             {
-                indexesFolder.Last()--;
                 if( indexesFolder.Last() <= 0 )
                 {
                     currentNode = currentNode->GetParent();
                     indexesFolder.Pop();
                 }
+                indexesFolder.Last()--;
             }
             
             if( layersInFolder[i]->GetType() == IOdysseyLayer::eType::kImage )
@@ -468,7 +474,7 @@ void FOdysseyLayerStack::DuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
             else if( layersInFolder[i]->GetType() == IOdysseyLayer::eType::kFolder )
             {
                 indexesFolder.Add( mLayers->FindNode( layersInFolder[i] )->GetNodes()->Num() );
-                FOdysseyFolderLayer* folderLayer = AddFolderLayer( currentNode );
+                folderLayer = AddFolderLayer( currentNode, layersInFolder[i]->GetName() );
                 currentNode = mLayers->FindNode( folderLayer );
             }
         }

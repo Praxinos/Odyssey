@@ -50,8 +50,8 @@ public:
     FOdysseyImageLayer*                             AddImageLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
     FOdysseyImageLayer*                             AddImageLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
        
-    FOdysseyFolderLayer*                            AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
-    FOdysseyFolderLayer*                            AddFolderLayer( int iAtIndex = -1 );
+    FOdysseyFolderLayer*                            AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
+    FOdysseyFolderLayer*                            AddFolderLayer( FName iName = FName(), int iAtIndex = -1 );
 
     FOdysseyNTree< IOdysseyLayer* >*                GetLayers();
     FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayer() const;
