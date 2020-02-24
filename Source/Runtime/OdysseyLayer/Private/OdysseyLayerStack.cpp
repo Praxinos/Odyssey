@@ -105,37 +105,75 @@ FOdysseyLayerStack::GetResultBlock()
 void
 FOdysseyLayerStack::ComputeResultBlock()
 {
+    ::ULIS::FPerformanceOptions performanceOptions;
+    performanceOptions.desired_workers = 1;
+    ::ULIS::FRect canvasRect = ::ULIS::FRect( 0, 0, mWidth, mHeight );
+    ::ULIS::FClearFillContext::Clear( mResultBlock->GetIBlock(), performanceOptions, false );
+    
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
     mLayers->DepthFirstSearchTree( &layers, false );
     
-    ::ULIS::FClearFillContext::Clear( mResultBlock->GetIBlock() );
+    TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* >();
+    
     for( int i = layers.Num() - 1; i >= 0 ; i-- )
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
         if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
         {
             FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
-
-            if( imageLayer )
-                ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity() );
+            FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
+            FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
+            
+            if( parentNode->GetNodeContent() != NULL ) //This means the imageLayer is inside a folder
+            {
+                bool visible = true;
+                while( parentNode->GetNodeContent() != NULL )
+                {
+                    //If a folder above isn't visible, we don't add this image layer to the result block
+                    if( !parentNode->GetNodeContent()->IsVisible() )
+                        visible = false;
+                    
+                    parentNode = parentNode->GetParent();
+                }
+                if( visible )
+                {
+                    if( folderBlocks.Contains(imageNode->GetParent() ) )
+                    {
+                        ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), folderBlocks[imageNode->GetParent()]->GetIBlock(), canvasRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                    }
+                    else
+                    {
+                        FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
+                        ::ULIS::FClearFillContext::Clear( block->GetIBlock(), performanceOptions, false  );
+                        ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), block->GetIBlock(), canvasRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                        
+                        folderBlocks.Add(imageNode->GetParent(), block );
+                    }
+                }
+            }
+            else //Image layer is at the root
+            {
+                ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), canvasRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+            }
         }
         else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() )
         {
-            FOdysseyNTree<IOdysseyLayer*>* nodeFolder = mLayers->FindNode( layers[i] );
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
             FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
 
-            FOdysseyBlock* blockFolder = ComputeBlockOfLayers( nodeFolder );
-            
-            if( blockFolder )
-                ::ULIS::FBlendingContext::Blend( blockFolder->GetIBlock(), mResultBlock->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), folderLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, folderLayer->GetOpacity() );
-            
-            TArray< IOdysseyLayer* > layersFolder = TArray<IOdysseyLayer*>();
-            nodeFolder->DepthFirstSearchTree( &layersFolder, false );
-            i = i - layersFolder.Num();
+            if( folderBlocks.Contains( folderNode ) ) //Time to blend the folder unto the resultBlock
+            {
+                ::ULIS::FBlendingContext::Blend( folderBlocks[folderNode]->GetIBlock(), mResultBlock->GetIBlock(), canvasRect, folderLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false  );
+            }
         }
     }
 
     mResultBlock->GetIBlock()->Invalidate();
+    
+    for (auto& elem : folderBlocks)
+    {
+        delete elem.Value;
+    }
 }
 
 void
@@ -144,23 +182,71 @@ FOdysseyLayerStack::ComputeResultBlock( const ::ULIS::FRect& iRect )
     ::ULIS::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
     ::ULIS::FClearFillContext::ClearRect( mResultBlock->GetIBlock(), iRect, performanceOptions, false );
-
+    
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
     mLayers->DepthFirstSearchTree( &layers, false );
+    
+    TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* >();
     
     for( int i = layers.Num() - 1; i >= 0 ; i-- )
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type != IOdysseyLayer::eType::kImage || !layers[i]->IsVisible() )
-            continue;
+        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
+            FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
+            FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
+            
+            if( parentNode->GetNodeContent() != NULL ) //This means the imageLayer is inside a folder
+            {
+                bool visible = true;
+                while( parentNode->GetNodeContent() != NULL )
+                {
+                    //If a folder above isn't visible, we don't add this image layer to the result block
+                    if( !parentNode->GetNodeContent()->IsVisible() )
+                        visible = false;
+                    
+                    parentNode = parentNode->GetParent();
+                }
+                if( visible )
+                {
+                    if( folderBlocks.Contains(imageNode->GetParent() ) )
+                    {
+                        ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), folderBlocks[imageNode->GetParent()]->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false  );
+                    }
+                    else
+                    {
+                        FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
+                        ::ULIS::FClearFillContext::Clear( block->GetIBlock(), performanceOptions, false  );
+                        ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), block->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false  );
+                        
+                        folderBlocks.Add(imageNode->GetParent(), block );
+                    }
+                }
+            }
+            else //Image layer is at the root
+            {
+                ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false  );
+            }
+        }
+        else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() )
+        {
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
 
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
-
-        if( imageLayer )
-            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+            if( folderBlocks.Contains( folderNode ) ) //Time to blend the folder unto the resultBlock
+            {
+                ::ULIS::FBlendingContext::Blend( folderBlocks[folderNode]->GetIBlock(), mResultBlock->GetIBlock(), iRect, folderLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false  );
+            }
+        }
     }
 
-    mResultBlock->GetIBlock()->Invalidate( iRect );
+    mResultBlock->GetIBlock()->Invalidate(iRect);
+    
+    for (auto& elem : folderBlocks)
+    {
+        delete elem.Value;
+    }
 }
 
 void
@@ -173,28 +259,103 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
     mLayers->DepthFirstSearchTree( &layers, false );
     
+    TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* >();
+    
     for( int i = layers.Num() - 1; i >= 0 ; i-- )
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type != IOdysseyLayer::eType::kImage || !layers[i]->IsVisible() )
-            continue;
-
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
-
-        if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
+        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
         {
-            ::ULIS::FPoint pos( iRect.x, iRect.y );
-            ::ULIS::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetIBlock(), mTempBlock->GetIBlock(), iRect, pos, performanceOptions );
-            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ULIS::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
-            ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
+            FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
+            FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
+            
+            if( parentNode->GetNodeContent() != NULL ) //This means the imageLayer is inside a folder
+            {
+                bool visible = true;
+                while( parentNode->GetNodeContent() != NULL )
+                {
+                    //If a folder above isn't visible, we don't add this image layer to the result block
+                    if( !parentNode->GetNodeContent()->IsVisible() )
+                        visible = false;
+                    
+                    parentNode = parentNode->GetParent();
+                }
+                if( visible )
+                {
+                    if( folderBlocks.Contains(imageNode->GetParent() ) )
+                    {
+                        if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
+                        {
+                            ::ULIS::FPoint pos( iRect.x, iRect.y );
+                            ::ULIS::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetIBlock(), mTempBlock->GetIBlock(), iRect, pos, performanceOptions );
+                            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ULIS::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
+                            ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), folderBlocks[imageNode->GetParent()]->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                        }
+                        else
+                        {
+                            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), folderBlocks[imageNode->GetParent()]->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                        }
+                    }
+                    else
+                    {
+                        if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
+                        {
+                            FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
+                            ::ULIS::FClearFillContext::Clear( block->GetIBlock(), performanceOptions, false  );
+                            
+                            ::ULIS::FPoint pos( iRect.x, iRect.y );
+                            ::ULIS::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetIBlock(), mTempBlock->GetIBlock(), iRect, pos, performanceOptions );
+                            ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ULIS::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
+                            ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), block->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                            
+                            folderBlocks.Add(imageNode->GetParent(), block );
+                        }
+                        else
+                        {
+                            FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
+                            ::ULIS::FClearFillContext::Clear( block->GetIBlock(), performanceOptions, false );
+                            
+                            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), block->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                            
+                            folderBlocks.Add(imageNode->GetParent(), block );
+                        }
+                    }
+                }
+            }
+            else //Image layer is at the root
+            {
+                if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
+                {
+                    ::ULIS::FPoint pos( iRect.x, iRect.y );
+                    ::ULIS::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetIBlock(), mTempBlock->GetIBlock(), iRect, pos, performanceOptions );
+                    ::ULIS::FBlendingContext::Blend( iTempBuffer->GetIBlock(), mTempBlock->GetIBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ULIS::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
+                    ::ULIS::FBlendingContext::Blend( mTempBlock->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                }
+                else if( imageLayer )
+                {
+                    ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                }
+            }
         }
-        else if( imageLayer )
+        else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() )
         {
-            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), mResultBlock->GetIBlock(), iRect, imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
+
+            if( folderBlocks.Contains( folderNode ) ) //Time to blend the folder unto the resultBlock
+            {
+                ::ULIS::FBlendingContext::Blend( folderBlocks[folderNode]->GetIBlock(), mResultBlock->GetIBlock(), iRect, folderLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false );
+            }
         }
     }
 
-    mResultBlock->GetIBlock()->Invalidate( iRect );
+    mResultBlock->GetIBlock()->Invalidate(iRect);
+    
+    for (auto& elem : folderBlocks)
+    {
+        delete elem.Value;
+    }
 }
 
 void
@@ -385,10 +546,12 @@ FOdysseyLayerStack::DeleteLayer( IOdysseyLayer* iLayerToDelete )
 
 void FOdysseyLayerStack::MergeDownLayer( IOdysseyLayer* iLayerToMergeDown )
 {
+    ::ULIS::FPerformanceOptions performanceOptions;
+    performanceOptions.desired_workers = 1;
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
     mLayers->DepthFirstSearchTree( &layers, false );
     
-    ::ULIS::FClearFillContext::Clear( mResultBlock->GetIBlock() );
+    ::ULIS::FClearFillContext::Clear( mResultBlock->GetIBlock(), performanceOptions, false );
     for( int i = 0; i < layers.Num(); i++ )
     {
         if( layers[i] == iLayerToMergeDown && layers[i]->GetType() == IOdysseyLayer::eType::kImage && i != (layers.Num() - 1) && layers[i + 1]->GetType() == IOdysseyLayer::eType::kImage )
@@ -398,7 +561,7 @@ void FOdysseyLayerStack::MergeDownLayer( IOdysseyLayer* iLayerToMergeDown )
 
             if( imageLayer1 && imageLayer2 )
             {
-                ::ULIS::FBlendingContext::Blend( imageLayer1->GetBlock()->GetIBlock(), imageLayer2->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer1->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, 1.f );
+                ::ULIS::FBlendingContext::Blend( imageLayer1->GetBlock()->GetIBlock(), imageLayer2->GetBlock()->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer1->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, 1.f, performanceOptions, false );
             }
             DeleteLayer( layers[i] );
             break;
@@ -550,25 +713,40 @@ FOdysseyLayerStack::ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLaye
 {
     checkf( iLayers != NULL, TEXT("Passed NullPtr to ComputeBlockOfLayers of FOdysseyLayerStack") );
     
-    TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    iLayers->DepthFirstSearchTree( &layers, false );
+    ::ULIS::FPerformanceOptions performanceOptions;
+    performanceOptions.desired_workers = 1;
     
     FOdysseyBlock* resultBlock = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-    ::ULIS::FClearFillContext::Clear( resultBlock->GetIBlock() );
+    ::ULIS::FClearFillContext::Clear( resultBlock->GetIBlock(), performanceOptions, false );
+    
+    if( !iLayers->GetNodeContent()->IsVisible() )
+        return resultBlock;
+    
+    TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
+    iLayers->DepthFirstSearchTree( &layers, false );
     
     for( int i = layers.Num() - 1; i >= 0 ; i-- )
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type != IOdysseyLayer::eType::kImage || !layers[i]->IsVisible() )
-            continue;
-
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
-
-        if( imageLayer )
-            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), resultBlock->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity() );
+        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
+            
+            ::ULIS::FBlendingContext::Blend( imageLayer->GetBlock()->GetIBlock(), resultBlock->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), imageLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+        }
+        else if( type == IOdysseyLayer::eType::kFolder )
+        {
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
+            
+            TArray<IOdysseyLayer*> layersInFolder = TArray<IOdysseyLayer*>();
+            folderNode->DepthFirstSearchTree( &layersInFolder, false );
+            i-=layersInFolder.Num();
+            
+            if( folderLayer->IsVisible() )
+                ::ULIS::FBlendingContext::Blend( ComputeBlockOfLayers( folderNode )->GetIBlock(), resultBlock->GetIBlock(), ::ULIS::FRect( 0, 0, mWidth, mHeight ), folderLayer->GetBlendingMode(), ::ULIS::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false );
+        }
     }
-
-    resultBlock->GetIBlock()->Invalidate();
     
     return resultBlock;
 }
