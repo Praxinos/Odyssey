@@ -15,7 +15,7 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
-    , IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
+    //, IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
     , mBlock( nullptr )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
@@ -29,7 +29,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
-    , IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
+    //, IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
     , mBlock( iBlock )
     , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
     , mOpacity( 1.0f )

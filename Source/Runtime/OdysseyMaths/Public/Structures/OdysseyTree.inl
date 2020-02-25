@@ -295,8 +295,6 @@ FOdysseyNTree<T>::HasForParent(FOdysseyNTree<T>* iParentToSearch) const
 
 
 class IOdysseyLayer;
-class OdysseyImageLayer;
-class OdysseyFolderLayer;
 
 inline FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree )
 {
@@ -304,22 +302,29 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveN
     {
         int numNodes = ioSaveNTree.mNodes.Num();
         
-        Ar << ioSaveNTree.mNodeContent;
+        Ar << &(ioSaveNTree.mNodeContent);
         
         Ar << numNodes;
+
         for( int i = 0; i < numNodes; i++ )
             Ar << (*ioSaveNTree.mNodes[i]);
     }
     else if( Ar.IsLoading() )
     {
         int numNodes;
-        Ar << ioSaveNTree.mNodeContent;
+        
+        if( ioSaveNTree.mParent ) //The root is empty, we don't load it
+        {
+            Ar << &(ioSaveNTree.mNodeContent);
+        }
+        
         Ar << numNodes;
+        
         for( int i = 0; i < numNodes; i++ )
         {
             FOdysseyNTree<IOdysseyLayer*>* newNode = new FOdysseyNTree<IOdysseyLayer*>(NULL);
-            Ar << *newNode;
             ioSaveNTree.AddNode( newNode );
+            Ar << *newNode;
         }
     }
     

@@ -5,22 +5,16 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
-#include "Engine/Texture.h"
 #include "IOdysseyLayer.h"
-#include "OdysseyBlock.h"
-#include "IOdysseySerializable.h"
-
 #include <ULIS_BLENDINGMODES>
-#include <ULIS_CORE>
 
 
 class FOdysseyBlock;
-class UTexture2D;
 
 /**
  * Implements a layer which contains an image
  */
-class ODYSSEYLAYER_API FOdysseyImageLayer : public IOdysseyLayer, IOdysseySerializable
+class ODYSSEYLAYER_API FOdysseyImageLayer : public IOdysseyLayer
 {
 public:
     // Construction / Destruction

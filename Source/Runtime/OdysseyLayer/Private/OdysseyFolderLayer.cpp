@@ -21,12 +21,6 @@ FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
 
 //---
 
-IOdysseyLayer::eType
-FOdysseyFolderLayer::GetType() const
-{
-    return eType::kFolder;
-}
-
 ::ULIS::eBlendingMode
 FOdysseyFolderLayer::GetBlendingMode()
 {

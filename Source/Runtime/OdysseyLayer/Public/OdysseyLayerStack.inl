@@ -11,47 +11,16 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
         
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;
-    Ar << *(ioSaveLayerStack->mLayers);
     
-    ioSaveLayerStack->mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
-      
-    /*
-    if( Ar.IsSaving() )
+    Ar << *(ioSaveLayerStack->mLayers);
+        
+    if ( Ar.IsLoading() )
     {
-        int numLayers = ioSaveLayerStack->mLayers.Num();
-        Ar << numLayers;
-        
-        TArray<TSharedPtr<IOdysseyLayer>>* layers = ioSaveLayerStack->GetLayers();
+        ioSaveLayerStack->mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
+        ioSaveLayerStack->mIsInitialized = false;
 
-        for( int i = 0; i < numLayers; i++)
-        {
-            FOdysseyImageLayer* imageLayer = nullptr;
-            imageLayer = static_cast<FOdysseyImageLayer*> ((*layers)[i].Get());
-
-            if( imageLayer )
-            {
-                Ar << imageLayer;
-            }
-        }
-    }
-    else*/ if ( Ar.IsLoading() )
-    {
+        ioSaveLayerStack->Init( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight );
         
-        ioSaveLayerStack->mResultBlock = new FOdysseyBlock( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mTextureSourceFormat );
-        ioSaveLayerStack->mTempBlock = new FOdysseyBlock( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mTextureSourceFormat );
-        ::ULIS::FClearFillContext::Clear( ioSaveLayerStack->mResultBlock->GetIBlock() );
-        ::ULIS::FClearFillContext::Clear( ioSaveLayerStack->mTempBlock->GetIBlock() );
-        
-        /*
-        int numLayers;
-        Ar << numLayers;
-        for (int i = 0; i < numLayers; i++)
-        {
-            FOdysseyImageLayer* imageLayer = ioSaveLayerStack->AddLayer();
-            
-            Ar << imageLayer;
-        }
-     */
         ioSaveLayerStack->ComputeResultBlock();
     }
 

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/FOdysseyLayerStackModel.h"
-#include "OdysseyImageLayer.h"
+#include "IOdysseyLayer.h"
 
 class FOdysseyLayerStackModel;
 

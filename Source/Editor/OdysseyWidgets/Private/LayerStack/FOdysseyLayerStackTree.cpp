@@ -3,8 +3,7 @@
 
 #include "LayerStack/FOdysseyLayerStackTree.h"
 
-#include "OdysseyFolderLayer.h"
-#include "OdysseyImageLayer.h"
+#include "IOdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "LayerStack/LayersGUI/OdysseyFolderLayerNode.h"
 #include "LayerStack/LayersGUI/OdysseyImageLayerNode.h"

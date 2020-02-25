@@ -29,7 +29,7 @@
 #include "OdysseyBlock.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBrushBlueprint.h"
-#include "OdysseyImageLayer.h"
+#include "IOdysseyLayer.h"
 #include "OdysseyPainterEditorViewportClient.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseySurfaceViewport.h"

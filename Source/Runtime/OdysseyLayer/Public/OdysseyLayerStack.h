@@ -11,14 +11,10 @@
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
 #include "IOdysseyLayer.h"
-#include "OdysseyImageLayer.h"
-#include "OdysseyFolderLayer.h"
 #include "OdysseyTree.h"
 
 #include "OdysseyBlock.h"
 
-class IOdysseyLayer;
-class FOdysseyImageLayer;
 class FOdysseyDrawingUndo;
 
 
