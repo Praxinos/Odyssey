@@ -7,7 +7,6 @@
 
 inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
 {
-    UE_LOG(LogTemp, Display, TEXT("Save Image Layer"));
     if(!ioSaveImageLayer) return Ar;
     
     /*IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
