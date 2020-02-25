@@ -768,12 +768,11 @@ FOdysseyLayerStack::ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLaye
 FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
 {
     mLayerStackPtr = iLayerStack;
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer()->GetNodeContent() );
 
     mData = TArray<uint8>();
     
     //We reserve the maximum memory needed for a undo
-    mData.Reserve( imageLayer->GetBlock()->GetIBlock()->BytesTotal() );
+    mData.Reserve( iLayerStack->GetResultBlock()->GetIBlock()->BytesTotal() );
 
     mUndoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("undos.save") );
     mRedoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("redos.save") );
