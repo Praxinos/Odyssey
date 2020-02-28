@@ -57,14 +57,14 @@ private:
 private:
 
     /** The main LayerStack model */
-    FOdysseyLayerStackModel* LayerStackModelPtr;
+    FOdysseyLayerStackModel* mLayerStackModelPtr;
 
     /** The tree view responsible for the GUI of the layerStackTree */
-    TSharedPtr<SOdysseyLayerStackTreeView> TreeView;
+    TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 
     /** Extender to use for the 'add' menu */
-    TSharedPtr<FExtender> AddMenuExtender;
+    TSharedPtr<FExtender> mAddMenuExtender;
 
     /** CallBack for the creation of the 'add' menu */
-    FOnGetAddMenuContent OnGetAddMenuContent;
+    FOnGetAddMenuContent mOnGetAddMenuContent;
 };

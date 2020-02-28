@@ -23,9 +23,9 @@ class SOdysseyLayerStackOutlinerTreeNode : public SCompoundWidget
 {
 public:
     SOdysseyLayerStackOutlinerTreeNode()
-        : ExpandedBackgroundBrush( NULL )
-        , CollapsedBackgroundBrush( NULL )
-        , InnerBackgroundBrush( NULL )
+        : mExpandedBackgroundBrush( NULL )
+        , mCollapsedBackgroundBrush( NULL )
+        , mInnerBackgroundBrush( NULL )
     {}
 
     ~SOdysseyLayerStackOutlinerTreeNode();
@@ -45,18 +45,8 @@ public:
     /** Change the node's label text to edit mode. */
     void EnterRenameMode();
 
-    /**
-     * @return The display node used by this widget.
-     */
-    const TSharedPtr<OdysseyBaseLayerNode> GetLayerNode() const
-    {
-        return LayerNode;
-    }
-
-private:
-    // SWIDGET INTERFACE
-    void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-    void OnMouseLeave(const FPointerEvent& MouseEvent) override;
+    /** @return The display node used by this widget. */
+    const TSharedPtr<OdysseyBaseLayerNode> GetLayerNode() const;
 
 private:
     //PRIVATE API
@@ -109,32 +99,29 @@ private:
     /** Get all descendant nodes from the given root node. */
     void GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> RootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& AllNodes);
 
-    /** Called when the user clicks the track color */
-    TSharedRef<SWidget> OnGetColorPicker() const;
-
 private:
 
     /** Layout node the widget is visualizing. */
-    TSharedPtr<OdysseyBaseLayerNode> LayerNode;
+    TSharedPtr<OdysseyBaseLayerNode> mLayerNode;
 
     /** Holds the editable text label widget. */
-    TSharedPtr<SInlineEditableTextBlock> EditableLabel;
+    TSharedPtr<SInlineEditableTextBlock> mEditableLabel;
 
     /** True if this node is a top level node, at the root of the tree, false otherwise */
-    bool bIsOuterTopLevelNode;
+    bool mIsOuterTopLevelNode;
 
     /** True if this is a top level node inside or a folder, otherwise false. */
-    bool bIsInnerTopLevelNode;
+    bool mIsInnerTopLevelNode;
 
     /** Default background brush for this node when expanded */
-    const FSlateBrush* ExpandedBackgroundBrush;
+    const FSlateBrush* mExpandedBackgroundBrush;
 
     /** Default background brush for this node when collapsed */
-    const FSlateBrush* CollapsedBackgroundBrush;
+    const FSlateBrush* mCollapsedBackgroundBrush;
 
     /** The brush to use when drawing the background for the inner portion of the node. */
-    const FSlateBrush* InnerBackgroundBrush;
+    const FSlateBrush* mInnerBackgroundBrush;
 
     /** The table row style used for nodes in the tree. This is required as we don't actually use the tree for selection. */
-    const FTableRowStyle* TableRowStyle;
+    const FTableRowStyle* mTableRowStyle;
 };

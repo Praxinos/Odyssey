@@ -20,27 +20,15 @@ TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::N
 {
     TSharedRef<FOdysseyLayerStackNodeDragDropOp> NewOp = MakeShareable(new FOdysseyLayerStackNodeDragDropOp);
 
-    NewOp->DraggedNodes = InDraggedNodes;
-    NewOp->DefaultHoverText = NewOp->CurrentHoverText = InDefaultText;
-    NewOp->DefaultHoverIcon = NewOp->CurrentIconBrush = InDefaultIcon;
+    NewOp->mDraggedNodes = InDraggedNodes;
+    NewOp->mDefaultHoverText = NewOp->mCurrentHoverText = InDefaultText;
+    NewOp->mDefaultHoverIcon = NewOp->mCurrentIconBrush = InDefaultIcon;
 
     NewOp->Construct();
     return NewOp;
 }
 
 //INTERFACE IMPLEMENTATION-----------------------
-
-    //~ FGraphEditorDragDropAction interface
-void FOdysseyLayerStackNodeDragDropOp::HoverTargetChanged()
-{
-
-}
-
-FReply FOdysseyLayerStackNodeDragDropOp::DroppedOnPanel( const TSharedRef< class SWidget >& Panel, FVector2D ScreenPosition, FVector2D GraphPosition, UEdGraph& Graph)
-{
-    return FReply::Unhandled();
-}
-
 
 void FOdysseyLayerStackNodeDragDropOp::Construct()
 {
@@ -75,16 +63,38 @@ void FOdysseyLayerStackNodeDragDropOp::Construct()
 
 //PUBLIC API-------------------------------------
 
+FText FOdysseyLayerStackNodeDragDropOp::GetDecoratorText() const
+{
+    return mCurrentHoverText;
+}
+
+const FSlateBrush* FOdysseyLayerStackNodeDragDropOp::GetDecoratorIcon() const
+{
+    return mCurrentIconBrush;
+}
+
 TArray<TSharedRef<OdysseyBaseLayerNode>>& FOdysseyLayerStackNodeDragDropOp::GetDraggedNodes()
 {
-    return DraggedNodes;
+    return mDraggedNodes;
+}
+
+const FSlateBrush* FOdysseyLayerStackNodeDragDropOp::GetCurrentIconBrush() const
+{
+    return mCurrentIconBrush;
+}
+
+
+void FOdysseyLayerStackNodeDragDropOp::SetCurrentIconBrush( const FSlateBrush* iNewIconBrush )
+{
+    mCurrentIconBrush = iNewIconBrush;
 }
 
 void FOdysseyLayerStackNodeDragDropOp::ResetToDefaultToolTip()
 {
-    CurrentHoverText = DefaultHoverText;
-    CurrentIconBrush = DefaultHoverIcon;
+    mCurrentHoverText = mDefaultHoverText;
+    mCurrentIconBrush = mDefaultHoverIcon;
 }
+
 
 //-----------------------------------------------
 

@@ -55,8 +55,8 @@ protected:
 
 
 private:
-    SHorizontalBox::FSlot* OpacityText;
-    SHorizontalBox::FSlot* BlendingModeText;
+    SHorizontalBox::FSlot* mOpacityText;
+    SHorizontalBox::FSlot* mBlendingModeText;
 
 
 };

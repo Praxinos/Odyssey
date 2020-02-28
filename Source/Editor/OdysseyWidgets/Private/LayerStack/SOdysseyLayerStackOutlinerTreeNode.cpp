@@ -31,33 +31,33 @@
 //CONSTRUCTION/DESTRUCTION--------------------------------------
 SOdysseyLayerStackOutlinerTreeNode::~SOdysseyLayerStackOutlinerTreeNode()
 {
-    LayerNode->OnRenameRequested().RemoveAll(this);
+    mLayerNode->OnRenameRequested().RemoveAll(this);
 }
 
 
 
 void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node, const TSharedRef<SOdysseyLayerStackViewRow>& InTableRow )
 {
-    LayerNode = Node;
-    bIsOuterTopLevelNode = !Node->GetParent().IsValid();
+    mLayerNode = Node;
+    mIsOuterTopLevelNode = !Node->GetParent().IsValid();
 
     auto NodeHeight = [=]() -> FOptionalSize { return Node->GetNodeHeight(); };
 
     FMargin InnerNodePadding;
-    if ( bIsInnerTopLevelNode )
+    if ( mIsInnerTopLevelNode )
     {
-        InnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" );
+        mInnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" );
         InnerNodePadding = FMargin(0.f, 1.f);
     }
     else
     {
-        InnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TransparentBorder" );
+        mInnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TransparentBorder" );
         InnerNodePadding = FMargin(0.f);
     }
 
     FSlateFontInfo NodeFont = FEditorStyle::GetFontStyle("Sequencer.AnimationOutliner.RegularFont");
 
-    EditableLabel = SNew( SInlineEditableTextBlock )
+    mEditableLabel = SNew( SInlineEditableTextBlock )
     .IsReadOnly(this, &SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelIsReadOnly )
     .Font(NodeFont)
     .ColorAndOpacity(this, &SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameColor)
@@ -117,7 +117,7 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
                                 .AutoWidth()
                                 .Padding(FMargin(0.f, 0.f, 20.f, 0.f))
                                 [
-                                    EditableLabel.ToSharedRef()
+                                    mEditableLabel.ToSharedRef()
                                 ]
                                 // Arbitrary customization slot
                                 + SHorizontalBox::Slot()
@@ -141,43 +141,34 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
 
 void SOdysseyLayerStackOutlinerTreeNode::EnterRenameMode()
 {
-    EditableLabel->EnterEditingMode();
+    mEditableLabel->EnterEditingMode();
 }
 
+const TSharedPtr<OdysseyBaseLayerNode> SOdysseyLayerStackOutlinerTreeNode::GetLayerNode() const
+{
+    return mLayerNode;
+}
 
 void SOdysseyLayerStackOutlinerTreeNode::GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> RootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& AllNodes)
 {
 
 }
 
-void SOdysseyLayerStackOutlinerTreeNode::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-
-}
-
-void SOdysseyLayerStackOutlinerTreeNode::OnMouseLeave(const FPointerEvent& MouseEvent)
-{
-
-}
+//PRIVATE API ----------------------------------------------------
 
 const FSlateBrush* SOdysseyLayerStackOutlinerTreeNode::GetNodeBorderImage() const
 {
-    return LayerNode->IsExpanded() ? ExpandedBackgroundBrush : CollapsedBackgroundBrush;
+    return mLayerNode->IsExpanded() ? mExpandedBackgroundBrush : mCollapsedBackgroundBrush;
 }
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetNodeBackgroundTint() const
 {
-    return bIsOuterTopLevelNode ? FLinearColor(FColor(48, 48, 48, 255)) : FLinearColor(FColor(62, 62, 62, 255));
+    return mIsOuterTopLevelNode ? FLinearColor(FColor(48, 48, 48, 255)) : FLinearColor(FColor(62, 62, 62, 255));
 }
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetNodeInnerBackgroundTint() const
 {
     return FLinearColor( 0.f, 0.f, 0.f, 0.f );
-}
-
-TSharedRef<SWidget> SOdysseyLayerStackOutlinerTreeNode::OnGetColorPicker() const
-{
-    return SNullWidget::NullWidget;
 }
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetTrackColorTint() const
@@ -187,43 +178,43 @@ FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetTrackColorTint() const
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetForegroundBasedOnSelection() const
 {
-    return TableRowStyle->SelectedTextColor;
+    return mTableRowStyle->SelectedTextColor;
 }
 
 
 EVisibility SOdysseyLayerStackOutlinerTreeNode::GetExpanderVisibility() const
 {
-    return LayerNode->GetNumChildren() > 0 ? EVisibility::Visible : EVisibility::Hidden;
+    return mLayerNode->GetNumChildren() > 0 ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameColor() const
 {
-    return LayerNode->GetDisplayNameColor();
+    return mLayerNode->GetDisplayNameColor();
 }
 
 
 FText SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameToolTipText() const
 {
-    return LayerNode->GetDisplayNameToolTipText();
+    return mLayerNode->GetDisplayNameToolTipText();
 }
 
 
 FText SOdysseyLayerStackOutlinerTreeNode::GetDisplayName() const
 {
-    return LayerNode->GetDisplayName();
+    return mLayerNode->GetDisplayName();
 }
 
 
 bool SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelIsReadOnly() const
 {
-    return !LayerNode->CanRenameNode();
+    return !mLayerNode->CanRenameNode();
 }
 
 
 void SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged(const FText& NewLabel, ETextCommit::Type iType)
 {
-    LayerNode->SetDisplayName(NewLabel);
+    mLayerNode->SetDisplayName(NewLabel);
 }
 
 

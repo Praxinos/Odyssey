@@ -17,65 +17,41 @@ class FOdysseyLayerStackNodeDragDropOp : public FGraphEditorDragDropAction
 {
 public: //STATIC
 
-    /**
-     * Construct a new drag/drop operation for dragging a selection of display nodes
-     */
+    /** Construct a new drag/drop operation for dragging a selection of display nodes */
     static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<OdysseyBaseLayerNode>>& InDraggedNodes, FText InDefaultText, const FSlateBrush* InDefaultIcon);
 
 public: //INTERFACE IMPLEMENTATION
-
-    //~ FGraphEditorDragDropAction interface
-    virtual void HoverTargetChanged() override;
-    virtual FReply DroppedOnPanel( const TSharedRef< class SWidget >& Panel, FVector2D ScreenPosition, FVector2D GraphPosition, UEdGraph& Graph) override;
-
     //~ FDragDropOperation interface
     virtual void Construct() override;
 
 public: //PUBLIC API
 
-    /**
-     * Get the current decorator text
-     */
-    FText GetDecoratorText() const
-    {
-        return CurrentHoverText;
-    }
+    FText GetDecoratorText() const;
 
-    /**
-     * Get the current decorator icon
-     */
-    const FSlateBrush* GetDecoratorIcon() const
-    {
-        return CurrentIconBrush;
-    }
-
-    /**
-     * Reset the tooltip decorator back to its original state
-     */
-    void ResetToDefaultToolTip();
+    const FSlateBrush* GetDecoratorIcon() const;
 
     TArray<TSharedRef<OdysseyBaseLayerNode>>& GetDraggedNodes();
 
-public: //PUBLIC MEMBERS
+    const FSlateBrush* GetCurrentIconBrush() const;
 
-    /**
-     * Current string to show as the decorator text
-     */
-    FText CurrentHoverText;
+    void SetCurrentIconBrush( const FSlateBrush* iNewIconBrush );
 
-    /**
-     * Current icon to be displayed on the decorator
-     */
-    const FSlateBrush* CurrentIconBrush;
+    void ResetToDefaultToolTip();
 
 private:
+    
+    /** Current string to show as the decorator text */
+    FText mCurrentHoverText;
 
+    /** Current icon to be displayed on the decorator */
+    const FSlateBrush* mCurrentIconBrush;
+    
     /** The nodes currently being dragged. */
-    TArray<TSharedRef<OdysseyBaseLayerNode>> DraggedNodes;
+    TArray<TSharedRef<OdysseyBaseLayerNode>> mDraggedNodes;
 
     /** Default string to show as hover text */
-    FText DefaultHoverText;
+    FText mDefaultHoverText;
 
     /** Default icon to be displayed */
-    const FSlateBrush* DefaultHoverIcon;
+    const FSlateBrush* mDefaultHoverIcon;
 };

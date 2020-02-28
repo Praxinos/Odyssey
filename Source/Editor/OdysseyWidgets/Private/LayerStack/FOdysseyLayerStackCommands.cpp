@@ -7,11 +7,9 @@
 
 void FOdysseyLayerStackCommands::RegisterCommands()
 {
-    UI_COMMAND( TestOption, "Test Option", "A Test Option", EUserInterfaceActionType::Button, FInputChord(EKeys::SpaceBar) );
+    UI_COMMAND(mMergeDownLayer, "Merge Layer Down", "Merge Layer Down", EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_COMMAND(MergeDownLayer, "Merge Layer Down", "Merge Layer Down", EUserInterfaceActionType::Button, FInputChord() );
-
-    UI_COMMAND(DeleteLayer, "Delete Layer", "Delete Layer", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND(mDeleteLayer, "Delete Layer", "Delete Layer", EUserInterfaceActionType::Button, FInputChord() );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -47,8 +47,8 @@ private:
 
 
 private:
-    TSharedPtr<FText> CurrentBlendingMode;
-    TArray< TSharedPtr<FText> > BlendingModes;
+    TSharedPtr<FText> mCurrentBlendingMode;
+    TArray< TSharedPtr<FText> > mBlendingModes;
 
-    TSharedPtr<SComboBox<TSharedPtr<FText> > > BlendingModeComboBox;
+    TSharedPtr<SComboBox<TSharedPtr<FText> > > mBlendingModeComboBox;
 };

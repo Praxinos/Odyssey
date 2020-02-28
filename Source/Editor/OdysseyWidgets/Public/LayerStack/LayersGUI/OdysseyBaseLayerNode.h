@@ -68,7 +68,7 @@ public:
 public: //EVENTS
 
     DECLARE_EVENT(OdysseyBaseLayerNode, FRequestRenameEvent);
-    FRequestRenameEvent& OnRenameRequested() { return RenameRequestedEvent; }
+    FRequestRenameEvent& OnRenameRequested() { return mRenameRequestedEvent; }
 
 
 public: // PUBLIC API
@@ -201,7 +201,7 @@ public: // PUBLIC API
      */
     FName GetNodeName() const
     {
-        return NodeName;
+        return mNodeName;
     }
 
     /**
@@ -209,7 +209,7 @@ public: // PUBLIC API
      */
     uint32 GetNumChildren() const
     {
-        return ChildNodes.Num();
+        return mChildNodes.Num();
     }
 
     /**
@@ -217,7 +217,7 @@ public: // PUBLIC API
      */
     const TArray<TSharedRef<OdysseyBaseLayerNode>>& GetChildNodes() const
     {
-        return ChildNodes;
+        return mChildNodes;
     }
 
     /**
@@ -225,7 +225,7 @@ public: // PUBLIC API
      */
     TSharedPtr<OdysseyBaseLayerNode> GetParent() const
     {
-        return ParentNode.Pin();
+        return mParentNode.Pin();
     }
 
     /**
@@ -233,25 +233,25 @@ public: // PUBLIC API
      */
     TSharedRef<OdysseyBaseLayerNode> GetOutermostParent()
     {
-        TSharedPtr<OdysseyBaseLayerNode> Parent = ParentNode.Pin();
+        TSharedPtr<OdysseyBaseLayerNode> Parent = mParentNode.Pin();
         return Parent.IsValid() ? Parent->GetOutermostParent() : AsShared();
     }
 
     /** Gets the layerStack that owns this node */
     FOdysseyLayerStackModel& GetLayerStack() const
     {
-        return ParentTree.GetLayerStack();
+        return mParentTree.GetLayerStack();
     }
 
     /** Gets the parent tree that this node is in */
     FOdysseyLayerStackTree& GetParentTree() const
     {
-        return ParentTree;
+        return mParentTree;
     }
 
     IOdysseyLayer* GetLayerDataPtr() const
     {
-        return LayerDataPtr;
+        return mLayerDataPtr;
     }
 
     /**
@@ -282,13 +282,13 @@ public: // PUBLIC API
     /** @return this node's virtual offset from the top of the tree, irrespective of expansion states */
     float GetVirtualTop() const
     {
-        return VirtualTop;
+        return mVirtualTop;
     }
 
     /** @return this node's virtual offset plus its virtual height, irrespective of expansion states */
     float GetVirtualBottom() const
     {
-        return VirtualBottom;
+        return mVirtualBottom;
     }
 
     /**
@@ -307,7 +307,7 @@ public: // PUBLIC API
     virtual void Drop( const TArray<TSharedRef<OdysseyBaseLayerNode>>& DraggedNodes, EItemDropZone DropZone ) { }
 
     /** Clears the parent of this node. */
-    void ClearParent() { ParentNode = nullptr; }
+    void ClearParent() { mParentNode = nullptr; }
 
     void MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<OdysseyBaseLayerNode> CurrentNode );
 
@@ -328,31 +328,31 @@ private: // HANDLES
 protected:
 
     /** The virtual offset of this item from the top of the tree, irrespective of expansion states. */
-    float VirtualTop;
+    float mVirtualTop;
 
     /** The virtual offset + virtual height of this item, irrespective of expansion states. */
-    float VirtualBottom;
+    float mVirtualBottom;
 
 
 protected:
     /** The parent of this node*/
-    TWeakPtr<OdysseyBaseLayerNode> ParentNode;
+    TWeakPtr<OdysseyBaseLayerNode> mParentNode;
 
     /** List of children belonging to this node */
-    TArray<TSharedRef<OdysseyBaseLayerNode>> ChildNodes;
+    TArray<TSharedRef<OdysseyBaseLayerNode>> mChildNodes;
 
     /** Parent tree that this node is in */
-    FOdysseyLayerStackTree& ParentTree;
+    FOdysseyLayerStackTree& mParentTree;
 
     /** The name identifier of this node */
-    FName NodeName;
+    FName mNodeName;
 
     /** Whether or not the node is expanded */
-    bool bExpanded;
+    bool mExpanded;
 
     /** Event that is triggered when rename is requested */
-    FRequestRenameEvent RenameRequestedEvent;
+    FRequestRenameEvent mRenameRequestedEvent;
 
     /** The interface ptr to the data represented by this node, only used as verification purposes */
-    IOdysseyLayer* LayerDataPtr;
+    IOdysseyLayer* mLayerDataPtr;
 };

@@ -13,8 +13,12 @@ typedef TSharedRef<OdysseyBaseLayerNode> OdysseyBaseLayerNodeRef;
 
 struct FHighlightRegion
 {
-    FHighlightRegion(float InTop, float InBottom) : Top(InTop), Bottom(InBottom) {}
-    float Top, Bottom;
+    FHighlightRegion(float InTop, float InBottom)
+    : mTop(InTop)
+    , mBottom(InBottom)
+    {}
+    
+    float mTop, mBottom;
 };
 
 
@@ -25,13 +29,20 @@ struct FLayerStackTreeViewColumn
 {
     typedef TFunction<TSharedRef<SWidget>(const OdysseyBaseLayerNodeRef&, const TSharedRef<SOdysseyLayerStackViewRow>&)> FOnGenerate;
 
-    FLayerStackTreeViewColumn(const FOnGenerate& InOnGenerate, const TAttribute<float>& InWidth) : Generator(InOnGenerate), Width(InWidth) {}
-    FLayerStackTreeViewColumn(FOnGenerate&& InOnGenerate, const TAttribute<float>& InWidth) : Generator(MoveTemp(InOnGenerate)), Width(InWidth) {}
+    FLayerStackTreeViewColumn(const FOnGenerate& InOnGenerate, const TAttribute<float>& InWidth)
+    : mGenerator(InOnGenerate)
+    , mWidth(InWidth)
+    {}
+    
+    FLayerStackTreeViewColumn(FOnGenerate&& InOnGenerate, const TAttribute<float>& InWidth)
+    : mGenerator(MoveTemp(InOnGenerate))
+    , mWidth(InWidth)
+    {}
 
     /** Function used to generate a cell for this column */
-    FOnGenerate Generator;
+    FOnGenerate mGenerator;
     /** Attribute specifying the width of this column */
-    TAttribute<float> Width;
+    TAttribute<float> mWidth;
 };
 
 
@@ -62,7 +73,7 @@ public:
 public:
     //PUBLIC API
     /** Access the underlying tree data */
-    TSharedPtr<FOdysseyLayerStackTree> GetNodeTree() { return LayerStackNodeTree; }
+    TSharedPtr<FOdysseyLayerStackTree> GetNodeTree() { return mLayerStackNodeTree; }
 
     /** Refresh this tree as a result of the underlying tree data changing */
     void Refresh( int OverrideNewSelectedNodeIndex = -1 );
@@ -97,35 +108,35 @@ protected:
 private:
 
     /** The tree view's header row (hidden) */
-    TSharedPtr<SHeaderRow> HeaderRow;
+    TSharedPtr<SHeaderRow> mHeaderRow;
 
     /** Pointer to the node tree data that is used to populate this tree */
-    TSharedPtr<FOdysseyLayerStackTree> LayerStackNodeTree;
+    TSharedPtr<FOdysseyLayerStackTree> mLayerStackNodeTree;
 
     /** Cached copy of the root nodes from the tree data */
-    TArray<OdysseyBaseLayerNodeRef> RootNodes;
+    TArray<OdysseyBaseLayerNodeRef> mRootNodes;
 
     /** The current selected node */
-    TSharedPtr<OdysseyBaseLayerNode> SelectedNode;
+    TSharedPtr<OdysseyBaseLayerNode> mSelectedNode;
 
     /** Column definitions for each of the columns in the tree view */
-    TMap<FName, FLayerStackTreeViewColumn> Columns;
+    TMap<FName, FLayerStackTreeViewColumn> mColumns;
 
     /** A global highlight for the currently hovered tree node hierarchy */
-    TOptional<FHighlightRegion> HighlightRegion;
+    TOptional<FHighlightRegion> mHighlightRegion;
 
     /** When true, the LayerStack selection is being updated from a change in the tree selection. */
-    bool bUpdatingLayerStackSelection;
+    bool mUpdatingLayerStackSelection;
 
     /** When true, the tree selection is being updated from a change in the LayerStack selection. */
-    bool bUpdatingTreeSelection;
+    bool mUpdatingTreeSelection;
 
-    FOnGetContextMenuContent OnGetContextMenuContent;
+    FOnGetContextMenuContent mOnGetContextMenuContent;
 
     //TSharedRef<FUICommandList> Commands;
 
     /** The property view of the currentSelected Node */
-    SVerticalBox::FSlot*  PropertyView;
+    SVerticalBox::FSlot*  mPropertyView;
 
 };
 
@@ -175,15 +186,15 @@ private: //CALLBACKS
 
 private:
     /** The item associated with this row of data */
-    mutable TWeakPtr<OdysseyBaseLayerNode> Node;
+    mutable TWeakPtr<OdysseyBaseLayerNode> mNode;
 
     /** Delegate to call to create a new widget for a particular column. */
-    FOnGenerateWidgetForColumn OnGenerateWidgetForColumn;
+    FOnGenerateWidgetForColumn mOnGenerateWidgetForColumn;
 
     /** Column definitions for each of the columns in the tree view */
-    TMap<FName, FLayerStackTreeViewColumn> Columns;
+    TMap<FName, FLayerStackTreeViewColumn> mColumns;
 
     /** A ptr to our tree view, so we can control our selection */
-    SOdysseyLayerStackTreeView* TreeView;
+    SOdysseyLayerStackTreeView* mTreeView;
 
 };

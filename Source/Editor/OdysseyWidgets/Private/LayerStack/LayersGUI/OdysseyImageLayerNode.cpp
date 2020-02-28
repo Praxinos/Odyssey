@@ -34,9 +34,9 @@ float OdysseyImageLayerNode::GetNodeHeight() const
 FNodePadding OdysseyImageLayerNode::GetNodePadding() const
 {
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
+    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
     
-    float leftPadding = (ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( LayerDataPtr )->GetNumberParents() - 1) * 10;
+    float leftPadding = (mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr )->GetNumberParents() - 1) * 10;
         
     return FNodePadding(leftPadding, 4, 4);
 }
@@ -84,7 +84,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
         +SHorizontalBox::Slot()
         .HAlign( HAlign_Left )
         .VAlign( VAlign_Center )
-        .Expose( BlendingModeText )
+        .Expose( mBlendingModeText )
         [
             SNew(STextBlock).Text( layer->GetBlendingModeAsText() )
         ]
@@ -92,7 +92,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
         +SHorizontalBox::Slot()
         .HAlign( HAlign_Left )
         .VAlign( VAlign_Center )
-        .Expose( OpacityText )
+        .Expose( mOpacityText )
         [
             SNew(STextBlock).Text( FText::AsPercent( layer->GetOpacity() ) )
         ]
@@ -156,28 +156,28 @@ void OdysseyImageLayerNode::BuildContextMenu(FMenuBuilder& MenuBuilder)
             LOCTEXT("DeleteLayer", "Delete"),
             LOCTEXT("DeleteLayerTooltip", "Delete this Layer"),
             FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentBrowser.AssetActions.Delete"),
-                                     FUIAction(FExecuteAction::CreateSP(&(ParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDeleteLayer, LayerDataPtr),
+                                     FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDeleteLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &OdysseyImageLayerNode::HandleDeleteLayerCanExecute)));
 
             MenuBuilder.AddMenuEntry(
             LOCTEXT("MergeDownLayer", "Merge Down"),
             LOCTEXT("MergeDownLayerTooltip", "Merge this Layer Down"),
             FSlateIcon(FEditorStyle::GetStyleSetName(), "MergeDownIcon"),
-                                     FUIAction(FExecuteAction::CreateSP(&(ParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnMergeLayerDown, LayerDataPtr),
+                                     FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnMergeLayerDown, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &OdysseyImageLayerNode::HandleMergeLayerDownCanExecute)));
         
             MenuBuilder.AddMenuEntry(
             LOCTEXT("DuplicateLayer", "Duplicate Layer"),
             LOCTEXT("DuplicateLayerTooltip", "Duplicate this Layer"),
             FSlateIcon(FEditorStyle::GetStyleSetName(), "DuplicateLayerIcon"),
-                                     FUIAction(FExecuteAction::CreateSP(&(ParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDuplicateLayer, LayerDataPtr),
+                                     FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDuplicateLayer, mLayerDataPtr),
                                      FCanExecuteAction::CreateSP(this, &OdysseyImageLayerNode::HandleDuplicateLayerCanExecute)));
     }
 }
 
 bool OdysseyImageLayerNode::IsHidden() const
 {
-    FOdysseyNTree<IOdysseyLayer*>* layerNode = ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( LayerDataPtr );
+    FOdysseyNTree<IOdysseyLayer*>* layerNode = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr );
 
     while( layerNode->GetParent()->GetNodeContent() != NULL )
     {
@@ -203,13 +203,13 @@ bool OdysseyImageLayerNode::HandleMergeLayerDownCanExecute() const
 {
     //We can only merge down to another image layer
     
-    int currentIndex = ParentTree.GetLayerStack().GetLayerStackData()->GetCurrentLayerAsIndex();
+    int currentIndex = mParentTree.GetLayerStack().GetLayerStackData()->GetCurrentLayerAsIndex();
     
-    if( currentIndex == (ParentTree.GetRootNodes().Num() - 1) )
+    if( currentIndex == (mParentTree.GetRootNodes().Num() - 1) )
         return false;
         
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layers, false );
+    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layers, false );
     
     return (layers[currentIndex + 1]->GetType() == IOdysseyLayer::eType::kImage);
     
@@ -264,23 +264,23 @@ FReply OdysseyImageLayerNode::OnToggleAlphaLocked()
 
 void OdysseyImageLayerNode::RefreshOpacityText() const
 {
-    if( OpacityText )
+    if( mOpacityText )
     {
         FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>( GetLayerDataPtr() );
 
-        OpacityText->DetachWidget();
-        OpacityText->AttachWidget( SNew(STextBlock).Text( FText::AsPercent( layer->GetOpacity() ) ) );
+        mOpacityText->DetachWidget();
+        mOpacityText->AttachWidget( SNew(STextBlock).Text( FText::AsPercent( layer->GetOpacity() ) ) );
     }
 }
 
 void OdysseyImageLayerNode::RefreshBlendingModeText() const
 {
-    if( BlendingModeText )
+    if( mBlendingModeText )
     {
         FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>( GetLayerDataPtr() );
 
-        BlendingModeText->DetachWidget();
-        BlendingModeText->AttachWidget( SNew(STextBlock).Text( layer->GetBlendingModeAsText() ) );
+        mBlendingModeText->DetachWidget();
+        mBlendingModeText->AttachWidget( SNew(STextBlock).Text( layer->GetBlendingModeAsText() ) );
     }
 }
 

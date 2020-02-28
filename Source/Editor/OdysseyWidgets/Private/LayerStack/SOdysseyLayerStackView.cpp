@@ -27,9 +27,9 @@ SOdysseyLayerStackView::~SOdysseyLayerStackView()
 
 void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 {
-    LayerStackModelPtr = new FOdysseyLayerStackModel( MakeShareable( this ), InArgs._LayerStackData );
+    mLayerStackModelPtr = new FOdysseyLayerStackModel( MakeShareable( this ), InArgs._LayerStackData );
 
-    SAssignNew(TreeView, SOdysseyLayerStackTreeView, LayerStackModelPtr->GetNodeTree());
+    SAssignNew(mTreeView, SOdysseyLayerStackTreeView, mLayerStackModelPtr->GetNodeTree());
 
     ChildSlot
     [
@@ -38,7 +38,7 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
         + SVerticalBox::Slot()
         .AutoHeight()
         .Padding( 16.f )
-        .Expose( TreeView->GetPropertyView() )
+        .Expose( mTreeView->GetPropertyView() )
         [
             SNullWidget::NullWidget
         ]
@@ -62,14 +62,14 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
                 .ScrollBarAlwaysVisible(false)
                 +SScrollBox::Slot()
                 [
-                    TreeView.ToSharedRef()
+                    mTreeView.ToSharedRef()
                 ]
             ]
         ]
     ];
 
-    TreeView->GetNodeTree()->Update();
-    TreeView->Refresh();
+    mTreeView->GetNodeTree()->Update();
+    mTreeView->Refresh();
 }
 
 
@@ -77,12 +77,12 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 
 TSharedPtr<SOdysseyLayerStackTreeView> SOdysseyLayerStackView::GetTreeView() const
 {
-    return TreeView;
+    return mTreeView;
 }
 
 void SOdysseyLayerStackView::RefreshView()
 {
-    TreeView->Refresh();
+    mTreeView->Refresh();
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -91,9 +91,9 @@ void SOdysseyLayerStackView::GetContextMenuContent(FMenuBuilder& MenuBuilder)
 {
     MenuBuilder.BeginSection("AddLayers");
 
-    if (LayerStackModelPtr)
+    if (mLayerStackModelPtr)
     {
-        LayerStackModelPtr->BuildAddLayerMenu(MenuBuilder);
+        mLayerStackModelPtr->BuildAddLayerMenu(MenuBuilder);
     }
 
     MenuBuilder.EndSection();
@@ -117,7 +117,6 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
             .TextStyle(FEditorStyle::Get(), "NormalText.Important")
             .Font(FEditorStyle::Get().GetFontStyle("FontAwesome.10"))
             .Text(FEditorFontGlyphs::Plus)
-            //.IsEnabled_Lambda([=]() { return !SequencerPtr.Pin()->IsReadOnly(); })
         ]
 
         + SHorizontalBox::Slot()
@@ -127,7 +126,6 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
             SNew(STextBlock)
             .TextStyle(FEditorStyle::Get(), "NormalText.Important")
             .Text(LOCTEXT("Layer", "Layer"))
-            //.IsEnabled_Lambda([=]() { return !SequencerPtr.Pin()->IsReadOnly(); })
         ]
 
         + SHorizontalBox::Slot()
@@ -139,14 +137,13 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()
             .TextStyle(FEditorStyle::Get(), "NormalText.Important")
             .Font(FEditorStyle::Get().GetFontStyle("FontAwesome.10"))
             .Text(FEditorFontGlyphs::Caret_Down)
-            //.IsEnabled_Lambda([=]() { return !SequencerPtr.Pin()->IsReadOnly(); })
         ]
      ];
 }
 
 TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddMenu()
 {
-    FMenuBuilder MenuBuilder(true, nullptr, AddMenuExtender);
+    FMenuBuilder MenuBuilder(true, nullptr, mAddMenuExtender);
     {
         GetContextMenuContent(MenuBuilder);
     }

@@ -22,13 +22,9 @@ public:
     )
     {}
 
-    /** Test option */
-    TSharedPtr< FUICommandInfo > TestOption;
+    TSharedPtr< FUICommandInfo > mMergeDownLayer;
 
-    TSharedPtr< FUICommandInfo > MergeDownLayer;
-
-    TSharedPtr< FUICommandInfo > DeleteLayer;
-
+    TSharedPtr< FUICommandInfo > mDeleteLayer;
 
     /**
      * Initialize commands

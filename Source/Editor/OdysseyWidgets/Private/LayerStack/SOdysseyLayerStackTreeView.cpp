@@ -17,20 +17,20 @@
 
 void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs, const TSharedRef<FOdysseyLayerStackTree>& InNodeTree)
 {
-    LayerStackNodeTree = InNodeTree;
-    LayerStackNodeTree->OnUpdated().AddRaw(this, &SOdysseyLayerStackTreeView::Refresh, -1);
+    mLayerStackNodeTree = InNodeTree;
+    mLayerStackNodeTree->OnUpdated().AddRaw(this, &SOdysseyLayerStackTreeView::Refresh, -1);
 
     FOdysseyLayerStackModel LayerStackModel = InNodeTree->GetLayerStack();
 
     HeaderRow = SNew(SHeaderRow).Visibility(EVisibility::Collapsed);
-    OnGetContextMenuContent = InArgs._OnGetContextMenuContent;
+    mOnGetContextMenuContent = InArgs._OnGetContextMenuContent;
 
     SetupColumns(InArgs);
 
     STreeView::Construct
     (
      STreeView::FArguments()
-     .TreeItemsSource(&RootNodes)
+     .TreeItemsSource(&mRootNodes)
      .SelectionMode(ESelectionMode::Single)
      .OnGenerateRow(this, &SOdysseyLayerStackTreeView::OnGenerateRow)
      .OnGetChildren(this, &SOdysseyLayerStackTreeView::OnGetChildren)
@@ -41,7 +41,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs, const TShar
      .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
      );
 
-    SelectedNode = nullptr;
+    mSelectedNode = nullptr;
 }
 
 
@@ -49,15 +49,15 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs, const TShar
 
 TSharedPtr<SWidget> SOdysseyLayerStackTreeView::OnContextMenuOpening()
 {
-    if( SelectedNode )
+    if( mSelectedNode )
     {
-        return SelectedNode->OnSummonContextMenu();
+        return mSelectedNode->OnSummonContextMenu();
     }
 
     const bool bShouldCloseWindowAfterMenuSelection = true;
-    FMenuBuilder MenuBuilder(bShouldCloseWindowAfterMenuSelection, LayerStackNodeTree->GetLayerStack().GetCommandBindings());
+    FMenuBuilder MenuBuilder(bShouldCloseWindowAfterMenuSelection, mLayerStackNodeTree->GetLayerStack().GetCommandBindings());
 
-    OnGetContextMenuContent.ExecuteIfBound(MenuBuilder);
+    mOnGetContextMenuContent.ExecuteIfBound(MenuBuilder);
 
     return MenuBuilder.MakeWidget();
 }
@@ -68,19 +68,19 @@ void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<OdysseyBaseLayerN
 
     if( InSelectedNode )
     {
-        int index = (RootNodes.Num() - 1) - RootNodes.Find(InSelectedNode.ToSharedRef()); //We have the nodes in the inverse order than the odysseyLayerStackData for GUI purposes
-        LayerStackNodeTree->GetLayerStack().GetLayerStackData()->SetCurrentLayer( InSelectedNode->GetLayerDataPtr() );
-        SelectedNode = InSelectedNode;
-        this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
+        int index = (mRootNodes.Num() - 1) - mRootNodes.Find(InSelectedNode.ToSharedRef()); //We have the nodes in the inverse order than the odysseyLayerStackData for GUI purposes
+        mLayerStackNodeTree->GetLayerStack().GetLayerStackData()->SetCurrentLayer( InSelectedNode->GetLayerDataPtr() );
+        mSelectedNode = InSelectedNode;
+        this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
     }
-    else if( SelectedNode )
+    else if( mSelectedNode )
     {
         //Stay selected
-        this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
+        this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
     }
 
-    PropertyView->DetachWidget();
-    PropertyView->AttachWidget( SelectedNode->GenerateContainerWidgetForPropertyView() );
+    mPropertyView->DetachWidget();
+    mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
 }
 
 TSharedRef<ITableRow> SOdysseyLayerStackTreeView::OnGenerateRow(OdysseyBaseLayerNodeRef InDisplayNode, const TSharedRef<STableViewBase>& OwnerTable)
@@ -95,11 +95,11 @@ TSharedRef<ITableRow> SOdysseyLayerStackTreeView::OnGenerateRow(OdysseyBaseLayer
 
 TSharedRef<SWidget> SOdysseyLayerStackTreeView::GenerateWidgetForColumn(const OdysseyBaseLayerNodeRef& InNode, const FName& ColumnId, const TSharedRef<SOdysseyLayerStackViewRow>& Row) const
 {
-    const auto* Definition = Columns.Find(ColumnId);
+    const auto* Definition = mColumns.Find(ColumnId);
 
     if (ensureMsgf(Definition, TEXT("Invalid column name specified")))
     {
-        return Definition->Generator(InNode, Row);
+        return Definition->mGenerator(InNode, Row);
     }
 
     return SNullWidget::NullWidget;
@@ -120,33 +120,33 @@ void SOdysseyLayerStackTreeView::OnGetChildren(OdysseyBaseLayerNodeRef InParent,
 
 void SOdysseyLayerStackTreeView::Refresh( int OverrideNewSelectedNodeIndex /* = -1*/ )
 {
-    int NumberOfNodes = LayerStackNodeTree->GetRootNodes().Num();
+    int NumberOfNodes = mLayerStackNodeTree->GetRootNodes().Num();
 
     //We reset the copy of the root nodes
-    RootNodes.Reset( NumberOfNodes );
+    mRootNodes.Reset( NumberOfNodes );
 
-    int indexCurrentNode = LayerStackNodeTree->Update();
+    int indexCurrentNode = mLayerStackNodeTree->Update();
 
     //Refresh the treeView and the selected node
     if( OverrideNewSelectedNodeIndex == -1 )
     {
-        if( LayerStackNodeTree->GetRootNodes().Num() > 0 )
+        if( mLayerStackNodeTree->GetRootNodes().Num() > 0 )
         {
             this->Private_ClearSelection();
-            SelectedNode = LayerStackNodeTree->GetRootNodes()[indexCurrentNode];
-            this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
+            mSelectedNode = mLayerStackNodeTree->GetRootNodes()[indexCurrentNode];
+            this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
         }
     }
-    else if( OverrideNewSelectedNodeIndex >= 0 && OverrideNewSelectedNodeIndex < LayerStackNodeTree->GetRootNodes().Num() )
+    else if( OverrideNewSelectedNodeIndex >= 0 && OverrideNewSelectedNodeIndex < mLayerStackNodeTree->GetRootNodes().Num() )
     {
         this->Private_ClearSelection();
-        SelectedNode = LayerStackNodeTree->GetRootNodes()[OverrideNewSelectedNodeIndex];
-        this->Private_SetItemSelection( SelectedNode.ToSharedRef(), true );
+        mSelectedNode = mLayerStackNodeTree->GetRootNodes()[OverrideNewSelectedNodeIndex];
+        this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
     }
 
     //Refresh the selected node related areas
 
-    for (const auto& RootNode : LayerStackNodeTree->GetRootNodes())
+    for (const auto& RootNode : mLayerStackNodeTree->GetRootNodes())
     {
         if (RootNode->IsExpanded())
         {
@@ -155,14 +155,14 @@ void SOdysseyLayerStackTreeView::Refresh( int OverrideNewSelectedNodeIndex /* = 
 
         if (!RootNode->IsHidden())
         {
-            RootNodes.Add(RootNode);
+            mRootNodes.Add(RootNode);
         }
     }
 
-    if( PropertyView )
+    if( mPropertyView )
     {
-        PropertyView->DetachWidget();
-        PropertyView->AttachWidget( SelectedNode->GenerateContainerWidgetForPropertyView() );
+        mPropertyView->DetachWidget();
+        mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
     }
 
     //STreeView Refresh
@@ -172,12 +172,12 @@ void SOdysseyLayerStackTreeView::Refresh( int OverrideNewSelectedNodeIndex /* = 
 TSharedPtr<OdysseyBaseLayerNode>
 SOdysseyLayerStackTreeView::GetSelectedNode()
 {
-    return SelectedNode;
+    return mSelectedNode;
 }
 
 SVerticalBox::FSlot*& SOdysseyLayerStackTreeView::GetPropertyView()
 {
-    return PropertyView;
+    return mPropertyView;
 }
 
 
@@ -186,7 +186,7 @@ SVerticalBox::FSlot*& SOdysseyLayerStackTreeView::GetPropertyView()
 
 void SOdysseyLayerStackTreeView::SetupColumns(const FArguments& InArgs)
 {
-    FOdysseyLayerStackModel& LayerStackModel = LayerStackNodeTree->GetLayerStack();
+    FOdysseyLayerStackModel& LayerStackModel = mLayerStackNodeTree->GetLayerStack();
 
     // Define a column for the Outliner
     auto GenerateOutliner = [=](const OdysseyBaseLayerNodeRef& InNode, const TSharedRef<SOdysseyLayerStackViewRow>& InRow)
@@ -194,14 +194,14 @@ void SOdysseyLayerStackTreeView::SetupColumns(const FArguments& InArgs)
         return InNode->GenerateContainerWidgetForOutliner(InRow);
     };
 
-    Columns.Add("Outliner", FLayerStackTreeViewColumn(GenerateOutliner, 1.f));
+    mColumns.Add("Outliner", FLayerStackTreeViewColumn(GenerateOutliner, 1.f));
 
     // Now populate the header row with the columns
-    for (auto& Pair : Columns)
+    for (auto& Pair : mColumns)
     {
             HeaderRow->AddColumn(
                 SHeaderRow::Column(Pair.Key)
-                .FillWidth(Pair.Value.Width));
+                .FillWidth(Pair.Value.mWidth));
     }
 }
 
@@ -223,9 +223,9 @@ SOdysseyLayerStackViewRow::~SOdysseyLayerStackViewRow()
 void SOdysseyLayerStackViewRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTableView, const OdysseyBaseLayerNodeRef& InNode)
 {
     //static_cast is dangerous, but we're sure that our owner table is of SOdysseyLayerStackTreeView type
-    TreeView = static_cast<SOdysseyLayerStackTreeView*>(&OwnerTableView.Get());
-    Node = InNode;
-    OnGenerateWidgetForColumn = InArgs._OnGenerateWidgetForColumn;
+    mTreeView = static_cast<SOdysseyLayerStackTreeView*>(&OwnerTableView.Get());
+    mNode = InNode;
+    mOnGenerateWidgetForColumn = InArgs._OnGenerateWidgetForColumn;
     bool bIsSelectable = InNode->IsSelectable();
 
     SMultiColumnTableRow::Construct(
@@ -240,10 +240,10 @@ void SOdysseyLayerStackViewRow::Construct(const FArguments& InArgs, const TShare
 
 TSharedRef<SWidget> SOdysseyLayerStackViewRow::GenerateWidgetForColumn(const FName& ColumnId)
 {
-    auto PinnedNode = Node.Pin();
+    auto PinnedNode = mNode.Pin();
     if (PinnedNode.IsValid())
     {
-        return OnGenerateWidgetForColumn.Execute(PinnedNode.ToSharedRef(), ColumnId, SharedThis(this));
+        return mOnGenerateWidgetForColumn.Execute(PinnedNode.ToSharedRef(), ColumnId, SharedThis(this));
     }
 
     return SNullWidget::NullWidget;
@@ -254,8 +254,8 @@ TSharedRef<SWidget> SOdysseyLayerStackViewRow::GenerateWidgetForColumn(const FNa
 
 FReply SOdysseyLayerStackViewRow::OnDragDetected( const FGeometry& InGeometry, const FPointerEvent& InPointerEvent )
 {
-    TSharedPtr<OdysseyBaseLayerNode> DisplayNode = Node.Pin();
-    TreeView->OnSelectionChanged( DisplayNode );
+    TSharedPtr<OdysseyBaseLayerNode> DisplayNode = mNode.Pin();
+    mTreeView->OnSelectionChanged( DisplayNode );
 
     if ( DisplayNode.IsValid() )
     {
@@ -281,7 +281,7 @@ TOptional<EItemDropZone> SOdysseyLayerStackViewRow::OnCanAcceptDrop( const FDrag
         TOptional<EItemDropZone> AllowedDropZone = DisplayNode->CanDrop( *DragDropOp, InItemDropZone );
         if ( AllowedDropZone.IsSet() == false )
         {
-            DragDropOp->CurrentIconBrush = FEditorStyle::GetBrush( TEXT( "Graph.ConnectorFeedback.Error" ) );
+            DragDropOp->SetCurrentIconBrush( FEditorStyle::GetBrush( TEXT( "Graph.ConnectorFeedback.Error" ) ) );
         }
         return AllowedDropZone;
     }
@@ -294,8 +294,8 @@ FReply SOdysseyLayerStackViewRow::OnAcceptDrop( const FDragDropEvent& DragDropEv
     if ( DragDropOp.IsValid())
     {
         DisplayNode->Drop( DragDropOp->GetDraggedNodes(), InItemDropZone );
-        TreeView->OnSelectionChanged( DragDropOp->GetDraggedNodes()[0] );
-        TreeView->Refresh();
+        mTreeView->OnSelectionChanged( DragDropOp->GetDraggedNodes()[0] );
+        mTreeView->Refresh();
 
         return FReply::Handled();
     }

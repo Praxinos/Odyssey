@@ -11,53 +11,48 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStackTree"
 
+//CONSTRUCTION-------------------------------------
+
+FOdysseyLayerStackTree::FOdysseyLayerStackTree( FOdysseyLayerStackModel& InLayerStack )
+    : mLayerStack(InLayerStack)
+{}
 
 //PUBLIC API-------------------------------------
 
 void FOdysseyLayerStackTree::Empty()
 {
-    RootNodes.Empty();
-    HoveredNode = nullptr;
+    mRootNodes.Empty();
 }
 
 
 int FOdysseyLayerStackTree::Update()
 {
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    LayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
+    mLayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
     
-    TArray< TSharedRef<OdysseyBaseLayerNode> > rootNodesCopy = RootNodes;
+    TArray< TSharedRef<OdysseyBaseLayerNode> > rootNodesCopy = mRootNodes;
     Empty();
 
     for( int i = 0; i < layersData.Num(); i++ )
     {
         if( layersData[i]->GetType() == IOdysseyLayer::eType::kImage )
-            RootNodes.Add( MakeShareable(new OdysseyImageLayerNode( *(static_cast<FOdysseyImageLayer*> (layersData[i])), nullptr, *this )) );
+            mRootNodes.Add( MakeShareable(new OdysseyImageLayerNode( *(static_cast<FOdysseyImageLayer*> (layersData[i])), nullptr, *this )) );
         else if( layersData[i]->GetType() == IOdysseyLayer::eType::kFolder )
-            RootNodes.Add( MakeShareable(new OdysseyFolderLayerNode( *(static_cast<FOdysseyFolderLayer*> (layersData[i])), nullptr, *this )) );
+            mRootNodes.Add( MakeShareable(new OdysseyFolderLayerNode( *(static_cast<FOdysseyFolderLayer*> (layersData[i])), nullptr, *this )) );
     }
     
-    return LayerStack.GetLayerStackData()->GetCurrentLayerAsIndex();
+    return mLayerStack.GetLayerStackData()->GetCurrentLayerAsIndex();
+}
+
+FOdysseyLayerStackModel& FOdysseyLayerStackTree::GetLayerStack()
+{
+    return mLayerStack;
 }
 
 const TArray< TSharedRef<OdysseyBaseLayerNode> >& FOdysseyLayerStackTree::GetRootNodes() const
 {
-    return RootNodes;
+    return mRootNodes;
 }
-
-void FOdysseyLayerStackTree::SetHoveredNode(const TSharedPtr<OdysseyBaseLayerNode>& InHoveredNode)
-{
-    if (InHoveredNode != HoveredNode)
-    {
-        HoveredNode = InHoveredNode;
-    }
-}
-
-const TSharedPtr<OdysseyBaseLayerNode>& FOdysseyLayerStackTree::GetHoveredNode() const
-{
-    return HoveredNode;
-}
-
 
 //---------------------------------------------
 

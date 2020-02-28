@@ -17,13 +17,13 @@
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
 OdysseyBaseLayerNode::OdysseyBaseLayerNode( FName InNodeName, TSharedPtr<OdysseyBaseLayerNode> InParentNode, FOdysseyLayerStackTree& InParentTree, IOdysseyLayer* InLayerDataPtr )
-    : VirtualTop( 0.f )
-    , VirtualBottom( 0.f )
-    , ParentNode( InParentNode )
-    , ParentTree( InParentTree )
-    , NodeName( InNodeName )
-    , bExpanded( false )
-    , LayerDataPtr( InLayerDataPtr )
+    : mVirtualTop( 0.f )
+    , mVirtualBottom( 0.f )
+    , mParentNode( InParentNode )
+    , mParentTree( InParentTree )
+    , mNodeName( InNodeName )
+    , mExpanded( false )
+    , mLayerDataPtr( InLayerDataPtr )
 {
 }
 
@@ -36,12 +36,12 @@ bool OdysseyBaseLayerNode::CanRenameNode() const
 
 FText OdysseyBaseLayerNode::GetDisplayName() const
 {
-    return FText::FromName( LayerDataPtr->GetName() );
+    return FText::FromName( mLayerDataPtr->GetName() );
 }
 
 void OdysseyBaseLayerNode::SetDisplayName(const FText& NewDisplayName)
 {
-    LayerDataPtr->SetName( FName( *NewDisplayName.ToString() ) );
+    mLayerDataPtr->SetName( FName( *NewDisplayName.ToString() ) );
 }
 
 FLinearColor OdysseyBaseLayerNode::GetDisplayNameColor() const
@@ -90,10 +90,10 @@ FString OdysseyBaseLayerNode::GetPathName() const
     // First get our parent's path
     FString PathName;
 
-    if (ParentNode.IsValid())
+    if (mParentNode.IsValid())
     {
-        ensure(ParentNode != SharedThis(this));
-        PathName = ParentNode.Pin()->GetPathName() + TEXT(".");
+        ensure(mParentNode != SharedThis(this));
+        PathName = mParentNode.Pin()->GetPathName() + TEXT(".");
     }
 
     //then append our path
@@ -105,7 +105,7 @@ FString OdysseyBaseLayerNode::GetPathName() const
 TSharedPtr<SWidget> OdysseyBaseLayerNode::OnSummonContextMenu()
 {
     const bool bShouldCloseWindowAfterMenuSelection = true;
-    FMenuBuilder MenuBuilder(bShouldCloseWindowAfterMenuSelection, ParentTree.GetLayerStack().GetCommandBindings());
+    FMenuBuilder MenuBuilder(bShouldCloseWindowAfterMenuSelection, mParentTree.GetLayerStack().GetCommandBindings());
     BuildContextMenu(MenuBuilder);
 
     return MenuBuilder.MakeWidget();
@@ -113,13 +113,13 @@ TSharedPtr<SWidget> OdysseyBaseLayerNode::OnSummonContextMenu()
 
 void OdysseyBaseLayerNode::SetExpansionState(bool bInExpanded)
 {
-    bExpanded = bInExpanded;
+    mExpanded = bInExpanded;
 }
 
 
 bool OdysseyBaseLayerNode::IsExpanded() const
 {
-    return bExpanded;
+    return mExpanded;
 }
 
 
@@ -136,8 +136,8 @@ bool OdysseyBaseLayerNode::IsHovered() const
 
 void OdysseyBaseLayerNode::Initialize(float InVirtualTop, float InVirtualBottom)
 {
-    VirtualTop = InVirtualTop;
-    VirtualBottom = InVirtualBottom;
+    mVirtualTop = InVirtualTop;
+    mVirtualBottom = InVirtualBottom;
 }
 
 
@@ -145,22 +145,22 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
 {
     //TODO: make the same thing with callbacks so we don't have to manipulate the layer stack manually here
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
+    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
         
     int indexBase = -1;
-    for( int i = 0; i < ParentTree.GetRootNodes().Num(); i++)
+    for( int i = 0; i < mParentTree.GetRootNodes().Num(); i++)
     {
-        if( this == &(ParentTree.GetRootNodes())[i].Get())
+        if( this == &(mParentTree.GetRootNodes())[i].Get())
             indexBase = i;
     }
 
-    int indexTarget = ParentTree.GetRootNodes().Find( CurrentNode );
+    int indexTarget = mParentTree.GetRootNodes().Find( CurrentNode );
 
     if( indexBase == indexTarget )
         return;
         
-    FOdysseyNTree<IOdysseyLayer*>* layerBase = ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( layersData[indexBase] );
-    FOdysseyNTree<IOdysseyLayer*>* layerTarget = ParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( layersData[indexTarget] );
+    FOdysseyNTree<IOdysseyLayer*>* layerBase = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( layersData[indexBase] );
+    FOdysseyNTree<IOdysseyLayer*>* layerTarget = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( layersData[indexTarget] );
     
     //We can't move a folder inside itself, this would make the tree invalid, so, we prevent it.
     if( layersData[indexBase]->GetType() == IOdysseyLayer::eType::kFolder && layerTarget->HasForParent(layerBase) )
@@ -184,8 +184,8 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
     }
 
 
-    ParentTree.OnUpdated().Broadcast();
-    ParentTree.GetLayerStack().GetLayerStackData()->ComputeResultBlock();
+    mParentTree.OnUpdated().Broadcast();
+    mParentTree.GetLayerStack().GetLayerStackData()->ComputeResultBlock();
 }
 
 
@@ -193,15 +193,15 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
 
 void OdysseyBaseLayerNode::AddChildAndSetParent( TSharedRef<OdysseyBaseLayerNode> InChild )
 {
-    ChildNodes.Add( InChild );
-    InChild->ParentNode = SharedThis( this );
+    mChildNodes.Add( InChild );
+    InChild->mParentNode = SharedThis( this );
 }
 
 //HANDLES-------------------------------------------------------
 
 void OdysseyBaseLayerNode::HandleContextMenuRenameNodeExecute()
 {
-    RenameRequestedEvent.Broadcast();
+    mRenameRequestedEvent.Broadcast();
 }
 
 

@@ -49,12 +49,12 @@ protected:
     
 private:
     /** The brush used to draw the icon when this folder is open .*/
-    const FSlateBrush* FolderOpenBrush;
+    const FSlateBrush* mFolderOpenBrush;
 
     /** The brush used to draw the icon when this folder is closed. */
-    const FSlateBrush* FolderClosedBrush;
+    const FSlateBrush* mFolderClosedBrush;
     
 private:
-    SHorizontalBox::FSlot* OpacityText;
-    SHorizontalBox::FSlot* BlendingModeText;
+    SHorizontalBox::FSlot* mOpacityText;
+    SHorizontalBox::FSlot* mBlendingModeText;
 };

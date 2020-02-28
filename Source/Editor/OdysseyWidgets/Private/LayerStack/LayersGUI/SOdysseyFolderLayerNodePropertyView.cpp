@@ -45,7 +45,7 @@ void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, T
 
 TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> trackNode )
 {
-    BlendingModes = LayerStack->GetBlendingModesAsText();
+    mBlendingModes = LayerStack->GetBlendingModesAsText();
 
     TSharedRef<SWidget>    FinalWidget =
         SNew( SVerticalBox )
@@ -90,8 +90,8 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
              .FillWidth(0.5f)
              .VAlign( VAlign_Center )
              [
-                SAssignNew( BlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                .OptionsSource(&BlendingModes)
+                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+                .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem)
                 .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, FolderLayer, LayerStack, trackNode )
                 .Content()
@@ -136,9 +136,9 @@ void SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr
     TrackNode->RefreshBlendingModeText();
     LayerStack->ComputeResultBlock();
 
-    BlendingModeComboBox->SetContent(
+    mBlendingModeComboBox->SetContent(
         SNew(   SComboBox<TSharedPtr<FText>> )
-                .OptionsSource(&BlendingModes)
+                .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem)
                 .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, FolderLayer, LayerStack, TrackNode )
                 .Content()

@@ -44,7 +44,7 @@ void SOdysseyImageLayerNodePropertyView::Construct( const FArguments& InArgs, TS
 
 TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewForImageLayer( FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> trackNode )
 {
-    BlendingModes = LayerStack->GetBlendingModesAsText();
+    mBlendingModes = LayerStack->GetBlendingModesAsText();
 
     TSharedRef<SWidget>    FinalWidget =
         SNew( SVerticalBox )
@@ -89,8 +89,8 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
              .FillWidth(0.5f)
              .VAlign( VAlign_Center )
              [
-                SAssignNew( BlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                .OptionsSource(&BlendingModes)
+                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+                .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem)
                 .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, ImageLayer, LayerStack, trackNode )
                 .Content()
@@ -135,9 +135,9 @@ void SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<
     TrackNode->RefreshBlendingModeText();
     LayerStack->ComputeResultBlock();
 
-    BlendingModeComboBox->SetContent(
+    mBlendingModeComboBox->SetContent(
         SNew(   SComboBox<TSharedPtr<FText>> )
-                .OptionsSource(&BlendingModes)
+                .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem)
                 .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, ImageLayer, LayerStack, TrackNode )
                 .Content()
