@@ -18,7 +18,7 @@ class FOdysseyLayerStackNodeDragDropOp : public FGraphEditorDragDropAction
 public: //STATIC
 
     /** Construct a new drag/drop operation for dragging a selection of display nodes */
-    static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<OdysseyBaseLayerNode>>& InDraggedNodes, FText InDefaultText, const FSlateBrush* InDefaultIcon);
+    static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<OdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon);
 
 public: //INTERFACE IMPLEMENTATION
     //~ FDragDropOperation interface

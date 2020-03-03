@@ -11,10 +11,10 @@ class FOdysseyLayerStackModel;
 class FOdysseyLayerAddMenu
 {
 public:
-    FOdysseyLayerAddMenu( TSharedRef<FOdysseyLayerStackModel> InLayerStack );
+    FOdysseyLayerAddMenu( TSharedRef<FOdysseyLayerStackModel> iLayerStack );
 
 public:
-    void BuildAddLayerMenu(FMenuBuilder& MenuBuilder);
+    void BuildAddLayerMenu(FMenuBuilder& iMenuBuilder);
 
 private: //Callbacks
 

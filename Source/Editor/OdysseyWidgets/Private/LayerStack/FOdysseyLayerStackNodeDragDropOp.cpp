@@ -16,16 +16,16 @@
 //STATIC -------------------------------------------
 
 
-TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::New(TArray<TSharedRef<OdysseyBaseLayerNode>>& InDraggedNodes, FText InDefaultText, const FSlateBrush* InDefaultIcon)
+TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::New(TArray<TSharedRef<OdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon)
 {
-    TSharedRef<FOdysseyLayerStackNodeDragDropOp> NewOp = MakeShareable(new FOdysseyLayerStackNodeDragDropOp);
+    TSharedRef<FOdysseyLayerStackNodeDragDropOp> newOp = MakeShareable(new FOdysseyLayerStackNodeDragDropOp);
 
-    NewOp->mDraggedNodes = InDraggedNodes;
-    NewOp->mDefaultHoverText = NewOp->mCurrentHoverText = InDefaultText;
-    NewOp->mDefaultHoverIcon = NewOp->mCurrentIconBrush = InDefaultIcon;
+    newOp->mDraggedNodes = iDraggedNodes;
+    newOp->mDefaultHoverText = newOp->mCurrentHoverText = iDefaultText;
+    newOp->mDefaultHoverIcon = newOp->mCurrentIconBrush = iDefaultIcon;
 
-    NewOp->Construct();
-    return NewOp;
+    newOp->Construct();
+    return newOp;
 }
 
 //INTERFACE IMPLEMENTATION-----------------------

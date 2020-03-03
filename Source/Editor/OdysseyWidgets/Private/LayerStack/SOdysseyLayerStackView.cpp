@@ -87,16 +87,16 @@ void SOdysseyLayerStackView::RefreshView()
 
 //PRIVATE API-----------------------------------------------------------
 
-void SOdysseyLayerStackView::GetContextMenuContent(FMenuBuilder& MenuBuilder)
+void SOdysseyLayerStackView::GetContextMenuContent(FMenuBuilder& ioMenuBuilder)
 {
-    MenuBuilder.BeginSection("AddLayers");
+    ioMenuBuilder.BeginSection("AddLayers");
 
     if (mLayerStackModelPtr)
     {
-        mLayerStackModelPtr->BuildAddLayerMenu(MenuBuilder);
+        mLayerStackModelPtr->BuildAddLayerMenu(ioMenuBuilder);
     }
 
-    MenuBuilder.EndSection();
+    ioMenuBuilder.EndSection();
 }
 
 TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddButton()

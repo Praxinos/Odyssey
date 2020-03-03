@@ -46,7 +46,7 @@ private:
     //PRIVATE API
 
     /** Get context menu contents. */
-    void GetContextMenuContent(FMenuBuilder& MenuBuilder);
+    void GetContextMenuContent(FMenuBuilder& ioMenuBuilder);
 
     /** Makes add button. */
     TSharedRef<SWidget> MakeAddButton();

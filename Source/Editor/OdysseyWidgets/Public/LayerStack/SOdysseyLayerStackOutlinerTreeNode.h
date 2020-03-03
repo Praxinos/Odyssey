@@ -37,7 +37,7 @@ public:
     SLATE_END_ARGS()
 
 
-    void Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node, const TSharedRef<SOdysseyLayerStackViewRow>& InTableRow );
+    void Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow );
 
 
 public:
@@ -94,10 +94,10 @@ private:
     bool HandleNodeLabelIsReadOnly() const;
 
     /** Callback for when the node label text has changed. */
-    void HandleNodeLabelTextChanged(const FText& NewLabel, ETextCommit::Type iType);
+    void HandleNodeLabelTextChanged(const FText& iNewLabel, ETextCommit::Type iType);
 
     /** Get all descendant nodes from the given root node. */
-    void GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> RootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& AllNodes);
+    void GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> iRootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& iAllNodes);
 
 private:
 

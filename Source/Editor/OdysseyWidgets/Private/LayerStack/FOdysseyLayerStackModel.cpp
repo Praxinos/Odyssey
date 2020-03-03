@@ -17,11 +17,11 @@
 
 //CONSTRUCTOR/DESTRUCTOR
 
-FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> InWidget, TSharedPtr<FOdysseyLayerStack> InLayerStackData )
+FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, TSharedPtr<FOdysseyLayerStack> iLayerStackData )
     : mLayerStackCommandBindings( new FUICommandList )
     , mNodeTree( MakeShareable( new FOdysseyLayerStackTree( *this ) ) )
-    , mLayerStackView( InWidget )
-    , mLayerStackData( InLayerStackData )
+    , mLayerStackView( iWidget )
+    , mLayerStackData( iLayerStackData )
     , mLayerStackAddMenu( MakeShareable( new FOdysseyLayerAddMenu( MakeShareable( this ) ) ) )
 {
     FOdysseyLayerStackCommands::Register();
@@ -35,9 +35,9 @@ FOdysseyLayerStackModel::~FOdysseyLayerStackModel()
 
 //PUBLIC API-------------------------------------
 
-void FOdysseyLayerStackModel::BuildAddLayerMenu(FMenuBuilder& MenuBuilder)
+void FOdysseyLayerStackModel::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
 {
-    mLayerStackAddMenu->BuildAddLayerMenu(MenuBuilder);
+    mLayerStackAddMenu->BuildAddLayerMenu(iMenuBuilder);
 }
 
 TSharedRef<FOdysseyLayerStackTree> FOdysseyLayerStackModel::GetNodeTree()
@@ -68,28 +68,28 @@ TSharedRef<SOdysseyLayerStackView> FOdysseyLayerStackModel::GetLayerStackView() 
 
 //HANDLES ----------------------------------
 
-void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* InLayerToDelete )
+void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* iLayerToDelete )
 {
-    GetLayerStackData()->DeleteLayer( InLayerToDelete );
+    GetLayerStackData()->DeleteLayer( iLayerToDelete );
     GetLayerStackData()->ComputeResultBlock();
     mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnMergeLayerDown( IOdysseyLayer* InLayerToMergeDown )
+void FOdysseyLayerStackModel::OnMergeLayerDown( IOdysseyLayer* iLayerToMergeDown )
 {
-    GetLayerStackData()->MergeDownLayer( InLayerToMergeDown );
+    GetLayerStackData()->MergeDownLayer( iLayerToMergeDown );
     mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnFlattenLayer( IOdysseyLayer* InLayerToMergeDown )
+void FOdysseyLayerStackModel::OnFlattenLayer( IOdysseyLayer* iLayerToMergeDown )
 {
-    GetLayerStackData()->FlattenLayer( InLayerToMergeDown );
+    GetLayerStackData()->FlattenLayer( iLayerToMergeDown );
     mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnDuplicateLayer( IOdysseyLayer* InLayerToDuplicate )
+void FOdysseyLayerStackModel::OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
 {
-    GetLayerStackData()->DuplicateLayer( InLayerToDuplicate );
+    GetLayerStackData()->DuplicateLayer( iLayerToDuplicate );
     mLayerStackView->RefreshView();
 }
 

@@ -23,7 +23,7 @@ class FOdysseyLayerStackModel : public TSharedFromThis<FOdysseyLayerStackModel>
 public:
     //CONSTRUCTOR/DESTRUCTOR
     /** Constructor */
-    FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> InWidget, TSharedPtr<FOdysseyLayerStack> InLayerStackData );
+    FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, TSharedPtr<FOdysseyLayerStack> iLayerStackData );
 
     /** Virtual destructor */
     virtual ~FOdysseyLayerStackModel();
@@ -36,7 +36,7 @@ public:
      *
      * @param MenuBuilder The menu builder to add things to.
      */
-    void BuildAddLayerMenu(FMenuBuilder& MenuBuilder);
+    void BuildAddLayerMenu(FMenuBuilder& iMenuBuilder);
 
     /** Gets the tree of nodes which is used to populate the GUI of the LayerStack */
     TSharedRef<FOdysseyLayerStackTree> GetNodeTree();
@@ -53,13 +53,13 @@ public:
 public:
     //HANDLES
 
-    void OnDeleteLayer( IOdysseyLayer* InLayerToDelete );
+    void OnDeleteLayer( IOdysseyLayer* iLayerToDelete );
 
-    void OnMergeLayerDown( IOdysseyLayer* InLayerToMergeDown );
+    void OnMergeLayerDown( IOdysseyLayer* iLayerToMergeDown );
     
-    void OnFlattenLayer( IOdysseyLayer* InLayerToMergeDown );
+    void OnFlattenLayer( IOdysseyLayer* iLayerToMergeDown );
     
-    void OnDuplicateLayer( IOdysseyLayer* InLayerToDuplicate );
+    void OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
 
 private:
     /** Command list for LayerStack commands and Only (Right-click commands) */

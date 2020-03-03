@@ -17,7 +17,7 @@ public:
     DECLARE_MULTICAST_DELEGATE(FOnUpdated);
 
 public: //CONSTRUCTION
-    FOdysseyLayerStackTree( FOdysseyLayerStackModel& InLayerStack );
+    FOdysseyLayerStackTree( FOdysseyLayerStackModel& iLayerStack );
 
 public: //PUBLIC API
 

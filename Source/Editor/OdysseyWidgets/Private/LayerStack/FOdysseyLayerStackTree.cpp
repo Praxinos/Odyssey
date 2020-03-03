@@ -13,8 +13,8 @@
 
 //CONSTRUCTION-------------------------------------
 
-FOdysseyLayerStackTree::FOdysseyLayerStackTree( FOdysseyLayerStackModel& InLayerStack )
-    : mLayerStack(InLayerStack)
+FOdysseyLayerStackTree::FOdysseyLayerStackTree( FOdysseyLayerStackModel& iLayerStack )
+    : mLayerStack(iLayerStack)
 {}
 
 //PUBLIC API-------------------------------------

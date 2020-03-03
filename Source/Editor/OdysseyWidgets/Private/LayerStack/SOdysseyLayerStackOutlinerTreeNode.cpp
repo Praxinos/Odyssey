@@ -36,23 +36,23 @@ SOdysseyLayerStackOutlinerTreeNode::~SOdysseyLayerStackOutlinerTreeNode()
 
 
 
-void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node, const TSharedRef<SOdysseyLayerStackViewRow>& InTableRow )
+void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow )
 {
-    mLayerNode = Node;
-    mIsOuterTopLevelNode = !Node->GetParent().IsValid();
+    mLayerNode = iNode;
+    mIsOuterTopLevelNode = !iNode->GetParent().IsValid();
 
-    auto NodeHeight = [=]() -> FOptionalSize { return Node->GetNodeHeight(); };
+    auto nodeHeight = [=]() -> FOptionalSize { return iNode->GetNodeHeight(); };
 
-    FMargin InnerNodePadding;
+    FMargin innerNodePadding;
     if ( mIsInnerTopLevelNode )
     {
         mInnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" );
-        InnerNodePadding = FMargin(0.f, 1.f);
+        innerNodePadding = FMargin(0.f, 1.f);
     }
     else
     {
         mInnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TransparentBorder" );
-        InnerNodePadding = FMargin(0.f);
+        innerNodePadding = FMargin(0.f);
     }
 
     FSlateFontInfo NodeFont = FEditorStyle::GetFontStyle("Sequencer.AnimationOutliner.RegularFont");
@@ -65,29 +65,29 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
     .Text(this, &SOdysseyLayerStackOutlinerTreeNode::GetDisplayName)
     .ToolTipText(this, &SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameToolTipText)
     .Clipping(EWidgetClipping::ClipToBounds)
-	.IsSelected(FIsSelected::CreateSP(InTableRow, &SOdysseyLayerStackViewRow::IsSelectedExclusively));
+	.IsSelected(FIsSelected::CreateSP(iTableRow, &SOdysseyLayerStackViewRow::IsSelectedExclusively));
 
-    Node->OnRenameRequested().AddRaw( this, &SOdysseyLayerStackOutlinerTreeNode::EnterRenameMode );
+    iNode->OnRenameRequested().AddRaw( this, &SOdysseyLayerStackOutlinerTreeNode::EnterRenameMode );
 
-    TSharedRef<SWidget>    FinalWidget =
+    TSharedRef<SWidget>    finalWidget =
         SNew( SBorder )
         .VAlign( VAlign_Center )
         .BorderImage( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeBorderImage )
         .BorderBackgroundColor( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeBackgroundTint )
-        .Padding(FMargin(Node->GetNodePadding().mLeft, Node->GetNodePadding().mTop, 0, Node->GetNodePadding().mBottom ))
+        .Padding(FMargin(iNode->GetNodePadding().mLeft, iNode->GetNodePadding().mTop, 0, iNode->GetNodePadding().mBottom ))
         [
             SNew( SHorizontalBox )
 
             + SHorizontalBox::Slot()
             [
                 SNew(SBox)
-                .HeightOverride_Lambda(NodeHeight)
+                .HeightOverride_Lambda(nodeHeight)
                 .Padding(FMargin(5.0f, 0.0f))
                 [
                     SNew( SHorizontalBox )
 
                      + SHorizontalBox::Slot()
-                        .Padding( InnerNodePadding )
+                        .Padding( innerNodePadding )
                         [
                             SNew( SBorder )
                             .BorderImage( FEditorStyle::GetBrush( "LayerStack.NodeOutliner.TopLevelBorder_Collapsed" ) )
@@ -133,7 +133,7 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
 
     ChildSlot
     [
-        FinalWidget
+        finalWidget
     ];
 }
 
@@ -149,7 +149,7 @@ const TSharedPtr<OdysseyBaseLayerNode> SOdysseyLayerStackOutlinerTreeNode::GetLa
     return mLayerNode;
 }
 
-void SOdysseyLayerStackOutlinerTreeNode::GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> RootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& AllNodes)
+void SOdysseyLayerStackOutlinerTreeNode::GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> iRootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& iAllNodes)
 {
 
 }
@@ -212,9 +212,9 @@ bool SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelIsReadOnly() const
 }
 
 
-void SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged(const FText& NewLabel, ETextCommit::Type iType)
+void SOdysseyLayerStackOutlinerTreeNode::HandleNodeLabelTextChanged(const FText& iNewLabel, ETextCommit::Type iType)
 {
-    mLayerNode->SetDisplayName(NewLabel);
+    mLayerNode->SetDisplayName(iNewLabel);
 }
 
 

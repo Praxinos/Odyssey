@@ -13,9 +13,9 @@ typedef TSharedRef<OdysseyBaseLayerNode> OdysseyBaseLayerNodeRef;
 
 struct FHighlightRegion
 {
-    FHighlightRegion(float InTop, float InBottom)
-    : mTop(InTop)
-    , mBottom(InBottom)
+    FHighlightRegion(float iTop, float iBottom)
+    : mTop(iTop)
+    , mBottom(iBottom)
     {}
     
     float mTop, mBottom;
@@ -29,14 +29,14 @@ struct FLayerStackTreeViewColumn
 {
     typedef TFunction<TSharedRef<SWidget>(const OdysseyBaseLayerNodeRef&, const TSharedRef<SOdysseyLayerStackViewRow>&)> FOnGenerate;
 
-    FLayerStackTreeViewColumn(const FOnGenerate& InOnGenerate, const TAttribute<float>& InWidth)
-    : mGenerator(InOnGenerate)
-    , mWidth(InWidth)
+    FLayerStackTreeViewColumn(const FOnGenerate& iOnGenerate, const TAttribute<float>& iWidth)
+    : mGenerator(iOnGenerate)
+    , mWidth(iWidth)
     {}
     
-    FLayerStackTreeViewColumn(FOnGenerate&& InOnGenerate, const TAttribute<float>& InWidth)
-    : mGenerator(MoveTemp(InOnGenerate))
-    , mWidth(InWidth)
+    FLayerStackTreeViewColumn(FOnGenerate&& iOnGenerate, const TAttribute<float>& iWidth)
+    : mGenerator(MoveTemp(iOnGenerate))
+    , mWidth(iWidth)
     {}
 
     /** Function used to generate a cell for this column */
@@ -68,7 +68,7 @@ public:
     SLATE_END_ARGS()
 
     /** Construct this widget */
-    void Construct(const FArguments& InArgs, const TSharedRef<FOdysseyLayerStackTree>& InNodeTree);
+    void Construct(const FArguments& InArgs, const TSharedRef<FOdysseyLayerStackTree>& iNodeTree);
 
 public:
     //PUBLIC API
@@ -76,14 +76,14 @@ public:
     TSharedPtr<FOdysseyLayerStackTree> GetNodeTree() { return mLayerStackNodeTree; }
 
     /** Refresh this tree as a result of the underlying tree data changing */
-    void Refresh( int OverrideNewSelectedNodeIndex = -1 );
+    void Refresh( int iOverrideNewSelectedNodeIndex = -1 );
 
     TSharedPtr<OdysseyBaseLayerNode> GetSelectedNode();
 
     SVerticalBox::FSlot*& GetPropertyView();
 
     /** Handles a change of selected layer in the layer stack  */
-    void OnSelectionChanged( TSharedPtr<OdysseyBaseLayerNode> InSelectedNode, ESelectInfo::Type InSeletionInfo = ESelectInfo::Type::Direct );
+    void OnSelectionChanged( TSharedPtr<OdysseyBaseLayerNode> iSelectedNode, ESelectInfo::Type iSeletionInfo = ESelectInfo::Type::Direct );
 
 protected: //CALLBACKS
 
@@ -91,13 +91,13 @@ protected: //CALLBACKS
     TSharedPtr<SWidget> OnContextMenuOpening();
 
     /** Gather the children from the specified node */
-    void OnGetChildren(OdysseyBaseLayerNodeRef InParent, TArray<OdysseyBaseLayerNodeRef>& OutChildren) const;
+    void OnGetChildren(OdysseyBaseLayerNodeRef iParent, TArray<OdysseyBaseLayerNodeRef>& oChildren) const;
 
     /** Generate a row for a particular node */
-    TSharedRef<ITableRow> OnGenerateRow(OdysseyBaseLayerNodeRef InDisplayNode, const TSharedRef<STableViewBase>& OwnerTable);
+    TSharedRef<ITableRow> OnGenerateRow(OdysseyBaseLayerNodeRef iDisplayNode, const TSharedRef<STableViewBase>& iOwnerTable);
 
     /** Generate a widget for the specified Node and Column */
-    TSharedRef<SWidget> GenerateWidgetForColumn(const OdysseyBaseLayerNodeRef& Node, const FName& ColumnId, const TSharedRef<SOdysseyLayerStackViewRow>& Row) const;
+    TSharedRef<SWidget> GenerateWidgetForColumn(const OdysseyBaseLayerNodeRef& iNode, const FName& iColumnId, const TSharedRef<SOdysseyLayerStackViewRow>& iRow) const;
 
 protected:
     //PROTECTED API
@@ -164,25 +164,25 @@ public: //CONSTRUCTION / DESTRUCTION
     ~SOdysseyLayerStackViewRow();
 
     /** Construct function for this widget */
-    void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTableView, const OdysseyBaseLayerNodeRef& InNode);
+    void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTableView, const OdysseyBaseLayerNodeRef& iNode);
 
 
 public: //PUBLIC API
 
     /** Overridden from SMultiColumnTableRow.  Generates a widget for this column of the tree row. */
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnId) override;
+    virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& iColumnId) override;
 
 
 private: //CALLBACKS
 
     /** Called whenever a drag is detected by the tree view. */
-    FReply OnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InPointerEvent);
+    FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iPointerEvent);
 
     /** Called to determine whether a current drag operation is valid for this row. */
-    TOptional<EItemDropZone> OnCanAcceptDrop( const FDragDropEvent& DragDropEvent, EItemDropZone ItemDropZone, OdysseyBaseLayerNodeRef DisplayNode);
+    TOptional<EItemDropZone> OnCanAcceptDrop( const FDragDropEvent& iDragDropEvent, EItemDropZone iItemDropZone, OdysseyBaseLayerNodeRef iDisplayNode);
 
     /** Called to complete a drag and drop onto this drop. */
-    FReply OnAcceptDrop( const FDragDropEvent& DragDropEvent, EItemDropZone ItemDropZone, OdysseyBaseLayerNodeRef DisplayNode );
+    FReply OnAcceptDrop( const FDragDropEvent& iDragDropEvent, EItemDropZone iItemDropZone, OdysseyBaseLayerNodeRef iDisplayNode );
 
 private:
     /** The item associated with this row of data */

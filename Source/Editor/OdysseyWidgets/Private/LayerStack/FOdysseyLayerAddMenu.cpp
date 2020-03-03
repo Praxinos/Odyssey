@@ -16,17 +16,17 @@
 
 //Construction
 
-FOdysseyLayerAddMenu::FOdysseyLayerAddMenu( TSharedRef<FOdysseyLayerStackModel> InLayerStack )
-    : mLayerStackRef(InLayerStack)
+FOdysseyLayerAddMenu::FOdysseyLayerAddMenu( TSharedRef<FOdysseyLayerStackModel> iLayerStack )
+    : mLayerStackRef(iLayerStack)
 {
 }
 
 
 //Implementation of FOdysseyLayerAddMenu--------------------------
 
-void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& MenuBuilder)
+void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
 {
-    MenuBuilder.AddMenuEntry(
+    iMenuBuilder.AddMenuEntry(
         LOCTEXT("AddImageLayer", "Add Image Layer"),
         LOCTEXT("AddImageLayerTooltip", "Adds a new image layer"),
         FSlateIcon(FEditorStyle::GetStyleSetName(), ""),
@@ -35,7 +35,7 @@ void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& MenuBuilder)
         )
     );
     
-    MenuBuilder.AddMenuEntry(
+    iMenuBuilder.AddMenuEntry(
         LOCTEXT("AddFolder", "Add Folder Layer"),
         LOCTEXT("AddFolderTooltip", "Adds a new folder layer"),
         FSlateIcon(FEditorStyle::GetStyleSetName(), ""),
