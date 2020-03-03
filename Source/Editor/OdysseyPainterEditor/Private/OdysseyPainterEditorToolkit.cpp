@@ -662,7 +662,7 @@ FOdysseyPainterEditorToolkit::OnImportTexturesAsLayers()
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
         FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture );
-        mOdysseyTexture->GetLayerStack()->AddImageLayerFromData( textureBlock, FName( *( openedTexture->GetName() ) ) );
+        mOdysseyTexture->GetLayerStack()->AddImageLayerFromData( textureBlock, mOdysseyTexture->GetLayerStack()->GetLayers(), FName( *( openedTexture->GetName() ) ) );
         delete textureBlock;
     }
 
