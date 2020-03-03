@@ -10,6 +10,7 @@
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushThumbnailRenderer.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
+#include "OdysseyBrush_ContentBrowserExtensions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushEditorModule"
 
@@ -32,8 +33,13 @@ void FOdysseyBrushEditorModule::StartupModule()
     AssetTools.RegisterAssetTypeActions( OdysseyBrushAssetTypeActions.ToSharedRef() );
 
     // Register the thumbnail renderers
-    UThumbnailManager::Get().RegisterCustomRenderer( UOdysseyBrush::StaticClass(), UOdysseyBrushThumbnailRenderer::StaticClass() );
+    //UThumbnailManager::Get().RegisterCustomRenderer( UOdysseyBrush::StaticClass(), UOdysseyBrushThumbnailRenderer::StaticClass() );
     /////////////////
+    
+    if( !IsRunningCommandlet() )
+    {
+        FOdysseyBrushContentBrowserExtensions::InstallHooks();
+    }
 
     // Register internal SCS editor customizations
     //RegisterSCSEditorCustomization("InstancedStaticMeshComponent", FOdysseySCSEditorCustomizationBuilder::CreateStatic(&FInstancedStaticMeshSCSEditorCustomization::MakeInstance));
