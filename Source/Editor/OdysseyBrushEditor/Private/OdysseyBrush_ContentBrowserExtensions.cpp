@@ -253,7 +253,7 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
             //Refresh the thumbnail
             UPackage* package = iBrushes[i]->GetOutermost();
 
-            UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetFullName()));
+            UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetName()));
             
             package->SetDirtyFlag( true );
         }
