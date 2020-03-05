@@ -6,8 +6,8 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
 {
     if(!ioSaveLayerStack) return Ar;
     
-    IOdysseySerializable* serializable = (IOdysseySerializable*)(ioSaveLayerStack);
-    Ar << serializable;
+    //IOdysseySerializable* serializable = (IOdysseySerializable*)(ioSaveLayerStack);
+    //Ar << serializable;
         
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;

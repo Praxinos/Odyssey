@@ -19,7 +19,7 @@
 class FOdysseyDrawingUndo;
 
 
-class ODYSSEYLAYER_API FOdysseyLayerStack : public IOdysseySerializable
+class ODYSSEYLAYER_API FOdysseyLayerStack //: public IOdysseySerializable
 {
 public:
     // Construction / Destruction

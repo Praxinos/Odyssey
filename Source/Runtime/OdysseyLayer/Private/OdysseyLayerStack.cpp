@@ -22,8 +22,8 @@ FOdysseyLayerStack::~FOdysseyLayerStack()
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack()
-    : IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
-    , mResultBlock( NULL )
+    //: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    : mResultBlock( NULL )
     , mTempBlock( NULL )
     , mLayers( new FOdysseyNTree<IOdysseyLayer*>(NULL))
     , mCurrentLayer( mLayers )
@@ -35,8 +35,8 @@ FOdysseyLayerStack::FOdysseyLayerStack()
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack( int iWidth, int iHeight )
-    : IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
-    , mResultBlock( NULL )
+    //: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    : mResultBlock( NULL )
     , mTempBlock( NULL )
     , mLayers( new FOdysseyNTree<IOdysseyLayer*>(NULL) )
     , mCurrentLayer( mLayers )

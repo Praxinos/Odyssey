@@ -14,7 +14,7 @@ enum class ePosition : char
 };
 
 template< typename T >
-class ODYSSEYMATHS_API FOdysseyNTree
+class FOdysseyNTree
 {
 //Construction Destruction
 public:
