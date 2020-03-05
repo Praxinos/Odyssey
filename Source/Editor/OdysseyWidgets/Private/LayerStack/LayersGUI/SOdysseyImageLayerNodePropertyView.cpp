@@ -11,7 +11,7 @@
 #include "Modules/ModuleManager.h"
 
 
-#define LOCTEXT_NAMESPACE "OdysseyImageLayerNodePropertyView"
+#define LOCTEXT_NAMESPACE "SOdysseyImageLayerNodePropertyView"
 
 //CONSTRUCTION/DESTRUCTION--------------------------------------
 
@@ -21,20 +21,20 @@ SOdysseyImageLayerNodePropertyView::~SOdysseyImageLayerNodePropertyView()
 
 
 
-void SOdysseyImageLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node )
+void SOdysseyImageLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode )
 {
-    FOdysseyLayerStack* OdysseyLayerStackPtr = Node->GetLayerStack().GetLayerStackData().Get();
-    IOdysseyLayer::eType LayerType = Node->GetLayerDataPtr()->GetType();
+    FOdysseyLayerStack* odysseyLayerStackPtr = iNode->GetLayerStack().GetLayerStackData().Get();
+    IOdysseyLayer::eType layerType = iNode->GetLayerDataPtr()->GetType();
 
-    TSharedRef<SWidget> FinalWidget = SNullWidget::NullWidget;
+    TSharedRef<SWidget> finalWidget = SNullWidget::NullWidget;
 
-    FOdysseyImageLayer* ImageLayer = static_cast<FOdysseyImageLayer*> (Node->GetLayerDataPtr());
-    TSharedRef<OdysseyImageLayerNode> trackNode = StaticCastSharedRef<OdysseyImageLayerNode>(Node);
-    FinalWidget = ConstructPropertyViewForImageLayer( ImageLayer, OdysseyLayerStackPtr, trackNode );
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> (iNode->GetLayerDataPtr());
+    TSharedRef<FOdysseyImageLayerNode> imageNode = StaticCastSharedRef<FOdysseyImageLayerNode>(iNode);
+    finalWidget = ConstructPropertyViewForImageLayer( imageLayer, odysseyLayerStackPtr, imageNode );
 
     ChildSlot
     [
-        FinalWidget
+        finalWidget
     ];
 }
 
@@ -42,11 +42,11 @@ void SOdysseyImageLayerNodePropertyView::Construct( const FArguments& InArgs, TS
 //PRIVATE API
 
 
-TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewForImageLayer( FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> trackNode )
+TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewForImageLayer( FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode )
 {
-    mBlendingModes = LayerStack->GetBlendingModesAsText();
+    mBlendingModes = iLayerStack->GetBlendingModesAsText();
 
-    TSharedRef<SWidget>    FinalWidget =
+    TSharedRef<SWidget>    finalWidget =
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
         [
@@ -65,12 +65,12 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
             [
                 SNew(SSpinBox<int>)
                 //.Style( FEditorStyle::Get(), "NoBorder" )
-                .Value(this, &SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue, ImageLayer)
+                .Value(this, &SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue, iImageLayer)
                 .MinValue(0)
                 .MaxValue(100)
                 .Delta(1)
-                .OnValueChanged(this, &SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged, ImageLayer, LayerStack, trackNode )
-                .OnValueCommitted(this, &SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue, ImageLayer, LayerStack, trackNode )
+                .OnValueChanged(this, &SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged, iImageLayer, iLayerStack, iImageNode )
+                .OnValueCommitted(this, &SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue, iImageLayer, iLayerStack, iImageNode )
              ]
          ]
         + SVerticalBox::Slot()
@@ -92,75 +92,75 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
                 SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
                 .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, ImageLayer, LayerStack, trackNode )
+                .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, iImageLayer, iLayerStack, iImageNode )
                 .Content()
                 [
                     //The text in the main button
-                    CreateBlendingModeTextWidget( ImageLayer )
+                    CreateBlendingModeTextWidget( iImageLayer )
                 ]
              ]
         ];
 
 
-    return FinalWidget;
+    return finalWidget;
 }
 
 
 
-int SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue( FOdysseyImageLayer* ImageLayer ) const
+int SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue( FOdysseyImageLayer* iImageLayer ) const
 {
-    return ImageLayer->GetOpacity() * 100;
+    return iImageLayer->GetOpacity() * 100;
 }
 
 
-void SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> TrackNode  )
+void SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
 {
-    ImageLayer->SetOpacity( iOpacity / 100.f );
-    TrackNode->RefreshOpacityText();
+    iImageLayer->SetOpacity( iOpacity / 100.f );
+    iImageNode->RefreshOpacityText();
 }
 
-void SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> TrackNode  )
+void SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
 {
-    ImageLayer->SetOpacity( iOpacity / 100.f );
-    TrackNode->RefreshOpacityText();
-    LayerStack->ComputeResultBlock();
+    iImageLayer->SetOpacity( iOpacity / 100.f );
+    iImageNode->RefreshOpacityText();
+    iLayerStack->ComputeResultBlock();
 }
 
 
 //PRIVATE
 
-void SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> TrackNode )
+void SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode )
 {
-    ImageLayer->SetBlendingMode( *(NewSelection.Get() ) );
-    TrackNode->RefreshBlendingModeText();
-    LayerStack->ComputeResultBlock();
+    iImageLayer->SetBlendingMode( *(iNewSelection.Get() ) );
+    iImageNode->RefreshBlendingModeText();
+    iLayerStack->ComputeResultBlock();
 
     mBlendingModeComboBox->SetContent(
         SNew(   SComboBox<TSharedPtr<FText>> )
                 .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, ImageLayer, LayerStack, TrackNode )
+                .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, iImageLayer, iLayerStack, iImageNode )
                 .Content()
                 [
                     //The text in the main button
-                    CreateBlendingModeTextWidget( ImageLayer )
+                    CreateBlendingModeTextWidget( iImageLayer )
                 ]
     );
 }
 
 
 
-TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem(TSharedPtr<FText> InItem)
+TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem(TSharedPtr<FText> iItem)
 {
       return SNew(STextBlock)
-           .Text(*(InItem.Get()));
+           .Text(*(iItem.Get()));
 }
 
 
-TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::CreateBlendingModeTextWidget( FOdysseyImageLayer* imageLayer)
+TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::CreateBlendingModeTextWidget( FOdysseyImageLayer* iImageLayer)
 {
       return SNew(STextBlock)
-           .Text( imageLayer->GetBlendingModeAsText() );
+           .Text( iImageLayer->GetBlendingModeAsText() );
 }
 
 

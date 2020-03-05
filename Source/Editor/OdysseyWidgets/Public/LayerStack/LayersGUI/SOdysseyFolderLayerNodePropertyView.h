@@ -29,20 +29,20 @@ public:
     SLATE_END_ARGS()
 
 
-    void Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node );
+    void Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode );
 
 
 private:
-    TSharedRef<SWidget> ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> trackNode );
+    TSharedRef<SWidget> ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
 
-    int GetLayerOpacityValue( FOdysseyFolderLayer* FolderLayer ) const;
-    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> TrackNode );
-    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> TrackNode );
+    int GetLayerOpacityValue( FOdysseyFolderLayer* iFolderLayer ) const;
+    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
+    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
 
 private:
-    TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem );
-    TSharedRef<SWidget> CreateBlendingModeTextWidget( FOdysseyFolderLayer* FolderLayer );
-    void HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo, FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> TrackNode);
+    TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> iItem );
+    TSharedRef<SWidget> CreateBlendingModeTextWidget( FOdysseyFolderLayer* iFolderLayer );
+    void HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode);
 
 
 private:

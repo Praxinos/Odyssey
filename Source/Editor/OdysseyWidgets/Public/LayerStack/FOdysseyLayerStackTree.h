@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "LayerStack/FOdysseyLayerStackModel.h"
 
-class OdysseyBaseLayerNode;
+class IOdysseyBaseLayerNode;
 
 /**
  * The tree structure that handle the content of the layerStack
@@ -31,7 +31,7 @@ public: //PUBLIC API
     FOdysseyLayerStackModel& GetLayerStack();
 
     /** @return The root nodes of the tree */
-    const TArray< TSharedRef<OdysseyBaseLayerNode> >& GetRootNodes() const;
+    const TArray< TSharedRef<IOdysseyBaseLayerNode> >& GetRootNodes() const;
 
 
 
@@ -43,7 +43,7 @@ public: //DELEGATES
 
 private:
     /** Root nodes */
-    TArray< TSharedRef<OdysseyBaseLayerNode> > mRootNodes;
+    TArray< TSharedRef<IOdysseyBaseLayerNode> > mRootNodes;
 
     /** OdysseyLayerStack interface */
     FOdysseyLayerStackModel& mLayerStack;

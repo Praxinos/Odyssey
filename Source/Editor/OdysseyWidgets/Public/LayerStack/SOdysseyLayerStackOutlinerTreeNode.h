@@ -37,7 +37,7 @@ public:
     SLATE_END_ARGS()
 
 
-    void Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow );
+    void Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow );
 
 
 public:
@@ -46,7 +46,7 @@ public:
     void EnterRenameMode();
 
     /** @return The display node used by this widget. */
-    const TSharedPtr<OdysseyBaseLayerNode> GetLayerNode() const;
+    const TSharedPtr<IOdysseyBaseLayerNode> GetLayerNode() const;
 
 private:
     //PRIVATE API
@@ -97,12 +97,12 @@ private:
     void HandleNodeLabelTextChanged(const FText& iNewLabel, ETextCommit::Type iType);
 
     /** Get all descendant nodes from the given root node. */
-    void GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> iRootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& iAllNodes);
+    void GetAllDescendantNodes(TSharedPtr<IOdysseyBaseLayerNode> iRootNode, TArray<TSharedRef<IOdysseyBaseLayerNode> >& iAllNodes);
 
 private:
 
     /** Layout node the widget is visualizing. */
-    TSharedPtr<OdysseyBaseLayerNode> mLayerNode;
+    TSharedPtr<IOdysseyBaseLayerNode> mLayerNode;
 
     /** Holds the editable text label widget. */
     TSharedPtr<SInlineEditableTextBlock> mEditableLabel;

@@ -11,7 +11,7 @@
 #include "Modules/ModuleManager.h"
 
 
-#define LOCTEXT_NAMESPACE "OdysseyFolderLayerNodePropertyView"
+#define LOCTEXT_NAMESPACE "SOdysseyFolderLayerNodePropertyView"
 
 //CONSTRUCTION/DESTRUCTION--------------------------------------
 
@@ -21,21 +21,21 @@ SOdysseyFolderLayerNodePropertyView::~SOdysseyFolderLayerNodePropertyView()
 
 
 
-void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node )
+void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode )
 {
-    FOdysseyLayerStack* OdysseyLayerStackPtr = Node->GetLayerStack().GetLayerStackData().Get();
-    IOdysseyLayer::eType LayerType = Node->GetLayerDataPtr()->GetType();
+    FOdysseyLayerStack* odysseyLayerStackPtr = iNode->GetLayerStack().GetLayerStackData().Get();
+    IOdysseyLayer::eType layerType = iNode->GetLayerDataPtr()->GetType();
 
-    TSharedRef<SWidget> FinalWidget = SNullWidget::NullWidget;
+    TSharedRef<SWidget> finalWidget = SNullWidget::NullWidget;
 
-    FOdysseyFolderLayer* FolderLayer = static_cast<FOdysseyFolderLayer*> (Node->GetLayerDataPtr());
-    TSharedRef<OdysseyFolderLayerNode> trackNode = StaticCastSharedRef<OdysseyFolderLayerNode>(Node);
-    FinalWidget = ConstructPropertyViewForFolderLayer( FolderLayer, OdysseyLayerStackPtr, trackNode );
+    FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*> (iNode->GetLayerDataPtr());
+    TSharedRef<FOdysseyFolderLayerNode> folderNode = StaticCastSharedRef<FOdysseyFolderLayerNode>(iNode);
+    finalWidget = ConstructPropertyViewForFolderLayer( folderLayer, odysseyLayerStackPtr, folderNode );
 
 
     ChildSlot
     [
-        FinalWidget
+        finalWidget
     ];
 }
 
@@ -43,11 +43,11 @@ void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, T
 //PRIVATE API
 
 
-TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> trackNode )
+TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode )
 {
-    mBlendingModes = LayerStack->GetBlendingModesAsText();
+    mBlendingModes = iLayerStack->GetBlendingModesAsText();
 
-    TSharedRef<SWidget>    FinalWidget =
+    TSharedRef<SWidget>    finalWidget =
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
         [
@@ -66,12 +66,12 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
             [
                 SNew(SSpinBox<int>)
                 //.Style( FEditorStyle::Get(), "NoBorder" )
-                .Value(this, &SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue, FolderLayer)
+                .Value(this, &SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue, iFolderLayer)
                 .MinValue(0)
                 .MaxValue(100)
                 .Delta(1)
-                .OnValueChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged, FolderLayer, LayerStack, trackNode )
-                .OnValueCommitted(this, &SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue, FolderLayer, LayerStack, trackNode )
+                .OnValueChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged, iFolderLayer, iLayerStack, iFolderNode )
+                .OnValueCommitted(this, &SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue, iFolderLayer, iLayerStack, iFolderNode )
              ]
          ]
         + SVerticalBox::Slot()
@@ -93,75 +93,75 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
                 SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
                 .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, FolderLayer, LayerStack, trackNode )
+                .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, iFolderLayer, iLayerStack, iFolderNode )
                 .Content()
                 [
                     //The text in the main button
-                    CreateBlendingModeTextWidget( FolderLayer )
+                    CreateBlendingModeTextWidget( iFolderLayer )
                 ]
              ]
         ];
 
 
-    return FinalWidget;
+    return finalWidget;
 }
 
 
 
-int SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue( FOdysseyFolderLayer* FolderLayer ) const
+int SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue( FOdysseyFolderLayer* iFolderLayer ) const
 {
-    return FolderLayer->GetOpacity() * 100;
+    return iFolderLayer->GetOpacity() * 100;
 }
 
 
-void SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> TrackNode  )
+void SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
 {
-    FolderLayer->SetOpacity( iOpacity / 100.f );
-    TrackNode->RefreshOpacityText();
+    iFolderLayer->SetOpacity( iOpacity / 100.f );
+    iFolderNode->RefreshOpacityText();
 }
 
-void SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> TrackNode  )
+void SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
 {
-    FolderLayer->SetOpacity( iOpacity / 100.f );
-    TrackNode->RefreshOpacityText();
-    LayerStack->ComputeResultBlock();
+    iFolderLayer->SetOpacity( iOpacity / 100.f );
+    iFolderNode->RefreshOpacityText();
+    iLayerStack->ComputeResultBlock();
 }
 
 
 //PRIVATE
 
-void SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo, FOdysseyFolderLayer* FolderLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyFolderLayerNode> TrackNode )
+void SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode )
 {
-    FolderLayer->SetBlendingMode( *(NewSelection.Get() ) );
-    TrackNode->RefreshBlendingModeText();
-    LayerStack->ComputeResultBlock();
+    iFolderLayer->SetBlendingMode( *(iNewSelection.Get() ) );
+    iFolderNode->RefreshBlendingModeText();
+    iLayerStack->ComputeResultBlock();
 
     mBlendingModeComboBox->SetContent(
         SNew(   SComboBox<TSharedPtr<FText>> )
                 .OptionsSource(&mBlendingModes)
                 .OnGenerateWidget(this, &SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, FolderLayer, LayerStack, TrackNode )
+                .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, iFolderLayer, iLayerStack, iFolderNode )
                 .Content()
                 [
                     //The text in the main button
-                    CreateBlendingModeTextWidget( FolderLayer )
+                    CreateBlendingModeTextWidget( iFolderLayer )
                 ]
     );
 }
 
 
 
-TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem(TSharedPtr<FText> InItem)
+TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem(TSharedPtr<FText> iItem)
 {
       return SNew(STextBlock)
-           .Text(*(InItem.Get()));
+           .Text(*(iItem.Get()));
 }
 
 
-TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::CreateBlendingModeTextWidget( FOdysseyFolderLayer* FolderLayer)
+TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::CreateBlendingModeTextWidget( FOdysseyFolderLayer* iFolderLayer)
 {
       return SNew(STextBlock)
-           .Text( FolderLayer->GetBlendingModeAsText() );
+           .Text( iFolderLayer->GetBlendingModeAsText() );
 }
 
 

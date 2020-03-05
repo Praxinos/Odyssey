@@ -14,13 +14,12 @@
 
 
 class FOdysseyImageLayer;
-class OdysseyImageLayerNode;
-
+class FOdysseyImageLayerNode;
 
 /**
  * The property view of a layer node
  */
-class SOdysseyImageLayerNodePropertyView : public SCompoundWidget//, public FNotifyHook
+class SOdysseyImageLayerNodePropertyView : public SCompoundWidget
 {
 public:
     ~SOdysseyImageLayerNodePropertyView();
@@ -30,20 +29,20 @@ public:
     SLATE_END_ARGS()
 
 
-    void Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> Node );
+    void Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode );
 
 
 private:
-    TSharedRef<SWidget> ConstructPropertyViewForImageLayer( FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> trackNode );
+    TSharedRef<SWidget> ConstructPropertyViewForImageLayer( FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
 
     int GetLayerOpacityValue( FOdysseyImageLayer* ImageLayer ) const;
-    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> TrackNode );
-    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> TrackNode );
+    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
+    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
 
 private:
-    TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem );
-    TSharedRef<SWidget> CreateBlendingModeTextWidget( FOdysseyImageLayer* imageLayer );
-    void HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo, FOdysseyImageLayer* ImageLayer, FOdysseyLayerStack* LayerStack, TSharedRef<OdysseyImageLayerNode> TrackNode);
+    TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> iItem );
+    TSharedRef<SWidget> CreateBlendingModeTextWidget( FOdysseyImageLayer* iImageLayer );
+    void HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode);
 
 
 private:

@@ -10,25 +10,25 @@
 /**
  * Base node GUI for a layer folder in the layerStack
  */
-class OdysseyFolderLayerNode : public OdysseyBaseLayerNode
+class FOdysseyFolderLayerNode : public IOdysseyBaseLayerNode
 {
     friend class SOdysseyFolderLayerNodePropertyView; //To link the content of the node with the content of the property view
 
 public:
     //CONSTRUCTION/DESTRUCTION
-    OdysseyFolderLayerNode( FOdysseyFolderLayer& InFolderLayer, TSharedPtr<OdysseyBaseLayerNode> InParentNode, FOdysseyLayerStackTree& InParentTree );
+    FOdysseyFolderLayerNode( FOdysseyFolderLayer& iFolderLayer, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree );
 
 public:
-    // ODYSSEYBASELAYERNODE IMPLEMENTATION
+    // IOdysseyBaseLayerNode IMPLEMENTATION
     virtual float GetNodeHeight() const override;
     virtual FNodePadding GetNodePadding() const override;
-    virtual TOptional<EItemDropZone> CanDrop(FOdysseyLayerStackNodeDragDropOp& DragDropOp, EItemDropZone ItemDropZone) const override;
-    virtual void Drop(const TArray<TSharedRef<OdysseyBaseLayerNode>>& DraggedNodes, EItemDropZone ItemDropZone) override;
+    virtual TOptional<EItemDropZone> CanDrop(FOdysseyLayerStackNodeDragDropOp& iDragDropOp, EItemDropZone iItemDropZone) const override;
+    virtual void Drop(const TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, EItemDropZone iItemDropZone) override;
     virtual TSharedRef<SWidget> GenerateContainerWidgetForPropertyView() override;
     virtual const FSlateBrush* GetIconBrush() const override;
     virtual TSharedRef<SWidget> GetCustomIconContent() override;
     virtual TSharedRef<SWidget> GetCustomOutlinerContent() override;
-    virtual void BuildContextMenu(FMenuBuilder& MenuBuilder) override;
+    virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder) override;
     virtual bool IsHidden() const override;
 
 private: // HANDLES

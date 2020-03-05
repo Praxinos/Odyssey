@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
-#include "../FOdysseyLayerStackTree.h"
+#include "LayerStack/FOdysseyLayerStackTree.h"
 #include "Widgets/SWidget.h"
 #include "Styling/SlateColor.h"
 
@@ -48,26 +48,26 @@ struct FNodePadding
 /**
  * Base node GUI for a layer node in the layerStack
  */
-class OdysseyBaseLayerNode : public TSharedFromThis<OdysseyBaseLayerNode>
+class IOdysseyBaseLayerNode : public TSharedFromThis<IOdysseyBaseLayerNode>
 {
 public:
 
     /**
      * Create and initialize a new instance.
      *
-     * @param InNodeName    The name identifier of the node
-     * @param InParentNode    The parent of this node or nullptr if this is a root node
-     * @param InParentTree    The tree this node is in
+     * @param iNodeName    The name identifier of the node
+     * @param iParentNode    The parent of this node or nullptr if this is a root node
+     * @param iParentTree    The tree this node is in
      */
-    OdysseyBaseLayerNode( FName InNodeName, TSharedPtr<OdysseyBaseLayerNode> InParentNode, FOdysseyLayerStackTree& InParentTree, IOdysseyLayer* InLayerDataPtr );
+    IOdysseyBaseLayerNode( FName iNodeName, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr );
 
     /** Virtual destructor. */
-    virtual ~OdysseyBaseLayerNode(){}
+    virtual ~IOdysseyBaseLayerNode(){}
 
 
 public: //EVENTS
 
-    DECLARE_EVENT(OdysseyBaseLayerNode, FRequestRenameEvent);
+    DECLARE_EVENT(IOdysseyBaseLayerNode, FRequestRenameEvent);
     FRequestRenameEvent& OnRenameRequested() { return mRenameRequestedEvent; }
 
 
@@ -129,7 +129,7 @@ public: // PUBLIC API
     /**
      * Resize this node
      */
-    virtual void Resize(float NewSize)
+    virtual void Resize(float iNewSize)
     {
 
     }
@@ -146,7 +146,7 @@ public: // PUBLIC API
      *
      * @return Generated outliner widget
      */
-    virtual TSharedRef<SWidget> GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& InRow);
+    virtual TSharedRef<SWidget> GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& iRow);
 
 
     /**
@@ -194,7 +194,7 @@ public: // PUBLIC API
     TSharedPtr<SWidget> OnSummonContextMenu();
 
     /** What sort of context menu this node summons */
-    virtual void BuildContextMenu(FMenuBuilder& MenuBuilder) = 0;
+    virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder) = 0;
 
     /**
      * @return The name of the node (for identification purposes)
@@ -215,7 +215,7 @@ public: // PUBLIC API
     /**
      * @return A List of all Child nodes belonging to this node
      */
-    const TArray<TSharedRef<OdysseyBaseLayerNode>>& GetChildNodes() const
+    const TArray<TSharedRef<IOdysseyBaseLayerNode>>& GetChildNodes() const
     {
         return mChildNodes;
     }
@@ -223,7 +223,7 @@ public: // PUBLIC API
     /**
      * @return The parent of this node
      */
-    TSharedPtr<OdysseyBaseLayerNode> GetParent() const
+    TSharedPtr<IOdysseyBaseLayerNode> GetParent() const
     {
         return mParentNode.Pin();
     }
@@ -231,10 +231,10 @@ public: // PUBLIC API
     /**
      * @return The outermost parent of this node
      */
-    TSharedRef<OdysseyBaseLayerNode> GetOutermostParent()
+    TSharedRef<IOdysseyBaseLayerNode> GetOutermostParent()
     {
-        TSharedPtr<OdysseyBaseLayerNode> Parent = mParentNode.Pin();
-        return Parent.IsValid() ? Parent->GetOutermostParent() : AsShared();
+        TSharedPtr<IOdysseyBaseLayerNode> parent = mParentNode.Pin();
+        return parent.IsValid() ? parent->GetOutermostParent() : AsShared();
     }
 
     /** Gets the layerStack that owns this node */
@@ -257,7 +257,7 @@ public: // PUBLIC API
     /**
      * Set whether this node is expanded or not
      */
-    void SetExpansionState(bool bInExpanded);
+    void SetExpansionState(bool iIsExpanded);
 
     /**
      * @return Whether or not this node is expanded
@@ -276,7 +276,7 @@ public: // PUBLIC API
     bool IsHovered() const;
 
     /** Initialize this node with expansion states and virtual offsets */
-    void Initialize(float InVirtualTop, float InVirtualBottom);
+    void Initialize(float iVirtualTop, float iVirtualBottom);
 
 
     /** @return this node's virtual offset from the top of the tree, irrespective of expansion states */
@@ -304,17 +304,19 @@ public: // PUBLIC API
     /**
      * Handles a drop of items onto this display node.
      */
-    virtual void Drop( const TArray<TSharedRef<OdysseyBaseLayerNode>>& DraggedNodes, EItemDropZone DropZone ) { }
+    virtual void Drop( const TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, EItemDropZone iDropZone ) 
+    {
+    }
 
     /** Clears the parent of this node. */
     void ClearParent() { mParentNode = nullptr; }
 
-    void MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<OdysseyBaseLayerNode> CurrentNode );
+    void MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<IOdysseyBaseLayerNode> iCurrentNode );
 
 protected: //PROTECTED API
 
     /** Adds a child to this node, and sets it's parent to this node. */
-    void AddChildAndSetParent( TSharedRef<OdysseyBaseLayerNode> InChild );
+    void AddChildAndSetParent( TSharedRef<IOdysseyBaseLayerNode> iChild );
 
 
 private: // HANDLES
@@ -336,10 +338,10 @@ protected:
 
 protected:
     /** The parent of this node*/
-    TWeakPtr<OdysseyBaseLayerNode> mParentNode;
+    TWeakPtr<IOdysseyBaseLayerNode> mParentNode;
 
     /** List of children belonging to this node */
-    TArray<TSharedRef<OdysseyBaseLayerNode>> mChildNodes;
+    TArray<TSharedRef<IOdysseyBaseLayerNode>> mChildNodes;
 
     /** Parent tree that this node is in */
     FOdysseyLayerStackTree& mParentTree;

@@ -36,7 +36,7 @@ SOdysseyLayerStackOutlinerTreeNode::~SOdysseyLayerStackOutlinerTreeNode()
 
 
 
-void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TSharedRef<OdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow )
+void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow )
 {
     mLayerNode = iNode;
     mIsOuterTopLevelNode = !iNode->GetParent().IsValid();
@@ -144,12 +144,12 @@ void SOdysseyLayerStackOutlinerTreeNode::EnterRenameMode()
     mEditableLabel->EnterEditingMode();
 }
 
-const TSharedPtr<OdysseyBaseLayerNode> SOdysseyLayerStackOutlinerTreeNode::GetLayerNode() const
+const TSharedPtr<IOdysseyBaseLayerNode> SOdysseyLayerStackOutlinerTreeNode::GetLayerNode() const
 {
     return mLayerNode;
 }
 
-void SOdysseyLayerStackOutlinerTreeNode::GetAllDescendantNodes(TSharedPtr<OdysseyBaseLayerNode> iRootNode, TArray<TSharedRef<OdysseyBaseLayerNode> >& iAllNodes)
+void SOdysseyLayerStackOutlinerTreeNode::GetAllDescendantNodes(TSharedPtr<IOdysseyBaseLayerNode> iRootNode, TArray<TSharedRef<IOdysseyBaseLayerNode> >& iAllNodes)
 {
 
 }

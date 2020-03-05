@@ -8,7 +8,7 @@
 #include "LayerStack/LayersGUI/OdysseyBaseLayerNode.h"
 #include "GraphEditorDragDropAction.h"
 
-class OdysseyBaseLayerNode;
+class IOdysseyBaseLayerNode;
 
 /**
  * An utility class to handle the drag n drop of nodes in the tree
@@ -18,7 +18,7 @@ class FOdysseyLayerStackNodeDragDropOp : public FGraphEditorDragDropAction
 public: //STATIC
 
     /** Construct a new drag/drop operation for dragging a selection of display nodes */
-    static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<OdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon);
+    static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon);
 
 public: //INTERFACE IMPLEMENTATION
     //~ FDragDropOperation interface
@@ -30,7 +30,7 @@ public: //PUBLIC API
 
     const FSlateBrush* GetDecoratorIcon() const;
 
-    TArray<TSharedRef<OdysseyBaseLayerNode>>& GetDraggedNodes();
+    TArray<TSharedRef<IOdysseyBaseLayerNode>>& GetDraggedNodes();
 
     const FSlateBrush* GetCurrentIconBrush() const;
 
@@ -47,7 +47,7 @@ private:
     const FSlateBrush* mCurrentIconBrush;
     
     /** The nodes currently being dragged. */
-    TArray<TSharedRef<OdysseyBaseLayerNode>> mDraggedNodes;
+    TArray<TSharedRef<IOdysseyBaseLayerNode>> mDraggedNodes;
 
     /** Default string to show as hover text */
     FText mDefaultHoverText;

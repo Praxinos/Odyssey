@@ -16,7 +16,7 @@
 //STATIC -------------------------------------------
 
 
-TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::New(TArray<TSharedRef<OdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon)
+TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::New(TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon)
 {
     TSharedRef<FOdysseyLayerStackNodeDragDropOp> newOp = MakeShareable(new FOdysseyLayerStackNodeDragDropOp);
 
@@ -73,7 +73,7 @@ const FSlateBrush* FOdysseyLayerStackNodeDragDropOp::GetDecoratorIcon() const
     return mCurrentIconBrush;
 }
 
-TArray<TSharedRef<OdysseyBaseLayerNode>>& FOdysseyLayerStackNodeDragDropOp::GetDraggedNodes()
+TArray<TSharedRef<IOdysseyBaseLayerNode>>& FOdysseyLayerStackNodeDragDropOp::GetDraggedNodes()
 {
     return mDraggedNodes;
 }

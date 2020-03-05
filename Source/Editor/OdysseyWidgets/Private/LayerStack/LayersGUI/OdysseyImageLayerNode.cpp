@@ -11,27 +11,24 @@
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SSpinBox.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyImageLayerNode"
+#define LOCTEXT_NAMESPACE "FOdysseyImageLayerNode"
 
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-OdysseyImageLayerNode::OdysseyImageLayerNode( FOdysseyImageLayer& InImageLayer, TSharedPtr<OdysseyBaseLayerNode> InParentNode, FOdysseyLayerStackTree& InParentTree )
-    : OdysseyBaseLayerNode( InImageLayer.GetName()
-    , InParentNode
-    , InParentTree
-    , &InImageLayer )
+FOdysseyImageLayerNode::FOdysseyImageLayerNode( FOdysseyImageLayer& iImageLayer, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree )
+    : IOdysseyBaseLayerNode( iImageLayer.GetName(), iParentNode, iParentTree, &iImageLayer )
 {
 }
 
-// ODYSSEYBASELAYERNODE IMPLEMENTATION---------------------------
+// IOdysseyBaseLayerNode IMPLEMENTATION---------------------------
 
-float OdysseyImageLayerNode::GetNodeHeight() const
+float FOdysseyImageLayerNode::GetNodeHeight() const
 {
     return 20.0f;
 }
 
-FNodePadding OdysseyImageLayerNode::GetNodePadding() const
+FNodePadding FOdysseyImageLayerNode::GetNodePadding() const
 {
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
     mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
@@ -41,41 +38,41 @@ FNodePadding OdysseyImageLayerNode::GetNodePadding() const
     return FNodePadding(leftPadding, 4, 4);
 }
 
-TOptional<EItemDropZone> OdysseyImageLayerNode::CanDrop(FOdysseyLayerStackNodeDragDropOp& DragDropOp, EItemDropZone ItemDropZone) const
+TOptional<EItemDropZone> FOdysseyImageLayerNode::CanDrop(FOdysseyLayerStackNodeDragDropOp& iDragDropOp, EItemDropZone iItemDropZone) const
 {
-    DragDropOp.ResetToDefaultToolTip();
+    iDragDropOp.ResetToDefaultToolTip();
 
-    return TOptional<EItemDropZone>( ItemDropZone );
+    return TOptional<EItemDropZone>( iItemDropZone );
 }
 
-void OdysseyImageLayerNode::Drop(const TArray<TSharedRef<OdysseyBaseLayerNode>>& DraggedNodes, EItemDropZone ItemDropZone)
+void FOdysseyImageLayerNode::Drop(const TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, EItemDropZone iItemDropZone)
 {
-    TSharedPtr<OdysseyBaseLayerNode> CurrentNode = SharedThis((OdysseyBaseLayerNode*)this);
+    TSharedPtr<IOdysseyBaseLayerNode> currentNode = SharedThis((IOdysseyBaseLayerNode*)this);
 
-    for( TSharedRef<OdysseyBaseLayerNode> DraggedNode: DraggedNodes)
+    for( TSharedRef<IOdysseyBaseLayerNode> draggedNode: iDraggedNodes)
     {
-        DraggedNode->MoveNodeTo( ItemDropZone, CurrentNode.ToSharedRef() );
+        draggedNode->MoveNodeTo( iItemDropZone, currentNode.ToSharedRef() );
     }
 }
 
-const FSlateBrush* OdysseyImageLayerNode::GetIconBrush() const
+const FSlateBrush* FOdysseyImageLayerNode::GetIconBrush() const
 {
     return FOdysseyStyle::GetBrush( "OdysseyLayerStack.ImageLayer16");
 }
 
-TSharedRef<SWidget> OdysseyImageLayerNode::GenerateContainerWidgetForPropertyView()
+TSharedRef<SWidget> FOdysseyImageLayerNode::GenerateContainerWidgetForPropertyView()
 {
     return SNew(SOdysseyImageLayerNodePropertyView, SharedThis(this) );
 }
 
-TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomIconContent()
+TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomIconContent()
 {
     return SNew(SImage)
             .Image(GetIconBrush())
             .ColorAndOpacity(GetIconColor());
 }
 
-TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
+TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomOutlinerContent()
 {
     FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>( GetLayerDataPtr() );
 
@@ -102,7 +99,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
         [
             SNew(SButton)
                 .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
-                .OnClicked( this, &OdysseyImageLayerNode::OnToggleVisibility )
+                .OnClicked( this, &FOdysseyImageLayerNode::OnToggleVisibility )
                 .ToolTipText( LOCTEXT("OdysseyLayerVisibilityButtonToolTip", "Toggle Layer Visibility") )
                 .ForegroundColor( FSlateColor::UseForeground() )
                 .HAlign( HAlign_Center )
@@ -110,7 +107,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
                 .Content()
                 [
                     SNew(SImage)
-                    .Image(this, &OdysseyImageLayerNode::GetVisibilityBrushForLayer)
+                    .Image(this, &FOdysseyImageLayerNode::GetVisibilityBrushForLayer)
                 ]
         ]
         +SHorizontalBox::Slot()
@@ -118,7 +115,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
         [
             SNew(SButton)
                 .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
-                .OnClicked( this, &OdysseyImageLayerNode::OnToggleLocked )
+                .OnClicked( this, &FOdysseyImageLayerNode::OnToggleLocked )
                 .ToolTipText( LOCTEXT("OdysseyLayerLockedButtonToolTip", "Toggle Layer Locked State") )
                 .ForegroundColor( FSlateColor::UseForeground() )
                 .HAlign( HAlign_Center )
@@ -126,7 +123,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
                 .Content()
                 [
                     SNew(SImage)
-                    .Image(this, &OdysseyImageLayerNode::GetLockedBrushForLayer)
+                    .Image(this, &FOdysseyImageLayerNode::GetLockedBrushForLayer)
                 ]
         ]
         +SHorizontalBox::Slot()
@@ -134,7 +131,7 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
         [
             SNew(SButton)
                 .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
-                .OnClicked( this, &OdysseyImageLayerNode::OnToggleAlphaLocked )
+                .OnClicked( this, &FOdysseyImageLayerNode::OnToggleAlphaLocked )
                 .ToolTipText( LOCTEXT("OdysseyLayerLockedButtonToolTip", "Toggle Layer Alpha Locked State") )
                 .ForegroundColor( FSlateColor::UseForeground() )
                 .HAlign( HAlign_Center )
@@ -142,40 +139,40 @@ TSharedRef<SWidget> OdysseyImageLayerNode::GetCustomOutlinerContent()
                 .Content()
                 [
                     SNew(SImage)
-                    .Image(this, &OdysseyImageLayerNode::GetAlphaLockedBrushForLayer)
+                    .Image(this, &FOdysseyImageLayerNode::GetAlphaLockedBrushForLayer)
                 ]
         ];
 }
 
 
-void OdysseyImageLayerNode::BuildContextMenu(FMenuBuilder& MenuBuilder)
+void FOdysseyImageLayerNode::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 {
-    MenuBuilder.BeginSection("Edit", LOCTEXT("EditContextMenuSectionName", "Edit"));
+    iMenuBuilder.BeginSection("Edit", LOCTEXT("EditContextMenuSectionName", "Edit"));
     {
-            MenuBuilder.AddMenuEntry(
+            iMenuBuilder.AddMenuEntry(
             LOCTEXT("DeleteLayer", "Delete"),
             LOCTEXT("DeleteLayerTooltip", "Delete this Layer"),
             FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentBrowser.AssetActions.Delete"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDeleteLayer, mLayerDataPtr),
-                                     FCanExecuteAction::CreateSP(this, &OdysseyImageLayerNode::HandleDeleteLayerCanExecute)));
+                                     FCanExecuteAction::CreateSP(this, &FOdysseyImageLayerNode::HandleDeleteLayerCanExecute)));
 
-            MenuBuilder.AddMenuEntry(
+            iMenuBuilder.AddMenuEntry(
             LOCTEXT("MergeDownLayer", "Merge Down"),
             LOCTEXT("MergeDownLayerTooltip", "Merge this Layer Down"),
             FSlateIcon(FEditorStyle::GetStyleSetName(), "MergeDownIcon"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnMergeLayerDown, mLayerDataPtr),
-                                     FCanExecuteAction::CreateSP(this, &OdysseyImageLayerNode::HandleMergeLayerDownCanExecute)));
+                                     FCanExecuteAction::CreateSP(this, &FOdysseyImageLayerNode::HandleMergeLayerDownCanExecute)));
         
-            MenuBuilder.AddMenuEntry(
+            iMenuBuilder.AddMenuEntry(
             LOCTEXT("DuplicateLayer", "Duplicate Layer"),
             LOCTEXT("DuplicateLayerTooltip", "Duplicate this Layer"),
             FSlateIcon(FEditorStyle::GetStyleSetName(), "DuplicateLayerIcon"),
                                      FUIAction(FExecuteAction::CreateSP(&(mParentTree.GetLayerStack()), &FOdysseyLayerStackModel::OnDuplicateLayer, mLayerDataPtr),
-                                     FCanExecuteAction::CreateSP(this, &OdysseyImageLayerNode::HandleDuplicateLayerCanExecute)));
+                                     FCanExecuteAction::CreateSP(this, &FOdysseyImageLayerNode::HandleDuplicateLayerCanExecute)));
     }
 }
 
-bool OdysseyImageLayerNode::IsHidden() const
+bool FOdysseyImageLayerNode::IsHidden() const
 {
     FOdysseyNTree<IOdysseyLayer*>* layerNode = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr );
 
@@ -194,12 +191,12 @@ bool OdysseyImageLayerNode::IsHidden() const
 
 //-----------------------------------------------------Handles
 
-bool OdysseyImageLayerNode::HandleDeleteLayerCanExecute() const
+bool FOdysseyImageLayerNode::HandleDeleteLayerCanExecute() const
 {
     return true;
 }
 
-bool OdysseyImageLayerNode::HandleMergeLayerDownCanExecute() const
+bool FOdysseyImageLayerNode::HandleMergeLayerDownCanExecute() const
 {
     //We can only merge down to another image layer
     
@@ -215,7 +212,7 @@ bool OdysseyImageLayerNode::HandleMergeLayerDownCanExecute() const
     
 }
 
-bool OdysseyImageLayerNode::HandleDuplicateLayerCanExecute() const
+bool FOdysseyImageLayerNode::HandleDuplicateLayerCanExecute() const
 {
     return true;
 }
@@ -224,37 +221,37 @@ bool OdysseyImageLayerNode::HandleDuplicateLayerCanExecute() const
 //--------------------------------------------------PROTECTED API
 
 
-const FSlateBrush* OdysseyImageLayerNode::GetVisibilityBrushForLayer() const
+const FSlateBrush* FOdysseyImageLayerNode::GetVisibilityBrushForLayer() const
 {
     return GetLayerDataPtr()->IsVisible() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16");
 }
 
-FReply OdysseyImageLayerNode::OnToggleVisibility()
+FReply FOdysseyImageLayerNode::OnToggleVisibility()
 {
     GetLayerDataPtr()->SetIsVisible( !GetLayerDataPtr()->IsVisible() );
     GetLayerStack().GetLayerStackData()->ComputeResultBlock();
     return FReply::Handled();
 }
 
-const FSlateBrush* OdysseyImageLayerNode::GetLockedBrushForLayer() const
+const FSlateBrush* FOdysseyImageLayerNode::GetLockedBrushForLayer() const
 {
     return GetLayerDataPtr()->IsLocked() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.Unlocked16");
 }
 
-FReply OdysseyImageLayerNode::OnToggleLocked()
+FReply FOdysseyImageLayerNode::OnToggleLocked()
 {
     GetLayerDataPtr()->SetIsLocked( !GetLayerDataPtr()->IsLocked() );
     return FReply::Handled();
 }
 
-const FSlateBrush* OdysseyImageLayerNode::GetAlphaLockedBrushForLayer() const
+const FSlateBrush* FOdysseyImageLayerNode::GetAlphaLockedBrushForLayer() const
 {
     FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*> (GetLayerDataPtr());
     
     return layer->IsAlphaLocked() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16");
 }
 
-FReply OdysseyImageLayerNode::OnToggleAlphaLocked()
+FReply FOdysseyImageLayerNode::OnToggleAlphaLocked()
 {
     FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*> (GetLayerDataPtr());
 
@@ -262,7 +259,7 @@ FReply OdysseyImageLayerNode::OnToggleAlphaLocked()
     return FReply::Handled();
 }
 
-void OdysseyImageLayerNode::RefreshOpacityText() const
+void FOdysseyImageLayerNode::RefreshOpacityText() const
 {
     if( mOpacityText )
     {
@@ -273,7 +270,7 @@ void OdysseyImageLayerNode::RefreshOpacityText() const
     }
 }
 
-void OdysseyImageLayerNode::RefreshBlendingModeText() const
+void FOdysseyImageLayerNode::RefreshBlendingModeText() const
 {
     if( mBlendingModeText )
     {

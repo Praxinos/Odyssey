@@ -11,53 +11,54 @@
 #include "Widgets/Views/STableRow.h" // For EItemZone
 #include "EditorStyleSet.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyBaseLayerNode"
+#define LOCTEXT_NAMESPACE "IOdysseyBaseLayerNode"
 
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-OdysseyBaseLayerNode::OdysseyBaseLayerNode( FName InNodeName, TSharedPtr<OdysseyBaseLayerNode> InParentNode, FOdysseyLayerStackTree& InParentTree, IOdysseyLayer* InLayerDataPtr )
+IOdysseyBaseLayerNode::IOdysseyBaseLayerNode( FName iNodeName, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr )
     : mVirtualTop( 0.f )
     , mVirtualBottom( 0.f )
-    , mParentNode( InParentNode )
-    , mParentTree( InParentTree )
-    , mNodeName( InNodeName )
+    , mParentNode( iParentNode )
+    , mParentTree( iParentTree )
+    , mNodeName( iNodeName )
     , mExpanded( false )
-    , mLayerDataPtr( InLayerDataPtr )
+    , mLayerDataPtr( iLayerDataPtr )
 {
 }
 
 //PUBLIC API-----------------------------------------------------
 
-bool OdysseyBaseLayerNode::CanRenameNode() const
+bool IOdysseyBaseLayerNode::CanRenameNode() const
 {
     return true;
 }
 
-FText OdysseyBaseLayerNode::GetDisplayName() const
+FText IOdysseyBaseLayerNode::GetDisplayName() const
 {
     return FText::FromName( mLayerDataPtr->GetName() );
 }
 
-void OdysseyBaseLayerNode::SetDisplayName(const FText& NewDisplayName)
+void IOdysseyBaseLayerNode::SetDisplayName(const FText& iNewDisplayName)
 {
-    mLayerDataPtr->SetName( FName( *NewDisplayName.ToString() ) );
+    mLayerDataPtr->SetName( FName( *iNewDisplayName.ToString() ) );
 }
 
-FLinearColor OdysseyBaseLayerNode::GetDisplayNameColor() const
+FLinearColor IOdysseyBaseLayerNode::GetDisplayNameColor() const
 {
     return FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-FText OdysseyBaseLayerNode::GetDisplayNameToolTipText() const
+FText IOdysseyBaseLayerNode::GetDisplayNameToolTipText() const
 {
     return FText();
 }
 
-TSharedRef<SWidget> OdysseyBaseLayerNode::GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& InRow)
+TSharedRef<SWidget> IOdysseyBaseLayerNode::GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& iRow)
 {
-    auto NewWidget = SNew(SOdysseyLayerStackOutlinerTreeNode, SharedThis(this), InRow)
-    .IconToolTipText(this, &OdysseyBaseLayerNode::GetIconToolTipText)
+    auto newWidget = 
+    SNew(SOdysseyLayerStackOutlinerTreeNode, SharedThis(this), iRow)
+    .IconToolTipText(this, &IOdysseyBaseLayerNode::GetIconToolTipText)
     .IconContent()
     [
         GetCustomIconContent()
@@ -67,81 +68,81 @@ TSharedRef<SWidget> OdysseyBaseLayerNode::GenerateContainerWidgetForOutliner(con
         GetCustomOutlinerContent()
     ];
 
-    return NewWidget;
+    return newWidget;
 }
 
-const FSlateBrush* OdysseyBaseLayerNode::GetIconBrush() const
+const FSlateBrush* IOdysseyBaseLayerNode::GetIconBrush() const
 {
     return nullptr;
 }
 
-FSlateColor OdysseyBaseLayerNode::GetIconColor() const
+FSlateColor IOdysseyBaseLayerNode::GetIconColor() const
 {
     return FSlateColor( FLinearColor::White );
 }
 
-FText OdysseyBaseLayerNode::GetIconToolTipText() const
+FText IOdysseyBaseLayerNode::GetIconToolTipText() const
 {
     return FText();
 }
 
-FString OdysseyBaseLayerNode::GetPathName() const
+FString IOdysseyBaseLayerNode::GetPathName() const
 {
     // First get our parent's path
-    FString PathName;
+    FString pathName;
 
     if (mParentNode.IsValid())
     {
         ensure(mParentNode != SharedThis(this));
-        PathName = mParentNode.Pin()->GetPathName() + TEXT(".");
+        pathName = mParentNode.Pin()->GetPathName() + TEXT(".");
     }
 
     //then append our path
-    PathName += GetNodeName().ToString();
+    pathName += GetNodeName().ToString();
 
-    return PathName;
+    return pathName;
 }
 
-TSharedPtr<SWidget> OdysseyBaseLayerNode::OnSummonContextMenu()
+TSharedPtr<SWidget> IOdysseyBaseLayerNode::OnSummonContextMenu()
 {
     const bool bShouldCloseWindowAfterMenuSelection = true;
-    FMenuBuilder MenuBuilder(bShouldCloseWindowAfterMenuSelection, mParentTree.GetLayerStack().GetCommandBindings());
-    BuildContextMenu(MenuBuilder);
+    FMenuBuilder menuBuilder(bShouldCloseWindowAfterMenuSelection, mParentTree.GetLayerStack().GetCommandBindings());
+    BuildContextMenu(menuBuilder);
 
-    return MenuBuilder.MakeWidget();
+    return menuBuilder.MakeWidget();
 }
 
-void OdysseyBaseLayerNode::SetExpansionState(bool bInExpanded)
+void IOdysseyBaseLayerNode::SetExpansionState(bool bInExpanded)
 {
     mExpanded = bInExpanded;
 }
 
 
-bool OdysseyBaseLayerNode::IsExpanded() const
+bool IOdysseyBaseLayerNode::IsExpanded() const
 {
     return mExpanded;
 }
 
 
-bool OdysseyBaseLayerNode::IsHidden() const
+bool IOdysseyBaseLayerNode::IsHidden() const
 {
     return false;
 }
 
 
-bool OdysseyBaseLayerNode::IsHovered() const
+bool IOdysseyBaseLayerNode::IsHovered() const
 {
     return false;
 }
 
-void OdysseyBaseLayerNode::Initialize(float InVirtualTop, float InVirtualBottom)
+void IOdysseyBaseLayerNode::Initialize(float iVirtualTop, float iVirtualBottom)
 {
-    mVirtualTop = InVirtualTop;
-    mVirtualBottom = InVirtualBottom;
+    mVirtualTop = iVirtualTop;
+    mVirtualBottom = iVirtualBottom;
 }
 
 
-void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<OdysseyBaseLayerNode> CurrentNode )
+void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<IOdysseyBaseLayerNode> iCurrentNode )
 {
     //TODO: make the same thing with callbacks so we don't have to manipulate the layer stack manually here
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
@@ -154,7 +155,7 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
             indexBase = i;
     }
 
-    int indexTarget = mParentTree.GetRootNodes().Find( CurrentNode );
+    int indexTarget = mParentTree.GetRootNodes().Find( iCurrentNode );
 
     if( indexBase == indexTarget )
         return;
@@ -166,15 +167,15 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
     if( layersData[indexBase]->GetType() == IOdysseyLayer::eType::kFolder && layerTarget->HasForParent(layerBase) )
         return;
     
-    if( ItemDropZone == EItemDropZone::BelowItem )
+    if( iItemDropZone == EItemDropZone::BelowItem )
     {
         layerBase->MoveNodeTo( layerTarget, ePosition::kAfter );
     }
-    else if( ItemDropZone == EItemDropZone::AboveItem )
+    else if( iItemDropZone == EItemDropZone::AboveItem )
     {
         layerBase->MoveNodeTo( layerTarget, ePosition::kBefore );
     }
-    else if( ItemDropZone == EItemDropZone::OntoItem && layersData[indexTarget]->GetType() == IOdysseyLayer::eType::kFolder )
+    else if( iItemDropZone == EItemDropZone::OntoItem && layersData[indexTarget]->GetType() == IOdysseyLayer::eType::kFolder )
     {
         layerBase->MoveNodeTo( layerTarget, ePosition::kIn );
     }
@@ -191,21 +192,21 @@ void OdysseyBaseLayerNode::MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<Od
 
 //PROTECTED API------------------------------------------
 
-void OdysseyBaseLayerNode::AddChildAndSetParent( TSharedRef<OdysseyBaseLayerNode> InChild )
+void IOdysseyBaseLayerNode::AddChildAndSetParent( TSharedRef<IOdysseyBaseLayerNode> iChild )
 {
-    mChildNodes.Add( InChild );
-    InChild->mParentNode = SharedThis( this );
+    mChildNodes.Add( iChild );
+    iChild->mParentNode = SharedThis( this );
 }
 
 //HANDLES-------------------------------------------------------
 
-void OdysseyBaseLayerNode::HandleContextMenuRenameNodeExecute()
+void IOdysseyBaseLayerNode::HandleContextMenuRenameNodeExecute()
 {
     mRenameRequestedEvent.Broadcast();
 }
 
 
-bool OdysseyBaseLayerNode::HandleContextMenuRenameNodeCanExecute() const
+bool IOdysseyBaseLayerNode::HandleContextMenuRenameNodeCanExecute() const
 {
     return CanRenameNode();
 }

@@ -60,7 +60,7 @@ TSharedPtr<SWidget> SOdysseyLayerStackTreeView::OnContextMenuOpening()
     return menuBuilder.MakeWidget();
 }
 
-void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<OdysseyBaseLayerNode> iSelectedNode, ESelectInfo::Type iSelectionInfo )
+void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<IOdysseyBaseLayerNode> iSelectedNode, ESelectInfo::Type iSelectionInfo )
 {
     this->Private_ClearSelection();
 
@@ -81,7 +81,7 @@ void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<OdysseyBaseLayerN
     mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
 }
 
-TSharedRef<ITableRow> SOdysseyLayerStackTreeView::OnGenerateRow(OdysseyBaseLayerNodeRef iDisplayNode, const TSharedRef<STableViewBase>& iOwnerTable)
+TSharedRef<ITableRow> SOdysseyLayerStackTreeView::OnGenerateRow(IOdysseyBaseLayerNodeRef iDisplayNode, const TSharedRef<STableViewBase>& iOwnerTable)
 {
     TSharedRef<SOdysseyLayerStackViewRow> Row =
     SNew(SOdysseyLayerStackViewRow, iOwnerTable, iDisplayNode)
@@ -91,7 +91,7 @@ TSharedRef<ITableRow> SOdysseyLayerStackTreeView::OnGenerateRow(OdysseyBaseLayer
 }
 
 
-TSharedRef<SWidget> SOdysseyLayerStackTreeView::GenerateWidgetForColumn(const OdysseyBaseLayerNodeRef& InNode, const FName& ColumnId, const TSharedRef<SOdysseyLayerStackViewRow>& Row) const
+TSharedRef<SWidget> SOdysseyLayerStackTreeView::GenerateWidgetForColumn(const IOdysseyBaseLayerNodeRef& InNode, const FName& ColumnId, const TSharedRef<SOdysseyLayerStackViewRow>& Row) const
 {
     const auto* Definition = mColumns.Find(ColumnId);
 
@@ -103,7 +103,7 @@ TSharedRef<SWidget> SOdysseyLayerStackTreeView::GenerateWidgetForColumn(const Od
     return SNullWidget::NullWidget;
 }
 
-void SOdysseyLayerStackTreeView::OnGetChildren(OdysseyBaseLayerNodeRef iParent, TArray<OdysseyBaseLayerNodeRef>& oChildren) const
+void SOdysseyLayerStackTreeView::OnGetChildren(IOdysseyBaseLayerNodeRef iParent, TArray<IOdysseyBaseLayerNodeRef>& oChildren) const
 {
     for (const auto& node : iParent->GetChildNodes())
     {
@@ -167,7 +167,7 @@ void SOdysseyLayerStackTreeView::Refresh( int iOverrideNewSelectedNodeIndex /* =
     RequestTreeRefresh();
 }
 
-TSharedPtr<OdysseyBaseLayerNode>
+TSharedPtr<IOdysseyBaseLayerNode>
 SOdysseyLayerStackTreeView::GetSelectedNode()
 {
     return mSelectedNode;
@@ -185,7 +185,7 @@ SVerticalBox::FSlot*& SOdysseyLayerStackTreeView::GetPropertyView()
 void SOdysseyLayerStackTreeView::SetupColumns(const FArguments& InArgs)
 {
     // Define a column for the Outliner
-    auto GenerateOutliner = [=](const OdysseyBaseLayerNodeRef& iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iRow)
+    auto GenerateOutliner = [=](const IOdysseyBaseLayerNodeRef& iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iRow)
     {
         return iNode->GenerateContainerWidgetForOutliner(iRow);
     };
@@ -216,7 +216,7 @@ SOdysseyLayerStackViewRow::~SOdysseyLayerStackViewRow()
 }
 
 /** Construct function for this widget */
-void SOdysseyLayerStackViewRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& iOwnerTableView, const OdysseyBaseLayerNodeRef& iNode)
+void SOdysseyLayerStackViewRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& iOwnerTableView, const IOdysseyBaseLayerNodeRef& iNode)
 {
     //static_cast is dangerous, but we're sure that our owner table is of SOdysseyLayerStackTreeView type
     mTreeView = static_cast<SOdysseyLayerStackTreeView*>(&iOwnerTableView.Get());
@@ -250,12 +250,12 @@ TSharedRef<SWidget> SOdysseyLayerStackViewRow::GenerateWidgetForColumn(const FNa
 
 FReply SOdysseyLayerStackViewRow::OnDragDetected( const FGeometry& iGeometry, const FPointerEvent& iPointerEvent )
 {
-    TSharedPtr<OdysseyBaseLayerNode> displayNode = mNode.Pin();
+    TSharedPtr<IOdysseyBaseLayerNode> displayNode = mNode.Pin();
     mTreeView->OnSelectionChanged( displayNode );
 
     if ( displayNode.IsValid() )
     {
-        TArray<TSharedRef<OdysseyBaseLayerNode> > draggableNodes;
+        TArray<TSharedRef<IOdysseyBaseLayerNode> > draggableNodes;
         draggableNodes.Add(displayNode.ToSharedRef());
 
         FText defaultText = FText::Format( NSLOCTEXT( "OdysseyLayerStackTreeViewRow", "DefaultDragDropFormat", "Move {0} item(s)" ), FText::AsNumber( draggableNodes.Num() ) );
@@ -267,7 +267,7 @@ FReply SOdysseyLayerStackViewRow::OnDragDetected( const FGeometry& iGeometry, co
     return FReply::Unhandled();
 }
 
-TOptional<EItemDropZone> SOdysseyLayerStackViewRow::OnCanAcceptDrop( const FDragDropEvent& iDragDropEvent, EItemDropZone iItemDropZone, OdysseyBaseLayerNodeRef iDisplayNode )
+TOptional<EItemDropZone> SOdysseyLayerStackViewRow::OnCanAcceptDrop( const FDragDropEvent& iDragDropEvent, EItemDropZone iItemDropZone, IOdysseyBaseLayerNodeRef iDisplayNode )
 {
     TSharedPtr<FOdysseyLayerStackNodeDragDropOp> dragDropOp = iDragDropEvent.GetOperationAs<FOdysseyLayerStackNodeDragDropOp>();
 
@@ -284,7 +284,7 @@ TOptional<EItemDropZone> SOdysseyLayerStackViewRow::OnCanAcceptDrop( const FDrag
     return TOptional<EItemDropZone>();
 }
 
-FReply SOdysseyLayerStackViewRow::OnAcceptDrop( const FDragDropEvent& iDragDropEvent, EItemDropZone iItemDropZone, OdysseyBaseLayerNodeRef iDisplayNode )
+FReply SOdysseyLayerStackViewRow::OnAcceptDrop( const FDragDropEvent& iDragDropEvent, EItemDropZone iItemDropZone, IOdysseyBaseLayerNodeRef iDisplayNode )
 {
     TSharedPtr<FOdysseyLayerStackNodeDragDropOp> dragDropOp = iDragDropEvent.GetOperationAs<FOdysseyLayerStackNodeDragDropOp>();
     if ( dragDropOp.IsValid())
