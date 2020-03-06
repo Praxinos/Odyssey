@@ -99,7 +99,7 @@ SOdysseyThumbnailSelectWindow::Construct( const FArguments& iArgs )
                     +SHorizontalBox::Slot()
                     [
                         SNew( SButton )
-                        .Text( LOCTEXT( "Create Asset", "Create Asset" ) )
+                        .Text( LOCTEXT( "Switch Thumbnail", "Switch Thumbnail" ) )
                         .HAlign( HAlign_Center )
                         .OnClicked_Raw( this, &SOdysseyThumbnailSelectWindow::OnAccept )
                     ]
@@ -243,19 +243,29 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
                 FObjectThumbnail thumbnail;
                 
                 ThumbnailTools::AssetHasCustomThumbnail( object->GetFullName(), thumbnail );
-                ThumbnailTools::CacheThumbnail( iBrushes[i]->GetFullName(), &thumbnail, iBrushes[i]->GetOutermost() );
+                if( thumbnail.GetImageWidth() != 0 && thumbnail.GetImageHeight() != 0 )
+                {
+                    ThumbnailTools::CacheThumbnail( iBrushes[i]->GetFullName(), &thumbnail, iBrushes[i]->GetOutermost() );
+
+                    //Refresh the thumbnail
+                    UPackage* package = iBrushes[i]->GetOutermost();
+
+                    UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetName()));
+            
+                    package->SetDirtyFlag( true );
+                }
             }
             else
             {
                 ThumbnailTools::CacheEmptyThumbnail( iBrushes[i]->GetFullName(), iBrushes[i]->GetOutermost() );
-            }
-            
-            //Refresh the thumbnail
-            UPackage* package = iBrushes[i]->GetOutermost();
 
-            UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetName()));
+                //Refresh the thumbnail
+                UPackage* package = iBrushes[i]->GetOutermost();
+
+                UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetName()));
             
-            package->SetDirtyFlag( true );
+                package->SetDirtyFlag( true );
+            }
         }
     }
 }
