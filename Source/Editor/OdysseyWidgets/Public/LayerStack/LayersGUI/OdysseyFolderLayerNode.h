@@ -16,7 +16,7 @@ class FOdysseyFolderLayerNode : public IOdysseyBaseLayerNode
 
 public:
     //CONSTRUCTION/DESTRUCTION
-    FOdysseyFolderLayerNode( FOdysseyFolderLayer& iFolderLayer, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree );
+    FOdysseyFolderLayerNode( FOdysseyFolderLayer& iFolderLayer, FOdysseyLayerStackTree& iParentTree );
 
 public:
     // IOdysseyBaseLayerNode IMPLEMENTATION

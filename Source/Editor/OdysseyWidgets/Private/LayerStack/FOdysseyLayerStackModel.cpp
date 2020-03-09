@@ -5,7 +5,6 @@
 
 #include "EditorStyleSet.h"
 
-#include "LayerStack/FOdysseyLayerStackCommands.h"
 #include "LayerStack/FOdysseyLayerStackTree.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
 
@@ -24,12 +23,10 @@ FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackV
     , mLayerStackData( iLayerStackData )
     , mLayerStackAddMenu( MakeShareable( new FOdysseyLayerAddMenu( MakeShareable( this ) ) ) )
 {
-    FOdysseyLayerStackCommands::Register();
 }
 
 FOdysseyLayerStackModel::~FOdysseyLayerStackModel()
 {
-    FOdysseyLayerStackCommands::Unregister();
 }
 
 

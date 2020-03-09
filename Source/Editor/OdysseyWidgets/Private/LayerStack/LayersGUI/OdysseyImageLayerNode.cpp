@@ -16,8 +16,8 @@
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-FOdysseyImageLayerNode::FOdysseyImageLayerNode( FOdysseyImageLayer& iImageLayer, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree )
-    : IOdysseyBaseLayerNode( iImageLayer.GetName(), iParentNode, iParentTree, &iImageLayer )
+FOdysseyImageLayerNode::FOdysseyImageLayerNode( FOdysseyImageLayer& iImageLayer, FOdysseyLayerStackTree& iParentTree )
+    : IOdysseyBaseLayerNode( iImageLayer.GetName(), iParentTree, &iImageLayer )
 {
 }
 

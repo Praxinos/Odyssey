@@ -21,7 +21,7 @@ class FOdysseyImageLayerNode : public IOdysseyBaseLayerNode
 
 public:
     //CONSTRUCTION/DESTRUCTION
-    FOdysseyImageLayerNode( FOdysseyImageLayer& iImageLayer, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree );
+    FOdysseyImageLayerNode( FOdysseyImageLayer& iImageLayer, FOdysseyLayerStackTree& iParentTree );
 
 public:
     // ODYSSEYBASELAYERNODE IMPLEMENTATION

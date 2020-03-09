@@ -16,18 +16,21 @@
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-IOdysseyBaseLayerNode::IOdysseyBaseLayerNode( FName iNodeName, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr )
+IOdysseyBaseLayerNode::IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr )
     : mVirtualTop( 0.f )
     , mVirtualBottom( 0.f )
-    , mParentNode( iParentNode )
     , mParentTree( iParentTree )
     , mNodeName( iNodeName )
-    , mExpanded( false )
     , mLayerDataPtr( iLayerDataPtr )
 {
 }
 
 //PUBLIC API-----------------------------------------------------
+
+bool IOdysseyBaseLayerNode::IsSelectable() const
+{
+    return true;
+}
 
 bool IOdysseyBaseLayerNode::CanRenameNode() const
 {
@@ -58,7 +61,6 @@ TSharedRef<SWidget> IOdysseyBaseLayerNode::GenerateContainerWidgetForOutliner(co
 {
     auto newWidget = 
     SNew(SOdysseyLayerStackOutlinerTreeNode, SharedThis(this), iRow)
-    .IconToolTipText(this, &IOdysseyBaseLayerNode::GetIconToolTipText)
     .IconContent()
     [
         GetCustomIconContent()
@@ -81,28 +83,6 @@ FSlateColor IOdysseyBaseLayerNode::GetIconColor() const
     return FSlateColor( FLinearColor::White );
 }
 
-FText IOdysseyBaseLayerNode::GetIconToolTipText() const
-{
-    return FText();
-}
-
-FString IOdysseyBaseLayerNode::GetPathName() const
-{
-    // First get our parent's path
-    FString pathName;
-
-    if (mParentNode.IsValid())
-    {
-        ensure(mParentNode != SharedThis(this));
-        pathName = mParentNode.Pin()->GetPathName() + TEXT(".");
-    }
-
-    //then append our path
-    pathName += GetNodeName().ToString();
-
-    return pathName;
-}
-
 TSharedPtr<SWidget> IOdysseyBaseLayerNode::OnSummonContextMenu()
 {
     const bool bShouldCloseWindowAfterMenuSelection = true;
@@ -112,17 +92,10 @@ TSharedPtr<SWidget> IOdysseyBaseLayerNode::OnSummonContextMenu()
     return menuBuilder.MakeWidget();
 }
 
-void IOdysseyBaseLayerNode::SetExpansionState(bool bInExpanded)
+FName IOdysseyBaseLayerNode::GetNodeName() const
 {
-    mExpanded = bInExpanded;
+    return mNodeName;
 }
-
-
-bool IOdysseyBaseLayerNode::IsExpanded() const
-{
-    return mExpanded;
-}
-
 
 bool IOdysseyBaseLayerNode::IsHidden() const
 {
@@ -141,6 +114,15 @@ void IOdysseyBaseLayerNode::Initialize(float iVirtualTop, float iVirtualBottom)
     mVirtualBottom = iVirtualBottom;
 }
 
+float IOdysseyBaseLayerNode::GetVirtualTop() const
+{
+    return mVirtualTop;
+}
+
+float IOdysseyBaseLayerNode::GetVirtualBottom() const
+{
+    return mVirtualBottom;
+}
 
 void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<IOdysseyBaseLayerNode> iCurrentNode )
 {
@@ -189,13 +171,19 @@ void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<
     mParentTree.GetLayerStack().GetLayerStackData()->ComputeResultBlock();
 }
 
-
-//PROTECTED API------------------------------------------
-
-void IOdysseyBaseLayerNode::AddChildAndSetParent( TSharedRef<IOdysseyBaseLayerNode> iChild )
+FOdysseyLayerStackModel& IOdysseyBaseLayerNode::GetLayerStack() const
 {
-    mChildNodes.Add( iChild );
-    iChild->mParentNode = SharedThis( this );
+    return mParentTree.GetLayerStack();
+}
+
+FOdysseyLayerStackTree& IOdysseyBaseLayerNode::GetParentTree() const
+{
+    return mParentTree;
+}
+
+IOdysseyLayer* IOdysseyBaseLayerNode::GetLayerDataPtr() const
+{
+    return mLayerDataPtr;
 }
 
 //HANDLES-------------------------------------------------------

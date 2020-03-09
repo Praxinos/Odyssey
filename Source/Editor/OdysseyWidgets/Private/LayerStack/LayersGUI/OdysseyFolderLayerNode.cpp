@@ -11,8 +11,8 @@
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-FOdysseyFolderLayerNode::FOdysseyFolderLayerNode( FOdysseyFolderLayer& iFolderLayer, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree )
-    : IOdysseyBaseLayerNode( iFolderLayer.GetName(), iParentNode, iParentTree, &iFolderLayer )
+FOdysseyFolderLayerNode::FOdysseyFolderLayerNode( FOdysseyFolderLayer& iFolderLayer, FOdysseyLayerStackTree& iParentTree )
+    : IOdysseyBaseLayerNode( iFolderLayer.GetName(), iParentTree, &iFolderLayer )
 {
     mFolderOpenBrush = FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
     mFolderClosedBrush = FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
@@ -235,7 +235,6 @@ const FSlateBrush* FOdysseyFolderLayerNode::GetLockedBrushForLayer() const
 FReply FOdysseyFolderLayerNode::OnToggleLocked()
 {
     GetLayerDataPtr()->SetIsLocked( !GetLayerDataPtr()->IsLocked() );
-    mExpanded = false;
     return FReply::Handled();
 }
 

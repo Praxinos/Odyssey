@@ -23,9 +23,7 @@ class SOdysseyLayerStackOutlinerTreeNode : public SCompoundWidget
 {
 public:
     SOdysseyLayerStackOutlinerTreeNode()
-        : mExpandedBackgroundBrush( NULL )
-        , mCollapsedBackgroundBrush( NULL )
-        , mInnerBackgroundBrush( NULL )
+        : mInnerBackgroundBrush( NULL )
     {}
 
     ~SOdysseyLayerStackOutlinerTreeNode();
@@ -56,11 +54,6 @@ private:
     FSlateColor GetTrackColorTint() const;
 
     /**
-     * @return The border image to show in the tree node.
-     */
-    const FSlateBrush* GetNodeBorderImage() const;
-
-    /**
      * @return The tint to apply to the border image
      */
     FSlateColor GetNodeBackgroundTint() const;
@@ -69,11 +62,6 @@ private:
     * @return The tint to apply to the border image for the inner portion of the node.
     */
     FSlateColor GetNodeInnerBackgroundTint() const;
-
-    /**
-     * @return The expander visibility of this node.
-     */
-    EVisibility GetExpanderVisibility() const;
 
     /**
      * @return The color used to draw the display name.
@@ -106,19 +94,7 @@ private:
 
     /** Holds the editable text label widget. */
     TSharedPtr<SInlineEditableTextBlock> mEditableLabel;
-
-    /** True if this node is a top level node, at the root of the tree, false otherwise */
-    bool mIsOuterTopLevelNode;
-
-    /** True if this is a top level node inside or a folder, otherwise false. */
-    bool mIsInnerTopLevelNode;
-
-    /** Default background brush for this node when expanded */
-    const FSlateBrush* mExpandedBackgroundBrush;
-
-    /** Default background brush for this node when collapsed */
-    const FSlateBrush* mCollapsedBackgroundBrush;
-
+    
     /** The brush to use when drawing the background for the inner portion of the node. */
     const FSlateBrush* mInnerBackgroundBrush;
 

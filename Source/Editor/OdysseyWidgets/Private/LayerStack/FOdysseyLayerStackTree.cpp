@@ -30,15 +30,14 @@ int FOdysseyLayerStackTree::Update()
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
     mLayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
     
-    TArray< TSharedRef<IOdysseyBaseLayerNode> > rootNodesCopy = mRootNodes;
     Empty();
 
     for( int i = 0; i < layersData.Num(); i++ )
     {
         if( layersData[i]->GetType() == IOdysseyLayer::eType::kImage )
-            mRootNodes.Add( MakeShareable(new FOdysseyImageLayerNode( *(static_cast<FOdysseyImageLayer*> (layersData[i])), nullptr, *this )) );
+            mRootNodes.Add( MakeShareable(new FOdysseyImageLayerNode( *(static_cast<FOdysseyImageLayer*> (layersData[i])), *this )) );
         else if( layersData[i]->GetType() == IOdysseyLayer::eType::kFolder )
-            mRootNodes.Add( MakeShareable(new FOdysseyFolderLayerNode( *(static_cast<FOdysseyFolderLayer*> (layersData[i])), nullptr, *this )) );
+            mRootNodes.Add( MakeShareable(new FOdysseyFolderLayerNode( *(static_cast<FOdysseyFolderLayer*> (layersData[i])), *this )) );
     }
     
     return mLayerStack.GetLayerStackData()->GetCurrentLayerAsIndex();

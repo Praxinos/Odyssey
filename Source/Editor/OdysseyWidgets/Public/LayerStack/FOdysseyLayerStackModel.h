@@ -62,7 +62,7 @@ public:
     void OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
 
 private:
-    /** Command list for LayerStack commands and Only (Right-click commands) */
+    /** Command list for general LayerStack commands (Right-click commands) */
     TSharedRef<FUICommandList> mLayerStackCommandBindings;
 
     /** Represents the tree of nodes to display*/

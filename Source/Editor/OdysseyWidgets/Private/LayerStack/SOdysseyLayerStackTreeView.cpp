@@ -3,7 +3,6 @@
 
 #include "LayerStack/SOdysseyLayerStackTreeView.h"
 #include "LayerStack/FOdysseyLayerStackNodeDragDropOp.h"
-#include "LayerStack/FOdysseyLayerStackCommands.h"
 #include "EditorStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStackView"
@@ -105,13 +104,6 @@ TSharedRef<SWidget> SOdysseyLayerStackTreeView::GenerateWidgetForColumn(const IO
 
 void SOdysseyLayerStackTreeView::OnGetChildren(IOdysseyBaseLayerNodeRef iParent, TArray<IOdysseyBaseLayerNodeRef>& oChildren) const
 {
-    for (const auto& node : iParent->GetChildNodes())
-    {
-        if (!node->IsHidden())
-        {
-            oChildren.Add(node);
-        }
-    }
 }
 
 //PUBLIC API
@@ -146,11 +138,6 @@ void SOdysseyLayerStackTreeView::Refresh( int iOverrideNewSelectedNodeIndex /* =
 
     for (const auto& rootNode : mLayerStackNodeTree->GetRootNodes())
     {
-        if (rootNode->IsExpanded())
-        {
-            SetItemExpansion(rootNode, true);
-        }
-
         if (!rootNode->IsHidden())
         {
             mRootNodes.Add(rootNode);

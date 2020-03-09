@@ -45,9 +45,7 @@ struct FNodePadding
 
 
 
-/**
- * Base node GUI for a layer node in the layerStack
- */
+/** Base node GUI for a layer node in the layerStack */
 class IOdysseyBaseLayerNode : public TSharedFromThis<IOdysseyBaseLayerNode>
 {
 public:
@@ -59,7 +57,7 @@ public:
      * @param iParentNode    The parent of this node or nullptr if this is a root node
      * @param iParentTree    The tree this node is in
      */
-    IOdysseyBaseLayerNode( FName iNodeName, TSharedPtr<IOdysseyBaseLayerNode> iParentNode, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr );
+    IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr );
 
     /** Virtual destructor. */
     virtual ~IOdysseyBaseLayerNode(){}
@@ -74,121 +72,46 @@ public: //EVENTS
 public: // PUBLIC API
 
     /** @return Whether or not this node can be selected */
-    virtual bool IsSelectable() const
-    {
-        return true;
-    }
+    virtual bool IsSelectable() const;
 
-    /**
-     * @return The desired height of the node when displayed
-     */
+    /** @return The desired height of the node when displayed */
     virtual float GetNodeHeight() const = 0;
 
-    /**
-     * @return The desired padding of the node when displayed
-     */
+    /** @return The desired padding of the node when displayed */
     virtual FNodePadding GetNodePadding() const = 0;
 
-    /**
-     * Whether the node can be renamed.
-     *
-     * @return true if this node can be renamed, false otherwise.
-     */
+    /** @return true if this node can be renamed, false otherwise. */
     virtual bool CanRenameNode() const;
 
-    /**
-     * @return The localized display name of this node
-     */
+    /** @return The localized display name of this node */
     virtual FText GetDisplayName() const;
 
-    /**
-     * @return the color used to draw the display name.
-     */
+    /** @return the color used to draw the display name. */
     virtual FLinearColor GetDisplayNameColor() const;
 
-    /**
-     * @return the text to display for the tool tip for the display name.
-     */
+    /** @return the text to display for the tool tip for the display name. */
     virtual FText GetDisplayNameToolTipText() const;
 
-    /**
-     * Set the node's display name.
-     *
-     * @param NewDisplayName the display name to set.
-     */
+    /** @param NewDisplayName the display name to set. */
     virtual void SetDisplayName(const FText& NewDisplayName);
 
-    /**
-     * @return Whether this node handles resize events
-     */
-    virtual bool IsResizable() const
-    {
-        return false;
-    }
-
-    /**
-     * Resize this node
-     */
-    virtual void Resize(float iNewSize)
-    {
-
-    }
-
-    /**
-     * Generates a widget for display in the property view section of the layer (where you can set the opacity, blend mode...)
-     *
-     * @return Generated Property View widget
-     */
+    /** @return Generated Property View widget */
     virtual TSharedRef<SWidget> GenerateContainerWidgetForPropertyView() = 0;
 
-    /**
-     * Generates a widget for display in the LayerStack section
-     *
-     * @return Generated outliner widget
-     */
+    /** @return Generated outliner widget */
     virtual TSharedRef<SWidget> GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& iRow);
 
-
-    /**
-     * Customizes the icon widget of the node
-     *
-     * @return Content to display on the outliner node
-     */
+    /** @return Content to display on the outliner node */
     virtual TSharedRef<SWidget> GetCustomIconContent() = 0;
     
-    /**
-     * Customizes an outliner widget that is to represent this node
-     *
-     * @return Content to display on the outliner node
-     */
+    /** @return Content to display on the outliner node */
     virtual TSharedRef<SWidget> GetCustomOutlinerContent() = 0;
 
-
-    /**
-     * Gets an icon that represents this sequencer display node
-     *
-     * @return This node's representative icon
-     */
+    /** @return This node's representative icon */
     virtual const FSlateBrush* GetIconBrush() const;
 
-    /**
-     * Gets the color for the icon brush
-     *
-     * @return This node's representative color
-     */
+    /** @return This node's representative color */
     virtual FSlateColor GetIconColor() const;
-
-    /**
-     * Get the tooltip text to display for this node's icon
-     *
-     * @return Text to display on the icon
-     */
-    virtual FText GetIconToolTipText() const;
-
-    /**
-     * @return the path to this node starting with the outermost parent
-     */
-    FString GetPathName() const;
 
     /** Summon context menu */
     TSharedPtr<SWidget> OnSummonContextMenu();
@@ -196,127 +119,41 @@ public: // PUBLIC API
     /** What sort of context menu this node summons */
     virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder) = 0;
 
-    /**
-     * @return The name of the node (for identification purposes)
-     */
-    FName GetNodeName() const
-    {
-        return mNodeName;
-    }
+    /** @return The name of the node (for identification purposes) */
+    FName GetNodeName() const;
 
-    /**
-     * @return The number of child nodes belonging to this node
-     */
-    uint32 GetNumChildren() const
-    {
-        return mChildNodes.Num();
-    }
-
-    /**
-     * @return A List of all Child nodes belonging to this node
-     */
-    const TArray<TSharedRef<IOdysseyBaseLayerNode>>& GetChildNodes() const
-    {
-        return mChildNodes;
-    }
-
-    /**
-     * @return The parent of this node
-     */
-    TSharedPtr<IOdysseyBaseLayerNode> GetParent() const
-    {
-        return mParentNode.Pin();
-    }
-
-    /**
-     * @return The outermost parent of this node
-     */
-    TSharedRef<IOdysseyBaseLayerNode> GetOutermostParent()
-    {
-        TSharedPtr<IOdysseyBaseLayerNode> parent = mParentNode.Pin();
-        return parent.IsValid() ? parent->GetOutermostParent() : AsShared();
-    }
-
-    /** Gets the layerStack that owns this node */
-    FOdysseyLayerStackModel& GetLayerStack() const
-    {
-        return mParentTree.GetLayerStack();
-    }
-
-    /** Gets the parent tree that this node is in */
-    FOdysseyLayerStackTree& GetParentTree() const
-    {
-        return mParentTree;
-    }
-
-    IOdysseyLayer* GetLayerDataPtr() const
-    {
-        return mLayerDataPtr;
-    }
-
-    /**
-     * Set whether this node is expanded or not
-     */
-    void SetExpansionState(bool iIsExpanded);
-
-    /**
-     * @return Whether or not this node is expanded
-     */
-    bool IsExpanded() const;
-
-    /**
-     * @return Whether this node is explicitly hidden from the view or not
-     */
+    /** @return Whether this node is explicitly hidden from the view or not */
     virtual bool IsHidden() const = 0;
 
-    /**
-     * Check whether the node's tree view or track area widgets are hovered by the user's mouse.
-     *
-     * @return true if hovered, false otherwise. */
+    /** @return true if hovered, false otherwise. */
     bool IsHovered() const;
 
-    /** Initialize this node with expansion states and virtual offsets */
+    /** Initialize this node virtual offsets */
     void Initialize(float iVirtualTop, float iVirtualBottom);
 
+    /** @return this node's virtual offset from the top of the tree*/
+    float GetVirtualTop() const;
 
-    /** @return this node's virtual offset from the top of the tree, irrespective of expansion states */
-    float GetVirtualTop() const
-    {
-        return mVirtualTop;
-    }
+    /** @return this node's virtual offset from the bottom of the tree* */
+    float GetVirtualBottom() const;
 
-    /** @return this node's virtual offset plus its virtual height, irrespective of expansion states */
-    float GetVirtualBottom() const
-    {
-        return mVirtualBottom;
-    }
+    /** Determines if there is a valid drop zone based on the current drag drop operation and the zone the items were dragged onto. */
+    virtual TOptional<EItemDropZone> CanDrop( FOdysseyLayerStackNodeDragDropOp& DragDropOp, EItemDropZone ItemDropZone ) const = 0;
 
-    /**
-     * Returns whether or not this node can be dragged.
-     */
-    virtual bool CanDrag() const { return false; }
+    /** Handles a drop of items onto this display node. */
+    virtual void Drop( const TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, EItemDropZone iDropZone ) = 0;
 
-    /**
-     * Determines if there is a valid drop zone based on the current drag drop operation and the zone the items were dragged onto.
-     */
-    virtual TOptional<EItemDropZone> CanDrop( FOdysseyLayerStackNodeDragDropOp& DragDropOp, EItemDropZone ItemDropZone ) const { return TOptional<EItemDropZone>(); }
-
-    /**
-     * Handles a drop of items onto this display node.
-     */
-    virtual void Drop( const TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, EItemDropZone iDropZone ) 
-    {
-    }
-
-    /** Clears the parent of this node. */
-    void ClearParent() { mParentNode = nullptr; }
-
+    /** Action to do when this node is moved to another node */
     void MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<IOdysseyBaseLayerNode> iCurrentNode );
+    
+    /** Gets the layerStack that owns this node */
+    FOdysseyLayerStackModel& GetLayerStack() const;
 
-protected: //PROTECTED API
+    /** Gets the parent tree that this node is in */
+    FOdysseyLayerStackTree& GetParentTree() const;
 
-    /** Adds a child to this node, and sets it's parent to this node. */
-    void AddChildAndSetParent( TSharedRef<IOdysseyBaseLayerNode> iChild );
+    /** Gets the pointer to the data contained in this node */
+    IOdysseyLayer* GetLayerDataPtr() const;
 
 
 private: // HANDLES
@@ -337,9 +174,6 @@ protected:
 
 
 protected:
-    /** The parent of this node*/
-    TWeakPtr<IOdysseyBaseLayerNode> mParentNode;
-
     /** List of children belonging to this node */
     TArray<TSharedRef<IOdysseyBaseLayerNode>> mChildNodes;
 
@@ -348,9 +182,6 @@ protected:
 
     /** The name identifier of this node */
     FName mNodeName;
-
-    /** Whether or not the node is expanded */
-    bool mExpanded;
 
     /** Event that is triggered when rename is requested */
     FRequestRenameEvent mRenameRequestedEvent;

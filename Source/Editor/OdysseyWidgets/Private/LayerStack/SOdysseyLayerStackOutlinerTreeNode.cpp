@@ -11,7 +11,6 @@
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SComboButton.h"
-#include "Widgets/Views/SExpanderArrow.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
@@ -39,21 +38,8 @@ SOdysseyLayerStackOutlinerTreeNode::~SOdysseyLayerStackOutlinerTreeNode()
 void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode, const TSharedRef<SOdysseyLayerStackViewRow>& iTableRow )
 {
     mLayerNode = iNode;
-    mIsOuterTopLevelNode = !iNode->GetParent().IsValid();
 
     auto nodeHeight = [=]() -> FOptionalSize { return iNode->GetNodeHeight(); };
-
-    FMargin innerNodePadding;
-    if ( mIsInnerTopLevelNode )
-    {
-        mInnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" );
-        innerNodePadding = FMargin(0.f, 1.f);
-    }
-    else
-    {
-        mInnerBackgroundBrush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TransparentBorder" );
-        innerNodePadding = FMargin(0.f);
-    }
 
     FSlateFontInfo NodeFont = FEditorStyle::GetFontStyle("Sequencer.AnimationOutliner.RegularFont");
 
@@ -72,7 +58,6 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
     TSharedRef<SWidget>    finalWidget =
         SNew( SBorder )
         .VAlign( VAlign_Center )
-        .BorderImage( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeBorderImage )
         .BorderBackgroundColor( this, &SOdysseyLayerStackOutlinerTreeNode::GetNodeBackgroundTint )
         .Padding(FMargin(iNode->GetNodePadding().mLeft, iNode->GetNodePadding().mTop, 0, iNode->GetNodePadding().mBottom ))
         [
@@ -87,7 +72,6 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
                     SNew( SHorizontalBox )
 
                      + SHorizontalBox::Slot()
-                        .Padding( innerNodePadding )
                         [
                             SNew( SBorder )
                             .BorderImage( FEditorStyle::GetBrush( "LayerStack.NodeOutliner.TopLevelBorder_Collapsed" ) )
@@ -156,14 +140,9 @@ void SOdysseyLayerStackOutlinerTreeNode::GetAllDescendantNodes(TSharedPtr<IOdyss
 
 //PRIVATE API ----------------------------------------------------
 
-const FSlateBrush* SOdysseyLayerStackOutlinerTreeNode::GetNodeBorderImage() const
-{
-    return mLayerNode->IsExpanded() ? mExpandedBackgroundBrush : mCollapsedBackgroundBrush;
-}
-
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetNodeBackgroundTint() const
 {
-    return mIsOuterTopLevelNode ? FLinearColor(FColor(48, 48, 48, 255)) : FLinearColor(FColor(62, 62, 62, 255));
+    return FLinearColor(FColor(62, 62, 62, 255));
 }
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetNodeInnerBackgroundTint() const
@@ -180,13 +159,6 @@ FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetForegroundBasedOnSelection() 
 {
     return mTableRowStyle->SelectedTextColor;
 }
-
-
-EVisibility SOdysseyLayerStackOutlinerTreeNode::GetExpanderVisibility() const
-{
-    return mLayerNode->GetNumChildren() > 0 ? EVisibility::Visible : EVisibility::Hidden;
-}
-
 
 FSlateColor SOdysseyLayerStackOutlinerTreeNode::GetDisplayNameColor() const
 {
