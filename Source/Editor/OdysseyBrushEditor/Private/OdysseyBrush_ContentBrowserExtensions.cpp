@@ -239,20 +239,20 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
             UObject* object = thumbnailSelectionWindow->GetCurrentTexture();
             if( object )
             {
-                UTexture* texture = static_cast<UTexture*>(object);
                 FObjectThumbnail thumbnail;
-                
                 ThumbnailTools::AssetHasCustomThumbnail( object->GetFullName(), thumbnail );
+                
                 if( thumbnail.GetImageWidth() != 0 && thumbnail.GetImageHeight() != 0 )
                 {
-                    ThumbnailTools::CacheThumbnail( iBrushes[i]->GetFullName(), &thumbnail, iBrushes[i]->GetOutermost() );
-
-                    //Refresh the thumbnail
+                    FObjectThumbnail* newThumbnail = ThumbnailTools::CacheThumbnail( iBrushes[i]->GetFullName(), &thumbnail, iBrushes[i]->GetOutermost() );
+                    
                     UPackage* package = iBrushes[i]->GetOutermost();
-
-                    UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], iBrushes[i]->GetFlags(), *(iBrushes[i]->GetName()));
+                    
+                    newThumbnail->MarkAsDirty();
+                    package->MarkPackageDirty();
+                    iBrushes[i]->PostEditChange();
             
-                    package->SetDirtyFlag( true );
+                    newThumbnail->SetCreatedAfterCustomThumbsEnabled();
                 }
             }
             else
