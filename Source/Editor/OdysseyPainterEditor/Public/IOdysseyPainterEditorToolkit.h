@@ -24,5 +24,6 @@ public:
 
     virtual FOdysseyPaintEngine* PaintEngine() = 0;
     virtual FOdysseyLayerStack* LayerStack() = 0;
+    virtual bool DoesDrawBrushPreview() const = 0;
     virtual void SetColor( const ::ULIS::CColor& iColor ) = 0;
 };

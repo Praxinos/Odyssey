@@ -88,6 +88,7 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
     , mBrush( NULL )
     , mBrushInstance( NULL )
     , mLiveUpdateInfo()
+    , mDrawBrushPreview( true )
     , mIsTextureDirty( false )
 {
 }
@@ -168,8 +169,6 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mStrokeOptionsTab->SetSmoothingEnabled( true );
     mStrokeOptionsTab->SetSmoothingRealTime( true );
     mStrokeOptionsTab->SetSmoothingCatchUp( true );
-
-    mPerformanceOptionsTab->SetPerformanceOptionLiveUpdate( true );
 
     mTopTab->SetSize( 20 );
     mTopTab->SetOpacity( 100 );
@@ -838,7 +837,8 @@ void
 FOdysseyPainterEditorToolkit::CreatePerformanceOptionsTab()
 {
     mPerformanceOptionsTab = SNew( SOdysseyPerformanceOptions )
-        .OnLiveUpdateChanged( this, &FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged );
+        .OnLiveUpdateChanged( this, &FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged )
+        .OnDrawBrushPreviewChanged( this, &FOdysseyPainterEditorToolkit::HandlePerformanceDrawBrushPreviewChanged );
 }
 
 /*
@@ -970,6 +970,12 @@ FOdysseyPainterEditorToolkit::SetTextureDirty( bool iIsTextureDirty )
     mIsTextureDirty = iIsTextureDirty;
 }
 
+bool
+FOdysseyPainterEditorToolkit::DoesDrawBrushPreview() const
+{
+    return mDrawBrushPreview;
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Brush Handlers
 void
@@ -1092,6 +1098,13 @@ void
 FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged( bool iValue )
 {
     mLiveUpdateInfo.enabled = iValue;
+    mDisplaySurface->Invalidate();
+}
+
+void
+FOdysseyPainterEditorToolkit::HandlePerformanceDrawBrushPreviewChanged( bool iValue )
+{
+    mDrawBrushPreview = iValue;
     mDisplaySurface->Invalidate();
 }
 

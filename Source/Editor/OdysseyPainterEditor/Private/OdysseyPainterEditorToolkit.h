@@ -146,6 +146,7 @@ protected:
 
 public:
     void SetTextureDirty( bool iTextureDirty ); //Set bIsTextureDirty, prompting, or not, the option to save before closing the editor
+    bool DoesDrawBrushPreview() const;
 
 private:
     // Brush Handlers
@@ -175,6 +176,7 @@ private:
 
     // Performance Handlers
     void HandlePerformanceLiveUpdateChanged( bool iValue );
+    void HandlePerformanceDrawBrushPreviewChanged( bool iValue );
 
 private:
     // Spawner callbacks
@@ -242,6 +244,7 @@ private:
     UOdysseyBrush*              mBrush;              // NOT Owned
     UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
     FOdysseyLiveUpdateInfo      mLiveUpdateInfo;
+    bool                        mDrawBrushPreview;
 
     bool                        mIsTextureDirty;
 

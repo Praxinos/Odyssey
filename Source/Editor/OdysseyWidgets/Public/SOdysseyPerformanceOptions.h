@@ -21,6 +21,7 @@ struct ODYSSEYWIDGETS_API FOdysseyPerformanceOptions
 
     FOdysseyPerformanceOptions()
         :  LiveUpdate           (   true    )
+        ,  DrawBrushPreview     (   true    )
         ,  CacheEditLock        (   false   )
         ,  SuperSize            (   0       )
         ,  SuperCount           (   0       )
@@ -43,7 +44,11 @@ struct ODYSSEYWIDGETS_API FOdysseyPerformanceOptions
     /** Should the texture live-stream update in the 3D viewport ( can impact performances ). */
     UPROPERTY( EditAnywhere, Category = "Performances" )
     bool    LiveUpdate;
-
+    
+    /** Should  we draw a custom cursor representing the preview of the brush  */
+    UPROPERTY( EditAnywhere, Category = "Performances" )
+    bool    DrawBrushPreview;
+    
     /** EditLock. */
     UPROPERTY()
     bool    CacheEditLock;
@@ -103,18 +108,20 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPerformanceOptions )
         {}
-        SLATE_EVENT( FOnBooleanValueChanged ,   OnLiveUpdateChanged     )
-        SLATE_EVENT( FOnBooleanValueChanged ,   OnAnyValueChanged       )
+        SLATE_EVENT( FOnBooleanValueChanged ,   OnLiveUpdateChanged           )
+        SLATE_EVENT( FOnBooleanValueChanged ,   OnDrawBrushPreviewChanged     )
+        SLATE_EVENT( FOnBooleanValueChanged ,   OnAnyValueChanged             )
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
 public:
     // Public Callbacks
-    const  FOdysseyPerformanceOptions&  GetPerformanceOptions()  const;
+    const FOdysseyPerformanceOptions&  GetPerformanceOptions()  const;
     void  SetPerformanceOptions( const  FOdysseyPerformanceOptions& iValue );
 
     void  SetPerformanceOptionLiveUpdate        ( bool iValue );
+    void  SetPerformanceOptionBrushPreview      ( bool iValue );
 
     void  SetPeformanceCacheInfoSuperSize       ( int32 iValue );
     void  SetPeformanceCacheInfoSuperCount      ( int32 iValue );
@@ -137,7 +144,8 @@ private:
     FOdysseyPerformanceOptions          PerformanceOptionsStructData;
     TSharedPtr< FStructOnScope >        PerformanceOptionsStructToDisplay;
 
-    FOnBooleanValueChanged  OnLiveUpdateChangedChangedCallback  ;
+    FOnBooleanValueChanged  OnLiveUpdateChangedCallback  ;
+    FOnBooleanValueChanged  OnDrawBrushPreviewChangedCallback  ;
     FOnBooleanValueChanged  OnAnyValueChangedCallback           ;
 };
 

@@ -16,7 +16,9 @@
 void
 SOdysseyPerformanceOptions::Construct( const FArguments& InArgs )
 {
-    OnLiveUpdateChangedChangedCallback  = InArgs._OnLiveUpdateChanged   ;
+    OnLiveUpdateChangedCallback  = InArgs._OnLiveUpdateChanged   ;
+    OnDrawBrushPreviewChangedCallback  = InArgs._OnDrawBrushPreviewChanged   ;
+    
     OnAnyValueChangedCallback           = InArgs._OnAnyValueChanged     ;
 
     // Create a details view
@@ -72,7 +74,8 @@ SOdysseyPerformanceOptions::SetPerformanceOptions( const  FOdysseyPerformanceOpt
 {
     PerformanceOptionsStructData = iValue;
 
-    OnLiveUpdateChangedChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+    OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+    OnDrawBrushPreviewChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.DrawBrushPreview );
 
     OnAnyValueChangedCallback.ExecuteIfBound( true );
 }
@@ -83,7 +86,16 @@ SOdysseyPerformanceOptions::SetPerformanceOptionLiveUpdate        ( bool iValue 
 {
     PerformanceOptionsStructData.LiveUpdate = iValue;
 
-    OnLiveUpdateChangedChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+    OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+    OnAnyValueChangedCallback.ExecuteIfBound( true );
+}
+
+void
+SOdysseyPerformanceOptions::SetPerformanceOptionBrushPreview     ( bool iValue )
+{
+    PerformanceOptionsStructData.DrawBrushPreview = iValue;
+
+    OnDrawBrushPreviewChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.DrawBrushPreview );
     OnAnyValueChangedCallback.ExecuteIfBound( true );
 }
 
@@ -165,7 +177,11 @@ SOdysseyPerformanceOptions::NotifyPostChange( const FPropertyChangedEvent& Prope
 {
     FString PropertyName = PropertyThatChanged->GetName();
     if( PropertyName == FString( TEXT("LiveUpdate") ) ) {
-        OnLiveUpdateChangedChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+        OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+    }
+    
+    if( PropertyName == FString( TEXT("DrawBrushPreview") ) ) {
+        OnDrawBrushPreviewChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.DrawBrushPreview );
     }
 
     OnAnyValueChangedCallback.ExecuteIfBound( true );
