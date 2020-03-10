@@ -8,18 +8,23 @@
 //For coordinates conversion purposes
 #include "Mac/MacApplication.h"
 
+FCriticalSection sgMutex;
+
 void
 FWTTabletContextInfo::Tick()
-{    
+{
     PreviousState = CurrentState;
     CurrentState.Empty();
-        
-    for( int i = 0; i < mPacketsBuffer.Num(); i++ )
-    {
-        CurrentState.Push( mPacketsBuffer[i].ToPublicState() );
-    }
     
+    sgMutex.Lock();
+    TArray<FNSEventStylusState> tmp( mPacketsBuffer );
     mPacketsBuffer.Empty();
+    sgMutex.Unlock();
+    
+    for( int i = 0; i < tmp.Num(); i++ )
+    {
+        CurrentState.Push( tmp[i].ToPublicState() );
+    }
 }
 
 
@@ -74,7 +79,20 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
     FNSEventStylusState state;
     
     NSPoint cursorPosition = NSEvent.mouseLocation;
-    state.Position = FMacApplication::ConvertCocoaPositionToSlate( cursorPosition.x, cursorPosition.y );
+    
+    //Sometimes, NSEvent.mouseLocation isn't initialized, so we have to make sure it exists before we convert it to cocoaPosition
+    if( &cursorPosition != 0 )
+    {
+        state.Position = FMacApplication::ConvertCocoaPositionToSlate( cursorPosition.x, cursorPosition.y );
+    }
+    else
+    {
+        UE_LOG(LogTemp, Display, TEXT("WARNING, ERROR POSITION"));
+        return Event;
+    }
+    
+    if( state.Position == FVector2D( 0, 0 ))
+        UE_LOG(LogTemp, Display, TEXT("WARNING, ERROR IN STATE"));
         
     //Tablet and mouse events are under the same main type of event. To distinguish them, we can check the subtype of the event received
     if( [Event type] == NSEventTypeLeftMouseDown || [Event type] == NSEventTypeLeftMouseDragged )
@@ -95,7 +113,7 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
             state.Twist = Event.rotation;
         }
     }
-    else if( [Event type ] == NSEventTypeTabletProximity )
+    else if( [Event type ] == NSEventTypeTabletProximity ||  [Event subtype ] == NSEventSubtypeTabletProximity )
     {
         if( Event.pointingDeviceType == NSPointingDeviceType::NSPointingDeviceTypeEraser && Event.isEnteringProximity )
             mTabletContext.mIsInverted = true;
@@ -104,8 +122,11 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
     }
             
     state.IsInverted = mTabletContext.mIsInverted;
-    mTabletContext.mPacketsBuffer.Push( state );
     
+    sgMutex.Lock();
+    mTabletContext.mPacketsBuffer.Push( state );
+    sgMutex.Unlock();
+
     return Event;
 }
 
