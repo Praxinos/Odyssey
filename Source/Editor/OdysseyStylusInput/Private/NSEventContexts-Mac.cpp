@@ -113,7 +113,7 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
             state.Twist = Event.rotation;
         }
     }
-    else if( [Event type ] == NSEventTypeTabletProximity ||  [Event subtype ] == NSEventSubtypeTabletProximity )
+    else if( [Event type ] == NSEventTypeTabletProximity )
     {
         if( Event.pointingDeviceType == NSPointingDeviceType::NSPointingDeviceTypeEraser && Event.isEnteringProximity )
             mTabletContext.mIsInverted = true;
