@@ -156,7 +156,8 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     CreatePerformanceOptionsTab();
     //CreateUndoHistoryTab();
 
-
+    mPerformanceOptionsTab->SetPerformanceOptionLiveUpdate( true );
+    
     // Setup Properties with callbacks
     mColorSelectorTab->SetColor( ::ULIS::CColor( 0, 0, 0 ) );
 
