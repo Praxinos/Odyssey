@@ -93,7 +93,7 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
 void
 FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type iMode,
                                                         const TSharedPtr< class IToolkitHost >& iInitToolkitHost,
-                                                        UOdysseyTexture* iTexture )
+                                                        UTexture2D* iTexture )
 {
     // Setup Texture
     mTexture = iTexture;
@@ -127,7 +127,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     // Setup Surface
     mDisplaySurface = new FOdysseySurface( mLayerStack->GetResultBlock() );
     mLiveUpdateInfo.main = mDisplaySurface->Texture();
-    mLiveUpdateInfo.live = mOdysseyTexture->GetResultTexture2D();
+    mLiveUpdateInfo.live = mTexture;
     mLiveUpdateInfo.enabled = false;
     mDisplaySurface->Block()->GetIBlock()->SetInvalidateCB( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) );
 
@@ -330,7 +330,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 
     IOdysseyPainterEditorModule* odysseyPainterEditorModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>( "OdysseyPainterEditor" );
 
-    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, OdysseyPainterEditorAppIdentifier, StandaloneDefaultLayout, true, false, mOdysseyTexture->GetResultTexture2D() );
+    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, OdysseyPainterEditorAppIdentifier, StandaloneDefaultLayout, true, false, mTexture );
 
     InitializeExtenders();
 
@@ -501,7 +501,7 @@ FOdysseyPainterEditorToolkit::SaveAsset_Execute()
     // Save backup
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
     ::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
-    InvalidateTextureFromData( mDisplaySurface->Block(), mOdysseyTexture->GetResultTexture2D() );
+    InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
     // Invalidate all
     mDisplaySurface->Invalidate();
 
@@ -652,8 +652,8 @@ FOdysseyPainterEditorToolkit::OnExportLayersAsTextures()
 {
     FSaveAssetDialogConfig saveAssetDialogConfig;
     saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
-    saveAssetDialogConfig.DefaultPath = FPaths::GetPath( mOdysseyTexture->GetPathName() );
-    saveAssetDialogConfig.DefaultAssetName = mOdysseyTexture->GetName();
+    saveAssetDialogConfig.DefaultPath = FPaths::GetPath( mTexture->GetPathName() );
+    saveAssetDialogConfig.DefaultAssetName = mTexture->GetName();
     saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
     saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
 
@@ -699,7 +699,7 @@ FOdysseyPainterEditorToolkit::OnImportTexturesAsLayers()
 {
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
-    openAssetDialogConfig.DefaultPath = FPaths::GetPath( mOdysseyTexture->GetPathName() );
+    openAssetDialogConfig.DefaultPath = FPaths::GetPath( mTexture->GetPathName() );
     openAssetDialogConfig.bAllowMultipleSelection = true;
     openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
 
