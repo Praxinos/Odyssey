@@ -210,23 +210,22 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
 {
     check( iClass->IsChildOf( UOdysseyTexture::StaticClass() ) );
 
-    UOdysseyTexture* object = NewObject<UOdysseyTexture>( iParent, iName, iFlags | RF_Transactional );
-
     // Init internal data
     FOdysseyBlock block( mTextureWidth, mTextureHeight, ETextureSourceFormat::TSF_BGRA8, nullptr, nullptr, true );
     
-    UTexture2D* texture = NewObject<UTexture2D>( object, TEXT("TextureResult") );
+    UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     texture->Source.Init( mTextureWidth, mTextureHeight, 1, 1, TSF_BGRA8 );
     texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
+    userData->GetLayerStack()->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+    texture->AddAssetUserData( userData );
     texture->PostEditChange();
     
     CopyBlockDataIntoUTexture( &block, texture );
-
-    object->SetResultTexture2D( texture );
     
-    return object;
+    return texture;
 }
 
 bool UOdysseyTextureFactory::ConfigureProperties()

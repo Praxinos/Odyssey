@@ -13,31 +13,7 @@
 #include "OdysseyTexture.generated.h"
 
 UCLASS()
-class UOdysseyTexture : public UTexture
+class UOdysseyTexture : public UObject
 {
-	GENERATED_UCLASS_BODY()
-
-public:
-
-	//~ Begin UObject Interface.
-	virtual void Serialize(FArchive& Ar) override;
-	//~ End UObject Interface.
-    
-	//~ Begin UTexture Interface.
-	virtual float GetSurfaceWidth() const override;
-	virtual float GetSurfaceHeight() const override;
-	virtual FTextureResource* CreateResource() override;
-	virtual EMaterialValueType GetMaterialType() const override;
-	//~ End UTexture Interface.
-
-public:
-    UTexture2D* GetResultTexture2D();
-    void SetResultTexture2D( UTexture2D* iTexture );
-    
-    FOdysseyLayerStack* GetLayerStack();
-    
-private:
-    FOdysseyLayerStack* mLayerStack;
-    
-    UTexture2D* mResultTexture;
+	GENERATED_BODY()
 };

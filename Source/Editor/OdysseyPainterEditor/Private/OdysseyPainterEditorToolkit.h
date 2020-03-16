@@ -44,6 +44,14 @@ class SOdysseySurfaceViewport;
 class UFactory;
 class UTexture;
 
+
+struct FTexturePropertiesBackup
+{
+    TextureMipGenSettings       mTextureMipGenBackup;
+    TextureCompressionSettings  mTextureCompressionBackup;
+    TextureGroup                mTextureGroupBackup;
+};
+
 /**
  * Implements an Editor toolkit for textures.
  */
@@ -59,7 +67,7 @@ public:
 public:
     void InitOdysseyPainterEditor( const EToolkitMode::Type iMode,
                                    const TSharedPtr< class IToolkitHost >& iInitToolkitHost,
-                                   UOdysseyTexture* iTexture );
+                                   UTexture2D* iTexture );
 
 public:
     // FAssetEditorToolkit interface
@@ -80,6 +88,7 @@ protected:
 
 protected:
     //FAssetEditorToolkit override
+    virtual void SaveAsset_Execute() override;
     virtual void SaveAssetAs_Execute() override;
     virtual bool OnRequestClose() override;
 
@@ -231,8 +240,11 @@ private:
     bool                mIsManipulationDirtiedSomething;
 
     /** Painting */
-    UOdysseyTexture*            mOdysseyTexture;
+    UTexture2D*                 mTexture;
+    FOdysseyBlock*              mTextureContentsBackup;
+    FTexturePropertiesBackup    mPropertiesBackup;
     FOdysseySurface*            mDisplaySurface;
+    FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
     FOdysseyPaintEngine         mPaintEngine;        // Owned        // Used by SOdysseyLayerStack
     UOdysseyBrush*              mBrush;              // NOT Owned
     UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview

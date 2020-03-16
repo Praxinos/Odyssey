@@ -6,6 +6,8 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "IOdysseyPainterEditorModule.h"
+#include "OdysseyTextureAssetUserData.h"
+
 
 #include "OdysseyTexture.h"
 
@@ -42,20 +44,34 @@ FOdysseyTextureAssetTypeActions::GetCategories()
     return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
 }
 
-
+//Works, but suppress the normal editor of UTexture2D, need to find a better solution to keep both editors
+/*
 void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
 	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-
+    TArray<UObject*> noUserDataObjects;
+    
 	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
 	{
-		auto odysseyTexture = Cast<UOdysseyTexture>(*ObjIt);
+		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
 		if (odysseyTexture != NULL)
 		{
-			IOdysseyPainterEditorModule* odysseyPainterModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>("OdysseyPainterEditor");
-            odysseyPainterModule->CreateOdysseyPainterEditor(Mode, EditWithinLevelEditor, odysseyTexture);
+            UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(odysseyTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+            
+            if( userData )
+            {
+                IOdysseyPainterEditorModule* odysseyPainterModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>("OdysseyPainterEditor");
+                odysseyPainterModule->CreateOdysseyPainterEditor(Mode, EditWithinLevelEditor, odysseyTexture);
+            }
+            else
+            {
+                noUserDataObjects.Add(odysseyTexture);
+            }
 		}
 	}
-}
+    
+    if( noUserDataObjects.Num() != 0 )
+        FAssetTypeActions_Base::OpenAssetEditor( noUserDataObjects, EditWithinLevelEditor );
+}*/
 
 #undef LOCTEXT_NAMESPACE

@@ -16,8 +16,9 @@
 FOdysseyLayerStack::~FOdysseyLayerStack()
 {
     delete mResultBlock;
-
-    //TODO: and other block ? layers ?
+    delete mTempBlock;
+    delete mLayers;
+    delete mDrawingUndo;
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack()
@@ -42,9 +43,9 @@ FOdysseyLayerStack::FOdysseyLayerStack( int iWidth, int iHeight )
     , mWidth( iWidth )
     , mHeight( iHeight )
     , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
-    , mIsInitialized( true )
+    , mIsInitialized( false )
 {
-    Init( mWidth, mHeight ); //TODO: what ? mIsInitialized is already to true ?!
+    Init( mWidth, mHeight );
 }
 
 //--------------------------------------------------------------------------------------
