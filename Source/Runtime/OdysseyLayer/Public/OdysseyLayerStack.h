@@ -11,6 +11,7 @@
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
 #include "IOdysseyLayer.h"
+#include "IOdysseySerializable.h"
 #include "OdysseyTree.h"
 
 #include "OdysseyBlock.h"
