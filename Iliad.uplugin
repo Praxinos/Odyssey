@@ -46,6 +46,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseySerializable",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyPaintEngine",
       "Type": "Editor",
       "LoadingPhase": "Default"
