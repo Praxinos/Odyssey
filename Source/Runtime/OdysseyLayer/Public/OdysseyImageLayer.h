@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/Texture.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
 #include <ULIS_BLENDINGMODES>
