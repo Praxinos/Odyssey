@@ -958,6 +958,8 @@ FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, 
     mToBinary << array;
 
     mNumberBlocksUndo[mCurrentIndex]++;
+
+    delete mTileData;
     
     return true;
 }
@@ -1042,6 +1044,8 @@ FOdysseyDrawingUndo::LoadData()
         EndRecordRedo();
     }
 
+    delete mTileData;
+
     return true;
 }
 
@@ -1107,6 +1111,8 @@ FOdysseyDrawingUndo::Redo()
     
     if( mCurrentIndex < (mUndosPositions.Num() - 1) )
         mCurrentIndex++;
+
+    delete mTileData;
 
     return true;
 }
