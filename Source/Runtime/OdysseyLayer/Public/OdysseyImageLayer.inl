@@ -7,7 +7,8 @@
 
 inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
 {
-    if(!ioSaveImageLayer) return Ar;
+    if( !ioSaveImageLayer ) 
+        return Ar;
     
     /*IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
     Ar << serializable;*/
@@ -36,6 +37,8 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
         TArray<uint8> layerData = TArray<uint8>();
         layerData.AddUninitialized(blockLayerData->BytesTotal());
         FMemory::Memcpy(layerData.GetData(), blockLayerData->DataPtr(), blockLayerData->BytesTotal());
+        delete blockLayerData;
+
         Ar << layerData;
     }
     else if( Ar.IsLoading() )
@@ -47,6 +50,7 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
         Ar << width;
         Ar << height;
         
+        check( !ioSaveImageLayer->mBlock );
         ioSaveImageLayer->mBlock = new FOdysseyBlock( width, height, textureFormat );
         ::ULIS::FClearFillContext::Clear( ioSaveImageLayer->mBlock->GetIBlock() );
         
