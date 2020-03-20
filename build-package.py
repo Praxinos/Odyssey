@@ -7,6 +7,7 @@ import itertools
 import json
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -76,6 +77,22 @@ uplugin_pathfile = uplugin_pathfiles[0]
 print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
 
 plugin_name = uplugin_pathfile.stem
+
+# Check Content filenames validity
+
+content_path = input_path / 'Content'
+invalid_subpathfiles = []
+for pathfile in content_path.rglob( '*' ):
+    subpathfile = pathfile.relative_to( content_path )
+   # Same regex as https://www.unrealengine.com/en-US/marketplace-guidelines#271c
+    if re.search( r'[^a-zA-Z0-9_]', str( subpathfile.stem ) ):
+        invalid_subpathfiles.append( subpathfile )
+
+if invalid_subpathfiles:
+    for invalid_subpathfile in invalid_subpathfiles:
+        print( f'Invalid characters: {content_path} {Fore.RED}{invalid_subpathfile}' )
+        
+    sys.exit( 12 )
 
 #
 
