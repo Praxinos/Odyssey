@@ -60,7 +60,7 @@ private:
     float           HandleZoomSliderValue( ) const;
     void            HandleRotationLeft();
     void            HandleRotationRight();
-    void            HandleRotationReset();
+    void            HandleViewportReset();
     void            HandleRotationChanged( int newRotation );
     int             HandleRotationValue() const;
     FText           HandleSurfaceSizeTextValue() const;
