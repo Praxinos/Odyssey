@@ -50,11 +50,27 @@ void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
 void FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryExecute()
 {
     FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&mLayerStackRef.Get());
-    
-    if( model->GetLayerStackData()->GetCurrentLayer() )
-        model->GetLayerStackData()->AddImageLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() + 1 );
+    IOdysseyLayer* currentLayer = model->GetLayerStackData()->GetCurrentLayer()->GetNodeContent();
+    if( currentLayer )
+    {
+        if( currentLayer->GetType() == IOdysseyLayer::eType::kFolder )
+        {
+            FOdysseyFolderLayer* folder = static_cast<FOdysseyFolderLayer*>(currentLayer);
+            if( folder->IsOpen() )
+                model->GetLayerStackData()->AddImageLayer( model->GetLayerStackData()->GetCurrentLayer(), 0 );
+            else
+                model->GetLayerStackData()->AddImageLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() );
+
+        }
+        else
+        {
+            model->GetLayerStackData()->AddImageLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() );
+        }
+    }
     else
+    {
         model->GetLayerStackData()->AddImageLayer();
+    }
     model->GetLayerStackView()->GetTreeView()->Refresh();
 }
 
@@ -66,11 +82,27 @@ bool FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryCanExecute() const
 void FOdysseyLayerAddMenu::HandleAddFolderLayerMenuEntryExecute()
 {
     FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&mLayerStackRef.Get());
-    
-    if( model->GetLayerStackData()->GetCurrentLayer() )
-        model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), FName(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() + 1 );
+    IOdysseyLayer* currentLayer = model->GetLayerStackData()->GetCurrentLayer()->GetNodeContent();
+    if( currentLayer )
+    {
+        if( currentLayer->GetType() == IOdysseyLayer::eType::kFolder )
+        {
+            FOdysseyFolderLayer* folder = static_cast<FOdysseyFolderLayer*>(currentLayer);
+            if( folder->IsOpen() )
+                model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer(), FName(), 0 );
+            else
+                model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), FName(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() );
+
+        }
+        else
+        {
+            model->GetLayerStackData()->AddFolderLayer( model->GetLayerStackData()->GetCurrentLayer()->GetParent(), FName(), model->GetLayerStackData()->GetCurrentLayer()->GetIndexInParent() );
+        }
+    }
     else
+    {
         model->GetLayerStackData()->AddFolderLayer();
+    }
     model->GetLayerStackView()->GetTreeView()->Refresh();
 }
 
