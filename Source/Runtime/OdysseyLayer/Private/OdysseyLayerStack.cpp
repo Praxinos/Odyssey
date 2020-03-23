@@ -760,6 +760,8 @@ FOdysseyLayerStack::ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLaye
 
 
 
+//TO DO: DELETE THIS WHEN WE GET INTELLIGENT TILING
+#define TILE_SIZE 64
 
 
 
@@ -915,7 +917,7 @@ FOdysseyDrawingUndo::SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile,
     if( imageLayer == nullptr )
         return false;
 
-    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * iSizeX, iYTile * iSizeY, iSizeX, iSizeY ) );
+    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * TILE_SIZE, iYTile * TILE_SIZE, iSizeX, iSizeY ) );
            
     TArray<uint8> array = TArray<uint8>();
     array.AddUninitialized(mTileData->BytesTotal());
@@ -942,7 +944,7 @@ FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, 
         return false;
     
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer()->GetNodeContent() );
-    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * iSizeX, iYTile * iSizeY, iSizeX, iSizeY ) );
+    mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( iXTile * TILE_SIZE, iYTile * TILE_SIZE, iSizeX, iSizeY ) );
     
     TArray<uint8> array = TArray<uint8>();
     array.AddUninitialized(mTileData->BytesTotal());
@@ -1025,7 +1027,7 @@ FOdysseyDrawingUndo::LoadData()
         
         //Useless, I just want mTileData at the right size for the next undo, to change
         if( i == 0 )
-            mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ) );
+            mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ) );
 
         if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
         {
@@ -1034,8 +1036,8 @@ FOdysseyDrawingUndo::LoadData()
                 *(mTileData->DataPtr() + j) = mData[j];
             }
     
-            ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect(0, 0, sizeX, sizeY ), ::ULIS::FPoint( tileX * sizeX, tileY * sizeY ) );
-            mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ));
+            ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect(0, 0, sizeX, sizeY ), ::ULIS::FPoint( tileX * TILE_SIZE, tileY * TILE_SIZE ) );
+            mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ));
         }
     }
     
@@ -1095,7 +1097,7 @@ FOdysseyDrawingUndo::Redo()
         
         //Useless, I just want mTileData at the right size for the next undo, to change
         if( i == 0 )
-            mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ) );
+            mTileData = ::ULIS::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ) );
 
         if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
         {
@@ -1105,7 +1107,7 @@ FOdysseyDrawingUndo::Redo()
             }
         
             ::ULIS::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetIBlock(), ::ULIS::FRect(0, 0, sizeX, sizeY ), ::ULIS::FPoint( tileX * sizeX, tileY * sizeY ) );
-            mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( tileX * sizeX, tileY * sizeY, sizeX, sizeY ));
+            mLayerStackPtr->ComputeResultBlock( ::ULIS::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ));
         }
     }
     
