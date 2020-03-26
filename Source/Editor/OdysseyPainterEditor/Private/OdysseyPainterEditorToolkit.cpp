@@ -1295,7 +1295,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket32" ) )
                         ]
                     ]
-                    +SWrapBox::Slot()
+                    /*+SWrapBox::Slot()
                     [
                         SNew( SButton )
                         .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -1304,10 +1304,10 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             SNew( SImage )
                             .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ColorPicker32" ) )
                         ]
-                    ]
+                    ]*/
                 ]
             ]
-            +SScrollBox::Slot()
+            /*+SScrollBox::Slot()
             [
                 SNew( SExpandableArea )
                 .HeaderContent()
@@ -1382,7 +1382,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                         ]
                     ]
                 ]
-            ]
+            ]*/
             +SScrollBox::Slot()
             [
                 SNew( SExpandableArea )
