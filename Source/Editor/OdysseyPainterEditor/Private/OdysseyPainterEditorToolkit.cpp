@@ -97,12 +97,12 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 {
     // Setup Texture
     mTexture = iTexture;
+    mTexture->MarkPackageDirty();
     mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup };
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
     mTexture->UpdateResource();
-    mTextureContentsBackup = NewOdysseyBlockFromUTextureData( mTexture );
     
     //Check if this texture already has Iliad User Data or not, if yes, we get its LayerStack
     UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
@@ -110,7 +110,9 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     {
         userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
         mTexture->AddAssetUserData( userData );
-        userData->GetLayerStack()->InitFromData( mTextureContentsBackup );
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture );
+        userData->GetLayerStack()->InitFromData( textureData );
+        delete textureData;
         mTexture->PostEditChange();
     }
     
@@ -496,16 +498,11 @@ FOdysseyPainterEditorToolkit::PostRedo( bool iSuccess )
 void
 FOdysseyPainterEditorToolkit::SaveAsset_Execute()
 {
-    // Commit changes permanently
-    //mDisplaySurface->CommitBlockChangesIntoTextureBulk();
-    // Save backup
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    ::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
     InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
-    // Invalidate all
-    mDisplaySurface->Invalidate();
 
     FAssetEditorToolkit::SaveAsset_Execute();
+    mTexture->MarkPackageDirty();
 }
 
 void
@@ -530,24 +527,6 @@ FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 bool
 FOdysseyPainterEditorToolkit::OnRequestClose()
 {
-    EAppReturnType::Type returnType = OpenMsgDlgInt( EAppMsgType::YesNoCancel
-                                                    , FText::Format( LOCTEXT( "Save Texture Prompt"
-                                                                            , "Save the texture {0} before exiting ?" )
-                                                                            , FText::FromString( mTexture->GetFName().ToString() ) )
-                                                    , LOCTEXT( "Save Texture Title", "Save Texture" ) );
-
-    if( returnType == EAppReturnType::Cancel )
-        return false;
-
-    if( returnType == EAppReturnType::Yes )
-        SaveAsset_Execute();
-
-    // Invalidate All from backup data
-    // If saved, no change
-    // If unsaved, revert display to last saved data
-    InvalidateTextureFromData( mTextureContentsBackup, mTexture );
-    InvalidateSurfaceFromData( mTextureContentsBackup, mDisplaySurface );
-
     mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
     mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
     mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;

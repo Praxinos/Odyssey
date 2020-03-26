@@ -241,7 +241,6 @@ private:
 
     /** Painting */
     UTexture2D*                 mTexture;
-    FOdysseyBlock*              mTextureContentsBackup;
     FTexturePropertiesBackup    mPropertiesBackup;
     FOdysseySurface*            mDisplaySurface;
     FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
