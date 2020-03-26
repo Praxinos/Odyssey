@@ -434,7 +434,7 @@ void
 SOdysseySurfaceViewport::HandleViewportReset()
 {
     SetRotationInDegrees( 0 );
-    SetPan(FVector2D());
+    SetPan(FVector2D(0, 0));
 }
 
 
