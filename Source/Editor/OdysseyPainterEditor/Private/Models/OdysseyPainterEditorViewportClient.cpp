@@ -270,7 +270,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
-    mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+    if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
+        mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+    else
+        mMouseCaptureMode = FViewportClient::CaptureMouseOnClick();
 
     //---
 
