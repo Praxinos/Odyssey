@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2019 Praxinos, Inc. All Rights Reserved.
+# Copyright 2019-2020 Praxinos, Inc. All Rights Reserved.
 
 import argparse
 from datetime import datetime
@@ -48,10 +48,10 @@ input_path = Path.cwd().resolve()
 output_path = ( input_path / '..' / 'package' ).resolve()
 upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
 if operating_system == 'darwin':
-    upload_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
+    upload_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
 ulis_binaries_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
 if operating_system == 'darwin':
-    ulis_binaries_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
+    ulis_binaries_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
 
 parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
 parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
