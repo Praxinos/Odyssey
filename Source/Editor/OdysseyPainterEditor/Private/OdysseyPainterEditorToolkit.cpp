@@ -6,10 +6,10 @@
 #include "AssetRegistryModule.h"
 #include "ContentBrowserModule.h"
 #include "Dialogs/Dialogs.h"
-#include "Engine/Texture.h"
 #include "Engine/Texture2D.h"
 #include "IContentBrowserSingleton.h"
 #include "ISettingsModule.h"
+#include "PackageTools.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Slate/SceneViewport.h"
@@ -24,12 +24,13 @@
 #include "Widgets/Layout/SWrapBox.h"
 
 #include "IOdysseyPainterEditorModule.h"
+#include "OdysseyTextureAssetUserData.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "OdysseyAboutScreen.h"
 #include "OdysseyBlock.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBrushBlueprint.h"
-#include "OdysseyImageLayer.h"
+#include "IOdysseyLayer.h"
 #include "OdysseyPainterEditorViewportClient.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseySurfaceViewport.h"
@@ -76,18 +77,13 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
     : mScopedTransaction( NULL )
     , mUndoHistory()
     , mIsManipulationDirtiedSomething( false )
-    , mIsEditorMarkedAsClosed( false )
     , mTexture( NULL )
     , mDisplaySurface( NULL )
-    , mTextureContentsBackup( NULL )
-    , mTextureMipGenBackup()
-    , mTextureCompressionBackup()
-    , mTextureGroupBackup()
     , mPaintEngine( &mUndoHistory )
-    , mLayerStack()
     , mBrush( NULL )
     , mBrushInstance( NULL )
     , mLiveUpdateInfo()
+    , mDrawBrushPreview( true )
     , mIsTextureDirty( false )
 {
 }
@@ -101,30 +97,37 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
 {
     // Setup Texture
     mTexture = iTexture;
-    mTextureMipGenBackup = mTexture->MipGenSettings;
-    mTextureCompressionBackup = mTexture->CompressionSettings;
-    mTextureGroupBackup = mTexture->LODGroup;
-
+    mTexture->MarkPackageDirty();
+    mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup };
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-
     mTexture->UpdateResource();
-    mTextureContentsBackup = NewOdysseyBlockFromUTextureData( mTexture );
-
-    // Setup Layers
-    mLayerStack.InitFromData( mTextureContentsBackup );
-    mLayerStack.ComputeResultBlock();
+    
+    //Check if this texture already has Iliad User Data or not, if yes, we get its LayerStack
+    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    if( !userData )
+    {
+        userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
+        mTexture->AddAssetUserData( userData );
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture );
+        userData->GetLayerStack()->InitFromData( textureData );
+        delete textureData;
+        mTexture->PostEditChange();
+    }
+    
+    mLayerStack = userData->GetLayerStack();
+    mLayerStack->ComputeResultBlock();
 
     // Setup Paint Engine
-    mPaintEngine.SetTextureSourceFormat( mTextureContentsBackup->GetUE4TextureSourceFormat() );
-    mPaintEngine.SetLayerStack( &mLayerStack );
+    mPaintEngine.SetTextureSourceFormat( mLayerStack->GetTextureSourceFormat() );
+    mPaintEngine.SetLayerStack( mLayerStack );
     mPaintEngine.SetBrushInstance( NULL );
     mPaintEngine.SetColor( ::ULIS::CColor() );
     mPaintEngine.SetSizeModifier( 20.f );
 
     // Setup Surface
-    mDisplaySurface = new FOdysseySurface( mLayerStack.GetResultBlock() );
+    mDisplaySurface = new FOdysseySurface( mLayerStack->GetResultBlock() );
     mLiveUpdateInfo.main = mDisplaySurface->Texture();
     mLiveUpdateInfo.live = mTexture;
     mLiveUpdateInfo.enabled = false;
@@ -155,7 +158,8 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     CreatePerformanceOptionsTab();
     //CreateUndoHistoryTab();
 
-
+    mPerformanceOptionsTab->SetPerformanceOptionLiveUpdate( true );
+    
     // Setup Properties with callbacks
     mColorSelectorTab->SetColor( ::ULIS::CColor( 0, 0, 0 ) );
 
@@ -168,8 +172,6 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mStrokeOptionsTab->SetSmoothingEnabled( true );
     mStrokeOptionsTab->SetSmoothingRealTime( true );
     mStrokeOptionsTab->SetSmoothingCatchUp( true );
-
-    mPerformanceOptionsTab->SetPerformanceOptionLiveUpdate( true );
 
     mTopTab->SetSize( 20 );
     mTopTab->SetOpacity( 100 );
@@ -492,19 +494,15 @@ FOdysseyPainterEditorToolkit::PostRedo( bool iSuccess )
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------- FAssetEditorToolkit override
+
 void
 FOdysseyPainterEditorToolkit::SaveAsset_Execute()
 {
-    // Commit changes permanently
-    //mDisplaySurface->CommitBlockChangesIntoTextureBulk();
-    // Reload backup
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    ::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
     InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
-    // Invalidate all
-    mDisplaySurface->Invalidate();
 
     FAssetEditorToolkit::SaveAsset_Execute();
+    mTexture->MarkPackageDirty();
 }
 
 void
@@ -529,33 +527,11 @@ FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 bool
 FOdysseyPainterEditorToolkit::OnRequestClose()
 {
-    if( !mIsEditorMarkedAsClosed )
-    {
-        EAppReturnType::Type returnType = OpenMsgDlgInt( EAppMsgType::YesNoCancel
-                                                        , FText::Format( LOCTEXT( "Save Texture Prompt"
-                                                                                , "Save the texture {0} before exiting ?"
-                                                                                  "\n"
-                                                                                  "\n"
-                                                                                  "Warning: when closing the texture, layers will be merged, "
-                                                                                  "export them first if you want to keep them ! (File/Export Layers)" )
-                                                                                , FText::FromString( mTexture->GetFName().ToString() ) )
-                                                        , LOCTEXT( "Save Texture Title", "Save Texture" ) );
+    mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
+    mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
+    mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
 
-        if( returnType == EAppReturnType::Cancel )
-            return false;
-
-        if( returnType == EAppReturnType::Yes )
-            SaveAsset_Execute();
-
-        // Invalidate All from backup data
-        // If saved, no change
-        // If unsaved, revert display to last saved data
-        InvalidateTextureFromData( mTextureContentsBackup, mTexture );
-        InvalidateSurfaceFromData( mTextureContentsBackup, mDisplaySurface );
-    }
-    mTexture->LODGroup = mTextureGroupBackup;
-    mIsEditorMarkedAsClosed = true;
-    mLayerStack.mDrawingUndo->Clear();
+    mLayerStack->mDrawingUndo->Clear();
     return true;
 }
 
@@ -665,14 +641,15 @@ FOdysseyPainterEditorToolkit::OnExportLayersAsTextures()
 
     if( saveObjectPath != "" )
     {
-        TArray<TSharedPtr<IOdysseyLayer>>* layers = mLayerStack.GetLayers();
+        TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
+        mLayerStack->GetLayers()->DepthFirstSearchTree( &layers, false );
 
-        for( int i = 0; i < layers->Num(); i++ )
+        for( int i = 0; i < layers.Num(); i++ )
         {
-            if( !( ( *layers )[i].Get()->GetType() == IOdysseyLayer::eType::kImage ) )
+            if( !( layers[i]->GetType() == IOdysseyLayer::eType::kImage ) )
                 continue;
 
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> ( ( *layers )[i].Get() );
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> ( layers[i] );
 
             FString assetPath = FPaths::GetPath( saveObjectPath ) + "/";
             FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
@@ -687,9 +664,11 @@ FOdysseyPainterEditorToolkit::OnExportLayersAsTextures()
             object->UpdateResource();
 
             FAssetRegistryModule::AssetCreated( object );
-            object->MarkPackageDirty();
 
-            bool success = UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
+            UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
+            
+            package->MarkAsFullyLoaded();
+            object->MarkPackageDirty();
         }
     }
 }
@@ -710,12 +689,12 @@ FOdysseyPainterEditorToolkit::OnImportTexturesAsLayers()
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
         FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture );
-        mLayerStack.AddLayerFromData( textureBlock, FName( *( openedTexture->GetName() ) ) );
+        mLayerStack->AddImageLayerFromData( textureBlock, mLayerStack->GetLayers(), FName( *( openedTexture->GetName() ) ) );
         delete textureBlock;
     }
 
     mLayerStackTab->RefreshView();
-    mLayerStack.ComputeResultBlock();
+    mLayerStack->ComputeResultBlock();
 }
 
 void
@@ -786,7 +765,7 @@ void
 FOdysseyPainterEditorToolkit::CreateLayerStackTab()
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
-        .LayerStackData( MakeShareable( &mLayerStack ) );
+        .LayerStackData( MakeShareable( mLayerStack ) );
 }
 
 void
@@ -838,7 +817,8 @@ void
 FOdysseyPainterEditorToolkit::CreatePerformanceOptionsTab()
 {
     mPerformanceOptionsTab = SNew( SOdysseyPerformanceOptions )
-        .OnLiveUpdateChanged( this, &FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged );
+        .OnLiveUpdateChanged( this, &FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged )
+        .OnDrawBrushPreviewChanged( this, &FOdysseyPainterEditorToolkit::HandlePerformanceDrawBrushPreviewChanged );
 }
 
 /*
@@ -931,7 +911,7 @@ FOdysseyPainterEditorToolkit::PaintEngine()
 FOdysseyLayerStack*
 FOdysseyPainterEditorToolkit::LayerStack()
 {
-    return &mLayerStack;
+    return mLayerStack;
 }
 
 //--------------------------------------------------------------------------------------
@@ -964,10 +944,10 @@ FOdysseyPainterEditorToolkit::EndTransaction()
 {
 }
 
-void
-FOdysseyPainterEditorToolkit::SetTextureDirty( bool iIsTextureDirty )
+bool
+FOdysseyPainterEditorToolkit::DoesDrawBrushPreview() const
 {
-    mIsTextureDirty = iIsTextureDirty;
+    return mDrawBrushPreview;
 }
 
 //--------------------------------------------------------------------------------------
@@ -1092,6 +1072,13 @@ void
 FOdysseyPainterEditorToolkit::HandlePerformanceLiveUpdateChanged( bool iValue )
 {
     mLiveUpdateInfo.enabled = iValue;
+    mDisplaySurface->Invalidate();
+}
+
+void
+FOdysseyPainterEditorToolkit::HandlePerformanceDrawBrushPreviewChanged( bool iValue )
+{
+    mDrawBrushPreview = iValue;
     mDisplaySurface->Invalidate();
 }
 
@@ -1308,7 +1295,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket32" ) )
                         ]
                     ]
-                    +SWrapBox::Slot()
+                    /*+SWrapBox::Slot()
                     [
                         SNew( SButton )
                         .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
@@ -1317,10 +1304,10 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                             SNew( SImage )
                             .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ColorPicker32" ) )
                         ]
-                    ]
+                    ]*/
                 ]
             ]
-            +SScrollBox::Slot()
+            /*+SScrollBox::Slot()
             [
                 SNew( SExpandableArea )
                 .HeaderContent()
@@ -1395,7 +1382,7 @@ FOdysseyPainterEditorToolkit::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& i
                         ]
                     ]
                 ]
-            ]
+            ]*/
             +SScrollBox::Slot()
             [
                 SNew( SExpandableArea )
@@ -1451,14 +1438,14 @@ FReply
 FOdysseyPainterEditorToolkit::OnClearCurrentLayer()
 {
     //Record
-    mLayerStack.mDrawingUndo->StartRecord();
-    mLayerStack.mDrawingUndo->SaveData( 0, 0, mLayerStack.Width(), mLayerStack.Height() );
-    mLayerStack.mDrawingUndo->EndRecord();
+    mLayerStack->mDrawingUndo->StartRecord();
+    mLayerStack->mDrawingUndo->SaveData( 0, 0, mLayerStack->Width(), mLayerStack->Height() );
+    mLayerStack->mDrawingUndo->EndRecord();
     //EndRecord
     mIsTextureDirty = true;
     mPaintEngine.AbortStroke();
-    mLayerStack.ClearCurrentLayer();
-    InvalidateTextureFromData( mLayerStack.GetResultBlock(), mTexture );
+    mLayerStack->ClearCurrentLayer();
+    InvalidateTextureFromData( mLayerStack->GetResultBlock(), mTexture );
     return FReply::Handled();
 }
 
@@ -1466,20 +1453,20 @@ FReply
 FOdysseyPainterEditorToolkit::OnFillCurrentLayer()
 {
     //Record
-    mLayerStack.mDrawingUndo->StartRecord();
-    mLayerStack.mDrawingUndo->SaveData( 0, 0, mLayerStack.Width(), mLayerStack.Height() );
-    mLayerStack.mDrawingUndo->EndRecord();
+    mLayerStack->mDrawingUndo->StartRecord();
+    mLayerStack->mDrawingUndo->SaveData( 0, 0, mLayerStack->Width(), mLayerStack->Height() );
+    mLayerStack->mDrawingUndo->EndRecord();
     //EndRecord
     mIsTextureDirty = true;
     mPaintEngine.AbortStroke();
-    mLayerStack.FillCurrentLayerWithColor( mPaintEngine.GetColor() );
+    mLayerStack->FillCurrentLayerWithColor( mPaintEngine.GetColor() );
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolkit::OnClearUndo()
 {
-    mLayerStack.mDrawingUndo->Clear();
+    mLayerStack->mDrawingUndo->Clear();
     return FReply::Handled();
 }
 
@@ -1517,7 +1504,7 @@ void
 FOdysseyPainterEditorToolkit::UndoIliad()
 {
     mPaintEngine.InterruptStrokeAndStampInPlace();
-    mLayerStack.mDrawingUndo->LoadData();
+    mLayerStack->mDrawingUndo->LoadData();
 }
 
 
@@ -1525,7 +1512,7 @@ void
 FOdysseyPainterEditorToolkit::RedoIliad()
 {
     mPaintEngine.InterruptStrokeAndStampInPlace();
-    mLayerStack.mDrawingUndo->Redo();
+    mLayerStack->mDrawingUndo->Redo();
 }
 
 #undef LOCTEXT_NAMESPACE

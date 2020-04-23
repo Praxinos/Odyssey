@@ -16,31 +16,19 @@
 //STATIC -------------------------------------------
 
 
-TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::New(TArray<TSharedRef<OdysseyBaseLayerNode>>& InDraggedNodes, FText InDefaultText, const FSlateBrush* InDefaultIcon)
+TSharedRef<FOdysseyLayerStackNodeDragDropOp> FOdysseyLayerStackNodeDragDropOp::New(TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon)
 {
-    TSharedRef<FOdysseyLayerStackNodeDragDropOp> NewOp = MakeShareable(new FOdysseyLayerStackNodeDragDropOp);
+    TSharedRef<FOdysseyLayerStackNodeDragDropOp> newOp = MakeShareable(new FOdysseyLayerStackNodeDragDropOp);
 
-    NewOp->DraggedNodes = InDraggedNodes;
-    NewOp->DefaultHoverText = NewOp->CurrentHoverText = InDefaultText;
-    NewOp->DefaultHoverIcon = NewOp->CurrentIconBrush = InDefaultIcon;
+    newOp->mDraggedNodes = iDraggedNodes;
+    newOp->mDefaultHoverText = newOp->mCurrentHoverText = iDefaultText;
+    newOp->mDefaultHoverIcon = newOp->mCurrentIconBrush = iDefaultIcon;
 
-    NewOp->Construct();
-    return NewOp;
+    newOp->Construct();
+    return newOp;
 }
 
 //INTERFACE IMPLEMENTATION-----------------------
-
-    //~ FGraphEditorDragDropAction interface
-void FOdysseyLayerStackNodeDragDropOp::HoverTargetChanged()
-{
-
-}
-
-FReply FOdysseyLayerStackNodeDragDropOp::DroppedOnPanel( const TSharedRef< class SWidget >& Panel, FVector2D ScreenPosition, FVector2D GraphPosition, UEdGraph& Graph)
-{
-    return FReply::Unhandled();
-}
-
 
 void FOdysseyLayerStackNodeDragDropOp::Construct()
 {
@@ -75,16 +63,38 @@ void FOdysseyLayerStackNodeDragDropOp::Construct()
 
 //PUBLIC API-------------------------------------
 
-TArray<TSharedRef<OdysseyBaseLayerNode>>& FOdysseyLayerStackNodeDragDropOp::GetDraggedNodes()
+FText FOdysseyLayerStackNodeDragDropOp::GetDecoratorText() const
 {
-    return DraggedNodes;
+    return mCurrentHoverText;
+}
+
+const FSlateBrush* FOdysseyLayerStackNodeDragDropOp::GetDecoratorIcon() const
+{
+    return mCurrentIconBrush;
+}
+
+TArray<TSharedRef<IOdysseyBaseLayerNode>>& FOdysseyLayerStackNodeDragDropOp::GetDraggedNodes()
+{
+    return mDraggedNodes;
+}
+
+const FSlateBrush* FOdysseyLayerStackNodeDragDropOp::GetCurrentIconBrush() const
+{
+    return mCurrentIconBrush;
+}
+
+
+void FOdysseyLayerStackNodeDragDropOp::SetCurrentIconBrush( const FSlateBrush* iNewIconBrush )
+{
+    mCurrentIconBrush = iNewIconBrush;
 }
 
 void FOdysseyLayerStackNodeDragDropOp::ResetToDefaultToolTip()
 {
-    CurrentHoverText = DefaultHoverText;
-    CurrentIconBrush = DefaultHoverIcon;
+    mCurrentHoverText = mDefaultHoverText;
+    mCurrentIconBrush = mDefaultHoverIcon;
 }
+
 
 //-----------------------------------------------
 

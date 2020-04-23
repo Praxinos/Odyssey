@@ -8,7 +8,7 @@
 #include "LayerStack/LayersGUI/OdysseyBaseLayerNode.h"
 #include "GraphEditorDragDropAction.h"
 
-class OdysseyBaseLayerNode;
+class IOdysseyBaseLayerNode;
 
 /**
  * An utility class to handle the drag n drop of nodes in the tree
@@ -17,65 +17,41 @@ class FOdysseyLayerStackNodeDragDropOp : public FGraphEditorDragDropAction
 {
 public: //STATIC
 
-    /**
-     * Construct a new drag/drop operation for dragging a selection of display nodes
-     */
-    static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<OdysseyBaseLayerNode>>& InDraggedNodes, FText InDefaultText, const FSlateBrush* InDefaultIcon);
+    /** Construct a new drag/drop operation for dragging a selection of display nodes */
+    static TSharedRef<FOdysseyLayerStackNodeDragDropOp> New(TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, FText iDefaultText, const FSlateBrush* iDefaultIcon);
 
 public: //INTERFACE IMPLEMENTATION
-
-    //~ FGraphEditorDragDropAction interface
-    virtual void HoverTargetChanged() override;
-    virtual FReply DroppedOnPanel( const TSharedRef< class SWidget >& Panel, FVector2D ScreenPosition, FVector2D GraphPosition, UEdGraph& Graph) override;
-
     //~ FDragDropOperation interface
     virtual void Construct() override;
 
 public: //PUBLIC API
 
-    /**
-     * Get the current decorator text
-     */
-    FText GetDecoratorText() const
-    {
-        return CurrentHoverText;
-    }
+    FText GetDecoratorText() const;
 
-    /**
-     * Get the current decorator icon
-     */
-    const FSlateBrush* GetDecoratorIcon() const
-    {
-        return CurrentIconBrush;
-    }
+    const FSlateBrush* GetDecoratorIcon() const;
 
-    /**
-     * Reset the tooltip decorator back to its original state
-     */
+    TArray<TSharedRef<IOdysseyBaseLayerNode>>& GetDraggedNodes();
+
+    const FSlateBrush* GetCurrentIconBrush() const;
+
+    void SetCurrentIconBrush( const FSlateBrush* iNewIconBrush );
+
     void ResetToDefaultToolTip();
 
-    TArray<TSharedRef<OdysseyBaseLayerNode>>& GetDraggedNodes();
-
-public: //PUBLIC MEMBERS
-
-    /**
-     * Current string to show as the decorator text
-     */
-    FText CurrentHoverText;
-
-    /**
-     * Current icon to be displayed on the decorator
-     */
-    const FSlateBrush* CurrentIconBrush;
-
 private:
+    
+    /** Current string to show as the decorator text */
+    FText mCurrentHoverText;
 
+    /** Current icon to be displayed on the decorator */
+    const FSlateBrush* mCurrentIconBrush;
+    
     /** The nodes currently being dragged. */
-    TArray<TSharedRef<OdysseyBaseLayerNode>> DraggedNodes;
+    TArray<TSharedRef<IOdysseyBaseLayerNode>> mDraggedNodes;
 
     /** Default string to show as hover text */
-    FText DefaultHoverText;
+    FText mDefaultHoverText;
 
     /** Default icon to be displayed */
-    const FSlateBrush* DefaultHoverIcon;
+    const FSlateBrush* mDefaultHoverIcon;
 };

@@ -3,18 +3,12 @@
 
 #include "LayerStack/FOdysseyLayerStackModel.h"
 
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "Textures/SlateIcon.h"
 #include "EditorStyleSet.h"
 
-#include "Widgets/Input/SButton.h"
-
-#include "LayerStack/FOdysseyLayerStackCommands.h"
 #include "LayerStack/FOdysseyLayerStackTree.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
 
-#include "LayerStack/LayersEditor/IOdysseyLayerEditor.h"
-#include "LayerStack/LayersEditor/FOdysseyImageLayerEditor.h" //TODO: Abstract this so we won't have to include all the layers Editors Manually
+#include "LayerStack/FOdysseyLayerAddMenu.h"
 
 #include "OdysseyLayerStack.h"
 
@@ -22,109 +16,78 @@
 
 //CONSTRUCTOR/DESTRUCTOR
 
-FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> InWidget, TSharedPtr<FOdysseyLayerStack> InLayerStackData )
-    : LayerStackCommandBindings( new FUICommandList )
-    , LayerStackSharedBindings( new FUICommandList )
-    , NodeTree( MakeShareable( new FOdysseyLayerStackTree( *this ) ) )
-    , LayerStackWidget( InWidget )
-    , LayerStackData( InLayerStackData )
-    , LayerEditors( TArray<TSharedPtr<IOdysseyLayerEditor>>() )
-    , bIsOnlyCurrentVisibleLayer(false)
+FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, TSharedPtr<FOdysseyLayerStack> iLayerStackData )
+    : mLayerStackCommandBindings( new FUICommandList )
+    , mNodeTree( MakeShareable( new FOdysseyLayerStackTree( *this ) ) )
+    , mLayerStackView( iWidget )
+    , mLayerStackData( iLayerStackData )
+    , mLayerStackAddMenu( MakeShareable( new FOdysseyLayerAddMenu( MakeShareable( this ) ) ) )
 {
-    FOdysseyLayerStackCommands::Register();
-    //UE_LOG(LogTemp, Display, TEXT("Number in layer stack data: %d"), LayerStackData->GetLayers()->Num())
-
-    BindCommands();
-
-    LayerEditors.Add(FOdysseyImageLayerEditor::CreateLayerEditor( MakeShareable(this) ));
 }
 
 FOdysseyLayerStackModel::~FOdysseyLayerStackModel()
 {
-    FOdysseyLayerStackCommands::Unregister();
 }
 
 
 //PUBLIC API-------------------------------------
 
-void FOdysseyLayerStackModel::BuildAddLayerMenu(FMenuBuilder& MenuBuilder)
+void FOdysseyLayerStackModel::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
 {
-    for (int32 i = 0; i < LayerEditors.Num(); ++i)
-    {
-        LayerEditors[i]->BuildAddLayerMenu(MenuBuilder);
-    }
+    mLayerStackAddMenu->BuildAddLayerMenu(iMenuBuilder);
 }
-
 
 TSharedRef<FOdysseyLayerStackTree> FOdysseyLayerStackModel::GetNodeTree()
 {
-    return NodeTree;
+    return mNodeTree;
 }
 
 TSharedPtr<FOdysseyLayerStack> FOdysseyLayerStackModel::GetLayerStackData()
 {
-    return LayerStackData;
+    return mLayerStackData;
+}
+
+const TSharedRef< FOdysseyLayerAddMenu > FOdysseyLayerStackModel::GetLayerAddMenu() const
+{
+    return mLayerStackAddMenu;
+}
+
+TSharedPtr<FUICommandList> FOdysseyLayerStackModel::GetCommandBindings() const
+{
+    return mLayerStackCommandBindings;
+}
+
+TSharedRef<SOdysseyLayerStackView> FOdysseyLayerStackModel::GetLayerStackView() const
+{
+    return mLayerStackView.ToSharedRef();
 }
 
 
-TSharedRef<SOdysseyLayerStackView> FOdysseyLayerStackModel::GetLayerStackWidget() const
+//HANDLES ----------------------------------
+
+void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* iLayerToDelete )
 {
-    return LayerStackWidget.ToSharedRef();
-}
-
-
-//PROTECTED API----------------------------------
-
-void FOdysseyLayerStackModel::BindCommands()
-{
-    const FOdysseyLayerStackCommands& Commands = FOdysseyLayerStackCommands::Get();
-
-    LayerStackCommandBindings->MapAction(
-        Commands.TestOption,
-        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackModel::TestOption ) );
-}
-
-void FOdysseyLayerStackModel::TestOption()
-{
-    bIsOnlyCurrentVisibleLayer = !bIsOnlyCurrentVisibleLayer;
-
-    if( bIsOnlyCurrentVisibleLayer )
-    {
-        UE_LOG(LogTemp, Display, TEXT("Animation mode activated"));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Display, TEXT("Animation mode deactivated"));
-    }
-
-}
-
-void FOdysseyLayerStackModel::OnAddFolder()
-{
-}
-
-void FOdysseyLayerStackModel::OnAddLayer(const IOdysseyLayer& InLayer)
-{
-}
-
-
-void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* InLayerToDelete )
-{
-    GetLayerStackData()->DeleteLayer( InLayerToDelete );
+    GetLayerStackData()->DeleteLayer( iLayerToDelete );
     GetLayerStackData()->ComputeResultBlock();
-    LayerStackWidget->RefreshView();
+    mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnMergeLayerDown( IOdysseyLayer* InLayerToMergeDown )
+void FOdysseyLayerStackModel::OnMergeLayerDown( IOdysseyLayer* iLayerToMergeDown )
 {
-    GetLayerStackData()->MergeDownLayer( InLayerToMergeDown );
-    LayerStackWidget->RefreshView();
+    GetLayerStackData()->MergeDownLayer( iLayerToMergeDown );
+    mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnDuplicateLayer( IOdysseyLayer* InLayerToDuplicate )
+void FOdysseyLayerStackModel::OnFlattenLayer( IOdysseyLayer* iLayerToMergeDown )
 {
-    GetLayerStackData()->DuplicateLayer( InLayerToDuplicate );
-    LayerStackWidget->RefreshView();
+    GetLayerStackData()->FlattenLayer( iLayerToMergeDown );
+    mLayerStackView->RefreshView();
+}
+
+void FOdysseyLayerStackModel::OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
+{
+    GetLayerStackData()->DuplicateLayer( iLayerToDuplicate );
+    mLayerStackView->RefreshView();
 }
 
 

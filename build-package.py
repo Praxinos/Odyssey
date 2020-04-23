@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2019 Praxinos, Inc. All Rights Reserved.
+# Copyright 2019-2020 Praxinos, Inc. All Rights Reserved.
 
 import argparse
 from datetime import datetime
@@ -7,6 +7,7 @@ import itertools
 import json
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -47,10 +48,10 @@ input_path = Path.cwd().resolve()
 output_path = ( input_path / '..' / 'package' ).resolve()
 upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
 if operating_system == 'darwin':
-    upload_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
+    upload_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
 ulis_binaries_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
 if operating_system == 'darwin':
-    ulis_binaries_path = Path( '/' ) / 'Users' / 'praxinos' / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
+    ulis_binaries_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
 
 parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
 parser.add_argument( '-i', '--input-dir', default=f'{input_path}', help=f'the input path\nit must contains a uplugin file' )
@@ -76,6 +77,22 @@ uplugin_pathfile = uplugin_pathfiles[0]
 print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
 
 plugin_name = uplugin_pathfile.stem
+
+# Check Content filenames validity
+
+content_path = input_path / 'Content'
+invalid_subpathfiles = []
+for pathfile in content_path.rglob( '*' ):
+    subpathfile = pathfile.relative_to( content_path )
+   # Same regex as https://www.unrealengine.com/en-US/marketplace-guidelines#271c
+    if re.search( r'[^a-zA-Z0-9_]', str( subpathfile.stem ) ):
+        invalid_subpathfiles.append( subpathfile )
+
+if invalid_subpathfiles:
+    for invalid_subpathfile in invalid_subpathfiles:
+        print( f'Invalid characters: {content_path} {Fore.RED}{invalid_subpathfile}' )
+        
+    sys.exit( 12 )
 
 #
 
@@ -193,15 +210,12 @@ if process.returncode != 0:
 
 # Add platform specification (all platforms) for marketplace
 if args.marketplace:
-    uplugin_pathfiles = list( output_path.glob( '*.uplugin' ) )
+    uplugin_pathfiles = [ entry for entry in output_path.glob( '*.uplugin' ) if entry.is_file() ]
     if not uplugin_pathfiles:
-        print( Fore.RED + f'uplugin file doesn\'t exist in: {output_path}' )
+        print( Fore.RED + f'no uplugin file in: {output_path}' )
         sys.exit( 40 )
 
     uplugin_pathfile = uplugin_pathfiles[0]
-    if not uplugin_pathfile.is_file():
-        print( Fore.RED + f'uplugin file is not a file: {uplugin_pathfile}' )
-        sys.exit( 42 )
         
     uplugin_data = {}
     with uplugin_pathfile.open() as infile:
@@ -235,9 +249,17 @@ for entry in thirdparty_ulis.rglob( '*' ):
 
 #---
 
+# Zipping
+folder_to_zip = output_path
+pathfile_zip = folder_to_zip # extension added by make_archive
+print( Fore.GREEN + f'Zipping: {folder_to_zip} -> {pathfile_zip}.zip' )
+pathfile_zip = shutil.make_archive( pathfile_zip, 'zip', folder_to_zip.parents[0], folder_to_zip.name )
+
+#---
+
 # Uploading
 if args.upload:
-    src_path = output_path
-    dst_path = upload_path
+    src_path = output_path.parents[0]
+    dst_path = upload_path.parents[0]
     print( Fore.GREEN + f'Copying/Uploading: {src_path} -> {dst_path}' )
     shutil.copytree( src_path, dst_path )

@@ -24,11 +24,11 @@ public:
 public:
     // Construction / Destruction
     virtual ~IOdysseyLayer() = 0;
-    IOdysseyLayer();
-    IOdysseyLayer( const FName& iName );
+    IOdysseyLayer( const eType type );
+    IOdysseyLayer( const FName& iName, const eType type );
 
 public:
-    virtual eType GetType() const = 0;
+    virtual eType GetType() const;
 
     virtual FName GetName() const;
     virtual FText GetNameAsText() const;
@@ -40,8 +40,56 @@ public:
     virtual bool  IsVisible() const;
     virtual void  SetIsVisible( bool iIsVisible );
 
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
+    
 protected:
     FName         mName;
     bool          mIsLocked;
     bool          mIsVisible;
+    eType         mType;
 };
+
+
+#include "OdysseyImageLayer.h"
+#include "OdysseyFolderLayer.h"
+inline FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveLayer )
+{
+    if(!ioSaveLayer) return Ar;
+
+    if( Ar.IsSaving() )
+    {
+        if(!(*ioSaveLayer)) return Ar; //We ignore the root, which is always NULL
+
+        Ar << (*ioSaveLayer)->mType;
+
+        if( (*ioSaveLayer)->GetType() == IOdysseyLayer::eType::kImage )
+        {
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> (*ioSaveLayer);
+            Ar << imageLayer;
+        }
+        else if( (*ioSaveLayer)->GetType() == IOdysseyLayer::eType::kFolder )
+        {
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*> (*ioSaveLayer);
+            Ar << folderLayer;
+        }
+    }
+    else if( Ar.IsLoading() )
+    {
+        IOdysseyLayer::eType layerType;
+        Ar << layerType;
+        
+        if( layerType == IOdysseyLayer::eType::kImage )
+        {
+            (*ioSaveLayer) = new FOdysseyImageLayer(FName(), NULL );
+            Ar << static_cast<FOdysseyImageLayer*>(*ioSaveLayer);
+        }
+        else if( layerType == IOdysseyLayer::eType::kFolder )
+        {
+            (*ioSaveLayer) = new FOdysseyFolderLayer( FName() );
+            Ar << static_cast<FOdysseyFolderLayer*>(*ioSaveLayer);
+        }
+    }
+
+    return Ar;
+}

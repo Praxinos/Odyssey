@@ -1,0 +1,77 @@
+// Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
+// IDDN FR.001.250001.002.S.P.2019.000.00000
+
+#include "OdysseyTexture_AssetTypeActions.h"
+
+#include "ContentBrowserModule.h"
+#include "IContentBrowserSingleton.h"
+#include "IOdysseyPainterEditorModule.h"
+#include "OdysseyTextureAssetUserData.h"
+
+
+#include "OdysseyTexture.h"
+
+#define LOCTEXT_NAMESPACE "OdysseyTexture_AssetTypeActions"
+
+//////////////////////////////////////////////////////////////////////////
+// FOdysseyTextureAssetTypeActions
+FOdysseyTextureAssetTypeActions::FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
+    : mMyAssetCategory( iAssetCategory )
+{
+}
+
+FText
+FOdysseyTextureAssetTypeActions::GetName() const
+{
+    return LOCTEXT( "FOdysseyTextureTypeActionsName", "Texture" );
+}
+
+FColor
+FOdysseyTextureAssetTypeActions::GetTypeColor() const
+{
+    return FColor( 255, 0, 0 );
+}
+
+UClass*
+FOdysseyTextureAssetTypeActions::GetSupportedClass() const
+{
+    return UOdysseyTexture::StaticClass();
+}
+
+uint32
+FOdysseyTextureAssetTypeActions::GetCategories()
+{
+    return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
+}
+
+//Works, but suppress the normal editor of UTexture2D, need to find a better solution to keep both editors
+/*
+void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
+{
+	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
+    TArray<UObject*> noUserDataObjects;
+    
+	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+	{
+		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
+		if (odysseyTexture != NULL)
+		{
+            UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(odysseyTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+            
+            if( userData )
+            {
+                IOdysseyPainterEditorModule* odysseyPainterModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>("OdysseyPainterEditor");
+                odysseyPainterModule->CreateOdysseyPainterEditor(Mode, EditWithinLevelEditor, odysseyTexture);
+            }
+            else
+            {
+                noUserDataObjects.Add(odysseyTexture);
+            }
+		}
+	}
+    
+    if( noUserDataObjects.Num() != 0 )
+        FAssetTypeActions_Base::OpenAssetEditor( noUserDataObjects, EditWithinLevelEditor );
+}*/
+
+#undef LOCTEXT_NAMESPACE

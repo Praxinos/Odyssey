@@ -4,15 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Engine/Texture.h"
+#include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
 #include <ULIS_BLENDINGMODES>
 
-#include "OdysseyBlockUndoable.h"
 
 class FOdysseyBlock;
-class UTexture2D;
 
 /**
  * Implements a layer which contains an image
@@ -24,9 +22,6 @@ public:
     virtual ~FOdysseyImageLayer();
     FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat );
     FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock );
-
-public:
-    virtual eType GetType() const override;
 
 public:
     // Public API
@@ -42,6 +37,9 @@ public:
     
     bool  IsAlphaLocked() const;
     void  SetIsAlphaLocked( bool iIsAlphaLocked );
+    
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer );
 
 public:
     void CopyPropertiesFrom( const FOdysseyImageLayer &iCopy ); // TODO: replace it by a Clone()/copy-ctor/...
@@ -53,3 +51,6 @@ private:
     float                   mOpacity;
     bool                    mIsAlphaLocked;
 };
+
+//Serialization of item
+#include "OdysseyImageLayer.inl"

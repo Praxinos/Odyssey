@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
-#include "../FOdysseyLayerStackTree.h"
+#include "LayerStack/FOdysseyLayerStackTree.h"
 #include "Widgets/SWidget.h"
 #include "Styling/SlateColor.h"
 
@@ -20,305 +20,140 @@ enum class EItemDropZone;
  */
 struct FNodePadding
 {
-    FNodePadding(float InUniform) : Top(InUniform), Bottom(InUniform) { }
-    FNodePadding(float InTop, float InBottom) : Top(InTop), Bottom(InBottom) { }
+    FNodePadding(float iLeft, float iTop, float iBottom)
+    : mLeft( iLeft )
+    , mTop( iTop )
+    , mBottom( iBottom )
+    {}
 
     /** @return The sum total of the separate padding values */
-    float Combined() const
+    float CombinedTopLeft() const
     {
-        return Top + Bottom;
+        return mTop + mBottom;
     }
 
+    /** Padding to be applied to the left of the node */
+    float mLeft;
+    
     /** Padding to be applied to the top of the node */
-    float Top;
+    float mTop;
 
     /** Padding to be applied to the bottom of the node */
-    float Bottom;
+    float mBottom;
 };
 
 
-namespace ELayerStackNode
-{
-    enum Type
-    {
-        Image,
-        /* Benign spacer node */
-        Spacer,
-        /* Folder node */
-        Folder
-    };
-}
 
-/**
- * Base node GUI for a layer node in the layerStack
- */
-class OdysseyBaseLayerNode : public TSharedFromThis<OdysseyBaseLayerNode>
+
+/** Base node GUI for a layer node in the layerStack */
+class IOdysseyBaseLayerNode : public TSharedFromThis<IOdysseyBaseLayerNode>
 {
 public:
 
     /**
      * Create and initialize a new instance.
      *
-     * @param InNodeName    The name identifier of the node
-     * @param InParentNode    The parent of this node or nullptr if this is a root node
-     * @param InParentTree    The tree this node is in
+     * @param iNodeName    The name identifier of the node
+     * @param iParentNode    The parent of this node or nullptr if this is a root node
+     * @param iParentTree    The tree this node is in
      */
-    OdysseyBaseLayerNode( FName InNodeName, TSharedPtr<OdysseyBaseLayerNode> InParentNode, FOdysseyLayerStackTree& InParentTree, IOdysseyLayer* InLayerDataPtr );
+    IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr );
 
     /** Virtual destructor. */
-    virtual ~OdysseyBaseLayerNode(){}
+    virtual ~IOdysseyBaseLayerNode(){}
 
 
 public: //EVENTS
 
-    DECLARE_EVENT(OdysseyBaseLayerNode, FRequestRenameEvent);
-    FRequestRenameEvent& OnRenameRequested() { return RenameRequestedEvent; }
+    DECLARE_EVENT(IOdysseyBaseLayerNode, FRequestRenameEvent);
+    FRequestRenameEvent& OnRenameRequested() { return mRenameRequestedEvent; }
 
 
 public: // PUBLIC API
 
     /** @return Whether or not this node can be selected */
-    virtual bool IsSelectable() const
-    {
-        return true;
-    }
+    virtual bool IsSelectable() const;
 
-    /**
-     * @return The desired height of the node when displayed
-     */
+    /** @return The desired height of the node when displayed */
     virtual float GetNodeHeight() const = 0;
 
-    /**
-     * @return The desired padding of the node when displayed
-     */
+    /** @return The desired padding of the node when displayed */
     virtual FNodePadding GetNodePadding() const = 0;
 
-    /**
-     * Whether the node can be renamed.
-     *
-     * @return true if this node can be renamed, false otherwise.
-     */
-    virtual bool CanRenameNode() const = 0;
+    /** @return true if this node can be renamed, false otherwise. */
+    virtual bool CanRenameNode() const;
 
-    /**
-     * @return The localized display name of this node
-     */
+    /** @return The localized display name of this node */
     virtual FText GetDisplayName() const;
 
-    /**
-     * @return the color used to draw the display name.
-     */
+    /** @return the color used to draw the display name. */
     virtual FLinearColor GetDisplayNameColor() const;
 
-    /**
-     * @return the text to display for the tool tip for the display name.
-     */
+    /** @return the text to display for the tool tip for the display name. */
     virtual FText GetDisplayNameToolTipText() const;
 
-    /**
-     * Set the node's display name.
-     *
-     * @param NewDisplayName the display name to set.
-     */
+    /** @param NewDisplayName the display name to set. */
     virtual void SetDisplayName(const FText& NewDisplayName);
 
-    /**
-     * @return Whether this node handles resize events
-     */
-    virtual bool IsResizable() const
-    {
-        return false;
-    }
+    /** @return Generated Property View widget */
+    virtual TSharedRef<SWidget> GenerateContainerWidgetForPropertyView() = 0;
 
-    /**
-     * Resize this node
-     */
-    virtual void Resize(float NewSize)
-    {
+    /** @return Generated outliner widget */
+    virtual TSharedRef<SWidget> GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& iRow);
 
-    }
+    /** @return Content to display on the outliner node */
+    virtual TSharedRef<SWidget> GetCustomIconContent() = 0;
+    
+    /** @return Content to display on the outliner node */
+    virtual TSharedRef<SWidget> GetCustomOutlinerContent() = 0;
 
-    /**
-     * Generates a widget for display in the property view section of the layer (where you can set the opacity, blend mode...)
-     *
-     * @return Generated Property View widget
-     */
-    virtual TSharedRef<SWidget> GenerateContainerWidgetForPropertyView();
-
-    /**
-     * Generates a widget for display in the LayerStack section
-     *
-     * @return Generated outliner widget
-     */
-    virtual TSharedRef<SWidget> GenerateContainerWidgetForOutliner(const TSharedRef<SOdysseyLayerStackViewRow>& InRow);
-
-
-    /**
-     * Customizes an outliner widget that is to represent this node
-     *
-     * @return Content to display on the outliner node
-     */
-    virtual TSharedRef<SWidget> GetCustomOutlinerContent();
-
-
-    /**
-     * Gets an icon that represents this sequencer display node
-     *
-     * @return This node's representative icon
-     */
+    /** @return This node's representative icon */
     virtual const FSlateBrush* GetIconBrush() const;
 
-    /**
-     * Get a brush to overlay on top of the icon for this node
-     *
-     * @return An overlay brush, or nullptr
-     */
-    virtual const FSlateBrush* GetIconOverlayBrush() const;
-
-    /**
-     * Gets the color for the icon brush
-     *
-     * @return This node's representative color
-     */
+    /** @return This node's representative color */
     virtual FSlateColor GetIconColor() const;
-
-    /**
-     * Get the tooltip text to display for this node's icon
-     *
-     * @return Text to display on the icon
-     */
-    virtual FText GetIconToolTipText() const;
-
-    /**
-     * @return the path to this node starting with the outermost parent
-     */
-    FString GetPathName() const;
 
     /** Summon context menu */
     TSharedPtr<SWidget> OnSummonContextMenu();
 
     /** What sort of context menu this node summons */
-    virtual void BuildContextMenu(FMenuBuilder& MenuBuilder);
+    virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder) = 0;
 
-    /**
-     * @return The name of the node (for identification purposes)
-     */
-    FName GetNodeName() const
-    {
-        return NodeName;
-    }
+    /** @return The name of the node (for identification purposes) */
+    FName GetNodeName() const;
 
-    /**
-     * @return The number of child nodes belonging to this node
-     */
-    uint32 GetNumChildren() const
-    {
-        return ChildNodes.Num();
-    }
+    /** @return Whether this node is explicitly hidden from the view or not */
+    virtual bool IsHidden() const = 0;
 
-    /**
-     * @return A List of all Child nodes belonging to this node
-     */
-    const TArray<TSharedRef<OdysseyBaseLayerNode>>& GetChildNodes() const
-    {
-        return ChildNodes;
-    }
-
-    /**
-     * @return The parent of this node
-     */
-    TSharedPtr<OdysseyBaseLayerNode> GetParent() const
-    {
-        return ParentNode.Pin();
-    }
-
-    /**
-     * @return The outermost parent of this node
-     */
-    TSharedRef<OdysseyBaseLayerNode> GetOutermostParent()
-    {
-        TSharedPtr<OdysseyBaseLayerNode> Parent = ParentNode.Pin();
-        return Parent.IsValid() ? Parent->GetOutermostParent() : AsShared();
-    }
-
-    /** Gets the layerStack that owns this node */
-    FOdysseyLayerStackModel& GetLayerStack() const
-    {
-        return ParentTree.GetLayerStack();
-    }
-
-    /** Gets the parent tree that this node is in */
-    FOdysseyLayerStackTree& GetParentTree() const
-    {
-        return ParentTree;
-    }
-
-    IOdysseyLayer* GetLayerDataPtr() const
-    {
-        return LayerDataPtr;
-    }
-
-    /**
-     * Set whether this node is expanded or not
-     */
-    void SetExpansionState(bool bInExpanded);
-
-    /**
-     * @return Whether or not this node is expanded
-     */
-    bool IsExpanded() const;
-
-    /**
-     * @return Whether this node is explicitly hidden from the view or not
-     */
-    bool IsHidden() const;
-
-    /**
-     * Check whether the node's tree view or track area widgets are hovered by the user's mouse.
-     *
-     * @return true if hovered, false otherwise. */
+    /** @return true if hovered, false otherwise. */
     bool IsHovered() const;
 
-    /** Initialize this node with expansion states and virtual offsets */
-    void Initialize(float InVirtualTop, float InVirtualBottom);
+    /** Initialize this node virtual offsets */
+    void Initialize(float iVirtualTop, float iVirtualBottom);
 
+    /** @return this node's virtual offset from the top of the tree*/
+    float GetVirtualTop() const;
 
-    /** @return this node's virtual offset from the top of the tree, irrespective of expansion states */
-    float GetVirtualTop() const
-    {
-        return VirtualTop;
-    }
+    /** @return this node's virtual offset from the bottom of the tree* */
+    float GetVirtualBottom() const;
 
-    /** @return this node's virtual offset plus its virtual height, irrespective of expansion states */
-    float GetVirtualBottom() const
-    {
-        return VirtualBottom;
-    }
+    /** Determines if there is a valid drop zone based on the current drag drop operation and the zone the items were dragged onto. */
+    virtual TOptional<EItemDropZone> CanDrop( FOdysseyLayerStackNodeDragDropOp& DragDropOp, EItemDropZone ItemDropZone ) const = 0;
 
-    /**
-     * Returns whether or not this node can be dragged.
-     */
-    virtual bool CanDrag() const { return false; }
+    /** Handles a drop of items onto this display node. */
+    virtual void Drop( const TArray<TSharedRef<IOdysseyBaseLayerNode>>& iDraggedNodes, EItemDropZone iDropZone ) = 0;
 
-    /**
-     * Determines if there is a valid drop zone based on the current drag drop operation and the zone the items were dragged onto.
-     */
-    virtual TOptional<EItemDropZone> CanDrop( FOdysseyLayerStackNodeDragDropOp& DragDropOp, EItemDropZone ItemDropZone ) const { return TOptional<EItemDropZone>(); }
+    /** Action to do when this node is moved to another node */
+    void MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<IOdysseyBaseLayerNode> iCurrentNode );
+    
+    /** Gets the layerStack that owns this node */
+    FOdysseyLayerStackModel& GetLayerStack() const;
 
-    /**
-     * Handles a drop of items onto this display node.
-     */
-    virtual void Drop( const TArray<TSharedRef<OdysseyBaseLayerNode>>& DraggedNodes, EItemDropZone DropZone ) { }
+    /** Gets the parent tree that this node is in */
+    FOdysseyLayerStackTree& GetParentTree() const;
 
-    /** Clears the parent of this node. */
-    void ClearParent() { ParentNode = nullptr; }
-
-    void MoveNodeTo( EItemDropZone ItemDropZone, TSharedRef<OdysseyBaseLayerNode> CurrentNode );
-
-protected: //PROTECTED API
-
-    /** Adds a child to this node, and sets it's parent to this node. */
-    void AddChildAndSetParent( TSharedRef<OdysseyBaseLayerNode> InChild );
+    /** Gets the pointer to the data contained in this node */
+    IOdysseyLayer* GetLayerDataPtr() const;
 
 
 private: // HANDLES
@@ -329,41 +164,28 @@ private: // HANDLES
     /** Callback for determining whether a "Rename Node" context menu action can execute. */
     bool HandleContextMenuRenameNodeCanExecute() const;
 
-    bool HandleDeleteLayerCanExecute() const;
-
-    bool HandleMergeLayerDownCanExecute() const;
-    
-    bool HandleDuplicateLayerCanExecute() const;
-
-
 protected:
 
     /** The virtual offset of this item from the top of the tree, irrespective of expansion states. */
-    float VirtualTop;
+    float mVirtualTop;
 
     /** The virtual offset + virtual height of this item, irrespective of expansion states. */
-    float VirtualBottom;
+    float mVirtualBottom;
 
 
 protected:
-    /** The parent of this node*/
-    TWeakPtr<OdysseyBaseLayerNode> ParentNode;
-
     /** List of children belonging to this node */
-    TArray<TSharedRef<OdysseyBaseLayerNode>> ChildNodes;
+    TArray<TSharedRef<IOdysseyBaseLayerNode>> mChildNodes;
 
     /** Parent tree that this node is in */
-    FOdysseyLayerStackTree& ParentTree;
+    FOdysseyLayerStackTree& mParentTree;
 
     /** The name identifier of this node */
-    FName NodeName;
-
-    /** Whether or not the node is expanded */
-    bool bExpanded;
+    FName mNodeName;
 
     /** Event that is triggered when rename is requested */
-    FRequestRenameEvent RenameRequestedEvent;
+    FRequestRenameEvent mRenameRequestedEvent;
 
     /** The interface ptr to the data represented by this node, only used as verification purposes */
-    IOdysseyLayer* LayerDataPtr;
+    IOdysseyLayer* mLayerDataPtr;
 };

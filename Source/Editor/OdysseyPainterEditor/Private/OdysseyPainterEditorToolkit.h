@@ -31,6 +31,8 @@
 #include "SOdysseyStrokeOptions.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 
+#include "OdysseyTexture.h"
+
 #include <memory>
 #include <ULIS_CCOLOR>
 
@@ -41,6 +43,14 @@ class STextBlock;
 class SOdysseySurfaceViewport;
 class UFactory;
 class UTexture;
+
+
+struct FTexturePropertiesBackup
+{
+    TextureMipGenSettings       mTextureMipGenBackup;
+    TextureCompressionSettings  mTextureCompressionBackup;
+    TextureGroup                mTextureGroupBackup;
+};
 
 /**
  * Implements an Editor toolkit for textures.
@@ -55,8 +65,9 @@ public:
     FOdysseyPainterEditorToolkit();
 
 public:
-    // Initialization
-    void InitOdysseyPainterEditor( const EToolkitMode::Type iMode, const TSharedPtr<class IToolkitHost>& iInitToolkitHost, UTexture2D* iTexture );
+    void InitOdysseyPainterEditor( const EToolkitMode::Type iMode,
+                                   const TSharedPtr< class IToolkitHost >& iInitToolkitHost,
+                                   UTexture2D* iTexture );
 
 public:
     // FAssetEditorToolkit interface
@@ -145,7 +156,7 @@ protected:
     void EndTransaction() override;
 
 public:
-    void SetTextureDirty( bool iTextureDirty ); //Set bIsTextureDirty, prompting, or not, the option to save before closing the editor
+    bool DoesDrawBrushPreview() const;
 
 private:
     // Brush Handlers
@@ -175,6 +186,7 @@ private:
 
     // Performance Handlers
     void HandlePerformanceLiveUpdateChanged( bool iValue );
+    void HandlePerformanceDrawBrushPreviewChanged( bool iValue );
 
 private:
     // Spawner callbacks
@@ -227,21 +239,16 @@ private:
     FOdysseyUndoHistory mUndoHistory;
     bool                mIsManipulationDirtiedSomething;
 
-    /** Marker for closed state, avoid multiple prompting */
-    bool                mIsEditorMarkedAsClosed;
-
     /** Painting */
     UTexture2D*                 mTexture;
+    FTexturePropertiesBackup    mPropertiesBackup;
     FOdysseySurface*            mDisplaySurface;
-    FOdysseyBlock*              mTextureContentsBackup;
-    TextureMipGenSettings       mTextureMipGenBackup;
-    TextureCompressionSettings  mTextureCompressionBackup;
-    TextureGroup                mTextureGroupBackup;
+    FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
     FOdysseyPaintEngine         mPaintEngine;        // Owned        // Used by SOdysseyLayerStack
-    FOdysseyLayerStack          mLayerStack;        // Owned        // Used by Viewport
     UOdysseyBrush*              mBrush;              // NOT Owned
     UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
     FOdysseyLiveUpdateInfo      mLiveUpdateInfo;
+    bool                        mDrawBrushPreview;
 
     bool                        mIsTextureDirty;
 

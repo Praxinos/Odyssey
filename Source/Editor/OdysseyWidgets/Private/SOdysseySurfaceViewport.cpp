@@ -187,7 +187,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     [
                         SNew(SButton)
                             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                            .OnPressed(this, &SOdysseySurfaceViewport::HandleRotationReset)
+                            .OnPressed(this, &SOdysseySurfaceViewport::HandleViewportReset)
                         [
                             SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateReset16"))
                         ]
@@ -431,9 +431,10 @@ SOdysseySurfaceViewport::HandleRotationRight()
 }
 
 void
-SOdysseySurfaceViewport::HandleRotationReset()
+SOdysseySurfaceViewport::HandleViewportReset()
 {
     SetRotationInDegrees( 0 );
+    SetPan(FVector2D(0, 0));
 }
 
 

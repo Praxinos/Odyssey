@@ -199,24 +199,27 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     // Draw Cursor Preview
-    auto paintEngine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
-    paintEngine->UpdateBrushCursorPreview();
-    if( paintEngine->mBrushCursorPreviewSurface )
+    if( mOdysseyPainterEditorPtr.Pin()->DoesDrawBrushPreview() )
     {
-        paintEngine->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );
-        paintEngine->mBrushCursorPreviewSurface->Texture()->WaitForStreaming();
-        FVector2D pos_in_viewport( iViewport->GetMouseX(), iViewport->GetMouseY() );
-        FVector2D shift = paintEngine->mBrushCursorPreviewShift;
-        FVector2D pos = pos_in_viewport + shift * GetZoom();
-        FVector2D size = FVector2D( paintEngine->mBrushCursorPreviewSurface->Block()->Width(), paintEngine->mBrushCursorPreviewSurface->Block()->Height() ) * GetZoom();
-        FCanvasTileItem cursorItem( pos, paintEngine->mBrushCursorPreviewSurface->Texture()->Resource, size, FLinearColor::White );
-        uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
-        result += ( 1 << 0 );
-        result += ( 1 << 1 );
-        result += ( 1 << 2 );
-        result += ( 1 << 3 );
-        cursorItem.BlendMode = (ESimpleElementBlendMode)result;
-        ioCanvas->DrawItem( cursorItem );
+        auto paintEngine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
+        paintEngine->UpdateBrushCursorPreview();
+        if( paintEngine->mBrushCursorPreviewSurface )
+        {
+            paintEngine->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );
+            paintEngine->mBrushCursorPreviewSurface->Texture()->WaitForStreaming();
+            FVector2D pos_in_viewport( iViewport->GetMouseX(), iViewport->GetMouseY() );
+            FVector2D shift = paintEngine->mBrushCursorPreviewShift;
+            FVector2D pos = pos_in_viewport + shift * GetZoom();
+            FVector2D size = FVector2D( paintEngine->mBrushCursorPreviewSurface->Block()->Width(), paintEngine->mBrushCursorPreviewSurface->Block()->Height() ) * GetZoom();
+            FCanvasTileItem cursorItem( pos, paintEngine->mBrushCursorPreviewSurface->Texture()->Resource, size, FLinearColor::White );
+            uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
+            result += ( 1 << 0 );
+            result += ( 1 << 1 );
+            result += ( 1 << 2 );
+            result += ( 1 << 3 );
+            cursorItem.BlendMode = (ESimpleElementBlendMode)result;
+            ioCanvas->DrawItem( cursorItem );
+        }
     }
 
     if( mMeshSelector->GetCurrentMesh() )
@@ -267,7 +270,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
-    mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+    if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
+        mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+    else
+        mMouseCaptureMode = FViewportClient::CaptureMouseOnClick();
 
     //---
 

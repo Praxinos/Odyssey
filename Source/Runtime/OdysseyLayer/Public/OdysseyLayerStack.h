@@ -10,14 +10,16 @@
 
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
+#include "IOdysseyLayer.h"
+#include "IOdysseySerializable.h"
+#include "OdysseyTree.h"
 
-class FOdysseyBlock;
-class IOdysseyLayer;
-class FOdysseyImageLayer;
+#include "OdysseyBlock.h"
+
 class FOdysseyDrawingUndo;
 
 
-class ODYSSEYLAYER_API FOdysseyLayerStack
+class ODYSSEYLAYER_API FOdysseyLayerStack //: public IOdysseySerializable
 {
 public:
     // Construction / Destruction
@@ -40,47 +42,66 @@ public:
 
 public:
     // Public Array Tampon Methods
-    FOdysseyImageLayer*                     AddLayer( int iAtIndex = -1 );
-    FOdysseyImageLayer*                     AddLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
-    TArray< TSharedPtr< IOdysseyLayer > >*  GetLayers();
+    FOdysseyImageLayer*                             AddImageLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayer( int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
+    FOdysseyImageLayer*                             AddImageLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
+       
+    FOdysseyFolderLayer*                            AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
+    FOdysseyFolderLayer*                            AddFolderLayer( FName iName = FName(), int iAtIndex = -1 );
 
-    void                                    DeleteLayer( IOdysseyLayer* ILayerToDelete );
-    void                                    DeleteLayer( int iIndexLayerToDelete );
-    void                                    MergeDownLayer( IOdysseyLayer* ILayerToMergeDown );
-    void                                    DuplicateLayer( IOdysseyLayer* ILayerToDuplicate );
+    FOdysseyNTree< IOdysseyLayer* >*                GetLayers();
+    FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayer() const;
+    int                                             GetCurrentLayerAsIndex() const;
+    FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayerFromIndex( int iIndex) const;
 
-    int                                     GetCurrentLayerIndex() const;
-    void                                    SetCurrentLayerIndex( int iIndex );
-    TSharedPtr< IOdysseyLayer >             GetCurrentLayer() const;
-    void                                    ClearCurrentLayer();
-    void                                    FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
+    void                                            SetCurrentLayer( IOdysseyLayer* iLayer );
+    void                                            SetCurrentLayer( FOdysseyNTree< IOdysseyLayer* >* iLayer );
+    
+    void                                            DeleteLayer( IOdysseyLayer* iLayerToDelete );
 
-    TArray< TSharedPtr< FText > >           GetBlendingModesAsText();
+    void                                            MergeDownLayer( IOdysseyLayer* iLayerToMergeDown );
+    void                                            FlattenLayer( IOdysseyLayer* iLayerToFlatten );
+    void                                            DuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
+    void                                            ClearCurrentLayer();
+    void                                            FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
+        
+    TArray< TSharedPtr< FText > >                   GetBlendingModesAsText();
+            
+    ETextureSourceFormat                            GetTextureSourceFormat();
 
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack );
+    
 private:
     // Private API
-    FName                                   GetNextLayerName();
-    void                                    InitResultAndTempBlock();
+    FName                                           GetNextLayerName();
+    void                                            InitResultAndTempBlock();
+    FOdysseyBlock*                                  ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLayers );
+
+    
+public:
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* SaveLayerStack );
 
 private:
     // Private Data Members
-    FOdysseyBlock*                          mResultBlock;
-    FOdysseyBlock*                          mTempBlock; // Temporary block for the blend of the tempBuffer into the image
-    TArray< TSharedPtr< IOdysseyLayer > >   mLayers;
-    int                                     mCurrentIndex;
-    int                                     mWidth;
-    int                                     mHeight;
-    ETextureSourceFormat                    mTextureSourceFormat;
-    bool                                    mIsInitialized;
-    
+    FOdysseyBlock*                                  mResultBlock;
+    FOdysseyBlock*                                  mTempBlock; // Temporary block for the blend of the tempBuffer into the image
+    FOdysseyNTree< IOdysseyLayer* >*                mLayers;
+    FOdysseyNTree< IOdysseyLayer* >*                mCurrentLayer;
+    int                                             mWidth;
+    int                                             mHeight;
+    ETextureSourceFormat                            mTextureSourceFormat;
+    bool                                            mIsInitialized;
+            
 public:
-    FOdysseyDrawingUndo*                    mDrawingUndo;
+    FOdysseyDrawingUndo*                            mDrawingUndo;
 };
 
-
-
-
-
+        
+//Serialization of item
+#include "OdysseyLayerStack.inl"
 
 
 class ODYSSEYLAYER_API FOdysseyDrawingUndo

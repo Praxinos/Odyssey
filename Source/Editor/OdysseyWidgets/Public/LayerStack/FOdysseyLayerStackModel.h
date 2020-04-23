@@ -7,13 +7,13 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Framework/Commands/UICommandList.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h" //For FMenuBuilder
-#include "LayerStack/LayersEditor/IOdysseyLayerEditor.h"
+#include "LayerStack/FOdysseyLayerAddMenu.h"
 #include "IOdysseyLayer.h"
 
 class FOdysseyLayerStackTree;
 class SOdysseyLayerStackView;
 class FOdysseyLayerStack;
-class IOdysseyLayerEditor;
+class FOdysseyLayerAddMenu;
 
 /**
  * Implements the Layer stack model
@@ -23,7 +23,7 @@ class FOdysseyLayerStackModel : public TSharedFromThis<FOdysseyLayerStackModel>
 public:
     //CONSTRUCTOR/DESTRUCTOR
     /** Constructor */
-    FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> InWidget, TSharedPtr<FOdysseyLayerStack> InLayerStackData );
+    FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, TSharedPtr<FOdysseyLayerStack> iLayerStackData );
 
     /** Virtual destructor */
     virtual ~FOdysseyLayerStackModel();
@@ -36,7 +36,7 @@ public:
      *
      * @param MenuBuilder The menu builder to add things to.
      */
-    void BuildAddLayerMenu(FMenuBuilder& MenuBuilder);
+    void BuildAddLayerMenu(FMenuBuilder& iMenuBuilder);
 
     /** Gets the tree of nodes which is used to populate the GUI of the LayerStack */
     TSharedRef<FOdysseyLayerStackTree> GetNodeTree();
@@ -44,68 +44,41 @@ public:
     /** Gets the LayerStack data */
     TSharedPtr<FOdysseyLayerStack> GetLayerStackData();
 
-    /**
-     * @return Layer tools used by the widget
-     */
-    const TArray<TSharedPtr<IOdysseyLayerEditor>>& GetLayerEditors() const
-    {
-        return LayerEditors;
-    }
+    const TSharedRef< FOdysseyLayerAddMenu > GetLayerAddMenu() const;
 
-    /** Gets the command bindings for the LayerStack */
-    TSharedPtr<FUICommandList> GetCommandBindings() const
-    {
-        return LayerStackCommandBindings;
-    }
+    TSharedPtr<FUICommandList> GetCommandBindings() const;
 
-    TSharedRef<SOdysseyLayerStackView> GetLayerStackWidget() const;
-
-    /** Handles adding a new folder to the outliner tree. */
-    void OnAddFolder();
-
-    /** Handles adding a newly created layer to the outliner tree */
-    void OnAddLayer(const IOdysseyLayer& InLayer);
-
-    void OnDeleteLayer( IOdysseyLayer* InLayerToDelete );
-
-    void OnMergeLayerDown( IOdysseyLayer* InLayerToMergeDown );
+    TSharedRef<SOdysseyLayerStackView> GetLayerStackView() const;
     
-    void OnDuplicateLayer( IOdysseyLayer* InLayerToDuplicate );
+public:
+    //HANDLES
 
-    void TestOption();
+    void OnDeleteLayer( IOdysseyLayer* iLayerToDelete );
 
-    /** Generates command bindings for UI commands */
-    void BindCommands();
-
-    /** Handles adding a newly created layer to the outliner tree by assigning it into a folder and selecting it. */
-    //void OnAddLayer(const TWeakObjectPtr<UOdysseyBaseLayer>& InLayer);
+    void OnMergeLayerDown( IOdysseyLayer* iLayerToMergeDown );
+    
+    void OnFlattenLayer( IOdysseyLayer* iLayerToMergeDown );
+    
+    void OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
 
 private:
-    /** Command list for LayerStack commands and Only (Right-click commands) */
-    TSharedRef<FUICommandList> LayerStackCommandBindings;
-
-    /** Command list for LayerStack commands and shared by others (Right-click commands) */
-    TSharedRef<FUICommandList> LayerStackSharedBindings;
+    /** Command list for general LayerStack commands (Right-click commands) */
+    TSharedRef<FUICommandList> mLayerStackCommandBindings;
 
     /** Represents the tree of nodes to display*/
-    TSharedRef<FOdysseyLayerStackTree> NodeTree;
+    TSharedRef<FOdysseyLayerStackTree> mNodeTree;
 
     /** Main LayerStack widget */
-    TSharedPtr<SOdysseyLayerStackView> LayerStackWidget;
+    TSharedPtr<SOdysseyLayerStackView> mLayerStackView;
 
     /** The true layers data of the layer Stack */
-    TSharedPtr<FOdysseyLayerStack> LayerStackData;
+    TSharedPtr<FOdysseyLayerStack> mLayerStackData;
 
     /** List of tools we own */
-    TArray<TSharedPtr<IOdysseyLayerEditor>> LayerEditors;
-
-public:
-    //Temporary Annecy
-    bool bIsOnlyCurrentVisibleLayer;
-
+    TSharedRef<FOdysseyLayerAddMenu> mLayerStackAddMenu;
 
 };
 
 
 /** A delegate that is executed when adding menu content. */
-DECLARE_DELEGATE_TwoParams(FOnGetAddMenuContent, FMenuBuilder& /*MenuBuilder*/, TSharedRef<FOdysseyLayerStackModel>);
+DECLARE_DELEGATE_TwoParams(FOnGetAddMenuContent, FMenuBuilder&, TSharedRef<FOdysseyLayerStackModel>);

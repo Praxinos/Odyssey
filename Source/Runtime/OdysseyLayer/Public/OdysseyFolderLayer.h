@@ -8,7 +8,6 @@
 #include "IOdysseyLayer.h"
 #include <ULIS_BLENDINGMODES>
 
-class FOdysseyBlock;
 
 /**
  * Implements a layer which is a folder
@@ -20,20 +19,30 @@ public:
     virtual ~FOdysseyFolderLayer();
     FOdysseyFolderLayer( const FName& iName );
 
-public:
-    virtual eType GetType() const override;
 
 public:
     // Public API
     ::ULIS::eBlendingMode     GetBlendingMode();
+    FText                     GetBlendingModeAsText() const;
     void                      SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode );
-
-    TSharedPtr<FOdysseyBlock> GenerateBlockFromContent() const;
-
-    void                      AppendLayer( TSharedPtr<IOdysseyLayer> iLayer );
-    void                      AddLayerAtIndex( TSharedPtr<IOdysseyLayer> iLayer, int iIndex );
+    void                      SetBlendingMode( FText iBlendingMode );
+    
+    float GetOpacity() const;
+    void  SetOpacity( float iOpacity );
+    
+    bool IsOpen() const;
+    void SetIsOpen( bool iIsOpen );
+    
+    // Overloads for save in archive
+    friend FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
 
 private:
-    TArray<TSharedPtr<IOdysseyLayer>>   mLayersInFolder;
     ::ULIS::eBlendingMode               mBlendingMode;
+    float                               mOpacity;
+    
+    //To do: Not good, should not be here in the model. To change after the dissociation between the model and the view
+    bool                                mIsOpen;
 };
+
+//Serialization of item
+#include "OdysseyFolderLayer.inl"

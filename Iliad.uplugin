@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
-  "Version": 2,
-  "VersionName": "0.2.424",
+  "Version": 4,
+  "VersionName": "0.4.424",
   "FriendlyName": "Iliad",
   "Description": "Painting plugin with Blueprint brushes for Unreal Engine",
   "Category": "2D",
@@ -42,6 +42,11 @@
     },
     {
       "Name": "OdysseyTransaction",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseySerializable",
       "Type": "Runtime",
       "LoadingPhase": "Default"
     },
