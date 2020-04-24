@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include <ULIS_BLENDINGMODES>
+#include <ULIS3>
 #include "OdysseyBrushBlending.generated.h"
 
 UENUM( BlueprintType )

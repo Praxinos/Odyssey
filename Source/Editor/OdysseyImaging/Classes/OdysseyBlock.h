@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Texture.h"
-#include <ULIS_FDECL>
+#include <ULIS3>
 
 /////////////////////////////////////////////////////
 // FOdysseyBlock

@@ -4,9 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include <ULIS_CORE>
-#include <ULIS_FDECL>
-#include <ULIS_BLENDINGMODES>
+#include <ULIS3>
 
 #include "Serialization/BufferArchive.h"
 #include "Serialization/MemoryReader.h"
