@@ -176,7 +176,7 @@ SOdysseyStrokeOptions::SetSmoothingCatchUp(  bool iValue )
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- FNotifyHook Interface
 void
-SOdysseyStrokeOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, UProperty* PropertyThatChanged )
+SOdysseyStrokeOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged )
 {
     FString PropertyName = PropertyThatChanged->GetName();
     if( PropertyName == FString( TEXT("Step") ) ) {

@@ -56,13 +56,13 @@ SOdysseyBrushExposedParameters::Refresh( UOdysseyBrushAssetBase* iValue )
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- FNotifyHook Interface
 void
-SOdysseyBrushExposedParameters::NotifyPreChange( UProperty* PropertyAboutToChange )
+SOdysseyBrushExposedParameters::NotifyPreChange( FProperty* PropertyAboutToChange )
 {
 }
 
 
 void
-SOdysseyBrushExposedParameters::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, UProperty* PropertyThatChanged )
+SOdysseyBrushExposedParameters::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged )
 {
     OnParameterChangedCallback.ExecuteIfBound();
 }

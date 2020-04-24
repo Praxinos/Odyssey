@@ -173,7 +173,7 @@ SOdysseyPerformanceOptions::SetPeformanceCacheInfoStepCount       ( int32 iValue
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- FNotifyHook Interface
 void
-SOdysseyPerformanceOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, UProperty* PropertyThatChanged )
+SOdysseyPerformanceOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged )
 {
     FString PropertyName = PropertyThatChanged->GetName();
     if( PropertyName == FString( TEXT("LiveUpdate") ) ) {
