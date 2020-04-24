@@ -34,7 +34,7 @@
 #include "OdysseyTexture.h"
 
 #include <memory>
-#include <ULIS_CCOLOR>
+#include <ULIS3>
 
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;

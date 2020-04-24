@@ -19,7 +19,7 @@
 #include "SOdysseyLeafWidget.h"
 
 #include "Color/SOdysseyAdvancedColorWheel.h"
-#include <ULIS_CCOLOR>
+#include <ULIS3>
 
 class ODYSSEYWIDGETS_API SOdysseyColorSelector : public SCompoundWidget
 {

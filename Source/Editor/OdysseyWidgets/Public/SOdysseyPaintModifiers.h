@@ -15,7 +15,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/SPanel.h"
-#include <ULIS_BLENDINGMODES>
+#include <ULIS3>
 
 /////////////////////////////////////////////////////
 // SOdysseyPaintModifiers

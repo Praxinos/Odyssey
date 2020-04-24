@@ -7,7 +7,7 @@
 #include "Misc/FileHelper.h"
 #include "UObject/UObjectGlobals.h"
 
-#include <ULIS_CORE>
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStack"
 

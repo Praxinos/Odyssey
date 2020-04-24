@@ -4,7 +4,7 @@
 #include "Color/SOdysseyColorSlider.h"
 #include "Rendering/DrawElements.h"
 #include "OdysseyBlock.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyColorSlider"
 

@@ -16,7 +16,7 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Layout/SScrollBox.h"
-#include <ULIS_CCOLOR>
+#include <ULIS3>
 
 class IOdysseyGroupChannelSlider;
 

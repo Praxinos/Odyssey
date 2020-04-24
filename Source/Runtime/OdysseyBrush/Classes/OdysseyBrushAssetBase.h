@@ -14,9 +14,7 @@
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
 #include "Proxies/OdysseyBrushCache.h"
-#include <ULIS_CCOLOR>
-#include <ULIS_MATHS>
-#include <ULIS_BLENDINGMODES>
+#include <ULIS3>
 #include "OdysseyBrushAssetBase.generated.h"
 
 class UTexture2D;

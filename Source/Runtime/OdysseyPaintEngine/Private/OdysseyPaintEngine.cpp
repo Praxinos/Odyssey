@@ -6,7 +6,7 @@
 #include "OdysseyInterpolationTypes.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 #include <chrono>
 
 #define TILE_SIZE 64

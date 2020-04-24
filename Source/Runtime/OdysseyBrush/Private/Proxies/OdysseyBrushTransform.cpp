@@ -5,7 +5,7 @@
 #include "OdysseyBrushContext.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBlock.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 
 /////////////////////////////////////////////////////
 // UOdysseyTransformProxyLibrary

@@ -7,7 +7,7 @@
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyBrushContext.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushFunctionLibrary"

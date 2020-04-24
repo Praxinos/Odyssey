@@ -13,7 +13,7 @@
 #include "Layout/Children.h"
 #include "Widgets/SPanel.h"
 #include "SOdysseyLeafWidget.h"
-#include <ULIS_CCOLOR>
+#include <ULIS3>
 
 DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::CColor& );
 

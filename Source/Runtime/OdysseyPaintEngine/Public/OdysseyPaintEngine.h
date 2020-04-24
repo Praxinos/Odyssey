@@ -10,8 +10,7 @@
 #include "OdysseySmoothingTypes.h"
 #include "IOdysseyLayer.h"
 #include "OdysseyTransactionnable.h"
-#include <ULIS_CCOLOR>
-#include <ULIS_BLENDINGMODES>
+#include <ULIS3>
 #include <queue>
 #include <functional>
 

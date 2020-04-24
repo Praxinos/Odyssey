@@ -34,7 +34,7 @@
 #include "OdysseyPainterEditorViewportClient.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseySurfaceViewport.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolkit"
 

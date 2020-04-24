@@ -17,7 +17,7 @@
 #include "SOdysseyLeafWidget.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "OdysseySurface.h"
-#include <ULIS_CCOLOR>
+#include <ULIS3>
 
 DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::CColor& );
 DECLARE_DELEGATE_OneParam( FOnChannelChanged, float );

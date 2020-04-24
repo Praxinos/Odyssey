@@ -3,7 +3,7 @@
 
 //The actual function to load and save a OdysseyImageLayer to disk
 #include "OdysseyBlock.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 
 inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
 {

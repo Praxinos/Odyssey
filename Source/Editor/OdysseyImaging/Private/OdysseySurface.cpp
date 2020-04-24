@@ -3,7 +3,7 @@
 
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
-#include <ULIS_CORE>
+#include <ULIS3>
 
 /////////////////////////////////////////////////////
 // Utlity

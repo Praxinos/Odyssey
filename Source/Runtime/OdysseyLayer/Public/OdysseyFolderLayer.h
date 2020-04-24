@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
-#include <ULIS_BLENDINGMODES>
+#include <ULIS3>
 
 
 /**

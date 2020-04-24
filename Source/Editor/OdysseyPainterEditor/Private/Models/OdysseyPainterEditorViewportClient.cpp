@@ -32,7 +32,7 @@
 #include "SOdysseySurfaceViewport.h"
 
 #include <memory>
-#include <ULIS_CORE>
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportClientt"
 
