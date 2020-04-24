@@ -9,7 +9,6 @@
 
 class FOdysseyLayerStack;
 class FOdysseyPaintEngine;
-namespace ULIS { class CColor; }
 
 /**
  * Interface for odyssey painter editor tool kits.

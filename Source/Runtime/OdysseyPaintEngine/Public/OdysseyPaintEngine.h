@@ -17,8 +17,6 @@
 class FOdysseyLayerStack;
 class UOdysseyBrushAssetBase;
 
-namespace ULIS { class FThreadPool; }
-
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
 {
 private:

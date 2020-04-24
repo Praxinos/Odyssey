@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
-#include <ULIS_FDECL>
+#include <ULIS3>
 
 class FOdysseySurface;
 class FOdysseyBlock;

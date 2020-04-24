@@ -4,7 +4,7 @@
 #include "CoreTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/ObjectMacros.h"
-#include <ULIS_CCOLOR>
+#include <ULIS3>
 #include "OdysseyBrushColor.generated.h"
 
 /////////////////////////////////////////////////////
