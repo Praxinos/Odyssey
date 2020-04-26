@@ -50,16 +50,16 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Source.m;
         FOdysseyBlock* dst = new  FOdysseyBlock( src->Width(), src->Height(), src->GetUE4TextureSourceFormat() );
-        ::ULIS::FMakeContext::CopyBlockInto( src->GetIBlock(), dst->GetIBlock() );
+        ::ul3::FMakeContext::CopyBlockInto( src->GetBlock(), dst->GetBlock() );
 
-        ::ULIS::ParallelFor( dst->Height()
+        ::ul3::ParallelFor( dst->Height()
                            , [&]( int iLine ) {
                                 for( int i = 0; i < dst->Width(); ++i )
                                 {
-                                    int alpha = dst->GetIBlock()->PixelColor( i, iLine ).Alpha();
-                                    ::ULIS::CColor col = Color.m;
+                                    int alpha = dst->GetBlock()->PixelColor( i, iLine ).Alpha();
+                                    ::ul3::CColor col = Color.m;
                                     col.SetAlpha( alpha );
-                                    dst->GetIBlock()->SetPixelColor( i, iLine, col );
+                                    dst->GetBlock()->SetPixelColor( i, iLine, col );
                                 }
                             } );
 
@@ -113,11 +113,11 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
     FOdysseyBlockProxy prox;
     FString op = "Blend_" + Top.id + "_" + Back.id + "_" + FString::SanitizeFloat( Opacity ) + "_" + FString::FromInt( (int32)BlendingMode ) + "_" + FString::FromInt( (int32)AlphaMode );
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
-        ::ULIS::IBlock* source  = Top.m->GetIBlock();
-        ::ULIS::IBlock* back    = Back.m->GetIBlock();
+        ::ul3::IBlock* source  = Top.m->GetBlock();
+        ::ul3::IBlock* back    = Back.m->GetBlock();
         FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), Back.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
-        ::ULIS::FMakeContext::CopyBlockInto( back, dst->GetIBlock() );
-        ::ULIS::FBlendingContext::Blend( source, dst->GetIBlock(), X, Y, (::ULIS::eBlendingMode)BlendingMode, (::ULIS::eAlphaMode)AlphaMode, Opacity );
+        ::ul3::FMakeContext::CopyBlockInto( back, dst->GetBlock() );
+        ::ul3::FBlendingContext::Blend( source, dst->GetBlock(), X, Y, (::ul3::eBlendingMode)BlendingMode, (::ul3::eAlphaMode)AlphaMode, Opacity );
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
     ODYSSEY_BRUSH_CACHE_OPERATION_END

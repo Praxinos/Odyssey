@@ -33,7 +33,7 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
         Ar << width;
         Ar << height;
         
-        ::ULIS::IBlock* blockLayerData = ::ULIS::FMakeContext::CopyBlockRect( ioSaveImageLayer->mBlock->GetIBlock(), ::ULIS::FRect( 0, 0, ioSaveImageLayer->mBlock->Width(), ioSaveImageLayer->mBlock->Height() ) );
+        ::ul3::IBlock* blockLayerData = ::ul3::FMakeContext::CopyBlockRect( ioSaveImageLayer->mBlock->GetBlock(), ::ul3::FRect( 0, 0, ioSaveImageLayer->mBlock->Width(), ioSaveImageLayer->mBlock->Height() ) );
         TArray<uint8> layerData = TArray<uint8>();
         layerData.AddUninitialized(blockLayerData->BytesTotal());
         FMemory::Memcpy(layerData.GetData(), blockLayerData->DataPtr(), blockLayerData->BytesTotal());
@@ -52,16 +52,16 @@ inline FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer )
         
         check( !ioSaveImageLayer->mBlock );
         ioSaveImageLayer->mBlock = new FOdysseyBlock( width, height, textureFormat );
-        ::ULIS::FClearFillContext::Clear( ioSaveImageLayer->mBlock->GetIBlock() );
+        ::ul3::FClearFillContext::Clear( ioSaveImageLayer->mBlock->GetBlock() );
         
         TArray<uint8> layerData = TArray<uint8>();
-        layerData.AddUninitialized(ioSaveImageLayer->mBlock->GetIBlock()->BytesTotal());
+        layerData.AddUninitialized(ioSaveImageLayer->mBlock->GetBlock()->BytesTotal());
         
         Ar << layerData;
 
         for( int j = 0; j < layerData.Num(); j++ )
         {
-            *(ioSaveImageLayer->mBlock->GetIBlock()->DataPtr() + j) = layerData[j];
+            *(ioSaveImageLayer->mBlock->GetBlock()->DataPtr() + j) = layerData[j];
         }
     }
     return Ar;

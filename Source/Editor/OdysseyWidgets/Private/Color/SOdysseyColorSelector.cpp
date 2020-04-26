@@ -152,7 +152,7 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
 void
-SOdysseyColorSelector::SetColor( const ::ULIS::CColor& iColor )
+SOdysseyColorSelector::SetColor( const ::ul3::CColor& iColor )
 {
     adv_color_wheel->SetColor( iColor );
 }
@@ -280,13 +280,13 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int r = HexStringToDecimal( str_r );
     int g = HexStringToDecimal( str_g );
     int b = HexStringToDecimal( str_b );
-    ::ULIS::CColor newColor( r, g, b );
+    ::ul3::CColor newColor( r, g, b );
     adv_color_wheel->SetColor( newColor );
 }
 
 
 void
-SOdysseyColorSelector::HandleWheelColorChangedCallback( const ::ULIS::CColor& iColor )
+SOdysseyColorSelector::HandleWheelColorChangedCallback( const ::ul3::CColor& iColor )
 {
     //Can be null so we have to check
     if( !hex_editable_text_box )

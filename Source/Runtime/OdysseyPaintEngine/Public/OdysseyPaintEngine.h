@@ -34,12 +34,12 @@ public:
     void SetTextureSourceFormat( ETextureSourceFormat iTextureSourceFormat );
     void SetLayerStack( FOdysseyLayerStack* iLayerStack );
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
-    void SetColor( const ::ULIS::CColor& iColor );
+    void SetColor( const ::ul3::CColor& iColor );
     void SetSizeModifier( float iValue );
     void SetOpacityModifier( float iValue );
     void SetFlowModifier( float iValue );
-    void SetBlendingModeModifier( ::ULIS::eBlendingMode iValue );
-    void SetAlphaModeModifier( ::ULIS::eAlphaMode iValue );
+    void SetBlendingModeModifier( ::ul3::eBlendingMode iValue );
+    void SetAlphaModeModifier( ::ul3::eAlphaMode iValue );
 
     void SetStrokeStep( int32 iValue );
     void SetStrokeAdaptative( bool iValue );
@@ -60,7 +60,7 @@ public:
     void TriggerStateChanged();
     void InterruptStrokeAndStampInPlace();
 
-    const ::ULIS::CColor& GetColor() const;
+    const ::ul3::CColor& GetColor() const;
 
     void UpdateBrushCursorPreview();
 private:
@@ -73,8 +73,8 @@ private:
     void ReallocInvalidTileMap( InvalidTileMap& ioMap );
     void ClearInvalidTileMap( InvalidTileMap ioMap );
 
-    ::ULIS::FRect MakeTileRect( int iTileX, int iTileY );
-    void SetMapWithRect( InvalidTileMap ioMap, const ::ULIS::FRect& iRect, bool iValue );
+    ::ul3::FRect MakeTileRect( int iTileX, int iTileY );
+    void SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue );
 
 private:
     // Private Data Members
@@ -94,13 +94,13 @@ private:
     InvalidTileMap                      mTmpInvalidTileMap;
     InvalidTileMap                      mStrokeInvalidTileMap;
 
-    ::ULIS::CColor                      mColor;
+    ::ul3::CColor                      mColor;
 
     float                               mSizeModifier;
     float                               mOpacityModifier;
     float                               mFlowModifier;
-    ::ULIS::eBlendingMode               mBlendingModeModifier;
-    ::ULIS::eAlphaMode                  mAlphaModeModifier;
+    ::ul3::eBlendingMode               mBlendingModeModifier;
+    ::ul3::eAlphaMode                  mAlphaModeModifier;
     float                               mStepValue;
 
     IOdysseyInterpolation*              mInterpolator;
@@ -114,7 +114,7 @@ private:
 
     bool                                mIsPendingEndStroke;
 
-    ::ULIS::FThreadPool*                mTileThreadPool;
+    ::ul3::FThreadPool*                mTileThreadPool;
     std::queue<std::function<void()>>   mDelayQueue;
 
 public:

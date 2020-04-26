@@ -486,7 +486,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
 
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-            mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
+            mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
 
             return true;
         }
@@ -553,7 +553,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     {
         FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
         FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-        mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetIBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
+        mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetBlock()->PixelColor( position_in_texture.X, position_in_texture.Y ) );
     }
 }
 
@@ -969,7 +969,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
                 int32 corner1 = edge;
                 int32 corner2 = ( edge + 1 ) % 3;
                 FLinearColor lc = mMeshSelector->GetMeshColor();
-                ::ULIS::CColor c = ::ULIS::CColor::FromRGBF( lc.R, lc.G, lc.B, lc.A );
+                ::ul3::CColor c = ::ul3::CColor::FromRGBF( lc.R, lc.G, lc.B, lc.A );
 
                 FLinearColor color = ( isOutOfBounds[corner1] || isOutOfBounds[corner2] ) ? FLinearColor( 0.6f, 0.0f, 0.0f ) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
                 lineItem.SetColor( color );

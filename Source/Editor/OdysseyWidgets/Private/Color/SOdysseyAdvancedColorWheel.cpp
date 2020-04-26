@@ -149,8 +149,8 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
     bMarkedAsInvalidated = false;
     Init();
 
-    colorA = ::ULIS::CColor( 255, 255, 255 );
-    ::ULIS::CColor start_color( 0, 0, 0 );
+    colorA = ::ul3::CColor( 255, 255, 255 );
+    ::ul3::CColor start_color( 0, 0, 0 );
     SetColor( start_color );
 }
 
@@ -158,7 +158,7 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Public Callback API
 void
-SOdysseyAdvancedColorWheel::SetColor( const ::ULIS::CColor& iColor )
+SOdysseyAdvancedColorWheel::SetColor( const ::ul3::CColor& iColor )
 {
     if( colorA == iColor )
         return;
@@ -168,12 +168,12 @@ SOdysseyAdvancedColorWheel::SetColor( const ::ULIS::CColor& iColor )
     float Ar, Ag, Ab;
     float Br, Bg, Bb;
     float Cr, Cg, Cb;
-    ::ULIS::CColor hsv_color = iColor.ToHSV();
+    ::ul3::CColor hsv_color = iColor.ToHSV();
     float hue = hsv_color.HSVHueF();
-    ::ULIS::CColor A_color = ::ULIS::CColor::FromRGBF( 1, 1, 1 );
-    ::ULIS::CColor B_color = ::ULIS::CColor::FromHSVF( hue, 1, 1 ).ToRGB();
-    ::ULIS::CColor C_color = ::ULIS::CColor::FromRGBF( 0, 0, 0 );
-    ::ULIS::CColor R_color = iColor.ToRGB();
+    ::ul3::CColor A_color = ::ul3::CColor::FromRGBF( 1, 1, 1 );
+    ::ul3::CColor B_color = ::ul3::CColor::FromHSVF( hue, 1, 1 ).ToRGB();
+    ::ul3::CColor C_color = ::ul3::CColor::FromRGBF( 0, 0, 0 );
+    ::ul3::CColor R_color = iColor.ToRGB();
     Rr = R_color.RedF();
     Rg = R_color.GreenF();
     Rb = R_color.BlueF();
@@ -403,7 +403,7 @@ void
 SOdysseyAdvancedColorWheel::PaintInternalBuffer( int iReason ) const
 {
     if( bMarkedAsInvalidated )
-        ::ULIS::FClearFillContext::Clear( surface->Block()->GetIBlock(), ::ULIS::FPerformanceOptions(), false );
+        ::ul3::FClearFillContext::Clear( surface->Block()->GetBlock(), ::ul3::FPerformanceOptions(), false );
 
     PaintTriangle();
     surface->Invalidate();
@@ -424,9 +424,9 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
     float triangleArea = triangle_buffer_size.X * triangle_buffer_size.Y * 0.5;
 
     // Bake base colors
-    ::ULIS::CColor Color1 = ::ULIS::CColor::FromRGB( 255, 255, 255 );             // pure white
-    ::ULIS::CColor Color2 = ::ULIS::CColor::FromHSV( hue_deg, 255, 255 ).ToRGB(); // pure hue, max sat
-    ::ULIS::CColor Color3 = ::ULIS::CColor::FromRGB( 0, 0, 0 );                   // pure black
+    ::ul3::CColor Color1 = ::ul3::CColor::FromRGB( 255, 255, 255 );             // pure white
+    ::ul3::CColor Color2 = ::ul3::CColor::FromHSV( hue_deg, 255, 255 ).ToRGB(); // pure hue, max sat
+    ::ul3::CColor Color3 = ::ul3::CColor::FromRGB( 0, 0, 0 );                   // pure black
 
     // Optimisation Constants
     float optconst1 = -triangle_buffer_size.Y / 2; // ( iPt2.Y - iPt3.Y )
@@ -462,7 +462,7 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
             int r  = ( Area1 * Color1.Red()   + Area2 * Color2.Red()   + Area3 * Color3.Red()   ) / triangleArea;
             int g  = ( Area1 * Color1.Green() + Area2 * Color2.Green() + Area3 * Color3.Green() ) / triangleArea;
             int b  = ( Area1 * Color1.Blue()  + Area2 * Color2.Blue()  + Area3 * Color3.Blue()  ) / triangleArea;
-            uint8* pixel = surface->Block()->GetIBlock()->PixelPtr( current.X, current.Y );
+            uint8* pixel = surface->Block()->GetBlock()->PixelPtr( current.X, current.Y );
             pixel[2] = r;
             pixel[1] = g;
             pixel[0] = b;
@@ -617,9 +617,9 @@ void
 SOdysseyAdvancedColorWheel::UpdateTint() const
 {
     result_tint = FLinearColor( FColor( colorA.Red(), colorA.Green(), colorA.Blue() ) );
-    ::ULIS::CColor hsv_tint = ::ULIS::CColor::FromHSV( hue_deg, 255, 255 ).ToRGB();
+    ::ul3::CColor hsv_tint = ::ul3::CColor::FromHSV( hue_deg, 255, 255 ).ToRGB();
     hue_tint = FLinearColor( FColor( hsv_tint.Red(), hsv_tint.Green(), hsv_tint.Blue() ) );
-    ::ULIS::CColor HSVColor = colorA.ToHSV();
+    ::ul3::CColor HSVColor = colorA.ToHSV();
     sat_tint = FLinearColor( FColor( HSVColor.Value(), HSVColor.Value(), HSVColor.Value(), HSVColor.HSVSaturation() ) );
     lum_tint = FLinearColor( FColor( HSVColor.Value(), HSVColor.Value(), HSVColor.Value(), 255 ) );
 }
@@ -629,16 +629,16 @@ void
 SOdysseyAdvancedColorWheel::UpdateColor() const
 {
     // Bake tints
-    ::ULIS::CColor Color1 = ::ULIS::CColor::FromRGB( 255, 255, 255 );             // pure white
-    ::ULIS::CColor Color2 = ::ULIS::CColor::FromHSV( hue_deg, 255, 255 ).ToRGB(); // pure hue, max sat
-    ::ULIS::CColor Color3 = ::ULIS::CColor::FromRGB( 0, 0, 0 );                   // pure black
+    ::ul3::CColor Color1 = ::ul3::CColor::FromRGB( 255, 255, 255 );             // pure white
+    ::ul3::CColor Color2 = ::ul3::CColor::FromHSV( hue_deg, 255, 255 ).ToRGB(); // pure hue, max sat
+    ::ul3::CColor Color3 = ::ul3::CColor::FromRGB( 0, 0, 0 );                   // pure black
     float a = triangle_cursor_barycentric_position.X;
     float b = triangle_cursor_barycentric_position.Y;
     float c = triangle_cursor_barycentric_position.Z;
     int R  = ( a * Color1.Red()   + b * Color2.Red()   + c * Color3.Red()   );
     int G  = ( a * Color1.Green() + b * Color2.Green() + c * Color3.Green() );
     int B  = ( a * Color1.Blue()  + b * Color2.Blue()  + c * Color3.Blue()  );
-    ::ULIS::CColor result( R, G, B );
+    ::ul3::CColor result( R, G, B );
 
     if( colorA != result )
     {

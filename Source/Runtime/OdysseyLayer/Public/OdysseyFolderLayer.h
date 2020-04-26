@@ -22,9 +22,9 @@ public:
 
 public:
     // Public API
-    ::ULIS::eBlendingMode     GetBlendingMode();
+    ::ul3::eBlendingMode     GetBlendingMode();
     FText                     GetBlendingModeAsText() const;
-    void                      SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode );
+    void                      SetBlendingMode( ::ul3::eBlendingMode iBlendingMode );
     void                      SetBlendingMode( FText iBlendingMode );
     
     float GetOpacity() const;
@@ -37,7 +37,7 @@ public:
     friend FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
 
 private:
-    ::ULIS::eBlendingMode               mBlendingMode;
+    ::ul3::eBlendingMode               mBlendingMode;
     float                               mOpacity;
     
     //To do: Not good, should not be here in the model. To change after the dissociation between the model and the view

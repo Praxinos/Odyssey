@@ -74,7 +74,7 @@ UOdysseyBrushAssetBase::GetState()
 }
 
 
-const TArray< ::ULIS::FRect >&
+const TArray< ::ul3::FRect >&
 UOdysseyBrushAssetBase::GetInvalidRects() const
 {
     return  invalid_rects;
@@ -82,7 +82,7 @@ UOdysseyBrushAssetBase::GetInvalidRects() const
 
 
 void
-UOdysseyBrushAssetBase::PushInvalidRect( const  ::ULIS::FRect& iRect )
+UOdysseyBrushAssetBase::PushInvalidRect( const  ::ul3::FRect& iRect )
 {
     invalid_rects.Add( iRect );
 }

@@ -27,9 +27,9 @@ public:
     // Public API
     FOdysseyBlock* GetBlock() const;
 
-    ::ULIS::eBlendingMode GetBlendingMode() const;
+    ::ul3::eBlendingMode GetBlendingMode() const;
     FText                 GetBlendingModeAsText() const;
-    void                  SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode );
+    void                  SetBlendingMode( ::ul3::eBlendingMode iBlendingMode );
     void                  SetBlendingMode( FText iBlendingMode );
 
     float GetOpacity() const;
@@ -47,7 +47,7 @@ public:
 private:
     // Private Data Members
     FOdysseyBlock*          mBlock;
-    ::ULIS::eBlendingMode   mBlendingMode;
+    ::ul3::eBlendingMode   mBlendingMode;
     float                   mOpacity;
     bool                    mIsAlphaLocked;
 };

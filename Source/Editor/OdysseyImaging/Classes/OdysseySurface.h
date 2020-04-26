@@ -19,10 +19,10 @@ ODYSSEYIMAGING_API FOdysseyBlock* NewOdysseyBlockFromUTextureData( UTexture2D* i
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData( FOdysseyBlock* iData, FOdysseySurface* iSurface );
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData( FOdysseyBlock* iData, FOdysseySurface* iSurface, int iX1, int iY1, int iX2, int iY2 );
 ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture );
-ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, const ::ULIS::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect );
 ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, int iX1, int iY1, int iX2, int iY2 );
-ODYSSEYIMAGING_API void InvalidateTextureFromData( ::ULIS::IBlock* iData, UTexture2D* iTexture, const ::ULIS::FRect& iRect );
-ODYSSEYIMAGING_API void InvalidateSurfaceFromData( ::ULIS::IBlock* iData, FOdysseySurface* iSurface, const ::ULIS::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateTextureFromData( ::ul3::IBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateSurfaceFromData( ::ul3::IBlock* iData, FOdysseySurface* iSurface, const ::ul3::FRect& iRect );
 
 struct FOdysseyLiveUpdateInfo
 {
@@ -34,8 +34,8 @@ struct FOdysseyLiveUpdateInfo
 ODYSSEYIMAGING_API void InvalidateSurfaceCallback( FOdysseyBlock* iData, void* iInfo, int iX1, int iY1, int iX2, int iY2 );
 ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( FOdysseyBlock* iData, void* iInfo, int iX1, int iY1, int iX2, int iY2 );
 
-ODYSSEYIMAGING_API void InvalidateSurfaceCallback( ::ULIS::IBlock* iData, void* iInfo, const ::ULIS::FRect& iRect );
-ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( ::ULIS::IBlock* iData, void* iInfo, const ::ULIS::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateSurfaceCallback( ::ul3::IBlock* iData, void* iInfo, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( ::ul3::IBlock* iData, void* iInfo, const ::ul3::FRect& iRect );
 
 /////////////////////////////////////////////////////
 // FOdysseySurface
@@ -81,7 +81,7 @@ public:
     int  Height();
     void Invalidate();
     void Invalidate( int iX1, int iY1, int iX2, int iY2 );
-    void Invalidate( const ::ULIS::FRect& iRect );
+    void Invalidate( const ::ul3::FRect& iRect );
 
 private:
     // Private Data

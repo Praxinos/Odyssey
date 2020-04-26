@@ -17,21 +17,21 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
     //, IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
     , mBlock( nullptr )
-    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mBlendingMode( ::ul3::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
     , mIsAlphaLocked( false )
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
-    ::ULIS::FClearFillContext::Clear( mBlock->GetIBlock() );
+    ::ul3::FClearFillContext::Clear( mBlock->GetBlock() );
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
     //, IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
     , mBlock( iBlock )
-    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mBlendingMode( ::ul3::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
     , mIsAlphaLocked( false )
 {
@@ -46,14 +46,14 @@ FOdysseyImageLayer::GetBlock() const
     return mBlock;
 }
 
-::ULIS::eBlendingMode
+::ul3::eBlendingMode
 FOdysseyImageLayer::GetBlendingMode() const
 {
     return mBlendingMode;
 }
 
 void
-FOdysseyImageLayer::SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode )
+FOdysseyImageLayer::SetBlendingMode( ::ul3::eBlendingMode iBlendingMode )
 {
     mBlendingMode = iBlendingMode;
 }
@@ -61,12 +61,12 @@ FOdysseyImageLayer::SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode )
 void
 FOdysseyImageLayer::SetBlendingMode( FText iBlendingMode )
 {
-    for( uint8 i = 0; i < (int)::ULIS::eBlendingMode::kNumBlendingModes; ++i )
+    for( uint8 i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
     {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[i] ) );
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) );
         if( iBlendingMode.EqualTo( entry ) )
         {
-            SetBlendingMode( static_cast<::ULIS::eBlendingMode>( i ) );
+            SetBlendingMode( static_cast<::ul3::eBlendingMode>( i ) );
             return;
         }
     }
@@ -75,7 +75,7 @@ FOdysseyImageLayer::SetBlendingMode( FText iBlendingMode )
 FText
 FOdysseyImageLayer::GetBlendingModeAsText() const
 {
-    return FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
+    return FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
 }
 
 float

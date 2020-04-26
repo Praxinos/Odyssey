@@ -29,7 +29,7 @@ IOdysseyChannelSlider::Init()
     cursor_t = 0;
     cursor_pos = FVector2D( 0, 0 );
     cursor_size = FVector2D( 1, 1 );
-    mColor = ::ULIS::CColor( 0, 0, 0 );
+    mColor = ::ul3::CColor( 0, 0, 0 );
     bMarkedAsInvalid = false;
 }
 
@@ -79,30 +79,30 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {
-    ::ULIS::FClearFillContext::Fill( surface->Block()->GetIBlock(), ::ULIS::CColor::FromRGB( 50, 50, 50 ), ::ULIS::FPerformanceOptions(), false );
+    ::ul3::FClearFillContext::Fill( surface->Block()->GetBlock(), ::ul3::CColor::FromRGB( 50, 50, 50 ), ::ul3::FPerformanceOptions(), false );
 
     int range = InternalSize.X - 2;
     for( int x = 1; x < InternalSize.X - 2; ++x )
     {
         float t = float( x ) / float( range );
-        ::ULIS::CColor res = GetColorForProportion( t ).ToRGB();
+        ::ul3::CColor res = GetColorForProportion( t ).ToRGB();
         for( int y = 1; y < InternalSize.Y - 1; ++y )
         {
-            surface->Block()->GetIBlock()->SetPixelColor( x, y, res );
+            surface->Block()->GetBlock()->SetPixelColor( x, y, res );
         }
     }
     surface->Invalidate();
 
-    ::ULIS::FPainterContext::DrawRectangle( cursor_surface->Block()->GetIBlock()
-                                          , ::ULIS::FPoint( 0, 0 )
-                                          , ::ULIS::FPoint( cursor_surface->Width(), cursor_surface->Height() )
-                                          , ::ULIS::CColor( 5, 5, 5 )
+    ::ul3::FPainterContext::DrawRectangle( cursor_surface->Block()->GetBlock()
+                                          , ::ul3::FPoint( 0, 0 )
+                                          , ::ul3::FPoint( cursor_surface->Width(), cursor_surface->Height() )
+                                          , ::ul3::CColor( 5, 5, 5 )
                                           , false );
 
-    ::ULIS::FPainterContext::DrawRectangle( cursor_surface->Block()->GetIBlock()
-                                          , ::ULIS::FPoint( 1, 1 )
-                                          , ::ULIS::FPoint( cursor_surface->Width() - 1, cursor_surface->Height() - 1 )
-                                          , ::ULIS::CColor( 255, 255, 255 )
+    ::ul3::FPainterContext::DrawRectangle( cursor_surface->Block()->GetBlock()
+                                          , ::ul3::FPoint( 1, 1 )
+                                          , ::ul3::FPoint( cursor_surface->Width() - 1, cursor_surface->Height() - 1 )
+                                          , ::ul3::CColor( 255, 255, 255 )
                                           , false );
 
     cursor_surface->Invalidate();
@@ -112,7 +112,7 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Public IOdysseyChannelSlider API
 void
-IOdysseyChannelSlider::SetColor( const ::ULIS::CColor& iColor )
+IOdysseyChannelSlider::SetColor( const ::ul3::CColor& iColor )
 {
     if( mColor == iColor )
         return;
@@ -186,23 +186,23 @@ IOdysseyChannelSlider::ProcessMouseAction( FVector2D iPos )
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Private IOdysseyChannelSlider API
 void
-IOdysseyChannelSlider::SetColor_Imp( const ::ULIS::CColor& iColor )
+IOdysseyChannelSlider::SetColor_Imp( const ::ul3::CColor& iColor )
 {
     mColor = iColor.ToRGB();
 }
 
 
-::ULIS::CColor
+::ul3::CColor
 IOdysseyChannelSlider::GetColorForProportion( float t ) const
 {
-    ::ULIS::CColor result = mColor;
+    ::ul3::CColor result = mColor;
     SetColorForProportion_Imp( result, t );
     return result;
 }
 
 
 void
-IOdysseyChannelSlider::SetColorForProportion_Imp( ::ULIS::CColor& color, float t ) const
+IOdysseyChannelSlider::SetColorForProportion_Imp( ::ul3::CColor& color, float t ) const
 {
     color.SetRedF( t );
 }

@@ -13,7 +13,7 @@ FOdysseyFolderLayer::~FOdysseyFolderLayer()
 
 FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kFolder )
-    , mBlendingMode( ::ULIS::eBlendingMode::kNormal )
+    , mBlendingMode( ::ul3::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
     , mIsOpen( true )
 {
@@ -21,14 +21,14 @@ FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
 
 //---
 
-::ULIS::eBlendingMode
+::ul3::eBlendingMode
 FOdysseyFolderLayer::GetBlendingMode()
 {
     return mBlendingMode;
 }
 
 void
-FOdysseyFolderLayer::SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode )
+FOdysseyFolderLayer::SetBlendingMode( ::ul3::eBlendingMode iBlendingMode )
 {
     mBlendingMode = iBlendingMode;
 }
@@ -36,12 +36,12 @@ FOdysseyFolderLayer::SetBlendingMode( ::ULIS::eBlendingMode iBlendingMode )
 void
 FOdysseyFolderLayer::SetBlendingMode( FText iBlendingMode )
 {
-    for( uint8 i = 0; i < (int)::ULIS::eBlendingMode::kNumBlendingModes; ++i )
+    for( uint8 i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
     {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[i] ) );
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) );
         if( iBlendingMode.EqualTo( entry ) )
         {
-            SetBlendingMode( static_cast<::ULIS::eBlendingMode>( i ) );
+            SetBlendingMode( static_cast<::ul3::eBlendingMode>( i ) );
             return;
         }
     }
@@ -50,7 +50,7 @@ FOdysseyFolderLayer::SetBlendingMode( FText iBlendingMode )
 FText
 FOdysseyFolderLayer::GetBlendingModeAsText() const
 {
-    return FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
+    return FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
 }
 
 float

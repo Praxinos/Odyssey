@@ -13,7 +13,7 @@
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeIdentityMatrix()
 {
-    return  ::ULIS::FTransformContext::GetIdentityMatrix();
+    return  ::ul3::FTransformContext::GetIdentityMatrix();
 }
 
 
@@ -21,7 +21,7 @@ UOdysseyTransformProxyLibrary::MakeIdentityMatrix()
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeTranslationMatrix( float DeltaX, float DeltaY )
 {
-    return  ::ULIS::FTransformContext::GetTranslationMatrix(  DeltaX, DeltaY );
+    return  ::ul3::FTransformContext::GetTranslationMatrix(  DeltaX, DeltaY );
 }
 
 
@@ -29,7 +29,7 @@ UOdysseyTransformProxyLibrary::MakeTranslationMatrix( float DeltaX, float DeltaY
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeRotationMatrix( float Angle )
 {
-    return  ::ULIS::FTransformContext::GetRotationMatrix( ( Angle * 3.14159265359f ) / 180.f );
+    return  ::ul3::FTransformContext::GetRotationMatrix( ( Angle * 3.14159265359f ) / 180.f );
 }
 
 
@@ -37,7 +37,7 @@ UOdysseyTransformProxyLibrary::MakeRotationMatrix( float Angle )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeScaleMatrix( float ScaleX, float ScaleY )
 {
-    return  ::ULIS::FTransformContext::GetScaleMatrix( ScaleX, ScaleY );
+    return  ::ul3::FTransformContext::GetScaleMatrix( ScaleX, ScaleY );
 }
 
 
@@ -45,7 +45,7 @@ UOdysseyTransformProxyLibrary::MakeScaleMatrix( float ScaleX, float ScaleY )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeShearMatrix( float ShearX, float ShearY )
 {
-    return  ::ULIS::FTransformContext::GetShearMatrix( ShearX, ShearY );
+    return  ::ul3::FTransformContext::GetShearMatrix( ShearX, ShearY );
 }
 
 
@@ -68,9 +68,9 @@ UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMat
     FString op = "Transform_" + Transform.ID() + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), Transform.mat );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), Transform.mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), Transform.mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), Transform.mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
@@ -90,10 +90,10 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
     FString op = "Rotate_" + FString::SanitizeFloat( Angle ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ULIS::FTransformContext::GetRotationMatrix( ( Angle * 3.14159265359f ) / 180.f );
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), mat );
+        auto mat = ::ul3::FTransformContext::GetRotationMatrix( ( Angle * 3.14159265359f ) / 180.f );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
@@ -114,10 +114,10 @@ UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Sc
     FString op = "ScaleUniform_" + FString::SanitizeFloat( Scale ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ULIS::FTransformContext::GetScaleMatrix( Scale, Scale );
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), mat );
+        auto mat = ::ul3::FTransformContext::GetScaleMatrix( Scale, Scale );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
@@ -138,10 +138,10 @@ UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX,
     FString op = "Scale_" + FString::SanitizeFloat( ScaleX ) + FString::SanitizeFloat( ScaleY ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ULIS::FTransformContext::GetScaleMatrix( ScaleX, ScaleY );
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), mat );
+        auto mat = ::ul3::FTransformContext::GetScaleMatrix( ScaleX, ScaleY );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
@@ -162,10 +162,10 @@ UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, f
     FString op = "Shear_" + FString::SanitizeFloat( ShearX ) + FString::SanitizeFloat( ShearY ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ULIS::FTransformContext::GetShearMatrix( ShearX, ShearY );
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), mat );
+        auto mat = ::ul3::FTransformContext::GetShearMatrix( ShearX, ShearY );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
@@ -191,10 +191,10 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
         float max = FMath::Max( src_width, src_height );
         float ratio = Size / max;
 
-        auto mat = ::ULIS::FTransformContext::GetScaleMatrix( ratio, ratio );
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), mat );
+        auto mat = ::ul3::FTransformContext::GetScaleMatrix( ratio, ratio );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
@@ -220,10 +220,10 @@ UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, f
         float ratioX = SizeX / src_width;
         float ratioY = SizeY / src_height;
 
-        auto mat = ::ULIS::FTransformContext::GetScaleMatrix( ratioX, ratioY );
-        ::ULIS::FRect box = ::ULIS::FTransformContext::GetTransformPreviewRect( src->GetIBlock(), mat );
+        auto mat = ::ul3::FTransformContext::GetScaleMatrix( ratioX, ratioY );
+        ::ul3::FRect box = ::ul3::FTransformContext::GetTransformPreviewRect( src->GetBlock(), mat );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
-        ::ULIS::FTransformContext::TransformInto( src->GetIBlock(), dst->GetIBlock(), mat, (::ULIS::eResamplingMethod)ResamplingMethod );
+        ::ul3::FTransformContext::TransformInto( src->GetBlock(), dst->GetBlock(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
 
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );

@@ -15,7 +15,7 @@
 #include "SOdysseyLeafWidget.h"
 #include <ULIS3>
 
-DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::CColor& );
+DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::CColor& );
 
 
 /////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ public:
 
 public:
     // Public Callback API
-    void SetColor( const ::ULIS::CColor& iColor );
+    void SetColor( const ::ul3::CColor& iColor );
     FVector2D GetInternalSize() const;
     FVector2D GetInternalPadding() const;
     bool IsFullyVisible() const;
@@ -138,7 +138,7 @@ private:
     mutable FLinearColor sat_tint;
     mutable FLinearColor lum_tint;
 
-    mutable ::ULIS::CColor colorA;
+    mutable ::ul3::CColor colorA;
 
     mutable bool bMarkedAsInvalidated;
 

@@ -31,9 +31,9 @@ public:
     void               InitFromData( FOdysseyBlock* iData );
     FOdysseyBlock*     GetResultBlock();
     void               ComputeResultBlock();
-    void               ComputeResultBlock( const ::ULIS::FRect& iRect );
-    void               ComputeResultBlockWithTempBuffer( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ULIS::eBlendingMode iMode = ::ULIS::eBlendingMode::kNormal, ::ULIS::eAlphaMode iAlphaMode = ::ULIS::eAlphaMode::kNormal );
-    void               BlendTempBufferOnCurrentBlock( const ::ULIS::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ULIS::eBlendingMode iMode = ::ULIS::eBlendingMode::kNormal, ::ULIS::eAlphaMode iAlphaMode = ::ULIS::eAlphaMode::kNormal );
+    void               ComputeResultBlock( const ::ul3::FRect& iRect );
+    void               ComputeResultBlockWithTempBuffer( const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ul3::eBlendingMode iMode = ::ul3::eBlendingMode::kNormal, ::ul3::eAlphaMode iAlphaMode = ::ul3::eAlphaMode::kNormal );
+    void               BlendTempBufferOnCurrentBlock( const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity = 1.f, ::ul3::eBlendingMode iMode = ::ul3::eBlendingMode::kNormal, ::ul3::eAlphaMode iAlphaMode = ::ul3::eAlphaMode::kNormal );
     int                Width() const;
     int                Height() const;
     FVector2D          Size() const;
@@ -62,7 +62,7 @@ public:
     void                                            FlattenLayer( IOdysseyLayer* iLayerToFlatten );
     void                                            DuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
     void                                            ClearCurrentLayer();
-    void                                            FillCurrentLayerWithColor( const ::ULIS::CColor& iColor );
+    void                                            FillCurrentLayerWithColor( const ::ul3::CColor& iColor );
         
     TArray< TSharedPtr< FText > >                   GetBlendingModesAsText();
             
@@ -140,7 +140,7 @@ private:
     
     //Content is: X of the tile, Y of the tile, X size of the tile, Y size of the tile, PixelData, these 5 for each tile.
     TArray<uint8> mData;
-    ::ULIS::IBlock* mTileData;
+    ::ul3::IBlock* mTileData;
     FString mUndoPath;
     FString mRedoPath;
 };

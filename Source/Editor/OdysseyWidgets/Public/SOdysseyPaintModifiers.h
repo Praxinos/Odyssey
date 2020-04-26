@@ -43,8 +43,8 @@ public:
     void  SetSize( int32 iValue );
     void  SetOpacity( int32 iValue );
     void  SetFlow( int32 iValue );
-    void  SetBlendingMode( ::ULIS::eBlendingMode iValue );
-    void  SetAlphaMode( ::ULIS::eAlphaMode iValue );
+    void  SetBlendingMode( ::ul3::eBlendingMode iValue );
+    void  SetAlphaMode( ::ul3::eAlphaMode iValue );
 
 private:
     // Private Callbacks
@@ -81,12 +81,12 @@ private:
     TSharedPtr< SSpinBox< int > >   mFlowSpinBox;
 
     TSharedPtr<SComboBox<TSharedPtr<FText>>>    mBlendingBox;
-    ::ULIS::eBlendingMode                       mCurrentBlendingMode;
+    ::ul3::eBlendingMode                       mCurrentBlendingMode;
     TArray< TSharedPtr<FText> >                 mBlendingModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mBlendingModeComboBox;
 
     TSharedPtr<SComboBox<TSharedPtr<FText>>>    mAlphaBox;
-    ::ULIS::eAlphaMode                          mCurrentAlphaMode;
+    ::ul3::eAlphaMode                          mCurrentAlphaMode;
     TArray< TSharedPtr<FText> >                 mAlphaModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mAlphaModeComboBox;
 

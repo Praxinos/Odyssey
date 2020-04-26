@@ -39,7 +39,7 @@ public:
 
 public:
     // Public Callbacks
-    void SetColor( const ::ULIS::CColor& iColor );
+    void SetColor( const ::ul3::CColor& iColor );
 
 private:
     // Private Callbacks
@@ -55,7 +55,7 @@ private:
     FReply HexBoxOnKeyChar( const FGeometry&, const FCharacterEvent& iEvent ) const;
     void HexBoxOnTextChanged( const FText& iText );
     void HexBoxOnTextCommited( const FText&, ETextCommit::Type );
-    void HandleWheelColorChangedCallback( const ::ULIS::CColor& iColor );
+    void HandleWheelColorChangedCallback( const ::ul3::CColor& iColor );
 
 private:
     // Private data members

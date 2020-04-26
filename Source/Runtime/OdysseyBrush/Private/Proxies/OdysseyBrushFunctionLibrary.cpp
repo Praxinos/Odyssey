@@ -28,27 +28,27 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     int center = ( diameter / 2 );
     int radius = center - 2;
     FOdysseyBlock round( diameter, diameter );
-    ::ULIS::CColor color = brush->GetState().color;
+    ::ul3::CColor color = brush->GetState().color;
     color.SetAlphaF( brush->GetState().flow_modifier );
-    ::ULIS::FPainterContext::DrawCircleAndres( round.GetIBlock(), ::ULIS::FPoint( center, center ), radius, color, true );
-    ::ULIS::FRect invalidRect;
+    ::ul3::FPainterContext::DrawCircleAndres( round.GetBlock(), ::ul3::FPoint( center, center ), radius, color, true );
+    ::ul3::FRect invalidRect;
     invalidRect.x = brush->GetX() - radius;
     invalidRect.y = brush->GetY() - radius;
     invalidRect.w = diameter;
     invalidRect.h = diameter;
-    ::ULIS::FBlendingContext::Blend( round.GetIBlock()
-                                   , brush->GetState().target_temp_buffer->GetIBlock()
+    ::ul3::FBlendingContext::Blend( round.GetBlock()
+                                   , brush->GetState().target_temp_buffer->GetBlock()
                                    , invalidRect.x
                                    , invalidRect.y
-                                   , ::ULIS::eBlendingMode::kNormal
-                                   , ::ULIS::eAlphaMode::kNormal
+                                   , ::ul3::eBlendingMode::kNormal
+                                   , ::ul3::eAlphaMode::kNormal
                                    , 1.f );
     brush->PushInvalidRect( invalidRect );
 }
 
 
 void
-ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY, ::ULIS::FRect* oRect )
+ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY, ::ul3::FRect* oRect )
 {
     int width = iBlock->Width();
     int height = iBlock->Height();
@@ -147,7 +147,7 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
     int height2 = height / 2;
 
     FVector2D computedOffset = Pivot.OffsetMode == EPivotOffsetMode::kAbsolute ? Pivot.Offset : Pivot.Offset * FVector2D( width, height );
-    ::ULIS::FRect invalidRect;
+    ::ul3::FRect invalidRect;
 
     invalidRect.x = X;
     invalidRect.y = Y;
@@ -225,15 +225,15 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
     */
 
     FOdysseyBlock* block = Sample.m;
-    ::ULIS::FRect invalidRect;
+    ::ul3::FRect invalidRect;
     ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
-    ::ULIS::FBlendingContext::Blend( block->GetIBlock()
-                                   , brush->GetState().target_temp_buffer->GetIBlock()
+    ::ul3::FBlendingContext::Blend( block->GetBlock()
+                                   , brush->GetState().target_temp_buffer->GetBlock()
                                    , invalidRect.x
                                    , invalidRect.y
-                                   , ::ULIS::eBlendingMode::kNormal
-                                   , ::ULIS::eAlphaMode::kNormal
+                                   , ::ul3::eBlendingMode::kNormal
+                                   , ::ul3::eAlphaMode::kNormal
                                    , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }
@@ -247,15 +247,15 @@ UOdysseyBrushFunctionLibrary::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pi
     ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN
 
     FOdysseyBlock* block = Sample.m;
-    ::ULIS::FRect invalidRect;
+    ::ul3::FRect invalidRect;
     ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
-    ::ULIS::FBlendingContext::Blend( block->GetIBlock()
-                                   , brush->GetState().target_temp_buffer->GetIBlock()
+    ::ul3::FBlendingContext::Blend( block->GetBlock()
+                                   , brush->GetState().target_temp_buffer->GetBlock()
                                    , invalidRect.x
                                    , invalidRect.y
-                                   , (::ULIS::eBlendingMode)BlendingMode
-                                   , (::ULIS::eAlphaMode)AlphaMode
+                                   , (::ul3::eBlendingMode)BlendingMode
+                                   , (::ul3::eAlphaMode)AlphaMode
                                    , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }

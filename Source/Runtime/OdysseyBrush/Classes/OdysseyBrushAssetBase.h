@@ -26,12 +26,12 @@ struct  FOdysseyBrushState
 {
     FOdysseyBlock*                          target_temp_buffer;
     FOdysseyStrokePoint                     point;
-    ::ULIS::CColor                          color;
+    ::ul3::CColor                          color;
     float                                   size_modifier;
     float                                   opacity_modifier;
     float                                   flow_modifier;
-    ::ULIS::eBlendingMode                   blendingMode_modifier;
-    ::ULIS::eAlphaMode                      alphaMode_modifier;
+    ::ul3::eBlendingMode                   blendingMode_modifier;
+    ::ul3::eAlphaMode                      alphaMode_modifier;
     float                                   step;
     float                                   smoothing_strength;
     int                                     currentPointIndex;
@@ -74,8 +74,8 @@ public:
 public:
     // Public C++ API
     FOdysseyBrushState&             GetState();
-    const TArray< ::ULIS::FRect >&  GetInvalidRects() const;
-    void                            PushInvalidRect( const  ::ULIS::FRect& iRect );
+    const TArray< ::ul3::FRect >&  GetInvalidRects() const;
+    void                            PushInvalidRect( const  ::ul3::FRect& iRect );
     void                            ClearInvalidRects();
 
     bool                            KeyExistsInPool(    ECacheLevel iLevel, const  FString&  iKey )  const;
@@ -270,7 +270,7 @@ public:
 private:
     // Private Members Data
     FOdysseyBrushState                      state;
-    TArray< ::ULIS::FRect >                 invalid_rects;
+    TArray< ::ul3::FRect >                 invalid_rects;
     TArray< FOdysseyBrushPoolCache >        pools;
 
 public:

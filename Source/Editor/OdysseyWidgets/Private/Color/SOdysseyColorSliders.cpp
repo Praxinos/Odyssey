@@ -66,7 +66,7 @@ SOdysseyColorSliders::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
 void
-SOdysseyColorSliders::SetColor( const ::ULIS::CColor& iColor )
+SOdysseyColorSliders::SetColor( const ::ul3::CColor& iColor )
 {
     for( int i = 0; i < sliders_options.Num(); ++i )
     {
@@ -141,7 +141,7 @@ SOdysseyColorSliders::GenerateContents()
 
 
 void
-SOdysseyColorSliders::HandleColorChanged( const ::ULIS::CColor& iColor )
+SOdysseyColorSliders::HandleColorChanged( const ::ul3::CColor& iColor )
 {
     for( int i = 0; i < sliders_options.Num(); ++i )
     {

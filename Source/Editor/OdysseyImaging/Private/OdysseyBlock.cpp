@@ -9,20 +9,18 @@
 uint32 ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
 {
     uint32 ret = 0;
-    switch( iFormat ) 
-    {
-        case TSF_Invalid:   ret = 0;                                                        break;
-        case TSF_G8:        ret = ::ULIS::Format::Format_uint8GnoAlphaGtypeLimits;          break;
-        case TSF_BGRA8:     ret = ::ULIS::Format::Format_uint8RGBhasAlphaBGRAtypeLimits;    break;
-        case TSF_BGRE8:     ret = ::ULIS::Format::Format_uint8RGBnoAlphaBGRtypeLimits;      break;
-        case TSF_RGBA16:    ret = ::ULIS::Format::Format_uint16RGBhasAlphaRGBAtypeLimits;   break;
-        case TSF_RGBA16F:   ret = ::ULIS::Format::Format_floatRGBhasAlphaRGBAnormalized;    break;
-        case TSF_RGBA8:     ret = ::ULIS::Format::Format_uint8RGBhasAlphaRGBAtypeLimits;    break;
-        case TSF_RGBE8:     ret = ::ULIS::Format::Format_uint8RGBnoAlphaRGBtypeLimits;      break;
-        case TSF_MAX:       ret = 0;                                                        break;
-        default:            ret = 0;                                                        break;
+    switch( iFormat ) {
+        case TSF_Invalid:   ret = 0;                    break;
+        case TSF_G8:        ret = ULIS3_FORMAT_G8;      break;
+        case TSF_BGRA8:     ret = ULIS3_FORMAT_BGRA8;   break;
+        case TSF_BGRE8:     ret = ULIS3_FORMAT_BGR8;    break;
+        case TSF_RGBA16:    ret = ULIS3_FORMAT_RGBA16;  break;
+        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBA16;  break;
+        case TSF_RGBA8:     ret = ULIS3_FORMAT_RGBA8;   break;
+        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGB8;    break;
+        case TSF_MAX:       ret = 0;                    break;
+        default:            ret = 0;                    break;
     }
-
     checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
     return ret;
 }
@@ -34,36 +32,32 @@ uint32 ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
 FOdysseyBlock::~FOdysseyBlock()
 {
     mArray.Empty();
-    delete mIBlock;
-    mIBlock = nullptr;
+    delete mBlock;
+    mBlock = nullptr;
 }
 
 FOdysseyBlock::FOdysseyBlock( int                           iWidth
                             , int                           iHeight
                             , ETextureSourceFormat          iFormat
-                            , ::ULIS::fpInvalidateFunction  iInvFunc
+                            , ::ul3::fpInvalidateFunction   iInvFunc
                             , void*                         iInvInfo
                             , bool                          iInitializeData )
     : mUE4TextureSourceFormat( iFormat )
     , mULISFormat( ULISFormatForUE4TextureSourceFormat( mUE4TextureSourceFormat ) )
-    , mIBlock( nullptr )
+    , mBlock( nullptr )
     , mArray()
 {
     // Retrieve spec info from ULIS format hash.
-    ::ULIS::FSpec spec = ::ULIS::FSpecContext::BlockSpecFromHash( mULISFormat );
-    int  bytesPerPixels = spec._pd;
+    ::ul3::FFormatInfo fmt( mULISFormat );
 
     // Allocate and fill array ( primary data rep )
     if( iInitializeData )
-        mArray.SetNumZeroed( iWidth * iHeight * bytesPerPixels );
+        mArray.SetNumZeroed( iWidth * iHeight * fmt.BPP );
     else
-        mArray.SetNumUninitialized( iWidth * iHeight * bytesPerPixels );
+        mArray.SetNumUninitialized( iWidth * iHeight * fmt.BPP );
 
     // Allocate block from external array data
-    mIBlock = ::ULIS::FMakeContext::MakeBlockFromExternalData( iWidth, iHeight, mArray.GetData(), mULISFormat );
-
-    // Setup invalid callback
-    mIBlock->SetInvalidateCB( iInvFunc, iInvInfo );
+    mBlock = new ::ul3::FBlock( mArray.GetData(), iWidth, iHeight, mULISFormat, nullptr, ::ul3::FOnInvalid(  iInvFunc, iInvInfo ), ::ul3::FOnCleanup( &::ul3::OnCleanup_DoNothing ) );
 }
 
 //--------------------------------------------------------------------------------------
@@ -80,28 +74,28 @@ FOdysseyBlock::GetArray() const
     return mArray;
 }
 
-::ULIS::IBlock*
-FOdysseyBlock::GetIBlock()
+::ul3::FBlock*
+FOdysseyBlock::GetBlock()
 {
-    return mIBlock;
+    return mBlock;
 }
 
-const ::ULIS::IBlock*
-FOdysseyBlock::GetIBlock() const
+const ::ul3::FBlock*
+FOdysseyBlock::GetBlock() const
 {
-    return mIBlock;
+    return mBlock;
 }
 
 int
 FOdysseyBlock::Width() const
 {
-    return mIBlock->Width();
+    return mBlock->Width();
 }
 
 int
 FOdysseyBlock::Height() const
 {
-    return mIBlock->Height();
+    return mBlock->Height();
 }
 
 FVector2D
@@ -126,7 +120,7 @@ void
 FOdysseyBlock::Reallocate( int                          iWidth
                          , int                          iHeight
                          , ETextureSourceFormat         iFormat
-                         , ::ULIS::fpInvalidateFunction iInvFunc
+                         , ::ul3::fpInvalidateFunction  iInvFunc
                          , void*                        iInvInfo )
 {
     // Set UE4 Format
@@ -136,20 +130,16 @@ FOdysseyBlock::Reallocate( int                          iWidth
     mULISFormat = ULISFormatForUE4TextureSourceFormat( mUE4TextureSourceFormat );
 
     // Retrieve spec info from ULIS format hash.
-    ::ULIS::FSpec spec = ::ULIS::FSpecContext::BlockSpecFromHash( mULISFormat );
-    int bytesPerPixels = spec._pd;
-
+    ::ul3::FFormatInfo fmt( mULISFormat );
+    
     // Empty and realloc array ( primary data rep )
     // data is not initialized / filled !
-    mArray.Empty( iWidth * iHeight * bytesPerPixels );
+    mArray.Empty( iWidth * iHeight * fmt.BPP );
 
     // Delete existing block
-    delete mIBlock;
+    delete mBlock;
 
     // Allocate block from external array data
-    mIBlock = ::ULIS::FMakeContext::MakeBlockFromExternalData( iWidth, iHeight, mArray.GetData(), mULISFormat );
-
-    // Setup invalid callback
-    mIBlock->SetInvalidateCB( iInvFunc, iInvInfo );
+    mBlock = new ::ul3::FBlock( mArray.GetData(), iWidth, iHeight, mULISFormat, nullptr, ::ul3::FOnInvalid(  iInvFunc, iInvInfo ), ::ul3::FOnCleanup( &::ul3::OnCleanup_DoNothing ) );
 }
 

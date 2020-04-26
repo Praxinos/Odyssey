@@ -18,7 +18,7 @@ public:
     FOdysseyBlock( int                          iWidth
                  , int                          iHeight
                  , ETextureSourceFormat         iFormat     = ETextureSourceFormat::TSF_BGRA8
-                 , ::ULIS::fpInvalidateFunction iInvFunc    = nullptr
+                 , ::ul3::fpInvalidateFunction  iInvFunc    = nullptr
                  , void*                        iInvInfo    = nullptr
                  , bool                         iInitializeData = false );
 
@@ -33,8 +33,8 @@ public:
     // Public API
     TArray64< uint8 >&          GetArray();
     const TArray64< uint8 >&    GetArray() const;
-    ::ULIS::IBlock*             GetIBlock();
-    const ::ULIS::IBlock*       GetIBlock() const;
+    ::ul3::FBlock*              GetBlock();
+    const ::ul3::FBlock*        GetBlock() const;
     int                         Width() const;
     int                         Height() const;
     FVector2D                   Size() const;
@@ -43,14 +43,14 @@ public:
     void                        Reallocate( int                             iWidth
                                           , int                             iHeight
                                           , ETextureSourceFormat            iFormat     = ETextureSourceFormat::TSF_BGRA8
-                                          , ::ULIS::fpInvalidateFunction    iInvFunc    = nullptr
+                                          , ::ul3::fpInvalidateFunction    iInvFunc    = nullptr
                                           , void*                           iInvInfo    = nullptr );
 
 private:
     // Private Data Members
     ETextureSourceFormat    mUE4TextureSourceFormat;
     uint32                  mULISFormat;
-    ::ULIS::IBlock*         mIBlock;
+    ::ul3::FBlock*          mBlock;
     TArray64<uint8>         mArray;
 };
 

@@ -25,7 +25,7 @@ CopyBlockDataIntoUTexture( FOdysseyBlock* iBlock, UTexture2D* iTexture )
             iBlock->Height() == iTexture->GetSizeY()
             , TEXT( "Sizes do not match" ) );
 
-    iTexture->Source.Init( iBlock->Width(), iBlock->Height(), 1, 1, iBlock->GetUE4TextureSourceFormat(), iBlock->GetIBlock()->DataPtr() );
+    iTexture->Source.Init( iBlock->Width(), iBlock->Height(), 1, 1, iBlock->GetUE4TextureSourceFormat(), iBlock->GetBlock()->DataPtr() );
 }
 
 FOdysseyBlock*
@@ -56,7 +56,7 @@ InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture )
 }
 
 void
-InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, const ::ULIS::FRect& iRect )
+InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect )
 {
     checkf( iData, TEXT( "Error" ) );
     checkf( iTexture, TEXT( "Error" ) );
@@ -83,9 +83,9 @@ InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, const ::U
         delete Regions;
     };
 
-    uint32 bpp = iData->GetIBlock()->BytesPerPixel();
-    uint32 pitch = iData->GetIBlock()->BytesPerScanLine();
-    iTexture->UpdateTextureRegions( 0, 1, region, pitch, bpp, iData->GetIBlock()->DataPtr(), dataCleanupFunc );
+    uint32 bpp = iData->GetBlock()->BytesPerPixel();
+    uint32 pitch = iData->GetBlock()->BytesPerScanLine();
+    iTexture->UpdateTextureRegions( 0, 1, region, pitch, bpp, iData->GetBlock()->DataPtr(), dataCleanupFunc );
 }
 
 void
@@ -116,13 +116,13 @@ InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, int x1, i
         delete Regions;
     };
 
-    uint32 bpp = iData->GetIBlock()->BytesPerPixel();
-    uint32 pitch = iData->GetIBlock()->BytesPerScanLine();
-    iTexture->UpdateTextureRegions( 0, 1, region, pitch, bpp, iData->GetIBlock()->DataPtr(), dataCleanupFunc );
+    uint32 bpp = iData->GetBlock()->BytesPerPixel();
+    uint32 pitch = iData->GetBlock()->BytesPerScanLine();
+    iTexture->UpdateTextureRegions( 0, 1, region, pitch, bpp, iData->GetBlock()->DataPtr(), dataCleanupFunc );
 }
 
 void
-InvalidateTextureFromData( ::ULIS::IBlock* iData, UTexture2D* iTexture, const ::ULIS::FRect& iRect )
+InvalidateTextureFromData( ::ul3::IBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect )
 {
     checkf( iData, TEXT( "Error" ) );
     checkf( iTexture, TEXT( "Error" ) );
@@ -154,7 +154,7 @@ InvalidateTextureFromData( ::ULIS::IBlock* iData, UTexture2D* iTexture, const ::
 }
 
 void
-InvalidateSurfaceFromData( ::ULIS::IBlock* iData, FOdysseySurface* iSurface, const ::ULIS::FRect& iRect )
+InvalidateSurfaceFromData( ::ul3::IBlock* iData, FOdysseySurface* iSurface, const ::ul3::FRect& iRect )
 {
     InvalidateTextureFromData( iData, iSurface->Texture(), iRect );
 }
@@ -177,14 +177,14 @@ InvalidateLiveSurfaceCallback( FOdysseyBlock* iData, void* iInfo, int iX1, int i
 }
 
 void
-InvalidateSurfaceCallback( ::ULIS::IBlock* iData, void* iInfo, const ::ULIS::FRect& iRect )
+InvalidateSurfaceCallback( ::ul3::IBlock* iData, void* iInfo, const ::ul3::FRect& iRect )
 {
     FOdysseySurface* surface = static_cast< FOdysseySurface* >( iInfo );
     InvalidateSurfaceFromData( iData, surface, iRect );
 }
 
 void
-InvalidateLiveSurfaceCallback( ::ULIS::IBlock* iData, void* iInfo, const ::ULIS::FRect& iRect )
+InvalidateLiveSurfaceCallback( ::ul3::IBlock* iData, void* iInfo, const ::ul3::FRect& iRect )
 {
     FOdysseyLiveUpdateInfo* liveUpdateInfo = static_cast< FOdysseyLiveUpdateInfo* >( iInfo );
     InvalidateTextureFromData( iData, liveUpdateInfo->main, iRect );
@@ -235,7 +235,7 @@ FOdysseySurface::~FOdysseySurface()
         mTexture = nullptr;
     }
 
-    mBlock->GetIBlock()->SetInvalidateCB( NULL, NULL );
+    mBlock->GetBlock()->SetInvalidateCB( NULL, NULL );
     if( !mIsBorrowedBlock )
     {
         if( mBlock )
@@ -298,7 +298,7 @@ FOdysseySurface::FOdysseySurface( FOdysseyBlock* iBlock )
     mTexture->UpdateResource();
     mTexture->AddToRoot();
 
-    mBlock->GetIBlock()->SetInvalidateCB( &InvalidateSurfaceCallback, static_cast< void* >( this ) );
+    mBlock->GetBlock()->SetInvalidateCB( &InvalidateSurfaceCallback, static_cast< void* >( this ) );
 
     // load texture data from block
     CopyBlockDataIntoUTexture( mBlock, mTexture );
@@ -360,17 +360,17 @@ FOdysseySurface::Height()
 void
 FOdysseySurface::Invalidate()
 {
-    mBlock->GetIBlock()->Invalidate();
+    mBlock->GetBlock()->Invalidate();
 }
 
 void
 FOdysseySurface::Invalidate( int iX1, int iY1, int iX2, int iY2 )
 {
-    mBlock->GetIBlock()->Invalidate( ::ULIS::FRect::FromMinMax( iX1, iY1, iX2, iY2 ) );
+    mBlock->GetBlock()->Invalidate( ::ul3::FRect::FromMinMax( iX1, iY1, iX2, iY2 ) );
 }
 
 void
-FOdysseySurface::Invalidate( const ::ULIS::FRect& iRect )
+FOdysseySurface::Invalidate( const ::ul3::FRect& iRect )
 {
-    mBlock->GetIBlock()->Invalidate( iRect );
+    mBlock->GetBlock()->Invalidate( iRect );
 }

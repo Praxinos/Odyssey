@@ -123,7 +123,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mPaintEngine.SetTextureSourceFormat( mLayerStack->GetTextureSourceFormat() );
     mPaintEngine.SetLayerStack( mLayerStack );
     mPaintEngine.SetBrushInstance( NULL );
-    mPaintEngine.SetColor( ::ULIS::CColor() );
+    mPaintEngine.SetColor( ::ul3::CColor() );
     mPaintEngine.SetSizeModifier( 20.f );
 
     // Setup Surface
@@ -131,7 +131,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mLiveUpdateInfo.main = mDisplaySurface->Texture();
     mLiveUpdateInfo.live = mTexture;
     mLiveUpdateInfo.enabled = false;
-    mDisplaySurface->Block()->GetIBlock()->SetInvalidateCB( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) );
+    mDisplaySurface->Block()->GetBlock()->SetInvalidateCB( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) );
 
     mDisplaySurface->Invalidate();
 
@@ -161,7 +161,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mPerformanceOptionsTab->SetPerformanceOptionLiveUpdate( true );
     
     // Setup Properties with callbacks
-    mColorSelectorTab->SetColor( ::ULIS::CColor( 0, 0, 0 ) );
+    mColorSelectorTab->SetColor( ::ul3::CColor( 0, 0, 0 ) );
 
     mStrokeOptionsTab->SetStrokeStep( 20 );
     mStrokeOptionsTab->SetStrokeAdaptative( true );
@@ -510,7 +510,7 @@ FOdysseyPainterEditorToolkit::SaveAssetAs_Execute()
 {
     /*
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    //::ULIS::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetIBlock(), mTextureContentsBackup->GetIBlock() );
+    //::ul3::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetBlock(), mTextureContentsBackup->GetBlock() );
     InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
     // Invalidate all
     mDisplaySurface->Invalidate();
@@ -866,8 +866,8 @@ FOdysseyPainterEditorToolkit::OnBrushSelected( UOdysseyBrush* iBrush )
         if( overrides.bOverride_Size )          mTopTab->SetSize( overrides.Size );
         if( overrides.bOverride_Opacity )       mTopTab->SetOpacity( overrides.Opacity );
         if( overrides.bOverride_Flow )          mTopTab->SetFlow( overrides.Flow );
-        if( overrides.bOverride_BlendingMode )  mTopTab->SetBlendingMode( ( ::ULIS::eBlendingMode )overrides.BlendingMode );
-        if( overrides.bOverride_AlphaMode )     mTopTab->SetAlphaMode( ( ::ULIS::eAlphaMode )overrides.AlphaMode );
+        if( overrides.bOverride_BlendingMode )  mTopTab->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
+        if( overrides.bOverride_AlphaMode )     mTopTab->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
     }
 }
 
@@ -961,7 +961,7 @@ FOdysseyPainterEditorToolkit::HandleBrushParameterChanged()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Color Handlers
 void
-FOdysseyPainterEditorToolkit::HandleSelectorColorChanged( const ::ULIS::CColor& iColor )
+FOdysseyPainterEditorToolkit::HandleSelectorColorChanged( const ::ul3::CColor& iColor )
 {
     if( mColorSlidersTab )
         mColorSlidersTab->SetColor( iColor );
@@ -970,7 +970,7 @@ FOdysseyPainterEditorToolkit::HandleSelectorColorChanged( const ::ULIS::CColor& 
 }
 
 void
-FOdysseyPainterEditorToolkit::HandleSlidersColorChanged( const ::ULIS::CColor& iColor )
+FOdysseyPainterEditorToolkit::HandleSlidersColorChanged( const ::ul3::CColor& iColor )
 {
     if( mColorSelectorTab )
         mColorSelectorTab->SetColor( iColor );
@@ -1001,13 +1001,13 @@ FOdysseyPainterEditorToolkit::HandleFlowModifierChanged( int32 iValue )
 void
 FOdysseyPainterEditorToolkit::HandleBlendingModeModifierChanged( int32 iValue )
 {
-    mPaintEngine.SetBlendingModeModifier( static_cast<::ULIS::eBlendingMode>( iValue ) );
+    mPaintEngine.SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
 }
 
 void
 FOdysseyPainterEditorToolkit::HandleAlphaModeModifierChanged( int32 iValue )
 {
-    mPaintEngine.SetAlphaModeModifier( static_cast<::ULIS::eAlphaMode>( iValue ) );
+    mPaintEngine.SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>( iValue ) );
 }
 
 //--------------------------------------------------------------------------------------
@@ -1494,7 +1494,7 @@ FOdysseyPainterEditorToolkit::OnCheck()
 }*/
 
 void
-FOdysseyPainterEditorToolkit::SetColor( const ::ULIS::CColor& iColor )
+FOdysseyPainterEditorToolkit::SetColor( const ::ul3::CColor& iColor )
 {
     if( mColorSelectorTab ) 
         mColorSelectorTab->SetColor( iColor );

@@ -17,11 +17,11 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mOnOpacityChangedCallback   = InArgs._OnOpacityChanged;
     mOnFlowChangedCallback      = InArgs._OnFlowChanged;
     mOnBlendingModeChangedCallback = InArgs._OnBlendingModeChanged;
-    mCurrentBlendingMode = ::ULIS::eBlendingMode::kNormal;
+    mCurrentBlendingMode = ::ul3::eBlendingMode::kNormal;
     mBlendingModes = GetBlendingModesAsText();
 
     mOnAlphaModeChangedCallback = InArgs._OnAlphaModeChanged;
-    mCurrentAlphaMode = ::ULIS::eAlphaMode::kNormal;
+    mCurrentAlphaMode = ::ul3::eAlphaMode::kNormal;
     mAlphaModes = GetAlphaModesAsText();
 
     ChildSlot
@@ -262,7 +262,7 @@ SOdysseyPaintModifiers::SetFlow( int32 iValue )
 
 
 void
-SOdysseyPaintModifiers::SetBlendingMode( ::ULIS::eBlendingMode iValue )
+SOdysseyPaintModifiers::SetBlendingMode( ::ul3::eBlendingMode iValue )
 {
     mCurrentBlendingMode = iValue;
     TSharedPtr< FText > sel = MakeShared< FText >( GetBlendingModeAsText() );
@@ -270,7 +270,7 @@ SOdysseyPaintModifiers::SetBlendingMode( ::ULIS::eBlendingMode iValue )
 }
 
 void
-SOdysseyPaintModifiers::SetAlphaMode( ::ULIS::eAlphaMode iValue )
+SOdysseyPaintModifiers::SetAlphaMode( ::ul3::eAlphaMode iValue )
 {
     mCurrentAlphaMode = iValue;
     TSharedPtr< FText > sel = MakeShared< FText >( GetAlphaModeAsText() );
@@ -394,12 +394,12 @@ SOdysseyPaintModifiers::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelecti
     );
 
 
-    for( uint8 i = 0; i < (int)::ULIS::eBlendingMode::kNumBlendingModes; ++i )
+    for( uint8 i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
     {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[ i ] ) );
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[ i ] ) );
         if( NewSelection.Get()->EqualTo( entry ) )
         {
-            mCurrentBlendingMode = static_cast<::ULIS::eBlendingMode>( i );
+            mCurrentBlendingMode = static_cast<::ul3::eBlendingMode>( i );
         }
     }
 
@@ -410,8 +410,8 @@ TArray< TSharedPtr< FText > >
 SOdysseyPaintModifiers::GetBlendingModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    for( int i = 0; i < (int)::ULIS::eBlendingMode::kNumBlendingModes; ++i )
-        array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[i] ) ) ) );
+    for( int i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
+        array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) ) ) );
     return array;
 }
 
@@ -419,7 +419,7 @@ SOdysseyPaintModifiers::GetBlendingModesAsText()
 FText
 SOdysseyPaintModifiers::GetBlendingModeAsText() const
 {
-    return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendingMode[ static_cast< int >( mCurrentBlendingMode ) ] ) );
+    return  FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[ static_cast< int >( mCurrentBlendingMode ) ] ) );
 }
 
 
@@ -457,12 +457,12 @@ SOdysseyPaintModifiers::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection,
     );
 
 
-    for( uint8 i = 0; i < (int)::ULIS::eAlphaMode::kNumAlphaModes; ++i )
+    for( uint8 i = 0; i < (int)::ul3::eAlphaMode::kNumAlphaModes; ++i )
     {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[ i ] ) );
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwAlphaMode[ i ] ) );
         if( NewSelection.Get()->EqualTo( entry ) )
         {
-            mCurrentAlphaMode = static_cast<::ULIS::eAlphaMode>( i );
+            mCurrentAlphaMode = static_cast<::ul3::eAlphaMode>( i );
         }
     }
 
@@ -473,8 +473,8 @@ TArray< TSharedPtr< FText > >
 SOdysseyPaintModifiers::GetAlphaModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    for( int i = 0; i < (int)::ULIS::eAlphaMode::kNumAlphaModes; ++i )
-        array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[i] ) ) ) );
+    for( int i = 0; i < (int)::ul3::eAlphaMode::kNumAlphaModes; ++i )
+        array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwAlphaMode[i] ) ) ) );
     return array;
 }
 
@@ -482,7 +482,7 @@ SOdysseyPaintModifiers::GetAlphaModesAsText()
 FText
 SOdysseyPaintModifiers::GetAlphaModeAsText() const
 {
-    return  FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwAlphaMode[ static_cast< int >( mCurrentAlphaMode ) ] ) );
+    return  FText::FromString( ANSI_TO_TCHAR( ::ul3::kwAlphaMode[ static_cast< int >( mCurrentAlphaMode ) ] ) );
 }
 
 

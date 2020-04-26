@@ -16,7 +16,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor( 255, 0, 0 );
+    col.m = ::ul3::CColor( 255, 0, 0 );
     return  col;
 }
 
@@ -28,7 +28,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromRGB( R, G, B, A );
+    col.m = ::ul3::CColor::FromRGB( R, G, B, A );
     return  col;
 }
 
@@ -38,7 +38,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSV( int H, int S, int V, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromHSV( H, S, V, A );
+    col.m = ::ul3::CColor::FromHSV( H, S, V, A );
     return  col;
 }
 
@@ -48,7 +48,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSL( int H, int S, int L, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromHSL( H, S, L, A );
+    col.m = ::ul3::CColor::FromHSL( H, S, L, A );
     return  col;
 }
 
@@ -58,7 +58,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYK( int C, int M, int Y, int K, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromCMYK( C, M, Y, K );
+    col.m = ::ul3::CColor::FromCMYK( C, M, Y, K );
     return  col;
 }
 
@@ -71,7 +71,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float G, float B, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromRGBF( R, G, B, A );
+    col.m = ::ul3::CColor::FromRGBF( R, G, B, A );
     return  col;
 }
 
@@ -81,7 +81,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSVF( float H, float S, float V, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromHSVF( H, S, V, A );
+    col.m = ::ul3::CColor::FromHSVF( H, S, V, A );
     return  col;
 }
 
@@ -91,7 +91,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSLF( float H, float S, float L, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromHSLF( H, S, L, A );
+    col.m = ::ul3::CColor::FromHSLF( H, S, L, A );
     return  col;
 }
 
@@ -101,7 +101,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYKF( float C, float M, float Y, float K, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ULIS::CColor::FromCMYKF( C, M, Y, K );
+    col.m = ::ul3::CColor::FromCMYKF( C, M, Y, K );
     return  col;
 }
 

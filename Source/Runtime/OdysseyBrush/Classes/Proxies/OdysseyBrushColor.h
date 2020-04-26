@@ -14,9 +14,9 @@ struct ODYSSEYBRUSH_API FOdysseyBrushColor
 {
     GENERATED_BODY()
 
-    FOdysseyBrushColor() : m( ::ULIS::CColor() ) {}
+    FOdysseyBrushColor() : m( ::ul3::CColor() ) {}
 
-    ::ULIS::CColor  m;
+    ::ul3::CColor  m;
 };
 
 /////////////////////////////////////////////////////

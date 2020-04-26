@@ -42,13 +42,13 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mTmpInvalidTileMap( NULL )
     , mStrokeInvalidTileMap( NULL )
 
-    , mColor( ::ULIS::CColor() )
+    , mColor( ::ul3::CColor() )
 
     , mSizeModifier( 20.f )
     , mOpacityModifier( 1.f )
     , mFlowModifier( 1.f )
-    , mBlendingModeModifier( ::ULIS::eBlendingMode::kNormal )
-    , mAlphaModeModifier( ::ULIS::eAlphaMode::kNormal )
+    , mBlendingModeModifier( ::ul3::eBlendingMode::kNormal )
+    , mAlphaModeModifier( ::ul3::eAlphaMode::kNormal )
     , mStepValue( 20.f )
 
     , mInterpolator( NULL )
@@ -70,7 +70,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
 {
     mSmoother = new FOdysseySmoothingAverage();
     mInterpolator = new FOdysseyInterpolationBezier();
-    mTileThreadPool = new ::ULIS::FThreadPool();
+    mTileThreadPool = new ::ul3::FThreadPool();
     int maxThreads = mTileThreadPool->GetMaxWorkers();
     mTileThreadPool->SetNumWorkers( maxThreads - 1 );
 }
@@ -106,11 +106,11 @@ FOdysseyPaintEngine::Tick()
     }
 
     /*
-    ::ULIS::ParallelForPool( (*mTileThreadPool), nTileY
+    ::ul3::ParallelForPool( (*mTileThreadPool), nTileY
                        , [&]( int iLine ) {
                             for( int x = 0; x < nTileX; ++x ) {
                                 if( tmpInvalidTileMap[iLine][x] ) {
-                                    ::ULIS::FRect  tileRect = MAKE_TILE_RECT( x, iLine );
+                                    ::ul3::FRect  tileRect = MAKE_TILE_RECT( x, iLine );
                                     layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier );
                                 }
                             }
@@ -125,7 +125,7 @@ FOdysseyPaintEngine::Tick()
             {
                 mTileThreadPool->ScheduleJob( [this, l, k]()
                 {
-                    ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                    ::ul3::FRect tileRect = MakeTileRect( l, k );
                     mLayerStack->ComputeResultBlockWithTempBuffer( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
                 } );
             }
@@ -151,11 +151,11 @@ FOdysseyPaintEngine::Tick()
                         IsRecordStarted = true;
                     }
 
-                    ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                    ::ul3::FRect tileRect = MakeTileRect( l, k );
                     mLayerStack->mDrawingUndo->SaveData( l, k, tileRect.w, tileRect.h );
                     mTileThreadPool->ScheduleJob( [this, l, k]()
                     {
-                        ::ULIS::FRect tileRect = MakeTileRect( l, k );
+                        ::ul3::FRect tileRect = MakeTileRect( l, k );
                         mLayerStack->BlendTempBufferOnCurrentBlock( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
                     } );
                 }
@@ -168,7 +168,7 @@ FOdysseyPaintEngine::Tick()
         mTileThreadPool->WaitForCompletion();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
-        ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
+        ::ul3::FClearFillContext::Clear( mTempBuffer->GetBlock() );
 
         //mBrushInstance->ExecuteStrokeEnd();
 
@@ -216,7 +216,7 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 }
 
 void
-FOdysseyPaintEngine::SetColor( const ::ULIS::CColor& iColor )
+FOdysseyPaintEngine::SetColor( const ::ul3::CColor& iColor )
 {
     InterruptStrokeAndStampInPlace();
     mColor = iColor;
@@ -259,7 +259,7 @@ FOdysseyPaintEngine::SetFlowModifier( float iValue )
 }
 
 void
-FOdysseyPaintEngine::SetBlendingModeModifier( ::ULIS::eBlendingMode iValue )
+FOdysseyPaintEngine::SetBlendingModeModifier( ::ul3::eBlendingMode iValue )
 {
     InterruptStrokeAndStampInPlace();
 
@@ -269,7 +269,7 @@ FOdysseyPaintEngine::SetBlendingModeModifier( ::ULIS::eBlendingMode iValue )
 }
 
 void
-FOdysseyPaintEngine::SetAlphaModeModifier( ::ULIS::eAlphaMode iValue )
+FOdysseyPaintEngine::SetAlphaModeModifier( ::ul3::eAlphaMode iValue )
 {
     InterruptStrokeAndStampInPlace();
 
@@ -501,7 +501,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
             auto invalid_rects = mBrushInstance->GetInvalidRects();
             for( int j = 0; j < invalid_rects.Num(); ++j )
             {
-                const ::ULIS::FRect& rect = invalid_rects[j];
+                const ::ul3::FRect& rect = invalid_rects[j];
                 float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
                 float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
                 float wf = float( rect.w ) / TILE_SIZE;
@@ -510,7 +510,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
                 int y = yf;
                 int w = FMath::Min( mCountTileX, int( ceil( xf + wf ) ) ) - x;
                 int h = FMath::Min( mCountTileY, int( ceil( yf + hf ) ) ) - y;
-                ::ULIS::FRect tileRect = { x, y, w, h };
+                ::ul3::FRect tileRect = { x, y, w, h };
                 SetMapWithRect( mTmpInvalidTileMap, tileRect, true );
                 SetMapWithRect( mStrokeInvalidTileMap, tileRect, true );
             }
@@ -530,7 +530,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
         auto invalid_rects = brush_instance->GetInvalidRects();
         for( int j = 0; j < invalid_rects.Num(); ++j )
         {
-            const ::ULIS::FRect& rect = invalid_rects[j];
+            const ::ul3::FRect& rect = invalid_rects[j];
             float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
             float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
             float wf = float( rect.w  ) / TILE_SIZE;
@@ -539,7 +539,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
             int y = yf;
             int w = FMath::Min( nTileX, int( ceil( xf + wf ) ) ) - x;
             int h = FMath::Min( nTileY, int( ceil( yf + hf ) ) ) - y;
-            ::ULIS::FRect tileRect = { x, y, w, h };
+            ::ul3::FRect tileRect = { x, y, w, h };
             SET_MAP_WITH_RECT( tmpInvalidTileMap,       tileRect, true );
             SET_MAP_WITH_RECT( strokeInvalidTileMap,    tileRect, true );
         }
@@ -548,17 +548,17 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
     */
 
     /*
-    static ::ULIS::FThreadPool tilePool;
+    static ::ul3::FThreadPool tilePool;
     auto num_workers = tilePool.GetNumWorkers();
     auto max_workers = tilePool.GetMaxWorkers() -1;
     if( num_workers!= max_workers )
         tilePool.SetNumWorkers( max_workers );
 
-    ::ULIS::ParallelForPool( tilePool, nTileY
+    ::ul3::ParallelForPool( tilePool, nTileY
                        , [&]( int iLine ) {
                             for( int x = 0; x < nTileX; ++x ) {
                                 if( tmpInvalidTileMap[iLine][x] ) {
-                                    ::ULIS::FRect  tileRect = MAKE_TILE_RECT( x, iLine );
+                                    ::ul3::FRect  tileRect = MAKE_TILE_RECT( x, iLine );
                                     layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier );
                                 }
                             }
@@ -569,7 +569,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
     for( int k = 0; k < nTileY; ++k ) {
         for( int l = 0; l < nTileX; ++l ) {
             if( tmpInvalidTileMap[k][l] ) {
-                ::ULIS::FRect  tileRect = MAKE_TILE_RECT( l, k );
+                ::ul3::FRect  tileRect = MAKE_TILE_RECT( l, k );
                 layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier );
     } } }
     */
@@ -593,7 +593,7 @@ FOdysseyPaintEngine::AbortStroke()
     mIsPendingEndStroke = false;
     InterruptDelay();
     mLayerStack->ComputeResultBlock();
-    ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
+    ::ul3::FClearFillContext::Clear( mTempBuffer->GetBlock() );
     ClearInvalidTileMap( mTmpInvalidTileMap );
     ClearInvalidTileMap( mStrokeInvalidTileMap );
 
@@ -627,7 +627,7 @@ FOdysseyPaintEngine::InterruptStrokeAndStampInPlace()
 }
 
 
-const ::ULIS::CColor&
+const ::ul3::CColor&
 FOdysseyPaintEngine::GetColor() const
 {
     return mColor;
@@ -650,7 +650,7 @@ FOdysseyPaintEngine::CheckReallocTempBuffer()
     {
         delete mTempBuffer;
         mTempBuffer = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-        ::ULIS::FClearFillContext::Clear( mTempBuffer->GetIBlock() );
+        ::ul3::FClearFillContext::Clear( mTempBuffer->GetBlock() );
         ReallocInvalidMaps();
     }
 }
@@ -744,7 +744,7 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     // Compute max invalid geometry
     for( int j = 0; j < invalid_rects.Num(); ++j )
     {
-        const ::ULIS::FRect& rect = invalid_rects[j];
+        const ::ul3::FRect& rect = invalid_rects[j];
         int x1 = rect.x;
         int y1 = rect.y;
         int x2 = rect.x + rect.w;
@@ -787,17 +787,17 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     mBrushCursorPreviewShift = FVector2D( shiftx, shifty );
 
     // Create Outline kernel for convolution
-    ::ULIS::FKernel edge_kernel( ::ULIS::FSize( 3, 3 )
+    ::ul3::FKernel edge_kernel( ::ul3::FSize( 3, 3 )
                           , {  255,   255,  255
                             ,  255, -4080,  255
                             ,  255,   255,  255 } );
-    ::ULIS::FKernel gaussian_kernel( ::ULIS::FSize( 3, 3 )
+    ::ul3::FKernel gaussian_kernel( ::ul3::FSize( 3, 3 )
                                , {  8, 16,  8
                                ,   16, 32, 16
                                ,    8, 16,  8 } );
     gaussian_kernel.Normalize();
     /*
-    ::ULIS::FKernel kernel( ::ULIS::FSize( 3, 3 )
+    ::ul3::FKernel kernel( ::ul3::FSize( 3, 3 )
                           , {  0,   0,  0
                             ,  0,   1,  0
                             ,  0,   0,  0 } );
@@ -813,15 +813,15 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     // Compute Outline in surface
     FOdysseyBlock* preview_outline = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
     FOdysseyBlock* preview_shadow = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
-    ::ULIS::FFXContext::Convolution( preview_color->GetIBlock(), preview_outline->GetIBlock(), edge_kernel, true );
-    ::ULIS::FClearFillContext::FillPreserveAlpha( preview_outline->GetIBlock(), ::ULIS::CColor( 0, 0, 0 ) );
-    ::ULIS::FFXContext::Convolution( preview_outline->GetIBlock(), preview_shadow->GetIBlock(), gaussian_kernel, true );
-    ::ULIS::FMakeContext::CopyBlockInto( preview_shadow->GetIBlock(), mBrushCursorPreviewSurface->Block()->GetIBlock() );
+    ::ul3::FFXContext::Convolution( preview_color->GetBlock(), preview_outline->GetBlock(), edge_kernel, true );
+    ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::CColor( 0, 0, 0 ) );
+    ::ul3::FFXContext::Convolution( preview_outline->GetBlock(), preview_shadow->GetBlock(), gaussian_kernel, true );
+    ::ul3::FMakeContext::CopyBlockInto( preview_shadow->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock() );
 
-    ::ULIS::FClearFillContext::FillPreserveAlpha( preview_outline->GetIBlock(), ::ULIS::CColor( 220, 220, 220 ) );
-    ::ULIS::FBlendingContext::Blend( preview_outline->GetIBlock(), mBrushCursorPreviewSurface->Block()->GetIBlock(), 0, 0, ::ULIS::eBlendingMode::kNormal, ::ULIS::eAlphaMode::kNormal, 1.f );
+    ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::CColor( 220, 220, 220 ) );
+    ::ul3::FBlendingContext::Blend( preview_outline->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock(), 0, 0, ::ul3::eBlendingMode::kNormal, ::ul3::eAlphaMode::kNormal, 1.f );
 
-    mBrushCursorPreviewSurface->Block()->GetIBlock()->Invalidate();
+    mBrushCursorPreviewSurface->Block()->GetBlock()->Invalidate();
     mLastBrushCursorComputationTime = current_millis;
 
     delete preview_color;
@@ -872,7 +872,7 @@ FOdysseyPaintEngine::ClearInvalidTileMap( InvalidTileMap ioMap )
     }
 }
 
-::ULIS::FRect
+::ul3::FRect
 FOdysseyPaintEngine::MakeTileRect( int iTileX, int iTileY )
 {
     return { iTileX * TILE_SIZE,
@@ -882,7 +882,7 @@ FOdysseyPaintEngine::MakeTileRect( int iTileX, int iTileY )
 }
 
 void
-FOdysseyPaintEngine::SetMapWithRect( InvalidTileMap ioMap, const ::ULIS::FRect& iRect, bool iValue )
+FOdysseyPaintEngine::SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue )
 {
     for( int k = 0; k < iRect.h; ++k )
     {
