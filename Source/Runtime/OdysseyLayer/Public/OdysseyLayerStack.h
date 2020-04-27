@@ -61,7 +61,7 @@ public:
     ETextureSourceFormat                            GetTextureSourceFormat();
 
     // Overloads for save in archive
-    friend FArchive& operator<<(FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack);
+    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack);
 
     const ::ul3::FHostDeviceInfo&                   GetHostDeviceInfo() const;
     ::ul3::FThreadPool*                             GetThreadPool() const;
@@ -89,6 +89,8 @@ private:
 public:
     FOdysseyDrawingUndo*                            mDrawingUndo;
 };
+
+ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack);
 
 //Serialization of item
 #include "OdysseyLayerStack.inl"

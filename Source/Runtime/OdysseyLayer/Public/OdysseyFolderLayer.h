@@ -34,7 +34,7 @@ public:
     void SetIsOpen( bool iIsOpen );
     
     // Overloads for save in archive
-    friend FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
+    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
 
 private:
     ::ul3::eBlendingMode               mBlendingMode;
@@ -44,5 +44,4 @@ private:
     bool                                mIsOpen;
 };
 
-//Serialization of item
-#include "OdysseyFolderLayer.inl"
+ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );

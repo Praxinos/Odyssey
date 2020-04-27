@@ -116,6 +116,64 @@ FOdysseyImageLayer::CopyPropertiesFrom( const FOdysseyImageLayer &iCopy )
     mIsAlphaLocked = iCopy.IsAlphaLocked();
 }
 
+
+FArchive& 
+operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
+{
+    if(!ioSaveImageLayer)
+        return Ar;
+
+    /*IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
+    Ar << serializable;*/
+    Ar << ioSaveImageLayer->mName;
+    Ar << ioSaveImageLayer->mIsLocked;
+    Ar << ioSaveImageLayer->mIsVisible;
+    Ar << ioSaveImageLayer->mIsAlphaLocked;
+    Ar << ioSaveImageLayer->mBlendingMode;
+    Ar << ioSaveImageLayer->mOpacity;
+
+    if(Ar.IsSaving()) {
+        int width = ioSaveImageLayer->mBlock->Width();
+        int height = ioSaveImageLayer->mBlock->Height();
+
+        Ar << width;
+        Ar << height;
+
+        ::ul3::IBlock* blockLayerData = ::ul3::FMakeContext::CopyBlockRect(ioSaveImageLayer->mBlock->GetBlock(),::ul3::FRect(0,0,ioSaveImageLayer->mBlock->Width(),ioSaveImageLayer->mBlock->Height()));
+        TArray<uint8> layerData = TArray<uint8>();
+        layerData.AddUninitialized(blockLayerData->BytesTotal());
+        FMemory::Memcpy(layerData.GetData(),blockLayerData->DataPtr(),blockLayerData->BytesTotal());
+        delete blockLayerData;
+
+        Ar << layerData;
+    } else if(Ar.IsLoading())
+    {
+        int width;
+        int height;
+
+        // Why is it BGRA8 ? Can we load / save images with other formats ?
+        ETextureSourceFormat textureFormat = ETextureSourceFormat::TSF_BGRA8;
+
+        Ar << width;
+        Ar << height;
+
+        check(!ioSaveImageLayer->mBlock);
+        ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height,textureFormat);
+        ::ul3::FClearFillContext::Clear(ioSaveImageLayer->mBlock->GetBlock());
+
+        TArray< uint8 > layerData = TArray< uint8 >();
+        layerData.AddUninitialized(ioSaveImageLayer->mBlock->GetBlock()->BytesTotal());
+
+        Ar << layerData;
+
+        // What is this ? A copy ? But layerData is uninitialized data ?
+        for(int j = 0; j < layerData.Num(); j++) {
+            *(ioSaveImageLayer->mBlock->GetBlock()->DataPtr() + j) = layerData[j];
+        }
+    }
+    return Ar;
+}
+
 //---
 
 #undef LOCTEXT_NAMESPACE

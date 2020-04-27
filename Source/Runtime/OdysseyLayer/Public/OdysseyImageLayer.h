@@ -38,7 +38,7 @@ public:
     void  SetIsAlphaLocked(bool iIsAlphaLocked);
 
     // Overloads for save in archive
-    friend FArchive& operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer);
+    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer);
 
 public:
     void CopyPropertiesFrom(const FOdysseyImageLayer &iCopy); // TODO: replace it by a Clone()/copy-ctor/...
@@ -51,5 +51,4 @@ private:
     bool                    mIsAlphaLocked;
 };
 
-//Serialization of item
-#include "OdysseyImageLayer.inl"
+ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer);

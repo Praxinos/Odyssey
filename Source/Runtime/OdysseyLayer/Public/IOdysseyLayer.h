@@ -44,7 +44,7 @@ public:
     const FOdysseyLayerStack* GetParentStack() const;
 
     // Overloads for save in archive
-    friend FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
+    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
 
 protected:
     FName         mName;
@@ -54,46 +54,4 @@ protected:
     const FOdysseyLayerStack* mParentStack;
 };
 
-
-#include "OdysseyImageLayer.h"
-#include "OdysseyFolderLayer.h"
-inline FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveLayer )
-{
-    if(!ioSaveLayer) return Ar;
-
-    if( Ar.IsSaving() )
-    {
-        if(!(*ioSaveLayer)) return Ar; //We ignore the root, which is always NULL
-
-        Ar << (*ioSaveLayer)->mType;
-
-        if( (*ioSaveLayer)->GetType() == IOdysseyLayer::eType::kImage )
-        {
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> (*ioSaveLayer);
-            Ar << imageLayer;
-        }
-        else if( (*ioSaveLayer)->GetType() == IOdysseyLayer::eType::kFolder )
-        {
-            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*> (*ioSaveLayer);
-            Ar << folderLayer;
-        }
-    }
-    else if( Ar.IsLoading() )
-    {
-        IOdysseyLayer::eType layerType;
-        Ar << layerType;
-        
-        if( layerType == IOdysseyLayer::eType::kImage )
-        {
-            (*ioSaveLayer) = new FOdysseyImageLayer(FName(), NULL );
-            Ar << static_cast<FOdysseyImageLayer*>(*ioSaveLayer);
-        }
-        else if( layerType == IOdysseyLayer::eType::kFolder )
-        {
-            (*ioSaveLayer) = new FOdysseyFolderLayer( FName() );
-            Ar << static_cast<FOdysseyFolderLayer*>(*ioSaveLayer);
-        }
-    }
-
-    return Ar;
-}
+ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );

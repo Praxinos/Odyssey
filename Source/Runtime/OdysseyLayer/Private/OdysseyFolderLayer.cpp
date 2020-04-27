@@ -80,6 +80,31 @@ FOdysseyFolderLayer::SetIsOpen( bool iIsOpen )
     mIsOpen = iIsOpen;
 }
 
+
+
+FArchive& 
+operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer )
+{
+    if(!ioSaveFolderLayer) return Ar;
+    
+    /*IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
+    Ar << serializable;*/
+ 
+    Ar << ioSaveFolderLayer->mName;
+    
+    Ar << ioSaveFolderLayer->mIsLocked;
+    
+    Ar << ioSaveFolderLayer->mIsVisible;
+        
+    Ar << ioSaveFolderLayer->mBlendingMode;
+    
+    Ar << ioSaveFolderLayer->mIsOpen;
+    
+    Ar << ioSaveFolderLayer->mOpacity;
+    
+    return Ar;
+}
+
 //---
 
 #undef LOCTEXT_NAMESPACE
