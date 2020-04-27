@@ -9,19 +9,18 @@
 #include "IOdysseyLayer.h"
 #include <ULIS3>
 
-
 class FOdysseyBlock;
 
 /**
  * Implements a layer which contains an image
  */
-class ODYSSEYLAYER_API FOdysseyImageLayer : public IOdysseyLayer
+class ODYSSEYLAYER_API FOdysseyImageLayer: public IOdysseyLayer
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyImageLayer();
-    FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat );
-    FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock );
+    FOdysseyImageLayer(const FName& iName,FVector2D iSize,ETextureSourceFormat iTextureSourceFormat);
+    FOdysseyImageLayer(const FName& iName,FOdysseyBlock* iBlock);
 
 public:
     // Public API
@@ -29,25 +28,25 @@ public:
 
     ::ul3::eBlendingMode GetBlendingMode() const;
     FText                 GetBlendingModeAsText() const;
-    void                  SetBlendingMode( ::ul3::eBlendingMode iBlendingMode );
-    void                  SetBlendingMode( FText iBlendingMode );
+    void                  SetBlendingMode(::ul3::eBlendingMode iBlendingMode);
+    void                  SetBlendingMode(FText iBlendingMode);
 
     float GetOpacity() const;
-    void  SetOpacity( float iOpacity );
-    
+    void  SetOpacity(float iOpacity);
+
     bool  IsAlphaLocked() const;
-    void  SetIsAlphaLocked( bool iIsAlphaLocked );
-    
+    void  SetIsAlphaLocked(bool iIsAlphaLocked);
+
     // Overloads for save in archive
-    friend FArchive& operator<<(FArchive &Ar, FOdysseyImageLayer* ioSaveImageLayer );
+    friend FArchive& operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer);
 
 public:
-    void CopyPropertiesFrom( const FOdysseyImageLayer &iCopy ); // TODO: replace it by a Clone()/copy-ctor/...
+    void CopyPropertiesFrom(const FOdysseyImageLayer &iCopy); // TODO: replace it by a Clone()/copy-ctor/...
 
 private:
     // Private Data Members
     FOdysseyBlock*          mBlock;
-    ::ul3::eBlendingMode   mBlendingMode;
+    ::ul3::eBlendingMode    mBlendingMode;
     float                   mOpacity;
     bool                    mIsAlphaLocked;
 };

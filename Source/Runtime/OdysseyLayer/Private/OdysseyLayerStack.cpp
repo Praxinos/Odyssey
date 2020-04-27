@@ -22,39 +22,39 @@ FOdysseyLayerStack::~FOdysseyLayerStack()
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack()
-    //: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
-    : mResultBlock( NULL )
-    , mTempBlock( NULL )
-    , mLayers( new FOdysseyNTree<IOdysseyLayer*>(NULL))
-    , mCurrentLayer( mLayers )
-    , mWidth( -1 )
-    , mHeight( -1 )
-    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
-    , mIsInitialized( false )
+//: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    : mResultBlock(NULL)
+    ,mTempBlock(NULL)
+    ,mLayers(new FOdysseyNTree<IOdysseyLayer*>(NULL))
+    ,mCurrentLayer(mLayers)
+    ,mWidth(-1)
+    ,mHeight(-1)
+    ,mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
+    ,mIsInitialized(false)
 {
 }
 
-FOdysseyLayerStack::FOdysseyLayerStack( int iWidth, int iHeight )
-    //: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
-    : mResultBlock( NULL )
-    , mTempBlock( NULL )
-    , mLayers( new FOdysseyNTree<IOdysseyLayer*>(NULL) )
-    , mCurrentLayer( mLayers )
-    , mWidth( iWidth )
-    , mHeight( iHeight )
-    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
-    , mIsInitialized( false )
+FOdysseyLayerStack::FOdysseyLayerStack(int iWidth,int iHeight)
+//: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    : mResultBlock(NULL)
+    ,mTempBlock(NULL)
+    ,mLayers(new FOdysseyNTree<IOdysseyLayer*>(NULL))
+    ,mCurrentLayer(mLayers)
+    ,mWidth(iWidth)
+    ,mHeight(iHeight)
+    ,mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
+    ,mIsInitialized(false)
 {
-    Init( mWidth, mHeight );
+    Init(mWidth,mHeight);
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 
 void
-FOdysseyLayerStack::Init( int iWidth, int iHeight )
+FOdysseyLayerStack::Init(int iWidth,int iHeight)
 {
-    if( mIsInitialized )
+    if(mIsInitialized)
         return;
 
     mWidth = iWidth;
@@ -63,23 +63,23 @@ FOdysseyLayerStack::Init( int iWidth, int iHeight )
     mIsInitialized = true;
 
     InitResultAndTempBlock();
-    
+
     //Is not 0 if it comes from an existing OdysseyTexture
-    if( mLayers->GetNodes()->Num() == 0 )
-        AddImageLayer( mLayers );
-    
+    if(mLayers->GetNodes()->Num() == 0)
+        AddImageLayer(mLayers);
+
     mCurrentLayer = mLayers->GetNodes()->GetData()[0];
-    
+
     mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
 
 void
-FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
+FOdysseyLayerStack::InitFromData(FOdysseyBlock* iData)
 {
-    if( mIsInitialized )
+    if(mIsInitialized)
         return;
 
-    checkf( iData, TEXT("Cannot Initialize Layer Stack from NULL data") );
+    checkf(iData,TEXT("Cannot Initialize Layer Stack from NULL data"));
 
     mWidth = iData->Width();
     mHeight = iData->Height();
@@ -87,13 +87,13 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
     mIsInitialized = true;
 
     InitResultAndTempBlock();
-    
+
     //Is not 0 if it comes from an existing OdysseyTexture
-    if( mLayers->GetNodes()->Num() == 0 )
-        AddImageLayerFromData( iData, mLayers );
-    
+    if(mLayers->GetNodes()->Num() == 0)
+        AddImageLayerFromData(iData,mLayers);
+
     mCurrentLayer = mLayers->GetNodes()->GetData()[0];
-    
+
     mDrawingUndo = new FOdysseyDrawingUndo(this);
 }
 
@@ -108,277 +108,265 @@ FOdysseyLayerStack::ComputeResultBlock()
 {
     ::ul3::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
-    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
-    ::ul3::FClearFillContext::Clear( mResultBlock->GetBlock(), performanceOptions, false );
-    
+    ::ul3::FRect canvasRect = ::ul3::FRect(0,0,mWidth,mHeight);
+    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock(),performanceOptions,false);
+
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* >();
-    
-    for( int i = layers.Num() - 1; i >= 0 ; i-- )
+    mLayers->DepthFirstSearchTree(&layers,false);
+
+    TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* >();
+
+    for(int i = layers.Num() - 1; i >= 0 ; i--)
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
+        if(type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible())
         {
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layers[i]);
             FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
             FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
-            
-            if( parentNode->GetNodeContent() != NULL ) //This means the imageLayer is inside a folder
+
+            if(parentNode->GetNodeContent() != NULL) //This means the imageLayer is inside a folder
             {
                 bool visible = true;
-                while( parentNode->GetNodeContent() != NULL )
+                while(parentNode->GetNodeContent() != NULL)
                 {
                     //If a folder above isn't visible, we don't add this image layer to the result block
-                    if( !parentNode->GetNodeContent()->IsVisible() )
+                    if(!parentNode->GetNodeContent()->IsVisible())
                         visible = false;
-                    
+
                     parentNode = parentNode->GetParent();
                 }
-                if( visible )
+                if(visible)
                 {
-                    if( folderBlocks.Contains(imageNode->GetParent() ) )
+                    if(folderBlocks.Contains(imageNode->GetParent()))
                     {
-                        ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), folderBlocks[imageNode->GetParent()]->GetBlock(), canvasRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                    }
-                    else
+                        ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),folderBlocks[imageNode->GetParent()]->GetBlock(),canvasRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+                    } else
                     {
-                        FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-                        ::ul3::FClearFillContext::Clear( block->GetBlock(), performanceOptions, false  );
-                        ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), block->GetBlock(), canvasRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                        
-                        folderBlocks.Add(imageNode->GetParent(), block );
+                        FOdysseyBlock* block = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+                        ::ul3::FClearFillContext::Clear(block->GetBlock(),performanceOptions,false);
+                        ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),block->GetBlock(),canvasRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+
+                        folderBlocks.Add(imageNode->GetParent(),block);
                     }
                 }
-            }
-            else //Image layer is at the root
+            } else //Image layer is at the root
             {
-                ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), mResultBlock->GetBlock(), canvasRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),mResultBlock->GetBlock(),canvasRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
             }
-        }
-        else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() )
+        } else if(type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible())
         {
-            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
-            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(layers[i]);
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>(layers[i]);
 
-            if( folderBlocks.Contains( folderNode ) ) //Time to blend the folder unto the resultBlock
+            if(folderBlocks.Contains(folderNode)) //Time to blend the folder unto the resultBlock
             {
-                ::ul3::FBlendingContext::Blend( folderBlocks[folderNode]->GetBlock(), mResultBlock->GetBlock(), canvasRect, folderLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false  );
+                ::ul3::FBlendingContext::Blend(folderBlocks[folderNode]->GetBlock(),mResultBlock->GetBlock(),canvasRect,folderLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,folderLayer->GetOpacity(),performanceOptions,false);
             }
         }
     }
 
     mResultBlock->GetBlock()->Invalidate();
-    
-    for (auto& elem : folderBlocks)
+
+    for(auto& elem : folderBlocks)
     {
         delete elem.Value;
     }
 }
 
 void
-FOdysseyLayerStack::ComputeResultBlock( const ::ul3::FRect& iRect )
+FOdysseyLayerStack::ComputeResultBlock(const ::ul3::FRect& iRect)
 {
     ::ul3::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
-    ::ul3::FClearFillContext::ClearRect( mResultBlock->GetBlock(), iRect, performanceOptions, false );
-    
+    ::ul3::FClearFillContext::ClearRect(mResultBlock->GetBlock(),iRect,performanceOptions,false);
+
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* >();
-    
-    for( int i = layers.Num() - 1; i >= 0 ; i-- )
+    mLayers->DepthFirstSearchTree(&layers,false);
+
+    TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* >();
+
+    for(int i = layers.Num() - 1; i >= 0 ; i--)
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
+        if(type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible())
         {
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layers[i]);
             FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
             FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
-            
-            if( parentNode->GetNodeContent() != NULL ) //This means the imageLayer is inside a folder
+
+            if(parentNode->GetNodeContent() != NULL) //This means the imageLayer is inside a folder
             {
                 bool visible = true;
-                while( parentNode->GetNodeContent() != NULL )
+                while(parentNode->GetNodeContent() != NULL)
                 {
                     //If a folder above isn't visible, we don't add this image layer to the result block
-                    if( !parentNode->GetNodeContent()->IsVisible() )
+                    if(!parentNode->GetNodeContent()->IsVisible())
                         visible = false;
-                    
+
                     parentNode = parentNode->GetParent();
                 }
-                if( visible )
+                if(visible)
                 {
-                    if( folderBlocks.Contains(imageNode->GetParent() ) )
+                    if(folderBlocks.Contains(imageNode->GetParent()))
                     {
-                        ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), folderBlocks[imageNode->GetParent()]->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false  );
-                    }
-                    else
+                        ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),folderBlocks[imageNode->GetParent()]->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+                    } else
                     {
-                        FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-                        ::ul3::FClearFillContext::Clear( block->GetBlock(), performanceOptions, false  );
-                        ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), block->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false  );
-                        
-                        folderBlocks.Add(imageNode->GetParent(), block );
+                        FOdysseyBlock* block = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+                        ::ul3::FClearFillContext::Clear(block->GetBlock(),performanceOptions,false);
+                        ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),block->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+
+                        folderBlocks.Add(imageNode->GetParent(),block);
                     }
                 }
-            }
-            else //Image layer is at the root
+            } else //Image layer is at the root
             {
-                ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), mResultBlock->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false  );
+                ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),mResultBlock->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
             }
-        }
-        else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() )
+        } else if(type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible())
         {
-            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
-            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(layers[i]);
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>(layers[i]);
 
-            if( folderBlocks.Contains( folderNode ) ) //Time to blend the folder unto the resultBlock
+            if(folderBlocks.Contains(folderNode)) //Time to blend the folder unto the resultBlock
             {
-                ::ul3::FBlendingContext::Blend( folderBlocks[folderNode]->GetBlock(), mResultBlock->GetBlock(), iRect, folderLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false  );
+                ::ul3::FBlendingContext::Blend(folderBlocks[folderNode]->GetBlock(),mResultBlock->GetBlock(),iRect,folderLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,folderLayer->GetOpacity(),performanceOptions,false);
             }
         }
     }
 
     mResultBlock->GetBlock()->Invalidate(iRect);
-    
-    for (auto& elem : folderBlocks)
+
+    for(auto& elem : folderBlocks)
     {
         delete elem.Value;
     }
 }
 
 void
-FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ul3::eBlendingMode iMode, ::ul3::eAlphaMode iAlphaMode )
+FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect,FOdysseyBlock* iTempBuffer,float iOpacity,::ul3::eBlendingMode iMode,::ul3::eAlphaMode iAlphaMode)
 {
     ::ul3::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
-    ::ul3::FClearFillContext::ClearRect( mResultBlock->GetBlock(), iRect, performanceOptions, false );
+    ::ul3::FClearFillContext::ClearRect(mResultBlock->GetBlock(),iRect,performanceOptions,false);
 
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*, FOdysseyBlock* >();
-    
-    for( int i = layers.Num() - 1; i >= 0 ; i-- )
+    mLayers->DepthFirstSearchTree(&layers,false);
+
+    TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* >();
+
+    for(int i = layers.Num() - 1; i >= 0 ; i--)
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
+        if(type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible())
         {
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layers[i]);
             FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
             FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
-            
-            if( parentNode->GetNodeContent() != NULL ) //This means the imageLayer is inside a folder
+
+            if(parentNode->GetNodeContent() != NULL) //This means the imageLayer is inside a folder
             {
                 bool visible = true;
-                while( parentNode->GetNodeContent() != NULL )
+                while(parentNode->GetNodeContent() != NULL)
                 {
                     //If a folder above isn't visible, we don't add this image layer to the result block
-                    if( !parentNode->GetNodeContent()->IsVisible() )
+                    if(!parentNode->GetNodeContent()->IsVisible())
                         visible = false;
-                    
+
                     parentNode = parentNode->GetParent();
                 }
-                if( visible )
+                if(visible)
                 {
-                    if( folderBlocks.Contains(imageNode->GetParent() ) )
+                    if(folderBlocks.Contains(imageNode->GetParent()))
                     {
-                        if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
+                        if(imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer)
                         {
-                            ::ul3::FPoint pos( iRect.x, iRect.y );
-                            ::ul3::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetBlock(), mTempBlock->GetBlock(), iRect, pos, performanceOptions );
-                            ::ul3::FBlendingContext::Blend( iTempBuffer->GetBlock(), mTempBlock->GetBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
-                            ::ul3::FBlendingContext::Blend( mTempBlock->GetBlock(), folderBlocks[imageNode->GetParent()]->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                        }
-                        else
+                            ::ul3::FPoint pos(iRect.x,iRect.y);
+                            ::ul3::FMakeContext::CopyBlockRectInto(imageLayer->GetBlock()->GetBlock(),mTempBlock->GetBlock(),iRect,pos,performanceOptions);
+                            ::ul3::FBlendingContext::Blend(iTempBuffer->GetBlock(),mTempBlock->GetBlock(),iRect,iMode,imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode,iOpacity,performanceOptions,false);
+                            ::ul3::FBlendingContext::Blend(mTempBlock->GetBlock(),folderBlocks[imageNode->GetParent()]->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+                        } else
                         {
-                            ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), folderBlocks[imageNode->GetParent()]->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
+                            ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),folderBlocks[imageNode->GetParent()]->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
                         }
-                    }
-                    else
+                    } else
                     {
-                        if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
+                        if(imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer)
                         {
-                            FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-                            ::ul3::FClearFillContext::Clear( block->GetBlock(), performanceOptions, false  );
-                            
-                            ::ul3::FPoint pos( iRect.x, iRect.y );
-                            ::ul3::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetBlock(), mTempBlock->GetBlock(), iRect, pos, performanceOptions );
-                            ::ul3::FBlendingContext::Blend( iTempBuffer->GetBlock(), mTempBlock->GetBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
-                            ::ul3::FBlendingContext::Blend( mTempBlock->GetBlock(), block->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                            
-                            folderBlocks.Add(imageNode->GetParent(), block );
-                        }
-                        else
-                        {
-                            FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-                            ::ul3::FClearFillContext::Clear( block->GetBlock(), performanceOptions, false );
-                            
-                            ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), block->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                            
-                            folderBlocks.Add(imageNode->GetParent(), block );
-                        }
-                    }
-                }
-            }
-            else //Image layer is at the root
-            {
-                if( imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer )
-                {
-                    ::ul3::FPoint pos( iRect.x, iRect.y );
-                    ::ul3::FMakeContext::CopyBlockRectInto( imageLayer->GetBlock()->GetBlock(), mTempBlock->GetBlock(), iRect, pos, performanceOptions );
-                    ::ul3::FBlendingContext::Blend( iTempBuffer->GetBlock(), mTempBlock->GetBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
-                    ::ul3::FBlendingContext::Blend( mTempBlock->GetBlock(), mResultBlock->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                }
-                else if( imageLayer )
-                {
-                    ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), mResultBlock->GetBlock(), iRect, imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-                }
-            }
-        }
-        else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() )
-        {
-            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
-            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
+                            FOdysseyBlock* block = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+                            ::ul3::FClearFillContext::Clear(block->GetBlock(),performanceOptions,false);
 
-            if( folderBlocks.Contains( folderNode ) ) //Time to blend the folder unto the resultBlock
+                            ::ul3::FPoint pos(iRect.x,iRect.y);
+                            ::ul3::FMakeContext::CopyBlockRectInto(imageLayer->GetBlock()->GetBlock(),mTempBlock->GetBlock(),iRect,pos,performanceOptions);
+                            ::ul3::FBlendingContext::Blend(iTempBuffer->GetBlock(),mTempBlock->GetBlock(),iRect,iMode,imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode,iOpacity,performanceOptions,false);
+                            ::ul3::FBlendingContext::Blend(mTempBlock->GetBlock(),block->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+
+                            folderBlocks.Add(imageNode->GetParent(),block);
+                        } else
+                        {
+                            FOdysseyBlock* block = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+                            ::ul3::FClearFillContext::Clear(block->GetBlock(),performanceOptions,false);
+
+                            ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),block->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+
+                            folderBlocks.Add(imageNode->GetParent(),block);
+                        }
+                    }
+                }
+            } else //Image layer is at the root
             {
-                ::ul3::FBlendingContext::Blend( folderBlocks[folderNode]->GetBlock(), mResultBlock->GetBlock(), iRect, folderLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false );
+                if(imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer)
+                {
+                    ::ul3::FPoint pos(iRect.x,iRect.y);
+                    ::ul3::FMakeContext::CopyBlockRectInto(imageLayer->GetBlock()->GetBlock(),mTempBlock->GetBlock(),iRect,pos,performanceOptions);
+                    ::ul3::FBlendingContext::Blend(iTempBuffer->GetBlock(),mTempBlock->GetBlock(),iRect,iMode,imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode,iOpacity,performanceOptions,false);
+                    ::ul3::FBlendingContext::Blend(mTempBlock->GetBlock(),mResultBlock->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+                } else if(imageLayer)
+                {
+                    ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),mResultBlock->GetBlock(),iRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+                }
+            }
+        } else if(type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible())
+        {
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(layers[i]);
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>(layers[i]);
+
+            if(folderBlocks.Contains(folderNode)) //Time to blend the folder unto the resultBlock
+            {
+                ::ul3::FBlendingContext::Blend(folderBlocks[folderNode]->GetBlock(),mResultBlock->GetBlock(),iRect,folderLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,folderLayer->GetOpacity(),performanceOptions,false);
             }
         }
     }
 
     mResultBlock->GetBlock()->Invalidate(iRect);
-    
-    for (auto& elem : folderBlocks)
+
+    for(auto& elem : folderBlocks)
     {
         delete elem.Value;
     }
 }
 
 void
-FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ul3::eBlendingMode iMode, ::ul3::eAlphaMode iAlphaMode )
+FOdysseyLayerStack::BlendTempBufferOnCurrentBlock(const ::ul3::FRect& iRect,FOdysseyBlock* iTempBuffer,float iOpacity,::ul3::eBlendingMode iMode,::ul3::eAlphaMode iAlphaMode)
 {
     ::ul3::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
-    ::ul3::FClearFillContext::ClearRect( mResultBlock->GetBlock(), iRect, performanceOptions, false );
+    ::ul3::FClearFillContext::ClearRect(mResultBlock->GetBlock(),iRect,performanceOptions,false);
 
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
+    mLayers->DepthFirstSearchTree(&layers,false);
+
     IOdysseyLayer::eType type = mCurrentLayer->GetNodeContent()->GetType();
-    if( type != IOdysseyLayer::eType::kImage || !mCurrentLayer->GetNodeContent()->IsVisible() )
+    if(type != IOdysseyLayer::eType::kImage || !mCurrentLayer->GetNodeContent()->IsVisible())
         return;
 
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mCurrentLayer->GetNodeContent() );
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
 
-    if( imageLayer && iTempBuffer )
-        ::ul3::FBlendingContext::Blend( iTempBuffer->GetBlock(), imageLayer->GetBlock()->GetBlock(), iRect, iMode, imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode, iOpacity, performanceOptions, false );
+    if(imageLayer && iTempBuffer)
+        ::ul3::FBlendingContext::Blend(iTempBuffer->GetBlock(),imageLayer->GetBlock()->GetBlock(),iRect,iMode,imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode,iOpacity,performanceOptions,false);
 
-    ComputeResultBlock( iRect );
+    ComputeResultBlock(iRect);
 }
 
 int
@@ -396,73 +384,73 @@ FOdysseyLayerStack::Height() const
 FVector2D
 FOdysseyLayerStack::Size() const
 {
-    return FVector2D( mWidth, mHeight );
+    return FVector2D(mWidth,mHeight);
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- Public Array Tampon Methods
 
 FOdysseyImageLayer*
-FOdysseyLayerStack::AddImageLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex )
+FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(), FVector2D( mWidth, mHeight ), mTextureSourceFormat );
-    mCurrentLayer = iPosition->AddNode( layer, iAtIndex );
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer(GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
 
 FOdysseyImageLayer*
-FOdysseyLayerStack::AddImageLayer( int iAtIndex )
+FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(), FVector2D( mWidth, mHeight ), mTextureSourceFormat );
-    mCurrentLayer = mLayers->AddNode( layer, iAtIndex );
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer(GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
     return layer;
 }
 
 FOdysseyImageLayer*
-FOdysseyLayerStack::AddImageLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName, int iAtIndex )
+FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IOdysseyLayer* >* iPosition,FName iName,int iAtIndex)
 {
-    assert( iData->GetUE4TextureSourceFormat() == mTextureSourceFormat );
+    assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
 
-    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-    ::ul3::FMakeContext::CopyBlockInto( iData->GetBlock(), explicitCopyResized->GetBlock() );
+    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    ::ul3::FMakeContext::CopyBlockInto(iData->GetBlock(),explicitCopyResized->GetBlock());
 
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( iName.IsNone() ? GetNextLayerName() : iName, explicitCopyResized );
-    iPosition->AddNode( layer, iAtIndex );
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer(iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
+    iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
 
 FOdysseyImageLayer*
-FOdysseyLayerStack::AddImageLayerFromData( FOdysseyBlock* iData, FName iName, int iAtIndex )
+FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int iAtIndex)
 {
-    assert( iData->GetUE4TextureSourceFormat() == mTextureSourceFormat );
+    assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
 
-    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-    ::ul3::FMakeContext::CopyBlockInto( iData->GetBlock(), explicitCopyResized->GetBlock() );
+    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    ::ul3::FMakeContext::CopyBlockInto(iData->GetBlock(),explicitCopyResized->GetBlock());
 
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( iName.IsNone() ? GetNextLayerName() : iName, explicitCopyResized );
-    mCurrentLayer->AddNode( layer, iAtIndex );
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer(iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
+    mCurrentLayer->AddNode(layer,iAtIndex);
     return layer;
 }
 
 FOdysseyFolderLayer*
-FOdysseyLayerStack::AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName, int iAtIndex )
+FOdysseyLayerStack::AddFolderLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,FName iName,int iAtIndex)
 {
-    if( iName == FName() )
+    if(iName == FName())
         iName = GetNextLayerName();
-    
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName );
-    mCurrentLayer = iPosition->AddNode( layer, iAtIndex );
+
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer(iName);
+    mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
 
 FOdysseyFolderLayer*
-FOdysseyLayerStack::AddFolderLayer( FName iName, int iAtIndex )
+FOdysseyLayerStack::AddFolderLayer(FName iName,int iAtIndex)
 {
-    if( iName == FName() )
+    if(iName == FName())
         iName = GetNextLayerName();
-    
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName );
-    mCurrentLayer = mLayers->AddNode( layer, iAtIndex );
+
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer(iName);
+    mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
     return layer;
 }
 
@@ -482,189 +470,187 @@ int
 FOdysseyLayerStack::GetCurrentLayerAsIndex() const
 {
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    for( int i = 0; i < layers.Num(); i++)
+    mLayers->DepthFirstSearchTree(&layers,false);
+
+    for(int i = 0; i < layers.Num(); i++)
     {
-        if( layers[i] == mCurrentLayer->GetNodeContent() )
+        if(layers[i] == mCurrentLayer->GetNodeContent())
             return i;
     }
     return 0;
 }
 
 FOdysseyNTree< IOdysseyLayer* >*
-FOdysseyLayerStack::GetCurrentLayerFromIndex( int iIndex ) const
+FOdysseyLayerStack::GetCurrentLayerFromIndex(int iIndex) const
 {
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    if( iIndex >= layers.Num() || iIndex < 0 )
+    mLayers->DepthFirstSearchTree(&layers,false);
+
+    if(iIndex >= layers.Num() || iIndex < 0)
         return NULL;
-    
-    return mLayers->FindNode( layers[iIndex] );
+
+    return mLayers->FindNode(layers[iIndex]);
 }
 
 void
-FOdysseyLayerStack::SetCurrentLayer( IOdysseyLayer* iLayer  )
+FOdysseyLayerStack::SetCurrentLayer(IOdysseyLayer* iLayer)
 {
-    mCurrentLayer = mLayers->FindNode( iLayer );
+    mCurrentLayer = mLayers->FindNode(iLayer);
 }
- 
+
 void
-FOdysseyLayerStack::SetCurrentLayer( FOdysseyNTree< IOdysseyLayer* >* iLayer )
+FOdysseyLayerStack::SetCurrentLayer(FOdysseyNTree< IOdysseyLayer* >* iLayer)
 {
     mCurrentLayer = iLayer;
 }
 
 void
-FOdysseyLayerStack::DeleteLayer( IOdysseyLayer* iLayerToDelete )
+FOdysseyLayerStack::DeleteLayer(IOdysseyLayer* iLayerToDelete)
 {
-    FOdysseyNTree< IOdysseyLayer* >* node = mLayers->FindNode( iLayerToDelete );
+    FOdysseyNTree< IOdysseyLayer* >* node = mLayers->FindNode(iLayerToDelete);
 
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers );
-    
+    mLayers->DepthFirstSearchTree(&layers);
+
     int indexNewSelectedLayer = -1;
-    for( int i = 0; i < layers.Num(); i++ )
+    for(int i = 0; i < layers.Num(); i++)
     {
-        if( iLayerToDelete == layers[i] )
+        if(iLayerToDelete == layers[i])
             indexNewSelectedLayer = i;
     }
-    
-    mLayers->DeleteNodeIfExist( node );
-    
+
+    mLayers->DeleteNodeIfExist(node);
+
     layers.Empty();
-    mLayers->DepthFirstSearchTree( &layers );
-        
-    if( layers.Num() == 0)
+    mLayers->DepthFirstSearchTree(&layers);
+
+    if(layers.Num() == 0)
         mCurrentLayer = NULL;
-    
-    if( indexNewSelectedLayer < layers.Num() - 1 )
-        mCurrentLayer = mLayers->FindNode( layers[indexNewSelectedLayer] );
+
+    if(indexNewSelectedLayer < layers.Num() - 1)
+        mCurrentLayer = mLayers->FindNode(layers[indexNewSelectedLayer]);
     else
-        mCurrentLayer = mLayers->FindNode( layers.Last() );
+        mCurrentLayer = mLayers->FindNode(layers.Last());
 }
 
-void FOdysseyLayerStack::MergeDownLayer( IOdysseyLayer* iLayerToMergeDown )
+void FOdysseyLayerStack::MergeDownLayer(IOdysseyLayer* iLayerToMergeDown)
 {
     ::ul3::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    ::ul3::FClearFillContext::Clear( mResultBlock->GetBlock(), performanceOptions, false );
-    for( int i = 0; i < layers.Num(); i++ )
-    {
-        if( layers[i] == iLayerToMergeDown && layers[i]->GetType() == IOdysseyLayer::eType::kImage && i != (layers.Num() - 1) && layers[i + 1]->GetType() == IOdysseyLayer::eType::kImage )
-        {
-            FOdysseyImageLayer* imageLayer1 = static_cast<FOdysseyImageLayer*>( layers[i] );
-            FOdysseyImageLayer* imageLayer2 = static_cast<FOdysseyImageLayer*>( layers[i + 1] );
+    mLayers->DepthFirstSearchTree(&layers,false);
 
-            if( imageLayer1 && imageLayer2 )
+    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock(),performanceOptions,false);
+    for(int i = 0; i < layers.Num(); i++)
+    {
+        if(layers[i] == iLayerToMergeDown && layers[i]->GetType() == IOdysseyLayer::eType::kImage && i != (layers.Num() - 1) && layers[i + 1]->GetType() == IOdysseyLayer::eType::kImage)
+        {
+            FOdysseyImageLayer* imageLayer1 = static_cast<FOdysseyImageLayer*>(layers[i]);
+            FOdysseyImageLayer* imageLayer2 = static_cast<FOdysseyImageLayer*>(layers[i + 1]);
+
+            if(imageLayer1 && imageLayer2)
             {
-                ::ul3::FBlendingContext::Blend( imageLayer1->GetBlock()->GetBlock(), imageLayer2->GetBlock()->GetBlock(), ::ul3::FRect( 0, 0, mWidth, mHeight ), imageLayer1->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, 1.f, performanceOptions, false );
+                ::ul3::FBlendingContext::Blend(imageLayer1->GetBlock()->GetBlock(),imageLayer2->GetBlock()->GetBlock(),::ul3::FRect(0,0,mWidth,mHeight),imageLayer1->GetBlendingMode(),::ul3::eAlphaMode::kNormal,1.f,performanceOptions,false);
             }
-            DeleteLayer( layers[i] );
+            DeleteLayer(layers[i]);
             break;
         }
     }
     ComputeResultBlock();
 }
 
-void FOdysseyLayerStack::FlattenLayer( IOdysseyLayer* iLayerToFlatten )
+void FOdysseyLayerStack::FlattenLayer(IOdysseyLayer* iLayerToFlatten)
 {
-    if( iLayerToFlatten->GetType() != IOdysseyLayer::eType::kFolder )
+    if(iLayerToFlatten->GetType() != IOdysseyLayer::eType::kFolder)
         return;
-    
+
     TArray< IOdysseyLayer* > layersToFlatten = TArray<IOdysseyLayer*>();
-    FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( iLayerToFlatten );
+    FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(iLayerToFlatten);
     int indexFolder = folderNode->GetIndexInParent();
-        
-    folderNode->DepthFirstSearchTree( &layersToFlatten, false );
-    
-    AddImageLayerFromData( ComputeBlockOfLayers( folderNode ), folderNode->GetParent(), iLayerToFlatten->GetName(), indexFolder );
-    DeleteLayer( iLayerToFlatten );
+
+    folderNode->DepthFirstSearchTree(&layersToFlatten,false);
+
+    AddImageLayerFromData(ComputeBlockOfLayers(folderNode),folderNode->GetParent(),iLayerToFlatten->GetName(),indexFolder);
+    DeleteLayer(iLayerToFlatten);
 }
 
-void FOdysseyLayerStack::DuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
+void FOdysseyLayerStack::DuplicateLayer(IOdysseyLayer* iLayerToDuplicate)
 {
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    FOdysseyNTree<IOdysseyLayer*>* nodeToDuplicate = mLayers->FindNode( iLayerToDuplicate );
-    
-    if( nodeToDuplicate == NULL )
+    mLayers->DepthFirstSearchTree(&layers,false);
+    FOdysseyNTree<IOdysseyLayer*>* nodeToDuplicate = mLayers->FindNode(iLayerToDuplicate);
+
+    if(nodeToDuplicate == NULL)
         return;
-    
-    ::ul3::FClearFillContext::Clear( mResultBlock->GetBlock() );
 
-    if( nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kImage )
+    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock());
+
+    if(nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kImage)
     {
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( nodeToDuplicate->GetNodeContent() );
+        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(nodeToDuplicate->GetNodeContent());
 
-        FOdysseyImageLayer* copiedLayer = AddImageLayerFromData( imageLayer->GetBlock(), nodeToDuplicate->GetParent(), FName( *( imageLayer->GetName().ToString() + FString( "_Copy" ) ) ), nodeToDuplicate->GetIndexInParent() + 1 );
+        FOdysseyImageLayer* copiedLayer = AddImageLayerFromData(imageLayer->GetBlock(),nodeToDuplicate->GetParent(),FName(*(imageLayer->GetName().ToString() + FString("_Copy"))),nodeToDuplicate->GetIndexInParent() + 1);
 
-        copiedLayer->CopyPropertiesFrom( *imageLayer );
-    }
-    else if( nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kFolder )
+        copiedLayer->CopyPropertiesFrom(*imageLayer);
+    } else if(nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kFolder)
     {
         // we need to duplicate the content of the folder as well as the folder
-        FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( nodeToDuplicate->GetNodeContent() );
-        FOdysseyFolderLayer* currentFolderLayer = AddFolderLayer( nodeToDuplicate->GetParent(), FName( *( folderLayer->GetName().ToString() + FString( "_Copy" ) ) ), nodeToDuplicate->GetIndexInParent() + 1 );
-        
-        FOdysseyNTree<IOdysseyLayer*>* currentNode = mLayers->FindNode( currentFolderLayer );
+        FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>(nodeToDuplicate->GetNodeContent());
+        FOdysseyFolderLayer* currentFolderLayer = AddFolderLayer(nodeToDuplicate->GetParent(),FName(*(folderLayer->GetName().ToString() + FString("_Copy"))),nodeToDuplicate->GetIndexInParent() + 1);
+
+        FOdysseyNTree<IOdysseyLayer*>* currentNode = mLayers->FindNode(currentFolderLayer);
         TArray<IOdysseyLayer*> layersInFolder = TArray<IOdysseyLayer*>();
-        nodeToDuplicate->DepthFirstSearchTree( &layersInFolder, false );
+        nodeToDuplicate->DepthFirstSearchTree(&layersInFolder,false);
         TArray<int> indexesFolder = TArray<int>();
-        
-        for( int i = 0; i < layersInFolder.Num(); i++ )
+
+        for(int i = 0; i < layersInFolder.Num(); i++)
         {
-            if( indexesFolder.Num() != 0 )
+            if(indexesFolder.Num() != 0)
             {
-                if( indexesFolder.Last() <= 0 )
+                if(indexesFolder.Last() <= 0)
                 {
                     currentNode = currentNode->GetParent();
                     indexesFolder.Pop();
                 }
                 indexesFolder.Last()--;
             }
-            
-            if( layersInFolder[i]->GetType() == IOdysseyLayer::eType::kImage )
-            {
-                FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layersInFolder[i] );
 
-                FOdysseyImageLayer* copiedLayer = AddImageLayerFromData( imageLayer->GetBlock(), currentNode, FName( *( imageLayer->GetName().ToString() ) ) );
-                copiedLayer->CopyPropertiesFrom( *imageLayer );
-            }
-            else if( layersInFolder[i]->GetType() == IOdysseyLayer::eType::kFolder )
+            if(layersInFolder[i]->GetType() == IOdysseyLayer::eType::kImage)
             {
-                indexesFolder.Add( mLayers->FindNode( layersInFolder[i] )->GetNodes()->Num() );
-                folderLayer = AddFolderLayer( currentNode, layersInFolder[i]->GetName() );
-                currentNode = mLayers->FindNode( folderLayer );
+                FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layersInFolder[i]);
+
+                FOdysseyImageLayer* copiedLayer = AddImageLayerFromData(imageLayer->GetBlock(),currentNode,FName(*(imageLayer->GetName().ToString())));
+                copiedLayer->CopyPropertiesFrom(*imageLayer);
+            } else if(layersInFolder[i]->GetType() == IOdysseyLayer::eType::kFolder)
+            {
+                indexesFolder.Add(mLayers->FindNode(layersInFolder[i])->GetNodes()->Num());
+                folderLayer = AddFolderLayer(currentNode,layersInFolder[i]->GetName());
+                currentNode = mLayers->FindNode(folderLayer);
             }
         }
     }
-    
+
     ComputeResultBlock();
 }
 
 void
 FOdysseyLayerStack::ClearCurrentLayer()
 {
-    if( mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage )
+    if(mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage)
     {
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mCurrentLayer->GetNodeContent() );
-        ::ul3::FClearFillContext::Clear( imageLayer->GetBlock()->GetBlock() );
+        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
+        ::ul3::FClearFillContext::Clear(imageLayer->GetBlock()->GetBlock());
         ComputeResultBlock();
     }
 }
 
 void
-FOdysseyLayerStack::FillCurrentLayerWithColor( const ::ul3::CColor& iColor )
+FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::CColor& iColor)
 {
-    if( mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage )
+    if(mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage)
     {
-        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mCurrentLayer->GetNodeContent() );
-        ::ul3::FClearFillContext::Fill( imageLayer->GetBlock()->GetBlock(), iColor );
+        FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
+        ::ul3::FClearFillContext::Fill(imageLayer->GetBlock()->GetBlock(),iColor);
         ComputeResultBlock();
     }
 }
@@ -673,8 +659,8 @@ TArray< TSharedPtr< FText > >
 FOdysseyLayerStack::GetBlendingModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    for( int i = 0; i < ( int )::ul3::eBlendingMode::kNumBlendingModes; ++i )
-        array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) ) ) );
+    for(int i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i)
+        array.Add(MakeShared< FText >(FText::FromString(ANSI_TO_TCHAR(::ul3::kwBlendingMode[i]))));
 
     return array;
 }
@@ -691,101 +677,88 @@ FName
 FOdysseyLayerStack::GetNextLayerName()
 {
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree( &layers, false );
-    
-    return FName( *( FString( "Layer " ) + FString::FromInt( layers.Num() ) ) );
+    mLayers->DepthFirstSearchTree(&layers,false);
+
+    return FName(*(FString("Layer ") + FString::FromInt(layers.Num())));
 }
 
 void
 FOdysseyLayerStack::InitResultAndTempBlock()
 {
-    if( !mIsInitialized )
+    if(!mIsInitialized)
         return;
 
-    mResultBlock = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-    mTempBlock = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-    ::ul3::FClearFillContext::Clear( mResultBlock->GetBlock() );
-    ::ul3::FClearFillContext::Clear( mTempBlock->GetBlock() );
+    mResultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    mTempBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock());
+    ::ul3::FClearFillContext::Clear(mTempBlock->GetBlock());
 }
 
-
 FOdysseyBlock*
-FOdysseyLayerStack::ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLayers )
+FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayers)
 {
-    checkf( iLayers != NULL, TEXT("Passed NullPtr to ComputeBlockOfLayers of FOdysseyLayerStack") );
-    
+    checkf(iLayers != NULL,TEXT("Passed NullPtr to ComputeBlockOfLayers of FOdysseyLayerStack"));
+
     ::ul3::FPerformanceOptions performanceOptions;
     performanceOptions.desired_workers = 1;
-    
-    FOdysseyBlock* resultBlock = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-    ::ul3::FClearFillContext::Clear( resultBlock->GetBlock(), performanceOptions, false );
-    
-    if( !iLayers->GetNodeContent()->IsVisible() )
+
+    FOdysseyBlock* resultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    ::ul3::FClearFillContext::Clear(resultBlock->GetBlock(),performanceOptions,false);
+
+    if(!iLayers->GetNodeContent()->IsVisible())
         return resultBlock;
-    
+
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    iLayers->DepthFirstSearchTree( &layers, false );
-    
-    for( int i = layers.Num() - 1; i >= 0 ; i-- )
+    iLayers->DepthFirstSearchTree(&layers,false);
+
+    for(int i = layers.Num() - 1; i >= 0 ; i--)
     {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() )
+        if(type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible())
         {
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layers[i] );
-            
-            ::ul3::FBlendingContext::Blend( imageLayer->GetBlock()->GetBlock(), resultBlock->GetBlock(), ::ul3::FRect( 0, 0, mWidth, mHeight ), imageLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, imageLayer->GetOpacity(), performanceOptions, false );
-        }
-        else if( type == IOdysseyLayer::eType::kFolder )
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layers[i]);
+
+            ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),resultBlock->GetBlock(),::ul3::FRect(0,0,mWidth,mHeight),imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+        } else if(type == IOdysseyLayer::eType::kFolder)
         {
-            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode( layers[i] );
-            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>( layers[i] );
-            
+            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(layers[i]);
+            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>(layers[i]);
+
             TArray<IOdysseyLayer*> layersInFolder = TArray<IOdysseyLayer*>();
-            folderNode->DepthFirstSearchTree( &layersInFolder, false );
+            folderNode->DepthFirstSearchTree(&layersInFolder,false);
             i-=layersInFolder.Num();
-            
-            if( folderLayer->IsVisible() )
-                ::ul3::FBlendingContext::Blend( ComputeBlockOfLayers( folderNode )->GetBlock(), resultBlock->GetBlock(), ::ul3::FRect( 0, 0, mWidth, mHeight ), folderLayer->GetBlendingMode(), ::ul3::eAlphaMode::kNormal, folderLayer->GetOpacity(), performanceOptions, false );
+
+            if(folderLayer->IsVisible())
+                ::ul3::FBlendingContext::Blend(ComputeBlockOfLayers(folderNode)->GetBlock(),resultBlock->GetBlock(),::ul3::FRect(0,0,mWidth,mHeight),folderLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,folderLayer->GetOpacity(),performanceOptions,false);
         }
     }
-    
+
     return resultBlock;
 }
 
-
 //---
-
-
-
-
-
 
 //TO DO: DELETE THIS WHEN WE GET INTELLIGENT TILING
 #define TILE_SIZE 64
 
-
-
-
-
 //FODysseyDrawingUndo ---------
-FOdysseyDrawingUndo::FOdysseyDrawingUndo( FOdysseyLayerStack* iLayerStack )
+FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
 {
     mLayerStackPtr = iLayerStack;
 
     mData = TArray<uint8>();
-    
-    //We reserve the maximum memory needed for a undo
-    mData.Reserve( iLayerStack->GetResultBlock()->GetBlock()->BytesTotal() );
 
-    mUndoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("undos.save") );
-    mRedoPath = FPaths::Combine( FPaths::EngineSavedDir(), TEXT("redos.save") );
-    
+    //We reserve the maximum memory needed for a undo
+    mData.Reserve(iLayerStack->GetResultBlock()->GetBlock()->BytesTotal());
+
+    mUndoPath = FPaths::Combine(FPaths::EngineSavedDir(),TEXT("undos.save"));
+    mRedoPath = FPaths::Combine(FPaths::EngineSavedDir(),TEXT("redos.save"));
+
     Clear();
 }
 
 FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
 {
-    
 }
 
 void
@@ -796,34 +769,31 @@ FOdysseyDrawingUndo::StartRecord()
     mToBinary.FArchive::Reset();
 
     //If we make a record while we're not at the end of the stack, we delete all records after this one
-    if( mCurrentIndex == 0 )
+    if(mCurrentIndex == 0)
     {
         Clear();
-    }
-    else if( mCurrentIndex < mUndosPositions.Num() - 1 )
+    } else if(mCurrentIndex < mUndosPositions.Num() - 1)
     {
-        mUndosPositions.SetNum( mCurrentIndex + 1 );
-        mNumberBlocksUndo.SetNum( mCurrentIndex + 1 );
-        mNumberBlocksUndo[ mCurrentIndex ] = 0;
-        mNumberBlocksRedo.SetNum( mCurrentIndex + 1 );
-        mNumberBlocksRedo[ mCurrentIndex ] = 0;
+        mUndosPositions.SetNum(mCurrentIndex + 1);
+        mNumberBlocksUndo.SetNum(mCurrentIndex + 1);
+        mNumberBlocksUndo[mCurrentIndex] = 0;
+        mNumberBlocksRedo.SetNum(mCurrentIndex + 1);
+        mNumberBlocksRedo[mCurrentIndex] = 0;
     }
 }
 
-    
 void
 FOdysseyDrawingUndo::EndRecord()
 {
-    if( mNumberBlocksUndo[mCurrentIndex] != 0 )
+    if(mNumberBlocksUndo[mCurrentIndex] != 0)
     {
         IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
-        IFileHandle* fileHandle = platformFile.OpenWrite(*mUndoPath, true);
-        fileHandle->Seek( mUndosPositions[mCurrentIndex] );
-        fileHandle->Write( mToBinary.GetData(), mToBinary.Num() );
-        fileHandle->Flush( true );
+        IFileHandle* fileHandle = platformFile.OpenWrite(*mUndoPath,true);
+        fileHandle->Seek(mUndosPositions[mCurrentIndex]);
+        fileHandle->Write(mToBinary.GetData(),mToBinary.Num());
+        fileHandle->Flush(true);
 
-        
-        mUndosPositions.Add( mUndosPositions[mCurrentIndex] + mToBinary.Num() );
+        mUndosPositions.Add(mUndosPositions[mCurrentIndex] + mToBinary.Num());
         mNumberBlocksUndo.Add(0);
         mNumberBlocksRedo.Add(0);
         mCurrentIndex++;
@@ -831,7 +801,6 @@ FOdysseyDrawingUndo::EndRecord()
         delete fileHandle;
     }
 }
-
 
 void
 FOdysseyDrawingUndo::StartRecordRedo()
@@ -841,18 +810,17 @@ FOdysseyDrawingUndo::StartRecordRedo()
     mToBinary.FArchive::Reset();
 }
 
-
 void
 FOdysseyDrawingUndo::EndRecordRedo()
 {
-    if( mNumberBlocksRedo[mCurrentIndex] != 0 )
+    if(mNumberBlocksRedo[mCurrentIndex] != 0)
     {
         IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
-        IFileHandle* fileHandle = platformFile.OpenWrite(*mRedoPath, true);
-        fileHandle->Seek( mUndosPositions[mCurrentIndex] );
-        fileHandle->Write( mToBinary.GetData(), mToBinary.Num() );
+        IFileHandle* fileHandle = platformFile.OpenWrite(*mRedoPath,true);
+        fileHandle->Seek(mUndosPositions[mCurrentIndex]);
+        fileHandle->Write(mToBinary.GetData(),mToBinary.Num());
         fileHandle->Flush(true);
-        
+
         delete fileHandle;
     }
 }
@@ -876,53 +844,51 @@ FOdysseyDrawingUndo::Clear()
 
 void FOdysseyDrawingUndo::Check()
 {
-    UE_LOG( LogTemp, Display, TEXT("Global:"));
-    UE_LOG( LogTemp, Display, TEXT("mCurrentIndex: %d"), mCurrentIndex );
-    for( int i = 0; i < mUndosPositions.Num(); i++ )
+    UE_LOG(LogTemp,Display,TEXT("Global:"));
+    UE_LOG(LogTemp,Display,TEXT("mCurrentIndex: %d"),mCurrentIndex);
+    for(int i = 0; i < mUndosPositions.Num(); i++)
     {
-        UE_LOG( LogTemp, Display, TEXT("mUndosPositions[%d]: %lld"), i, mUndosPositions[i] );
+        UE_LOG(LogTemp,Display,TEXT("mUndosPositions[%d]: %lld"),i,mUndosPositions[i]);
     }
 
-
-    UE_LOG( LogTemp, Display, TEXT("Undo:"));
-    for( int i = 0; i < mNumberBlocksUndo.Num(); i++ )
+    UE_LOG(LogTemp,Display,TEXT("Undo:"));
+    for(int i = 0; i < mNumberBlocksUndo.Num(); i++)
     {
-        UE_LOG( LogTemp, Display, TEXT("mNumberBlocksUndo[%d]: %d"), i, mNumberBlocksUndo[i] );
+        UE_LOG(LogTemp,Display,TEXT("mNumberBlocksUndo[%d]: %d"),i,mNumberBlocksUndo[i]);
     }
-    
-    UE_LOG( LogTemp, Display, TEXT("Redo:"));
-    for( int i = 0; i < mNumberBlocksRedo.Num(); i++ )
+
+    UE_LOG(LogTemp,Display,TEXT("Redo:"));
+    for(int i = 0; i < mNumberBlocksRedo.Num(); i++)
     {
-        UE_LOG( LogTemp, Display, TEXT("mNumberBlocksRedo[%d]: %d"), i, mNumberBlocksRedo[i] );
+        UE_LOG(LogTemp,Display,TEXT("mNumberBlocksRedo[%d]: %d"),i,mNumberBlocksRedo[i]);
     }
 }
 
-
 bool
-FOdysseyDrawingUndo::SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY )
+FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress,uint8 iXTile,uint8 iYTile,unsigned int iSizeX,unsigned int iSizeY)
 {
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayerStackPtr->GetLayers()->DepthFirstSearchTree( &layers, false );
-    
+    mLayerStackPtr->GetLayers()->DepthFirstSearchTree(&layers,false);
+
     FOdysseyImageLayer* imageLayer = nullptr;
-    for( int j = 0; j < layers.Num(); j++)
+    for(int j = 0; j < layers.Num(); j++)
     {
-        if( iAddress == (UPTRINT) layers[j] )
+        if(iAddress == (UPTRINT)layers[j])
         {
             imageLayer = static_cast<FOdysseyImageLayer*> (layers[j]);
             break;
         }
     }
-    
-    if( imageLayer == nullptr )
+
+    if(imageLayer == nullptr)
         return false;
 
-    mTileData = ::ul3::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetBlock(), ::ul3::FRect( iXTile * TILE_SIZE, iYTile * TILE_SIZE, iSizeX, iSizeY ) );
-           
+    mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(iXTile * TILE_SIZE,iYTile * TILE_SIZE,iSizeX,iSizeY));
+
     TArray<uint8> array = TArray<uint8>();
     array.AddUninitialized(mTileData->BytesTotal());
-    
-    FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
+
+    FMemory::Memcpy(array.GetData(),mTileData->DataPtr(),mTileData->BytesTotal());
 
     UPTRINT address = (UPTRINT)imageLayer;
     mToBinary << address;
@@ -931,26 +897,29 @@ FOdysseyDrawingUndo::SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile,
     mToBinary << iSizeX;
     mToBinary << iSizeY;
     mToBinary << array;
-        
+
     mNumberBlocksRedo[mCurrentIndex]++;
-    
+
+    // Why is mTileData not deleted here ??
+    //delete  mTileData;
+
     return true;
 }
 
 bool
-FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY )
+FOdysseyDrawingUndo::SaveData(uint8 iXTile,uint8 iYTile,unsigned int iSizeX,unsigned int iSizeY)
 {
-    if( mLayerStackPtr->GetCurrentLayer()->GetNodeContent()->GetType() != IOdysseyLayer::eType::kImage )
+    if(mLayerStackPtr->GetCurrentLayer()->GetNodeContent()->GetType() != IOdysseyLayer::eType::kImage)
         return false;
-    
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStackPtr->GetCurrentLayer()->GetNodeContent() );
-    mTileData = ::ul3::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetBlock(), ::ul3::FRect( iXTile * TILE_SIZE, iYTile * TILE_SIZE, iSizeX, iSizeY ) );
-    
+
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mLayerStackPtr->GetCurrentLayer()->GetNodeContent());
+    mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(iXTile * TILE_SIZE,iYTile * TILE_SIZE,iSizeX,iSizeY));
+
     TArray<uint8> array = TArray<uint8>();
     array.AddUninitialized(mTileData->BytesTotal());
 
-    FMemory::Memcpy(array.GetData(), mTileData->DataPtr(), mTileData->BytesTotal());
-    
+    FMemory::Memcpy(array.GetData(),mTileData->DataPtr(),mTileData->BytesTotal());
+
     UPTRINT address = (UPTRINT)imageLayer;
     mToBinary << address;
     mToBinary << iXTile;
@@ -962,19 +931,19 @@ FOdysseyDrawingUndo::SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, 
     mNumberBlocksUndo[mCurrentIndex]++;
 
     delete mTileData;
-    
+
     return true;
 }
 
 bool
 FOdysseyDrawingUndo::LoadData()
 {
-    if( mCurrentIndex > 0 )
+    if(mCurrentIndex > 0)
         mCurrentIndex--;
-    
+
     bool bSaveForRedo = mNumberBlocksRedo[mCurrentIndex] == 0;
-        
-    if( bSaveForRedo )
+
+    if(bSaveForRedo)
     {
         StartRecordRedo();
     }
@@ -984,14 +953,14 @@ FOdysseyDrawingUndo::LoadData()
     uint8 tileY = 0;
     unsigned int sizeX;
     unsigned int sizeY;
-    
-	TArray<uint8> TheBinaryArray;
-    FFileHelper::LoadFileToArray(TheBinaryArray, *mUndoPath);
-    
-    FMemoryReader Ar = FMemoryReader(TheBinaryArray );
+
+    TArray<uint8> TheBinaryArray;
+    FFileHelper::LoadFileToArray(TheBinaryArray,*mUndoPath);
+
+    FMemoryReader Ar = FMemoryReader(TheBinaryArray);
     Ar.Seek(mUndosPositions[mCurrentIndex]);
-    
-    for( int i = 0; i < mNumberBlocksUndo[mCurrentIndex]; i++)
+
+    for(int i = 0; i < mNumberBlocksUndo[mCurrentIndex]; i++)
     {
         Ar << address;
         Ar << tileX;
@@ -999,49 +968,48 @@ FOdysseyDrawingUndo::LoadData()
         Ar << sizeX;
         Ar << sizeY;
 
-        if( bSaveForRedo )
+        if(bSaveForRedo)
         {
-            SaveDataRedo( address, tileX, tileY, sizeX, sizeY );
+            SaveDataRedo(address,tileX,tileY,sizeX,sizeY);
         }
-        
+
         Ar << mData;
 
         //Should be out of this loop
         FOdysseyImageLayer* imageLayer = nullptr;
         TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-        mLayerStackPtr->GetLayers()->DepthFirstSearchTree( &layers, false );
-        
-        for( int j = 0; j < layers.Num(); j++)
+        mLayerStackPtr->GetLayers()->DepthFirstSearchTree(&layers,false);
+
+        for(int j = 0; j < layers.Num(); j++)
         {
-            if( address == (UPTRINT) layers[j] )
+            if(address == (UPTRINT)layers[j])
             {
                 imageLayer = static_cast<FOdysseyImageLayer*> (layers[j]);
                 break;
             }
         }
 
-        if( imageLayer == nullptr )
+        if(imageLayer == nullptr)
             return false;
         //---
 
-        
         //Useless, I just want mTileData at the right size for the next undo, to change
-        if( i == 0 )
-            mTileData = ::ul3::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetBlock(), ::ul3::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ) );
+        if(i == 0)
+            mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
 
-        if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
+        if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
-            for( int j = 0; j < mData.Num(); j++)
+            for(int j = 0; j < mData.Num(); j++)
             {
                 *(mTileData->DataPtr() + j) = mData[j];
             }
-    
-            ::ul3::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetBlock(), ::ul3::FRect(0, 0, sizeX, sizeY ), ::ul3::FPoint( tileX * TILE_SIZE, tileY * TILE_SIZE ) );
-            mLayerStackPtr->ComputeResultBlock( ::ul3::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ));
+
+            ::ul3::FMakeContext::CopyBlockRectInto(mTileData,imageLayer->GetBlock()->GetBlock(),::ul3::FRect(0,0,sizeX,sizeY),::ul3::FPoint(tileX * TILE_SIZE,tileY * TILE_SIZE));
+            mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
         }
     }
-    
-    if( bSaveForRedo )
+
+    if(bSaveForRedo)
     {
         EndRecordRedo();
     }
@@ -1051,7 +1019,6 @@ FOdysseyDrawingUndo::LoadData()
     return true;
 }
 
-
 bool
 FOdysseyDrawingUndo::Redo()
 {
@@ -1060,14 +1027,14 @@ FOdysseyDrawingUndo::Redo()
     uint8 tileY;
     unsigned int sizeX;
     unsigned int sizeY;
-    
-	TArray<uint8> TheBinaryArray;
-    FFileHelper::LoadFileToArray(TheBinaryArray, *mRedoPath);
-    
-    FMemoryReader Ar = FMemoryReader(TheBinaryArray );
+
+    TArray<uint8> TheBinaryArray;
+    FFileHelper::LoadFileToArray(TheBinaryArray,*mRedoPath);
+
+    FMemoryReader Ar = FMemoryReader(TheBinaryArray);
     Ar.Seek(mUndosPositions[mCurrentIndex]);
-    
-    for( int i = 0; i < mNumberBlocksRedo[mCurrentIndex]; i++)
+
+    for(int i = 0; i < mNumberBlocksRedo[mCurrentIndex]; i++)
     {
         Ar << address;
         Ar << tileX;
@@ -1075,51 +1042,47 @@ FOdysseyDrawingUndo::Redo()
         Ar << sizeX;
         Ar << sizeY;
         Ar << mData;
-        
+
         //Should be out of this loop
         FOdysseyImageLayer* imageLayer = nullptr;
         TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-        mLayerStackPtr->GetLayers()->DepthFirstSearchTree( &layers, false );
-        
-        for( int j = 0; j < layers.Num(); j++)
+        mLayerStackPtr->GetLayers()->DepthFirstSearchTree(&layers,false);
+
+        for(int j = 0; j < layers.Num(); j++)
         {
-            if( address == (UPTRINT) layers[j] )
+            if(address == (UPTRINT)layers[j])
             {
                 imageLayer = static_cast<FOdysseyImageLayer*> (layers[j]);
                 break;
             }
         }
 
-        if( imageLayer == nullptr )
+        if(imageLayer == nullptr)
             return false;
         //---
 
-        
         //Useless, I just want mTileData at the right size for the next undo, to change
-        if( i == 0 )
-            mTileData = ::ul3::FMakeContext::CopyBlockRect( imageLayer->GetBlock()->GetBlock(), ::ul3::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ) );
+        if(i == 0)
+            mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
 
-        if( mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0 )
+        if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
-            for( int j = 0; j < mData.Num(); j++)
+            for(int j = 0; j < mData.Num(); j++)
             {
                 *(mTileData->DataPtr() + j) = mData[j];
             }
-        
-            ::ul3::FMakeContext::CopyBlockRectInto( mTileData, imageLayer->GetBlock()->GetBlock(), ::ul3::FRect(0, 0, sizeX, sizeY ), ::ul3::FPoint( tileX * sizeX, tileY * sizeY ) );
-            mLayerStackPtr->ComputeResultBlock( ::ul3::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ));
+
+            ::ul3::FMakeContext::CopyBlockRectInto(mTileData,imageLayer->GetBlock()->GetBlock(),::ul3::FRect(0,0,sizeX,sizeY),::ul3::FPoint(tileX * sizeX,tileY * sizeY));
+            mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
         }
     }
-    
-    if( mCurrentIndex < (mUndosPositions.Num() - 1) )
+
+    if(mCurrentIndex < (mUndosPositions.Num() - 1))
         mCurrentIndex++;
 
     delete mTileData;
 
     return true;
 }
-
-
-
 
 #undef LOCTEXT_NAMESPACE
