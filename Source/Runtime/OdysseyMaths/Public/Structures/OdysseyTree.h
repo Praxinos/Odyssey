@@ -50,7 +50,7 @@ public:
 
     // Overloads for save in archive
     friend FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree );
-    
+
 private:
     T mNodeContent;
     TArray<FOdysseyNTree*> mNodes;

@@ -11,8 +11,8 @@ FOdysseyFolderLayer::~FOdysseyFolderLayer()
 {
 }
 
-FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
-    : IOdysseyLayer( iName, IOdysseyLayer::eType::kFolder )
+FOdysseyFolderLayer::FOdysseyFolderLayer( const FOdysseyLayerStack* iParentStack, const FName& iName )
+    : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kFolder )
     , mBlendingMode( ::ul3::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
     , mIsOpen( true )

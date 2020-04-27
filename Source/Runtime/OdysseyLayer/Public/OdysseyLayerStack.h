@@ -43,42 +43,34 @@ public:
     FOdysseyImageLayer*                             AddImageLayer(int iAtIndex = -1);
     FOdysseyImageLayer*                             AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IOdysseyLayer* >* iPosition,FName iName = FName(),int iAtIndex = -1);
     FOdysseyImageLayer*                             AddImageLayerFromData(FOdysseyBlock* iData,FName iName = FName(),int iAtIndex = -1);
-
     FOdysseyFolderLayer*                            AddFolderLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,FName iName = FName(),int iAtIndex = -1);
     FOdysseyFolderLayer*                            AddFolderLayer(FName iName = FName(),int iAtIndex = -1);
-
     FOdysseyNTree< IOdysseyLayer* >*                GetLayers();
     FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayer() const;
     int                                             GetCurrentLayerAsIndex() const;
     FOdysseyNTree< IOdysseyLayer* >*                GetCurrentLayerFromIndex(int iIndex) const;
-
     void                                            SetCurrentLayer(IOdysseyLayer* iLayer);
     void                                            SetCurrentLayer(FOdysseyNTree< IOdysseyLayer* >* iLayer);
-
     void                                            DeleteLayer(IOdysseyLayer* iLayerToDelete);
-
     void                                            MergeDownLayer(IOdysseyLayer* iLayerToMergeDown);
     void                                            FlattenLayer(IOdysseyLayer* iLayerToFlatten);
     void                                            DuplicateLayer(IOdysseyLayer* iLayerToDuplicate);
     void                                            ClearCurrentLayer();
-    void                                            FillCurrentLayerWithColor(const ::ul3::CColor& iColor);
-
+    void                                            FillCurrentLayerWithColor(const ::ul3::IPixel& iColor);
     TArray< TSharedPtr< FText > >                   GetBlendingModesAsText();
-
     ETextureSourceFormat                            GetTextureSourceFormat();
 
     // Overloads for save in archive
     friend FArchive& operator<<(FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack);
+
+    const ::ul3::FHostDeviceInfo&                   GetHostDeviceInfo() const;
+    ::ul3::FThreadPool*                             GetThreadPool() const;
 
 private:
     // Private API
     FName                                           GetNextLayerName();
     void                                            InitResultAndTempBlock();
     FOdysseyBlock*                                  ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayers);
-
-public:
-    // Overloads for save in archive
-    friend FArchive& operator<<(FArchive &Ar,FOdysseyLayerStack* SaveLayerStack);
 
 private:
     // Private Data Members
@@ -90,6 +82,9 @@ private:
     int                                             mHeight;
     ETextureSourceFormat                            mTextureSourceFormat;
     bool                                            mIsInitialized;
+
+    ::ul3::FHostDeviceInfo                          mHostDeviceInfo;
+    ::ul3::FThreadPool*                             mThreadPool;
 
 public:
     FOdysseyDrawingUndo*                            mDrawingUndo;

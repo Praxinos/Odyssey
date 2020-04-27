@@ -19,17 +19,17 @@ class ODYSSEYLAYER_API FOdysseyImageLayer: public IOdysseyLayer
 public:
     // Construction / Destruction
     virtual ~FOdysseyImageLayer();
-    FOdysseyImageLayer(const FName& iName,FVector2D iSize,ETextureSourceFormat iTextureSourceFormat);
-    FOdysseyImageLayer(const FName& iName,FOdysseyBlock* iBlock);
+    FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName,FVector2D iSize,ETextureSourceFormat iTextureSourceFormat);
+    FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName,FOdysseyBlock* iBlock);
 
 public:
     // Public API
     FOdysseyBlock* GetBlock() const;
 
-    ::ul3::eBlendingMode GetBlendingMode() const;
-    FText                 GetBlendingModeAsText() const;
-    void                  SetBlendingMode(::ul3::eBlendingMode iBlendingMode);
-    void                  SetBlendingMode(FText iBlendingMode);
+    ::ul3::eBlendingMode    GetBlendingMode() const;
+    FText                   GetBlendingModeAsText() const;
+    void                    SetBlendingMode(::ul3::eBlendingMode iBlendingMode);
+    void                    SetBlendingMode(FText iBlendingMode);
 
     float GetOpacity() const;
     void  SetOpacity(float iOpacity);

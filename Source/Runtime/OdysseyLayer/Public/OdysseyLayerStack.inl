@@ -4,25 +4,22 @@
 //The actual function to load and save a FOdysseyLayerStack to disk
 inline FArchive& operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
 {
-    if(!ioSaveLayerStack) return Ar;
-    
-    //IOdysseySerializable* serializable = (IOdysseySerializable*)(ioSaveLayerStack);
-    //Ar << serializable;
-        
+    if( !ioSaveLayerStack )
+        return Ar;
+
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;
-    
+
     Ar << *(ioSaveLayerStack->mLayers);
-        
+
     if ( Ar.IsLoading() )
     {
         ioSaveLayerStack->mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
         ioSaveLayerStack->mIsInitialized = false;
-
         ioSaveLayerStack->Init( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight );
-        
         ioSaveLayerStack->ComputeResultBlock();
     }
 
     return Ar;
 }
+

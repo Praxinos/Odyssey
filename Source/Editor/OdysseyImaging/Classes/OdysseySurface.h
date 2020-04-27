@@ -1,8 +1,6 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
-
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 #include <ULIS3>
@@ -12,7 +10,6 @@ class FOdysseyBlock;
 
 /////////////////////////////////////////////////////
 // Utlity
-
 ODYSSEYIMAGING_API void CopyUTextureDataIntoBlock(const FOdysseyBlock* iBlock,UTexture2D* iTexture);
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture);
 ODYSSEYIMAGING_API FOdysseyBlock* NewOdysseyBlockFromUTextureData(UTexture2D* iTexture);
@@ -24,18 +21,17 @@ ODYSSEYIMAGING_API void InvalidateTextureFromData(const FOdysseyBlock* iData,UTe
 ODYSSEYIMAGING_API void InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect);
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData(const ::ul3::FBlock* iData,FOdysseySurface* iSurface,const ::ul3::FRect& iRect);
 
+ODYSSEYIMAGING_API void InvalidateSurfaceCallback(const FOdysseyBlock* iData,void* iInfo,int iX1,int iY1,int iX2,int iY2);
+ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback(const FOdysseyBlock* iData,void* iInfo,int iX1,int iY1,int iX2,int iY2);
+ODYSSEYIMAGING_API void InvalidateSurfaceCallback(const ::ul3::FBlock* iData,void* iInfo,const ::ul3::FRect& iRect);
+ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback(const ::ul3::FBlock* iData,void* iInfo,const ::ul3::FRect& iRect);
+
 struct FOdysseyLiveUpdateInfo
 {
     UTexture2D* main;
     UTexture2D* live;
     bool        enabled;
 };
-
-ODYSSEYIMAGING_API void InvalidateSurfaceCallback(const FOdysseyBlock* iData,void* iInfo,int iX1,int iY1,int iX2,int iY2);
-ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback(const FOdysseyBlock* iData,void* iInfo,int iX1,int iY1,int iX2,int iY2);
-
-ODYSSEYIMAGING_API void InvalidateSurfaceCallback(const ::ul3::FBlock* iData,void* iInfo,const ::ul3::FRect& iRect);
-ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback(const ::ul3::FBlock* iData,void* iInfo,const ::ul3::FRect& iRect);
 
 /////////////////////////////////////////////////////
 // FOdysseySurface
@@ -89,7 +85,7 @@ private:
     const bool mIsBorrowedBlock;
 
     UPROPERTY()
-        UTexture2D* mTexture;
+    UTexture2D* mTexture;
 
     FOdysseyBlock* mBlock;
 };

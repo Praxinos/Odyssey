@@ -17,7 +17,7 @@ class ODYSSEYLAYER_API FOdysseyFolderLayer : public IOdysseyLayer
 public:
     // Construction / Destruction
     virtual ~FOdysseyFolderLayer();
-    FOdysseyFolderLayer( const FName& iName );
+    FOdysseyFolderLayer( const FOdysseyLayerStack* iParentStack, const FName& iName );
 
 
 public:

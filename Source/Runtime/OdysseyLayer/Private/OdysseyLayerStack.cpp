@@ -15,6 +15,9 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyLayerStack::~FOdysseyLayerStack()
 {
+    mThreadPool->WaitForCompletion();
+    delete  mThreadPool;
+
     delete mResultBlock;
     delete mTempBlock;
     delete mLayers;
@@ -22,15 +25,17 @@ FOdysseyLayerStack::~FOdysseyLayerStack()
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack()
-//: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
+    //: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
     : mResultBlock(NULL)
-    ,mTempBlock(NULL)
-    ,mLayers(new FOdysseyNTree<IOdysseyLayer*>(NULL))
-    ,mCurrentLayer(mLayers)
-    ,mWidth(-1)
-    ,mHeight(-1)
-    ,mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
-    ,mIsInitialized(false)
+    , mTempBlock(NULL)
+    , mLayers(new FOdysseyNTree<IOdysseyLayer*>(NULL))
+    , mCurrentLayer(mLayers)
+    , mWidth(-1)
+    , mHeight(-1)
+    , mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
+    , mIsInitialized(false)
+    , mHostDeviceInfo( ::ul3::FHostDeviceInfo::Detect() )
+    , mThreadPool( new  ::ul3::FThreadPool() )
 {
 }
 
@@ -44,6 +49,8 @@ FOdysseyLayerStack::FOdysseyLayerStack(int iWidth,int iHeight)
     ,mHeight(iHeight)
     ,mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
     ,mIsInitialized(false)
+    , mHostDeviceInfo( ::ul3::FHostDeviceInfo::Detect() )
+    , mThreadPool( new  ::ul3::FThreadPool() )
 {
     Init(mWidth,mHeight);
 }
@@ -645,7 +652,7 @@ FOdysseyLayerStack::ClearCurrentLayer()
 }
 
 void
-FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::CColor& iColor)
+FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
 {
     if(mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage)
     {
@@ -669,6 +676,16 @@ ETextureSourceFormat
 FOdysseyLayerStack::GetTextureSourceFormat()
 {
     return mTextureSourceFormat;
+}
+
+const ::ul3::FHostDeviceInfo&
+FOdysseyLayerStack::GetHostDeviceInfo() const {
+    return  mHostDeviceInfo;
+}
+
+::ul3::FThreadPool*
+FOdysseyLayerStack::GetThreadPool() const {
+    return  mThreadPool
 }
 
 //--------------------------------------------------------------------------------------

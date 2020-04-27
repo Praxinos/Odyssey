@@ -9,19 +9,21 @@ IOdysseyLayer::~IOdysseyLayer()
 {
 }
 
-IOdysseyLayer::IOdysseyLayer( const eType type )
+IOdysseyLayer::IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const eType type )
     : mName()
     , mIsLocked( false )
     , mIsVisible( true )
     , mType( type )
+    , mParentStack( iParentStack )
 {
 }
 
-IOdysseyLayer::IOdysseyLayer( const FName& iName, const eType type )
+IOdysseyLayer::IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, const eType type )
     : mName( iName )
     , mIsLocked( false )
     , mIsVisible( true )
     , mType( type )
+    , mParentStack( iParentStack )
 {
 }
 
@@ -74,4 +76,9 @@ void
 IOdysseyLayer::SetIsVisible( bool iIsVisible )
 {
     mIsVisible = iIsVisible;
+}
+
+const FOdysseyLayerStack*
+IOdysseyLayer::GetParentStack() const {
+    return  mParentStack;
 }

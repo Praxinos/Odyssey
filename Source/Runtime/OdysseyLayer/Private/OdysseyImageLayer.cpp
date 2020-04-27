@@ -13,9 +13,9 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
     delete mBlock;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
-    : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
-    //, IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
+FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
+    //: IOdysseySerializable( 1 ) // Version of FOdysseyImageLayer
+    : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kImage )
     , mBlock( nullptr )
     , mBlendingMode( ::ul3::eBlendingMode::kNormal )
     , mOpacity( 1.0f )
@@ -27,9 +27,9 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
     ::ul3::FClearFillContext::Clear( mBlock->GetBlock() );
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
-    : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
-    //, IOdysseySerializable( 1 ) //Version of FOdysseyImageLayer
+FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, FOdysseyBlock* iBlock )
+    //: IOdysseySerializable( 1 ) // Version of FOdysseyImageLayer
+    : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kImage )
     , mBlock( iBlock )
     , mBlendingMode( ::ul3::eBlendingMode::kNormal )
     , mOpacity( 1.0f )

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 class FOdysseyBlock;
+class FOdysseyLayerStack;
 
 /**
  * Odyssey Layer
@@ -24,8 +25,8 @@ public:
 public:
     // Construction / Destruction
     virtual ~IOdysseyLayer() = 0;
-    IOdysseyLayer( const eType type );
-    IOdysseyLayer( const FName& iName, const eType type );
+    IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const eType type );
+    IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, const eType type );
 
 public:
     virtual eType GetType() const;
@@ -40,14 +41,17 @@ public:
     virtual bool  IsVisible() const;
     virtual void  SetIsVisible( bool iIsVisible );
 
+    const FOdysseyLayerStack* GetParentStack() const;
+
     // Overloads for save in archive
     friend FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
-    
+
 protected:
     FName         mName;
     bool          mIsLocked;
     bool          mIsVisible;
     eType         mType;
+    const FOdysseyLayerStack* mParentStack;
 };
 
 
