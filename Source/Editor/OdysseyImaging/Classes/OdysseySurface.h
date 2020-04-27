@@ -13,16 +13,16 @@ class FOdysseyBlock;
 /////////////////////////////////////////////////////
 // Utlity
 
-ODYSSEYIMAGING_API void CopyUTextureDataIntoBlock( FOdysseyBlock* iBlock, UTexture2D* iTexture );
-ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( FOdysseyBlock* iBlock, UTexture2D* iTexture );
+ODYSSEYIMAGING_API void CopyUTextureDataIntoBlock( const FOdysseyBlock* iBlock, UTexture2D* iTexture );
+ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const FOdysseyBlock* iBlock, UTexture2D* iTexture );
 ODYSSEYIMAGING_API FOdysseyBlock* NewOdysseyBlockFromUTextureData( UTexture2D* iTexture );
-ODYSSEYIMAGING_API void InvalidateSurfaceFromData( FOdysseyBlock* iData, FOdysseySurface* iSurface );
-ODYSSEYIMAGING_API void InvalidateSurfaceFromData( FOdysseyBlock* iData, FOdysseySurface* iSurface, int iX1, int iY1, int iX2, int iY2 );
-ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture );
-ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect );
-ODYSSEYIMAGING_API void InvalidateTextureFromData( FOdysseyBlock* iData, UTexture2D* iTexture, int iX1, int iY1, int iX2, int iY2 );
-ODYSSEYIMAGING_API void InvalidateTextureFromData( ::ul3::IBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect );
-ODYSSEYIMAGING_API void InvalidateSurfaceFromData( ::ul3::IBlock* iData, FOdysseySurface* iSurface, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateSurfaceFromData( const FOdysseyBlock* iData, FOdysseySurface* iSurface );
+ODYSSEYIMAGING_API void InvalidateSurfaceFromData( const FOdysseyBlock* iData, FOdysseySurface* iSurface, int iX1, int iY1, int iX2, int iY2 );
+ODYSSEYIMAGING_API void InvalidateTextureFromData( const FOdysseyBlock* iData, UTexture2D* iTexture );
+ODYSSEYIMAGING_API void InvalidateTextureFromData( const FOdysseyBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateTextureFromData( const FOdysseyBlock* iData, UTexture2D* iTexture, int iX1, int iY1, int iX2, int iY2 );
+ODYSSEYIMAGING_API void InvalidateTextureFromData( const ::ul3::FBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateSurfaceFromData( const ::ul3::FBlock* iData, FOdysseySurface* iSurface, const ::ul3::FRect& iRect );
 
 struct FOdysseyLiveUpdateInfo
 {
@@ -31,11 +31,11 @@ struct FOdysseyLiveUpdateInfo
     bool        enabled;
 };
 
-ODYSSEYIMAGING_API void InvalidateSurfaceCallback( FOdysseyBlock* iData, void* iInfo, int iX1, int iY1, int iX2, int iY2 );
-ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( FOdysseyBlock* iData, void* iInfo, int iX1, int iY1, int iX2, int iY2 );
+ODYSSEYIMAGING_API void InvalidateSurfaceCallback( const FOdysseyBlock* iData, void* iInfo, int iX1, int iY1, int iX2, int iY2 );
+ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( const FOdysseyBlock* iData, void* iInfo, int iX1, int iY1, int iX2, int iY2 );
 
-ODYSSEYIMAGING_API void InvalidateSurfaceCallback( ::ul3::IBlock* iData, void* iInfo, const ::ul3::FRect& iRect );
-ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( ::ul3::IBlock* iData, void* iInfo, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateSurfaceCallback( const ::ul3::FBlock* iData, void* iInfo, const ::ul3::FRect& iRect );
+ODYSSEYIMAGING_API void InvalidateLiveSurfaceCallback( const ::ul3::FBlock* iData, void* iInfo, const ::ul3::FRect& iRect );
 
 /////////////////////////////////////////////////////
 // FOdysseySurface
