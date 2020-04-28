@@ -6,6 +6,8 @@
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/FileHelper.h"
 #include "UObject/UObjectGlobals.h"
+#include "OdysseyImageLayer.h"
+#include "OdysseyFolderLayer.h"
 
 #include <ULIS3>
 
@@ -113,72 +115,112 @@ FOdysseyLayerStack::GetResultBlock()
 void
 FOdysseyLayerStack::ComputeResultBlock()
 {
-    ::ul3::FPerformanceOptions performanceOptions;
-    performanceOptions.desired_workers = 1;
-    ::ul3::FRect canvasRect = ::ul3::FRect(0,0,mWidth,mHeight);
-    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock(),performanceOptions,false);
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
 
-    TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mLayers->DepthFirstSearchTree(&layers,false);
+    TArray< IOdysseyLayer* > layers = TArray< IOdysseyLayer* >();
+    mLayers->DepthFirstSearchTree( &layers, false );
 
-    TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree<IOdysseyLayer*>*,FOdysseyBlock* >();
+    TMap< FOdysseyNTree<IOdysseyLayer* >*, FOdysseyBlock* > folderBlocks = TMap< FOdysseyNTree< IOdysseyLayer* >*, FOdysseyBlock* >();
 
-    for(int i = layers.Num() - 1; i >= 0 ; i--)
-    {
+    for( int i = layers.Num() - 1; i >= 0 ; i-- ) {
         IOdysseyLayer::eType type = layers[i]->GetType();
-        if(type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible())
-        {
+        if( type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible() ) {
             FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layers[i]);
             FOdysseyNTree<IOdysseyLayer*>* imageNode = mLayers->FindNode(imageLayer);
             FOdysseyNTree<IOdysseyLayer*>* parentNode = imageNode->GetParent();
 
-            if(parentNode->GetNodeContent() != NULL) //This means the imageLayer is inside a folder
-            {
+            if( parentNode->GetNodeContent() != NULL ) {
+                // This means the imageLayer is inside a folder
                 bool visible = true;
-                while(parentNode->GetNodeContent() != NULL)
-                {
+                while( parentNode->GetNodeContent() != NULL ) {
                     //If a folder above isn't visible, we don't add this image layer to the result block
-                    if(!parentNode->GetNodeContent()->IsVisible())
+                    if( !parentNode->GetNodeContent()->IsVisible() )
                         visible = false;
 
                     parentNode = parentNode->GetParent();
                 }
-                if(visible)
-                {
-                    if(folderBlocks.Contains(imageNode->GetParent()))
-                    {
-                        ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),folderBlocks[imageNode->GetParent()]->GetBlock(),canvasRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
-                    } else
-                    {
-                        FOdysseyBlock* block = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
-                        ::ul3::FClearFillContext::Clear(block->GetBlock(),performanceOptions,false);
-                        ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),block->GetBlock(),canvasRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
 
+                if( visible ) {
+                    if( folderBlocks.Contains( imageNode->GetParent() ) )
+                    {
+                        ::ul3::Blend( mThreadPool
+                                    , ULIS3_BLOCKING
+                                    , perfIntent
+                                    , mHostDeviceInfo
+                                    , ULIS3_NOCB
+                                    , imageLayer->GetBlock()->GetBlock()
+                                    , folderBlocks[imageNode->GetParent()]->GetBlock()
+                                    , canvasRect
+                                    , ::ul3::FVec2F( 0, 0 )
+                                    , ULIS3_NOAA
+                                    , imageLayer->GetBlendingMode()
+                                    , ::ul3::AM_NORMAL
+                                    , imageLayer->GetOpacity() );
+
+                    } else {
+                        FOdysseyBlock* block = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
+                        ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, block->GetBlock(), canvasRect );
+                        ::ul3::Blend( mThreadPool
+                                    , ULIS3_BLOCKING
+                                    , perfIntent
+                                    , mHostDeviceInfo
+                                    , ULIS3_NOCB
+                                    , imageLayer->GetBlock()->GetBlock()
+                                    , block->GetBlock()
+                                    , canvasRect
+                                    , ::ul3::FVec2F( 0, 0 )
+                                    , ULIS3_NOAA
+                                    , imageLayer->GetBlendingMode()
+                                    , ::ul3::AM_NORMAL
+                                    , imageLayer->GetOpacity() );
                         folderBlocks.Add(imageNode->GetParent(),block);
                     }
                 }
-            } else //Image layer is at the root
-            {
-                ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),mResultBlock->GetBlock(),canvasRect,imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+            } else {
+                //Image layer is at the root
+                ::ul3::Blend( mThreadPool
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , mHostDeviceInfo
+                            , ULIS3_NOCB
+                            , imageLayer->GetBlock()->GetBlock()
+                            , mResultBlock->GetBlock()
+                            , canvasRect
+                            , ::ul3::FVec2F( 0, 0 )
+                            , ULIS3_NOAA
+                            , imageLayer->GetBlendingMode()
+                            , ::ul3::AM_NORMAL
+                            , imageLayer->GetOpacity() );
             }
-        } else if(type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible())
-        {
-            FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(layers[i]);
-            FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*>(layers[i]);
+        } else if( type == IOdysseyLayer::eType::kFolder && layers[i]->IsVisible() ) {
+            FOdysseyNTree< IOdysseyLayer* >* folderNode = mLayers->FindNode( layers[i] );
+            FOdysseyFolderLayer* folderLayer = static_cast< FOdysseyFolderLayer* >( layers[i] );
 
-            if(folderBlocks.Contains(folderNode)) //Time to blend the folder unto the resultBlock
-            {
-                ::ul3::FBlendingContext::Blend(folderBlocks[folderNode]->GetBlock(),mResultBlock->GetBlock(),canvasRect,folderLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,folderLayer->GetOpacity(),performanceOptions,false);
+            if( folderBlocks.Contains(folderNode) ) {
+                //Time to blend the folder unto the resultBlock
+
+                ::ul3::Blend( mThreadPool
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , mHostDeviceInfo
+                            , ULIS3_NOCB
+                            , folderBlocks[folderNode]->GetBlock()
+                            , mResultBlock->GetBlock()
+                            , canvasRect
+                            , ::ul3::FVec2F( 0, 0 )
+                            , ULIS3_NOAA
+                            , folderLayer->GetBlendingMode()
+                            , ::ul3::AM_NORMAL
+                            , folderLayer->GetOpacity() );
             }
         }
     }
 
     mResultBlock->GetBlock()->Invalidate();
-
-    for(auto& elem : folderBlocks)
-    {
+    for( auto& elem : folderBlocks )
         delete elem.Value;
-    }
 }
 
 void
