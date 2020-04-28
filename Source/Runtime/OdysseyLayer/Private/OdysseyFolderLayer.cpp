@@ -92,7 +92,8 @@ operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer )
     Ar << ioSaveFolderLayer->mName;
     Ar << ioSaveFolderLayer->mIsLocked;
     Ar << ioSaveFolderLayer->mIsVisible;
-    Ar << static_cast< int >( ioSaveFolderLayer->mBlendingMode );
+    int bm = static_cast< int >( ioSaveFolderLayer->mBlendingMode );
+    Ar << bm;
     Ar << ioSaveFolderLayer->mIsOpen;
     Ar << ioSaveFolderLayer->mOpacity;
     return Ar;

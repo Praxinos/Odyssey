@@ -137,7 +137,8 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
     Ar << ioSaveImageLayer->mIsLocked;
     Ar << ioSaveImageLayer->mIsVisible;
     Ar << ioSaveImageLayer->mIsAlphaLocked;
-    Ar << static_cast< int >( ioSaveImageLayer->mBlendingMode );
+    int bm = static_cast< int >( ioSaveImageLayer->mBlendingMode );
+    Ar << bm;
     Ar << ioSaveImageLayer->mOpacity;
 
     if(Ar.IsSaving()) {

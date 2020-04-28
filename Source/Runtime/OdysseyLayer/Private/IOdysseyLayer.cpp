@@ -114,12 +114,12 @@ operator<<(FArchive &Ar, IOdysseyLayer** ioSaveLayer )
         
         if( layerType == IOdysseyLayer::eType::kImage )
         {
-            (*ioSaveLayer) = new FOdysseyImageLayer(FName(), NULL );
+            (*ioSaveLayer) = new FOdysseyImageLayer( (*ioSaveLayer)->GetParentStack(), FName(), NULL );
             Ar << static_cast<FOdysseyImageLayer*>(*ioSaveLayer);
         }
         else if( layerType == IOdysseyLayer::eType::kFolder )
         {
-            (*ioSaveLayer) = new FOdysseyFolderLayer( FName() );
+            (*ioSaveLayer) = new FOdysseyFolderLayer( (*ioSaveLayer)->GetParentStack(), FName() );
             Ar << static_cast<FOdysseyFolderLayer*>(*ioSaveLayer);
         }
     }

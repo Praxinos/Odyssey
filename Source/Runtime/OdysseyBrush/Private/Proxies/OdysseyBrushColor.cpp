@@ -16,7 +16,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor( 255, 0, 0 );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 0, 0, 0 } ) );
     return  col;
 }
 
@@ -28,7 +28,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromRGB( R, G, B, A );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { R, G, B, A } ) );
     return  col;
 }
 
@@ -38,7 +38,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSV( int H, int S, int V, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromHSV( H, S, V, A );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_HSVA8, { H, S, V, A } ) );
     return  col;
 }
 
@@ -48,7 +48,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSL( int H, int S, int L, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromHSL( H, S, L, A );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_HSLA8, { H, S, L, A } ) );
     return  col;
 }
 
@@ -58,7 +58,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYK( int C, int M, int Y, int K, int A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromCMYK( C, M, Y, K );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_CMYKA8, { C, M, Y, K, A } ) );
     return  col;
 }
 
@@ -71,7 +71,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float G, float B, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromRGBF( R, G, B, A );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBAF, { R, G, B, A } ) );
     return  col;
 }
 
@@ -81,7 +81,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSVF( float H, float S, float V, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromHSVF( H, S, V, A );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_HSVF, { H, S, V, A } ) );
     return  col;
 }
 
@@ -91,7 +91,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSLF( float H, float S, float L, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromHSLF( H, S, L, A );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_HSLF, { H, S, L, A } ) );
     return  col;
 }
 
@@ -101,7 +101,7 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYKF( float C, float M, float Y, float K, float A )
 {
     FOdysseyBrushColor col;
-    col.m = ::ul3::CColor::FromCMYKF( C, M, Y, K );
+    col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_CMYKF, { C, M, Y, K, A } ) );
     return  col;
 }
 
@@ -112,12 +112,11 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYKF( float C, floa
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoRGB( const  FOdysseyBrushColor& Color, int& R, int& G, int& B, int& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
-    R = col.m.Red();
-    G = col.m.Green();
-    B = col.m.Blue();
-    A = col.m.Alpha();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_RGBA8 );
+    R = conv.R8();
+    G = conv.G8();
+    B = conv.B8();
+    A = conv.A8();
 }
 
 
@@ -125,12 +124,11 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoRGB( const  FOdysse
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSV( const  FOdysseyBrushColor& Color, int& H, int& S, int& V, int& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToHSV();
-    H = col.m.HSVHue();
-    S = col.m.HSVSaturation();
-    V = col.m.Value();
-    A = col.m.Alpha();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_HSVA8 );
+    H = conv.Hue8();
+    S = conv.Saturation8();
+    V = conv.Value8();
+    A = conv.A8();
 }
 
 
@@ -138,12 +136,11 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSV( const  FOdysse
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSL( const  FOdysseyBrushColor& Color, int& H, int& S, int& L, int& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToHSL();
-    H = col.m.HSLHue();
-    S = col.m.HSLSaturation();
-    L = col.m.Lightness();
-    A = col.m.Alpha();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_HSLA8 );
+    H = conv.Hue8();
+    S = conv.Saturation8();
+    L = conv.Lightness8();
+    A = conv.A8();
 }
 
 
@@ -151,13 +148,12 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSL( const  FOdysse
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoCMYK( const  FOdysseyBrushColor& Color, int& C, int& M, int& Y, int& K, int& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToCMYK();
-    C = col.m.Cyan();
-    M = col.m.Magenta();
-    Y = col.m.Yellow();
-    K = col.m.Key();
-    A = col.m.Alpha();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_CMYKA8 );
+    C = conv.Cyan8();
+    M = conv.Magenta8();
+    Y = conv.Yellow8();
+    K = conv.Key8();
+    A = conv.A8();
 }
 
 
@@ -168,12 +164,11 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoCMYK( const  FOdyss
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoRGBF( const  FOdysseyBrushColor& Color, float& R, float& G, float& B, float& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToRGB();
-    R = col.m.RedF();
-    G = col.m.GreenF();
-    B = col.m.BlueF();
-    A = col.m.AlphaF();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_RGBAF );
+    R = conv.RF();
+    G = conv.GF();
+    B = conv.BF();
+    A = conv.AF();
 }
 
 
@@ -181,12 +176,11 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoRGBF( const  FOdyss
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSVF( const  FOdysseyBrushColor& Color, float& H, float& S, float& V, float& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToHSV();
-    H = col.m.HSVHueF();
-    S = col.m.HSVSaturationF();
-    V = col.m.ValueF();
-    A = col.m.AlphaF();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_HSVAF );
+    H = conv.HueF();
+    S = conv.SaturationF();
+    V = conv.ValueF();
+    A = conv.AF();
 }
 
 
@@ -194,12 +188,11 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSVF( const  FOdyss
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSLF( const  FOdysseyBrushColor& Color, float& H, float& S, float& L, float& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToHSL();
-    H = col.m.HSLHueF();
-    S = col.m.HSLSaturationF();
-    L = col.m.LightnessF();
-    A = col.m.AlphaF();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_HSLAF );
+    H = conv.HueF();
+    S = conv.SaturationF();
+    L = conv.LightnessF();
+    A = conv.AF();
 }
 
 
@@ -207,13 +200,12 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoHSLF( const  FOdyss
 void
 UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoCMYKF( const  FOdysseyBrushColor& Color, float& C, float& M, float& Y, float& K, float& A )
 {
-    FOdysseyBrushColor col;
-    col.m = Color.m.ToCMYK();
-    C = col.m.CyanF();
-    M = col.m.MagentaF();
-    Y = col.m.YellowF();
-    K = col.m.KeyF();
-    A = col.m.AlphaF();
+    ::ul3::FPixelValue conv = ::ul3::Conv( *Color.m, ULIS3_FORMAT_CMYKAF );
+    C = conv.CyanF();
+    M = conv.MagentaF();
+    Y = conv.YellowF();
+    K = conv.KeyF();
+    A = conv.AF();
 }
 
 
