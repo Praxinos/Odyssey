@@ -13,7 +13,7 @@ FOdysseyFolderLayer::~FOdysseyFolderLayer()
 
 FOdysseyFolderLayer::FOdysseyFolderLayer( const FOdysseyLayerStack* iParentStack, const FName& iName )
     : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kFolder )
-    , mBlendingMode( ::ul3::eBlendingMode::kNormal )
+    , mBlendingMode( ::ul3::BM_NORMAL )
     , mOpacity( 1.0f )
     , mIsOpen( true )
 {
@@ -36,7 +36,8 @@ FOdysseyFolderLayer::SetBlendingMode( ::ul3::eBlendingMode iBlendingMode )
 void
 FOdysseyFolderLayer::SetBlendingMode( FText iBlendingMode )
 {
-    for( uint8 i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
+    const int max = static_cast< int >( ::ul3::NUM_BLENDING_MODES );
+    for( uint8 i = 0; i < max; ++i )
     {
         auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) );
         if( iBlendingMode.EqualTo( entry ) )
@@ -85,26 +86,16 @@ FOdysseyFolderLayer::SetIsOpen( bool iIsOpen )
 FArchive& 
 operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer )
 {
-    if(!ioSaveFolderLayer) return Ar;
-    
-    /*IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
-    Ar << serializable;*/
- 
+    if(!ioSaveFolderLayer)
+        return Ar;
+
     Ar << ioSaveFolderLayer->mName;
-    
     Ar << ioSaveFolderLayer->mIsLocked;
-    
     Ar << ioSaveFolderLayer->mIsVisible;
-        
-    Ar << ioSaveFolderLayer->mBlendingMode;
-    
+    Ar << static_cast< int >( ioSaveFolderLayer->mBlendingMode );
     Ar << ioSaveFolderLayer->mIsOpen;
-    
     Ar << ioSaveFolderLayer->mOpacity;
-    
     return Ar;
 }
-
-//---
 
 #undef LOCTEXT_NAMESPACE

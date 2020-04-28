@@ -2,6 +2,8 @@
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
 #include "OdysseyImageLayer.h"
+#include "OdysseyBlock.h"
+#include "OdysseyLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
 
@@ -14,24 +16,29 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
-    //: IOdysseySerializable( 1 ) // Version of FOdysseyImageLayer
     : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kImage )
     , mBlock( nullptr )
-    , mBlendingMode( ::ul3::eBlendingMode::kNormal )
+    , mBlendingMode( ::ul3::BM_NORMAL )
     , mOpacity( 1.0f )
     , mIsAlphaLocked( false )
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
-    ::ul3::FClearFillContext::Clear( mBlock->GetBlock() );
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Clear( GetParentStack()->GetThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , GetParentStack()->GetHostDeviceInfo()
+                , ULIS3_NOCB
+                , mBlock->GetBlock()
+                , mBlock->GetBlock()->Rect() );
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, FOdysseyBlock* iBlock )
-    //: IOdysseySerializable( 1 ) // Version of FOdysseyImageLayer
     : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kImage )
     , mBlock( iBlock )
-    , mBlendingMode( ::ul3::eBlendingMode::kNormal )
+    , mBlendingMode( ::ul3::BM_NORMAL )
     , mOpacity( 1.0f )
     , mIsAlphaLocked( false )
 {
@@ -61,7 +68,8 @@ FOdysseyImageLayer::SetBlendingMode( ::ul3::eBlendingMode iBlendingMode )
 void
 FOdysseyImageLayer::SetBlendingMode( FText iBlendingMode )
 {
-    for( uint8 i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
+    const int max = static_cast< int >( ::ul3::NUM_BLENDING_MODES );
+    for( uint8 i = 0; i < max; ++i )
     {
         auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) );
         if( iBlendingMode.EqualTo( entry ) )
@@ -129,7 +137,7 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
     Ar << ioSaveImageLayer->mIsLocked;
     Ar << ioSaveImageLayer->mIsVisible;
     Ar << ioSaveImageLayer->mIsAlphaLocked;
-    Ar << ioSaveImageLayer->mBlendingMode;
+    Ar << static_cast< int >( ioSaveImageLayer->mBlendingMode );
     Ar << ioSaveImageLayer->mOpacity;
 
     if(Ar.IsSaving()) {
@@ -139,7 +147,15 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         Ar << width;
         Ar << height;
 
-        ::ul3::IBlock* blockLayerData = ::ul3::FMakeContext::CopyBlockRect(ioSaveImageLayer->mBlock->GetBlock(),::ul3::FRect(0,0,ioSaveImageLayer->mBlock->Width(),ioSaveImageLayer->mBlock->Height()));
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::FBlock* blockLayerData = ::ul3::XCopy( ioSaveImageLayer->GetParentStack()->GetThreadPool()
+                                                    , ULIS3_BLOCKING
+                                                    , perfIntent
+                                                    , ioSaveImageLayer->GetParentStack()->GetHostDeviceInfo()
+                                                    , ULIS3_NOCB
+                                                    , ioSaveImageLayer->mBlock->GetBlock()
+                                                    , ::ul3::FRect( 0, 0, ioSaveImageLayer->mBlock->Width(), ioSaveImageLayer->mBlock->Height() ) );
+
         TArray<uint8> layerData = TArray<uint8>();
         layerData.AddUninitialized(blockLayerData->BytesTotal());
         FMemory::Memcpy(layerData.GetData(),blockLayerData->DataPtr(),blockLayerData->BytesTotal());
@@ -159,7 +175,15 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
 
         check(!ioSaveImageLayer->mBlock);
         ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height,textureFormat);
-        ::ul3::FClearFillContext::Clear(ioSaveImageLayer->mBlock->GetBlock());
+
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Clear( ioSaveImageLayer->GetParentStack()->GetThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , ioSaveImageLayer->GetParentStack()->GetHostDeviceInfo()
+                    , ULIS3_NOCB
+                    , ioSaveImageLayer->mBlock->GetBlock()
+                    , ioSaveImageLayer->mBlock->GetBlock()->Rect() );
 
         TArray< uint8 > layerData = TArray< uint8 >();
         layerData.AddUninitialized(ioSaveImageLayer->mBlock->GetBlock()->BytesTotal());

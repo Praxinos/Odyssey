@@ -22,26 +22,24 @@ public:
 
 public:
     // Public API
-    ::ul3::eBlendingMode     GetBlendingMode();
-    FText                     GetBlendingModeAsText() const;
-    void                      SetBlendingMode( ::ul3::eBlendingMode iBlendingMode );
-    void                      SetBlendingMode( FText iBlendingMode );
-    
+    ::ul3::eBlendingMode    GetBlendingMode();
+    FText                   GetBlendingModeAsText() const;
+    void                    SetBlendingMode( ::ul3::eBlendingMode iBlendingMode );
+    void                    SetBlendingMode( FText iBlendingMode );
+
     float GetOpacity() const;
     void  SetOpacity( float iOpacity );
-    
+
     bool IsOpen() const;
     void SetIsOpen( bool iIsOpen );
-    
+
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
 
 private:
-    ::ul3::eBlendingMode               mBlendingMode;
-    float                               mOpacity;
-    
-    //To do: Not good, should not be here in the model. To change after the dissociation between the model and the view
-    bool                                mIsOpen;
+    ::ul3::eBlendingMode    mBlendingMode;
+    float                   mOpacity;
+    bool                    mIsOpen; // Todo: This should not be here in the model, but it should be part of the view.
 };
 
-ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
+ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
