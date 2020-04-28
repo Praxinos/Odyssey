@@ -1,15 +1,11 @@
-// Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
+// Copyright © 2018-2020 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
-
 #include "OdysseyLayerStack.h"
-
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/FileHelper.h"
 #include "UObject/UObjectGlobals.h"
 #include "OdysseyImageLayer.h"
 #include "OdysseyFolderLayer.h"
-
-#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStack"
 
@@ -19,51 +15,48 @@ FOdysseyLayerStack::~FOdysseyLayerStack()
 {
     mThreadPool->WaitForCompletion();
     delete  mThreadPool;
-
-    delete mResultBlock;
-    delete mTempBlock;
-    delete mLayers;
-    delete mDrawingUndo;
+    delete  mResultBlock;
+    delete  mTempBlock;
+    delete  mLayers;
+    delete  mDrawingUndo;
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack()
-    //: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
-    : mResultBlock(NULL)
-    , mTempBlock(NULL)
-    , mLayers(new FOdysseyNTree<IOdysseyLayer*>(NULL))
-    , mCurrentLayer(mLayers)
-    , mWidth(-1)
-    , mHeight(-1)
-    , mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
-    , mIsInitialized(false)
+    : mResultBlock( nullptr )
+    , mTempBlock( nullptr )
+    , mLayers( new  FOdysseyNTree< IOdysseyLayer* >( nullptr ) )
+    , mCurrentLayer( mLayers )
+    , mWidth( 0 )
+    , mHeight( 0 )
+    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
+    , mIsInitialized( false )
     , mHostDeviceInfo( ::ul3::FHostDeviceInfo::Detect() )
     , mThreadPool( new  ::ul3::FThreadPool() )
 {
 }
 
 FOdysseyLayerStack::FOdysseyLayerStack(int iWidth,int iHeight)
-//: IOdysseySerializable( 1 ) //Version of FOdysseyLayerStack
-    : mResultBlock(NULL)
-    ,mTempBlock(NULL)
-    ,mLayers(new FOdysseyNTree<IOdysseyLayer*>(NULL))
-    ,mCurrentLayer(mLayers)
-    ,mWidth(iWidth)
-    ,mHeight(iHeight)
-    ,mTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8)
-    ,mIsInitialized(false)
+    : mResultBlock( nullptr )
+    , mTempBlock( nullptr )
+    , mLayers( new  FOdysseyNTree< IOdysseyLayer* >( nullptr ) )
+    , mCurrentLayer( mLayers )
+    , mWidth( iWidth )
+    , mHeight( iHeight )
+    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
+    , mIsInitialized( false )
     , mHostDeviceInfo( ::ul3::FHostDeviceInfo::Detect() )
     , mThreadPool( new  ::ul3::FThreadPool() )
 {
-    Init(mWidth,mHeight);
+    Init( mWidth, mHeight );
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 
 void
-FOdysseyLayerStack::Init(int iWidth,int iHeight)
+FOdysseyLayerStack::Init( int iWidth, int iHeight )
 {
-    if(mIsInitialized)
+    if( mIsInitialized )
         return;
 
     mWidth = iWidth;
@@ -74,21 +67,21 @@ FOdysseyLayerStack::Init(int iWidth,int iHeight)
     InitResultAndTempBlock();
 
     //Is not 0 if it comes from an existing OdysseyTexture
-    if(mLayers->GetNodes()->Num() == 0)
-        AddImageLayer(mLayers);
+    if( mLayers->GetNodes()->Num() == 0 )
+        AddImageLayer( mLayers );
 
     mCurrentLayer = mLayers->GetNodes()->GetData()[0];
 
-    mDrawingUndo = new FOdysseyDrawingUndo(this);
+    mDrawingUndo = new  FOdysseyDrawingUndo( this );
 }
 
 void
-FOdysseyLayerStack::InitFromData(FOdysseyBlock* iData)
+FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
 {
-    if(mIsInitialized)
+    if( mIsInitialized )
         return;
 
-    checkf(iData,TEXT("Cannot Initialize Layer Stack from NULL data"));
+    checkf( iData, TEXT( "Cannot Initialize Layer Stack from NULL data" ) );
 
     mWidth = iData->Width();
     mHeight = iData->Height();
@@ -98,18 +91,18 @@ FOdysseyLayerStack::InitFromData(FOdysseyBlock* iData)
     InitResultAndTempBlock();
 
     //Is not 0 if it comes from an existing OdysseyTexture
-    if(mLayers->GetNodes()->Num() == 0)
-        AddImageLayerFromData(iData,mLayers);
+    if( mLayers->GetNodes()->Num() == 0 )
+        AddImageLayerFromData( iData,mLayers );
 
     mCurrentLayer = mLayers->GetNodes()->GetData()[0];
 
-    mDrawingUndo = new FOdysseyDrawingUndo(this);
+    mDrawingUndo = new  FOdysseyDrawingUndo( this );
 }
 
 FOdysseyBlock*
 FOdysseyLayerStack::GetResultBlock()
 {
-    return mResultBlock;
+    return  mResultBlock;
 }
 
 void
@@ -333,7 +326,7 @@ FOdysseyLayerStack::ComputeResultBlock( const ::ul3::FRect& iRect ) {
 void
 FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ul3::eBlendingMode iMode ,::ul3::eAlphaMode iAlphaMode ) {
     ::ul3::FVec2F pos( iRect.x, iRect.y );
-                            ::ul3::FVec2I posi( pos.x, pos.y );
+    ::ul3::FVec2I posi( pos.x, pos.y );
 
     uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mResultBlock->GetBlock(), iRect );
@@ -561,9 +554,9 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ul3::FRect& iRect,
 void
 FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ul3::eBlendingMode iMode ,::ul3::eAlphaMode iAlphaMode )
 {
-    ::ul3::FPerformanceOptions performanceOptions;
-    performanceOptions.desired_workers = 1;
-    ::ul3::FClearFillContext::ClearRect(mResultBlock->GetBlock(),iRect,performanceOptions,false);
+    ::ul3::FVec2F pos( iRect.x, iRect.y );
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mResultBlock->GetBlock(), iRect );
 
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
     mLayers->DepthFirstSearchTree(&layers,false);
@@ -575,9 +568,21 @@ FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ul3::FRect& iRect, FO
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
 
     if(imageLayer && iTempBuffer)
-        ::ul3::FBlendingContext::Blend(iTempBuffer->GetBlock(),imageLayer->GetBlock()->GetBlock(),iRect,iMode,imageLayer->IsAlphaLocked() ? ::ul3::eAlphaMode::kBack : iAlphaMode,iOpacity,performanceOptions,false);
+        ::ul3::Blend( mThreadPool
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , mHostDeviceInfo
+                    , ULIS3_NOCB
+                    , iTempBuffer->GetBlock()
+                    , imageLayer->GetBlock()->GetBlock()
+                    , iRect
+                    , pos
+                    , ULIS3_NOAA
+                    , iMode
+                    , imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : iAlphaMode
+                    , iOpacity );
 
-    ComputeResultBlock(iRect);
+    ComputeResultBlock( iRect );
 }
 
 int
@@ -604,7 +609,7 @@ FOdysseyLayerStack::Size() const
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer(GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer(this, GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
     mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -612,7 +617,7 @@ FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer(GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( this, GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
     mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -622,12 +627,21 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IO
 {
     assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
 
-    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
-    ::ul3::FMakeContext::CopyBlockInto(iData->GetBlock(),explicitCopyResized->GetBlock());
+    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat);
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Copy( mThreadPool
+               , ULIS3_BLOCKING
+               , perfIntent
+               , mHostDeviceInfo
+               , ULIS3_NOCB
+               , iData->GetBlock()
+               , explicitCopyResized->GetBlock()
+               , iData->GetBlock()->Rect()
+               , ::ul3::FVec2I( 0, 0 ) );
 
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer(iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
-    iPosition->AddNode(layer,iAtIndex);
-    return layer;
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( this, iName.IsNone() ? GetNextLayerName() : iName, explicitCopyResized );
+    iPosition->AddNode( layer,iAtIndex );
+    return  layer;
 }
 
 FOdysseyImageLayer*
@@ -636,9 +650,20 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int i
     assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
 
     FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
-    ::ul3::FMakeContext::CopyBlockInto(iData->GetBlock(),explicitCopyResized->GetBlock());
 
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer(iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
+
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Copy( mThreadPool
+               , ULIS3_BLOCKING
+               , perfIntent
+               , mHostDeviceInfo
+               , ULIS3_NOCB
+               , iData->GetBlock()
+               , explicitCopyResized->GetBlock()
+               , iData->GetBlock()->Rect()
+               , ::ul3::FVec2I( 0, 0 ) );
+
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( this, iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
     mCurrentLayer->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -649,7 +674,7 @@ FOdysseyLayerStack::AddFolderLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,FN
     if(iName == FName())
         iName = GetNextLayerName();
 
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer(iName);
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( this, iName);
     mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -660,7 +685,7 @@ FOdysseyLayerStack::AddFolderLayer(FName iName,int iAtIndex)
     if(iName == FName())
         iName = GetNextLayerName();
 
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer(iName);
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( this, iName);
     mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -746,24 +771,34 @@ FOdysseyLayerStack::DeleteLayer(IOdysseyLayer* iLayerToDelete)
 
 void FOdysseyLayerStack::MergeDownLayer(IOdysseyLayer* iLayerToMergeDown)
 {
-    ::ul3::FPerformanceOptions performanceOptions;
-    performanceOptions.desired_workers = 1;
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
     mLayers->DepthFirstSearchTree(&layers,false);
 
-    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock(),performanceOptions,false);
-    for(int i = 0; i < layers.Num(); i++)
-    {
-        if(layers[i] == iLayerToMergeDown && layers[i]->GetType() == IOdysseyLayer::eType::kImage && i != (layers.Num() - 1) && layers[i + 1]->GetType() == IOdysseyLayer::eType::kImage)
-        {
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
+
+    for(int i = 0; i < layers.Num(); i++) {
+        if( layers[i] == iLayerToMergeDown && layers[i]->GetType() == IOdysseyLayer::eType::kImage && i != (layers.Num() - 1) && layers[i + 1]->GetType() == IOdysseyLayer::eType::kImage ) {
             FOdysseyImageLayer* imageLayer1 = static_cast<FOdysseyImageLayer*>(layers[i]);
             FOdysseyImageLayer* imageLayer2 = static_cast<FOdysseyImageLayer*>(layers[i + 1]);
 
-            if(imageLayer1 && imageLayer2)
-            {
-                ::ul3::FBlendingContext::Blend(imageLayer1->GetBlock()->GetBlock(),imageLayer2->GetBlock()->GetBlock(),::ul3::FRect(0,0,mWidth,mHeight),imageLayer1->GetBlendingMode(),::ul3::eAlphaMode::kNormal,1.f,performanceOptions,false);
+            if(imageLayer1 && imageLayer2) {
+                ::ul3::Blend( mThreadPool
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , mHostDeviceInfo
+                            , ULIS3_NOCB
+                            , imageLayer1->GetBlock()->GetBlock()
+                            , imageLayer2->GetBlock()->GetBlock()
+                            , canvasRect
+                            , ::ul3::FVec2F( 0, 0 )
+                            , ULIS3_NOAA
+                            , imageLayer1->GetBlendingMode()
+                            , ::ul3::AM_NORMAL
+                            , imageLayer1->GetOpacity() );
             }
-            DeleteLayer(layers[i]);
+            DeleteLayer( layers[i] );
             break;
         }
     }
@@ -794,7 +829,9 @@ void FOdysseyLayerStack::DuplicateLayer(IOdysseyLayer* iLayerToDuplicate)
     if(nodeToDuplicate == NULL)
         return;
 
-    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock());
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
 
     if(nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kImage)
     {
@@ -850,7 +887,9 @@ FOdysseyLayerStack::ClearCurrentLayer()
     if(mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage)
     {
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
-        ::ul3::FClearFillContext::Clear(imageLayer->GetBlock()->GetBlock());
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
+        ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), canvasRect );
         ComputeResultBlock();
     }
 }
@@ -861,7 +900,9 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
     if(mCurrentLayer->GetNodeContent()->GetType() == FOdysseyImageLayer::eType::kImage)
     {
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
-        ::ul3::FClearFillContext::Fill(imageLayer->GetBlock()->GetBlock(),iColor);
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
+        ::ul3::Fill( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), iColor, canvasRect );
         ComputeResultBlock();
     }
 }
@@ -870,10 +911,11 @@ TArray< TSharedPtr< FText > >
 FOdysseyLayerStack::GetBlendingModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    for(int i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i)
-        array.Add(MakeShared< FText >(FText::FromString(ANSI_TO_TCHAR(::ul3::kwBlendingMode[i]))));
+    const int max = static_cast< int >( ::ul3::NUM_BLENDING_MODES );
+    for( int i = 0; i < max; ++i )
+        array.Add(MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) ) ) );
 
-    return array;
+    return  array;
 }
 
 ETextureSourceFormat
@@ -889,7 +931,7 @@ FOdysseyLayerStack::GetHostDeviceInfo() const {
 
 ::ul3::FThreadPool*
 FOdysseyLayerStack::GetThreadPool() const {
-    return  mThreadPool
+    return  mThreadPool;
 }
 
 //--------------------------------------------------------------------------------------
@@ -911,8 +953,11 @@ FOdysseyLayerStack::InitResultAndTempBlock()
 
     mResultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
     mTempBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
-    ::ul3::FClearFillContext::Clear(mResultBlock->GetBlock());
-    ::ul3::FClearFillContext::Clear(mTempBlock->GetBlock());
+
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, mTempBlock->GetBlock(), canvasRect );
 }
 
 FOdysseyBlock*
@@ -920,11 +965,11 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
 {
     checkf(iLayers != NULL,TEXT("Passed NullPtr to ComputeBlockOfLayers of FOdysseyLayerStack"));
 
-    ::ul3::FPerformanceOptions performanceOptions;
-    performanceOptions.desired_workers = 1;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
 
     FOdysseyBlock* resultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
-    ::ul3::FClearFillContext::Clear(resultBlock->GetBlock(),performanceOptions,false);
+    ::ul3::Clear( mThreadPool, ULIS3_BLOCKING, perfIntent, mHostDeviceInfo, ULIS3_NOCB, resultBlock->GetBlock(), canvasRect );
 
     if(!iLayers->GetNodeContent()->IsVisible())
         return resultBlock;
@@ -938,8 +983,21 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
         if(type == IOdysseyLayer::eType::kImage && layers[i]->IsVisible())
         {
             FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layers[i]);
+            ::ul3::Blend( mThreadPool
+                        , ULIS3_BLOCKING
+                        , perfIntent
+                        , mHostDeviceInfo
+                        , ULIS3_NOCB
+                        , imageLayer->GetBlock()->GetBlock()
+                        , resultBlock->GetBlock()
+                        , canvasRect
+                        , ::ul3::FVec2F( 0, 0 )
+                        , ULIS3_NOAA
+                        , imageLayer->GetBlendingMode()
+                        , ::ul3::AM_NORMAL
+                        , imageLayer->GetOpacity() );
 
-            ::ul3::FBlendingContext::Blend(imageLayer->GetBlock()->GetBlock(),resultBlock->GetBlock(),::ul3::FRect(0,0,mWidth,mHeight),imageLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,imageLayer->GetOpacity(),performanceOptions,false);
+
         } else if(type == IOdysseyLayer::eType::kFolder)
         {
             FOdysseyNTree<IOdysseyLayer*>* folderNode = mLayers->FindNode(layers[i]);
@@ -950,7 +1008,19 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
             i-=layersInFolder.Num();
 
             if(folderLayer->IsVisible())
-                ::ul3::FBlendingContext::Blend(ComputeBlockOfLayers(folderNode)->GetBlock(),resultBlock->GetBlock(),::ul3::FRect(0,0,mWidth,mHeight),folderLayer->GetBlendingMode(),::ul3::eAlphaMode::kNormal,folderLayer->GetOpacity(),performanceOptions,false);
+                ::ul3::Blend( mThreadPool
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , mHostDeviceInfo
+                            , ULIS3_NOCB
+                            , ComputeBlockOfLayers(folderNode)->GetBlock()
+                            , resultBlock->GetBlock()
+                            , canvasRect
+                            , ::ul3::FVec2F( 0, 0 )
+                            , ULIS3_NOAA
+                            , folderLayer->GetBlendingMode()
+                            , ::ul3::AM_NORMAL
+                            , folderLayer->GetOpacity() );
         }
     }
 
@@ -1126,7 +1196,14 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress,uint8 iXTile,uint8 iYTile,uns
     if(imageLayer == nullptr)
         return false;
 
-    mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(iXTile * TILE_SIZE,iYTile * TILE_SIZE,iSizeX,iSizeY));
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    mTileData = ::ul3::XCopy( mLayerStackPtr->GetThreadPool()
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , mLayerStackPtr->GetHostDeviceInfo()
+                            , ULIS3_NOCB
+                            , imageLayer->GetBlock()->GetBlock()
+                            , ::ul3::FRect( iXTile * TILE_SIZE, iYTile * TILE_SIZE, iSizeX, iSizeY ) );
 
     TArray<uint8> array = TArray<uint8>();
     array.AddUninitialized(mTileData->BytesTotal());
@@ -1156,7 +1233,14 @@ FOdysseyDrawingUndo::SaveData(uint8 iXTile,uint8 iYTile,unsigned int iSizeX,unsi
         return false;
 
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mLayerStackPtr->GetCurrentLayer()->GetNodeContent());
-    mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(iXTile * TILE_SIZE,iYTile * TILE_SIZE,iSizeX,iSizeY));
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    mTileData = ::ul3::XCopy( mLayerStackPtr->GetThreadPool()
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , mLayerStackPtr->GetHostDeviceInfo()
+                            , ULIS3_NOCB
+                            , imageLayer->GetBlock()->GetBlock()
+                            , ::ul3::FRect( iXTile * TILE_SIZE, iYTile * TILE_SIZE, iSizeX, iSizeY ) );
 
     TArray<uint8> array = TArray<uint8>();
     array.AddUninitialized(mTileData->BytesTotal());
@@ -1237,8 +1321,15 @@ FOdysseyDrawingUndo::LoadData()
         //---
 
         //Useless, I just want mTileData at the right size for the next undo, to change
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         if(i == 0)
-            mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
+            mTileData = ::ul3::XCopy( mLayerStackPtr->GetThreadPool()
+                                    , ULIS3_BLOCKING
+                                    , perfIntent
+                                    , mLayerStackPtr->GetHostDeviceInfo()
+                                    , ULIS3_NOCB
+                                    , imageLayer->GetBlock()->GetBlock()
+                                    , ::ul3::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ) );
 
         if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
@@ -1247,7 +1338,15 @@ FOdysseyDrawingUndo::LoadData()
                 *(mTileData->DataPtr() + j) = mData[j];
             }
 
-            ::ul3::FMakeContext::CopyBlockRectInto(mTileData,imageLayer->GetBlock()->GetBlock(),::ul3::FRect(0,0,sizeX,sizeY),::ul3::FPoint(tileX * TILE_SIZE,tileY * TILE_SIZE));
+            ::ul3::Copy( mLayerStackPtr->GetThreadPool()
+                       , ULIS3_BLOCKING
+                       , perfIntent
+                       , mLayerStackPtr->GetHostDeviceInfo()
+                       , ULIS3_NOCB
+                       , mTileData
+                       , imageLayer->GetBlock()->GetBlock()
+                       , ::ul3::FRect( 0, 0, sizeX, sizeY )
+                       , ::ul3::FVec2I( tileX * TILE_SIZE, tileY * TILE_SIZE ) );
             mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
         }
     }
@@ -1305,8 +1404,15 @@ FOdysseyDrawingUndo::Redo()
         //---
 
         //Useless, I just want mTileData at the right size for the next undo, to change
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         if(i == 0)
-            mTileData = ::ul3::FMakeContext::CopyBlockRect(imageLayer->GetBlock()->GetBlock(),::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
+            mTileData = ::ul3::XCopy( mLayerStackPtr->GetThreadPool()
+                                    , ULIS3_BLOCKING
+                                    , perfIntent
+                                    , mLayerStackPtr->GetHostDeviceInfo()
+                                    , ULIS3_NOCB
+                                    , imageLayer->GetBlock()->GetBlock()
+                                    , ::ul3::FRect( tileX * TILE_SIZE, tileY * TILE_SIZE, sizeX, sizeY ) );
 
         if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
@@ -1315,7 +1421,15 @@ FOdysseyDrawingUndo::Redo()
                 *(mTileData->DataPtr() + j) = mData[j];
             }
 
-            ::ul3::FMakeContext::CopyBlockRectInto(mTileData,imageLayer->GetBlock()->GetBlock(),::ul3::FRect(0,0,sizeX,sizeY),::ul3::FPoint(tileX * sizeX,tileY * sizeY));
+            ::ul3::Copy( mLayerStackPtr->GetThreadPool()
+                       , ULIS3_BLOCKING
+                       , perfIntent
+                       , mLayerStackPtr->GetHostDeviceInfo()
+                       , ULIS3_NOCB
+                       , mTileData
+                       , imageLayer->GetBlock()->GetBlock()
+                       , ::ul3::FRect( 0, 0, sizeX, sizeY )
+                       , ::ul3::FVec2I( tileX * TILE_SIZE, tileY * TILE_SIZE ) );
             mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX * TILE_SIZE,tileY * TILE_SIZE,sizeX,sizeY));
         }
     }
