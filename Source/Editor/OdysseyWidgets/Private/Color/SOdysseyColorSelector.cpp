@@ -152,7 +152,7 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
 void
-SOdysseyColorSelector::SetColor( const ::ul3::CColor& iColor )
+SOdysseyColorSelector::SetColor( const ::ul3::FPixelValue& iColor )
 {
     adv_color_wheel->SetColor( iColor );
 }
@@ -280,21 +280,21 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int r = HexStringToDecimal( str_r );
     int g = HexStringToDecimal( str_g );
     int b = HexStringToDecimal( str_b );
-    ::ul3::CColor newColor( r, g, b );
+    ::ul3::FPixelValue newColor = ::ul3::FPixelValue::FromRGBA8( r, g, b );
     adv_color_wheel->SetColor( newColor );
 }
 
 
 void
-SOdysseyColorSelector::HandleWheelColorChangedCallback( const ::ul3::CColor& iColor )
+SOdysseyColorSelector::HandleWheelColorChangedCallback( const ::ul3::FPixelValue& iColor )
 {
     //Can be null so we have to check
     if( !hex_editable_text_box )
         return;
 
-    uint8 r = iColor.Red();
-    uint8 g = iColor.Green();
-    uint8 b = iColor.Blue();
+    uint8 r = iColor.Red8();
+    uint8 g = iColor.Green8();
+    uint8 b = iColor.Blue8();
     FString str_r = DecimalToHexString( r );
     FString str_g = DecimalToHexString( g );
     FString str_b = DecimalToHexString( b );
