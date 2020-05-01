@@ -21,6 +21,10 @@ IOdysseyChannelSlider::Construct( const FArguments& InArgs )
     Init();
 }
 
+IOdysseyChannelSlider::IOdysseyChannelSlider( uint32 iFormat )
+    : mColor( iFormat )
+{
+}
 
 void
 IOdysseyChannelSlider::Init()

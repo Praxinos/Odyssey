@@ -26,12 +26,12 @@ struct  FOdysseyBrushState
 {
     FOdysseyBlock*                          target_temp_buffer;
     FOdysseyStrokePoint                     point;
-    ::ul3::CColor                          color;
+    ::ul3::CColor                           color;
     float                                   size_modifier;
     float                                   opacity_modifier;
     float                                   flow_modifier;
-    ::ul3::eBlendingMode                   blendingMode_modifier;
-    ::ul3::eAlphaMode                      alphaMode_modifier;
+    ::ul3::eBlendingMode                    blendingMode_modifier;
+    ::ul3::eAlphaMode                       alphaMode_modifier;
     float                                   step;
     float                                   smoothing_strength;
     int                                     currentPointIndex;

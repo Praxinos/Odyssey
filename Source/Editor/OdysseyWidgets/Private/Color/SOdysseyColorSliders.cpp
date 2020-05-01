@@ -66,7 +66,7 @@ SOdysseyColorSliders::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
 void
-SOdysseyColorSliders::SetColor( const ::ul3::CColor& iColor )
+SOdysseyColorSliders::SetColor( const ::ul3::FPixelValue& iColor )
 {
     for( int i = 0; i < sliders_options.Num(); ++i )
     {
@@ -81,7 +81,7 @@ void
 SOdysseyColorSliders::GenerateMenu()
 {
     sliders_options.Add( MakeShared< FSliderOption >( "RGB",    true,   SNew( FOdysseyGroupChannelSlider_RGB  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
-    sliders_options.Add( MakeShared< FSliderOption >( "HSV",    true,  SNew( FOdysseyGroupChannelSlider_HSV  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
+    sliders_options.Add( MakeShared< FSliderOption >( "HSV",    true,   SNew( FOdysseyGroupChannelSlider_HSV  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
     sliders_options.Add( MakeShared< FSliderOption >( "HSL",    false,  SNew( FOdysseyGroupChannelSlider_HSL  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
     sliders_options.Add( MakeShared< FSliderOption >( "CMYK",   false,  SNew( FOdysseyGroupChannelSlider_CMYK ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
 
@@ -141,7 +141,7 @@ SOdysseyColorSliders::GenerateContents()
 
 
 void
-SOdysseyColorSliders::HandleColorChanged( const ::ul3::CColor& iColor )
+SOdysseyColorSliders::HandleColorChanged( const ::ul3::FPixelValue& iColor )
 {
     for( int i = 0; i < sliders_options.Num(); ++i )
     {

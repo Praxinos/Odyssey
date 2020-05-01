@@ -20,7 +20,7 @@
 
 class IOdysseyGroupChannelSlider;
 
-DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::CColor& );
+DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
 
 class ODYSSEYWIDGETS_API SOdysseyColorSliders : public SCompoundWidget
 {
@@ -52,7 +52,7 @@ public:
 
 public:
     // Public Callbacks
-    void SetColor( const ::ul3::CColor& iColor );
+    void SetColor( const ::ul3::FPixelValue& iColor );
 
 private:
     // Private Callbacks
@@ -60,7 +60,7 @@ private:
     void ItemChanged( int index, ECheckBoxState iState );
 
     void GenerateContents();
-    void HandleColorChanged( const ::ul3::CColor& iColor );
+    void HandleColorChanged( const ::ul3::FPixelValue& iColor );
 
 private:
     // Private data members
