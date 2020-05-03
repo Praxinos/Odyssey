@@ -79,7 +79,10 @@ private:
 
 private:
     // Private IOdysseyChannelSlider API
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor );
+    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) {
+        ::ul3::Conv( iColor, mColor );
+    }
+
     ::ul3::FPixelValue GetColorForProportion( float t ) const;
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const;
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const = 0;
@@ -101,7 +104,7 @@ private:
 
 /////////////////////////////////////////////////////
 // Inheritance Utility Define
-#define ODYSSEY_CHANNEL_SLIDER( iClass )                    \
+#define ODYSSEY_CHANNEL_SLIDER( iClass, iFormat )           \
 public:                                                     \
     SLATE_BEGIN_ARGS( iClass )                              \
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ARGS                  \
@@ -117,6 +120,8 @@ public:                                                     \
         OnChannelChangedCallback = InArgs._OnChannelChanged;\
         Init();                                             \
     }                                                       \
+                                                            \
+    iClass () : IOdysseyChannelSlider( iFormat ) {}         \
                                                             \
     static int GetMinValue()                                \
     {                                                       \
@@ -134,13 +139,9 @@ public:                                                     \
 // R
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_R : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_R )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_R, ULIS3_FORMAT_RGBAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToRGB();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
         color.SetRedF( t );
     }
@@ -159,13 +160,9 @@ public:
 // G
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_G : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_G )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_G, ULIS3_FORMAT_RGBAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToRGB();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
         color.SetGreenF( t );
     }
@@ -184,13 +181,9 @@ public:
 // B
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_B : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_B )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_B, ULIS3_FORMAT_RGBAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToRGB();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
         color.SetBlueF( t );
     }
@@ -209,13 +202,9 @@ public:
 // A
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_A : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_A )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_A, ULIS3_FORMAT_RGBAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToRGB();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
         color.SetAlphaF( t );
     }
@@ -237,19 +226,18 @@ public:
 // H
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_H : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_H )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_H, ULIS3_FORMAT_HSVAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToHSV();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetHSVF( t, 1, 1 );
+        color.SetHueF( t );
+        color.SetSaturationF( 1.f );
+        color.SetValueF( 1.f );
+        color.SetAlphaF( 1.f );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
-        return  mColor.HSVHueF();
+        return  mColor.HueF();
     }
 
 public:
@@ -262,19 +250,15 @@ public:
 // S
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_S : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_S )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_S, ULIS3_FORMAT_HSVAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToHSV();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetHSVF( color.HSVHueF(), t, color.ValueF() );
+        color.SetSaturationF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
-        return  mColor.HSVSaturationF();
+        return  mColor.SaturationF();
     }
 
 public:
@@ -287,15 +271,11 @@ public:
 // V
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_V : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_V )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_V, ULIS3_FORMAT_HSVAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToHSV();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetHSVF( color.HSVHueF(), color.HSVSaturationF(), t );
+        color.SetValueF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
@@ -315,19 +295,17 @@ public:
 // H
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_H : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_H )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_H, ULIS3_FORMAT_HSLAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToHSL();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetHSLF( t, 1, 0.5 );
+        color.SetHueF( t );
+        color.SetSaturationF( 1.f );
+        color.SetLightnessF( 0.5f );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
-        return  mColor.HSLHueF();
+        return  mColor.HueF();
     }
 
 public:
@@ -340,19 +318,15 @@ public:
 // S
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_S : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_S )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_S, ULIS3_FORMAT_HSLAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToHSL();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetHSLF( color.HSLHueF(), t, color.LightnessF() );
+        color.SetSaturationF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
-        return  mColor.HSLSaturationF();
+        return  mColor.SaturationF();
     }
 
 public:
@@ -365,15 +339,11 @@ public:
 // L
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_L : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_L )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_L, ULIS3_FORMAT_HSLAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToHSL();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetHSLF( color.HSLHueF(), color.HSLSaturationF(), t );
+        color.SetLightnessF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
@@ -394,15 +364,11 @@ public:
 // C
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_C : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_C )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_C, ULIS3_FORMAT_CMYKAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToCMYK();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetCMYKF( t, color.MagentaF(), color.YellowF(), color.KeyF() );
+        color.SetCyanF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
@@ -419,15 +385,10 @@ public:
 // M
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_M : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_M )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_M, ULIS3_FORMAT_CMYKAF )
 
-private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToCMYK();
-    }
-
-    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetCMYKF( color.CyanF(), t, color.YellowF(), color.KeyF() );
+private:virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetMagentaF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
@@ -444,15 +405,11 @@ public:
 // Y
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Y : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Y )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Y, ULIS3_FORMAT_CMYKAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToCMYK();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetCMYKF( color.CyanF(), color.MagentaF(), t, color.KeyF() );
+        color.SetYellowF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
@@ -469,15 +426,11 @@ public:
 // K
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_K : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_K )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_K, ULIS3_FORMAT_CMYKAF )
 
 private:
-    virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) override {
-        mColor = iColor.ToCMYK();
-    }
-
     virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
-        color.SetCMYKF( color.CyanF(), color.MagentaF(), color.YellowF(), t );
+        color.SetKeyF( t );
     }
 
     virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
@@ -749,11 +702,14 @@ public:
             sliders[i]->SetColor( iColor );
         }
         DisableCallbackPropagation = false;
-        mColor = iColor;
+        ::ul3::Conv( iColor, mColor );
     }
 
     virtual void ComputeColorOnChanged() = 0;
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor ) = 0;
+    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor ) {
+        ::ul3::Conv( iColor, mColor );
+    }
+
 };
 
 
@@ -801,14 +757,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupCh
 
     virtual void ComputeColorOnChanged()
     {
-        mColor = ::ul3::FPixelValue::FromRGBF( sliders[0]->GetValue()
-                                        , sliders[1]->GetValue()
-                                        , sliders[2]->GetValue() );
-    }
-
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor )
-    {
-        mColor = iColor.ToRGB();
+        ::ul3::Conv( ::ul3::FPixelValue::FromRGBAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue() ), mColor );
     }
 };
 
@@ -836,16 +785,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupC
 
     virtual void ComputeColorOnChanged()
     {
-        mColor = ::ul3::FPixelValue::FromRGBF( sliders[0]->GetValue()
-                                        , sliders[1]->GetValue()
-                                        , sliders[2]->GetValue()
-                                        , sliders[3]->GetValue() );
-    }
-
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor )
-    {
-        mColor = iColor.ToRGB();
-        mColor.SetAlphaF( sliders[3]->GetValue() );
+        ::ul3::Conv( ::ul3::FPixelValue::FromRGBAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue(), sliders[3]->GetValue() ), mColor );
     }
 };
 
@@ -867,16 +807,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupCha
 
     virtual void ComputeColorOnChanged()
     {
-        mColor = ::ul3::FPixelValue::FromHSVF( sliders[0]->GetValue()
-                                        , 1.f
-                                        , 1.f
-                                        , sliders[1]->GetValue() );
-    }
-
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor )
-    {
-        mColor = iColor.ToRGB();
-        mColor.SetAlphaF( sliders[1]->GetValue() );
+        ::ul3::Conv( ::ul3::FPixelValue::FromHSVAF( sliders[0]->GetValue(), 1.f, 1.f, sliders[1]->GetValue() ), mColor );
     }
 };
 
@@ -901,14 +832,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupCh
 
     virtual void ComputeColorOnChanged()
     {
-        mColor = ::ul3::FPixelValue::FromHSVF( sliders[0]->GetValue()
-                                        , sliders[1]->GetValue()
-                                        , sliders[2]->GetValue() );
-    }
-
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor )
-    {
-        mColor = iColor.ToHSV();
+        ::ul3::Conv( ::ul3::FPixelValue::FromHSVAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue() ), mColor );
     }
 };
 
@@ -934,14 +858,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupCh
 
     virtual void ComputeColorOnChanged()
     {
-        mColor = ::ul3::FPixelValue::FromHSLF( sliders[0]->GetValue()
-                                        , sliders[1]->GetValue()
-                                        , sliders[2]->GetValue() );
-    }
-
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor )
-    {
-        mColor = iColor.ToHSL();
+        ::ul3::Conv( ::ul3::FPixelValue::FromHSLAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue() ), mColor );
     }
 };
 
@@ -970,15 +887,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupC
 
     virtual void ComputeColorOnChanged()
     {
-        mColor = ::ul3::FPixelValue::FromCMYKAF( sliders[0]->GetValue()
-                                               , sliders[1]->GetValue()
-                                               , sliders[2]->GetValue()
-                                               , sliders[3]->GetValue() );
-    }
-
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor )
-    {
-        mColor = iColor.ToCMYK();
+        ::ul3::Conv( ::ul3::FPixelValue::FromCMYKAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue(), sliders[3]->GetValue() ), mColor );
     }
 };
 

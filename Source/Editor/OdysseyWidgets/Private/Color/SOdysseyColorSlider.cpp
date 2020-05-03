@@ -33,7 +33,6 @@ IOdysseyChannelSlider::Init()
     cursor_t = 0;
     cursor_pos = FVector2D( 0, 0 );
     cursor_size = FVector2D( 1, 1 );
-    mColor = ::ul3::CColor( 0, 0, 0 );
     bMarkedAsInvalid = false;
 }
 
@@ -83,32 +82,23 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {
-    ::ul3::FClearFillContext::Fill( surface->Block()->GetBlock(), ::ul3::CColor::FromRGB( 50, 50, 50 ), ::ul3::FPerformanceOptions(), false );
+    // TODO: Check to avoid recomputing ::ul3::FHostDeviceInfo::Detect() everytime
+    ::ul3::Fill( nullptr, ULIS3_BLOCKING, ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42, ::ul3::FHostDeviceInfo::Detect(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );
 
     int range = InternalSize.X - 2;
     for( int x = 1; x < InternalSize.X - 2; ++x )
     {
         float t = float( x ) / float( range );
-        ::ul3::CColor res = GetColorForProportion( t ).ToRGB();
+        ::ul3::FPixelValue res = ::ul3::Conv( GetColorForProportion( t ), ULIS3_FORMAT_RGBA8 );
         for( int y = 1; y < InternalSize.Y - 1; ++y )
         {
-            surface->Block()->GetBlock()->SetPixelColor( x, y, res );
+            surface->Block()->GetBlock()->PixelProxy( x,y ).AssignMemoryUnsafe( res );
         }
     }
     surface->Invalidate();
 
-    ::ul3::FPainterContext::DrawRectangle( cursor_surface->Block()->GetBlock()
-                                          , ::ul3::FPoint( 0, 0 )
-                                          , ::ul3::FPoint( cursor_surface->Width(), cursor_surface->Height() )
-                                          , ::ul3::CColor( 5, 5, 5 )
-                                          , false );
-
-    ::ul3::FPainterContext::DrawRectangle( cursor_surface->Block()->GetBlock()
-                                          , ::ul3::FPoint( 1, 1 )
-                                          , ::ul3::FPoint( cursor_surface->Width() - 1, cursor_surface->Height() - 1 )
-                                          , ::ul3::CColor( 255, 255, 255 )
-                                          , false );
-
+    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 5, 5, 5, 255 } ), ::ul3::FRect( 0, 0, cursor_surface->Width(), cursor_surface->Height() ) );
+    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 255, 255, 255 } ), ::ul3::FRect( 1, 1, cursor_surface->Width()-1, cursor_surface->Height()-1 ) );
     cursor_surface->Invalidate();
 }
 
@@ -116,7 +106,7 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Public IOdysseyChannelSlider API
 void
-IOdysseyChannelSlider::SetColor( const ::ul3::CColor& iColor )
+IOdysseyChannelSlider::SetColor( const ::ul3::FPixelValue& iColor )
 {
     if( mColor == iColor )
         return;
@@ -135,7 +125,7 @@ IOdysseyChannelSlider::SetPosition( float iPos )
         return;
 
     cursor_t = iPos;
-    mColor = GetColorForProportion( cursor_t );
+    ::ul3::Conv( GetColorForProportion( cursor_t ), mColor );
     bMarkedAsInvalid = true;
     OnChannelChangedCallback.ExecuteIfBound( cursor_t );
 }
@@ -189,24 +179,18 @@ IOdysseyChannelSlider::ProcessMouseAction( FVector2D iPos )
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Private IOdysseyChannelSlider API
-void
-IOdysseyChannelSlider::SetColor_Imp( const ::ul3::CColor& iColor )
-{
-    mColor = iColor.ToRGB();
-}
 
-
-::ul3::CColor
+::ul3::FPixelValue
 IOdysseyChannelSlider::GetColorForProportion( float t ) const
 {
-    ::ul3::CColor result = mColor;
+    ::ul3::FPixelValue result( mColor );
     SetColorForProportion_Imp( result, t );
     return result;
 }
 
 
 void
-IOdysseyChannelSlider::SetColorForProportion_Imp( ::ul3::CColor& color, float t ) const
+IOdysseyChannelSlider::SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const
 {
     color.SetRedF( t );
 }
