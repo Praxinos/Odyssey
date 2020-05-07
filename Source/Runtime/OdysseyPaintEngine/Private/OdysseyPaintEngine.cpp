@@ -47,8 +47,8 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mSizeModifier( 20.f )
     , mOpacityModifier( 1.f )
     , mFlowModifier( 1.f )
-    , mBlendingModeModifier( ::ul3::eBlendingMode::kNormal )
-    , mAlphaModeModifier( ::ul3::eAlphaMode::kNormal )
+    , mBlendingModeModifier( ::ul3::BM_NORMAL )
+    , mAlphaModeModifier( ::ul3::AM_NORMAL )
     , mStepValue( 20.f )
 
     , mInterpolator( NULL )
@@ -819,7 +819,7 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     ::ul3::FMakeContext::CopyBlockInto( preview_shadow->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock() );
 
     ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::CColor( 220, 220, 220 ) );
-    ::ul3::FBlendingContext::Blend( preview_outline->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock(), 0, 0, ::ul3::eBlendingMode::kNormal, ::ul3::eAlphaMode::kNormal, 1.f );
+    ::ul3::FBlendingContext::Blend( preview_outline->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock(), 0, 0, ::ul3::BM_NORMAL, ::ul3::AM_NORMAL, 1.f );
 
     mBrushCursorPreviewSurface->Block()->GetBlock()->Invalidate();
     mLastBrushCursorComputationTime = current_millis;

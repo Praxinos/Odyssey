@@ -40,8 +40,8 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
                                    , brush->GetState().target_temp_buffer->GetBlock()
                                    , invalidRect.x
                                    , invalidRect.y
-                                   , ::ul3::eBlendingMode::kNormal
-                                   , ::ul3::eAlphaMode::kNormal
+                                   , ::ul3::BM_NORMAL
+                                   , ::ul3::AM_NORMAL
                                    , 1.f );
     brush->PushInvalidRect( invalidRect );
 }
@@ -232,8 +232,8 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
                                    , brush->GetState().target_temp_buffer->GetBlock()
                                    , invalidRect.x
                                    , invalidRect.y
-                                   , ::ul3::eBlendingMode::kNormal
-                                   , ::ul3::eAlphaMode::kNormal
+                                   , ::ul3::BM_NORMAL
+                                   , ::ul3::AM_NORMAL
                                    , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }
