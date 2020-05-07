@@ -28,7 +28,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     int center = ( diameter / 2 );
     int radius = center - 2;
     FOdysseyBlock round( diameter, diameter );
-    ::ul3::CColor color = brush->GetState().color;
+    ::ul3::FPixelValue color = brush->GetState().color;
     color.SetAlphaF( brush->GetState().flow_modifier );
     ::ul3::FPainterContext::DrawCircleAndres( round.GetBlock(), ::ul3::FPoint( center, center ), radius, color, true );
     ::ul3::FRect invalidRect;

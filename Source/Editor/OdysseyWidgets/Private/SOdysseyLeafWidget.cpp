@@ -196,7 +196,7 @@ SOdysseyLeafWidget::InitInternalBuffers() const
 void
 SOdysseyLeafWidget::PaintInternalBuffer( int iReason ) const
 {
-    ::ul3::FClearFillContext::Fill( surface->Block()->GetBlock(), ::ul3::CColor::FromRGB( 220, 220, 220 ), ::ul3::FPerformanceOptions(), false );
+    ::ul3::FClearFillContext::Fill( surface->Block()->GetBlock(), ::ul3::FPixelValue::FromRGBA8( 220, 220, 220 ), ::ul3::FPerformanceOptions(), false );
     surface->Invalidate();
 }
 

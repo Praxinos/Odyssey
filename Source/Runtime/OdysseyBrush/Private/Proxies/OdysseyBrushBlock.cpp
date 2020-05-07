@@ -57,7 +57,7 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
                                 for( int i = 0; i < dst->Width(); ++i )
                                 {
                                     int alpha = dst->GetBlock()->PixelColor( i, iLine ).Alpha();
-                                    ::ul3::CColor col = Color.m;
+                                    ::ul3::FPixelValue col = *(Color.m);
                                     col.SetAlpha( alpha );
                                     dst->GetBlock()->SetPixelColor( i, iLine, col );
                                 }

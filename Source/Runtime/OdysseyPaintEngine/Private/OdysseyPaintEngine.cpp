@@ -42,7 +42,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mTmpInvalidTileMap( NULL )
     , mStrokeInvalidTileMap( NULL )
 
-    , mColor( ::ul3::CColor() )
+    , mColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0, 255 ) )
 
     , mSizeModifier( 20.f )
     , mOpacityModifier( 1.f )
@@ -216,10 +216,10 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 }
 
 void
-FOdysseyPaintEngine::SetColor( const ::ul3::CColor& iColor )
+FOdysseyPaintEngine::SetColor( const ::ul3::FPixelValue& iColor )
 {
     InterruptStrokeAndStampInPlace();
-    mColor = iColor;
+    ::ul3::Conv( iColor, mColor );
     UpdateBrushInstance();
 }
 
@@ -627,7 +627,7 @@ FOdysseyPaintEngine::InterruptStrokeAndStampInPlace()
 }
 
 
-const ::ul3::CColor&
+const ::ul3::FPixelValue&
 FOdysseyPaintEngine::GetColor() const
 {
     return mColor;
@@ -679,7 +679,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     FOdysseyBrushState& state = mBrushInstance->GetState();
     state.target_temp_buffer = mTempBuffer;
     state.point = FOdysseyStrokePoint();
-    state.color = mColor;
+    ::ul3::Conv( mColor, state.color );
     state.size_modifier = mSizeModifier;
     state.opacity_modifier = mOpacityModifier;
     state.flow_modifier = mFlowModifier;
@@ -814,11 +814,10 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     FOdysseyBlock* preview_outline = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
     FOdysseyBlock* preview_shadow = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
     ::ul3::FFXContext::Convolution( preview_color->GetBlock(), preview_outline->GetBlock(), edge_kernel, true );
-    ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::CColor( 0, 0, 0 ) );
+    ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) );
     ::ul3::FFXContext::Convolution( preview_outline->GetBlock(), preview_shadow->GetBlock(), gaussian_kernel, true );
     ::ul3::FMakeContext::CopyBlockInto( preview_shadow->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock() );
-
-    ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::CColor( 220, 220, 220 ) );
+    ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::FPixelValue::FromRGBA8( 220, 220, 220 ) );
     ::ul3::FBlendingContext::Blend( preview_outline->GetBlock(), mBrushCursorPreviewSurface->Block()->GetBlock(), 0, 0, ::ul3::BM_NORMAL, ::ul3::AM_NORMAL, 1.f );
 
     mBrushCursorPreviewSurface->Block()->GetBlock()->Invalidate();

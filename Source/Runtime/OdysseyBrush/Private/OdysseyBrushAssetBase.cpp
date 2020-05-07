@@ -345,7 +345,11 @@ FOdysseyBrushColor
 UOdysseyBrushAssetBase::GetColor()
 {
     FOdysseyBrushColor col;
-    col.m = state.color;
+
+    if( col.m )
+        delete col.m;
+
+    col.m = new ::ul3::FPixelValue(state.color);
     return  col;
 }
 
