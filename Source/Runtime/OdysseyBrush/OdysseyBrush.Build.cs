@@ -22,6 +22,7 @@ public class OdysseyBrush : ModuleRules
                 "OdysseyStrokePipeline",
                 "OdysseyImaging",
                 "ULIS",
+                "ULISLoader",
             }
         );
     }

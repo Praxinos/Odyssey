@@ -20,6 +20,7 @@ public class OdysseyImaging : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "ULIS",
+                "ULISLoader",
              }
         );
 

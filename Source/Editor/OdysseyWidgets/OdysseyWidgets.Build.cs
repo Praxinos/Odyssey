@@ -37,6 +37,7 @@ public class OdysseyWidgets : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "ULIS",
+                "ULISLoader",
              }
         );
     }

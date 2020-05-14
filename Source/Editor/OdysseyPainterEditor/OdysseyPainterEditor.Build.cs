@@ -91,6 +91,7 @@ public class OdysseyPainterEditor : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "ULIS",
+                "ULISLoader",
              }
         );
 

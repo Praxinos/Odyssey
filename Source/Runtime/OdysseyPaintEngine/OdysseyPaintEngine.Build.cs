@@ -26,6 +26,7 @@ public class OdysseyPaintEngine : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "ULIS",
+                "ULISLoader",
              }
         );
 
