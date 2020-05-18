@@ -6,6 +6,13 @@
 
 class FULISLoaderModule : public IULISLoaderModule
 {
+
+public:
+    FULISLoaderModule()
+        : mHostDeviceInfo ( ::ul3::FHostDeviceInfo::Detect() )
+    {
+    }
+
 private:
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
@@ -14,9 +21,9 @@ private:
 public:
     /** IULISLoaderModule implementation */
     virtual ::ul3::FThreadPool* ThreadPool() override;
-    virtual const ::ul3::FHostDeviceInfo& HostDeviceInfo() override;
-    virtual const ::ul3::FFontEngine& FontEngine() override;
-    virtual const ::ul3::FFontRegistry& FontRegistry() override;
+    virtual const ::ul3::FHostDeviceInfo& HostDeviceInfo() const override;
+    virtual const ::ul3::FFontEngine& FontEngine() const override;
+    virtual const ::ul3::FFontRegistry& FontRegistry() const override;
 
     // Private Data Members
 private:
@@ -31,7 +38,6 @@ IMPLEMENT_MODULE( FULISLoaderModule, ULISLoader )
 
 void FULISLoaderModule::StartupModule() {
     mThreadPool     = new ::ul3::FThreadPool();
-    mHostDeviceInfo = ::ul3::FHostDeviceInfo::Detect();
     mFontEngine     = new ::ul3::FFontEngine();
     mFontRegistry   = new ::ul3::FFontRegistry( *mFontEngine );
 }
@@ -51,19 +57,19 @@ FULISLoaderModule::ThreadPool() {
 
 
 const ::ul3::FHostDeviceInfo&
-FULISLoaderModule::HostDeviceInfo() {
+FULISLoaderModule::HostDeviceInfo() const {
     return  mHostDeviceInfo;
 }
 
 
 const ::ul3::FFontEngine&
-FULISLoaderModule::FontEngine() {
-    return  mFontEngine;
+FULISLoaderModule::FontEngine() const {
+    return  *mFontEngine;
 }
 
 
 const ::ul3::FFontRegistry&
-FULISLoaderModule::FontRegistry() {
-    return  mFontRegistry;
+FULISLoaderModule::FontRegistry() const {
+    return  *mFontRegistry;
 }
 
