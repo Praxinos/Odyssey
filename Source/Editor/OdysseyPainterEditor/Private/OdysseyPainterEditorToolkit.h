@@ -143,7 +143,7 @@ protected:
     //FReply OnCheck();
     
 
-    virtual void SetColor( const ::ul3::CColor& iColor ) override;
+    virtual void SetColor( const ::ul3::FPixelValue& iColor ) override;
     
 private:
     void UndoIliad();
@@ -163,8 +163,8 @@ private:
     void HandleBrushParameterChanged();
 
     // Color Handlers
-    void HandleSelectorColorChanged( const ::ul3::CColor& iColor );
-    void HandleSlidersColorChanged( const ::ul3::CColor& iColor );
+    void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
+    void HandleSlidersColorChanged( const ::ul3::FPixelValue& iColor );
 
     // Modifiers Handlers
     void HandleSizeModifierChanged( int32 iValue );

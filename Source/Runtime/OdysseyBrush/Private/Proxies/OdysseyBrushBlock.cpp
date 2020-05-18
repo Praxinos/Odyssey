@@ -57,7 +57,7 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
                                 for( int i = 0; i < dst->Width(); ++i )
                                 {
                                     int alpha = dst->GetBlock()->PixelColor( i, iLine ).Alpha();
-                                    ::ul3::CColor col = Color.m;
+                                    ::ul3::FPixelValue col = *(Color.m);
                                     col.SetAlpha( alpha );
                                     dst->GetBlock()->SetPixelColor( i, iLine, col );
                                 }
@@ -113,8 +113,8 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
     FOdysseyBlockProxy prox;
     FString op = "Blend_" + Top.id + "_" + Back.id + "_" + FString::SanitizeFloat( Opacity ) + "_" + FString::FromInt( (int32)BlendingMode ) + "_" + FString::FromInt( (int32)AlphaMode );
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
-        ::ul3::IBlock* source  = Top.m->GetBlock();
-        ::ul3::IBlock* back    = Back.m->GetBlock();
+        ::ul3::FBlock* source  = Top.m->GetBlock();
+        ::ul3::FBlock* back    = Back.m->GetBlock();
         FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), Back.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
         ::ul3::FMakeContext::CopyBlockInto( back, dst->GetBlock() );
         ::ul3::FBlendingContext::Blend( source, dst->GetBlock(), X, Y, (::ul3::eBlendingMode)BlendingMode, (::ul3::eAlphaMode)AlphaMode, Opacity );

@@ -28,7 +28,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     int center = ( diameter / 2 );
     int radius = center - 2;
     FOdysseyBlock round( diameter, diameter );
-    ::ul3::CColor color = brush->GetState().color;
+    ::ul3::FPixelValue color = ::ul3::Conv( brush->GetState().color, ULIS3_FORMAT_RGBAF );
     color.SetAlphaF( brush->GetState().flow_modifier );
     ::ul3::FPainterContext::DrawCircleAndres( round.GetBlock(), ::ul3::FPoint( center, center ), radius, color, true );
     ::ul3::FRect invalidRect;
@@ -37,12 +37,12 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     invalidRect.w = diameter;
     invalidRect.h = diameter;
     ::ul3::FBlendingContext::Blend( round.GetBlock()
-                                   , brush->GetState().target_temp_buffer->GetBlock()
-                                   , invalidRect.x
-                                   , invalidRect.y
-                                   , ::ul3::eBlendingMode::kNormal
-                                   , ::ul3::eAlphaMode::kNormal
-                                   , 1.f );
+                                  , brush->GetState().target_temp_buffer->GetBlock()
+                                  , invalidRect.x
+                                  , invalidRect.y
+                                  , ::ul3::BM_NORMAL
+                                  , ::ul3::AM_NORMAL
+                                  , 1.f );
     brush->PushInvalidRect( invalidRect );
 }
 
@@ -232,8 +232,8 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
                                    , brush->GetState().target_temp_buffer->GetBlock()
                                    , invalidRect.x
                                    , invalidRect.y
-                                   , ::ul3::eBlendingMode::kNormal
-                                   , ::ul3::eAlphaMode::kNormal
+                                   , ::ul3::BM_NORMAL
+                                   , ::ul3::AM_NORMAL
                                    , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }

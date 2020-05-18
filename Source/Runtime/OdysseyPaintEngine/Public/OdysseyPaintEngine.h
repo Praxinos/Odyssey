@@ -34,7 +34,7 @@ public:
     void SetTextureSourceFormat( ETextureSourceFormat iTextureSourceFormat );
     void SetLayerStack( FOdysseyLayerStack* iLayerStack );
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
-    void SetColor( const ::ul3::CColor& iColor );
+    void SetColor( const ::ul3::FPixelValue& iColor );
     void SetSizeModifier( float iValue );
     void SetOpacityModifier( float iValue );
     void SetFlowModifier( float iValue );
@@ -60,7 +60,7 @@ public:
     void TriggerStateChanged();
     void InterruptStrokeAndStampInPlace();
 
-    const ::ul3::CColor& GetColor() const;
+    const ::ul3::FPixelValue& GetColor() const;
 
     void UpdateBrushCursorPreview();
 private:
@@ -94,7 +94,7 @@ private:
     InvalidTileMap                      mTmpInvalidTileMap;
     InvalidTileMap                      mStrokeInvalidTileMap;
 
-    ::ul3::CColor                      mColor;
+    ::ul3::FPixelValue                  mColor;
 
     float                               mSizeModifier;
     float                               mOpacityModifier;

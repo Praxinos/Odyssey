@@ -17,11 +17,11 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mOnOpacityChangedCallback   = InArgs._OnOpacityChanged;
     mOnFlowChangedCallback      = InArgs._OnFlowChanged;
     mOnBlendingModeChangedCallback = InArgs._OnBlendingModeChanged;
-    mCurrentBlendingMode = ::ul3::eBlendingMode::kNormal;
+    mCurrentBlendingMode = ::ul3::BM_NORMAL;
     mBlendingModes = GetBlendingModesAsText();
 
     mOnAlphaModeChangedCallback = InArgs._OnAlphaModeChanged;
-    mCurrentAlphaMode = ::ul3::eAlphaMode::kNormal;
+    mCurrentAlphaMode = ::ul3::AM_NORMAL;
     mAlphaModes = GetAlphaModesAsText();
 
     ChildSlot
@@ -394,7 +394,7 @@ SOdysseyPaintModifiers::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelecti
     );
 
 
-    for( uint8 i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
+    for( uint8 i = 0; i < (int)::ul3::NUM_BLENDING_MODES; ++i )
     {
         auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[ i ] ) );
         if( NewSelection.Get()->EqualTo( entry ) )
@@ -410,7 +410,7 @@ TArray< TSharedPtr< FText > >
 SOdysseyPaintModifiers::GetBlendingModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    for( int i = 0; i < (int)::ul3::eBlendingMode::kNumBlendingModes; ++i )
+    for( int i = 0; i < (int)::ul3::NUM_BLENDING_MODES; ++i )
         array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) ) ) );
     return array;
 }
@@ -457,7 +457,7 @@ SOdysseyPaintModifiers::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection,
     );
 
 
-    for( uint8 i = 0; i < (int)::ul3::eAlphaMode::kNumAlphaModes; ++i )
+    for( uint8 i = 0; i < (int)::ul3::NUM_ALPHA_MODES; ++i )
     {
         auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwAlphaMode[ i ] ) );
         if( NewSelection.Get()->EqualTo( entry ) )
@@ -473,7 +473,7 @@ TArray< TSharedPtr< FText > >
 SOdysseyPaintModifiers::GetAlphaModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    for( int i = 0; i < (int)::ul3::eAlphaMode::kNumAlphaModes; ++i )
+    for( int i = 0; i < (int)::ul3::NUM_ALPHA_MODES; ++i )
         array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwAlphaMode[i] ) ) ) );
     return array;
 }

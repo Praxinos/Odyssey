@@ -31,7 +31,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, i
     col.SetValue( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { R, G, B, A } ) );
     return  col;
 }
-
+ 
 
 //static
 FOdysseyBrushColor

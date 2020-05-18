@@ -10,23 +10,46 @@
 /////////////////////////////////////////////////////
 // Odyssey Brush Color
 USTRUCT(BlueprintType)
-struct ODYSSEYBRUSH_API FOdysseyBrushColor
+class ODYSSEYBRUSH_API FOdysseyBrushColor
 {
+public:
     GENERATED_BODY()
 
     FOdysseyBrushColor()
         : m( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 ) )
     {}
 
+    FOdysseyBrushColor( FOdysseyBrushColor& iOther ) {
+        m = new ::ul3::FPixelValue( iOther.m->Format() );
+        memcpy( m->Ptr(), iOther.m->Ptr(), m->Depth() );
+    }
+
+    FOdysseyBrushColor( const ::ul3::FPixelValue& iVal ) {
+        m = new ::ul3::FPixelValue( iVal.Format() );
+        memcpy( m->Ptr(), iVal.Ptr(), m->Depth() );
+    }
+
+    FOdysseyBrushColor( FOdysseyBrushColor&& iOther ) {
+        m = iOther.m;
+        iOther.m = nullptr;
+    }
+
     ~FOdysseyBrushColor() {
-        delete  m;
+        if( m )
+            delete  m;
     }
 
     void SetValue( ::ul3::FPixelValue* iVal ) {
-        delete  m;
+        if( m )
+            delete  m;
         m = iVal;
     }
 
+    const ::ul3::FPixelValue& GetValue() const {
+        return  *m;
+    }
+
+private:
     ::ul3::FPixelValue* m;
 };
 

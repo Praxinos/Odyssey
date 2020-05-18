@@ -123,7 +123,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mPaintEngine.SetTextureSourceFormat( mLayerStack->GetTextureSourceFormat() );
     mPaintEngine.SetLayerStack( mLayerStack );
     mPaintEngine.SetBrushInstance( NULL );
-    mPaintEngine.SetColor( ::ul3::CColor() );
+    mPaintEngine.SetColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) );
     mPaintEngine.SetSizeModifier( 20.f );
 
     // Setup Surface
@@ -161,7 +161,7 @@ FOdysseyPainterEditorToolkit::InitOdysseyPainterEditor( const EToolkitMode::Type
     mPerformanceOptionsTab->SetPerformanceOptionLiveUpdate( true );
     
     // Setup Properties with callbacks
-    mColorSelectorTab->SetColor( ::ul3::CColor( 0, 0, 0 ) );
+    mColorSelectorTab->SetColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) );
 
     mStrokeOptionsTab->SetStrokeStep( 20 );
     mStrokeOptionsTab->SetStrokeAdaptative( true );
@@ -961,7 +961,7 @@ FOdysseyPainterEditorToolkit::HandleBrushParameterChanged()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Color Handlers
 void
-FOdysseyPainterEditorToolkit::HandleSelectorColorChanged( const ::ul3::CColor& iColor )
+FOdysseyPainterEditorToolkit::HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor )
 {
     if( mColorSlidersTab )
         mColorSlidersTab->SetColor( iColor );
@@ -970,7 +970,7 @@ FOdysseyPainterEditorToolkit::HandleSelectorColorChanged( const ::ul3::CColor& i
 }
 
 void
-FOdysseyPainterEditorToolkit::HandleSlidersColorChanged( const ::ul3::CColor& iColor )
+FOdysseyPainterEditorToolkit::HandleSlidersColorChanged( const ::ul3::FPixelValue& iColor )
 {
     if( mColorSelectorTab )
         mColorSelectorTab->SetColor( iColor );
@@ -1494,7 +1494,7 @@ FOdysseyPainterEditorToolkit::OnCheck()
 }*/
 
 void
-FOdysseyPainterEditorToolkit::SetColor( const ::ul3::CColor& iColor )
+FOdysseyPainterEditorToolkit::SetColor( const ::ul3::FPixelValue& iColor )
 {
     if( mColorSelectorTab ) 
         mColorSelectorTab->SetColor( iColor );
