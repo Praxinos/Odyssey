@@ -24,6 +24,10 @@ class FOdysseyBlock;
 // FOdysseyBrushState
 struct  FOdysseyBrushState
 {
+    FOdysseyBrushState()
+    {
+    }
+
     FOdysseyBlock*                          target_temp_buffer;
     FOdysseyStrokePoint                     point;
     ::ul3::FPixelValue                      color;

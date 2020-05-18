@@ -344,13 +344,7 @@ UOdysseyBrushAssetBase::GetJolt()
 FOdysseyBrushColor
 UOdysseyBrushAssetBase::GetColor()
 {
-    FOdysseyBrushColor col;
-
-    if( col.m )
-        delete col.m;
-
-    col.m = new ::ul3::FPixelValue(state.color);
-    return  col;
+    return  FOdysseyBrushColor( state.color );
 }
 
 
