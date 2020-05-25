@@ -56,7 +56,9 @@ public class OdysseyBrushEditor : ModuleRules
                 "BlueprintNativeCodeGen",
                 "UMG", // for SBlueprintDiff
                 "WorkspaceMenuStructure",
-                "OdysseyBrush"
+                "OdysseyBrush",
+                "ULIS",
+                "ULISLoader",
             }
             );
 
