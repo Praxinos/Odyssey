@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////
 // Utlity
 void
-CopyUTextureDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
+CopyUTextureDataIntoBlock(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
 {
     checkf(iBlock->Width() == iTexture->GetSizeX() &&
            iBlock->Height() == iTexture->GetSizeY()
@@ -17,7 +17,7 @@ CopyUTextureDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 }
 
 void
-CopyBlockDataIntoUTexture(FOdysseyBlock* iBlock,UTexture2D* iTexture)
+CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
 {
     checkf(iBlock->Width() == iTexture->GetSizeX() &&
            iBlock->Height() == iTexture->GetSizeY()
