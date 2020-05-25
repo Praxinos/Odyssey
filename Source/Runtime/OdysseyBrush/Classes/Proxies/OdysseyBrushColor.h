@@ -29,6 +29,13 @@ public:
         memcpy( m->Ptr(), iVal.Ptr(), m->Depth() );
     }
 
+    FOdysseyBrushColor& operator =( const FOdysseyBrushColor& iVal ) {
+        if( m ) delete m;
+        m = new ::ul3::FPixelValue( iVal.m->Format() );
+        memcpy( m->Ptr(), iVal.m->Ptr(), m->Depth() );
+        return  *this;
+    }
+
     FOdysseyBrushColor( FOdysseyBrushColor&& iOther ) {
         m = iOther.m;
         iOther.m = nullptr;
