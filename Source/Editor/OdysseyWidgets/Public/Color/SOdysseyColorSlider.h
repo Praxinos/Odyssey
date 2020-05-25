@@ -663,6 +663,11 @@ public:
     void Construct(const FArguments& InArgs)
     {}
 
+    IOdysseyGroupChannelSlider( uint32 iFormat )
+        : mColor( iFormat )
+    {
+    }
+
     void BuildContents()
     {
         TSharedPtr< SVerticalBox > vbox = SNew( SVerticalBox );
@@ -716,7 +721,7 @@ public:
 
 /////////////////////////////////////////////////////
 // Inheritance Utility Define
-#define ODYSSEY_GROUP_SLIDER( iClass )                      \
+#define ODYSSEY_GROUP_SLIDER( iClass , iFormat )            \
     typedef IOdysseyGroupChannelSlider tSuperClass;         \
     typedef iClass tSelf;                                   \
 public:                                                     \
@@ -735,13 +740,15 @@ public:                                                     \
         DisableCallbackPropagation = false;                 \
         BuildWidgets();                                     \
         BuildContents();                                    \
-    }
+    }                                                       \
+                                                            \
+    iClass() : IOdysseyGroupChannelSlider( iFormat ) {}
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_RGB
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGB )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGB, ULIS3_FORMAT_RGB8 )
     void BuildWidgets()
     {
         sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_R > )
@@ -766,7 +773,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_RGBA
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGBA )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGBA, ULIS3_FORMAT_RGBA8 )
     void BuildWidgets()
     {
         sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_R > )
@@ -794,7 +801,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupC
 // FOdysseyGroupChannelSlider_HA (Hue, Alpha)
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HA )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HA, ULIS3_FORMAT_HSVA8 )
     void BuildWidgets()
     {
         sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_H > )
@@ -816,7 +823,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupCha
 // FOdysseyGroupChannelSlider_HSV
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSV )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSV, ULIS3_FORMAT_HSV8 )
     void BuildWidgets()
     {
         sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_H > )
@@ -841,7 +848,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_HSL
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSL )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSL, ULIS3_FORMAT_HSL8 )
     void BuildWidgets()
     {
         sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSL_H > )
@@ -868,7 +875,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_CMYK
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_CMYK )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_CMYK, ULIS3_FORMAT_CMYK8 )
     void BuildWidgets()
     {
         sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_C > )
