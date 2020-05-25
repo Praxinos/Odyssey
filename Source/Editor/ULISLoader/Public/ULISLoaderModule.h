@@ -19,9 +19,9 @@ public:
         return  FModuleManager::Get().IsModuleLoaded( "ULISLoader" );
     }
 
-    virtual ::ul3::FThreadPool* ThreadPool() = 0;
-    virtual const ::ul3::FHostDeviceInfo& HostDeviceInfo() const = 0;
-    virtual const ::ul3::FFontEngine& FontEngine() const = 0;
-    virtual const ::ul3::FFontRegistry& FontRegistry() const = 0;
+    virtual ::ul3::FThreadPool* ThreadPool() =                      0;
+    virtual const ::ul3::FHostDeviceInfo& HostDeviceInfo()  const = 0;
+    virtual const ::ul3::FFontEngine& FontEngine()          const = 0;
+    virtual const ::ul3::FFontRegistry& FontRegistry()      const = 0;
 };
 

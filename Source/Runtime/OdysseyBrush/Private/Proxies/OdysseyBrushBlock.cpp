@@ -8,6 +8,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>
+#include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////
 // UOdysseyBlockProxyFunctionLibrary
@@ -46,23 +47,17 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
     if( !Source.m ) return  FOdysseyBlockProxy::MakeNullProxy();
 
     FOdysseyBlockProxy prox;
-    FString op = "FillPreserveAlpha_" + FString::FromInt( Color.m.RGBHexValue() ) + "_" + Source.id;
+
+    ::ul3::FPixelValue color = ::ul3::Conv( Color.GetValue(), Source.m->GetULISFormat() );
+    FString colorID = FString::FromBlob( ( const uint8* )color.Ptr(), color.Depth() );
+    FString op = "FillPreserveAlpha_" + colorID + "_" + Source.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Source.m;
         FOdysseyBlock* dst = new  FOdysseyBlock( src->Width(), src->Height(), src->GetUE4TextureSourceFormat() );
-        ::ul3::FMakeContext::CopyBlockInto( src->GetBlock(), dst->GetBlock() );
-
-        ::ul3::ParallelFor( dst->Height()
-                           , [&]( int iLine ) {
-                                for( int i = 0; i < dst->Width(); ++i )
-                                {
-                                    int alpha = dst->GetBlock()->PixelColor( i, iLine ).Alpha();
-                                    ::ul3::FPixelValue col = *(Color.m);
-                                    col.SetAlpha( alpha );
-                                    dst->GetBlock()->SetPixelColor( i, iLine, col );
-                                }
-                            } );
-
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src->GetBlock()->Rect(), ::ul3::FVec2I( 0, 0 ) );
+        ::ul3::FillPreserveAlpha( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, dst->GetBlock(), color, dst->GetBlock()->Rect() );
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
     ODYSSEY_BRUSH_CACHE_OPERATION_END
@@ -116,8 +111,12 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
         ::ul3::FBlock* source  = Top.m->GetBlock();
         ::ul3::FBlock* back    = Back.m->GetBlock();
         FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), Back.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
-        ::ul3::FMakeContext::CopyBlockInto( back, dst->GetBlock() );
-        ::ul3::FBlendingContext::Blend( source, dst->GetBlock(), X, Y, (::ul3::eBlendingMode)BlendingMode, (::ul3::eAlphaMode)AlphaMode, Opacity );
+
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, dst->GetBlock(), back->Rect(), ::ul3::FVec2I( 0, 0 ) );
+        ::ul3::Blend( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, dst->GetBlock(), source->Rect(), ::ul3::FVec2F( X, Y ), ULIS3_AA, (::ul3::eBlendingMode)BlendingMode, (::ul3::eAlphaMode)AlphaMode, Opacity );
+
         prox = FOdysseyBlockProxy( dst, op );
         brush->StoreInPool( Cache, op, prox );
     ODYSSEY_BRUSH_CACHE_OPERATION_END

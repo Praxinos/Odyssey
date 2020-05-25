@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////
 // Odyssey Brush Color
 USTRUCT(BlueprintType)
-class ODYSSEYBRUSH_API FOdysseyBrushColor
+struct ODYSSEYBRUSH_API FOdysseyBrushColor
 {
 public:
     GENERATED_BODY()

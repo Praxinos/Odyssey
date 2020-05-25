@@ -25,12 +25,11 @@ class FOdysseyBlock;
 struct  FOdysseyBrushState
 {
     FOdysseyBrushState()
-    {
-    }
+    {}
 
     FOdysseyBlock*                          target_temp_buffer;
     FOdysseyStrokePoint                     point;
-    ::ul3::FPixelValue                      color;
+    ::ul3::FPixelValue*                     color;
     float                                   size_modifier;
     float                                   opacity_modifier;
     float                                   flow_modifier;
@@ -78,7 +77,7 @@ public:
 public:
     // Public C++ API
     FOdysseyBrushState&             GetState();
-    const TArray< ::ul3::FRect >&  GetInvalidRects() const;
+    const TArray< ::ul3::FRect >&   GetInvalidRects() const;
     void                            PushInvalidRect( const  ::ul3::FRect& iRect );
     void                            ClearInvalidRects();
 
@@ -274,7 +273,7 @@ public:
 private:
     // Private Members Data
     FOdysseyBrushState                      state;
-    TArray< ::ul3::FRect >                 invalid_rects;
+    TArray< ::ul3::FRect >                  invalid_rects;
     TArray< FOdysseyBrushPoolCache >        pools;
 
 public:

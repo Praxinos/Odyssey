@@ -44,9 +44,10 @@ void FULISLoaderModule::StartupModule() {
 
 
 void FULISLoaderModule::ShutdownModule() {
+    mThreadPool->WaitForCompletion();
     delete  mThreadPool;
-    delete  mFontEngine;
     delete  mFontRegistry;
+    delete  mFontEngine;
 }
 
 
