@@ -19,7 +19,7 @@ public:
         : m( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 ) )
     {}
 
-    FOdysseyBrushColor( FOdysseyBrushColor& iOther ) {
+    FOdysseyBrushColor( const FOdysseyBrushColor& iOther ) {
         m = new ::ul3::FPixelValue( iOther.m->Format() );
         memcpy( m->Ptr(), iOther.m->Ptr(), m->Depth() );
     }
