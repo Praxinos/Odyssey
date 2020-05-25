@@ -7,6 +7,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include <ULIS3>
+#include "ULISLoaderModule.h"
 #include <chrono>
 
 #define TILE_SIZE 64
@@ -168,7 +169,10 @@ FOdysseyPaintEngine::Tick()
         mTileThreadPool->WaitForCompletion();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
-        ::ul3::FClearFillContext::Clear( mTempBuffer->GetBlock() );
+
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
 
         //mBrushInstance->ExecuteStrokeEnd();
 
@@ -593,7 +597,11 @@ FOdysseyPaintEngine::AbortStroke()
     mIsPendingEndStroke = false;
     InterruptDelay();
     mLayerStack->ComputeResultBlock();
-    ::ul3::FClearFillContext::Clear( mTempBuffer->GetBlock() );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
+
     ClearInvalidTileMap( mTmpInvalidTileMap );
     ClearInvalidTileMap( mStrokeInvalidTileMap );
 
@@ -650,7 +658,11 @@ FOdysseyPaintEngine::CheckReallocTempBuffer()
     {
         delete mTempBuffer;
         mTempBuffer = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-        ::ul3::FClearFillContext::Clear( mTempBuffer->GetBlock() );
+
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
+
         ReallocInvalidMaps();
     }
 }
@@ -679,7 +691,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     FOdysseyBrushState& state = mBrushInstance->GetState();
     state.target_temp_buffer = mTempBuffer;
     state.point = FOdysseyStrokePoint();
-    ::ul3::Conv( mColor, state.color );
+    ::ul3::Conv( mColor, *state.color );
     state.size_modifier = mSizeModifier;
     state.opacity_modifier = mOpacityModifier;
     state.flow_modifier = mFlowModifier;
@@ -698,6 +710,10 @@ FOdysseyPaintEngine::UpdateBrushInstance()
 void
 FOdysseyPaintEngine::UpdateBrushCursorPreview()
 {
+    // CURRENTLY DISABLED !
+    return;
+
+    /*
     auto current_time = std::chrono::system_clock::now();
     auto duration = current_time.time_since_epoch();
     auto current_millis = std::chrono::duration_cast< std::chrono::milliseconds >( duration ).count();
@@ -796,13 +812,6 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
                                ,   16, 32, 16
                                ,    8, 16,  8 } );
     gaussian_kernel.Normalize();
-    /*
-    ::ul3::FKernel kernel( ::ul3::FSize( 3, 3 )
-                          , {  0,   0,  0
-                            ,  0,   1,  0
-                            ,  0,   0,  0 } );
-    */
-
     // Dealloc Cursor Preview Surface
     if( mBrushCursorPreviewSurface )
         delete  mBrushCursorPreviewSurface;
@@ -827,6 +836,7 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     delete preview_outline;
     delete preview_shadow;
     mBrushCursorInvalid = false;
+    */
 }
 
 
