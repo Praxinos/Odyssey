@@ -5,6 +5,7 @@
 #include "Rendering/DrawElements.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyColorSlider"
 
@@ -82,8 +83,9 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {
-    // TODO: Check to avoid recomputing ::ul3::FHostDeviceInfo::Detect() everytime
-    ::ul3::Fill( nullptr, ULIS3_BLOCKING, ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42, ::ul3::FHostDeviceInfo::Detect(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );
 
     int range = InternalSize.X - 2;
     for( int x = 1; x < InternalSize.X - 2; ++x )
