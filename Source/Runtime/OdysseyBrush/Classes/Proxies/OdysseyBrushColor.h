@@ -29,10 +29,10 @@ public:
         memcpy( m->Ptr(), iVal.Ptr(), m->Depth() );
     }
 
-    FOdysseyBrushColor& operator =( const FOdysseyBrushColor& iVal ) {
+    FOdysseyBrushColor& operator =( const FOdysseyBrushColor& iOther ) {
         if( m ) delete m;
-        m = new ::ul3::FPixelValue( iVal.m->Format() );
-        memcpy( m->Ptr(), iVal.m->Ptr(), m->Depth() );
+        m = new ::ul3::FPixelValue( iOther.m->Format() );
+        memcpy( m->Ptr(), iOther.m->Ptr(), m->Depth() );
         return  *this;
     }
 
