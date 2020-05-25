@@ -8,7 +8,7 @@
 #include "OdysseyBlock.h"
 #include "OdysseyBrushContext.h"
 #include <ULIS3>
-
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushFunctionLibrary"
 
@@ -27,22 +27,41 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     int diameter = FMath::Max( 2.f, brush->GetSizeModifier() * brush->GetPressure() );
     int center = ( diameter / 2 );
     int radius = center - 2;
-    FOdysseyBlock round( diameter, diameter );
-    ::ul3::FPixelValue color = ::ul3::Conv( brush->GetState().color, ULIS3_FORMAT_RGBAF );
+    FOdysseyBlock round( diameter, diameter, brush->GetState().target_temp_buffer->GetUE4TextureSourceFormat() );
+    ::ul3::FPixelValue color = ::ul3::Conv( *(brush->GetState().color), ULIS3_FORMAT_RGBAF );
     color.SetAlphaF( brush->GetState().flow_modifier );
-    ::ul3::FPainterContext::DrawCircleAndres( round.GetBlock(), ::ul3::FPoint( center, center ), radius, color, true );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Fill( hULIS.ThreadPool()
+               , ULIS3_BLOCKING
+               , perfIntent
+               , hULIS.HostDeviceInfo()
+               , ULIS3_NOCB
+               , round.GetBlock()
+               , color
+               , round.GetBlock()->Rect() );
+
     ::ul3::FRect invalidRect;
     invalidRect.x = brush->GetX() - radius;
     invalidRect.y = brush->GetY() - radius;
     invalidRect.w = diameter;
     invalidRect.h = diameter;
-    ::ul3::FBlendingContext::Blend( round.GetBlock()
-                                  , brush->GetState().target_temp_buffer->GetBlock()
-                                  , invalidRect.x
-                                  , invalidRect.y
-                                  , ::ul3::BM_NORMAL
-                                  , ::ul3::AM_NORMAL
-                                  , 1.f );
+
+    ::ul3::Blend( hULIS.ThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , hULIS.HostDeviceInfo()
+                , ULIS3_NOCB
+                , round.GetBlock()
+                , brush->GetState().target_temp_buffer->GetBlock()
+                , round.GetBlock()->Rect()
+                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
+                , ULIS3_NOAA
+                , ::ul3::BM_NORMAL
+                , ::ul3::AM_NORMAL
+                , 1.f );
+
     brush->PushInvalidRect( invalidRect );
 }
 
@@ -139,102 +158,26 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
     ODYSSEY_BRUSH_CONTEXT_CHECK
     ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN
 
-    /*
-    FOdysseyBlock* block = Sample.m;
-    int width = block->Width();
-    int height = block->Height();
-    int width2 = width / 2;
-    int height2 = height / 2;
-
-    FVector2D computedOffset = Pivot.OffsetMode == EPivotOffsetMode::kAbsolute ? Pivot.Offset : Pivot.Offset * FVector2D( width, height );
-    ::ul3::FRect invalidRect;
-
-    invalidRect.x = X;
-    invalidRect.y = Y;
-    invalidRect.w = block->Width();
-    invalidRect.h = block->Height();
-
-    switch( Pivot.Reference )
-    {
-        case EPivotReference::kTopLeft:
-        {
-            invalidRect.x = X;
-            invalidRect.y = Y;
-            break;
-        }
-
-        case EPivotReference::kTopMiddle:
-        {
-            invalidRect.x = X - width2;
-            invalidRect.y = Y;
-            break;
-        }
-
-        case EPivotReference::kTopRight:
-        {
-            invalidRect.x = X - width;
-            invalidRect.y = Y;
-            break;
-        }
-
-        case EPivotReference::kMiddleLeft:
-        {
-            invalidRect.x = X;
-            invalidRect.y = Y - height2;
-            break;
-        }
-
-        case EPivotReference::kCenter:
-        {
-            invalidRect.x = X - width2;
-            invalidRect.y = Y - height2;
-            break;
-        }
-
-        case EPivotReference::kMiddleRight:
-        {
-            invalidRect.x = X - width;
-            invalidRect.y = Y - height2;
-            break;
-        }
-
-        case EPivotReference::kBotLeft:
-        {
-            invalidRect.x = X;
-            invalidRect.y = Y - height;
-            break;
-        }
-
-        case EPivotReference::kBotMiddle:
-        {
-            invalidRect.x = X - width2;
-            invalidRect.y = Y - height;
-            break;
-        }
-
-        case EPivotReference::kBotRight:
-        {
-            invalidRect.x = X - width;
-            invalidRect.y = Y - height;
-            break;
-        }
-    }
-
-    invalidRect.x += computedOffset.X;
-    invalidRect.y += computedOffset.Y;
-    */
-
     FOdysseyBlock* block = Sample.m;
     ::ul3::FRect invalidRect;
     ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
-    ::ul3::FBlendingContext::Blend( block->GetBlock()
-                                   , brush->GetState().target_temp_buffer->GetBlock()
-                                   , invalidRect.x
-                                   , invalidRect.y
-                                   , ::ul3::BM_NORMAL
-                                   , ::ul3::AM_NORMAL
-                                   , FMath::Clamp( Flow, 0.f, 1.f ) );
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Blend( hULIS.ThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , hULIS.HostDeviceInfo()
+                , ULIS3_NOCB
+                , block->GetBlock()
+                , brush->GetState().target_temp_buffer->GetBlock()
+                , block->GetBlock()->Rect()
+                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
+                , ULIS3_NOAA
+                , ::ul3::BM_NORMAL
+                , ::ul3::AM_NORMAL
+                , FMath::Clamp( Flow, 0.f, 1.f ) );
+
     brush->PushInvalidRect( invalidRect );
 }
 
@@ -250,13 +193,22 @@ UOdysseyBrushFunctionLibrary::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pi
     ::ul3::FRect invalidRect;
     ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
-    ::ul3::FBlendingContext::Blend( block->GetBlock()
-                                   , brush->GetState().target_temp_buffer->GetBlock()
-                                   , invalidRect.x
-                                   , invalidRect.y
-                                   , (::ul3::eBlendingMode)BlendingMode
-                                   , (::ul3::eAlphaMode)AlphaMode
-                                   , FMath::Clamp( Flow, 0.f, 1.f ) );
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+
+    ::ul3::Blend( hULIS.ThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , hULIS.HostDeviceInfo()
+                , ULIS3_NOCB
+                , block->GetBlock()
+                , brush->GetState().target_temp_buffer->GetBlock()
+                , block->GetBlock()->Rect()
+                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
+                , ULIS3_NOAA
+                , static_cast< ::ul3::eBlendingMode >( BlendingMode )
+                , static_cast< ::ul3::eAlphaMode >( AlphaMode )
+                , FMath::Clamp( Flow, 0.f, 1.f ) );
     brush->PushInvalidRect( invalidRect );
 }
 
