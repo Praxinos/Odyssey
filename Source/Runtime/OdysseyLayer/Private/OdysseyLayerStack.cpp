@@ -609,7 +609,7 @@ FOdysseyLayerStack::Size() const
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer(this, GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
     mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -617,7 +617,7 @@ FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( this, GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
     mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -639,7 +639,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IO
                , iData->GetBlock()->Rect()
                , ::ul3::FVec2I( 0, 0 ) );
 
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( this, iName.IsNone() ? GetNextLayerName() : iName, explicitCopyResized );
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( iName.IsNone() ? GetNextLayerName() : iName, explicitCopyResized );
     iPosition->AddNode( layer,iAtIndex );
     return  layer;
 }
@@ -663,7 +663,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int i
                , iData->GetBlock()->Rect()
                , ::ul3::FVec2I( 0, 0 ) );
 
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( this, iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
     mCurrentLayer->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -674,7 +674,7 @@ FOdysseyLayerStack::AddFolderLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,FN
     if(iName == FName())
         iName = GetNextLayerName();
 
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( this, iName);
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName);
     mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
     return layer;
 }
@@ -685,7 +685,7 @@ FOdysseyLayerStack::AddFolderLayer(FName iName,int iAtIndex)
     if(iName == FName())
         iName = GetNextLayerName();
 
-    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( this, iName);
+    FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName);
     mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
     return layer;
 }

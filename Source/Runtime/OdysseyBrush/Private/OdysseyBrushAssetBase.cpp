@@ -344,7 +344,7 @@ UOdysseyBrushAssetBase::GetJolt()
 FOdysseyBrushColor
 UOdysseyBrushAssetBase::GetColor()
 {
-    return  FOdysseyBrushColor( *state.color );
+    return  FOdysseyBrushColor( state.color );
 }
 
 

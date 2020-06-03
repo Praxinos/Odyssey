@@ -11,21 +11,19 @@ IOdysseyLayer::~IOdysseyLayer()
 {
 }
 
-IOdysseyLayer::IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const eType type )
+IOdysseyLayer::IOdysseyLayer( const eType type )
     : mName()
     , mIsLocked( false )
     , mIsVisible( true )
     , mType( type )
-    , mParentStack( iParentStack )
 {
 }
 
-IOdysseyLayer::IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, const eType type )
+IOdysseyLayer::IOdysseyLayer( const FName& iName, const eType type )
     : mName( iName )
     , mIsLocked( false )
     , mIsVisible( true )
     , mType( type )
-    , mParentStack( iParentStack )
 {
 }
 
@@ -80,11 +78,6 @@ IOdysseyLayer::SetIsVisible( bool iIsVisible )
     mIsVisible = iIsVisible;
 }
 
-const FOdysseyLayerStack*
-IOdysseyLayer::GetParentStack() const {
-    return  mParentStack;
-}
-
 FArchive& 
 operator<<(FArchive &Ar, IOdysseyLayer** ioSaveLayer )
 {
@@ -114,12 +107,12 @@ operator<<(FArchive &Ar, IOdysseyLayer** ioSaveLayer )
         
         if( layerType == IOdysseyLayer::eType::kImage )
         {
-            (*ioSaveLayer) = new FOdysseyImageLayer( (*ioSaveLayer)->GetParentStack(), FName(), NULL );
+            (*ioSaveLayer) = new FOdysseyImageLayer( FName(), NULL );
             Ar << static_cast<FOdysseyImageLayer*>(*ioSaveLayer);
         }
         else if( layerType == IOdysseyLayer::eType::kFolder )
         {
-            (*ioSaveLayer) = new FOdysseyFolderLayer( (*ioSaveLayer)->GetParentStack(), FName() );
+            (*ioSaveLayer) = new FOdysseyFolderLayer( FName() );
             Ar << static_cast<FOdysseyFolderLayer*>(*ioSaveLayer);
         }
     }

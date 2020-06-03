@@ -16,48 +16,23 @@ public:
     GENERATED_BODY()
 
     FOdysseyBrushColor()
-        : m( new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 ) )
+        : m( ULIS3_FORMAT_RGBA8 )
     {}
 
-    FOdysseyBrushColor( const FOdysseyBrushColor& iOther ) {
-        m = new ::ul3::FPixelValue( iOther.m->Format() );
-        memcpy( m->Ptr(), iOther.m->Ptr(), m->Depth() );
-    }
+    FOdysseyBrushColor( const ::ul3::FPixelValue& iVal )
+        : m( iVal )
+    {}
 
-    FOdysseyBrushColor( const ::ul3::FPixelValue& iVal ) {
-        m = new ::ul3::FPixelValue( iVal.Format() );
-        memcpy( m->Ptr(), iVal.Ptr(), m->Depth() );
-    }
-
-    FOdysseyBrushColor& operator =( const FOdysseyBrushColor& iOther ) {
-        if( m ) delete m;
-        m = new ::ul3::FPixelValue( iOther.m->Format() );
-        memcpy( m->Ptr(), iOther.m->Ptr(), m->Depth() );
-        return  *this;
-    }
-
-    FOdysseyBrushColor( FOdysseyBrushColor&& iOther ) {
-        m = iOther.m;
-        iOther.m = nullptr;
-    }
-
-    ~FOdysseyBrushColor() {
-        if( m )
-            delete  m;
-    }
-
-    void SetValue( ::ul3::FPixelValue* iVal ) {
-        if( m )
-            delete  m;
+    void SetValue( const ::ul3::FPixelValue& iVal ) {
         m = iVal;
     }
 
     const ::ul3::FPixelValue& GetValue() const {
-        return  *m;
+        return  m;
     }
 
 private:
-    ::ul3::FPixelValue* m;
+    ::ul3::FPixelValue  m;
 };
 
 /////////////////////////////////////////////////////

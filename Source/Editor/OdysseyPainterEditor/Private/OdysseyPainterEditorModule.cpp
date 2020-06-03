@@ -21,6 +21,16 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
 
+class SimpleTestFramework {
+public:
+    void RunTest() {
+        const volatile int fenceA = 0;
+        ::ul3::FPixelValue* p = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
+        delete p; // No crash
+        const volatile int fenceB = 0;
+    }
+};
+
 /*-----------------------------------------------------------------------------
    FOdysseyPainterEditorModule
 -----------------------------------------------------------------------------*/
@@ -78,8 +88,11 @@ public:
 
     virtual void StartupModule() override
     {
-        // Register asset types
+        // Perform test
+        SimpleTestFramework f;
+        f.RunTest();
 
+        // Register asset types
         IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
         mOdysseyPainterCategory = assetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "IliadPainterAssetCategory", "ILIAD" ) );
         RegisterAssetTypeAction( assetTools, MakeShareable( new FOdysseyTextureAssetTypeActions( mOdysseyPainterCategory ) ) );

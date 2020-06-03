@@ -29,7 +29,7 @@ struct  FOdysseyBrushState
 
     FOdysseyBlock*                          target_temp_buffer;
     FOdysseyStrokePoint                     point;
-    ::ul3::FPixelValue*                     color;
+    ::ul3::FPixelValue                      color;
     float                                   size_modifier;
     float                                   opacity_modifier;
     float                                   flow_modifier;

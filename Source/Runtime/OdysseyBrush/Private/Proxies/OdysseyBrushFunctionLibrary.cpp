@@ -28,7 +28,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     int center = ( diameter / 2 );
     int radius = center - 2;
     FOdysseyBlock round( diameter, diameter, brush->GetState().target_temp_buffer->GetUE4TextureSourceFormat() );
-    ::ul3::FPixelValue color = ::ul3::Conv( *(brush->GetState().color), ULIS3_FORMAT_RGBAF );
+    ::ul3::FPixelValue color = ::ul3::Conv( brush->GetState().color, ULIS3_FORMAT_RGBAF );
     color.SetAlphaF( brush->GetState().flow_modifier );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();

@@ -4,9 +4,9 @@
 #include "OdysseyImageLayer.h"
 #include "OdysseyBlock.h"
 #include "OdysseyLayerStack.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
-
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -15,8 +15,8 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
     delete mBlock;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
-    : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kImage )
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
+    : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
     , mBlock( nullptr )
     , mBlendingMode( ::ul3::BM_NORMAL )
     , mOpacity( 1.0f )
@@ -25,18 +25,19 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, 
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Clear( GetParentStack()->GetThreadPool()
+    ::ul3::Clear( hULIS.ThreadPool()
                 , ULIS3_BLOCKING
                 , perfIntent
-                , GetParentStack()->GetHostDeviceInfo()
+                , hULIS.HostDeviceInfo()
                 , ULIS3_NOCB
                 , mBlock->GetBlock()
                 , mBlock->GetBlock()->Rect() );
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, FOdysseyBlock* iBlock )
-    : IOdysseyLayer( iParentStack, iName, IOdysseyLayer::eType::kImage )
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
+    : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
     , mBlock( iBlock )
     , mBlendingMode( ::ul3::BM_NORMAL )
     , mOpacity( 1.0f )
@@ -148,11 +149,12 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         Ar << width;
         Ar << height;
 
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::FBlock* blockLayerData = ::ul3::XCopy( ioSaveImageLayer->GetParentStack()->GetThreadPool()
+        ::ul3::FBlock* blockLayerData = ::ul3::XCopy( hULIS.ThreadPool()
                                                     , ULIS3_BLOCKING
                                                     , perfIntent
-                                                    , ioSaveImageLayer->GetParentStack()->GetHostDeviceInfo()
+                                                    , hULIS.HostDeviceInfo()
                                                     , ULIS3_NOCB
                                                     , ioSaveImageLayer->mBlock->GetBlock()
                                                     , ::ul3::FRect( 0, 0, ioSaveImageLayer->mBlock->Width(), ioSaveImageLayer->mBlock->Height() ) );
@@ -177,11 +179,12 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         check(!ioSaveImageLayer->mBlock);
         ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height,textureFormat);
 
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( ioSaveImageLayer->GetParentStack()->GetThreadPool()
+        ::ul3::Clear( hULIS.ThreadPool()
                     , ULIS3_BLOCKING
                     , perfIntent
-                    , ioSaveImageLayer->GetParentStack()->GetHostDeviceInfo()
+                    , hULIS.HostDeviceInfo()
                     , ULIS3_NOCB
                     , ioSaveImageLayer->mBlock->GetBlock()
                     , ioSaveImageLayer->mBlock->GetBlock()->Rect() );

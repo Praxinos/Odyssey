@@ -154,7 +154,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 255;
     static const TCHAR Prefix = 'R';
-    static const TCHAR Unit = ' ';
+    static const WIDECHAR Unit = ' ';
 };
 
 // G
@@ -175,7 +175,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 255;
     static const TCHAR Prefix = 'G';
-    static const TCHAR Unit = ' ';
+    static const WIDECHAR Unit = ' ';
 };
 
 // B
@@ -196,7 +196,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 255;
     static const TCHAR Prefix = 'B';
-    static const TCHAR Unit = ' ';
+    static const WIDECHAR Unit = ' ';
 };
 
 // A
@@ -217,7 +217,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 255;
     static const TCHAR Prefix = 'A';
-    static const TCHAR Unit = ' ';
+    static const WIDECHAR Unit = ' ';
 };
 
 
@@ -244,7 +244,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 360;
     static const TCHAR Prefix = 'H';
-    static const TCHAR Unit = '\'';
+    static const WIDECHAR Unit = L'°';
 };
 
 // S
@@ -265,7 +265,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'S';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 // V
@@ -286,7 +286,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'V';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 
@@ -312,7 +312,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 360;
     static const TCHAR Prefix = 'H';
-    static const TCHAR Unit = '\'';
+    static const WIDECHAR Unit = L'°';
 };
 
 // S
@@ -333,7 +333,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'S';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 // L
@@ -354,7 +354,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'L';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 
@@ -379,7 +379,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'C';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 // M
@@ -399,7 +399,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'M';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 // Y
@@ -420,7 +420,7 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'Y';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
 // K
@@ -441,9 +441,138 @@ public:
     static const int MinValue = 0;
     static const int MaxValue = 100;
     static const TCHAR Prefix = 'K';
-    static const TCHAR Unit = '%';
+    static const WIDECHAR Unit = '%';
 };
 
+/////////////////////////////////////////////////////
+// YUV
+// Y
+class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_Y : public IOdysseyChannelSlider
+{
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_Y, ULIS3_FORMAT_YUVAF )
+
+private:
+    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetLumaF( t );
+    }
+
+    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+        return  mColor.LumaF();
+    }
+
+public:
+    static const int MinValue = 0;
+    static const int MaxValue = 100;
+    static const TCHAR Prefix = 'Y';
+    static const WIDECHAR Unit = ' ';
+};
+
+// S
+class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_U : public IOdysseyChannelSlider
+{
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_U, ULIS3_FORMAT_YUVAF )
+
+private:
+    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetUF( t );
+    }
+
+    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+        return  mColor.UF();
+    }
+
+public:
+    static const int MinValue = -127;
+    static const int MaxValue = 128;
+    static const TCHAR Prefix = 'U';
+    static const WIDECHAR Unit = ' ';
+};
+
+// L
+class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_V : public IOdysseyChannelSlider
+{
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_V, ULIS3_FORMAT_YUVAF )
+
+private:
+    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetVF( t );
+    }
+
+    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+        return  mColor.VF();
+    }
+
+public:
+    static const int MinValue = -127;
+    static const int MaxValue = 128;
+    static const TCHAR Prefix = 'V';
+    static const WIDECHAR Unit = ' ';
+};
+
+/////////////////////////////////////////////////////
+// Lab
+// L
+class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_L : public IOdysseyChannelSlider
+{
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_L, ULIS3_FORMAT_LabAF )
+
+private:
+    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetLF( t );
+    }
+
+    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+        return  mColor.LF();
+    }
+
+public:
+    static const int MinValue = 0;
+    static const int MaxValue = 100;
+    static const TCHAR Prefix = 'L';
+    static const WIDECHAR Unit = ' ';
+};
+
+// a
+class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_a : public IOdysseyChannelSlider
+{
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_a, ULIS3_FORMAT_LabAF )
+
+private:
+    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetaF( t );
+    }
+
+    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+        return  mColor.aF();
+    }
+
+public:
+    static const int MinValue = -127;
+    static const int MaxValue = 128;
+    static const TCHAR Prefix = 'a';
+    static const WIDECHAR Unit = ' ';
+};
+
+// b
+class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_b : public IOdysseyChannelSlider
+{
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_b, ULIS3_FORMAT_LabAF )
+
+private:
+    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const override {
+        color.SetbF( t );
+    }
+
+    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+        return  mColor.bF();
+    }
+
+public:
+    static const int MinValue = -127;
+    static const int MaxValue = 128;
+    static const TCHAR Prefix = 'b';
+    static const WIDECHAR Unit = ' ';
+};
 
 /////////////////////////////////////////////////////
 // IOdysseyPrettyChannelSlider
@@ -502,7 +631,7 @@ public:
         DisableCallbackPropagation = false;
         DisableNextCallback = false;
         TCHAR PrefixChar = TSliderType::Prefix;
-        TCHAR UnitChar = TSliderType::Unit;
+        WIDECHAR UnitChar = TSliderType::Unit;
         int HeightOverride = InArgs._HeightOverride;
         FString PrefixString;
         PrefixString.AppendChar( PrefixChar );
@@ -897,4 +1026,58 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupC
         ::ul3::Conv( ::ul3::FPixelValue::FromCMYKAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue(), sliders[3]->GetValue() ), mColor );
     }
 };
+
+
+/////////////////////////////////////////////////////
+// FOdysseyGroupChannelSlider_YUV
+class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupChannelSlider
+{
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_YUV, ULIS3_FORMAT_YUV8 )
+    void BuildWidgets()
+    {
+        sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_Y > )
+                .HeightOverride( HeightOverride )
+                .OnValueChanged( this, &tSelf::HandleValueChanged ) );
+        sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_U > )
+                .HeightOverride( HeightOverride )
+                .OnValueChanged( this, &tSelf::HandleValueChanged ) );
+        sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_V > )
+                .HeightOverride( HeightOverride )
+                .OnValueChanged( this, &tSelf::HandleValueChanged ) );
+    }
+
+
+    virtual void ComputeColorOnChanged()
+    {
+        ::ul3::Conv( ::ul3::FPixelValue::FromYUVAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue() ), mColor );
+    }
+};
+
+
+/////////////////////////////////////////////////////
+// FOdysseyGroupChannelSlider_Lab
+class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_Lab : public IOdysseyGroupChannelSlider
+{
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_Lab, ULIS3_FORMAT_Lab8 )
+    void BuildWidgets()
+    {
+        sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_L > )
+                .HeightOverride( HeightOverride )
+                .OnValueChanged( this, &tSelf::HandleValueChanged ) );
+        sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_a > )
+                .HeightOverride( HeightOverride )
+                .OnValueChanged( this, &tSelf::HandleValueChanged ) );
+        sliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_b > )
+                .HeightOverride( HeightOverride )
+                .OnValueChanged( this, &tSelf::HandleValueChanged ) );
+    }
+
+
+    virtual void ComputeColorOnChanged()
+    {
+        ::ul3::Conv( ::ul3::FPixelValue::FromLabAF( sliders[0]->GetValue(), sliders[1]->GetValue(), sliders[2]->GetValue() ), mColor );
+    }
+};
+
+
 

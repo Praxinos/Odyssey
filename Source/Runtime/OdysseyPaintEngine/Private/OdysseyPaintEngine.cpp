@@ -73,7 +73,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     mInterpolator = new FOdysseyInterpolationBezier();
     mTileThreadPool = new ::ul3::FThreadPool();
     int maxThreads = mTileThreadPool->GetMaxWorkers();
-    mTileThreadPool->SetNumWorkers( maxThreads - 1 );
+    mTileThreadPool->SetNumWorkers( maxThreads );
 }
 
 //--------------------------------------------------------------------------------------
@@ -691,7 +691,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     FOdysseyBrushState& state = mBrushInstance->GetState();
     state.target_temp_buffer = mTempBuffer;
     state.point = FOdysseyStrokePoint();
-    ::ul3::Conv( mColor, *state.color );
+    state.color = mColor;
     state.size_modifier = mSizeModifier;
     state.opacity_modifier = mOpacityModifier;
     state.flow_modifier = mFlowModifier;

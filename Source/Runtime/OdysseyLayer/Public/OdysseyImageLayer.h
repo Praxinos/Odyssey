@@ -19,8 +19,8 @@ class ODYSSEYLAYER_API FOdysseyImageLayer: public IOdysseyLayer
 public:
     // Construction / Destruction
     virtual ~FOdysseyImageLayer();
-    FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName,FVector2D iSize,ETextureSourceFormat iTextureSourceFormat);
-    FOdysseyImageLayer( const FOdysseyLayerStack* iParentStack, const FName& iName,FOdysseyBlock* iBlock);
+    FOdysseyImageLayer( const FName& iName,FVector2D iSize,ETextureSourceFormat iTextureSourceFormat);
+    FOdysseyImageLayer( const FName& iName,FOdysseyBlock* iBlock);
 
 public:
     // Public API

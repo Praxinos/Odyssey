@@ -622,7 +622,7 @@ void
 SOdysseyAdvancedColorWheel::UpdateTint() const
 {
     result_tint = FLinearColor( FColor( colorA->Red8(), colorA->Green8(), colorA->Blue8() ) );
-    ::ul3::FPixelValue hsv_tint = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( hue_deg, 255, 255 ), ULIS3_FORMAT_RGBA8 );
+    ::ul3::FPixelValue hsv_tint = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 );
     hue_tint = FLinearColor( FColor( hsv_tint.Red8(), hsv_tint.Green8(), hsv_tint.Blue8() ) );
     ::ul3::FPixelValue HSVColor = ::ul3::Conv( *colorA, ULIS3_FORMAT_HSVA8 );
     sat_tint = FLinearColor( FColor( HSVColor.Value8(), HSVColor.Value8(), HSVColor.Value8(), HSVColor.Saturation8() ) );
@@ -635,7 +635,7 @@ SOdysseyAdvancedColorWheel::UpdateColor() const
 {
     // Bake tints
     ::ul3::FPixelValue Color1 = ::ul3::FPixelValue::FromRGBA8( 255, 255, 255 );             // pure white
-    ::ul3::FPixelValue Color2 = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( hue_deg, 255, 255 ), ULIS3_FORMAT_RGBA8 ); // pure hue, max sat
+    ::ul3::FPixelValue Color2 = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 ); // pure hue, max sat
     ::ul3::FPixelValue Color3 = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 );                   // pure black
     float a = triangle_cursor_barycentric_position.X;
     float b = triangle_cursor_barycentric_position.Y;

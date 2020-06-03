@@ -25,8 +25,8 @@ public:
 public:
     // Construction / Destruction
     virtual ~IOdysseyLayer() = 0;
-    IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const eType type );
-    IOdysseyLayer( const FOdysseyLayerStack* iParentStack, const FName& iName, const eType type );
+    IOdysseyLayer( const eType type );
+    IOdysseyLayer( const FName& iName, const eType type );
 
 public:
     virtual eType GetType() const;
@@ -41,8 +41,6 @@ public:
     virtual bool  IsVisible() const;
     virtual void  SetIsVisible( bool iIsVisible );
 
-    const FOdysseyLayerStack* GetParentStack() const;
-
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
 
@@ -51,7 +49,6 @@ protected:
     bool          mIsLocked;
     bool          mIsVisible;
     eType         mType;
-    const FOdysseyLayerStack* mParentStack;
 };
 
 ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );

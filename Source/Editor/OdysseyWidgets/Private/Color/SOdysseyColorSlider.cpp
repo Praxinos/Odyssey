@@ -91,7 +91,7 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
     for( int x = 1; x < InternalSize.X - 2; ++x )
     {
         float t = float( x ) / float( range );
-        ::ul3::FPixelValue res = ::ul3::Conv( GetColorForProportion( t ), ULIS3_FORMAT_RGBA8 );
+        ::ul3::FPixelValue res = ::ul3::Conv( GetColorForProportion( t ), surface->Block()->GetBlock()->Format() );
         for( int y = 1; y < InternalSize.Y - 1; ++y )
         {
             surface->Block()->GetBlock()->PixelProxy( x,y ).AssignMemoryUnsafe( res );
@@ -99,8 +99,8 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
     }
     surface->Invalidate();
 
-    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 5, 5, 5, 255 } ), ::ul3::FRect( 0, 0, cursor_surface->Width(), cursor_surface->Height() ) );
-    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 255, 255, 255 } ), ::ul3::FRect( 1, 1, cursor_surface->Width()-1, cursor_surface->Height()-1 ) );
+    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 5, 5, 5, 255 } ), ::ul3::FRect( 0, 0, cursor_surface->Width() - 1, cursor_surface->Height() - 1 ) );
+    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 255, 255, 255 } ), ::ul3::FRect( 1, 1, cursor_surface->Width() - 2, cursor_surface->Height() - 2 ) );
     cursor_surface->Invalidate();
 }
 
@@ -187,6 +187,7 @@ IOdysseyChannelSlider::GetColorForProportion( float t ) const
 {
     ::ul3::FPixelValue result( mColor );
     SetColorForProportion_Imp( result, t );
+    result.SetAlphaF( 1.f );
     return result;
 }
 
