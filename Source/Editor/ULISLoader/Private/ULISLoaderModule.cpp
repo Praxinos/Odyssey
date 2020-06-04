@@ -25,8 +25,8 @@ public:
     virtual const ::ul3::FFontEngine& FontEngine() const override;
     virtual const ::ul3::FFontRegistry& FontRegistry() const override;
 
-    // Private Data Members
 private:
+    // Private Data Members
     ::ul3::FThreadPool*     mThreadPool;
     ::ul3::FHostDeviceInfo  mHostDeviceInfo;
     ::ul3::FFontEngine*     mFontEngine;
