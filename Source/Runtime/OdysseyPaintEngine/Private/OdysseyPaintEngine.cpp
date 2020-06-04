@@ -72,8 +72,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     mSmoother = new FOdysseySmoothingAverage();
     mInterpolator = new FOdysseyInterpolationBezier();
     mTileThreadPool = new ::ul3::FThreadPool();
-    int maxThreads = mTileThreadPool->GetMaxWorkers();
-    mTileThreadPool->SetNumWorkers( maxThreads );
+    mTileThreadPool->SetNumWorkers( ::ul3::FThreadPool::MaxWorkers() );
 }
 
 //--------------------------------------------------------------------------------------
