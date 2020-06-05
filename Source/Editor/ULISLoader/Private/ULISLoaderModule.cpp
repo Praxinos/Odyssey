@@ -37,15 +37,14 @@ private:
 IMPLEMENT_MODULE( FULISLoaderModule, ULISLoader )
 
 void FULISLoaderModule::StartupModule() {
-    mThreadPool     = new ::ul3::FThreadPool();
+    mThreadPool     = ::ul3::XCreateThreadPool();
     mFontEngine     = new ::ul3::FFontEngine();
     mFontRegistry   = new ::ul3::FFontRegistry( *mFontEngine );
 }
 
 
 void FULISLoaderModule::ShutdownModule() {
-    mThreadPool->WaitForCompletion();
-    delete  mThreadPool;
+    ::ul3::XDeleteThreadPool( mThreadPool );
     delete  mFontRegistry;
     delete  mFontEngine;
 }
