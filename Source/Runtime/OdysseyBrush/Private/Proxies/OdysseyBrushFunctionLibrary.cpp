@@ -27,7 +27,8 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     int diameter = FMath::Max( 2.f, brush->GetSizeModifier() * brush->GetPressure() );
     int center = ( diameter / 2 );
     int radius = center - 2;
-    FOdysseyBlock round( diameter, diameter, brush->GetState().target_temp_buffer->GetUE4TextureSourceFormat() );
+
+    ::ul3::FBlock debug_stamp( diameter, diameter, brush->GetState().target_temp_buffer->GetULISFormat() );
     ::ul3::FPixelValue color = ::ul3::Conv( brush->GetState().color, ULIS3_FORMAT_RGBAF );
     color.SetAlphaF( brush->GetState().flow_modifier );
 
@@ -38,24 +39,38 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
                , perfIntent
                , hULIS.HostDeviceInfo()
                , ULIS3_NOCB
-               , round.GetBlock()
+               , &debug_stamp
                , color
-               , round.GetBlock()->Rect() );
+               , debug_stamp.Rect() );
+
+    ::ul3::FTransform2D transform( ::ul3::MakeRotationMatrix( ::ul3::FMaths::kPIf / 4.f ) );
+    ::ul3::FRect box = ::ul3::TransformAffineMetrics( debug_stamp.Rect(), transform, ::ul3::INTERP_BILINEAR );
+    ::ul3::FBlock dst( box.w, box.h, debug_stamp.Format() );
+    ::ul3::TransformAffine( hULIS.ThreadPool()
+                          , ULIS3_BLOCKING
+                          , perfIntent
+                          , hULIS.HostDeviceInfo()
+                          , ULIS3_NOCB
+                          , &debug_stamp
+                          , &dst
+                          , debug_stamp.Rect()
+                          , transform
+                          , ::ul3::INTERP_BILINEAR );
 
     ::ul3::FRect invalidRect;
-    invalidRect.x = brush->GetX() - radius;
-    invalidRect.y = brush->GetY() - radius;
-    invalidRect.w = diameter;
-    invalidRect.h = diameter;
+    invalidRect.x = brush->GetX() - dst.Width() / 2;
+    invalidRect.y = brush->GetY() - dst.Height() / 2;
+    invalidRect.w = dst.Width();
+    invalidRect.h = dst.Height();
 
     ::ul3::Blend( hULIS.ThreadPool()
                 , ULIS3_BLOCKING
                 , perfIntent
                 , hULIS.HostDeviceInfo()
                 , ULIS3_NOCB
-                , round.GetBlock()
+                , &dst
                 , brush->GetState().target_temp_buffer->GetBlock()
-                , round.GetBlock()->Rect()
+                , dst.Rect()
                 , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
                 , ULIS3_NOAA
                 , ::ul3::BM_NORMAL

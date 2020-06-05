@@ -6,6 +6,8 @@
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyBrushContext.h"
+#include <ULIS3>
+#include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyBrushPoolCache
@@ -418,6 +420,65 @@ UOdysseyBrushAssetBase::GetCanvasHeight()
         return  0;
 }
 
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------- Odyssey Brush Stamp Functions
+void
+UOdysseyBrushAssetBase::DebugStamp() {
+    int diameter = ::ul3::FMaths::Max( 2.f, GetSizeModifier() * GetPressure() );
+    int center = ( diameter / 2 );
+    int radius = center - 2;
+
+    ::ul3::FBlock debug_stamp( diameter, diameter, state.target_temp_buffer->GetULISFormat() );
+    ::ul3::FPixelValue color = ::ul3::Conv( state.color, ULIS3_FORMAT_RGBAF );
+    color.SetAlphaF( GetFlowModifier() );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Fill( hULIS.ThreadPool()
+               , ULIS3_BLOCKING
+               , perfIntent
+               , hULIS.HostDeviceInfo()
+               , ULIS3_NOCB
+               , &debug_stamp
+               , color
+               , debug_stamp.Rect() );
+
+    ::ul3::FTransform2D transform( ::ul3::MakeRotationMatrix( ::ul3::FMaths::kPIf / 4.f ) );
+    ::ul3::FRect box = ::ul3::TransformAffineMetrics( debug_stamp.Rect(), transform, ::ul3::INTERP_BILINEAR );
+    ::ul3::FBlock dst( box.w, box.h, debug_stamp.Format() );
+    ::ul3::TransformAffine( hULIS.ThreadPool()
+                          , ULIS3_BLOCKING
+                          , perfIntent
+                          , hULIS.HostDeviceInfo()
+                          , ULIS3_NOCB
+                          , &debug_stamp
+                          , &dst
+                          , debug_stamp.Rect()
+                          , transform
+                          , ::ul3::INTERP_BILINEAR );
+
+    ::ul3::FRect invalidRect;
+    invalidRect.x = GetX() - dst.Width() / 2;
+    invalidRect.y = GetY() - dst.Height() / 2;
+    invalidRect.w = dst.Width();
+    invalidRect.h = dst.Height();
+
+    ::ul3::Blend( hULIS.ThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , hULIS.HostDeviceInfo()
+                , ULIS3_NOCB
+                , &dst
+                , state.target_temp_buffer->GetBlock()
+                , dst.Rect()
+                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
+                , ULIS3_NOAA
+                , ::ul3::BM_NORMAL
+                , ::ul3::AM_NORMAL
+                , 1.f );
+
+    PushInvalidRect( invalidRect );
+}
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- Odyssey Brush Native events
@@ -436,6 +497,7 @@ UOdysseyBrushAssetBase::OnTick_Implementation()
 void
 UOdysseyBrushAssetBase::OnStep_Implementation()
 {
+    DebugStamp();
 }
 
 void

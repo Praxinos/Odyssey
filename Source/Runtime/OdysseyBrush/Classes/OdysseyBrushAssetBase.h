@@ -231,6 +231,11 @@ public:
     int  GetCanvasHeight();
 
 public:
+    // Brush Stamp Functions
+    UFUNCTION( BlueprintCallable, Category="OdysseyBrush" )
+    void  DebugStamp();
+
+public:
     // Odyssey Brush Native events
     UFUNCTION(BlueprintNativeEvent)
     void OnSelected();

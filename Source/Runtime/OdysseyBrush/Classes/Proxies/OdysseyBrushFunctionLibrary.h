@@ -21,15 +21,27 @@ public:
     // Odyssey Brush Blueprint Callable Methods
 
     /** Test of tooltip */
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
+    UFUNCTION( BlueprintCallable
+             , Category="OdysseyBrushFunctionLibrary"
+             , meta = ( DeprecatedFunction
+                      , DeprecationMessage="As of 4.25 this function is now deprecated. It will be definitely removed in 4.26. Please update to the non-deprecated counterpart"
+                      , DisplayName="DEPRECATED_DebugStamp" ) )
     static  void  DebugStamp();
 
     /** Simple Version of Stamp */
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
+    UFUNCTION( BlueprintCallable
+             , Category="OdysseyBrushFunctionLibrary"
+             , meta = ( DeprecatedFunction
+                      , DeprecationMessage="As of 4.25 this function is now deprecated. It will be definitely removed in 4.26. Please update to the non-deprecated counterpart"
+                      , DisplayName="DEPRECATED_SimpleStamp" ) )
     static  void  SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f );
 
     /** Stamp */
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
+    UFUNCTION( BlueprintCallable
+            , Category="OdysseyBrushFunctionLibrary"
+            , meta = ( DeprecatedFunction
+                      , DeprecationMessage="As of 4.25 this function is now deprecated. It will be definitely removed in 4.26. Please update to the non-deprecated counterpart"
+                      , DisplayName="DEPRECATED_Stamp" ) )
     static  void  Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
 
