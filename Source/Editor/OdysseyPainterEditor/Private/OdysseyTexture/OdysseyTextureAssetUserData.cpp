@@ -6,26 +6,24 @@
 #include "EngineUtils.h"
 
 UOdysseyTextureAssetUserData::UOdysseyTextureAssetUserData(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+    : Super(ObjectInitializer)
 {
     mLayerStack = new FOdysseyLayerStack();
 }
 
 
-//UObject Interface--------
 //-------------------------
-
+//UObject Interface--------
 void UOdysseyTextureAssetUserData::Serialize(FArchive& Ar)
 {
-	Super::Serialize(Ar);
-        
+    Super::Serialize(Ar);
     Ar << mLayerStack;
 }
-
-//End UObject Interface----
 //-------------------------
+//End UObject Interface----
 
 FOdysseyLayerStack* UOdysseyTextureAssetUserData::GetLayerStack()
 {
     return mLayerStack;
 }
+

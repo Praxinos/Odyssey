@@ -11,20 +11,20 @@
 
 #include "OdysseyTextureAssetUserData.generated.h"
 
-
 UCLASS()
 class UOdysseyTextureAssetUserData : public UAssetUserData
 {
-	GENERATED_UCLASS_BODY()
+    GENERATED_UCLASS_BODY()
 
 public:
-	//~ Begin UObject Interface.
-	virtual void Serialize(FArchive& Ar) override;
-	//~ End UObject Interface.
+    //~ Begin UObject Interface.
+    virtual void Serialize(FArchive& Ar) override;
+    //~ End UObject Interface.
 
 public:
     FOdysseyLayerStack* GetLayerStack();
-    
+
 private:
     FOdysseyLayerStack* mLayerStack;
 };
+

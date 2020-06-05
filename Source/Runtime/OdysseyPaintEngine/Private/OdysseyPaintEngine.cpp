@@ -628,6 +628,9 @@ FOdysseyPaintEngine::TriggerStateChanged()
 void
 FOdysseyPaintEngine::InterruptStrokeAndStampInPlace()
 {
+    if( mDelayQueue.empty() )
+        return;
+
     EndStroke();
     InterruptDelay();
     Tick();

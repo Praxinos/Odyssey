@@ -69,4 +69,5 @@ private:
     TSharedPtr< SVerticalBox > combo_menu;
     TSharedPtr< SScrollBox > contents;
     FOnColorChanged OnColorChangedCallback;
+    bool bDisableNextCallback;
 };
