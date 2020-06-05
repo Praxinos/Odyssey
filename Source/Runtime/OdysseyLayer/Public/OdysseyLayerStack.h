@@ -67,8 +67,6 @@ public:
     void                                FillCurrentLayerWithColor( const ::ul3::IPixel& iColor );
     TArray< TSharedPtr< FText > >       GetBlendingModesAsText();
     ETextureSourceFormat                GetTextureSourceFormat();
-    const ::ul3::FHostDeviceInfo&       GetHostDeviceInfo() const;
-    ::ul3::FThreadPool*                 GetThreadPool() const;
 
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack );
@@ -89,9 +87,6 @@ private:
     int                                 mHeight;
     ETextureSourceFormat                mTextureSourceFormat;
     bool                                mIsInitialized;
-
-    ::ul3::FHostDeviceInfo              mHostDeviceInfo;
-    ::ul3::FThreadPool*                 mThreadPool;
 
 public:
     FOdysseyDrawingUndo*                mDrawingUndo;
