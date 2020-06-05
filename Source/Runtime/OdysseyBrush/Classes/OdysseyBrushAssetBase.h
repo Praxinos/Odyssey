@@ -232,7 +232,7 @@ public:
 
 public:
     // Brush Stamp Functions
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrush" )
+    UFUNCTION( BlueprintCallable, Category="OdysseyBrush", meta = ( HideSelfPin = "true" ) )
     void  DebugStamp();
 
 public:
