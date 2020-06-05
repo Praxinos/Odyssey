@@ -116,30 +116,11 @@ FOdysseyBlock::GetULISFormat() const
     return mULISFormat;
 }
 
+
 void
-FOdysseyBlock::Reallocate( int                          iWidth
-                         , int                          iHeight
-                         , ETextureSourceFormat         iFormat
-                         , ::ul3::fpInvalidateFunction  iInvFunc
-                         , void*                        iInvInfo )
+FOdysseyBlock::ResyncData()
 {
-    // Set UE4 Format
-    mUE4TextureSourceFormat = iFormat;
-
-    // Retrieve ULIS format hash.
-    mULISFormat = ULISFormatForUE4TextureSourceFormat( mUE4TextureSourceFormat );
-
-    // Retrieve spec info from ULIS format hash.
-    ::ul3::FFormatInfo fmt( mULISFormat );
-    
-    // Empty and realloc array ( primary data rep )
-    // data is not initialized / filled !
-    mArray.Empty( iWidth * iHeight * fmt.BPP );
-
-    // Delete existing block
-    delete mBlock;
-
-    // Allocate block from external array data
-    mBlock = new ::ul3::FBlock( mArray.GetData(), iWidth, iHeight, mULISFormat, nullptr, ::ul3::FOnInvalid(  iInvFunc, iInvInfo ), ::ul3::FOnCleanup( &::ul3::OnCleanup_DoNothing ) );
+    checkf( mArray.Num() == mBlock->BytesTotal(), TEXT( "Error, resync sizes don't match !" ) );
+    mBlock->ResyncNonOwnedData( mArray.GetData() );
 }
 

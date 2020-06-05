@@ -14,6 +14,7 @@ CopyUTextureDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
            ,TEXT("Sizes do not match"));
 
     iTexture->Source.GetMipData(iBlock->GetArray(),0);
+    iBlock->ResyncData();
 }
 
 void

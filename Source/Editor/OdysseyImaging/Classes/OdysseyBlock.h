@@ -40,11 +40,7 @@ public:
     FVector2D                   Size() const;
     ETextureSourceFormat        GetUE4TextureSourceFormat() const;
     uint32                      GetULISFormat() const;
-    void                        Reallocate( int                             iWidth
-                                          , int                             iHeight
-                                          , ETextureSourceFormat            iFormat     = ETextureSourceFormat::TSF_BGRA8
-                                          , ::ul3::fpInvalidateFunction    iInvFunc    = nullptr
-                                          , void*                           iInvInfo    = nullptr );
+    void                        ResyncData();
 
 private:
     // Private Data Members
