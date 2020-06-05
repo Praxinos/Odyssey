@@ -22,9 +22,6 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
     DeallocInvalidTileMap( mTmpInvalidTileMap );
     DeallocInvalidTileMap( mStrokeInvalidTileMap );
 
-    mTileThreadPool->WaitForCompletion();
-    delete mTileThreadPool;
-
     if( mBrushCursorPreviewSurface )
         delete  mBrushCursorPreviewSurface;
 }
@@ -61,7 +58,6 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mIsAdaptativeStep( true )
     , mIsPaintOnTick( false )
     , mIsPendingEndStroke( false )
-    , mTileThreadPool( nullptr )
     , mDelayQueue()
 
     , mBrushCursorPreviewSurface( nullptr )
@@ -71,8 +67,6 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
 {
     mSmoother = new FOdysseySmoothingAverage();
     mInterpolator = new FOdysseyInterpolationBezier();
-    mTileThreadPool = new ::ul3::FThreadPool();
-    mTileThreadPool->SetNumWorkers( ::ul3::FThreadPool::MaxWorkers() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -105,33 +99,17 @@ FOdysseyPaintEngine::Tick()
             break;
     }
 
-    /*
-    ::ul3::ParallelForPool( (*mTileThreadPool), nTileY
-                       , [&]( int iLine ) {
-                            for( int x = 0; x < nTileX; ++x ) {
-                                if( tmpInvalidTileMap[iLine][x] ) {
-                                    ::ul3::FRect  tileRect = MAKE_TILE_RECT( x, iLine );
-                                    layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier );
-                                }
-                            }
-                       } );
-    */
-
     for( int k = 0; k < mCountTileY; ++k )
     {
         for( int l = 0; l < mCountTileX; ++l )
         {
             if( mTmpInvalidTileMap[k][l] )
             {
-                mTileThreadPool->ScheduleJob( [this, l, k]()
-                {
-                    ::ul3::FRect tileRect = MakeTileRect( l, k );
-                    mLayerStack->ComputeResultBlockWithTempBuffer( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
-                } );
+                ::ul3::FRect tileRect = MakeTileRect( l, k );
+                mLayerStack->ComputeResultBlockWithTempBuffer( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
             }
         }
     }
-    mTileThreadPool->WaitForCompletion();
 
     ClearInvalidTileMap( mTmpInvalidTileMap );
 
@@ -153,19 +131,13 @@ FOdysseyPaintEngine::Tick()
 
                     ::ul3::FRect tileRect = MakeTileRect( l, k );
                     mLayerStack->mDrawingUndo->SaveData( l, k, tileRect.w, tileRect.h );
-                    mTileThreadPool->ScheduleJob( [this, l, k]()
-                    {
-                        ::ul3::FRect tileRect = MakeTileRect( l, k );
-                        mLayerStack->BlendTempBufferOnCurrentBlock( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
-                    } );
+                    mLayerStack->BlendTempBufferOnCurrentBlock( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
                 }
             }
         }
 
         if( IsRecordStarted )
             mLayerStack->mDrawingUndo->EndRecord();
-
-        mTileThreadPool->WaitForCompletion();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
 

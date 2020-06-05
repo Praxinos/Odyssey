@@ -99,8 +99,8 @@ private:
     float                               mSizeModifier;
     float                               mOpacityModifier;
     float                               mFlowModifier;
-    ::ul3::eBlendingMode               mBlendingModeModifier;
-    ::ul3::eAlphaMode                  mAlphaModeModifier;
+    ::ul3::eBlendingMode                mBlendingModeModifier;
+    ::ul3::eAlphaMode                   mAlphaModeModifier;
     float                               mStepValue;
 
     IOdysseyInterpolation*              mInterpolator;
@@ -114,7 +114,6 @@ private:
 
     bool                                mIsPendingEndStroke;
 
-    ::ul3::FThreadPool*                mTileThreadPool;
     std::queue<std::function<void()>>   mDelayQueue;
 
 public:
