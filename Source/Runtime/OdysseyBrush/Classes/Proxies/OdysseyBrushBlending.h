@@ -11,7 +11,7 @@
 UENUM( BlueprintType )
 enum class EOdysseyBlendingMode : uint8
 {
-      kNormal               UMETA( DisplayName = "Normal"
+      kNormal               UMETA( DisplayName = "Normal"               )
     , kTop                  UMETA( DisplayName = "Top"                  )
     , kBack                 UMETA( DisplayName = "Back"                 )
     , kBehind               UMETA( DisplayName = "Behind"               )
