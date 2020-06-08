@@ -22,20 +22,12 @@ USTRUCT(BlueprintType)
 struct ODYSSEYBRUSH_API FOdysseyMatrix
 {
     GENERATED_BODY()
+    FOdysseyMatrix();
+    FOdysseyMatrix( const  glm::mat3&  iMat );
+    FString ID() const;
+    const glm::mat3& GetValue() const;
 
-    FOdysseyMatrix()
-        : mat( glm::mat3( 1.f ) )
-    {}
-
-    FOdysseyMatrix( const  glm::mat3&  iMat )
-        : mat( iMat )
-    {}
-
-    FString ID()
-    {
-        return  FString::FromBlob( ( const uint8* )glm::value_ptr( mat ), 9 * sizeof( float ) );
-    }
-
+private:
     glm::mat3  mat;
 };
 

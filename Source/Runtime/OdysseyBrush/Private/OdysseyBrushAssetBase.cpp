@@ -6,6 +6,7 @@
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyBrushContext.h"
+#include "Proxies/OdysseyBrushColor.h"
 #include <ULIS3>
 #include "ULISLoaderModule.h"
 

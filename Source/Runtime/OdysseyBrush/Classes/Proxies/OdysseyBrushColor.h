@@ -15,21 +15,10 @@ struct ODYSSEYBRUSH_API FOdysseyBrushColor
 public:
     GENERATED_BODY()
 
-    FOdysseyBrushColor()
-        : m( ULIS3_FORMAT_RGBA8 )
-    {}
-
-    FOdysseyBrushColor( const ::ul3::FPixelValue& iVal )
-        : m( iVal )
-    {}
-
-    void SetValue( const ::ul3::FPixelValue& iVal ) {
-        m = iVal;
-    }
-
-    const ::ul3::FPixelValue& GetValue() const {
-        return  m;
-    }
+    FOdysseyBrushColor();
+    FOdysseyBrushColor( const ::ul3::FPixelValue& iVal );
+    void SetValue( const ::ul3::FPixelValue& iVal );
+    const ::ul3::FPixelValue& GetValue() const;
 
 private:
     ::ul3::FPixelValue  m;

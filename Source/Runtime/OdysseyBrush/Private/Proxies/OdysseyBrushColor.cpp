@@ -3,6 +3,27 @@
 #include "Proxies/OdysseyBrushColor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushColor"
+/////////////////////////////////////////////////////
+// Odyssey Brush Color
+
+FOdysseyBrushColor::FOdysseyBrushColor()
+    : m( ULIS3_FORMAT_RGBA8 )
+{}
+
+FOdysseyBrushColor::FOdysseyBrushColor( const ::ul3::FPixelValue& iVal )
+    : m( iVal )
+{}
+
+void
+FOdysseyBrushColor::SetValue( const ::ul3::FPixelValue& iVal ) {
+    m = iVal;
+}
+
+const ::ul3::FPixelValue&
+FOdysseyBrushColor::GetValue() const {
+    return  m;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // UOdysseyBrushFunctionLibrary
 UOdysseyBrushColorFunctionLibrary::UOdysseyBrushColorFunctionLibrary( const  FObjectInitializer&  ObjectInitializer )
@@ -15,7 +36,7 @@ UOdysseyBrushColorFunctionLibrary::UOdysseyBrushColorFunctionLibrary( const  FOb
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 0, 0, 0 } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 0, 0, 0 } ) );
 }
 
 
@@ -25,7 +46,7 @@ UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { R, G, B, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { R, G, B, A } ) );
 }
  
 
@@ -33,7 +54,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, i
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSV( int H, int S, int V, int A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_HSVA8, { H, S, V, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_HSVA8, { H, S, V, A } ) );
 }
 
 
@@ -41,7 +62,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSV( int H, int S, i
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSL( int H, int S, int L, int A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_HSLA8, { H, S, L, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_HSLA8, { H, S, L, A } ) );
 }
 
 
@@ -49,7 +70,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSL( int H, int S, i
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYK( int C, int M, int Y, int K, int A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_CMYKA8, { C, M, Y, K, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_CMYKA8, { C, M, Y, K, A } ) );
 }
 
 
@@ -60,7 +81,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYK( int C, int M, 
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float G, float B, float A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_RGBAF, { R, G, B, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_RGBAF, { R, G, B, A } ) );
 }
 
 
@@ -68,7 +89,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSVF( float H, float S, float V, float A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_HSVF, { H, S, V, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_HSVF, { H, S, V, A } ) );
 }
 
 
@@ -76,7 +97,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSVF( float H, float
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSLF( float H, float S, float L, float A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_HSLF, { H, S, L, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_HSLF, { H, S, L, A } ) );
 }
 
 
@@ -84,7 +105,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromHSLF( float H, float
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYKF( float C, float M, float Y, float K, float A )
 {
-    return  ::ul3::FPixelValue( ULIS3_FORMAT_CMYKF, { C, M, Y, K, A } );
+    return  FOdysseyBrushColor( ::ul3::FPixelValue( ULIS3_FORMAT_CMYKF, { C, M, Y, K, A } ) );
 }
 
 
