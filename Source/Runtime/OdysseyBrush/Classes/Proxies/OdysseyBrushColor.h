@@ -17,8 +17,13 @@ public:
 
     FOdysseyBrushColor();
     FOdysseyBrushColor( const ::ul3::FPixelValue& iVal );
+    FOdysseyBrushColor( ::ul3::FPixelValue&& iVal );
+    FOdysseyBrushColor( const FOdysseyBrushColor& iOther );
+    FOdysseyBrushColor( FOdysseyBrushColor&& iOther );
+    FOdysseyBrushColor& operator=( const FOdysseyBrushColor& iOther );
     void SetValue( const ::ul3::FPixelValue& iVal );
     const ::ul3::FPixelValue& GetValue() const;
+    static  FOdysseyBrushColor FromTemp( ::ul3::FPixelValue&& iVal );
 
 private:
     ::ul3::FPixelValue  m;
