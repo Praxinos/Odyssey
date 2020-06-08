@@ -434,7 +434,7 @@ UOdysseyBrushAssetBase::DebugStamp() {
     color.SetAlphaF( GetFlowModifier() );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent
@@ -447,6 +447,7 @@ UOdysseyBrushAssetBase::DebugStamp() {
     ::ul3::FTransform2D transform( ::ul3::MakeRotationMatrix( ::ul3::FMaths::kPIf / 4.f ) );
     ::ul3::FRect box = ::ul3::TransformAffineMetrics( debug_stamp.Rect(), transform, ::ul3::INTERP_BILINEAR );
     ::ul3::FBlock dst( box.w, box.h, debug_stamp.Format() );
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, &dst, dst.Rect() );
     ::ul3::TransformAffine( hULIS.ThreadPool()
                           , ULIS3_BLOCKING
                           , perfIntent
