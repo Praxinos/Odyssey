@@ -456,8 +456,10 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
     };
 
     FVector2D current;
-    for( current.Y = Point1.Y; current.Y <= Point3.Y; ++current.Y ) {
-        for( current.X = Point1.X; current.X < Point2.X; ++current.X ) {
+    const float maxy = static_cast< int >( Point3.Y );
+    const float maxx = static_cast< int >( Point2.X );
+    for( current.Y = Point1.Y; current.Y < maxy; ++current.Y ) {
+        for( current.X = Point1.X; current.X < maxx; ++current.X ) {
             if( !InTriangle( Point1, Point2, Point3, current ) )
                 break;
 
