@@ -3,10 +3,10 @@
 
 #include "OdysseyBrushContext.h"
 
+//TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
+
 /////////////////////////////////////////////////////
 // FOdysseyBrushContext
-
-
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Singleton Getter
 //static

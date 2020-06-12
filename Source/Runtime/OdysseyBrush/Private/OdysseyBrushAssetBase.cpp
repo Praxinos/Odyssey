@@ -523,11 +523,13 @@ UOdysseyBrushAssetBase::OnStrokeEnd_Implementation()
 void
 UOdysseyBrushAssetBase::ExecuteSelected()
 {
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->SetContext( this );
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnSelected();
 
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->ClearContext();
 }
 
@@ -535,11 +537,13 @@ UOdysseyBrushAssetBase::ExecuteSelected()
 void
 UOdysseyBrushAssetBase::ExecuteTick()
 {
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->SetContext( this );
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnTick();
 
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->ClearContext();
 }
 
@@ -547,11 +551,13 @@ UOdysseyBrushAssetBase::ExecuteTick()
 void
 UOdysseyBrushAssetBase::ExecuteStep()
 {
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->SetContext( this );
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnStep();
 
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->ClearContext();
 }
 
@@ -559,11 +565,13 @@ UOdysseyBrushAssetBase::ExecuteStep()
 void
 UOdysseyBrushAssetBase::ExecuteStateChanged()
 {
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->SetContext( this );
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnStateChanged();
 
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->ClearContext();
 }
 
@@ -571,11 +579,13 @@ UOdysseyBrushAssetBase::ExecuteStateChanged()
 void
 UOdysseyBrushAssetBase::ExecuteStrokeBegin()
 {
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->SetContext( this );
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnStrokeBegin();
 
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->ClearContext();
 }
 
@@ -583,11 +593,13 @@ UOdysseyBrushAssetBase::ExecuteStrokeBegin()
 void
 UOdysseyBrushAssetBase::ExecuteStrokeEnd()
 {
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->SetContext( this );
 
     FEditorScriptExecutionGuard ScriptGuard;
     OnStrokeEnd();
 
+    //TODO: The brush context mechanic is deprecated, it will be removed in 4.26.
     FOdysseyBrushContext::Instance()->ClearContext();
 }
 
