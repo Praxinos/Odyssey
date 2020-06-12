@@ -9,8 +9,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushCache.h"
 #include "Proxies/OdysseyBrushBlock.h"
-#include <glm/matrix.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <ULIS3>
 
 #include "OdysseyBrushTransform.generated.h"
 
@@ -23,12 +22,12 @@ struct ODYSSEYBRUSH_API FOdysseyMatrix
 {
     GENERATED_BODY()
     FOdysseyMatrix();
-    FOdysseyMatrix( const  glm::mat3&  iMat );
+    FOdysseyMatrix( const  ::ul3::FTransform2D&  iMat );
     FString ID() const;
-    const glm::mat3& GetValue() const;
+    const ::ul3::FTransform2D& GetValue() const;
 
 private:
-    glm::mat3  mat;
+    ::ul3::FTransform2D m;
 };
 
 /////////////////////////////////////////////////////

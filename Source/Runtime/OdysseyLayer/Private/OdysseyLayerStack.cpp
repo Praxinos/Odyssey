@@ -624,7 +624,7 @@ FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IOdysseyLayer* >* iPosition,FName iName,int iAtIndex)
 {
-    assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
+    //assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
 
     FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat);
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -647,7 +647,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IO
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int iAtIndex)
 {
-    assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
+    //assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
 
     FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
 

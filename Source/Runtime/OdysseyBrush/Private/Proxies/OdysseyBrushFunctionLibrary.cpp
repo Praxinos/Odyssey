@@ -43,7 +43,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
                , color
                , debug_stamp.Rect() );
 
-    ::ul3::FTransform2D transform( ::ul3::MakeRotationMatrix( ::ul3::FMaths::kPIf / 4.f ) );
+    ::ul3::FTransform2D transform( ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::kPIf / 4.f ) );
     ::ul3::FRect box = ::ul3::TransformAffineMetrics( debug_stamp.Rect(), transform, ::ul3::INTERP_BILINEAR );
     ::ul3::FBlock dst( box.w, box.h, debug_stamp.Format() );
     ::ul3::TransformAffine( hULIS.ThreadPool()

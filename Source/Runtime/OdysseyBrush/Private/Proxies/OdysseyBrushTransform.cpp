@@ -11,22 +11,23 @@
 /////////////////////////////////////////////////////
 // Odyssey Resampling
 FOdysseyMatrix::FOdysseyMatrix()
-    : mat( glm::mat3( 1.f ) )
+    : m()
 {}
 
-FOdysseyMatrix::FOdysseyMatrix( const  glm::mat3&  iMat )
-    : mat( iMat )
+FOdysseyMatrix::FOdysseyMatrix( const  ::ul3::FTransform2D&  iMat )
+    : m( iMat )
 {}
 
 FString
 FOdysseyMatrix::ID() const
 {
-    return  FString::FromBlob( ( const uint8* )glm::value_ptr( mat ), 9 * sizeof( float ) );
+    //return  FString::FromBlob( ( const uint8* )glm::value_ptr( mat ), 9 * sizeof( float ) );
+    return  FString();
 }
 
-const glm::mat3&
+const ::ul3::FTransform2D&
 FOdysseyMatrix::GetValue() const {
-    return  mat;
+    return  m;
 }
 
 /////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ FOdysseyMatrix::GetValue() const {
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeIdentityMatrix()
 {
-    return  FOdysseyMatrix( ::ul3::MakeIdentityMatrix() );
+    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeIdentityTransform() );
 }
 
 
@@ -43,7 +44,7 @@ UOdysseyTransformProxyLibrary::MakeIdentityMatrix()
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeTranslationMatrix( float DeltaX, float DeltaY )
 {
-    return  FOdysseyMatrix( ::ul3::MakeTranslationMatrix( DeltaX, DeltaY ) );
+    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeTranslationTransform( DeltaX, DeltaY ) );
 }
 
 
@@ -51,7 +52,7 @@ UOdysseyTransformProxyLibrary::MakeTranslationMatrix( float DeltaX, float DeltaY
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeRotationMatrix( float Deg )
 {
-    return  FOdysseyMatrix( ::ul3::MakeRotationMatrix( Deg * 3.14159265359 / 180.0 ) );
+    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeRotationTransform( Deg * 3.14159265359 / 180.0 ) );
 }
 
 
@@ -59,7 +60,7 @@ UOdysseyTransformProxyLibrary::MakeRotationMatrix( float Deg )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeScaleMatrix( float ScaleX, float ScaleY )
 {
-    return  FOdysseyMatrix( ::ul3::MakeScaleMatrix( ScaleX, ScaleY ) );
+    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeScaleTransform( ScaleX, ScaleY ) );
 }
 
 
@@ -67,7 +68,7 @@ UOdysseyTransformProxyLibrary::MakeScaleMatrix( float ScaleX, float ScaleY )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeShearMatrix( float ShearX, float ShearY )
 {
-    return  FOdysseyMatrix( ::ul3::MakeShearMatrix( ShearX, ShearY ) );
+    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
 }
 
 
@@ -75,7 +76,7 @@ UOdysseyTransformProxyLibrary::MakeShearMatrix( float ShearX, float ShearY )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second )
 {
-    return  FOdysseyMatrix( Second.GetValue() * First.GetValue() );
+    return  FOdysseyMatrix( ::ul3::FTransform2D::ComposeTransforms( Second.GetValue(), First.GetValue() ) );
 }
 
 
@@ -123,7 +124,7 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
     FString op = "Rotate_" + FString::SanitizeFloat( Angle ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ul3::FTransform2D( ::ul3::MakeRotationMatrix( ( Angle * 3.14159265359f ) / 180.f ) );
+        auto mat = ::ul3::FTransform2D( ::ul3::FTransform2D::MakeRotationTransform( ( Angle * 3.14159265359f ) / 180.f ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -158,7 +159,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Sc
     FString op = "ScaleUniform_" + FString::SanitizeFloat( Scale ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ul3::FTransform2D( ::ul3::MakeScaleMatrix( Scale, Scale ) );
+        auto mat = ::ul3::FTransform2D( ::ul3::FTransform2D::MakeScaleTransform( Scale, Scale ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -193,7 +194,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX,
     FString op = "Scale_" + FString::SanitizeFloat( ScaleX ) + FString::SanitizeFloat( ScaleY ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ul3::FTransform2D( ::ul3::MakeScaleMatrix( ScaleX, ScaleY ) );
+        auto mat = ::ul3::FTransform2D( ::ul3::FTransform2D::MakeScaleTransform( ScaleX, ScaleY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -228,7 +229,7 @@ UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, f
     FString op = "Shear_" + FString::SanitizeFloat( ShearX ) + FString::SanitizeFloat( ShearY ) + "_" + Sample.id;
     ODYSSEY_BRUSH_CACHE_OPERATION_START( Cache, op )
         FOdysseyBlock* src = Sample.m;
-        auto mat = ::ul3::FTransform2D( ::ul3::MakeShearMatrix( ShearX, ShearY ) );
+        auto mat = ::ul3::FTransform2D( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -268,7 +269,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
         float max = FMath::Max( src_width, src_height );
         float ratio = Size / max;
 
-        auto mat = ::ul3::FTransform2D( ::ul3::MakeScaleMatrix( ratio, ratio ) );
+        auto mat = ::ul3::FTransform2D( ::ul3::FTransform2D::MakeScaleTransform( ratio, ratio ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -308,7 +309,7 @@ UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, f
         float ratioX = SizeX / src_width;
         float ratioY = SizeY / src_height;
 
-        auto mat = ::ul3::FTransform2D( ::ul3::MakeScaleMatrix( ratioX, ratioY ) );
+        auto mat = ::ul3::FTransform2D( ::ul3::FTransform2D::MakeScaleTransform( ratioX, ratioY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
