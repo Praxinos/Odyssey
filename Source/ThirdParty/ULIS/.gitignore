@@ -1,2 +1,3 @@
-ULIS.Build.cs
-redist
+*
+!.gitignore
+!README.md
