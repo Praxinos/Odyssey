@@ -21,8 +21,7 @@ FOdysseyMatrix::FOdysseyMatrix( const  ::ul3::FTransform2D&  iMat )
 FString
 FOdysseyMatrix::ID() const
 {
-    //return  FString::FromBlob( ( const uint8* )glm::value_ptr( mat ), 9 * sizeof( float ) );
-    return  FString();
+    return  FString::FromBlob( m.Ptr(), 9 * sizeof( float ) );
 }
 
 const ::ul3::FTransform2D&
