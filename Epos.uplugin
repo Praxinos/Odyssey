@@ -14,11 +14,16 @@
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": false,
 	"Installed": false,
-	"Modules": [
-		{
-			"Name": "Epos",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		}
-	]
+  "Modules": [
+    {
+      "Name": "Epos",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "EposEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ]
 }

@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
+// IDDN 
 
 #pragma once
 

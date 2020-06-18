@@ -1,6 +1,7 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
+// IDDN 
 
-#include "Epos.h"
+#include "EposModule.h"
 
 #define LOCTEXT_NAMESPACE "FEposModule"
 
