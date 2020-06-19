@@ -27,7 +27,7 @@ void FOdysseyBrushEditorModule::StartupModule()
     // Sub Menu Advanced Category
     //EAssetTypeCategories::Type OdysseyBrushAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("OdysseyBrush")), LOCTEXT("OdysseyBrushAssetCategory", "OdysseyBrush"));
     // Basic Category
-    EAssetTypeCategories::Type OdysseyBrushAssetCategoryBit = EAssetTypeCategories::Type::Basic;
+    EAssetTypeCategories::Type OdysseyBrushAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "ILIAD" ) ), LOCTEXT( "IliadPainterAssetCategory", "ILIAD" ) );
 
     OdysseyBrushAssetTypeActions = MakeShareable( new  FAssetTypeActions_OdysseyBrush( OdysseyBrushAssetCategoryBit ) );
     AssetTools.RegisterAssetTypeActions( OdysseyBrushAssetTypeActions.ToSharedRef() );
