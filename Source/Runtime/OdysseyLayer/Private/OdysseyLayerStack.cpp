@@ -1355,7 +1355,8 @@ FOdysseyDrawingUndo::LoadData()
         EndRecordRedo();
     }
 
-    delete mTileData;
+    if( mNumberBlocksUndo[mCurrentIndex] != 0)
+        delete mTileData;
 
     return true;
 }
@@ -1438,7 +1439,8 @@ FOdysseyDrawingUndo::Redo()
     if(mCurrentIndex < (mUndosPositions.Num() - 1))
         mCurrentIndex++;
 
-    delete mTileData;
+    if( mNumberBlocksRedo[mCurrentIndex] != 0 )
+        delete mTileData;
 
     return true;
 }
