@@ -713,7 +713,7 @@ FOdysseyLayerStack::GetCurrentLayerAsIndex() const
         if(layers[i] == mCurrentLayer->GetNodeContent())
             return i;
     }
-    return 0;
+    return -1;
 }
 
 FOdysseyNTree< IOdysseyLayer* >*

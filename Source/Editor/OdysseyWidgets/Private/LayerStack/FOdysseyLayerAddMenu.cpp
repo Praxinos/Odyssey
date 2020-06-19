@@ -50,9 +50,12 @@ void FOdysseyLayerAddMenu::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
 void FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryExecute()
 {
     FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&mLayerStackRef.Get());
-    IOdysseyLayer* currentLayer = model->GetLayerStackData()->GetCurrentLayer()->GetNodeContent();
-    if( currentLayer )
+    FOdysseyNTree<IOdysseyLayer*>* currentNode = model->GetLayerStackData()->GetCurrentLayer();
+    
+    if( currentNode )
     {
+        IOdysseyLayer* currentLayer = currentNode->GetNodeContent();
+
         if( currentLayer->GetType() == IOdysseyLayer::eType::kFolder )
         {
             FOdysseyFolderLayer* folder = static_cast<FOdysseyFolderLayer*>(currentLayer);
