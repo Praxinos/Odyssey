@@ -7,10 +7,12 @@
 #include "ISequencerModule.h"
 #include "ISettingsModule.h"
 #include "Modules/ModuleManager.h"
+#include "SequencerSettings.h"
 
 #include "AssetTools/BoardSequenceActions.h"
 #include "AssetTools/ShotSequenceActions.h"
 #include "Board/BoardSequence.h"
+#include "Settings/EposEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposEditorStyle.h"
 
@@ -18,16 +20,34 @@
 
 //---
 
+FEposEditorModule::FEposEditorModule()
+    : mSettings( nullptr )
+{
+}
+
+//--- IModuleInterface interface
+
 void
 FEposEditorModule::StartupModule()
 {
     RegisterAssetTools();
+    RegisterSettings();
 }
 
 void
 FEposEditorModule::ShutdownModule()
 {
+    UnregisterSettings();
     UnregisterAssetTools();
+}
+
+//--- FGCObject interface
+
+void
+FEposEditorModule::AddReferencedObjects( FReferenceCollector& Collector )
+{
+    if( mSettings )
+        Collector.AddReferencedObject( mSettings );
 }
 
 //---
@@ -54,6 +74,41 @@ FEposEditorModule::UnregisterAssetTools()
     IAssetTools& AssetTools = AssetToolsModule->Get();
     AssetTools.UnregisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );
     AssetTools.UnregisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
+}
+
+//---
+
+void
+FEposEditorModule::RegisterSettings()
+{
+    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+    if( !SettingsModule )
+        return;
+
+    SettingsModule->RegisterSettings( "Project", "Plugins", "Epos",
+                                        LOCTEXT( "EposSettingsName", "Epos" ),
+                                        LOCTEXT( "EposSettingsDescription", "Configure the Epos Editor." ),
+                                        GetMutableDefault<UEposEditorSettings>() );
+
+    //---
+
+    mSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposEditor" ) ); // Don't know how to use/manage them
+
+    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposEditor",
+                                        LOCTEXT( "EposEditorSettingsName", "Epos Editor" ),
+                                        LOCTEXT( "EposEditorSettingsDescription", "Configure the look and feel of the Epos Editor." ),
+                                        mSettings );
+}
+
+void
+FEposEditorModule::UnregisterSettings()
+{
+    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+    if( !SettingsModule )
+        return;
+
+    SettingsModule->UnregisterSettings( "Project", "Plugins", "Epos" );
+    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "EposEditor" );
 }
 
 //---
