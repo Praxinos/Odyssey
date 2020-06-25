@@ -8,8 +8,6 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
-#include "OdysseyStylusInputDriver.h"
-
 #include "OdysseyPainterEditorSettings.generated.h"
 
 /**
@@ -38,11 +36,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorSettings
     : public UObject
 {
     GENERATED_UCLASS_BODY()
-
-public:
-    virtual void PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent ) override;
-    
-    void RefreshStylusInputDriver();
 
 public:
     /** The type of background to draw in the texture editor view port. */
@@ -86,10 +79,6 @@ public:
     /** Color to use for the texture border, if enabled. */
     UPROPERTY(config, EditAnywhere, Category=TextureBorder)
     FColor TextureBorderColor;
-    
-    /** Color to use for the texture border, if enabled. */
-    UPROPERTY(config, EditAnywhere, Category=StylusDriver )
-    TEnumAsByte<EOdysseyStylusInputDriver> StylusInputDriver;
 
     /** If true, displays a border around the texture. */
     UPROPERTY(config)

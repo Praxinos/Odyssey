@@ -12,7 +12,7 @@
 #include "OdysseyTextureAssetUserData.generated.h"
 
 UCLASS()
-class UOdysseyTextureAssetUserData : public UAssetUserData
+class ODYSSEYTEXTURE_API UOdysseyTextureAssetUserData : public UAssetUserData
 {
     GENERATED_UCLASS_BODY()
 

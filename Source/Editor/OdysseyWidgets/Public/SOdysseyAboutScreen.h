@@ -17,7 +17,7 @@ struct FSlateBrush;
 /**
  * About screen contents widget
  */
-class SOdysseyAboutScreen
+class ODYSSEYWIDGETS_API SOdysseyAboutScreen
     : public SCompoundWidget
 {
 public:

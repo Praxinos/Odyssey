@@ -7,12 +7,15 @@
 
 #include "Framework/Docking/TabManager.h"
 #include "Interfaces/IMainFrameModule.h"
+#include "ISettingsModule.h"
 #include "Logging/LogMacros.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/SWindow.h"
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
 #include "SStylusInputDebugWidget.h"
+
+#include "OdysseyStylusInputSettings.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyStylusInputModule"
 
@@ -21,6 +24,31 @@ static const FName StylusInputDebugTabName = FName("StylusInputDebug");
 
 class FOdysseyStylusInputModule : public IModuleInterface
 {
+public:
+	virtual void StartupModule() override
+	{
+		// register settings
+		ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
+
+		if (settingsModule)
+		{
+			settingsModule->RegisterSettings("Editor", "ContentEditors", "ILIADStylusInput"
+				, LOCTEXT("OdysseyPainterEditorSettingsName", "ILIAD Stylus Input")
+				, LOCTEXT("OdysseyPainterEditorSettingsDescription", "Configure the behaviour of stylus inputs in ILIAD.")
+				, GetMutableDefault<UOdysseyStylusInputSettings>());
+		}
+	}
+
+	virtual void ShutdownModule() override
+	{
+		// unregister settings
+		ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
+
+		if (settingsModule)
+		{
+			settingsModule->UnregisterSettings("Editor", "ContentEditors", "ILIADStylusInput");
+		}
+	}
 };
 
 IMPLEMENT_MODULE(FOdysseyStylusInputModule, OdysseyStylusInput)

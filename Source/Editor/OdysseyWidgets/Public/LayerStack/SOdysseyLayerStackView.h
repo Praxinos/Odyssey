@@ -9,7 +9,7 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h" //For FMenuBuilder
 #include "FOdysseyLayerStackModel.h"
 
-#include "OdysseyLayerStack.h"
+// #include "OdysseyLayerStack.h"
 
 class FExtender;
 class SOdysseyLayerStackTreeView;

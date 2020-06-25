@@ -5,7 +5,7 @@
 
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
-#include "IOdysseyPainterEditorModule.h"
+// #include "OdysseyTextureEditorModule.h"
 #include "OdysseyTextureAssetUserData.h"
 
 
@@ -60,8 +60,8 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
             
             if( userData )
             {
-                IOdysseyPainterEditorModule* odysseyPainterModule = &FModuleManager::LoadModuleChecked<IOdysseyPainterEditorModule>("OdysseyPainterEditor");
-                odysseyPainterModule->CreateOdysseyPainterEditor(Mode, EditWithinLevelEditor, odysseyTexture);
+                FOdysseyTextureEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
+                odysseyTextureModule->CreateOdysseyTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
             }
             else
             {

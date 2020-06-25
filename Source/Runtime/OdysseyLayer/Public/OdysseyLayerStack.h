@@ -19,6 +19,9 @@ class FOdysseyDrawingUndo;
 class ODYSSEYLAYER_API FOdysseyLayerStack
 {
 public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentLayerChanged, FOdysseyNTree< IOdysseyLayer* >*);
+
+public:
     // Construction / Destruction
     ~FOdysseyLayerStack();
     FOdysseyLayerStack();
@@ -36,6 +39,7 @@ public:
                                                                         , float                 iOpacity    = 1.f
                                                                         , ::ul3::eBlendingMode  iMode       = ::ul3::BM_NORMAL
                                                                         , ::ul3::eAlphaMode     iAlphaMode  = ::ul3::AM_NORMAL );
+	void                                ComputeResultBlockWithTempBlock(const ::ul3::FRect&   iRect, FOdysseyBlock*        iTempBlock);
     void                                BlendTempBufferOnCurrentBlock( const ::ul3::FRect&  iRect
                                                                      , FOdysseyBlock*       iTempBuffer
                                                                      , float                iOpacity    = 1.f
@@ -71,6 +75,8 @@ public:
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack );
 
+	FOnCurrentLayerChanged&	OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
+
 private:
     // Private API
     FName                               GetNextLayerName();
@@ -87,6 +93,8 @@ private:
     int                                 mHeight;
     ETextureSourceFormat                mTextureSourceFormat;
     bool                                mIsInitialized;
+
+	FOnCurrentLayerChanged				mOnCurrentLayerChanged;
 
 public:
     FOdysseyDrawingUndo*                mDrawingUndo;
@@ -107,11 +115,11 @@ public:
 private:
     void StartRecordRedo();
     void EndRecordRedo();
-    bool SaveDataRedo( UPTRINT iAddress, uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
+    bool SaveDataRedo( UPTRINT iAddress, unsigned int iXTile, unsigned int iYTile, unsigned int iSizeX, unsigned int iSizeY );
 
 public:
     bool Clear();
-    bool SaveData( uint8 iXTile, uint8 iYTile, unsigned int iSizeX, unsigned int iSizeY );
+    bool SaveData(unsigned int iXTile, unsigned int iYTile, unsigned int iSizeX, unsigned int iSizeY );
     bool LoadData();
     bool Redo();
     void Check();

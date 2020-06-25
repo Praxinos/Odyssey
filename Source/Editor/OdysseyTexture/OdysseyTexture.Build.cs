@@ -1,10 +1,12 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
+
 namespace UnrealBuildTool.Rules
 {
-	public class OdysseyStylusInput : ModuleRules
+	public class OdysseyTexture : ModuleRules
     {
-		public OdysseyStylusInput(ReadOnlyTargetRules Target) : base(Target)
+		public OdysseyTexture(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -23,34 +25,29 @@ namespace UnrealBuildTool.Rules
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
-					"CoreUObject",
-					"EditorSubsystem",
-					"Engine",
-					"UnrealEd",
-					"WinTab",
+                    "ULIS",
+                    "ULISLoader",
 					// ... add other public dependencies that you statically link with here ...
 				}
 				);
-
-            //We need ApplicationCore for Mac for this module
-            if( Target.Platform == UnrealTargetPlatform.Mac )
-            {
-                PrivateDependencyModuleNames.AddRange(
-                new string[]
-				{
-                    "ApplicationCore"
-                }
-                );
-            }
                 
 			PrivateDependencyModuleNames.AddRange(
 				new string[]
-				{
-					"Core",
-					"MainFrame",
-					"SlateCore",
-					"Slate",
-					"WorkspaceMenuStructure"
+                {
+                    "AssetTools",
+                    "Core",
+                    "CoreUObject",
+                    "EditorStyle",
+                    "Engine",
+                    "InputCore",
+                    "OdysseyImaging",
+                    "OdysseyLayer",
+                    "OdysseyTextureEditor",
+                    "Slate",
+                    "SlateCore",
+                    "UnrealEd"
+					// "Core",
+					// "MainFrame",
 					// ... add private dependencies that you statically link with here ...
 				}
 				);

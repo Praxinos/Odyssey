@@ -1,7 +1,7 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
-#include "OdysseyTexture/OdysseyTextureContentBrowserExtensions.h"
+#include "OdysseyTextureContentBrowserExtensions.h"
 
 #include "AssetData.h"
 #include "AssetToolsModule.h"
@@ -17,7 +17,7 @@
 #include "Modules/ModuleManager.h"
 #include "Textures/SlateIcon.h"
 
-#include "IOdysseyPainterEditorModule.h"
+#include "IOdysseyTextureEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureContentBrowserExtensions"
 
@@ -93,8 +93,8 @@ FEditTextureExtension::EditTextures( TArray<UTexture2D*>& iTextures )
     for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
     {
         UTexture2D* texture = *textureIt;
-        IOdysseyPainterEditorModule* odysseyPainterEditorModule = &FModuleManager::GetModuleChecked<IOdysseyPainterEditorModule>( "OdysseyPainterEditor" );
-        odysseyPainterEditorModule->CreateOdysseyPainterEditor( EToolkitMode::Standalone, NULL, texture );
+        IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>( "OdysseyTextureEditor" );
+        odysseyTextureEditorModule->CreateOdysseyTextureEditor( EToolkitMode::Standalone, NULL, texture );
     }
 }
 
@@ -134,7 +134,7 @@ FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuB
     ioMenuBuilder.AddMenuEntry(
           LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit with ILIAD" )
         , LOCTEXT( "CB_Extension_Texture_OpenPaintEditor_Tooltip", "Open ILIAD paint editor for the selected Texture" )
-        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
+        , FSlateIcon( "OdysseyStyle", "TextureEditor.OpenPaintEditor16" )
         , action_EditTexture
         , NAME_None
         , EUserInterfaceActionType::Button );

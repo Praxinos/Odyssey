@@ -4,9 +4,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class OdysseyPainterEditor : ModuleRules
+public class OdysseyTextureEditor : ModuleRules
 {
-    public OdysseyPainterEditor(ReadOnlyTargetRules Target) : base(Target)
+    public OdysseyTextureEditor(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -39,25 +39,27 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyWidgets",
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
+                "OdysseyPainterEditor",
                 "OdysseyStrokePipeline",
-                // "OdysseyLayer",
+                "OdysseyLayer",
                 "OdysseyTransaction",
                 "OdysseyStylusInput",
-                // "OdysseyTexture"
+                "OdysseyTexture"
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Private", "Models"),
-                Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
+                Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
             }
         );
 
         PublicIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
+                Path.Combine(ModuleDirectory, "Public"),
+                Path.Combine(ModuleDirectory, "Public", "Settings"),
             }
         );
 

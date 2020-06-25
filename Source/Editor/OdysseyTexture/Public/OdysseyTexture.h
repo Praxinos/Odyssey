@@ -13,7 +13,7 @@
 #include "OdysseyTexture.generated.h"
 
 UCLASS()
-class UOdysseyTexture : public UObject
+class ODYSSEYTEXTURE_API UOdysseyTexture : public UObject
 {
 	GENERATED_BODY()
 };

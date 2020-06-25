@@ -13,12 +13,14 @@
 
 #include "OdysseyStrokePoint.h"
 
+#include <ULIS3>
+
 class UOdysseyStylusInputSubsystem;
 class FCanvas;
 class UTexture2D;
 
 class FOdysseyMeshSelector;
-class IOdysseyPainterEditorToolkit;
+class FOdysseyPainterEditorData;
 class IStylusInputInterfaceInternal;
 class SOdysseySurfaceViewport;
 
@@ -57,6 +59,9 @@ class FOdysseyPainterEditorViewportClient
     , public IStylusMessageHandler
 {
 public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPickColor, const ::ul3::FPixelValue&)
+
+public:
     enum class eState
     {
         kIdle,
@@ -71,7 +76,7 @@ public:
 
 public:
     // Construction / Destruction
-    FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit > iTextureEditor, TWeakPtr< SOdysseySurfaceViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector );
+    FOdysseyPainterEditorViewportClient(TWeakPtr<FOdysseyPainterEditorData>iData, TWeakPtr< SOdysseySurfaceViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector);
     ~FOdysseyPainterEditorViewportClient();
 
 public:
@@ -98,6 +103,7 @@ public:
     // Public API
     void        ModifyCheckerboardTextureColors();
     FText       GetDisplayedResolution() const;
+	FOnPickColor&	OnPickColor() { return mOnPickColor; }
 
 private:
     // Private API
@@ -122,7 +128,7 @@ private:
     FKey                                    mLastKey;
     EInputEvent                             mLastEvent;
     EMouseCaptureMode                       mMouseCaptureMode;
-    TWeakPtr<IOdysseyPainterEditorToolkit>  mOdysseyPainterEditorPtr;
+    TWeakPtr<FOdysseyPainterEditorData>		mOdysseyPainterEditorDataPtr;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
     UTexture2D*                             mCheckerboardTexture;
@@ -132,4 +138,6 @@ private:
     FVector2D                               mPivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
 
     eState                                  mCurrentToolState;
+
+	FOnPickColor							mOnPickColor;
 };

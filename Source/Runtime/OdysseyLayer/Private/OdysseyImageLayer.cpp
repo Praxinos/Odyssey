@@ -111,7 +111,11 @@ FOdysseyImageLayer::IsAlphaLocked() const
 void
 FOdysseyImageLayer::SetIsAlphaLocked( bool iIsAlphaLocked )
 {
-    mIsAlphaLocked = iIsAlphaLocked;
+	if (iIsAlphaLocked != mIsAlphaLocked)
+	{
+		mIsAlphaLocked = iIsAlphaLocked;
+		mOnIsAlphaLockedChanged.Broadcast(mIsAlphaLocked);
+	}
 }
 
 

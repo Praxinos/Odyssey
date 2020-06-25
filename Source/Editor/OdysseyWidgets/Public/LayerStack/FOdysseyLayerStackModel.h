@@ -8,12 +8,12 @@
 #include "Framework/Commands/UICommandList.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h" //For FMenuBuilder
 #include "LayerStack/FOdysseyLayerAddMenu.h"
-#include "IOdysseyLayer.h"
 
 class FOdysseyLayerStackTree;
 class SOdysseyLayerStackView;
 class FOdysseyLayerStack;
 class FOdysseyLayerAddMenu;
+class IOdysseyLayer;
 
 /**
  * Implements the Layer stack model

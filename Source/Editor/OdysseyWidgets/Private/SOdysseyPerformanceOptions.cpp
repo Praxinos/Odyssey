@@ -9,6 +9,23 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPerformanceOptions"
 
+void
+FOdysseyPerformanceOptions::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
+{
+	FString PropertyName = PropertyThatChanged->GetName();
+	/* if( PropertyName == FString( TEXT("LiveUpdate") ) ) {
+		OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+	} */
+
+	//mPerformanceOptions.OnValueChanged(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
+
+	if (PropertyName == FString(TEXT("DrawBrushPreview"))) {
+		mOnDrawBrushPreviewChanged.ExecuteIfBound(DrawBrushPreview);
+	}
+
+	mOnAnyValueChanged.ExecuteIfBound(true);
+}
+
 /////////////////////////////////////////////////////
 // SOdysseyPerformanceOptions
 //--------------------------------------------------------------------------------------
@@ -16,17 +33,17 @@
 void
 SOdysseyPerformanceOptions::Construct( const FArguments& InArgs )
 {
-    OnLiveUpdateChangedCallback  = InArgs._OnLiveUpdateChanged   ;
-    OnDrawBrushPreviewChangedCallback  = InArgs._OnDrawBrushPreviewChanged   ;
-    
-    OnAnyValueChangedCallback           = InArgs._OnAnyValueChanged     ;
+    // OnLiveUpdateChangedCallback  = InArgs._OnLiveUpdateChanged   ;
+    // OnDrawBrushPreviewChangedCallback  = InArgs._OnDrawBrushPreviewChanged   ;
+    // OnAnyValueChangedCallback           = InArgs._OnAnyValueChanged     ;
 
     // Create a details view
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FNotifyHook* NotifyHook = this;
 
-    PerformanceOptionsStructData        = FOdysseyPerformanceOptions();
-    PerformanceOptionsStructToDisplay   = MakeShared< FStructOnScope >( FOdysseyPerformanceOptions::StaticStruct(), (uint8*)&PerformanceOptionsStructData );
+    //PerformanceOptionsStructData        = FOdysseyPerformanceOptions();
+    PerformanceOptionsStructData        = InArgs._PerformanceOptions.Get();
+    PerformanceOptionsStructToDisplay   = MakeShared< FStructOnScope >( PerformanceOptionsStructData->GetScriptStruct(), (uint8*)PerformanceOptionsStructData );
 
     // create struct to display
     FStructureDetailsViewArgs StructureViewArgs;
@@ -62,35 +79,35 @@ SOdysseyPerformanceOptions::Construct( const FArguments& InArgs )
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks
-const  FOdysseyPerformanceOptions&
+/* const  FOdysseyPerformanceOptions&
 SOdysseyPerformanceOptions::GetPerformanceOptions()  const
 {
-    return  PerformanceOptionsStructData;
+    return  *PerformanceOptionsStructData;
 }
 
 
 void
 SOdysseyPerformanceOptions::SetPerformanceOptions( const  FOdysseyPerformanceOptions& iValue )
 {
-    PerformanceOptionsStructData = iValue;
+    *PerformanceOptionsStructData = iValue;
 
-    OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
+    // OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
     OnDrawBrushPreviewChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.DrawBrushPreview );
 
     OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
+} */
 
 
-void
+/* void
 SOdysseyPerformanceOptions::SetPerformanceOptionLiveUpdate        ( bool iValue )
 {
     PerformanceOptionsStructData.LiveUpdate = iValue;
 
     OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
     OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
+} */
 
-void
+/* void
 SOdysseyPerformanceOptions::SetPerformanceOptionBrushPreview     ( bool iValue )
 {
     PerformanceOptionsStructData.DrawBrushPreview = iValue;
@@ -167,7 +184,7 @@ void
 SOdysseyPerformanceOptions::SetPeformanceCacheInfoStepCount       ( int32 iValue )
 {
     PerformanceOptionsStructData.StepCount = iValue;
-}
+}*/
 
 
 //--------------------------------------------------------------------------------------
@@ -175,16 +192,20 @@ SOdysseyPerformanceOptions::SetPeformanceCacheInfoStepCount       ( int32 iValue
 void
 SOdysseyPerformanceOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged )
 {
-    FString PropertyName = PropertyThatChanged->GetName();
+    /* FString PropertyName = PropertyThatChanged->GetName();
     if( PropertyName == FString( TEXT("LiveUpdate") ) ) {
         OnLiveUpdateChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.LiveUpdate );
     }
+
+	//mPerformanceOptions.OnValueChanged(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
     
     if( PropertyName == FString( TEXT("DrawBrushPreview") ) ) {
         OnDrawBrushPreviewChangedCallback.ExecuteIfBound( PerformanceOptionsStructData.DrawBrushPreview );
     }
 
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
+    OnAnyValueChangedCallback.ExecuteIfBound( true ); */
+
+	PerformanceOptionsStructData->NotifyPostChange(PropertyChangedEvent, PropertyThatChanged);
 }
 
 

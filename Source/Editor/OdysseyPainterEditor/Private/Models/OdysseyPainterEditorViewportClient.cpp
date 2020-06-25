@@ -23,10 +23,13 @@
 #include "Widgets/SViewport.h"
 
 #include "IOdysseyStylusInputModule.h"
-#include "OdysseyLayerStack.h"
+// #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorSettings.h"
-#include "OdysseyPainterEditorToolkit.h"
+#include "OdysseyStylusInputSettings.h"
+// #include "OdysseyPainterEditorToolkit.h"
+#include "OdysseyPainterEditorData.h"
+#include "Mesh/FOdysseyMeshSelector.h"
 #include "OdysseySurface.h"
 #include "SOdysseyCursorWidget.h"
 #include "SOdysseySurfaceViewport.h"
@@ -40,14 +43,14 @@
 // FOdysseyPainterEditorViewportClient
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< IOdysseyPainterEditorToolkit >  iOdysseyPainterEditor,
+FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< FOdysseyPainterEditorData >     iOdysseyPainterEditorData,
                                                                           TWeakPtr< SOdysseySurfaceViewport >       iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
     : InputSubsystem( nullptr )
     , mLastKey( EKeys::Invalid )
     , mLastEvent( EInputEvent::IE_MAX )
     , mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
-    , mOdysseyPainterEditorPtr( iOdysseyPainterEditor )
+    , mOdysseyPainterEditorDataPtr( iOdysseyPainterEditorData )
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
     , mMeshSelector( iMeshSelector )
     , mCheckerboardTexture( NULL )
@@ -55,13 +58,13 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     , mPivotPointRatio( FVector2D( 0.5, 0.5 ) )
     , mCurrentToolState( eState::kIdle )
 {
-    check( mOdysseyPainterEditorPtr.IsValid() &&
+    check( // mOdysseyPainterEditorDataPtr.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
 
     InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
     //PATCH: as I don't know how to initialize usubsystem inside settings ctor (as usubsystem are called after)
-    UOdysseyPainterEditorSettings* settings = GetMutableDefault< UOdysseyPainterEditorSettings >();
+	UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
     settings->RefreshStylusInputDriver();
     //PATCH
 
@@ -92,27 +95,25 @@ FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInp
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    if( !mOdysseyPainterEditorPtr.IsValid() )
-        return;
+    /* if( !mOdysseyPainterEditorDataPtr.IsValid() )
+        return; */
 
     // Draw on tick or catch up
-    /*
-    auto paintengine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
-    FVector2D oldpoint = FVector2D( RefEventStrokePoint.x, RefEventStrokePoint.y );
-    FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
-    FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-    if( mCurrentToolState == eState::kDrawing
-    && ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position_in_texture ) ) )
-    {
-        FOdysseyStrokePoint point = RefEventStrokePoint;
-        point.x = position_in_texture.X;
-        point.y = position_in_texture.Y;
-        paintengine->PushStroke( point );
-    }
-    */
+    // auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+    // FVector2D oldpoint = FVector2D( RefEventStrokePoint.x, RefEventStrokePoint.y );
+    // FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
+    // FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+    // if( mCurrentToolState == eState::kDrawing
+    // && ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position_in_texture ) ) )
+    // {
+    //     FOdysseyStrokePoint point = RefEventStrokePoint;
+    //     point.x = position_in_texture.X;
+    //     point.y = position_in_texture.Y;
+    //     paintengine->PushStroke( point );
+    // }
 
     // Send Tick to PaintEngine
-    mOdysseyPainterEditorPtr.Pin()->PaintEngine()->Tick();
+	mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->Tick();
 
     double rotation         = mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees();
     FVector2D pan           = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
@@ -187,21 +188,20 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.Rotation.Add( 0, rotation, 0 );
         ioCanvas->DrawItem( tileItem );
 
-        /* TODO: Unreal BoxItem doesn't support rotation, so we can't draw it properly. We'll have to come up with our own HUD
+        // TODO: Unreal BoxItem doesn't support rotation, so we can't draw it properly. We'll have to come up with our own HUD
         // Draw a white border around the texture to show its extents
-        if( settings.TextureBorderEnabled )
-        {
-            FCanvasBoxItem boxItem( FVector2D( xPos, yPos ), FVector2D( width , height ) );
-            boxItem.SetColor( Settings.TextureBorderColor );
-            Canvas->DrawItem( boxItem );
-        }
-        */
+        // if( settings.TextureBorderEnabled )
+        // {
+        //     FCanvasBoxItem boxItem( FVector2D( xPos, yPos ), FVector2D( width , height ) );
+        //     boxItem.SetColor( Settings.TextureBorderColor );
+        //     Canvas->DrawItem( boxItem );
+        // }
     }
 
     // Draw Cursor Preview
-    if( mOdysseyPainterEditorPtr.Pin()->DoesDrawBrushPreview() )
+    if( mOdysseyPainterEditorDataPtr.Pin()->DrawBrushPreview() )
     {
-        auto paintEngine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
+        auto paintEngine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
         paintEngine->UpdateBrushCursorPreview();
         if( paintEngine->mBrushCursorPreviewSurface )
         {
@@ -355,17 +355,17 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
             mCurrentToolState = eState::kDrawing;
-            //mOdysseyPainterEditorPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
-            //mOdysseyPainterEditorPtr.Pin()->MarkTransactionAsDirty();
+            //mOdysseyPainterEditorDataPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
+            //mOdysseyPainterEditorDataPtr.Pin()->MarkTransactionAsDirty();
 
             FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
-            mOdysseyPainterEditorPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
+			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
 
             return true;
         }
         else if( iKey == EKeys::Escape && iEvent == EInputEvent::IE_Pressed )
         {
-            mOdysseyPainterEditorPtr.Pin()->PaintEngine()->AbortStroke();
+			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->AbortStroke();
             return true;
         }
         else if( iKey == EKeys::P && iEvent == EInputEvent::IE_Pressed )
@@ -403,8 +403,8 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         {
             mCurrentToolState = eState::kIdle;
 
-            mOdysseyPainterEditorPtr.Pin()->PaintEngine()->EndStroke();
-            //mOdysseyPainterEditorPtr.Pin()->EndTransaction();
+			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->EndStroke();
+            //mOdysseyPainterEditorDataPtr.Pin()->EndTransaction();
 
             return true;
         }
@@ -490,7 +490,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             if( position_in_texture.X > 0 && position_in_texture.X <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
                 position_in_texture.Y > 0 && position_in_texture.Y <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
             {
-                mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetBlock()->PixelValue( position_in_texture.X, position_in_texture.Y ) );
+                mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
             }
 
             return true;
@@ -518,11 +518,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 {
     if( mCurrentToolState == eState::kDrawing )
     {
-        auto paintengine = mOdysseyPainterEditorPtr.Pin()->PaintEngine();
-        /*
-        if( paintengine->GetStokePaintOnTick() )
-            return;
-        */
+        auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+        
+        // if( paintengine->GetStokePaintOnTick() )
+        //     return;
 
         FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
         paintengine->PushStroke( point_in_texture );
@@ -562,7 +561,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         if( position_in_texture.X > 0 && position_in_texture.X <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
             position_in_texture.Y > 0 && position_in_texture.Y <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
         {
-            mOdysseyPainterEditorPtr.Pin()->SetColor( mOdysseyPainterEditorPtr.Pin()->LayerStack()->GetResultBlock()->GetBlock()->PixelValue( position_in_texture.X, position_in_texture.Y ) );
+            mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
         }
     }
 }
@@ -919,13 +918,12 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
         
         const FVector2D uvBoxOrigin( minX + xPos + pivotPan.X, minY + yPos + pivotPan.Y );
 
-        /* If we want to draw a bounding box to the UV
-        FCanvasTileItem BoxBackgroundTileItem(uvBoxOrigin, GWhiteTexture, FVector2D(Width, Height), FLinearColor(0, 0, 0, 0.0f));
-        BoxBackgroundTileItem.PivotPoint = FVector2D( 0.5, 0.5 );
-        BoxBackgroundTileItem.Rotation.Add(0, mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees(), 0 );
-        BoxBackgroundTileItem.BlendMode = SE_BLEND_AlphaComposite;
-        InCanvas->DrawItem(BoxBackgroundTileItem);
-        */
+        // If we want to draw a bounding box to the UV
+        // FCanvasTileItem BoxBackgroundTileItem(uvBoxOrigin, GWhiteTexture, FVector2D(Width, Height), FLinearColor(0, 0, 0, 0.0f));
+        // BoxBackgroundTileItem.PivotPoint = FVector2D( 0.5, 0.5 );
+        // BoxBackgroundTileItem.Rotation.Add(0, mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees(), 0 );
+        // BoxBackgroundTileItem.BlendMode = SE_BLEND_AlphaComposite;
+        // InCanvas->DrawItem(BoxBackgroundTileItem);
 
         //draw triangles
         uint32 numIndices = iIndices.Num();

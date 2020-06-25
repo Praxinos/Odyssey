@@ -23,6 +23,7 @@ public class OdysseyWidgets : ModuleRules
                 "Layers",
                 "MainFrame",
                 "GraphEditor",
+                "Projects",
                 "PropertyEditor",
                 "OdysseyBrush",
                 "OdysseyImaging",

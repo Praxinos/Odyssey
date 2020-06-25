@@ -17,11 +17,15 @@
 USTRUCT()
 struct ODYSSEYWIDGETS_API FOdysseyPerformanceOptions
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
+
+	virtual ~FOdysseyPerformanceOptions()
+	{
+
+	}
 
     FOdysseyPerformanceOptions()
-        :  LiveUpdate           (   true    )
-        ,  DrawBrushPreview     (   true    )
+        :  DrawBrushPreview     (   true    )
         ,  CacheEditLock        (   false   )
         ,  SuperSize            (   0       )
         ,  SuperCount           (   0       )
@@ -34,16 +38,6 @@ struct ODYSSEYWIDGETS_API FOdysseyPerformanceOptions
         ,  StepSize             (   0       )
         ,  StepCount            (   0       )
     {}
-
-    // Short member list:
-    //  bool    LiveUpdate          ;
-    //  bool    DelayedPaint        ;
-    //  int32   Delay               ;
-    //  bool    MultiThreadedPaint  ;
-
-    /** Should the texture live-stream update in the 3D viewport ( can impact performances ). */
-    UPROPERTY( EditAnywhere, Category = "Performances" )
-    bool    LiveUpdate;
     
     /** Should  we draw a custom cursor representing the preview of the brush  */
     UPROPERTY( EditAnywhere, Category = "Performances" )
@@ -92,6 +86,18 @@ struct ODYSSEYWIDGETS_API FOdysseyPerformanceOptions
     /** Super Cache object count. */
     UPROPERTY( VisibleAnywhere, Category = "Step", meta = ( EditCondition = CacheEditLock ) )
     int32   StepCount;
+
+	DECLARE_DELEGATE_OneParam(FOnDrawBrushPreviewChanged, bool)
+	DECLARE_DELEGATE_OneParam(FOnAnyValueChanged, bool)
+
+	FOnDrawBrushPreviewChanged mOnDrawBrushPreviewChanged;
+	FOnAnyValueChanged mOnAnyValueChanged;
+
+	virtual void NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged);
+	
+	virtual const UStruct* GetScriptStruct() {
+		return FOdysseyPerformanceOptions::StaticStruct();
+	}
 };
 
 
@@ -108,22 +114,20 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPerformanceOptions )
         {}
-        SLATE_EVENT( FOnBooleanValueChanged ,   OnLiveUpdateChanged           )
-        SLATE_EVENT( FOnBooleanValueChanged ,   OnDrawBrushPreviewChanged     )
-        SLATE_EVENT( FOnBooleanValueChanged ,   OnAnyValueChanged             )
+        SLATE_ATTRIBUTE(FOdysseyPerformanceOptions*, PerformanceOptions)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
 public:
     // Public Callbacks
-    const FOdysseyPerformanceOptions&  GetPerformanceOptions()  const;
-    void  SetPerformanceOptions( const  FOdysseyPerformanceOptions& iValue );
+    // const FOdysseyPerformanceOptions&  GetPerformanceOptions()  const;
+    // void  SetPerformanceOptions( const  FOdysseyPerformanceOptions& iValue );
 
-    void  SetPerformanceOptionLiveUpdate        ( bool iValue );
-    void  SetPerformanceOptionBrushPreview      ( bool iValue );
+    // void  SetPerformanceOptionLiveUpdate        ( bool iValue );
+    // void  SetPerformanceOptionBrushPreview      ( bool iValue );
 
-    void  SetPeformanceCacheInfoSuperSize       ( int32 iValue );
+    /* void  SetPeformanceCacheInfoSuperSize       ( int32 iValue );
     void  SetPeformanceCacheInfoSuperCount      ( int32 iValue );
     void  SetPeformanceCacheInfoStateSize       ( int32 iValue );
     void  SetPeformanceCacheInfoStateCount      ( int32 iValue );
@@ -132,7 +136,7 @@ public:
     void  SetPeformanceCacheInfoSubstrokeSize   ( int32 iValue );
     void  SetPeformanceCacheInfoSubstrokeCount  ( int32 iValue );
     void  SetPeformanceCacheInfoStepSize        ( int32 iValue );
-    void  SetPeformanceCacheInfoStepCount       ( int32 iValue );
+    void  SetPeformanceCacheInfoStepCount       ( int32 iValue ); */
 
 public:
     // FNotifyHook Interface
@@ -141,11 +145,11 @@ public:
 private:
     // Private data members
     TSharedPtr< IStructureDetailsView > PerformanceOptionsDetailsView;
-    FOdysseyPerformanceOptions          PerformanceOptionsStructData;
+    FOdysseyPerformanceOptions*         PerformanceOptionsStructData;
     TSharedPtr< FStructOnScope >        PerformanceOptionsStructToDisplay;
 
-    FOnBooleanValueChanged  OnLiveUpdateChangedCallback  ;
-    FOnBooleanValueChanged  OnDrawBrushPreviewChangedCallback  ;
-    FOnBooleanValueChanged  OnAnyValueChangedCallback           ;
+    // FOnBooleanValueChanged  OnLiveUpdateChangedCallback  ;
+    // FOnBooleanValueChanged  OnDrawBrushPreviewChangedCallback  ;
+    // FOnBooleanValueChanged  OnAnyValueChangedCallback           ;
 };
 

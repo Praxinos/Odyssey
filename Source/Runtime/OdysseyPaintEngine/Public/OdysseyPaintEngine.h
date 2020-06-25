@@ -8,17 +8,21 @@
 #include "OdysseySurface.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
-#include "IOdysseyLayer.h"
 #include "OdysseyTransactionnable.h"
 #include <ULIS3>
 #include <queue>
 #include <functional>
 
-class FOdysseyLayerStack;
 class UOdysseyBrushAssetBase;
 
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
 {
+public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeChanged, const TArray<::ul3::FRect>&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeWillEnd, const TArray<::ul3::FRect>&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeEnd, const TArray<::ul3::FRect>&);
+	DECLARE_MULTICAST_DELEGATE(FOnStrokeAbort);
+
 private:
     typedef bool** InvalidTileMap;
 
@@ -31,8 +35,6 @@ public:
     // Public API
     void InterruptDelay();
     void Tick();
-    void SetTextureSourceFormat( ETextureSourceFormat iTextureSourceFormat );
-    void SetLayerStack( FOdysseyLayerStack* iLayerStack );
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
     void SetColor( const ::ul3::FPixelValue& iColor );
     void SetSizeModifier( float iValue );
@@ -61,11 +63,20 @@ public:
     void InterruptStrokeAndStampInPlace();
 
     const ::ul3::FPixelValue& GetColor() const;
+	void Block(FOdysseyBlock* iBlock);
+	FOdysseyBlock* TempBlock();
 
     void UpdateBrushCursorPreview();
+
+public: //DELEGATES
+	FOnStrokeChanged&	OnStrokeChanged()	{ return mOnStrokeChangedDelegate; }
+	FOnStrokeWillEnd&   OnStrokeWillEnd()   { return mOnStrokeWillEndDelegate; }
+	FOnStrokeEnd&		OnStrokeEnd()		{ return mOnStrokeEndDelegate; }
+	FOnStrokeAbort&		OnStrokeAbort()		{ return mOnStrokeAbortDelegate; }
+
 private:
     // Private API
-    void CheckReallocTempBuffer();
+    // void CheckReallocTempBuffer();
     void ReallocInvalidMaps();
     void UpdateBrushInstance();
 
@@ -78,10 +89,11 @@ private:
 
 private:
     // Private Data Members
+	FOdysseyBlock*                      mBlock; // Holds th original block to edit
+	FOdysseyBlock*                      mTempBlock; //Holds the changed tiles (original + stroke)
+	FOdysseyBlock*                      mTempBuffer; //Holds the stroke tiles
     UOdysseyBrushAssetBase*             mBrushInstance;
 
-    ETextureSourceFormat                mTextureSourceFormat;
-    FOdysseyLayerStack*                 mLayerStack;
     int                                 mWidth;
     int                                 mHeight;
     int                                 mCountTileX;
@@ -90,7 +102,6 @@ private:
     TArray< FOdysseyStrokePoint >       mRawStroke;
     TArray< FOdysseyStrokePoint >       mResultStroke;
 
-    FOdysseyBlock*                      mTempBuffer;
     InvalidTileMap                      mTmpInvalidTileMap;
     InvalidTileMap                      mStrokeInvalidTileMap;
 
@@ -115,6 +126,11 @@ private:
     bool                                mIsPendingEndStroke;
 
     std::queue<std::function<void()>>   mDelayQueue;
+
+	FOnStrokeChanged					mOnStrokeChangedDelegate;
+	FOnStrokeEnd						mOnStrokeWillEndDelegate;
+	FOnStrokeEnd						mOnStrokeEndDelegate;
+	FOnStrokeAbort						mOnStrokeAbortDelegate;
 
 public:
     FOdysseySurface*                    mBrushCursorPreviewSurface;

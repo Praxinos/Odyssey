@@ -13,25 +13,14 @@
   "CanContainContent": true,
   "IsBetaVersion": true,
   "Installed": false,
-
   "Modules": [
     {
-      "Name": "OdysseyImaging",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyMaths",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyStrokePipeline",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyBrush",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyImaging",
       "Type": "Runtime",
       "LoadingPhase": "Default"
     },
@@ -41,7 +30,12 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyTransaction",
+      "Name": "OdysseyMaths",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyPaintEngine",
       "Type": "Runtime",
       "LoadingPhase": "Default"
     },
@@ -51,8 +45,23 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyPaintEngine",
-      "Type": "Editor",
+      "Name": "OdysseyStrokePipeline",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyStylusInput",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyTransaction",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "ULISLoader",
+      "Type": "Runtime",
       "LoadingPhase": "Default"
     },
     {
@@ -61,22 +70,27 @@
       "LoadingPhase": "PostEngineInit"
     },
     {
-      "Name": "OdysseyStyle",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyWidgets",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyPainterEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyStylusInput",
+      "Name": "OdysseyStyle",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyTexture",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyTextureEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyWidgets",
       "Type": "Editor",
       "LoadingPhase": "Default"
     }
