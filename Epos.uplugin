@@ -21,7 +21,17 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "EposTracks",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "EposEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "EposTracksEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     }

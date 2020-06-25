@@ -3,9 +3,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class EposEditor : ModuleRules
+public class EposTracks : ModuleRules
 {
-	public EposEditor(ReadOnlyTargetRules Target) : base(Target)
+	public EposTracks(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -28,7 +28,7 @@ public class EposEditor : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
-            }
+			}
 			);
 			
 		
@@ -41,12 +41,8 @@ public class EposEditor : ModuleRules
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...
 				"MovieScene",
-				"MovieSceneTools",
-				"Sequencer",
-				"UnrealEd",
-				"Projects",
+				"MovieSceneTracks",
                 //
-				"Epos",
             }
 			);
 		

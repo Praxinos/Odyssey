@@ -3,17 +3,17 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class EposEditor : ModuleRules
+public class EposTracksEditor : ModuleRules
 {
-	public EposEditor(ReadOnlyTargetRules Target) : base(Target)
+	public EposTracksEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
-            }
-			);
+			}
+            );
 				
 		
 		PrivateIncludePaths.AddRange(
@@ -28,7 +28,7 @@ public class EposEditor : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
-            }
+			}
 			);
 			
 		
@@ -40,13 +40,16 @@ public class EposEditor : ModuleRules
 				"Slate",
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...
+				"Sequencer",
 				"MovieScene",
 				"MovieSceneTools",
-				"Sequencer",
 				"UnrealEd",
-				"Projects",
+				"EditorStyle",
+				"InputCore",
                 //
-				"Epos",
+                "Epos",
+                "EposEditor",
+                "EposTracks",
             }
 			);
 		

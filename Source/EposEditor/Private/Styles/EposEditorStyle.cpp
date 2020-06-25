@@ -39,6 +39,8 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_16x", Icon16x16 ) );
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_64x", Icon64x64 ) );
 
+    Set( "Sequencer.Tracks.Board", new IMAGE_BRUSH( "IconBoardTrack_16x", Icon16x16 ) );
+
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }
 
@@ -54,9 +56,7 @@ TSharedRef<FEposEditorStyle>
 FEposEditorStyle::Get()
 {
     if( !smSingleton.IsValid() )
-    {
         smSingleton = MakeShareable( new FEposEditorStyle );
-    }
 
     return smSingleton.ToSharedRef();
 }

@@ -9,7 +9,8 @@
 /**
  * Implements the visual style of the epos editor.
  */
-class FEposEditorStyle : public FSlateStyleSet
+class EPOSEDITOR_API FEposEditorStyle 
+    : public FSlateStyleSet
 {
 public:
     static TSharedRef<FEposEditorStyle> Get();
