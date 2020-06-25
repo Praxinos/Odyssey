@@ -34,7 +34,7 @@ public:
      *
      * @param InSequencer The sequencer instance to be used by this tool.
      */
-    FBoardTrackEditor( TSharedRef<ISequencer> InSequencer );
+    FBoardTrackEditor( TSharedRef<ISequencer> iSequencer );
 
     /** Virtual destructor. */
     virtual ~FBoardTrackEditor()
@@ -47,29 +47,26 @@ public:
      * @param OwningSequencer The sequencer instance to be used by this tool.
      * @return The new instance of this class.
      */
-    static TSharedRef<ISequencerTrackEditor> CreateTrackEditor( TSharedRef<ISequencer> OwningSequencer );
+    static TSharedRef<ISequencerTrackEditor> CreateTrackEditor( TSharedRef<ISequencer> iOwningSequencer );
 
-    TWeakObjectPtr<AActor> GetBoardCamera() const
-    {
-        return BoardCamera;
-    }
+    TWeakObjectPtr<AActor> GetBoardCamera() const;
 
 public:
 
     // ISequencerTrackEditor interface
     virtual void OnInitialize() override;
     virtual void OnRelease() override;
-    virtual void BuildAddTrackMenu( FMenuBuilder& MenuBuilder ) override;
-    virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params ) override;
-    virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding ) override;
-    virtual bool HandleAssetAdded( UObject* Asset, const FGuid& TargetObjectGuid ) override;
-    virtual bool SupportsSequence( UMovieSceneSequence* InSequence ) const override;
-    virtual bool SupportsType( TSubclassOf<UMovieSceneTrack> Type ) const override;
-    virtual void Tick( float DeltaTime ) override;
-    //virtual void BuildTrackContextMenu( FMenuBuilder& MenuBuilder, UMovieSceneTrack* Track ) override;
+    virtual void BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) override;
+    virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams ) override;
+    virtual TSharedRef<ISequencerSection> MakeSectionInterface( UMovieSceneSection& ioSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding ) override;
+    virtual bool HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid ) override;
+    virtual bool SupportsSequence( UMovieSceneSequence* iSequence ) const override;
+    virtual bool SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const override;
+    virtual void Tick( float iDeltaTime ) override;
+    //virtual void BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) override;
     virtual const FSlateBrush* GetIconBrush() const override;
-    virtual bool OnAllowDrop( const FDragDropEvent& DragDropEvent, UMovieSceneTrack* Track, int32 RowIndex, const FGuid& TargetObjectGuid ) override;
-    virtual FReply OnDrop( const FDragDropEvent& DragDropEvent, UMovieSceneTrack* Track, int32 RowIndex, const FGuid& TargetObjectGuid ) override;
+    virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
+    virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
 
     /*
      * Insert board.
@@ -86,35 +83,35 @@ public:
      *
      * @param Section The section to duplicate
      */
-    void DuplicateBoard( UMovieSceneBoardSection* Section );
+    void DuplicateBoard( UMovieSceneBoardSection* iSection );
 
     /*
      * Render board.
      *
      * @param Section The section to render
      */
-    void RenderBoard( UMovieSceneBoardSection* Section );
+    void RenderBoard( UMovieSceneBoardSection* iSection );
 
     /*
      * Rename board.
      *
      * @param Section The section to rename.
      */
-    void RenameBoard( UMovieSceneBoardSection* Section );
+    void RenameBoard( UMovieSceneBoardSection* iSection );
 
     /*
      * New take.
      *
      * @param Section The section to create a new take of.
      */
-    //void NewTake( UMovieSceneBoardSection* Section );
+    //void NewTake( UMovieSceneBoardSection* iSection );
 
     /*
     * Switch take for the selected sections
     *
     * @param TakeObject The take object to switch to.
     */
-    //void SwitchTake( UObject* TakeObject );
+    //void SwitchTake( UObject* iTakeObject );
 
 private:
 
@@ -126,7 +123,7 @@ private:
      * @param BoardToDuplicate The board to duplicate.
      * @return The new board.
      */
-    UMovieSceneSubSection* CreateBoardInternal( FString& NewBoardName, FFrameNumber NewBoardStartTime, UMovieSceneBoardSection* BoardToDuplicate = nullptr );
+    UMovieSceneSubSection* CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneBoardSection* iBoardToDuplicate = nullptr );
 
 
 private:
@@ -141,22 +138,22 @@ private:
     TSharedRef<SWidget> HandleAddBoardComboButtonGetMenuContent();
 
     /** Callback for executing a menu entry in the "Add Board" combo button. */
-    void HandleAddBoardComboButtonMenuEntryExecute( const FAssetData& AssetData );
+    void HandleAddBoardComboButtonMenuEntryExecute( const FAssetData& iAssetData );
 
     /** Callback for executing a menu entry in the "Add Board" combo button when enter pressed. */
-    void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& AssetData );
+    void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData );
 
     /** Find or create a cinematic board track in the currently focused movie scene. */
     UMovieSceneBoardTrack* FindOrCreateBoardTrack();
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
-    FKeyPropertyResult AddKeyInternal( FFrameNumber KeyTime, UMovieSceneSequence* InMovieSceneSequence, int32 RowIndex );
+    FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex );
 
     /** Delegate for boards button lock state */
     ECheckBoxState AreBoardsLocked() const;
 
     /** Delegate for locked boards button */
-    void OnLockBoardsClicked( ECheckBoxState CheckBoxState );
+    void OnLockBoardsClicked( ECheckBoxState iCheckBoxState );
 
     /** Delegate for boards button lock tooltip */
     FText GetLockBoardsToolTip() const;
@@ -170,22 +167,22 @@ private:
      * @param Sequence The sequence to check.
      * @return true if the sequence can be added as a sub-sequence, false otherwise.
      */
-    bool CanAddSubSequence( const UMovieSceneSequence& Sequence ) const;
+    bool CanAddSubSequence( const UMovieSceneSequence& iSequence ) const;
 
     /** Called when our sequencer wants to switch cameras */
-    void OnUpdateCameraCut( UObject* CameraObject, bool bJumpCut );
+    void OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut );
 
     /** Callback for AnimatablePropertyChanged in HandleAssetAdded. */
-    FKeyPropertyResult HandleSequenceAdded( FFrameNumber KeyTime, UMovieSceneSequence* Sequence, int32 RowIndex );
+    FKeyPropertyResult HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, int32 iRowIndex );
 
 private:
 
     /** The Thumbnail pool which draws all the viewport thumbnails for the board track. */
-    TSharedPtr<FTrackEditorThumbnailPool> ThumbnailPool;
+    TSharedPtr<FTrackEditorThumbnailPool> mThumbnailPool;
 
     /** The camera actor for the current cut. */
-    TWeakObjectPtr<AActor> BoardCamera;
+    TWeakObjectPtr<AActor> mBoardCamera;
 
     /** Delegate binding handle for ISequencer::OnCameraCut */
-    FDelegateHandle OnCameraCutHandle;
+    FDelegateHandle mOnCameraCutHandle;
 };

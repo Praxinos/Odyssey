@@ -10,9 +10,9 @@ class FEposTracksEditorModule : public IModuleInterface
 {
 public:
 
-	/** IModuleInterface implementation */
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+    /** IModuleInterface implementation */
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
 
 private:
     FDelegateHandle BoardTrackCreateEditorHandle;

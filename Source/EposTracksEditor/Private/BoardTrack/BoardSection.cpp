@@ -2,7 +2,7 @@
 // IDDN 
 
 #include "BoardTrack/BoardSection.h"
-#include "BoardTrack/MovieSceneBoardSection.h"
+
 #include "Rendering/DrawElements.h"
 #include "Textures/SlateIcon.h"
 #include "Framework/Commands/UIAction.h"
@@ -10,18 +10,19 @@
 #include "ScopedTransaction.h"
 #include "MovieSceneTrack.h"
 #include "MovieScene.h"
-#include "BoardTrack/BoardTrackEditor.h"
 #include "SequencerSectionPainter.h"
 #include "EditorStyleSet.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneTimeHelpers.h"
-
-#include "Tracks/MovieSceneCameraCutTrack.h"
-#include "Sections/MovieSceneCameraCutSection.h"
+//#include "Tracks/MovieSceneCameraCutTrack.h"
+//#include "Sections/MovieSceneCameraCutSection.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "CommonMovieSceneTools.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Editor.h"
+
+#include "BoardTrack/BoardTrackEditor.h"
+#include "BoardTrack/MovieSceneBoardSection.h"
 
 #define LOCTEXT_NAMESPACE "FBoardSection"
 
@@ -29,31 +30,41 @@
 /* FBoardSection structors
  *****************************************************************************/
 
-FBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneBoardSection* Section )
-    : InnerFrameRate( 1, 1 )
-    , InnerFrameOffset( 0 )
-    , SectionStartFrame( 0 )
-    , TimeScale( 1.f )
+FBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneBoardSection* iSection )
+    : mInnerFrameRate( 1, 1 )
+    , mInnerFrameOffset( 0 )
+    , mSectionStartFrame( 0 )
+    , mTimeScale( 1.f )
 {
-    if( Section )
+    if( iSection )
     {
-        UMovieSceneSequence* InnerSequence = Section->GetSequence();
-        if( InnerSequence )
+        UMovieSceneSequence* innerSequence = iSection->GetSequence();
+        if( innerSequence )
         {
-            InnerFrameRate = InnerSequence->GetMovieScene()->GetTickResolution();
+            mInnerFrameRate = innerSequence->GetMovieScene()->GetTickResolution();
         }
 
-        InnerFrameOffset = Section->Parameters.StartFrameOffset;
-        SectionStartFrame = Section->HasStartFrame() ? Section->GetInclusiveStartFrame() : 0;
-        TimeScale = Section->Parameters.TimeScale;
+        mInnerFrameOffset = iSection->Parameters.StartFrameOffset;
+        mSectionStartFrame = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
+        mTimeScale = iSection->Parameters.TimeScale;
     }
 }
 
+bool
+FBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache& iRHS ) const
+{
+    return mInnerFrameRate != iRHS.mInnerFrameRate 
+        || mInnerFrameOffset != iRHS.mInnerFrameOffset 
+        || mSectionStartFrame != iRHS.mSectionStartFrame 
+        || mTimeScale != iRHS.mTimeScale;
+}
 
-FBoardSection::FBoardSection( TSharedPtr<ISequencer> InSequencer, UMovieSceneBoardSection& InSection, TSharedPtr<FBoardTrackEditor> InBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool )
-    : TSubSectionMixin( InSequencer, InSection, InSequencer, InThumbnailPool, InSection )
-    , BoardTrackEditor( InBoardTrackEditor )
-    , ThumbnailCacheData( &InSection )
+//---
+
+FBoardSection::FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool )
+    : TSubSectionMixin( iSequencer, iSection, iSequencer, iThumbnailPool, iSection )
+    , mBoardTrackEditor( iBoardTrackEditor )
+    , mThumbnailCacheData( &iSection )
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 }
@@ -82,15 +93,15 @@ FBoardSection::GetContentPadding() const
 }
 
 void
-FBoardSection::SetSingleTime( double GlobalTime )
+FBoardSection::SetSingleTime( double iGlobalTime )
 {
-    UMovieSceneBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
-    double ReferenceOffsetSeconds = SectionObject.HasStartFrame() ? SectionObject.GetInclusiveStartFrame() / SectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() : 0;
-    SectionObject.SetThumbnailReferenceOffset( GlobalTime - ReferenceOffsetSeconds );
+    UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    double referenceOffsetSeconds = sectionObject.HasStartFrame() ? sectionObject.GetInclusiveStartFrame() / sectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() : 0;
+    sectionObject.SetThumbnailReferenceOffset( iGlobalTime - referenceOffsetSeconds );
 }
 
 UCameraComponent* 
-FindCameraCutComponentRecursive( FFrameNumber GlobalTime, FMovieSceneSequenceID InnerSequenceID, const FMovieSceneSequenceHierarchy& Hierarchy, IMovieScenePlayer& Player )
+FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID iInnerSequenceID, const FMovieSceneSequenceHierarchy& iHierarchy, IMovieScenePlayer& ioPlayer )
 {
     //const FMovieSceneSequenceHierarchyNode* Node = Hierarchy.FindNode( InnerSequenceID );
     //const FMovieSceneSubSequenceData*       SubData = Hierarchy.FindSubData( InnerSequenceID );
@@ -158,36 +169,36 @@ FindCameraCutComponentRecursive( FFrameNumber GlobalTime, FMovieSceneSequenceID 
 UCameraComponent*
 FBoardSection::GetViewCamera()
 {
-    TSharedPtr<ISequencer> Sequencer = GetSequencer();
-    if( !Sequencer.IsValid() )
+    TSharedPtr<ISequencer> sequencer = GetSequencer();
+    if( !sequencer.IsValid() )
     {
         return nullptr;
     }
 
 
-    const UMovieSceneBoardSection&          SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
-    const FMovieSceneSequenceID             ThisSequenceID = Sequencer->GetFocusedTemplateID();
-    const FMovieSceneSequenceID             TargetSequenceID = SectionObject.GetSequenceID();
-    const FMovieSceneSequenceHierarchy&     Hierarchy = Sequencer->GetEvaluationTemplate().GetHierarchy();
-    const FMovieSceneSequenceHierarchyNode* ThisSequenceNode = Hierarchy.FindNode( ThisSequenceID );
+    const UMovieSceneBoardSection&          sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    const FMovieSceneSequenceID             thisSequenceID = sequencer->GetFocusedTemplateID();
+    const FMovieSceneSequenceID             targetSequenceID = sectionObject.GetSequenceID();
+    const FMovieSceneSequenceHierarchy&     hierarchy = sequencer->GetEvaluationTemplate().GetHierarchy();
+    const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy.FindNode( thisSequenceID );
 
-    check( ThisSequenceNode );
+    check( thisSequenceNode );
 
     // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-    const FMovieSceneSequenceID* InnerSequenceID = Algo::FindByPredicate( ThisSequenceNode->Children,
-                                                                          [&Hierarchy, TargetSequenceID]( FMovieSceneSequenceID InSequenceID )
+    const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
+                                                                          [&hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
     {
-        const FMovieSceneSubSequenceData* SubData = Hierarchy.FindSubData( InSequenceID );
-        return SubData && SubData->DeterministicSequenceID == TargetSequenceID;
+        const FMovieSceneSubSequenceData* subData = hierarchy.FindSubData( iSequenceID );
+        return subData && subData->DeterministicSequenceID == targetSequenceID;
     }
     );
 
-    if( InnerSequenceID )
+    if( innerSequenceID )
     {
-        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( Sequencer->GetGlobalTime().Time.FrameNumber, *InnerSequenceID, Hierarchy, *Sequencer );
-        if( CameraComponent )
+        UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, *innerSequenceID, hierarchy, *sequencer );
+        if( cameraComponent )
         {
-            return CameraComponent;
+            return cameraComponent;
         }
     }
 
@@ -202,81 +213,81 @@ FBoardSection::IsReadOnly() const
 }
 
 void
-FBoardSection::Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime )
+FBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime )
 {
     // Set cached data
-    UMovieSceneBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
-    FCinematicSectionCache NewCacheData( &SectionObject );
-    if( NewCacheData != ThumbnailCacheData )
+    UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    FCinematicSectionCache newCacheData( &sectionObject );
+    if( newCacheData != mThumbnailCacheData )
     {
         ThumbnailCache.ForceRedraw();
     }
-    ThumbnailCacheData = NewCacheData;
+    mThumbnailCacheData = newCacheData;
 
     // Update single reference frame settings
-    if( GetDefault<UMovieSceneUserThumbnailSettings>()->bDrawSingleThumbnails && SectionObject.HasStartFrame() )
+    if( GetDefault<UMovieSceneUserThumbnailSettings>()->bDrawSingleThumbnails && sectionObject.HasStartFrame() )
     {
-        double ReferenceTime = SectionObject.GetInclusiveStartFrame() / SectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() + SectionObject.GetThumbnailReferenceOffset();
-        ThumbnailCache.SetSingleReferenceFrame( ReferenceTime );
+        double referenceTime = sectionObject.GetInclusiveStartFrame() / sectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() + sectionObject.GetThumbnailReferenceOffset();
+        ThumbnailCache.SetSingleReferenceFrame( referenceTime );
     }
     else
     {
         ThumbnailCache.SetSingleReferenceFrame( TOptional<double>() );
     }
 
-    FViewportThumbnailSection::Tick( AllottedGeometry, ClippedGeometry, InCurrentTime, InDeltaTime );
+    FViewportThumbnailSection::Tick( iAllottedGeometry, iClippedGeometry, iCurrentTime, iDeltaTime );
 }
 
 int32
-FBoardSection::OnPaintSection( FSequencerSectionPainter& InPainter ) const
+FBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
 {
-    static const FSlateBrush* FilmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
+    static const FSlateBrush* filmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
 
-    InPainter.LayerId = InPainter.PaintSectionBackground();
+    ioPainter.LayerId = ioPainter.PaintSectionBackground();
 
-    FVector2D LocalSectionSize = InPainter.SectionGeometry.GetLocalSize();
-    const UMovieSceneBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    FVector2D localSectionSize = ioPainter.SectionGeometry.GetLocalSize();
+    const UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
 
     // Paint fancy-looking film border.
     FSlateDrawElement::MakeBox(
-        InPainter.DrawElements,
-        InPainter.LayerId++,
-        InPainter.SectionGeometry.ToPaintGeometry( FVector2D( LocalSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, 4.f ) ) ),
-        FilmBorder,
-        InPainter.bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect
+        ioPainter.DrawElements,
+        ioPainter.LayerId++,
+        ioPainter.SectionGeometry.ToPaintGeometry( FVector2D( localSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, 4.f ) ) ),
+        filmBorder,
+        ioPainter.bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect
     );
 
     FSlateDrawElement::MakeBox(
-        InPainter.DrawElements,
-        InPainter.LayerId++,
-        InPainter.SectionGeometry.ToPaintGeometry( FVector2D( LocalSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, LocalSectionSize.Y - 11.f ) ) ),
-        FilmBorder,
-        InPainter.bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect
+        ioPainter.DrawElements,
+        ioPainter.LayerId++,
+        ioPainter.SectionGeometry.ToPaintGeometry( FVector2D( localSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, localSectionSize.Y - 11.f ) ) ),
+        filmBorder,
+        ioPainter.bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect
     );
 
     // Paint the thumbnails.
-    FViewportThumbnailSection::OnPaintSection( InPainter );
+    FViewportThumbnailSection::OnPaintSection( ioPainter );
 
     // Paint the sub-sequence information/looping boundaries/etc.
 
-    FSubSectionPainterParams SubSectionPainterParams( GetContentPadding() );
-    SubSectionPainterParams.bShowTrackNum = false;
+    FSubSectionPainterParams subSectionPainterParams( GetContentPadding() );
+    subSectionPainterParams.bShowTrackNum = false;
 
-    FSubSectionPainterUtil::PaintSection( GetSequencer(), SectionObject, InPainter, SubSectionPainterParams );
+    FSubSectionPainterUtil::PaintSection( GetSequencer(), sectionObject, ioPainter, subSectionPainterParams );
 
-    return InPainter.LayerId;
+    return ioPainter.LayerId;
 }
 
 void
-FBoardSection::BuildSectionContextMenu( FMenuBuilder& MenuBuilder, const FGuid& ObjectBinding )
+FBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding )
 {
-    FViewportThumbnailSection::BuildSectionContextMenu( MenuBuilder, ObjectBinding );
+    FViewportThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
 
-    UMovieSceneBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
 
-    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "BoardMenuText", "Board" ) );
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "BoardMenuText", "Board" ) );
     {
-        //MenuBuilder.AddSubMenu(
+        //ioMenuBuilder.AddSubMenu(
         //    LOCTEXT( "TakesMenu", "Takes" ),
         //    LOCTEXT( "TakesMenuTooltip", "Shot takes" ),
         //    FNewMenuDelegate::CreateLambda( [=]( FMenuBuilder& InMenuBuilder )
@@ -284,42 +295,42 @@ FBoardSection::BuildSectionContextMenu( FMenuBuilder& MenuBuilder, const FGuid& 
         //    AddTakesMenu( InMenuBuilder );
         //} ) );
 
-        //MenuBuilder.AddMenuEntry(
+        //ioMenuBuilder.AddMenuEntry(
         //    LOCTEXT( "NewTake", "New Take" ),
         //    FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( SectionObject.GetShotDisplayName() ) ),
         //    FSlateIcon(),
         //    FUIAction( FExecuteAction::CreateSP( CinematicShotTrackEditor.Pin().ToSharedRef(), &FCinematicShotTrackEditor::NewTake, &SectionObject ) )
         //);
 
-        MenuBuilder.AddMenuEntry(
+        ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "InsertNewBoard", "Insert Board" ),
             LOCTEXT( "InsertNewBoardTooltip", "Insert a new board at the current time" ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( BoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::InsertBoard ) )
+            FUIAction( FExecuteAction::CreateSP( mBoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::InsertBoard ) )
         );
 
-        MenuBuilder.AddMenuEntry(
+        ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "DuplicateBoard", "Duplicate Board" ),
-            FText::Format( LOCTEXT( "DuplicateBoardTooltip", "Duplicate {0} to create a new board" ), FText::FromString( SectionObject.GetBoardDisplayName() ) ),
+            FText::Format( LOCTEXT( "DuplicateBoardTooltip", "Duplicate {0} to create a new board" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( BoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::DuplicateBoard, &SectionObject ) )
+            FUIAction( FExecuteAction::CreateSP( mBoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::DuplicateBoard, &sectionObject ) )
         );
 
-        MenuBuilder.AddMenuEntry(
+        ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "RenderBoard", "Render Board" ),
-            FText::Format( LOCTEXT( "RenderBoardTooltip", "Render board movie" ), FText::FromString( SectionObject.GetBoardDisplayName() ) ),
+            FText::Format( LOCTEXT( "RenderBoardTooltip", "Render board movie" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( BoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::RenderBoard, &SectionObject ) )
+            FUIAction( FExecuteAction::CreateSP( mBoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::RenderBoard, &sectionObject ) )
         );
 
-        MenuBuilder.AddMenuEntry(
+        ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "RenameBoard", "Rename Board" ),
-            FText::Format( LOCTEXT( "RenameBoardTooltip", "Rename {0}" ), FText::FromString( SectionObject.GetBoardDisplayName() ) ),
+            FText::Format( LOCTEXT( "RenameBoardTooltip", "Rename {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
             FUIAction( FExecuteAction::CreateSP( this, &FBoardSection::EnterRename ) )
         );
     }
-    MenuBuilder.EndSection();
+    ioMenuBuilder.EndSection();
 }
 
 //void FCinematicShotSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
@@ -366,23 +377,23 @@ FBoardSection::BuildSectionContextMenu( FMenuBuilder& MenuBuilder, const FGuid& 
 FText
 FBoardSection::HandleThumbnailTextBlockText() const
 {
-    const UMovieSceneBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
-    return FText::FromString( SectionObject.GetBoardDisplayName() );
+    const UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    return FText::FromString( sectionObject.GetBoardDisplayName() );
 }
 
 
 void
-FBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& NewBoardName, ETextCommit::Type CommitType )
+FBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& iNewBoardName, ETextCommit::Type iCommitType )
 {
-    if( CommitType == ETextCommit::OnEnter && !HandleThumbnailTextBlockText().EqualTo( NewBoardName ) )
+    if( iCommitType == ETextCommit::OnEnter && !HandleThumbnailTextBlockText().EqualTo( iNewBoardName ) )
     {
-        UMovieSceneBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+        UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
 
-        SectionObject.Modify();
+        sectionObject.Modify();
 
-        const FScopedTransaction Transaction( LOCTEXT( "SetBoardName", "Set Board Name" ) );
+        const FScopedTransaction transaction( LOCTEXT( "SetBoardName", "Set Board Name" ) );
 
-        SectionObject.SetBoardDisplayName( NewBoardName.ToString() );
+        sectionObject.SetBoardDisplayName( iNewBoardName.ToString() );
     }
 }
 

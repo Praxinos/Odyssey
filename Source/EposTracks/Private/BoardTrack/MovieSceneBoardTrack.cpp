@@ -14,8 +14,8 @@
 
 /* UMovieSceneSubTrack interface
  *****************************************************************************/
-UMovieSceneBoardTrack::UMovieSceneBoardTrack( const FObjectInitializer& ObjectInitializer )
-    : Super( ObjectInitializer )
+UMovieSceneBoardTrack::UMovieSceneBoardTrack( const FObjectInitializer& iObjectInitializer )
+    : Super( iObjectInitializer )
 {
 #if WITH_EDITORONLY_DATA
     TrackTint = FColor( 0, 0, 0, 127 );
@@ -23,23 +23,23 @@ UMovieSceneBoardTrack::UMovieSceneBoardTrack( const FObjectInitializer& ObjectIn
 }
 
 UMovieSceneSubSection*
-UMovieSceneBoardTrack::AddSequence( UMovieSceneSequence* Sequence, FFrameNumber StartTime, int32 Duration )
+UMovieSceneBoardTrack::AddSequence( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration )
 {
-    return AddSequenceOnRow( Sequence, StartTime, Duration, INDEX_NONE );
+    return AddSequenceOnRow( iSequence, iStartTime, iDuration, INDEX_NONE );
 }
 
 UMovieSceneSubSection*
-UMovieSceneBoardTrack::AddSequenceOnRow( UMovieSceneSequence* Sequence, FFrameNumber StartTime, int32 Duration, int32 RowIndex )
+UMovieSceneBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex )
 {
-    UMovieSceneSubSection* NewSection = UMovieSceneSubTrack::AddSequenceOnRow( Sequence, StartTime, Duration, RowIndex );
+    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, iStartTime, iDuration, iRowIndex );
 
-    UMovieSceneBoardSection* NewBoardSection = Cast<UMovieSceneBoardSection>( NewSection );
+    UMovieSceneBoardSection* newBoardSection = Cast<UMovieSceneBoardSection>( newSection );
 
 #if WITH_EDITOR
 
-    if( Sequence != nullptr )
+    if( iSequence != nullptr )
     {
-        NewBoardSection->SetBoardDisplayName( Sequence->GetDisplayName().ToString() );
+        newBoardSection->SetBoardDisplayName( iSequence->GetDisplayName().ToString() );
     }
 
 #endif
@@ -50,25 +50,25 @@ UMovieSceneBoardTrack::AddSequenceOnRow( UMovieSceneSequence* Sequence, FFrameNu
     // Once sequences are sorted fixup the surrounding sequences to fix any gaps
     //MovieSceneHelpers::FixupConsecutiveSections(Sections, *NewSection, false);
 
-    return NewSection;
+    return newSection;
 }
 
 /* UMovieSceneTrack interface
  *****************************************************************************/
 
 void
-UMovieSceneBoardTrack::AddSection( UMovieSceneSection& Section )
+UMovieSceneBoardTrack::AddSection( UMovieSceneSection& ioSection )
 {
-    if( Section.IsA<UMovieSceneBoardSection>() )
+    if( ioSection.IsA<UMovieSceneBoardSection>() )
     {
-        Sections.Add( &Section );
+        Sections.Add( &ioSection );
     }
 }
 
 bool
-UMovieSceneBoardTrack::SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const
+UMovieSceneBoardTrack::SupportsType( TSubclassOf<UMovieSceneSection> iSectionClass ) const
 {
-    return SectionClass == UMovieSceneBoardSection::StaticClass();
+    return iSectionClass == UMovieSceneBoardSection::StaticClass();
 }
 
 
@@ -79,9 +79,9 @@ UMovieSceneBoardTrack::CreateNewSection()
 }
 
 void
-UMovieSceneBoardTrack::RemoveSection( UMovieSceneSection& Section )
+UMovieSceneBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 {
-    Sections.Remove( &Section );
+    Sections.Remove( &ioSection );
     //MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, true);
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
@@ -89,9 +89,9 @@ UMovieSceneBoardTrack::RemoveSection( UMovieSceneSection& Section )
 }
 
 void
-UMovieSceneBoardTrack::RemoveSectionAt( int32 SectionIndex )
+UMovieSceneBoardTrack::RemoveSectionAt( int32 iSectionIndex )
 {
-    Sections.RemoveAt( SectionIndex );
+    Sections.RemoveAt( iSectionIndex );
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 }
 
@@ -107,9 +107,9 @@ UMovieSceneBoardTrack::GetTrackSegmentBlender() const
     // Apply a high pass filter to overlapping sections such that only the highest row in a track wins
     struct FBoardTrackRowBlender : FMovieSceneTrackSegmentBlender
     {
-        virtual void Blend( FSegmentBlendData& BlendData ) const override
+        virtual void Blend( FSegmentBlendData& ioBlendData ) const override
         {
-            MovieSceneSegmentCompiler::ChooseLowestRowIndex( BlendData );
+            MovieSceneSegmentCompiler::ChooseLowestRowIndex( ioBlendData );
         }
     };
     return FBoardTrackRowBlender();
@@ -120,53 +120,53 @@ UMovieSceneBoardTrack::GetRowSegmentBlender() const
 {
     class FCinematicRowRules : public FMovieSceneTrackRowSegmentBlender
     {
-        virtual void Blend( FSegmentBlendData& BlendData ) const override
+        virtual void Blend( FSegmentBlendData& ioBlendData ) const override
         {
             // Sort everything by priority, then latest start time wins
-            if( BlendData.Num() <= 1 )
+            if( ioBlendData.Num() <= 1 )
             {
                 return;
             }
 
-            BlendData.Sort( SortPredicate );
+            ioBlendData.Sort( SortPredicate );
 
-            int32 RemoveAtIndex = 0;
+            int32 removeAtIndex = 0;
             // Skip over any pre/postroll sections
-            while( BlendData.IsValidIndex( RemoveAtIndex ) && EnumHasAnyFlags( BlendData[RemoveAtIndex].Flags, ESectionEvaluationFlags::PreRoll | ESectionEvaluationFlags::PostRoll ) )
+            while( ioBlendData.IsValidIndex( removeAtIndex ) && EnumHasAnyFlags( ioBlendData[removeAtIndex].Flags, ESectionEvaluationFlags::PreRoll | ESectionEvaluationFlags::PostRoll ) )
             {
-                ++RemoveAtIndex;
+                ++removeAtIndex;
             }
 
             // Skip over the first genuine evaluation if it exists
-            ++RemoveAtIndex;
+            ++removeAtIndex;
 
-            int32 NumToRemove = BlendData.Num() - RemoveAtIndex;
-            if( NumToRemove > 0 )
+            int32 numToRemove = ioBlendData.Num() - removeAtIndex;
+            if( numToRemove > 0 )
             {
-                BlendData.RemoveAt( RemoveAtIndex, NumToRemove, true );
+                ioBlendData.RemoveAt( removeAtIndex, numToRemove, true );
             }
         }
 
-        static bool SortPredicate( const FMovieSceneSectionData& A, const FMovieSceneSectionData& B )
+        static bool SortPredicate( const FMovieSceneSectionData& iA, const FMovieSceneSectionData& iB )
         {
             // Always sort pre/postroll to the front of the array
-            const bool PrePostRollA = EnumHasAnyFlags( A.Flags, ESectionEvaluationFlags::PreRoll | ESectionEvaluationFlags::PostRoll );
-            const bool PrePostRollB = EnumHasAnyFlags( B.Flags, ESectionEvaluationFlags::PreRoll | ESectionEvaluationFlags::PostRoll );
+            const bool prePostRollA = EnumHasAnyFlags( iA.Flags, ESectionEvaluationFlags::PreRoll | ESectionEvaluationFlags::PostRoll );
+            const bool prePostRollB = EnumHasAnyFlags( iB.Flags, ESectionEvaluationFlags::PreRoll | ESectionEvaluationFlags::PostRoll );
 
-            if( PrePostRollA != PrePostRollB )
+            if( prePostRollA != prePostRollB )
             {
-                return PrePostRollA;
+                return prePostRollA;
             }
-            else if( PrePostRollA )
+            else if( prePostRollA )
             {
                 return false;
             }
-            else if( A.Section->GetOverlapPriority() == B.Section->GetOverlapPriority() )
+            else if( iA.Section->GetOverlapPriority() == iB.Section->GetOverlapPriority() )
             {
-                TRangeBound<FFrameNumber> StartBoundA = A.Section->GetRange().GetLowerBound();
-                return TRangeBound<FFrameNumber>::MaxLower( StartBoundA, B.Section->GetRange().GetLowerBound() ) == StartBoundA;
+                TRangeBound<FFrameNumber> startBoundA = iA.Section->GetRange().GetLowerBound();
+                return TRangeBound<FFrameNumber>::MaxLower( startBoundA, iB.Section->GetRange().GetLowerBound() ) == startBoundA;
             }
-            return A.Section->GetOverlapPriority() > B.Section->GetOverlapPriority();
+            return iA.Section->GetOverlapPriority() > iB.Section->GetOverlapPriority();
         }
     };
 
@@ -175,9 +175,9 @@ UMovieSceneBoardTrack::GetRowSegmentBlender() const
 
 #if WITH_EDITOR
 void
-UMovieSceneBoardTrack::OnSectionMoved( UMovieSceneSection& Section, const FMovieSceneSectionMovedParams& Params )
+UMovieSceneBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams )
 {
-    //MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, false);
+    //MovieSceneHelpers::FixupConsecutiveSections(Sections, ioSection, false);
 }
 #endif
 

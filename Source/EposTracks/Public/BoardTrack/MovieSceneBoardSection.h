@@ -27,12 +27,12 @@ public:
 
     /** Set the board display name */
     UFUNCTION( BlueprintCallable, Category = "Movie Scene Section" )
-    void SetBoardDisplayName( const FString& InBoardDisplayName );
+    void SetBoardDisplayName( const FString& BoardDisplayName );
 
 private:
     /** The Board's display name */
     UPROPERTY()
-    FString BoardDisplayName;
+    FString mBoardDisplayName;
 
 #if WITH_EDITORONLY_DATA
 public:
@@ -40,12 +40,12 @@ public:
     float GetThumbnailReferenceOffset() const;
 
     /** Set the thumbnail reference offset */
-    void SetThumbnailReferenceOffset( float InNewOffset );
+    void SetThumbnailReferenceOffset( float iNewOffset );
 
 private:
 
     /** The board's reference frame offset for single thumbnail rendering */
     UPROPERTY()
-    float ThumbnailReferenceOffset;
+    float mThumbnailReferenceOffset;
 #endif
 };

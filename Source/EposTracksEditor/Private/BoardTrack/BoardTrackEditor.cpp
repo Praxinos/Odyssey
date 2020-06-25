@@ -9,8 +9,6 @@
 #include "GameFramework/Actor.h"
 #include "Factories/Factory.h"
 #include "Tracks/MovieSceneSubTrack.h"
-#include "BoardTrack/MovieSceneBoardTrack.h"
-#include "BoardTrack/MovieSceneBoardSection.h"
 #include "Modules/ModuleManager.h"
 #include "Application/ThrottleManager.h"
 #include "Framework/Application/SlateApplication.h"
@@ -20,7 +18,6 @@
 #include "LevelEditorViewport.h"
 #include "MovieSceneToolHelpers.h"
 #include "FCPXML/FCPXMLMovieSceneTranslator.h"
-#include "BoardTrack/BoardSection.h"
 #include "SequencerUtilities.h"
 #include "IAssetTools.h"
 #include "IContentBrowserSingleton.h"
@@ -37,6 +34,9 @@
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "Board/BoardSequence.h"
+#include "BoardTrack/BoardSection.h"
+#include "BoardTrack/MovieSceneBoardSection.h"
+#include "BoardTrack/MovieSceneBoardTrack.h"
 #include "EposTracksEditorHelpers.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposEditorStyle.h"
@@ -46,33 +46,40 @@
 /* FBoardTrackEditor structors
  *****************************************************************************/
 
-FBoardTrackEditor::FBoardTrackEditor( TSharedRef<ISequencer> InSequencer )
-    : FMovieSceneTrackEditor( InSequencer )
+FBoardTrackEditor::FBoardTrackEditor( TSharedRef<ISequencer> iSequencer )
+    : FMovieSceneTrackEditor( iSequencer )
 {
-    ThumbnailPool = MakeShareable( new FTrackEditorThumbnailPool( InSequencer ) );
+    mThumbnailPool = MakeShareable( new FTrackEditorThumbnailPool( iSequencer ) );
 }
 
 
 TSharedRef<ISequencerTrackEditor>
-FBoardTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> InSequencer )
+FBoardTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> iSequencer )
 {
-    return MakeShareable( new FBoardTrackEditor( InSequencer ) );
+    return MakeShareable( new FBoardTrackEditor( iSequencer ) );
+}
+
+
+TWeakObjectPtr<AActor>
+FBoardTrackEditor::GetBoardCamera() const
+{
+    return mBoardCamera;
 }
 
 
 void
 FBoardTrackEditor::OnInitialize()
 {
-    OnCameraCutHandle = GetSequencer()->OnCameraCut().AddSP( this, &FBoardTrackEditor::OnUpdateCameraCut );
+    mOnCameraCutHandle = GetSequencer()->OnCameraCut().AddSP( this, &FBoardTrackEditor::OnUpdateCameraCut );
 }
 
 
 void
 FBoardTrackEditor::OnRelease()
 {
-    if( OnCameraCutHandle.IsValid() && GetSequencer().IsValid() )
+    if( mOnCameraCutHandle.IsValid() && GetSequencer().IsValid() )
     {
-        GetSequencer()->OnCameraCut().Remove( OnCameraCutHandle );
+        GetSequencer()->OnCameraCut().Remove( mOnCameraCutHandle );
     }
 }
 
@@ -81,9 +88,9 @@ FBoardTrackEditor::OnRelease()
  *****************************************************************************/
 
 void
-FBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder )
+FBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder )
 {
-    MenuBuilder.AddMenuEntry(
+    ioMenuBuilder.AddMenuEntry(
         LOCTEXT( "AddBoardTrack", "Board Track" ),
         LOCTEXT( "AddBoardTooltip", "Adds a board track." ),
         FSlateIcon( FEposEditorStyle::Get()->GetStyleSetName(), "Sequencer.Tracks.Board" ),
@@ -96,7 +103,7 @@ FBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder )
 
 
 TSharedPtr<SWidget>
-FBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params )
+FBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding, UMovieSceneTrack* iTrack, const FBuildEditWidgetParams& iParams )
 {
     // Create a container edit box
     return SNew( SHorizontalBox )
@@ -106,7 +113,7 @@ FBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSc
         .AutoWidth()
         .VAlign( VAlign_Center )
         [
-            FSequencerUtilities::MakeAddButton( LOCTEXT( "BoardText", "Board" ), FOnGetContent::CreateSP( this, &FBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), Params.NodeIsHovered, GetSequencer() )
+            FSequencerUtilities::MakeAddButton( LOCTEXT( "BoardText", "Board" ), FOnGetContent::CreateSP( this, &FBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), iParams.NodeIsHovered, GetSequencer() )
         ]
 
     + SHorizontalBox::Slot()
@@ -132,101 +139,101 @@ FBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSc
 
 
 TSharedRef<ISequencerSection>
-FBoardTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding )
+FBoardTrackEditor::MakeSectionInterface( UMovieSceneSection& iSectionObject, UMovieSceneTrack& ioTrack, FGuid iObjectBinding )
 {
-    check( SupportsType( SectionObject.GetOuter()->GetClass() ) );
+    check( SupportsType( iSectionObject.GetOuter()->GetClass() ) );
 
-    UMovieSceneBoardSection& SectionObjectImpl = *CastChecked<UMovieSceneBoardSection>( &SectionObject );
-    return MakeShareable( new FBoardSection( GetSequencer(), SectionObjectImpl, SharedThis( this ), ThumbnailPool ) );
+    UMovieSceneBoardSection& sectionObjectImpl = *CastChecked<UMovieSceneBoardSection>( &iSectionObject );
+    return MakeShareable( new FBoardSection( GetSequencer(), sectionObjectImpl, SharedThis( this ), mThumbnailPool ) );
 }
 
 
 bool
-FBoardTrackEditor::HandleAssetAdded( UObject* Asset, const FGuid& TargetObjectGuid )
+FBoardTrackEditor::HandleAssetAdded( UObject* iAsset, const FGuid& iTargetObjectGuid )
 {
-    UMovieSceneSequence* Sequence = Cast<UMovieSceneSequence>( Asset );
+    UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( iAsset );
 
-    if( Sequence == nullptr )
+    if( sequence == nullptr )
     {
         return false;
     }
 
-    if( !SupportsSequence( Sequence ) )
+    if( !SupportsSequence( sequence ) )
     {
         return false;
     }
 
     //@todo If there's already a subscenes track, allow that track to handle this asset
-    UMovieScene* FocusedMovieScene = GetFocusedMovieScene();
+    UMovieScene* focusedMovieScene = GetFocusedMovieScene();
 
-    if( FocusedMovieScene != nullptr && FocusedMovieScene->FindMasterTrack<UMovieSceneSubTrack>() != nullptr )
+    if( focusedMovieScene != nullptr && focusedMovieScene->FindMasterTrack<UMovieSceneSubTrack>() != nullptr )
     {
         return false;
     }
 
-    if( Sequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
+    if( sequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
     {
-        FNotificationInfo Info( FText::Format( LOCTEXT( "InvalidSequenceDuration", "Invalid level sequence {0}. The sequence has no duration." ), Sequence->GetDisplayName() ) );
-        Info.bUseLargeFont = false;
-        FSlateNotificationManager::Get().AddNotification( Info );
+        FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequenceDuration", "Invalid level sequence {0}. The sequence has no duration." ), sequence->GetDisplayName() ) );
+        info.bUseLargeFont = false;
+        FSlateNotificationManager::Get().AddNotification( info );
         return false;
     }
 
-    if( CanAddSubSequence( *Sequence ) )
+    if( CanAddSubSequence( *sequence ) )
     {
-        const FScopedTransaction Transaction( LOCTEXT( "AddBoard_Transaction", "Add Board" ) );
+        const FScopedTransaction transaction( LOCTEXT( "AddBoard_Transaction", "Add Board" ) );
 
-        int32 RowIndex = INDEX_NONE;
-        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FBoardTrackEditor::HandleSequenceAdded, Sequence, RowIndex ) );
+        int32 rowIndex = INDEX_NONE;
+        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FBoardTrackEditor::HandleSequenceAdded, sequence, rowIndex ) );
 
         return true;
     }
 
-    FNotificationInfo Info( FText::Format( LOCTEXT( "InvalidSequence", "Invalid level sequence {0}. There could be a circular dependency." ), Sequence->GetDisplayName() ) );
-    Info.bUseLargeFont = false;
-    FSlateNotificationManager::Get().AddNotification( Info );
+    FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequence", "Invalid level sequence {0}. There could be a circular dependency." ), sequence->GetDisplayName() ) );
+    info.bUseLargeFont = false;
+    FSlateNotificationManager::Get().AddNotification( info );
 
     return false;
 }
 
 
 bool
-FBoardTrackEditor::SupportsSequence( UMovieSceneSequence* InSequence ) const
+FBoardTrackEditor::SupportsSequence( UMovieSceneSequence* iSequence ) const
 {
-    return ( InSequence != nullptr ) && ( ( InSequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( InSequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) );
+    return ( iSequence != nullptr ) && ( ( iSequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( iSequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) );
 }
 
 
 bool
-FBoardTrackEditor::SupportsType( TSubclassOf<UMovieSceneTrack> Type ) const
+FBoardTrackEditor::SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const
 {
-    return ( Type == UMovieSceneBoardTrack::StaticClass() );
+    return ( iType == UMovieSceneBoardTrack::StaticClass() );
 }
 
 
 void
-FBoardTrackEditor::Tick( float DeltaTime )
+FBoardTrackEditor::Tick( float iDeltaTime )
 {
-    TSharedPtr<ISequencer> SequencerPin = GetSequencer();
-    if( !SequencerPin.IsValid() )
+    TSharedPtr<ISequencer> sequencerPin = GetSequencer();
+    if( !sequencerPin.IsValid() )
     {
         return;
     }
 
-    EMovieScenePlayerStatus::Type PlaybackState = SequencerPin->GetPlaybackStatus();
+    EMovieScenePlayerStatus::Type playbackState = sequencerPin->GetPlaybackStatus();
 
-    if( FSlateThrottleManager::Get().IsAllowingExpensiveTasks() && PlaybackState != EMovieScenePlayerStatus::Playing && PlaybackState != EMovieScenePlayerStatus::Scrubbing )
+    if( FSlateThrottleManager::Get().IsAllowingExpensiveTasks() && playbackState != EMovieScenePlayerStatus::Playing && playbackState != EMovieScenePlayerStatus::Scrubbing )
     {
-        SequencerPin->EnterSilentMode();
+        sequencerPin->EnterSilentMode();
 
-        FFrameTime SavedTime = SequencerPin->GetGlobalTime().Time;
+        FFrameTime savedTime = sequencerPin->GetGlobalTime().Time;
 
-        if( DeltaTime > 0.f && ThumbnailPool->DrawThumbnails() )
+        if( iDeltaTime > 0.f && mThumbnailPool->DrawThumbnails() )
         {
-            SequencerPin->SetGlobalTime( SavedTime );
+            sequencerPin->SetGlobalTime( savedTime );
         }
 
-        SequencerPin->ExitSilentMode();
+        sequencerPin->ExitSilentMode();
     }
 }
 
@@ -275,25 +282,25 @@ FBoardTrackEditor::GetIconBrush() const
 }
 
 bool
-FBoardTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, UMovieSceneTrack* Track, int32 RowIndex, const FGuid& TargetObjectGuid )
+FBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid )
 {
-    if( !Track->IsA( UMovieSceneBoardTrack::StaticClass() ) )
+    if( !iTrack->IsA( UMovieSceneBoardTrack::StaticClass() ) )
     {
         return false;
     }
 
-    TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
+    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
 
-    if( !Operation.IsValid() || !Operation->IsOfType<FAssetDragDropOp>() )
+    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
     {
         return false;
     }
 
-    TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
+    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
 
-    for( const FAssetData& AssetData : DragDropOp->GetAssets() )
+    for( const FAssetData& assetData : dragDropOp->GetAssets() )
     {
-        if( Cast<UMovieSceneSequence>( AssetData.GetAsset() ) )
+        if( Cast<UMovieSceneSequence>( assetData.GetAsset() ) )
         {
             return true;
         }
@@ -304,75 +311,75 @@ FBoardTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, UMovieScene
 
 
 FReply
-FBoardTrackEditor::OnDrop( const FDragDropEvent& DragDropEvent, UMovieSceneTrack* Track, int32 RowIndex, const FGuid& TargetObjectGuid )
+FBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid )
 {
-    if( !Track->IsA( UMovieSceneBoardTrack::StaticClass() ) )
+    if( !iTrack->IsA( UMovieSceneBoardTrack::StaticClass() ) )
     {
         return FReply::Unhandled();
     }
 
-    TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
+    TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
 
-    if( !Operation.IsValid() || !Operation->IsOfType<FAssetDragDropOp>() )
+    if( !operation.IsValid() || !operation->IsOfType<FAssetDragDropOp>() )
     {
         return FReply::Unhandled();
     }
 
-    TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
+    TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
 
-    bool bAnyDropped = false;
-    for( const FAssetData& AssetData : DragDropOp->GetAssets() )
+    bool anyDropped = false;
+    for( const FAssetData& assetData : dragDropOp->GetAssets() )
     {
-        UMovieSceneSequence* Sequence = Cast<UMovieSceneSequence>( AssetData.GetAsset() );
+        UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
 
-        if( Sequence )
+        if( sequence )
         {
-            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FBoardTrackEditor::AddKeyInternal, Sequence, RowIndex ) );
+            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FBoardTrackEditor::AddKeyInternal, sequence, iRowIndex ) );
 
-            bAnyDropped = true;
+            anyDropped = true;
         }
     }
 
-    return bAnyDropped ? FReply::Handled() : FReply::Unhandled();
+    return anyDropped ? FReply::Handled() : FReply::Unhandled();
 }
 
 UMovieSceneSubSection*
-FBoardTrackEditor::CreateBoardInternal( FString& NewBoardName, FFrameNumber NewBoardStartTime, UMovieSceneBoardSection* BoardToDuplicate )
+FBoardTrackEditor::CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneBoardSection* iBoardToDuplicate )
 {
-    FString NewBoardPath;
+    FString newBoardPath;
 
-    if( BoardToDuplicate != nullptr )
+    if( iBoardToDuplicate != nullptr )
     {
         // If duplicating a board, use that board's path
-        NewBoardPath = FPaths::GetPath( BoardToDuplicate->GetSequence()->GetPathName() );
+        newBoardPath = FPaths::GetPath( iBoardToDuplicate->GetSequence()->GetPathName() );
     }
     else
     {
-        NewBoardPath = EposTracksEditorHelpers::GenerateNewBoardPath( GetSequencer()->GetFocusedMovieSceneSequence()->GetMovieScene(), NewBoardName );
+        newBoardPath = EposTracksEditorHelpers::GenerateNewBoardPath( GetSequencer()->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewBoardName );
     }
 
     // Create a new level sequence asset with the appropriate name
-    IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+    IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
 
-    UObject* NewAsset = nullptr;
+    UObject* newAsset = nullptr;
     for( TObjectIterator<UClass> It; It; ++It )
     {
-        UClass* CurrentClass = *It;
-        if( CurrentClass->IsChildOf( UFactory::StaticClass() ) && !( CurrentClass->HasAnyClassFlags( CLASS_Abstract ) ) )
+        UClass* currentClass = *It;
+        if( currentClass->IsChildOf( UFactory::StaticClass() ) && !( currentClass->HasAnyClassFlags( CLASS_Abstract ) ) )
         {
-            UFactory* Factory = Cast<UFactory>( CurrentClass->GetDefaultObject() );
-            if( Factory->CanCreateNew() && Factory->ImportPriority >= 0 && ( Factory->SupportedClass == UBoardSequence::StaticClass() || Factory->SupportedClass == UShotSequence::StaticClass() ) )
+            UFactory* factory = Cast<UFactory>( currentClass->GetDefaultObject() );
+            if( factory->CanCreateNew() && factory->ImportPriority >= 0 && ( factory->SupportedClass == UBoardSequence::StaticClass() || factory->SupportedClass == UShotSequence::StaticClass() ) )
             {
-                if( BoardToDuplicate != nullptr )
+                if( iBoardToDuplicate != nullptr )
                 {
-                    NewAsset = AssetTools.DuplicateAssetWithDialog( NewBoardName, NewBoardPath, BoardToDuplicate->GetSequence() );
+                    newAsset = assetTools.DuplicateAssetWithDialog( ioNewBoardName, newBoardPath, iBoardToDuplicate->GetSequence() );
                 }
                 else
                 {
-                    if( Factory->SupportedClass == UBoardSequence::StaticClass() )
-                        NewAsset = AssetTools.CreateAssetWithDialog( NewBoardName, NewBoardPath, UBoardSequence::StaticClass(), Factory );
+                    if( factory->SupportedClass == UBoardSequence::StaticClass() )
+                        newAsset = assetTools.CreateAssetWithDialog( ioNewBoardName, newBoardPath, UBoardSequence::StaticClass(), factory );
                     else
-                        NewAsset = AssetTools.CreateAssetWithDialog( NewBoardName, NewBoardPath, UShotSequence::StaticClass(), Factory );
+                        newAsset = assetTools.CreateAssetWithDialog( ioNewBoardName, newBoardPath, UShotSequence::StaticClass(), factory );
 
                 }
                 break;
@@ -380,41 +387,42 @@ FBoardTrackEditor::CreateBoardInternal( FString& NewBoardName, FFrameNumber NewB
         }
     }
 
-    if( NewAsset == nullptr )
+    if( newAsset == nullptr )
     {
         return nullptr;
     }
 
-    UMovieSceneSequence* NewSequence = Cast<UMovieSceneSequence>( NewAsset );
+    UMovieSceneSequence* newSequence = Cast<UMovieSceneSequence>( newAsset );
 
-    int32 Duration = MovieScene::DiscreteSize( BoardToDuplicate ? BoardToDuplicate->GetRange() : NewSequence->GetMovieScene()->GetPlaybackRange() );
+    int32 duration = MovieScene::DiscreteSize( iBoardToDuplicate ? iBoardToDuplicate->GetRange() : newSequence->GetMovieScene()->GetPlaybackRange() );
 
-    UMovieSceneBoardTrack* BoardTrack = FindOrCreateBoardTrack();
+    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
     // Create a board section. 
-    UMovieSceneSubSection* NewSection = BoardTrack->AddSequence( NewSequence, NewBoardStartTime, Duration );
-    return NewSection;
+    UMovieSceneSubSection* newSection = boardTrack->AddSequence( newSequence, iNewBoardStartTime, duration );
+
+    return newSection;
 }
 
 void
 FBoardTrackEditor::InsertBoard()
 {
-    const FScopedTransaction Transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
+    const FScopedTransaction transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
 
-    FFrameTime NewBoardStartTime = GetSequencer()->GetLocalTime().Time;
+    FFrameTime newBoardStartTime = GetSequencer()->GetLocalTime().Time;
 
-    UMovieSceneBoardTrack* BoardTrack = FindOrCreateBoardTrack();
-    FString NewBoardName = EposTracksEditorHelpers::GenerateNewBoardName( BoardTrack->GetAllSections(), NewBoardStartTime.FrameNumber );
+    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), newBoardStartTime.FrameNumber );
 
-    UMovieSceneSubSection* NewBoard = CreateBoardInternal( NewBoardName, NewBoardStartTime.FrameNumber );
-    if( NewBoard )
+    UMovieSceneSubSection* newBoard = CreateBoardInternal( newBoardName, newBoardStartTime.FrameNumber );
+    if( newBoard )
     {
-        NewBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( BoardTrack, NewBoard ) );
+        newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
     }
 
     GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     GetSequencer()->EmptySelection();
-    GetSequencer()->SelectSection( NewBoard );
+    GetSequencer()->SelectSection( newBoard );
     GetSequencer()->ThrobSectionSelection();
 }
 
@@ -422,68 +430,68 @@ FBoardTrackEditor::InsertBoard()
 void
 FBoardTrackEditor::InsertFiller()
 {
-    const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
+    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
-    const FScopedTransaction Transaction( LOCTEXT( "InsertFiller_Transaction", "Insert Filler" ) );
+    const FScopedTransaction transaction( LOCTEXT( "InsertFiller_Transaction", "Insert Filler" ) );
 
-    FQualifiedFrameTime CurrentTime = GetSequencer()->GetLocalTime();
+    FQualifiedFrameTime currentTime = GetSequencer()->GetLocalTime();
 
-    UMovieSceneBoardTrack* BoardTrack = FindOrCreateBoardTrack();
+    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
-    int32 Duration = ( ProjectSettings->DefaultDuration * CurrentTime.Rate ).FrameNumber.Value;
+    int32 duration = ( projectSettings->DefaultDuration * currentTime.Rate ).FrameNumber.Value;
 
-    UMovieSceneSequence* NullSequence = nullptr;
+    UMovieSceneSequence* nullSequence = nullptr;
 
-    UMovieSceneSubSection* NewSection = BoardTrack->AddSequence( NullSequence, CurrentTime.Time.FrameNumber, Duration );
+    UMovieSceneSubSection* newSection = boardTrack->AddSequence( nullSequence, currentTime.Time.FrameNumber, duration );
 
-    UMovieSceneBoardSection* NewBoardSection = Cast<UMovieSceneBoardSection>( NewSection );
+    UMovieSceneBoardSection* newBoardSection = Cast<UMovieSceneBoardSection>( newSection );
 
-    NewBoardSection->SetBoardDisplayName( FText( LOCTEXT( "Filler", "Filler" ) ).ToString() );
+    newBoardSection->SetBoardDisplayName( FText( LOCTEXT( "Filler", "Filler" ) ).ToString() );
 
     GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     GetSequencer()->EmptySelection();
-    GetSequencer()->SelectSection( NewSection );
+    GetSequencer()->SelectSection( newSection );
     GetSequencer()->ThrobSectionSelection();
 }
 
 
 void
-FBoardTrackEditor::DuplicateBoard( UMovieSceneBoardSection* Section )
+FBoardTrackEditor::DuplicateBoard( UMovieSceneBoardSection* iSection )
 {
-    const FScopedTransaction Transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
+    const FScopedTransaction transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
 
-    UMovieSceneBoardTrack* BoardTrack = FindOrCreateBoardTrack();
+    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
-    FFrameNumber StartTime = Section->HasStartFrame() ? Section->GetInclusiveStartFrame() : 0;
-    FString NewBoardName = EposTracksEditorHelpers::GenerateNewBoardName( BoardTrack->GetAllSections(), StartTime );
+    FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
+    FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), startTime );
 
     // Duplicate the board and put it on the next available row
-    UMovieSceneSubSection* NewBoard = CreateBoardInternal( NewBoardName, StartTime, Section );
-    if( NewBoard )
+    UMovieSceneSubSection* newBoard = CreateBoardInternal( newBoardName, startTime, iSection );
+    if( newBoard )
     {
-        NewBoard->SetRange( Section->GetRange() );
-        NewBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( BoardTrack, NewBoard ) );
-        NewBoard->Parameters.StartFrameOffset = Section->Parameters.StartFrameOffset;
-        NewBoard->Parameters.TimeScale = Section->Parameters.TimeScale;
-        NewBoard->SetPreRollFrames( Section->GetPreRollFrames() );
+        newBoard->SetRange( iSection->GetRange() );
+        newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+        newBoard->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
+        newBoard->Parameters.TimeScale = iSection->Parameters.TimeScale;
+        newBoard->SetPreRollFrames( iSection->GetPreRollFrames() );
 
         GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
         GetSequencer()->EmptySelection();
-        GetSequencer()->SelectSection( NewBoard );
+        GetSequencer()->SelectSection( newBoard );
         GetSequencer()->ThrobSectionSelection();
     }
 }
 
 
 void
-FBoardTrackEditor::RenderBoard( UMovieSceneBoardSection* Section )
+FBoardTrackEditor::RenderBoard( UMovieSceneBoardSection* iSection )
 {
-    GetSequencer()->RenderMovie( Section );
+    GetSequencer()->RenderMovie( iSection );
 }
 
 
 void
-FBoardTrackEditor::RenameBoard( UMovieSceneBoardSection* Section )
+FBoardTrackEditor::RenameBoard( UMovieSceneBoardSection* iSection )
 {
     //@todo
 }
@@ -612,22 +620,22 @@ FBoardTrackEditor::RenameBoard( UMovieSceneBoardSection* Section )
 bool
 FBoardTrackEditor::HandleAddBoardTrackMenuEntryCanExecute() const
 {
-    UMovieScene* FocusedMovieScene = GetFocusedMovieScene();
+    UMovieScene* focusedMovieScene = GetFocusedMovieScene();
 
-    return ( ( FocusedMovieScene != nullptr ) && ( FocusedMovieScene->FindMasterTrack<UMovieSceneBoardTrack>() == nullptr ) );
+    return ( ( focusedMovieScene != nullptr ) && ( focusedMovieScene->FindMasterTrack<UMovieSceneBoardTrack>() == nullptr ) );
 }
 
 
 void
 FBoardTrackEditor::HandleAddBoardTrackMenuEntryExecute()
 {
-    UMovieSceneBoardTrack* BoardTrack = FindOrCreateBoardTrack();
-    if( BoardTrack )
+    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    if( boardTrack )
     {
         if( GetSequencer().IsValid() )
         {
             // Board Tracks can't be placed in folders, they're only allowed in the root.
-            GetSequencer()->OnAddTrack( BoardTrack, FGuid() );
+            GetSequencer()->OnAddTrack( boardTrack, FGuid() );
         }
     }
 }
@@ -636,152 +644,152 @@ FBoardTrackEditor::HandleAddBoardTrackMenuEntryExecute()
 TSharedRef<SWidget>
 FBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent()
 {
-    FMenuBuilder MenuBuilder( true, nullptr );
+    FMenuBuilder menuBuilder( true, nullptr );
 
-    MenuBuilder.AddMenuEntry(
+    menuBuilder.AddMenuEntry(
         LOCTEXT( "InsertBoard", "Insert Board" ),
         LOCTEXT( "InsertBoardTooltip", "Insert new board at current time" ),
         FSlateIcon(),
         FUIAction( FExecuteAction::CreateSP( this, &FBoardTrackEditor::InsertBoard ) )
     );
 
-    MenuBuilder.AddMenuEntry(
+    menuBuilder.AddMenuEntry(
         LOCTEXT( "InsertFiller", "Insert Filler" ),
         LOCTEXT( "InsertFillerTooltip", "Insert filler at current time" ),
         FSlateIcon(),
         FUIAction( FExecuteAction::CreateSP( this, &FBoardTrackEditor::InsertFiller ) )
     );
 
-    FAssetPickerConfig AssetPickerConfig;
+    FAssetPickerConfig assetPickerConfig;
     {
-        AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw( this, &FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute );
-        AssetPickerConfig.OnAssetEnterPressed = FOnAssetEnterPressed::CreateRaw( this, &FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed );
-        AssetPickerConfig.bAllowNullSelection = false;
-        AssetPickerConfig.InitialAssetViewType = EAssetViewType::Tile;
-        AssetPickerConfig.Filter.ClassNames.Add( TEXT( "BoardSequence" ) );
-        AssetPickerConfig.Filter.ClassNames.Add( TEXT( "ShotSequence" ) );
+        assetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw( this, &FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute );
+        assetPickerConfig.OnAssetEnterPressed = FOnAssetEnterPressed::CreateRaw( this, &FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed );
+        assetPickerConfig.bAllowNullSelection = false;
+        assetPickerConfig.InitialAssetViewType = EAssetViewType::Tile;
+        assetPickerConfig.Filter.ClassNames.Add( TEXT( "BoardSequence" ) );
+        assetPickerConfig.Filter.ClassNames.Add( TEXT( "ShotSequence" ) );
     }
 
-    FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
+    FContentBrowserModule& contentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
 
-    TSharedPtr<SBox> MenuEntry = SNew( SBox )
+    TSharedPtr<SBox> menuEntry = SNew( SBox )
         .WidthOverride( 300.0f )
         .HeightOverride( 300.f )
         [
-            ContentBrowserModule.Get().CreateAssetPicker( AssetPickerConfig )
+            contentBrowserModule.Get().CreateAssetPicker( assetPickerConfig )
         ];
 
-    MenuBuilder.AddWidget( MenuEntry.ToSharedRef(), FText::GetEmpty(), true );
+    menuBuilder.AddWidget( menuEntry.ToSharedRef(), FText::GetEmpty(), true );
 
-    return MenuBuilder.MakeWidget();
+    return menuBuilder.MakeWidget();
 }
 
 
 void
-FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute( const FAssetData& AssetData )
+FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute( const FAssetData& iAssetData )
 {
     FSlateApplication::Get().DismissAllMenus();
 
-    UObject* SelectedObject = AssetData.GetAsset();
+    UObject* selectedObject = iAssetData.GetAsset();
 
-    if( SelectedObject && SelectedObject->IsA( UMovieSceneSequence::StaticClass() ) )
+    if( selectedObject && selectedObject->IsA( UMovieSceneSequence::StaticClass() ) )
     {
-        UMovieSceneSequence* MovieSceneSequence = CastChecked<UMovieSceneSequence>( AssetData.GetAsset() );
+        UMovieSceneSequence* movieSceneSequence = CastChecked<UMovieSceneSequence>( iAssetData.GetAsset() );
 
-        int32 RowIndex = INDEX_NONE;
-        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FBoardTrackEditor::AddKeyInternal, MovieSceneSequence, RowIndex ) );
+        int32 rowIndex = INDEX_NONE;
+        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FBoardTrackEditor::AddKeyInternal, movieSceneSequence, rowIndex ) );
     }
 }
 
 void
-FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& AssetData )
+FBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData )
 {
-    if( AssetData.Num() > 0 )
+    if( iAssetData.Num() > 0 )
     {
-        HandleAddBoardComboButtonMenuEntryExecute( AssetData[0].GetAsset() );
+        HandleAddBoardComboButtonMenuEntryExecute( iAssetData[0].GetAsset() );
     }
 }
 
 FKeyPropertyResult
-FBoardTrackEditor::AddKeyInternal( FFrameNumber KeyTime, UMovieSceneSequence* InMovieSceneSequence, int32 RowIndex )
+FBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex )
 {
-    FKeyPropertyResult KeyPropertyResult;
+    FKeyPropertyResult keyPropertyResult;
 
-    if( InMovieSceneSequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
+    if( iMovieSceneSequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
     {
-        FNotificationInfo Info( FText::Format( LOCTEXT( "InvalidSequenceDuration", "Invalid level sequence {0}. The sequence has no duration." ), InMovieSceneSequence->GetDisplayName() ) );
-        Info.bUseLargeFont = false;
-        FSlateNotificationManager::Get().AddNotification( Info );
-        return KeyPropertyResult;
+        FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequenceDuration", "Invalid level sequence {0}. The sequence has no duration." ), iMovieSceneSequence->GetDisplayName() ) );
+        info.bUseLargeFont = false;
+        FSlateNotificationManager::Get().AddNotification( info );
+        return keyPropertyResult;
     }
 
-    if( CanAddSubSequence( *InMovieSceneSequence ) )
+    if( CanAddSubSequence( *iMovieSceneSequence ) )
     {
-        UMovieSceneBoardTrack* BoardTrack = FindOrCreateBoardTrack();
+        UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
-        const FFrameRate TickResolution = InMovieSceneSequence->GetMovieScene()->GetTickResolution();
-        const FQualifiedFrameTime InnerDuration = FQualifiedFrameTime(
-            MovieScene::DiscreteSize( InMovieSceneSequence->GetMovieScene()->GetPlaybackRange() ),
-            TickResolution );
+        const FFrameRate tickResolution = iMovieSceneSequence->GetMovieScene()->GetTickResolution();
+        const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
+            MovieScene::DiscreteSize( iMovieSceneSequence->GetMovieScene()->GetPlaybackRange() ),
+            tickResolution );
 
-        const FFrameRate OuterFrameRate = BoardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
-        const int32      OuterDuration = InnerDuration.ConvertTo( OuterFrameRate ).FrameNumber.Value;
+        const FFrameRate outerFrameRate = boardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
+        const int32      outerDuration = innerDuration.ConvertTo( outerFrameRate ).FrameNumber.Value;
 
-        UMovieSceneSubSection* NewSection = BoardTrack->AddSequenceOnRow( InMovieSceneSequence, KeyTime, OuterDuration, RowIndex );
-        KeyPropertyResult.bTrackModified = true;
+        UMovieSceneSubSection* newSection = boardTrack->AddSequenceOnRow( iMovieSceneSequence, iKeyTime, outerDuration, iRowIndex );
+        keyPropertyResult.bTrackModified = true;
 
         GetSequencer()->EmptySelection();
-        GetSequencer()->SelectSection( NewSection );
+        GetSequencer()->SelectSection( newSection );
         GetSequencer()->ThrobSectionSelection();
 
-        if( TickResolution != OuterFrameRate )
+        if( tickResolution != outerFrameRate )
         {
-            FNotificationInfo Info( FText::Format( LOCTEXT( "TickResolutionMismatch", "The parent sequence has a different tick resolution {0} than the newly added sequence {1}" ), OuterFrameRate.ToPrettyText(), TickResolution.ToPrettyText() ) );
-            Info.bUseLargeFont = false;
-            FSlateNotificationManager::Get().AddNotification( Info );
+            FNotificationInfo info( FText::Format( LOCTEXT( "TickResolutionMismatch", "The parent sequence has a different tick resolution {0} than the newly added sequence {1}" ), outerFrameRate.ToPrettyText(), tickResolution.ToPrettyText() ) );
+            info.bUseLargeFont = false;
+            FSlateNotificationManager::Get().AddNotification( info );
         }
 
-        return KeyPropertyResult;
+        return keyPropertyResult;
     }
 
-    FNotificationInfo Info( FText::Format( LOCTEXT( "InvalidSequence", "Invalid level sequence {0}. There could be a circular dependency." ), InMovieSceneSequence->GetDisplayName() ) );
-    Info.bUseLargeFont = false;
-    FSlateNotificationManager::Get().AddNotification( Info );
+    FNotificationInfo info( FText::Format( LOCTEXT( "InvalidSequence", "Invalid level sequence {0}. There could be a circular dependency." ), iMovieSceneSequence->GetDisplayName() ) );
+    info.bUseLargeFont = false;
+    FSlateNotificationManager::Get().AddNotification( info );
 
-    return KeyPropertyResult;
+    return keyPropertyResult;
 }
 
 
 UMovieSceneBoardTrack*
 FBoardTrackEditor::FindOrCreateBoardTrack()
 {
-    UMovieScene* FocusedMovieScene = GetFocusedMovieScene();
+    UMovieScene* focusedMovieScene = GetFocusedMovieScene();
 
-    if( FocusedMovieScene == nullptr )
+    if( focusedMovieScene == nullptr )
     {
         return nullptr;
     }
 
-    if( FocusedMovieScene->IsReadOnly() )
+    if( focusedMovieScene->IsReadOnly() )
     {
         return nullptr;
     }
 
-    UMovieSceneBoardTrack* BoardTrack = FocusedMovieScene->FindMasterTrack<UMovieSceneBoardTrack>();
-    if( BoardTrack != nullptr )
+    UMovieSceneBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneBoardTrack>();
+    if( boardTrack != nullptr )
     {
-        return BoardTrack;
+        return boardTrack;
     }
 
-    const FScopedTransaction Transaction( LOCTEXT( "AddBoardTrack_Transaction", "Add Board Track" ) );
-    FocusedMovieScene->Modify();
+    const FScopedTransaction transaction( LOCTEXT( "AddBoardTrack_Transaction", "Add Board Track" ) );
+    focusedMovieScene->Modify();
 
-    auto NewTrack = FocusedMovieScene->AddMasterTrack<UMovieSceneBoardTrack>();
-    ensure( NewTrack );
+    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneBoardTrack>();
+    ensure( newTrack );
 
     GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
 
-    return NewTrack;
+    return newTrack;
 }
 
 
@@ -800,18 +808,18 @@ FBoardTrackEditor::AreBoardsLocked() const
 
 
 void
-FBoardTrackEditor::OnLockBoardsClicked( ECheckBoxState CheckBoxState )
+FBoardTrackEditor::OnLockBoardsClicked( ECheckBoxState iCheckBoxState )
 {
-    if( CheckBoxState == ECheckBoxState::Checked )
+    if( iCheckBoxState == ECheckBoxState::Checked )
     {
-        for( FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients() )
+        for( FLevelEditorViewportClient* levelVC : GEditor->GetLevelViewportClients() )
         {
-            if( LevelVC && LevelVC->AllowsCinematicControl() && LevelVC->GetViewMode() != VMI_Unknown )
+            if( levelVC && levelVC->AllowsCinematicControl() && levelVC->GetViewMode() != VMI_Unknown )
             {
-                LevelVC->SetActorLock( nullptr );
-                LevelVC->bLockedCameraView = false;
-                LevelVC->UpdateViewForLockedActor();
-                LevelVC->Invalidate();
+                levelVC->SetActorLock( nullptr );
+                levelVC->bLockedCameraView = false;
+                levelVC->UpdateViewForLockedActor();
+                levelVC->Invalidate();
             }
         }
         GetSequencer()->SetPerspectiveViewportCameraCutEnabled( true );
@@ -836,34 +844,34 @@ FBoardTrackEditor::GetLockBoardsToolTip() const
 
 
 bool
-FBoardTrackEditor::CanAddSubSequence( const UMovieSceneSequence& Sequence ) const
+FBoardTrackEditor::CanAddSubSequence( const UMovieSceneSequence& iSequence ) const
 {
     // prevent adding ourselves and ensure we have a valid movie scene
-    UMovieSceneSequence* FocusedSequence = GetSequencer()->GetFocusedMovieSceneSequence();
+    UMovieSceneSequence* focusedSequence = GetSequencer()->GetFocusedMovieSceneSequence();
 
-    if( ( FocusedSequence == nullptr ) || ( FocusedSequence == &Sequence ) || ( FocusedSequence->GetMovieScene() == nullptr ) )
+    if( ( focusedSequence == nullptr ) || ( focusedSequence == &iSequence ) || ( focusedSequence->GetMovieScene() == nullptr ) )
     {
         return false;
     }
 
     // ensure that the other sequence has a valid movie scene
-    UMovieScene* SequenceMovieScene = Sequence.GetMovieScene();
+    UMovieScene* sequenceMovieScene = iSequence.GetMovieScene();
 
-    if( SequenceMovieScene == nullptr )
+    if( sequenceMovieScene == nullptr )
     {
         return false;
     }
 
     // make sure we are not contained in the other sequence (circular dependency)
     // @todo sequencer: this check is not sufficient (does not prevent circular dependencies of 2+ levels)
-    UMovieSceneSubTrack* SequenceSubTrack = SequenceMovieScene->FindMasterTrack<UMovieSceneSubTrack>();
-    if( SequenceSubTrack && SequenceSubTrack->ContainsSequence( *FocusedSequence, true ) )
+    UMovieSceneSubTrack* sequenceSubTrack = sequenceMovieScene->FindMasterTrack<UMovieSceneSubTrack>();
+    if( sequenceSubTrack && sequenceSubTrack->ContainsSequence( *focusedSequence, true ) )
     {
         return false;
     }
 
-    UMovieSceneBoardTrack* BoardTrack = SequenceMovieScene->FindMasterTrack<UMovieSceneBoardTrack>();
-    if( BoardTrack && BoardTrack->ContainsSequence( *FocusedSequence, true ) )
+    UMovieSceneBoardTrack* boardTrack = sequenceMovieScene->FindMasterTrack<UMovieSceneBoardTrack>();
+    if( boardTrack && boardTrack->ContainsSequence( *focusedSequence, true ) )
     {
         return false;
     }
@@ -873,43 +881,43 @@ FBoardTrackEditor::CanAddSubSequence( const UMovieSceneSequence& Sequence ) cons
 
 
 void
-FBoardTrackEditor::OnUpdateCameraCut( UObject* CameraObject, bool bJumpCut )
+FBoardTrackEditor::OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut )
 {
     // Keep track of the camera when it switches so that the thumbnail can be drawn with the correct camera
-    BoardCamera = Cast<AActor>( CameraObject );
+    mBoardCamera = Cast<AActor>( iCameraObject );
 }
 
 
 FKeyPropertyResult
-FBoardTrackEditor::HandleSequenceAdded( FFrameNumber KeyTime, UMovieSceneSequence* Sequence, int32 RowIndex )
+FBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSceneSequence* iSequence, int32 iRowIndex )
 {
-    FKeyPropertyResult KeyPropertyResult;
+    FKeyPropertyResult keyPropertyResult;
 
-    auto BoardTrack = FindOrCreateBoardTrack();
+    auto boardTrack = FindOrCreateBoardTrack();
 
-    const FFrameRate TickResolution = Sequence->GetMovieScene()->GetTickResolution();
-    const FQualifiedFrameTime InnerDuration = FQualifiedFrameTime(
-        MovieScene::DiscreteSize( Sequence->GetMovieScene()->GetPlaybackRange() ),
-        TickResolution );
+    const FFrameRate tickResolution = iSequence->GetMovieScene()->GetTickResolution();
+    const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
+        MovieScene::DiscreteSize( iSequence->GetMovieScene()->GetPlaybackRange() ),
+        tickResolution );
 
-    const FFrameRate OuterFrameRate = BoardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
-    const int32      OuterDuration = InnerDuration.ConvertTo( OuterFrameRate ).FrameNumber.Value;
+    const FFrameRate outerFrameRate = boardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
+    const int32      outerDuration = innerDuration.ConvertTo( outerFrameRate ).FrameNumber.Value;
 
-    UMovieSceneSubSection* NewSection = BoardTrack->AddSequenceOnRow( Sequence, KeyTime, OuterDuration, RowIndex );
-    KeyPropertyResult.bTrackModified = true;
+    UMovieSceneSubSection* newSection = boardTrack->AddSequenceOnRow( iSequence, iKeyTime, outerDuration, iRowIndex );
+    keyPropertyResult.bTrackModified = true;
 
     GetSequencer()->EmptySelection();
-    GetSequencer()->SelectSection( NewSection );
+    GetSequencer()->SelectSection( newSection );
     GetSequencer()->ThrobSectionSelection();
 
-    if( TickResolution != OuterFrameRate )
+    if( tickResolution != outerFrameRate )
     {
-        FNotificationInfo Info( FText::Format( LOCTEXT( "TickResolutionMismatch", "The parent sequence has a different tick resolution {0} than the newly added sequence {1}" ), OuterFrameRate.ToPrettyText(), TickResolution.ToPrettyText() ) );
-        Info.bUseLargeFont = false;
-        FSlateNotificationManager::Get().AddNotification( Info );
+        FNotificationInfo info( FText::Format( LOCTEXT( "TickResolutionMismatch", "The parent sequence has a different tick resolution {0} than the newly added sequence {1}" ), outerFrameRate.ToPrettyText(), tickResolution.ToPrettyText() ) );
+        info.bUseLargeFont = false;
+        FSlateNotificationManager::Get().AddNotification( info );
     }
 
-    return KeyPropertyResult;
+    return keyPropertyResult;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -33,5 +33,5 @@ FEposTracksEditorModule::ShutdownModule()
 //---
 
 #undef LOCTEXT_NAMESPACE
-	
-IMPLEMENT_MODULE(FEposTracksEditorModule, EposTracksEditor)
+
+IMPLEMENT_MODULE( FEposTracksEditorModule, EposTracksEditor )

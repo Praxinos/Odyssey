@@ -24,28 +24,28 @@ class UMovieSceneBoardTrack
 
 public:
 
-    UMovieSceneBoardTrack( const FObjectInitializer& ObjectInitializer );
+    UMovieSceneBoardTrack( const FObjectInitializer& iObjectInitializer );
 
     EPOSTRACKS_API void SortSections();
 
     // UMovieSceneSubTrack interface
 
-    EPOSTRACKS_API virtual UMovieSceneSubSection* AddSequence( UMovieSceneSequence* Sequence, FFrameNumber StartTime, int32 Duration ) override;
-    EPOSTRACKS_API virtual UMovieSceneSubSection* AddSequenceOnRow( UMovieSceneSequence* Sequence, FFrameNumber StartTime, int32 Duration, int32 RowIndex ) override;
+    EPOSTRACKS_API virtual UMovieSceneSubSection* AddSequence( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration ) override;
+    EPOSTRACKS_API virtual UMovieSceneSubSection* AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex ) override;
 
     // UMovieSceneTrack interface
 
-    virtual void AddSection( UMovieSceneSection& Section ) override;
-    virtual bool SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const override;
+    virtual void AddSection( UMovieSceneSection& ioSection ) override;
+    virtual bool SupportsType( TSubclassOf<UMovieSceneSection> iSectionClass ) const override;
     virtual UMovieSceneSection* CreateNewSection() override;
-    virtual void RemoveSection( UMovieSceneSection& Section ) override;
-    virtual void RemoveSectionAt( int32 SectionIndex ) override;
+    virtual void RemoveSection( UMovieSceneSection& ioSection ) override;
+    virtual void RemoveSectionAt( int32 iSectionIndex ) override;
     virtual bool SupportsMultipleRows() const override;
     virtual FMovieSceneTrackRowSegmentBlenderPtr GetRowSegmentBlender() const override;
     virtual FMovieSceneTrackSegmentBlenderPtr GetTrackSegmentBlender() const override;
 
 #if WITH_EDITOR
-    virtual void OnSectionMoved( UMovieSceneSection& Section, const FMovieSceneSectionMovedParams& Params ) override;
+    virtual void OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams ) override;
 #endif
 
 #if WITH_EDITORONLY_DATA

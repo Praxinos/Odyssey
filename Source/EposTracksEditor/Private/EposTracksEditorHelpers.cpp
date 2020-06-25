@@ -17,11 +17,11 @@
 
 namespace
 {
-static bool IsPackageNameUnique( const TArray<FAssetData>& ObjectList, FString& NewPackageName )
+static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FString& iNewPackageName )
 {
-    for( auto AssetObject : ObjectList )
+    for( auto AssetObject : iObjectList )
     {
-        if( AssetObject.PackageName.ToString() == NewPackageName )
+        if( AssetObject.PackageName.ToString() == iNewPackageName )
         {
             return false;
         }
@@ -31,139 +31,139 @@ static bool IsPackageNameUnique( const TArray<FAssetData>& ObjectList, FString& 
 }
 
 FString
-EposTracksEditorHelpers::GenerateNewBoardPath( UMovieScene* SequenceMovieScene, FString& NewShotName )
+EposTracksEditorHelpers::GenerateNewBoardPath( UMovieScene* iSequenceMovieScene, FString& ioNewBoardName )
 {
-    const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
+    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
-    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
-    TArray<FAssetData> ObjectList;
-    AssetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetFName(), ObjectList );
+    TArray<FAssetData> objectList;
+    assetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetFName(), objectList );
 
-    UObject* SequenceAsset = SequenceMovieScene->GetOuter();
-    UPackage* SequencePackage = SequenceAsset->GetOutermost();
-    FString SequencePackageName = SequencePackage->GetName(); // ie. /Game/cine/max/master
-    int32 LastSlashPos = SequencePackageName.Find( TEXT( "/" ), ESearchCase::IgnoreCase, ESearchDir::FromEnd );
-    FString SequencePath = SequencePackageName.Left( LastSlashPos );
+    UObject* sequenceAsset = iSequenceMovieScene->GetOuter();
+    UPackage* sequencePackage = sequenceAsset->GetOutermost();
+    FString sequencePackageName = sequencePackage->GetName(); // ie. /Game/cine/max/master
+    int32 lastSlashPos = sequencePackageName.Find( TEXT( "/" ), ESearchCase::IgnoreCase, ESearchDir::FromEnd );
+    FString sequencePath = sequencePackageName.Left( lastSlashPos );
 
-    FString NewShotPrefix;
-    uint32 NewShotNumber = INDEX_NONE;
-    uint32 NewTakeNumber = INDEX_NONE;
-    MovieSceneToolHelpers::ParseShotName( NewShotName, NewShotPrefix, NewShotNumber, NewTakeNumber );
+    FString newShotPrefix;
+    uint32 newShotNumber = INDEX_NONE;
+    uint32 newTakeNumber = INDEX_NONE;
+    MovieSceneToolHelpers::ParseShotName( ioNewBoardName, newShotPrefix, newShotNumber, newTakeNumber );
 
-    FString NewShotDirectory = MovieSceneToolHelpers::ComposeShotName( NewShotPrefix, NewShotNumber, INDEX_NONE );
-    FString NewShotPath = SequencePath;
+    FString newShotDirectory = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, INDEX_NONE );
+    FString newShotPath = sequencePath;
 
-    FString ShotDirectory = ProjectSettings->ShotDirectory;
-    if( !ShotDirectory.IsEmpty() )
+    FString shotDirectory = projectSettings->ShotDirectory;
+    if( !shotDirectory.IsEmpty() )
     {
-        NewShotPath /= ShotDirectory;
+        newShotPath /= shotDirectory;
     }
-    NewShotPath /= NewShotDirectory; // put this in the shot directory, ie. /Game/cine/max/shots/shot0010
+    newShotPath /= newShotDirectory; // put this in the shot directory, ie. /Game/cine/max/shots/shot0010
 
     // Make sure this shot path is unique
-    FString NewPackageName = NewShotPath;
-    NewPackageName /= NewShotName; // ie. /Game/cine/max/shots/shot0010/shot0010_001
-    if( !IsPackageNameUnique( ObjectList, NewPackageName ) )
+    FString newPackageName = newShotPath;
+    newPackageName /= ioNewBoardName; // ie. /Game/cine/max/shots/shot0010/shot0010_001
+    if( !IsPackageNameUnique( objectList, newPackageName ) )
     {
         while( 1 )
         {
-            NewShotNumber += ProjectSettings->ShotIncrement;
-            NewShotName = MovieSceneToolHelpers::ComposeShotName( NewShotPrefix, NewShotNumber, NewTakeNumber );
-            NewShotDirectory = MovieSceneToolHelpers::ComposeShotName( NewShotPrefix, NewShotNumber, INDEX_NONE );
-            NewShotPath = SequencePath;
-            if( !ShotDirectory.IsEmpty() )
+            newShotNumber += projectSettings->ShotIncrement;
+            ioNewBoardName = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, newTakeNumber );
+            newShotDirectory = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, INDEX_NONE );
+            newShotPath = sequencePath;
+            if( !shotDirectory.IsEmpty() )
             {
-                NewShotPath /= ShotDirectory;
+                newShotPath /= shotDirectory;
             }
-            NewShotPath /= NewShotDirectory;
+            newShotPath /= newShotDirectory;
 
-            NewPackageName = NewShotPath;
-            NewPackageName /= NewShotName;
-            if( IsPackageNameUnique( ObjectList, NewPackageName ) )
+            newPackageName = newShotPath;
+            newPackageName /= ioNewBoardName;
+            if( IsPackageNameUnique( objectList, newPackageName ) )
             {
                 break;
             }
         }
     }
 
-    return NewShotPath;
+    return newShotPath;
 }
 
 
 FString
-EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>& AllSections, FFrameNumber Time )
+EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime )
 {
-    const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
+    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
-    UMovieSceneBoardSection* BeforeShot = nullptr;
-    UMovieSceneBoardSection* NextShot = nullptr;
+    UMovieSceneBoardSection* beforeShot = nullptr;
+    UMovieSceneBoardSection* nextShot = nullptr;
 
-    FFrameNumber MinEndDiff = TNumericLimits<int32>::Max();
-    FFrameNumber MinStartDiff = TNumericLimits<int32>::Max();
+    FFrameNumber minEndDiff = TNumericLimits<int32>::Max();
+    FFrameNumber minStartDiff = TNumericLimits<int32>::Max();
 
-    for( auto Section : AllSections )
+    for( auto section : iAllSections )
     {
-        if( Section->HasEndFrame() && Section->GetExclusiveEndFrame() >= Time )
+        if( section->HasEndFrame() && section->GetExclusiveEndFrame() >= iTime )
         {
-            FFrameNumber EndDiff = Section->GetExclusiveEndFrame() - Time;
-            if( MinEndDiff > EndDiff )
+            FFrameNumber endDiff = section->GetExclusiveEndFrame() - iTime;
+            if( minEndDiff > endDiff )
             {
-                MinEndDiff = EndDiff;
-                BeforeShot = Cast<UMovieSceneBoardSection>( Section );
+                minEndDiff = endDiff;
+                beforeShot = Cast<UMovieSceneBoardSection>( section );
             }
         }
-        if( Section->HasStartFrame() && Section->GetInclusiveStartFrame() <= Time )
+        if( section->HasStartFrame() && section->GetInclusiveStartFrame() <= iTime )
         {
-            FFrameNumber StartDiff = Time - Section->GetInclusiveStartFrame();
-            if( MinStartDiff > StartDiff )
+            FFrameNumber startDiff = iTime - section->GetInclusiveStartFrame();
+            if( minStartDiff > startDiff )
             {
-                MinStartDiff = StartDiff;
-                NextShot = Cast<UMovieSceneBoardSection>( Section );
+                minStartDiff = startDiff;
+                nextShot = Cast<UMovieSceneBoardSection>( section );
             }
         }
     }
 
     // There aren't any shots, let's create the first shot name
-    if( BeforeShot == nullptr || NextShot == nullptr )
+    if( beforeShot == nullptr || nextShot == nullptr )
     {
         // Default case
     }
     // This is the last shot
-    else if( BeforeShot == NextShot )
+    else if( beforeShot == nextShot )
     {
-        FString NextShotPrefix = ProjectSettings->ShotPrefix;
-        uint32 NextShotNumber = ProjectSettings->FirstShotNumber;
-        uint32 NextTakeNumber = ProjectSettings->FirstTakeNumber;
+        FString nextShotPrefix = projectSettings->ShotPrefix;
+        uint32 nextShotNumber = projectSettings->FirstShotNumber;
+        uint32 nextTakeNumber = projectSettings->FirstTakeNumber;
 
-        if( MovieSceneToolHelpers::ParseShotName( NextShot->GetBoardDisplayName(), NextShotPrefix, NextShotNumber, NextTakeNumber ) )
+        if( MovieSceneToolHelpers::ParseShotName( nextShot->GetBoardDisplayName(), nextShotPrefix, nextShotNumber, nextTakeNumber ) )
         {
-            uint32 NewShotNumber = NextShotNumber + ProjectSettings->ShotIncrement;
-            return MovieSceneToolHelpers::ComposeShotName( NextShotPrefix, NewShotNumber, ProjectSettings->FirstTakeNumber );
+            uint32 newShotNumber = nextShotNumber + projectSettings->ShotIncrement;
+            return MovieSceneToolHelpers::ComposeShotName( nextShotPrefix, newShotNumber, projectSettings->FirstTakeNumber );
         }
     }
     // This is in between two shots
     else
     {
-        FString BeforeShotPrefix = ProjectSettings->ShotPrefix;
-        uint32 BeforeShotNumber = ProjectSettings->FirstShotNumber;
-        uint32 BeforeTakeNumber = ProjectSettings->FirstTakeNumber;
+        FString beforeShotPrefix = projectSettings->ShotPrefix;
+        uint32 beforeShotNumber = projectSettings->FirstShotNumber;
+        uint32 beforeTakeNumber = projectSettings->FirstTakeNumber;
 
-        FString NextShotPrefix = ProjectSettings->ShotPrefix;
-        uint32 NextShotNumber = ProjectSettings->FirstShotNumber;
-        uint32 NextTakeNumber = ProjectSettings->FirstTakeNumber;
+        FString nextShotPrefix = projectSettings->ShotPrefix;
+        uint32 nextShotNumber = projectSettings->FirstShotNumber;
+        uint32 nextTakeNumber = projectSettings->FirstTakeNumber;
 
-        if( MovieSceneToolHelpers::ParseShotName( BeforeShot->GetBoardDisplayName(), BeforeShotPrefix, BeforeShotNumber, BeforeTakeNumber ) &&
-            MovieSceneToolHelpers::ParseShotName( NextShot->GetBoardDisplayName(), NextShotPrefix, NextShotNumber, NextTakeNumber ) )
+        if( MovieSceneToolHelpers::ParseShotName( beforeShot->GetBoardDisplayName(), beforeShotPrefix, beforeShotNumber, beforeTakeNumber ) &&
+            MovieSceneToolHelpers::ParseShotName( nextShot->GetBoardDisplayName(), nextShotPrefix, nextShotNumber, nextTakeNumber ) )
         {
-            if( BeforeShotNumber < NextShotNumber )
+            if( beforeShotNumber < nextShotNumber )
             {
-                uint32 NewShotNumber = BeforeShotNumber + ( ( NextShotNumber - BeforeShotNumber ) / 2 ); // what if we can't find one? or conflicts with another?
-                return MovieSceneToolHelpers::ComposeShotName( BeforeShotPrefix, NewShotNumber, ProjectSettings->FirstTakeNumber );
+                uint32 newShotNumber = beforeShotNumber + ( ( nextShotNumber - beforeShotNumber ) / 2 ); // what if we can't find one? or conflicts with another?
+                return MovieSceneToolHelpers::ComposeShotName( beforeShotPrefix, newShotNumber, projectSettings->FirstTakeNumber );
             }
         }
     }
 
     // Default case
-    return MovieSceneToolHelpers::ComposeShotName( ProjectSettings->ShotPrefix, ProjectSettings->FirstShotNumber, ProjectSettings->FirstTakeNumber );
+    return MovieSceneToolHelpers::ComposeShotName( projectSettings->ShotPrefix, projectSettings->FirstShotNumber, projectSettings->FirstTakeNumber );
 }

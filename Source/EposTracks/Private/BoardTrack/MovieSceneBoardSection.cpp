@@ -15,15 +15,15 @@ UMovieSceneBoardSection::UMovieSceneBoardSection()
 FString
 UMovieSceneBoardSection::GetBoardDisplayName() const
 {
-    return BoardDisplayName;
+    return mBoardDisplayName;
 }
 
 void
-UMovieSceneBoardSection::SetBoardDisplayName( const FString& InBoardDisplayName )
+UMovieSceneBoardSection::SetBoardDisplayName( const FString& iBoardDisplayName )
 {
     if( TryModify() )
     {
-        BoardDisplayName = InBoardDisplayName;
+        mBoardDisplayName = iBoardDisplayName;
     }
 }
 
@@ -34,14 +34,14 @@ UMovieSceneBoardSection::SetBoardDisplayName( const FString& InBoardDisplayName 
 float
 UMovieSceneBoardSection::GetThumbnailReferenceOffset() const
 {
-    return ThumbnailReferenceOffset;
+    return mThumbnailReferenceOffset;
 }
 
 void
-UMovieSceneBoardSection::SetThumbnailReferenceOffset( float InNewOffset )
+UMovieSceneBoardSection::SetThumbnailReferenceOffset( float iNewOffset )
 {
     Modify();
-    ThumbnailReferenceOffset = InNewOffset;
+    mThumbnailReferenceOffset = iNewOffset;
 }
 
 #endif
