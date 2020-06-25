@@ -487,8 +487,8 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
 
-            if( position_in_texture.X > 0 && position_in_texture.X <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
-                position_in_texture.Y > 0 && position_in_texture.Y <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
+            if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
+                position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
             {
                 mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
             }
@@ -558,8 +558,8 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
         FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
 
-        if( position_in_texture.X > 0 && position_in_texture.X <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
-            position_in_texture.Y > 0 && position_in_texture.Y <= mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
+        if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
+            position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
         {
             mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
         }
