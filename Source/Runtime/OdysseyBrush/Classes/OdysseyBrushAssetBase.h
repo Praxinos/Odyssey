@@ -75,6 +75,9 @@ public:
     ~UOdysseyBrushAssetBase();
 
 public:
+    /** Getter for World Pointer, this workaround may be unsafe but allows us to use Blueprint Function Libraries withing Odyssey Brushes. It is always NULL in a brush context. */
+    virtual UWorld* GetWorld() const override final { return  nullptr; }
+
     // Public C++ API
     FOdysseyBrushState&             GetState();
     const TArray< ::ul3::FRect >&   GetInvalidRects() const;
@@ -229,11 +232,6 @@ public:
     /** Get Current Canvas Height */
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     int  GetCanvasHeight();
-
-public:
-    // Brush Stamp Functions
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrush", meta = ( HideSelfPin = "true" ) )
-    void  DebugStamp();
 
 public:
     // Odyssey Brush Native events
