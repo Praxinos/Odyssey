@@ -17,23 +17,22 @@
 // UOdysseyBrushFunctionLibrary
 //--------------------------------------------------------------------------------------
 //--------------------------------------------- Odyssey Brush Blueprint Callable Methods
-
 //static
 void
-UOdysseyBrushFunctionLibrary::DebugStamp()
-{
-    ODYSSEY_BRUSH_CONTEXT_CHECK
+UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext ) {
+    if( !BrushContext )
+        return;
 
-    int diameter = FMath::Max( 2.f, brush->GetSizeModifier() * brush->GetPressure() );
+    int diameter = ::ul3::FMaths::Max( 2.f, BrushContext->GetSizeModifier() * BrushContext->GetPressure() );
     int center = ( diameter / 2 );
     int radius = center - 2;
 
-    ::ul3::FBlock debug_stamp( diameter, diameter, brush->GetState().target_temp_buffer->GetULISFormat() );
-    ::ul3::FPixelValue color = ::ul3::Conv( brush->GetState().color, ULIS3_FORMAT_RGBAF );
-    color.SetAlphaF( brush->GetState().flow_modifier );
+    ::ul3::FBlock debug_stamp( diameter, diameter, BrushContext->GetState().target_temp_buffer->GetULISFormat() );
+    ::ul3::FPixelValue color = ::ul3::Conv( BrushContext->GetState().color, ULIS3_FORMAT_RGBAF );
+    color.SetAlphaF( BrushContext->GetFlowModifier() );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent
@@ -46,6 +45,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
     ::ul3::FTransform2D transform( ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::kPIf / 4.f ) );
     ::ul3::FRect box = ::ul3::TransformAffineMetrics( debug_stamp.Rect(), transform, ::ul3::INTERP_BILINEAR );
     ::ul3::FBlock dst( box.w, box.h, debug_stamp.Format() );
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, &dst, dst.Rect() );
     ::ul3::TransformAffine( hULIS.ThreadPool()
                           , ULIS3_BLOCKING
                           , perfIntent
@@ -58,8 +58,8 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
                           , ::ul3::INTERP_BILINEAR );
 
     ::ul3::FRect invalidRect;
-    invalidRect.x = brush->GetX() - dst.Width() / 2;
-    invalidRect.y = brush->GetY() - dst.Height() / 2;
+    invalidRect.x = BrushContext->GetX() - dst.Width() / 2;
+    invalidRect.y = BrushContext->GetY() - dst.Height() / 2;
     invalidRect.w = dst.Width();
     invalidRect.h = dst.Height();
 
@@ -69,7 +69,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
                 , hULIS.HostDeviceInfo()
                 , ULIS3_NOCB
                 , &dst
-                , brush->GetState().target_temp_buffer->GetBlock()
+                , BrushContext->GetState().target_temp_buffer->GetBlock()
                 , dst.Rect()
                 , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
                 , ULIS3_NOAA
@@ -77,7 +77,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp()
                 , ::ul3::AM_NORMAL
                 , 1.f );
 
-    brush->PushInvalidRect( invalidRect );
+    BrushContext->PushInvalidRect( invalidRect );
 }
 
 

@@ -10,6 +10,7 @@
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
 #include "Proxies/OdysseyBrushBlending.h"
+#include "OdysseyBrushAssetBase.h"
 #include "OdysseyBrushFunctionLibrary.generated.h"
 
 UCLASS(meta=(ScriptName="OdysseyBrushLibrary"))
@@ -20,15 +21,13 @@ class ODYSSEYBRUSH_API UOdysseyBrushFunctionLibrary : public UBlueprintFunctionL
 public:
     // Odyssey Brush Blueprint Callable Methods
 
-    /** Test of tooltip */
+    /** Debug Stamp, stamps a basic shape with the current modifiers parameters. */
     UFUNCTION( BlueprintCallable
              , Category="OdysseyBrushFunctionLibrary"
-             , meta = ( DeprecatedFunction
-                      , DeprecationMessage="As of 4.25 this function is now deprecated. It will be definitely removed in 4.26. Please update to the non-deprecated counterpart"
-                      , DisplayName="DEPRECATED_DebugStamp" ) )
-    static  void  DebugStamp();
+             , meta = ( DefaultToSelf="BrushContext" ) )
+    static  void  DebugStamp( UOdysseyBrushAssetBase* BrushContext );
 
-    /** Simple Version of Stamp */
+    /** Deprecated Simple Version of Stamp */
     UFUNCTION( BlueprintCallable
              , Category="OdysseyBrushFunctionLibrary"
              , meta = ( DeprecatedFunction
@@ -36,12 +35,12 @@ public:
                       , DisplayName="DEPRECATED_SimpleStamp" ) )
     static  void  SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f );
 
-    /** Stamp */
+    /** Deprecated Stamp */
     UFUNCTION( BlueprintCallable
             , Category="OdysseyBrushFunctionLibrary"
             , meta = ( DeprecatedFunction
-                      , DeprecationMessage="As of 4.25 this function is now deprecated. It will be definitely removed in 4.26. Please update to the non-deprecated counterpart"
-                      , DisplayName="DEPRECATED_Stamp" ) )
+                     , DeprecationMessage="As of 4.25 this function is now deprecated. It will be definitely removed in 4.26. Please update to the non-deprecated counterpart"
+                     , DisplayName="DEPRECATED_Stamp" ) )
     static  void  Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
 
