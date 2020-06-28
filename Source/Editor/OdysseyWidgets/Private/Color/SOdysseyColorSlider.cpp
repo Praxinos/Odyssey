@@ -84,7 +84,7 @@ void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );
 
     int range = InternalSize.X - 2;

@@ -198,7 +198,7 @@ void
 SOdysseyLeafWidget::PaintInternalBuffer( int iReason ) const
 {
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent

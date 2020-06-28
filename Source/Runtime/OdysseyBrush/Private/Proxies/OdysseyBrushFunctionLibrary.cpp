@@ -32,7 +32,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
     color.SetAlphaF( BrushContext->GetFlowModifier() );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent
@@ -178,7 +178,7 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( FOdysseyBlockProxy Sample, FOdysseyPi
     ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Blend( hULIS.ThreadPool()
                 , ULIS3_BLOCKING
                 , perfIntent
@@ -209,7 +209,7 @@ UOdysseyBrushFunctionLibrary::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pi
     ComputeRectWithPivot( block, Pivot, X, Y, &invalidRect );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
 
     ::ul3::Blend( hULIS.ThreadPool()
                 , ULIS3_BLOCKING

@@ -93,7 +93,7 @@ UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMat
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), ::ul3::FTransform2D( Transform.GetValue() ), (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent
@@ -127,7 +127,7 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent
@@ -162,7 +162,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Sc
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent
@@ -197,7 +197,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX,
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent
@@ -232,7 +232,7 @@ UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, f
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent
@@ -272,7 +272,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent
@@ -312,7 +312,7 @@ UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, f
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, (::ul3::eResamplingMethod)ResamplingMethod );
         FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::TransformAffine( hULIS.ThreadPool()
                               , ULIS3_BLOCKING
                               , perfIntent

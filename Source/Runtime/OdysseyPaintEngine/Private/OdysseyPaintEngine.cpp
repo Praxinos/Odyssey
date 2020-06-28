@@ -99,7 +99,7 @@ FOdysseyPaintEngine::Tick()
 
 
 	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-	uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+	uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
 	TArray<::ul3::FRect> changedTiles;
     for( int k = 0; k < mCountTileY; ++k )
     {
@@ -227,7 +227,7 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
 		mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->GetUE4TextureSourceFormat());
 
 		IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-		::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+		::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
 		::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
 		::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mBlock->GetBlock(), mTempBlock->GetBlock(), mTempBlock->GetBlock()->Rect(), ::ul3::FVec2I(0, 0));
 
@@ -647,7 +647,7 @@ FOdysseyPaintEngine::AbortStroke()
     //mLayerStack->ComputeResultBlock();
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBlock->GetBlock(), mTempBlock->GetBlock()->Rect() );
 	::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
 
@@ -712,7 +712,7 @@ FOdysseyPaintEngine::CheckReallocTempBuffer()
         mTempBuffer = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
 
         ReallocInvalidMaps();

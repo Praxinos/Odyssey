@@ -28,3 +28,7 @@ Then, it will produce a directory named ULIS3_FullBuildUE4_XXX_Redist, containin
 
 Once it's done, you might want to copy the files in redist/bin into the Binaries folder of your project, or else it will complain that some library are missing at runtime.
 
+
+## Latest Compatible Commit
+e9410faf64b60d80974897fc4602d030aa88cf1b
+

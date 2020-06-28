@@ -104,7 +104,7 @@ void
 FOdysseyLayerStack::ComputeResultBlock()
 {
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
 
@@ -215,7 +215,7 @@ void
 FOdysseyLayerStack::ComputeResultBlock( const ::ul3::FRect& iRect ) {
     ::ul3::FVec2F pos( iRect.x, iRect.y );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), iRect );
 
     TArray< IOdysseyLayer* > layers = TArray< IOdysseyLayer* >();
@@ -326,7 +326,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer( const ::ul3::FRect& iRect,
     ::ul3::FVec2I posi( pos.x, pos.y );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), iRect );
 
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
@@ -556,7 +556,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBlock(const ::ul3::FRect& iRect, F
 
 	// Clear result block
 	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-	uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+	uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
 	::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), iRect);
 
 	TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
@@ -724,7 +724,7 @@ FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ul3::FRect& iRect, FO
 {
     ::ul3::FVec2F pos( iRect.x, iRect.y );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), iRect );
 
     TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
@@ -798,7 +798,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IO
 
     FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat);
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Copy( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent
@@ -822,7 +822,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int i
     FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Copy( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent
@@ -951,7 +951,7 @@ void FOdysseyLayerStack::MergeDownLayer(IOdysseyLayer* iLayerToMergeDown)
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
 
     for(int i = 0; i < layers.Num(); i++) {
@@ -1007,7 +1007,7 @@ void FOdysseyLayerStack::DuplicateLayer(IOdysseyLayer* iLayerToDuplicate)
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
 
     if(nodeToDuplicate->GetNodeContent()->GetType() == IOdysseyLayer::eType::kImage)
@@ -1066,7 +1066,7 @@ FOdysseyLayerStack::ClearCurrentLayer()
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
         ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), canvasRect );
         ComputeResultBlock();
     }
@@ -1080,7 +1080,7 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
         FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mCurrentLayer->GetNodeContent());
         ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), iColor, canvasRect );
         ComputeResultBlock();
     }
@@ -1125,7 +1125,7 @@ FOdysseyLayerStack::InitResultAndTempBlock()
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mResultBlock->GetBlock(), canvasRect );
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBlock->GetBlock(), canvasRect );
 }
@@ -1136,7 +1136,7 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
     checkf(iLayers != NULL,TEXT("Passed NullPtr to ComputeBlockOfLayers of FOdysseyLayerStack"));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
 
     FOdysseyBlock* resultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
@@ -1365,7 +1365,7 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
         return false;
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     mTileData = ::ul3::XCopy( hULIS.ThreadPool()
                             , ULIS3_BLOCKING
                             , perfIntent
@@ -1403,7 +1403,7 @@ FOdysseyDrawingUndo::SaveData(unsigned int iXTile, unsigned int iYTile,unsigned 
 
     FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mLayerStackPtr->GetCurrentLayer()->GetNodeContent());
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     mTileData = ::ul3::XCopy( hULIS.ThreadPool()
                             , ULIS3_BLOCKING
                             , perfIntent
@@ -1492,7 +1492,7 @@ FOdysseyDrawingUndo::LoadData()
 
         //Useless, I just want mTileData at the right size for the next undo, to change
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         if(i == 0)
             mTileData = ::ul3::XCopy( hULIS.ThreadPool()
                                     , ULIS3_BLOCKING
@@ -1577,7 +1577,7 @@ FOdysseyDrawingUndo::Redo()
 
         //Useless, I just want mTileData at the right size for the next undo, to change
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         if( i == 0 ) {
             mTileData = ::ul3::XCopy( hULIS.ThreadPool()
                                     , ULIS3_BLOCKING

@@ -55,7 +55,7 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
         FOdysseyBlock* src = Source.m;
         FOdysseyBlock* dst = new  FOdysseyBlock( src->Width(), src->Height(), src->GetUE4TextureSourceFormat() );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src->GetBlock()->Rect(), ::ul3::FVec2I( 0, 0 ) );
         ::ul3::FillPreserveAlpha( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, dst->GetBlock(), color, dst->GetBlock()->Rect() );
         prox = FOdysseyBlockProxy( dst, op );
@@ -113,7 +113,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
         FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), Back.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, dst->GetBlock(), back->Rect(), ::ul3::FVec2I( 0, 0 ) );
         ::ul3::Blend( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, dst->GetBlock(), source->Rect(), ::ul3::FVec2F( X, Y ), ULIS3_AA, (::ul3::eBlendingMode)BlendingMode, (::ul3::eAlphaMode)AlphaMode, Opacity );
 

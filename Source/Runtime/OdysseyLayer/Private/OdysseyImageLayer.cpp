@@ -26,7 +26,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool()
                 , ULIS3_BLOCKING
                 , perfIntent
@@ -154,7 +154,7 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         Ar << height;
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::FBlock* blockLayerData = ::ul3::XCopy( hULIS.ThreadPool()
                                                     , ULIS3_BLOCKING
                                                     , perfIntent
@@ -184,7 +184,7 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height,textureFormat);
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_TSPEC | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Clear( hULIS.ThreadPool()
                     , ULIS3_BLOCKING
                     , perfIntent
