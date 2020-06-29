@@ -5,8 +5,10 @@
 
 #include "CoreTypes.h"
 #include "UObject/ObjectMacros.h"
+#include <ULIS3>
 #include "OdysseyBrushPivot.generated.h"
 
+class FOdysseyBlock;
 /////////////////////////////////////////////////////
 // Pivot Enum
 UENUM( BlueprintType )
@@ -57,4 +59,8 @@ struct ODYSSEYBRUSH_API FOdysseyPivot
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyPivot" )
     FVector2D           Offset;
 };
+
+/////////////////////////////////////////////////////
+// Utilities
+::ul3::FRect ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
 

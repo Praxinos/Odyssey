@@ -12,6 +12,7 @@
 #include "OdysseyBrushBlock.generated.h"
 
 class  FOdysseyBlock;
+class  UOdysseyBrushAssetBase;
 
 /////////////////////////////////////////////////////
 // Odyssey Block Proxy
@@ -52,23 +53,34 @@ class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary : public UBlueprintFunc
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintPure, meta = (DisplayName = "To OdysseyBlockProxy (Texture2D)", CompactNodeTitle = "->", BlueprintAutocast), Category="OdysseyBlockProxy")
-    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture );
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockProxy"
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "To OdysseyBlockProxy (Texture2D)", CompactNodeTitle = "->", BlueprintAutocast ) )
+    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UOdysseyBrushAssetBase* BrushContext, UTexture2D* Texture );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyBlockProxy")
-    static FOdysseyBlockProxy FillPreserveAlpha( FOdysseyBlockProxy Sample
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockProxy"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy FillPreserveAlpha( UOdysseyBrushAssetBase* BrushContext
+                                               , FOdysseyBlockProxy Sample
                                                , FOdysseyBrushColor Color
                                                , ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="InitializeData, Cache" ), Category="OdysseyBlockProxy")
-    static FOdysseyBlockProxy CreateBlock( int Width = 256
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockProxy"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="InitializeData, Cache" ) )
+    static FOdysseyBlockProxy CreateBlock( UOdysseyBrushAssetBase* BrushContext
+                                         , int Width = 256
                                          , int Height = 256
                                          , const FString& ID = "NewDynamicBlock"
                                          , bool InitializeData = true
                                          , ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyBlockProxy")
-    static FOdysseyBlockProxy Blend( FOdysseyBlockProxy Top
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyBlockProxy"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
+                                   , FOdysseyBlockProxy Top
                                    , FOdysseyBlockProxy BacK
                                    , int X = 0
                                    , int Y = 0
@@ -77,10 +89,10 @@ public:
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal
                                    , ECacheLevel Cache = ECacheLevel::kState );
 
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
+    UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetHeight( FOdysseyBlockProxy Sample );
 };
 
