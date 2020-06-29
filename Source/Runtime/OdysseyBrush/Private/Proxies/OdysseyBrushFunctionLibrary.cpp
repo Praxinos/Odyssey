@@ -21,7 +21,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
     if( !BrushContext )
         return;
 
-    int size = BrushContext->GetSizeModifier() * BrushContext->GetPressure();
+    int size = ::ul3::FMaths::Max( BrushContext->GetSizeModifier() * BrushContext->GetPressure(), 1.f );
 
     ::ul3::FBlock debug_stamp( size, size, BrushContext->GetState().target_temp_buffer->GetULISFormat() );
     ::ul3::FPixelValue color = ::ul3::Conv( BrushContext->GetState().color, ULIS3_FORMAT_RGBAF );
@@ -42,8 +42,8 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
     ::ul3::FRect invalidRect;
     invalidRect.x = BrushContext->GetX() - size / 2;
     invalidRect.y = BrushContext->GetY() - size / 2;
-    invalidRect.w = size;
-    invalidRect.h = size;
+    invalidRect.w = size + 1;
+    invalidRect.h = size + 1;
 
     ::ul3::Blend( hULIS.ThreadPool()
                 , ULIS3_BLOCKING
@@ -53,8 +53,8 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
                 , &debug_stamp
                 , BrushContext->GetState().target_temp_buffer->GetBlock()
                 , debug_stamp.Rect()
-                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
-                , ULIS3_NOAA
+                , ::ul3::FVec2F( BrushContext->GetX() - size / 2, BrushContext->GetY() - size / 2 )
+                , ULIS3_AA
                 , ::ul3::BM_NORMAL
                 , ::ul3::AM_NORMAL
                 , 1.f );
