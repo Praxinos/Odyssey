@@ -25,9 +25,9 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
-	: mBlock( NULL )
-	, mTempBlock(NULL)
-	, mTempBuffer(NULL)
+    : mBlock( NULL )
+    , mTempBlock(NULL)
+    , mTempBuffer(NULL)
     , mBrushInstance( NULL )
 
     , mWidth( 0 )
@@ -82,7 +82,7 @@ FOdysseyPaintEngine::Tick()
     if( !mBrushInstance )
         return;
 
-    //mBrushInstance->ExecuteTick();
+    mBrushInstance->ExecuteTick();
 
     auto start_time = std::chrono::steady_clock::now();
     long long max_time = 1000 / 60;
@@ -98,51 +98,51 @@ FOdysseyPaintEngine::Tick()
     }
 
 
-	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-	uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-	TArray<::ul3::FRect> changedTiles;
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    TArray<::ul3::FRect> changedTiles;
     for( int k = 0; k < mCountTileY; ++k )
     {
         for( int l = 0; l < mCountTileX; ++l )
         {
             if( mTmpInvalidTileMap[k][l] )
             {
-				::ul3::FRect rect = MakeTileRect(l, k);
-				::ul3::FVec2F pos(rect.x, rect.y);
-				::ul3::FVec2I posi(pos.x, pos.y);
-				changedTiles.Add(rect);
-				::ul3::Copy(hULIS.ThreadPool()
-					, ULIS3_BLOCKING
-					, perfIntent
-					, hULIS.HostDeviceInfo()
-					, ULIS3_NOCB
-					, mBlock->GetBlock()
-					, mTempBlock->GetBlock()
-					, rect
-					, posi);
-				::ul3::Blend(hULIS.ThreadPool()
-					, ULIS3_BLOCKING
-					, perfIntent
-					, hULIS.HostDeviceInfo()
-					, ULIS3_NOCB
-					, mTempBuffer->GetBlock()
-					, mTempBlock->GetBlock()
-					, rect
-					, pos
-					, ULIS3_NOAA
-					, mBlendingModeModifier
-					, mAlphaModeModifier
-					, mOpacityModifier);
+                ::ul3::FRect rect = MakeTileRect(l, k);
+                ::ul3::FVec2F pos(rect.x, rect.y);
+                ::ul3::FVec2I posi(pos.x, pos.y);
+                changedTiles.Add(rect);
+                ::ul3::Copy(hULIS.ThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , hULIS.HostDeviceInfo()
+                    , ULIS3_NOCB
+                    , mBlock->GetBlock()
+                    , mTempBlock->GetBlock()
+                    , rect
+                    , posi);
+                ::ul3::Blend(hULIS.ThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , hULIS.HostDeviceInfo()
+                    , ULIS3_NOCB
+                    , mTempBuffer->GetBlock()
+                    , mTempBlock->GetBlock()
+                    , rect
+                    , pos
+                    , ULIS3_NOAA
+                    , mBlendingModeModifier
+                    , mAlphaModeModifier
+                    , mOpacityModifier);
 
                 // mLayerStack->ComputeResultBlockWithTempBuffer( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
             }
         }
     }
 
-	if (changedTiles.Num() > 0) {
-		mOnStrokeChangedDelegate.Broadcast(changedTiles);
-	}
-	changedTiles.Reset();
+    if (changedTiles.Num() > 0) {
+        mOnStrokeChangedDelegate.Broadcast(changedTiles);
+    }
+    changedTiles.Reset();
 
     ClearInvalidTileMap( mTmpInvalidTileMap );
 
@@ -152,44 +152,44 @@ FOdysseyPaintEngine::Tick()
         {
             for( int l = 0; l < mCountTileX; ++l )
             {
-				if (!mStrokeInvalidTileMap[k][l])
-					continue;
-				changedTiles.Add(MakeTileRect(l, k));
+                if (!mStrokeInvalidTileMap[k][l])
+                    continue;
+                changedTiles.Add(MakeTileRect(l, k));
             }
         }
 
         /* if( IsRecordStarted )
             mLayerStack->mDrawingUndo->EndRecord(); */
 
-		if (changedTiles.Num() > 0) {
-			mOnStrokeWillEndDelegate.Broadcast(changedTiles);
+        if (changedTiles.Num() > 0) {
+            mOnStrokeWillEndDelegate.Broadcast(changedTiles);
 
-			for (int i = 0; i < changedTiles.Num(); i++)
-			{
-				::ul3::FRect& rect = changedTiles[i];
-				::ul3::FVec2F pos(rect.x, rect.y);
-				::ul3::FVec2I posi(pos.x, pos.y);
+            for (int i = 0; i < changedTiles.Num(); i++)
+            {
+                ::ul3::FRect& rect = changedTiles[i];
+                ::ul3::FVec2F pos(rect.x, rect.y);
+                ::ul3::FVec2I posi(pos.x, pos.y);
 
-				::ul3::Copy(hULIS.ThreadPool()
-					, ULIS3_BLOCKING
-					, perfIntent
-					, hULIS.HostDeviceInfo()
-					, ULIS3_NOCB
-					, mTempBlock->GetBlock()
-					, mBlock->GetBlock()
-					, rect
-					, posi);
-			}
+                ::ul3::Copy(hULIS.ThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , hULIS.HostDeviceInfo()
+                    , ULIS3_NOCB
+                    , mTempBlock->GetBlock()
+                    , mBlock->GetBlock()
+                    , rect
+                    , posi);
+            }
 
-			mOnStrokeEndDelegate.Broadcast(changedTiles);
-		}
-		changedTiles.Reset();
+            mOnStrokeEndDelegate.Broadcast(changedTiles);
+        }
+        changedTiles.Reset();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
 
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
 
-        //mBrushInstance->ExecuteStrokeEnd();
+        mBrushInstance->ExecuteStrokeEnd();
 
         if( mBrushInstance )
             mBrushInstance->CleansePool( ECacheLevel::kStroke );
@@ -205,42 +205,42 @@ FOdysseyPaintEngine::Tick()
 void
 FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
 {
-	mBlock = iBlock;
-	if (!mBlock) {
-		mWidth = -1;
-		mHeight = -1;
+    mBlock = iBlock;
+    if (!mBlock) {
+        mWidth = -1;
+        mHeight = -1;
 
-		delete mTempBlock;
-		delete mTempBuffer;
+        delete mTempBlock;
+        delete mTempBuffer;
 
-		return;
-	}
-	mWidth = iBlock->Width();
-	mHeight = iBlock->Height();
+        return;
+    }
+    mWidth = iBlock->Width();
+    mHeight = iBlock->Height();
 
-	if (!mTempBuffer || mTempBuffer->Size() != mBlock->Size())
-	{
-		delete mTempBlock;
-		mTempBlock = new FOdysseyBlock(mWidth, mHeight, mBlock->GetUE4TextureSourceFormat());
+    if (!mTempBuffer || mTempBuffer->Size() != mBlock->Size())
+    {
+        delete mTempBlock;
+        mTempBlock = new FOdysseyBlock(mWidth, mHeight, mBlock->GetUE4TextureSourceFormat());
 
-		delete mTempBuffer;
-		mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->GetUE4TextureSourceFormat());
+        delete mTempBuffer;
+        mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->GetUE4TextureSourceFormat());
 
-		IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-		::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-		::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
-		::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mBlock->GetBlock(), mTempBlock->GetBlock(), mTempBlock->GetBlock()->Rect(), ::ul3::FVec2I(0, 0));
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
+        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mBlock->GetBlock(), mTempBlock->GetBlock(), mTempBlock->GetBlock()->Rect(), ::ul3::FVec2I(0, 0));
 
-		ReallocInvalidMaps();
-	}
-	UpdateBrushInstance();
+        ReallocInvalidMaps();
+    }
+    UpdateBrushInstance();
 }
 
 
 FOdysseyBlock*
 FOdysseyPaintEngine::TempBlock()
 {
-	return mTempBlock;
+    return mTempBlock;
 }
 
 /* void
@@ -258,10 +258,8 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 {
     //InterruptStrokeAndStampInPlace();
 
-    /*
     if( iBrushInstance != nullptr && mBrushInstance != iBrushInstance )
         iBrushInstance->ExecuteSelected();
-    */
 
     mBrushInstance = iBrushInstance;
     UpdateBrushInstance();
@@ -465,14 +463,6 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
         mIsPendingEndStroke )
         return;
 
-    /* //If the layerStack is empty, we don't draw
-    if( !mLayerStack->GetCurrentLayer() )
-        return;
-    
-    //If the layer is locked, we don't draw
-    if( mLayerStack->GetCurrentLayer()->GetNodeContent()->IsLocked() )
-        return; */
-
     bool firstPoint = ( mRawStroke.Num() == 0 ) && ( iFirst == false );
 
     if( firstPoint )
@@ -530,11 +520,6 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
         current_point.distance_travelled = previous_point.distance_travelled + current_point.speed.Size();
     }
 
-    /*
-    mDelayQueue.emplace( [&](){
-
-    }
-    */
     for( int i = currentIndexBasis; i < mResultStroke.Num(); i++ )
     {
         auto point = mResultStroke[i];
@@ -568,68 +553,6 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
             mBrushInstance->ClearInvalidRects();
         } );
     }
-
-    /*
-    for( int i = currentIndexBasis; i < result_stroke.Num(); i++ )
-    {
-        FOdysseyBrushState& state = brush_instance->GetState();
-        state.point = result_stroke[ i ];
-        state.currentPointIndex = i;
-        brush_instance->ExecuteStep();
-        brush_instance->CleansePool( ECacheLevel::kStep );
-
-        auto invalid_rects = brush_instance->GetInvalidRects();
-        for( int j = 0; j < invalid_rects.Num(); ++j )
-        {
-            const ::ul3::FRect& rect = invalid_rects[j];
-            float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
-            float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
-            float wf = float( rect.w  ) / TILE_SIZE;
-            float hf = float( rect.h ) / TILE_SIZE;
-            int x = xf;
-            int y = yf;
-            int w = FMath::Min( nTileX, int( ceil( xf + wf ) ) ) - x;
-            int h = FMath::Min( nTileY, int( ceil( yf + hf ) ) ) - y;
-            ::ul3::FRect tileRect = { x, y, w, h };
-            SET_MAP_WITH_RECT( tmpInvalidTileMap,       tileRect, true );
-            SET_MAP_WITH_RECT( strokeInvalidTileMap,    tileRect, true );
-        }
-        brush_instance->ClearInvalidRects();
-    }
-    */
-
-    /*
-    static ::ul3::FThreadPool tilePool;
-    auto num_workers = tilePool.GetNumWorkers();
-    auto max_workers = tilePool.GetMaxWorkers() -1;
-    if( num_workers!= max_workers )
-        tilePool.SetNumWorkers( max_workers );
-
-    ::ul3::ParallelForPool( tilePool, nTileY
-                       , [&]( int iLine ) {
-                            for( int x = 0; x < nTileX; ++x ) {
-                                if( tmpInvalidTileMap[iLine][x] ) {
-                                    ::ul3::FRect  tileRect = MAKE_TILE_RECT( x, iLine );
-                                    layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier );
-                                }
-                            }
-                       } );
-    */
-
-    /*
-    for( int k = 0; k < nTileY; ++k ) {
-        for( int l = 0; l < nTileX; ++l ) {
-            if( tmpInvalidTileMap[k][l] ) {
-                ::ul3::FRect  tileRect = MAKE_TILE_RECT( l, k );
-                layer_stack->ComputeResultBlockWithTempBuffer( tileRect, temp_buffer, opacity_modifier );
-    } } }
-    */
-
-    /*
-    CLEAR_MAP( tmpInvalidTileMap );
-    brush_instance->ClearInvalidRects();
-    brush_instance->CleansePool( ECacheLevel::kSubstroke );
-    */
 }
 
 void
@@ -643,13 +566,12 @@ FOdysseyPaintEngine::AbortStroke()
 {
     mIsPendingEndStroke = false;
     InterruptDelay();
-	mOnStrokeAbortDelegate.Broadcast();
-    //mLayerStack->ComputeResultBlock();
+    mOnStrokeAbortDelegate.Broadcast();
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBlock->GetBlock(), mTempBlock->GetBlock()->Rect() );
-	::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
 
     ClearInvalidTileMap( mTmpInvalidTileMap );
     ClearInvalidTileMap( mStrokeInvalidTileMap );

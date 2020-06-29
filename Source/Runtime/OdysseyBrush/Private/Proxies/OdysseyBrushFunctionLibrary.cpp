@@ -23,16 +23,14 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
     if( !BrushContext )
         return;
 
-    int diameter = ::ul3::FMaths::Max( 2.f, BrushContext->GetSizeModifier() * BrushContext->GetPressure() );
-    int center = ( diameter / 2 );
-    int radius = center - 2;
+    int size = BrushContext->GetSizeModifier() * BrushContext->GetPressure();
 
-    ::ul3::FBlock debug_stamp( diameter, diameter, BrushContext->GetState().target_temp_buffer->GetULISFormat() );
+    ::ul3::FBlock debug_stamp( size, size, BrushContext->GetState().target_temp_buffer->GetULISFormat() );
     ::ul3::FPixelValue color = ::ul3::Conv( BrushContext->GetState().color, ULIS3_FORMAT_RGBAF );
     color.SetAlphaF( BrushContext->GetFlowModifier() );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_SSE42;
     ::ul3::Fill( hULIS.ThreadPool()
                , ULIS3_BLOCKING
                , perfIntent
@@ -42,35 +40,20 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
                , color
                , debug_stamp.Rect() );
 
-    ::ul3::FTransform2D transform( ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::kPIf / 4.f ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( debug_stamp.Rect(), transform, ::ul3::INTERP_BILINEAR );
-    ::ul3::FBlock dst( box.w, box.h, debug_stamp.Format() );
-    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, &dst, dst.Rect() );
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                          , ULIS3_BLOCKING
-                          , perfIntent
-                          , hULIS.HostDeviceInfo()
-                          , ULIS3_NOCB
-                          , &debug_stamp
-                          , &dst
-                          , debug_stamp.Rect()
-                          , transform
-                          , ::ul3::INTERP_BILINEAR );
-
     ::ul3::FRect invalidRect;
-    invalidRect.x = BrushContext->GetX() - dst.Width() / 2;
-    invalidRect.y = BrushContext->GetY() - dst.Height() / 2;
-    invalidRect.w = dst.Width();
-    invalidRect.h = dst.Height();
+    invalidRect.x = BrushContext->GetX() - size / 2;
+    invalidRect.y = BrushContext->GetY() - size / 2;
+    invalidRect.w = size;
+    invalidRect.h = size;
 
     ::ul3::Blend( hULIS.ThreadPool()
                 , ULIS3_BLOCKING
                 , perfIntent
                 , hULIS.HostDeviceInfo()
                 , ULIS3_NOCB
-                , &dst
+                , &debug_stamp
                 , BrushContext->GetState().target_temp_buffer->GetBlock()
-                , dst.Rect()
+                , debug_stamp.Rect()
                 , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
                 , ULIS3_NOAA
                 , ::ul3::BM_NORMAL
