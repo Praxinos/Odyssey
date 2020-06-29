@@ -9,6 +9,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushCache.h"
 #include "Proxies/OdysseyBrushBlock.h"
+#include "OdysseyBrushAssetBase.h"
 #include <ULIS3>
 
 #include "OdysseyBrushTransform.generated.h"
@@ -37,6 +38,8 @@ enum  class  EResamplingMethod : uint8
 {
     kNearestNeighbour   UMETA( DisplayName="Nearest Neighbour" ),
     kBilinear           UMETA( DisplayName="Bilinear" ),
+    kBicubic            UMETA( DisplayName="Bicubic" ),
+    kArea               UMETA( DisplayName="Area" ),
 };
 
 /////////////////////////////////////////////////////
@@ -65,33 +68,51 @@ public:
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure, meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ), Category="OdysseyTransform")
+    static FOdysseyBlockProxy Transform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy Rotate( FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy Rotate( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy ScaleUniform( FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy ScaleUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy ScaleXY( FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy ScaleXY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy Shear( FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy Shear( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy ResizeUniform( FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy ResizeUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy Resize( FOdysseyBlockProxy Sample, float SizeX, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy Resize( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float SizeX, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy FlipX( FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy FlipX( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy FlipY( FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy FlipY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
-    UFUNCTION(BlueprintPure, meta = ( AdvancedDisplay="Cache" ), Category="OdysseyTransform")
-    static FOdysseyBlockProxy FlipXY( FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyTransform"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static FOdysseyBlockProxy FlipXY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 };

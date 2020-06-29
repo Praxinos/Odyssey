@@ -95,9 +95,3 @@ public:
     UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetHeight( FOdysseyBlockProxy Sample );
 };
-
-#define  ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN                     \
-    if( !Sample.m ) return;
-
-#define  ODYSSEY_BRUSH_BLOCK_PROXY_CHECK_RETURN_VALUE( iValue )     \
-    if( !Sample.m ) return  iValue;

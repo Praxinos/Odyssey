@@ -4,7 +4,6 @@
 #include "Proxies/OdysseyBrushBlock.h"
 
 #include "OdysseySurface.h"
-#include "OdysseyBrushContext.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>
