@@ -65,7 +65,7 @@ FOdysseyLayerStack::Init( int iWidth, int iHeight )
     if( mLayers->GetNodes()->Num() == 0 )
         AddImageLayer( mLayers );
 
-    mCurrentLayer = mLayers->GetNodes()->GetData()[0];
+    SetCurrentLayer( mLayers->GetNodes()->GetData()[0] );
 
     mDrawingUndo = new  FOdysseyDrawingUndo( this );
 }
@@ -89,7 +89,7 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
     if( mLayers->GetNodes()->Num() == 0 )
         AddImageLayerFromData( iData,mLayers );
 
-    mCurrentLayer = mLayers->GetNodes()->GetData()[0];
+    SetCurrentLayer(  mLayers->GetNodes()->GetData()[0] );
 
     mDrawingUndo = new  FOdysseyDrawingUndo( this );
 }
@@ -779,7 +779,7 @@ FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int iAtIndex)
 {
     FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
-    mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
+    SetCurrentLayer(iPosition->AddNode(layer,iAtIndex));
     return layer;
 }
 
@@ -787,7 +787,7 @@ FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 {
     FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
-    mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
+    SetCurrentLayer( mLayers->AddNode(layer,iAtIndex) );
     return layer;
 }
 
@@ -845,7 +845,7 @@ FOdysseyLayerStack::AddFolderLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,FN
         iName = GetNextLayerName();
 
     FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName);
-    mCurrentLayer = iPosition->AddNode(layer,iAtIndex);
+    SetCurrentLayer( iPosition->AddNode(layer,iAtIndex) );
     return layer;
 }
 
@@ -856,7 +856,7 @@ FOdysseyLayerStack::AddFolderLayer(FName iName,int iAtIndex)
         iName = GetNextLayerName();
 
     FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName);
-    mCurrentLayer = mLayers->AddNode(layer,iAtIndex);
+    SetCurrentLayer( mLayers->AddNode(layer,iAtIndex) );
     return layer;
 }
 
@@ -901,11 +901,8 @@ FOdysseyLayerStack::GetCurrentLayerFromIndex(int iIndex) const
 void
 FOdysseyLayerStack::SetCurrentLayer(IOdysseyLayer* iLayer)
 {
-	if (iLayer != mCurrentLayer->GetNodeContent())
-	{
-		mCurrentLayer = mLayers->FindNode(iLayer);
-		mOnCurrentLayerChanged.Broadcast(mCurrentLayer);
-	}
+	mCurrentLayer = mLayers->FindNode(iLayer);
+	mOnCurrentLayerChanged.Broadcast(mCurrentLayer);
 }
 
 void
@@ -936,12 +933,15 @@ FOdysseyLayerStack::DeleteLayer(IOdysseyLayer* iLayerToDelete)
     mLayers->DepthFirstSearchTree(&layers);
 
     if(layers.Num() == 0)
-        mCurrentLayer = NULL;
+    {
+        IOdysseyLayer* nullLayer = NULL;
+        SetCurrentLayer(nullLayer);
+    }
 
     if(indexNewSelectedLayer < layers.Num() - 1)
-        mCurrentLayer = mLayers->FindNode(layers[indexNewSelectedLayer]);
+        SetCurrentLayer( mLayers->FindNode(layers[indexNewSelectedLayer]) );
     else
-        mCurrentLayer = mLayers->FindNode(layers.Last());
+        SetCurrentLayer( mLayers->FindNode(layers.Last()) );
 }
 
 void FOdysseyLayerStack::MergeDownLayer(IOdysseyLayer* iLayerToMergeDown)

@@ -63,7 +63,11 @@ IOdysseyLayer::IsLocked() const
 void
 IOdysseyLayer::SetIsLocked( bool iIsLocked )
 {
-    mIsLocked = iIsLocked;
+    if( iIsLocked != mIsLocked )
+    {
+        mIsLocked = iIsLocked;
+	    mOnIsLockedChanged.Broadcast(this);
+    }
 }
 
 bool
@@ -75,7 +79,11 @@ IOdysseyLayer::IsVisible() const
 void
 IOdysseyLayer::SetIsVisible( bool iIsVisible )
 {
-    mIsVisible = iIsVisible;
+    if( iIsVisible != mIsVisible )
+    {
+        mIsVisible = iIsVisible;
+	    mOnIsVisibleChanged.Broadcast(this);
+    }
 }
 
 FArchive& 

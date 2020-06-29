@@ -35,6 +35,7 @@ public:
     // Public API
     void InterruptDelay();
     void Tick();
+    void SetIsAllowedToPaint( bool iIsAllowedToPaint );
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
     void SetColor( const ::ul3::FPixelValue& iColor );
     void SetSizeModifier( float iValue );
@@ -116,7 +117,8 @@ private:
 
     IOdysseyInterpolation*              mInterpolator;
     IOdysseySmoothing*                  mSmoother;
-
+    
+    bool                                mIsAllowedToPaint;
     bool                                mIsSmoothingEnabled;
     bool                                mIsRealTime;
     bool                                mIsCatchUp;

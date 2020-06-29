@@ -17,7 +17,7 @@ class FOdysseyBlock;
 class ODYSSEYLAYER_API FOdysseyImageLayer: public IOdysseyLayer
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsAlphaLockedChanged, bool);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsAlphaLockedChanged, FOdysseyImageLayer*);
 
 public:
     // Construction / Destruction

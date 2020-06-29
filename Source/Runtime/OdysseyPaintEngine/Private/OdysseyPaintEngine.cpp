@@ -50,6 +50,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mInterpolator( NULL )
     , mSmoother( NULL )
 
+    , mIsAllowedToPaint( true )
     , mIsSmoothingEnabled( true )
     , mIsRealTime( true )
     , mIsCatchUp( true )
@@ -79,7 +80,7 @@ FOdysseyPaintEngine::InterruptDelay()
 void
 FOdysseyPaintEngine::Tick()
 {
-    if( !mBrushInstance )
+    if( !mIsAllowedToPaint || !mBrushInstance || !mTempBuffer || !mTempBlock )
         return;
 
     mBrushInstance->ExecuteTick();
@@ -210,8 +211,10 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
         mWidth = -1;
         mHeight = -1;
 
-        delete mTempBlock;
-        delete mTempBuffer;
+		delete mTempBlock;
+        mTempBlock = nullptr;
+		delete mTempBuffer;
+        mTempBuffer = nullptr;
 
         return;
     }
@@ -252,6 +255,12 @@ FOdysseyPaintEngine::SetLayerStack( FOdysseyLayerStack* iLayerStack )
 
     UpdateBrushInstance();
 } */
+
+void
+FOdysseyPaintEngine::SetIsAllowedToPaint( bool iIsAllowedToPaint )
+{
+    mIsAllowedToPaint = iIsAllowedToPaint;
+}
 
 void
 FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
@@ -458,7 +467,8 @@ FOdysseyPaintEngine::GetSmoothingCatchUp() const
 void
 FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst )
 {
-    if( !mBrushInstance ||
+    if( !mIsAllowedToPaint ||
+        !mBrushInstance ||
         !mTempBuffer ||
         mIsPendingEndStroke )
         return;

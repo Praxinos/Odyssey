@@ -15,6 +15,10 @@ class FOdysseyLayerStack;
 class ODYSSEYLAYER_API IOdysseyLayer
 {
 public:
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsLockedChanged, IOdysseyLayer*);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsVisibleChanged, IOdysseyLayer*);
+
+public:
     enum class eType : char
     {
         kInvalid,
@@ -41,6 +45,9 @@ public:
     virtual bool  IsVisible() const;
     virtual void  SetIsVisible( bool iIsVisible );
 
+	FOnIsLockedChanged&	OnIsLockedChanged() { return mOnIsLockedChanged; }
+    FOnIsVisibleChanged& OnIsVisibleChanged() { return mOnIsVisibleChanged; }
+
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
 
@@ -49,6 +56,8 @@ protected:
     bool          mIsLocked;
     bool          mIsVisible;
     eType         mType;
+	FOnIsLockedChanged mOnIsLockedChanged;
+    FOnIsVisibleChanged mOnIsVisibleChanged;
 };
 
 ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
