@@ -19,6 +19,23 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditorController::~FOdysseyTextureEditorController()
 {
+    mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+
+    TArray<IOdysseyLayer*> layersArray = TArray<IOdysseyLayer*>();
+    mData->LayerStack()->GetLayers()->DepthFirstSearchTree( &layersArray, false );
+
+    for( int i = 0; i < layersArray.Num(); i++ )
+    {
+        layersArray[i]->OnIsLockedChanged().RemoveAll(this);
+        layersArray[i]->OnIsVisibleChanged().RemoveAll(this);
+    
+        if (layersArray[i]->GetType() == IOdysseyLayer::eType::kImage) 
+        {
+    		FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layersArray[i]);
+            imageLayer->OnIsAlphaLockedChanged().RemoveAll(this);
+        }
+
+    }
 }
 
 FOdysseyTextureEditorController::FOdysseyTextureEditorController(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorGUI>& iGUI)
@@ -54,14 +71,11 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
     // Set Image Layer in PaintEngine
 	IOdysseyLayer* layer = mData->LayerStack()->GetCurrentLayer()->GetNodeContent();
 
-    //We need to call the callbacks in addition to setting them because the properties (visible, locked...) of the previous selected layer and the newly selected may be different
     if( layer )
     {
-        OnLayerIsLockedChanged(layer);
         if( !(layer->OnIsLockedChanged().IsBound()) )
             layer->OnIsLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
 
-        OnLayerIsVisibleChanged(layer);
         if( !(layer->OnIsVisibleChanged().IsBound()) )
             layer->OnIsVisibleChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged);
     }
@@ -72,7 +86,6 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
 			mData->PaintEngine()->Block(imageLayer->GetBlock());
 
 			//Add Image Layer Callback
-            OnLayerIsAlphaLockedChanged(imageLayer);
             if( !(imageLayer->OnIsAlphaLockedChanged().IsBound()) )
 			    imageLayer->OnIsAlphaLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsAlphaLockedChanged);
 		}

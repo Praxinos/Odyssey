@@ -574,6 +574,11 @@ FOdysseyPaintEngine::EndStroke()
 void
 FOdysseyPaintEngine::AbortStroke()
 {
+    if( !mIsAllowedToPaint ||
+        !mTempBuffer ||
+        !mTempBlock )
+        return;
+
     mIsPendingEndStroke = false;
     InterruptDelay();
     mOnStrokeAbortDelegate.Broadcast();

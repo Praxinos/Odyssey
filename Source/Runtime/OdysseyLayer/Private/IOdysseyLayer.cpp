@@ -9,6 +9,8 @@
 
 IOdysseyLayer::~IOdysseyLayer()
 {
+    mOnIsLockedChanged.Clear();
+    mOnIsVisibleChanged.Clear();
 }
 
 IOdysseyLayer::IOdysseyLayer( const eType type )

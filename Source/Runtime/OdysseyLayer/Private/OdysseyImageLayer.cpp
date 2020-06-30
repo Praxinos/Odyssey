@@ -12,6 +12,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyImageLayer::~FOdysseyImageLayer()
 {
+    mOnIsAlphaLockedChanged.Clear();
     delete mBlock;
 }
 
