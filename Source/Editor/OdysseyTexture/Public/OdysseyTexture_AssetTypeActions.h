@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Toolkits/IToolkitHost.h"
 
-class FOdysseyTextureAssetTypeActions
+class ODYSSEYTEXTURE_API FOdysseyTextureAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:

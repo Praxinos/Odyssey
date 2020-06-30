@@ -14,28 +14,13 @@ class  FAssetTypeActions_OdysseyTexture;
  */
 class FOdysseyTextureModule :
 	public IModuleInterface
-	, public IHasMenuExtensibility
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
 	
-	TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
 	// End of IModuleInterface interface
 
 	void ShowPluginContentInContentBrowser();
-
-	void RegisterAssetTypeAction(IAssetTools& ioAssetTools, TSharedRef<IAssetTypeActions> iAction);
-
-    TSharedPtr< FAssetTypeActions_OdysseyTexture >  OdysseyTextureAssetTypeActions;
-
-private:
-	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TArray< TSharedPtr<IAssetTypeActions> > mCreatedAssetTypeActions;
-
-	EAssetTypeCategories::Type mOdysseyPainterCategory;
-
-	// Holds the menu extensibility manager.
-	TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;
 };

@@ -10,17 +10,6 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureModule"
 
-TSharedPtr<FExtensibilityManager> FOdysseyTextureModule::GetMenuExtensibilityManager()
-{
-	return mMenuExtensibilityManager;
-}
-
-void FOdysseyTextureModule::RegisterAssetTypeAction(IAssetTools& ioAssetTools, TSharedRef<IAssetTypeActions> iAction)
-{
-	ioAssetTools.RegisterAssetTypeActions(iAction);
-	mCreatedAssetTypeActions.Add(iAction);
-}
-
 // From ...\UnrealEngine\Engine\Source\Editor\ContentBrowser\Private\SAssetView.cpp#3543
 void FOdysseyTextureModule::ShowPluginContentInContentBrowser()
 {
@@ -44,39 +33,11 @@ void FOdysseyTextureModule::ShowPluginContentInContentBrowser()
 }
 
 void FOdysseyTextureModule::StartupModule() {
-	// Register asset types
-	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	mOdysseyPainterCategory = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
-	RegisterAssetTypeAction(assetTools, MakeShareable(new FOdysseyTextureAssetTypeActions(mOdysseyPainterCategory)));
-
-	// register menu extensions
-	mMenuExtensibilityManager = MakeShareable(new FExtensibilityManager);
-
 	ShowPluginContentInContentBrowser();
-
-	if (!IsRunningCommandlet())
-	{
-		FOdysseyTextureContentBrowserExtensions::InstallHooks();
-	}
 }
 
 void FOdysseyTextureModule::ShutdownModule()
 {
-
-	// unregister menu extensions
-	mMenuExtensibilityManager.Reset();
-
-	// Unregister all the asset types that we registered
-	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-		for (int32 index = 0; index < mCreatedAssetTypeActions.Num(); ++index)
-		{
-			assetTools.UnregisterAssetTypeActions(mCreatedAssetTypeActions[index].ToSharedRef());
-		}
-	}
-
-	FOdysseyTextureContentBrowserExtensions::RemoveHooks();
 }
 
 IMPLEMENT_MODULE(FOdysseyTextureModule, OdysseyTexture);
