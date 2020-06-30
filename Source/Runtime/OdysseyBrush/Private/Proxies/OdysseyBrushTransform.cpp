@@ -81,8 +81,8 @@ UOdysseyTransformProxyLibrary::ComposeMatrix( const FOdysseyMatrix& First, const
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "Transform_" + Transform.ID() + "_" + Sample.id;
 
@@ -93,7 +93,7 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
     {
         FOdysseyBlock* src = Sample.m;
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), Transform.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
@@ -125,8 +125,8 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "Rotate_" + FString::SanitizeFloat( Angle ) + "_" + Sample.id;
 
@@ -138,7 +138,7 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
         FOdysseyBlock* src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::DegToRadF( Angle ) ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
@@ -171,8 +171,8 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "ScaleUniform_" + FString::SanitizeFloat( Scale ) + "_" + Sample.id;
 
@@ -184,7 +184,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
         FOdysseyBlock* src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( Scale, Scale ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
@@ -216,8 +216,8 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "Scale_" + FString::SanitizeFloat( ScaleX ) + FString::SanitizeFloat( ScaleY ) + "_" + Sample.id;
 
@@ -229,7 +229,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
         FOdysseyBlock* src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ScaleX, ScaleY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
@@ -263,8 +263,8 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "Shear_" + FString::SanitizeFloat( ShearX ) + FString::SanitizeFloat( ShearY ) + "_" + Sample.id;
 
@@ -276,7 +276,7 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
         FOdysseyBlock* src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
@@ -309,8 +309,8 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "ResizeUniform_" + FString::SanitizeFloat( Size ) + "_" + Sample.id;
     if( BrushContext->KeyExistsInPool( Cache, op ) ) {
@@ -326,7 +326,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
 
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ratio, ratio ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
@@ -359,8 +359,8 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod, ECacheLevel Cache ) {
-    if( !BrushContext ) FOdysseyBlockProxy::MakeNullProxy();
-    if( !Sample.m )     FOdysseyBlockProxy::MakeNullProxy();
+    if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
+    if( !Sample.m )     return  FOdysseyBlockProxy::MakeNullProxy();
 
     FString op = "Resize_" + FString::SanitizeFloat( SizeX ) + FString::SanitizeFloat( SizeY ) + "_" + Sample.id;
     if( BrushContext->KeyExistsInPool( Cache, op ) ) {
@@ -376,7 +376,7 @@ UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOd
 
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ratioX, ratioY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-        if( box.Area() <= 0 ) FOdysseyBlockProxy::MakeNullProxy();
+        if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
         ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x )
                                                                                                                                  , static_cast< float >( -box.y ) )
