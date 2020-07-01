@@ -15,6 +15,8 @@ public class OdysseyStrokePipeline : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "OdysseyMaths",
+                "ULIS",
+                "ULISLoader",
              }
         );
     }

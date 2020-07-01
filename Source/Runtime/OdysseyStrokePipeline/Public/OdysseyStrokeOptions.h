@@ -18,7 +18,7 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
         : Step          ( 20 )
         , SizeAdaptative( true )
         , PaintOnTick   ( false )
-        , Type          ( EOdysseyInterpolationType::kBezier )
+        , Type          ( EOdysseyInterpolationType::kCatmullRom )
         , Method        ( EOdysseySmoothingMethod::kAverage )
         , Strength      ( 10 )
         , Enabled       ( true )

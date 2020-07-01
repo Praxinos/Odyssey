@@ -65,7 +65,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mBrushCursorInvalid( true )
 {
     mSmoother = new FOdysseySmoothingAverage();
-    mInterpolator = new FOdysseyInterpolationBezier();
+    mInterpolator = new FOdysseyInterpolationCatmullRom();
 }
 
 //--------------------------------------------------------------------------------------
@@ -379,16 +379,29 @@ FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
     {
         case EOdysseyInterpolationType::kBezier:
         {
-            // Nothing ATM
+            if( mInterpolator ) delete mInterpolator;
+            mInterpolator = new FOdysseyInterpolationBezier();
             break;
         }
 
         case EOdysseyInterpolationType::kLine:
         {
-            // Nothing ATM
+            if( mInterpolator ) delete mInterpolator;
+            mInterpolator = new FOdysseyInterpolationCatmullRom();
+            break;
+        }
+
+        case EOdysseyInterpolationType::kCatmullRom:
+        {
+            if( mInterpolator ) delete mInterpolator;
+            mInterpolator = new FOdysseyInterpolationCatmullRom();
             break;
         }
     }
+
+    float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
+    mInterpolator->SetStep( val );
+    UpdateBrushInstance();
 }
 
 void

@@ -423,7 +423,7 @@ FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(TSharedPtr<FOdysseyPainterEdito
 	mStrokeOptionsTab->SetStrokeStep(20);
 	mStrokeOptionsTab->SetStrokeAdaptative(true);
 	mStrokeOptionsTab->SetStrokePaintOnTick(false);
-	mStrokeOptionsTab->SetInterpolationType((int32)EOdysseyInterpolationType::kBezier);
+	mStrokeOptionsTab->SetInterpolationType((int32)EOdysseyInterpolationType::kCatmullRom);
 	mStrokeOptionsTab->SetSmoothingMethod((int32)EOdysseySmoothingMethod::kAverage);
 	mStrokeOptionsTab->SetSmoothingStrength(10);
 	mStrokeOptionsTab->SetSmoothingEnabled(true);
