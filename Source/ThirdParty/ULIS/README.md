@@ -30,5 +30,5 @@ Once it's done, you might want to copy the files in redist/bin into the Binaries
 
 
 ## Latest Compatible Commit
-2c1c52945bd8c4888db5676d67b6deedcdd03219
+ec7659e511aae688b7632865bad1710d0f9a4e25
 
