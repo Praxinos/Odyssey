@@ -74,17 +74,19 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext,
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-    ::ul3::AlphaBlend( hULIS.ThreadPool()
-                     , ULIS3_BLOCKING
-                     , perfIntent
-                     , hULIS.HostDeviceInfo()
-                     , ULIS3_NOCB
-                     , block->GetBlock()
-                     , BrushContext->GetState().target_temp_buffer->GetBlock()
-                     , block->GetBlock()->Rect()
-                     , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
-                     , ULIS3_NOAA
-                     , FMath::Clamp( Flow, 0.f, 1.f ) );
+    ::ul3::Blend( hULIS.ThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , hULIS.HostDeviceInfo()
+                , ULIS3_NOCB
+                , block->GetBlock()
+                , BrushContext->GetState().target_temp_buffer->GetBlock()
+                , block->GetBlock()->Rect()
+                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
+                , ULIS3_NOAA
+                , ::ul3::BM_NORMAL
+                , ::ul3::AM_NORMAL
+                , FMath::Clamp( Flow, 0.f, 1.f ) );
 
     BrushContext->PushInvalidRect( invalidRect );
 }
