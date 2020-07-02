@@ -20,11 +20,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyImaging",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyLayer",
       "Type": "Runtime",
       "LoadingPhase": "Default"
@@ -50,11 +45,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyStylusInput",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyTransaction",
       "Type": "Runtime",
       "LoadingPhase": "Default"
@@ -62,6 +52,16 @@
     {
       "Name": "ULISLoader",
       "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyImaging",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyStylusInput",
+      "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
