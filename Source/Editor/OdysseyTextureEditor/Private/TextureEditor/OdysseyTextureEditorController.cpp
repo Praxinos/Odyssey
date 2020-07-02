@@ -359,11 +359,7 @@ FOdysseyTextureEditorController::HandleAlphaModeModifierChanged( int32 iValue )
     if( !(mData->LayerStack()->GetCurrentLayer()) )
         return;
 
-	FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mData->LayerStack()->GetCurrentLayer()->GetNodeContent());
-    if (!imageLayer || !imageLayer->IsAlphaLocked()) {
-        return FOdysseyPainterEditorController::HandleAlphaModeModifierChanged(iValue);
-    }
-    return FOdysseyPainterEditorController::HandleAlphaModeModifierChanged(::ul3::AM_BACK);
+    return FOdysseyPainterEditorController::HandleAlphaModeModifierChanged(iValue);
 }
 
 //--------------------------------------------------------------------------------------
