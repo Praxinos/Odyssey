@@ -36,7 +36,7 @@ class CustomArgumentDefaultsHelpFormatter( argparse.RawTextHelpFormatter ):
         
 #---
 
-version_ue = '4.24'
+version_ue = '4.25'
 now = datetime.now()
 
 operating_system = platform.system().lower() # 'windows', 'darwin', 'linux', ...
