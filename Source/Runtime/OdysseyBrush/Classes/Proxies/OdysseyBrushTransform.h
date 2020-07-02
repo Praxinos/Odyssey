@@ -99,7 +99,7 @@ public:
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
-    static FOdysseyBlockProxy Resize( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float SizeX, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
+    static FOdysseyBlockProxy Resize( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
