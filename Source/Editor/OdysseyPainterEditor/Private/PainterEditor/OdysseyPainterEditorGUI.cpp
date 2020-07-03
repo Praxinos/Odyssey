@@ -611,6 +611,7 @@ FOdysseyPainterEditorGUI::CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& 
 					SNew( SButton )
 					.Text( LOCTEXT( "Clear Undo History", "Clear Undo History" ) )
 					.ToolTipText( LOCTEXT( "Clear Undos tooltip", "If the undo/redo is slow, clear the cache by clicking this button" ))
+                    .VAlign(EVerticalAlignment::VAlign_Center)
 					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnClearUndo)
 				]
 				]
