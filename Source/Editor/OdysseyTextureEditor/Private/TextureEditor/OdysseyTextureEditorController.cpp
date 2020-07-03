@@ -375,6 +375,9 @@ FOdysseyTextureEditorController::HandlePerformanceLiveUpdateChanged( bool iValue
 FReply
 FOdysseyTextureEditorController::OnClear()
 {
+    if( mData->LayerStack()->GetCurrentLayer() == NULL )
+        return FReply::Handled();
+
     //Record
     mData->LayerStack()->mDrawingUndo->StartRecord();
 	mData->LayerStack()->mDrawingUndo->SaveData( 0, 0, mData->LayerStack()->Width(), mData->LayerStack()->Height() );
@@ -391,6 +394,9 @@ FOdysseyTextureEditorController::OnClear()
 FReply
 FOdysseyTextureEditorController::OnFill()
 {
+    if( mData->LayerStack()->GetCurrentLayer() == NULL )
+        return FReply::Handled();
+
     //Record
 	mData->LayerStack()->mDrawingUndo->StartRecord();
 	mData->LayerStack()->mDrawingUndo->SaveData( 0, 0, mData->LayerStack()->Width(), mData->LayerStack()->Height() );

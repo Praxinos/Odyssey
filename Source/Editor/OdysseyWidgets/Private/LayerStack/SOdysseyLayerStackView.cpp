@@ -68,8 +68,8 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
         ]
     ];
 
-    mTreeView->GetNodeTree()->Update();
-    mTreeView->Refresh();
+    if( mTreeView->GetNodeTree()->Update() != -1 ) //Empty stack
+        mTreeView->Refresh();
 }
 
 

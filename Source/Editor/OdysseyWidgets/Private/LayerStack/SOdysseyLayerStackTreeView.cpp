@@ -77,7 +77,10 @@ void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<IOdysseyBaseLayer
     }
 
     mPropertyView->DetachWidget();
-    mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
+    if( mSelectedNode )
+        mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
+    else
+        mPropertyView->AttachWidget( SNullWidget::NullWidget );
 }
 
 TSharedRef<ITableRow> SOdysseyLayerStackTreeView::OnGenerateRow(IOdysseyBaseLayerNodeRef iDisplayNode, const TSharedRef<STableViewBase>& iOwnerTable)
@@ -116,6 +119,7 @@ void SOdysseyLayerStackTreeView::Refresh( int iOverrideNewSelectedNodeIndex /* =
     mRootNodes.Reset( numberOfNodes );
 
     int indexCurrentNode = mLayerStackNodeTree->Update();
+    mSelectedNode = NULL;
 
     //Refresh the treeView and the selected node
     if( iOverrideNewSelectedNodeIndex == -1 )
@@ -147,7 +151,10 @@ void SOdysseyLayerStackTreeView::Refresh( int iOverrideNewSelectedNodeIndex /* =
     if( mPropertyView )
     {
         mPropertyView->DetachWidget();
-        mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
+        if( mSelectedNode != NULL )
+            mPropertyView->AttachWidget( mSelectedNode->GenerateContainerWidgetForPropertyView() );
+        else
+            mPropertyView->AttachWidget( SNullWidget::NullWidget );
     }
 
     //STreeView Refresh
