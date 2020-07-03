@@ -40,7 +40,7 @@ struct ODYSSEYWIDGETS_API FOdysseyPerformanceOptions
     {}
     
     /** Should  we draw a custom cursor representing the preview of the brush  */
-    UPROPERTY( EditAnywhere, Category = "Performances" )
+    //UPROPERTY( EditAnywhere, Category = "Performances" )
     bool    DrawBrushPreview;
     
     /** EditLock. */
