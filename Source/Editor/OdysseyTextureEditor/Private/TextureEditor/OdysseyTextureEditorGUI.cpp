@@ -97,7 +97,7 @@ FOdysseyTextureEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
     iTabManager->RegisterTabSpawner( smLayerStackTabId, FOnSpawnTab::CreateSP( this, &FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnLayerStack ) )
         .SetDisplayName( LOCTEXT( "LayerStackTab", "LayerStack" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "TextureEditor.Layers16" ) );
+        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ) );
 }
 
 void
