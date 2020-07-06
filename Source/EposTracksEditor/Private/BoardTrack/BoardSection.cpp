@@ -186,11 +186,11 @@ FBoardSection::GetViewCamera()
 
     // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
     const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
-                                                                          [&hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
-    {
-        const FMovieSceneSubSequenceData* subData = hierarchy.FindSubData( iSequenceID );
-        return subData && subData->DeterministicSequenceID == targetSequenceID;
-    }
+        [&hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
+        {
+            const FMovieSceneSubSequenceData* subData = hierarchy.FindSubData( iSequenceID );
+            return subData && subData->DeterministicSequenceID == targetSequenceID;
+        }
     );
 
     if( innerSequenceID )

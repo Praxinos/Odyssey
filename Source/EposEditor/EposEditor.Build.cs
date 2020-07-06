@@ -12,15 +12,15 @@ public class EposEditor : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
-            }
+			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
-            }
-            );
+			}
+			);
 			
 		
 		PublicDependencyModuleNames.AddRange(
@@ -28,7 +28,7 @@ public class EposEditor : ModuleRules
 			{
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
-            }
+			}
 			);
 			
 		
@@ -45,9 +45,9 @@ public class EposEditor : ModuleRules
 				"Sequencer",
 				"UnrealEd",
 				"Projects",
-                //
+				//
 				"Epos",
-            }
+			}
 			);
 		
 		

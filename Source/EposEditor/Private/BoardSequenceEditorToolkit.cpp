@@ -287,6 +287,11 @@ void FBoardSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class 
 void FBoardSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
     // TODO-lchabant: add default tracks (re-use level sequence toolkit code).
+
+    // Test: this will remove the 'empty' actor track if actor's drop are not managed
+    //UMovieSceneSequence* sequence = mSequencer->GetFocusedMovieSceneSequence();
+    //UMovieScene* movie_scene = sequence->GetMovieScene();
+    //movie_scene->RemovePossessable( iBinding );
 }
 
 void FBoardSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

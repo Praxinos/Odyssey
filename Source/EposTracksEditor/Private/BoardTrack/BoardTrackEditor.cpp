@@ -343,6 +343,8 @@ FBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrac
     return anyDropped ? FReply::Handled() : FReply::Unhandled();
 }
 
+//---
+
 UMovieSceneSubSection*
 FBoardTrackEditor::CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneBoardSection* iBoardToDuplicate )
 {
