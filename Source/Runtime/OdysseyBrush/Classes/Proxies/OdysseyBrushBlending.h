@@ -17,7 +17,7 @@ enum class EOdysseyBlendingMode : uint8
     , kDissolve             UMETA( DisplayName = "Dissolve"             )
     , kBayerDither8x8       UMETA( DisplayName = "BayerDither8x8"       )
     , kDarken               UMETA( DisplayName = "Darken"               )
-    , kMultipy              UMETA( DisplayName = "Multipy"              )
+    , kMultiply             UMETA( DisplayName = "Multiply"             )
     , kColorBurn            UMETA( DisplayName = "ColorBurn"            )
     , kLinearBurn           UMETA( DisplayName = "LinearBurn"           )
     , kDarkerColor          UMETA( DisplayName = "DarkerColor"          )
