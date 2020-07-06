@@ -30,6 +30,9 @@ private:
     void RegisterSettings();
     void UnregisterSettings();
 
+    void RegisterSequenceCustomizations();
+    void UnregisterSequenceCustomizations();
+
 private:
     TSharedPtr<FBoardSequenceActions>   mBoardSequenceTypeActions;
     TSharedPtr<FShotSequenceActions>    mShotSequenceTypeActions;

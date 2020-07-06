@@ -12,6 +12,8 @@
 #include "AssetTools/BoardSequenceActions.h"
 #include "AssetTools/ShotSequenceActions.h"
 #include "Board/BoardSequence.h"
+#include "Customization/BoardSequenceCustomization.h"
+#include "Customization/ShotSequenceCustomization.h"
 #include "Settings/EposEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposEditorStyle.h"
@@ -32,11 +34,13 @@ FEposEditorModule::StartupModule()
 {
     RegisterAssetTools();
     RegisterSettings();
+    RegisterSequenceCustomizations();
 }
 
 void
 FEposEditorModule::ShutdownModule()
 {
+    UnregisterSequenceCustomizations();
     UnregisterSettings();
     UnregisterAssetTools();
 }
@@ -109,6 +113,34 @@ FEposEditorModule::UnregisterSettings()
 
     SettingsModule->UnregisterSettings( "Project", "Plugins", "Epos" );
     SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "EposEditor" );
+}
+
+//---
+
+void
+FEposEditorModule::RegisterSequenceCustomizations()
+{
+    ISequencerModule& sequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
+
+    sequencerModule.GetSequencerCustomizationManager()->RegisterInstancedSequencerCustomization( UBoardSequence::StaticClass(),
+        FOnGetSequencerCustomizationInstance::CreateLambda( []()
+        {
+            return new FBoardSequenceCustomization();
+        } ) );
+    sequencerModule.GetSequencerCustomizationManager()->RegisterInstancedSequencerCustomization( UShotSequence::StaticClass(),
+        FOnGetSequencerCustomizationInstance::CreateLambda( []()
+        {
+            return new FShotSequenceCustomization();
+        } ) );
+}
+
+void
+FEposEditorModule::UnregisterSequenceCustomizations()
+{
+    ISequencerModule& sequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
+
+    sequencerModule.GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UBoardSequence::StaticClass() );
+    sequencerModule.GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UShotSequence::StaticClass() );
 }
 
 //---
