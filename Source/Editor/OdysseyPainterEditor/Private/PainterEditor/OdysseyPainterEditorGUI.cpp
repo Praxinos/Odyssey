@@ -46,7 +46,7 @@ FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI()
-	: mLayout(FTabManager::NewLayout("Standalone_OdysseyPainterEditor_Layout"))
+	: mLayout(FTabManager::NewLayout("OdysseyPainterEditor_Layout"))
 	, mPerformanceOptions( NULL )
 {
 }
