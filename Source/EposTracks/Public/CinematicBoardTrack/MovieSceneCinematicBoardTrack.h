@@ -8,7 +8,7 @@
 #include "Misc/InlineValue.h"
 #include "Tracks/MovieSceneSubTrack.h"
 #include "Compilation/MovieSceneSegmentCompiler.h"
-#include "MovieSceneBoardTrack.generated.h"
+#include "MovieSceneCinematicBoardTrack.generated.h"
 
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
@@ -17,14 +17,14 @@ class UMovieSceneSubSection;
  * A track that holds consecutive sub sequences.
  */
 UCLASS( MinimalAPI )
-class UMovieSceneBoardTrack
+class UMovieSceneCinematicBoardTrack
     : public UMovieSceneSubTrack
 {
     GENERATED_BODY()
 
 public:
 
-    UMovieSceneBoardTrack( const FObjectInitializer& iObjectInitializer );
+    UMovieSceneCinematicBoardTrack( const FObjectInitializer& iObjectInitializer );
 
     EPOSTRACKS_API void SortSections();
 

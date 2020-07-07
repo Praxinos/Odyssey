@@ -1,20 +1,20 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "BoardTrack/MovieSceneBoardTrack.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 
 #include "MovieSceneSequence.h"
 #include "MovieSceneCommonHelpers.h"
-#include "BoardTrack/MovieSceneBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Compilation/MovieSceneCompilerRules.h"
 
 
-#define LOCTEXT_NAMESPACE "MovieSceneBoardTrack"
+#define LOCTEXT_NAMESPACE "MovieSceneCinematicBoardTrack"
 
 
 /* UMovieSceneSubTrack interface
  *****************************************************************************/
-UMovieSceneBoardTrack::UMovieSceneBoardTrack( const FObjectInitializer& iObjectInitializer )
+UMovieSceneCinematicBoardTrack::UMovieSceneCinematicBoardTrack( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
 {
 #if WITH_EDITORONLY_DATA
@@ -23,17 +23,17 @@ UMovieSceneBoardTrack::UMovieSceneBoardTrack( const FObjectInitializer& iObjectI
 }
 
 UMovieSceneSubSection*
-UMovieSceneBoardTrack::AddSequence( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration )
+UMovieSceneCinematicBoardTrack::AddSequence( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration )
 {
     return AddSequenceOnRow( iSequence, iStartTime, iDuration, INDEX_NONE );
 }
 
 UMovieSceneSubSection*
-UMovieSceneBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex )
+UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex )
 {
     UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, iStartTime, iDuration, iRowIndex );
 
-    UMovieSceneBoardSection* newBoardSection = Cast<UMovieSceneBoardSection>( newSection );
+    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 
 #if WITH_EDITOR
 
@@ -57,29 +57,29 @@ UMovieSceneBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameN
  *****************************************************************************/
 
 void
-UMovieSceneBoardTrack::AddSection( UMovieSceneSection& ioSection )
+UMovieSceneCinematicBoardTrack::AddSection( UMovieSceneSection& ioSection )
 {
-    if( ioSection.IsA<UMovieSceneBoardSection>() )
+    if( ioSection.IsA<UMovieSceneCinematicBoardSection>() )
     {
         Sections.Add( &ioSection );
     }
 }
 
 bool
-UMovieSceneBoardTrack::SupportsType( TSubclassOf<UMovieSceneSection> iSectionClass ) const
+UMovieSceneCinematicBoardTrack::SupportsType( TSubclassOf<UMovieSceneSection> iSectionClass ) const
 {
-    return iSectionClass == UMovieSceneBoardSection::StaticClass();
+    return iSectionClass == UMovieSceneCinematicBoardSection::StaticClass();
 }
 
 
 UMovieSceneSection*
-UMovieSceneBoardTrack::CreateNewSection()
+UMovieSceneCinematicBoardTrack::CreateNewSection()
 {
-    return NewObject<UMovieSceneBoardSection>( this, NAME_None, RF_Transactional );
+    return NewObject<UMovieSceneCinematicBoardSection>( this, NAME_None, RF_Transactional );
 }
 
 void
-UMovieSceneBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
+UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 {
     Sections.Remove( &ioSection );
     //MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, true);
@@ -89,34 +89,34 @@ UMovieSceneBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 }
 
 void
-UMovieSceneBoardTrack::RemoveSectionAt( int32 iSectionIndex )
+UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
 {
     Sections.RemoveAt( iSectionIndex );
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 }
 
 bool
-UMovieSceneBoardTrack::SupportsMultipleRows() const
+UMovieSceneCinematicBoardTrack::SupportsMultipleRows() const
 {
     return true;
 }
 
 FMovieSceneTrackSegmentBlenderPtr
-UMovieSceneBoardTrack::GetTrackSegmentBlender() const
+UMovieSceneCinematicBoardTrack::GetTrackSegmentBlender() const
 {
     // Apply a high pass filter to overlapping sections such that only the highest row in a track wins
-    struct FBoardTrackRowBlender : FMovieSceneTrackSegmentBlender
+    struct FCinematicBoardTrackRowBlender : FMovieSceneTrackSegmentBlender
     {
         virtual void Blend( FSegmentBlendData& ioBlendData ) const override
         {
             MovieSceneSegmentCompiler::ChooseLowestRowIndex( ioBlendData );
         }
     };
-    return FBoardTrackRowBlender();
+    return FCinematicBoardTrackRowBlender();
 }
 
 FMovieSceneTrackRowSegmentBlenderPtr
-UMovieSceneBoardTrack::GetRowSegmentBlender() const
+UMovieSceneCinematicBoardTrack::GetRowSegmentBlender() const
 {
     class FCinematicRowRules : public FMovieSceneTrackRowSegmentBlender
     {
@@ -175,7 +175,7 @@ UMovieSceneBoardTrack::GetRowSegmentBlender() const
 
 #if WITH_EDITOR
 void
-UMovieSceneBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams )
+UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams )
 {
     //MovieSceneHelpers::FixupConsecutiveSections(Sections, ioSection, false);
 }
@@ -183,14 +183,14 @@ UMovieSceneBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, const FMov
 
 #if WITH_EDITORONLY_DATA
 FText
-UMovieSceneBoardTrack::GetDefaultDisplayName() const
+UMovieSceneCinematicBoardTrack::GetDefaultDisplayName() const
 {
     return LOCTEXT( "TrackName", "Boards" );
 }
 #endif
 
 void
-UMovieSceneBoardTrack::SortSections()
+UMovieSceneCinematicBoardTrack::SortSections()
 {
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 }

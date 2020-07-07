@@ -13,7 +13,7 @@ class FBoardTrackEditor;
 class FMenuBuilder;
 class FSequencerSectionPainter;
 class FTrackEditorThumbnailPool;
-class UMovieSceneBoardSection;
+class UMovieSceneCinematicBoardSection;
 
 /**
  * Board section, which paints and ticks the appropriate section.
@@ -24,7 +24,7 @@ class FBoardSection
 public:
 
     /** Create and initialize a new instance. */
-    FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool );
+    FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool );
 
     /** Virtual destructor. */
     virtual ~FBoardSection();
@@ -59,7 +59,7 @@ private:
 
     struct FCinematicSectionCache
     {
-        FCinematicSectionCache( UMovieSceneBoardSection* iSection = nullptr );
+        FCinematicSectionCache( UMovieSceneCinematicBoardSection* iSection = nullptr );
 
         bool operator!=( const FCinematicSectionCache& iRHS ) const;
 

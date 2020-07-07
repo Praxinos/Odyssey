@@ -35,8 +35,8 @@
 
 #include "Board/BoardSequence.h"
 #include "BoardTrack/BoardSection.h"
-#include "BoardTrack/MovieSceneBoardSection.h"
-#include "BoardTrack/MovieSceneBoardTrack.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposTracksEditorHelpers.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposEditorStyle.h"
@@ -143,7 +143,7 @@ FBoardTrackEditor::MakeSectionInterface( UMovieSceneSection& iSectionObject, UMo
 {
     check( SupportsType( iSectionObject.GetOuter()->GetClass() ) );
 
-    UMovieSceneBoardSection& sectionObjectImpl = *CastChecked<UMovieSceneBoardSection>( &iSectionObject );
+    UMovieSceneCinematicBoardSection& sectionObjectImpl = *CastChecked<UMovieSceneCinematicBoardSection>( &iSectionObject );
     return MakeShareable( new FBoardSection( GetSequencer(), sectionObjectImpl, SharedThis( this ), mThumbnailPool ) );
 }
 
@@ -207,7 +207,7 @@ FBoardTrackEditor::SupportsSequence( UMovieSceneSequence* iSequence ) const
 bool
 FBoardTrackEditor::SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const
 {
-    return ( iType == UMovieSceneBoardTrack::StaticClass() );
+    return ( iType == UMovieSceneCinematicBoardTrack::StaticClass() );
 }
 
 
@@ -284,7 +284,7 @@ FBoardTrackEditor::GetIconBrush() const
 bool
 FBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid )
 {
-    if( !iTrack->IsA( UMovieSceneBoardTrack::StaticClass() ) )
+    if( !iTrack->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
     {
         return false;
     }
@@ -313,7 +313,7 @@ FBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieScen
 FReply
 FBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid )
 {
-    if( !iTrack->IsA( UMovieSceneBoardTrack::StaticClass() ) )
+    if( !iTrack->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
     {
         return FReply::Unhandled();
     }
@@ -346,7 +346,7 @@ FBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrac
 //---
 
 UMovieSceneSubSection*
-FBoardTrackEditor::CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneBoardSection* iBoardToDuplicate )
+FBoardTrackEditor::CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneCinematicBoardSection* iBoardToDuplicate )
 {
     FString newBoardPath;
 
@@ -398,7 +398,7 @@ FBoardTrackEditor::CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iN
 
     int32 duration = MovieScene::DiscreteSize( iBoardToDuplicate ? iBoardToDuplicate->GetRange() : newSequence->GetMovieScene()->GetPlaybackRange() );
 
-    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
     // Create a board section. 
     UMovieSceneSubSection* newSection = boardTrack->AddSequence( newSequence, iNewBoardStartTime, duration );
@@ -413,7 +413,7 @@ FBoardTrackEditor::InsertBoard()
 
     FFrameTime newBoardStartTime = GetSequencer()->GetLocalTime().Time;
 
-    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateBoardTrack();
     FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), newBoardStartTime.FrameNumber );
 
     UMovieSceneSubSection* newBoard = CreateBoardInternal( newBoardName, newBoardStartTime.FrameNumber );
@@ -438,7 +438,7 @@ FBoardTrackEditor::InsertFiller()
 
     FQualifiedFrameTime currentTime = GetSequencer()->GetLocalTime();
 
-    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
     int32 duration = ( projectSettings->DefaultDuration * currentTime.Rate ).FrameNumber.Value;
 
@@ -446,7 +446,7 @@ FBoardTrackEditor::InsertFiller()
 
     UMovieSceneSubSection* newSection = boardTrack->AddSequence( nullSequence, currentTime.Time.FrameNumber, duration );
 
-    UMovieSceneBoardSection* newBoardSection = Cast<UMovieSceneBoardSection>( newSection );
+    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 
     newBoardSection->SetBoardDisplayName( FText( LOCTEXT( "Filler", "Filler" ) ).ToString() );
 
@@ -458,11 +458,11 @@ FBoardTrackEditor::InsertFiller()
 
 
 void
-FBoardTrackEditor::DuplicateBoard( UMovieSceneBoardSection* iSection )
+FBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iSection )
 {
     const FScopedTransaction transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
 
-    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
     FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
     FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), startTime );
@@ -486,21 +486,21 @@ FBoardTrackEditor::DuplicateBoard( UMovieSceneBoardSection* iSection )
 
 
 void
-FBoardTrackEditor::RenderBoard( UMovieSceneBoardSection* iSection )
+FBoardTrackEditor::RenderBoard( UMovieSceneCinematicBoardSection* iSection )
 {
     GetSequencer()->RenderMovie( iSection );
 }
 
 
 void
-FBoardTrackEditor::RenameBoard( UMovieSceneBoardSection* iSection )
+FBoardTrackEditor::RenameBoard( UMovieSceneCinematicBoardSection* iSection )
 {
     //@todo
 }
 
 
 //void
-//FBoardTrackEditor::NewTake( UMovieSceneBoardSection* Section )
+//FBoardTrackEditor::NewTake( UMovieSceneCinematicBoardSection* Section )
 //{
 //    const FScopedTransaction Transaction( LOCTEXT( "NewTake_Transaction", "New Take" ) );
 //
@@ -624,14 +624,14 @@ FBoardTrackEditor::HandleAddBoardTrackMenuEntryCanExecute() const
 {
     UMovieScene* focusedMovieScene = GetFocusedMovieScene();
 
-    return ( ( focusedMovieScene != nullptr ) && ( focusedMovieScene->FindMasterTrack<UMovieSceneBoardTrack>() == nullptr ) );
+    return ( ( focusedMovieScene != nullptr ) && ( focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() == nullptr ) );
 }
 
 
 void
 FBoardTrackEditor::HandleAddBoardTrackMenuEntryExecute()
 {
-    UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateBoardTrack();
     if( boardTrack )
     {
         if( GetSequencer().IsValid() )
@@ -727,7 +727,7 @@ FBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* i
 
     if( CanAddSubSequence( *iMovieSceneSequence ) )
     {
-        UMovieSceneBoardTrack* boardTrack = FindOrCreateBoardTrack();
+        UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateBoardTrack();
 
         const FFrameRate tickResolution = iMovieSceneSequence->GetMovieScene()->GetTickResolution();
         const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
@@ -762,7 +762,7 @@ FBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* i
 }
 
 
-UMovieSceneBoardTrack*
+UMovieSceneCinematicBoardTrack*
 FBoardTrackEditor::FindOrCreateBoardTrack()
 {
     UMovieScene* focusedMovieScene = GetFocusedMovieScene();
@@ -777,7 +777,7 @@ FBoardTrackEditor::FindOrCreateBoardTrack()
         return nullptr;
     }
 
-    UMovieSceneBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     if( boardTrack != nullptr )
     {
         return boardTrack;
@@ -786,7 +786,7 @@ FBoardTrackEditor::FindOrCreateBoardTrack()
     const FScopedTransaction transaction( LOCTEXT( "AddBoardTrack_Transaction", "Add Board Track" ) );
     focusedMovieScene->Modify();
 
-    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneBoardTrack>();
+    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
     ensure( newTrack );
 
     GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
@@ -872,7 +872,7 @@ FBoardTrackEditor::CanAddSubSequence( const UMovieSceneSequence& iSequence ) con
         return false;
     }
 
-    UMovieSceneBoardTrack* boardTrack = sequenceMovieScene->FindMasterTrack<UMovieSceneBoardTrack>();
+    UMovieSceneCinematicBoardTrack* boardTrack = sequenceMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     if( boardTrack && boardTrack->ContainsSequence( *focusedSequence, true ) )
     {
         return false;

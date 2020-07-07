@@ -22,7 +22,7 @@
 #include "Editor.h"
 
 #include "BoardTrack/BoardTrackEditor.h"
-#include "BoardTrack/MovieSceneBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 
 #define LOCTEXT_NAMESPACE "FBoardSection"
 
@@ -30,7 +30,7 @@
 /* FBoardSection structors
  *****************************************************************************/
 
-FBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneBoardSection* iSection )
+FBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneCinematicBoardSection* iSection )
     : mInnerFrameRate( 1, 1 )
     , mInnerFrameOffset( 0 )
     , mSectionStartFrame( 0 )
@@ -61,7 +61,7 @@ FBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache&
 
 //---
 
-FBoardSection::FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool )
+FBoardSection::FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool )
     : TSubSectionMixin( iSequencer, iSection, iSequencer, iThumbnailPool, iSection )
     , mBoardTrackEditor( iBoardTrackEditor )
     , mThumbnailCacheData( &iSection )
@@ -95,7 +95,7 @@ FBoardSection::GetContentPadding() const
 void
 FBoardSection::SetSingleTime( double iGlobalTime )
 {
-    UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     double referenceOffsetSeconds = sectionObject.HasStartFrame() ? sectionObject.GetInclusiveStartFrame() / sectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() : 0;
     sectionObject.SetThumbnailReferenceOffset( iGlobalTime - referenceOffsetSeconds );
 }
@@ -176,7 +176,7 @@ FBoardSection::GetViewCamera()
     }
 
 
-    const UMovieSceneBoardSection&          sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     const FMovieSceneSequenceID             thisSequenceID = sequencer->GetFocusedTemplateID();
     const FMovieSceneSequenceID             targetSequenceID = sectionObject.GetSequenceID();
     const FMovieSceneSequenceHierarchy&     hierarchy = sequencer->GetEvaluationTemplate().GetHierarchy();
@@ -216,7 +216,7 @@ void
 FBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime )
 {
     // Set cached data
-    UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     FCinematicSectionCache newCacheData( &sectionObject );
     if( newCacheData != mThumbnailCacheData )
     {
@@ -246,7 +246,7 @@ FBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
     ioPainter.LayerId = ioPainter.PaintSectionBackground();
 
     FVector2D localSectionSize = ioPainter.SectionGeometry.GetLocalSize();
-    const UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
     // Paint fancy-looking film border.
     FSlateDrawElement::MakeBox(
@@ -283,7 +283,7 @@ FBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid
 {
     FViewportThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
 
-    UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
     ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "BoardMenuText", "Board" ) );
     {
@@ -377,7 +377,7 @@ FBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid
 FText
 FBoardSection::HandleThumbnailTextBlockText() const
 {
-    const UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+    const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     return FText::FromString( sectionObject.GetBoardDisplayName() );
 }
 
@@ -387,7 +387,7 @@ FBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& iNewBoardName
 {
     if( iCommitType == ETextCommit::OnEnter && !HandleThumbnailTextBlockText().EqualTo( iNewBoardName ) )
     {
-        UMovieSceneBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneBoardSection>();
+        UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
         sectionObject.Modify();
 

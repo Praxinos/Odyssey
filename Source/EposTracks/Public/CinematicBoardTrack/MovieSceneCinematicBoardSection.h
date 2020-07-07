@@ -6,19 +6,19 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Sections/MovieSceneSubSection.h"
-#include "MovieSceneBoardSection.generated.h"
+#include "MovieSceneCinematicBoardSection.generated.h"
 
 /**
  * Implements a board section.
  */
 UCLASS( BlueprintType )
-class EPOSTRACKS_API UMovieSceneBoardSection
+class EPOSTRACKS_API UMovieSceneCinematicBoardSection
     : public UMovieSceneSubSection
 {
     GENERATED_BODY()
 
     /** Default constructor. */
-    UMovieSceneBoardSection();
+    UMovieSceneCinematicBoardSection();
 
 public:
     /** @return The board display name */

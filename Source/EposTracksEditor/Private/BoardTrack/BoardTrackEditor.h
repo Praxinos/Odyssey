@@ -17,8 +17,8 @@ class AActor;
 struct FAssetData;
 class FMenuBuilder;
 class FTrackEditorThumbnailPool;
-class UMovieSceneBoardSection;
-class UMovieSceneBoardTrack;
+class UMovieSceneCinematicBoardSection;
+class UMovieSceneCinematicBoardTrack;
 class UMovieSceneSubSection;
 
 /**
@@ -83,28 +83,28 @@ public:
      *
      * @param Section The section to duplicate
      */
-    void DuplicateBoard( UMovieSceneBoardSection* iSection );
+    void DuplicateBoard( UMovieSceneCinematicBoardSection* iSection );
 
     /*
      * Render board.
      *
      * @param Section The section to render
      */
-    void RenderBoard( UMovieSceneBoardSection* iSection );
+    void RenderBoard( UMovieSceneCinematicBoardSection* iSection );
 
     /*
      * Rename board.
      *
      * @param Section The section to rename.
      */
-    void RenameBoard( UMovieSceneBoardSection* iSection );
+    void RenameBoard( UMovieSceneCinematicBoardSection* iSection );
 
     /*
      * New take.
      *
      * @param Section The section to create a new take of.
      */
-    //void NewTake( UMovieSceneBoardSection* iSection );
+    //void NewTake( UMovieSceneCinematicBoardSection* iSection );
 
     /*
     * Switch take for the selected sections
@@ -123,7 +123,7 @@ private:
      * @param BoardToDuplicate The board to duplicate.
      * @return The new board.
      */
-    UMovieSceneSubSection* CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneBoardSection* iBoardToDuplicate = nullptr );
+    UMovieSceneSubSection* CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneCinematicBoardSection* iBoardToDuplicate = nullptr );
 
 
 private:
@@ -144,7 +144,7 @@ private:
     void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData );
 
     /** Find or create a cinematic board track in the currently focused movie scene. */
-    UMovieSceneBoardTrack* FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* FindOrCreateBoardTrack();
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
     FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex );

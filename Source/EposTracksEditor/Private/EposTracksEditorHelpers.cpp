@@ -8,10 +8,10 @@
 #include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
-#include "BoardTrack/MovieSceneBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 
 // Same functions as in MovieSceneToolHelpers.cpp
-// Convert ULevelSequence/UMovieSceneCinematicShotSection to UBoardSequence/UMovieSceneBoardSection
+// Convert ULevelSequence/UMovieSceneCinematicShotSection to UBoardSequence/UMovieSceneCinematicBoardSection
 
 //---
 
@@ -96,8 +96,8 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
-    UMovieSceneBoardSection* beforeShot = nullptr;
-    UMovieSceneBoardSection* nextShot = nullptr;
+    UMovieSceneCinematicBoardSection* beforeShot = nullptr;
+    UMovieSceneCinematicBoardSection* nextShot = nullptr;
 
     FFrameNumber minEndDiff = TNumericLimits<int32>::Max();
     FFrameNumber minStartDiff = TNumericLimits<int32>::Max();
@@ -110,7 +110,7 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
             if( minEndDiff > endDiff )
             {
                 minEndDiff = endDiff;
-                beforeShot = Cast<UMovieSceneBoardSection>( section );
+                beforeShot = Cast<UMovieSceneCinematicBoardSection>( section );
             }
         }
         if( section->HasStartFrame() && section->GetInclusiveStartFrame() <= iTime )
@@ -119,7 +119,7 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
             if( minStartDiff > startDiff )
             {
                 minStartDiff = startDiff;
-                nextShot = Cast<UMovieSceneBoardSection>( section );
+                nextShot = Cast<UMovieSceneCinematicBoardSection>( section );
             }
         }
     }
