@@ -16,4 +16,6 @@ public:
 
 private:
     FDelegateHandle BoardTrackCreateEditorHandle;
+    FDelegateHandle AudioTrackCreateEditorHandle;
+    FDelegateHandle LevelVisibilityTrackCreateEditorHandle;
 };

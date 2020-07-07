@@ -46,6 +46,9 @@ public class EposTracksEditor : ModuleRules
 				"UnrealEd",
 				"EditorStyle",
 				"InputCore",
+				"RenderCore",
+                "MovieSceneTracks",
+                "EditorWidgets",
                 //
                 "Epos",
                 "EposEditor",

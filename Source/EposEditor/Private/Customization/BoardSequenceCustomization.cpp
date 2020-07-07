@@ -11,8 +11,6 @@
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequence.h"
 
-#define LOCTEXT_NAMESPACE "FEposEditor"
-
 //---
 
 void

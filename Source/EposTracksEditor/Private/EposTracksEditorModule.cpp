@@ -6,6 +6,8 @@
 #include "ISequencerModule.h"
 
 #include "BoardTrack/BoardTrackEditor.h"
+#include "AudioTrack/AudioTrackEditor.h"
+#include "LevelVisibilityTrack/LevelVisibilityTrackEditor.h"
 
 #define LOCTEXT_NAMESPACE "FEposTracksEditorModule"
 
@@ -19,6 +21,8 @@ FEposTracksEditorModule::StartupModule()
         ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
 
         BoardTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FBoardTrackEditor::CreateTrackEditor ) );
+        AudioTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FAudioTrackEditor::CreateTrackEditor ) );
+        LevelVisibilityTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FLevelVisibilityTrackEditor::CreateTrackEditor ) );
     }
 }
 
@@ -28,6 +32,8 @@ FEposTracksEditorModule::ShutdownModule()
     ISequencerModule& SequencerModule = FModuleManager::Get().GetModuleChecked<ISequencerModule>( "Sequencer" );
 
     SequencerModule.UnRegisterTrackEditor( BoardTrackCreateEditorHandle );
+    SequencerModule.UnRegisterTrackEditor( AudioTrackCreateEditorHandle );
+    SequencerModule.UnRegisterTrackEditor( LevelVisibilityTrackCreateEditorHandle );
 }
 
 //---
