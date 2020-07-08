@@ -34,12 +34,7 @@ public:
     FOdysseyBlock*                      GetResultBlock();
     void                                ComputeResultBlock();
     void                                ComputeResultBlock( const ::ul3::FRect& iRect );
-    void                                ComputeResultBlockWithTempBuffer( const ::ul3::FRect&   iRect
-                                                                        , FOdysseyBlock*        iTempBuffer
-                                                                        , float                 iOpacity    = 1.f
-                                                                        , ::ul3::eBlendingMode  iMode       = ::ul3::BM_NORMAL
-                                                                        , ::ul3::eAlphaMode     iAlphaMode  = ::ul3::AM_NORMAL );
-	void                                ComputeResultBlockWithTempBlock(const ::ul3::FRect&   iRect, FOdysseyBlock*        iTempBlock);
+	void                                ComputeResultBlockWithTempBuffer(const ::ul3::FRect&   iRect, FOdysseyBlock*        iTempBuffer);
     void                                BlendTempBufferOnCurrentBlock( const ::ul3::FRect&  iRect
                                                                      , FOdysseyBlock*       iTempBuffer
                                                                      , float                iOpacity    = 1.f

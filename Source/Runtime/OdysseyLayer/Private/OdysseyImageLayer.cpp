@@ -12,7 +12,6 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyImageLayer::~FOdysseyImageLayer()
 {
-    mOnIsAlphaLockedChanged.Clear();
     delete mBlock;
 }
 
@@ -112,11 +111,8 @@ FOdysseyImageLayer::IsAlphaLocked() const
 void
 FOdysseyImageLayer::SetIsAlphaLocked( bool iIsAlphaLocked )
 {
-	if (iIsAlphaLocked != mIsAlphaLocked)
-	{
-		mIsAlphaLocked = iIsAlphaLocked;
-		mOnIsAlphaLockedChanged.Broadcast(this);
-	}
+
+	mIsAlphaLocked = iIsAlphaLocked;
 }
 
 

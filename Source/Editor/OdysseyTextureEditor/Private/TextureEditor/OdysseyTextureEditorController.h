@@ -36,11 +36,6 @@ protected:
 
 public:
 	void OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer);
-	void OnLayerIsAlphaLockedChanged(FOdysseyImageLayer* iLayer);
-
-    //Both those functions are the same, but it seems better to keep them both, for clarity purposes
-    void OnLayerIsLockedChanged(IOdysseyLayer* iLayer);
-	void OnLayerIsVisibleChanged(IOdysseyLayer* iLayer);
 
     void OnExportLayersAsTextures();
     void OnImportTexturesAsLayers();

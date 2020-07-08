@@ -20,22 +20,6 @@
 FOdysseyTextureEditorController::~FOdysseyTextureEditorController()
 {
     mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-
-    TArray<IOdysseyLayer*> layersArray = TArray<IOdysseyLayer*>();
-    mData->LayerStack()->GetLayers()->DepthFirstSearchTree( &layersArray, false );
-
-    for( int i = 0; i < layersArray.Num(); i++ )
-    {
-        layersArray[i]->OnIsLockedChanged().RemoveAll(this);
-        layersArray[i]->OnIsVisibleChanged().RemoveAll(this);
-    
-        if (layersArray[i]->GetType() == IOdysseyLayer::eType::kImage) 
-        {
-    		FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layersArray[i]);
-            imageLayer->OnIsAlphaLockedChanged().RemoveAll(this);
-        }
-
-    }
 }
 
 FOdysseyTextureEditorController::FOdysseyTextureEditorController(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorGUI>& iGUI)
@@ -71,23 +55,12 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
     // Set Image Layer in PaintEngine
 	IOdysseyLayer* layer = mData->LayerStack()->GetCurrentLayer()->GetNodeContent();
 
-    if( layer )
+	if (layer->GetType() == IOdysseyLayer::eType::kImage) 
     {
-        if( !(layer->OnIsLockedChanged().IsBound()) )
-            layer->OnIsLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
-
-        if( !(layer->OnIsVisibleChanged().IsBound()) )
-            layer->OnIsVisibleChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged);
-    }
-
-	if (layer->GetType() == IOdysseyLayer::eType::kImage) {
 		FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mData->LayerStack()->GetCurrentLayer()->GetNodeContent());
-		if (imageLayer) {
+		if (imageLayer) 
+        {
 			mData->PaintEngine()->Block(imageLayer->GetBlock());
-
-			//Add Image Layer Callback
-            if( !(imageLayer->OnIsAlphaLockedChanged().IsBound()) )
-			    imageLayer->OnIsAlphaLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsAlphaLockedChanged);
 		}
 	}
 }
@@ -140,7 +113,7 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::
     FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(iChangedTiles);
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
-		mData->LayerStack()->ComputeResultBlockWithTempBlock(iChangedTiles[i], mData->PaintEngine()->TempBlock());
+		mData->LayerStack()->ComputeResultBlockWithTempBuffer(iChangedTiles[i], mData->PaintEngine()->TempBuffer());
 	}
 }
 
@@ -152,6 +125,7 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
 		mData->LayerStack()->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
+        mData->LayerStack()->BlendTempBufferOnCurrentBlock(iChangedTiles[i], mData->PaintEngine()->TempBuffer());
 	}
 }
 
@@ -174,7 +148,6 @@ void
 FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer)
 {
 	//Add Image Layer Callback
-	//imageLayer->OnIsAlphaLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged);
     if( mData->LayerStack()->GetCurrentLayer() == NULL )
     {
 		mData->PaintEngine()->Block(NULL);
@@ -183,100 +156,17 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(FOdysseyNTree< 
 
 	IOdysseyLayer* layer = mData->LayerStack()->GetCurrentLayer()->GetNodeContent();
 
-    if( layer )
+	if (layer->GetType() != IOdysseyLayer::eType::kImage) 
     {
-        OnLayerIsLockedChanged(layer);
-        if( !(layer->OnIsLockedChanged().IsBound()) )
-            layer->OnIsLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
-       
-        OnLayerIsVisibleChanged(layer);
-        if( !(layer->OnIsVisibleChanged().IsBound()) )
-            layer->OnIsVisibleChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged);
-    }
-
-	if (layer->GetType() != IOdysseyLayer::eType::kImage) {
 		mData->PaintEngine()->Block(NULL);
 		return;
 	}
 
 	FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(mData->LayerStack()->GetCurrentLayer()->GetNodeContent());
-	if (imageLayer) {
+	if (imageLayer) 
+    {
 		mData->PaintEngine()->Block(imageLayer->GetBlock());
-
-        OnLayerIsAlphaLockedChanged(imageLayer);
-        if( !(imageLayer->OnIsAlphaLockedChanged().IsBound()) )
-		    imageLayer->OnIsAlphaLockedChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsAlphaLockedChanged);
 	}
-}
-
-void
-FOdysseyTextureEditorController::OnLayerIsAlphaLockedChanged(FOdysseyImageLayer* iLayer)
-{
-    if( iLayer == mData->LayerStack()->GetCurrentLayer()->GetNodeContent() )
-    {
-	    if (iLayer->IsAlphaLocked())
-	    {
-		    mData->PaintEngine()->SetAlphaModeModifier(::ul3::AM_BACK);
-	    }
-	    else
-	    {
-		    mData->PaintEngine()->SetAlphaModeModifier(mData->AlphaMode());
-	    }
-    }
-}
-
-void
-FOdysseyTextureEditorController::OnLayerIsLockedChanged(IOdysseyLayer* iLayer)
-{
-    //simple case. If the current layer can't be drawn on, we just tell the paint engine to not draw, and be done with it.
-    bool allowedToPaint = mData->LayerStack()->GetCurrentLayer()->GetNodeContent()->IsVisible() && !mData->LayerStack()->GetCurrentLayer()->GetNodeContent()->IsLocked();
-    if( !allowedToPaint )
-    {
-        mData->PaintEngine()->SetIsAllowedToPaint(false);
-        return;
-    }
-
-    //harder case. If we can draw on the current layer, we check all parent folders of the current layer
-    FOdysseyNTree< IOdysseyLayer* >* checkedNode = mData->LayerStack()->GetCurrentLayer()->GetParent();
-    while( checkedNode->GetParent() != NULL ) //If parent is null, we're at the root of the layer stack
-    {
-        allowedToPaint = checkedNode->GetNodeContent()->IsVisible() && !checkedNode->GetNodeContent()->IsLocked();
-        if( !allowedToPaint )
-        {
-            mData->PaintEngine()->SetIsAllowedToPaint(false);
-            return;
-        }
-        checkedNode = checkedNode->GetParent();
-    }
-
-    mData->PaintEngine()->SetIsAllowedToPaint(true);
-}
-
-void
-FOdysseyTextureEditorController::OnLayerIsVisibleChanged(IOdysseyLayer* iLayer)
-{
-    //simple case. If the current layer can't be drawn on, we just tell the paint engine to not draw, and be done with it.
-    bool allowedToPaint = mData->LayerStack()->GetCurrentLayer()->GetNodeContent()->IsVisible() && !mData->LayerStack()->GetCurrentLayer()->GetNodeContent()->IsLocked();
-    if( !allowedToPaint )
-    {
-        mData->PaintEngine()->SetIsAllowedToPaint(false);
-        return;
-    }
-
-    //harder case. If we can draw on the current layer, we check all parent folders of the current layer
-    FOdysseyNTree< IOdysseyLayer* >* checkedNode = mData->LayerStack()->GetCurrentLayer()->GetParent();
-    while( checkedNode->GetParent() != NULL ) //If parent is null, we're at the root of the layer stack
-    {
-        allowedToPaint = checkedNode->GetNodeContent()->IsVisible() && !checkedNode->GetNodeContent()->IsLocked();
-        if( !allowedToPaint )
-        {
-            mData->PaintEngine()->SetIsAllowedToPaint(false);
-            return;
-        }
-        checkedNode = checkedNode->GetParent();
-    }
-
-    mData->PaintEngine()->SetIsAllowedToPaint(true);
 }
 
 void

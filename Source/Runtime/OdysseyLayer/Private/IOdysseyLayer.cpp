@@ -9,8 +9,6 @@
 
 IOdysseyLayer::~IOdysseyLayer()
 {
-    mOnIsLockedChanged.Clear();
-    mOnIsVisibleChanged.Clear();
 }
 
 IOdysseyLayer::IOdysseyLayer( const eType type )
@@ -65,11 +63,8 @@ IOdysseyLayer::IsLocked() const
 void
 IOdysseyLayer::SetIsLocked( bool iIsLocked )
 {
-    if( iIsLocked != mIsLocked )
-    {
-        mIsLocked = iIsLocked;
-	    mOnIsLockedChanged.Broadcast(this);
-    }
+
+    mIsLocked = iIsLocked;
 }
 
 bool
@@ -81,11 +76,7 @@ IOdysseyLayer::IsVisible() const
 void
 IOdysseyLayer::SetIsVisible( bool iIsVisible )
 {
-    if( iIsVisible != mIsVisible )
-    {
-        mIsVisible = iIsVisible;
-	    mOnIsVisibleChanged.Broadcast(this);
-    }
+    mIsVisible = iIsVisible;
 }
 
 FArchive& 

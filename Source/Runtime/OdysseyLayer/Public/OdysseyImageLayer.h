@@ -17,9 +17,6 @@ class FOdysseyBlock;
 class ODYSSEYLAYER_API FOdysseyImageLayer: public IOdysseyLayer
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsAlphaLockedChanged, FOdysseyImageLayer*);
-
-public:
     // Construction / Destruction
     virtual ~FOdysseyImageLayer();
     FOdysseyImageLayer( const FName& iName,FVector2D iSize,ETextureSourceFormat iTextureSourceFormat);
@@ -46,15 +43,12 @@ public:
 public:
     void CopyPropertiesFrom(const FOdysseyImageLayer &iCopy); // TODO: replace it by a Clone()/copy-ctor/...
 	
-	FOnIsAlphaLockedChanged&	OnIsAlphaLockedChanged() { return mOnIsAlphaLockedChanged; }
 private:
     // Private Data Members
     FOdysseyBlock*          mBlock;
     ::ul3::eBlendingMode    mBlendingMode;
     float                   mOpacity;
     bool                    mIsAlphaLocked;
-
-	FOnIsAlphaLockedChanged mOnIsAlphaLockedChanged;
 };
 
 ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer);

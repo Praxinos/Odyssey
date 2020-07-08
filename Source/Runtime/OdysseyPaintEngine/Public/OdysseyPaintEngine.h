@@ -35,7 +35,6 @@ public:
     // Public API
     void InterruptDelay();
     void Tick();
-    void SetIsAllowedToPaint( bool iIsAllowedToPaint );
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
     void SetColor( const ::ul3::FPixelValue& iColor );
     void SetSizeModifier( float iValue );
@@ -66,6 +65,7 @@ public:
     const ::ul3::FPixelValue& GetColor() const;
 	void Block(FOdysseyBlock* iBlock);
 	FOdysseyBlock* TempBlock();
+	FOdysseyBlock* TempBuffer();
 
     void UpdateBrushCursorPreview();
 
@@ -91,7 +91,6 @@ private:
 private:
     // Private Data Members
 	FOdysseyBlock*                      mBlock; // Holds th original block to edit
-	FOdysseyBlock*                      mTempBlock; //Holds the changed tiles (original + stroke)
 	FOdysseyBlock*                      mTempBuffer; //Holds the stroke tiles
     UOdysseyBrushAssetBase*             mBrushInstance;
 
@@ -118,7 +117,6 @@ private:
     IOdysseyInterpolation*              mInterpolator;
     IOdysseySmoothing*                  mSmoother;
     
-    bool                                mIsAllowedToPaint;
     bool                                mIsSmoothingEnabled;
     bool                                mIsRealTime;
     bool                                mIsCatchUp;
