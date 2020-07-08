@@ -1,7 +1,7 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "BoardTrack/BoardSection.h"
+#include "CinematicBoardTrack/CinematicBoardSection.h"
 
 #include "Rendering/DrawElements.h"
 #include "Textures/SlateIcon.h"
@@ -21,16 +21,16 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Editor.h"
 
-#include "BoardTrack/BoardTrackEditor.h"
+#include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 
-#define LOCTEXT_NAMESPACE "FBoardSection"
+#define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
 
-/* FBoardSection structors
+/* FCinematicBoardSection structors
  *****************************************************************************/
 
-FBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneCinematicBoardSection* iSection )
+FCinematicBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneCinematicBoardSection* iSection )
     : mInnerFrameRate( 1, 1 )
     , mInnerFrameOffset( 0 )
     , mSectionStartFrame( 0 )
@@ -51,7 +51,7 @@ FBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneCinema
 }
 
 bool
-FBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache& iRHS ) const
+FCinematicBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache& iRHS ) const
 {
     return mInnerFrameRate != iRHS.mInnerFrameRate 
         || mInnerFrameOffset != iRHS.mInnerFrameOffset 
@@ -61,39 +61,39 @@ FBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache&
 
 //---
 
-FBoardSection::FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool )
+FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FCinematicBoardTrackEditor> iCinematicBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool )
     : TSubSectionMixin( iSequencer, iSection, iSequencer, iThumbnailPool, iSection )
-    , mBoardTrackEditor( iBoardTrackEditor )
+    , mCinematicBoardTrackEditor( iCinematicBoardTrackEditor )
     , mThumbnailCacheData( &iSection )
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 }
 
 
-FBoardSection::~FBoardSection()
+FCinematicBoardSection::~FCinematicBoardSection()
 {
 }
 
 FText
-FBoardSection::GetSectionTitle() const
+FCinematicBoardSection::GetSectionTitle() const
 {
     return GetRenameVisibility() == EVisibility::Visible ? FText::GetEmpty() : HandleThumbnailTextBlockText();
 }
 
 float
-FBoardSection::GetSectionHeight() const
+FCinematicBoardSection::GetSectionHeight() const
 {
     return FViewportThumbnailSection::GetSectionHeight() + 2 * 9.f;
 }
 
 FMargin
-FBoardSection::GetContentPadding() const
+FCinematicBoardSection::GetContentPadding() const
 {
     return FMargin( 8.f, 15.f );
 }
 
 void
-FBoardSection::SetSingleTime( double iGlobalTime )
+FCinematicBoardSection::SetSingleTime( double iGlobalTime )
 {
     UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     double referenceOffsetSeconds = sectionObject.HasStartFrame() ? sectionObject.GetInclusiveStartFrame() / sectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() : 0;
@@ -167,7 +167,7 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
 }
 
 UCameraComponent*
-FBoardSection::GetViewCamera()
+FCinematicBoardSection::GetViewCamera()
 {
     TSharedPtr<ISequencer> sequencer = GetSequencer();
     if( !sequencer.IsValid() )
@@ -206,14 +206,14 @@ FBoardSection::GetViewCamera()
 }
 
 bool
-FBoardSection::IsReadOnly() const
+FCinematicBoardSection::IsReadOnly() const
 {
     // Overridden to false regardless of movie scene section read only state so that we can double click into the sub section
     return false;
 }
 
 void
-FBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime )
+FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime )
 {
     // Set cached data
     UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
@@ -239,7 +239,7 @@ FBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClipp
 }
 
 int32
-FBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
+FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
 {
     static const FSlateBrush* filmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
 
@@ -279,7 +279,7 @@ FBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
 }
 
 void
-FBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding )
+FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding )
 {
     FViewportThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
 
@@ -306,28 +306,28 @@ FBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid
             LOCTEXT( "InsertNewBoard", "Insert Board" ),
             LOCTEXT( "InsertNewBoardTooltip", "Insert a new board at the current time" ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mBoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::InsertBoard ) )
+            FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::InsertBoard ) )
         );
 
         ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "DuplicateBoard", "Duplicate Board" ),
             FText::Format( LOCTEXT( "DuplicateBoardTooltip", "Duplicate {0} to create a new board" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mBoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::DuplicateBoard, &sectionObject ) )
+            FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::DuplicateBoard, &sectionObject ) )
         );
 
         ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "RenderBoard", "Render Board" ),
             FText::Format( LOCTEXT( "RenderBoardTooltip", "Render board movie" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mBoardTrackEditor.Pin().ToSharedRef(), &FBoardTrackEditor::RenderBoard, &sectionObject ) )
+            FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::RenderBoard, &sectionObject ) )
         );
 
         ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "RenameBoard", "Rename Board" ),
             FText::Format( LOCTEXT( "RenameBoardTooltip", "Rename {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( this, &FBoardSection::EnterRename ) )
+            FUIAction( FExecuteAction::CreateSP( this, &FCinematicBoardSection::EnterRename ) )
         );
     }
     ioMenuBuilder.EndSection();
@@ -371,11 +371,11 @@ FBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid
 //    }
 //}
 
-/* FBoardSection callbacks
+/* FCinematicBoardSection callbacks
  *****************************************************************************/
 
 FText
-FBoardSection::HandleThumbnailTextBlockText() const
+FCinematicBoardSection::HandleThumbnailTextBlockText() const
 {
     const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     return FText::FromString( sectionObject.GetBoardDisplayName() );
@@ -383,7 +383,7 @@ FBoardSection::HandleThumbnailTextBlockText() const
 
 
 void
-FBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& iNewBoardName, ETextCommit::Type iCommitType )
+FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& iNewBoardName, ETextCommit::Type iCommitType )
 {
     if( iCommitType == ETextCommit::OnEnter && !HandleThumbnailTextBlockText().EqualTo( iNewBoardName ) )
     {

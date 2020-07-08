@@ -9,7 +9,7 @@
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 
-class FBoardTrackEditor;
+class FCinematicBoardTrackEditor;
 class FMenuBuilder;
 class FSequencerSectionPainter;
 class FTrackEditorThumbnailPool;
@@ -18,16 +18,16 @@ class UMovieSceneCinematicBoardSection;
 /**
  * Board section, which paints and ticks the appropriate section.
  */
-class FBoardSection
+class FCinematicBoardSection
     : public TSubSectionMixin<FViewportThumbnailSection>
 {
 public:
 
     /** Create and initialize a new instance. */
-    FBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FBoardTrackEditor> iBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool );
+    FCinematicBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FCinematicBoardTrackEditor> iCinematicBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool );
 
     /** Virtual destructor. */
-    virtual ~FBoardSection();
+    virtual ~FCinematicBoardSection();
 
 public:
 
@@ -55,7 +55,7 @@ private:
 private:
 
     /** The board track editor that contains this section */
-    TWeakPtr<FBoardTrackEditor> mBoardTrackEditor;
+    TWeakPtr<FCinematicBoardTrackEditor> mCinematicBoardTrackEditor;
 
     struct FCinematicSectionCache
     {

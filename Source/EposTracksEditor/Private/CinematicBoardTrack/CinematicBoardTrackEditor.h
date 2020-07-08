@@ -24,7 +24,7 @@ class UMovieSceneSubSection;
 /**
  * Tools for boards.
  */
-class FBoardTrackEditor
+class FCinematicBoardTrackEditor
     : public FMovieSceneTrackEditor
 {
 public:
@@ -34,10 +34,10 @@ public:
      *
      * @param InSequencer The sequencer instance to be used by this tool.
      */
-    FBoardTrackEditor( TSharedRef<ISequencer> iSequencer );
+    FCinematicBoardTrackEditor( TSharedRef<ISequencer> iSequencer );
 
     /** Virtual destructor. */
-    virtual ~FBoardTrackEditor()
+    virtual ~FCinematicBoardTrackEditor()
     {
     }
 
@@ -129,10 +129,10 @@ private:
 private:
 
     /** Callback for determining whether the "Add Board" menu entry can execute. */
-    bool HandleAddBoardTrackMenuEntryCanExecute() const;
+    bool HandleAddCinematicBoardTrackMenuEntryCanExecute() const;
 
     /** Callback for executing the "Add Board Track" menu entry. */
-    void HandleAddBoardTrackMenuEntryExecute();
+    void HandleAddCinematicBoardTrackMenuEntryExecute();
 
     /** Callback for generating the menu of the "Add Board" combo button. */
     TSharedRef<SWidget> HandleAddBoardComboButtonGetMenuContent();
@@ -144,7 +144,7 @@ private:
     void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData );
 
     /** Find or create a cinematic board track in the currently focused movie scene. */
-    UMovieSceneCinematicBoardTrack* FindOrCreateBoardTrack();
+    UMovieSceneCinematicBoardTrack* FindOrCreateCinematicBoardTrack();
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
     FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex );

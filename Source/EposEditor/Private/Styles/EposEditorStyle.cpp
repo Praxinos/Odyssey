@@ -39,7 +39,7 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_16x", Icon16x16 ) );
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_64x", Icon64x64 ) );
 
-    Set( "Sequencer.Tracks.Board", new IMAGE_BRUSH( "IconBoardTrack_16x", Icon16x16 ) );
+    Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "IconCinematicBoardTrack_16x", Icon16x16 ) );
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }

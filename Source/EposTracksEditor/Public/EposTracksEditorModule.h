@@ -15,7 +15,7 @@ public:
     virtual void ShutdownModule() override;
 
 private:
-    FDelegateHandle BoardTrackCreateEditorHandle;
+    FDelegateHandle CinematicBoardTrackCreateEditorHandle;
     FDelegateHandle AudioTrackCreateEditorHandle;
     FDelegateHandle LevelVisibilityTrackCreateEditorHandle;
 };
