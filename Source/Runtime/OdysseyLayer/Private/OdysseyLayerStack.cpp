@@ -68,6 +68,7 @@ FOdysseyLayerStack::Init( int iWidth, int iHeight )
     SetCurrentLayer( mLayers->GetNodes()->GetData()[0] );
 
     mDrawingUndo = new  FOdysseyDrawingUndo( this );
+    ComputeResultBlock();
 }
 
 void
@@ -92,6 +93,7 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
     SetCurrentLayer(  mLayers->GetNodes()->GetData()[0] );
 
     mDrawingUndo = new  FOdysseyDrawingUndo( this );
+    ComputeResultBlock();
 }
 
 FOdysseyBlock*
