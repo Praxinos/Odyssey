@@ -59,7 +59,7 @@ FOdysseyTextureEditorData::Init()
     mDisplaySurface = new FOdysseySurface( mLayerStack->GetResultBlock() );
     mLiveUpdateInfo.main = mDisplaySurface->Texture();
     mLiveUpdateInfo.live = mTexture;
-    mLiveUpdateInfo.enabled = false;
+    mLiveUpdateInfo.enabled = true;
     mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) ) );
 
     mDisplaySurface->Invalidate();
