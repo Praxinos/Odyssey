@@ -389,14 +389,13 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 
 					if (imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && !locked && iTempBuffer) //Current layer inside a folder
                     {
-                        FOdysseyBlock* tempBlock = new FOdysseyBlock(mWidth, mHeight, mTextureSourceFormat);
                         ::ul3::Copy( hULIS.ThreadPool()
                             , ULIS3_BLOCKING
                             , perfIntent
                             , hULIS.HostDeviceInfo()
                             , ULIS3_NOCB
                             , imageLayer->GetBlock()->GetBlock()
-                            , tempBlock->GetBlock()
+                            , mTempBlock->GetBlock()
                             , iRect
                             , ::ul3::FVec2I( iRect.x, iRect.y ) );
 
@@ -406,7 +405,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 							, hULIS.HostDeviceInfo()
 							, ULIS3_NOCB
 							, iTempBuffer->GetBlock()
-							, tempBlock->GetBlock()
+							, mTempBlock->GetBlock()
 							, iRect
 							, pos
 							, ULIS3_NOAA
@@ -419,7 +418,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 							, perfIntent
 							, hULIS.HostDeviceInfo()
 							, ULIS3_NOCB
-							, tempBlock->GetBlock()
+							, mTempBlock->GetBlock()
 							, folderBlocks[imageNode->GetParent()]->GetBlock()
 							, iRect
 							, pos
@@ -427,8 +426,6 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 							, imageLayer->GetBlendingMode()
 							, ::ul3::AM_NORMAL
 							, imageLayer->GetOpacity());
-
-                        delete tempBlock;
 					}
 					else //Other layer inside a folder
                     {
@@ -452,14 +449,13 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 			{
 				if (imageLayer && imageLayer == mCurrentLayer->GetNodeContent() && iTempBuffer) //Current layer
 				{
-                    FOdysseyBlock* tempBlock = new FOdysseyBlock(mWidth, mHeight, mTextureSourceFormat);
                     ::ul3::Copy( hULIS.ThreadPool()
                         , ULIS3_BLOCKING
                         , perfIntent
                         , hULIS.HostDeviceInfo()
                         , ULIS3_NOCB
                         , imageLayer->GetBlock()->GetBlock()
-                        , tempBlock->GetBlock()
+                        , mTempBlock->GetBlock()
                         , iRect
                         , ::ul3::FVec2I( iRect.x, iRect.y ) );
 
@@ -469,7 +465,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 						, hULIS.HostDeviceInfo()
 						, ULIS3_NOCB
 						, iTempBuffer->GetBlock()
-						, tempBlock->GetBlock()
+						, mTempBlock->GetBlock()
 						, iRect
 						, pos
 						, ULIS3_NOAA
@@ -482,7 +478,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 						, perfIntent
 						, hULIS.HostDeviceInfo()
 						, ULIS3_NOCB
-						, tempBlock->GetBlock()
+						, mTempBlock->GetBlock()
 						, mResultBlock->GetBlock()
 						, iRect
 						, pos
@@ -490,8 +486,6 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 						, imageLayer->GetBlendingMode()
 						, ::ul3::AM_NORMAL
 						, imageLayer->GetOpacity());
-
-                    delete tempBlock;
 				}
 				else if (imageLayer) //Other layer
                 {
