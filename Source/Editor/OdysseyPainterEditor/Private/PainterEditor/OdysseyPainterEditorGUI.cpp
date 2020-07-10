@@ -400,7 +400,7 @@ FOdysseyPainterEditorGUI::CreateTopTab(TSharedPtr<FOdysseyPainterEditorData>& iD
         .OnBlendingModeChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleBlendingModeModifierChanged )
         .OnAlphaModeChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleAlphaModeModifierChanged );
 
-	mTopTab->SetAlphaMode(iData->AlphaMode());
+	mTopTab->SetAlphaMode(iData->PaintEngine()->GetAlphaMode());
 	mTopTab->SetSize(20);
 	mTopTab->SetOpacity(100);
 	mTopTab->SetFlow(100);

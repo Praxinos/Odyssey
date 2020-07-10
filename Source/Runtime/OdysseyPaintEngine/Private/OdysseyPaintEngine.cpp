@@ -110,7 +110,6 @@ FOdysseyPaintEngine::Tick()
                 ::ul3::FVec2F pos(rect.x, rect.y);
                 ::ul3::FVec2I posi(pos.x, pos.y);
                 changedTiles.Add(rect);
-                // mLayerStack->ComputeResultBlockWithTempBuffer( tileRect, mTempBuffer, mOpacityModifier, mBlendingModeModifier, mAlphaModeModifier );
             }
         }
     }
@@ -133,9 +132,6 @@ FOdysseyPaintEngine::Tick()
                 changedTiles.Add(MakeTileRect(l, k));
             }
         }
-
-        /* if( IsRecordStarted )
-            mLayerStack->mDrawingUndo->EndRecord(); */
 
         if (changedTiles.Num() > 0) 
         {
@@ -197,21 +193,9 @@ FOdysseyPaintEngine::TempBuffer()
     return mTempBuffer;
 }
 
-/* void
-FOdysseyPaintEngine::SetLayerStack( FOdysseyLayerStack* iLayerStack )
-{
-    mLayerStack = iLayerStack;
-
-    CheckReallocTempBuffer();
-
-    UpdateBrushInstance();
-} */
-
 void
 FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 {
-    //InterruptStrokeAndStampInPlace();
-
     if( iBrushInstance != nullptr && mBrushInstance != iBrushInstance )
         iBrushInstance->ExecuteSelected();
 
@@ -420,6 +404,24 @@ bool
 FOdysseyPaintEngine::GetSmoothingCatchUp() const
 {
     return mIsCatchUp;
+}
+
+float
+FOdysseyPaintEngine::GetOpacity() const
+{
+    return mOpacityModifier;
+}
+
+::ul3::eBlendingMode
+FOdysseyPaintEngine::GetBlendingMode() const
+{
+    return mBlendingModeModifier;
+}
+
+::ul3::eAlphaMode 
+FOdysseyPaintEngine::GetAlphaMode() const
+{
+    return mAlphaModeModifier;
 }
 
 void

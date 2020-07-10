@@ -30,7 +30,6 @@ FOdysseyPainterEditorData::FOdysseyPainterEditorData()
     , mBrush( NULL )
     , mBrushInstance( NULL )
     , mDrawBrushPreview( true )
-	, mAlphaMode (::ul3::AM_NORMAL)
 {
 }
 
@@ -80,12 +79,6 @@ FOdysseyPainterEditorData::DrawBrushPreview()
 	return mDrawBrushPreview;
 }
 
-::ul3::eAlphaMode
-FOdysseyPainterEditorData::AlphaMode()
-{
-	return mAlphaMode;
-}
-
 void
 FOdysseyPainterEditorData::Brush(UOdysseyBrush* iBrush)
 {
@@ -102,10 +95,4 @@ void
 FOdysseyPainterEditorData::DrawBrushPreview(bool iDrawBrushPreview)
 {
 	mDrawBrushPreview = iDrawBrushPreview;
-}
-
-void
-FOdysseyPainterEditorData::AlphaMode(::ul3::eAlphaMode iAlphaMode)
-{
-	mAlphaMode = iAlphaMode;
 }

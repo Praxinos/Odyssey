@@ -42,9 +42,6 @@ public:
 
     // Performance Handlers
     void HandlePerformanceLiveUpdateChanged( bool iValue );
-	
-public:
-	virtual void HandleAlphaModeModifierChanged(int32 iValue) override;
 
 	virtual void OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles) override;

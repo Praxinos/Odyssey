@@ -113,7 +113,7 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::
     FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(iChangedTiles);
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
-		mData->LayerStack()->ComputeResultBlockWithTempBuffer(iChangedTiles[i], mData->PaintEngine()->TempBuffer());
+		mData->LayerStack()->ComputeResultBlockWithTempBuffer(iChangedTiles[i], mData->PaintEngine()->TempBuffer(), mData->PaintEngine()->GetOpacity(), mData->PaintEngine()->GetBlendingMode(), mData->PaintEngine()->GetAlphaMode());
 	}
 }
 
@@ -125,7 +125,7 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
 		mData->LayerStack()->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
-        mData->LayerStack()->BlendTempBufferOnCurrentBlock(iChangedTiles[i], mData->PaintEngine()->TempBuffer());
+        mData->LayerStack()->BlendTempBufferOnCurrentBlock(iChangedTiles[i], mData->PaintEngine()->TempBuffer(), mData->PaintEngine()->GetOpacity(), mData->PaintEngine()->GetBlendingMode(), mData->PaintEngine()->GetAlphaMode());
 	}
 }
 
@@ -238,18 +238,6 @@ FOdysseyTextureEditorController::OnImportTexturesAsLayers()
 
     mGUI->GetLayerStackTab()->RefreshView();
 	mData->LayerStack()->ComputeResultBlock();
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------- Paint engine driving methods
-
-void
-FOdysseyTextureEditorController::HandleAlphaModeModifierChanged( int32 iValue )
-{
-    if( !(mData->LayerStack()->GetCurrentLayer()) )
-        return;
-
-    return FOdysseyPainterEditorController::HandleAlphaModeModifierChanged(iValue);
 }
 
 //--------------------------------------------------------------------------------------

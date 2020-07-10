@@ -340,9 +340,7 @@ FOdysseyPainterEditorController::HandleBlendingModeModifierChanged( int32 iValue
 void
 FOdysseyPainterEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 {
-    ::ul3::eAlphaMode mode = static_cast<::ul3::eAlphaMode>(iValue);
-	GetData()->AlphaMode(mode);
-	GetData()->PaintEngine()->SetAlphaModeModifier( mode );
+	GetData()->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
 }
 
 //--------------------------------------------------------------------------------------

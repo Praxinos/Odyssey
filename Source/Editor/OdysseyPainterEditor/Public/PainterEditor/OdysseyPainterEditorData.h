@@ -32,13 +32,10 @@ public:
 	UOdysseyBrush*               Brush();
 	UOdysseyBrushAssetBase*      BrushInstance();
 	bool                         DrawBrushPreview();
-	::ul3::eAlphaMode            AlphaMode();
 
 	void						 Brush(UOdysseyBrush* iBrush);
 	void						 BrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
 	void                         DrawBrushPreview(bool iDrawBrushPreview);
-
-	void					     AlphaMode(::ul3::eAlphaMode iAlphaMode);
 
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
@@ -47,6 +44,5 @@ private:
 	UOdysseyBrush*              mBrush;              // NOT Owned
 	UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
 	bool                        mDrawBrushPreview;
-	::ul3::eAlphaMode			mAlphaMode; // The selecte dAlpha Mode (not always the alpha mode used by the paint engine)
 };
 

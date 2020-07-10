@@ -327,7 +327,7 @@ FOdysseyLayerStack::ComputeResultBlock( const ::ul3::FRect& iRect )
 }
 
 void
-FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer) 
+FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, FOdysseyBlock* iTempBuffer, float iOpacity, ::ul3::eBlendingMode iMode ,::ul3::eAlphaMode iAlphaMode)
 {
     //There is no current layer or the current layer is locked or not visible -> We don't need to redraw anything
     if( !mCurrentLayer || mCurrentLayer->GetNodeContent()->IsLocked() || !mCurrentLayer->GetNodeContent()->IsVisible() )
@@ -409,9 +409,9 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 							, iRect
 							, pos
 							, ULIS3_NOAA
-						    , ::ul3::BM_NORMAL
-							, imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : ::ul3::AM_NORMAL
-							, imageLayer->GetOpacity());
+						    , iMode
+							, imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : iAlphaMode
+							, iOpacity);
 
                         ::ul3::Blend(hULIS.ThreadPool()
 							, ULIS3_BLOCKING
@@ -469,9 +469,9 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
 						, iRect
 						, pos
 						, ULIS3_NOAA
-						, ::ul3::BM_NORMAL
-						, imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : ::ul3::AM_NORMAL
-						, imageLayer->GetOpacity());
+						, iMode
+						, imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : iAlphaMode
+						, iOpacity);
 
                     ::ul3::Blend(hULIS.ThreadPool()
 						, ULIS3_BLOCKING

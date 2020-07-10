@@ -55,6 +55,10 @@ public:
 
     bool GetStokePaintOnTick() const;
     bool GetSmoothingCatchUp() const;
+    float GetOpacity()         const;
+    ::ul3::eBlendingMode GetBlendingMode() const;
+    ::ul3::eAlphaMode GetAlphaMode() const;
+
 
     void PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst = false );
     void EndStroke();
