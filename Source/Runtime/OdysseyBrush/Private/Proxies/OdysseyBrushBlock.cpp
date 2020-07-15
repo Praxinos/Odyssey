@@ -15,7 +15,7 @@
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UOdysseyBrushAssetBase* BrushContext, UTexture2D* Texture )
+UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, UOdysseyBrushAssetBase* BrushContext )
 {
     if( !BrushContext ) return  FOdysseyBlockProxy::MakeNullProxy();
     if( !Texture )      return  FOdysseyBlockProxy::MakeNullProxy();

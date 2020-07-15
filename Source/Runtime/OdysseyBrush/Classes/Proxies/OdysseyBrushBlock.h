@@ -56,7 +56,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", DisplayName = "To OdysseyBlockProxy (Texture2D)", CompactNodeTitle = "->", BlueprintAutocast ) )
-    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UOdysseyBrushAssetBase* BrushContext, UTexture2D* Texture );
+    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, UOdysseyBrushAssetBase* BrushContext );
 
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
