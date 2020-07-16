@@ -590,7 +590,7 @@ FOdysseyLayerStack::BlendTempBufferOnCurrentBlock( const ::ul3::FRect& iRect, FO
                     , imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : iAlphaMode
                     , iOpacity );
 
-    //ComputeResultBlock( iRect );
+    mOnLayerStackDirty.Broadcast();
 }
 
 int
@@ -619,6 +619,7 @@ FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int
 {
     FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
     SetCurrentLayer(iPosition->AddNode(layer,iAtIndex));
+    mOnLayerStackDirty.Broadcast();
     return layer;
 }
 
@@ -627,6 +628,7 @@ FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 {
     FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
     SetCurrentLayer( mLayers->AddNode(layer,iAtIndex) );
+    mOnLayerStackDirty.Broadcast();
     return layer;
 }
 
@@ -650,6 +652,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IO
 
     FOdysseyImageLayer* layer = new FOdysseyImageLayer( iName.IsNone() ? GetNextLayerName() : iName, explicitCopyResized );
     iPosition->AddNode( layer,iAtIndex );
+    mOnLayerStackDirty.Broadcast();
     return  layer;
 }
 
@@ -674,6 +677,7 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int i
 
     FOdysseyImageLayer* layer = new FOdysseyImageLayer( iName.IsNone() ? GetNextLayerName() : iName,explicitCopyResized);
     mCurrentLayer->AddNode(layer,iAtIndex);
+    mOnLayerStackDirty.Broadcast();
     return layer;
 }
 
@@ -685,6 +689,7 @@ FOdysseyLayerStack::AddFolderLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,FN
 
     FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName);
     SetCurrentLayer( iPosition->AddNode(layer,iAtIndex) );
+    mOnLayerStackDirty.Broadcast();
     return layer;
 }
 
@@ -696,6 +701,7 @@ FOdysseyLayerStack::AddFolderLayer(FName iName,int iAtIndex)
 
     FOdysseyFolderLayer* layer = new FOdysseyFolderLayer( iName);
     SetCurrentLayer( mLayers->AddNode(layer,iAtIndex) );
+    mOnLayerStackDirty.Broadcast();
     return layer;
 }
 
@@ -742,6 +748,7 @@ FOdysseyLayerStack::SetCurrentLayer(IOdysseyLayer* iLayer)
 {
 	mCurrentLayer = mLayers->FindNode(iLayer);
 	mOnCurrentLayerChanged.Broadcast(mCurrentLayer);
+    mOnLayerStackDirty.Broadcast();
 }
 
 void
@@ -749,6 +756,7 @@ FOdysseyLayerStack::SetCurrentLayer(FOdysseyNTree< IOdysseyLayer* >* iLayer)
 {
     mCurrentLayer = iLayer;
 	mOnCurrentLayerChanged.Broadcast(mCurrentLayer);
+    mOnLayerStackDirty.Broadcast();
 }
 
 void
@@ -781,6 +789,8 @@ FOdysseyLayerStack::DeleteLayer(IOdysseyLayer* iLayerToDelete)
         SetCurrentLayer( mLayers->FindNode(layers[indexNewSelectedLayer]) );
     else
         SetCurrentLayer( mLayers->FindNode(layers.Last()) );
+
+    mOnLayerStackDirty.Broadcast();
 }
 
 void FOdysseyLayerStack::MergeDownLayer(IOdysseyLayer* iLayerToMergeDown)
@@ -895,6 +905,7 @@ void FOdysseyLayerStack::DuplicateLayer(IOdysseyLayer* iLayerToDuplicate)
     }
 
     ComputeResultBlock();
+    mOnLayerStackDirty.Broadcast();
 }
 
 void
@@ -908,6 +919,7 @@ FOdysseyLayerStack::ClearCurrentLayer()
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), canvasRect );
         ComputeResultBlock();
+        mOnLayerStackDirty.Broadcast();
     }
 }
 
@@ -922,6 +934,7 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), iColor, canvasRect );
         ComputeResultBlock();
+        mOnLayerStackDirty.Broadcast();
     }
 }
 

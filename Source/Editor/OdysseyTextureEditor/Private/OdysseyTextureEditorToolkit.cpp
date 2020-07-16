@@ -44,7 +44,6 @@ FOdysseyTextureEditorToolkit::SaveAsset_Execute()
 	mData->SyncTextureAndInvalidate();
 
     FAssetEditorToolkit::SaveAsset_Execute();
-    mData->Texture()->MarkPackageDirty(); //PATCH:
 }
 
 void
@@ -69,6 +68,7 @@ FOdysseyTextureEditorToolkit::SaveAssetAs_Execute()
 bool
 FOdysseyTextureEditorToolkit::OnRequestClose()
 {
+	mData->SyncTextureAndInvalidate();
 	mData->ApplyPropertiesBackup();
 
 	//TODO: Move in the right place

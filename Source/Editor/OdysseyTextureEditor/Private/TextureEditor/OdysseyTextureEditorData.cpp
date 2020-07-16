@@ -27,10 +27,7 @@ FOdysseyTextureEditorData::FOdysseyTextureEditorData(UTexture2D* iTexture)
 //----------------------------------------------------------------------- Initialization
 void
 FOdysseyTextureEditorData::Init()
-{
-    // Setup Texture
-    mTexture->MarkPackageDirty();
-    
+{    
 	// Backup Texture properties
 	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup };
     

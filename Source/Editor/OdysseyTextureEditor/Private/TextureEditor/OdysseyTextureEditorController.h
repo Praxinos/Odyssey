@@ -36,6 +36,7 @@ protected:
 
 public:
 	void OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer);
+	void OnLayerStackDirty();
 
     void OnExportLayersAsTextures();
     void OnImportTexturesAsLayers();

@@ -20,6 +20,7 @@
 FOdysseyTextureEditorController::~FOdysseyTextureEditorController()
 {
     mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+    mData->LayerStack()->OnLayerStackDirty().RemoveAll(this);
 }
 
 FOdysseyTextureEditorController::FOdysseyTextureEditorController(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorGUI>& iGUI)
@@ -48,6 +49,9 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
 	// Set LayerStack CB
     if( !(mData->LayerStack()->OnCurrentLayerChanged().IsBound()) )
 	    mData->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged);
+
+    if( !(mData->LayerStack()->OnLayerStackDirty().IsBound()) )
+	    mData->LayerStack()->OnLayerStackDirty().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackDirty);
 
     if( !mData->LayerStack()->GetCurrentLayer() )
         return;
@@ -167,6 +171,12 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(FOdysseyNTree< 
     {
 		mData->PaintEngine()->Block(imageLayer->GetBlock());
 	}
+}
+
+void
+FOdysseyTextureEditorController::OnLayerStackDirty()
+{
+    mData->Texture()->MarkPackageDirty();
 }
 
 void

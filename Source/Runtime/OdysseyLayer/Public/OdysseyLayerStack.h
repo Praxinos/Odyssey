@@ -20,6 +20,7 @@ class ODYSSEYLAYER_API FOdysseyLayerStack
 {
 public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentLayerChanged, FOdysseyNTree< IOdysseyLayer* >*);
+	DECLARE_MULTICAST_DELEGATE(FOnLayerStackDirty);
 
 public:
     // Construction / Destruction
@@ -76,6 +77,7 @@ public:
     friend ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack );
 
 	FOnCurrentLayerChanged&	OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
+    FOnLayerStackDirty& OnLayerStackDirty() { return mOnLayerStackDirty; }
 
 private:
     // Private API
@@ -95,6 +97,7 @@ private:
     bool                                mIsInitialized;
 
 	FOnCurrentLayerChanged				mOnCurrentLayerChanged;
+    FOnLayerStackDirty                  mOnLayerStackDirty;
 
 public:
     FOdysseyDrawingUndo*                mDrawingUndo;
