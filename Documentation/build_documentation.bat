@@ -10,4 +10,3 @@ pushd %~dp0
 cd ..
 
 doxygen %~dp0Doxyfile
-PAUSE

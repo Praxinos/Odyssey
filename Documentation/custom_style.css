@@ -1,24 +1,59 @@
 body {
-    background: rgb( 230, 230, 230 );
-    color: #282828;
+    /*background: rgb( 245, 245, 245 );*/
+    background: white;
+    color: #24292e;
+    font-family: 'Segoe UI Light';
+}
+
+#top {
+    background-color: rgb( 245, 245, 245 );
 }
 
 #titlearea {
-    padding: 10px;
-    display:block;
+    padding: 0px;
+    display:inline-block;
     box-sizing: border-box;
     margin: 0px;
-    width: 100%;
-    color: #00a99d;
-    background-color: #B0B0B0;
+    width: initial;
+    color: #0366d6;
+    background-color: #transparent;
+    border: 0px;
+    background: rgb( 245, 245, 245 );
+    padding-top: 10px;
+}
+
+#titlearea table tbody tr {
+    height:initial !important;
+}
+
+div.dynheader {
+    visibility:hidden;
 }
 
 #projectname {
     visibility:hidden;
+    font: 0%;
 }
 
 #projectbrief {
+    display:none;
     visibility:hidden;
+    font: 0%;
+}
+
+table #projectlogo {
+    text-align: left;
+    font-size:0px !important;
+    padding: 5px 20px 5px 20px;
+}
+
+#projectalign {
+    display: none;
+}
+
+dl.warning, dl.attention {
+    border-left: 0px solid;
+    border-color: #FFFFFF;
 }
 
 table.classindex {
@@ -26,9 +61,15 @@ table.classindex {
 }
 
 div.contents {
-    width: 80%;
+    width: 60%;
     margin: auto;
     background:white;
+    padding: 5px 35px 10px 35px;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-bottom-left-radius:2px;
+    border-bottom-right-radius:2px;
 }
 
 /* Class Index Title */
@@ -43,27 +84,42 @@ div.ah, span.ah {
     width:100%;
     border: none;
     box-shadow: none;
-    border-bottom: 2px solid #00a99d;
+    border-bottom: 1px solid #ccc;
 }
 
 a {
-    color: #00a99d;
+    font-weight: normal;
+    color: #0366d6;
+}
+
+a.el {
+    font-weight: normal;
+    font-family: 'Segoe UI';
 }
 
 .contents a:visited {
-    color: #00a99d;
+    color: #0366d6;
 }
 
 div.header {
+    width: 60%;
     background-image: none;
-    background: rgb( 248, 248, 248 );
-    margin: 0px;
-    border-bottom: 5px solid #00a99d;
+    background:white;
+    margin: auto;
+    margin-top: 50px;
+    border-bottom: 0px solid #0366d6;
+    padding: 15px 35px 5px 35px;
+
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    border-top-left-radius:2px;
+    border-top-right-radius:2px;
 }
 
 div.qindex, div.navtab {
     border: none;
-    background: rgb( 248, 248, 248 );
+    background: white;
     text-transform: uppercase;
 }
 
@@ -85,7 +141,7 @@ hr {
     height: 14px;
     width: 16px;
     display: inline-block;
-    background-color: #00a99d;
+    background-color: #0366d6;
     color: white;
     text-align: center;
     border-radius: 4px;
@@ -99,17 +155,21 @@ hr {
     padding-left: 40px;
 }
 
+div.headertitle {
+    padding: 0;
+}
+
 table.memberdecls {
 
     border-spacing: 0px;
     padding: 0px;
-    width:80%;
+    width:100%;
     margin:auto;
 }
 
 h2.groupheader {
-    border-bottom: 2px solid #00a99d;
-    color: #00a99d;
+    border-bottom: 0px;
+    color: #2C2C2C;
     font-size: 150%;
     font-weight: normal;
     margin-top: 1.75em;
@@ -119,7 +179,7 @@ h2.groupheader {
 }
 
 span.mlabel {
-    background-color: #00a99d;
+    background-color: #0366d6;
     border: none;
     text-shadow: none;
     color: white;
@@ -154,7 +214,7 @@ span.mlabel {
 
 .memproto, dl.reflist dt {
     border:none;
-    border-bottom: 2px solid #00a99d;
+    border-bottom: 1px solid #ccc;
     padding: 6px 0px 6px 0px;
     color: #282828;
     font-weight: bold;
@@ -176,7 +236,7 @@ div.memproto {
 div.textblock {
     padding: 15px;
     color: #282828;
-    font-weight: bold;
+    /*font-weight: bold;*/
     background-color: #white;
 }
 
@@ -231,12 +291,16 @@ div.textblock {
     padding: 0px;
 }
 
+a:hover {
+    /*text-decoration: none;*/
+}
+
 .sm-dox a:hover {
     background-image: none;
-    background: #00a99d;
-    color: white;
-    text-shadow: 0 1px 1px black;
+    color: #0366d6;
+    text-shadow: 0 0px 0px black;
     border:none;
+    text-decoration: none;
 }
 
 .image > img {
@@ -246,4 +310,215 @@ div.textblock {
 th.markdownTableHeadLeft, th.markdownTableHeadRight, th.markdownTableHeadCenter, th.markdownTableHeadNone {
     background: #FFFFFF;
     color:#000000;
+}
+
+table, table td, table th {
+    border: 0px solid #eee;
+    margin:0;
+    padding:0;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+[class^="separator"] {
+    height: 0px;
+    visibility: hidden;
+}
+
+table [class^="memitem"] {
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+tr.heading {
+    border-bottom: 1px solid #eee;
+}
+
+.memSeparator {
+    border-bottom: 0px;
+    margin: 0px;
+    line-height: 0px;
+    padding: 0px;
+    visibility: hidden;
+}
+
+.mdescLeft, .mdescRight, .memItemLeft, .memItemRight, .memTemplItemLeft, .memTemplItemRight, .memTemplParams {
+    background-color: white;
+}
+
+.memItemRight {
+    border-left: 1px solid #eee;
+}
+
+.memitem {
+    padding-bottom: 50px;
+}
+
+#main-nav {
+    display: inline-block;
+    /*width:100%;*/
+    background: rgb( 245, 245, 245 );
+    vertical-align: top;
+    padding-top: 12px;
+}
+
+#main-menu li a {
+    background-image: none;
+    color: #4C4C4C;
+    text-shadow: 0 0px 0px black;
+    border:none;
+    text-decoration: none;
+}
+
+.memTemplParams {
+    display:none;
+    visibility: hidden;
+    font: 0%;
+    height:0px;
+    padding:0;
+    margin:0;
+    padding:0;
+}
+
+.section.see dt {
+    display: inline;
+}
+
+.section.see dt:after {
+    content:":";
+}
+
+.section.see dd {
+    display: inline;
+    margin: 5px;
+}
+
+.section.warning dt {
+    display: inline;
+}
+
+.section.warning dt:after {
+    content:":";
+}
+
+.section.warning dd {
+    display: inline;
+    margin: 5px;
+}
+
+.title {
+    font: 400 14px/28px Segoe UI Black,sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+    font-size: 150%;
+    font-weight: bold;
+    margin: 10px 2px;
+}
+
+body, table, div, p, dl {
+    font: 400 14px/22px Segoe UI Semilight,sans-serif;
+}
+
+.sm-dox a, .sm-dox a:focus, .sm-dox a:hover, .sm-dox a:active {
+    padding: 0 12px;
+    padding-right: 43px;
+    font-family: "Segoe UI Light";
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 36px;
+    text-decoration: none;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.9);
+    color: #283a5d;
+    outline: 0;
+}
+
+dl.see {
+    margin-left: -7px;
+    padding-left: 3px;
+}
+
+table.directory tbody tr td:first-child {
+    width:80%;
+    text-overflow: ellipsis;
+    overflow:hidden;
+}
+
+table.directory tbody tr td:last-child {
+    text-align:right;
+}
+
+table.directory {
+    font: 400 14px/22px Segoe UI Semilight,sans-serif;
+    width: 100%;
+    table-layout: fixed;
+}
+
+div.directory {
+    margin: 10px 0px;
+    border-top: 1px solid #ccc;
+    border-bottom: 0px;
+    width: 100%;
+}
+
+.arrow {
+    color: #79b8ff;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    font-size: 80%;
+    display: inline-block;
+    width: 16px;
+    height: 22px;
+    font-family: "Arial Black";
+}
+
+.iconfopen {
+    width: 24px;
+    height: 18px;
+    margin-bottom: 4px;
+    background-image: url('folderopen.png');
+    background-position: 0px 0px;
+    background-repeat: repeat-y;
+    vertical-align: top;
+    display: inline-block;
+}
+
+.iconfclosed {
+    width: 24px;
+    height: 18px;
+    margin-bottom: 4px;
+    background-image: url('folderclosed.png');
+    background-position: 0px 0px;
+    background-repeat: repeat-y;
+    vertical-align: top;
+    display: inline-block;
+}
+
+.icondoc {
+    width: 24px;
+    height: 18px;
+    margin-bottom: 4px;
+    background-image: url('doc.png');
+    background-position: 0px 0px;
+    background-repeat: repeat-y;
+    vertical-align: top;
+    display: inline-block;
+}
+
+span.comment {
+    color: #008000;
+}
+
+span.keyword {
+    color: #0066ff;
 }
