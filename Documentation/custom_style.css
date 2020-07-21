@@ -18,6 +18,17 @@ body {
     width: initial;
 }
 
+.directory .levels span {
+    cursor: pointer;
+    padding-left: 2px;
+    padding-right: 2px;
+    color: #d3a800;
+}
+
+div.navpath {
+    display:none;
+}
+
 .dyncontent {
     background: grey;
     padding:10px;
@@ -178,7 +189,7 @@ span.mlabel {
     background-color: #d3a800;
     border: none;
     text-shadow: none;
-    color: white;
+    color: black;
     margin-right: 4px;
     padding: 2px 3px;
     border-radius: 3px;
