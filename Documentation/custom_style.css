@@ -1,25 +1,26 @@
 body {
-    /*background: rgb( 245, 245, 245 );*/
-    background: white;
-    color: #24292e;
+    background: #282828;
+    color: #b5b5b5;
     font-family: 'Segoe UI Light';
 }
 
 #top {
-    background-color: rgb( 245, 245, 245 );
+    background-color: #303030;
 }
 
 #titlearea {
     padding: 0px;
+    padding-top: 10px;
+    border: 0px;
     display:inline-block;
     box-sizing: border-box;
     margin: 0px;
     width: initial;
-    color: #0366d6;
-    background-color: #transparent;
-    border: 0px;
-    background: rgb( 245, 245, 245 );
-    padding-top: 10px;
+}
+
+.dyncontent {
+    background: grey;
+    padding:10px;
 }
 
 #titlearea table tbody tr {
@@ -27,23 +28,18 @@ body {
 }
 
 div.dynheader {
-    visibility:hidden;
+    display:none;
 }
 
 #projectname {
-    visibility:hidden;
-    font: 0%;
+    display:none;
 }
 
 #projectbrief {
     display:none;
-    visibility:hidden;
-    font: 0%;
 }
 
 table #projectlogo {
-    text-align: left;
-    font-size:0px !important;
     padding: 5px 20px 5px 20px;
 }
 
@@ -63,11 +59,11 @@ table.classindex {
 div.contents {
     width: 60%;
     margin: auto;
-    background:white;
+    background: #282828;
     padding: 5px 35px 10px 35px;
-    border-left: 1px solid #ddd;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #424242;
+    border-right: 1px solid #424242;
+    border-bottom: 1px solid #424242;
     border-bottom-left-radius:2px;
     border-bottom-right-radius:2px;
 }
@@ -76,20 +72,20 @@ div.contents {
 div.ah, span.ah {
     font-size: 40px;
     text-transform: uppercase;
-    color: #282828;
+    color: #b5b5b5;
     background-image: none;
-    background-color: rgba( 0, 0, 0, 0 );
+    background-color: transparent;
     border-radius: 0px;
     display: block;
     width:100%;
     border: none;
     box-shadow: none;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #424242;
 }
 
 a {
     font-weight: normal;
-    color: #0366d6;
+    color: #d3a800;
 }
 
 a.el {
@@ -98,28 +94,28 @@ a.el {
 }
 
 .contents a:visited {
-    color: #0366d6;
+    color: #d3a800;
 }
 
 div.header {
     width: 60%;
     background-image: none;
-    background:white;
+    background:#282828;
     margin: auto;
     margin-top: 50px;
-    border-bottom: 0px solid #0366d6;
     padding: 15px 35px 5px 35px;
 
-    border-left: 1px solid #ddd;
-    border-right: 1px solid #ddd;
-    border-top: 1px solid #ddd;
+    border-left: 1px solid #424242;
+    border-right: 1px solid #424242;
+    border-top: 1px solid #424242;
+    border-bottom: 0px;
     border-top-left-radius:2px;
     border-top-right-radius:2px;
 }
 
 div.qindex, div.navtab {
     border: none;
-    background: white;
+    background: transparent;
     text-transform: uppercase;
 }
 
@@ -141,7 +137,7 @@ hr {
     height: 14px;
     width: 16px;
     display: inline-block;
-    background-color: #0366d6;
+    background-color: #d3a800;
     color: white;
     text-align: center;
     border-radius: 4px;
@@ -169,7 +165,7 @@ table.memberdecls {
 
 h2.groupheader {
     border-bottom: 0px;
-    color: #2C2C2C;
+    color: #b5b5b5;
     font-size: 150%;
     font-weight: normal;
     margin-top: 1.75em;
@@ -179,7 +175,7 @@ h2.groupheader {
 }
 
 span.mlabel {
-    background-color: #0366d6;
+    background-color: #d3a800;
     border: none;
     text-shadow: none;
     color: white;
@@ -201,22 +197,21 @@ span.mlabel {
 
 .memtemplate {
     font-size: 80%;
-    color: #714D24;
+    color: #545454;
     font-weight: normal;
     margin-left: 9px;
 }
 
-
 .memTemplParams {
-    color: #714D24;
+    color: #545454;
     padding-left: 75px;
 }
 
 .memproto, dl.reflist dt {
     border:none;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #424242;
     padding: 6px 0px 6px 0px;
-    color: #282828;
+    color: #b5b5b5;
     font-weight: bold;
     border-radius: 0px;
     box-shadow: none;
@@ -224,7 +219,7 @@ span.mlabel {
 }
 
 div.memproto {
-    background-color: rgba( 0, 0, 0, 0 );
+    background-color: #303030;
 }
 
 .memname {
@@ -235,9 +230,8 @@ div.memproto {
 
 div.textblock {
     padding: 15px;
-    color: #282828;
-    /*font-weight: bold;*/
-    background-color: #white;
+    color: #b5b5b5;
+    background-color: transparent;
 }
 
 .memdoc, dl.reflist dd {
@@ -264,6 +258,7 @@ div.textblock {
     background-image: none;
     line-height: 36px;
 }
+
 .sm-dox {
     background-image: none;
 }
@@ -297,23 +292,39 @@ a:hover {
 
 .sm-dox a:hover {
     background-image: none;
-    color: #0366d6;
+    color: #d3a800;
     text-shadow: 0 0px 0px black;
     border:none;
     text-decoration: none;
 }
 
-.image > img {
-    max-width:200px;
+table.markdownTable {
+    width: initial;
 }
 
 th.markdownTableHeadLeft, th.markdownTableHeadRight, th.markdownTableHeadCenter, th.markdownTableHeadNone {
-    background: #FFFFFF;
-    color:#000000;
+    background: transparent;
+    color: #b5b5b5;
+}
+
+
+table.markdownTable td, table.markdownTable th {
+    border: 1px solid #424242;
+}
+
+.markdownTableRowOdd {
+    background: #303030;
+}
+
+div.fragment {
+    padding: 5px 5px 5px 5px;
+    margin: 4px 8px 4px 2px;
+    background-color: #151515;
+    border: 1px solid #424242;
 }
 
 table, table td, table th {
-    border: 0px solid #eee;
+    border: 0px solid;
     margin:0;
     padding:0;
 }
@@ -331,60 +342,52 @@ table {
 }
 
 table [class^="memitem"] {
-    border-left: 1px solid #eee;
-    border-right: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    background: white;
+    border-left: 1px solid #424242;
+    border-right: 1px solid #424242;
+    border-bottom: 1px solid #424242;
+    background: transparent;
 }
 
 tr.heading {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #424242;
 }
 
 .memSeparator {
-    border-bottom: 0px;
-    margin: 0px;
-    line-height: 0px;
-    padding: 0px;
-    visibility: hidden;
+    display:none;
 }
 
 .mdescLeft, .mdescRight, .memItemLeft, .memItemRight, .memTemplItemLeft, .memTemplItemRight, .memTemplParams {
-    background-color: white;
+    background-color: transparent;
 }
 
 .memItemRight {
-    border-left: 1px solid #eee;
+    border-left: 1px solid #424242;
 }
 
 .memitem {
-    padding-bottom: 50px;
+    padding-bottom: 20px;
 }
 
 #main-nav {
     display: inline-block;
-    /*width:100%;*/
-    background: rgb( 245, 245, 245 );
     vertical-align: top;
     padding-top: 12px;
 }
 
 #main-menu li a {
+    color: #b5b5b5;
     background-image: none;
-    color: #4C4C4C;
-    text-shadow: 0 0px 0px black;
+    text-shadow: none;
     border:none;
     text-decoration: none;
 }
 
+.directory tr.even {
+    background: #303030;
+}
+
 .memTemplParams {
-    display:none;
-    visibility: hidden;
-    font: 0%;
-    height:0px;
-    padding:0;
-    margin:0;
-    padding:0;
+    display: none;
 }
 
 .section.see dt {
@@ -445,7 +448,7 @@ dl.see {
 }
 
 table.directory tbody tr td:first-child {
-    width:80%;
+    width:60%;
     text-overflow: ellipsis;
     overflow:hidden;
 }
@@ -468,7 +471,7 @@ div.directory {
 }
 
 .arrow {
-    color: #79b8ff;
+    color: #d3a800;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
