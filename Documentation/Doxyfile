@@ -1256,8 +1256,10 @@ HTML_EXTRA_STYLESHEET  = "./documentation/custom_style.css"
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       =    "./documentation/images/doc.png"           \
-                            "./documentation/images/folderclosed.png"  \
+HTML_EXTRA_FILES       =    "./documentation/images/doc.png"            \
+                            "./documentation/images/open.png"           \
+                            "./documentation/images/closed.png"         \
+                            "./documentation/images/folderclosed.png"   \
                             "./documentation/images/folderopen.png"
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
