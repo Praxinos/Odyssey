@@ -135,6 +135,25 @@ def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
 
     return Path( main_folder ) / date_folder / iPluginName
 
+# Get the name of the zip (with version/...)
+def GetZipName( iArgs, iUPluginPathFile, iPluginName ):
+    global gOperatingSystem
+    
+    uplugin_data = {}
+    with iUPluginPathFile.open() as infile:
+        uplugin_data = json.load( infile )
+        
+    zip_name = []
+    zip_name.append( iPluginName )
+    zip_name.append( uplugin_data["VersionName"] )
+    zip_name.append( 'beta' if uplugin_data['IsBetaVersion'] else '' )
+    if not iArgs.marketplace:
+        zip_name.append( gOperatingSystem )
+    zip_name = list( filter( None, zip_name ) )
+    zip_name = '-'.join( zip_name )
+
+    return zip_name
+
 # Get output package directory
 def ProcessArgumentForOutputPath( iArgs, iIntermediateFolders ):
     output_path = Path( iArgs.output_dir ).resolve()
@@ -294,9 +313,9 @@ def Clean( iArgs, iOutputPath ):
 #---
 
 # Zipping
-def Zip( iArgs, iOutputPath ):
-    folder_to_zip = iOutputPath
-    pathfile_zip = folder_to_zip # extension added by make_archive
+def Zip( iArgs, iPathToZip, iZipName ):
+    folder_to_zip = iPathToZip
+    pathfile_zip = iPathToZip.parent / iZipName # extension added by make_archive
     print( Fore.GREEN + f'Zipping: {folder_to_zip} -> {pathfile_zip}.zip' )
     pathfile_zip = shutil.make_archive( pathfile_zip, 'zip', folder_to_zip.parents[0], folder_to_zip.name )
 
@@ -320,6 +339,7 @@ args = GetArguments()
 
 uplugin_pathfile, plugin_name   = ProcessArgumentForInputPath( args )
 intermediate_folders            = GetIntermediateFolders( args, uplugin_pathfile, plugin_name )
+zip_name                        = GetZipName( args, uplugin_pathfile, plugin_name )
 output_path                     = ProcessArgumentForOutputPath( args, intermediate_folders )
 upload_path                     = ProcessArgumentForUploadPath( args, intermediate_folders )
 ulis_binaries_path              = ProcessArgumentForUlisBinariesPath( args )
@@ -331,13 +351,13 @@ Build( uplugin_pathfile, output_path )
 
 #---
 
-PostBuildFixPlatforms( args, output_path )                              # For marketplace package, the plugin must know all the os supported
+PostBuildFixPlatforms( args, output_path )                              # For marketplace package, the uplugin file must know all the os supported
 PostBuildUpdateUlisBinaries( args, output_path, ulis_binaries_path )    # Replace the Ulis binaries of the generated package (which comes from the local binaries) by the ones on pcloud which contains both windows/mac builds
 
 #---
 
 Clean( args, output_path )
 
-Zip( args, output_path )
+Zip( args, output_path, zip_name )
 
 Upload( args, output_path, upload_path )
