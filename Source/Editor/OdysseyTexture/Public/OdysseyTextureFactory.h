@@ -11,7 +11,8 @@
 #include "OdysseyTextureFactory.generated.h"
 
 UCLASS()
-class UOdysseyTextureFactory : public UFactory
+class UOdysseyTextureFactory 
+    : public UFactory
 {
     GENERATED_UCLASS_BODY()
 
@@ -20,8 +21,12 @@ private:
 
     virtual bool ConfigureProperties() override;
 
+    virtual FString GetDefaultNewAssetName() const;
 
 private:
-    int mTextureWidth;
-    int mTextureHeight;
+    int                  mTextureWidth;
+    int                  mTextureHeight;
+    ETextureSourceFormat mTextureFormat;
+    FString              mDefaultName;
+    FLinearColor         mBackgroundColor;
 };

@@ -44,7 +44,8 @@ namespace UnrealBuildTool.Rules
                     "OdysseyLayer",
                     "Slate",
                     "SlateCore",
-                    "UnrealEd"
+                    "UnrealEd",
+                    //"AppFramework", // For SColorPicker inside OdysseyTextureFactory.cpp
 					// "Core",
 					// "MainFrame",
 					// ... add private dependencies that you statically link with here ...
