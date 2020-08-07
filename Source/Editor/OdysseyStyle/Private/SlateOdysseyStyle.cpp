@@ -338,6 +338,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.Merge16", new IMAGE_BRUSH( "OdysseyLayerStack/merge_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.AlphaLocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_locked_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.AlphaUnlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_unlocked_16", mIcon16x16 ) );
+    
+    //OdysseyViewportDrawingEditor
+    Set("OdysseyViewportDrawingEditMode.SetOdysseyBrushSettingsView", new IMAGE_BRUSH("PainterEditor/brush_selector_16", mIcon16x16 ));
+	Set("OdysseyViewportDrawingEditMode.SetOdysseyLayerStackView", new IMAGE_BRUSH("PainterEditor/layers_16", mIcon16x16 ));
+	Set("OdysseyViewportDrawingEditMode.SetOdysseyStrokeOptions", new IMAGE_BRUSH("PainterEditor/stroke_options_16", mIcon16x16 ));
+	Set("OdysseyViewportDrawingEditMode.SetOdysseyPerformanceOptions", new IMAGE_BRUSH("PainterEditor/performance_tools_16", mIcon16x16 ));
+    Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_16",mIcon16x16));
+    Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_40",mIcon40x40));
 
     //TableRow
     Set( "TableRow.BaseColorRowHovered16", new IMAGE_BRUSH( "TableRow/base_color_row_hovered_16", mIcon16x16 ) );

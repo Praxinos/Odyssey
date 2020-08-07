@@ -7,7 +7,6 @@
 
 class FOdysseyPaintEngine;
 class FOdysseyUndoHistory;
-class FOdysseyBlock;
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;
 class FOdysseySurfaceEditable;
