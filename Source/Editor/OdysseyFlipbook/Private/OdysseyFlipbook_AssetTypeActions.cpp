@@ -28,7 +28,7 @@ FOdysseyFlipbookAssetTypeActions::GetName() const
 FColor
 FOdysseyFlipbookAssetTypeActions::GetTypeColor() const
 {
-    return FColor( 255, 0, 0 );
+    return FColor( 129, 196, 115 );
 }
 
 UClass*
