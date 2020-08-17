@@ -24,7 +24,7 @@ public:
     FOdysseyPainterEditorToolkit();
 
 public:
-    void InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UObject* iObjectToEdit );
+    void InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit);
 
 protected:
     // FAssetEditorToolkit interface

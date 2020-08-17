@@ -63,17 +63,19 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView){}
         /** Externally supplied scroll bar */
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
+		/** Node Tree to display */
+		SLATE_ATTRIBUTE(TSharedPtr<FOdysseyLayerStackTree>, NodeTree)
         /** Called to populate the context menu. */
         SLATE_EVENT( FOnGetContextMenuContent, OnGetContextMenuContent )
     SLATE_END_ARGS()
 
     /** Construct this widget */
-    void Construct(const FArguments& InArgs, const TSharedRef<FOdysseyLayerStackTree>& iNodeTree);
+    void Construct(const FArguments& InArgs);
 
 public:
     //PUBLIC API
     /** Access the underlying tree data */
-    TSharedPtr<FOdysseyLayerStackTree> GetNodeTree() { return mLayerStackNodeTree; }
+    TSharedPtr<FOdysseyLayerStackTree> GetNodeTree() { return mLayerStackNodeTree.Get(); }
 
     /** Refresh this tree as a result of the underlying tree data changing */
     void Refresh( int iOverrideNewSelectedNodeIndex = -1 );
@@ -111,7 +113,7 @@ private:
     TSharedPtr<SHeaderRow> mHeaderRow;
 
     /** Pointer to the node tree data that is used to populate this tree */
-    TSharedPtr<FOdysseyLayerStackTree> mLayerStackNodeTree;
+    TAttribute<TSharedPtr<FOdysseyLayerStackTree>> mLayerStackNodeTree;
 
     /** Cached copy of the root nodes from the tree data */
     TArray<IOdysseyBaseLayerNodeRef> mRootNodes;

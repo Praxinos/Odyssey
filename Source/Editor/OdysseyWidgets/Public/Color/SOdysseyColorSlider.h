@@ -16,7 +16,7 @@
 #include "Widgets/SPanel.h"
 #include "SOdysseyLeafWidget.h"
 #include "Widgets/Input/SSpinBox.h"
-#include "OdysseySurface.h"
+#include "OdysseySurfaceEditable.h"
 #include <ULIS3>
 
 DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
@@ -94,7 +94,7 @@ protected:
 
 private:
     // Private data members
-    mutable TUniquePtr< FOdysseySurface > cursor_surface;
+    mutable TUniquePtr< FOdysseySurfaceEditable > cursor_surface;
     mutable TUniquePtr< FSlateBrush > cursor_brush;
     mutable FVector2D cursor_size;
     float cursor_t;

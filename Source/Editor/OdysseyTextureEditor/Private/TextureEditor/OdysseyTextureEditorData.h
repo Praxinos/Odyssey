@@ -32,10 +32,9 @@ public:
 	virtual void Init() override;
 
     // Paint engine driving methods
-	UTexture2D*                 Texture();
-    FOdysseyLayerStack*			LayerStack();
-	FOdysseyLiveUpdateInfo*     LiveUpdateInfo();
-	virtual FOdysseySurface*    DisplaySurface() override;
+	UTexture2D*							Texture();
+    FOdysseyLayerStack*					LayerStack();
+	virtual FOdysseySurfaceEditable*    DisplaySurface() override;
 
 public:
 	void SyncTextureAndInvalidate();
@@ -44,8 +43,7 @@ public:
 private:
     UTexture2D*                 mTexture;
     FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
-	FOdysseyLiveUpdateInfo      mLiveUpdateInfo;
-	FOdysseySurface*            mDisplaySurface;
+	FOdysseySurfaceEditable*            mDisplaySurface;
 
     FTexturePropertiesBackup    mPropertiesBackup;
 };

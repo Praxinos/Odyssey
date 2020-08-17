@@ -3,7 +3,7 @@
 
 #include "Color/SOdysseyAdvancedColorWheel.h"
 #include "OdysseyStyleSet.h"
-#include "OdysseySurface.h"
+#include "OdysseySurfaceEditable.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>
 
@@ -396,7 +396,7 @@ SOdysseyAdvancedColorWheel::OnResizeEvent( const FVector2D& iNewSize ) const
 void
 SOdysseyAdvancedColorWheel::InitInternalBuffers() const
 {
-    surface = MakeUnique< FOdysseySurface >( triangle_buffer_size.X, triangle_buffer_size.Y );
+    surface = MakeUnique< FOdysseySurfaceEditable >( triangle_buffer_size.X, triangle_buffer_size.Y );
     ItemBrush = MakeUnique< FSlateBrush >();
     ItemBrush->SetResourceObject( surface->Texture() );
     ItemBrush->ImageSize.X = surface->Width();

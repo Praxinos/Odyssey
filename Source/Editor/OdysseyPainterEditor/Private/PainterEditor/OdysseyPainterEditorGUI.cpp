@@ -45,8 +45,8 @@ FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 	delete mPerformanceOptions;
 }
 
-FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI()
-	: mLayout(FTabManager::NewLayout("OdysseyPainterEditor_Layout"))
+FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(const FName iLayoutName)
+	: mLayout(FTabManager::NewLayout(iLayoutName))
 	, mPerformanceOptions( NULL )
 {
 }

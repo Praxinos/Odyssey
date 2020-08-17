@@ -72,6 +72,8 @@ public:
     const TSharedRef< FLinearColor > mDefaultForeground_LinearRef;
     const FSlateColor mDefaultForeground;
 
+    FButtonStyle mButton;
+
     FTableRowStyle mNormalTableRowStyle;
 };
 
@@ -106,6 +108,8 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
     , mDefaultForeground_LinearRef( MakeShareable( new FLinearColor( 0.72f, 0.72f, 0.72f, 1.f ) ) )
     , mDefaultForeground( mDefaultForeground_LinearRef )
 
+    , mButton()
+
     , mNormalTableRowStyle()
 {
 }
@@ -138,6 +142,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 #if WITH_EDITOR
     //OdysseyTexture
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
+    Set( "ClassIcon.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_16x", mIcon16x16));
+	Set( "ClassThumbnail.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_64x", mIcon64x64));
+			
 
     // OdysseyBrush
     Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
@@ -359,6 +366,66 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetNormalPadding( FMargin(0,0) )
         .SetPressedPadding( FMargin(0,0) )
         );
+
+	//For flipbook
+	Set("FlipbookTimeline.RegionGrabHandle", new BOX_BRUSH("OdysseyFlipbook/ScrubHandleWhole", FMargin(6.f / 13.f, 10 / 24.f, 6 / 13.f, 10 / 24.f)));
+	Set("FlipbookTimeline.RegionBody", new BOX_BRUSH("OdysseyFlipbook/Scrollbar_Thumb", FMargin(4.f / 16.f)));
+	Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 8.f)));
+	Set("FlipbookTimeline.TimelineFrameLengthHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameLengthHandle", FVector2D(16.f, 16.f)));
+    Set("FlipbookTimeline.TimelineFrameWarning", new IMAGE_BRUSH("OdysseyFlipbook/icon_warning_16x", FVector2D(16.f, 16.f)));
+	
+	//PlaybackControls
+	Set("PlaybackControls.Play", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.Stop", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.Beginning", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.End", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.Previous", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.Next", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.Looping", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.NotLooping", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_ON_24", mIcon24x24))
+	);
+
+    //OdysseyScrubWidget
+    Set("ScrubWidget.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
+    Set("ScrubWidget.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
 
 #endif
 }

@@ -120,25 +120,6 @@ public:
     void  Construct( const  FArguments&  InArgs );
 
 public:
-    // Public Callbacks
-    // const FOdysseyPerformanceOptions&  GetPerformanceOptions()  const;
-    // void  SetPerformanceOptions( const  FOdysseyPerformanceOptions& iValue );
-
-    // void  SetPerformanceOptionLiveUpdate        ( bool iValue );
-    // void  SetPerformanceOptionBrushPreview      ( bool iValue );
-
-    /* void  SetPeformanceCacheInfoSuperSize       ( int32 iValue );
-    void  SetPeformanceCacheInfoSuperCount      ( int32 iValue );
-    void  SetPeformanceCacheInfoStateSize       ( int32 iValue );
-    void  SetPeformanceCacheInfoStateCount      ( int32 iValue );
-    void  SetPeformanceCacheInfoStrokeSize      ( int32 iValue );
-    void  SetPeformanceCacheInfoStrokeCount     ( int32 iValue );
-    void  SetPeformanceCacheInfoSubstrokeSize   ( int32 iValue );
-    void  SetPeformanceCacheInfoSubstrokeCount  ( int32 iValue );
-    void  SetPeformanceCacheInfoStepSize        ( int32 iValue );
-    void  SetPeformanceCacheInfoStepCount       ( int32 iValue ); */
-
-public:
     // FNotifyHook Interface
     virtual void NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged) override;
 
@@ -147,9 +128,5 @@ private:
     TSharedPtr< IStructureDetailsView > PerformanceOptionsDetailsView;
     FOdysseyPerformanceOptions*         PerformanceOptionsStructData;
     TSharedPtr< FStructOnScope >        PerformanceOptionsStructToDisplay;
-
-    // FOnBooleanValueChanged  OnLiveUpdateChangedCallback  ;
-    // FOnBooleanValueChanged  OnDrawBrushPreviewChangedCallback  ;
-    // FOnBooleanValueChanged  OnAnyValueChangedCallback           ;
 };
 

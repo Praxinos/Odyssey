@@ -185,7 +185,7 @@ SOdysseyLeafWidget::OnResizeEvent( const FVector2D& iNewSize ) const
 void
 SOdysseyLeafWidget::InitInternalBuffers() const
 {
-    surface = MakeUnique< FOdysseySurface >( FMath::Max( 1.f, InternalSize.X ), FMath::Max( 1.f, InternalSize.Y ) );
+    surface = MakeUnique< FOdysseySurfaceEditable >( FMath::Max( 1.f, InternalSize.X ), FMath::Max( 1.f, InternalSize.Y ) );
     ItemBrush = MakeUnique< FSlateBrush >();
     ItemBrush->SetResourceObject( surface->Texture() );
     ItemBrush->ImageSize.X = surface->Width();

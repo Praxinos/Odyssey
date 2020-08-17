@@ -17,10 +17,7 @@
 void
 FOdysseyTexturePerformanceOptions::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
 {
-	FString PropertyName = PropertyThatChanged->GetName();
-	if (PropertyName == FString(TEXT("LiveUpdate"))) {
-		mOnLiveUpdateChanged.ExecuteIfBound(LiveUpdate);
-	}
+	// FString PropertyName = PropertyThatChanged->GetName();
 	FOdysseyPerformanceOptions::NotifyPostChange(PropertyChangedEvent, PropertyThatChanged);
 }
 
@@ -32,7 +29,8 @@ FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
 }
 
-FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI()
+FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI() :
+	FOdysseyPainterEditorGUI("OdysseyTextureEditor_Layout")
 {
 }
 
@@ -43,7 +41,6 @@ void
 FOdysseyTextureEditorGUI::Init(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
 	FOdysseyTexturePerformanceOptions* performanceOptions = new FOdysseyTexturePerformanceOptions();
-	performanceOptions->mOnLiveUpdateChanged.BindRaw(iController.Get(), &FOdysseyTextureEditorController::HandlePerformanceLiveUpdateChanged);
 	PerformanceOptions(performanceOptions);
 
 	CreateLayerStackTab(iData, iController);
@@ -113,7 +110,7 @@ void
 FOdysseyTextureEditorGUI::CreateLayerStackTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
-        .LayerStackData( MakeShareable( iData->LayerStack() ) );
+        .LayerStackData( iData->LayerStack() );
 }
 
 //--------------------------------------------------------------------------------------

@@ -32,7 +32,9 @@ FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TShared
 	mController->Init(ToolkitCommands);
 	mGUI->Init(mData, mController);
 
-	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iMode, iInitToolkitHost, iAppIdentifier, iTexture);
+	TArray<UObject*> objectsToEdit;
+	objectsToEdit.Add(iTexture);
+	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iMode, iInitToolkitHost, iAppIdentifier, objectsToEdit);
 }
 
 //--------------------------------------------------------------------------------------
@@ -70,10 +72,23 @@ FOdysseyTextureEditorToolkit::OnRequestClose()
 {
 	mData->SyncTextureAndInvalidate();
 	mData->ApplyPropertiesBackup();
+    mData->SyncTextureAndInvalidate();
 
 	//TODO: Move in the right place
     mData->LayerStack()->mDrawingUndo->Clear();
     return true;
+}
+
+FText
+FOdysseyTextureEditorToolkit::GetToolkitName() const
+{
+	return GetLabelForObject(mData->Texture());
+}
+
+FText
+FOdysseyTextureEditorToolkit::GetToolkitToolTipText() const
+{
+	return GetToolTipTextForObject(mData->Texture());
 }
 
 FText

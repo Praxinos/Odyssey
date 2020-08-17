@@ -10,7 +10,7 @@ class FOdysseyUndoHistory;
 class FOdysseyBlock;
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;
-class FOdysseySurface;
+class FOdysseySurfaceEditable;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -27,7 +27,7 @@ public:
 	virtual void Init();
 
     FOdysseyPaintEngine*		 PaintEngine();
-	virtual FOdysseySurface*     DisplaySurface() = 0;
+	virtual FOdysseySurfaceEditable*     DisplaySurface() = 0;
 	FOdysseyUndoHistory*		 UndoHistory();
 	UOdysseyBrush*               Brush();
 	UOdysseyBrushAssetBase*      BrushInstance();

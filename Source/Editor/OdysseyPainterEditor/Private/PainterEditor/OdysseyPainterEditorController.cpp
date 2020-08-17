@@ -282,15 +282,20 @@ FOdysseyPainterEditorController::HandleBrushParameterChanged()
 //----------------------------------------------------------------------- Color Handlers
 
 void
-FOdysseyPainterEditorController::HandleViewportColorPicked(const ::ul3::FPixelValue& iColor)
+FOdysseyPainterEditorController::HandleViewportColorPicked(const FVector2D& iPositionInTexture)
 {
+	if (!GetData()->DisplaySurface())
+		return;
+
+	const ::ul3::FPixelValue& color = GetData()->DisplaySurface()->Block()->GetBlock()->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
+
 	if (GetGUI()->GetColorSlidersTab())
-		GetGUI()->GetColorSlidersTab()->SetColor(iColor);
+		GetGUI()->GetColorSlidersTab()->SetColor(color);
 
 	if (GetGUI()->GetColorSelectorTab())
-		GetGUI()->GetColorSelectorTab()->SetColor(iColor);
+		GetGUI()->GetColorSelectorTab()->SetColor(color);
 
-	GetData()->PaintEngine()->SetColor(iColor);
+	GetData()->PaintEngine()->SetColor(color);
 }
 
 void
@@ -406,7 +411,10 @@ void
 FOdysseyPainterEditorController::HandlePerformanceDrawBrushPreviewChanged( bool iValue )
 {
     GetData()->DrawBrushPreview( iValue );
-    GetData()->DisplaySurface()->Invalidate();
+    if (GetData()->DisplaySurface())
+    {
+        GetData()->DisplaySurface()->Invalidate();
+    }
 }
 
 FReply

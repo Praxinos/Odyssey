@@ -29,43 +29,65 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 {
     mLayerStackModelPtr = new FOdysseyLayerStackModel( MakeShareable( this ), InArgs._LayerStackData );
 
-    SAssignNew(mTreeView, SOdysseyLayerStackTreeView, mLayerStackModelPtr->GetNodeTree());
+    //SAssignNew(mTreeView, SOdysseyLayerStackTreeView, mLayerStackModelPtr->GetNodeTree());
+	SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
+		.NodeTree(mLayerStackModelPtr, &FOdysseyLayerStackModel::GetNodeTree);
+
+	mLayerStackModelPtr->OnUpdated().AddSP(mTreeView.ToSharedRef(), &SOdysseyLayerStackTreeView::Refresh, -1);
 
     ChildSlot
     [
-        //Here we put the current layer infos
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        .Padding( 16.f )
-        .Expose( mTreeView->GetPropertyView() )
-        [
-            SNullWidget::NullWidget
-        ]
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Visibility(this, &SOdysseyLayerStackView::LayerIsMissingWarningVisibility)
+			.Text(LOCTEXT("EmptyLayerStackInstructions", "No Layer Stack can be displayed"))
+		]
 
-        + SVerticalBox::Slot()
-        [
-            SNew(SSplitter)
-            .Orientation(Orient_Vertical)
-            .PhysicalSplitterHandleSize( 0 )
-            .HitDetectionSplitterHandleSize( 0 )
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SBorder)
+			.Visibility(this, &SOdysseyLayerStackView::LayerStackVisibility)
+			[
+				SNew(SVerticalBox)
+				//Here we put the current layer infos
+				+SVerticalBox::Slot()
+				.AutoHeight()
+				.Padding(16.f)
+				.Expose(mTreeView->GetPropertyView())
+				[
+					SNullWidget::NullWidget
+				]
 
-            + SSplitter::Slot()
-            .SizeRule( SSplitter::ESizeRule::SizeToContent )
-            [
-                MakeAddButton()
-            ]
-            + SSplitter::Slot()
-            [
-                SNew(SScrollBox)
-                .Orientation(Orient_Vertical)
-                .ScrollBarAlwaysVisible(false)
-                +SScrollBox::Slot()
-                [
-                    mTreeView.ToSharedRef()
-                ]
-            ]
-        ]
+				+ SVerticalBox::Slot()
+				[
+					SNew(SSplitter)
+					.Orientation(Orient_Vertical)
+					.PhysicalSplitterHandleSize(0)
+					.HitDetectionSplitterHandleSize(0)
+
+					+ SSplitter::Slot()
+					.SizeRule(SSplitter::ESizeRule::SizeToContent)
+					[
+						MakeAddButton()
+					]
+
+					+ SSplitter::Slot()
+					[
+						SNew(SScrollBox)
+						.Orientation(Orient_Vertical)
+						.ScrollBarAlwaysVisible(false)
+						+ SScrollBox::Slot()
+						[
+							mTreeView.ToSharedRef()
+						]
+					]
+				]
+			]
+		]
     ];
 
     if( mTreeView->GetNodeTree()->Update() != -1 ) //Empty stack
@@ -149,6 +171,18 @@ TSharedRef<SWidget> SOdysseyLayerStackView::MakeAddMenu()
     }
 
     return MenuBuilder.MakeWidget();
+}
+
+EVisibility
+SOdysseyLayerStackView::LayerIsMissingWarningVisibility() const
+{
+	return mLayerStackModelPtr->GetNodeTree().IsValid() && mLayerStackModelPtr->GetLayerStackData() ? EVisibility::Hidden : EVisibility::Visible;
+}
+
+EVisibility
+SOdysseyLayerStackView::LayerStackVisibility() const
+{
+	return mLayerStackModelPtr->GetNodeTree().IsValid() && mLayerStackModelPtr->GetLayerStackData() ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 

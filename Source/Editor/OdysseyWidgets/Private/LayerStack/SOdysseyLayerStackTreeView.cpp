@@ -14,10 +14,10 @@
 
 //CONSTRUCTION / DESTRUCTION---------------------------------------------
 
-void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs, const TSharedRef<FOdysseyLayerStackTree>& iNodeTree)
+void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 {
-    mLayerStackNodeTree = iNodeTree;
-    mLayerStackNodeTree->OnUpdated().AddRaw(this, &SOdysseyLayerStackTreeView::Refresh, -1);
+    mLayerStackNodeTree = InArgs._NodeTree;
+    // mLayerStackNodeTree.Get()->OnUpdated().AddRaw(this, &SOdysseyLayerStackTreeView::Refresh, -1);
 
     HeaderRow = SNew(SHeaderRow).Visibility(EVisibility::Collapsed);
     mOnGetContextMenuContent = InArgs._OnGetContextMenuContent;
@@ -51,8 +51,9 @@ TSharedPtr<SWidget> SOdysseyLayerStackTreeView::OnContextMenuOpening()
         return mSelectedNode->OnSummonContextMenu();
     }
 
+	
     const bool bShouldCloseWindowAfterMenuSelection = true;
-    FMenuBuilder menuBuilder(bShouldCloseWindowAfterMenuSelection, mLayerStackNodeTree->GetLayerStack().GetCommandBindings());
+    FMenuBuilder menuBuilder(bShouldCloseWindowAfterMenuSelection, mLayerStackNodeTree.Get()->GetLayerStack().GetCommandBindings());
 
     mOnGetContextMenuContent.ExecuteIfBound(menuBuilder);
 
@@ -63,10 +64,10 @@ void SOdysseyLayerStackTreeView::OnSelectionChanged(TSharedPtr<IOdysseyBaseLayer
 {
     this->Private_ClearSelection();
 
-    if( iSelectedNode )
+    if( iSelectedNode && mLayerStackNodeTree.Get()->GetLayerStack().GetLayerStackData())
     {
         int index = (mRootNodes.Num() - 1) - mRootNodes.Find(iSelectedNode.ToSharedRef()); //We have the nodes in the inverse order than the odysseyLayerStackData for GUI purposes
-        mLayerStackNodeTree->GetLayerStack().GetLayerStackData()->SetCurrentLayer( iSelectedNode->GetLayerDataPtr() );
+		mLayerStackNodeTree.Get()->GetLayerStack().GetLayerStackData()->SetCurrentLayer( iSelectedNode->GetLayerDataPtr() );
         mSelectedNode = iSelectedNode;
         this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
     }
@@ -113,34 +114,34 @@ void SOdysseyLayerStackTreeView::OnGetChildren(IOdysseyBaseLayerNodeRef iParent,
 
 void SOdysseyLayerStackTreeView::Refresh( int iOverrideNewSelectedNodeIndex /* = -1*/ )
 {
-    int numberOfNodes = mLayerStackNodeTree->GetRootNodes().Num();
+    int numberOfNodes = mLayerStackNodeTree.Get()->GetRootNodes().Num();
 
     //We reset the copy of the root nodes
     mRootNodes.Reset( numberOfNodes );
 
-    int indexCurrentNode = mLayerStackNodeTree->Update();
+    int indexCurrentNode = mLayerStackNodeTree.Get()->Update();
     mSelectedNode = NULL;
 
     //Refresh the treeView and the selected node
     if( iOverrideNewSelectedNodeIndex == -1 )
     {
-        if( mLayerStackNodeTree->GetRootNodes().Num() > 0 )
+        if(mLayerStackNodeTree.Get()->GetRootNodes().Num() > 0 )
         {
             this->Private_ClearSelection();
-            mSelectedNode = mLayerStackNodeTree->GetRootNodes()[indexCurrentNode];
+            mSelectedNode = mLayerStackNodeTree.Get()->GetRootNodes()[indexCurrentNode];
             this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
         }
     }
-    else if( iOverrideNewSelectedNodeIndex >= 0 && iOverrideNewSelectedNodeIndex < mLayerStackNodeTree->GetRootNodes().Num() )
+    else if( iOverrideNewSelectedNodeIndex >= 0 && iOverrideNewSelectedNodeIndex < mLayerStackNodeTree.Get()->GetRootNodes().Num() )
     {
         this->Private_ClearSelection();
-        mSelectedNode = mLayerStackNodeTree->GetRootNodes()[iOverrideNewSelectedNodeIndex];
+        mSelectedNode = mLayerStackNodeTree.Get()->GetRootNodes()[iOverrideNewSelectedNodeIndex];
         this->Private_SetItemSelection( mSelectedNode.ToSharedRef(), true );
     }
 
     //Refresh the selected node related areas
 
-    for (const auto& rootNode : mLayerStackNodeTree->GetRootNodes())
+    for (const auto& rootNode : mLayerStackNodeTree.Get()->GetRootNodes())
     {
         if (!rootNode->IsHidden())
         {

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyBlock.h"
-#include "OdysseySurface.h"
+#include "OdysseySurfaceEditable.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
 #include "OdysseyTransactionnable.h"
@@ -137,7 +137,7 @@ private:
 	FOnStrokeAbort						mOnStrokeAbortDelegate;
 
 public:
-    FOdysseySurface*                    mBrushCursorPreviewSurface;
+    FOdysseySurfaceEditable*                    mBrushCursorPreviewSurface;
     FVector2D                           mBrushCursorPreviewShift;
     long long                           mLastBrushCursorComputationTime;
     bool                                mBrushCursorInvalid;

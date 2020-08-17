@@ -27,10 +27,15 @@ void FOdysseyLayerStackTree::Empty()
 
 int FOdysseyLayerStackTree::Update()
 {
+	Empty();
+
+	if (!mLayerStack.GetLayerStackData())
+	{
+		return -1;
+	}
+
     TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
     mLayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
-    
-    Empty();
 
     for( int i = 0; i < layersData.Num(); i++ )
     {

@@ -12,7 +12,7 @@
 class FSceneViewport;
 class SScrollBar;
 class SViewport;
-class FOdysseySurface;
+class IOdysseySurface;
 class UTexture2D;
 
 
@@ -32,12 +32,12 @@ public:
 
 public:
     // Public API
-    void                        SetSurface( FOdysseySurface* iValue );
+    void                        SetSurface( IOdysseySurface* iValue );
     TSharedPtr<FSceneViewport>  GetViewport()              const;
     TSharedPtr<SViewport>       GetViewportWidget()        const;
     TSharedPtr<SScrollBar>      GetVerticalScrollBar()     const;
     TSharedPtr<SScrollBar>      GetHorizontalScrollBar()   const;
-    FOdysseySurface*            GetSurface() const;
+    IOdysseySurface*            GetSurface() const;
     float                       GetViewportVerticalScrollBarRatio() const;
     float                       GetViewportHorizontalScrollBarRatio() const;
     void                        SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
@@ -90,7 +90,7 @@ public:
 
 private:
     // Private Member Data
-    FOdysseySurface*            Surface;
+    IOdysseySurface*            Surface;
     TSharedPtr<FViewportClient> ViewportClient;
     TSharedPtr<FSceneViewport>  Viewport;
     TSharedPtr<SViewport>       ViewportWidget;

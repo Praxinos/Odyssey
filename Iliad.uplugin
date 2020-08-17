@@ -13,6 +13,12 @@
   "CanContainContent": true,
   "IsBetaVersion": true,
   "Installed": false,
+  "Plugins": [
+    {
+      "Enabled": true,
+      "Name": "Paper2D"
+    }
+  ],
   "Modules": [
     {
       "Name": "OdysseyBrush",
@@ -68,6 +74,16 @@
       "Name": "OdysseyBrushEditor",
       "Type": "Editor",
       "LoadingPhase": "PostEngineInit"
+    },
+    {
+      "Name": "OdysseyFlipbook",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyFlipbookEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyPainterEditor",

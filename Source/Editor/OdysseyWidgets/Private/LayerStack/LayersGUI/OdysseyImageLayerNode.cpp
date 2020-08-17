@@ -53,6 +53,8 @@ void FOdysseyImageLayerNode::Drop(const TArray<TSharedRef<IOdysseyBaseLayerNode>
     {
         draggedNode->MoveNodeTo( iItemDropZone, currentNode.ToSharedRef() );
     }
+
+	//Refresh
 }
 
 const FSlateBrush* FOdysseyImageLayerNode::GetIconBrush() const

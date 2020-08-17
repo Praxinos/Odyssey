@@ -49,7 +49,6 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     : InputSubsystem( nullptr )
     , mLastKey( EKeys::Invalid )
     , mLastEvent( EInputEvent::IE_MAX )
-    , mMouseCaptureMode( FViewportClient::CaptureMouseOnClick() )
     , mOdysseyPainterEditorDataPtr( iOdysseyPainterEditorData )
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
     , mMeshSelector( iMeshSelector )
@@ -85,9 +84,6 @@ FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 void
 FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
 {
-    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusInputChanged") );
-
-    mMouseCaptureMode = FViewportClient::CaptureMouseOnClick();
 }
 
 //--------------------------------------------------------------------------------------
@@ -115,6 +111,14 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Send Tick to PaintEngine
 	mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->Tick();
 
+	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+	ioCanvas->Clear(settings.BackgroundColor);
+
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
     double rotation         = mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees();
     FVector2D pan           = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
@@ -130,8 +134,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     int32 xPos              = xOffset - scrollBarPos.X;
 
     UpdateScrollBars();
-    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    ioCanvas->Clear( settings.BackgroundColor );
     UTexture2D* texture2D = Cast< UTexture2D >( texture );
 
     // Fully stream in the texture before drawing it.
@@ -247,10 +249,10 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     mLastKey = iKey;
     mLastEvent = iEvent;
 
-    if( mMouseCaptureMode == EMouseCaptureMode::NoCapture
+    /* if( mMouseCaptureMode == EMouseCaptureMode::NoCapture
         && ( iKey == EKeys::LeftMouseButton
              || iKey == EKeys::RightMouseButton ) )
-        return true;
+        return true; */
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
@@ -270,10 +272,16 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
-    if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
+    //If we don't have a surface, then we don't interact with anything
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
+    /* if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
         mMouseCaptureMode = EMouseCaptureMode::NoCapture;
     else
-        mMouseCaptureMode = FViewportClient::CaptureMouseOnClick();
+        mMouseCaptureMode = FViewportClient::CaptureMouseOnClick(); */
 
     //---
 
@@ -350,6 +358,12 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 bool
 FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
+    //If we don't have a surface, then we don't interact with anything
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return true;
+    }
+
     if( mCurrentToolState == eState::kIdle )
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
@@ -490,7 +504,9 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
                 position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
             {
-                mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
+				// TODO: 
+				mOnPickColor.Broadcast(position_in_texture);
+                // mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
             }
 
             return true;
@@ -516,6 +532,12 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport )
 {
+    //If we don't have a surface, then we don't interact with anything
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
     if( mCurrentToolState == eState::kDrawing )
     {
         auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
@@ -561,7 +583,9 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
             position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
         {
-            mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
+			//TODO:
+			mOnPickColor.Broadcast(position_in_texture);
+            // mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
         }
     }
 }
@@ -612,7 +636,8 @@ FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCur
 EMouseCaptureMode
 FOdysseyPainterEditorViewportClient::CaptureMouseOnClick()
 {
-    return mMouseCaptureMode;
+	return EMouseCaptureMode::CaptureDuringMouseDown;
+    //return mMouseCaptureMode;
 }
 
 //--------------------------------------------------------------------------------------
@@ -740,6 +765,12 @@ FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 void
 FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositionInViewport )
 {
+    //If we don't have a surface, then we don't interact with anything
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
     // Diff between before and after the zoom
@@ -777,6 +808,12 @@ FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositio
 void
 FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositionInViewport )
 {
+    //If we don't have a surface, then we don't interact with anything
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
     // Diff between before and after the zoom
@@ -814,6 +851,12 @@ FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositi
 double
 FOdysseyPainterEditorViewportClient::GetZoom() const
 {
+    //If we don't have a surface, then we return a default 100% zoom
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return 1.0;
+    }
+
     double zoom = 1.0;
     bool fitToViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetFitToViewport();
 
@@ -836,6 +879,12 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
 FVector2D
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation ) const
 {
+    //If we don't have a surface, then we don't have a local mouse position
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return FVector2D();
+    }
+
     double zoom = GetZoom();
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
     FVector2D textureViewportPosition = GetViewportScrollBarPositions();
@@ -889,6 +938,12 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStroke
 void 
 FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices )
 {
+    //If we don't have a surface, we can't draw UVs
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
     uint32 width, height;

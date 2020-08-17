@@ -1084,8 +1084,11 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
     //We reserve the maximum memory needed for a undo
     mData.Reserve(iLayerStack->GetResultBlock()->GetBlock()->BytesTotal());
 
-    mUndoPath = FPaths::Combine(FPaths::EngineSavedDir(),TEXT("undos.save"));
-    mRedoPath = FPaths::Combine(FPaths::EngineSavedDir(),TEXT("redos.save"));
+    static int numberUndoStack = 1;
+
+    mUndoPath = FPaths::Combine(FPaths::EngineSavedDir(),*FString( FString::FromInt(numberUndoStack) + "undos.save"));
+    mRedoPath = FPaths::Combine(FPaths::EngineSavedDir(),*FString( FString::FromInt(numberUndoStack) + "redos.save"));
+    numberUndoStack++;
 
     Clear();
 }

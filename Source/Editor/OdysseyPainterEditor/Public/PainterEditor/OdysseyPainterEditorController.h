@@ -69,7 +69,7 @@ public:
     virtual void HandleBrushParameterChanged();
 
     // Color Handlers
-	virtual void HandleViewportColorPicked(const ::ul3::FPixelValue& iColor);
+	virtual void HandleViewportColorPicked(const FVector2D& iPositionInTexture);
     virtual void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
     virtual void HandleSlidersColorChanged( const ::ul3::FPixelValue& iColor );
 

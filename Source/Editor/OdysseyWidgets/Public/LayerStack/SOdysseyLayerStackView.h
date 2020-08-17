@@ -26,7 +26,7 @@ public:
         /** Called to populate the add combo button in the toolbar. */
         //SLATE_EVENT( FOnGetAddMenuContent, OnGetAddMenuContent )
         /** Extender to use for the add menu. */
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyLayerStack>, LayerStackData )
+        SLATE_ATTRIBUTE( FOdysseyLayerStack*, LayerStackData )
         SLATE_ARGUMENT( TSharedPtr<FExtender>, AddMenuExtender )
     SLATE_END_ARGS()
 
@@ -53,6 +53,12 @@ private:
 
     /** Makes the add menu for the toolbar. */
     TSharedRef<SWidget> MakeAddMenu();
+
+	/** Returns the visibility of the warning message for missing layer stack */
+	EVisibility LayerIsMissingWarningVisibility() const;
+
+	/** Returns the visibility of the layerstack */
+	EVisibility LayerStackVisibility() const;
 
 private:
 

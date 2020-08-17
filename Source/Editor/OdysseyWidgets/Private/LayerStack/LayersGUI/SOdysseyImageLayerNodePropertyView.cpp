@@ -23,7 +23,7 @@ SOdysseyImageLayerNodePropertyView::~SOdysseyImageLayerNodePropertyView()
 
 void SOdysseyImageLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode )
 {
-    FOdysseyLayerStack* odysseyLayerStackPtr = iNode->GetLayerStack().GetLayerStackData().Get();
+    FOdysseyLayerStack* odysseyLayerStackPtr = iNode->GetLayerStack().GetLayerStackData();
     IOdysseyLayer::eType layerType = iNode->GetLayerDataPtr()->GetType();
 
     TSharedRef<SWidget> finalWidget = SNullWidget::NullWidget;

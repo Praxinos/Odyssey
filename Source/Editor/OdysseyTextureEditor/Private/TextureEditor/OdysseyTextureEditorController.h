@@ -40,14 +40,11 @@ public:
 
     void OnExportLayersAsTextures();
     void OnImportTexturesAsLayers();
-
-    // Performance Handlers
-    void HandlePerformanceLiveUpdateChanged( bool iValue );
-
+	
+	virtual void OnPaintEngineStrokeAbort() override;
 	virtual void OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles) override;
-	virtual void OnPaintEngineStrokeAbort() override;
 
     virtual void UndoIliad() override;
     virtual void RedoIliad() override;

@@ -253,13 +253,6 @@ FOdysseyTextureEditorController::OnImportTexturesAsLayers()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------- Performance Handlers
 
-void
-FOdysseyTextureEditorController::HandlePerformanceLiveUpdateChanged( bool iValue )
-{
-    mData->LiveUpdateInfo()->enabled = iValue;
-    mData->DisplaySurface()->Invalidate();
-}
-
 FReply
 FOdysseyTextureEditorController::OnClear()
 {

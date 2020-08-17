@@ -3,7 +3,7 @@
 
 #include "Proxies/OdysseyBrushBlock.h"
 
-#include "OdysseySurface.h"
+#include "OdysseySurfaceEditable.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>

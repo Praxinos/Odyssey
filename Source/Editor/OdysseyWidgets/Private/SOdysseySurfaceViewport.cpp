@@ -260,11 +260,9 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 void
-SOdysseySurfaceViewport::SetSurface( FOdysseySurface* iValue )
+SOdysseySurfaceViewport::SetSurface( IOdysseySurface* iValue )
 {
     Surface = iValue;
-    PreviewEffectiveTextureWidth =  Surface->Width();
-    PreviewEffectiveTextureHeight = Surface->Height();
 }
 
 
@@ -296,7 +294,7 @@ SOdysseySurfaceViewport::GetHorizontalScrollBar( ) const
 }
 
 
-FOdysseySurface*
+IOdysseySurface*
 SOdysseySurfaceViewport::GetSurface() const
 {
     return  Surface;
@@ -473,6 +471,8 @@ SOdysseySurfaceViewport::HandleRotationValue( ) const
 FText
 SOdysseySurfaceViewport::HandleSurfaceSizeTextValue( ) const
 {
+    if (!Surface || !Surface->Texture())
+        return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
     return FText::Format( NSLOCTEXT("Texture Size","Texture Size","{0}x{1} px"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ) );
 }
 
@@ -582,6 +582,13 @@ void SOdysseySurfaceViewport::RotateRight()
 
 void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, uint32& Height ) const
 {
+    if (!Surface || !Surface->Texture())
+    {
+        Width = 0;
+        Height = 0;
+        return;
+    }
+
     uint32 ImportedWidth = Surface->Width();
     uint32 ImportedHeight = Surface->Height();
 
@@ -640,8 +647,8 @@ void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, 
     }
     else
     {
-        Width = PreviewEffectiveTextureWidth * GetZoom();
-        Height = PreviewEffectiveTextureHeight * GetZoom();
+        Width = Surface->Width() * GetZoom();
+        Height = Surface->Height() * GetZoom();
     }
 }
 

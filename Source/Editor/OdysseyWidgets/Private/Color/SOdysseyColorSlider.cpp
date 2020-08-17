@@ -72,7 +72,7 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 {
     tSuperClass::InitInternalBuffers();
     cursor_size = FVector2D( 8, InternalSize.Y );
-    cursor_surface = MakeUnique< FOdysseySurface >( cursor_size.X, cursor_size.Y );
+    cursor_surface = MakeUnique< FOdysseySurfaceEditable >( cursor_size.X, cursor_size.Y );
     cursor_brush = MakeUnique< FSlateBrush >();
     cursor_brush->SetResourceObject( cursor_surface->Texture() );
     cursor_brush->ImageSize.X = surface->Width();

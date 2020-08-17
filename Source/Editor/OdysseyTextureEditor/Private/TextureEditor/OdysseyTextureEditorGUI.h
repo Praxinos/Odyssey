@@ -31,17 +31,7 @@ struct FOdysseyTexturePerformanceOptions : public FOdysseyPerformanceOptions
 	GENERATED_BODY()
 
 		FOdysseyTexturePerformanceOptions()
-		: LiveUpdate(true)
 	{}
-
-	/** Should the texture live-stream update in the 3D viewport ( can impact performances ). */
-	UPROPERTY(EditAnywhere, Category = "Performances")
-	bool    LiveUpdate;
-
-	DECLARE_DELEGATE_OneParam(FOnLiveUpdateChanged, bool)
-
-	FOnLiveUpdateChanged mOnLiveUpdateChanged;
-
 
 	virtual void NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged) override;
 

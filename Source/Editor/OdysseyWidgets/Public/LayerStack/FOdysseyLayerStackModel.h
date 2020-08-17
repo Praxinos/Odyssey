@@ -21,9 +21,12 @@ class IOdysseyLayer;
 class FOdysseyLayerStackModel : public TSharedFromThis<FOdysseyLayerStackModel>
 {
 public:
+	DECLARE_MULTICAST_DELEGATE(FOnUpdated);
+
+public:
     //CONSTRUCTOR/DESTRUCTOR
     /** Constructor */
-    FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, TSharedPtr<FOdysseyLayerStack> iLayerStackData );
+    FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, const TAttribute< FOdysseyLayerStack* >& iLayerStackData);
 
     /** Virtual destructor */
     virtual ~FOdysseyLayerStackModel();
@@ -39,17 +42,21 @@ public:
     void BuildAddLayerMenu(FMenuBuilder& iMenuBuilder);
 
     /** Gets the tree of nodes which is used to populate the GUI of the LayerStack */
-    TSharedRef<FOdysseyLayerStackTree> GetNodeTree();
+    TSharedPtr<FOdysseyLayerStackTree> GetNodeTree() const;
 
     /** Gets the LayerStack data */
-    TSharedPtr<FOdysseyLayerStack> GetLayerStackData();
+    FOdysseyLayerStack* GetLayerStackData();
 
     const TSharedRef< FOdysseyLayerAddMenu > GetLayerAddMenu() const;
 
     TSharedPtr<FUICommandList> GetCommandBindings() const;
 
     TSharedRef<SOdysseyLayerStackView> GetLayerStackView() const;
-    
+
+public: //DELEGATES
+	/** Gets a multicast delegate which is called whenever the node tree has been updated.*/
+	FOnUpdated& OnUpdated() { return mOnUpdatedDelegate; }
+
 public:
     //HANDLES
 
@@ -72,10 +79,13 @@ private:
     TSharedPtr<SOdysseyLayerStackView> mLayerStackView;
 
     /** The true layers data of the layer Stack */
-    TSharedPtr<FOdysseyLayerStack> mLayerStackData;
+    const TAttribute< FOdysseyLayerStack* > mLayerStackData;
 
     /** List of tools we own */
     TSharedRef<FOdysseyLayerAddMenu> mLayerStackAddMenu;
+
+	/** A multicast delegate which is called whenever the node tree has been updated. */
+	FOnUpdated mOnUpdatedDelegate;
 
 };
 

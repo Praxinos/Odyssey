@@ -16,7 +16,7 @@
 
 //CONSTRUCTOR/DESTRUCTOR
 
-FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, TSharedPtr<FOdysseyLayerStack> iLayerStackData )
+FOdysseyLayerStackModel::FOdysseyLayerStackModel( TSharedPtr<SOdysseyLayerStackView> iWidget, const TAttribute< FOdysseyLayerStack* >& iLayerStackData )
     : mLayerStackCommandBindings( new FUICommandList )
     , mNodeTree( MakeShareable( new FOdysseyLayerStackTree( *this ) ) )
     , mLayerStackView( iWidget )
@@ -37,14 +37,14 @@ void FOdysseyLayerStackModel::BuildAddLayerMenu(FMenuBuilder& iMenuBuilder)
     mLayerStackAddMenu->BuildAddLayerMenu(iMenuBuilder);
 }
 
-TSharedRef<FOdysseyLayerStackTree> FOdysseyLayerStackModel::GetNodeTree()
+TSharedPtr<FOdysseyLayerStackTree> FOdysseyLayerStackModel::GetNodeTree() const
 {
     return mNodeTree;
 }
 
-TSharedPtr<FOdysseyLayerStack> FOdysseyLayerStackModel::GetLayerStackData()
+FOdysseyLayerStack* FOdysseyLayerStackModel::GetLayerStackData()
 {
-    return mLayerStackData;
+    return mLayerStackData.Get();
 }
 
 const TSharedRef< FOdysseyLayerAddMenu > FOdysseyLayerStackModel::GetLayerAddMenu() const

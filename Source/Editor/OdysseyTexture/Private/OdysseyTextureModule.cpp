@@ -32,7 +32,8 @@ void FOdysseyTextureModule::ShowPluginContentInContentBrowser()
 	GetMutableDefault<UContentBrowserSettings>()->PostEditChange();
 }
 
-void FOdysseyTextureModule::StartupModule() {
+void FOdysseyTextureModule::StartupModule()
+{
 	ShowPluginContentInContentBrowser();
 }
 

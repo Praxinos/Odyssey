@@ -30,7 +30,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGUI :
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorGUI();
-    FOdysseyPainterEditorGUI();
+    FOdysseyPainterEditorGUI(const FName iLayoutName);
 
 private:
     void CreateViewportTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);

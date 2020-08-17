@@ -1,6 +1,7 @@
 // Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
+using System.IO;
 using UnrealBuildTool;
 
 public class OdysseyWidgets : ModuleRules
@@ -18,6 +19,7 @@ public class OdysseyWidgets : ModuleRules
                 "SlateCore",
                 "InputCore",
                 "EditorStyle",
+                "EditorWidgets",
                 "Engine",
                 "UnrealEd",
                 "Layers",
@@ -31,7 +33,9 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyStyle",
                 "OdysseyStrokePipeline",
                 "OdysseyTransaction",
-                "OdysseyMaths"
+                "OdysseyMaths",
+                "Paper2D",
+				"KismetWidgets"
             }
         );
 
@@ -39,7 +43,24 @@ public class OdysseyWidgets : ModuleRules
              new string[] {
                 "ULIS",
                 "ULISLoader",
+                "EditorWidgets",
              }
+        );
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Private", "Timeline"),
+            }
+        );
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public"),
+                Path.Combine(ModuleDirectory, "Public", "Timeline"),
+                Path.Combine(ModuleDirectory, "Public", "Timeline", "Events"),
+                Path.Combine(ModuleDirectory, "Public", "Common"),
+                Path.Combine(ModuleDirectory, "Public", "Common", "Events"),
+            }
         );
     }
 }

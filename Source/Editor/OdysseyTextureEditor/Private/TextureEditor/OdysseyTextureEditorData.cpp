@@ -19,7 +19,6 @@ FOdysseyTextureEditorData::~FOdysseyTextureEditorData()
 
 FOdysseyTextureEditorData::FOdysseyTextureEditorData(UTexture2D* iTexture)
     : mTexture( iTexture )
-    , mLiveUpdateInfo()
 {
 }
 
@@ -53,12 +52,8 @@ FOdysseyTextureEditorData::Init()
     mLayerStack = userData->GetLayerStack();
 
     // Setup Surface
-    mDisplaySurface = new FOdysseySurface( mLayerStack->GetResultBlock() );
-    mLiveUpdateInfo.main = mDisplaySurface->Texture();
-    mLiveUpdateInfo.live = mTexture;
-    mLiveUpdateInfo.enabled = true;
-    mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) ) );
-
+    mDisplaySurface = new FOdysseySurfaceEditable(mTexture, mLayerStack->GetResultBlock() );
+    mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateSurfaceCallback, static_cast<void*>( mDisplaySurface ) ) );
     mDisplaySurface->Invalidate();
 
     // Support undo/redo
@@ -74,7 +69,7 @@ void
 FOdysseyTextureEditorData::SyncTextureAndInvalidate()
 {
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
+    // InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
 }
 
 
@@ -99,14 +94,8 @@ FOdysseyTextureEditorData::Texture()
 	return mTexture;
 }
 
-FOdysseySurface*
+FOdysseySurfaceEditable*
 FOdysseyTextureEditorData::DisplaySurface()
 {
 	return mDisplaySurface;
-}
-
-FOdysseyLiveUpdateInfo*
-FOdysseyTextureEditorData::LiveUpdateInfo()
-{
-	return &mLiveUpdateInfo;
 }

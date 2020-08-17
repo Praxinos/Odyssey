@@ -166,8 +166,7 @@ void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<
         return;
     }
 
-
-    mParentTree.OnUpdated().Broadcast();
+	mParentTree.GetLayerStack().OnUpdated().Broadcast();
     mParentTree.GetLayerStack().GetLayerStackData()->ComputeResultBlock();
 }
 

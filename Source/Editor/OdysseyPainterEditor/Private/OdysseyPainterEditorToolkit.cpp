@@ -21,9 +21,9 @@ FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 void
-FOdysseyPainterEditorToolkit::InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UObject* iObjectToEdit )
+FOdysseyPainterEditorToolkit::InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit )
 {
-    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, iAppIdentifier, GetLayout(), true, false, iObjectToEdit );
+    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, iAppIdentifier, GetLayout(), true, false, iObjectsToEdit);
     InitializeExtenders();
     RegenerateMenusAndToolbars();
 }

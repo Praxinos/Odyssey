@@ -59,7 +59,7 @@ class FOdysseyPainterEditorViewportClient
     , public IStylusMessageHandler
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPickColor, const ::ul3::FPixelValue&)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPickColor, const FVector2D&)
 
 public:
     enum class eState
@@ -127,7 +127,7 @@ private:
     UOdysseyStylusInputSubsystem*           InputSubsystem;
     FKey                                    mLastKey;
     EInputEvent                             mLastEvent;
-    EMouseCaptureMode                       mMouseCaptureMode;
+    // EMouseCaptureMode                       mMouseCaptureMode;
     TWeakPtr<FOdysseyPainterEditorData>		mOdysseyPainterEditorDataPtr;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
