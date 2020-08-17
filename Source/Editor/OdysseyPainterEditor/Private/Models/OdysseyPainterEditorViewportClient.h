@@ -127,7 +127,6 @@ private:
     UOdysseyStylusInputSubsystem*           InputSubsystem;
     FKey                                    mLastKey;
     EInputEvent                             mLastEvent;
-    // EMouseCaptureMode                       mMouseCaptureMode;
     TWeakPtr<FOdysseyPainterEditorData>		mOdysseyPainterEditorDataPtr;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
@@ -140,4 +139,5 @@ private:
     eState                                  mCurrentToolState;
 
 	FOnPickColor							mOnPickColor;
+    bool                                    mIsCapturedByStylus;
 };

@@ -56,6 +56,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     , mCurrentMouseCursor( EMouseCursor::Default )
     , mPivotPointRatio( FVector2D( 0.5, 0.5 ) )
     , mCurrentToolState( eState::kIdle )
+    , mIsCapturedByStylus(false)
 {
     check( // mOdysseyPainterEditorDataPtr.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
@@ -249,10 +250,10 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     mLastKey = iKey;
     mLastEvent = iEvent;
 
-    /* if( mMouseCaptureMode == EMouseCaptureMode::NoCapture
+    if( mIsCapturedByStylus
         && ( iKey == EKeys::LeftMouseButton
              || iKey == EKeys::RightMouseButton ) )
-        return true; */
+        return true;
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
@@ -263,6 +264,9 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
+    if (mIsCapturedByStylus)
+        return;
+
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
@@ -274,14 +278,16 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 {
     //If we don't have a surface, then we don't interact with anything
     if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
         return;
-    }
 
-    /* if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
-        mMouseCaptureMode = EMouseCaptureMode::NoCapture;
+    if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
+    {
+        mIsCapturedByStylus = true;
+    }
     else
-        mMouseCaptureMode = FViewportClient::CaptureMouseOnClick(); */
+    {
+        mIsCapturedByStylus = false;
+    }
 
     //---
 
@@ -637,7 +643,6 @@ EMouseCaptureMode
 FOdysseyPainterEditorViewportClient::CaptureMouseOnClick()
 {
 	return EMouseCaptureMode::CaptureDuringMouseDown;
-    //return mMouseCaptureMode;
 }
 
 //--------------------------------------------------------------------------------------
