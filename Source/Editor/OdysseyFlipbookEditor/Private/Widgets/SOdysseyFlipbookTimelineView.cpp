@@ -33,6 +33,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
 
     mIsPlaying = false;
     mIsLooping = false;
+    mScrubPositionBeforePlay = 0.0f;
 
 	mOnCurrentKeyframeChanged = InArgs._OnCurrentKeyframeChanged;
 	mOnPlayStarted = InArgs._OnPlayStarted;
@@ -60,7 +61,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
                 .IsPlaying(this, &SOdysseyFlipbookTimelineView::IsPlaying)
                 .IsLooping(this, &SOdysseyFlipbookTimelineView::IsLooping)
                 .OnPlayClicked(this, &SOdysseyFlipbookTimelineView::OnPlayClicked)
-                .OnStopClicked(this, &SOdysseyFlipbookTimelineView::OnStopClicked)
+                .OnPauseClicked(this, &SOdysseyFlipbookTimelineView::OnPauseClicked)
                 .OnBeginningClicked(this, &SOdysseyFlipbookTimelineView::OnBeginningClicked)
                 .OnEndClicked(this, &SOdysseyFlipbookTimelineView::OnEndClicked)
                 .OnPreviousClicked(this, &SOdysseyFlipbookTimelineView::OnPreviousClicked)
@@ -174,7 +175,7 @@ SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const doub
     else if (scrubPosition >= mFlipbook->GetNumFrames())
     {
         //If we don't loop and we play after the flipbook duration, then we stop playing
-		mTimelineWidget->ScrubPosition(0); //TODO: Select the right frame
+		mTimelineWidget->ScrubPosition(mScrubPositionBeforePlay);
         Stop();
         return;
     }
@@ -282,15 +283,14 @@ SOdysseyFlipbookTimelineView::OnFrameRateChanged(float iFrameRate)
 FReply
 SOdysseyFlipbookTimelineView::OnPlayClicked()
 {
+    mScrubPositionBeforePlay = mTimelineWidget->ScrubPosition();
 	Play();
-	mTimelineWidget->ScrubPosition(0);
 	return FReply::Handled();
 }
 
 FReply
-SOdysseyFlipbookTimelineView::OnStopClicked()
+SOdysseyFlipbookTimelineView::OnPauseClicked()
 {
-	mTimelineWidget->ScrubPosition(0); //TODO: Select the right frame
 	Stop();
 	return FReply::Handled();
 }

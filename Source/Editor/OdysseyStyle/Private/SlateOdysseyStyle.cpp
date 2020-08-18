@@ -381,10 +381,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_ON_24", mIcon24x24))
 	);
 
-    Set("PlaybackControls.Stop", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_ON_24", mIcon24x24))
+    Set("PlaybackControls.Pause", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_ON_24", mIcon24x24))
 	);
 
     Set("PlaybackControls.Beginning", FButtonStyle(mButton)

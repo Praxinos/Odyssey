@@ -10,7 +10,7 @@ DECLARE_DELEGATE_OneParam(FOnFrameRateChanged, float);
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyPlaybackControlss
-// Diplays all controls for a playback (play / stop / next / end / previous / start / framerate)
+// Diplays all controls for a playback (play / pause / next / end / previous / start / framerate)
 class ODYSSEYWIDGETS_API SOdysseyPlaybackControls : public SCompoundWidget
 {
 public:
@@ -19,7 +19,7 @@ public:
 		SLATE_ATTRIBUTE(bool, IsPlaying)
 		SLATE_ATTRIBUTE(bool, IsLooping)
 		SLATE_EVENT(FOnClicked, OnPlayClicked)
-		SLATE_EVENT(FOnClicked, OnStopClicked)
+		SLATE_EVENT(FOnClicked, OnPauseClicked)
 		SLATE_EVENT(FOnClicked, OnBeginningClicked)
 		SLATE_EVENT(FOnClicked, OnEndClicked)
 		SLATE_EVENT(FOnClicked, OnPreviousClicked)
@@ -32,7 +32,7 @@ public:
 
 private:
 	EVisibility GetPlayButtonVisibility() const;
-	EVisibility GetStopButtonVisibility() const;
+	EVisibility GetPauseButtonVisibility() const;
 	EVisibility GetLoopingButtonVisibility() const;
 	EVisibility GetNotLoopingButtonVisibility() const;
 
@@ -41,7 +41,7 @@ private:
 	TAttribute<bool> mIsLooping;
 
 	FOnClicked mOnPlayClicked;
-	FOnClicked mOnStopClicked;
+	FOnClicked mOnPauseClicked;
 	FOnClicked mOnBeginningClicked;
 	FOnClicked mOnEndClicked;
 	FOnClicked mOnPreviousClicked;

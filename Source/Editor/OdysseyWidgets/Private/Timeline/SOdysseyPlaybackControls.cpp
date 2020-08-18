@@ -10,7 +10,7 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 	mIsLooping = InArgs._IsLooping;
 
 	mOnPlayClicked = InArgs._OnPlayClicked;
-	mOnStopClicked = InArgs._OnStopClicked;
+	mOnPauseClicked = InArgs._OnPauseClicked;
 	mOnBeginningClicked = InArgs._OnBeginningClicked;
 	mOnEndClicked = InArgs._OnEndClicked;
 	mOnPreviousClicked = InArgs._OnPreviousClicked;
@@ -55,11 +55,11 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 		.AutoWidth()
 		[
 			SNew(SButton)
-			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Stop"))
-			.Visibility(this, &SOdysseyPlaybackControls::GetStopButtonVisibility)
+			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Pause"))
+			.Visibility(this, &SOdysseyPlaybackControls::GetPauseButtonVisibility)
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
-			.OnClicked(mOnStopClicked)
+			.OnClicked(mOnPauseClicked)
 		]
 		+SHorizontalBox::Slot()
 		.AutoWidth()
@@ -113,7 +113,7 @@ SOdysseyPlaybackControls::GetPlayButtonVisibility() const
 }
 
 EVisibility
-SOdysseyPlaybackControls::GetStopButtonVisibility() const
+SOdysseyPlaybackControls::GetPauseButtonVisibility() const
 {
 	return mIsPlaying.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }

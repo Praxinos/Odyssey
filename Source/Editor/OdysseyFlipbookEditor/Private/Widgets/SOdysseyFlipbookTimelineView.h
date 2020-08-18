@@ -74,7 +74,7 @@ private:
 
     //SOdysseyPlaybackControls
 	FReply OnPlayClicked();
-	FReply OnStopClicked();
+	FReply OnPauseClicked();
 	FReply OnBeginningClicked();
 	FReply OnEndClicked();
 	FReply OnPreviousClicked();
@@ -108,6 +108,8 @@ private:
 
     bool mIsPlaying;
     bool mIsLooping;
+
+    float mScrubPositionBeforePlay;
 
     //Widgets
     TSharedPtr<SOdysseyTimeline> mTimelineWidget;
