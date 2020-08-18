@@ -12,7 +12,7 @@
 // SOdysseyTimeline
 
 const float defaultFrameSize = 30.f; //in pixels
-const float defaultHeight = 30.f; //in pixels
+const float defaultHeight = 25.f; //in pixels
 
 void SOdysseyTimeline::Construct(const FArguments& InArgs)
 {

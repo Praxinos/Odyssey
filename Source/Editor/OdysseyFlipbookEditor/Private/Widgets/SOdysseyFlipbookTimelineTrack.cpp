@@ -138,7 +138,7 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
 
 		contentWidget = SNew(SScaleBox)
 			.HAlign(HAlign_Left)
-			.Stretch(EStretch::ScaleToFit)
+			.Stretch(EStretch::ScaleToFitY)
 			[
 				thumbnailWidget.ToSharedRef()
 			];
@@ -161,42 +161,6 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
 	return contentWidget;
 }
 
-/* void
-SOdysseyFlipbookTimelineTrack::OnFrameLengthChanged(TSharedPtr<SOdysseyTimelineFrame> iFrame)
-{	
-	UPaperFlipbook* flipbook = mFlipbook.Get();
-	if (!flipbook)
-		return;
-
-	TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = iFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
-	if (!metadata)
-		return;
-
-	FScopedFlipbookMutator mutator(flipbook);
-	FPaperFlipbookKeyFrame& keyframe = mutator.KeyFrames[metadata->Index()];
-	keyframe.FrameRun = iFrame->Length();
-}
-
-FReply
-SOdysseyFlipbookTimelineTrack::GenerateFrameContextMenu(TSharedPtr<SOdysseyTimelineFrame> iFrame)
-{
-	TSharedPtr<FUICommandList> frameCommandList = MakeShareable(new FUICommandList());
-	frameCommandList->MapAction(FGenericCommands::Get().Delete, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DeleteFrame, iFrame));
-
-	FMenuBuilder MenuBuilder(true, frameCommandList);
-	{	
-		const FText KeyframeSectionTitle = LOCTEXT("OdysseyTimelineFrameActionsHeader", "Keyframe Actions");
-		MenuBuilder.BeginSection("KeyframeActions", KeyframeSectionTitle);
-		MenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
-		MenuBuilder.EndSection();
-	}
-
-	TSharedRef<SWidget> MenuContents = MenuBuilder.MakeWidget();
-	FWidgetPath WidgetPath = iMouseEvent.GetEventPath() != nullptr ? *iMouseEvent.GetEventPath() : FWidgetPath();
-	FSlateApplication::Get().PushMenu(AsShared(), WidgetPath, MenuContents, iMouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
-
-	return FReply::Handled();
-} */
 
 float
 SOdysseyFlipbookTimelineTrack::FrameSize() const
@@ -231,129 +195,6 @@ SOdysseyFlipbookTimelineTrack::DeleteFrame(int32 iIndex)
 	mOnKeyframeRemoved.ExecuteIfBound(keyframe);
 	mOnFlipbookChanged.ExecuteIfBound();
 }
-
-/* FReply
-SOdysseyFlipbookTimelineTrack::OnFrameListDrop(const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent)
-{
-	TSharedPtr<FDragDropOperation> operation = iDragDropEvent.GetOperation();
-	if (!operation.IsValid())
-	{
-	}
-	else if (operation->IsOfType<FAssetDragDropOp>())
-	{
-		const auto& AssetDragDropOp = StaticCastSharedPtr<FAssetDragDropOp>(operation);
-		//@TODO: Handle asset inserts
-
-		// 			OnAssetsDropped(*AssetDragDropOp);
-		// 			bWasDropHandled = true;
-	}
-	else if (operation->IsOfType<FOdysseyFlipbookTimelineFrameDragDropOperation>())
-	{
-		const auto& FrameDragDropOp = StaticCastSharedPtr<FOdysseyFlipbookTimelineFrameDragDropOperation>(operation);
-		
-		UPaperFlipbook* flipbook = mFlipbook.Get();
-		if (!flipbook)
-			return FReply::Handled();
-
-		TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> srcMetadata = FrameDragDropOp->Frame()->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
-		if (!srcMetadata)
-			return FReply::Handled();
-
-		int32 srcIndex = srcMetadata->Index();
-		int32 destIndex = mFrameList->FrameCount();// flipbook->GetNumKeyFrames();
-
-		//Move in GUI
-		mFrameList->InsertFrameAt(FrameDragDropOp->Frame(), destIndex); //Move to the end
-
-		//Move in Data
-		{
-			FScopedFlipbookMutator mutator(flipbook);
-			FPaperFlipbookKeyFrame keyframe = mutator.KeyFrames[srcIndex];
-			
-			mutator.KeyFrames.RemoveAt(srcIndex);
-			mutator.KeyFrames.Add(keyframe);
-		}
-
-		mOnStructureChanged.ExecuteIfBound();
-		return FReply::Handled();
-	}
-	return FReply::Unhandled();
-}
-
-bool
-SOdysseyFlipbookTimelineTrack::OnFrameAcceptDrop(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent)
-{
-	TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
-	return Operation.IsValid() && Operation->IsOfType<FOdysseyFlipbookTimelineFrameDragDropOperation>();
-}
-
-FReply
-SOdysseyFlipbookTimelineTrack::OnFrameDragDetected(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
-{
-	if (iMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
-	{
-		TSharedRef<FOdysseyFlipbookTimelineFrameDragDropOperation> operation = MakeShareable(new FOdysseyFlipbookTimelineFrameDragDropOperation(iFrame, mFrameList));
-		return FReply::Handled().BeginDragDrop(operation);
-	}
-
-	return FReply::Unhandled();
-}
-
-FReply
-SOdysseyFlipbookTimelineTrack::OnFrameDrop(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent, int32 iIndexOffset)
-{
-	TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
-	if (!Operation.IsValid())
-	{
-	}
-	else if (Operation->IsOfType<FAssetDragDropOp>())
-	{
-		const auto& AssetDragDropOp = StaticCastSharedPtr<FAssetDragDropOp>(Operation);
-		//@TODO: Handle asset inserts
-
-		// 			OnAssetsDropped(*AssetDragDropOp);
-		// 			bWasDropHandled = true;
-	}
-	else if (Operation->IsOfType<FOdysseyFlipbookTimelineFrameDragDropOperation>())
-	{
-		const auto& FrameDragDropOp = StaticCastSharedPtr<FOdysseyFlipbookTimelineFrameDragDropOperation>(Operation);
-		
-		UPaperFlipbook* flipbook = mFlipbook.Get();
-		if (!flipbook)
-			return FReply::Handled();
-
-		TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> srcMetadata = FrameDragDropOp->Frame()->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
-		if (!srcMetadata)
-			return FReply::Handled();
-
-		TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> destMetadata = iFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
-		if (!destMetadata)
-			return FReply::Handled();
-
-		int32 srcIndex = srcMetadata->Index();
-		int32 destIndex = destMetadata->Index() + iIndexOffset;
-
-		//Move in GUI
-		mFrameList->InsertFrameAt(FrameDragDropOp->Frame(), destIndex);
-
-		//Move in Data
-		{
-			FScopedFlipbookMutator mutator(flipbook);
-			FPaperFlipbookKeyFrame keyframe = mutator.KeyFrames[srcIndex];
-			
-			mutator.KeyFrames.RemoveAt(srcIndex);
-			
-			if (destIndex > srcIndex )
-				destIndex--;
-			
-			mutator.KeyFrames.Insert(keyframe, destIndex);
-		}
-
-		mOnStructureChanged.ExecuteIfBound();
-		return FReply::Handled();
-	}
-	return FReply::Unhandled();
-} */
 
 void
 SOdysseyFlipbookTimelineTrack::OnFramesMoved(TArray<int32> iSrcIndexes, int32 iDstIndex)

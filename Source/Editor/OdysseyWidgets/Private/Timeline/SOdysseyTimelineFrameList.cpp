@@ -72,6 +72,7 @@ SOdysseyTimelineFrameList::ComputeDesiredSize(float LayoutScaleMultiplier) const
 	//Add a half of the size of a handle to be able to see the last one it entirely
 	FVector2D size = mFramesContainer->GetDesiredSize();
 	size.X += FMath::Max(mLengthHandleBrush->ImageSize.X, mTimingHandleBrush->ImageSize.X) / 2;
+	size.Y += mTimingHandleBrush->ImageSize.Y / 2;
 	return size;
 }
 
@@ -478,13 +479,13 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
 		[
 			SNew(SOverlay)
 			+SOverlay::Slot()
-			.Padding(0.f, 0.f, 0.f, 0.f)
+			.Padding(0.f, mTimingHandleBrush->ImageSize.Y/2, 0.f, 0.f)
 			[
 				iFrame.ToSharedRef()
 			]
 			
 			+SOverlay::Slot()
-			.Padding(0.0f, 0.f, -mTimingHandleBrush->ImageSize.X/2, 0.f)
+			.Padding(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X/2, 0.f)
 			.HAlign(HAlign_Right)
 			.VAlign(VAlign_Top)
 			[
@@ -504,7 +505,7 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
 				]
 			]
 			+ SOverlay::Slot()
-			.Padding(0.0f, 0.f, -mLengthHandleBrush->ImageSize.X/2, 0.f)
+			.Padding(0.0f, mTimingHandleBrush->ImageSize.Y/2, -mLengthHandleBrush->ImageSize.X/2, 0.f)
 			.HAlign(HAlign_Right)
 			.VAlign(VAlign_Center)
 			[
