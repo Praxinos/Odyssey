@@ -317,7 +317,7 @@ void
 SOdysseyTimeline::ScrubPosition(float iPosition)
 {
 	float oldPosition = mScrubPosition;
-	mScrubPosition = iPosition;
+	mScrubPosition = FMath::Max(iPosition, 0.0f);
 	mOnScrubPositionChanged.ExecuteIfBound(oldPosition);
 }
 
