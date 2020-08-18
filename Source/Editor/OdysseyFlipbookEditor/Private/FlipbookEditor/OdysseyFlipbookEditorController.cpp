@@ -311,9 +311,6 @@ FOdysseyFlipbookEditorController::GetGUI()
 void
 FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
-	if (iKeyframeIndex < 0 || iKeyframeIndex >= mData->Flipbook()->GetNumKeyFrames())
-        return;
-
 	UTexture2D* texture = mData->TextureAtKeyframe(iKeyframeIndex);
 	if (mGUI->GetTimelineTab()->IsScrubbing())
 	{
