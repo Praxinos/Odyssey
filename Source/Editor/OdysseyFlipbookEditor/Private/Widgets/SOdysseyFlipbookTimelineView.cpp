@@ -159,6 +159,22 @@ SOdysseyFlipbookTimelineView::GetKeyframeIndexAtScrubPosition(float iPosition) c
     return -1;
 }
 
+float
+SOdysseyFlipbookTimelineView::GetScrubPositionForKeyFrameIndex(int32 iIndex) const
+{
+    if (iIndex < 0 || iIndex >= mFlipbook->GetNumKeyFrames())
+        return -1;
+
+    int32 position = 0; //int32 to avoid float imprecision in the for loop
+
+    for (int32 i = 0; i < iIndex; i++)
+    {
+        position += mFlipbook->GetKeyFrameChecked(i).FrameRun;
+    }
+
+    return position;
+}
+
 void
 SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
@@ -298,28 +314,40 @@ SOdysseyFlipbookTimelineView::OnPauseClicked()
 FReply
 SOdysseyFlipbookTimelineView::OnBeginningClicked()
 {
-	mTimelineWidget->ScrubPosition(0);
+	mTimelineWidget->ScrubPosition(0.5f);
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnEndClicked()
 {
-	mTimelineWidget->ScrubPosition(mFlipbook->GetNumFrames());
+	mTimelineWidget->ScrubPosition(mFlipbook->GetNumFrames() - 0.5f);
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnPreviousClicked()
 {
-	mTimelineWidget->ScrubPosition(FMath::Max(0.0f, mTimelineWidget->ScrubPosition() - 1.0f));
+    int32 index = GetKeyframeIndexAtScrubPosition(mTimelineWidget->ScrubPosition());
+    if (index <= 0 || index >= mFlipbook->GetNumKeyFrames())
+        return FReply::Handled();
+
+    float position = GetScrubPositionForKeyFrameIndex(index - 1);
+    mTimelineWidget->ScrubPosition(position + 0.5f);
+
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnNextClicked()
 {
-	mTimelineWidget->ScrubPosition(mTimelineWidget->ScrubPosition() + 1.0f);
+	int32 index = GetKeyframeIndexAtScrubPosition(mTimelineWidget->ScrubPosition());
+    if (index < 0 || index >= mFlipbook->GetNumKeyFrames() - 1)
+        return FReply::Handled();
+
+    float position = GetScrubPositionForKeyFrameIndex(index + 1);
+    mTimelineWidget->ScrubPosition(position + 0.5f);
+
 	return FReply::Handled();
 }
 

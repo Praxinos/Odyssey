@@ -60,6 +60,7 @@ public:
     //The keyframe index at Scrub position
     int GetCurrentKeyframeIndex() const;
     int GetKeyframeIndexAtScrubPosition(float iPosition) const;
+    float GetScrubPositionForKeyFrameIndex(int32 iIndex) const;
 
     bool IsLooping() const;
     bool IsPlaying() const;
