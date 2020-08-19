@@ -18,6 +18,9 @@
 
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbook"
+#define MaxZoom 1.0
+#define MinZoom 0.01
+#define ZoomStep 0.01
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 
@@ -45,6 +48,34 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
     mOnFlipbookChanged = InArgs._OnFlipbookChanged;
 	mOnSpriteCreated = InArgs._OnSpriteCreated;
 	mOnTextureCreated = InArgs._OnTextureCreated;
+
+    // create zoom menu
+    FMenuBuilder ZoomMenuBuilder(true, NULL);
+    {
+        FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 0.25));
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom25Action", "25%"), LOCTEXT("Zoom25ActionHint", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
+
+        FUIAction Zoom50Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 0.5));
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom50Action", "50%"), LOCTEXT("Zoom50ActionHint", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
+
+        FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 1.0));
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom100Action", "100%"), LOCTEXT("Zoom100ActionHint", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
+
+        FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 2.0));
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom200Action", "200%"), LOCTEXT("Zoom200ActionHint", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
+
+        FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 4.0));
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("Zoom400Action", "400%"), LOCTEXT("Zoom400ActionHint", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
+
+        ZoomMenuBuilder.AddMenuSeparator();
+
+        /* FUIAction ZoomFitAction(
+            FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuFitClicked),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateSP(this, &SOdysseyFlipbookTimelineView::IsZoomMenuFitChecked)
+            );
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("ZoomFitAction", "Scale To Fit"), LOCTEXT("ZoomFillActionHint", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton); */
+    }
 
     ChildSlot
     [
@@ -107,7 +138,6 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
 
 		+ SVerticalBox::Slot()
 		.Padding(0, 0, 0, 0)
-		.AutoHeight()
 		[
 			SAssignNew(mTimelineWidget, SOdysseyTimeline)
             .OnScrubStarted(this, &SOdysseyFlipbookTimelineView::OnScrubStarted)
@@ -121,6 +151,55 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
                 .OnKeyframeRemoved(InArgs._OnKeyframeRemoved)
             ]
 		]
+        + SVerticalBox::Slot()
+		.AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot() //Spacer
+            + SHorizontalBox::Slot() //Spacer
+            + SHorizontalBox::Slot()
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                [
+                    SNew(STextBlock)
+                        .Text(LOCTEXT("ZoomLabel", "Zoom:"))
+                ]
+
+                + SHorizontalBox::Slot()
+                .FillWidth(1.0f)
+                .Padding(4.0f, 0.0f)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SSlider)
+                        .OnValueChanged(this, &SOdysseyFlipbookTimelineView::OnZoomSliderChanged)
+                        .Value(this, &SOdysseyFlipbookTimelineView::ZoomSliderValue)
+                ]
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                [
+                    SNew(STextBlock)
+                        .Text(this, &SOdysseyFlipbookTimelineView::OnZoomPercentageText)
+                ]
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .Padding(2.0f, 0.0f, 0.0f, 0.0f)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SComboButton)
+                        .ContentPadding(FMargin(0.0))
+                        .MenuContent()
+                        [
+                            ZoomMenuBuilder.MakeWidget()
+                        ]
+                ]
+            ]
+        ]
     ];
 }
 
@@ -373,6 +452,31 @@ SOdysseyFlipbookTimelineView::OnFixCurrentFrameClicked()
 {
     FixFrame(GetCurrentKeyframeIndex());
 	return FReply::Handled();
+}
+
+void
+SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked( double ZoomValue )
+{
+    mTimelineWidget->Zoom( ZoomValue );
+}
+
+FText
+SOdysseyFlipbookTimelineView::OnZoomPercentageText( ) const
+{
+    return FText::AsPercent(mTimelineWidget->Zoom());
+}
+
+void
+SOdysseyFlipbookTimelineView::OnZoomSliderChanged( float NewValue )
+{
+	mTimelineWidget->Zoom( NewValue * MaxZoom );
+}
+
+
+float
+SOdysseyFlipbookTimelineView::ZoomSliderValue() const
+{
+    return  (mTimelineWidget->Zoom() / MaxZoom );
 }
 
 bool

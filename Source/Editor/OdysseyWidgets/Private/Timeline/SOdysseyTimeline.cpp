@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyTimeline
 
-const float defaultFrameSize = 25.f; //in pixels
+const float defaultFrameSize = 50.f; //in pixels
 const float defaultHeight = 25.f; //in pixels
 
 void SOdysseyTimeline::Construct(const FArguments& InArgs)
 {
-	mZoom = FMath::Max(1.0f, InArgs._Zoom);
+	mZoom = FMath::Clamp(InArgs._Zoom, 0.01f, 1.0f);
     mOffset = InArgs._Offset;
 	mScrubPosition = InArgs._ScrubPosition;
 	
@@ -57,7 +57,9 @@ void SOdysseyTimeline::Construct(const FArguments& InArgs)
 		[
 			mScrollBoxH.ToSharedRef()
 		]
+		+ SVerticalBox::Slot() //Spacer
 		+ SVerticalBox::Slot()
+		.AutoHeight()
 		[
 			mScrollBarH.ToSharedRef()
 		]
@@ -89,7 +91,7 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	float offsetPercent = mScrollBarH->DistanceFromTop();
 	float offset = FMath::Max(0.0f, (offsetPercent * contentWidth / FrameSize()));
 	const float frameSize = FrameSize();
-	const float frameNumberMinSize = 20.f;
+	const float frameNumberMinSize = 30.f;
 	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
 	int32 startKey = FGenericPlatformMath::FloorToInt(offset);
 	int32 endKey = FGenericPlatformMath::CeilToInt(offset + (width / frameSize));
@@ -172,10 +174,11 @@ FReply SOdysseyTimeline::OnMouseWheel(const FGeometry& MyGeometry, const FPointe
 	if (MouseEvent.IsControlDown())
 	{
 		const float minZoom = 0.01f;
+		const float maxZoom = 1.0f;
 		const float directionScale = 0.08f;
 		const float direction = MouseEvent.GetWheelDelta();
 
-		Zoom(FMath::Max(minZoom, mZoom * (1.0f + direction * directionScale)));
+		Zoom(mZoom * (1.0f + direction * directionScale));
 		return FReply::Handled();
 	}
 	else
@@ -273,7 +276,7 @@ void
 SOdysseyTimeline::Zoom(float iZoom)
 {
 	const float oldZoom = mZoom;
-	mZoom = FMath::Max(1.0f, iZoom);
+	mZoom = FMath::Clamp(iZoom, 0.01f, 1.0f);
 	mOnZoomChanged.ExecuteIfBound(oldZoom);
 }
 

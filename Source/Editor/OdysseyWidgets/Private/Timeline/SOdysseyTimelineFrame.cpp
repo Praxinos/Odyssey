@@ -104,7 +104,7 @@ SOdysseyTimelineFrame::MaxLength(int32 iLength)
 FOptionalSize
 SOdysseyTimelineFrame::GetWidthInPixels() const
 {
-	return FrameSize() * Length();
+	return FOptionalSize(FrameSize() * Length());
 }
 
 void

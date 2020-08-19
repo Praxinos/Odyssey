@@ -487,11 +487,13 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
 					iFrame.ToSharedRef()
 				]
 				+ SOverlay::Slot()
-				.Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X/2, 0.f)
+				//.Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X/2, 0.f)
+				.Padding(TAttribute<FMargin>(this, &SOdysseyTimelineFrameList::GetTimingHandlePadding))
 				.HAlign(HAlign_Right)
 				.VAlign(VAlign_Center)
 				[
 					SNew(SBox)
+					.Visibility(this, &SOdysseyTimelineFrameList::GetLengthHandleVisibility)
 					// .Padding(FFlipbookUIConstants::FramePadding)
 					.WidthOverride(mLengthHandleBrush->ImageSize.X)
 					.HeightOverride(mLengthHandleBrush->ImageSize.Y)
@@ -510,11 +512,13 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
 			]
 			
 			+SOverlay::Slot()
-			.Padding(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X/2, 0.f)
+			//.Padding(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X/2, 0.f)
+			.Padding(TAttribute<FMargin>(this, &SOdysseyTimelineFrameList::GetTimingHandlePadding))
 			.HAlign(HAlign_Right)
 			.VAlign(VAlign_Top)
 			[
 				SNew(SBox)
+				.Visibility(this, &SOdysseyTimelineFrameList::GetLengthHandleVisibility)
 				.WidthOverride(mTimingHandleBrush->ImageSize.X)
 				.HeightOverride(mTimingHandleBrush->ImageSize.Y)
 				[
@@ -578,6 +582,35 @@ SOdysseyTimelineFrameList::DropPreviewRightVisibility(TSharedPtr<FOdysseyTimelin
 		return EVisibility::Collapsed;
 
 	return EVisibility::HitTestInvisible;
+}
+
+EVisibility
+SOdysseyTimelineFrameList::GetTimingHandleVisibility() const
+{
+	return (GetFrameSize() < mTimingHandleBrush->ImageSize.X / 2) ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+EVisibility
+SOdysseyTimelineFrameList::GetLengthHandleVisibility() const
+{
+	return (GetFrameSize() < mLengthHandleBrush->ImageSize.X / 2) ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+
+FMargin
+SOdysseyTimelineFrameList::GetTimingHandlePadding() const
+{
+	return (GetFrameSize() < mTimingHandleBrush->ImageSize.X / 2) ?
+		FMargin(0.0f, 0.0f, 0.f, 0.f) :
+		FMargin(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X / 2, 0.f);
+}
+
+FMargin
+SOdysseyTimelineFrameList::GetLengthHandlePadding() const
+{
+	return (GetFrameSize() < mTimingHandleBrush->ImageSize.X / 2) ?
+		FMargin(0.0f, 0.0f, 0.f, 0.f) :
+		FMargin(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X / 2, 0.f);
 }
 
 #undef LOCTEXT_NAMESPACE

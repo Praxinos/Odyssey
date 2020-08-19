@@ -89,6 +89,11 @@ private:
 
 	void OnFrameRateChanged(float iFrameRate);
 
+    void  OnZoomMenuEntryClicked( double ZoomValue );
+    FText OnZoomPercentageText( ) const;
+    void  OnZoomSliderChanged( float NewValue );
+    float ZoomSliderValue() const;
+
 private:
     //Manipulations
 	bool AddFrame();

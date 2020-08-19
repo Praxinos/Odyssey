@@ -67,6 +67,11 @@ public:
 	int32 GetFrameLength(int32 iIndex) const;
 	TSharedPtr<SWidget> GetFrameContent(int32 iIndex) const;
 	EVisibility GetFrameVisibility(int32 iIndex) const;
+	EVisibility GetTimingHandleVisibility() const;
+	EVisibility GetLengthHandleVisibility() const;
+	FMargin GetTimingHandlePadding() const;
+	FMargin GetLengthHandlePadding() const;
+	
 
 	// TSharedPtr<SOdysseyTimelineFrame>& GetFrame(int32 iIndex);
 	// TSharedPtr<FOdysseyTimelineFrame> GetFrameAt(int32 iIndex) const;
