@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyTimeline
 
-const float defaultFrameSize = 30.f; //in pixels
+const float defaultFrameSize = 25.f; //in pixels
 const float defaultHeight = 25.f; //in pixels
 
 void SOdysseyTimeline::Construct(const FArguments& InArgs)
 {
-	mZoom = InArgs._Zoom;
+	mZoom = FMath::Max(1.0f, InArgs._Zoom);
     mOffset = InArgs._Offset;
 	mScrubPosition = InArgs._ScrubPosition;
 	
@@ -53,6 +53,7 @@ void SOdysseyTimeline::Construct(const FArguments& InArgs)
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
+		.AutoHeight()
 		[
 			mScrollBoxH.ToSharedRef()
 		]
@@ -88,6 +89,8 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	float offsetPercent = mScrollBarH->DistanceFromTop();
 	float offset = FMath::Max(0.0f, (offsetPercent * contentWidth / FrameSize()));
 	const float frameSize = FrameSize();
+	const float frameNumberMinSize = 20.f;
+	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
 	int32 startKey = FGenericPlatformMath::FloorToInt(offset);
 	int32 endKey = FGenericPlatformMath::CeilToInt(offset + (width / frameSize));
 	for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
@@ -123,19 +126,22 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 
 
 		//Draw key num
-		const FString frameString = FString::Printf(TEXT("%d"), keyNum);
-		const FVector2D textPos(x + 2.f, 0.f);
+		if (!(keyNum % frameNumberFrequency))
+		{
+			const FString frameString = FString::Printf(TEXT("%d"), keyNum);
+			const FVector2D textPos(x + 2.f, 0.f);
 
-		const TSharedRef< FSlateFontMeasure > fontMeasureService = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-		const FVector2D textSize = fontMeasureService->Measure(frameString, textFontInfo);
+			const TSharedRef< FSlateFontMeasure > fontMeasureService = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+			const FVector2D textSize = fontMeasureService->Measure(frameString, textFontInfo);
 
-		FSlateDrawElement::MakeText(
-			OutDrawElements,
-			textLayer,
-			AllottedGeometry.ToPaintGeometry(textPos, textSize),
-			frameString, 
-			textFontInfo, 
-			ESlateDrawEffect::None);
+			FSlateDrawElement::MakeText(
+				OutDrawElements,
+				textLayer,
+				AllottedGeometry.ToPaintGeometry(textPos, textSize),
+				frameString, 
+				textFontInfo, 
+				ESlateDrawEffect::None);
+		}
 	}
 
 	LayerId = SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
@@ -267,7 +273,7 @@ void
 SOdysseyTimeline::Zoom(float iZoom)
 {
 	const float oldZoom = mZoom;
-	mZoom = iZoom;
+	mZoom = FMath::Max(1.0f, iZoom);
 	mOnZoomChanged.ExecuteIfBound(oldZoom);
 }
 
