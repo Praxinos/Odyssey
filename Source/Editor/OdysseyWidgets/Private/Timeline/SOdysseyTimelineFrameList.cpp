@@ -72,7 +72,7 @@ SOdysseyTimelineFrameList::ComputeDesiredSize(float LayoutScaleMultiplier) const
 	//Add a half of the size of a handle to be able to see the last one it entirely
 	FVector2D size = mFramesContainer->GetDesiredSize();
 	size.X += FMath::Max(mLengthHandleBrush->ImageSize.X, mTimingHandleBrush->ImageSize.X) / 2;
-	size.Y += mTimingHandleBrush->ImageSize.Y / 2;
+	// size.Y += mTimingHandleBrush->ImageSize.Y / 2;
 	return size;
 }
 
@@ -481,7 +481,32 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
 			+SOverlay::Slot()
 			.Padding(0.f, mTimingHandleBrush->ImageSize.Y/2, 0.f, 0.f)
 			[
-				iFrame.ToSharedRef()
+				SNew(SOverlay)
+				+SOverlay::Slot()
+				[
+					iFrame.ToSharedRef()
+				]
+				+ SOverlay::Slot()
+				.Padding(0.0f, 0.0f, -mLengthHandleBrush->ImageSize.X/2, 0.f)
+				.HAlign(HAlign_Right)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SBox)
+					// .Padding(FFlipbookUIConstants::FramePadding)
+					.WidthOverride(mLengthHandleBrush->ImageSize.X)
+					.HeightOverride(mLengthHandleBrush->ImageSize.Y)
+					[
+						SNew(SOdysseyTimelineFrameHandle)
+						.FrameSize(mFrameSize)
+						.OnDragStarted(this, &SOdysseyTimelineFrameList::OnLengthHandleDragStarted, metaData)
+						.OnDragged(this, &SOdysseyTimelineFrameList::OnLengthHandleDragged, metaData)
+						.OnDragStopped(this, &SOdysseyTimelineFrameList::OnLengthHandleDragStopped, metaData)
+						[
+							SNew(SImage)
+							.Image(mLengthHandleBrush)
+						]
+					]
+				]
 			]
 			
 			+SOverlay::Slot()
@@ -501,27 +526,6 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
 					[
 						SNew(SImage)
 						.Image(mTimingHandleBrush)
-					]
-				]
-			]
-			+ SOverlay::Slot()
-			.Padding(0.0f, mTimingHandleBrush->ImageSize.Y/2, -mLengthHandleBrush->ImageSize.X/2, 0.f)
-			.HAlign(HAlign_Right)
-			.VAlign(VAlign_Center)
-			[
-				SNew(SBox)
-				// .Padding(FFlipbookUIConstants::FramePadding)
-				.WidthOverride(mLengthHandleBrush->ImageSize.X)
-				.HeightOverride(mLengthHandleBrush->ImageSize.Y)
-				[
-					SNew(SOdysseyTimelineFrameHandle)
-					.FrameSize(mFrameSize)
-					.OnDragStarted(this, &SOdysseyTimelineFrameList::OnLengthHandleDragStarted, metaData)
-					.OnDragged(this, &SOdysseyTimelineFrameList::OnLengthHandleDragged, metaData)
-					.OnDragStopped(this, &SOdysseyTimelineFrameList::OnLengthHandleDragStopped, metaData)
-					[
-						SNew(SImage)
-						.Image(mLengthHandleBrush)
 					]
 				]
 			]

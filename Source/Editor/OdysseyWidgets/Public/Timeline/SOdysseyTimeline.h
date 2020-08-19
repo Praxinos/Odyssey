@@ -57,8 +57,7 @@ public:
 	// Returns the framesize in pixels according to the zoom
 	float FrameSize() const;
 
-	FOptionalSize GetScrollBoxHWidth() const;
-	FOptionalSize GetScrollBoxVHeight() const;
+	FOptionalSize GetScrollBoxHWidth() const;;
 
 private:
 	//Zoom
@@ -80,7 +79,5 @@ private:
 
 	TSharedPtr<SWidget> mContent;
 	TSharedPtr<SScrollBar> mScrollBarH;
-	TSharedPtr<SScrollBar> mScrollBarV;
 	TSharedPtr<SScrollBox> mScrollBoxH;
-	TSharedPtr<SScrollBox> mScrollBoxV;
 };

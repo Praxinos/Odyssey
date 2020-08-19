@@ -31,25 +31,9 @@ void SOdysseyTimeline::Construct(const FArguments& InArgs)
 	mIsOffsetting = false;
     mIsScrubbing = false;
 
-	SAssignNew(mScrollBarV, SScrollBar)
-		.Orientation(Orient_Vertical)
-		.AlwaysShowScrollbar(true);
-
 	SAssignNew(mScrollBarH, SScrollBar)
 		.Orientation(Orient_Horizontal)
-		.AlwaysShowScrollbar(true);
-
-	SAssignNew(mScrollBoxV, SScrollBox)
-		.Orientation(Orient_Vertical)
-		.ExternalScrollbar(mScrollBarV)
-		+ SScrollBox::Slot()
-		[
-			SNew(SBox)
-			.WidthOverride(this, &SOdysseyTimeline::GetScrollBoxVHeight)
-			[
-				mContent.ToSharedRef()
-			]
-		];
+		.AlwaysShowScrollbar(false);
 
 	SAssignNew(mScrollBoxH, SScrollBox)
 		.Orientation(Orient_Horizontal)
@@ -58,29 +42,23 @@ void SOdysseyTimeline::Construct(const FArguments& InArgs)
 		+ SScrollBox::Slot()
 		[
 			SNew(SBox)
-			.WidthOverride(this, &SOdysseyTimeline::GetScrollBoxHWidth)
+			.MinDesiredWidth(this, &SOdysseyTimeline::GetScrollBoxHWidth)
 			[
-				mScrollBoxV.ToSharedRef()
+				mContent.ToSharedRef()
 			]
 		];
 
 	ChildSlot
-	.Padding(FMargin(0.0f, defaultHeight, 0.0f, 0.0f))
+	.Padding(0.f ,defaultHeight, 0.f, 0.f)
 	[
-		SNew(SGridPanel)
-		.FillColumn(0, 1.f)
-		.FillRow(0, 1.f)
-		+ SGridPanel::Slot(0, 0)
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
 		[
 			mScrollBoxH.ToSharedRef()
 		]
-		+ SGridPanel::Slot(0, 1)
+		+ SVerticalBox::Slot()
 		[
 			mScrollBarH.ToSharedRef()
-		]
-		+ SGridPanel::Slot(1, 0)
-		[
-			mScrollBarV.ToSharedRef()
 		]
 	];
 }
@@ -340,26 +318,8 @@ SOdysseyTimeline::GetScrollBoxHWidth() const
 	if (!mScrollBoxH.IsValid())
 		return FOptionalSize(0.0f);
 
-	if (!mContent.IsValid())
-		return FOptionalSize(0.0f);
-
-	float hSize = mScrollBoxH->GetCachedGeometry().GetLocalSize().X;
-	float cSize = mContent->GetDesiredSize().X;
-	return FOptionalSize(FMath::Max(hSize, cSize));
-}
-
-FOptionalSize
-SOdysseyTimeline::GetScrollBoxVHeight() const
-{
-	if (!mScrollBoxV.IsValid())
-		return FOptionalSize(0.0f);
-
-	if (!mContent.IsValid())
-		return FOptionalSize(0.0f);
-
-	float vSize = mScrollBoxV->GetCachedGeometry().GetLocalSize().Y;
-	float cSize = mContent->GetDesiredSize().Y;
-	return FOptionalSize(FMath::Max(vSize, cSize));
+	float hSize = mScrollBoxH->GetCachedGeometry().GetLocalSize().X - 1.0f;
+	return FOptionalSize(hSize);
 }
 
 //////////////////////////////////////////////////////////////////////////
