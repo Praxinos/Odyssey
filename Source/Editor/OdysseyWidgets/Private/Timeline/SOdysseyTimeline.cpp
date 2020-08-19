@@ -288,6 +288,7 @@ SOdysseyTimeline::Offset(float iOffset)
 {
 	const float oldOffset = mOffset;
 	mOffset = iOffset;
+	mScrollBoxH->SetScrollOffset(iOffset * FrameSize());
 	mOnOffsetChanged.ExecuteIfBound(oldOffset);
 }
 
