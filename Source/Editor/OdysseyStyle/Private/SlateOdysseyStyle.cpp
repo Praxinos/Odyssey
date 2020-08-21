@@ -368,8 +368,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         );
 
 	//For flipbook
-	Set("FlipbookTimeline.RegionGrabHandle", new BOX_BRUSH("OdysseyFlipbook/ScrubHandleWhole", FMargin(6.f / 13.f, 10 / 24.f, 6 / 13.f, 10 / 24.f)));
-	Set("FlipbookTimeline.RegionBody", new BOX_BRUSH("OdysseyFlipbook/Scrollbar_Thumb", FMargin(4.f / 16.f)));
+	Set("FlipbookTimeline.TimelineFrameBackground", new BOX_BRUSH("OdysseyFlipbook/TimelineFrameBackground", FMargin(4.f / 16.f)));
 	Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 16.f)));
 	Set("FlipbookTimeline.TimelineFrameLengthHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameLengthHandle", FVector2D(16.f, 16.f)));
     Set("FlipbookTimeline.TimelineFrameWarning", new IMAGE_BRUSH("OdysseyFlipbook/icon_warning_16x", FVector2D(16.f, 16.f)));

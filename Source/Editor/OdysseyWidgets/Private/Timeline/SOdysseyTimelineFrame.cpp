@@ -30,8 +30,8 @@ void SOdysseyTimelineFrame::Construct( const SOdysseyTimelineFrame::FArguments& 
 		.VAlign(VAlign_Fill)
 		[
 			SAssignNew(mContentContainer, SBorder)
-			.BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.RegionBody"))
-			.BorderBackgroundColor(FLinearColor::White)
+			.BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
+			.BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
 			[
 				InArgs._Content.Widget
 			]
