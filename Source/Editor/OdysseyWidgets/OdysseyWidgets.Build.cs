@@ -34,6 +34,7 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyStrokePipeline",
                 "OdysseyTransaction",
                 "OdysseyMaths",
+                "RenderCore",
                 "Paper2D",
 				"KismetWidgets"
             }

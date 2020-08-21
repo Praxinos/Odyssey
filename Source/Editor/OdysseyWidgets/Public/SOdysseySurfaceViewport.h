@@ -9,7 +9,7 @@
 #include "Widgets/SCompoundWidget.h"
 
 
-class FSceneViewport;
+class FOdysseySceneViewport;
 class SScrollBar;
 class SViewport;
 class IOdysseySurface;
@@ -33,7 +33,7 @@ public:
 public:
     // Public API
     void                        SetSurface( IOdysseySurface* iValue );
-    TSharedPtr<FSceneViewport>  GetViewport()              const;
+    TSharedPtr<FOdysseySceneViewport>  GetViewport()              const;
     TSharedPtr<SViewport>       GetViewportWidget()        const;
     TSharedPtr<SScrollBar>      GetVerticalScrollBar()     const;
     TSharedPtr<SScrollBar>      GetHorizontalScrollBar()   const;
@@ -92,7 +92,7 @@ private:
     // Private Member Data
     IOdysseySurface*            Surface;
     TSharedPtr<FViewportClient> ViewportClient;
-    TSharedPtr<FSceneViewport>  Viewport;
+    TSharedPtr<FOdysseySceneViewport>  Viewport;
     TSharedPtr<SViewport>       ViewportWidget;
     TSharedPtr<SScrollBar>      TextureViewportVerticalScrollBar;
     TSharedPtr<SScrollBar>      TextureViewportHorizontalScrollBar;

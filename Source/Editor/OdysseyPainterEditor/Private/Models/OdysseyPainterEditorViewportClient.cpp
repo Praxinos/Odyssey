@@ -14,7 +14,7 @@
 #include "Engine/VolumeTexture.h"
 #include "ImageUtils.h"
 #include "RawMesh.h"
-#include "Slate/SceneViewport.h"
+#include "FOdysseySceneViewport.h"
 #include "Texture2DPreview.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "UnrealEdGlobals.h"
@@ -311,7 +311,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
 	
-    //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), State.GetPosition().X, State.GetPosition().Y, local.X, local.Y );
+    //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged AbsoluteToLocal: screen:%f %f -> local (ref widget): %f %f" ), iState.GetPosition().X, iState.GetPosition().Y, position_in_viewport.X, position_in_viewport.Y );
 
     FOdysseyStrokePoint stroke_point( position_in_viewport.X
                                       , position_in_viewport.Y
@@ -642,7 +642,10 @@ FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCur
 EMouseCaptureMode
 FOdysseyPainterEditorViewportClient::CaptureMouseOnClick()
 {
-	return EMouseCaptureMode::CaptureDuringMouseDown;
+    //No Capture, the capture is managed by FOdysseySceneViewport
+    //Because this capture activates HighPrecisionMouseMovements, which is applying acceleration to the mouse (on Mac at least)
+    //And we don't want that
+    return EMouseCaptureMode::NoCapture;
 }
 
 //--------------------------------------------------------------------------------------

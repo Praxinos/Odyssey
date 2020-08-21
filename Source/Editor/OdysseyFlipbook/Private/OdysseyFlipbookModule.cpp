@@ -42,3 +42,5 @@ void FOdysseyFlipbookModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyFlipbookModule, OdysseyFlipbook);
+
+#undef LOCTEXT_NAMESPACE

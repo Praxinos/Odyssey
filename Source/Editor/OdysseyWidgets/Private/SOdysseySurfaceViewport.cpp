@@ -12,7 +12,7 @@
 #include "Widgets/SViewport.h"
 #include "Widgets/Input/SSlider.h"
 #include "Engine/Texture.h"
-#include "Slate/SceneViewport.h"
+#include "FOdysseySceneViewport.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
@@ -266,7 +266,7 @@ SOdysseySurfaceViewport::SetSurface( IOdysseySurface* iValue )
 }
 
 
-TSharedPtr< FSceneViewport >
+TSharedPtr< FOdysseySceneViewport >
 SOdysseySurfaceViewport::GetViewport() const
 {
     return  Viewport;
@@ -346,7 +346,7 @@ void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient
     }
 
     ViewportClient  = InViewportClient;
-    Viewport        = MakeShareable(new FSceneViewport(ViewportClient.Get(), ViewportWidget));
+    Viewport        = MakeShareable(new FOdysseySceneViewport(ViewportClient.Get(), ViewportWidget));
     ViewportWidget->SetViewportInterface(Viewport.ToSharedRef());
 }
 

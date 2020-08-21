@@ -42,3 +42,5 @@ void FOdysseyTextureModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FOdysseyTextureModule, OdysseyTexture);
+
+#undef LOCTEXT_NAMESPACE
