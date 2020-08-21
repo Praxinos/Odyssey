@@ -19,7 +19,9 @@ public:
 		SLATE_ATTRIBUTE(bool, IsPlaying)
 		SLATE_ATTRIBUTE(bool, IsLooping)
 		SLATE_EVENT(FOnClicked, OnPlayClicked)
+		SLATE_EVENT(FOnClicked, OnPlayBackwardClicked)
 		SLATE_EVENT(FOnClicked, OnPauseClicked)
+		SLATE_EVENT(FOnClicked, OnStopClicked)
 		SLATE_EVENT(FOnClicked, OnBeginningClicked)
 		SLATE_EVENT(FOnClicked, OnEndClicked)
 		SLATE_EVENT(FOnClicked, OnPreviousClicked)
@@ -33,6 +35,7 @@ public:
 private:
 	EVisibility GetPlayButtonVisibility() const;
 	EVisibility GetPauseButtonVisibility() const;
+	EVisibility GetStopButtonVisibility() const;
 	EVisibility GetLoopingButtonVisibility() const;
 	EVisibility GetNotLoopingButtonVisibility() const;
 
@@ -41,7 +44,9 @@ private:
 	TAttribute<bool> mIsLooping;
 
 	FOnClicked mOnPlayClicked;
+	FOnClicked mOnPlayBackwardClicked;
 	FOnClicked mOnPauseClicked;
+	FOnClicked mOnStopClicked;
 	FOnClicked mOnBeginningClicked;
 	FOnClicked mOnEndClicked;
 	FOnClicked mOnPreviousClicked;

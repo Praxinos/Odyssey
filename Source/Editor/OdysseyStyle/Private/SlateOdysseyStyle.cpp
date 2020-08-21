@@ -374,6 +374,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 	Set("FlipbookTimeline.TimelineFrameLengthHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameLengthHandle", FVector2D(16.f, 16.f)));
     Set("FlipbookTimeline.TimelineFrameWarning", new IMAGE_BRUSH("OdysseyFlipbook/icon_warning_16x", FVector2D(16.f, 16.f)));
 	
+
 	//PlaybackControls
 	Set("PlaybackControls.Play", FButtonStyle(mButton)
 		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
@@ -381,10 +382,23 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_ON_24", mIcon24x24))
 	);
 
+	//PlaybackControls
+	Set("PlaybackControls.PlayBackward", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_ON_24", mIcon24x24))
+	);
+
     Set("PlaybackControls.Pause", FButtonStyle(mButton)
 		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
 		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
 		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.Stop", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_ON_24", mIcon24x24))
 	);
 
     Set("PlaybackControls.Beginning", FButtonStyle(mButton)

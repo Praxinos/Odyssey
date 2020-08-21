@@ -51,6 +51,7 @@ private:
 private:
     //Play/Stop Methods
     void Play();
+    void Pause();
     void Stop();
 
 public:
@@ -74,8 +75,9 @@ private:
     // Event callbacks
 
     //SOdysseyPlaybackControls
-	FReply OnPlayClicked();
+	FReply OnPlayClicked(bool iIsBackward);
 	FReply OnPauseClicked();
+    FReply OnStopClicked();
 	FReply OnBeginningClicked();
 	FReply OnEndClicked();
 	FReply OnPreviousClicked();
@@ -113,6 +115,7 @@ private:
     UPaperFlipbook* mFlipbook;
 
     bool mIsPlaying;
+    bool mIsPlayingBackward;
     bool mIsLooping;
 
     float mScrubPositionBeforePlay;
