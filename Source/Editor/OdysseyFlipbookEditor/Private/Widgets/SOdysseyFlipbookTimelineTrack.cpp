@@ -118,13 +118,25 @@ SOdysseyFlipbookTimelineTrack::SetFrame(int32 iIndex, UTexture2D* iTexture)
 TSharedPtr<SWidget>
 SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
 {
-	static const float thumbnailWidth = 40;
-	static const float thumbnailHeight = 40;
-
 	TSharedPtr<SWidget> contentWidget = nullptr;
 	if (iTexture)
 	{
-		TSharedPtr<FAssetThumbnail> AssetThumbnail = MakeShareable( new FAssetThumbnail( iTexture, thumbnailWidth, thumbnailHeight, mAssetThumbnailPool ) );
+		float w = iTexture->GetSizeX();
+		float h = iTexture->GetSizeY();
+		if (w > h)
+		{
+			float ratio = 64.f / w;
+			w = 64.f;
+			h *= ratio;
+		}
+		else
+		{
+			float ratio = 64.f / h;
+			h = 64.f;
+			w *= ratio;
+		}
+
+		TSharedPtr<FAssetThumbnail> AssetThumbnail = MakeShareable( new FAssetThumbnail( iTexture, w, h, mAssetThumbnailPool ) );
 		FAssetThumbnailConfig ThumbnailConfig;
 		ThumbnailConfig.bAllowFadeIn = true;
 		ThumbnailConfig.bAllowHintText = false;
@@ -138,25 +150,34 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
 
 		contentWidget = SNew(SScaleBox)
 			.HAlign(HAlign_Left)
+			.VAlign(VAlign_Center)
 			.Stretch(EStretch::ScaleToFitY)
+			.StretchDirection(EStretchDirection::DownOnly)
 			[
-				thumbnailWidget.ToSharedRef()
+				SNew(SBox)
+				.WidthOverride(w)
+				.HeightOverride(h)
+				[
+					thumbnailWidget.ToSharedRef()
+				]
 			];
 	}
 	else
 	{
-		contentWidget = SNew(SBox)
-		.WidthOverride(mFrameWarningBrush->ImageSize.X)
-		.HeightOverride(mFrameWarningBrush->ImageSize.Y)
-		[
-			SNew(SScaleBox)
+		contentWidget = SNew(SScaleBox)
 			.HAlign(HAlign_Left)
+			.VAlign(VAlign_Center)
 			.Stretch(EStretch::ScaleToFitY)
+			.StretchDirection(EStretchDirection::DownOnly)
 			[
-				SNew(SImage)
-				.Image(mFrameWarningBrush)
-			]
-		];
+				SNew(SBox)
+				.WidthOverride(mFrameWarningBrush->ImageSize.X)
+				.HeightOverride(mFrameWarningBrush->ImageSize.Y)
+				[
+					SNew(SImage)
+					.Image(mFrameWarningBrush)
+				]
+			];
 	}
 	return contentWidget;
 }

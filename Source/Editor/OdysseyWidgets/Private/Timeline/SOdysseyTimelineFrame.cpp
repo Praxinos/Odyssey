@@ -24,7 +24,7 @@ void SOdysseyTimelineFrame::Construct( const SOdysseyTimelineFrame::FArguments& 
 	ChildSlot
 	[
 		SNew(SBox)
-		.HeightOverride(50.0f) //TODO: Move the size in an other widget or directly in the view or track itself
+		.HeightOverride(50.f) //TODO: Move the size in an other widget or directly in the view or track itself
 		.WidthOverride(this, &SOdysseyTimelineFrame::GetWidthInPixels)
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
@@ -32,6 +32,8 @@ void SOdysseyTimelineFrame::Construct( const SOdysseyTimelineFrame::FArguments& 
 			SAssignNew(mContentContainer, SBorder)
 			.BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
 			.BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
 			[
 				InArgs._Content.Widget
 			]
