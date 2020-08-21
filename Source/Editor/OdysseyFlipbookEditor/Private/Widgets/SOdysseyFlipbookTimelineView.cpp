@@ -91,6 +91,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
             [
                 SNew(SOdysseyPlaybackControls)
                 .IsPlaying(this, &SOdysseyFlipbookTimelineView::IsPlaying)
+                .IsPlayingBackward(this, &SOdysseyFlipbookTimelineView::IsPlayingBackward)
                 .IsLooping(this, &SOdysseyFlipbookTimelineView::IsLooping)
                 .OnPlayClicked(this, &SOdysseyFlipbookTimelineView::OnPlayClicked, false)
                 .OnPlayBackwardClicked(this, &SOdysseyFlipbookTimelineView::OnPlayClicked, true)
@@ -100,6 +101,8 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
                 .OnEndClicked(this, &SOdysseyFlipbookTimelineView::OnEndClicked)
                 .OnPreviousClicked(this, &SOdysseyFlipbookTimelineView::OnPreviousClicked)
                 .OnNextClicked(this, &SOdysseyFlipbookTimelineView::OnNextClicked)
+                .OnPreviousKeyClicked(this, &SOdysseyFlipbookTimelineView::OnPreviousKeyClicked)
+                .OnNextKeyClicked(this, &SOdysseyFlipbookTimelineView::OnNextKeyClicked)
                 .OnLoopClicked(this, &SOdysseyFlipbookTimelineView::OnLoopClicked)
                 //.OnFrameRateChanged(this, &SOdysseyFlipbookTimelineView::OnFrameRateChanged)
             ]
@@ -335,11 +338,15 @@ SOdysseyFlipbookTimelineView::OnScrubPositionChanged(float iOldPosition)
 }
 
 void
-SOdysseyFlipbookTimelineView::Play()
+SOdysseyFlipbookTimelineView::Play(bool iBackward)
 {
+    //Allow playing in the other direction when we are already playing in a direction
+    mIsPlayingBackward = iBackward;
+
     if (mIsPlaying)
         return;
 
+    mScrubPositionBeforePlay = mTimelineWidget->ScrubPosition();
 	mIsPlaying = true;
 
     //start scrubbing
@@ -396,6 +403,12 @@ SOdysseyFlipbookTimelineView::IsPlaying() const
 }
 
 bool
+SOdysseyFlipbookTimelineView::IsPlayingBackward() const
+{
+	return mIsPlayingBackward;
+}
+
+bool
 SOdysseyFlipbookTimelineView::IsScrubbing() const
 {
 	return mIsPlaying || mTimelineWidget->IsScrubbing();
@@ -416,11 +429,9 @@ SOdysseyFlipbookTimelineView::OnFrameRateChanged(float iFrameRate)
 }
 
 FReply
-SOdysseyFlipbookTimelineView::OnPlayClicked(bool iIsBackward)
+SOdysseyFlipbookTimelineView::OnPlayClicked(bool iBackward)
 {
-    mScrubPositionBeforePlay = mTimelineWidget->ScrubPosition();
-    mIsPlayingBackward = iIsBackward;
-	Play();
+	Play(iBackward);
 	return FReply::Handled();
 }
 
@@ -455,9 +466,47 @@ SOdysseyFlipbookTimelineView::OnEndClicked()
 FReply
 SOdysseyFlipbookTimelineView::OnPreviousClicked()
 {
-    int32 index = GetKeyframeIndexAtScrubPosition(mTimelineWidget->ScrubPosition());
-    if (index <= 0 || index >= mFlipbook->GetNumKeyFrames())
+    if (mTimelineWidget->ScrubPosition() < 1.0f)
         return FReply::Handled();
+
+    mTimelineWidget->ScrubPosition(FGenericPlatformMath::FloorToFloat(mTimelineWidget->ScrubPosition() - 1.0f) + 0.5f);
+	return FReply::Handled();
+}
+
+FReply
+SOdysseyFlipbookTimelineView::OnNextClicked()
+{
+    if (mTimelineWidget->ScrubPosition() < 0.f)
+    {
+        mTimelineWidget->ScrubPosition(0.5f);
+        return FReply::Handled();
+    }
+
+    mTimelineWidget->ScrubPosition(FGenericPlatformMath::FloorToFloat(mTimelineWidget->ScrubPosition() + 1.0f) + 0.5f);
+	return FReply::Handled();
+}
+
+FReply
+SOdysseyFlipbookTimelineView::OnPreviousKeyClicked()
+{
+    int32 index = GetKeyframeIndexAtScrubPosition(mTimelineWidget->ScrubPosition());
+    if (index == 0)
+        return FReply::Handled();
+        
+    if (index < 0)
+    {
+        if (mTimelineWidget->ScrubPosition() >= mFlipbook->GetNumFrames())
+        {
+            float position = GetScrubPositionForKeyFrameIndex(mFlipbook->GetNumKeyFrames() - 1);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        else
+        {
+            float position = GetScrubPositionForKeyFrameIndex(0);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        return FReply::Handled();
+    }
 
     float position = GetScrubPositionForKeyFrameIndex(index - 1);
     mTimelineWidget->ScrubPosition(position + 0.5f);
@@ -466,11 +515,26 @@ SOdysseyFlipbookTimelineView::OnPreviousClicked()
 }
 
 FReply
-SOdysseyFlipbookTimelineView::OnNextClicked()
+SOdysseyFlipbookTimelineView::OnNextKeyClicked()
 {
 	int32 index = GetKeyframeIndexAtScrubPosition(mTimelineWidget->ScrubPosition());
-    if (index < 0 || index >= mFlipbook->GetNumKeyFrames() - 1)
+    if (index >= mFlipbook->GetNumKeyFrames() - 1)
         return FReply::Handled();
+
+    if (index < 0)
+    {
+        if (mTimelineWidget->ScrubPosition() >= mFlipbook->GetNumFrames())
+        {
+            float position = GetScrubPositionForKeyFrameIndex(mFlipbook->GetNumKeyFrames() - 1);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        else
+        {
+            float position = GetScrubPositionForKeyFrameIndex(0);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        return FReply::Handled();
+    }
 
     float position = GetScrubPositionForKeyFrameIndex(index + 1);
     mTimelineWidget->ScrubPosition(position + 0.5f);

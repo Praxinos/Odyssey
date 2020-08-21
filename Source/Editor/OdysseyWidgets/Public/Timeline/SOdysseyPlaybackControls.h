@@ -17,6 +17,7 @@ public:
 	SLATE_BEGIN_ARGS(SOdysseyPlaybackControls)
 		{}
 		SLATE_ATTRIBUTE(bool, IsPlaying)
+		SLATE_ATTRIBUTE(bool, IsPlayingBackward)
 		SLATE_ATTRIBUTE(bool, IsLooping)
 		SLATE_EVENT(FOnClicked, OnPlayClicked)
 		SLATE_EVENT(FOnClicked, OnPlayBackwardClicked)
@@ -26,6 +27,8 @@ public:
 		SLATE_EVENT(FOnClicked, OnEndClicked)
 		SLATE_EVENT(FOnClicked, OnPreviousClicked)
 		SLATE_EVENT(FOnClicked, OnNextClicked)
+		SLATE_EVENT(FOnClicked, OnPreviousKeyClicked)
+		SLATE_EVENT(FOnClicked, OnNextKeyClicked)
 		SLATE_EVENT(FOnClicked, OnLoopClicked)
 		SLATE_EVENT(FOnFrameRateChanged, OnFrameRateChanged)
 	SLATE_END_ARGS()
@@ -34,13 +37,15 @@ public:
 
 private:
 	EVisibility GetPlayButtonVisibility() const;
+	EVisibility GetPlayBackwardButtonVisibility() const;
 	EVisibility GetPauseButtonVisibility() const;
-	EVisibility GetStopButtonVisibility() const;
+	EVisibility GetPauseBackwardButtonVisibility() const;
 	EVisibility GetLoopingButtonVisibility() const;
 	EVisibility GetNotLoopingButtonVisibility() const;
 
 private:
 	TAttribute<bool> mIsPlaying;
+	TAttribute<bool> mIsPlayingBackward;
 	TAttribute<bool> mIsLooping;
 
 	FOnClicked mOnPlayClicked;
@@ -51,6 +56,8 @@ private:
 	FOnClicked mOnEndClicked;
 	FOnClicked mOnPreviousClicked;
 	FOnClicked mOnNextClicked;
+	FOnClicked mOnPreviousKeyClicked;
+	FOnClicked mOnNextKeyClicked;
 	FOnClicked mOnLoopClicked;
 	FOnFrameRateChanged mOnFrameRateChanged;
 };

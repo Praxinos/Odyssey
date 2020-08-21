@@ -50,7 +50,7 @@ private:
 
 private:
     //Play/Stop Methods
-    void Play();
+    void Play(bool iBackward);
     void Pause();
     void Stop();
 
@@ -65,6 +65,7 @@ public:
 
     bool IsLooping() const;
     bool IsPlaying() const;
+    bool IsPlayingBackward() const;
     bool IsScrubbing() const;
 
     float FrameSize() const;
@@ -75,13 +76,15 @@ private:
     // Event callbacks
 
     //SOdysseyPlaybackControls
-	FReply OnPlayClicked(bool iIsBackward);
+	FReply OnPlayClicked(bool iBackward);
 	FReply OnPauseClicked();
     FReply OnStopClicked();
 	FReply OnBeginningClicked();
 	FReply OnEndClicked();
 	FReply OnPreviousClicked();
 	FReply OnNextClicked();
+	FReply OnPreviousKeyClicked();
+	FReply OnNextKeyClicked();
 	FReply OnLoopClicked();
 	FReply OnAddFrameClicked();
     FReply OnFixCurrentFrameClicked();

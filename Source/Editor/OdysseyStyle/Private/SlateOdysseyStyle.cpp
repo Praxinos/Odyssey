@@ -419,10 +419,22 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_ON_24", mIcon24x24))
 	);
 
+    Set("PlaybackControls.PreviousKey", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_ON_24", mIcon24x24))
+	);
+
     Set("PlaybackControls.Next", FButtonStyle(mButton)
 		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
 		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
 		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_ON_24", mIcon24x24))
+	);
+
+    Set("PlaybackControls.NextKey", FButtonStyle(mButton)
+		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_OFF_24", mIcon24x24))
+		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_OFF_24", mIcon24x24))
+		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_ON_24", mIcon24x24))
 	);
 
     Set("PlaybackControls.Looping", FButtonStyle(mButton)

@@ -7,6 +7,7 @@ void
 SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 {
 	mIsPlaying = InArgs._IsPlaying;
+	mIsPlayingBackward = InArgs._IsPlayingBackward;
 	mIsLooping = InArgs._IsLooping;
 
 	mOnPlayClicked = InArgs._OnPlayClicked;
@@ -17,6 +18,8 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 	mOnEndClicked = InArgs._OnEndClicked;
 	mOnPreviousClicked = InArgs._OnPreviousClicked;
 	mOnNextClicked = InArgs._OnNextClicked;
+	mOnPreviousKeyClicked = InArgs._OnPreviousKeyClicked;
+	mOnNextKeyClicked = InArgs._OnNextKeyClicked;
 	mOnLoopClicked = InArgs._OnLoopClicked;
 	mOnFrameRateChanged = InArgs._OnFrameRateChanged;
 
@@ -37,6 +40,15 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 		.AutoWidth()
 		[
 			SNew(SButton)
+			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.PreviousKey"))
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Center)
+			.OnClicked(mOnPreviousKeyClicked)
+		]
+		+SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			SNew(SButton)
 			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Previous"))
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
@@ -47,10 +59,29 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 		[
 			SNew(SButton)
 			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.PlayBackward"))
-			.Visibility(this, &SOdysseyPlaybackControls::GetPlayButtonVisibility)
+			.Visibility(this, &SOdysseyPlaybackControls::GetPlayBackwardButtonVisibility)
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
 			.OnClicked(mOnPlayBackwardClicked)
+		]
+		+SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			SNew(SButton)
+			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Pause"))
+			.Visibility(this, &SOdysseyPlaybackControls::GetPauseBackwardButtonVisibility)
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Center)
+			.OnClicked(mOnPauseClicked)
+		]
+		+SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			SNew(SButton)
+			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Stop"))
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Center)
+			.OnClicked(mOnStopClicked)
 		]
 		+SHorizontalBox::Slot()
 		.AutoWidth()
@@ -76,20 +107,19 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 		.AutoWidth()
 		[
 			SNew(SButton)
-			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Stop"))
-			.Visibility(this, &SOdysseyPlaybackControls::GetStopButtonVisibility)
+			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Next"))
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
-			.OnClicked(mOnStopClicked)
+			.OnClicked(mOnNextClicked)
 		]
 		+SHorizontalBox::Slot()
 		.AutoWidth()
 		[
 			SNew(SButton)
-			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.Next"))
+			.ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("PlaybackControls.NextKey"))
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
-			.OnClicked(mOnNextClicked)
+			.OnClicked(mOnNextKeyClicked)
 		]
 		+SHorizontalBox::Slot()
 		.AutoWidth()
@@ -130,19 +160,25 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
 EVisibility
 SOdysseyPlaybackControls::GetPlayButtonVisibility() const
 {
-	return mIsPlaying.Get() ? EVisibility::Collapsed : EVisibility::Visible;
+	return mIsPlaying.Get() && !mIsPlayingBackward.Get() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+EVisibility
+SOdysseyPlaybackControls::GetPlayBackwardButtonVisibility() const
+{
+	return mIsPlaying.Get() && mIsPlayingBackward.Get() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 EVisibility
 SOdysseyPlaybackControls::GetPauseButtonVisibility() const
 {
-	return mIsPlaying.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+	return mIsPlaying.Get() && !mIsPlayingBackward.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
-SOdysseyPlaybackControls::GetStopButtonVisibility() const
+SOdysseyPlaybackControls::GetPauseBackwardButtonVisibility() const
 {
-	return mIsPlaying.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+	return mIsPlaying.Get() && mIsPlayingBackward.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
