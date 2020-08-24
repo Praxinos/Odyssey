@@ -60,8 +60,6 @@ public:
 
     //The keyframe index at Scrub position
     int GetCurrentKeyframeIndex() const;
-    int GetKeyframeIndexAtScrubPosition(float iPosition) const;
-    float GetScrubPositionForKeyFrameIndex(int32 iIndex) const;
 
     bool IsLooping() const;
     bool IsPlaying() const;
@@ -93,6 +91,7 @@ private:
 	void OnScrubPositionChanged(float iOldPosition);
 
 	void OnFrameRateChanged(float iFrameRate);
+    void OnKeyframeAdded(FPaperFlipbookKeyFrame& iKeyFrame);
 
     void  OnZoomMenuEntryClicked( double ZoomValue );
     FText OnZoomPercentageText( ) const;
@@ -103,8 +102,6 @@ private:
     //Manipulations
 	bool AddFrame();
 	bool FixFrame(int32 iIndex);
-	UTexture2D* CreateTexture(int32 width, int32 height);
-    UPaperSprite* CreateSprite(UTexture2D* iTexture);
 
 private:
     TArray<SNumericDropDown<float>::FNamedValue> FrameRateDropDownValues() const;

@@ -46,23 +46,15 @@ public:
 
     //Currently Edited LayerStack
     FOdysseyLayerStack*					LayerStack() const;
-
-	//Returns the Texture at given keyframe index or NULL
-	UTexture2D*							TextureAtKeyframe(int32 iKeyframe);
     
-	//UTexture2D*							TextureAtScrubPosition(float iScrubPosition);
-	
-    //int									KeyFrame();
 	FOdysseySurfaceReadOnly*			PreviewSurface();
 
     //Data Sanity Methods 
 
     // Sets the currently edited texture
     void                        Texture(UTexture2D* iTexture);
-    //void                        KeyFrame(int iIndex/*, bool iForceUpdate = false*/);
-
+    
 private:
-    // void                        SetCurrentTexture(UTexture2D* iTexture);
     UOdysseyTextureAssetUserData* FindOrCreateTextureUserData(UTexture2D* iTexture);
 
 public:
@@ -77,7 +69,6 @@ public:
 private:
     UPaperFlipbook*             mFlipbook;
     UTexture2D*                 mTexture;
-    // int                         mKeyFrame; //Current Keyframe
 
     FOdysseyLayerStack*         mLayerStack;  // Copied from mOdysseyTexture AssetUserData
     

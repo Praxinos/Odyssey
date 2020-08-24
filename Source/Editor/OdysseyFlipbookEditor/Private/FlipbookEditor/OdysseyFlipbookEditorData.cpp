@@ -7,6 +7,7 @@
 #include "PaperFlipbook.h"
 #include "PaperSprite.h"
 #include "OdysseyTextureAssetUserData.h"
+#include "OdysseyFlipbookUtils.h"
 
 
 /////////////////////////////////////////////////////
@@ -29,7 +30,6 @@ FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(UPaperFlipbook* iFlipbook)
     : mFlipbook( iFlipbook )
     , mTexture( NULL )
-    //, mKeyFrame(-1)
     , mLayerStack( NULL )
 	, mDisplaySurface(NULL)
 	, mPreviewSurface(new FOdysseySurfaceReadOnly(NULL))
@@ -51,39 +51,19 @@ FOdysseyFlipbookEditorData::Init()
         return;
     }
 
-    Texture(TextureAtKeyframe(0)); //TODO: Check if this should be done here or if we should rely on the timeline scrubposition to select teh keyframe
+	FOdysseyFlipbookUtils flipbookUtils(mFlipbook);
+
+    Texture(flipbookUtils.GetKeyframeTexture(0));
 }
-
-/* int
-FOdysseyFlipbookEditorData::KeyFrame()
-{
-	return mKeyFrame;
-} */
-
-// void
-// FOdysseyFlipbookEditorData::KeyFrame(int iIndex/*, bool iForceUpdate*/) //should we set a keyframe or the timeline scrubposition
-// {
-    /* if (iIndex == mKeyFrame && !iForceUpdate)
-        return; */
-
-   /* UTexture2D* texture = TextureAtKeyframe(iIndex);
-    if (texture == mTexture)
-        return;*/
-
-    //
-    //SetCurrentTexture(texture);
-
-    //mKeyFrame = iIndex;
-//}
 
 void
 FOdysseyFlipbookEditorData::Texture(UTexture2D* iTexture)
 {
     // Apply current Texture properties backup
-    ApplyPropertiesBackup(); //TODO: Find Better name
+    ApplyPropertiesBackup();
 
     //Sync current texture with surface data
-    SyncTextureWithSurfaceBlock(); //TODO: Find Better name
+    SyncTextureWithSurfaceBlock();
 
 	//Remove Surface
 	if (mDisplaySurface)
@@ -186,62 +166,8 @@ FOdysseyFlipbookEditorData::Flipbook()
 UTexture2D*
 FOdysseyFlipbookEditorData::Texture()
 {
-	return mTexture; //TextureAtKeyframe(mKeyFrame);
+	return mTexture;
 }
-
-UTexture2D*
-FOdysseyFlipbookEditorData::TextureAtKeyframe(int32 iKeyframe)
-{
-	if (iKeyframe < 0 || iKeyframe >= mFlipbook->GetNumKeyFrames())
-		return NULL;
-
-	const FPaperFlipbookKeyFrame& keyFrame = mFlipbook->GetKeyFrameChecked(iKeyframe);
-	const UPaperSprite* sprite = keyFrame.Sprite;
-	if (!sprite)
-	{
-		return NULL;
-	}
-
-	return sprite->GetSourceTexture();
-}
-
-/* UTexture2D*
-FOdysseyFlipbookEditorData::TextureAtScrubPosition(float iScrubPosition)
-{
-	if (iScrubPosition < 0.0f || iScrubPosition >= mFlipbook->GetNumFrames())
-		return NULL;
-
-	if (FramesPerSecond > 0.0f)
-	{
-		float SumTime = 0.0f;
-
-		for (int32 KeyFrameIndex = 0; KeyFrameIndex < KeyFrames.Num(); ++KeyFrameIndex)
-		{
-			SumTime += KeyFrames[KeyFrameIndex].FrameRun / FramesPerSecond;
-
-			if (Time <= SumTime)
-			{
-				return KeyFrameIndex;
-			}
-		}
-
-		// Return the last frame (note: relies on INDEX_NONE = -1 if there are no key frames)
-		return KeyFrames.Num() - 1;
-	}
-	else
-	{
-		return (KeyFrames.Num() > 0) ? 0 : INDEX_NONE;
-	}
-
-	const FPaperFlipbookKeyFrame& keyFrame = mFlipbook->GetKeyFrameChecked(iKeyframe);
-	const UPaperSprite* sprite = keyFrame.Sprite;
-	if (!sprite)
-	{
-		return NULL;
-	}
-
-	return sprite->GetSourceTexture();
-} */
 
 FOdysseySurfaceEditable*
 FOdysseyFlipbookEditorData::DisplaySurface()

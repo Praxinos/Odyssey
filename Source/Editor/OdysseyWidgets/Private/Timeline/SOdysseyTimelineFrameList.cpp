@@ -205,10 +205,6 @@ SOdysseyTimelineFrameList::AddFrame()
 		.FrameSize(mFrameSize)
 		.MinLength(1)
 		.Length(1)
-		/* .OnDrop(this, &SOdysseyTimelineFrameList::OnFrameDrop, metadata)
-		.OnDragEnter(this, &SOdysseyTimelineFrameList::OnFrameDragEnter, metadata)
-		.OnDragOver(this, &SOdysseyTimelineFrameList::OnFrameDragOver, metadata)
-		.OnDragLeave(this, &SOdysseyTimelineFrameList::OnFrameDragLeave, metadata) */
 		.OnDragDetected(this, &SOdysseyTimelineFrameList::OnFrameDragDetected, metadata)
 		.OnGenerateContextMenu(this, &SOdysseyTimelineFrameList::OnGenerateFrameContextMenu, metadata);
 
@@ -223,6 +219,39 @@ SOdysseyTimelineFrameList::AddFrame()
 	];
 
 	return mFrames.Num() - 1;
+}
+
+//---
+//---
+//---
+
+void
+SOdysseyTimelineFrameList::InsertFrame(int32 iIndex)
+{	
+	TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = MakeShareable(new FOdysseyTimelineFrameListFrameMetaData(iIndex));
+
+	TSharedPtr<SOdysseyTimelineFrame> frame = SNew(SOdysseyTimelineFrame)
+		.FrameSize(mFrameSize)
+		.MinLength(1)
+		.Length(1)
+		.OnDragDetected(this, &SOdysseyTimelineFrameList::OnFrameDragDetected, metadata)
+		.OnGenerateContextMenu(this, &SOdysseyTimelineFrameList::OnGenerateFrameContextMenu, metadata);
+
+	frame->AddMetadata(metadata.ToSharedRef());
+
+	mFrames.Insert(frame, iIndex);
+	mFramesContainer->InsertSlot(iIndex)
+	.Padding(0.f, 0.f, 0.f, 0.f)
+	.AutoWidth()
+	[
+		CreateFrameControlWidget(frame).ToSharedRef()
+	];
+
+	for (int i = iIndex; i < mFrames.Num(); i++)
+	{
+		metadata = mFrames[i]->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
+		metadata->Index(i);
+	}
 }
 
 

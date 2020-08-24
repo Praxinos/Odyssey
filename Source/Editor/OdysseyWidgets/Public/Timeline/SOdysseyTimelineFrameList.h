@@ -83,6 +83,7 @@ public:
 	void SetFrameVisibility(int32 iIndex, EVisibility iVisibility);
 
 	int32 AddFrame();
+	void InsertFrame(int32 iIndex);
 	void MoveFrame(int32 iSrcIndex, int32 iDestIndex);
 	void RemoveFrameAt(int32 iIndex);
 	void RemoveAllFrames();

@@ -25,6 +25,7 @@ public:
 		SLATE_EVENT( FOnStructureChanged, OnStructureChanged) */
 		SLATE_EVENT( FOnFlipbookChanged, OnFlipbookChanged)
         SLATE_EVENT( FOnKeyframeRemoved, OnKeyframeRemoved)
+		SLATE_EVENT( FOnKeyframeAdded, OnKeyframeAdded)
 	SLATE_END_ARGS()
 
 	// Construct the widget
@@ -41,12 +42,16 @@ public:
 	//Adds a new frame containing iTexture for iFrameLength time
 	void AddFrame(UTexture2D* iTexture, int32 iFrameLength);
 
+	//Inserts a new frame containing iTexture for iFrameLength time
+	void InsertFrame(int32 iIndex, UTexture2D* iTexture, int32 iFrameLength);
+
 	//Sets an existing frame to contain iTexture for iFrameLength time
 	void SetFrame(int32 iIndex, UTexture2D* iTexture);
 
 private:
 	void Rebuild();
 	TSharedPtr<SWidget> CreateFrameContent(UTexture2D* iTexture);
+	void DuplicateFrame(int32 iIndex);
 	void DeleteFrame(int32 iIndex);
 
 private:
@@ -75,6 +80,7 @@ private:
 	/* FOnStructureChanged mOnStructureChanged; */
 	FOnFlipbookChanged mOnFlipbookChanged;
     FOnKeyframeRemoved mOnKeyframeRemoved;
+	FOnKeyframeRemoved mOnKeyframeAdded;
 
 	const FSlateBrush* mFrameWarningBrush;
 };

@@ -209,11 +209,12 @@ FOdysseyTextureEditorController::OnExportLayersAsTextures()
             UPackage* package = CreatePackage( nullptr, *packagePath );
 
             UTexture2D* object = NewObject<UTexture2D>( package, UTexture2D::StaticClass(), FName( *( FPaths::GetBaseFilename( saveObjectPath ) + TEXT( "_" ) + imageLayer->GetName().ToString() ) ), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone );
-            object->Source.Init( imageLayer->GetBlock()->Width(), imageLayer->GetBlock()->Height(), 1, 1, TSF_BGRA8 );
+            object->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+            object->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+            object->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+            InitTextureWithBlockData(imageLayer->GetBlock(), object);
+
             object->PostEditChange();
-
-            CopyBlockDataIntoUTexture( imageLayer->GetBlock(), object );
-
             object->UpdateResource();
 
             FAssetRegistryModule::AssetCreated( object );

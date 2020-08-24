@@ -10,3 +10,4 @@
 DECLARE_DELEGATE(FOnStructureChanged)
 DECLARE_DELEGATE(FOnFlipbookChanged)
 DECLARE_DELEGATE_OneParam(FOnKeyframeRemoved, FPaperFlipbookKeyFrame&)
+DECLARE_DELEGATE_OneParam(FOnKeyframeAdded, FPaperFlipbookKeyFrame&)

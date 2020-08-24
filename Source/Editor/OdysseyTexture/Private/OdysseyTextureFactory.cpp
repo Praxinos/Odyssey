@@ -63,7 +63,7 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     //::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block.GetBlock(), color, canvasRect );
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
-    texture->Source.Init( mTextureWidth, mTextureHeight, 1, 1, mTextureFormat );
+    InitTextureWithBlockData(&block, texture);
     texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
@@ -72,8 +72,6 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     userData->GetLayerStack()->FillCurrentLayerWithColor( color );
     texture->AddAssetUserData( userData );
     texture->PostEditChange();
-    
-    CopyBlockDataIntoUTexture( &block, texture );
 
     return texture;
 }

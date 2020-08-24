@@ -184,7 +184,6 @@ FOdysseyFlipbookEditorToolkit::GetLayout() const
 const TArray<TSharedPtr<FExtender>>&
 FOdysseyFlipbookEditorToolkit::GetMenuExtenders() const
 {
-	//mController->GetMenuExtenders();
 	const FOdysseyFlipbookEditorController* controller = mController.Get();
 	return controller->GetMenuExtenders();
 }

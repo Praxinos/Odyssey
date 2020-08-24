@@ -11,6 +11,7 @@ class FOdysseyBlock;
 // Utlity
 ODYSSEYIMAGING_API void CopyUTextureDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture);
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture);
+ODYSSEYIMAGING_API void InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture);
 ODYSSEYIMAGING_API FOdysseyBlock* NewOdysseyBlockFromUTextureData(UTexture2D* iTexture);
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceEditable* iSurface);
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceEditable* iSurface,int iX1,int iY1,int iX2,int iY2);

@@ -27,6 +27,12 @@ CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
     iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iBlock->GetUE4TextureSourceFormat(),iBlock->GetBlock()->DataPtr());
 }
 
+void
+InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture)
+{
+    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iBlock->GetUE4TextureSourceFormat(),iBlock->GetBlock()->DataPtr());
+}
+
 FOdysseyBlock*
 NewOdysseyBlockFromUTextureData(UTexture2D* iTexture)
 {

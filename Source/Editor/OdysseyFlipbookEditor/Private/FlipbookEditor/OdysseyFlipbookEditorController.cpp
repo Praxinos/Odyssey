@@ -13,11 +13,14 @@
 
 #include "OdysseyFlipbookEditorData.h"
 #include "OdysseyFlipbookEditorGUI.h"
+#include "OdysseyFlipbookUtils.h"
 
 #include "SOdysseySurfaceViewport.h"
 
 #include "PaperFlipbook.h"
 #include "PaperSprite.h"
+
+
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
@@ -311,20 +314,13 @@ FOdysseyFlipbookEditorController::GetGUI()
 void
 FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
-	UTexture2D* texture = mData->TextureAtKeyframe(iKeyframeIndex);
+	FOdysseyFlipbookUtils flipbookUtils(mData->Flipbook());
+	UTexture2D* texture = flipbookUtils.GetKeyframeTexture(iKeyframeIndex);
 	if (mGUI->GetTimelineTab()->IsScrubbing())
 	{
-		/*if (texture != mData->Texture())
-		{ */
-			mData->PreviewSurface()->Texture(texture);
-			mGUI->GetViewportTab()->SetSurface(mData->PreviewSurface());
-			return;
-		//}
-
-		//Set Display Surface when displaying current texture to display 
-		// mGUI->GetViewportTab()->SetSurface(mData->DisplaySurface());
-		// mData->PreviewSurface()->Texture(NULL);
-		//return;
+		mData->PreviewSurface()->Texture(texture);
+		mGUI->GetViewportTab()->SetSurface(mData->PreviewSurface());
+		return;
 	}
 
 	//If we are not playing or scrubbing

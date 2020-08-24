@@ -43,34 +43,4 @@ FOdysseyFlipbookAssetTypeActions::GetCategories()
     return /* EAssetTypeCategories::Animation | */ mMyAssetCategory;
 }
 
-//Works, but suppress the normal editor of UFlipbook2D, need to find a better solution to keep both editors
-/*
-void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
-{
-	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-    TArray<UObject*> noUserDataObjects;
-    
-	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
-	{
-		auto odysseyFlipbook = Cast<UFlipbook2D>(*ObjIt);
-		if (odysseyFlipbook != NULL)
-		{
-            UOdysseyFlipbookAssetUserData* userData = Cast<UOdysseyFlipbookAssetUserData>(odysseyFlipbook->GetAssetUserDataOfClass(UOdysseyFlipbookAssetUserData::StaticClass()));
-            
-            if( userData )
-            {
-                FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-                odysseyFlipbookModule->CreateOdysseyFlipbookEditor(Mode, EditWithinLevelEditor, odysseyFlipbook);
-            }
-            else
-            {
-                noUserDataObjects.Add(odysseyFlipbook);
-            }
-		}
-	}
-    
-    if( noUserDataObjects.Num() != 0 )
-        FAssetTypeActions_Base::OpenAssetEditor( noUserDataObjects, EditWithinLevelEditor );
-}*/
-
 #undef LOCTEXT_NAMESPACE
