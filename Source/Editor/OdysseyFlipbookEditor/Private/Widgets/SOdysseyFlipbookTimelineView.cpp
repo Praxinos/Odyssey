@@ -155,6 +155,8 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
                 .OnFlipbookChanged(mOnFlipbookChanged)
                 .OnKeyframeRemoved(InArgs._OnKeyframeRemoved)
                 .OnKeyframeAdded(this, &SOdysseyFlipbookTimelineView::OnKeyframeAdded)
+                .OnSpriteCreated(this, &SOdysseyFlipbookTimelineView::OnSpriteCreated)
+                .OnTextureCreated(this, &SOdysseyFlipbookTimelineView::OnTextureCreated)
             ]
 		]
         + SVerticalBox::Slot()
@@ -605,7 +607,7 @@ SOdysseyFlipbookTimelineView::AddFrame()
 
     UTexture2D* createdTexture = NULL;
     UPaperSprite* createdSprite = NULL;
-    if (!flipbookUtils.AddKeyFrame(&createdTexture, &createdSprite))
+    if (!flipbookUtils.AddKeyFrame(mFlipbook->GetNumKeyFrames(), &createdTexture, &createdSprite))
         return false;
 
 	mTimelineTrackWidget->AddFrame(createdTexture, 1);
@@ -648,6 +650,18 @@ float
 SOdysseyFlipbookTimelineView::GetFrameRate() const
 {
     return mFlipbook->GetFramesPerSecond();
+}
+
+void
+SOdysseyFlipbookTimelineView::OnSpriteCreated(UPaperSprite* iSprite)
+{
+	mOnSpriteCreated.ExecuteIfBound(iSprite);
+}
+
+void
+SOdysseyFlipbookTimelineView::OnTextureCreated(UTexture2D* iTexture)
+{
+    mOnTextureCreated.ExecuteIfBound(iTexture);
 }
 
 #undef LOCTEXT_NAMESPACE

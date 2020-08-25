@@ -98,6 +98,9 @@ private:
     void  OnZoomSliderChanged( float NewValue );
     float ZoomSliderValue() const;
 
+    void OnSpriteCreated(UPaperSprite* iSprite);
+    void OnTextureCreated(UTexture2D* iTexture);
+
 private:
     //Manipulations
 	bool AddFrame();

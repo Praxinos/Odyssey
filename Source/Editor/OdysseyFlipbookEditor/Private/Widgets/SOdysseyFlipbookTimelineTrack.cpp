@@ -7,12 +7,12 @@
 #include "Fonts/FontMeasure.h"
 #include "SOdysseyTimelineFrameList.h"
 #include "SOdysseyTimelineFrame.h"
+#include "OdysseyFlipbookEditorCommands.h"
 
 #include "Widgets/Layout/SScaleBox.h"
 #include "PaperImporterSettings.h"
 #include "PaperSprite.h"
 #include "Framework/Commands/GenericCommands.h"
-//#include "FOdysseyFlipbookTimelineFrameDragDropOperation.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookTimelineTrack"
 
@@ -23,6 +23,8 @@ void SOdysseyFlipbookTimelineTrack::Construct( const SOdysseyFlipbookTimelineTra
 	mOnFlipbookChanged = InArgs._OnFlipbookChanged;
     mOnKeyframeRemoved = InArgs._OnKeyframeRemoved;
 	mOnKeyframeAdded = InArgs._OnKeyframeAdded;
+	mOnSpriteCreated = InArgs._OnSpriteCreated;
+	mOnTextureCreated = InArgs._OnTextureCreated;
 
 	mFrameWarningBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameWarning");
 
@@ -212,6 +214,28 @@ SOdysseyFlipbookTimelineTrack::DuplicateFrame(int32 iIndex)
 }
 
 void
+SOdysseyFlipbookTimelineTrack::ShowKeyFrameSpriteInContentBrowser(int32 iIndex)
+{
+	UPaperFlipbook* flipbook = mFlipbook.Get();
+	if (!flipbook)
+		return;
+
+	FOdysseyFlipbookUtils flipbookUtils(flipbook);
+	flipbookUtils.ShowKeyFrameSpriteInContentBrowser(iIndex);
+}
+
+void
+SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame(int32 iIndex)
+{
+	UPaperFlipbook* flipbook = mFlipbook.Get();
+	if (!flipbook)
+		return;
+
+	FOdysseyFlipbookUtils flipbookUtils(flipbook);
+	flipbookUtils.OpenKeyFrameSpriteEditor(iIndex);
+}
+
+void
 SOdysseyFlipbookTimelineTrack::OnFramesMoved(TArray<int32> iSrcIndexes, int32 iDstIndex)
 {
 	//Move in Data
@@ -257,9 +281,16 @@ SOdysseyFlipbookTimelineTrack::OnFramesEditCancel()
 FReply
 SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent, int32 iFrameIndex)
 {
+	UPaperFlipbook* flipbook = mFlipbook.Get();
+	const FOdysseyFlipbookEditorCommands& flipbookCommands = FOdysseyFlipbookEditorCommands::Get();
 	TSharedPtr<FUICommandList> frameCommandList = MakeShareable(new FUICommandList());
 	frameCommandList->MapAction(FGenericCommands::Get().Duplicate, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DuplicateFrame, iFrameIndex));
 	frameCommandList->MapAction(FGenericCommands::Get().Delete, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DeleteFrame, iFrameIndex));
+	frameCommandList->MapAction(flipbookCommands.ShowSpriteInContentBrowser, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::ShowKeyFrameSpriteInContentBrowser, iFrameIndex));
+	frameCommandList->MapAction(flipbookCommands.EditSpriteForKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame, iFrameIndex));
+	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, flipbook->GetNumKeyFrames()), FCanExecuteAction());
+	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameBefore, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex), FCanExecuteAction());
+	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameAfter, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex + 1), FCanExecuteAction());
 
 	FMenuBuilder MenuBuilder(true, frameCommandList);
 	{	
@@ -267,6 +298,22 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 		MenuBuilder.BeginSection("KeyframeActions", KeyframeSectionTitle);
 		MenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
 		MenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
+
+		MenuBuilder.AddMenuSeparator();
+
+		MenuBuilder.AddMenuEntry(flipbookCommands.AddNewKeyFrameBefore);
+		MenuBuilder.AddMenuEntry(flipbookCommands.AddNewKeyFrameAfter);
+
+		MenuBuilder.EndSection();
+
+		const FText SpriteSectionTitle = LOCTEXT("OdysseyTimelineSpriteActionsHeader", "Sprite Actions");
+		MenuBuilder.BeginSection("SpriteActions", SpriteSectionTitle);
+		MenuBuilder.AddMenuEntry(flipbookCommands.ShowSpriteInContentBrowser);
+		MenuBuilder.AddMenuEntry(flipbookCommands.EditSpriteForKeyFrame);
+		/* MenuBuilder.AddSubMenu(
+			flipbookCommands.PickNewSpriteFrame->GetLabel(),
+			flipbookCommands.PickNewSpriteFrame->GetDescription(),
+			FNewMenuDelegate::CreateSP(this, &SOdysseyFlipbookTimelineTrack::OpenSpritePickerMenu, iFrameIndex)); */
 		MenuBuilder.EndSection();
 	}
 
@@ -277,5 +324,59 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 	return FReply::Handled();
 }
 
+void
+SOdysseyFlipbookTimelineTrack::OpenSpritePickerMenu(FMenuBuilder& MenuBuilder, int32 iIndex)
+{
+	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
+	UPaperSprite* sprite = flipbookUtils.GetKeyframeSprite(iIndex);
+	if (!sprite)
+		return;
+	
+	FAssetData CurrentAssetData(sprite);
+
+	const bool bAllowClear = true;
+	TArray<const UClass*> AllowedClasses;
+	AllowedClasses.Add(UPaperSprite::StaticClass());
+
+	TSharedRef<SWidget> AssetPickerWidget = PropertyCustomizationHelpers::MakeAssetPickerWithMenu(CurrentAssetData,
+		bAllowClear,
+		AllowedClasses,
+		PropertyCustomizationHelpers::GetNewAssetFactoriesForClasses(AllowedClasses),
+		FOnShouldFilterAsset(),
+		FOnAssetSelected::CreateSP(this, &SOdysseyFlipbookTimelineTrack::OnAssetSelected, iIndex),
+		FSimpleDelegate::CreateSP(this, &SOdysseyFlipbookTimelineTrack::CloseMenu));
+
+	MenuBuilder.AddWidget(AssetPickerWidget, FText::GetEmpty(), /*bNoIndent=*/ true);
+}
+
+void
+SOdysseyFlipbookTimelineTrack::CloseMenu()
+{
+	FSlateApplication::Get().DismissAllMenus();
+}
+
+void
+SOdysseyFlipbookTimelineTrack::OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex)
+{
+	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
+	UPaperSprite* sprite = Cast<UPaperSprite>(AssetData.GetAsset());
+	flipbookUtils.SetKeyframeSprite(iFrameIndex, sprite);
+
+	//TODO: Call an equivalent to SpriteCreated or TextureCreated
+}
+
+void
+SOdysseyFlipbookTimelineTrack::AddNewKeyframe(int32 iIndex)
+{
+	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
+	UPaperSprite* sprite = NULL;
+	UTexture2D* texture = NULL;
+	if (!flipbookUtils.AddKeyFrame(iIndex, &texture, &sprite))
+		return;
+
+	InsertFrame(iIndex, texture, mFlipbook.Get()->GetKeyFrameChecked(iIndex).FrameRun);
+    mOnSpriteCreated.ExecuteIfBound(sprite);
+    mOnTextureCreated.ExecuteIfBound(texture);
+}
 
 #undef LOCTEXT_NAMESPACE

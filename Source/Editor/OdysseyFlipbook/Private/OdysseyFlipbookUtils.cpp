@@ -5,9 +5,13 @@
 
 #include "AssetRegistryModule.h"
 
+#include "Editor.h"
+
 #include "PaperFlipbook.h"
 #include "PaperImporterSettings.h"
 #include "PaperSprite.h"
+
+#include "Subsystems/AssetEditorSubsystem.h"
 
 #include "SOdysseyTextureConfigureWindow.h"
 #include "OdysseyTextureAssetUserData.h"
@@ -19,7 +23,7 @@ FOdysseyFlipbookUtils::FOdysseyFlipbookUtils(UPaperFlipbook* iFlipbook)
 }
 
 bool
-FOdysseyFlipbookUtils::AddKeyFrame(UTexture2D** oTexture, UPaperSprite** oSprite)
+FOdysseyFlipbookUtils::AddKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite)
 {
     // Displays a modal window asking for Width and Height of the new texture to draw in
 	// If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
@@ -49,7 +53,7 @@ FOdysseyFlipbookUtils::AddKeyFrame(UTexture2D** oTexture, UPaperSprite** oSprite
 	
 	{
 		FScopedFlipbookMutator mutator(mFlipbook);
-		mutator.KeyFrames.Add(keyframe);
+		mutator.KeyFrames.Insert(keyframe, iIndex);
 	}
 
 	return true;
@@ -358,4 +362,27 @@ FOdysseyFlipbookUtils::GetKeyframeStartPosition(int32 iIndex)
     }
 
     return position;
+}
+
+
+void
+FOdysseyFlipbookUtils::ShowKeyFrameSpriteInContentBrowser(int32 iIndex)
+{
+    UPaperSprite* sprite = GetKeyframeSprite(iIndex);
+    if (!sprite)
+        return;
+
+    TArray<UObject*> ObjectsToSync;
+    ObjectsToSync.Add(sprite);
+    GEditor->SyncBrowserToObjects(ObjectsToSync);
+}
+
+void
+FOdysseyFlipbookUtils::OpenKeyFrameSpriteEditor(int32 iIndex)
+{
+    UPaperSprite* sprite = GetKeyframeSprite(iIndex);
+    if (!sprite)
+        return;
+
+	GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(sprite);
 }

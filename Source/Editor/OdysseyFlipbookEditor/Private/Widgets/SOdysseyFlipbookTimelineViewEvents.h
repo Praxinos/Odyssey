@@ -7,8 +7,6 @@
 #include "SOdysseyTimelineEvents.h"
 
 // Called when the selection changes
-DECLARE_DELEGATE(FOnPlayStarted);
-DECLARE_DELEGATE(FOnPlayStopped);
-DECLARE_DELEGATE_OneParam(FOnCurrentKeyframeChanged, int32);
-DECLARE_DELEGATE_OneParam(FOnSpriteCreated, UPaperSprite*)
-DECLARE_DELEGATE_OneParam(FOnTextureCreated, UTexture2D*)
+DECLARE_DELEGATE(FOnPlayStarted)
+DECLARE_DELEGATE(FOnPlayStopped)
+DECLARE_DELEGATE_OneParam(FOnCurrentKeyframeChanged, int32)

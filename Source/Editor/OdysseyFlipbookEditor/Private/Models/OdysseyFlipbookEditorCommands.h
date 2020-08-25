@@ -26,4 +26,13 @@ public:
 public:
     /** If enabled, render in real time the 3D props on which the Flipbook is used */
     TSharedPtr<FUICommandInfo> Render3DInRealTime;
+    /** Opens the UPaperSprite default editor */
+    TSharedPtr<FUICommandInfo> OpenUPaperSpriteEditor;
+    TSharedPtr<FUICommandInfo> AddNewKeyFrame;
+	TSharedPtr<FUICommandInfo> AddNewKeyFrameBefore;
+	TSharedPtr<FUICommandInfo> AddNewKeyFrameAfter;
+
+	TSharedPtr<FUICommandInfo> PickNewSpriteForKeyFrame;
+	TSharedPtr<FUICommandInfo> EditSpriteForKeyFrame;
+	TSharedPtr<FUICommandInfo> ShowSpriteInContentBrowser;
 };

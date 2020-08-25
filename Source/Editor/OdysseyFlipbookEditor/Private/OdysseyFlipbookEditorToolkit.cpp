@@ -39,19 +39,10 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
 	TArray<UObject*> objectsToEdit;
 	objectsToEdit.Add(iFlipbook);
 
+	FOdysseyFlipbookUtils flipbookUtils(mData->Flipbook());
 	for (int32 index = 0; index < iFlipbook->GetNumKeyFrames(); ++index)
 	{
-		const FPaperFlipbookKeyFrame& keyframe = iFlipbook->GetKeyFrameChecked(index);
-		int32 frameLength = keyframe.FrameRun;
-
-		UTexture2D* texture = NULL;
-		
-		UPaperSprite* sprite = keyframe.Sprite;
-		if (!sprite)
-            continue;
-        objectsToEdit.Add(sprite);
-
-		texture = sprite->GetSourceTexture();
+		UTexture2D* texture = flipbookUtils.GetKeyframeTexture(index);
         if (!texture)
             continue;
             
@@ -64,7 +55,7 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
 void
 FOdysseyFlipbookEditorToolkit::OnSpriteCreated(UPaperSprite* iSprite)
 {
-	AddEditingObject(iSprite);
+	//AddEditingObject(iSprite);
 }
 
 void
@@ -94,13 +85,32 @@ FOdysseyFlipbookEditorToolkit::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyfra
 void
 FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 {
-    //TODO: Save correctly everything
-    // - Flipbook itself
-    // - Sprites
-    // - Modified Textures
 	mData->SyncTextureWithSurfaceBlock();
 
+	//Small trick
+	//We want to save all sprites, but we don't want to be considered the actual sprite editor
+	//So we set ourselves as editing all sprites just before saving and cancel this just after saving
+	FOdysseyFlipbookUtils flipbookUtils(mData->Flipbook());
+	for (int i = 0; i < mData->Flipbook()->GetNumKeyFrames(); i++)
+	{
+		UPaperSprite* sprite = flipbookUtils.GetKeyframeSprite(i);
+		if (!sprite)
+			continue;
+
+		AddEditingObject(sprite);
+	}
+
     FAssetEditorToolkit::SaveAsset_Execute();
+
+	for (int i = 0; i < mData->Flipbook()->GetNumKeyFrames(); i++)
+	{
+		UPaperSprite* sprite = flipbookUtils.GetKeyframeSprite(i);
+		if (!sprite)
+			continue;
+
+		RemoveEditingObject(sprite);
+	}
+
     // mData->Flipbook()->MarkPackageDirty(); //PATCH:
 }
 

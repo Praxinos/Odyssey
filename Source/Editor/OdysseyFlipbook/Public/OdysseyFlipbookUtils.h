@@ -25,7 +25,7 @@ public:
 
 public:
     //Modifiers
-    bool AddKeyFrame(UTexture2D** oTexture, UPaperSprite** oSprite);
+    bool AddKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite);
     bool DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite);
     bool FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite);
 
@@ -34,6 +34,9 @@ public:
 
     void SetKeyframeTexture(int32 iIndex, UTexture2D* iTexture);
     void SetKeyframeSprite(int32 iIndex, UPaperSprite* iSprite);
+ 
+	void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
+	void OpenKeyFrameSpriteEditor(int32 iIndex);
 
 public:
     //Getters

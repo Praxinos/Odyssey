@@ -16,16 +16,11 @@ public:
         {}
 		SLATE_ATTRIBUTE( UPaperFlipbook*, Flipbook )
         SLATE_ATTRIBUTE( float, FrameSize )
-        /* SLATE_EVENT( FOnFrameLengthChangeStart, OnFrameLengthChangeStart) //A specific frame timing changes
-		SLATE_EVENT( FOnFrameLengthChanged, OnFrameLengthChanged)
-		SLATE_EVENT( FOnFrameLengthChangeStop, OnFrameLengthChangeStop)
-        SLATE_EVENT( FOnFramesLengthChangeStart, OnFramesLengthChangeStart) //One or more frames timing changes
-		SLATE_EVENT( FOnFramesLengthChanged, OnFramesLengthChanged)
-		SLATE_EVENT( FOnFramesLengthChangeStop, OnFramesLengthChangeStop)
-		SLATE_EVENT( FOnStructureChanged, OnStructureChanged) */
 		SLATE_EVENT( FOnFlipbookChanged, OnFlipbookChanged)
         SLATE_EVENT( FOnKeyframeRemoved, OnKeyframeRemoved)
 		SLATE_EVENT( FOnKeyframeAdded, OnKeyframeAdded)
+		SLATE_EVENT( FOnSpriteCreated, OnSpriteCreated)
+		SLATE_EVENT( FOnTextureCreated, OnTextureCreated)
 	SLATE_END_ARGS()
 
 	// Construct the widget
@@ -53,6 +48,9 @@ private:
 	TSharedPtr<SWidget> CreateFrameContent(UTexture2D* iTexture);
 	void DuplicateFrame(int32 iIndex);
 	void DeleteFrame(int32 iIndex);
+	void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
+	void EditSpriteForKeyFrame(int32 iIndex);
+	void AddNewKeyframe(int32 iIndex);
 
 private:
 	//Events
@@ -70,6 +68,10 @@ private:
 	void OnFramesEditStop();
 	void OnFramesEditCancel();
 	FReply OnGenerateFrameContextMenu(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent, int32 iFrameIndex);
+	
+	void OpenSpritePickerMenu(FMenuBuilder& MenuBuilder, int32 iIndex);
+	void CloseMenu();
+	void OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex);
 
 private:
 	TAttribute<UPaperFlipbook*> mFlipbook;
@@ -81,6 +83,8 @@ private:
 	FOnFlipbookChanged mOnFlipbookChanged;
     FOnKeyframeRemoved mOnKeyframeRemoved;
 	FOnKeyframeRemoved mOnKeyframeAdded;
+	FOnSpriteCreated mOnSpriteCreated;
+	FOnTextureCreated mOnTextureCreated;
 
 	const FSlateBrush* mFrameWarningBrush;
 };
