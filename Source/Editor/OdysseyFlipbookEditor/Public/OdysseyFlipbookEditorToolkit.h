@@ -51,6 +51,7 @@ protected:
 
 protected:
 	void OnSpriteCreated(UPaperSprite* iSprite);
+    void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
 	void OnTextureCreated(UTexture2D* iTexture);
 	void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 
@@ -58,5 +59,7 @@ private:
 	TSharedPtr<FOdysseyFlipbookEditorData> mData;
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 	TSharedPtr<FOdysseyFlipbookEditorController> mController;
+
+	FDelegateHandle mOnSpriteTextureChangedHandle;
 };
 

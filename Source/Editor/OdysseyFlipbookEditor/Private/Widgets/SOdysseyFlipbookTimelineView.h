@@ -24,7 +24,7 @@ public:
         /** Called to populate the add combo button in the toolbar. */
         // SLATE_EVENT( FOnGetAddMenuContent, OnGetAddMenuContent )
         /** Extender to use for the add menu. */
-        SLATE_ARGUMENT( UPaperFlipbook*, Flipbook )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyFlipbookWrapper>, FlipbookWrapper )
         SLATE_EVENT(FOnCurrentKeyframeChanged, OnCurrentKeyframeChanged)
         SLATE_EVENT(FOnPlayStarted, OnPlayStarted)
         SLATE_EVENT(FOnPlayStopped, OnPlayStopped)
@@ -115,7 +115,7 @@ private:
 	EVisibility FixCurrentFrameVisibility() const;
 
 private:
-    UPaperFlipbook* mFlipbook;
+    TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
 
     bool mIsPlaying;
     bool mIsPlayingBackward;

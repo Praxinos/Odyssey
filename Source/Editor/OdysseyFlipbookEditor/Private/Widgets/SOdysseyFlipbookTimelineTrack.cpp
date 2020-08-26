@@ -16,15 +16,22 @@
 
 #define LOCTEXT_NAMESPACE "FlipbookTimelineTrack"
 
+SOdysseyFlipbookTimelineTrack::~SOdysseyFlipbookTimelineTrack()
+{
+	mFlipbookWrapper->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
+}
+
 void SOdysseyFlipbookTimelineTrack::Construct( const SOdysseyFlipbookTimelineTrack::FArguments& InArgs )
 {
-	mFlipbook = InArgs._Flipbook;
+	mFlipbookWrapper = InArgs._FlipbookWrapper;
     mFrameSize = InArgs._FrameSize;
 	mOnFlipbookChanged = InArgs._OnFlipbookChanged;
     mOnKeyframeRemoved = InArgs._OnKeyframeRemoved;
 	mOnKeyframeAdded = InArgs._OnKeyframeAdded;
 	mOnSpriteCreated = InArgs._OnSpriteCreated;
 	mOnTextureCreated = InArgs._OnTextureCreated;
+
+	mOnSpriteTextureChangedHandle = mFlipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &SOdysseyFlipbookTimelineTrack::OnSpriteTextureChanged);
 
 	mFrameWarningBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameWarning");
 
@@ -48,18 +55,13 @@ void
 SOdysseyFlipbookTimelineTrack::Rebuild()
 {
 	mFrameList->RemoveAllFrames();
-	
-	UPaperFlipbook* flipbook = mFlipbook.Get();
-	if (!flipbook)
-		return;
 
 	mAssetThumbnailPool = MakeShareable( new FAssetThumbnailPool(1024, true) );
 
-	FOdysseyFlipbookUtils flipbookUtils(flipbook);
-	for (int32 index = 0; index < flipbook->GetNumKeyFrames(); ++index)
+	for (int32 index = 0; index < mFlipbookWrapper->Flipbook()->GetNumKeyFrames(); ++index)
 	{
-		const FPaperFlipbookKeyFrame& keyframe = flipbook->GetKeyFrameChecked(index);
-		AddFrame(flipbookUtils.GetKeyframeTexture(index), keyframe.FrameRun);
+		const FPaperFlipbookKeyFrame& keyframe = mFlipbookWrapper->Flipbook()->GetKeyFrameChecked(index);
+		AddFrame(mFlipbookWrapper->GetKeyframeTexture(index), keyframe.FrameRun);
 	}
 }
 
@@ -164,27 +166,22 @@ SOdysseyFlipbookTimelineTrack::FrameSize() const
 	return mFrameSize.Get();
 }
 
-UPaperFlipbook*
-SOdysseyFlipbookTimelineTrack::Flipbook() const
+const TSharedPtr<FOdysseyFlipbookWrapper>&
+SOdysseyFlipbookTimelineTrack::FlipbookWrapper() const
 {
-	return mFlipbook.Get();
+	return mFlipbookWrapper;
 }
 
 void
 SOdysseyFlipbookTimelineTrack::DeleteFrame(int32 iIndex)
 {
-	UPaperFlipbook* flipbook = mFlipbook.Get();
-	if (!flipbook)
-		return;
-
 	//Remove from GUI
 	mFrameList->RemoveFrameAt(iIndex);
 
 	//Remove from Data
-	FPaperFlipbookKeyFrame keyframe = flipbook->GetKeyFrameChecked(iIndex);
+	FPaperFlipbookKeyFrame keyframe = mFlipbookWrapper->Flipbook()->GetKeyFrameChecked(iIndex);
 
-	FOdysseyFlipbookUtils flipbookUtils(flipbook);
-	flipbookUtils.RemoveKeyFrame(iIndex);
+	mFlipbookWrapper->RemoveKeyFrame(iIndex);
 	
 	mOnKeyframeRemoved.ExecuteIfBound(keyframe);
 	mOnFlipbookChanged.ExecuteIfBound();
@@ -193,20 +190,13 @@ SOdysseyFlipbookTimelineTrack::DeleteFrame(int32 iIndex)
 void
 SOdysseyFlipbookTimelineTrack::DuplicateFrame(int32 iIndex)
 {
-	UPaperFlipbook* flipbook = mFlipbook.Get();
-	if (!flipbook)
-		return;
-
-
 	//Remove from Data
-	FOdysseyFlipbookUtils flipbookUtils(flipbook);
-	
 	UTexture2D* createdTexture = NULL;
 	UPaperSprite* createdSprite = NULL;
-	if (!flipbookUtils.DuplicateKeyFrame(iIndex, &createdTexture, &createdSprite))
+	if (!mFlipbookWrapper->DuplicateKeyFrame(iIndex, &createdTexture, &createdSprite))
 		return;
 	
-	FPaperFlipbookKeyFrame keyframe = flipbook->GetKeyFrameChecked(iIndex + 1);
+	FPaperFlipbookKeyFrame keyframe = mFlipbookWrapper->Flipbook()->GetKeyFrameChecked(iIndex + 1);
 	InsertFrame(iIndex + 1, createdTexture, keyframe.FrameRun);
 
 	mOnKeyframeAdded.ExecuteIfBound(keyframe);
@@ -216,31 +206,20 @@ SOdysseyFlipbookTimelineTrack::DuplicateFrame(int32 iIndex)
 void
 SOdysseyFlipbookTimelineTrack::ShowKeyFrameSpriteInContentBrowser(int32 iIndex)
 {
-	UPaperFlipbook* flipbook = mFlipbook.Get();
-	if (!flipbook)
-		return;
-
-	FOdysseyFlipbookUtils flipbookUtils(flipbook);
-	flipbookUtils.ShowKeyFrameSpriteInContentBrowser(iIndex);
+	mFlipbookWrapper->ShowKeyFrameSpriteInContentBrowser(iIndex);
 }
 
 void
 SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame(int32 iIndex)
 {
-	UPaperFlipbook* flipbook = mFlipbook.Get();
-	if (!flipbook)
-		return;
-
-	FOdysseyFlipbookUtils flipbookUtils(flipbook);
-	flipbookUtils.OpenKeyFrameSpriteEditor(iIndex);
+	mFlipbookWrapper->OpenKeyFrameSpriteEditor(iIndex);
 }
 
 void
 SOdysseyFlipbookTimelineTrack::OnFramesMoved(TArray<int32> iSrcIndexes, int32 iDstIndex)
 {
 	//Move in Data
-	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
-	flipbookUtils.MoveKeyFrames(iSrcIndexes, iDstIndex);
+	mFlipbookWrapper->MoveKeyFrames(iSrcIndexes, iDstIndex);
 
 	mOnFlipbookChanged.ExecuteIfBound();
 }
@@ -250,7 +229,7 @@ SOdysseyFlipbookTimelineTrack::OnFramesLengthChanged(TArray<int32> iFrameIndexes
 {
 	//Change in Data
 	{
-		FScopedFlipbookMutator mutator(mFlipbook.Get());
+		FScopedFlipbookMutator mutator(mFlipbookWrapper->Flipbook());
 		for( int i = 0; i < iFrameIndexes.Num(); i++)
 		{
 			mutator.KeyFrames[iFrameIndexes[i]].FrameRun = mFrameList->GetFrameLength(iFrameIndexes[i]);
@@ -281,14 +260,13 @@ SOdysseyFlipbookTimelineTrack::OnFramesEditCancel()
 FReply
 SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent, int32 iFrameIndex)
 {
-	UPaperFlipbook* flipbook = mFlipbook.Get();
 	const FOdysseyFlipbookEditorCommands& flipbookCommands = FOdysseyFlipbookEditorCommands::Get();
 	TSharedPtr<FUICommandList> frameCommandList = MakeShareable(new FUICommandList());
 	frameCommandList->MapAction(FGenericCommands::Get().Duplicate, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DuplicateFrame, iFrameIndex));
 	frameCommandList->MapAction(FGenericCommands::Get().Delete, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DeleteFrame, iFrameIndex));
 	frameCommandList->MapAction(flipbookCommands.ShowSpriteInContentBrowser, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::ShowKeyFrameSpriteInContentBrowser, iFrameIndex));
 	frameCommandList->MapAction(flipbookCommands.EditSpriteForKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame, iFrameIndex));
-	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, flipbook->GetNumKeyFrames()), FCanExecuteAction());
+	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, mFlipbookWrapper->Flipbook()->GetNumKeyFrames()), FCanExecuteAction());
 	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameBefore, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex), FCanExecuteAction());
 	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameAfter, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex + 1), FCanExecuteAction());
 
@@ -325,10 +303,25 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 }
 
 void
+SOdysseyFlipbookTimelineTrack::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
+{
+	UTexture2D* texture = iSprite->GetSourceTexture();
+
+	UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
+	for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
+	{
+		UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(i);
+		if (sprite == iSprite)
+		{
+			SetFrame(i, texture);
+		}
+	}	
+}
+
+void
 SOdysseyFlipbookTimelineTrack::OpenSpritePickerMenu(FMenuBuilder& MenuBuilder, int32 iIndex)
 {
-	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
-	UPaperSprite* sprite = flipbookUtils.GetKeyframeSprite(iIndex);
+	UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(iIndex);
 	if (!sprite)
 		return;
 	
@@ -358,9 +351,8 @@ SOdysseyFlipbookTimelineTrack::CloseMenu()
 void
 SOdysseyFlipbookTimelineTrack::OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex)
 {
-	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
 	UPaperSprite* sprite = Cast<UPaperSprite>(AssetData.GetAsset());
-	flipbookUtils.SetKeyframeSprite(iFrameIndex, sprite);
+	mFlipbookWrapper->SetKeyframeSprite(iFrameIndex, sprite);
 
 	//TODO: Call an equivalent to SpriteCreated or TextureCreated
 }
@@ -368,13 +360,12 @@ SOdysseyFlipbookTimelineTrack::OnAssetSelected(const FAssetData& AssetData, int3
 void
 SOdysseyFlipbookTimelineTrack::AddNewKeyframe(int32 iIndex)
 {
-	FOdysseyFlipbookUtils flipbookUtils(mFlipbook.Get());
 	UPaperSprite* sprite = NULL;
 	UTexture2D* texture = NULL;
-	if (!flipbookUtils.AddKeyFrame(iIndex, &texture, &sprite))
+	if (!mFlipbookWrapper->CreateKeyFrame(iIndex, &texture, &sprite))
 		return;
 
-	InsertFrame(iIndex, texture, mFlipbook.Get()->GetKeyFrameChecked(iIndex).FrameRun);
+	InsertFrame(iIndex, texture, mFlipbookWrapper->Flipbook()->GetKeyFrameChecked(iIndex).FrameRun);
     mOnSpriteCreated.ExecuteIfBound(sprite);
     mOnTextureCreated.ExecuteIfBound(texture);
 }

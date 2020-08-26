@@ -15,6 +15,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditorToolkit::~FOdysseyFlipbookEditorToolkit()
 {
+	mData->FlipbookWrapper()->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
 }
 
 FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit()
@@ -24,7 +25,9 @@ FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit()
 void
 FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UPaperFlipbook* iFlipbook)
 {
-	mData = MakeShareable(new FOdysseyFlipbookEditorData(iFlipbook));
+	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook));
+	mOnSpriteTextureChangedHandle = flipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditorToolkit::OnSpriteTextureChanged);
+	mData = MakeShareable(new FOdysseyFlipbookEditorData(flipbookWrapper, SharedThis(this)));
 	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI());
 	mController = MakeShareable(new FOdysseyFlipbookEditorController(mData, mGUI));
 
@@ -39,10 +42,9 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
 	TArray<UObject*> objectsToEdit;
 	objectsToEdit.Add(iFlipbook);
 
-	FOdysseyFlipbookUtils flipbookUtils(mData->Flipbook());
 	for (int32 index = 0; index < iFlipbook->GetNumKeyFrames(); ++index)
 	{
-		UTexture2D* texture = flipbookUtils.GetKeyframeTexture(index);
+		UTexture2D* texture = flipbookWrapper->GetKeyframeTexture(index);
         if (!texture)
             continue;
             
@@ -56,6 +58,27 @@ void
 FOdysseyFlipbookEditorToolkit::OnSpriteCreated(UPaperSprite* iSprite)
 {
 	//AddEditingObject(iSprite);
+}
+
+
+void
+FOdysseyFlipbookEditorToolkit::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
+{
+	UTexture2D* texture = iSprite->GetSourceTexture();
+
+	UPaperFlipbook* flipbook = mData->FlipbookWrapper()->Flipbook();
+	for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
+	{
+		UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(i);
+		if (sprite == iSprite)
+		{
+			if (iOldTexture)
+				RemoveEditingObject(iOldTexture);
+
+			if (texture)
+				AddEditingObject(texture);
+		}
+	}
 }
 
 void
@@ -90,10 +113,9 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 	//Small trick
 	//We want to save all sprites, but we don't want to be considered the actual sprite editor
 	//So we set ourselves as editing all sprites just before saving and cancel this just after saving
-	FOdysseyFlipbookUtils flipbookUtils(mData->Flipbook());
-	for (int i = 0; i < mData->Flipbook()->GetNumKeyFrames(); i++)
+	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
-		UPaperSprite* sprite = flipbookUtils.GetKeyframeSprite(i);
+		UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(i);
 		if (!sprite)
 			continue;
 
@@ -102,16 +124,16 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 
     FAssetEditorToolkit::SaveAsset_Execute();
 
-	for (int i = 0; i < mData->Flipbook()->GetNumKeyFrames(); i++)
+	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
-		UPaperSprite* sprite = flipbookUtils.GetKeyframeSprite(i);
+		UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(i);
 		if (!sprite)
 			continue;
 
 		RemoveEditingObject(sprite);
 	}
 
-    // mData->Flipbook()->MarkPackageDirty(); //PATCH:
+    // mData->FlipbookWrapper()->MarkPackageDirty(); //PATCH:
 }
 
 void
@@ -157,14 +179,14 @@ FOdysseyFlipbookEditorToolkit::GetBaseToolkitName() const
 FText
 FOdysseyFlipbookEditorToolkit::GetToolkitName() const
 {
-	return GetLabelForObject(mData->Flipbook());
+	return GetLabelForObject(mData->FlipbookWrapper()->Flipbook());
 }
 
 
 FText
 FOdysseyFlipbookEditorToolkit::GetToolkitToolTipText() const
 {
-	return GetToolTipTextForObject(mData->Flipbook());
+	return GetToolTipTextForObject(mData->FlipbookWrapper()->Flipbook());
 }
 
 FName

@@ -23,6 +23,7 @@ class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyFlipbookEditorController;
+class SOdysseyFlipbookPropertiesTabBody;
 
 /////////////////////////////////////////////////////
 // FOdysseyPerformanceOptions
@@ -76,6 +77,7 @@ private:
     // Internal widget creation
     void CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
     void CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+    void CreateDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 private:
 	// Spawner callbacks
@@ -86,14 +88,19 @@ private:
 	// Callback for spawning the Timeline tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iArgs);
 
+	// Callback for spawning the Details tab.
+	TSharedRef<SDockTab> HandleTabSpawnerSpawnDetails(const FSpawnTabArgs& iArgs);
+
 private:
     //Tabs
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
 	TSharedPtr<SOdysseyFlipbookTimelineView>    mTimelineTab;
+	TSharedPtr<SOdysseyFlipbookPropertiesTabBody>    mDetailsTab;
 
 private:
     /** Tabs IDs */
     static const FName smLayerStackTabId;
 	static const FName smTimelineTabId;
+	static const FName smDetailsTabId;
 };
 

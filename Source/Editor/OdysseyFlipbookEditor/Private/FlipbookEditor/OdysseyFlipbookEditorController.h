@@ -69,6 +69,7 @@ protected:
 
 private:
 	void SetTextureAtKeyframeIndex(int32 iKeyframe);
+	void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
 
 private:
 	TSharedPtr<FOdysseyFlipbookEditorData>		mData;
@@ -77,5 +78,7 @@ private:
 	FOnSpriteCreated mOnSpriteCreated;
 	FOnTextureCreated mOnTextureCreated;
     FOnKeyframeRemoved mOnKeyframeRemoved;
+	
+	FDelegateHandle mOnSpriteTextureChangedHandle;
 };
 

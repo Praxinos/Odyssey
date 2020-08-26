@@ -13,7 +13,7 @@
 
 #include "OdysseyFlipbookEditorData.h"
 #include "OdysseyFlipbookEditorGUI.h"
-#include "OdysseyFlipbookUtils.h"
+#include "OdysseyFlipbookWrapper.h"
 
 #include "SOdysseySurfaceViewport.h"
 
@@ -30,6 +30,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditorController::~FOdysseyFlipbookEditorController()
 {
+	mData->FlipbookWrapper()->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
 	if (mData->LayerStack())
 	{
 		mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
@@ -47,6 +48,8 @@ FOdysseyFlipbookEditorController::FOdysseyFlipbookEditorController(TSharedPtr<FO
 void
 FOdysseyFlipbookEditorController::Init(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
+	mOnSpriteTextureChangedHandle = mData->FlipbookWrapper()->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnSpriteTextureChanged);
+
 	// Add Menu Extender
     GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
 
@@ -314,8 +317,7 @@ FOdysseyFlipbookEditorController::GetGUI()
 void
 FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
-	FOdysseyFlipbookUtils flipbookUtils(mData->Flipbook());
-	UTexture2D* texture = flipbookUtils.GetKeyframeTexture(iKeyframeIndex);
+	UTexture2D* texture = mData->FlipbookWrapper()->GetKeyframeTexture(iKeyframeIndex);
 	if (mGUI->GetTimelineTab()->IsScrubbing())
 	{
 		mData->PreviewSurface()->Texture(texture);
@@ -345,6 +347,16 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 		//Set display Surface
 		mGUI->GetViewportTab()->SetSurface(mData->DisplaySurface());
 	}
+}
+
+void
+FOdysseyFlipbookEditorController::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
+{
+	UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
+	if (sprite != iSprite)
+		return;
+
+	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -32,6 +32,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "RenderCore",
                 "RawMesh",
                 "EditorStyle",
+                "KismetWidgets",
                 "PropertyEditor",
                 "Projects",
                 "OdysseyStyle",

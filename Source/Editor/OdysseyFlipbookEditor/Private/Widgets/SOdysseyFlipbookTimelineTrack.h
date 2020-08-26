@@ -14,7 +14,7 @@ class SOdysseyFlipbookTimelineTrack : public SCompoundWidget
 public:
 	SLATE_BEGIN_ARGS(SOdysseyFlipbookTimelineTrack)
         {}
-		SLATE_ATTRIBUTE( UPaperFlipbook*, Flipbook )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyFlipbookWrapper>, FlipbookWrapper )
         SLATE_ATTRIBUTE( float, FrameSize )
 		SLATE_EVENT( FOnFlipbookChanged, OnFlipbookChanged)
         SLATE_EVENT( FOnKeyframeRemoved, OnKeyframeRemoved)
@@ -23,12 +23,15 @@ public:
 		SLATE_EVENT( FOnTextureCreated, OnTextureCreated)
 	SLATE_END_ARGS()
 
+	
+	~SOdysseyFlipbookTimelineTrack();
+
 	// Construct the widget
 	void Construct( const FArguments& InArgs );
 
 public:
 	//Accessors
-	UPaperFlipbook* Flipbook() const;
+	const TSharedPtr<FOdysseyFlipbookWrapper>& FlipbookWrapper() const;
 	float FrameSize() const;
 
 public:
@@ -72,9 +75,10 @@ private:
 	void OpenSpritePickerMenu(FMenuBuilder& MenuBuilder, int32 iIndex);
 	void CloseMenu();
 	void OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex);
+    void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
 
 private:
-	TAttribute<UPaperFlipbook*> mFlipbook;
+	TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
     TAttribute<float> 	mFrameSize;
 	TSharedPtr<SOdysseyTimelineFrameList> mFrameList;
 	TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;
@@ -87,5 +91,6 @@ private:
 	FOnTextureCreated mOnTextureCreated;
 
 	const FSlateBrush* mFrameWarningBrush;
+	FDelegateHandle mOnSpriteTextureChangedHandle;
 };
 

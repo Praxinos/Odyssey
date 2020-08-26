@@ -12,6 +12,8 @@ class UPaperFlipbook;
 class UTexture2D;
 class UOdysseyBrush;
 class UOdysseyTextureAssetUserData;
+class FOdysseyFlipbookEditorToolkit;
+class FOdysseyFlipbookWrapper;
 
 struct FTexturePropertiesBackup
 {
@@ -29,7 +31,7 @@ class FOdysseyFlipbookEditorData :
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorData();
-    FOdysseyFlipbookEditorData(UPaperFlipbook* iFlipbook);
+    FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyFlipbookEditorToolkit> iToolkit);
 
 public:
     //Overrides
@@ -39,7 +41,7 @@ public:
     //Getters
 
     //Currently Edited Flipbook
-	UPaperFlipbook*						Flipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper>& FlipbookWrapper();
 
     //Currently Edited Texture
     UTexture2D*							Texture();
@@ -48,6 +50,8 @@ public:
     FOdysseyLayerStack*					LayerStack() const;
     
 	FOdysseySurfaceReadOnly*			PreviewSurface();
+
+    TWeakPtr<FOdysseyFlipbookEditorToolkit>& Toolkit();
 
     //Data Sanity Methods 
 
@@ -67,7 +71,7 @@ public:
     void PrepareTextureProperties();
 
 private:
-    UPaperFlipbook*             mFlipbook;
+    TSharedPtr<FOdysseyFlipbookWrapper>             mFlipbookWrapper;
     UTexture2D*                 mTexture;
 
     FOdysseyLayerStack*         mLayerStack;  // Copied from mOdysseyTexture AssetUserData
@@ -80,5 +84,7 @@ private:
 
     //Current Texture Properties backup
     FTexturePropertiesBackup    mPropertiesBackup;
+
+    TWeakPtr<FOdysseyFlipbookEditorToolkit> mToolkit;
 };
 

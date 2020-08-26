@@ -7,7 +7,9 @@
 #include "PaperFlipbook.h"
 #include "PaperSprite.h"
 #include "OdysseyTextureAssetUserData.h"
-#include "OdysseyFlipbookUtils.h"
+#include "OdysseyFlipbookWrapper.h"
+#include "OdysseyFlipbookEditorToolkit.h"
+
 
 
 /////////////////////////////////////////////////////
@@ -27,12 +29,13 @@ FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 	}
 }
 
-FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(UPaperFlipbook* iFlipbook)
-    : mFlipbook( iFlipbook )
+FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyFlipbookEditorToolkit> iToolkit)
+    : mFlipbookWrapper( iFlipbookWrapper )
     , mTexture( NULL )
     , mLayerStack( NULL )
 	, mDisplaySurface(NULL)
 	, mPreviewSurface(new FOdysseySurfaceReadOnly(NULL))
+    , mToolkit( iToolkit )
 {
 }
 
@@ -45,15 +48,12 @@ FOdysseyFlipbookEditorData::Init()
     // mFlipbook->MarkPackageDirty(); //TODO: Call MarkPackageDirty only when needed, not here
 
     // Get Flipbook keyFrames
-    if (mFlipbook->GetNumKeyFrames() <= 0)
+    if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() <= 0)
     {
         //We don't need to initialize anything if there is no keyFrames
         return;
     }
-
-	FOdysseyFlipbookUtils flipbookUtils(mFlipbook);
-
-    Texture(flipbookUtils.GetKeyframeTexture(0));
+    Texture(mFlipbookWrapper->GetKeyframeTexture(0));
 }
 
 void
@@ -157,16 +157,22 @@ FOdysseyFlipbookEditorData::LayerStack() const
 }
 
 
-UPaperFlipbook*
-FOdysseyFlipbookEditorData::Flipbook()
+TSharedPtr<FOdysseyFlipbookWrapper>&
+FOdysseyFlipbookEditorData::FlipbookWrapper()
 {
-	return mFlipbook;
+	return mFlipbookWrapper;
 }
 
 UTexture2D*
 FOdysseyFlipbookEditorData::Texture()
 {
 	return mTexture;
+}
+
+TWeakPtr<FOdysseyFlipbookEditorToolkit>&
+FOdysseyFlipbookEditorData::Toolkit()
+{
+	return mToolkit;
 }
 
 FOdysseySurfaceEditable*
