@@ -14,9 +14,6 @@
 #include "OdysseySurfaceEditable.h"
 #include "OdysseyTexture.h"
 
-#include "SOdysseyTextureConfigureWindow.h"
-
-
 #define LOCTEXT_NAMESPACE "OdysseyFlipbook"
 #define MaxZoom 1.0
 #define MinZoom 0.01
