@@ -19,5 +19,8 @@ UOdysseyFlipbookFactory::UOdysseyFlipbookFactory( const FObjectInitializer& iObj
 UObject*
 UOdysseyFlipbookFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
-    return UPaperFlipbookFactory::FactoryCreateNew( UPaperFlipbook::StaticClass(), iParent, iName, iFlags, iContext, iWarn );
+    UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(UPaperFlipbookFactory::FactoryCreateNew( UPaperFlipbook::StaticClass(), iParent, iName, iFlags, iContext, iWarn ));
+    FScopedFlipbookMutator mutator(flipbook);
+	mutator.FramesPerSecond = 24.0f;
+    return flipbook;
 }
