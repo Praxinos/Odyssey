@@ -30,7 +30,7 @@ public:
 
 protected:
     // Commands building
-    void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);
+    virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
 	TSharedPtr<FExtender> CreateMenuExtenders(const TSharedRef<FUICommandList>& iToolkitCommands);
     static void FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyTextureEditorController& iOdysseyTextureEditor );
 

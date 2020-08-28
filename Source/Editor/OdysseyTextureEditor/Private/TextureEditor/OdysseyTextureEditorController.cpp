@@ -37,14 +37,11 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
 	// Add Menu Extender
     GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
 
+	// Register our commands. This will only register them if not previously registered
+	FOdysseyTextureEditorCommands::Register();
+
     // Init Painter Editor
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(iToolkitCommands);
-
-    // Register our commands. This will only register them if not previously registered
-    FOdysseyTextureEditorCommands::Register();
-
-    // Bind each command to its function
-    BindCommands(iToolkitCommands);
 
 	// Set LayerStack CB
     if( !(mData->LayerStack()->OnCurrentLayerChanged().IsBound()) )
