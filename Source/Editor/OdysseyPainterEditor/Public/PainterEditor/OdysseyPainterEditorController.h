@@ -94,9 +94,11 @@ public:
     // Performance Handlers
     virtual void HandlePerformanceDrawBrushPreviewChanged( bool iValue );
 
-private:
+protected:
     // Commands building
-    void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);
+    virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);
+
+private:
     TSharedPtr<FExtender> CreateMenuExtender(const TSharedRef<FUICommandList>& iToolkitCommands);
     static void FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor );
     static void FillAboutMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor );

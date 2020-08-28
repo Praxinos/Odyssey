@@ -8,5 +8,21 @@
 
 UOdysseyFlipbookEditorSettings::UOdysseyFlipbookEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
+    /* , PreviousFrame( EKeys::Left )
+    , NextFrame( EKeys::Right )
+    , PreviousKeyFrame( EKeys::A )
+    , NextKeyFrame( EKeys::B )
+    , FirstFrame( EKeys::Home )
+    , LastFrame( EKeys::End )
+    , PlayForward( EKeys::SpaceBar )
+    , PlayBackward( EKeys::Enter )
+    , Pause( EKeys::SpaceBar )
+    , Stop( EKeys::Enter )
+    , ToggleLoopingMode( EKeys::L )
+    , AddKeyFrameAtEnd( EKeys::Add )
+    , AddKeyFrameBeforeCurrentKeyFrame( EKeys::Insert )
+    , AddKeyFrameAfterCurrentKeyFrame( EKeys::C )
+    , DuplicateCurrentKeyFrame( EKeys::D )
+    , DeleteCurrentKeyFrame( EKeys::Delete ) */
 {
 }

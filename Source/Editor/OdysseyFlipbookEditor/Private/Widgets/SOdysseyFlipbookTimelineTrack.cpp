@@ -370,4 +370,10 @@ SOdysseyFlipbookTimelineTrack::AddNewKeyframe(int32 iIndex)
     mOnTextureCreated.ExecuteIfBound(texture);
 }
 
+void
+SOdysseyFlipbookTimelineTrack::BindCommands(const TSharedRef<FUICommandList>& iCommandList)
+{
+	
+}
+
 #undef LOCTEXT_NAMESPACE

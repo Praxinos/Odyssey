@@ -53,14 +53,11 @@ FOdysseyFlipbookEditorController::Init(const TSharedRef<FUICommandList>& iToolki
 	// Add Menu Extender
     GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
 
+	// Register our commands. This will only register them if not previously registered
+	FOdysseyFlipbookEditorCommands::Register();
+
     // Init Painter Editor
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(iToolkitCommands);
-
-    // Register our commands. This will only register them if not previously registered
-    FOdysseyFlipbookEditorCommands::Register();
-
-    // Bind each command to its function
-    BindCommands(iToolkitCommands);
 
 	InitLayerStack();
 }
@@ -86,6 +83,8 @@ FOdysseyFlipbookEditorController::InitLayerStack()
 void
 FOdysseyFlipbookEditorController::BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
+	mGUI->GetTimelineTab()->BindCommands(iToolkitCommands);
+	FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 }
 
 TSharedPtr<FExtender>

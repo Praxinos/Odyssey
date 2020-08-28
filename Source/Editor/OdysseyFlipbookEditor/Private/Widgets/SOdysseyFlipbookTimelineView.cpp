@@ -431,111 +431,56 @@ SOdysseyFlipbookTimelineView::OnStopClicked()
 FReply
 SOdysseyFlipbookTimelineView::OnBeginningClicked()
 {
-	mTimelineWidget->ScrubPosition(0.5f);
+    ScrubToFirstFrame();
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnEndClicked()
 {
-	mTimelineWidget->ScrubPosition(mFlipbookWrapper->Flipbook()->GetNumFrames() - 0.5f);
+    ScrubToLastFrame();
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnPreviousClicked()
 {
-    if (mTimelineWidget->ScrubPosition() < 1.0f)
-        return FReply::Handled();
-
-    mTimelineWidget->ScrubPosition(FGenericPlatformMath::FloorToFloat(mTimelineWidget->ScrubPosition() - 1.0f) + 0.5f);
+    ScrubToPreviousFrame();
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnNextClicked()
 {
-    if (mTimelineWidget->ScrubPosition() < 0.f)
-    {
-        mTimelineWidget->ScrubPosition(0.5f);
-        return FReply::Handled();
-    }
-
-    mTimelineWidget->ScrubPosition(FGenericPlatformMath::FloorToFloat(mTimelineWidget->ScrubPosition() + 1.0f) + 0.5f);
+    ScrubToNextFrame();
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnPreviousKeyClicked()
 {
-    int32 index = mFlipbookWrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
-    if (index == 0)
-        return FReply::Handled();
-        
-    if (index < 0)
-    {
-        if (mTimelineWidget->ScrubPosition() >= mFlipbookWrapper->Flipbook()->GetNumFrames())
-        {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(mFlipbookWrapper->Flipbook()->GetNumKeyFrames() - 1);
-            mTimelineWidget->ScrubPosition(position + 0.5f);
-        }
-        else
-        {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(0);
-            mTimelineWidget->ScrubPosition(position + 0.5f);
-        }
-        return FReply::Handled();
-    }
-
-    float position = mFlipbookWrapper->GetKeyframeStartPosition(index - 1);
-    mTimelineWidget->ScrubPosition(position + 0.5f);
-
-	return FReply::Handled();
+    ScrubToPreviousKeyFrame();
+    return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnNextKeyClicked()
 {
-    UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
-    int32 index = mFlipbookWrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
-    if (index >= flipbook->GetNumKeyFrames() - 1)
-        return FReply::Handled();
-
-    if (index < 0)
-    {
-        if (mTimelineWidget->ScrubPosition() >= flipbook->GetNumFrames())
-        {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(flipbook->GetNumKeyFrames() - 1);
-            mTimelineWidget->ScrubPosition(position + 0.5f);
-        }
-        else
-        {
-            float position = mFlipbookWrapper->GetKeyframeStartPosition(0);
-            mTimelineWidget->ScrubPosition(position + 0.5f);
-        }
-        return FReply::Handled();
-    }
-
-    float position = mFlipbookWrapper->GetKeyframeStartPosition(index + 1);
-    mTimelineWidget->ScrubPosition(position + 0.5f);
-
+    ScrubToNextKeyFrame();
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnLoopClicked()
 {
-	mIsLooping = !mIsLooping;
+    ToggleLooping();
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyFlipbookTimelineView::OnAddFrameClicked()
 {
-	if (AddFrame())
-    {
-        mTimelineWidget->ScrubPosition(mFlipbookWrapper->Flipbook()->GetNumFrames() - 0.5f);
-    }
+	AddFrame();
 	return FReply::Handled();
 }
 
@@ -593,21 +538,161 @@ SOdysseyFlipbookTimelineView::FixFrame(int32 iIndex)
 	return true;
 }
 
-bool
-SOdysseyFlipbookTimelineView::AddFrame()
+void
+SOdysseyFlipbookTimelineView::AddFrame(int32 iIndex)
 {
     UTexture2D* createdTexture = NULL;
     UPaperSprite* createdSprite = NULL;
-    if (!mFlipbookWrapper->CreateKeyFrame(mFlipbookWrapper->Flipbook()->GetNumKeyFrames(), &createdTexture, &createdSprite))
-        return false;
+    if (!mFlipbookWrapper->CreateKeyFrame(iIndex, &createdTexture, &createdSprite))
+        return;
 
-	mTimelineTrackWidget->AddFrame(createdTexture, 1);
+	mTimelineTrackWidget->InsertFrame(iIndex, createdTexture, 1);
 
     mOnSpriteCreated.ExecuteIfBound(createdSprite);
     mOnTextureCreated.ExecuteIfBound(createdTexture);
 	mOnFlipbookChanged.ExecuteIfBound();
-    return true;
+
+	mTimelineWidget->ScrubPosition(mFlipbookWrapper->GetKeyframeStartPosition(iIndex) + 0.5f);
 }
+
+void
+SOdysseyFlipbookTimelineView::AddFrame()
+{
+    AddFrame(mFlipbookWrapper->Flipbook()->GetNumKeyFrames());
+}
+
+void
+SOdysseyFlipbookTimelineView::AddFrameAfter()
+{
+    int32 index = GetCurrentKeyframeIndex();
+    if (index < 0 || index >= mFlipbookWrapper->Flipbook()->GetNumKeyFrames())
+    {
+        if (GetScrubPosition() < 0)
+        {
+            AddFrame(0);
+        }
+        else
+        {
+            AddFrame(mFlipbookWrapper->Flipbook()->GetNumKeyFrames());
+        }
+        return;
+    }
+    
+    AddFrame(index + 1);
+}
+
+void
+SOdysseyFlipbookTimelineView::AddFrameBefore()
+{
+    int32 index = GetCurrentKeyframeIndex();
+    if (index < 0 || index >= mFlipbookWrapper->Flipbook()->GetNumKeyFrames())
+    {
+        if (GetScrubPosition() < 0)
+        {
+            AddFrame(0);
+        }
+        else
+        {
+            AddFrame(mFlipbookWrapper->Flipbook()->GetNumKeyFrames());
+        }
+        return;
+    }
+    AddFrame(index);
+}
+
+void
+SOdysseyFlipbookTimelineView::ScrubToFirstFrame()
+{
+	mTimelineWidget->ScrubPosition(0.5f);
+}
+
+void
+SOdysseyFlipbookTimelineView::ScrubToLastFrame()
+{
+	mTimelineWidget->ScrubPosition(mFlipbookWrapper->Flipbook()->GetNumFrames() - 0.5f);
+}
+
+void
+SOdysseyFlipbookTimelineView::ScrubToNextFrame()
+{
+    if (mTimelineWidget->ScrubPosition() < 0.f)
+    {
+        mTimelineWidget->ScrubPosition(0.5f);
+        return;
+    }
+
+    mTimelineWidget->ScrubPosition(FGenericPlatformMath::FloorToFloat(mTimelineWidget->ScrubPosition() + 1.0f) + 0.5f);
+}
+
+void
+SOdysseyFlipbookTimelineView::ScrubToPreviousFrame()
+{
+    if (mTimelineWidget->ScrubPosition() < 1.0f)
+        return;
+
+    mTimelineWidget->ScrubPosition(FGenericPlatformMath::FloorToFloat(mTimelineWidget->ScrubPosition() - 1.0f) + 0.5f);
+}
+
+void
+SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame()
+{
+    UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
+    int32 index = mFlipbookWrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
+    if (index >= flipbook->GetNumKeyFrames() - 1)
+        return;
+
+    if (index < 0)
+    {
+        if (mTimelineWidget->ScrubPosition() >= flipbook->GetNumFrames())
+        {
+            float position = mFlipbookWrapper->GetKeyframeStartPosition(flipbook->GetNumKeyFrames() - 1);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        else
+        {
+            float position = mFlipbookWrapper->GetKeyframeStartPosition(0);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        return;
+    }
+
+    float position = mFlipbookWrapper->GetKeyframeStartPosition(index + 1);
+    mTimelineWidget->ScrubPosition(position + 0.5f);
+}
+
+void
+SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame()
+{
+    int32 index = mFlipbookWrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
+    if (index == 0)
+        return;
+        
+    if (index < 0)
+    {
+        if (mTimelineWidget->ScrubPosition() >= mFlipbookWrapper->Flipbook()->GetNumFrames())
+        {
+            float position = mFlipbookWrapper->GetKeyframeStartPosition(mFlipbookWrapper->Flipbook()->GetNumKeyFrames() - 1);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        else
+        {
+            float position = mFlipbookWrapper->GetKeyframeStartPosition(0);
+            mTimelineWidget->ScrubPosition(position + 0.5f);
+        }
+        return;
+    }
+
+    float position = mFlipbookWrapper->GetKeyframeStartPosition(index - 1);
+    mTimelineWidget->ScrubPosition(position + 0.5f);
+}
+
+
+void
+SOdysseyFlipbookTimelineView::ToggleLooping()
+{
+	mIsLooping = !mIsLooping;
+}
+
 
 EVisibility
 SOdysseyFlipbookTimelineView::FixCurrentFrameVisibility() const
@@ -652,6 +737,26 @@ void
 SOdysseyFlipbookTimelineView::OnTextureCreated(UTexture2D* iTexture)
 {
     mOnTextureCreated.ExecuteIfBound(iTexture);
+}
+
+void
+SOdysseyFlipbookTimelineView::BindCommands(const TSharedRef<FUICommandList>& iCommandList)
+{
+	iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrameAfter, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameAfter)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrameBefore, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameBefore)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayForward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Play, false)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayBackward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Play, true)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().Pause, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Pause)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().Stop, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Stop)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PreviousFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().NextFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToNextFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PreviousKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().NextKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().FirstFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToFirstFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().LastFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToLastFrame)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().ToggleLooping, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ToggleLooping)));
+	mTimelineTrackWidget->BindCommands(iCommandList);
 }
 
 #undef LOCTEXT_NAMESPACE

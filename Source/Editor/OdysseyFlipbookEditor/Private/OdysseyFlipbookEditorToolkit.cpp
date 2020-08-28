@@ -36,8 +36,8 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
     mController->OnKeyframeRemoved().BindRaw(this, &FOdysseyFlipbookEditorToolkit::OnKeyframeRemoved);
 
 	mData->Init();
-	mController->Init(ToolkitCommands);
 	mGUI->Init(mData, mController);
+	mController->Init(ToolkitCommands);
 
 	TArray<UObject*> objectsToEdit;
 	objectsToEdit.Add(iFlipbook);

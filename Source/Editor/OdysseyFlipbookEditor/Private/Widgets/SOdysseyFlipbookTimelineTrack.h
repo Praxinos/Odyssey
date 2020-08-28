@@ -28,6 +28,7 @@ public:
 
 	// Construct the widget
 	void Construct( const FArguments& InArgs );
+	void BindCommands(const TSharedRef<FUICommandList>& iCommandList);
 
 public:
 	//Accessors

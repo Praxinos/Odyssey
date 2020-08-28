@@ -43,6 +43,7 @@ public:
     // Construction / Destruction
     ~SOdysseyFlipbookTimelineView();
     void Construct(const FArguments& InArgs);
+	void BindCommands(const TSharedRef<FUICommandList>& iCommandList);
 
 private:
     // The playback functions
@@ -67,8 +68,6 @@ public:
     bool IsScrubbing() const;
 
     float FrameSize() const;
-
-    // Deprecated Accessors 
 
 private:
     // Event callbacks
@@ -103,8 +102,20 @@ private:
 
 private:
     //Manipulations
-	bool AddFrame();
+	void AddFrame(int32 iIndex);
+    void AddFrame();
+    void AddFrameAfter();
+    void AddFrameBefore();
 	bool FixFrame(int32 iIndex);
+
+    //Timeline
+    void ScrubToFirstFrame();
+    void ScrubToLastFrame();
+    void ScrubToNextFrame();
+    void ScrubToPreviousFrame();
+    void ScrubToNextKeyFrame();
+    void ScrubToPreviousKeyFrame();
+    void ToggleLooping();
 
 private:
     TArray<SNumericDropDown<float>::FNamedValue> FrameRateDropDownValues() const;
@@ -126,7 +137,7 @@ private:
     //Widgets
     TSharedPtr<SOdysseyTimeline> mTimelineWidget;
 	TSharedPtr<SOdysseyFlipbookTimelineTrack> mTimelineTrackWidget;
-
+    
     //Events
     FOnCurrentKeyframeChanged mOnCurrentKeyframeChanged;
     FOnPlayStarted mOnPlayStarted;
