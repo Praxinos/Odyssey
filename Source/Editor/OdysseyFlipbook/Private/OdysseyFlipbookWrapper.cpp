@@ -508,7 +508,7 @@ FOdysseyFlipbookWrapper::OnPreSpriteTextureChanged(UPaperSprite* iSprite, const 
     FProperty* property = iEditPropertyChain.GetActiveNode()->GetValue();
     if (property->GetFName() == "SourceTexture")
     {
-		FSoftObjectProperty* textureProperty = Cast<FSoftObjectProperty>(property);
+		FSoftObjectProperty* textureProperty = CastField<FSoftObjectProperty>(property);
         mSpritePreviousTexture = Cast<UTexture2D>(textureProperty->GetObjectPropertyValue(textureProperty->ContainerPtrToValuePtr<UPaperSprite>(iSprite)));
     }
 }
