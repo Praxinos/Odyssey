@@ -26,12 +26,12 @@ public:
 public:
 	virtual void Init();
 
-    FOdysseyPaintEngine*		 PaintEngine();
-	virtual FOdysseySurfaceEditable*     DisplaySurface() = 0;
-	FOdysseyUndoHistory*		 UndoHistory();
-	UOdysseyBrush*               Brush();
-	UOdysseyBrushAssetBase*      BrushInstance();
-	bool                         DrawBrushPreview();
+    FOdysseyPaintEngine*		        PaintEngine();
+	virtual FOdysseySurfaceEditable*    DisplaySurface() = 0;
+	FOdysseyUndoHistory*		        UndoHistory();
+	UOdysseyBrush*                      Brush();
+	UOdysseyBrushAssetBase*             BrushInstance();
+	bool                                DrawBrushPreview();
 
 	void						 Brush(UOdysseyBrush* iBrush);
 	void						 BrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
@@ -39,9 +39,9 @@ public:
 
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
-    FOdysseyPaintEngine*        mPaintEngine;        // Owned        // Used by SOdysseyLayerStack
-	FOdysseyBlock*				mPaintEngineBlock;        // Owned   // Used by PaintEngine
-	UOdysseyBrush*              mBrush;              // NOT Owned
+    FOdysseyPaintEngine*        mPaintEngine;       // Owned        // Used by SOdysseyLayerStack
+	FOdysseyBlock*				mPaintEngineBlock;  // Owned        // Used by PaintEngine
+	UOdysseyBrush*              mBrush;             // NOT Owned
 	UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview
 	bool                        mDrawBrushPreview;
 };

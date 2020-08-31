@@ -646,6 +646,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     state.smoothing_strength = mSmoother->GetStrength();
     state.currentPointIndex = 0;
     state.currentStroke = &mResultStroke;
+
     mBrushInstance->CleansePool( ECacheLevel::kState );
 
     mBrushInstance->ExecuteStateChanged();

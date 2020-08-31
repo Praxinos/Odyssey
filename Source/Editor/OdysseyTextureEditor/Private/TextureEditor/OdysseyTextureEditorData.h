@@ -43,7 +43,7 @@ public:
 private:
     UTexture2D*                 mTexture;
     FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
-	FOdysseySurfaceEditable*            mDisplaySurface;
+	FOdysseySurfaceEditable*    mDisplaySurface;
 
     FTexturePropertiesBackup    mPropertiesBackup;
 };

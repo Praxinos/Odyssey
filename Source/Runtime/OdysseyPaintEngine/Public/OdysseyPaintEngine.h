@@ -137,7 +137,7 @@ private:
 	FOnStrokeAbort						mOnStrokeAbortDelegate;
 
 public:
-    FOdysseySurfaceEditable*                    mBrushCursorPreviewSurface;
+    FOdysseySurfaceEditable*            mBrushCursorPreviewSurface;
     FVector2D                           mBrushCursorPreviewShift;
     long long                           mLastBrushCursorComputationTime;
     bool                                mBrushCursorInvalid;

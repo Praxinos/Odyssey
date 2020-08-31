@@ -34,6 +34,7 @@ FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TShared
 
 	TArray<UObject*> objectsToEdit;
 	objectsToEdit.Add(iTexture);
+
 	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iMode, iInitToolkitHost, iAppIdentifier, objectsToEdit);
 }
 
