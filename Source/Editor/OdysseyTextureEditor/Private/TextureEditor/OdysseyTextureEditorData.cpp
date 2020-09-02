@@ -79,6 +79,7 @@ FOdysseyTextureEditorData::ApplyPropertiesBackup()
 	mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
 	mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
 	mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
+    mTexture->UpdateResource();
 }
 
 FOdysseyLayerStack*
