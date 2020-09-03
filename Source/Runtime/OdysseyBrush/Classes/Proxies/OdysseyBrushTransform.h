@@ -67,7 +67,11 @@ public:
 
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
-
+    
+    //TOTEST with multiple matrix to check associativity
+    //UFUNCTION(BlueprintPure, meta=(CommutativeAssociativeBinaryOperator = "true"), Category="OdysseyTransform")
+    //static FOdysseyMatrix ComposeMatrixMatrix2( const FOdysseyMatrix& A, const FOdysseyMatrix& B ) { return ComposeMatrix( A, B ); }
+    
     UFUNCTION(BlueprintPure, meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ), Category="OdysseyTransform")
     static FOdysseyBlockProxy Transform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
