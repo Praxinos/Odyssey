@@ -10,6 +10,8 @@
 #include "Models/OdysseyTextureEditorCommands.h"
 #include "SOdysseyAboutScreen.h"
 #include "OdysseyBrushAssetBase.h"
+#include "TextureEditor/OdysseyTextureEditorData.h"
+#include "TextureEditor/OdysseyTextureEditorState.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
@@ -109,6 +111,45 @@ FOdysseyTextureEditorController::FillImportExportMenu( FMenuBuilder& ioMenuBuild
 }
 
 void
+FOdysseyTextureEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
+{
+    FOdysseyPainterEditorController::OnBrushSelected( iBrush );
+
+    if( mData->BrushInstance() )
+    {
+        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( mData->LayerStack() );
+        mData->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+    }
+}
+
+void
+FOdysseyTextureEditorController::OnBrushChanged( UBlueprint* iBrush )
+{
+    FOdysseyPainterEditorController::OnBrushChanged( iBrush );
+
+    UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>( iBrush );
+    if( !check_brush )
+        return;
+}
+
+void
+FOdysseyTextureEditorController::OnBrushCompiled( UBlueprint* iBrush )
+{
+    FOdysseyPainterEditorController::OnBrushCompiled( iBrush );
+
+    UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>( iBrush );
+    if( !check_brush )
+        return;
+
+    if( mData->BrushInstance() )
+    {
+        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( mData->LayerStack() );
+        mData->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+    }
+}
+
+
+void
 FOdysseyTextureEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(iChangedTiles);
@@ -175,6 +216,12 @@ void
 FOdysseyTextureEditorController::OnLayerStackDirty()
 {
     mData->Texture()->MarkPackageDirty();
+
+    if( mData->BrushInstance() )
+    {
+        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( mData->LayerStack() );
+        mData->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+    }
 }
 
 void

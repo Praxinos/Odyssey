@@ -44,7 +44,8 @@ public class OdysseyTextureEditor : ModuleRules
                 "OdysseyLayer",
                 "OdysseyTransaction",
                 "OdysseyStylusInput",
-                "OdysseyTexture"
+                "OdysseyTexture",
+                "OdysseyDrawingState",
             }
         );
 

@@ -9,6 +9,7 @@
 #include "UObject/ScriptMacros.h"
 #include "Math/Color.h"
 #include "OdysseyStrokePoint.h"
+#include "OdysseyDrawingState.h"
 #include "OdysseyBrushPreferencesOverrides.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushPivot.h"
@@ -17,7 +18,6 @@
 #include <ULIS3>
 #include "OdysseyBrushAssetBase.generated.h"
 
-class UTexture2D;
 class FOdysseyBlock;
 
 /////////////////////////////////////////////////////
@@ -89,6 +89,10 @@ public:
     FOdysseyBlockProxy              RetrieveInPool(     ECacheLevel iLevel, const  FString&  iKey )  const;
     void                            CleansePool(        ECacheLevel iLevel );
     void                            CleansePools();
+
+    void                            AddOrReplaceState( const FName& iKey, FOdysseyDrawingState* iState );
+    FOdysseyDrawingState*           FindState( const FName& iKey ); //TODO: maybe not needed ?
+    const FOdysseyDrawingState*     FindState( const FName& iKey ) const;
 
 public:
     // OdysseyBrushBlueprint Getters
@@ -276,6 +280,7 @@ public:
 private:
     // Private Members Data
     FOdysseyBrushState                      state;
+    TMap< FName, FOdysseyDrawingState* >    mStates;
     TArray< ::ul3::FRect >                  invalid_rects;
     TArray< FOdysseyBrushPoolCache >        pools;
 

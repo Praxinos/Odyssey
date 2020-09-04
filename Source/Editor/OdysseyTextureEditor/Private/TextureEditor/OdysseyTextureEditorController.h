@@ -57,6 +57,10 @@ protected:
 	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
 
+    virtual void OnBrushSelected( UOdysseyBrush* iBrush ) override;
+    virtual void OnBrushChanged( UBlueprint* iBrush ) override;
+    virtual void OnBrushCompiled( UBlueprint* iBrush ) override;
+
 private:
 	TSharedPtr<FOdysseyTextureEditorData>		mData;
 	TSharedPtr<FOdysseyTextureEditorGUI>		mGUI;

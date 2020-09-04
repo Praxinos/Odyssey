@@ -75,6 +75,28 @@ UOdysseyBrushAssetBase::GetState()
     return  state;
 }
 
+FOdysseyDrawingState*
+UOdysseyBrushAssetBase::FindState( const FName& iKey )
+{
+    return *mStates.Find( iKey );
+}
+
+const FOdysseyDrawingState*
+UOdysseyBrushAssetBase::FindState( const FName& iKey ) const
+{
+    return *mStates.Find( iKey );
+}
+
+void
+UOdysseyBrushAssetBase::AddOrReplaceState( const FName& iKey, FOdysseyDrawingState* iState )
+{
+    FOdysseyDrawingState* old_state = nullptr;
+    mStates.RemoveAndCopyValue( iKey, old_state );
+    delete old_state;
+
+    mStates.Add( iKey, iState );
+}
+
 
 const TArray< ::ul3::FRect >&
 UOdysseyBrushAssetBase::GetInvalidRects() const

@@ -1,0 +1,250 @@
+// Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
+// IDDN FR.001.250001.002.S.P.2019.000.00000
+
+#include "TextureEditor/OdysseyTextureEditorFunctionLibrary.h"
+
+#include "OdysseyBrushAssetBase.h"
+#include "OdysseyLayerStack.h"
+#include "TextureEditor/OdysseyTextureEditorState.h"
+#include <ULIS3>
+#include "ULISLoaderModule.h"
+
+//---
+
+namespace
+{
+static
+FOdysseyLayerStack*
+GetStack( UOdysseyBrushAssetBase* BrushContext )
+{
+    if( !BrushContext )
+        return nullptr;
+
+    FOdysseyDrawingState* istate = BrushContext->FindState( FOdysseyTextureEditorState::GetId() );
+    if( !istate )
+        return nullptr;
+
+    FOdysseyTextureEditorState* state = static_cast<FOdysseyTextureEditorState*>( istate );
+    check( state );
+    if( !state )
+        return nullptr;
+
+    //---
+
+    return state->LayerStack();
+}
+
+static
+FOdysseyImageLayer*
+GetCurrentLayer( FOdysseyLayerStack* iStack )
+{
+    if( !iStack )
+        return nullptr;
+
+    IOdysseyLayer* layer = iStack->GetCurrentLayer()->GetNodeContent();
+    check( layer );
+    if( layer->GetType() != IOdysseyLayer::eType::kImage )
+        return nullptr;
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layer );
+    if( !imageLayer )
+        return nullptr;
+
+    return imageLayer;
+}
+
+static
+FOdysseyImageLayer*
+GetLayerByName( FOdysseyLayerStack* iStack, const FString& iName )
+{
+    if( !iStack )
+        return nullptr;
+
+    TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
+    iStack->GetLayers()->DepthFirstSearchTree( &layers, false );
+
+    for( auto layer : layers )
+    {
+        FString layer_name( layer->GetName().ToString() );
+        if( layer_name == iName )
+        {
+            if( layer->GetType() != IOdysseyLayer::eType::kImage )
+                return nullptr;
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layer );
+            if( !imageLayer )
+                return nullptr;
+
+            return imageLayer;
+        }
+    }
+
+    return nullptr;
+}
+
+static
+FOdysseyImageLayer*
+GetLayerByIndex( FOdysseyLayerStack* iStack, int iIndex )
+{
+    if( !iStack )
+        return nullptr;
+
+    FOdysseyNTree< IOdysseyLayer* >* layer_node = iStack->GetCurrentLayerFromIndex( iIndex );
+    if( !layer_node )
+        return nullptr;
+
+    IOdysseyLayer* layer = layer_node->GetNodeContent();
+    check( layer );
+    if( layer->GetType() != IOdysseyLayer::eType::kImage )
+        return nullptr;
+    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layer );
+    if( !imageLayer )
+        return nullptr;
+
+    return imageLayer;
+}
+}
+
+//static
+FOdysseyBlockProxy
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* iBrushContext, int iIndex, int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+{
+    if( !iBrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+
+    FString op = "LayerBlock_Index-" + FString::FromInt( iIndex ) + "_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
+
+    if( iBrushContext->KeyExistsInPool( iCache, op ) )
+        return iBrushContext->RetrieveInPool( iCache, op );
+
+    //---
+
+    FOdysseyLayerStack* stack = GetStack( iBrushContext );
+    if( !stack )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    FOdysseyImageLayer* layer = GetLayerByIndex( stack, iIndex );
+    if( !layer )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+
+    FOdysseyBlock* src = layer->GetBlock();
+    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
+    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
+
+    FOdysseyBlockProxy prox( dst, op );
+    iBrushContext->StoreInPool( iCache, op, prox );
+    return prox;
+}
+
+//static
+FOdysseyBlockProxy
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetBase* iBrushContext, const FString& iName, int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+{
+    if( !iBrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+
+    FString op = "LayerBlock_" + iName + "_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
+
+    if( iBrushContext->KeyExistsInPool( iCache, op ) )
+        return iBrushContext->RetrieveInPool( iCache, op );
+
+    //---
+
+    FOdysseyLayerStack* stack = GetStack( iBrushContext );
+    if( !stack )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    FOdysseyImageLayer* layer = GetLayerByName( stack, iName );
+    if( !layer )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+
+    FOdysseyBlock* src = layer->GetBlock();
+    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
+    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
+
+    FOdysseyBlockProxy prox( dst, op );
+    iBrushContext->StoreInPool( iCache, op, prox );
+    return prox;
+}
+
+//static
+FOdysseyBlockProxy
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* iBrushContext, int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+{
+    if( !iBrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+
+    FString op = "LayerBlock_Current_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
+
+    if( iBrushContext->KeyExistsInPool( iCache, op ) )
+        return iBrushContext->RetrieveInPool( iCache, op );
+
+    //---
+
+    FOdysseyLayerStack* stack = GetStack( iBrushContext );
+    if( !stack )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    FOdysseyImageLayer* layer = GetCurrentLayer( stack );
+    if( !layer )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+
+    FOdysseyBlock* src = layer->GetBlock();
+    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
+    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
+
+    FOdysseyBlockProxy prox( dst, op );
+    iBrushContext->StoreInPool( iCache, op, prox );
+    return prox;
+}
+
+#if 0
+//static
+FOdysseyBlockProxy
+UOdysseyTextureEditorFunctionLibrary::GetResultBlock( UOdysseyBrushAssetBase* BrushContext )
+{
+    if( !BrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    FOdysseyDrawingState* istate = BrushContext->FindState( FOdysseyTextureEditorState::GetId() );
+    //FOdysseyDrawingState* istate = *BrushContext->GetStates().Find( FOdysseyTextureEditorState::GetId() );
+    if( !istate )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    FOdysseyTextureEditorState* state = static_cast<FOdysseyTextureEditorState*>( istate );
+    check( state );
+
+    FOdysseyLayerStack* stack = state->LayerStack();
+    //FOdysseyLayerStack* stack = const_cast<FOdysseyLayerStack*>( s->LayerStack() );
+
+    FOdysseyBlock* block = stack->GetResultBlock();
+    //const FOdysseyBlock* block = s->LayerStack()->GetResultBlock();
+    FString id( "blabla" );
+    return FOdysseyBlockProxy( block, id );
+}
+#endif
