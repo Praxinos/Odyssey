@@ -94,4 +94,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetHeight( FOdysseyBlockProxy Sample );
+    
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
+    static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 };
