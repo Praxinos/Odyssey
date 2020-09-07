@@ -132,8 +132,6 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 
 		RemoveEditingObject(sprite);
 	}
-
-    // mData->FlipbookWrapper()->MarkPackageDirty(); //PATCH:
 }
 
 void

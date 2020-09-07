@@ -232,7 +232,7 @@ SOdysseyFlipbookTimelineTrack::OnFramesLengthChanged(TArray<int32> iFrameIndexes
 		FScopedFlipbookMutator mutator(mFlipbookWrapper->Flipbook());
 		for( int i = 0; i < iFrameIndexes.Num(); i++)
 		{
-			mutator.KeyFrames[iFrameIndexes[i]].FrameRun = mFrameList->GetFrameLength(iFrameIndexes[i]);
+			mFlipbookWrapper->SetKeyFrameLength(iFrameIndexes[i], mFrameList->GetFrameLength(iFrameIndexes[i]));
 		}
 	}
 

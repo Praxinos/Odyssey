@@ -126,6 +126,7 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRe
     check(mData->LayerStack());
     FOdysseyPainterEditorController::OnPaintEngineStrokeEnd(iChangedTiles);
 	mData->LayerStack()->ComputeResultBlock();
+	mData->Texture()->MarkPackageDirty(); 
 }
 
 void

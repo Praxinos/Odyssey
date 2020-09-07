@@ -136,6 +136,7 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRec
     FOdysseyPainterEditorController::OnPaintEngineStrokeEnd(iChangedTiles);
 	mData->LayerStack()->mDrawingUndo->EndRecord();
 	mData->LayerStack()->ComputeResultBlock();
+	mData->Texture()->MarkPackageDirty();
 }
 
 void

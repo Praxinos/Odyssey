@@ -39,7 +39,6 @@ public:
     int32 GetKeyframeIndexAtPosition(float iPosition);
     float GetKeyframeStartPosition(int32 iIndex);
 
-    void CreateEmptyKeyFrame(int32 iIndex);
     bool CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite);
     bool DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite);
     bool FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite);
@@ -79,6 +78,7 @@ public:
     }
 
 private:
+    void CreateEmptyKeyFrame(int32 iIndex);
     UTexture2D* CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor);
     UTexture2D* CreateTexture(FString iName, UTexture2D* iTexture);
     UTexture2D* CreateTexture(FString iName, FOdysseyBlock* iBlock = NULL);

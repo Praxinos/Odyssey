@@ -38,6 +38,8 @@ FOdysseyFlipbookWrapper::CreateEmptyKeyFrame(int32 iIndex)
     FPaperFlipbookKeyFrame keyframe;
 	FScopedFlipbookMutator mutator(mFlipbook);
 	mutator.KeyFrames.Insert(keyframe, iIndex);
+    
+	mFlipbook->MarkPackageDirty();
 
     //TODO: Do it by changing UProperties
 }
@@ -190,6 +192,8 @@ FOdysseyFlipbookWrapper::MoveKeyFrames(TArray<int32> iSrcIndexes, int32 iDstInde
         
     //insert keyframes at their new place
     mutator.KeyFrames.Insert(keyframes, fixedDestIndex);
+    
+	mFlipbook->MarkPackageDirty();
 }
 
 //Deletion
@@ -204,6 +208,8 @@ FOdysseyFlipbookWrapper::RemoveKeyFrame(int32 iIndex)
 		FScopedFlipbookMutator mutator(mFlipbook);
 		mutator.KeyFrames.RemoveAt(iIndex);
 	}
+    
+	mFlipbook->MarkPackageDirty();
 }
 
 void
@@ -211,6 +217,8 @@ FOdysseyFlipbookWrapper::SetKeyFrameLength(int32 iIndex, int32 iLength)
 {
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames[iIndex].FrameRun = iLength;
+    
+	mFlipbook->MarkPackageDirty();
 }
 
 UTexture2D*
@@ -266,7 +274,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
      UTexture2D* texture = CreateTexture(iName, blockPtr);
 
 	delete blockPtr;
-     return texture;
+    return texture;
 }
 
 UTexture2D*
@@ -288,7 +296,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
         delete block;
     }
      
-     return texture;
+    return texture;
 }
 
 UPaperSprite*
@@ -339,6 +347,8 @@ FOdysseyFlipbookWrapper::SetKeyframeSprite(int32 iIndex, UPaperSprite* iSprite)
     //TODO: Do It With UProperties
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames[iIndex].Sprite = iSprite;
+    
+	mFlipbook->MarkPackageDirty();
 }
 
 void
@@ -352,6 +362,8 @@ FOdysseyFlipbookWrapper::SetKeyframeTexture(int32 iIndex, UTexture2D* iTexture)
 	UClass* spriteClass = sprite->StaticClass();
     FSoftObjectProperty* sourceTextureProperty = FindFProperty<FSoftObjectProperty>(spriteClass, "SourceTexture");
     sourceTextureProperty->SetObjectPropertyValue(sourceTextureProperty->ContainerPtrToValuePtr<UPaperSprite>(sprite), iTexture);
+    
+	sprite->MarkPackageDirty();
 }
 
 UTexture2D*

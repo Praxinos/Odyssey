@@ -44,9 +44,6 @@ FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbo
 void
 FOdysseyFlipbookEditorData::Init()
 {
-    // Setup Flipbook
-    // mFlipbook->MarkPackageDirty(); //TODO: Call MarkPackageDirty only when needed, not here
-
     // Get Flipbook keyFrames
     if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() <= 0)
     {
