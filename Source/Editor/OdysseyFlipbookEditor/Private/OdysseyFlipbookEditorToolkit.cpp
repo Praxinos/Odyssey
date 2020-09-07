@@ -240,4 +240,16 @@ FOdysseyFlipbookEditorToolkit::UnregisterTabSpawners(const TSharedRef<class FTab
 	mGUI->UnregisterTabSpawners(iTabManager);
 }
 
+bool
+FOdysseyFlipbookEditorToolkit::CanReimport() const
+{
+	return false;
+}
+
+bool
+FOdysseyFlipbookEditorToolkit::CanReimport(UObject* EditingObject) const
+{
+	return false;
+}
+
 #undef LOCTEXT_NAMESPACE

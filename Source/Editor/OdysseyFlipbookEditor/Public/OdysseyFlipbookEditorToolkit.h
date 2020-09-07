@@ -44,6 +44,10 @@ protected:
     virtual void RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
+	/** Called to check to see if there's an asset capable of being reimported */
+	virtual bool CanReimport() const;
+	virtual bool CanReimport(UObject* EditingObject) const;
+
 protected:
     // FOdysseyPainterEditorToolkit overrides
     virtual const TSharedRef<FTabManager::FLayout>& GetLayout() const override;
