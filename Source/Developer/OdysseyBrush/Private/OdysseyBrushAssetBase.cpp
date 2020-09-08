@@ -348,7 +348,7 @@ UOdysseyBrushAssetBase::GetSpeed()
 FVector2D
 UOdysseyBrushAssetBase::GetAcceleration()
 {
-    return  state.point.speed;
+    return  state.point.acceleration;
 }
 
 
