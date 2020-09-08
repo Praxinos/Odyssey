@@ -22,42 +22,42 @@
   "Modules": [
     {
       "Name": "OdysseyBrush",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyLayer",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyMaths",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyPaintEngine",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseySerializable",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyStrokePipeline",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyTransaction",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "ULISLoader",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
