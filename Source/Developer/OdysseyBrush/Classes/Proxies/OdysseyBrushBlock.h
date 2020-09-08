@@ -81,7 +81,7 @@ public:
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
                                    , FOdysseyBlockProxy Top
-                                   , FOdysseyBlockProxy BacK
+                                   , FOdysseyBlockProxy Back
                                    , int X = 0
                                    , int Y = 0
                                    , float Opacity = 1.f
