@@ -159,12 +159,12 @@ UOdysseyBlockProxyFunctionLibrary::GetHeight( FOdysseyBlockProxy Sample )
 
 //static
 bool
-UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color )
+UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy iBlock, float iX, float iY, FOdysseyBrushColor& oColor )
 {
-    int x = FMath::FloorToInt( X );
-    int y = FMath::FloorToInt( Y );
+    int x = FMath::FloorToInt( iX );
+    int y = FMath::FloorToInt( iY );
 
-    FOdysseyBlock* block = Block.m;
+    FOdysseyBlock* block = iBlock.m;
     if( !block )
         return false;
 
@@ -176,8 +176,7 @@ UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy Block,
     ::ul3::FPixelValue p = block->GetBlock()->PixelValue( x, y );
 
     FOdysseyBrushColor color( p );
-    Color = color;
+    oColor = color;
 
     return true;
 }
-

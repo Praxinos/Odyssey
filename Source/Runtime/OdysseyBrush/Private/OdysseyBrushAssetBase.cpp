@@ -442,6 +442,32 @@ UOdysseyBrushAssetBase::GetCanvasHeight()
         return  0;
 }
 
+
+/** Get Stroke Buffer*/
+FOdysseyBlockProxy
+UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+{
+    FString op = "StrokeBlock_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
+
+    if( KeyExistsInPool( iCache, op ) )
+        return RetrieveInPool( iCache, op );
+
+    //---
+
+    FOdysseyBlock* src = state.target_temp_buffer;
+    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
+    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
+
+    FOdysseyBlockProxy prox( dst, op );
+    StoreInPool( iCache, op, prox );
+    return prox;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------- Odyssey Brush Native events
 void
