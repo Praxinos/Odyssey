@@ -66,7 +66,7 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     static FOdysseyBrushColor MakeOdysseyBrushColorFromCMYKF( float C, float M, float Y, float K, float A = 1.f );
 
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
-    static FOdysseyBrushColor MakeOdysseyBrushColorFromLabF( float L, float a, float b, float A = 255 );
+    static FOdysseyBrushColor MakeOdysseyBrushColorFromLabF( float L, float A, float B, float Alpha = 255 );
 
     /* Break */
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
@@ -95,6 +95,6 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     static void BreakOdysseyBrushColorIntoCMYKF( const FOdysseyBrushColor& Color, float& C, float& M, float& Y, float& K, float& A );
 
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
-    static void BreakOdysseyBrushColorIntoLabF( const  FOdysseyBrushColor& Color, float& L, float& a, float& b, float& A );
+    static void BreakOdysseyBrushColorIntoLabF( const  FOdysseyBrushColor& Color, float& L, float& A, float& B, float& Alpha );
 };
 

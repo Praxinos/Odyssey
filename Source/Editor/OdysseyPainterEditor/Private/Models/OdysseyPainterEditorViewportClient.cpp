@@ -317,6 +317,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
                                       , position_in_viewport.Y
                                       , iState.GetZ()
                                       , iState.GetPressure()
+                                      , iState.GetTimer()
                                       , iState.GetAltitude()
                                       , iState.GetAzimuth()
                                       , iState.GetTwist()
@@ -557,7 +558,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     else if( mCurrentToolState == eState::kPanning )
     {
         FVector2D deltaReference( iPointInViewport.x - mPanReference.X, iPointInViewport.y - mPanReference.Y );
-        FVector2D delta_in_viewport = FVector2D();
+        FVector2D delta_in_viewport = FVector2D(0,0);
 
         float rotation = FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
 
@@ -890,7 +891,7 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     //If we don't have a surface, then we don't have a local mouse position
     if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
     {
-        return FVector2D();
+        return FVector2D(0,0);
     }
 
     double zoom = GetZoom();

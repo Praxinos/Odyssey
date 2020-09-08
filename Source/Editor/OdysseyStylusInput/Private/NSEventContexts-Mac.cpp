@@ -93,6 +93,8 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
     
     if( state.Position == FVector2D( 0, 0 ))
         UE_LOG(LogTemp, Display, TEXT("WARNING, ERROR IN STATE"));
+
+    state.Timer = NSEvent.timestamp;
         
     //Tablet and mouse events are under the same main type of event. To distinguish them, we can check the subtype of the event received
     if( [Event type] == NSEventTypeLeftMouseDown || [Event type] == NSEventTypeLeftMouseDragged )

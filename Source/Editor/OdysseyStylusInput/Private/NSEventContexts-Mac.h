@@ -26,6 +26,7 @@ enum class EWintabPacketType
 	Y,
 	Z,
 	Status,
+    Timer,
 	NormalPressure,
 	TangentPressure,
 	ButtonPressure,
@@ -43,6 +44,7 @@ struct FNSEventStylusState
 {
 	FVector2D Position;
 	float Z;
+    unsigned int Timer;
     float Azimuth;
     float Altitude;
 	float Twist;
@@ -54,7 +56,7 @@ struct FNSEventStylusState
 	bool IsInverted : 1;
     
     FNSEventStylusState() :
-		Position(0, 0), Z(0), Azimuth(0), Altitude(0), Twist(0), Tilt(0, 0), NormalPressure(0), TangentPressure(0),
+		Position(0, 0), Z(0), Timer(0), Azimuth(0), Altitude(0), Twist(0), Tilt(0, 0), NormalPressure(0), TangentPressure(0),
 		Size(0, 0), IsTouching(false), IsInverted(false)
 	{
 	}
@@ -78,7 +80,7 @@ struct FNSEventStylusState
 
 	FStylusState ToPublicState() const
 	{
-		return FStylusState(Position, Z, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
+		return FStylusState(Position, Z, Timer, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
 	}
 };
 

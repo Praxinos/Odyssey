@@ -197,6 +197,15 @@ public:
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetJolt();
 
+    /** Get Delta Position between this event and the last */
+    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    FVector2D GetDeltaPosition();
+
+    /** Get Delta Time in micro seconds between this event and the last */
+    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    int GetDeltaTime();
+
+
     /*******************************/
     /**       State Getters        */
     /*******************************/

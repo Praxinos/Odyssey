@@ -47,7 +47,7 @@ struct ODYSSEYBRUSH_API FOdysseyPivot
     FOdysseyPivot()
         : Reference(    EPivotReference::kCenter )
         , OffsetMode(   EPivotOffsetMode::kRelative )
-        , Offset(       FVector2D() )
+        , Offset(       FVector2D(0,0) )
     {}
 
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyPivot" )

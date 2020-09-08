@@ -11,24 +11,27 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokePoint
 {
 public:
     // Construction / Destruction
-    FOdysseyStrokePoint( float      iX                              = 0
-                       , float      iY                              = 0
-                       , float      iZ                              = 0
-                       , float      iPressure                       = 1.f
-                       , float      iAltitude                       = 0
-                       , float      iAzimuth                        = 0
-                       , float      iTwist                          = 0
-                       , float      iPitch                          = 0
-                       , float      iRoll                           = 0
-                       , float      iYaw                            = 0
-                       , float      iDistanceTravelled              = 0
-                       , FVector2D  iDirectionVectorTangent         = FVector2D()
-                       , FVector2D  iDirectionVectorNormal          = FVector2D()
-                       , float      iDirectionAngleDegreesTangent   = 0
-                       , float      iDirectionAngleDegreesNormal    = 0
-                       , FVector2D  iSpeed                          = FVector2D()
-                       , FVector2D  iAcceleration                   = FVector2D()
-                       , FVector2D  iJolt                           = FVector2D()
+    FOdysseyStrokePoint( float          iX                              = 0
+                       , float          iY                              = 0
+                       , float          iZ                              = 0
+                       , float          iPressure                       = 1.f
+                       , unsigned int   iTime                           = 0
+                       , float          iAltitude                       = 0
+                       , float          iAzimuth                        = 0
+                       , float          iTwist                          = 0
+                       , float          iPitch                          = 0
+                       , float          iRoll                           = 0
+                       , float          iYaw                            = 0
+                       , float          iDistanceTravelled              = 0
+                       , FVector2D      iDirectionVectorTangent         = FVector2D(0,0)
+                       , FVector2D      iDirectionVectorNormal          = FVector2D(0,0)
+                       , float          iDirectionAngleDegreesTangent   = 0
+                       , float          iDirectionAngleDegreesNormal    = 0
+                       , FVector2D      iSpeed                          = FVector2D(0,0)
+                       , FVector2D      iAcceleration                   = FVector2D(0,0)
+                       , FVector2D      iJolt                           = FVector2D(0,0)
+                       , FVector2D      iDeltaPosition                  = FVector2D(0,0)
+                       , unsigned int   iDeltaTime                      = 0
                        );
 
 public:
@@ -51,24 +54,27 @@ public:
 
 public: //TODO: rename to m* or even better Get/Set*() ...
     // Members
-    float       x;
-    float       y;
-    float       z;
-    float       pressure;
-    float       altitude;
-    float       azimuth;
-    float       twist;
-    float       pitch;
-    float       roll;
-    float       yaw;
-    float       distance_travelled;
-    FVector2D   direction_vector_tangent;
-    FVector2D   direction_vector_normal;
-    float       direction_angle_deg_tangent;
-    float       direction_angle_deg_normal;
-    FVector2D   speed;
-    FVector2D   acceleration;
-    FVector2D   jolt;
+    float           x;
+    float           y;
+    float           z;
+    float           pressure;
+    unsigned int    time;
+    float           altitude;
+    float           azimuth;
+    float           twist;
+    float           pitch;
+    float           roll;
+    float           yaw;
+    float           distance_travelled;
+    FVector2D       direction_vector_tangent;
+    FVector2D       direction_vector_normal;
+    float           direction_angle_deg_tangent;
+    float           direction_angle_deg_normal;
+    FVector2D       speed;
+    FVector2D       acceleration;
+    FVector2D       jolt;
+    FVector2D       deltaPosition;
+    unsigned int    deltaTime;
 };
 
 //---

@@ -12,6 +12,7 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
                                         , float         iY
                                         , float         iZ
                                         , float         iPressure
+                                        , unsigned int  iTime
                                         , float         iAltitude
                                         , float         iAzimuth
                                         , float         iTwist
@@ -26,11 +27,14 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
                                         , FVector2D     iSpeed
                                         , FVector2D     iAcceleration
                                         , FVector2D     iJolt
+                                        , FVector2D     iDeltaPosition
+                                        , unsigned int  iDeltaTime
                                         )
     : x                             ( iX )
     , y                             ( iY )
     , z                             ( iZ )
     , pressure                      ( iPressure )
+    , time                          ( iTime )
     , altitude                      ( iAltitude )
     , azimuth                       ( iAzimuth )
     , twist                         ( iTwist )
@@ -45,6 +49,8 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
     , speed                         ( iSpeed )
     , acceleration                  ( iAcceleration )
     , jolt                          ( iJolt )
+    , deltaPosition                 ( iDeltaPosition )
+    , deltaTime                     ( iDeltaTime )
 {}
 
 //--------------------------------------------------------------------------------------
@@ -72,6 +78,7 @@ FOdysseyStrokePoint::operator==( const FOdysseyStrokePoint& iRhs ) const
            && y                           == iRhs.y
            && z                           == iRhs.z
            && pressure                    == iRhs.pressure
+           && time                        == iRhs.time
            && altitude                    == iRhs.altitude
            && azimuth                     == iRhs.azimuth
            && twist                       == iRhs.twist
@@ -85,7 +92,9 @@ FOdysseyStrokePoint::operator==( const FOdysseyStrokePoint& iRhs ) const
            && direction_angle_deg_normal  == iRhs.direction_angle_deg_normal
            && speed                       == iRhs.speed
            && acceleration                == iRhs.acceleration
-           && jolt                        == iRhs.jolt;
+           && jolt                        == iRhs.jolt
+           && deltaPosition               == iRhs.deltaPosition
+           && deltaTime                   == iRhs.deltaTime;
 }
 
 FOdysseyStrokePoint&
@@ -95,6 +104,7 @@ FOdysseyStrokePoint::operator=( const FOdysseyStrokePoint& iRhs )
     y                           = iRhs.y;
     z                           = iRhs.z;
     pressure                    = iRhs.pressure;
+    time                        = iRhs.time;
     altitude                    = iRhs.altitude;
     azimuth                     = iRhs.azimuth;
     twist                       = iRhs.twist;
@@ -109,6 +119,8 @@ FOdysseyStrokePoint::operator=( const FOdysseyStrokePoint& iRhs )
     speed                       = iRhs.speed;
     acceleration                = iRhs.acceleration;
     jolt                        = iRhs.jolt;
+    deltaPosition               = iRhs.deltaPosition;
+    deltaTime                   = iRhs.deltaTime;
 
     return *this;
 }
@@ -120,6 +132,7 @@ FOdysseyStrokePoint::operator+=( const FOdysseyStrokePoint& iRhs )
     y                           += iRhs.y;
     z                           += iRhs.z;
     pressure                    += iRhs.pressure;
+    time                        += iRhs.time;
     altitude                    += iRhs.altitude;
     azimuth                     += iRhs.azimuth;
     twist                       += iRhs.twist;
@@ -134,6 +147,8 @@ FOdysseyStrokePoint::operator+=( const FOdysseyStrokePoint& iRhs )
     speed                       += iRhs.speed;
     acceleration                += iRhs.acceleration;
     jolt                        += iRhs.jolt;
+    deltaPosition               += iRhs.deltaPosition;
+    deltaTime                   += iRhs.deltaTime;
 
     return *this;
 }
@@ -145,6 +160,7 @@ FOdysseyStrokePoint::operator-=( const FOdysseyStrokePoint& iRhs )
     y                           -= iRhs.y;
     z                           -= iRhs.z;
     pressure                    -= iRhs.pressure;
+    time                        -= iRhs.time;
     altitude                    -= iRhs.altitude;
     azimuth                     -= iRhs.azimuth;
     twist                       -= iRhs.twist;
@@ -159,6 +175,8 @@ FOdysseyStrokePoint::operator-=( const FOdysseyStrokePoint& iRhs )
     speed                       -= iRhs.speed;
     acceleration                -= iRhs.acceleration;
     jolt                        -= iRhs.jolt;
+    deltaPosition               -= iRhs.deltaPosition;
+    deltaTime                   -= iRhs.deltaTime;
 
     return *this;
 }
@@ -188,6 +206,7 @@ FOdysseyStrokePoint::operator*=( float iRhs )
     y                           *= iRhs;
     z                           *= iRhs;
     pressure                    *= iRhs;
+    time                        *= iRhs;
     altitude                    *= iRhs;
     azimuth                     *= iRhs;
     twist                       *= iRhs;
@@ -202,6 +221,8 @@ FOdysseyStrokePoint::operator*=( float iRhs )
     speed                       *= iRhs;
     acceleration                *= iRhs;
     jolt                        *= iRhs;
+    deltaPosition               *= iRhs;
+    deltaTime                   *= iRhs;
 
     return *this;
 }
@@ -213,6 +234,7 @@ FOdysseyStrokePoint::operator/=( float iRhs )
     y                           /= iRhs;
     z                           /= iRhs;
     pressure                    /= iRhs;
+    time                        /= iRhs;
     altitude                    /= iRhs;
     azimuth                     /= iRhs;
     twist                       /= iRhs;
@@ -227,6 +249,8 @@ FOdysseyStrokePoint::operator/=( float iRhs )
     speed                       /= iRhs;
     acceleration                /= iRhs;
     jolt                        /= iRhs;
+    deltaPosition               /= iRhs;
+    deltaTime                   /= iRhs;
 
     return *this;
 }

@@ -58,7 +58,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mDelayQueue()
 
     , mBrushCursorPreviewSurface( nullptr )
-    , mBrushCursorPreviewShift( FVector2D() )
+    , mBrushCursorPreviewShift( FVector2D(0,0) )
     , mLastBrushCursorComputationTime( 0 )
     , mBrushCursorInvalid( true )
 {
@@ -479,9 +479,14 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
 
         FOdysseyStrokePoint& previous_point = mResultStroke[i - 1];
         FOdysseyStrokePoint& current_point = mResultStroke[i];
-        current_point.speed = FVector2D( current_point.x - previous_point.x, current_point.y - previous_point.y );
+        
+        current_point.deltaPosition = FVector2D( current_point.x - previous_point.x, current_point.y - previous_point.y );
+        current_point.deltaTime = current_point.time - previous_point.time;
+
+        current_point.speed = current_point.deltaTime != 0 ? current_point.deltaPosition / current_point.deltaTime : FVector2D(0,0);
         current_point.acceleration = current_point.speed - previous_point.speed;
         current_point.jolt = current_point.acceleration - previous_point.acceleration;
+
         current_point.direction_angle_deg_tangent = atan2( current_point.y - previous_point.y, current_point.x - previous_point.x ) * 180.f / 3.14159265359f;
         current_point.direction_angle_deg_normal = current_point.direction_angle_deg_tangent + 90;
         current_point.direction_vector_tangent = current_point.speed.GetSafeNormal();

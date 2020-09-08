@@ -41,7 +41,7 @@ SOdysseyCursorWidget::OnPaint( const FPaintArgs& Args
 {
     FSlateDrawElement::MakeBox( OutDrawElements,
                                 LayerId,
-                                AllottedGeometry.ToPaintGeometry( FVector2D(), FVector2D( DesiredWidth, DesiredHeight ) ),
+                                AllottedGeometry.ToPaintGeometry( FVector2D(0,0), FVector2D( DesiredWidth, DesiredHeight ) ),
                                 Icon,
                                 ESlateDrawEffect::None,
                                 FLinearColor( 1, 1, 1, 1 ) );

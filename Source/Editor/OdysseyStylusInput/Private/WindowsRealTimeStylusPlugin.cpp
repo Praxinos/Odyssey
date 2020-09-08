@@ -81,6 +81,10 @@ static void SetupPacketDescriptions(IRealTimeStylus* RealTimeStylus, FTabletCont
 			{
 				PacketType = EWindowsPacketType::Status;
 			}
+			else if (CurrentProperty.guid == GUID_PACKETPROPERTY_GUID_TIMER_TICK)
+			{
+				PacketType = EWindowsPacketType::Timer;
+			}
 			else if (CurrentProperty.guid == GUID_PACKETPROPERTY_GUID_NORMAL_PRESSURE)
 			{
 				PacketType = EWindowsPacketType::NormalPressure;
@@ -168,6 +172,16 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 	{
 		TabletContext.SupportedPackets.Add(EWindowsPacketType::Z);
 		TabletContext.AddSupportedInput(EStylusInputType::Z);
+	}
+
+	SysFreeString(GuidBSTR);
+	GuidBSTR = SysAllocString(STR_GUID_TIMERTICK);
+	
+	InkTablet->IsPacketPropertySupported(GuidBSTR, &Supported);
+	if (Supported)
+	{
+		TabletContext.SupportedPackets.Add(EWindowsPacketType::Timer);
+		TabletContext.AddSupportedInput(EStylusInputType::Timer);
 	}
 
 	SysFreeString(GuidBSTR);
@@ -472,6 +486,9 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
                 windows_state.Position.Y = y + ptClientUL.y;
                 break;
             }
+			case EWindowsPacketType::Timer:
+                windows_state.Timer = Packets[i];
+				break;
 			case EWindowsPacketType::Status:
 				break;
 			case EWindowsPacketType::Z:

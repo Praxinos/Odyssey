@@ -13,6 +13,7 @@ enum class ODYSSEYSTYLUSINPUT_API EStylusInputType
 {
 	Position,
 	Z,
+    Timer,
 	Pressure,
 	Tilt,
 	Azimuth,
@@ -30,22 +31,22 @@ class ODYSSEYSTYLUSINPUT_API FStylusState
 {
 public:
 
-	FStylusState() : Position(0, 0), Z(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0), Pressure(0), 
+	FStylusState() : Position(0, 0), Z(0), Timer(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0), Pressure(0), 
 		TangentPressure(0), Size(0, 0), IsDown(false), IsInverted(false)
 	{
 	}
 
-	FStylusState(FVector2D InPosition, float InZ, FVector2D InTilt, float InAzimuth, float InAltitude, float InTwist,
+	FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, FVector2D InTilt, float InAzimuth, float InAltitude, float InTwist,
 		float InPressure, float InTanPressure, FVector2D InSize, 
 		bool InDown, bool InInverted) : 
-		Position(InPosition), Z(InZ), Tilt(InTilt), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist),
+		Position(InPosition), Z(InZ), Timer(InTimer), Tilt(InTilt), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist),
 		Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize),
 		IsDown(InDown), IsInverted(InInverted)
 	{
 	}
 
 	FStylusState(const FStylusState& Other) :
-		Position(Other.Position), Z(Other.Z), Tilt(Other.Tilt), Azimuth(Other.Azimuth), Altitude(Other.Altitude), Twist(Other.Twist),
+		Position(Other.Position), Z(Other.Z), Timer(Other.Timer), Tilt(Other.Tilt), Azimuth(Other.Azimuth), Altitude(Other.Altitude), Twist(Other.Twist),
 		Pressure(Other.Pressure), TangentPressure(Other.TangentPressure), Size(Other.Size),
 		IsDown(Other.IsDown), IsInverted(Other.IsInverted)
 	{
@@ -64,6 +65,12 @@ public:
 	 * Defaults to 0 if EStylusInputType::Z is not supported.
 	 */
 	float GetZ() const { return Z; }
+
+	/**
+	 * Elapsed time in ms from the start of the tablet context
+     * Defaults to 0 if not supported
+	 */
+	unsigned int GetTimer() const { return Timer; }
 
 	/** 
 	 * The current tilt along the X axis in degrees, normalized to the range of [-90, 90]. 
@@ -130,6 +137,7 @@ private:
 
 	FVector2D Position;
 	float Z;
+    unsigned int Timer;
 	FVector2D Tilt;
 	float Azimuth;
 	float Altitude;

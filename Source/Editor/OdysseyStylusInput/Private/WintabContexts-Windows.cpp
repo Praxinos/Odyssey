@@ -39,6 +39,7 @@ FWTTabletContextInfo::Tick()
     int count = FWintabLibrary::WTPacketsGet( mTabletContext, mPacketsBuffer.Num(), mPacketsBuffer.GetData() );
 
     const FWTPacketDescription* packet_description_z = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Z );
+    const FWTPacketDescription* packet_description_timer = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Timer );
     const FWTPacketDescription* packet_description_npressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::NormalPressure );
     const FWTPacketDescription* packet_description_tpressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::TangentPressure );
     const FWTPacketDescription* packet_description_twist = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Twist );
@@ -52,6 +53,8 @@ FWTTabletContextInfo::Tick()
         FWintabStylusState state;
         state.Position = FVector2D( packet.pkX / 1000.f, packet.pkY / 1000.f );
         state.Z = packet_description_z ? packet.pkZ : 0.0;
+
+        state.Timer = packet.pkTime;
 
         state.NormalPressure = packet_description_npressure ? Normalize( packet.pkNormalPressure, *packet_description_npressure ) : 0.0;
         state.TangentPressure = packet_description_tpressure ? Normalize( packet.pkTangentPressure, *packet_description_tpressure ) : 0.0;
@@ -321,6 +324,12 @@ SetupTabletSupportedPackets( FWTTabletContextInfo* ioTabletContext )
     {
         ioTabletContext->SupportedPackets.Add( EWintabPacketType::Z );
         ioTabletContext->AddSupportedInput( EStylusInputType::Z );
+    }
+
+    if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Timer ) )
+    {
+        ioTabletContext->SupportedPackets.Add( EWintabPacketType::Timer );
+        ioTabletContext->AddSupportedInput( EStylusInputType::Timer );
     }
 
     if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::NormalPressure ) )
