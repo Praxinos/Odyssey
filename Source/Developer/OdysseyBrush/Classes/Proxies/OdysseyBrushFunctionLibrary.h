@@ -31,14 +31,13 @@ public:
     UFUNCTION( BlueprintCallable
              , Category="OdysseyBrushFunctionLibrary"
              , meta = ( DefaultToSelf="BrushContext" ) )
-    static  void  SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f );
+    static  void  SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false );
 
     /** Deprecated Stamp */
     UFUNCTION( BlueprintCallable
             , Category="OdysseyBrushFunctionLibrary"
             , meta = ( DefaultToSelf="BrushContext" ) )
-    static  void  Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
-
+    static  void  Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
     UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
     static  void  GenerateOrbitDelta( float AngleRad, float  Radius, float& DeltaX, float& DeltaY );

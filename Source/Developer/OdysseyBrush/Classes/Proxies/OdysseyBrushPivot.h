@@ -62,5 +62,14 @@ struct ODYSSEYBRUSH_API FOdysseyPivot
 
 /////////////////////////////////////////////////////
 // Utilities
-::ul3::FRect ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
+struct FRectF    //PATCH: until ::ulis3::FRectF
+{
+    float x;
+    float y;
+    float w;
+    float h;
+};
+
+FRectF ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
+//::ul3::FRect ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
 

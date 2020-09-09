@@ -17,7 +17,8 @@
 //--------------------------------------------- Odyssey Brush Blueprint Callable Methods
 //static
 void
-UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext ) {
+UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
+{
     if( !BrushContext )
         return;
 
@@ -65,12 +66,14 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
 
 //static
 void
-UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow ) {
+UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing )
+{
     if( !BrushContext ) return;
     if( !Sample.m )     return;
 
     FOdysseyBlock* block = Sample.m;
-    ::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
+    FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
+    //::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
@@ -83,23 +86,26 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext,
                 , BrushContext->GetState().target_temp_buffer->GetBlock()
                 , block->GetBlock()->Rect()
                 , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
-                , ULIS3_NOAA
+                , iAntiAliasing
                 , ::ul3::BM_NORMAL
                 , ::ul3::AM_NORMAL
                 , FMath::Clamp( Flow, 0.f, 1.f ) );
 
-    BrushContext->PushInvalidRect( invalidRect );
+    ::ul3::FRect invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
+    BrushContext->PushInvalidRect( invalidRectI );
 }
 
 
 //static
 void
-UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode ) {
+UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode )
+{
     if( !BrushContext ) return;
     if( !Sample.m )     return;
 
     FOdysseyBlock* block = Sample.m;
-    ::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
+    FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
+    //::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
@@ -112,11 +118,13 @@ UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdys
                 , BrushContext->GetState().target_temp_buffer->GetBlock()
                 , block->GetBlock()->Rect()
                 , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
-                , ULIS3_NOAA
+                , iAntiAliasing
                 , static_cast< ::ul3::eBlendingMode >( BlendingMode )
                 , static_cast< ::ul3::eAlphaMode >( AlphaMode )
                 , FMath::Clamp( Flow, 0.f, 1.f ) );
-    BrushContext->PushInvalidRect( invalidRect );
+
+    ::ul3::FRect invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
+    BrushContext->PushInvalidRect( invalidRectI );
 }
 
 

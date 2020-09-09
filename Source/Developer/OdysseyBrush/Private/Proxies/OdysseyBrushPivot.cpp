@@ -2,20 +2,22 @@
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 
 #include "Proxies/OdysseyBrushPivot.h"
+#include "OdysseyBlock.h"
 #include "OdysseySurface.h"
 
 /////////////////////////////////////////////////////
 // Utilities
-::ul3::FRect
+FRectF
+//::ul3::FRect
 ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
 {
-    ::ul3::FRect result;
     int width = iBlock->Width();
     int height = iBlock->Height();
-    int width2 = width / 2;
-    int height2 = height / 2;
+    float width2 = width / 2.f;
+    float height2 = height / 2.f;
 
-    FVector2D computedOffset = iPivot.OffsetMode == EPivotOffsetMode::kAbsolute ? iPivot.Offset : iPivot.Offset * FVector2D( width, height );
+    FRectF result;
+    //::ul3::FRect result;
     result.x = iX;
     result.y = iY;
     result.w = width;
@@ -33,8 +35,10 @@ ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float 
         case EPivotReference::kBotRight     : { result.x = iX - width;  result.y = iY - height;     break; }
     }
 
+    FVector2D computedOffset = iPivot.OffsetMode == EPivotOffsetMode::kAbsolute ? iPivot.Offset : iPivot.Offset * FVector2D( width, height );
     result.x += computedOffset.X;
     result.y += computedOffset.Y;
+
     return  result;
 }
 
