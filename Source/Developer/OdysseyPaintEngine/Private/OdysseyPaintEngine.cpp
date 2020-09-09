@@ -489,9 +489,9 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst 
 
         current_point.direction_angle_deg_tangent = atan2( current_point.y - previous_point.y, current_point.x - previous_point.x ) * 180.f / 3.14159265359f;
         current_point.direction_angle_deg_normal = current_point.direction_angle_deg_tangent + 90;
-        current_point.direction_vector_tangent = current_point.speed.GetSafeNormal();
+        current_point.direction_vector_tangent = current_point.deltaPosition.GetSafeNormal();
         current_point.direction_vector_normal = FVector2D( -current_point.direction_vector_tangent.Y, current_point.direction_vector_tangent.X );
-        current_point.distance_travelled = previous_point.distance_travelled + current_point.speed.Size();
+        current_point.distance_travelled = previous_point.distance_travelled + current_point.deltaPosition.Size();
     }
 
     for( int i = currentIndexBasis; i < mResultStroke.Num(); i++ )
