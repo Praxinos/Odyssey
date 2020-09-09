@@ -368,7 +368,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
     //If we don't have a surface, then we don't interact with anything
     if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
     {
-        return true;
+        return false;
     }
 
     if( mCurrentToolState == eState::kIdle )

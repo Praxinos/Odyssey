@@ -208,6 +208,30 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
     ];
 }
 
+TSharedPtr<SWidget>
+SOdysseyFlipbookTimelineView::OnArrowNavigation(EUINavigation iNavigation)
+{
+    switch(iNavigation)
+    {
+        case EUINavigation::Left:
+            ScrubToPreviousFrame();
+        break;
+
+        case EUINavigation::Right:
+            ScrubToNextFrame();
+        break;
+
+        case EUINavigation::Next:
+            ScrubToNextKeyFrame();
+        break;
+
+        case EUINavigation::Previous:
+            ScrubToPreviousKeyFrame();
+        break;
+    }
+    return NULL;
+}
+
 //In Frames
 float
 SOdysseyFlipbookTimelineView::GetScrubPosition() const

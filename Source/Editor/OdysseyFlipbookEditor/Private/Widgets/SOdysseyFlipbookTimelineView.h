@@ -69,6 +69,8 @@ public:
 
     float FrameSize() const;
 
+    TSharedPtr<SWidget> OnArrowNavigation(EUINavigation iNavigation);
+
 private:
     // Event callbacks
 

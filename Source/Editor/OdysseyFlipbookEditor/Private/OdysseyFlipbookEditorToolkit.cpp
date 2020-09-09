@@ -7,6 +7,8 @@
 #include "OdysseyFlipbookEditorData.h"
 #include "OdysseyFlipbookEditorGUI.h"
 
+#include "Types/NavigationMetaData.h"
+
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
 /////////////////////////////////////////////////////
@@ -52,6 +54,45 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
 	}
 
 	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iMode, iInitToolkitHost, iAppIdentifier, objectsToEdit);
+
+	TSharedPtr<SDockTab> OwnerTab = GetTabManager()->GetOwnerTab();
+	TSharedPtr<SWindow> parentWindow = NULL;
+	if (OwnerTab.IsValid())
+	{
+		parentWindow = FSlateApplication::Get().FindWidgetWindow(OwnerTab.ToSharedRef());
+	}
+	else
+	{
+		parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
+	}
+
+	SetTimelineNavigationShortcuts(parentWindow);
+
+	//The following does not work but keeping it for record
+	/* SetTimelineNavigationShortcuts(mGUI->GetLayerStackTab());
+	SetTimelineNavigationShortcuts(mGUI->GetTimelineTab());
+    SetTimelineNavigationShortcuts(mGUI->GetViewportTab());
+    SetTimelineNavigationShortcuts(mGUI->GetBrushSelectorTab());
+    SetTimelineNavigationShortcuts(mGUI->GetMeshSelectorTab());
+    SetTimelineNavigationShortcuts(mGUI->GetBrushExposedParametersTab());
+    SetTimelineNavigationShortcuts(mGUI->GetColorSelectorTab());
+    SetTimelineNavigationShortcuts(mGUI->GetColorSlidersTab());
+    SetTimelineNavigationShortcuts(mGUI->GetStrokeOptionsTab());
+    SetTimelineNavigationShortcuts(mGUI->GetPerformanceOptionsTab());
+    //SetTimelineNavigationShortcuts(mGUI->GetUndoHistoryTab());
+    SetTimelineNavigationShortcuts(mGUI->GetTopTab());
+    SetTimelineNavigationShortcuts(mGUI->GetToolsTab()); */
+}
+
+void
+FOdysseyFlipbookEditorToolkit::SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget)
+{
+	TSharedPtr<FNavigationMetaData> navigationMetaData = MakeShareable(new FNavigationMetaData());
+	navigationMetaData->SetNavigationCustom(EUINavigation::Left, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
+	navigationMetaData->SetNavigationCustom(EUINavigation::Right, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
+	navigationMetaData->SetNavigationCustom(EUINavigation::Next, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
+	navigationMetaData->SetNavigationCustom(EUINavigation::Previous, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
+	iWidget->AddMetadata(navigationMetaData.ToSharedRef());
 }
 
 void

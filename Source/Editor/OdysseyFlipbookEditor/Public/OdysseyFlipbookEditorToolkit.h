@@ -60,6 +60,9 @@ protected:
 	void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 
 private:
+    void SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget);
+
+private:
 	TSharedPtr<FOdysseyFlipbookEditorData> mData;
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 	TSharedPtr<FOdysseyFlipbookEditorController> mController;

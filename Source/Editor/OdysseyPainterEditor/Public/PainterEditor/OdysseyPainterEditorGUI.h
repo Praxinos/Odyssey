@@ -98,7 +98,6 @@ public:
     TSharedPtr<SOdysseyBrushExposedParameters>& GetBrushExposedParametersTab();
     TSharedPtr<SOdysseyColorSelector>& GetColorSelectorTab();
     TSharedPtr<SOdysseyColorSliders>& GetColorSlidersTab();
-    TSharedPtr<SOdysseyLayerStackView>& GetLayerStackTab();
     TSharedPtr<SOdysseyStrokeOptions>& GetStrokeOptionsTab();
     TSharedPtr<SOdysseyPerformanceOptions>& GetPerformanceOptionsTab();
     //TSharedPtr<SOdysseyUndoHistory>& GetUndoHistoryTab();
