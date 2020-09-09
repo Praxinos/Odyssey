@@ -90,9 +90,17 @@ FEditTextureExtension::Execute()
 void
 FEditTextureExtension::EditTextures( TArray<UTexture2D*>& iTextures )
 {
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
     {
         UTexture2D* texture = *textureIt;
+
+		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
+		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+		if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+		{
+			continue;
+		}
         IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>( "OdysseyTextureEditor" );
         odysseyTextureEditorModule->CreateOdysseyTextureEditor( EToolkitMode::Standalone, NULL, texture );
     }

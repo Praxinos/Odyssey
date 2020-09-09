@@ -90,9 +90,17 @@ FEditFlipbookExtension::Execute()
 void
 FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
 {
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     for( auto FlipbookIt = iFlipbooks.CreateConstIterator(); FlipbookIt; ++FlipbookIt )
     {
-        UPaperFlipbook* Flipbook = *FlipbookIt;
+		UPaperFlipbook* Flipbook = *FlipbookIt;
+
+		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
+		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+		if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
+		{
+			continue;
+		}
         IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );
         odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( EToolkitMode::Standalone, NULL, Flipbook );
     }
