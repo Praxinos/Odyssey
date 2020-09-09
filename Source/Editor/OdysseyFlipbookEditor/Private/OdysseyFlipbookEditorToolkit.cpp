@@ -9,6 +9,8 @@
 
 #include "Types/NavigationMetaData.h"
 
+#include "IOdysseyFlipbookEditorModule.h"
+
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
 /////////////////////////////////////////////////////
@@ -177,21 +179,40 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 
 void
 FOdysseyFlipbookEditorToolkit::SaveAssetAs_Execute()
-{
-    /*
-    CopyBlockDataIntoUFlipbook( mDisplaySurface->Block(), mFlipbook );
-    //::ul3::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetBlock(), mFlipbookContentsBackup->GetBlock() );
-    InvalidateFlipbookFromData( mDisplaySurface->Block(), mFlipbook );
-    // Invalidate all
-    mDisplaySurface->Invalidate();
+{	
+	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
+	{
+		UTexture2D* texture = mData->FlipbookWrapper()->GetKeyframeTexture(i);
+		if (!texture)
+			continue;
+
+		RemoveEditingObject(texture);
+	}
+
+	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	FDelegateHandle openAssetHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddRaw(this, &FOdysseyFlipbookEditorToolkit::OpenAsset);
 
     FAssetEditorToolkit::SaveAssetAs_Execute();
 
-    CopyBlockDataIntoUFlipbook( mFlipbookContentsBackup, mFlipbook );
+	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
 
-    InvalidateFlipbookFromData( mFlipbookContentsBackup, mFlipbook );
-    InvalidateSurfaceFromData( mFlipbookContentsBackup, mDisplaySurface );
-    */
+	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
+	{
+		UTexture2D* texture = mData->FlipbookWrapper()->GetKeyframeTexture(i);
+		if (!texture)
+			continue;
+
+		AddEditingObject(texture);
+	}
+}
+
+void
+FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
+{
+	UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(iObject);
+	IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
+	odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor(EToolkitMode::Standalone, NULL, flipbook);
 }
 
 bool

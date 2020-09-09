@@ -24,11 +24,14 @@ public:
     virtual ~FOdysseyFlipbookEditorToolkit();
     FOdysseyFlipbookEditorToolkit();
 	void Init(const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UPaperFlipbook* iFlipbook);
+
 protected:
     //FAssetEditorToolkit override
     virtual void SaveAsset_Execute() override;
     virtual void SaveAssetAs_Execute() override;
     virtual bool OnRequestClose() override;
+
+	void OpenAsset(UObject* iObject);
 
 public:
     // IToolkit interface

@@ -7,6 +7,8 @@
 #include "OdysseyTextureEditorData.h"
 #include "OdysseyTextureEditorGUI.h"
 
+#include "IOdysseyTextureEditorModule.h"
+
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
 /////////////////////////////////////////////////////
@@ -52,20 +54,23 @@ FOdysseyTextureEditorToolkit::SaveAsset_Execute()
 void
 FOdysseyTextureEditorToolkit::SaveAssetAs_Execute()
 {
-    /*
-    CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    //::ul3::FMakeContext::CopyBlockInto( mDisplaySurface->Block()->GetBlock(), mTextureContentsBackup->GetBlock() );
-    InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
-    // Invalidate all
-    mDisplaySurface->Invalidate();
+	mData->SyncTextureAndInvalidate();
 
-    FAssetEditorToolkit::SaveAssetAs_Execute();
+	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	FDelegateHandle openAssetHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddRaw(this, &FOdysseyTextureEditorToolkit::OpenAsset);
 
-    CopyBlockDataIntoUTexture( mTextureContentsBackup, mTexture );
+	FAssetEditorToolkit::SaveAssetAs_Execute();
 
-    InvalidateTextureFromData( mTextureContentsBackup, mTexture );
-    InvalidateSurfaceFromData( mTextureContentsBackup, mDisplaySurface );
-    */
+	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
+}
+
+void
+FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
+{
+	UTexture2D* texture = Cast<UTexture2D>(iObject);
+	IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>("OdysseyTextureEditor");
+	odysseyTextureEditorModule->CreateOdysseyTextureEditor(EToolkitMode::Standalone, NULL, texture);
 }
 
 bool

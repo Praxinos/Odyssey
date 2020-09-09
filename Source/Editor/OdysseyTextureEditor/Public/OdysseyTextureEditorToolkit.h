@@ -30,6 +30,8 @@ protected:
     virtual void SaveAssetAs_Execute() override;
     virtual bool OnRequestClose() override;
 
+	void OpenAsset(UObject* iObject);
+
 public:
     // IToolkit interface
     virtual FText GetBaseToolkitName() const override;
