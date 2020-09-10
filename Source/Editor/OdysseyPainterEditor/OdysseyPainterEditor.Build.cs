@@ -43,7 +43,8 @@ public class OdysseyPainterEditor : ModuleRules
                 // "OdysseyLayer",
                 "OdysseyTransaction",
                 "OdysseyStylusInput",
-                // "OdysseyTexture"
+                // "OdysseyTexture",
+                "OdysseyDrawingState",
             }
         );
 

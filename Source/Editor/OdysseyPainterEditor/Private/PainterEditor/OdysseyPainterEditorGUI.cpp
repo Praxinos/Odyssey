@@ -14,7 +14,10 @@
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
+#include "SOdysseySurfaceViewport.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
+#include "Models/OdysseyPainterEditorViewportClient.h"
+#include "OdysseyPainterEditorController.h"
 
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SExpandableArea.h"
@@ -351,6 +354,8 @@ FOdysseyPainterEditorGUI::CreateViewportTab(TSharedPtr<FOdysseyPainterEditorData
 	FOdysseyPainterEditorViewportClient* viewportClient = new FOdysseyPainterEditorViewportClient(iData, mViewportTab, mMeshSelectorTab->GetMeshSelectorPtr());
 	viewportClient->OnPickColor().AddRaw(iController.Get(), &FOdysseyPainterEditorController::HandleViewportColorPicked);
 	mViewportTab->SetViewportClient(MakeShareable(viewportClient));
+
+    mViewportTab->OnParameterChanged().AddRaw( iController.Get(), &FOdysseyPainterEditorController::HandleViewportParameterChanged );
 }
 
 void

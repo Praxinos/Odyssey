@@ -94,6 +94,9 @@ public:
     // Performance Handlers
     virtual void HandlePerformanceDrawBrushPreviewChanged( bool iValue );
 
+    // Viewport (zoom/rotation/pan) Handlers
+    virtual void HandleViewportParameterChanged();
+
 protected:
     // Commands building
     virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);

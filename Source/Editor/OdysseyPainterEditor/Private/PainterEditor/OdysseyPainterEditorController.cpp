@@ -8,6 +8,8 @@
 #include "IContentBrowserSingleton.h"
 
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "PainterEditor/OdysseyPainterEditorData.h"
+#include "PainterEditor/OdysseyPainterEditorGUI.h"
 #include "SOdysseyAboutScreen.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
@@ -23,6 +25,7 @@
 #include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
+#include "PainterEditor/OdysseyPainterEditorState.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolkit"
 
@@ -200,6 +203,7 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
         //mBrush->OnChanged().AddSP( this, &FOdysseyPainterEditorController::OnBrushChanged );
 
 		GetData()->Brush()->OnCompiled().AddSP( this, &FOdysseyPainterEditorController::OnBrushCompiled );
+
 		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetData()->Brush()->GeneratedClass);
 		brushInstance->AddToRoot();
 		GetData()->BrushInstance(brushInstance);
@@ -222,6 +226,11 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
         if( overrides.bOverride_Flow )          GetGUI()->GetTopTab()->SetFlow( overrides.Flow );
         if( overrides.bOverride_BlendingMode )  GetGUI()->GetTopTab()->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
         if( overrides.bOverride_AlphaMode )     GetGUI()->GetTopTab()->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
+
+        //---
+
+        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
+        GetData()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
 
@@ -254,6 +263,11 @@ FOdysseyPainterEditorController::OnBrushCompiled( UBlueprint* iBrush )
 
 		GetData()->PaintEngine()->SetBrushInstance(GetData()->BrushInstance());
         GetGUI()->GetBrushExposedParametersTab()->Refresh(GetData()->BrushInstance());
+
+        //---
+
+        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
+        GetData()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
 
@@ -268,6 +282,18 @@ FOdysseyPainterEditorController::OnMeshSelected( UStaticMesh* iMesh )
 void
 FOdysseyPainterEditorController::OnMeshChanged( UBlueprint* iMesh )
 {
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- Viewport Handlers
+void
+FOdysseyPainterEditorController::HandleViewportParameterChanged()
+{
+    if( GetData()->BrushInstance() )
+    {
+        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
+        GetData()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
+    }
 }
 
 //--------------------------------------------------------------------------------------

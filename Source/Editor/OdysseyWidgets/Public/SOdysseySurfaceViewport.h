@@ -21,6 +21,9 @@ class UTexture2D;
 class ODYSSEYWIDGETS_API SOdysseySurfaceViewport : public SCompoundWidget
 {
 public:
+    DECLARE_MULTICAST_DELEGATE( FOnParameterChanged );
+
+public:
 
     SLATE_BEGIN_ARGS(SOdysseySurfaceViewport)
         {}
@@ -33,14 +36,16 @@ public:
 public:
     // Public API
     void                        SetSurface( IOdysseySurface* iValue );
-    TSharedPtr<FOdysseySceneViewport>  GetViewport()              const;
-    TSharedPtr<SViewport>       GetViewportWidget()        const;
-    TSharedPtr<SScrollBar>      GetVerticalScrollBar()     const;
-    TSharedPtr<SScrollBar>      GetHorizontalScrollBar()   const;
-    IOdysseySurface*            GetSurface() const;
+    void                        SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
+
+    TSharedPtr<FOdysseySceneViewport>   GetViewport()              const;
+    TSharedPtr<SViewport>               GetViewportWidget()        const;
+    TSharedPtr<SScrollBar>              GetVerticalScrollBar()     const;
+    TSharedPtr<SScrollBar>              GetHorizontalScrollBar()   const;
+    IOdysseySurface*                    GetSurface() const;
+
     float                       GetViewportVerticalScrollBarRatio() const;
     float                       GetViewportHorizontalScrollBarRatio() const;
-    void                        SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
 
 public:
     // SWidget overrides
@@ -87,6 +92,8 @@ public:
     void            RotateLeft();
     void            RotateRight();
     void            CalculateTextureDisplayDimensions(uint32& Width, uint32& Height) const;
+    
+    FOnParameterChanged& OnParameterChanged() { return mOnParameterChanged; }
 
 private:
     // Private Member Data
@@ -102,4 +109,6 @@ private:
     bool                        IsFitToViewport;
     uint32                      PreviewEffectiveTextureWidth;
     uint32                      PreviewEffectiveTextureHeight;
+
+    FOnParameterChanged         mOnParameterChanged;
 };

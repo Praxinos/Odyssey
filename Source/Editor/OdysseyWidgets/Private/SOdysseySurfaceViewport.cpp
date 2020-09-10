@@ -505,6 +505,8 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
 {
     Zoom = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
     SetFitToViewport( false );
+
+    mOnParameterChanged.Broadcast();
 }
 
 
@@ -552,6 +554,8 @@ double SOdysseySurfaceViewport::GetRotationInDegrees() const
 void SOdysseySurfaceViewport::SetRotationInDegrees(double RotationValue)
 {
     Rotation = RotationValue;
+
+    mOnParameterChanged.Broadcast();
 }
 
 FVector2D SOdysseySurfaceViewport::GetPan() const
@@ -562,22 +566,30 @@ FVector2D SOdysseySurfaceViewport::GetPan() const
 void SOdysseySurfaceViewport::SetPan( FVector2D PanValue )
 {
     Pan = PanValue;
+
+    mOnParameterChanged.Broadcast();
 }
 
 void SOdysseySurfaceViewport::AddPan( FVector2D PanValue )
 {
     Pan+=PanValue;
+
+    mOnParameterChanged.Broadcast();
 }
 
 
 void SOdysseySurfaceViewport::RotateLeft()
 {
     Rotation -= RotationStep;
+
+    mOnParameterChanged.Broadcast();
 }
 
 void SOdysseySurfaceViewport::RotateRight()
 {
     Rotation += RotationStep;
+
+    mOnParameterChanged.Broadcast();
 }
 
 void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, uint32& Height ) const

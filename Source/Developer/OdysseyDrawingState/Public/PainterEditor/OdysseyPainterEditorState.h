@@ -1,0 +1,31 @@
+// Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
+// IDDN FR.001.250001.002.S.P.2019.000.00000
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "OdysseyDrawingState.h"
+
+//---
+
+class ODYSSEYDRAWINGSTATE_API FOdysseyPainterEditorState
+    : public FOdysseyDrawingState
+{
+public:
+    static const FName& GetId();
+
+public:
+    FOdysseyPainterEditorState( float iZoom, float iRotationInDegrees, const FVector2D& iPan );
+
+public:
+    float               Zoom();
+    float               RotationInDegrees();
+    const FVector2D&    Pan();
+
+private:
+    float       mZoom;
+    float       mRotation;
+    FVector2D   mPan;
+};
+
