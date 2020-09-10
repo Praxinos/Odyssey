@@ -342,19 +342,22 @@ FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
     {
         case EOdysseySmoothingMethod::kAverage:
         {
-            // Nothing ATM
+            if (mSmoother) delete mSmoother;
+            mSmoother = new FOdysseySmoothingAverage();
             break;
         }
 
-        case EOdysseySmoothingMethod::kGravity:
+        /* case EOdysseySmoothingMethod::kGravity:
         {
-            // Nothing ATM
+            if (mSmoother) delete mSmoother;
+            mSmoother = new FOdysseySmoothingAverage();
             break;
-        }
+        } */
 
         case EOdysseySmoothingMethod::kPull:
         {
-            // Nothing ATM
+            if (mSmoother) delete mSmoother;
+            mSmoother = new FOdysseySmoothingPull();
             break;
         }
     }
