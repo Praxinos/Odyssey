@@ -11,11 +11,11 @@ class ODYSSEYSTROKEPIPELINE_API FOdysseySmoothingAverage : public IOdysseySmooth
 public:
     // Construction / Destruction
     virtual ~FOdysseySmoothingAverage();
-    FOdysseySmoothingAverage();
+    FOdysseySmoothingAverage(FOdysseySmoothingParameters* iParameters);
 
 public:
     // Public API
     virtual bool IsReady() const override;
-    virtual int MinimumRequiredPoints() const override;
     virtual FOdysseyStrokePoint ComputePoint() override;
+    virtual void AddPoint( const FOdysseyStrokePoint& iPoint ) override;
 };

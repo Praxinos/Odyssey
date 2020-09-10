@@ -15,7 +15,8 @@ FOdysseySmoothingPull::~FOdysseySmoothingPull()
 {
 }
 
-FOdysseySmoothingPull::FOdysseySmoothingPull()
+FOdysseySmoothingPull::FOdysseySmoothingPull(FOdysseySmoothingParameters* iParameters)
+    : IOdysseySmoothing(iParameters)
 {
 }
 
@@ -35,13 +36,7 @@ FOdysseySmoothingPull::IsReady() const
     float x = point.x - mPoints[0].x;
     float y = point.y - mPoints[0].y;
     float dist2 = x * x + y * y;
-    return dist2 >= mStrength * mStrength;
-}
-
-int
-FOdysseySmoothingPull::MinimumRequiredPoints() const
-{
-    return 1;
+    return dist2 >= mParameters->GetStrength() * mParameters->GetStrength();
 }
 
 FOdysseyStrokePoint
@@ -53,7 +48,7 @@ FOdysseySmoothingPull::ComputePoint()
 	if (mPoints.Num() == 1)
 		return mPoints[0];
 
-	if (mStrength <= 0)
+	if (mParameters->GetStrength() <= 0)
 	{
 		FOdysseyStrokePoint outPoint = mPoints[mPoints.Num() - 1];
 		mPoints.Empty();
@@ -63,7 +58,7 @@ FOdysseySmoothingPull::ComputePoint()
 
     FOdysseyStrokePoint distPoint = mPoints[mPoints.Num() - 1] - mPoints[0];
     float dist2 = distPoint.x * distPoint.x + distPoint.y * distPoint.y;
-    float ratio = FGenericPlatformMath::Sqrt(dist2 / (mStrength * mStrength));
+    float ratio = FGenericPlatformMath::Sqrt(dist2 / (mParameters->GetStrength() * mParameters->GetStrength()));
 
 	FOdysseyStrokePoint outPoint = mPoints[mPoints.Num() - 1];
     outPoint.x = mPoints[0].x + distPoint.x * (ratio - 1.0);

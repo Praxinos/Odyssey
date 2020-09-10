@@ -14,7 +14,8 @@ FOdysseySmoothingAverage::~FOdysseySmoothingAverage()
 {
 }
 
-FOdysseySmoothingAverage::FOdysseySmoothingAverage()
+FOdysseySmoothingAverage::FOdysseySmoothingAverage(FOdysseySmoothingParameters* iParameters)
+    : IOdysseySmoothing(iParameters)
 {
 }
 
@@ -24,13 +25,16 @@ FOdysseySmoothingAverage::FOdysseySmoothingAverage()
 bool
 FOdysseySmoothingAverage::IsReady() const
 {
-    return ( mPoints.Num() > MinimumRequiredPoints() );
+    return mPoints.Num() > mParameters->GetStrength();
 }
 
-int
-FOdysseySmoothingAverage::MinimumRequiredPoints() const
+void
+FOdysseySmoothingAverage::AddPoint( const FOdysseyStrokePoint& iPoint )
 {
-    return mStrength;
+    for (int i = mPoints.Num(); i < mParameters->GetStrength() + 1; i++)
+    {
+        IOdysseySmoothing::AddPoint(iPoint);
+    }
 }
 
 FOdysseyStrokePoint

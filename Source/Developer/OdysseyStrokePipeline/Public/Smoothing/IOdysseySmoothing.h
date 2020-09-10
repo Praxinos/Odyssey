@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyStrokePoint.h"
+#include "OdysseySmoothingParameters.h"
 
 /**
  * Implements the smoothing for a Bezier 3 Points
@@ -13,20 +14,15 @@ class ODYSSEYSTROKEPIPELINE_API IOdysseySmoothing
 {
 public:
     virtual ~IOdysseySmoothing() = 0;
-    IOdysseySmoothing();
+    IOdysseySmoothing(FOdysseySmoothingParameters* iParameters);
 
 public:
     virtual bool IsReady() const = 0;
-    virtual int MinimumRequiredPoints() const = 0;
     virtual FOdysseyStrokePoint ComputePoint() = 0;
-
-    void Reset();
-    void AddPoint( const FOdysseyStrokePoint& iPoint );
-
-    int GetStrength() const;
-    void SetStrength( int iValue );
+    virtual void AddPoint( const FOdysseyStrokePoint& iPoint );
+    virtual void Reset();
 
 protected:
     TArray< FOdysseyStrokePoint> mPoints;
-    int mStrength;
+    FOdysseySmoothingParameters* mParameters;
 };

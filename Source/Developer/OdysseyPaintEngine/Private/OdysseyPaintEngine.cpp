@@ -16,6 +16,7 @@
 FOdysseyPaintEngine::~FOdysseyPaintEngine()
 {
     delete mSmoother;
+    delete mSmoothingParameters;
     delete mInterpolator;
     DeallocInvalidTileMap( mTmpInvalidTileMap );
     DeallocInvalidTileMap( mStrokeInvalidTileMap );
@@ -47,6 +48,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mStepValue( 20.f )
 
     , mInterpolator( NULL )
+    , mSmoothingParameters( NULL )
     , mSmoother( NULL )
 
     , mIsSmoothingEnabled( true )
@@ -62,7 +64,8 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mLastBrushCursorComputationTime( 0 )
     , mBrushCursorInvalid( true )
 {
-    mSmoother = new FOdysseySmoothingAverage();
+    mSmoothingParameters = new FOdysseySmoothingParameters();
+	mSmoother = new FOdysseySmoothingAverage(mSmoothingParameters);
     mInterpolator = new FOdysseyInterpolationCatmullRom();
 }
 
@@ -343,21 +346,21 @@ FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
         case EOdysseySmoothingMethod::kAverage:
         {
             if (mSmoother) delete mSmoother;
-            mSmoother = new FOdysseySmoothingAverage();
+            mSmoother = new FOdysseySmoothingAverage(mSmoothingParameters);
             break;
         }
 
         /* case EOdysseySmoothingMethod::kGravity:
         {
             if (mSmoother) delete mSmoother;
-            mSmoother = new FOdysseySmoothingAverage();
+            mSmoother = new FOdysseySmoothingAverage(mSmoothingParameters);
             break;
         } */
 
         case EOdysseySmoothingMethod::kPull:
         {
             if (mSmoother) delete mSmoother;
-            mSmoother = new FOdysseySmoothingPull();
+            mSmoother = new FOdysseySmoothingPull(mSmoothingParameters);
             break;
         }
     }
@@ -368,7 +371,7 @@ FOdysseyPaintEngine::SetSmoothingStrength( int32 iValue )
 {
     InterruptStrokeAndStampInPlace();
 
-    mSmoother->SetStrength( iValue );
+    mSmoothingParameters->SetStrength( iValue );
 
     UpdateBrushInstance();
 }
@@ -428,26 +431,12 @@ FOdysseyPaintEngine::GetAlphaMode() const
 }
 
 void
-FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst )
+FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirst */ )
 {
     if( !mBrushInstance ||
         !mTempBuffer ||
         mIsPendingEndStroke )
         return;
-
-    bool firstPoint = ( mRawStroke.Num() == 0 ) && ( iFirst == false );
-
-    if( firstPoint )
-    {
-        int duplicate_number = mInterpolator->MinimumRequiredPoints();
-        if( mIsRealTime && mIsSmoothingEnabled )
-            duplicate_number += mSmoother->MinimumRequiredPoints();
-
-        for( int i = 0; i < duplicate_number; ++i )
-            PushStroke( iPoint, true );
-
-        return;
-    }
 
     mRawStroke.Add( iPoint );
 
@@ -536,6 +525,8 @@ void
 FOdysseyPaintEngine::EndStroke()
 {
     mIsPendingEndStroke = true;
+
+    //TODO: Apply Smoothing if realtime is on
 }
 
 void
@@ -651,7 +642,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     state.blendingMode_modifier = mBlendingModeModifier;
     state.alphaMode_modifier = mAlphaModeModifier;
     state.step = mInterpolator->GetStep();
-    state.smoothing_strength = mSmoother->GetStrength();
+    state.smoothing_strength = mSmoothingParameters->GetStrength();
     state.currentPointIndex = 0;
     state.currentStroke = &mResultStroke;
 

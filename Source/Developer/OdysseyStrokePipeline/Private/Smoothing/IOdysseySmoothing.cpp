@@ -13,9 +13,9 @@ IOdysseySmoothing::~IOdysseySmoothing()
 {
 }
 
-IOdysseySmoothing::IOdysseySmoothing()
+IOdysseySmoothing::IOdysseySmoothing(FOdysseySmoothingParameters* iParameters)
     : mPoints()
-    , mStrength( 0 )
+    , mParameters(iParameters)
 {
 }
 
@@ -31,18 +31,6 @@ void
 IOdysseySmoothing::AddPoint( const FOdysseyStrokePoint& iPoint )
 {
     mPoints.Add( iPoint );
-}
-
-int
-IOdysseySmoothing::GetStrength() const
-{
-    return mStrength;
-}
-
-void
-IOdysseySmoothing::SetStrength( int iValue )
-{
-    mStrength = iValue;
 }
 
 //---

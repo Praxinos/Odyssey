@@ -60,7 +60,7 @@ public:
     ::ul3::eAlphaMode GetAlphaMode() const;
 
 
-    void PushStroke( const FOdysseyStrokePoint& iPoint, bool iFirst = false );
+    void PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirst = false*/ );
     void EndStroke();
     void AbortStroke();
     void TriggerStateChanged();
@@ -119,6 +119,7 @@ private:
     float                               mStepValue;
 
     IOdysseyInterpolation*              mInterpolator;
+    FOdysseySmoothingParameters*        mSmoothingParameters;
     IOdysseySmoothing*                  mSmoother;
     
     bool                                mIsSmoothingEnabled;

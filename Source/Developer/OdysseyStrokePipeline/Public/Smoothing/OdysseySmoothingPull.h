@@ -11,11 +11,10 @@ class ODYSSEYSTROKEPIPELINE_API FOdysseySmoothingPull : public IOdysseySmoothing
 public:
     // Construction / Destruction
     virtual ~FOdysseySmoothingPull();
-    FOdysseySmoothingPull();
+    FOdysseySmoothingPull(FOdysseySmoothingParameters* iParameters);
 
 public:
     // Public API
     virtual bool IsReady() const override;
-    virtual int MinimumRequiredPoints() const override;
     virtual FOdysseyStrokePoint ComputePoint() override;
 };
