@@ -12,7 +12,7 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
                                         , float         iY
                                         , float         iZ
                                         , float         iPressure
-                                        , unsigned int  iTime
+                                        , unsigned long iTime
                                         , float         iAltitude
                                         , float         iAzimuth
                                         , float         iTwist
@@ -28,7 +28,7 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
                                         , FVector2D     iAcceleration
                                         , FVector2D     iJolt
                                         , FVector2D     iDeltaPosition
-                                        , unsigned int  iDeltaTime
+                                        , int           iDeltaTime
                                         )
     : x                             ( iX )
     , y                             ( iY )

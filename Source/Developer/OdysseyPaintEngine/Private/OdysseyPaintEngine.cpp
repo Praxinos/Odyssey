@@ -479,7 +479,8 @@ FOdysseyPaintEngine::ComputeInterpolation()
         FOdysseyStrokePoint& current_point = mResultStroke[i];
         
         current_point.deltaPosition = FVector2D( current_point.x - previous_point.x, current_point.y - previous_point.y );
-        current_point.deltaTime = current_point.time - previous_point.time;
+        current_point.deltaTime = FMath::Max(current_point.time, previous_point.time) - FMath::Min(current_point.time, previous_point.time);
+        if( current_point.deltaTime == 0) current_point.deltaTime++;
 
         current_point.speed = current_point.deltaTime != 0 ? current_point.deltaPosition / current_point.deltaTime : FVector2D(0,0);
         current_point.acceleration = current_point.speed - previous_point.speed;

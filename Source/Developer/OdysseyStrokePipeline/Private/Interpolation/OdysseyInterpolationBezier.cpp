@@ -34,6 +34,11 @@ FOdysseyInterpolationBezier::MinimumRequiredPoints() const
 
 const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationBezier::ComputePoints()
 {
+    UE_LOG(LogTemp, Display, TEXT("-----"))
+    for( int i = 1; i < mInputPoints.Num(); i++ )
+    {
+        UE_LOG(LogTemp, Display, TEXT("%lf"), mInputPoints[i].time - mInputPoints[i-1].time )
+    }
     mResultPoints.Empty();
 
     if( !IsReady() )

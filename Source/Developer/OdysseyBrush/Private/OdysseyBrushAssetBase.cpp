@@ -359,7 +359,7 @@ UOdysseyBrushAssetBase::GetJolt()
     return  state.point.jolt;
 }
 
-/** Get Delta Position between this event and the last */
+/** Get Delta Position between this point and the last */
 FVector2D
 UOdysseyBrushAssetBase::GetDeltaPosition()
 {
@@ -367,7 +367,7 @@ UOdysseyBrushAssetBase::GetDeltaPosition()
 }
 
 
-/** Get Delta Time in ms between this event and the last */
+/** Get Delta Time in ms between this point and the last */
 int
 UOdysseyBrushAssetBase::GetDeltaTime()
 {

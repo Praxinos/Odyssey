@@ -15,7 +15,7 @@ public:
                        , float          iY                              = 0
                        , float          iZ                              = 0
                        , float          iPressure                       = 1.f
-                       , unsigned int   iTime                           = 0
+                       , unsigned long  iTime                           = 0
                        , float          iAltitude                       = 0
                        , float          iAzimuth                        = 0
                        , float          iTwist                          = 0
@@ -31,7 +31,7 @@ public:
                        , FVector2D      iAcceleration                   = FVector2D(0,0)
                        , FVector2D      iJolt                           = FVector2D(0,0)
                        , FVector2D      iDeltaPosition                  = FVector2D(0,0)
-                       , unsigned int   iDeltaTime                      = 0
+                       , int            iDeltaTime                      = 0
                        );
 
 public:
@@ -58,7 +58,7 @@ public: //TODO: rename to m* or even better Get/Set*() ...
     float           y;
     float           z;
     float           pressure;
-    unsigned int    time;
+    unsigned long   time;
     float           altitude;
     float           azimuth;
     float           twist;
@@ -74,7 +74,7 @@ public: //TODO: rename to m* or even better Get/Set*() ...
     FVector2D       acceleration;
     FVector2D       jolt;
     FVector2D       deltaPosition;
-    unsigned int    deltaTime;
+    int             deltaTime;
 };
 
 //---
