@@ -440,7 +440,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirs
 
     mRawStroke.Add( iPoint );
 
-    if( mIsSmoothingEnabled )
+    if( mIsSmoothingEnabled && mIsRealTime )
     {
         mSmoother->AddPoint( iPoint );
 
@@ -457,6 +457,12 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirs
     if( !mInterpolator->IsReady() )
         return;
 
+    ComputeInterpolation();
+}
+
+void
+FOdysseyPaintEngine::ComputeInterpolation()
+{
     const TArray< FOdysseyStrokePoint >& tmp = mInterpolator->ComputePoints();
     int currentIndexBasis = mResultStroke.Num();
     mResultStroke.Append( tmp );
@@ -524,6 +530,50 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirs
 void
 FOdysseyPaintEngine::EndStroke()
 {
+    if (!mIsRealTime && mIsSmoothingEnabled)
+    {
+        //Cancel the tempbuffer   
+        if( !mTempBuffer )
+            return;
+
+        InterruptDelay();
+
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
+
+        ClearInvalidTileMap( mTmpInvalidTileMap );
+        ClearInvalidTileMap( mStrokeInvalidTileMap );
+
+        if( mBrushInstance )
+        {
+            mBrushInstance->CleansePool( ECacheLevel::kStep );
+            mBrushInstance->CleansePool( ECacheLevel::kSubstroke );
+            mBrushInstance->CleansePool( ECacheLevel::kStroke );
+        }
+
+        mInterpolator->Reset();
+        mSmoother->Reset();
+        mResultStroke.Empty();
+
+        //Reapply
+    
+        for (int i = 0; i < mRawStroke.Num(); i++)
+        {
+            mSmoother->AddPoint(mRawStroke[i]);
+
+            if( !mSmoother->IsReady() )
+                continue;
+
+            mInterpolator->AddPoint( mSmoother->ComputePoint() );
+
+			if (!mInterpolator->IsReady())
+				continue;
+
+            ComputeInterpolation();
+        }
+    }
+
     mIsPendingEndStroke = true;
 
     //TODO: Apply Smoothing if realtime is on

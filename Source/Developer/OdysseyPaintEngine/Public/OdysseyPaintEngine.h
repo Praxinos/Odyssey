@@ -92,6 +92,8 @@ private:
     ::ul3::FRect MakeTileRect( int iTileX, int iTileY );
     void SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue );
 
+    void ComputeInterpolation();
+
 private:
     // Private Data Members
 	FOdysseyBlock*                      mBlock; // Holds th original block to edit
