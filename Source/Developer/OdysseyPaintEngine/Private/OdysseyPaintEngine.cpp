@@ -573,6 +573,16 @@ FOdysseyPaintEngine::EndStroke()
 
             ComputeInterpolation();
         }
+
+        //Execute everything in the queue at once to avoid glitches
+        while( !mDelayQueue.empty() )
+        {
+            std::function<void() >& f = mDelayQueue.front();
+            f();
+            mDelayQueue.pop();
+        }
+		//InterruptDelay();
+		//Tick();
     }
 
     mIsPendingEndStroke = true;

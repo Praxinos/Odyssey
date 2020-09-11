@@ -56,17 +56,18 @@ FOdysseySmoothingPull::ComputePoint()
 		return outPoint;
 	}
 
-    FOdysseyStrokePoint distPoint = mPoints[mPoints.Num() - 1] - mPoints[0];
-    float dist2 = distPoint.x * distPoint.x + distPoint.y * distPoint.y;
-    float ratio = FGenericPlatformMath::Sqrt(dist2 / (mParameters->GetStrength() * mParameters->GetStrength()));
+    FOdysseyStrokePoint point = mPoints[mPoints.Num() - 1];
+    float x = point.x - mPoints[0].x;
+    float y = point.y - mPoints[0].y;
+    float dist = FGenericPlatformMath::Sqrt(x * x + y * y);
+    float ratio = (dist - mParameters->GetStrength()) / dist;
 
-	FOdysseyStrokePoint outPoint = mPoints[mPoints.Num() - 1];
-    outPoint.x = mPoints[0].x + distPoint.x * (ratio - 1.0);
-    outPoint.y = mPoints[0].y + distPoint.y * (ratio - 1.0);
+    point.x = mPoints[0].x + x * ratio;
+    point.y = mPoints[0].y + y * ratio;
 	mPoints.Empty();
-	mPoints.Add(outPoint);
+	mPoints.Add(point);
 
-    return outPoint;
+    return point;
 }
 
 //---
