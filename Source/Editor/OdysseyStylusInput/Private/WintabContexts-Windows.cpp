@@ -6,7 +6,7 @@
 #include "WintabContexts-Windows.h"
 
 #include "IOdysseyStylusInputModule.h" // for UE_LOG
-
+#include <chrono>
 //---
 
 static
@@ -54,7 +54,7 @@ FWTTabletContextInfo::Tick()
         state.Position = FVector2D( packet.pkX / 1000.f, packet.pkY / 1000.f );
         state.Z = packet_description_z ? packet.pkZ : 0.0;
 
-        state.Timer = packet.pkTime;
+        state.Timer = std::chrono::system_clock::now().time_since_epoch().count() / 1000;
 
         state.NormalPressure = packet_description_npressure ? Normalize( packet.pkNormalPressure, *packet_description_npressure ) : 0.0;
         state.TangentPressure = packet_description_tpressure ? Normalize( packet.pkTangentPressure, *packet_description_tpressure ) : 0.0;
