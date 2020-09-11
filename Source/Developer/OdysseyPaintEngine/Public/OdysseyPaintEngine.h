@@ -126,7 +126,7 @@ private:
     
     bool                                mIsSmoothingEnabled;
     bool                                mIsRealTime;
-    bool                                mIsCatchUp;
+    //bool                                mIsCatchUp;
     bool                                mIsAdaptativeStep;
     bool                                mIsPaintOnTick;
 
@@ -138,6 +138,8 @@ private:
 	FOnStrokeEnd						mOnStrokeWillEndDelegate;
 	FOnStrokeEnd						mOnStrokeEndDelegate;
 	FOnStrokeAbort						mOnStrokeAbortDelegate;
+
+    std::chrono::steady_clock::time_point mLastStrokeTimePoint;
 
 public:
     FOdysseySurfaceEditable*            mBrushCursorPreviewSurface;

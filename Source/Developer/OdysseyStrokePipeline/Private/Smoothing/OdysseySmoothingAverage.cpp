@@ -54,6 +54,12 @@ FOdysseySmoothingAverage::ComputePoint()
     return outPoint;
 }
 
+bool
+FOdysseySmoothingAverage::CanCatchUp() const
+{
+    return true;
+}
+
 //---
 
 #undef LOCTEXT_NAMESPACE

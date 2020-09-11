@@ -33,6 +33,12 @@ IOdysseySmoothing::AddPoint( const FOdysseyStrokePoint& iPoint )
     mPoints.Add( iPoint );
 }
 
+bool
+IOdysseySmoothing::CanCatchUp() const
+{
+    return false;
+}
+
 //---
 
 #undef LOCTEXT_NAMESPACE

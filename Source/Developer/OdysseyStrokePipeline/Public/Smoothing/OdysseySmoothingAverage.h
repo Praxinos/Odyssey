@@ -18,4 +18,5 @@ public:
     virtual bool IsReady() const override;
     virtual FOdysseyStrokePoint ComputePoint() override;
     virtual void AddPoint( const FOdysseyStrokePoint& iPoint ) override;
+    virtual bool CanCatchUp() const override;
 };

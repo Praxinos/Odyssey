@@ -21,6 +21,7 @@ public:
     virtual FOdysseyStrokePoint ComputePoint() = 0;
     virtual void AddPoint( const FOdysseyStrokePoint& iPoint );
     virtual void Reset();
+    virtual bool CanCatchUp() const;
 
 protected:
     TArray< FOdysseyStrokePoint> mPoints;

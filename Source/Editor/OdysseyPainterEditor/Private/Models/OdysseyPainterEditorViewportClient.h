@@ -140,4 +140,5 @@ private:
 
 	FOnPickColor							mOnPickColor;
     bool                                    mIsCapturedByStylus;
+	FOdysseyStrokePoint						mLastPointInTexture;
 };

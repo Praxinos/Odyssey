@@ -18,6 +18,10 @@ public:
     int GetStrength() const;
     void SetStrength( int iValue );
 
+    bool GetCatchUp() const;
+    void SetCatchUp( bool iValue );
+
 protected:
     int mStrength;
+    bool mCatchUp;
 };

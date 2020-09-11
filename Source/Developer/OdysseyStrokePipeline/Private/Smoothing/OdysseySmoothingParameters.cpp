@@ -15,6 +15,7 @@ FOdysseySmoothingParameters::~FOdysseySmoothingParameters()
 
 FOdysseySmoothingParameters::FOdysseySmoothingParameters()
     : mStrength( 0 )
+    , mCatchUp( false )
 {
 }
 
@@ -30,6 +31,18 @@ void
 FOdysseySmoothingParameters::SetStrength( int iValue )
 {
     mStrength = iValue;
+}
+
+bool
+FOdysseySmoothingParameters::GetCatchUp() const
+{
+    return mCatchUp;
+}
+
+void
+FOdysseySmoothingParameters::SetCatchUp( bool iValue )
+{
+    mCatchUp = iValue;
 }
 
 //---

@@ -53,7 +53,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
 
     , mIsSmoothingEnabled( true )
     , mIsRealTime( true )
-    , mIsCatchUp( true )
+    // , mIsCatchUp( true )
     , mIsAdaptativeStep( true )
     , mIsPaintOnTick( false )
     , mIsPendingEndStroke( false )
@@ -83,6 +83,20 @@ FOdysseyPaintEngine::Tick()
 {
     if( !mBrushInstance || !mTempBuffer )
         return;
+
+    //Manage CatchUp if needed
+
+    if (mIsSmoothingEnabled && mSmoothingParameters->GetCatchUp() && mSmoother->CanCatchUp() && mRawStroke.Num() > 0)
+    {
+		long long max_time = 1000 / 60;
+		auto end_time = std::chrono::steady_clock::now();
+        auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mLastStrokeTimePoint).count();
+        if( delta > max_time )
+        {
+			FOdysseyStrokePoint newPoint = mRawStroke[mRawStroke.Num() - 1];
+            PushStroke(newPoint);
+        }
+    }
 
     mBrushInstance->ExecuteTick();
 
@@ -397,7 +411,9 @@ FOdysseyPaintEngine::SetSmoothingCatchUp( bool iValue )
 {
     InterruptStrokeAndStampInPlace();
 
-    mIsCatchUp = iValue;
+    mSmoothingParameters->SetCatchUp( iValue );
+
+    //mIsCatchUp = iValue;
 }
 
 bool
@@ -409,7 +425,7 @@ FOdysseyPaintEngine::GetStokePaintOnTick() const
 bool
 FOdysseyPaintEngine::GetSmoothingCatchUp() const
 {
-    return mIsCatchUp;
+    return mSmoothingParameters->GetCatchUp();
 }
 
 float
@@ -438,6 +454,7 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirs
         mIsPendingEndStroke )
         return;
 
+    mLastStrokeTimePoint = std::chrono::steady_clock::now();
     mRawStroke.Add( iPoint );
 
     if( mIsSmoothingEnabled && mIsRealTime )

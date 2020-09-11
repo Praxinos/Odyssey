@@ -381,6 +381,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
 
             FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
 			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
+			mLastPointInTexture = point_in_texture;
 
             return true;
         }
@@ -553,7 +554,11 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         //     return;
 
         FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
+		if (long(point_in_texture.x) == long(mLastPointInTexture.x) && long(point_in_texture.y) == long(mLastPointInTexture.y))
+			return;
+
         paintengine->PushStroke( point_in_texture );
+		mLastPointInTexture = point_in_texture;
     }
     else if( mCurrentToolState == eState::kPanning )
     {
