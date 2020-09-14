@@ -12,6 +12,7 @@
 #include "OdysseyBrushBlock.generated.h"
 
 class  FOdysseyBlock;
+class  UFont;
 class  UOdysseyBrushAssetBase;
 
 /////////////////////////////////////////////////////
@@ -35,13 +36,50 @@ struct ODYSSEYBRUSH_API FOdysseyBlockProxy
 
     static
     FOdysseyBlockProxy
-    MakeNullProxy() {
+    MakeNullProxy()
+    {
         return  FOdysseyBlockProxy();
     }
 
     FOdysseyBlock*  m;
     FString         id;
     bool            valid;
+};
+
+
+// Duplicate FFontCharacter (in Font.h#29) to be able to expose values in BP (as FFontCharacter is not tagged BlueprintType)
+USTRUCT(BlueprintType)
+struct FOdysseyFontCharacter
+{
+    GENERATED_BODY()
+
+    UPROPERTY( BlueprintReadWrite )
+    int32 StartU;
+
+    UPROPERTY( BlueprintReadWrite )
+    int32 StartV;
+
+    UPROPERTY( BlueprintReadWrite )
+    int32 USize;
+
+    UPROPERTY( BlueprintReadWrite )
+    int32 VSize;
+
+    UPROPERTY( BlueprintReadWrite )
+    uint8 TextureIndex;
+
+    UPROPERTY( BlueprintReadWrite )
+    int32 VerticalOffset;
+
+    FOdysseyFontCharacter()
+        : StartU( 0 )
+        , StartV( 0 )
+        , USize( 0 )
+        , VSize( 0 )
+        , TextureIndex( 0 )
+        , VerticalOffset( 0 )
+    {
+    }
 };
 
 
@@ -89,11 +127,26 @@ public:
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal
                                    , ECacheLevel Cache = ECacheLevel::kState );
 
+    //---
+
     UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetHeight( FOdysseyBlockProxy Sample );
+
+    //---
+
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockProxy"
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, ECacheLevel Cache = ECacheLevel::kState );
+    
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockProxy" )
+    static TArray< FOdysseyFontCharacter > GetFontCharacterInfo( const UFont* Font, const FString& String );
+
+    //---
     
     UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );

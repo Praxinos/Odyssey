@@ -21,17 +21,17 @@ class ODYSSEYDRAWINGSTATE_API UOdysseyTextureEditorFunctionLibrary
     GENERATED_BODY()
 
 public:
-    UFUNCTION( BlueprintCallable, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* BrushContext, int X, int Y, int Width, int Height, ECacheLevel Cache );
     
-    UFUNCTION( BlueprintCallable, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetBlockOfLayerByName( UOdysseyBrushAssetBase* BrushContext, const FString& Name, int X, int Y, int Width, int Height, ECacheLevel Cache );
     
-    UFUNCTION( BlueprintCallable, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* BrushContext, int Index, int X, int Y, int Width, int Height, ECacheLevel Cache );
     
 #if 0
-    UFUNCTION( BlueprintCallable, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetResultBlock( UOdysseyBrushAssetBase* BrushContext );
 #endif
 };

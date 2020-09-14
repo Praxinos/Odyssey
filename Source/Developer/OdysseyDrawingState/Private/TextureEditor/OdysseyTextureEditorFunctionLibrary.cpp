@@ -134,7 +134,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
     ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
 
@@ -174,7 +174,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
     ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
 
@@ -214,7 +214,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
     ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
 
