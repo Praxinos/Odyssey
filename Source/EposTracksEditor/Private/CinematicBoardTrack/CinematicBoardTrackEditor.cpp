@@ -396,7 +396,7 @@ FCinematicBoardTrackEditor::CreateBoardInternal( FString& ioNewBoardName, FFrame
 
     UMovieSceneSequence* newSequence = Cast<UMovieSceneSequence>( newAsset );
 
-    int32 duration = MovieScene::DiscreteSize( iBoardToDuplicate ? iBoardToDuplicate->GetRange() : newSequence->GetMovieScene()->GetPlaybackRange() );
+    int32 duration = UE::MovieScene::DiscreteSize( iBoardToDuplicate ? iBoardToDuplicate->GetRange() : newSequence->GetMovieScene()->GetPlaybackRange() );
 
     UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateCinematicBoardTrack();
 
@@ -731,7 +731,7 @@ FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSe
 
         const FFrameRate tickResolution = iMovieSceneSequence->GetMovieScene()->GetTickResolution();
         const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
-            MovieScene::DiscreteSize( iMovieSceneSequence->GetMovieScene()->GetPlaybackRange() ),
+            UE::MovieScene::DiscreteSize( iMovieSceneSequence->GetMovieScene()->GetPlaybackRange() ),
             tickResolution );
 
         const FFrameRate outerFrameRate = boardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
@@ -899,7 +899,7 @@ FCinematicBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSc
 
     const FFrameRate tickResolution = iSequence->GetMovieScene()->GetTickResolution();
     const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
-        MovieScene::DiscreteSize( iSequence->GetMovieScene()->GetPlaybackRange() ),
+        UE::MovieScene::DiscreteSize( iSequence->GetMovieScene()->GetPlaybackRange() ),
         tickResolution );
 
     const FFrameRate outerFrameRate = boardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();

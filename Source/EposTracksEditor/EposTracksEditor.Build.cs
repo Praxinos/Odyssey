@@ -49,6 +49,7 @@ public class EposTracksEditor : ModuleRules
 				"RenderCore",
                 "MovieSceneTracks",
                 "EditorWidgets",
+                "RHI",
                 //
                 "Epos",
                 "EposEditor",
