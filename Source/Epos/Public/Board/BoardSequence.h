@@ -31,12 +31,13 @@ public:
     virtual void UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context ) override;
     virtual void UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context ) override;
 
-//#if WITH_EDITOR
+#if WITH_EDITOR
+    virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
 //    virtual FText GetDisplayName() const override;
 //
 //    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
 //    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
-//#endif
+#endif
 
 public:
 
