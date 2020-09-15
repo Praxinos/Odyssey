@@ -52,7 +52,7 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
     FOdysseyPainterEditorCommands::Register();
 
     // Build commands
-    BindCommands(iToolkitCommands);
+    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 
 	//Add PaintEngine Callbacks
 	GetData()->PaintEngine()->OnStrokeChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeChanged);

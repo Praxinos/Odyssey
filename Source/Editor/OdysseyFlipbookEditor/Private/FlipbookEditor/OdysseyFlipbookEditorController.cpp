@@ -59,6 +59,9 @@ FOdysseyFlipbookEditorController::Init(const TSharedRef<FUICommandList>& iToolki
     // Init Painter Editor
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(iToolkitCommands);
 
+    // Bind each command to its function
+    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
+
 	InitLayerStack();
 }
 
