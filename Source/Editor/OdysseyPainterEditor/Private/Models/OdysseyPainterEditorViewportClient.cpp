@@ -302,11 +302,11 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
 
     //---
 
-    //UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f"), iIndex, 
+    /* UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f"), iIndex, 
             iState.GetPosition().X, iState.GetPosition().Y, 
             iState.GetPressure(), iState.IsStylusDown(), 
             iState.GetTilt().X, iState.GetTilt().Y, 
-            iState.GetAzimuth(), iState.GetAltitude() );
+            iState.GetAzimuth(), iState.GetAltitude() ); */
 
     float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
