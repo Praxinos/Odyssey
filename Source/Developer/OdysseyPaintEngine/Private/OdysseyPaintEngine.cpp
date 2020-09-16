@@ -140,6 +140,8 @@ FOdysseyPaintEngine::Tick()
 
     if( mIsPendingEndStroke && mDelayQueue.empty() )
     {
+        mBrushInstance->ExecuteStrokeEnd();
+
         for( int k = 0; k < mCountTileY; ++k )
         {
             for( int l = 0; l < mCountTileX; ++l )
@@ -160,8 +162,6 @@ FOdysseyPaintEngine::Tick()
         ClearInvalidTileMap( mStrokeInvalidTileMap );
 
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
-
-        mBrushInstance->ExecuteStrokeEnd();
 
         if( mBrushInstance )
             mBrushInstance->CleansePool( ECacheLevel::kStroke );
