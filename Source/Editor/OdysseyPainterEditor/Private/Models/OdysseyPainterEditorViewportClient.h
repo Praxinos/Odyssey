@@ -141,4 +141,5 @@ private:
 	FOnPickColor							mOnPickColor;
     bool                                    mIsCapturedByStylus;
 	FOdysseyStrokePoint						mCurrentPointInTexture;
+    std::chrono::steady_clock::time_point   mStylusLastEventTime;
 };

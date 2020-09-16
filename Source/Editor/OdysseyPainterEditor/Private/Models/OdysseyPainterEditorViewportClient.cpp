@@ -35,6 +35,7 @@
 #include "SOdysseySurfaceViewport.h"
 
 #include <memory>
+#include <chrono>
 #include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportClientt"
@@ -250,9 +251,10 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     mLastKey = iKey;
     mLastEvent = iEvent;
 
-    if( mIsCapturedByStylus
-        && ( iKey == EKeys::LeftMouseButton
-             || iKey == EKeys::RightMouseButton ) )
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
+
+    if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton ) )
         return true;
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
@@ -264,7 +266,10 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
-    if (mIsCapturedByStylus)
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
+
+    if (mIsCapturedByStylus || delta < 500)
         return;
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
@@ -279,15 +284,6 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     //If we don't have a surface, then we don't interact with anything
     if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
         return;
-
-    if( mCurrentToolState == eState::kIdle || mCurrentToolState == eState::kDrawing )
-    {
-        mIsCapturedByStylus = true;
-    }
-    else
-    {
-        mIsCapturedByStylus = false;
-    }
 
     //---
 
@@ -358,6 +354,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
         /* FOdysseyStrokePoint point;
         queue.Dequeue( point ); */
         InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+        mIsCapturedByStylus = true;
 
         /* while( queue.Dequeue( point ) ) // Process all the down'd points which occur before having the ue pressed event
         {
@@ -375,6 +372,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
         //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Released" ) );
 
         InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+        mIsCapturedByStylus = false;
 
         /* FOdysseyStrokePoint point;
         while( queue.Dequeue( point ) )
@@ -416,6 +414,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
         //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Nothing" ) );
     }
 
+    mStylusLastEventTime = std::chrono::steady_clock::now();
     mLastKey = EKeys::Invalid;
     mLastEvent = EInputEvent::IE_MAX;
 }
