@@ -23,13 +23,13 @@ FOdysseyInterpolationBezier::FOdysseyInterpolationBezier()
 bool
 FOdysseyInterpolationBezier::IsReady() const
 {
-    return ( mInputPoints.Num() >= MinimumRequiredPoints() );
+    return ( mInputPoints.Num() >= 3 );
 }
 
 int
 FOdysseyInterpolationBezier::MinimumRequiredPoints() const
 {
-    return 3;
+    return 1;
 }
 
 const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationBezier::ComputePoints()

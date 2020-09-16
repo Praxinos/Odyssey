@@ -23,13 +23,15 @@ FOdysseyInterpolationCatmullRom::FOdysseyInterpolationCatmullRom()
 bool
 FOdysseyInterpolationCatmullRom::IsReady() const
 {
-    return ( mInputPoints.Num() >= MinimumRequiredPoints() );
+    //We need 4 points to draw a spline with Catmul-Rom
+    return ( mInputPoints.Num() >= 4 );
 }
 
 int
 FOdysseyInterpolationCatmullRom::MinimumRequiredPoints() const
 {
-    return 4;
+    //The line starts at the second point in Catmul-Rom
+    return 2;
 }
 
 const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoints()

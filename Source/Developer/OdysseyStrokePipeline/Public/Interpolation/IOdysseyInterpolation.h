@@ -17,7 +17,12 @@ public:
     IOdysseyInterpolation();
 
 public:
+    //Returns true when the interpolation is ready to compute at least 1 point
     virtual bool IsReady() const = 0;
+
+    //Returns the amount of point needed to define the starting point correctly
+    // Example : for Catmul-Rom, the curve starts at the second point, so it will return 2
+    // Example : for Bezier, the curve starts at the first point, so it will return 1
     virtual int MinimumRequiredPoints() const = 0;
     virtual const TArray< FOdysseyStrokePoint >& ComputePoints() = 0;
 
