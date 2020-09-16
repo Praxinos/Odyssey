@@ -7,6 +7,10 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
+#include "Tracks/MovieSceneFadeTrack.h"
+#include "Tracks/MovieSceneLevelVisibilityTrack.h"
+#include "Tracks/MovieSceneAudioTrack.h"
+#include "Tracks/MovieSceneCameraCutTrack.h"
 
 //---
 
@@ -95,7 +99,23 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     //BoundActorComponents.Remove(ObjectId);
 }
 
-//#if WITH_EDITOR
+#if WITH_EDITOR
+
+ETrackSupport
+UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
+{
+    if( InTrackClass == UMovieSceneCameraCutTrack::StaticClass() ||
+        InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
+        InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
+        InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )
+    {
+        return ETrackSupport::Supported;
+    }
+
+    return ETrackSupport::NotSupported;
+    //return Super::IsTrackSupported( InTrackClass );
+}
+
 //FText UShotSequence::GetDisplayName() const
 //{
 //	return UMovieSceneSequence::GetDisplayName();
@@ -128,4 +148,4 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
 //		);
 //}
 //
-//#endif
+#endif

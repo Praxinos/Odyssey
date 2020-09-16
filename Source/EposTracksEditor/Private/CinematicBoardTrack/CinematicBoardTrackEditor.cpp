@@ -158,7 +158,8 @@ FCinematicBoardTrackEditor::HandleAssetAdded( UObject* iAsset, const FGuid& iTar
         return false;
     }
 
-    if( !SupportsSequence( sequence ) )
+    if( !( ( sequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( sequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) ) )
+    //if( !SupportsSequence( sequence ) )
     {
         return false;
     }
@@ -200,7 +201,8 @@ FCinematicBoardTrackEditor::HandleAssetAdded( UObject* iAsset, const FGuid& iTar
 bool
 FCinematicBoardTrackEditor::SupportsSequence( UMovieSceneSequence* iSequence ) const
 {
-    return ( iSequence != nullptr ) && ( ( iSequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( iSequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) );
+    ETrackSupport TrackSupported = iSequence ? iSequence->IsTrackSupported( UMovieSceneCinematicBoardTrack::StaticClass() ) : ETrackSupport::NotSupported;
+    return TrackSupported == ETrackSupport::Supported;
 }
 
 
@@ -716,6 +718,9 @@ FKeyPropertyResult
 FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex )
 {
     FKeyPropertyResult keyPropertyResult;
+
+    if( !( ( iMovieSceneSequence->GetClass()->GetName() == TEXT( "BoardSequence" ) ) || ( iMovieSceneSequence->GetClass()->GetName() == TEXT( "ShotSequence" ) ) ) )
+        return keyPropertyResult;
 
     if( iMovieSceneSequence->GetMovieScene()->GetPlaybackRange().IsEmpty() )
     {

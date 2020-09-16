@@ -64,6 +64,9 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp )
 {
+    return ESequencerDropResult::Unhandled; // No more used, but left for info
+
+#if 0
     if( !iAssets.Num() )
         return ESequencerDropResult::Unhandled;
 
@@ -80,11 +83,15 @@ FBoardSequenceCustomization::OnSequencerAssetsDrop( const TArray<UObject*>& iAss
         return ESequencerDropResult::Unhandled; // let's the default behavior of the sequencer processes them
 
     return ESequencerDropResult::DropDenied;    // Don't process the default behavior of the sequencer
+#endif
 }
 
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr<UClass>>& iClasses, const FClassDragDropOp& iDragDropOp )
 {
+    return ESequencerDropResult::Unhandled;
+
+#if 0
     if( !iClasses.Num() )
         return ESequencerDropResult::Unhandled;
     //if( !iClasses[0].IsValid() )
@@ -93,15 +100,20 @@ FBoardSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr
 
 
     return ESequencerDropResult::DropDenied;    // Don't process the default behavior of the sequencer
+#endif
 }
 
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropGraphEdOp& iDragDropOp )
 {
+    return ESequencerDropResult::Unhandled;
+
+#if 0
     if( !iActors.Num() )
         return ESequencerDropResult::Unhandled;
 
 
 
     return ESequencerDropResult::DropDenied;    // Don't process the default behavior of the sequencer
+#endif
 }
