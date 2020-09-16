@@ -303,10 +303,10 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     //---
 
     //UE_LOG( LogStylusInput, Log, TEXT("OnStylusStateChanged index:%d x:%f y:%f pressure:%f down:%d tilt:%f %f azimuth:%f altitude:%f"), iIndex, 
-    //        iState.GetPosition().X, iState.GetPosition().Y, 
-    //        iState.GetPressure(), iState.IsStylusDown(), 
-    //        iState.GetTilt().X, iState.GetTilt().Y, 
-    //        iState.GetAzimuth(), iState.GetAltitude() );
+            iState.GetPosition().X, iState.GetPosition().Y, 
+            iState.GetPressure(), iState.IsStylusDown(), 
+            iState.GetTilt().X, iState.GetTilt().Y, 
+            iState.GetAzimuth(), iState.GetAltitude() );
 
     float scale_dpi = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = widget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
@@ -328,34 +328,92 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
   //---
 
     static TQueue< FOdysseyStrokePoint > queue;
-
-    if( iState.IsStylusDown() )
-        queue.Enqueue( stroke_point );
-    else
-        queue.Empty();
-
+    static bool stylusWasDown = false;
     static bool is_dragging = false;
-    if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Pressed )
-    {
-        is_dragging = true;
 
-        FOdysseyStrokePoint first;
-        queue.Dequeue( first );
-        InputKeyWithStrokePoint( first, 0, mLastKey, mLastEvent );
-    }
-    else if( mLastKey == EKeys::LeftMouseButton && mLastEvent == EInputEvent::IE_Released )
-    {
-        FOdysseyStrokePoint last;
-        queue.Dequeue( last );
-        InputKeyWithStrokePoint( last, 0, mLastKey, mLastEvent );
+    bool isDownEvent = !stylusWasDown && iState.IsStylusDown();
+    bool isUpEvent = stylusWasDown && !iState.IsStylusDown();
+    bool isMoveEvent = stylusWasDown == iState.IsStylusDown();
 
-        is_dragging = false;
-    }
-    else if( is_dragging ) // MUSTY BE the last, or at least after "is_dragging = false;"
+    stylusWasDown = iState.IsStylusDown();
+
+    //enqueue stroke points if stylus is down or was down in last event
+    //queue will be emptied when a EInputEvent::IE_Released will be received
+    /* if (iState.IsStylusDown() || stylusWasDown )
     {
-        FOdysseyStrokePoint point;
-        while( queue.Dequeue( point ) ) // Process all the down'd points which occur before having the ue pressed event
+        queue.Enqueue( stroke_point );
+    } */
+
+    
+
+    /* if( !iState.IsStylusDown() )
+        queue.Enqueue( stroke_point ); */
+
+    
+    if( isDownEvent )
+    {
+        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Pressed" ) );
+        // is_dragging = true;
+
+        /* FOdysseyStrokePoint point;
+        queue.Dequeue( point ); */
+        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+
+        /* while( queue.Dequeue( point ) ) // Process all the down'd points which occur before having the ue pressed event
+        {
+            //If stylus is up, then we keep an event for the release
+            if (!iState.IsStylusDown() && queue.IsEmpty())
+            {
+                queue.Enqueue( point );
+                break;
+            }
             CapturedMouseMoveWithStrokePoint( point );
+        } */
+    }
+    else if( isUpEvent )
+    {
+        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Released" ) );
+
+        InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+
+        /* FOdysseyStrokePoint point;
+        while( queue.Dequeue( point ) )
+        {
+            //If stylus is up, then we keep an event for the release
+            if (queue.IsEmpty())
+            {
+                InputKeyWithStrokePoint( point, 0, mLastKey, mLastEvent );
+                break;
+            }
+            CapturedMouseMoveWithStrokePoint( point );
+        }
+	
+		is_dragging = false;*/
+    }
+    else if( iState.IsStylusDown() ) // MUSTY BE the last, or at least after "is_dragging = false;"
+    {
+        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Dragging" ) );
+
+        CapturedMouseMoveWithStrokePoint( stroke_point );
+        
+        /* FOdysseyStrokePoint point;
+        while( queue.Dequeue( point ) )
+        {
+            //If stylus is up, then we keep an event for the release
+            if (!iState.IsStylusDown() && queue.IsEmpty())
+            {
+                queue.Enqueue( point );
+                break;
+            }
+            CapturedMouseMoveWithStrokePoint( point );
+        } */
+
+    }
+    else
+    {
+		// Register the point in texture when hovering the canvas
+		mCurrentPointInTexture = GetLocalMousePosition(stroke_point);
+        //UE_LOG( LogStylusInput, Log, TEXT( "OnStylusStateChanged Nothing" ) );
     }
 
     mLastKey = EKeys::Invalid;
@@ -371,6 +429,9 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         return false;
     }
 
+    FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
+    mCurrentPointInTexture = GetLocalMousePosition( iPointInViewport );
+
     if( mCurrentToolState == eState::kIdle )
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
@@ -378,11 +439,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             mCurrentToolState = eState::kDrawing;
             //mOdysseyPainterEditorDataPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
             //mOdysseyPainterEditorDataPtr.Pin()->MarkTransactionAsDirty();
-
-            FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
-			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->PushStroke( point_in_texture );
-			mLastPointInTexture = point_in_texture;
-
+			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->BeginStroke( mCurrentPointInTexture, lastPointInTexture );
             return true;
         }
         else if( iKey == EKeys::Escape && iEvent == EInputEvent::IE_Pressed )
@@ -546,6 +603,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         return;
     }
 
+    
+    FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
+    mCurrentPointInTexture = GetLocalMousePosition( iPointInViewport );
+
     if( mCurrentToolState == eState::kDrawing )
     {
         auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
@@ -553,12 +614,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         // if( paintengine->GetStokePaintOnTick() )
         //     return;
 
-        FOdysseyStrokePoint point_in_texture = GetLocalMousePosition( iPointInViewport );
-		if (long(point_in_texture.x) == long(mLastPointInTexture.x) && long(point_in_texture.y) == long(mLastPointInTexture.y))
+		if (long(mCurrentPointInTexture.x) == long(lastPointInTexture.x) && long(mCurrentPointInTexture.y) == long(lastPointInTexture.y))
 			return;
 
-        paintengine->PushStroke( point_in_texture );
-		mLastPointInTexture = point_in_texture;
+        paintengine->PushStroke( mCurrentPointInTexture );
     }
     else if( mCurrentToolState == eState::kPanning )
     {

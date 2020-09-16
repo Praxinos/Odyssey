@@ -447,7 +447,34 @@ FOdysseyPaintEngine::GetAlphaMode() const
 }
 
 void
-FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirst */ )
+FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdysseyStrokePoint& iPreviousPoint )
+{
+    if( !mBrushInstance ||
+        !mTempBuffer ||
+        mIsPendingEndStroke )
+        return;
+
+    mLastStrokeTimePoint = std::chrono::steady_clock::now();
+    mRawStroke.Add( iPoint );
+
+    if( mIsSmoothingEnabled && mIsRealTime )
+    {
+        mSmoother->AddPoint( iPoint );
+    }
+    
+    mInterpolator->AddPoint( iPoint );
+
+    FOdysseyStrokePoint point = iPoint;
+    ComputePointRelativeParameters(point, iPreviousPoint);
+
+    TArray<FOdysseyStrokePoint> points;
+    points.Add(point);
+
+    AddResultPoints(points);
+}
+
+void
+FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint )
 {
     if( !mBrushInstance ||
         !mTempBuffer ||
@@ -474,42 +501,33 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirs
     if( !mInterpolator->IsReady() )
         return;
 
-    ComputeInterpolation();
+    TArray< FOdysseyStrokePoint > points = ComputeInterpolation();
+    AddResultPoints(points);
 }
 
 void
-FOdysseyPaintEngine::ComputeInterpolation()
+FOdysseyPaintEngine::ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint, const FOdysseyStrokePoint& iPreviousPoint)
 {
-    const TArray< FOdysseyStrokePoint >& tmp = mInterpolator->ComputePoints();
+    ioPoint.deltaPosition = FVector2D( ioPoint.x - iPreviousPoint.x, ioPoint.y - iPreviousPoint.y );
+    ioPoint.deltaTime = FMath::Max(ioPoint.time, iPreviousPoint.time) - FMath::Min(ioPoint.time, iPreviousPoint.time);
+    if( ioPoint.deltaTime == 0) ioPoint.deltaTime++;
+
+    ioPoint.speed = ioPoint.deltaTime != 0 ? ioPoint.deltaPosition / ioPoint.deltaTime : FVector2D(0,0);
+    ioPoint.acceleration = ioPoint.speed - iPreviousPoint.speed;
+    ioPoint.jolt = ioPoint.acceleration - iPreviousPoint.acceleration;
+
+    ioPoint.direction_angle_deg_tangent = atan2( ioPoint.y - iPreviousPoint.y, ioPoint.x - iPreviousPoint.x ) * 180.f / 3.14159265359f;
+    ioPoint.direction_angle_deg_normal = ioPoint.direction_angle_deg_tangent + 90;
+    ioPoint.direction_vector_tangent = ioPoint.deltaPosition.GetSafeNormal();
+    ioPoint.direction_vector_normal = FVector2D( -ioPoint.direction_vector_tangent.Y, ioPoint.direction_vector_tangent.X );
+    ioPoint.distance_travelled = iPreviousPoint.distance_travelled + ioPoint.deltaPosition.Size();
+}
+
+void
+FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoints)
+{
     int currentIndexBasis = mResultStroke.Num();
-    mResultStroke.Append( tmp );
-
-    if( !tmp.Num() )
-        return;
-
-    for( int i = currentIndexBasis; i < mResultStroke.Num(); ++i )
-    {
-        if( i == 0 )
-            continue;
-
-        FOdysseyStrokePoint& previous_point = mResultStroke[i - 1];
-        FOdysseyStrokePoint& current_point = mResultStroke[i];
-        
-        current_point.deltaPosition = FVector2D( current_point.x - previous_point.x, current_point.y - previous_point.y );
-        current_point.deltaTime = FMath::Max(current_point.time, previous_point.time) - FMath::Min(current_point.time, previous_point.time);
-        if( current_point.deltaTime == 0) current_point.deltaTime++;
-
-        current_point.speed = current_point.deltaTime != 0 ? current_point.deltaPosition / current_point.deltaTime : FVector2D(0,0);
-        current_point.acceleration = current_point.speed - previous_point.speed;
-        current_point.jolt = current_point.acceleration - previous_point.acceleration;
-
-        current_point.direction_angle_deg_tangent = atan2( current_point.y - previous_point.y, current_point.x - previous_point.x ) * 180.f / 3.14159265359f;
-        current_point.direction_angle_deg_normal = current_point.direction_angle_deg_tangent + 90;
-        current_point.direction_vector_tangent = current_point.deltaPosition.GetSafeNormal();
-        current_point.direction_vector_normal = FVector2D( -current_point.direction_vector_tangent.Y, current_point.direction_vector_tangent.X );
-        current_point.distance_travelled = previous_point.distance_travelled + current_point.deltaPosition.Size();
-    }
-
+    mResultStroke.Append( iPoints );
     for( int i = currentIndexBasis; i < mResultStroke.Num(); i++ )
     {
         auto point = mResultStroke[i];
@@ -543,6 +561,30 @@ FOdysseyPaintEngine::ComputeInterpolation()
             mBrushInstance->ClearInvalidRects();
         } );
     }
+}
+
+TArray< FOdysseyStrokePoint >
+FOdysseyPaintEngine::ComputeInterpolation()
+{
+    TArray< FOdysseyStrokePoint > tmp = mInterpolator->ComputePoints();
+
+	if (tmp.Num() > 0 && mResultStroke.Num() > 0)
+	{
+		FOdysseyStrokePoint& previous_point = mResultStroke[mResultStroke.Num() - 1];
+		FOdysseyStrokePoint& current_point = tmp[0];
+
+		ComputePointRelativeParameters(current_point, previous_point);
+	}
+
+    for( int i =  1; i < tmp.Num(); ++i )
+    {
+        FOdysseyStrokePoint& previous_point = tmp[i - 1];
+        FOdysseyStrokePoint& current_point = tmp[i];
+        
+        ComputePointRelativeParameters(current_point, previous_point);
+    }
+
+    return tmp;
 }
 
 void
@@ -588,7 +630,8 @@ FOdysseyPaintEngine::EndStroke()
 			if (!mInterpolator->IsReady())
 				continue;
 
-            ComputeInterpolation();
+            TArray< FOdysseyStrokePoint > points = ComputeInterpolation();
+            AddResultPoints(points);
         }
 
         //Execute everything in the queue at once to avoid glitches

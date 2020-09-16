@@ -31,7 +31,7 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusDown(IRealTimeStylus* RealTimeStylus
 	{
         TabletContext->IsTouching = true;
 
-        HandlePacket( RealTimeStylus, StylusInfo, sizeof( LONG ), PacketSize * sizeof( LONG ), Packet ); // need to be done after IsTouching = true (HandlePacket uses it)
+        HandlePacket( RealTimeStylus, StylusInfo, 1, PacketSize, Packet ); // need to be done after IsTouching = true (HandlePacket uses it)
 
         //if( TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
         //    TabletContext->WindowsState.Last().NormalPressure = 1.0;
@@ -48,7 +48,7 @@ HRESULT FWindowsRealTimeStylusPlugin::StylusUp(IRealTimeStylus* RealTimeStylus, 
         TabletContext->IsTouching = false;
 		//TabletContext->WindowsState2.NormalPressure = 0;
 
-        HandlePacket( RealTimeStylus, StylusInfo, sizeof( LONG ), PacketSize * sizeof( LONG ), Packet );
+        HandlePacket( RealTimeStylus, StylusInfo, 1, PacketSize, Packet );
 	}
 	return S_OK;
 }
@@ -419,7 +419,6 @@ FTabletContextInfo::Tick()
 
     for( FWindowsStylusState& window_state : tmp )
     {
-        window_state.IsTouching = IsTouching;
         CurrentState.Push( window_state.ToPublicState() );
     }
 
@@ -434,8 +433,7 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 		return;
 	}
 
-    FWindowsStylusState windows_state;
-    windows_state.IsInverted = StylusInfo->bIsInvertedCursor;
+	TArray<FWindowsStylusState> states;
 
     //TODO: find another place to get data, not for each packet, but be sure to update data when moving/resizing HWND
     // can't be in AddTabletContext() because it is NOT called when moving HWND
@@ -464,75 +462,84 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 
 	ULONG PropertyCount = PacketBufferLength / PacketCount;
     //UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket" ) ); // also remove #include
+	//UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket : %d %d %s" ), PacketCount, PropertyCount, TabletContext->IsTouching ? "down" : "up"); // also remove #include
 
-	for (ULONG i = 0; i < PropertyCount; ++i)
+	for (ULONG j = 0; j < PacketCount; ++j)
 	{
-		const FPacketDescription& PacketDescription = TabletContext->PacketDescriptions[i];
+		FWindowsStylusState windows_state;
+		windows_state.IsInverted = StylusInfo->bIsInvertedCursor;
 
-		float Normalized = Normalize(Packets[i], PacketDescription);
-
-		switch (PacketDescription.Type)
+		for (ULONG i = 0; i < PropertyCount; ++i)
 		{
-			case EWindowsPacketType::X:
-            {
-                float x = Packets[i] / ( 1000.0 * 2.54 / dpix ); // http://code.rawlinson.us/2007/01/pixelspace-to-inkspace.html
-                //float x = Packets[i] / 11.76;
-                windows_state.Position.X = x + ptClientUL.x;
-                break;
-            }
-			case EWindowsPacketType::Y:
-            {
-                float y = Packets[i] / ( 1000.0 * 2.54 / dpiy );
-                windows_state.Position.Y = y + ptClientUL.y;
-                break;
-            }
-			case EWindowsPacketType::Timer:
-                windows_state.Timer = Packets[i];
-				break;
-			case EWindowsPacketType::Status:
-				break;
-			case EWindowsPacketType::Z:
-                windows_state.Z = Normalized;
-				break;
-			case EWindowsPacketType::NormalPressure:
-                windows_state.NormalPressure = Normalized;
-				break;
-			case EWindowsPacketType::TangentPressure:
-                windows_state.TangentPressure = Normalized;
-				break;
-			case EWindowsPacketType::Twist:
-                windows_state.Twist = ToDegrees(Packets[i], PacketDescription);
-				break;
-			case EWindowsPacketType::XTilt:
-                windows_state.Tilt.X = ToDegrees(Packets[i], PacketDescription);
-				break;
-			case EWindowsPacketType::YTilt:
-                windows_state.Tilt.Y = ToDegrees(Packets[i], PacketDescription);
-				break;
-            case EWindowsPacketType::Azimuth:
-                windows_state.Azimuth = ToDegrees( Packets[i], PacketDescription );
-                break;
-            case EWindowsPacketType::Altitude:
-                windows_state.Altitude = ToDegrees( Packets[i], PacketDescription );
-                break;
-			case EWindowsPacketType::Width:
-                windows_state.Size.X = Normalized;
-				break;
-			case EWindowsPacketType::Height:
-                windows_state.Size.Y = Normalized;
-				break;
+			const FPacketDescription& PacketDescription = TabletContext->PacketDescriptions[i];
+
+			float Normalized = Normalize(Packets[i], PacketDescription);
+
+			switch (PacketDescription.Type)
+			{
+				case EWindowsPacketType::X:
+				{
+					float x = Packets[i] / (1000.0 * 2.54 / dpix); // http://code.rawlinson.us/2007/01/pixelspace-to-inkspace.html
+					//float x = Packets[i] / 11.76;
+					windows_state.Position.X = x + ptClientUL.x;
+					break;
+				}
+				case EWindowsPacketType::Y:
+				{
+					float y = Packets[i] / (1000.0 * 2.54 / dpiy);
+					windows_state.Position.Y = y + ptClientUL.y;
+					break;
+				}
+				case EWindowsPacketType::Timer:
+					windows_state.Timer = Packets[i];
+					break;
+				case EWindowsPacketType::Status:
+					break;
+				case EWindowsPacketType::Z:
+					windows_state.Z = Normalized;
+					break;
+				case EWindowsPacketType::NormalPressure:
+					windows_state.NormalPressure = Normalized;
+					break;
+				case EWindowsPacketType::TangentPressure:
+					windows_state.TangentPressure = Normalized;
+					break;
+				case EWindowsPacketType::Twist:
+					windows_state.Twist = ToDegrees(Packets[i], PacketDescription);
+					break;
+				case EWindowsPacketType::XTilt:
+					windows_state.Tilt.X = ToDegrees(Packets[i], PacketDescription);
+					break;
+				case EWindowsPacketType::YTilt:
+					windows_state.Tilt.Y = ToDegrees(Packets[i], PacketDescription);
+					break;
+				case EWindowsPacketType::Azimuth:
+					windows_state.Azimuth = ToDegrees(Packets[i], PacketDescription);
+					break;
+				case EWindowsPacketType::Altitude:
+					windows_state.Altitude = ToDegrees(Packets[i], PacketDescription);
+					break;
+				case EWindowsPacketType::Width:
+					windows_state.Size.X = Normalized;
+					break;
+				case EWindowsPacketType::Height:
+					windows_state.Size.Y = Normalized;
+					break;
+			}
 		}
+		windows_state.IsTouching = TabletContext->IsTouching;
+
+		if( TabletContext->IsTouching && TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
+			windows_state.NormalPressure = 1.0;
+
+		states.Add(windows_state);
+		//UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket x:%f y:%f" ), windows_state.Position.X, windows_state.Position.Y );
 	}
 
-    if( TabletContext->IsTouching && TabletContext->mKind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (and maybe other attributes)
-        windows_state.NormalPressure = 1.0;
-
-    //UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket x:%f y:%f" ), windows_state.Position.X, windows_state.Position.Y );
-
-    sgMutex.Lock();
-    TabletContext->SetDirty();
-    TabletContext->WindowsState.Push( windows_state );
-    sgMutex.Unlock();
+	sgMutex.Lock();
+	TabletContext->SetDirty();
+	TabletContext->WindowsState.Append(states);
+	sgMutex.Unlock();
 }
 
 HRESULT FWindowsRealTimeStylusPlugin::Packets(IRealTimeStylus* RealTimeStylus, const StylusInfo* StylusInfo,

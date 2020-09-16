@@ -59,8 +59,8 @@ public:
     ::ul3::eBlendingMode GetBlendingMode() const;
     ::ul3::eAlphaMode GetAlphaMode() const;
 
-
-    void PushStroke( const FOdysseyStrokePoint& iPoint/*, bool iFirst = false*/ );
+    void BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdysseyStrokePoint& iPreviousPoint );
+    void PushStroke( const FOdysseyStrokePoint& iPoint );
     void EndStroke();
     void AbortStroke();
     void TriggerStateChanged();
@@ -92,7 +92,9 @@ private:
     ::ul3::FRect MakeTileRect( int iTileX, int iTileY );
     void SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue );
 
-    void ComputeInterpolation();
+    TArray< FOdysseyStrokePoint > ComputeInterpolation();
+    void ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint, const FOdysseyStrokePoint& iPreviousPoint);
+    void AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoints);
 
 private:
     // Private Data Members
