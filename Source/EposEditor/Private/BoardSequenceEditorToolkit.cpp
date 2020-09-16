@@ -130,8 +130,8 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
         TSharedPtr<FTabManager> levelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
         if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() )
         {
-            levelEditorTabManager->InvokeTab( FName( "LevelEditorSceneOutliner" ) )->RequestCloseTab();
-            levelEditorTabManager->InvokeTab( FName( "LevelEditorSceneOutliner" ) );
+            levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) )->RequestCloseTab();
+            levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) );
         }
     }
 

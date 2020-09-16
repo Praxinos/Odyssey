@@ -130,8 +130,8 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         TSharedPtr<FTabManager> levelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
         if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() ) // SceneOutliner == WorldOutliner ...
         {
-            levelEditorTabManager->InvokeTab( FName( "LevelEditorSceneOutliner" ) )->RequestCloseTab();
-            levelEditorTabManager->InvokeTab( FName( "LevelEditorSceneOutliner" ) );
+            levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) )->RequestCloseTab();
+            levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) );
         }
     }
 
