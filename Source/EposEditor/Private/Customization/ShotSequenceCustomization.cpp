@@ -52,17 +52,17 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
 ESequencerDropResult
 FShotSequenceCustomization::OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp )
 {
-    return ESequencerDropResult::Unhandled; // No more used, but left for info
+    return ESequencerDropResult::Unhandled; // Process the default behavior for assets
 }
 
 ESequencerDropResult
 FShotSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr<UClass>>& iClasses, const FClassDragDropOp& iDragDropOp )
 {
-    return ESequencerDropResult::Unhandled;
+    return ESequencerDropResult::DropDenied;    // Don't accept classes
 }
 
 ESequencerDropResult
 FShotSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropGraphEdOp& iDragDropOp )
 {
-    return ESequencerDropResult::Unhandled;
+    return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }
