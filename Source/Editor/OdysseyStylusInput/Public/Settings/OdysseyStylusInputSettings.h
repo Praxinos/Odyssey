@@ -24,6 +24,7 @@ class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSettings
 public:
     virtual void PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent ) override;
     void RefreshStylusInputDriver();
+    static FText GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iFormat );
 
 public:
     /** Driver to use to interpret Stylus inputs. */

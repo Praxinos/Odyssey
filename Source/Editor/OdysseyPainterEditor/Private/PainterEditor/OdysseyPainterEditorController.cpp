@@ -24,6 +24,7 @@
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
+#include "Dialogs/CustomDialog.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "PainterEditor/OdysseyPainterEditorState.h"
 
@@ -86,12 +87,12 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
     
 	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().Undo,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::UndoIliad ),
+        FExecuteAction::CreateLambda( [this]() { this->OnUndoIliad(); } ),
         FCanExecuteAction() );
     
 	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().Redo,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::RedoIliad ),
+        FExecuteAction::CreateLambda( [this]() { this->OnRedoIliad(); } ),
         FCanExecuteAction() );
 
 	iToolkitCommands->MapAction(
@@ -102,6 +103,121 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
 	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().VisitPraxinosForums,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnVisitPraxinosForums ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().FillCurrentLayer,
+        FExecuteAction::CreateLambda( [this]() { this->OnFill(); } ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ClearCurrentLayer,
+        FExecuteAction::CreateLambda( [this]() { this->OnClear(); } ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().CreateNewLayer,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnCreateNewLayer ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().DuplicateCurrentLayer,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnDuplicateCurrentLayer ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().DeleteCurrentLayer,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnDeleteCurrentLayer ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ResetViewportPosition,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnResetViewportPosition ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ResetViewportRotation,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnResetViewportRotation ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().RotateViewportLeft,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRotateViewportLeft ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().RotateViewportRight,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRotateViewportRight ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom10Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.1 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom20Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.2 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom30Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.3 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom40Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.4 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom50Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.5 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom60Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.6 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom70Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.7 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom80Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.8 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom90Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.9 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoom100Percent,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 1.0 ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetZoomFitScreen,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoomFitScreen ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ZoomIn,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnZoomIn ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ZoomOut,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnZoomOut ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SwitchTabletAPI,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSwitchTabletAPI ),
         FCanExecuteAction() );
 }
 
@@ -129,6 +245,27 @@ FOdysseyPainterEditorController::FillAboutMenu( FMenuBuilder& ioMenuBuilder, FOd
         ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosForums );
     }
 }
+
+TSharedRef<SWidget>
+FOdysseyPainterEditorController::GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem )
+{
+	return  SNew(STextBlock)
+            .Text( UOdysseyStylusInputSettings::GetFormatText( iItem ) );
+}
+
+void 
+FOdysseyPainterEditorController::ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo )
+{
+    mComboBoxTabletAPISelected = iNewSelection;
+}
+
+FText 
+FOdysseyPainterEditorController::GetComboBoxTabletAPISelectedAsText() const
+{
+    return UOdysseyStylusInputSettings::GetFormatText( mComboBoxTabletAPISelected );
+}
+
+
 
 void
 FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles)
@@ -443,6 +580,9 @@ FOdysseyPainterEditorController::HandlePerformanceDrawBrushPreviewChanged( bool 
     }
 }
 
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- Shortcuts actions
+
 FReply
 FOdysseyPainterEditorController::OnClear()
 {
@@ -458,37 +598,143 @@ FOdysseyPainterEditorController::OnFill()
 }
 
 FReply
+FOdysseyPainterEditorController::OnUndoIliad()
+{
+	GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    return FReply::Handled();
+}
+
+
+FReply
+FOdysseyPainterEditorController::OnRedoIliad()
+{
+	GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    return FReply::Handled();
+}
+
+FReply
 FOdysseyPainterEditorController::OnClearUndo()
 {
     return FReply::Handled();
 }
 
-FReply
-FOdysseyPainterEditorController::OnUndo()
+void
+FOdysseyPainterEditorController::OnCreateNewLayer()
 {
-    UndoIliad();
-    return FReply::Handled();
-}
-
-
-FReply
-FOdysseyPainterEditorController::OnRedo()
-{
-    RedoIliad();
-    return FReply::Handled();
 }
 
 void
-FOdysseyPainterEditorController::UndoIliad()
+FOdysseyPainterEditorController::OnDuplicateCurrentLayer()
 {
-	GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+}
+
+void
+FOdysseyPainterEditorController::OnDeleteCurrentLayer()
+{
+}
+
+void
+FOdysseyPainterEditorController::OnResetViewportPosition()
+{
+    GetGUI()->GetViewportTab()->SetRotationInDegrees( 0 );
+    GetGUI()->GetViewportTab()->SetPan(FVector2D(0, 0));
+}
+
+void
+FOdysseyPainterEditorController::OnResetViewportRotation()
+{
+    GetGUI()->GetViewportTab()->SetRotationInDegrees( 0 );
+}
+
+void
+FOdysseyPainterEditorController::OnRotateViewportLeft()
+{
+    GetGUI()->GetViewportTab()->RotateLeft();
+}
+
+void
+FOdysseyPainterEditorController::OnRotateViewportRight()
+{
+    GetGUI()->GetViewportTab()->RotateRight();
+}
+
+void
+FOdysseyPainterEditorController::OnSetZoom(double iZoomValue)
+{
+    GetGUI()->GetViewportTab()->SetZoom(iZoomValue);
+}
+
+void
+FOdysseyPainterEditorController::OnSetZoomFitScreen()
+{
+    GetGUI()->GetViewportTab()->ToggleFitToViewport();
+}
+
+void
+FOdysseyPainterEditorController::OnZoomIn()
+{
+    GetGUI()->GetViewportTab()->ZoomIn();
+}
+
+void
+FOdysseyPainterEditorController::OnZoomOut()
+{
+    GetGUI()->GetViewportTab()->ZoomOut();
 }
 
 
 void
-FOdysseyPainterEditorController::RedoIliad()
+FOdysseyPainterEditorController::OnSwitchTabletAPI()
 {
-	GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
+    mComboBoxTabletAPISelected = MakeShared<EOdysseyStylusInputDriver>(settings->StylusInputDriver);
+    TArray<TSharedPtr<EOdysseyStylusInputDriver>> options;
+
+    #if PLATFORM_WINDOWS
+        options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Ink));
+        options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Wintab));
+    #elif PLATFORM_MAC
+        options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_NSEvent));
+    #endif
+
+    options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_None));
+
+	TSharedRef<SVerticalBox> dialogContents = SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        [
+            SNew( STextBlock )
+            .Text( FText::FromString("Select tablet API") )
+        ]
+		+ SVerticalBox::Slot()
+		[
+			SNew(SComboBox<TSharedPtr<EOdysseyStylusInputDriver>>)
+            .OptionsSource(&options)
+            .OnGenerateWidget(this, &FOdysseyPainterEditorController::GenerateTabletAPIComboBoxItem)
+            .OnSelectionChanged( this, &FOdysseyPainterEditorController::ChangeSelectionTabletAPIComboBoxItem )
+            [
+                SNew( STextBlock )
+                .Text( this, &FOdysseyPainterEditorController::GetComboBoxTabletAPISelectedAsText )
+            ]
+		];
+
+	TSharedPtr<SCustomDialog> customDialog;
+
+	FText dialogTitle = LOCTEXT("SelectTabletAPI", "Select Tablet API" );
+
+	FText oKText = LOCTEXT("OkSwitchAPI", "OK" );
+	FText cancelText = LOCTEXT("CancelSwitchAPI", "Cancel");
+
+	customDialog = SNew(SCustomDialog)
+		.Title(dialogTitle)
+		.DialogContent(dialogContents)
+		.Buttons( { SCustomDialog::FButton(oKText), SCustomDialog::FButton(cancelText) } );
+
+    if( customDialog->ShowModal() == 0/*OK*/ )
+    {
+        settings->StylusInputDriver = *(mComboBoxTabletAPISelected.Get());
+        settings->RefreshStylusInputDriver();
+    }
 }
+
 
 #undef LOCTEXT_NAMESPACE

@@ -24,20 +24,7 @@ public:
     virtual void RegisterCommands() override;
 
 public:
-    /** If enabled, the texture will be scaled to fit the viewport */
-    TSharedPtr<FUICommandInfo> FitToViewport;
-
-    /** Sets the checkered background pattern */
-    TSharedPtr<FUICommandInfo> CheckeredBackground;
-
-    /** Sets the checkered background pattern (filling the view port) */
-    TSharedPtr<FUICommandInfo> CheckeredBackgroundFill;
-
-    /** Sets the solid color background */
-    TSharedPtr<FUICommandInfo> SolidBackground;
-
-    /** If enabled, a border is drawn around the texture */
-    TSharedPtr<FUICommandInfo> TextureBorder;
+    //About actions
 
     /** Action to see the team and links to ILIAD resources */
     TSharedPtr<FUICommandInfo> AboutIliad;
@@ -48,10 +35,95 @@ public:
     /** Action to go to praxinos' forum */
     TSharedPtr<FUICommandInfo> VisitPraxinosForums;
     
+
+    //Undo Redo
+
     /** Action for undoing a stroke in ILIAD*/
     TSharedPtr<FUICommandInfo> Undo;
     
     /** Action for redoing a stroke in ILIAD*/
     TSharedPtr<FUICommandInfo> Redo;
+
+
+    //Tools Actions
+
+    /** Action for filling the current layer with the current color */
+    TSharedPtr<FUICommandInfo> FillCurrentLayer;
+
+    /** Action for clearing the current layer */
+    TSharedPtr<FUICommandInfo> ClearCurrentLayer;
+
+    
+    //Layers Actions
+
+    /** Action for creating a new layer */
+    TSharedPtr<FUICommandInfo> CreateNewLayer;
+
+    /** Action for duplicating the current layer */
+    TSharedPtr<FUICommandInfo> DuplicateCurrentLayer;
+
+    /** Action for deleting the current layer */
+    TSharedPtr<FUICommandInfo> DeleteCurrentLayer;
+
+    
+    //Viewport Actions
+
+    /** Action to reset the viewport to its original position */
+    TSharedPtr<FUICommandInfo> ResetViewportPosition;
+
+    /** Action to reset the viewport rotation */
+    TSharedPtr<FUICommandInfo> ResetViewportRotation; 
+
+    /** Action to rotate the viewport left */
+    TSharedPtr<FUICommandInfo> RotateViewportLeft; 
+
+    /** Action to rotate the viewport right */
+    TSharedPtr<FUICommandInfo> RotateViewportRight; 
+
+    /** Action to set zoom pourcentage at 10% */
+    TSharedPtr<FUICommandInfo> SetZoom10Percent; 
+
+    /** Action to set zoom pourcentage at 20% */
+    TSharedPtr<FUICommandInfo> SetZoom20Percent; 
+
+    /** Action to set zoom pourcentage at 30% */
+    TSharedPtr<FUICommandInfo> SetZoom30Percent; 
+
+    /** Action to set zoom pourcentage at 40% */
+    TSharedPtr<FUICommandInfo> SetZoom40Percent; 
+
+    /** Action to set zoom pourcentage at 50% */
+    TSharedPtr<FUICommandInfo> SetZoom50Percent; 
+
+    /** Action to set zoom pourcentage at 60% */
+    TSharedPtr<FUICommandInfo> SetZoom60Percent; 
+
+    /** Action to set zoom pourcentage at 70% */
+    TSharedPtr<FUICommandInfo> SetZoom70Percent; 
+
+    /** Action to set zoom pourcentage at 80% */
+    TSharedPtr<FUICommandInfo> SetZoom80Percent; 
+
+    /** Action to set zoom pourcentage at 90% */
+    TSharedPtr<FUICommandInfo> SetZoom90Percent; 
+
+    /** Action to set zoom pourcentage at 100% */
+    TSharedPtr<FUICommandInfo> SetZoom100Percent; 
+
+    /** Action to set zoom at fit to screen */
+    TSharedPtr<FUICommandInfo> SetZoomFitScreen; 
+
+    /** Action to zoom in*/
+    TSharedPtr<FUICommandInfo> ZoomIn; 
+
+    /** Action to set zoom out*/
+    TSharedPtr<FUICommandInfo> ZoomOut; 
+
+
+
+    //Switch tablet API
+
+    /** Action to switch tablet API */
+    TSharedPtr<FUICommandInfo> SwitchTabletAPI; 
 
 };

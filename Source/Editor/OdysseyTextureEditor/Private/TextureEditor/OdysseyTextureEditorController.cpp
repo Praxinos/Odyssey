@@ -46,7 +46,7 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
     FOdysseyTextureEditorCommands::Register();
 
     // Bind each command to its function
-    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
+    BindCommands(iToolkitCommands);
 
 	// Set LayerStack CB
     if( !(mData->LayerStack()->OnCurrentLayerChanged().IsBound()) )
@@ -86,6 +86,8 @@ FOdysseyTextureEditorController::BindCommands(const TSharedRef<FUICommandList>& 
         FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures,
         FExecuteAction::CreateSP( this, &FOdysseyTextureEditorController::OnExportLayersAsTextures ),
         FCanExecuteAction() );
+
+    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 }
 
 TSharedPtr<FExtender>
@@ -346,19 +348,62 @@ FOdysseyTextureEditorController::OnClearUndo()
     return FOdysseyPainterEditorController::OnClearUndo();
 }
 
-void
-FOdysseyTextureEditorController::UndoIliad()
+FReply
+FOdysseyTextureEditorController::OnUndoIliad()
 {
-    FOdysseyPainterEditorController::UndoIliad();
+    FOdysseyPainterEditorController::OnUndoIliad();
 	mData->LayerStack()->mDrawingUndo->LoadData();
+    return FReply::Handled();
 }
 
 
-void
-FOdysseyTextureEditorController::RedoIliad()
+FReply
+FOdysseyTextureEditorController::OnRedoIliad()
 {
-    FOdysseyPainterEditorController::RedoIliad();
+    FOdysseyPainterEditorController::OnRedoIliad();
 	mData->LayerStack()->mDrawingUndo->Redo();
+    return FReply::Handled();
+}
+
+void
+FOdysseyTextureEditorController::OnCreateNewLayer()
+{
+    FOdysseyPainterEditorController::OnCreateNewLayer();
+
+    mData->LayerStack()->AddImageLayer(0);
+    mData->LayerStack()->ComputeResultBlock();
+    mGUI->GetLayerStackTab()->RefreshView();
+}
+
+void
+FOdysseyTextureEditorController::OnDuplicateCurrentLayer()
+{
+    FOdysseyPainterEditorController::OnDuplicateCurrentLayer();
+
+    if( mData->LayerStack()->GetCurrentLayer() )
+    {
+        mData->LayerStack()->DuplicateLayer( mData->LayerStack()->GetCurrentLayer()->GetNodeContent() );
+        mData->LayerStack()->ComputeResultBlock();
+        mGUI->GetLayerStackTab()->RefreshView();
+    }
+}
+
+void
+FOdysseyTextureEditorController::OnDeleteCurrentLayer()
+{
+    FOdysseyPainterEditorController::OnDeleteCurrentLayer();
+
+
+    if( mData->LayerStack()->GetCurrentLayer() )
+    {
+		FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Deleting current layer");
+        if( FMessageDialog::Open(EAppMsgType::OkCancel,  LOCTEXT("DeletingCurrentLayer", "Are you sure you want to delete this layer ?" ), &Title ) == EAppReturnType::Ok )
+        {
+            mData->LayerStack()->DeleteLayer( mData->LayerStack()->GetCurrentLayer()->GetNodeContent() );
+            mData->LayerStack()->ComputeResultBlock();
+            mGUI->GetLayerStackTab()->RefreshView();
+        }
+    }
 }
 
 

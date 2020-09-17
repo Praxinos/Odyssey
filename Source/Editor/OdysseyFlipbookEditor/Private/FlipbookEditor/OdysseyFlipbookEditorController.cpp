@@ -60,7 +60,7 @@ FOdysseyFlipbookEditorController::Init(const TSharedRef<FUICommandList>& iToolki
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(iToolkitCommands);
 
     // Bind each command to its function
-    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
+    BindCommands(iToolkitCommands);
 
 	InitLayerStack();
 }
@@ -280,28 +280,65 @@ FOdysseyFlipbookEditorController::OnClearUndo()
     return FOdysseyPainterEditorController::OnClearUndo();
 }
 
-void
-FOdysseyFlipbookEditorController::UndoIliad()
+FReply
+FOdysseyFlipbookEditorController::OnUndoIliad()
 {
-    FOdysseyPainterEditorController::UndoIliad();
+    FOdysseyPainterEditorController::OnUndoIliad();
     
     if(!mData->LayerStack())
     {
-        return;
+        return FReply::Handled();
     }
 	mData->LayerStack()->mDrawingUndo->LoadData();
+    return FReply::Handled();
 }
 
 
-void
-FOdysseyFlipbookEditorController::RedoIliad()
+FReply
+FOdysseyFlipbookEditorController::OnRedoIliad()
 {
-    FOdysseyPainterEditorController::RedoIliad();
+    FOdysseyPainterEditorController::OnRedoIliad();
     if(!mData->LayerStack())
     {
-        return;
+        return FReply::Handled();
     }
 	mData->LayerStack()->mDrawingUndo->Redo();
+    return FReply::Handled();
+}
+
+void
+FOdysseyFlipbookEditorController::OnCreateNewLayer()
+{
+    FOdysseyPainterEditorController::OnCreateNewLayer();
+
+    mData->LayerStack()->AddImageLayer(0);
+    mData->LayerStack()->ComputeResultBlock();
+    mGUI->GetLayerStackTab()->RefreshView();}
+
+void
+FOdysseyFlipbookEditorController::OnDuplicateCurrentLayer()
+{
+    FOdysseyPainterEditorController::OnDuplicateCurrentLayer();
+
+    if( mData->LayerStack()->GetCurrentLayer() )
+    {
+        mData->LayerStack()->DuplicateLayer( mData->LayerStack()->GetCurrentLayer()->GetNodeContent() );
+        mData->LayerStack()->ComputeResultBlock();
+        mGUI->GetLayerStackTab()->RefreshView();
+    }
+}
+
+void
+FOdysseyFlipbookEditorController::OnDeleteCurrentLayer()
+{
+    FOdysseyPainterEditorController::OnDeleteCurrentLayer();
+
+    if( mData->LayerStack()->GetCurrentLayer() )
+    {
+        mData->LayerStack()->DeleteLayer( mData->LayerStack()->GetCurrentLayer()->GetNodeContent() );
+        mData->LayerStack()->ComputeResultBlock();
+        mGUI->GetLayerStackTab()->RefreshView();
+    }
 }
 
 

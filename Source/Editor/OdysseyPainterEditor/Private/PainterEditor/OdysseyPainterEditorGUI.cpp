@@ -590,7 +590,7 @@ FOdysseyPainterEditorGUI::CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& 
 				[
 					SNew( SButton )
 					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnUndo)
+					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnUndoIliad)
 					[
 						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo32"))
 					]
@@ -599,7 +599,7 @@ FOdysseyPainterEditorGUI::CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& 
 				[
 					SNew( SButton )
 					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnRedo)
+					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnRedoIliad)
 					[
 						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
 					]

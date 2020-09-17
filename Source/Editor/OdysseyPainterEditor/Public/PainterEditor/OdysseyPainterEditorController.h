@@ -4,6 +4,7 @@
 #pragma once
 
 #include <ULIS3>
+#include "OdysseyStylusInputSettings.h"
 
 class FOdysseyPainterEditorToolkit;
 class FOdysseyPainterEditorData;
@@ -58,12 +59,24 @@ public:
     virtual void OnMeshSelected( UStaticMesh* iMesh );
     virtual void OnMeshChanged( UBlueprint* iMesh );
 
-    //TODO: Get rid of this when we'll have a toolbox widget
+    //Shortcut Actions
     virtual FReply OnClear();
     virtual FReply OnFill();
-    virtual FReply OnUndo();
-    virtual FReply OnRedo();
+    virtual FReply OnUndoIliad();
+    virtual FReply OnRedoIliad();
     virtual FReply OnClearUndo();
+    virtual void   OnCreateNewLayer();
+    virtual void   OnDuplicateCurrentLayer();
+    virtual void   OnDeleteCurrentLayer();
+    void           OnResetViewportPosition();
+    void           OnResetViewportRotation();
+    void           OnRotateViewportLeft();
+    void           OnRotateViewportRight();
+    void           OnSetZoom(double iZoomValue);
+    void           OnSetZoomFitScreen();
+    void           OnZoomIn();
+    void           OnZoomOut();
+    void           OnSwitchTabletAPI();
 
     // Brush Handlers
     virtual void HandleBrushParameterChanged();
@@ -106,11 +119,12 @@ private:
     static void FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor );
     static void FillAboutMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor );
 
-protected:
-	virtual void UndoIliad();
-	virtual void RedoIliad();
+    TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem );
+    void ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo );
+    FText GetComboBoxTabletAPISelectedAsText() const;
 
 private:
+    TSharedPtr<EOdysseyStylusInputDriver>       mComboBoxTabletAPISelected;
 	TArray<TSharedPtr<FExtender>>               mMenuExtenders;
 };
 

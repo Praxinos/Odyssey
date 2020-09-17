@@ -903,8 +903,6 @@ void FOdysseyLayerStack::DuplicateLayer(IOdysseyLayer* iLayerToDuplicate)
             }
         }
     }
-
-    ComputeResultBlock();
     mOnLayerStackDirty.Broadcast();
 }
 
