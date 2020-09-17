@@ -44,6 +44,13 @@ public:
     UPROPERTY()
     UMovieScene* MovieScene;
 
+    UPROPERTY()
+    FGuid BindingId;
+
+    UPROPERTY()
+	FSoftObjectPath ExternalObjectPath;
+	//FString ObjectPath;
+
     //UPROPERTY()
     //TSoftClassPtr<AActor> BoundActorClass;
 
