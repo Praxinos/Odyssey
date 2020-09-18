@@ -15,7 +15,7 @@
 #include "ISequencerModule.h"
 #include "LevelEditor.h"
 #include "LevelEditorSequencerIntegration.h"
-//#include "Misc/TemplateSequenceEditorPlaybackContext.h"
+#include "Misc/ShotSequenceEditorPlaybackContext.h"
 //#include "Misc/TemplateSequenceEditorSpawnRegister.h"
 //#include "Misc/TemplateSequenceEditorUtil.h"
 #include "Modules/ModuleManager.h"
@@ -78,7 +78,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         );
 
     mShotSequence = iShotSequence;
-    //PlaybackContext = MakeShared<FTemplateSequenceEditorPlaybackContext>();
+    mPlaybackContext = MakeShared<FShotSequenceEditorPlaybackContext>();
 
     // Mode sould always be world-centric (don't know how to have a standalone one)
     // in this case, SequencerDefs::ShotSequencerAppIdentifier & StandaloneDefaultLayout is not useful
@@ -99,7 +99,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         sequencerInitParams.HostCapabilities.bSupportsCurveEditor = true;
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
 
-        //sequencerInitParams.PlaybackContext.Bind( PlaybackContext.ToSharedRef(), &FTemplateSequenceEditorPlaybackContext::GetPlaybackContext );
+        sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FShotSequenceEditorPlaybackContext::GetPlaybackContext );
 
         sequencerInitParams.ViewParams.UniqueName = "ShotSequenceEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;

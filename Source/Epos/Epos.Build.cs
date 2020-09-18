@@ -43,7 +43,9 @@ public class Epos : ModuleRules
 				"MovieScene",
 				"MovieSceneTracks",
 				"EposTracks",
-            }
+				"LevelSequence",
+				"CinematicCamera",
+			}
 			);
 		
 		

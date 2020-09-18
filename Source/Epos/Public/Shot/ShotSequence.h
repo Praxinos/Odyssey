@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "LevelSequenceBindingReference.h"
 #include "MovieSceneSequence.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
@@ -44,19 +45,16 @@ public:
     UPROPERTY()
     UMovieScene* MovieScene;
 
-    UPROPERTY()
-    FGuid BindingId;
+    //--- Camera
 
     UPROPERTY()
-	FSoftObjectPath ExternalObjectPath;
-	//FString ObjectPath;
+    FGuid CameraBindingId;
 
-    //UPROPERTY()
-    //TSoftClassPtr<AActor> BoundActorClass;
+    UPROPERTY()
+    FLevelSequenceBindingReference CameraBindingReference;
+    
+    //--- Planes
 
-    //UPROPERTY()
-    //TSoftObjectPtr<AActor> BoundPreviewActor;
-
-    //UPROPERTY()
-    //TMap<FGuid, FName> BoundActorComponents;
+	//UPROPERTY()
+	TMap< FGuid, FLevelSequenceBindingReference > BindingIdToReferences;
 };

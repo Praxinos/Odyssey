@@ -2,6 +2,7 @@
 // IDDN 
 
 #include "Shot/ShotSequence.h"
+#include "CineCameraActor.h"
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
@@ -37,93 +38,54 @@ void UShotSequence::Initialize()
 
 void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& PossessedObject, UObject* Context )
 {
-    //if (UActorComponent* Component = Cast<UActorComponent>(&PossessedObject))
-    //{
-    //	const FName ComponentName = Component->GetFName();
-    //	BoundActorComponents.Add(ObjectId, ComponentName);
-    //}
-
-    UPackage* ObjectPackage = PossessedObject.GetOutermost();
-    if( !ensure( ObjectPackage ) )
+    if( !CanPossessObject( PossessedObject, Context ) )
     {
+        MovieScene->RemovePossessable( ObjectId );
+        //UnbindPossessableObjects( ObjectId ); // Not necessary (?) as it can't have been added previously (?)
+
         return;
     }
 
-    BindingId = ObjectId;
-    //ObjectPath = PossessedObject.GetPathName( Context );
-
-    FString PackageName = ObjectPackage->GetName();
-#if WITH_EDITORONLY_DATA
-    // If this is being set from PIE we need to remove the pie prefix and point to the editor object
-    if( ObjectPackage->PIEInstanceID != INDEX_NONE )
+    if( PossessedObject.IsA<ACineCameraActor>() )
     {
-        FString PIEPrefix = FString::Printf( PLAYWORLD_PACKAGE_PREFIX TEXT( "_%d_" ), ObjectPackage->PIEInstanceID );
-        PackageName.ReplaceInline( *PIEPrefix, TEXT( "" ) );
-    }
-#endif
+        MovieScene->RemovePossessable( CameraBindingId );
+        UnbindPossessableObjects( CameraBindingId );
 
-    FString FullPath = PackageName + TEXT( "." ) + PossessedObject.GetPathName( ObjectPackage );
-    ExternalObjectPath = FSoftObjectPath( FullPath );
+        CameraBindingId = ObjectId;
+        CameraBindingReference = FLevelSequenceBindingReference( &PossessedObject, Context );
+    }
+    else
+    {
+        BindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+    }
 }
 
 bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContext ) const
 {
-    return Object.IsA<AStaticMeshActor>();
+    return Object.IsA<AStaticMeshActor>() || Object.IsA<ACineCameraActor>();
 }
 
 void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects ) const
 {
-    //AActor* Actor = Cast<AActor>(Context);
-    //if (Actor == nullptr)
-    //{
-    //	return;
-    //}
-
-    //const FName* ComponentName = BoundActorComponents.Find(ObjectId);
-    //if (ComponentName == nullptr)
-    //{
-    //	return;
-    //}
-
-    //if (UActorComponent* FoundComponent = FindObject<UActorComponent>(Actor, *ComponentName->ToString(), false))
-    //{
-    //	OutObjects.Add(FoundComponent);
-    //}
-
-    if( ObjectId != BindingId )
-        return;
-
-    //UObject* object = FindObject<UObject>( Context, *ObjectPath, false );
-    //if( !object )
-    //    return;
-
-    FSoftObjectPath TempPath = ExternalObjectPath;
-
-    // Soft Object Paths don't follow asset redirectors when attempting to call ResolveObject or TryLoad.
-    // We want to follow the asset redirector so that maps that have been renamed (from Untitled to their first asset name)
-    // properly resolve. This fixes Possessable bindings losing their references the first time you save a map.
-    TempPath.PreSavePath();
-
-#if WITH_EDITORONLY_DATA
-    int32 ContextPlayInEditorID = Context ? Context->GetOutermost()->PIEInstanceID : INDEX_NONE;
-
-    if( ContextPlayInEditorID != INDEX_NONE )
+    if( CameraBindingId == ObjectId )
     {
-        // We have an override PIE id, so set the global before entering
-        TGuardValue<int32> PIEGuard( GPlayInEditorID, ContextPlayInEditorID );
-        TempPath.FixupForPIE();
-    }
-    else
-    {
-        TempPath.FixupForPIE();
-    }
-#endif
+        UObject* object = CameraBindingReference.Resolve( Context, NAME_None );
+        if( !object )
+            return;
 
-    UObject* object = TempPath.ResolveObject();
-    if( !object )
+        OutObjects.Add( object );
         return;
+    }
 
-    OutObjects.Add( object );
+    const FLevelSequenceBindingReference* Reference = BindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( ResolvedObject && ResolvedObject->GetWorld() )
+        {
+            OutObjects.Add( ResolvedObject );
+        }
+    }
 }
 
 UMovieScene* UShotSequence::GetMovieScene() const
@@ -143,17 +105,60 @@ UObject* UShotSequence::GetParentObject( UObject* Object ) const
 
 void UShotSequence::UnbindPossessableObjects( const FGuid& ObjectId )
 {
-    //BoundActorComponents.Remove(ObjectId);
+    if( CameraBindingId == ObjectId )
+    {
+        CameraBindingId = FGuid();
+        CameraBindingReference = FLevelSequenceBindingReference();
+        return;
+    }
+
+    BindingIdToReferences.Remove( ObjectId );
 }
 
 void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context )
 {
-    //BoundActorComponents.Remove(ObjectId);
+    if( CameraBindingId == ObjectId )
+    {
+        CameraBindingId = FGuid();
+        CameraBindingReference = FLevelSequenceBindingReference();
+
+        return;
+    }
+
+    FLevelSequenceBindingReference* Reference = BindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( InObjects.Contains( ResolvedObject ) )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
+
+        return;
+    }
 }
 
 void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context )
 {
-    //BoundActorComponents.Remove(ObjectId);
+    if( CameraBindingId == ObjectId )
+    {
+        CameraBindingId = FGuid();
+        CameraBindingReference = FLevelSequenceBindingReference();
+
+        return;
+    }
+
+    FLevelSequenceBindingReference* Reference = BindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
+
+        return;
+    }
 }
 
 #if WITH_EDITOR
