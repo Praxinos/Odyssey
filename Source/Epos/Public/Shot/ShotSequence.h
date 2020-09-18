@@ -25,6 +25,7 @@ public:
     //~ UMovieSceneSequence interface
     virtual void BindPossessableObject( const FGuid& ObjectId, UObject& PossessedObject, UObject* Context ) override;
     virtual bool CanPossessObject( UObject& Object, UObject* InPlaybackContext ) const override;
+    virtual bool CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const override;
     virtual void LocateBoundObjects( const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects ) const override;
     virtual UMovieScene* GetMovieScene() const override;
     virtual UObject* GetParentObject( UObject* Object ) const override;
@@ -36,8 +37,8 @@ public:
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
 //    virtual FText GetDisplayName() const override;
 //
-//    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
-//    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
+    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
+    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
 #endif
 
 public:
@@ -55,6 +56,6 @@ public:
     
     //--- Planes
 
-	//UPROPERTY()
+	UPROPERTY()
 	TMap< FGuid, FLevelSequenceBindingReference > BindingIdToReferences;
 };

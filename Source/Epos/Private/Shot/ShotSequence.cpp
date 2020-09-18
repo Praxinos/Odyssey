@@ -65,6 +65,11 @@ bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContex
     return Object.IsA<AStaticMeshActor>() || Object.IsA<ACineCameraActor>();
 }
 
+bool UShotSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const
+{
+    return !InPossessable.GetParent().IsValid();
+}
+
 void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects ) const
 {
     if( CameraBindingId == ObjectId )
@@ -182,32 +187,49 @@ UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClas
 //{
 //	return UMovieSceneSequence::GetDisplayName();
 //}
-//
-//void UShotSequence::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
-//{
-//	Super::GetAssetRegistryTags(OutTags);
-//
-//	if (BoundActorClass != nullptr)
-//	{
-//		FAssetRegistryTag Tag("BoundActorClass", BoundActorClass->GetName(), FAssetRegistryTag::TT_Alphabetical);
-//		OutTags.Add(Tag);
-//	}
-//	else
-//	{
-//		OutTags.Emplace("BoundActorClass", "(None)", FAssetRegistryTag::TT_Alphabetical);
-//	}
-//}
-//
-//void UShotSequence::GetAssetRegistryTagMetadata(TMap<FName, FAssetRegistryTagMetadata>& OutMetadata) const
-//{
-//	Super::GetAssetRegistryTagMetadata(OutMetadata);
-//
-//	OutMetadata.Add(
-//		"BoundActorClass",
-//		FAssetRegistryTagMetadata()
-//			.SetDisplayName(NSLOCTEXT("TemplateSequence", "BoundActorClass_Label", "Bound Actor Class"))
-//			.SetTooltip(NSLOCTEXT("TemplateSequence", "BoundActorClass_Tooltip", "The type of actor bound to this template sequence"))
-//		);
-//}
-//
+
+void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const
+{
+	Super::GetAssetRegistryTags( OutTags );
+
+    if( CameraBindingId.IsValid() )
+    {
+        FAssetRegistryTag Tag( "Camera", MovieScene->GetObjectDisplayName( CameraBindingId ).ToString(), FAssetRegistryTag::TT_Alphabetical );
+        OutTags.Add( Tag );
+    }
+    else
+    {
+        OutTags.Emplace( "Camera", "(None)", FAssetRegistryTag::TT_Alphabetical );
+    }
+
+    if( BindingIdToReferences.Num() )
+    {
+        FAssetRegistryTag Tag( "Planes", FString::FromInt( BindingIdToReferences.Num() ), FAssetRegistryTag::TT_Alphabetical );
+        OutTags.Add( Tag );
+    }
+    else
+    {
+        OutTags.Emplace( "Planes", "(0)", FAssetRegistryTag::TT_Alphabetical );
+    }
+}
+
+void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const
+{
+	Super::GetAssetRegistryTagMetadata( OutMetadata );
+
+    OutMetadata.Add(
+        "Camera",
+        FAssetRegistryTagMetadata()
+        .SetDisplayName( NSLOCTEXT( "ShotSequence", "Camera_Label", "Camera in shot" ) )
+        .SetTooltip( NSLOCTEXT( "ShotSequence", "Camera_Tooltip", "The camera bound to this shot sequence" ) )
+    );
+
+    OutMetadata.Add(
+        "Planes",
+        FAssetRegistryTagMetadata()
+        .SetDisplayName( NSLOCTEXT( "ShotSequence", "Planes_Label", "Planes in shot" ) )
+        .SetTooltip( NSLOCTEXT( "ShotSequence", "Planes_Tooltip", "The planes bound to this shot sequence" ) )
+    );
+}
+
 #endif
