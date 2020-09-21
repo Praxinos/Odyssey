@@ -64,9 +64,12 @@ public:
 
 private:
 
-    //TSharedRef<FExtender> HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects );
-    //void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
-    //void HandleAddComponentActionExecute( UActorComponent* Component );
+    /** Callback for the menu extensibility manager. */
+    TSharedRef<FExtender> HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects );
+    /** Callback for the track menu extender. */
+    void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
+    /** Callback for executing the Add Component action. */
+    void HandleAddComponentActionExecute( UActorComponent* Component );
 
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
@@ -85,7 +88,7 @@ private:
     TSharedRef<ISlateStyle> mStyle;
 
     /** Handle to the sequencer properties menu extender. */
-    //FDelegateHandle mSequencerExtenderHandle;
+    FDelegateHandle mSequencerExtenderHandle;
 
     TSharedPtr<FShotSequenceEditorPlaybackContext> mPlaybackContext;
 

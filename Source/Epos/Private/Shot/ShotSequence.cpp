@@ -20,7 +20,7 @@ UShotSequence::UShotSequence( const FObjectInitializer& ObjectInitializer )
     : Super( ObjectInitializer )
     , MovieScene( nullptr )
 {
-    //bParentContextsAreSignificant = true;
+    bParentContextsAreSignificant = true;
 }
 
 void UShotSequence::Initialize()
@@ -48,21 +48,33 @@ void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& Posse
 
     if( PossessedObject.IsA<ACineCameraActor>() )
     {
-        MovieScene->RemovePossessable( CameraBindingId );
-        UnbindPossessableObjects( CameraBindingId );
+        for( auto It = CameraBindingIdToReferences.CreateConstIterator(); It; ++It )
+        {
+            FGuid binding = It.Key();
+            //FGuid binding = pair.Key;
+            //FLevelSequenceBindingReference reference = pair.Value;
 
-        CameraBindingId = ObjectId;
-        CameraBindingReference = FLevelSequenceBindingReference( &PossessedObject, Context );
+            MovieScene->RemovePossessable( binding );
+            UnbindPossessableObjects( binding );
+        }
+
+        check( !CameraBindingIdToReferences.Num() );
+
+        CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+    }
+    else if( PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter< ACineCameraActor >() )
+    {
+        CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
     }
     else
     {
-        BindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+        PlanesBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
     }
 }
 
 bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContext ) const
 {
-    return Object.IsA<AStaticMeshActor>() || Object.IsA<ACineCameraActor>();
+    return Object.IsA<AStaticMeshActor>() || Object.IsA<ACineCameraActor>() || Object.IsA<UActorComponent>();
 }
 
 bool UShotSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const
@@ -72,17 +84,18 @@ bool UShotSequence::CanRebindPossessable( const FMovieScenePossessable& InPosses
 
 void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects ) const
 {
-    if( CameraBindingId == ObjectId )
+    const FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
+    if( Reference )
     {
-        UObject* object = CameraBindingReference.Resolve( Context, NAME_None );
-        if( !object )
-            return;
-
-        OutObjects.Add( object );
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( ResolvedObject && ResolvedObject->GetWorld() )
+        {
+            OutObjects.Add( ResolvedObject );
+        }
         return;
     }
 
-    const FLevelSequenceBindingReference* Reference = BindingIdToReferences.Find( ObjectId );
+    Reference = PlanesBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
@@ -100,37 +113,35 @@ UMovieScene* UShotSequence::GetMovieScene() const
 
 UObject* UShotSequence::GetParentObject( UObject* Object ) const
 {
-    //if (UActorComponent* Component = Cast<UActorComponent>(Object))
-    //{
-    //	return Component->GetOwner();
-    //}
+    if( UActorComponent* Component = Cast<UActorComponent>( Object ) )
+    {
+    	return Component->GetOwner();
+    }
 
     return nullptr;
 }
 
 void UShotSequence::UnbindPossessableObjects( const FGuid& ObjectId )
 {
-    if( CameraBindingId == ObjectId )
-    {
-        CameraBindingId = FGuid();
-        CameraBindingReference = FLevelSequenceBindingReference();
-        return;
-    }
-
-    BindingIdToReferences.Remove( ObjectId );
+    CameraBindingIdToReferences.Remove( ObjectId );
+    PlanesBindingIdToReferences.Remove( ObjectId );
 }
 
 void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context )
 {
-    if( CameraBindingId == ObjectId )
+    FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
+    if( Reference )
     {
-        CameraBindingId = FGuid();
-        CameraBindingReference = FLevelSequenceBindingReference();
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( InObjects.Contains( ResolvedObject ) )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
 
         return;
     }
 
-    FLevelSequenceBindingReference* Reference = BindingIdToReferences.Find( ObjectId );
+    Reference = PlanesBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
@@ -145,15 +156,19 @@ void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>
 
 void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context )
 {
-    if( CameraBindingId == ObjectId )
+    FLevelSequenceBindingReference* Reference = CameraBindingIdToReferences.Find( ObjectId );
+    if( Reference )
     {
-        CameraBindingId = FGuid();
-        CameraBindingReference = FLevelSequenceBindingReference();
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
 
         return;
     }
 
-    FLevelSequenceBindingReference* Reference = BindingIdToReferences.Find( ObjectId );
+    Reference = PlanesBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
@@ -192,9 +207,25 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
 {
 	Super::GetAssetRegistryTags( OutTags );
 
-    if( CameraBindingId.IsValid() )
+    if( CameraBindingIdToReferences.Num() )
     {
-        FAssetRegistryTag Tag( "Camera", MovieScene->GetObjectDisplayName( CameraBindingId ).ToString(), FAssetRegistryTag::TT_Alphabetical );
+        FString value;
+        for( const TPair< FGuid, FLevelSequenceBindingReference >& pair : CameraBindingIdToReferences )
+        {
+            FGuid binding = pair.Key;
+            //FLevelSequenceBindingReference reference = pair.Value;
+
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( binding );
+            if( possessable )
+            {
+                value = possessable->GetName();
+                //value = MovieScene->GetObjectDisplayName( binding ).ToString();
+
+                break; // Should be only one camera root
+            }
+        }
+
+        FAssetRegistryTag Tag( "Camera", value, FAssetRegistryTag::TT_Alphabetical );
         OutTags.Add( Tag );
     }
     else
@@ -202,9 +233,23 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
         OutTags.Emplace( "Camera", "(None)", FAssetRegistryTag::TT_Alphabetical );
     }
 
-    if( BindingIdToReferences.Num() )
+    if( PlanesBindingIdToReferences.Num() )
     {
-        FAssetRegistryTag Tag( "Planes", FString::FromInt( BindingIdToReferences.Num() ), FAssetRegistryTag::TT_Alphabetical );
+        int plane_count = 0;
+        for( const TPair< FGuid, FLevelSequenceBindingReference >& pair : PlanesBindingIdToReferences )
+        {
+            FGuid binding = pair.Key;
+            //FLevelSequenceBindingReference reference = pair.Value;
+
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( binding );
+            if( possessable && !possessable->GetParent().IsValid() /* to get only root planes */ )
+            {
+                plane_count++;
+            }
+        }
+
+        FAssetRegistryTag Tag( "Planes", FString::FromInt( plane_count ), FAssetRegistryTag::TT_Alphabetical );
+        //FAssetRegistryTag Tag( "Planes", FString::FromInt( PlanesBindingIdToReferences.Num() ), FAssetRegistryTag::TT_Alphabetical );
         OutTags.Add( Tag );
     }
     else

@@ -38,10 +38,11 @@ FShotSequenceEditorToolkit::FShotSequenceEditorToolkit( const TSharedRef<ISlateS
     : mShotSequence( nullptr )
     , mStyle( iStyle )
 {
-    //ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    //int32 NewIndex = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().Add(
-    //    FAssetEditorExtender::CreateRaw( this, &FTemplateSequenceEditorToolkit::HandleMenuExtensibilityGetExtender ) );
-    //SequencerExtenderHandle = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates()[NewIndex].GetHandle();
+    // register sequencer menu extenders
+    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
+    int32 NewIndex = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().Add(
+        FAssetEditorExtender::CreateRaw( this, &FShotSequenceEditorToolkit::HandleMenuExtensibilityGetExtender ) );
+    mSequencerExtenderHandle = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates()[NewIndex].GetHandle();
 }
 
 FShotSequenceEditorToolkit::~FShotSequenceEditorToolkit()
@@ -50,17 +51,19 @@ FShotSequenceEditorToolkit::~FShotSequenceEditorToolkit()
 
     mSequencer->Close();
 
+    // unregister delegates
     if( FModuleManager::Get().IsModuleLoaded( TEXT( "LevelEditor" ) ) )
     {
         auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
         levelEditorModule.OnMapChanged().RemoveAll( this );
     }
 
-    //ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    //SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().RemoveAll( [this]( const FAssetEditorExtender& Extender )
-    //{
-    //    return SequencerExtenderHandle == Extender.GetHandle();
-    //} );
+    // unregister sequencer menu extenders
+    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
+    SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().RemoveAll( [this]( const FAssetEditorExtender& Extender )
+    {
+        return mSequencerExtenderHandle == Extender.GetHandle();
+    } );
 }
 
 void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UShotSequence* iShotSequence )
@@ -206,83 +209,86 @@ void FShotSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class F
 
 //---
 
-//TSharedRef<FExtender> FTemplateSequenceEditorToolkit::HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects )
-//{
-//    TSharedRef<FExtender> AddTrackMenuExtender( new FExtender() );
-//    AddTrackMenuExtender->AddMenuExtension(
-//        SequencerMenuExtensionPoints::AddTrackMenu_PropertiesSection,
-//        EExtensionHook::Before,
-//        CommandList,
-//        FMenuExtensionDelegate::CreateRaw( this, &FTemplateSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack, ContextSensitiveObjects ) );
-//
-//    return AddTrackMenuExtender;
-//}
-//
-//void FTemplateSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects )
-//{
-//    // TODO-lchabant: stolen from level sequence.
-//    if( ContextObjects.Num() != 1 )
-//    {
-//        return;
-//    }
-//
-//    AActor* Actor = Cast<AActor>( ContextObjects[0] );
-//    if( Actor == nullptr )
-//    {
-//        return;
-//    }
-//
-//    AddTrackMenuBuilder.BeginSection( "Components", LOCTEXT( "ComponentsSection", "Components" ) );
-//    {
-//        for( UActorComponent* Component : Actor->GetComponents() )
-//        {
-//            if( Component )
-//            {
-//                FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FTemplateSequenceEditorToolkit::HandleAddComponentActionExecute, Component ) );
-//                FText AddComponentLabel = FText::FromString( Component->GetName() );
-//                FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), FText::FromString( Component->GetName() ) );
-//                AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
-//            }
-//        }
-//    }
-//    AddTrackMenuBuilder.EndSection();
-//}
-//
-//void FTemplateSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
-//{
-//    // TODO-lchabant: stolen from level sequence.
-//    const FScopedTransaction Transaction( LOCTEXT( "AddComponent", "Add Component" ) );
-//
-//    FString ComponentName = Component->GetName();
-//
-//    TArray<UActorComponent*> ActorComponents;
-//    ActorComponents.Add( Component );
-//
-//    USelection* SelectedActors = GEditor->GetSelectedActors();
-//    if( SelectedActors && SelectedActors->Num() > 0 )
-//    {
-//        for( FSelectionIterator Iter( *SelectedActors ); Iter; ++Iter )
-//        {
-//            AActor* Actor = CastChecked<AActor>( *Iter );
-//
-//            TArray<UActorComponent*> OutActorComponents;
-//            Actor->GetComponents( OutActorComponents );
-//
-//            for( UActorComponent* ActorComponent : OutActorComponents )
-//            {
-//                if( ActorComponent->GetName() == ComponentName )
-//                {
-//                    ActorComponents.AddUnique( ActorComponent );
-//                }
-//            }
-//        }
-//    }
-//
-//    for( UActorComponent* ActorComponent : ActorComponents )
-//    {
-//        Sequencer->GetHandleToObject( ActorComponent );
-//    }
-//}
+TSharedRef<FExtender>
+FShotSequenceEditorToolkit::HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects )
+{
+    TSharedRef<FExtender> AddTrackMenuExtender( new FExtender() );
+    AddTrackMenuExtender->AddMenuExtension(
+        SequencerMenuExtensionPoints::AddTrackMenu_PropertiesSection,
+        EExtensionHook::Before,
+        CommandList,
+        FMenuExtensionDelegate::CreateRaw( this, &FShotSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack, ContextSensitiveObjects ) );
+
+    return AddTrackMenuExtender;
+}
+
+void
+FShotSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects )
+{
+    // TODO-lchabant: stolen from level sequence.
+    if( ContextObjects.Num() != 1 )
+    {
+        return;
+    }
+
+    AActor* Actor = Cast<AActor>( ContextObjects[0] );
+    if( Actor == nullptr )
+    {
+        return;
+    }
+
+    AddTrackMenuBuilder.BeginSection( "Components", LOCTEXT( "ComponentsSection", "Components" ) );
+    {
+        for( UActorComponent* Component : Actor->GetComponents() )
+        {
+            if( Component )
+            {
+                FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleAddComponentActionExecute, Component ) );
+                FText AddComponentLabel = FText::FromString( Component->GetName() );
+                FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), FText::FromString( Component->GetName() ) );
+                AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
+            }
+        }
+    }
+    AddTrackMenuBuilder.EndSection();
+}
+
+void
+FShotSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
+{
+    // TODO-lchabant: stolen from level sequence.
+    const FScopedTransaction Transaction( LOCTEXT( "AddComponent", "Add Component" ) );
+
+    FString ComponentName = Component->GetName();
+
+    TArray<UActorComponent*> ActorComponents;
+    ActorComponents.Add( Component );
+
+    USelection* SelectedActors = GEditor->GetSelectedActors();
+    if( SelectedActors && SelectedActors->Num() > 0 )
+    {
+        for( FSelectionIterator Iter( *SelectedActors ); Iter; ++Iter )
+        {
+            AActor* Actor = CastChecked<AActor>( *Iter );
+
+            TArray<UActorComponent*> OutActorComponents;
+            Actor->GetComponents( OutActorComponents );
+
+            for( UActorComponent* ActorComponent : OutActorComponents )
+            {
+                if( ActorComponent->GetName() == ComponentName )
+                {
+                    ActorComponents.AddUnique( ActorComponent );
+                }
+            }
+        }
+    }
+
+    for( UActorComponent* ActorComponent : ActorComponents )
+    {
+        mSequencer->GetHandleToObject( ActorComponent );
+    }
+}
 
 void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {

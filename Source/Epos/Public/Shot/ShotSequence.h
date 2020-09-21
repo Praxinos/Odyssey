@@ -46,16 +46,12 @@ public:
     UPROPERTY()
     UMovieScene* MovieScene;
 
-    //--- Camera
-
+    // The map should contain only one root cinecamera actor and its multiple components
+    // Only one entry should have an invalid guid
     UPROPERTY()
-    FGuid CameraBindingId;
-
-    UPROPERTY()
-    FLevelSequenceBindingReference CameraBindingReference;
+    TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences;
     
-    //--- Planes
-
-	UPROPERTY()
-	TMap< FGuid, FLevelSequenceBindingReference > BindingIdToReferences;
+    // The map will contain multiple staticmesh actor (planes) and all their multiple components
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences;
 };
