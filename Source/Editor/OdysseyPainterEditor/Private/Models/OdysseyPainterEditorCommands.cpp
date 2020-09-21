@@ -6,55 +6,52 @@
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorCommands"
 
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
-    : TCommands<FOdysseyPainterEditorCommands>( "OdysseyPainterEditor", NSLOCTEXT( "Contexts", "OdysseyPainterEditor", "Odyssey Painter Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
+    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
 {
 }
 
 void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
-    UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( VisitPraxinosForums, "Praxinos Forums...", "Praxinos Forums...", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD",                                         EUserInterfaceActionType::Button, FInputChord( EKeys::F1 ) );
+    UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...",               EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( VisitPraxinosForums, "Praxinos Forums...", "Praxinos Forums...",                  EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_COMMAND( ResetViewportPosition, "ResetViewportPosition", "ResetViewportPosition",EUserInterfaceActionType::Button, FInputChord( EKeys::NumPadFive ) );
-    UI_COMMAND( ResetViewportRotation, "ResetViewportRotation", "ResetViewportRotation",EUserInterfaceActionType::Button, FInputChord( EKeys::NumPadTwo ) );
-    UI_COMMAND( RotateViewportLeft, "RotateViewportLeft", "RotateViewportLeft",         EUserInterfaceActionType::Button, FInputChord( EKeys::NumPadOne ) );
-    UI_COMMAND( RotateViewportRight, "RotateViewportRight", "RotateViewportRight",      EUserInterfaceActionType::Button, FInputChord( EKeys::NumPadThree ) );
+    UI_COMMAND( ImportTexturesAsLayers, "Import Textures As Layers", "Import Textures As Layers",    EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::P ) );
+    UI_COMMAND( ExportLayersAsTextures, "Export Layer As Textures", "Export Layer As Textures",      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::E ) );    
 
-    UI_COMMAND( SetZoom10Percent, "SetZoom10Percent", "SetZoom10Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::Ampersand ) );
-    UI_COMMAND( SetZoom20Percent, "SetZoom20Percent", "SetZoom20Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::E_AccentAigu ) );
-    UI_COMMAND( SetZoom30Percent, "SetZoom30Percent", "SetZoom30Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::Quote ) );
-    UI_COMMAND( SetZoom40Percent, "SetZoom40Percent", "SetZoom40Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::Apostrophe ) );
-    UI_COMMAND( SetZoom50Percent, "SetZoom50Percent", "SetZoom50Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::LeftParantheses ) );
-    UI_COMMAND( SetZoom60Percent, "SetZoom60Percent", "SetZoom60Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::Hyphen ) );
-    UI_COMMAND( SetZoom70Percent, "SetZoom70Percent", "SetZoom70Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::E_AccentGrave ) );
-    UI_COMMAND( SetZoom80Percent, "SetZoom80Percent", "SetZoom80Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::Underscore ) );
-    UI_COMMAND( SetZoom90Percent, "SetZoom90Percent", "SetZoom90Percent",               EUserInterfaceActionType::Button, FInputChord( EKeys::C_Cedille ) );
-    UI_COMMAND( SetZoom100Percent, "SetZoom100Percent", "SetZoom100Percent",            EUserInterfaceActionType::Button, FInputChord( EKeys::A_AccentGrave ) );
-    UI_COMMAND( SetZoomFitScreen, "SetZoomFitScreen", "SetZoomFitScreen",               EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
-    UI_COMMAND( ZoomIn, "ZoomIn", "ZoomIn",                                             EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
-    UI_COMMAND( ZoomOut, "ZoomOut", "ZoomOut",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
+    UI_COMMAND( ResetViewportRotation, "Reset Viewport Rotation", "Reset viewport rotation",        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::R ) );
+    UI_COMMAND( ResetViewportPosition, "Reset Viewport Position", "Reset viewport position",        EUserInterfaceActionType::Button, FInputChord( EKeys::Escape ) );
+    UI_COMMAND( RotateViewportLeft, "Rotate Viewport Left", "Rotate viewport left",                 EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::L ) );
+    UI_COMMAND( RotateViewportRight, "Rotate Viewport Right", "Rotate viewport right",              EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::R ) );
+    UI_COMMAND( SetZoom10Percent, "Set Zoom 10 Percent", "Set zoom at 10 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom20Percent, "Set Zoom 20 Percent", "Set zoom at 20 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom30Percent, "Set Zoom 30 Percent", "Set zoom at 30 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom40Percent, "Set Zoom 40 Percent", "Set zoom at 40 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom50Percent, "Set Zoom 50 Percent", "Set zoom at 50 percent",                   EUserInterfaceActionType::Button, FInputChord( EKeys::H ) );
+    UI_COMMAND( SetZoom60Percent, "Set Zoom 60 Percent", "Set zoom at 60 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom70Percent, "Set Zoom 70 Percent", "Set zoom at 70 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom80Percent, "Set Zoom 80 Percent", "Set zoom at 80 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom90Percent, "Set Zoom 90 Percent", "Set zoom at 90 percent",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetZoom100Percent, "Set Zoom 100 Percent", "Set zoom at 100 percent",                EUserInterfaceActionType::Button, FInputChord( EKeys::Z ) );
+    UI_COMMAND( SetZoomFitScreen, "Set Zoom Fit Screen", "Set zoom fit screen",                      EUserInterfaceActionType::Button, FInputChord( EKeys::S ) );
+    UI_COMMAND( ZoomIn, "Zoom In", "Zoom in",                                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
+    UI_COMMAND( ZoomOut, "Zoom Out", "Zoom out",                                                   EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
+   
+    UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                          EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::A ) );
+   
+    UI_COMMAND( CreateNewLayer, "Create New Layer", "Create new image layer",                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::N ) );
+    UI_COMMAND( DuplicateCurrentLayer, "Duplicate Current Layer", "Duplicate current layer",        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::D ) );
+    UI_COMMAND( FillCurrentLayer, "Fill Current Layer", "Fill current layer",                       EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
+    UI_COMMAND( ClearCurrentLayer, "Clear Current Layer", "Clear current layer",                    EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
+    UI_COMMAND( DeleteCurrentLayer, "Delete Current Layer", "Delete current layer",                 EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::Delete ) );
 
-    
 #if PLATFORM_MAC
-    UI_COMMAND( Undo, "Undo Iliad", "Undo Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Z ) );
-    UI_COMMAND( Redo, "Redo Iliad", "Redo Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Y ) );
-    UI_COMMAND( FillCurrentLayer, "FillCurrentLayer", "FillCurrentLayer",               EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::F ) );
-    UI_COMMAND( ClearCurrentLayer, "ClearCurrentLayer", "ClearCurrentLayer",            EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::C ) );
-    UI_COMMAND( CreateNewLayer, "CreateNewLayer", "CreateNewLayer",                     EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::N ) );
-    UI_COMMAND( DuplicateCurrentLayer, "DuplicateCurrentLayer", "DuplicateCurrentLayer",EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::D ) );
-    UI_COMMAND( DeleteCurrentLayer, "DeleteCurrentLayer", "DeleteCurrentLayer",         EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::X ) );
-    UI_COMMAND( SwitchTabletAPI, "SwitchTabletAPI", "SwitchTabletAPI",                  EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::A ) );
+    UI_COMMAND( Undo, "Undo Iliad", "Undo stroke in Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Z ) );
+    UI_COMMAND( Redo, "Redo Iliad", "Redo stroke in Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Y ) );
 #else
-    UI_COMMAND( Undo, "Undo Iliad", "Undo Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Z ) );
-    UI_COMMAND( Redo, "Redo Iliad", "Redo Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Y ) );
-    UI_COMMAND( FillCurrentLayer, "FillCurrentLayer", "FillCurrentLayer",               EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::F ) );
-    UI_COMMAND( ClearCurrentLayer, "ClearCurrentLayer", "ClearCurrentLayer",            EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::C ) );
-    UI_COMMAND( CreateNewLayer, "CreateNewLayer", "CreateNewLayer",                     EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::N ) );
-    UI_COMMAND( DuplicateCurrentLayer, "DuplicateCurrentLayer", "DuplicateCurrentLayer",EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::D ) );
-    UI_COMMAND( DeleteCurrentLayer, "DeleteCurrentLayer", "DeleteCurrentLayer",         EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::X ) );
-    UI_COMMAND( SwitchTabletAPI, "SwitchTabletAPI", "SwitchTabletAPI",                  EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::A ) );
+    UI_COMMAND( Undo, "Undo Iliad", "Undo stroke in Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Z ) );
+    UI_COMMAND( Redo, "Redo Iliad", "Redo stroke in Iliad",                                       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Y ) );
 #endif
     
 }

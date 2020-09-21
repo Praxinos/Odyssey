@@ -36,9 +36,6 @@ FOdysseyTextureEditorController::FOdysseyTextureEditorController(TSharedPtr<FOdy
 void
 FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
-	// Add Menu Extender
-    GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
-
     // Init Painter Editor
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(iToolkitCommands);
 
@@ -77,42 +74,7 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
 void
 FOdysseyTextureEditorController::BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
-	iToolkitCommands->MapAction(
-        FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers,
-        FExecuteAction::CreateSP( this, &FOdysseyTextureEditorController::OnImportTexturesAsLayers ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures,
-        FExecuteAction::CreateSP( this, &FOdysseyTextureEditorController::OnExportLayersAsTextures ),
-        FCanExecuteAction() );
-
     FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
-}
-
-TSharedPtr<FExtender>
-FOdysseyTextureEditorController::CreateMenuExtenders(const TSharedRef<FUICommandList>& iToolkitCommands)
-{
-    FExtender* extender = new FExtender();
-
-	extender->AddMenuExtension(
-        "FileLoadAndSave",
-        EExtensionHook::After,
-		iToolkitCommands,
-        FMenuExtensionDelegate::CreateStatic< FOdysseyTextureEditorController& >( &FOdysseyTextureEditorController::FillImportExportMenu, *this) );
-
-    return MakeShareable(extender);
-}
-
-//static
-void
-FOdysseyTextureEditorController::FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyTextureEditorController& iOdysseyTextureEditor )
-{
-    ioMenuBuilder.BeginSection( "FileOdysseyTexture", LOCTEXT( "OdysseyTexture", "OdysseyTexture" ) );
-    {
-        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
-        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
-    }
 }
 
 void

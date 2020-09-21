@@ -140,7 +140,7 @@ FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuB
         FExecuteAction::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editTextureFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit with ILIAD" )
+          LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit Texture with ILIAD" )
         , LOCTEXT( "CB_Extension_Texture_OpenPaintEditor_Tooltip", "Open ILIAD paint editor for the selected Texture" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditTexture

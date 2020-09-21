@@ -45,6 +45,15 @@ public:
     TSharedPtr<FUICommandInfo> Redo;
 
 
+    //Import Export
+
+    /** Action used to import Textures as Layers */
+    TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
+
+    /** Action used to export Layers as Textures */
+    TSharedPtr<FUICommandInfo> ExportLayersAsTextures;
+
+
     //Tools Actions
 
     /** Action for filling the current layer with the current color */

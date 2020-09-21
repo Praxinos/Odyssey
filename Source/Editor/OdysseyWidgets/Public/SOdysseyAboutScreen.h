@@ -50,6 +50,10 @@ private:
     const FSlateBrush* GetLinkedInButtonBrush() const;
     const FSlateBrush* GetInstagramButtonBrush() const;
     const FSlateBrush* GetYoutubeButtonBrush() const;
+    const FSlateBrush* GetDiscordButtonBrush() const;
+    const FSlateBrush* GetUserDocButtonBrush() const;
+    const FSlateBrush* GetGitButtonBrush() const;
+
 
     FReply OnIliadButtonClicked();
     FReply OnPraxinosButtonClicked();
@@ -58,6 +62,10 @@ private:
     FReply OnLinkedInButtonClicked();
     FReply OnInstagramButtonClicked();
     FReply OnYoutubeButtonClicked();
+    FReply OnDiscordButtonClicked();
+    FReply OnUserDocButtonClicked();
+    FReply OnGitButtonClicked();
+
     FReply OnClose();
 
 private:
@@ -69,11 +77,16 @@ private:
     TSharedPtr<SButton> mLinkedInButton;
     TSharedPtr<SButton> mInstagramButton;
     TSharedPtr<SButton> mYoutubeButton;
+    TSharedPtr<SButton> mDiscordButton;
+    TSharedPtr<SButton> mUserDocButton;
+    TSharedPtr<SButton> mGitButton;
+
 
     FText mPraxinosUrl;
     FText mForumUrl;
     FText mIliadUrl;
     FText mContactUsUrl;
+    FText mExternalLibsULISUrl;
     FText mExternalLibsLittleCMSUrl;
     FText mExternalLibsGLMUrl;
     FText mExternalLibsBoostPreprocessorUrl;
@@ -82,4 +95,7 @@ private:
     FText mLinkedInUrl;
     FText mInstagramUrl;
     FText mYoutubeUrl;
+    FText mDiscordUrl;
+    FText mUserDocUrl;
+    FText mGitUrl;
 };

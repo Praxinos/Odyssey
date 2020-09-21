@@ -82,6 +82,7 @@ SOdysseyAboutScreen::SOdysseyAboutScreen()
     , mForumUrl( LOCTEXT( "url.forum", "https://praxinos.coop/forum/" ) )
     , mIliadUrl( LOCTEXT( "url.iliad", "https://praxinos.coop/iliad.php" ) )
     , mContactUsUrl( LOCTEXT( "url.contact-us", "https://praxinos.coop/contact.php" ) )
+    , mExternalLibsULISUrl( LOCTEXT( "url.external-libs.ULIS", "https://github.com/Praxinos/ULIS" ) )
     , mExternalLibsLittleCMSUrl( LOCTEXT( "url.external-libs.littlecms", "http://www.littlecms.com/" ) )
     , mExternalLibsGLMUrl( LOCTEXT( "url.external-libs.glm", "https://www.opengl.org/sdk/libs/GLM/" ) )
     , mExternalLibsBoostPreprocessorUrl( LOCTEXT( "url.external-libs.boost-preprocessor", "https://www.boost.org/doc/libs/1_71_0/libs/preprocessor/doc/index.html" ) )
@@ -90,6 +91,9 @@ SOdysseyAboutScreen::SOdysseyAboutScreen()
     , mLinkedInUrl( LOCTEXT( "url.social.linkedin", "https://www.linkedin.com/company/praxinos" ) )
     , mInstagramUrl( LOCTEXT( "url.social.instagram", "https://www.instagram.com/praxinos/" ) )
     , mYoutubeUrl( LOCTEXT( "url.social.youtube", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) )
+    , mDiscordUrl( LOCTEXT( "url.social.discord", "https://discord.gg/gEd6pj7" ) )
+    , mUserDocUrl( LOCTEXT( "url.social.userDoc", "https://praxinos.coop/Documentation/Iliad/User/html/" ))
+    , mGitUrl(LOCTEXT( "url.social.git", "https://github.com/Praxinos/Iliad" ))
 {
 }
 
@@ -105,10 +109,8 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                                                                                 // This spaces are here to match the start of the first person name in the first line
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.team-2", "                             Naomiki Sato, Antoine Antin, Eric Scholl, Michael Schreiner" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
 
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.forum", "Praxinos tech support forum" ), mForumUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.contact-us", "Contact us" ), mContactUsUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
-
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs", "External libraries:" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.ULIS", "- ULIS" ), mExternalLibsULISUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.little-cms", "- littleCMS" ), mExternalLibsLittleCMSUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.glm", "- glm" ), mExternalLibsGLMUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.external-libs.boost-preprocessor", "- boost.preprocessor" ), mExternalLibsBoostPreprocessorUrl, 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
@@ -187,7 +189,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                 SNew( SHorizontalBox )
                 +SHorizontalBox::Slot()
                 .HAlign( HAlign_Left )
-                .FillWidth( 0.4f )
+                .FillWidth( 0.72f )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
@@ -255,10 +257,49 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                             SNew( SImage ).Image( this, &SOdysseyAboutScreen::GetYoutubeButtonBrush )
                         ]
                     ]
+                    +SHorizontalBox::Slot()
+                    .HAlign( HAlign_Left )
+                    .Padding( FMargin( 5.f, 0.f, 5.f, 5.f ) )
+                    [
+                        SAssignNew( mDiscordButton, SButton )
+                        .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
+                        .ToolTipText( LOCTEXT( "DiscordToolTip", "Praxinos on Discord" ) )
+                        .OnClicked( this, &SOdysseyAboutScreen::OnDiscordButtonClicked )
+                        [
+                            SNew( SImage ).Image( this, &SOdysseyAboutScreen::GetDiscordButtonBrush )
+                        ]
+                    ]
+                    +SHorizontalBox::Slot()
+                    .HAlign( HAlign_Left )
+                    .Padding( FMargin( 5.f, 0.f, 5.f, 5.f ) )
+                    [
+                        SAssignNew( mUserDocButton, SButton )
+                        .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
+                        .ToolTipText( LOCTEXT( "UserDocToolTip", "Iliad User Documentation" ) )
+                        .OnClicked( this, &SOdysseyAboutScreen::OnUserDocButtonClicked )
+                        [
+                            SNew( SImage ).Image( this, &SOdysseyAboutScreen::GetUserDocButtonBrush )
+                        ]
+                    ]
+                    +SHorizontalBox::Slot()
+                    .HAlign( HAlign_Left )
+                    .Padding( FMargin( 5.f, 0.f, 5.f, 5.f ) )
+                    [
+                        SAssignNew( mGitButton, SButton )
+                        .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                        .Cursor( EMouseCursor::Hand )
+                        .ToolTipText( LOCTEXT( "GitToolTip", "Praxinos on Git" ) )
+                        .OnClicked( this, &SOdysseyAboutScreen::OnGitButtonClicked )
+                        [
+                            SNew( SImage ).Image( this, &SOdysseyAboutScreen::GetGitButtonBrush )
+                        ]
+                    ]
                 ]
                 +SHorizontalBox::Slot()
                 .HAlign( HAlign_Right )
-                .FillWidth( 0.6f )
+                .FillWidth( 0.28f )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
@@ -370,6 +411,24 @@ SOdysseyAboutScreen::GetYoutubeButtonBrush() const
     return FOdysseyStyle::GetBrush( TEXT( "About.Youtube" ) );
 }
 
+const FSlateBrush*
+SOdysseyAboutScreen::GetDiscordButtonBrush() const
+{
+    return FOdysseyStyle::GetBrush( TEXT( "About.Discord" ) );
+}
+
+const FSlateBrush*
+SOdysseyAboutScreen::GetUserDocButtonBrush() const
+{
+    return FOdysseyStyle::GetBrush( TEXT( "About.UserDoc" ) );
+}
+
+const FSlateBrush*
+SOdysseyAboutScreen::GetGitButtonBrush() const
+{
+    return FOdysseyStyle::GetBrush( TEXT( "About.Git" ) );
+}
+
 FReply
 SOdysseyAboutScreen::OnIliadButtonClicked()
 {
@@ -430,6 +489,33 @@ SOdysseyAboutScreen::OnYoutubeButtonClicked()
 {
     FString youtubeURL = mYoutubeUrl.ToString();
     FPlatformProcess::LaunchURL( *youtubeURL, NULL, NULL );
+
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyAboutScreen::OnDiscordButtonClicked()
+{
+    FString discordURL = mDiscordUrl.ToString();
+    FPlatformProcess::LaunchURL( *discordURL, NULL, NULL );
+
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyAboutScreen::OnUserDocButtonClicked()
+{
+    FString userDocURL = mUserDocUrl.ToString();
+    FPlatformProcess::LaunchURL( *userDocURL, NULL, NULL );
+
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyAboutScreen::OnGitButtonClicked()
+{
+    FString gitURL = mGitUrl.ToString();
+    FPlatformProcess::LaunchURL( *gitURL, NULL, NULL );
 
     return FReply::Handled();
 }

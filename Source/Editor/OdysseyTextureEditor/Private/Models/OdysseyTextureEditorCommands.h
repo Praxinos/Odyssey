@@ -22,14 +22,4 @@ public:
 public:
     // TCommands interface
     virtual void RegisterCommands() override;
-
-public:
-    /** If enabled, render in real time the 3D props on which the texture is used */
-    TSharedPtr<FUICommandInfo> Render3DInRealTime;
-
-    /** Action used to import Textures as Layers */
-    TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
-
-    /** Action used to export Layers as Textures */
-    TSharedPtr<FUICommandInfo> ExportLayersAsTextures;
 };

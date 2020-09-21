@@ -341,6 +341,78 @@ FOdysseyFlipbookEditorController::OnDeleteCurrentLayer()
     }
 }
 
+void           
+FOdysseyFlipbookEditorController::OnExportLayersAsTextures()
+{
+    FSaveAssetDialogConfig saveAssetDialogConfig;
+    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
+    saveAssetDialogConfig.DefaultPath = FPaths::GetPath( mData->Texture()->GetPathName() );
+    saveAssetDialogConfig.DefaultAssetName = mData->Texture()->GetName();
+    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
+    saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
+
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
+    FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
+
+    if( saveObjectPath != "" )
+    {
+        TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
+		mData->LayerStack()->GetLayers()->DepthFirstSearchTree( &layers, false );
+
+        for( int i = 0; i < layers.Num(); i++ )
+        {
+            if( !( layers[i]->GetType() == IOdysseyLayer::eType::kImage ) )
+                continue;
+
+            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> ( layers[i] );
+
+            FString assetPath = FPaths::GetPath( saveObjectPath ) + "/";
+            FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
+            UPackage* package = CreatePackage( nullptr, *packagePath );
+
+            UTexture2D* object = NewObject<UTexture2D>( package, UTexture2D::StaticClass(), FName( *( FPaths::GetBaseFilename( saveObjectPath ) + TEXT( "_" ) + imageLayer->GetName().ToString() ) ), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone );
+            object->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+            object->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+            object->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+            InitTextureWithBlockData(imageLayer->GetBlock(), object);
+
+            object->PostEditChange();
+            object->UpdateResource();
+
+            FAssetRegistryModule::AssetCreated( object );
+
+            UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
+            
+            package->MarkAsFullyLoaded();
+            object->MarkPackageDirty();
+        }
+    }
+}
+
+void           
+FOdysseyFlipbookEditorController::OnImportTexturesAsLayers()
+{
+    FOpenAssetDialogConfig openAssetDialogConfig;
+    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
+    openAssetDialogConfig.DefaultPath = FPaths::GetPath(mData->Texture()->GetPathName() );
+    openAssetDialogConfig.bAllowMultipleSelection = true;
+    openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
+
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
+    TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
+
+    for( int i = 0; i < assetsData.Num(); i++ )
+    {
+        UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
+        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture );
+		mData->LayerStack()->AddImageLayerFromData( textureBlock, mData->LayerStack()->GetLayers(), FName( *( openedTexture->GetName() ) ) );
+        delete textureBlock;
+    }
+
+    mGUI->GetLayerStackTab()->RefreshView();
+	mData->LayerStack()->ComputeResultBlock();
+}
+
 
 TSharedPtr<FOdysseyPainterEditorData>
 FOdysseyFlipbookEditorController::GetData()

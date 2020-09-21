@@ -68,6 +68,8 @@ public:
     virtual void   OnCreateNewLayer();
     virtual void   OnDuplicateCurrentLayer();
     virtual void   OnDeleteCurrentLayer();
+    virtual void   OnExportLayersAsTextures() = 0;
+    virtual void   OnImportTexturesAsLayers() = 0;
     void           OnResetViewportPosition();
     void           OnResetViewportRotation();
     void           OnRotateViewportLeft();

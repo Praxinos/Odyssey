@@ -6,15 +6,13 @@
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorCommands"
 
 FOdysseyTextureEditorCommands::FOdysseyTextureEditorCommands()
-    : TCommands<FOdysseyTextureEditorCommands>( "OdysseyTextureEditor", NSLOCTEXT( "Contexts", "OdysseyTextureEditor", "Odyssey Texture Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
+    : TCommands<FOdysseyTextureEditorCommands>( "IliadTextureEditor", NSLOCTEXT( "Contexts", "IliadTextureEditor", "Iliad Texture Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
 {
 }
 
 void
 FOdysseyTextureEditorCommands::RegisterCommands()
 {
-    UI_COMMAND( ImportTexturesAsLayers, "Import Textures As Layers", "Import Textures As Layers", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( ExportLayersAsTextures, "Export Layer As Textures", "Export Layer As Textures", EUserInterfaceActionType::Button, FInputChord() );    
 }
 
 #undef LOCTEXT_NAMESPACE

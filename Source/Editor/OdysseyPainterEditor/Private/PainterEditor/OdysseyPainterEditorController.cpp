@@ -48,7 +48,10 @@ void
 FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
     mMenuExtenders.Add(CreateMenuExtender(iToolkitCommands));
-    
+
+    // Add Menu Extender
+    //GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
+
     // Register our commands. This will only register them if not previously registered
     FOdysseyPainterEditorCommands::Register();
 
@@ -219,19 +222,47 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
         FOdysseyPainterEditorCommands::Get().SwitchTabletAPI,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSwitchTabletAPI ),
         FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ImportTexturesAsLayers,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnImportTexturesAsLayers ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().ExportLayersAsTextures,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnExportLayersAsTextures ),
+        FCanExecuteAction() );
 }
 
 TSharedPtr<FExtender>
 FOdysseyPainterEditorController::CreateMenuExtender(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
     FExtender* extender = new FExtender();
+
 	extender->AddMenuExtension(
         "HelpApplication",
         EExtensionHook::After,
 		iToolkitCommands,
         FMenuExtensionDelegate::CreateStatic< FOdysseyPainterEditorController& >( &FOdysseyPainterEditorController::FillAboutMenu, *this ) );
 
+	extender->AddMenuExtension(
+        "FileLoadAndSave",
+        EExtensionHook::After,
+		iToolkitCommands,
+        FMenuExtensionDelegate::CreateStatic< FOdysseyPainterEditorController& >( &FOdysseyPainterEditorController::FillImportExportMenu, *this) );
+
     return MakeShareable(extender);
+}
+
+//static
+void
+FOdysseyPainterEditorController::FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyTextureEditor )
+{
+    ioMenuBuilder.BeginSection( "FileOdysseyTexture", LOCTEXT( "OdysseyTexture", "OdysseyTexture" ) );
+    {
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ImportTexturesAsLayers );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportLayersAsTextures );
+    }
 }
 
 //static

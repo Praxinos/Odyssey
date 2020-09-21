@@ -31,15 +31,13 @@ public:
 protected:
     // Commands building
     virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
-	TSharedPtr<FExtender> CreateMenuExtenders(const TSharedRef<FUICommandList>& iToolkitCommands);
-    static void FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyTextureEditorController& iOdysseyTextureEditor );
 
 public:
 	void OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer);
 	void OnLayerStackDirty();
 
-    void OnExportLayersAsTextures();
-    void OnImportTexturesAsLayers();
+    void OnExportLayersAsTextures() override;
+    void OnImportTexturesAsLayers() override;
 	
 	virtual void OnPaintEngineStrokeAbort() override;
 	virtual void OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles) override;

@@ -140,7 +140,7 @@ FOdysseyFlipbookContentBrowserExtensions_Impl::PopulateFlipbookActionsMenu( FMen
         FExecuteAction::CreateStatic( &FOdysseyFlipbookContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editFlipbookFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Flipbook_OpenPaintEditor", "Edit with ILIAD" )
+          LOCTEXT( "CB_Extension_Flipbook_OpenPaintEditor", "Edit Flipbook with ILIAD" )
         , LOCTEXT( "CB_Extension_Flipbook_OpenPaintEditor_Tooltip", "Open ILIAD paint editor for the selected Flipbook" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditFlipbook

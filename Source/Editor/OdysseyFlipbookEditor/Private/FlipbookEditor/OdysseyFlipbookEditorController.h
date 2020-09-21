@@ -65,6 +65,9 @@ public:
     virtual void   OnDuplicateCurrentLayer() override;
     virtual void   OnDeleteCurrentLayer() override;
 
+    void           OnExportLayersAsTextures() override;
+    void           OnImportTexturesAsLayers() override;
+
 protected:
 	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
