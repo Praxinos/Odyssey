@@ -454,6 +454,10 @@ FShotSequenceEditorToolkit::ProcessPropertyTrack( AActor* iActor, const FString&
 
 void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
+    // For binding which has been removed when dropped actor is not supported
+    if( !mShotSequence->GetMovieScene()->FindBinding( iBinding ) )
+        return;
+
     // TODO-lchabant: add default tracks (re-use level sequence toolkit code).
 
     // Only for cinecamera actor
