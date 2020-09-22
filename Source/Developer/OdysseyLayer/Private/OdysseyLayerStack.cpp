@@ -27,36 +27,36 @@ FOdysseyLayerStack::FOdysseyLayerStack()
     , mCurrentLayer( mLayers )
     , mWidth( 0 )
     , mHeight( 0 )
-    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
+    , mFormat(ULIS3_FORMAT_BGRA8)
     , mIsInitialized( false )
 {
 }
 
-FOdysseyLayerStack::FOdysseyLayerStack(int iWidth,int iHeight)
+FOdysseyLayerStack::FOdysseyLayerStack(int iWidth,int iHeight, ::ul3::tFormat iFormat)
     : mResultBlock( nullptr )
     , mTempBlock( nullptr )
     , mLayers( new  FOdysseyNTree< IOdysseyLayer* >( nullptr ) )
     , mCurrentLayer( mLayers )
     , mWidth( iWidth )
     , mHeight( iHeight )
-    , mTextureSourceFormat( ETextureSourceFormat::TSF_BGRA8 )
+    , mFormat(iFormat)
     , mIsInitialized( false )
 {
-    Init( mWidth, mHeight );
+    Init( mWidth, mHeight, mFormat);
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 
 void
-FOdysseyLayerStack::Init( int iWidth, int iHeight )
+FOdysseyLayerStack::Init( int iWidth, int iHeight, ::ul3::tFormat iFormat)
 {
     if( mIsInitialized )
         return;
 
     mWidth = iWidth;
     mHeight = iHeight;
-    mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
+    mFormat = iFormat;
     mIsInitialized = true;
 
     InitResultAndTempBlock();
@@ -81,7 +81,7 @@ FOdysseyLayerStack::InitFromData( FOdysseyBlock* iData )
 
     mWidth = iData->Width();
     mHeight = iData->Height();
-    mTextureSourceFormat = iData->GetUE4TextureSourceFormat();
+    mFormat = iData->Format();
     mIsInitialized = true;
 
     InitResultAndTempBlock();
@@ -147,7 +147,7 @@ FOdysseyLayerStack::ComputeResultBlock()
                     }
                     else
                     {
-                        block = new FOdysseyBlock(mWidth, mHeight, mTextureSourceFormat);
+                        block = new FOdysseyBlock(mWidth, mHeight, mFormat);
                         ::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), block->GetBlock()->Rect());
                         folderBlocks.Add(imageNode->GetParent(), block);
                     }
@@ -258,7 +258,7 @@ FOdysseyLayerStack::ComputeResultBlock( const ::ul3::FRect& iRect )
                     }
                     else
                     {
-                        block = new FOdysseyBlock(mWidth, mHeight, mTextureSourceFormat);
+                        block = new FOdysseyBlock(mWidth, mHeight, mFormat);
                         ::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), block->GetBlock()->Rect());
                         folderBlocks.Add(imageNode->GetParent(), block);
                     }
@@ -382,7 +382,7 @@ FOdysseyLayerStack::ComputeResultBlockWithTempBuffer(const ::ul3::FRect& iRect, 
                     }
                     else
                     {
-                        block = new FOdysseyBlock(mWidth, mHeight, mTextureSourceFormat);
+                        block = new FOdysseyBlock(mWidth, mHeight, mFormat);
                         ::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), block->GetBlock()->Rect());
                         folderBlocks.Add(imageNode->GetParent(), block);
                     }
@@ -617,7 +617,7 @@ FOdysseyLayerStack::Size() const
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mFormat);
     SetCurrentLayer(iPosition->AddNode(layer,iAtIndex));
     mOnLayerStackDirty.Broadcast();
     return layer;
@@ -626,7 +626,7 @@ FOdysseyLayerStack::AddImageLayer(FOdysseyNTree< IOdysseyLayer* >* iPosition,int
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 {
-    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mTextureSourceFormat);
+    FOdysseyImageLayer* layer = new FOdysseyImageLayer( GetNextLayerName(),FVector2D(mWidth,mHeight),mFormat);
     SetCurrentLayer( mLayers->AddNode(layer,iAtIndex) );
     mOnLayerStackDirty.Broadcast();
     return layer;
@@ -635,9 +635,9 @@ FOdysseyLayerStack::AddImageLayer(int iAtIndex)
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IOdysseyLayer* >* iPosition,FName iName,int iAtIndex)
 {
-    //assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
+    //assert(iData->GetUE4PixelFormat() == mUE4PixelFormat);
 
-    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat);
+    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock( mWidth, mHeight, mFormat);
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Copy( hULIS.ThreadPool()
@@ -659,9 +659,9 @@ FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FOdysseyNTree< IO
 FOdysseyImageLayer*
 FOdysseyLayerStack::AddImageLayerFromData(FOdysseyBlock* iData,FName iName,int iAtIndex)
 {
-    //assert(iData->GetUE4TextureSourceFormat() == mTextureSourceFormat);
+    //assert(iData->GetUE4PixelFormat() == mUE4PixelFormat);
 
-    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    FOdysseyBlock* explicitCopyResized = new FOdysseyBlock(mWidth,mHeight,mFormat);
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -947,11 +947,23 @@ FOdysseyLayerStack::GetBlendingModesAsText()
     return  array;
 }
 
-ETextureSourceFormat
+::ul3::tFormat
+FOdysseyLayerStack::GetFormat()
+{
+    return mFormat;
+}
+
+/* ETextureSourceFormat
 FOdysseyLayerStack::GetTextureSourceFormat()
 {
     return mTextureSourceFormat;
 }
+
+EPixelFormat
+FOdysseyLayerStack::GetUE4PixelFormat()
+{
+    return mUE4PixelFormat;
+} */
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
@@ -970,8 +982,8 @@ FOdysseyLayerStack::InitResultAndTempBlock()
     if(!mIsInitialized)
         return;
 
-    mResultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
-    mTempBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    mResultBlock = new FOdysseyBlock(mWidth,mHeight,mFormat);
+    mTempBlock = new FOdysseyBlock(mWidth,mHeight,mFormat);
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -989,7 +1001,7 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
     uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mWidth, mHeight );
 
-    FOdysseyBlock* resultBlock = new FOdysseyBlock(mWidth,mHeight,mTextureSourceFormat);
+    FOdysseyBlock* resultBlock = new FOdysseyBlock(mWidth,mHeight,mFormat);
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, resultBlock->GetBlock(), canvasRect );
 
     if(!iLayers->GetNodeContent()->IsVisible())
@@ -1048,22 +1060,56 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
     return resultBlock;
 }
 
+// Custom serialization version for changes made in Dev-AnimPhys stream
+struct FOdysseyLayerStackObjectVersion
+{
+	enum Type
+	{
+		// Before any version changes were made
+		SavePixelFormat,
+		
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	const static FGuid GUID;
+
+private:
+	FOdysseyLayerStackObjectVersion() {}
+};
+
+const FGuid FOdysseyLayerStackObjectVersion::GUID(0x09295A41, 0x4809652E, 0xBE684D8E, 0x5BBAC5E0);
+FCustomVersionRegistration FOdysseyLayerStackObjectVersionRegistration(FOdysseyLayerStackObjectVersion::GUID, FOdysseyLayerStackObjectVersion::LatestVersion, TEXT("FOdysseyLayerStackObjectVersion::SavePixelFormat"));
+
 FArchive& 
 operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
 {
     if( !ioSaveLayerStack )
         return Ar;
 
+	//Set the Object Version
+	Ar.UsingCustomVersion(FOdysseyLayerStackObjectVersion::GUID);
+
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;
-
     Ar << *(ioSaveLayerStack->mLayers);
 
+	//Saving / Loading the TextureFormat
+	//Check that the loading version is at least the version managing the textureFormatSaving
+	if (Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat)
+	{
+        Ar << ioSaveLayerStack->mFormat;
+	}
+	else if (Ar.IsLoading())
+	{
+        ioSaveLayerStack->mFormat = ULIS3_FORMAT_BGRA8;
+	}
+
     if ( Ar.IsLoading() )
-    {
-        ioSaveLayerStack->mTextureSourceFormat = ETextureSourceFormat::TSF_BGRA8;
+    {	
         ioSaveLayerStack->mIsInitialized = false;
-        ioSaveLayerStack->Init( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight );
+        ioSaveLayerStack->Init( ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mFormat);
         ioSaveLayerStack->ComputeResultBlock();
     }
 

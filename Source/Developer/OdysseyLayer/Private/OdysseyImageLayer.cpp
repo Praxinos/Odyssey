@@ -15,7 +15,7 @@ FOdysseyImageLayer::~FOdysseyImageLayer()
     delete mBlock;
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETextureSourceFormat iTextureSourceFormat )
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ::ul3::tFormat iFormat)
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
     , mBlock( nullptr )
     , mBlendingMode( ::ul3::BM_NORMAL )
@@ -24,7 +24,7 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ETe
 {
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
-    mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iTextureSourceFormat );
+    mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iFormat);
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool()
@@ -178,7 +178,7 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         Ar << height;
 
         check(!ioSaveImageLayer->mBlock);
-        ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height,textureFormat);
+        ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height, ULISFormatForUE4TextureSourceFormat(textureFormat));
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;

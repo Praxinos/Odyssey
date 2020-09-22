@@ -6,9 +6,10 @@
 
 /////////////////////////////////////////////////////
 // Utlity
-uint32 ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
+
+::ul3::tFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
 {
-    uint32 ret = 0;
+    ::ul3::tFormat ret = 0;
     switch( iFormat ) {
         case TSF_Invalid:   ret = 0;                    break;
         case TSF_G8:        ret = ULIS3_FORMAT_G8;      break;
@@ -20,6 +21,51 @@ uint32 ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
         case TSF_RGBE8:     ret = ULIS3_FORMAT_RGB8;    break;
         case TSF_MAX:       ret = 0;                    break;
         default:            ret = 0;                    break;
+    }
+    checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
+    return ret;
+}
+
+::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat )
+{
+    ::ul3::tFormat ret = 0;
+    switch( iFormat ) {
+        case PF_Unknown:			ret = ULIS3_FORMAT_BGRA8;   break;
+		case PF_A8:					ret = ULIS3_FORMAT_G8;      break;
+        case PF_G8:					ret = ULIS3_FORMAT_G8;      break;
+		case PF_R8_UINT:			ret = ULIS3_FORMAT_G8;      break;
+		case PF_L8:					ret = ULIS3_FORMAT_G8;      break;
+        case PF_G16:				ret = ULIS3_FORMAT_G16;		break;
+		case PF_A8R8G8B8:			ret = ULIS3_FORMAT_ARGB8;   break;
+        case PF_B8G8R8A8:			ret = ULIS3_FORMAT_BGRA8;   break;
+        case PF_A32B32G32R32F:		ret = ULIS3_FORMAT_ABGRF;	break;
+		case PF_R32G32B32A32_UINT:	ret = ULIS3_FORMAT_RGBA32;	break;
+        case PF_R16G16B16A16_UINT:	ret = ULIS3_FORMAT_RGBA16;	break;
+		case PF_R16_UINT:			ret = ULIS3_FORMAT_G16;		break;
+        case PF_R32_UINT:			ret = ULIS3_FORMAT_G32;		break;
+        case PF_R8G8B8A8_UINT:		ret = ULIS3_FORMAT_RGBA8;   break;
+		case PF_R8G8B8A8_SNORM:		ret = ULIS3_FORMAT_RGBA8;   break;
+		case PF_R16G16B16A16_UNORM:		ret = ULIS3_FORMAT_RGBA16;   break;
+		case PF_R16G16B16A16_SNORM:		ret = ULIS3_FORMAT_RGBA16;   break;
+        default:					ret = 0;                    break;
+    }
+    checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
+    return ret;
+}
+
+EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFormat )
+{
+    EPixelFormat ret = PF_Unknown;
+    switch( iFormat ) {
+        case ULIS3_FORMAT_G8:		ret = PF_G8;                break;
+        case ULIS3_FORMAT_G16:		ret = PF_G16;		        break;
+		case ULIS3_FORMAT_ARGB8:	ret = PF_A8R8G8B8;          break;
+        case ULIS3_FORMAT_BGRA8:	ret = PF_B8G8R8A8;          break;
+        case ULIS3_FORMAT_ABGRF:	ret = PF_A32B32G32R32F;	    break;
+		case ULIS3_FORMAT_RGBA32:	ret = PF_R32G32B32A32_UINT;	break;
+        case ULIS3_FORMAT_RGBA16:	ret = PF_R16G16B16A16_UINT;	break;
+        case ULIS3_FORMAT_RGBA8:	ret = PF_R8G8B8A8_UINT;     break;
+        default:					ret = PF_Unknown;                    break;
     }
     checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
     return ret;
@@ -38,17 +84,18 @@ FOdysseyBlock::~FOdysseyBlock()
 
 FOdysseyBlock::FOdysseyBlock( int                           iWidth
                             , int                           iHeight
-                            , ETextureSourceFormat          iFormat
+                            , ::ul3::tFormat                iFormat
                             , ::ul3::fpInvalidateFunction   iInvFunc
                             , void*                         iInvInfo
                             , bool                          iInitializeData )
-    : mUE4TextureSourceFormat( iFormat )
-    , mULISFormat( ULISFormatForUE4TextureSourceFormat( mUE4TextureSourceFormat ) )
-    , mBlock( nullptr )
+    // : mUE4TextureSourceFormat( iTextureSourceFormat )
+    // , mUE4PixelFormat( iPixelFormat )
+    // , mULISFormat( ULISFormatForUE4PixelFormat(mUE4PixelFormat) )
+    : mBlock( nullptr )
     , mArray()
 {
     // Retrieve spec info from ULIS format hash.
-    ::ul3::FFormatInfo fmt( mULISFormat );
+    ::ul3::FFormatInfo fmt( iFormat );
 
     // Allocate and fill array ( primary data rep )
     if( iInitializeData )
@@ -57,7 +104,7 @@ FOdysseyBlock::FOdysseyBlock( int                           iWidth
         mArray.SetNumUninitialized( iWidth * iHeight * fmt.BPP );
 
     // Allocate block from external array data
-    mBlock = new ::ul3::FBlock( mArray.GetData(), iWidth, iHeight, mULISFormat, nullptr, ::ul3::FOnInvalid(  iInvFunc, iInvInfo ), ::ul3::FOnCleanup( &::ul3::OnCleanup_DoNothing ) );
+    mBlock = new ::ul3::FBlock( mArray.GetData(), iWidth, iHeight, iFormat, nullptr, ::ul3::FOnInvalid(  iInvFunc, iInvInfo ), ::ul3::FOnCleanup( &::ul3::OnCleanup_DoNothing ) );
 }
 
 //--------------------------------------------------------------------------------------
@@ -104,18 +151,23 @@ FOdysseyBlock::Size() const
     return FVector2D( Width(), Height() );
 }
 
-ETextureSourceFormat
+/* ETextureSourceFormat
 FOdysseyBlock::GetUE4TextureSourceFormat() const
 {
     return mUE4TextureSourceFormat;
 }
 
-uint32
-FOdysseyBlock::GetULISFormat() const
+EPixelFormat
+FOdysseyBlock::GetUE4PixelFormat() const
 {
-    return mULISFormat;
-}
+    return mUE4PixelFormat;
+} */
 
+::ul3::tFormat
+FOdysseyBlock::Format() const
+{
+    return mBlock->Format();
+}
 
 void
 FOdysseyBlock::ResyncData()

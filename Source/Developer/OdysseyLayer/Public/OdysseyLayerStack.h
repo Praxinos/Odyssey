@@ -26,11 +26,11 @@ public:
     // Construction / Destruction
     ~FOdysseyLayerStack();
     FOdysseyLayerStack();
-    FOdysseyLayerStack( int iWidth,int iHeight );
+    FOdysseyLayerStack( int iWidth,int iHeight, ::ul3::tFormat iFormat);
 
 public:
     // Public API
-    void                                Init( int iWidth,int iHeight );
+    void                                Init( int iWidth,int iHeight, ::ul3::tFormat iFormat);
     void                                InitFromData( FOdysseyBlock* iData );
     FOdysseyBlock*                      GetResultBlock();
     void                                ComputeResultBlock();
@@ -71,7 +71,7 @@ public:
     void                                ClearCurrentLayer();
     void                                FillCurrentLayerWithColor( const ::ul3::IPixel& iColor );
     TArray< TSharedPtr< FText > >       GetBlendingModesAsText();
-    ETextureSourceFormat                GetTextureSourceFormat();
+    ::ul3::tFormat                      GetFormat();
 
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack );
@@ -93,7 +93,7 @@ private:
     FOdysseyNTree< IOdysseyLayer* >*    mCurrentLayer;
     int                                 mWidth;
     int                                 mHeight;
-    ETextureSourceFormat                mTextureSourceFormat;
+    ::ul3::tFormat                      mFormat;
     bool                                mIsInitialized;
 
 	FOnCurrentLayerChanged				mOnCurrentLayerChanged;

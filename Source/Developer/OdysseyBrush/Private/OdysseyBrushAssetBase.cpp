@@ -476,7 +476,7 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight,
     //---
 
     FOdysseyBlock* src = state.target_temp_buffer;
-    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;

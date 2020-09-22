@@ -7,6 +7,11 @@
 #include "Engine/Texture.h"
 #include <ULIS3>
 
+//
+ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat );
+ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat );
+ODYSSEYIMAGING_API EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFormat );
+
 /////////////////////////////////////////////////////
 // FOdysseyBlock
 // Block Wrapper for Odyssey
@@ -17,7 +22,7 @@ public:
     ~FOdysseyBlock();
     FOdysseyBlock( int                          iWidth
                  , int                          iHeight
-                 , ETextureSourceFormat         iFormat     = ETextureSourceFormat::TSF_BGRA8
+                 , ::ul3::tFormat               iFormat
                  , ::ul3::fpInvalidateFunction  iInvFunc    = nullptr
                  , void*                        iInvInfo    = nullptr
                  , bool                         iInitializeData = false );
@@ -38,14 +43,17 @@ public:
     int                         Width() const;
     int                         Height() const;
     FVector2D                   Size() const;
-    ETextureSourceFormat        GetUE4TextureSourceFormat() const;
-    uint32                      GetULISFormat() const;
+    ::ul3::tFormat              Format() const;
+    // ETextureSourceFormat        GetUE4TextureSourceFormat() const;
+    // EPixelFormat				GetUE4PixelFormat() const;
+    // uint32                      GetULISFormat() const;
     void                        ResyncData();
 
 private:
     // Private Data Members
-    ETextureSourceFormat    mUE4TextureSourceFormat;
-    uint32                  mULISFormat;
+    // ETextureSourceFormat    mUE4TextureSourceFormat;
+	// EPixelFormat			mUE4PixelFormat;
+    // ::ul3::tFormat          mULISFormat;
     ::ul3::FBlock*          mBlock;
     TArray64<uint8>         mArray;
 };

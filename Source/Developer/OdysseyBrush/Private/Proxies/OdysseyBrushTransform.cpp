@@ -99,7 +99,7 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , Transform.GetValue() ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -144,7 +144,7 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -190,7 +190,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -235,7 +235,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -282,7 +282,7 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -332,7 +332,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -382,7 +382,7 @@ UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOd
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->GetUE4TextureSourceFormat(), nullptr, nullptr, true );
+        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;

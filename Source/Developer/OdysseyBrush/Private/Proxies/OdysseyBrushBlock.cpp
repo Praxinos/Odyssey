@@ -52,7 +52,7 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* Br
     if( !Source.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    ::ul3::FPixelValue color = ::ul3::Conv( Color.GetValue(), Source.m->GetULISFormat() );
+    ::ul3::FPixelValue color = ::ul3::Conv( Color.GetValue(), Source.m->Format() );
     FString colorID = FString::FromBlob( ( const uint8* )color.Ptr(), color.Depth() );
     FString op = "FillPreserveAlpha_" + colorID + "_" + Source.id;
 
@@ -62,7 +62,7 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* Br
     //---
 
     FOdysseyBlock* src = Source.m;
-    FOdysseyBlock* dst = new  FOdysseyBlock( src->Width(), src->Height(), src->GetUE4TextureSourceFormat() );
+    FOdysseyBlock* dst = new  FOdysseyBlock( src->Width(), src->Height(), src->Format() );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = src->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -96,7 +96,7 @@ UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushCon
 
     //---
 
-    FOdysseyBlock* tmp = new  FOdysseyBlock( Width, Height, BrushContext->GetState().target_temp_buffer->GetUE4TextureSourceFormat(), nullptr, nullptr, InitializeData );
+    FOdysseyBlock* tmp = new  FOdysseyBlock( Width, Height, BrushContext->GetState().target_temp_buffer->Format(), nullptr, nullptr, InitializeData );
 
     FOdysseyBlockProxy prox( tmp, op );
     BrushContext->StoreInPool( Cache, op, prox );
@@ -132,7 +132,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
 
     ::ul3::FBlock* source  = Top.m->GetBlock();
     ::ul3::FBlock* back    = Back.m->GetBlock();
-    FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), Back.m->GetUE4TextureSourceFormat(), nullptr, nullptr, false );
+    FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), back->Format(), nullptr, nullptr, false );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = Top.m->Height() > 256 ? ULIS3_PERF_MT : 0;

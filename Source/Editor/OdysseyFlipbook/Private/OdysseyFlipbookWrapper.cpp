@@ -222,7 +222,7 @@ FOdysseyFlipbookWrapper::SetKeyFrameLength(int32 iIndex, int32 iLength)
 }
 
 UTexture2D*
-FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock)
+FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETextureSourceFormat iFormat)
 {
     FOdysseyBlock* blockPtr = iBlock;
 
@@ -242,7 +242,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock)
     texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
     // Init Texture and its layerstack with iBlock
-    InitTextureWithBlockData(blockPtr, texture);
+    InitTextureWithBlockData(blockPtr, texture, iFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
     userData->GetLayerStack()->InitFromData(blockPtr);
     texture->AddAssetUserData( userData );
@@ -263,7 +263,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock)
 UTexture2D*
 FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor)
 {
-     FOdysseyBlock* blockPtr = new FOdysseyBlock( iWidth, iHeight, iFormat, nullptr, nullptr, true );
+     FOdysseyBlock* blockPtr = new FOdysseyBlock( iWidth, iHeight, ULISFormatForUE4TextureSourceFormat(iFormat), nullptr, nullptr, true );
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, iWidth, iHeight );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -271,7 +271,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 	::ul3::FPixelValue color(::ul3::FPixelValue::FromRGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, blockPtr->GetBlock(), color, canvasRect );
 
-     UTexture2D* texture = CreateTexture(iName, blockPtr);
+     UTexture2D* texture = CreateTexture(iName, blockPtr, iFormat);
 
 	delete blockPtr;
     return texture;
@@ -287,12 +287,12 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
     {
         textureUserData->GetLayerStack()->ComputeResultBlock();
         block = textureUserData->GetLayerStack()->GetResultBlock();
-        texture = CreateTexture(iName, block);
+        texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
     }
     else
     {
         block = NewOdysseyBlockFromUTextureData(texture);
-        texture = CreateTexture(iName, block);
+        texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
         delete block;
     }
      

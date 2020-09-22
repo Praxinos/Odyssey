@@ -78,7 +78,6 @@ FOdysseyTextureEditorToolkit::OnRequestClose()
 {
 	mData->SyncTextureAndInvalidate();
 	mData->ApplyPropertiesBackup();
-    mData->SyncTextureAndInvalidate();
 
 	//TODO: Move in the right place
     mData->LayerStack()->mDrawingUndo->Clear();

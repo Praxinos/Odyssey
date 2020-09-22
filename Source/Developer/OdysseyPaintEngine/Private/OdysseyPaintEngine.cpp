@@ -193,7 +193,7 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
     if (!mTempBuffer || mTempBuffer->Size() != mBlock->Size())
     {
         delete mTempBuffer;
-        mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->GetUE4TextureSourceFormat());
+        mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->Format());
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -865,7 +865,7 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     int preview_h = FMath::Max( 1, ymax - ymin );
 
     // Allocate preview_color & preview_outline to draw on step in
-    FOdysseyBlock* preview_color = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, true );
+    FOdysseyBlock* preview_color = new FOdysseyBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat), nullptr, nullptr, true );
 
     // Set the preview_color block as target for brush
     state.target_temp_buffer = preview_color;
@@ -901,11 +901,11 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
         delete  mBrushCursorPreviewSurface;
 
     // Realloc
-    mBrushCursorPreviewSurface = new FOdysseySurface( preview_w, preview_h, mTextureSourceFormat );
+    mBrushCursorPreviewSurface = new FOdysseySurface( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat) );
 
     // Compute Outline in surface
-    FOdysseyBlock* preview_outline = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
-    FOdysseyBlock* preview_shadow = new FOdysseyBlock( preview_w, preview_h, mTextureSourceFormat, nullptr, nullptr, false );
+    FOdysseyBlock* preview_outline = new FOdysseyBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat), nullptr, nullptr, false );
+    FOdysseyBlock* preview_shadow = new FOdysseyBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat), nullptr, nullptr, false );
     ::ul3::FFXContext::Convolution( preview_color->GetBlock(), preview_outline->GetBlock(), edge_kernel, true );
     ::ul3::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) );
     ::ul3::FFXContext::Convolution( preview_outline->GetBlock(), preview_shadow->GetBlock(), gaussian_kernel, true );

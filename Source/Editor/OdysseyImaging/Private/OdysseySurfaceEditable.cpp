@@ -2,6 +2,7 @@
 // IDDN FR.001.250001.002.S.P.2019.000.00000
 #include "OdysseySurfaceEditable.h"
 #include "OdysseyBlock.h"
+#include "ULISLoaderModule.h"
 #include <ULIS3>
 
 /////////////////////////////////////////////////////
@@ -24,19 +25,19 @@ CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
            iBlock->Height() == iTexture->GetSizeY()
            ,TEXT("Sizes do not match"));
 
-    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iBlock->GetUE4TextureSourceFormat(),iBlock->GetBlock()->DataPtr());
+    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iTexture->Source.GetFormat(),iBlock->GetBlock()->DataPtr());
 }
 
 void
-InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture)
+InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
 {
-    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iBlock->GetUE4TextureSourceFormat(),iBlock->GetBlock()->DataPtr());
+    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iFormat,iBlock->GetBlock()->DataPtr());
 }
 
 FOdysseyBlock*
 NewOdysseyBlockFromUTextureData(UTexture2D* iTexture)
 {
-    FOdysseyBlock* ret = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),iTexture->Source.GetFormat());
+    FOdysseyBlock* ret = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
     CopyUTextureDataIntoBlock(ret,iTexture);
 
     return ret;
@@ -66,31 +67,7 @@ InvalidateTextureFromData(const FOdysseyBlock* iData,UTexture2D* iTexture,const 
     checkf(iData,TEXT("Error"));
     checkf(iTexture,TEXT("Error"));
 
-    checkf(iData->GetUE4TextureSourceFormat() == iTexture->Source.GetFormat(),TEXT("Bad format"));
-    checkf(iData->Width() == iTexture->GetSizeX() &&
-           iData->Height() == iTexture->GetSizeY()
-           ,TEXT("Sizes do not match"));
-
-    int x = iRect.x;
-    int y = iRect.y;
-    int w = iRect.w;
-    int h = iRect.h;
-    checkf(x >= 0 &&
-           x >= 0 &&
-           w > 0  &&
-           h > 0
-           ,TEXT("Error"));
-
-    // Considering only one region is an assumption that works but you have to be more carefull with several regions.
-    FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x,y,x,y,w,h);
-
-    TFunction<void(uint8* SrcData,const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [&](uint8*,const FUpdateTextureRegion2D* Regions) {
-        delete Regions;
-    };
-
-    uint32 bpp = iData->GetBlock()->BytesPerPixel();
-    uint32 pitch = iData->GetBlock()->BytesPerScanLine();
-    iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(iData->GetBlock()->DataPtr()),dataCleanupFunc);
+    InvalidateTextureFromData(iData->GetBlock(), iTexture, iRect);
 }
 
 void
@@ -99,31 +76,8 @@ InvalidateTextureFromData(const FOdysseyBlock* iData,UTexture2D* iTexture,int x1
     checkf(iData,TEXT("Error"));
     checkf(iTexture,TEXT("Error"));
 
-    checkf(iData->GetUE4TextureSourceFormat() == iTexture->Source.GetFormat(),TEXT("Bad format"));
-    checkf(iData->Width() == iTexture->GetSizeX() &&
-           iData->Height() == iTexture->GetSizeY()
-           ,TEXT("Sizes do not match"));
-
-    int w = x2 - x1;
-    int h = y2 - y1;
-    checkf(x1 >= 0 &&
-           x2 >= 0 &&
-           y1 >= 0 &&
-           y2 >= 0 &&
-           w > 0  &&
-           h > 0
-           ,TEXT("Error"));
-
-    // Considering only one region is an assumption that works but you have to be more carefull with several regions.
-    FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x1,y1,x1,y1,w,h);
-
-    TFunction<void(uint8* SrcData,const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [&](uint8*,const FUpdateTextureRegion2D* Regions) {
-        delete Regions;
-    };
-
-    uint32 bpp = iData->GetBlock()->BytesPerPixel();
-    uint32 pitch = iData->GetBlock()->BytesPerScanLine();
-    iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(iData->GetBlock()->DataPtr()),dataCleanupFunc);
+    ::ul3::FRect rect = ::ul3::FRect::FromMinMax(x1, y1, x2, y2);
+    InvalidateTextureFromData(iData->GetBlock(), iTexture, rect);
 }
 
 void
@@ -149,13 +103,43 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
     // Considering only one region is an assumption that works but you have to be more carefull with several regions.
     FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x,y,x,y,w,h);
 
-    TFunction<void(uint8* SrcData,const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [&](uint8*,const FUpdateTextureRegion2D* Regions) {
-        delete Regions;
-    };
+    ::ul3::tFormat pixelFormat = ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat());
+    if (iData->Format() == pixelFormat)
+    {
+		TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [&](uint8*, const FUpdateTextureRegion2D* Regions) {
+			delete Regions;
+		};
+		uint32 bpp = iData->BytesPerPixel();
+		uint32 pitch = iData->BytesPerScanLine();
+        iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(iData->DataPtr()),dataCleanupFunc);
+    }
+    else
+    {
 
-    uint32 bpp = iData->BytesPerPixel();
-    uint32 pitch = iData->BytesPerScanLine();
-    iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(iData->DataPtr()),dataCleanupFunc);
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 MT_bit = iData->Height() > 256 ? ULIS3_PERF_MT : 0;
+        ::ul3::uint32 perfIntent = MT_bit | 0;
+
+        ::ul3::FBlock* block = new ::ul3::FBlock(w, h, iData->Format());
+		::ul3::FBlock* conv = new ::ul3::FBlock(w, h, pixelFormat);
+        ::ul3::FVec2I pos(0, 0);
+        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iData, block, iRect, pos);
+        ::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block, conv);
+
+		uint32 bpp = conv->BytesPerPixel();
+		uint32 pitch = conv->BytesPerScanLine();
+
+        delete block;
+
+		TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [conv](uint8*, const FUpdateTextureRegion2D* Regions) {
+			delete Regions;
+			if (conv)
+				delete conv;
+		};
+        iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(conv->DataPtr()),dataCleanupFunc);
+        // conv destruction is handled in dataCleanupFunc
+    }
+    
 }
 
 void
@@ -177,31 +161,6 @@ InvalidateSurfaceCallback(const ::ul3::FBlock* iData,void* iInfo,const ::ul3::FR
     FOdysseySurfaceEditable* surface = static_cast<FOdysseySurfaceEditable*>(iInfo);
     InvalidateSurfaceFromData(iData,surface,iRect);
 }
-
-namespace detail {
-
-    EPixelFormat
-        UE4PixelFormatForUE4TextureSourceFormat(ETextureSourceFormat iFormat)
-    {
-        EPixelFormat ret = PF_Unknown;
-        switch(iFormat)
-        {
-        case TSF_Invalid:   ret = PF_Unknown;           break;
-        case TSF_G8:        ret = PF_G8;                break;
-        case TSF_BGRA8:     ret = PF_B8G8R8A8;          break;
-        case TSF_BGRE8:     ret = PF_Unknown;           break;
-        case TSF_RGBA16:    ret = PF_A16B16G16R16; break;
-        case TSF_RGBA16F:   ret = PF_FloatRGBA;         break;
-        case TSF_RGBA8:     ret = PF_Unknown;           break;
-        case TSF_RGBE8:     ret = PF_Unknown;           break;
-        case TSF_MAX:       ret = PF_Unknown;           break;
-        default:            ret = PF_Unknown;           break;
-        }
-        checkf(ret != PF_Unknown,TEXT("Bad format")); // Crash
-        return ret;
-    }
-
-} // namespace detail
 
 /////////////////////////////////////////////////////
 // FOdysseySurfaceEditable
@@ -230,11 +189,11 @@ FOdysseySurfaceEditable::~FOdysseySurfaceEditable()
     }
 }
 
-FOdysseySurfaceEditable::FOdysseySurfaceEditable(int iWidth,int iHeight,ETextureSourceFormat iFormat)
+FOdysseySurfaceEditable::FOdysseySurfaceEditable(int iWidth,int iHeight, ::ul3::tFormat iFormat)
     : mIsBorrowedTexture(false)
     ,mIsBorrowedBlock(false)
 {
-    mTexture = UTexture2D::CreateTransient(iWidth,iHeight,::detail::UE4PixelFormatForUE4TextureSourceFormat(iFormat));
+    mTexture = UTexture2D::CreateTransient(iWidth, iHeight, UE4PixelFormatForULISFormat(iFormat));
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
@@ -246,7 +205,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(int iWidth,int iHeight,ETexture
     mTexture->AddToRoot();
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
-    mBlock = new FOdysseyBlock(iWidth,iHeight,iFormat,&InvalidateSurfaceCallback,static_cast<void*>(this),true);
+    mBlock = new FOdysseyBlock(iWidth,iHeight, iFormat, &InvalidateSurfaceCallback, static_cast<void*>(this), true);
     // load texture data from block
     CopyBlockDataIntoUTexture(mBlock,mTexture);
 }
@@ -270,7 +229,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
     mTexture->AddToRoot();
 
     // Warning: the block is allocated, then the texture data is copied into it.
-    mBlock = new FOdysseyBlock(mTexture->GetSizeX(),mTexture->GetSizeY(),iTexture->Source.GetFormat(),&InvalidateSurfaceCallback,static_cast<void*>(this));
+    mBlock = new FOdysseyBlock(mTexture->GetSizeX(),mTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()),&InvalidateSurfaceCallback,static_cast<void*>(this));
     // load block data from texture
     CopyUTextureDataIntoBlock(mBlock,mTexture);
 }
@@ -282,7 +241,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(FOdysseyBlock* iBlock)
     checkf(iBlock,TEXT("Cannot Initialize with Null borrowed block"));
     mBlock = iBlock;
 
-    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(),::detail::UE4PixelFormatForUE4TextureSourceFormat(iBlock->GetUE4TextureSourceFormat()));
+    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), UE4PixelFormatForULISFormat(mBlock->Format()));
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif

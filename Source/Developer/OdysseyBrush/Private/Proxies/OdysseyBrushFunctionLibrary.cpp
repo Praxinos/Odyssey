@@ -24,7 +24,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
 
     int size = ::ul3::FMaths::Max( BrushContext->GetSizeModifier() * BrushContext->GetPressure(), 1.f );
 
-    ::ul3::FBlock debug_stamp( size, size, BrushContext->GetState().target_temp_buffer->GetULISFormat() );
+    ::ul3::FBlock debug_stamp( size, size, BrushContext->GetState().target_temp_buffer->Format() );
     ::ul3::FPixelValue color = ::ul3::Conv( BrushContext->GetState().color, ULIS3_FORMAT_RGBAF );
     color.SetAlphaF( BrushContext->GetFlowModifier() );
 
@@ -77,19 +77,45 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext,
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-    ::ul3::Blend( hULIS.ThreadPool()
-                , ULIS3_BLOCKING
-                , perfIntent
-                , hULIS.HostDeviceInfo()
-                , ULIS3_NOCB
-                , block->GetBlock()
-                , BrushContext->GetState().target_temp_buffer->GetBlock()
-                , block->GetBlock()->Rect()
-                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
-                , iAntiAliasing
-                , ::ul3::BM_NORMAL
-                , ::ul3::AM_NORMAL
-                , FMath::Clamp( Flow, 0.f, 1.f ) );
+
+	::ul3::tFormat block_format = block->Format();
+	::ul3::tFormat target_format = BrushContext->GetState().target_temp_buffer->Format();
+	if (block_format == target_format)
+	{
+		::ul3::Blend(hULIS.ThreadPool()
+			, ULIS3_BLOCKING
+			, perfIntent
+			, hULIS.HostDeviceInfo()
+			, ULIS3_NOCB
+			, block->GetBlock()
+			, BrushContext->GetState().target_temp_buffer->GetBlock()
+			, block->GetBlock()->Rect()
+			, ::ul3::FVec2F(invalidRect.x, invalidRect.y)
+			, iAntiAliasing
+			, ::ul3::BM_NORMAL
+			, ::ul3::AM_NORMAL
+			, FMath::Clamp(Flow, 0.f, 1.f));
+	}
+	else
+	{
+		FOdysseyBlock* conv = new FOdysseyBlock(block->Width(), block->Height(), target_format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), conv->GetBlock());
+		::ul3::Blend(hULIS.ThreadPool()
+			, ULIS3_BLOCKING
+			, perfIntent
+			, hULIS.HostDeviceInfo()
+			, ULIS3_NOCB
+			, conv->GetBlock()
+			, BrushContext->GetState().target_temp_buffer->GetBlock()
+			, conv->GetBlock()->Rect()
+			, ::ul3::FVec2F(invalidRect.x, invalidRect.y)
+			, iAntiAliasing
+			, ::ul3::BM_NORMAL
+			, ::ul3::AM_NORMAL
+			, FMath::Clamp(Flow, 0.f, 1.f));
+
+		delete conv;
+	}
 
     ::ul3::FRect invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
     BrushContext->PushInvalidRect( invalidRectI );
@@ -109,19 +135,45 @@ UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdys
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-    ::ul3::Blend( hULIS.ThreadPool()
-                , ULIS3_BLOCKING
-                , perfIntent
-                , hULIS.HostDeviceInfo()
-                , ULIS3_NOCB
-                , block->GetBlock()
-                , BrushContext->GetState().target_temp_buffer->GetBlock()
-                , block->GetBlock()->Rect()
-                , ::ul3::FVec2F( invalidRect.x, invalidRect.y )
-                , iAntiAliasing
-                , static_cast< ::ul3::eBlendingMode >( BlendingMode )
-                , static_cast< ::ul3::eAlphaMode >( AlphaMode )
-                , FMath::Clamp( Flow, 0.f, 1.f ) );
+
+	::ul3::tFormat block_format = block->Format();
+	::ul3::tFormat target_format = BrushContext->GetState().target_temp_buffer->Format();
+	if (block_format == target_format)
+	{
+		::ul3::Blend(hULIS.ThreadPool()
+			, ULIS3_BLOCKING
+			, perfIntent
+			, hULIS.HostDeviceInfo()
+			, ULIS3_NOCB
+			, block->GetBlock()
+			, BrushContext->GetState().target_temp_buffer->GetBlock()
+			, block->GetBlock()->Rect()
+			, ::ul3::FVec2F(invalidRect.x, invalidRect.y)
+			, iAntiAliasing
+			, static_cast<::ul3::eBlendingMode>(BlendingMode)
+			, static_cast<::ul3::eAlphaMode>(AlphaMode)
+			, FMath::Clamp(Flow, 0.f, 1.f));
+	}
+	else
+	{
+		FOdysseyBlock* conv = new FOdysseyBlock(block->Width(), block->Height(), target_format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), conv->GetBlock());
+		::ul3::Blend(hULIS.ThreadPool()
+			, ULIS3_BLOCKING
+			, perfIntent
+			, hULIS.HostDeviceInfo()
+			, ULIS3_NOCB
+			, conv->GetBlock()
+			, BrushContext->GetState().target_temp_buffer->GetBlock()
+			, conv->GetBlock()->Rect()
+			, ::ul3::FVec2F(invalidRect.x, invalidRect.y)
+			, iAntiAliasing
+			, static_cast<::ul3::eBlendingMode>(BlendingMode)
+			, static_cast<::ul3::eAlphaMode>(AlphaMode)
+			, FMath::Clamp(Flow, 0.f, 1.f));
+
+		delete conv;
+	}
 
     ::ul3::FRect invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
     BrushContext->PushInvalidRect( invalidRectI );

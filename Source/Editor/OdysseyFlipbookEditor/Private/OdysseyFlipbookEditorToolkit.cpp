@@ -218,8 +218,8 @@ FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
 bool
 FOdysseyFlipbookEditorToolkit::OnRequestClose()
 {
+	mData->SyncTextureWithSurfaceBlock();
 	mData->ApplyPropertiesBackup();
-    mData->SyncTextureWithSurfaceBlock();
 
 	//TODO: Move in the right place
 	//TODO: Do it on every texture

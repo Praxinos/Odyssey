@@ -51,7 +51,7 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     check( iClass->IsChildOf( UOdysseyTexture::StaticClass() ) );
 
     // Init internal data
-    FOdysseyBlock block( mTextureWidth, mTextureHeight, mTextureFormat, nullptr, nullptr, true );
+    FOdysseyBlock block( mTextureWidth, mTextureHeight, ULISFormatForUE4TextureSourceFormat(mTextureFormat), nullptr, nullptr, true );
 
     ::ul3::FPixelValue color( ::ul3::FPixelValue::FromRGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
 
@@ -63,12 +63,9 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     //::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block.GetBlock(), color, canvasRect );
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
-    InitTextureWithBlockData(&block, texture);
-    texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+    InitTextureWithBlockData(&block, texture, mTextureFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-    userData->GetLayerStack()->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+    userData->GetLayerStack()->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY(), ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
     userData->GetLayerStack()->FillCurrentLayerWithColor( color );
     texture->AddAssetUserData( userData );
     texture->PostEditChange();

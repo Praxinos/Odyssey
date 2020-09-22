@@ -224,7 +224,7 @@ FOdysseyTextureEditorController::OnExportLayersAsTextures()
             object->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
             object->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
             object->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-            InitTextureWithBlockData(imageLayer->GetBlock(), object);
+            InitTextureWithBlockData(imageLayer->GetBlock(), object, mData->Texture()->Source.GetFormat());
 
             object->PostEditChange();
             object->UpdateResource();
