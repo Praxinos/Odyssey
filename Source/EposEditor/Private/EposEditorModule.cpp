@@ -96,12 +96,19 @@ FEposEditorModule::RegisterSettings()
 
     //---
 
-    mSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposEditor" ) ); // Don't know how to use/manage them
+    mSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "ShotSequenceEditor" ) ); // Don't know how to use/manage them -> Inside Config directory.
 
-    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposEditor",
-                                        LOCTEXT( "EposEditorSettingsName", "Epos Editor" ),
-                                        LOCTEXT( "EposEditorSettingsDescription", "Configure the look and feel of the Epos Editor." ),
+    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "ShotSequenceEditor",
+                                        LOCTEXT( "EposEditorSettingsName", "Epos Editor (ShotSequence)" ),
+                                        LOCTEXT( "EposEditorSettingsDescription", "Configure the look and feel of the Epos Editor (ShotSequence)." ),
                                         mSettings );
+
+    mSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "BoardSequenceEditor" ) ); // Don't know how to use/manage them -> Inside Config directory.
+
+    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "BoardSequenceEditor",
+                                      LOCTEXT( "EposEditorSettingsName", "Epos Editor (BoardSequence)" ),
+                                      LOCTEXT( "EposEditorSettingsDescription", "Configure the look and feel of the Epos Editor (BoardSequence)." ),
+                                      mSettings );
 }
 
 void

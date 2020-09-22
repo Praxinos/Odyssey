@@ -77,6 +77,11 @@ private:
     void OnSequencerReceivedFocus();
 
 private:
+    UMovieSceneTrack*   ProcessTrack( AActor* iActor, const FGuid& iBinding, UClass* iClass );
+    FGuid               ProcessComponent( AActor* iActor, const FString& iComponentName );
+    void                ProcessPropertyTrack( AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath );
+
+private:
 
     /** Shot sequence for our edit operation. */
     UShotSequence* mShotSequence;

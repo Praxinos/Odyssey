@@ -42,9 +42,11 @@ public class EposEditor : ModuleRules
 				// ... add private dependencies that you statically link with here ...
 				"MovieScene",
 				"MovieSceneTools",
+				"MovieSceneTracks",
 				"Sequencer",
 				"UnrealEd",
 				"Projects",
+				"CinematicCamera",
 				//
 				"Epos",
 			}
