@@ -296,7 +296,7 @@ FShotSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
 }
 
 UMovieSceneTrack*
-FShotSequenceEditorToolkit::ProcessTrack( AActor* iActor, const FGuid& iBinding, UClass* iClass )
+FShotSequenceEditorToolkit::CreateTrack( AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
 {
     if( !iBinding.IsValid() )
         return nullptr;
@@ -311,7 +311,8 @@ FShotSequenceEditorToolkit::ProcessTrack( AActor* iActor, const FGuid& iBinding,
         return nullptr;
 
     UMovieSceneTrack* NewTrack = movieScene->FindTrack( iClass, iBinding );
-    if( !NewTrack )
+    // For material track, multiple new tracks (of the same type) may be needed
+    if( !NewTrack || iMaterialTrackIndex > 0 )
         NewTrack = movieScene->AddTrack( iClass, iBinding );
 
     bool bCreateDefaultSection = false;
@@ -364,6 +365,15 @@ FShotSequenceEditorToolkit::ProcessTrack( AActor* iActor, const FGuid& iBinding,
             FloatChannels[8]->SetDefault( Scale.Z );
         }
 
+        if( NewTrack->IsA<UMovieScenePrimitiveMaterialTrack>() )
+        {
+            UMovieScenePrimitiveMaterialTrack* material_track = Cast< UMovieScenePrimitiveMaterialTrack >( NewTrack );
+            check( material_track );
+
+            material_track->MaterialIndex = iMaterialTrackIndex;
+            material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->MaterialIndex ) ) );
+        }
+
         if( mSequencer->GetInfiniteKeyAreas() )
         {
             NewSection->SetRange( TRange<FFrameNumber>::All() );
@@ -374,7 +384,7 @@ FShotSequenceEditorToolkit::ProcessTrack( AActor* iActor, const FGuid& iBinding,
 }
 
 FGuid
-FShotSequenceEditorToolkit::ProcessComponent( AActor* iActor, const FString& iComponentName )
+FShotSequenceEditorToolkit::CreateComponentTrack( AActor* iActor, const FString& iComponentName )
 {
     for( UActorComponent* Component : iActor->GetComponents() )
     {
@@ -386,14 +396,16 @@ FShotSequenceEditorToolkit::ProcessComponent( AActor* iActor, const FString& iCo
 
         FGuid binding = mSequencer->GetHandleToObject( Component );
         if( binding.IsValid() )
-            return binding;
+        {
+            return binding; // Get only the first component matching the name
+        }
     }
 
     return FGuid();
 }
 
 void
-FShotSequenceEditorToolkit::ProcessPropertyTrack( AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath )
+FShotSequenceEditorToolkit::CreatePropertyTrack( AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath )
 {
     TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
     UObject* PropertyOwner = iActor;
@@ -468,11 +480,11 @@ void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, co
     //     - 'CurrentAperture' property
     if( iActor->IsA<ACineCameraActor>() )
     {
-        ProcessTrack( iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+        CreateTrack( iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
 
-        //ProcessPropertyTrack( iActor, "CameraComponent", "CurrentFocalLength" );
-        //ProcessPropertyTrack( iActor, "CameraComponent", "FocusSettings.ManualFocusDistance" );
-        //ProcessPropertyTrack( iActor, "CameraComponent", "CurrentAperture" );
+        //CreatePropertyTrack( iActor, "CameraComponent", "CurrentFocalLength" );
+        //CreatePropertyTrack( iActor, "CameraComponent", "FocusSettings.ManualFocusDistance" );
+        //CreatePropertyTrack( iActor, "CameraComponent", "CurrentAperture" );
 
         return;
     }
@@ -481,19 +493,28 @@ void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, co
     // - '3DTransform' track
     // - 'StaticMeshComponent' binding
     //     - 'Material Switcher' track
-    ProcessTrack( iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+    CreateTrack( iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
 
-    FGuid binding = ProcessComponent( iActor, "StaticMeshComponent" );
-    UMovieSceneTrack* track = ProcessTrack( iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass() );
+    FGuid binding = CreateComponentTrack( iActor, "StaticMeshComponent" ); //TODO: improve how to find it ?
 
-    if( track && track->IsA<UMovieScenePrimitiveMaterialTrack>() )
+    //---
+
+    // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
+    int32 minNumMaterials = TNumericLimits<int32>::Max();
+    for( TWeakObjectPtr<> weakObject : mSequencer->FindObjectsInCurrentSequence( binding ) )
     {
-        UMovieScenePrimitiveMaterialTrack* material_track = Cast< UMovieScenePrimitiveMaterialTrack >( track );
-        check( material_track );
+        UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( weakObject.Get() );
+        if( !primitiveComponent )
+            continue;
 
-        material_track->MaterialIndex = 0; //TODO: how ?
-        material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->MaterialIndex ) ) );
+        minNumMaterials = FMath::Min( minNumMaterials, primitiveComponent->GetNumMaterials() );
     }
+
+    if( minNumMaterials == TNumericLimits<int32>::Max() )
+        minNumMaterials = 0;
+
+    for( int material_index = 0; material_index < minNumMaterials; material_index++ )
+        CreateTrack( iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
 }
 
 void FShotSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

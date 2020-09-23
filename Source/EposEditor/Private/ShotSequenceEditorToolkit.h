@@ -77,9 +77,9 @@ private:
     void OnSequencerReceivedFocus();
 
 private:
-    UMovieSceneTrack*   ProcessTrack( AActor* iActor, const FGuid& iBinding, UClass* iClass );
-    FGuid               ProcessComponent( AActor* iActor, const FString& iComponentName );
-    void                ProcessPropertyTrack( AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath );
+    UMovieSceneTrack*   CreateTrack( AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
+    FGuid               CreateComponentTrack( AActor* iActor, const FString& iComponentName );
+    void                CreatePropertyTrack( AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath );
 
 private:
 
