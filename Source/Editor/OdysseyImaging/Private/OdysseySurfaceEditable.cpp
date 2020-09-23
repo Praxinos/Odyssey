@@ -101,11 +101,10 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
            ,TEXT("Error"));
 
     // Considering only one region is an assumption that works but you have to be more carefull with several regions.
-    FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x,y,x,y,w,h);
-
     ::ul3::tFormat pixelFormat = ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat());
     if (iData->Format() == pixelFormat)
     {
+		FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x, y, x, y, w, h);
 		TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [&](uint8*, const FUpdateTextureRegion2D* Regions) {
 			delete Regions;
 		};
@@ -123,6 +122,7 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
         ::ul3::FBlock* block = new ::ul3::FBlock(w, h, iData->Format());
 		::ul3::FBlock* conv = new ::ul3::FBlock(w, h, pixelFormat);
         ::ul3::FVec2I pos(0, 0);
+		FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x, y, 0, 0, w, h);
         ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iData, block, iRect, pos);
         ::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block, conv);
 

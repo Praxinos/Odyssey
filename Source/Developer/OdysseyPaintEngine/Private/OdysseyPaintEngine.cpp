@@ -190,7 +190,7 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
     mWidth = iBlock->Width();
     mHeight = iBlock->Height();
 
-    if (!mTempBuffer || mTempBuffer->Size() != mBlock->Size())
+    if (!mTempBuffer || mTempBuffer->Size() != mBlock->Size() || mTempBuffer->Format() != mBlock->Format())
     {
         delete mTempBuffer;
         mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->Format());

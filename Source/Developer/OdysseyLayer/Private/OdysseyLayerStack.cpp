@@ -1060,7 +1060,7 @@ FOdysseyLayerStack::ComputeBlockOfLayers(FOdysseyNTree< IOdysseyLayer* >* iLayer
     return resultBlock;
 }
 
-// Custom serialization version for changes made in Dev-AnimPhys stream
+// Custom serialization version for FOdysseyLayerStack
 struct FOdysseyLayerStackObjectVersion
 {
 	enum Type

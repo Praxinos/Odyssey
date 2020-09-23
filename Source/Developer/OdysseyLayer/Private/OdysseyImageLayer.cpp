@@ -126,12 +126,36 @@ FOdysseyImageLayer::CopyPropertiesFrom( const FOdysseyImageLayer &iCopy )
     mIsAlphaLocked = iCopy.IsAlphaLocked();
 }
 
+// Custom serialization version for FOdysseyLayerStack
+struct FOdysseyImageLayerObjectVersion
+{
+	enum Type
+	{
+		// Before any version changes were made
+		SavePixelFormat,
+		
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	const static FGuid GUID;
+
+private:
+	FOdysseyImageLayerObjectVersion() {}
+};
+
+const FGuid FOdysseyImageLayerObjectVersion::GUID(0xE2CA928C, 0x4FCB03A0, 0xE22252AA, 0xA88FC0B5);
+FCustomVersionRegistration FOdysseyImageLayerObjectVersionRegistration(FOdysseyImageLayerObjectVersion::GUID, FOdysseyImageLayerObjectVersion::LatestVersion, TEXT("FOdysseyImageLayerObjectVersion::SavePixelFormat"));
 
 FArchive& 
 operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
 {
     if(!ioSaveImageLayer)
         return Ar;
+
+	//Set the Object Version
+	Ar.UsingCustomVersion(FOdysseyImageLayerObjectVersion::GUID);
 
     /*IOdysseySerializable* serializable = (FOdysseyImageLayer*)(ioSaveImageLayer);
     Ar << serializable;*/
@@ -146,9 +170,15 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
     if(Ar.IsSaving()) {
         int width = ioSaveImageLayer->mBlock->Width();
         int height = ioSaveImageLayer->mBlock->Height();
+		::ul3::tFormat format = ioSaveImageLayer->mBlock->Format();
 
         Ar << width;
         Ar << height;
+		if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat)
+		{
+			
+			Ar << format;
+		}
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -171,14 +201,17 @@ operator<<(FArchive &Ar,FOdysseyImageLayer* ioSaveImageLayer)
         int width;
         int height;
 
-        // Why is it BGRA8 ? Can we load / save images with other formats ?
-        ETextureSourceFormat textureFormat = ETextureSourceFormat::TSF_BGRA8;
-
         Ar << width;
         Ar << height;
 
+		::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(ETextureSourceFormat::TSF_BGRA8);
+		if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat)
+		{
+			Ar << format;
+		}
+
         check(!ioSaveImageLayer->mBlock);
-        ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height, ULISFormatForUE4TextureSourceFormat(textureFormat));
+        ioSaveImageLayer->mBlock = new FOdysseyBlock(width,height, format);
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
