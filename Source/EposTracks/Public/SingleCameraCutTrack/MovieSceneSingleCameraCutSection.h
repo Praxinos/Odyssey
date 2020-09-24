@@ -114,5 +114,5 @@ private:
 	float ThumbnailReferenceOffset;
 #endif
 
-	//friend class UMovieSceneCameraCutTrackInstance;
+	friend class UMovieSceneSingleCameraCutTrackInstance;
 };

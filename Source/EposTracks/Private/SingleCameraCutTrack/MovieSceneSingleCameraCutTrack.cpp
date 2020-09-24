@@ -175,7 +175,7 @@ void UMovieSceneSingleCameraCutTrack::RemoveAllAnimationData()
 #if WITH_EDITORONLY_DATA
 FText UMovieSceneSingleCameraCutTrack::GetDefaultDisplayName() const
 {
-	return LOCTEXT("TrackName", "Camera Cuts");
+	return LOCTEXT("TrackName", "Single Camera Cut");
 }
 #endif
 

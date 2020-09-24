@@ -16,7 +16,7 @@
 #include "EntitySystem/Interrogation/MovieSceneInterrogatedPropertyInstantiator.h"
 #include "EntitySystem/TrackInstance/MovieSceneTrackInstanceSystem.h"
 #include "Systems/MovieSceneComponentTransformSystem.h"
-//#include "TrackInstances/MovieSceneCameraCutTrackInstance.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneTransformTrack.h"
 #include "UObject/LinkerLoad.h"
@@ -99,15 +99,15 @@ void UMovieSceneSingleCameraCutSection::PostEditChangeProperty(FPropertyChangedE
 
 void UMovieSceneSingleCameraCutSection::ImportEntityImpl(UMovieSceneEntitySystemLinker* EntityLinker, const FEntityImportParams& Params, FImportedEntity* OutImportedEntity)
 {
-//	using namespace UE::MovieScene;
-//
-//	FMovieSceneTrackInstanceComponent TrackInstance { this, UMovieSceneCameraCutTrackInstance::StaticClass() };
-//
-//	OutImportedEntity->AddBuilder(
-//		FEntityBuilder()
-//		.AddTag(FBuiltInComponentTypes::Get()->Tags.Master)
-//		.Add(FBuiltInComponentTypes::Get()->TrackInstance, TrackInstance)
-//	);
+	using namespace UE::MovieScene;
+
+	FMovieSceneTrackInstanceComponent TrackInstance { this, UMovieSceneSingleCameraCutTrackInstance::StaticClass() };
+
+	OutImportedEntity->AddBuilder(
+		FEntityBuilder()
+		.AddTag(FBuiltInComponentTypes::Get()->Tags.Master)
+		.Add(FBuiltInComponentTypes::Get()->TrackInstance, TrackInstance)
+	);
 }
 
 void UMovieSceneSingleCameraCutSection::ComputeInitialCameraCutTransform()
