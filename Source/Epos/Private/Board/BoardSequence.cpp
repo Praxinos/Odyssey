@@ -11,6 +11,7 @@
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h" //TMP
 
 //---
 
@@ -105,6 +106,7 @@ ETrackSupport
 UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
     if( InTrackClass == UMovieSceneCinematicBoardTrack::StaticClass() || 
+        InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() || //TMP
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )

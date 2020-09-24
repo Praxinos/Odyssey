@@ -12,7 +12,7 @@
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
-#include "Tracks/MovieSceneCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 //---
 
@@ -186,7 +186,7 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
 ETrackSupport
 UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
-    if( InTrackClass == UMovieSceneCameraCutTrack::StaticClass() ||
+    if( InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() ||
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )

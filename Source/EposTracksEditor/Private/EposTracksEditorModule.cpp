@@ -6,6 +6,7 @@
 #include "ISequencerModule.h"
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
+#include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 
 #define LOCTEXT_NAMESPACE "FEposTracksEditorModule"
 
@@ -19,6 +20,7 @@ FEposTracksEditorModule::StartupModule()
         ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
 
         CinematicBoardTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FCinematicBoardTrackEditor::CreateTrackEditor ) );
+        SingleCameraCutTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FSingleCameraCutTrackEditor::CreateTrackEditor ) );
     }
 }
 
@@ -28,6 +30,7 @@ FEposTracksEditorModule::ShutdownModule()
     ISequencerModule& SequencerModule = FModuleManager::Get().GetModuleChecked<ISequencerModule>( "Sequencer" );
 
     SequencerModule.UnRegisterTrackEditor( CinematicBoardTrackCreateEditorHandle );
+    SequencerModule.UnRegisterTrackEditor( SingleCameraCutTrackCreateEditorHandle );
 }
 
 //---
