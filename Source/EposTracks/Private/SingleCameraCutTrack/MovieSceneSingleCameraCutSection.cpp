@@ -27,10 +27,7 @@
 UMovieSceneSingleCameraCutSection::UMovieSceneSingleCameraCutSection(const FObjectInitializer& Init)
 	: Super(Init)
 {
-	EvalOptions.EnableAndSetCompletionMode
-		(GetLinkerCustomVersion(FSequencerObjectVersion::GUID) < FSequencerObjectVersion::WhenFinishedDefaultsToProjectDefault ? 
-		 EMovieSceneCompletionMode::RestoreState : 
-		 EMovieSceneCompletionMode::ProjectDefault);
+	EvalOptions.EnableAndSetCompletionMode( EMovieSceneCompletionMode::ProjectDefault );
 
 	SetBlendType(EMovieSceneBlendType::Absolute);
 }
@@ -48,6 +45,49 @@ void UMovieSceneSingleCameraCutSection::OnBindingsUpdated(const TMap<FGuid, FGui
 void UMovieSceneSingleCameraCutSection::GetReferencedBindings(TArray<FGuid>& OutBindings)
 {
 	OutBindings.Add(CameraBindingID.GetGuid());
+}
+
+void UMovieSceneSingleCameraCutSection::SetRange( const TRange<FFrameNumber>& NewRange )
+{
+    // Do not modify for objects that still need initialization (i.e. we're in the object's constructor)
+    bool bCanSetRange = HasAnyFlags( RF_NeedInitialization ) || TryModify();
+    if( !bCanSetRange )
+        return;
+
+    check( NewRange.GetLowerBound().IsOpen() || NewRange.GetUpperBound().IsOpen() || NewRange.GetLowerBoundValue() <= NewRange.GetUpperBoundValue() );
+    SectionRange.Value = NewRange;
+    TRangeBound<FFrameNumber> bound( TRangeBound<FFrameNumber>::Inclusive( 0 ) );
+    SectionRange.Value.SetLowerBound( bound );
+}
+
+void UMovieSceneSingleCameraCutSection::SetStartFrame( TRangeBound<FFrameNumber> NewEndFrame )
+{
+    SetStartFrameAuto();
+}
+
+void UMovieSceneSingleCameraCutSection::SetStartFrameAuto()
+{
+    if( !TryModify() )
+        return;
+
+    TRangeBound<FFrameNumber> bound( TRangeBound<FFrameNumber>::Inclusive( 0 ) );
+    SectionRange.Value.SetLowerBound( bound );
+}
+
+//TODO: Not called because Super::MoveSection() is not virtual !!!
+void UMovieSceneSingleCameraCutSection::MoveSection( FFrameNumber DeltaFrame )
+{
+}
+
+UMovieSceneSection* UMovieSceneSingleCameraCutSection::SplitSection( FQualifiedFrameTime SplitTime, bool bDeleteKeys )
+{
+    return nullptr;
+}
+
+void UMovieSceneSingleCameraCutSection::TrimSection( FQualifiedFrameTime TrimTime, bool bTrimLeft, bool bDeleteKeys )
+{
+    if( !bTrimLeft )
+        Super::TrimSection( TrimTime, bTrimLeft, bDeleteKeys );
 }
 
 void UMovieSceneSingleCameraCutSection::PostLoad()
@@ -88,6 +128,9 @@ void UMovieSceneSingleCameraCutSection::PostEditChangeProperty(FPropertyChangedE
 	const FName PropertyName = PropertyChangedEvent.GetPropertyName();
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMovieSceneSingleCameraCutSection, SectionRange))
 	{
+        TRangeBound<FFrameNumber> bound( TRangeBound<FFrameNumber>::Inclusive( 0 ) );
+        SectionRange.Value.SetLowerBound( bound );
+
 		if (UMovieSceneSingleCameraCutTrack* Track = GetTypedOuter<UMovieSceneSingleCameraCutTrack>())
 		{
 			Track->OnSectionMoved(*this, EPropertyChangeType::ValueSet);

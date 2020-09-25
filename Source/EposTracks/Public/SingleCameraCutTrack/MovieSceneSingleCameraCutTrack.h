@@ -59,10 +59,6 @@ protected:
 
 	virtual void PreCompileImpl() override;
 
-public:
-	UPROPERTY()
-	bool bCanBlend;
-
 private:
 
 	/** All movie scene sections. */

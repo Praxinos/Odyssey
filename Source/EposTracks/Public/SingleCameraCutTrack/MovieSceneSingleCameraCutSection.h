@@ -51,12 +51,52 @@ public:
 		CameraBindingID = InCameraBindingID;
 	}
 
+    //---
+
 	//~ UMovieSceneSection interface
 	virtual void OnBindingsUpdated(const TMap<FGuid, FGuid>& OldGuidToNewGuidMap) override;
 	virtual void GetReferencedBindings(TArray<FGuid>& OutBindings) override;
+    /**
+     * Sets a new range of times for this section
+     *
+     * @param NewRange	The new range of times
+     */
+    EPOSTRACKS_API virtual void SetRange( const TRange<FFrameNumber>& NewRange );
+    /**
+     * Set this section's end frame in sequence resolution space
+     * @note: Will be clamped to the current start frame if necessary
+     */
+    EPOSTRACKS_API virtual void SetStartFrame( TRangeBound<FFrameNumber> NewEndFrame );
+    virtual void SetStartFrameAuto();
+    /**
+     * Moves the section by a specific amount of time
+     *
+     * @param DeltaTime	The distance in time to move the curve
+     */
+    EPOSTRACKS_API void MoveSection( FFrameNumber DeltaTime );
+    /**
+     * Split a section in two at the split time
+     *
+     * @param SplitTime The time at which to split
+     * @param bDeleteKeys Delete keys outside the split ranges
+     * @return The newly created split section
+     */
+    EPOSTRACKS_API virtual UMovieSceneSection* SplitSection( FQualifiedFrameTime SplitTime, bool bDeleteKeys );
+    /**
+     * Trim a section at the trim time
+     *
+     * @param TrimTime The time at which to trim
+     * @param bTrimLeft Whether to trim left or right
+     * @param bDeleteKeys Delete keys outside the split ranges
+     */
+    EPOSTRACKS_API virtual void TrimSection( FQualifiedFrameTime TrimTime, bool bTrimLeft, bool bDeleteKeys );
+
+    //---
 
 	/** ~UObject interface */
 	virtual void PostLoad() override;
+
+    //---
 
 	/**
 	 * Resolve a camera component for this cut section from the specified player and sequence ID
