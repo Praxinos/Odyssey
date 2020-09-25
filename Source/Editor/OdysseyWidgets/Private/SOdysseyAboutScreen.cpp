@@ -189,7 +189,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                 SNew( SHorizontalBox )
                 +SHorizontalBox::Slot()
                 .HAlign( HAlign_Left )
-                .FillWidth( 0.72f )
+                .FillWidth( 0.64f )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
@@ -299,7 +299,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
                 ]
                 +SHorizontalBox::Slot()
                 .HAlign( HAlign_Right )
-                .FillWidth( 0.28f )
+                .FillWidth( 0.36f )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
