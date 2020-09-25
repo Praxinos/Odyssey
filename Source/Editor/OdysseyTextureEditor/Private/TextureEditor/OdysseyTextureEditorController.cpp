@@ -254,7 +254,7 @@ FOdysseyTextureEditorController::OnImportTexturesAsLayers()
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture );
+        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, mData->LayerStack()->GetFormat() );
 		mData->LayerStack()->AddImageLayerFromData( textureBlock, mData->LayerStack()->GetLayers(), FName( *( openedTexture->GetName() ) ) );
         delete textureBlock;
     }

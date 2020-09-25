@@ -35,10 +35,22 @@ InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETex
 }
 
 FOdysseyBlock*
-NewOdysseyBlockFromUTextureData(UTexture2D* iTexture)
+NewOdysseyBlockFromUTextureData(UTexture2D* iTexture, ::ul3::tFormat iFormat)
 {
-    FOdysseyBlock* ret = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
-    CopyUTextureDataIntoBlock(ret,iTexture);
+    ::ul3::tFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+
+    FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),sourceFormat);
+    CopyUTextureDataIntoBlock(block,iTexture);
+
+    if (sourceFormat == iFormat)
+        return block;
+
+    FOdysseyBlock* ret = new FOdysseyBlock(block->Width(),block->Height(),iFormat);
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Conv( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), ret->GetBlock() );
+    delete block;
 
     return ret;
 }

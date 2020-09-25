@@ -82,7 +82,7 @@ public:
 private:
     // Private API
     FName                               GetNextLayerName();
-    void                                InitResultAndTempBlock();
+    void                                InitResultAndTempBlock(int iWidth, int iHeight, ::ul3::tFormat iFormat);
     FOdysseyBlock*                      ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLayers );
 
 private:
@@ -91,9 +91,6 @@ private:
     FOdysseyBlock*                      mTempBlock;
     FOdysseyNTree< IOdysseyLayer* >*    mLayers;
     FOdysseyNTree< IOdysseyLayer* >*    mCurrentLayer;
-    int                                 mWidth;
-    int                                 mHeight;
-    ::ul3::tFormat                      mFormat;
     bool                                mIsInitialized;
 
 	FOnCurrentLayerChanged				mOnCurrentLayerChanged;

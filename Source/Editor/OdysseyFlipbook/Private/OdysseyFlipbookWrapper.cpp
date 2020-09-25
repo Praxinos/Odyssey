@@ -291,7 +291,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
     }
     else
     {
-        block = NewOdysseyBlockFromUTextureData(texture);
+        block = NewOdysseyBlockFromUTextureData(texture, ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
         texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
         delete block;
     }

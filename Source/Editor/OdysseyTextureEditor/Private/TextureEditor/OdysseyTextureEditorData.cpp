@@ -47,7 +47,7 @@ FOdysseyTextureEditorData::Init()
     {
         userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
         mTexture->AddAssetUserData( userData );
-        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture );
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, ULISFormatForUE4PixelFormat(mTexture->GetPixelFormat()) );
         userData->GetLayerStack()->InitFromData( textureData );
         delete textureData;
         mTexture->PostEditChange();

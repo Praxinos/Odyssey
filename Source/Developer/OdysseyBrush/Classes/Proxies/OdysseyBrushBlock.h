@@ -8,7 +8,9 @@
 #include "UObject/ObjectMacros.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushCache.h"
+#include "Proxies/OdysseyBrushFormat.h"
 #include "Proxies/OdysseyBrushBlending.h"
+
 #include "OdysseyBrushBlock.generated.h"
 
 class  FOdysseyBlock;
@@ -82,7 +84,6 @@ struct FOdysseyFontCharacter
     }
 };
 
-
 /////////////////////////////////////////////////////
 // UOdysseyBlockProxyFunctionLibrary
 UCLASS(meta=(ScriptName="OdysseyBlockProxyLibrary"))
@@ -95,8 +96,8 @@ public:
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", DisplayName = "To OdysseyBlockProxy (Texture2D)", CompactNodeTitle = "->", BlueprintAutocast ) )
-    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, UOdysseyBrushAssetBase* BrushContext );
-    
+    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyBlockFormat Format, UOdysseyBrushAssetBase* BrushContext);
+
     //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
@@ -113,6 +114,7 @@ public:
     static FOdysseyBlockProxy CreateBlock( UOdysseyBrushAssetBase* BrushContext
                                          , int Width = 256
                                          , int Height = 256
+                                         , EOdysseyBlockFormat Format = EOdysseyBlockFormat::kAuto
                                          , const FString& ID = "NewDynamicBlock"
                                          , bool InitializeData = true
                                          , ECacheLevel Cache = ECacheLevel::kStep );
@@ -130,9 +132,10 @@ public:
                                    , int X = 0
                                    , int Y = 0
                                    , float Opacity = 1.f
+								   , EOdysseyBlockFormat Format = EOdysseyBlockFormat::kAuto
                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal
-                                   , ECacheLevel Cache = ECacheLevel::kState );
+                                   , ECacheLevel Cache = ECacheLevel::kState);
 
     //---
 
@@ -151,7 +154,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
-    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, ECacheLevel Cache = ECacheLevel::kState );
+    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, EOdysseyBlockFormat Format = EOdysseyBlockFormat::kAuto, ECacheLevel Cache = ECacheLevel::kState );
     
     //Requires a Font and a String to return an Array of Odyssey Block Proxy.
     //This node find the correspondance between letters from the String and characters from the Font.

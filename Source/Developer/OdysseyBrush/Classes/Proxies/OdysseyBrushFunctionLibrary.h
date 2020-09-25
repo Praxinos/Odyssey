@@ -7,6 +7,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/ObjectMacros.h"
 #include "Proxies/OdysseyBrushColor.h"
+#include "Proxies/OdysseyBrushFormat.h"
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
 #include "Proxies/OdysseyBrushBlending.h"

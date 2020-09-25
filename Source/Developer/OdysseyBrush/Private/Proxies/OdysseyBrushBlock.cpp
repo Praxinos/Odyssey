@@ -11,13 +11,9 @@
 #include <ULIS3>
 #include "ULISLoaderModule.h"
 
-/////////////////////////////////////////////////////
-// UOdysseyBlockProxyFunctionLibrary
-
-
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, UOdysseyBrushAssetBase* BrushContext )
+UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyBlockFormat Format, UOdysseyBrushAssetBase* BrushContext )
 {
     if( !BrushContext )
         return  FOdysseyBlockProxy::MakeNullProxy();
@@ -32,7 +28,10 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
 
     //---
 
-    FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( Texture );
+
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, BrushContext->GetState().target_temp_buffer->Format());
+    
+    FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( Texture, format );
 
     FOdysseyBlockProxy prox( block, op );
     BrushContext->StoreInPool( level, op, prox );
@@ -80,6 +79,7 @@ FOdysseyBlockProxy
 UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushContext
                                               , int Width
                                               , int Height
+                                              , EOdysseyBlockFormat Format
                                               , const FString& ID
                                               , bool InitializeData
                                               , ECacheLevel Cache )
@@ -96,7 +96,9 @@ UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushCon
 
     //---
 
-    FOdysseyBlock* tmp = new  FOdysseyBlock( Width, Height, BrushContext->GetState().target_temp_buffer->Format(), nullptr, nullptr, InitializeData );
+    ::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, BrushContext->GetState().target_temp_buffer->Format());
+
+    FOdysseyBlock* tmp = new  FOdysseyBlock( Width, Height, format, nullptr, nullptr, InitializeData );
 
     FOdysseyBlockProxy prox( tmp, op );
     BrushContext->StoreInPool( Cache, op, prox );
@@ -112,9 +114,10 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
                                         , int X
                                         , int Y
                                         , float Opacity
+										, EOdysseyBlockFormat Format
                                         , EOdysseyBlendingMode BlendingMode
                                         , EOdysseyAlphaMode AlphaMode
-                                        , ECacheLevel Cache )
+                                        , ECacheLevel Cache)
 {
     if( !BrushContext )
         return  FOdysseyBlockProxy::MakeNullProxy();
@@ -129,16 +132,39 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
         return  BrushContext->RetrieveInPool( Cache, op );
 
     //---
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, BrushContext->GetState().target_temp_buffer->Format());
 
-    ::ul3::FBlock* source  = Top.m->GetBlock();
-    ::ul3::FBlock* back    = Back.m->GetBlock();
-    FOdysseyBlock* dst = new FOdysseyBlock( back->Width(), back->Height(), back->Format(), nullptr, nullptr, false );
+    FOdysseyBlock* dst = new FOdysseyBlock(Back.m->GetBlock()->Width(), Back.m->GetBlock()->Height(), format, nullptr, nullptr, false );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = Top.m->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* source = Top.m->GetBlock();
+	::ul3::FBlock* back = Back.m->GetBlock();
+
+	if (source->Format() != format)
+	{
+		::ul3::FBlock* conv = new ::ul3::FBlock(back->Width(), back->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, conv);
+		source = conv;
+	}
+
+	if (back->Format() != format)
+	{
+		::ul3::FBlock* conv = new ::ul3::FBlock(back->Width(), back->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, conv);
+		back = conv;
+	}
+
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, dst->GetBlock(), back->Rect(), ::ul3::FVec2I( 0, 0 ) );
     ::ul3::Blend( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, dst->GetBlock(), source->Rect(), ::ul3::FVec2F( X, Y ), ULIS3_AA, static_cast< ::ul3::eBlendingMode >( BlendingMode ), static_cast< ::ul3::eAlphaMode >( AlphaMode ), Opacity );
+
+	if (Top.m->GetBlock() != source)
+		delete source;
+
+	if (Back.m->GetBlock() != back)
+		delete back;
 
     FOdysseyBlockProxy prox( dst, op );
     BrushContext->StoreInPool( Cache, op, prox );
@@ -169,7 +195,7 @@ UOdysseyBlockProxyFunctionLibrary::GetHeight( FOdysseyBlockProxy Sample )
 
 //static
 TArray< FOdysseyBlockProxy >
-UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrushContext, const UFont* iFont, ECacheLevel iCache )
+UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrushContext, const UFont* iFont, EOdysseyBlockFormat Format, ECacheLevel iCache)
 {
     TArray< FOdysseyBlockProxy > blocks;
     if( !iBrushContext )
@@ -178,6 +204,8 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrush
         return blocks;
     
     check( iFont->Textures.Num() )
+
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, iBrushContext->GetState().target_temp_buffer->Format());
     
     for( auto texture : iFont->Textures )
     {
@@ -191,7 +219,7 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrush
             continue;
         }
 
-        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( texture );
+        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( texture, format);
         FOdysseyBlockProxy prox( block, iFont->GetName() );
         iBrushContext->StoreInPool( iCache, op, prox );
         blocks.Add( prox );

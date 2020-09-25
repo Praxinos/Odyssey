@@ -213,10 +213,28 @@ FOdysseyPaintEngine::TempBuffer()
 void
 FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 {
+	mBrushInstance = iBrushInstance;
+	mBrushCursorInvalid = true;
+
+	//we need to do this before iBrushInstance->ExecuteSelected();
+	//and we cannot use UpdateBrushInstance() as it sends a StateChanged, and we only want this after iBrushInstance->ExecuteSelected();
+	FOdysseyBrushState& state = mBrushInstance->GetState();
+	state.target_temp_buffer = mTempBuffer;
+	state.point = FOdysseyStrokePoint();
+	state.color = mColor;
+	state.size_modifier = mSizeModifier;
+	state.opacity_modifier = mOpacityModifier;
+	state.flow_modifier = mFlowModifier;
+	state.blendingMode_modifier = mBlendingModeModifier;
+	state.alphaMode_modifier = mAlphaModeModifier;
+	state.step = mInterpolator->GetStep();
+	state.smoothing_strength = mSmoothingParameters->GetStrength();
+	state.currentPointIndex = 0;
+	state.currentStroke = &mResultStroke;
+
     if( iBrushInstance != nullptr && mBrushInstance != iBrushInstance )
         iBrushInstance->ExecuteSelected();
 
-    mBrushInstance = iBrushInstance;
     UpdateBrushInstance();
 }
 

@@ -103,7 +103,7 @@ FOdysseyFlipbookEditorData::FindOrCreateTextureUserData(UTexture2D* iTexture)
     {
         userData = NewObject< UOdysseyTextureAssetUserData >(iTexture, NAME_None, RF_Public);
         iTexture->AddAssetUserData( userData );
-        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture );
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()) );
         userData->GetLayerStack()->InitFromData( textureData );
         delete textureData;
         iTexture->PostEditChange();
