@@ -43,11 +43,7 @@ FOdysseySmoothingAverage::ComputePoint()
     if( !IsReady() )
         return FOdysseyStrokePoint();
 
-    FOdysseyStrokePoint outPoint = FOdysseyStrokePoint::ZeroPoint();
-    for( int i = 0; i < mPoints.Num(); ++i )
-        outPoint += mPoints[i];
-
-    outPoint /= mPoints.Num();
+    FOdysseyStrokePoint outPoint = FOdysseyStrokePoint::Average( mPoints );
 
     mPoints.RemoveAt( 0 );
 

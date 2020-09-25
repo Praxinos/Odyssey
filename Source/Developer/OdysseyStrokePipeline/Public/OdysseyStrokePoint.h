@@ -50,7 +50,18 @@ public:
     FOdysseyStrokePoint& operator*=( float iRhs );
     FOdysseyStrokePoint& operator/=( float iRhs );
     FOdysseyStrokePoint  operator* ( float iRhs ) const;
-    FOdysseyStrokePoint  operator/ ( float iRhs ) const;
+    __declspec(deprecated) FOdysseyStrokePoint  operator/ ( float iRhs ) const;
+
+public: 
+    //Returns the average of two points (It is NOT (iPt1 + iPt2) / 2)
+    static FOdysseyStrokePoint Average( const FOdysseyStrokePoint& iPt1, const FOdysseyStrokePoint& iPt2 );
+    
+    //Same with multiple points
+    static FOdysseyStrokePoint Average( const TArray< FOdysseyStrokePoint>& iPoints );
+
+    //Returns the linear interpolation between two points (It is NOT iPt1 + (iPt2 - iPt1 ) * iT )
+    static FOdysseyStrokePoint Lerp( const FOdysseyStrokePoint& iPt1, const FOdysseyStrokePoint& iPt2, float iT );
+
 
 public: //TODO: rename to m* or even better Get/Set*() ...
     // Members

@@ -284,3 +284,81 @@ operator/( float iLhs, const FOdysseyStrokePoint& iRhs )
 {
     return iRhs.operator/( iLhs );
 }
+
+FOdysseyStrokePoint 
+FOdysseyStrokePoint::Average( const FOdysseyStrokePoint& iPt1, const FOdysseyStrokePoint& iPt2 )
+{
+    FOdysseyStrokePoint outPoint = (iPt1 + iPt2) / 2;
+
+    if( FMath::Abs( iPt1.azimuth - iPt2.azimuth ) > 180 )
+    {
+        outPoint.azimuth = FMath::Fmod( (iPt1.azimuth + iPt2.azimuth + 360) / 2, 360.0 );
+    }
+
+    return outPoint;
+}
+
+FOdysseyStrokePoint 
+FOdysseyStrokePoint::Average( const TArray< FOdysseyStrokePoint>& iPoints )
+{
+    //Empty array case
+    if( iPoints.Num() == 0 )
+        return FOdysseyStrokePoint::ZeroPoint();
+
+    //Init base outPoint
+    FOdysseyStrokePoint outPoint = iPoints[0];
+
+    for( int i = 1; i < iPoints.Num(); i++ )
+        outPoint += iPoints[i];
+
+    outPoint /= iPoints.Num();
+
+    //Init correctAzimuth
+    TArray<float> azimuths;
+    for( int i = 0; i < iPoints.Num(); i++)
+    {
+        azimuths.Add(iPoints[i].azimuth);
+    }
+
+    int currentIndex = 0;
+    while( azimuths.Num() != 1 )
+    {       
+        if( FMath::Abs( azimuths[currentIndex] - azimuths[currentIndex + 1] ) > 180 )
+        {
+            azimuths[currentIndex] = FMath::Fmod( (azimuths[currentIndex] + azimuths[currentIndex + 1] + 360) / 2, 360.0 );
+        }
+        else
+        {
+            azimuths[currentIndex] = ( azimuths[currentIndex] + azimuths[currentIndex + 1 ] ) / 2;
+        }
+
+        currentIndex++;
+
+        if( currentIndex >= azimuths.Num() - 1 )
+        {
+            currentIndex = 0;
+            azimuths.Pop();
+        }
+    }
+    outPoint.azimuth = azimuths[0];
+    //---
+
+    return outPoint;
+
+}
+
+
+
+FOdysseyStrokePoint 
+FOdysseyStrokePoint::Lerp( const FOdysseyStrokePoint& iPt1, const FOdysseyStrokePoint& iPt2, float iT )
+{
+    FOdysseyStrokePoint outPoint = iPt1 + (iPt2 - iPt1) * iT;
+
+    if( FMath::Abs( iPt1.azimuth - iPt2.azimuth ) > 180 )
+    {
+        int sign = iPt1.azimuth >= iPt2.azimuth ? 1 : -1;
+        outPoint.azimuth = FMath::Fmod( iPt1.azimuth + (iPt2.azimuth - iPt1.azimuth + 360 * sign ) * iT + 360, 360.0 ) ;
+    }
+
+    return outPoint;
+}

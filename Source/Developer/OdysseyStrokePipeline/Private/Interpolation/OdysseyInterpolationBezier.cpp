@@ -34,17 +34,12 @@ FOdysseyInterpolationBezier::MinimumRequiredPoints() const
 
 const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationBezier::ComputePoints()
 {
-    UE_LOG(LogTemp, Display, TEXT("-----"))
-    for( int i = 1; i < mInputPoints.Num(); i++ )
-    {
-        UE_LOG(LogTemp, Display, TEXT("%lf"), mInputPoints[i].time - mInputPoints[i-1].time )
-    }
     mResultPoints.Empty();
 
     if( !IsReady() )
         return mResultPoints;
 
-    mInputPoints[2] = ( mInputPoints[1] + mInputPoints[2] ) / 2;
+    mInputPoints[2] = FOdysseyStrokePoint::Average( mInputPoints[1], mInputPoints[2] );
     TArray< FOdysseyMathUtils::FOdysseyBezierLutElement > LUT;
     FVector2D A( mInputPoints[0].x, mInputPoints[0].y );
     FVector2D B( mInputPoints[1].x, mInputPoints[1].y );
@@ -87,8 +82,8 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationBezier::ComputePoints(
             FVector2D pos = prevElement.point + ( nextElement.point - prevElement.point ) * currPosParamDelta;
             float propertyParam = ( currPosParam < 0.5 ) ? currPosParam * 2 : ( currPosParam - 0.5 ) * 2;
             FOdysseyStrokePoint point = ( currPosParam < 0.5 ) ?
-                mInputPoints[0] + ( mInputPoints[1] - mInputPoints[0] ) * propertyParam :
-                mInputPoints[1] + ( mInputPoints[2] - mInputPoints[1] ) * propertyParam;
+                FOdysseyStrokePoint::Lerp( mInputPoints[0], mInputPoints[1], propertyParam ) :
+                FOdysseyStrokePoint::Lerp( mInputPoints[1], mInputPoints[2], propertyParam );
             point.x = pos.X;
             point.y = pos.Y;
             mResultPoints.Add( point );

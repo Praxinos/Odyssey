@@ -83,7 +83,7 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoi
             float currPosParamDelta = ( posParamDelta == 0 ) ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
             ::ul3::FVec2F posU = prevElement.position + ( nextElement.position - prevElement.position ) * currPosParamDelta;
             FVector2D pos( posU.x, posU.y );
-            FOdysseyStrokePoint point = mInputPoints[1] + ( mInputPoints[2] - mInputPoints[1] ) * currPosParamDelta;
+            FOdysseyStrokePoint point = FOdysseyStrokePoint::Lerp( mInputPoints[1], mInputPoints[2], currPosParamDelta );
             point.x = pos.X;
             point.y = pos.Y;
             mResultPoints.Add( point );
