@@ -44,6 +44,12 @@ FOdysseyTextureAssetTypeActions::GetCategories()
     return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
 }
 
+void 
+FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
+{
+    InFilter.ClassNames.Add( UTexture2D::StaticClass()->GetFName());
+}
+
 //Works, but suppress the normal editor of UTexture2D, need to find a better solution to keep both editors
 /*
 void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )

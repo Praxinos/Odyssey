@@ -3,10 +3,10 @@
 
 #include "OdysseyFlipbook_AssetTypeActions.h"
 
+#include "PaperFlipbook.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 // #include "OdysseyFlipbookEditorModule.h"
-
 
 #include "OdysseyFlipbook.h"
 
@@ -41,6 +41,12 @@ uint32
 FOdysseyFlipbookAssetTypeActions::GetCategories()
 {
     return /* EAssetTypeCategories::Animation | */ mMyAssetCategory;
+}
+
+void 
+FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
+{
+    InFilter.ClassNames.Add( UPaperFlipbook::StaticClass()->GetFName());
 }
 
 #undef LOCTEXT_NAMESPACE
