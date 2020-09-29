@@ -50,7 +50,7 @@ public:
     FOdysseyStrokePoint& operator*=( float iRhs );
     FOdysseyStrokePoint& operator/=( float iRhs );
     FOdysseyStrokePoint  operator* ( float iRhs ) const;
-    __declspec(deprecated) FOdysseyStrokePoint  operator/ ( float iRhs ) const;
+    FOdysseyStrokePoint  operator/ ( float iRhs ) const;
 
 public: 
     //Returns the average of two points (It is NOT (iPt1 + iPt2) / 2)
