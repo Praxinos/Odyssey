@@ -70,16 +70,13 @@ private:
     void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
     /** Callback for executing the Add Component action. */
     void HandleAddComponentActionExecute( UActorComponent* Component );
+    /** Callback for executing the Add Camera command. */
+    void HandleCreateCamera();
 
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 
     void OnSequencerReceivedFocus();
-
-private:
-    UMovieSceneTrack*   CreateTrack( AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
-    FGuid               CreateComponentTrack( AActor* iActor, const FString& iComponentName );
-    void                CreatePropertyTrack( AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath );
 
 private:
 

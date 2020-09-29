@@ -42,9 +42,10 @@ public class Epos : ModuleRules
 				// ... add private dependencies that you statically link with here ...
 				"MovieScene",
 				"MovieSceneTracks",
-				"EposTracks",
 				"LevelSequence",
 				"CinematicCamera",
+				//
+				"EposTracks",
 			}
 			);
 		

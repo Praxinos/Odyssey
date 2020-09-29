@@ -19,6 +19,8 @@ public:
     virtual void UnregisterSequencerCustomization() override;
 
 private:
+    void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
+
     //bool OnSequencerReceivedDragOver( const FGeometry& iMyGeometry, const FDragDropEvent& iDragDropEvent, FReply& oReply );
     ESequencerDropResult OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp );
     ESequencerDropResult OnSequencerClassesDrop( const TArray<TWeakObjectPtr<UClass>>& iClasses, const FClassDragDropOp& iDragDropOp );

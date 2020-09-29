@@ -49,6 +49,7 @@ public class EposEditor : ModuleRules
 				"CinematicCamera",
 				//
 				"Epos",
+				"EposTracks",
 			}
 			);
 		

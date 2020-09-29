@@ -24,6 +24,9 @@ public:
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
 
 private:
+    void RegisterCommands();
+    void UnregisterCommands();
+
     void RegisterAssetTools();
     void UnregisterAssetTools();
 

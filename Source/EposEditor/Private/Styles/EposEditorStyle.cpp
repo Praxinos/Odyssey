@@ -24,6 +24,7 @@ FEposEditorStyle::FEposEditorStyle()
     : FSlateStyleSet( "EposEditorStyle" )
 {
     const FVector2D Icon16x16( 16.0f, 16.0f );
+    const FVector2D Icon24x24( 24.0f, 24.0f );
     const FVector2D Icon64x64( 64.0f, 64.0f );
 
     TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
@@ -40,6 +41,8 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_64x", Icon64x64 ) );
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "IconCinematicBoardTrack_16x", Icon16x16 ) );
+
+    Set( "ShotSequenceEditor.CreateCamera.Small", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon24x24 ) );
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }

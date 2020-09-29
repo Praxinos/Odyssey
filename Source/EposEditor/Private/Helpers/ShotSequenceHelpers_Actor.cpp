@@ -1,0 +1,255 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#include "ShotSequenceHelpers.h"
+
+#include "Actor.h"
+#include "Channels/MovieSceneFloatChannel.h"
+#include "CineCameraActor.h"
+#include "Containers/ArrayBuilder.h"
+#include "ISequencer.h"
+#include "MovieScene.h"
+#include "MovieSceneSequence.h"
+#include "MovieSceneToolHelpers.h"
+#include "Sections/MovieScene3DTransformSection.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
+#include "Tracks/MovieSceneCinematicShotTrack.h"
+#include "Tracks/MovieScenePrimitiveMaterialTrack.h"
+
+#define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Actors"
+
+//static
+UMovieSceneTrack*
+ShotSequenceHelpers::CreateTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
+{
+    if( !iBinding.IsValid() )
+        return nullptr;
+
+    // get focused movie scene
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( sequence == nullptr )
+        return nullptr;
+
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( movieScene == nullptr )
+        return nullptr;
+
+    UMovieSceneTrack* NewTrack = movieScene->FindTrack( iClass, iBinding );
+    // For material track, multiple new tracks (of the same type) may be needed
+    if( !NewTrack || iMaterialTrackIndex > 0 )
+        NewTrack = movieScene->AddTrack( iClass, iBinding );
+
+    bool bCreateDefaultSection = false;
+#if WITH_EDITORONLY_DATA
+    bCreateDefaultSection = NewTrack->SupportsDefaultSections();
+#endif
+
+    if( bCreateDefaultSection )
+    {
+        UMovieSceneSection* NewSection;
+        if( NewTrack->GetAllSections().Num() > 0 )
+        {
+            NewSection = NewTrack->GetAllSections()[0];
+        }
+        else
+        {
+            NewSection = NewTrack->CreateNewSection();
+            NewTrack->AddSection( *NewSection );
+        }
+
+        // @todo sequencer: hack: setting defaults for transform tracks
+        if( NewTrack->IsA( UMovieScene3DTransformTrack::StaticClass() ) && iSequencer->GetAutoSetTrackDefaults() )
+        {
+            auto TransformSection = Cast<UMovieScene3DTransformSection>( NewSection );
+
+            FVector Location = iActor->GetActorLocation();
+            FRotator Rotation = iActor->GetActorRotation();
+            FVector Scale = iActor->GetActorScale();
+
+            if( iActor->GetRootComponent() )
+            {
+                FTransform ActorRelativeTransform = iActor->GetRootComponent()->GetRelativeTransform();
+
+                Location = ActorRelativeTransform.GetTranslation();
+                Rotation = ActorRelativeTransform.GetRotation().Rotator();
+                Scale = ActorRelativeTransform.GetScale3D();
+            }
+
+            TArrayView<FMovieSceneFloatChannel*> FloatChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+            FloatChannels[0]->SetDefault( Location.X );
+            FloatChannels[1]->SetDefault( Location.Y );
+            FloatChannels[2]->SetDefault( Location.Z );
+
+            FloatChannels[3]->SetDefault( Rotation.Euler().X );
+            FloatChannels[4]->SetDefault( Rotation.Euler().Y );
+            FloatChannels[5]->SetDefault( Rotation.Euler().Z );
+
+            FloatChannels[6]->SetDefault( Scale.X );
+            FloatChannels[7]->SetDefault( Scale.Y );
+            FloatChannels[8]->SetDefault( Scale.Z );
+        }
+
+        if( NewTrack->IsA<UMovieScenePrimitiveMaterialTrack>() )
+        {
+            UMovieScenePrimitiveMaterialTrack* material_track = Cast< UMovieScenePrimitiveMaterialTrack >( NewTrack );
+            check( material_track );
+
+            material_track->MaterialIndex = iMaterialTrackIndex;
+            material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->MaterialIndex ) ) );
+        }
+
+        if( iSequencer->GetInfiniteKeyAreas() )
+        {
+            NewSection->SetRange( TRange<FFrameNumber>::All() );
+        }
+    }
+
+    return NewTrack;
+}
+
+//static
+FGuid
+ShotSequenceHelpers::CreateComponentTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentName )
+{
+    for( UActorComponent* Component : iActor->GetComponents() )
+    {
+        if( !Component )
+            continue;
+
+        if( !Component->GetName().Contains( iComponentName ) )
+            continue;
+
+        FGuid binding = iSequencer->GetHandleToObject( Component );
+        if( binding.IsValid() )
+        {
+            return binding; // Get only the first component matching the name
+        }
+    }
+
+    return FGuid();
+}
+
+//static
+void
+ShotSequenceHelpers::CreatePropertyTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath )
+{
+    TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
+    UObject* PropertyOwner = iActor;
+
+    // determine object hierarchy
+    TArray<FString> ComponentNames;
+    iComponentPath.ParseIntoArray( ComponentNames, TEXT( "." ) );
+
+    for( const FString& ComponentName : ComponentNames )
+    {
+        PropertyOwner = FindObjectFast<UObject>( PropertyOwner, *ComponentName );
+        if( PropertyOwner == nullptr )
+            return;
+    }
+
+    UStruct* PropertyOwnerClass = PropertyOwner->GetClass();
+
+    // determine property path
+    TArray<FString> PropertyNames;
+    iPropertyPath.ParseIntoArray( PropertyNames, TEXT( "." ) );
+
+    for( const FString& PropertyName : PropertyNames )
+    {
+        FProperty* Property = PropertyOwnerClass->FindPropertyByName( *PropertyName );
+
+        if( Property != nullptr )
+        {
+            PropertyPath->AddProperty( FPropertyInfo( Property ) );
+        }
+
+        FStructProperty* StructProperty = CastField<FStructProperty>( Property );
+
+        if( StructProperty != nullptr )
+        {
+            PropertyOwnerClass = StructProperty->Struct;
+            continue;
+        }
+
+        FObjectProperty* ObjectProperty = CastField<FObjectProperty>( Property );
+
+        if( ObjectProperty != nullptr )
+        {
+            PropertyOwnerClass = ObjectProperty->PropertyClass;
+            continue;
+        }
+
+        break;
+    }
+
+    if( !iSequencer->CanKeyProperty( FCanKeyPropertyParams( PropertyOwner->GetClass(), *PropertyPath ) ) )
+        return;
+
+    // key property
+    FKeyPropertyParams KeyPropertyParams( TArrayBuilder<UObject*>().Add( PropertyOwner ), *PropertyPath, ESequencerKeyMode::ManualKey );
+
+    iSequencer->KeyProperty( KeyPropertyParams );
+}
+
+//static
+void
+ShotSequenceHelpers::CreateDefaultInnerTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+{
+    // For binding which has been removed when dropped actor is not supported
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return;
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( !movieScene )
+        return;
+    if( !movieScene->FindBinding( iBinding ) )
+        return;
+
+    // TODO-lchabant: add default tracks (re-use level sequence toolkit code).
+
+    // Only for cinecamera actor
+    // - '3DTransform' track
+    // - 'CameraComponent' binding (automatically when adding property)
+    //     - 'CurrentFocalLength' property
+    //     - 'FocusSettings.ManualFocusDistance' property
+    //     - 'CurrentAperture' property
+    if( iActor->IsA<ACineCameraActor>() )
+    {
+        CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+
+        //CreatePropertyTrack( iSequencer, iActor, "CameraComponent", "CurrentFocalLength" );
+        //CreatePropertyTrack( iSequencer, iActor, "CameraComponent", "FocusSettings.ManualFocusDistance" );
+        //CreatePropertyTrack( iSequencer, iActor, "CameraComponent", "CurrentAperture" );
+
+        return;
+    }
+
+    // For all other actors (except cinecamera actor)
+    // - '3DTransform' track
+    // - 'StaticMeshComponent' binding
+    //     - 'Material Switcher' track
+    CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+
+    FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ?
+
+    //---
+
+    // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
+    int32 minNumMaterials = TNumericLimits<int32>::Max();
+    for( TWeakObjectPtr<> weakObject : iSequencer->FindObjectsInCurrentSequence( binding ) )
+    {
+        UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( weakObject.Get() );
+        if( !primitiveComponent )
+            continue;
+
+        minNumMaterials = FMath::Min( minNumMaterials, primitiveComponent->GetNumMaterials() );
+    }
+
+    if( minNumMaterials == TNumericLimits<int32>::Max() )
+        minNumMaterials = 0;
+
+    for( int material_index = 0; material_index < minNumMaterials; material_index++ )
+        CreateTrack( iSequencer, iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
+}
+
+#undef LOCTEXT_NAMESPACE

@@ -4,6 +4,9 @@
 #include "Customization/ShotSequenceCustomization.h"
 
 #include "Shot/ShotSequence.h"
+#include "ShotSequenceEditorCommands.h"
+
+#define LOCTEXT_NAMESPACE "ShotSequenceCustomization"
 
 //---
 
@@ -14,6 +17,10 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     mShotSequence = Cast<UShotSequence>( &ioBuilder.GetFocusedSequence() );
 
     FSequencerCustomizationInfo customization;
+
+    TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
+    ToolbarExtender->AddToolBarExtension( "Curve Editor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FShotSequenceCustomization::ExtendSequencerToolbar ) );
+    customization.ToolbarExtender = ToolbarExtender;
 
     customization.OnAssetsDrop.BindRaw( this, &FShotSequenceCustomization::OnSequencerAssetsDrop );
     customization.OnClassesDrop.BindRaw( this, &FShotSequenceCustomization::OnSequencerClassesDrop );
@@ -27,6 +34,39 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
 {
     mSequencer = nullptr;
     mShotSequence = nullptr;
+}
+
+//---
+
+void
+FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
+{
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCamera );
+
+	//TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
+	//	+SHorizontalBox::Slot()
+	//	.AutoWidth()
+	//	.VAlign(VAlign_Center)
+	//	[
+	//		SNew(STextBlock)
+	//		.Text(LOCTEXT("BoundActorClassPicker", "Bound Actor Class"))
+		//]
+		//+SHorizontalBox::Slot()
+		//.AutoWidth()
+		//.VAlign(VAlign_Center)
+		//[
+		//	SNew(SComboButton)
+		//	.OnGetMenuContent_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassMenuContent)
+		//	.ButtonContent()
+		//	[
+		//		SNew(STextBlock)
+		//		.Text_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassName)
+		//	]
+		//];
+	
+	//ToolbarBuilder.AddWidget(Widget);
 }
 
 //---
@@ -66,3 +106,5 @@ FShotSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<A
 {
     return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }
+
+#undef LOCTEXT_NAMESPACE

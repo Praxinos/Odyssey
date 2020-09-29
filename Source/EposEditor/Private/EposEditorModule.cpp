@@ -16,6 +16,7 @@
 #include "Customization/ShotSequenceCustomization.h"
 #include "Settings/EposEditorSettings.h"
 #include "Shot/ShotSequence.h"
+#include "ShotSequenceEditorCommands.h"
 #include "Styles/EposEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FEposEditorModule"
@@ -32,6 +33,7 @@ FEposEditorModule::FEposEditorModule()
 void
 FEposEditorModule::StartupModule()
 {
+    RegisterCommands();
     RegisterAssetTools();
     RegisterSettings();
     RegisterSequenceCustomizations();
@@ -43,6 +45,7 @@ FEposEditorModule::ShutdownModule()
     UnregisterSequenceCustomizations();
     UnregisterSettings();
     UnregisterAssetTools();
+    UnregisterCommands();
 }
 
 //--- FGCObject interface
@@ -52,6 +55,20 @@ FEposEditorModule::AddReferencedObjects( FReferenceCollector& Collector )
 {
     if( mSettings )
         Collector.AddReferencedObject( mSettings );
+}
+
+//---
+
+void
+FEposEditorModule::RegisterCommands()
+{
+    FShotSequenceEditorCommands::Register();
+}
+
+void
+FEposEditorModule::UnregisterCommands()
+{
+    FShotSequenceEditorCommands::Unregister();
 }
 
 //---
