@@ -78,6 +78,7 @@ public:
     void           OnSetZoomFitScreen();
     void           OnZoomIn();
     void           OnZoomOut();
+    void           OnRefreshBrush();
     void           OnSwitchTabletAPI();
 
     // Brush Handlers

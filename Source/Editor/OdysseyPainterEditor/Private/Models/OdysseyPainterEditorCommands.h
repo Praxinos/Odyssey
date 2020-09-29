@@ -129,6 +129,11 @@ public:
     TSharedPtr<FUICommandInfo> ZoomOut; 
 
 
+    //Brush actions
+
+    /** Action to refresh the brush back to its original overidden parameters */
+    TSharedPtr<FUICommandInfo> RefreshBrush;
+
 
     //Switch tablet API
 

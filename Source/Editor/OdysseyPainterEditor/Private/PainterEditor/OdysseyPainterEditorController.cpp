@@ -219,6 +219,11 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
         FCanExecuteAction() );
 
 	iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().RefreshBrush,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRefreshBrush ),
+        FCanExecuteAction() );
+
+	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().SwitchTabletAPI,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSwitchTabletAPI ),
         FCanExecuteAction() );
@@ -711,6 +716,13 @@ void
 FOdysseyPainterEditorController::OnZoomOut()
 {
     GetGUI()->GetViewportTab()->ZoomOut();
+}
+
+void
+FOdysseyPainterEditorController::OnRefreshBrush()
+{
+    if( GetData()->Brush() )
+        OnBrushSelected( GetData()->Brush() );
 }
 
 
