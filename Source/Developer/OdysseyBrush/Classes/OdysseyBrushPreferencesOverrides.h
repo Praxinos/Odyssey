@@ -109,7 +109,7 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     /////////////////////////////////////////////////////
     // Overrides Values
     /** Modifier Size Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "1", ClampMax = "2000", UIMin = "1", UIMax = "2000", SliderExponent = "3", editcondition = "bOverride_Size" ) )
+    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "1", ClampMax = "1000", UIMin = "1", UIMax = "1000", SliderExponent = "1", editcondition = "bOverride_Size" ) )
     uint32  Size;
 
     /** Modifier Opacity Override Value. */
@@ -129,7 +129,7 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     EOdysseyAlphaMode       AlphaMode;
 
     /** Stroke Step Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "3", editcondition = "bOverride_Step" ) )
+    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Step" ) )
     int32   Step;
 
     /** Stroke Size Adaptative Override Value. */
@@ -149,7 +149,7 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     EOdysseySmoothingMethod   Method;
 
     /** Smoothing Strength Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "3", editcondition = "bOverride_Strength" ) )
+    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Strength" ) )
     int32   Strength;
 
     /** Smoothing Enabled Override Value. */

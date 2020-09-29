@@ -27,7 +27,7 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
     {}
 
     /** Distance beetween two Stamps. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "3" ) )
+    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
     int32   Step;
 
     /** Should Step be expressed as a relative fraction of the result Stamp size, or in pixels. */
@@ -47,7 +47,7 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
     EOdysseySmoothingMethod Method;
 
     /** Distance for Smooting computation. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "3" ) )
+    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
     int32   Strength;
 
     /** Should smoothing be enabled. */

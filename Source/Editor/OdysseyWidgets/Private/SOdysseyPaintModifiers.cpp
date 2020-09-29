@@ -32,7 +32,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 SNew( SHorizontalBox )
 
                 +SHorizontalBox::Slot()
-                .AutoWidth()
+                .HAlign( HAlign_Fill )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
@@ -40,41 +40,30 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                     .VAlign( VAlign_Center )
                     [
                         SNew( SBox )
-                        .WidthOverride( 50 )
-                        .HAlign( HAlign_Center )
+                        .HAlign( HAlign_Left )
                         [
                             SNew( STextBlock )
                             .Text( LOCTEXT( "Size", "Size:" ) )
                         ]
                     ]
                     +SHorizontalBox::Slot()
-                    .AutoWidth()
+                    .VAlign( VAlign_Center )
+                    .Padding( 6.f, 0.f )
                     [
                         SNew( SBox )
-                        .WidthOverride( 100 )
-                        [
-                            SAssignNew( mSizeSlider, SSlider )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::HandleSizeSliderChanged )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding( 0.f, 2.f )
-                    [
-                        SNew( SBox )
-                        .WidthOverride( 50 )
+                        .HAlign( HAlign_Fill )
                         [
                             SAssignNew( mSizeSpinBox, SSpinBox< int > )
                             .MinValue( 1 )
-                            .MaxValue( 2000 )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                            .MaxValue( 1000 )
+                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
                             .Delta( 1 )
                         ]
                     ]
                 ]
 
                 +SHorizontalBox::Slot()
-                .AutoWidth()
+                .HAlign( HAlign_Fill )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
@@ -82,40 +71,29 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                     .VAlign( VAlign_Center )
                     [
                         SNew( SBox )
-                        .WidthOverride( 50 )
-                        .HAlign( HAlign_Center )
+                        .HAlign( HAlign_Left )
                         [
                             SNew( STextBlock )
                             .Text( LOCTEXT( "Opacity", "Opacity:" ) )
                         ]
                     ]
                     +SHorizontalBox::Slot()
-                    .AutoWidth()
+                    .VAlign( VAlign_Center )
+                    .Padding( 6.f, 0.f )
                     [
                         SNew( SBox )
-                        .WidthOverride( 100 )
-                        [
-                            SAssignNew( mOpacitySlider, SSlider )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::HandleOpacitySliderChanged )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding( 0.f, 2.f )
-                    [
-                        SNew( SBox )
-                        .WidthOverride( 50 )
+                        .HAlign( HAlign_Fill )
                         [
                             SAssignNew( mOpacitySpinBox, SSpinBox< int > )
                             .MinValue( 0 )
                             .MaxValue( 100 )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
+                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                         ]
                     ]
                 ]
 
                 +SHorizontalBox::Slot()
-                .AutoWidth()
+                .HAlign( HAlign_Fill )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
@@ -123,62 +101,47 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                     .VAlign( VAlign_Center )
                     [
                         SNew( SBox )
-                        .WidthOverride( 50 )
-                        .HAlign( HAlign_Center )
+                        .HAlign( HAlign_Left )
                         [
                             SNew( STextBlock )
                             .Text( LOCTEXT( "Flow", "Flow:" ) )
                         ]
                     ]
                     +SHorizontalBox::Slot()
-                    .AutoWidth()
+                    .VAlign( VAlign_Center )
+                    .Padding( 6.f, 0.f )
                     [
                         SNew( SBox )
-                        .WidthOverride( 100 )
-                        [
-                            SAssignNew( mFlowSlider, SSlider )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::HandleFlowSliderChanged )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding( 0.f, 2.f )
-                    [
-                        SNew( SBox )
-                        .WidthOverride( 50 )
+                        .HAlign( HAlign_Fill )
                         [
                             SAssignNew( mFlowSpinBox, SSpinBox< int > )
                             .MinValue( 0 )
                             .MaxValue( 100 )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
+                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                         ]
                     ]
                 ]
 
                 +SHorizontalBox::Slot()
-                .AutoWidth()
+                .HAlign( HAlign_Fill )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
                     .AutoWidth()
-                    .Padding( 0.f, 2.f )
                     .VAlign( VAlign_Center )
                     [
                         SNew( SBox )
-                        .WidthOverride( 50 )
-                        .HAlign( HAlign_Center )
+                        .HAlign( HAlign_Left )
                         [
                             SNew( STextBlock )
                             .Text( LOCTEXT( "Blend", "Blend:" ) )
                         ]
                     ]
                     +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding( 0.f, 2.f )
                     .VAlign( VAlign_Center )
+                    .Padding( 6.f, 0.f )
                     [
                         SNew( SBox )
-                        .WidthOverride( 100 )
                         .HAlign( HAlign_Fill )
                         [
                             SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
@@ -195,29 +158,25 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 
 
                 +SHorizontalBox::Slot()
-                .AutoWidth()
+                .HAlign( HAlign_Fill )
                 [
                     SNew( SHorizontalBox )
                     +SHorizontalBox::Slot()
                     .AutoWidth()
-                    .Padding( 0.f, 2.f )
                     .VAlign( VAlign_Center )
                     [
                         SNew( SBox )
-                        .WidthOverride( 50 )
-                        .HAlign( HAlign_Center )
+                        .HAlign( HAlign_Left )
                         [
                             SNew( STextBlock )
                             .Text( LOCTEXT( "Alpha", "Alpha:" ) )
                         ]
                     ]
                     +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding( 0.f, 2.f )
                     .VAlign( VAlign_Center )
+                    .Padding( 6.f, 0.f )
                     [
                         SNew( SBox )
-                        .WidthOverride( 100 )
                         .HAlign( HAlign_Fill )
                         [
                             SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
@@ -232,7 +191,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                         ]
                     ]
                 ]
-
             ]
     ];
 }
@@ -280,84 +238,25 @@ SOdysseyPaintModifiers::SetAlphaMode( ::ul3::eAlphaMode iValue )
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks
+
 void
-SOdysseyPaintModifiers::HandleSizeSliderChanged( float iValue )
+SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int32 iValue, ETextCommit::Type iType )
 {
-    int32 value = FMath::Pow( iValue, 3.f ) * mSizeSpinBox->GetMaxValue() + 1;
-    int32 spinvalue = mSizeSpinBox->GetValue();
-    if( value != spinvalue )
-    {
-        mSizeSpinBox->SetValue( value );
-        mOnSizeChangedCallback.ExecuteIfBound( value );
-    }
+    mOnSizeChangedCallback.ExecuteIfBound( iValue );
 }
 
 
 void
-SOdysseyPaintModifiers::HandleOpacitySliderChanged( float iValue )
+SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged( int32 iValue, ETextCommit::Type iType )
 {
-    int32 value = iValue * mOpacitySpinBox->GetMaxValue();
-    int32 spinvalue = mOpacitySpinBox->GetValue();
-    if( value != spinvalue )
-    {
-        mOpacitySpinBox->SetValue( value );
-        mOnOpacityChangedCallback.ExecuteIfBound( value );
-    }
+    mOnOpacityChangedCallback.ExecuteIfBound( iValue );
 }
 
 
 void
-SOdysseyPaintModifiers::HandleFlowSliderChanged( float iValue )
+SOdysseyPaintModifiers::HandleFlowSpinBoxChanged( int32 iValue, ETextCommit::Type iType )
 {
-    int32 value = iValue * mFlowSpinBox->GetMaxValue();
-    int32 spinvalue = mFlowSpinBox->GetValue();
-    if( value != spinvalue )
-    {
-        mFlowSpinBox->SetValue( value );
-        mOnFlowChangedCallback.ExecuteIfBound( value );
-    }
-}
-
-
-void
-SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int32 iValue )
-{
-    int32 value = iValue - 1;
-    auto  slider_value      = mSizeSlider->GetValue();          // Actual slider value
-    auto  corrected_value   = FMath::Pow( slider_value, 3.f );  // Corrected slider value
-    int32 display_value     = corrected_value * mSizeSpinBox->GetMaxValue();
-
-    if( value != display_value )
-    {
-        mSizeSlider->SetValue( FMath::Pow( float( value ) / mSizeSpinBox->GetMaxValue(), 1.f / 3.f ) );
-        mOnSizeChangedCallback.ExecuteIfBound( iValue );
-    }
-}
-
-
-void
-SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged( int32 iValue )
-{
-    int32 value = iValue;
-    int32 slideValue = mOpacitySlider->GetValue() * mOpacitySpinBox->GetMaxValue();
-    if( value != slideValue )
-    {
-        mOpacitySlider->SetValue( float( value ) / mOpacitySpinBox->GetMaxValue() );
-        mOnOpacityChangedCallback.ExecuteIfBound( value );
-    }
-}
-
-
-void
-SOdysseyPaintModifiers::HandleFlowSpinBoxChanged( int32 iValue )
-{
-    int32 value = iValue;
-    int32 slideValue = mFlowSlider->GetValue() * mFlowSpinBox->GetMaxValue();
-    if( value != slideValue )
-    {
-        mFlowSlider->SetValue( float( value ) / mFlowSpinBox->GetMaxValue() );
-        mOnFlowChangedCallback.ExecuteIfBound( value );
-    }
+    mOnFlowChangedCallback.ExecuteIfBound( iValue );
 }
 
 

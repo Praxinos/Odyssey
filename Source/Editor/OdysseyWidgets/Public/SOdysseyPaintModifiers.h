@@ -48,12 +48,9 @@ public:
 
 private:
     // Private Callbacks
-    void HandleSizeSliderChanged( float iValue );
-    void HandleOpacitySliderChanged( float iValue );
-    void HandleFlowSliderChanged( float iValue );
-    void HandleSizeSpinBoxChanged( int32 iValue );
-    void HandleOpacitySpinBoxChanged( int32 iValue );
-    void HandleFlowSpinBoxChanged( int32 iValue );
+    void HandleSizeSpinBoxChanged( int32 iValue, ETextCommit::Type iType );
+    void HandleOpacitySpinBoxChanged( int32 iValue, ETextCommit::Type iType );
+    void HandleFlowSpinBoxChanged( int32 iValue, ETextCommit::Type iType );
 
 private:
     // Blending mode Callbacks
@@ -73,11 +70,8 @@ private:
 
 private:
     // Private Data Members
-    TSharedPtr< SSlider >           mSizeSlider;
     TSharedPtr< SSpinBox< int > >   mSizeSpinBox;
-    TSharedPtr< SSlider >           mOpacitySlider;
     TSharedPtr< SSpinBox< int > >   mOpacitySpinBox;
-    TSharedPtr< SSlider >           mFlowSlider;
     TSharedPtr< SSpinBox< int > >   mFlowSpinBox;
 
     TSharedPtr<SComboBox<TSharedPtr<FText>>>    mBlendingBox;
