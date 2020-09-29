@@ -202,6 +202,7 @@ void
 SOdysseyPaintModifiers::SetSize( int32 iValue )
 {
     mSizeSpinBox->SetValue( iValue );
+    mOnSizeChangedCallback.ExecuteIfBound( iValue );
 }
 
 
@@ -209,6 +210,7 @@ void
 SOdysseyPaintModifiers::SetOpacity( int32 iValue )
 {
     mOpacitySpinBox->SetValue( iValue );
+    mOnOpacityChangedCallback.ExecuteIfBound( iValue );
 }
 
 
@@ -216,6 +218,7 @@ void
 SOdysseyPaintModifiers::SetFlow( int32 iValue )
 {
     mFlowSpinBox->SetValue( iValue );
+    mOnFlowChangedCallback.ExecuteIfBound( iValue );
 }
 
 
