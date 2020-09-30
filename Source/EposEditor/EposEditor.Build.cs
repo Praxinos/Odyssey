@@ -47,6 +47,7 @@ public class EposEditor : ModuleRules
 				"UnrealEd",
 				"Projects",
 				"CinematicCamera",
+				"LevelEditor",
 				//
 				"Epos",
 				"EposTracks",

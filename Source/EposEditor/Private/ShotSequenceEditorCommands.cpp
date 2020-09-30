@@ -14,7 +14,8 @@ FShotSequenceEditorCommands::FShotSequenceEditorCommands()
 void
 FShotSequenceEditorCommands::RegisterCommands()
 {
-    UI_COMMAND( CreateCamera, "Create Camera", "Create a new camera and set it as the current camera cut", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( CreateCamera,           "Create Camera", "Create a new camera and set it as the current camera cut", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SnapCameraToViewport,   "Snap Camera to Viewport", "Snap the existing camera to the viewport", EUserInterfaceActionType::Button, FInputChord() );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -72,11 +72,17 @@ private:
     void HandleAddComponentActionExecute( UActorComponent* Component );
     /** Callback for executing the Add Camera command. */
     void HandleCreateCamera();
+    /** Callback for executing the Snap Camera command. */
+    void HandleSnapCameraToViewport();
 
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 
     void OnSequencerReceivedFocus();
+
+private:
+
+    void BindCommands( TSharedPtr<FUICommandList> CommandList );
 
 private:
 

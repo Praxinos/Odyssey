@@ -6,6 +6,7 @@
 #include "Misc/Guid.h"
 
 class AActor;
+class ACineCameraActor;
 class UMovieScene;
 class UMovieSceneTrack;
 class ISequencer;
@@ -13,6 +14,13 @@ class ISequencer;
 class EPOSEDITOR_API ShotSequenceHelpers
 {
 public:
+    /**
+    *  Find a Camera from the camera track
+    *
+    * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
+    */
+    static ACineCameraActor* GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid );
+
     /**
     *  Camera track was added, we usually do extra things, like add a Camera Cut tracks
     *
@@ -28,6 +36,13 @@ public:
     * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
     */
     static void CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer );
+
+    /**
+    *  Update the camera location from the viewport (and set 
+    *
+    * @param TSharedPtr<ISequencer> iSequencer to update camera.
+    */
+    static void SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer );
 
 //---
 

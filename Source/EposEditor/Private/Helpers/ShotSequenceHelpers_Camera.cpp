@@ -2,27 +2,70 @@
 
 #include "ShotSequenceHelpers.h"
 
+#include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
 #include "ISequencer.h"
+#include "LevelEditorActions.h"
 #include "LevelEditorViewport.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 
+#include "Editor/EditorEngine.h"
+
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Camera"
+
+//static
+ACineCameraActor*
+ShotSequenceHelpers::GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return nullptr;
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( !movieScene )
+        return nullptr;
+
+    ACineCameraActor* ExistingCamera = nullptr;
+    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+
+        for( auto Object : iSequencer->FindObjectsInCurrentSequence( possessable.GetGuid() ) )
+        {
+            ExistingCamera = Cast<ACineCameraActor>( Object.Get() );
+
+            if( ExistingCamera )
+            {
+                if( oGuid )
+                    *oGuid = possessable.GetGuid();
+
+                return ExistingCamera;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+//---
 
 //static
 void
 ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer ) // From FSequencer::CreateCamera()
 {
-    UMovieScene* FocusedMovieScene = iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
-    if( !FocusedMovieScene )
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return;
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( !movieScene )
         return;
 
-    if( FocusedMovieScene->IsReadOnly() )
+    if( movieScene->IsReadOnly() )
     {
         //ShowReadOnlyError();
         return;
@@ -32,17 +75,23 @@ ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer
     if( !World )
         return;
 
+    FGuid CameraGuid;
+    ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, &CameraGuid );
+
+    if( ExistingCamera )
+        return;
+
+    //---
+
     const FScopedTransaction Transaction( LOCTEXT( "CreateStoryCameraHere", "Create Storyboard Camera Here" ) );
 
-//TODO: check if a camera alreay exist and set it to new current coordinates ... and all (?) planes ?
-
-        // Set new camera to match viewport
+    // Set new camera to match viewport
     FActorSpawnParameters SpawnParams;
     ACineCameraActor* NewCamera = World->SpawnActor<ACineCameraActor>( SpawnParams );
     if( !NewCamera )
         return;
 
-    FGuid CameraGuid = iSequencer->CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
+    CameraGuid = iSequencer->CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
 
     if( !CameraGuid.IsValid() )
         return;
@@ -54,26 +103,23 @@ ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer
     iSequencer->OnActorAddedToSequencer().Broadcast( NewCamera, CameraGuid );
 
     //---
-    //NewCameraAdded( CameraGuid, NewCamera ); // From FSequencer::NewCameraAdded()
+    // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
+
+    //iSequencer->SetPerspectiveViewportCameraCutEnabled( false );
+
+    // Lock the viewport to this camera
+    if( NewCamera && NewCamera->GetLevel() )
     {
-        iSequencer->SetPerspectiveViewportCameraCutEnabled( false );
+        // an option ?
 
-        // Lock the viewport to this camera
-        if( NewCamera && NewCamera->GetLevel() )
-        {
-            GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-            GCurrentLevelEditingViewportClient->SetActorLock( NewCamera );
-            GCurrentLevelEditingViewportClient->bLockedCameraView = true;
-            GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
-            GCurrentLevelEditingViewportClient->Invalidate();
-        }
-
-        UMovieSceneSequence* Sequence = iSequencer->GetFocusedMovieSceneSequence();
-        UMovieScene* OwnerMovieScene = Sequence->GetMovieScene();
-
-        ShotSequenceHelpers::CameraAdded( OwnerMovieScene, CameraGuid, iSequencer->GetLocalTime().Time.FloorToFrame() );
+        //GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
+        //GCurrentLevelEditingViewportClient->SetActorLock( NewCamera );
+        //GCurrentLevelEditingViewportClient->bLockedCameraView = true;
+        //GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
+        GCurrentLevelEditingViewportClient->Invalidate();
     }
 
+    ShotSequenceHelpers::CameraAdded( movieScene, CameraGuid, iSequencer->GetLocalTime().Time.FloorToFrame() );
     //---
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
@@ -86,15 +132,18 @@ ShotSequenceHelpers::CameraAdded(UMovieScene* OwnerMovieScene, FGuid CameraGuid,
 	// If there's a cinematic shot track, no need to set this camera to a shot
 	UMovieSceneTrack* CinematicShotTrack = OwnerMovieScene->FindMasterTrack(UMovieSceneCinematicShotTrack::StaticClass());
 	if (CinematicShotTrack)
-	{
 		return;
-	}
 
 	UMovieSceneTrack* CameraCutTrack = OwnerMovieScene->GetCameraCutTrack();
 
 	// If there's a camera cut track with at least one section, no need to change the section
 	if (CameraCutTrack && CameraCutTrack->GetAllSections().Num() > 0)
 	{
+        UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( CameraCutTrack->GetAllSections()[0] );
+
+        CameraCutSection->Modify();
+        CameraCutSection->SetCameraGuid( CameraGuid );
+
 		return;
 	}
 
@@ -124,5 +173,97 @@ ShotSequenceHelpers::CameraAdded(UMovieScene* OwnerMovieScene, FGuid CameraGuid,
 		}
 	}
 }
+
+//---
+
+//static
+void
+ShotSequenceHelpers::SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return;
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( !movieScene )
+        return;
+
+    if( movieScene->IsReadOnly() )
+    {
+        //ShowReadOnlyError();
+        return;
+    }
+
+    FGuid CameraGuid;
+    ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, &CameraGuid );
+
+    if( !ExistingCamera )
+        return;
+
+    UMovieSceneTrack* track = movieScene->FindTrack( UMovieScene3DTransformTrack::StaticClass(), CameraGuid );
+    UMovieScene3DTransformTrack* transform_track = Cast<UMovieScene3DTransformTrack>( track );
+
+    if( !transform_track )
+        return;
+
+    //---
+
+    if( !transform_track->GetAllSections().Num() )
+        return;
+
+    //---
+
+    UMovieSceneSection* section = transform_track->GetAllSections()[0];
+    UMovieScene3DTransformSection* transform_section = Cast<UMovieScene3DTransformSection>( section );
+
+    if( !transform_section )
+        return;
+
+
+    //---
+
+    FVector new_location = GCurrentLevelEditingViewportClient->GetViewLocation();
+    FRotator new_rotation = GCurrentLevelEditingViewportClient->GetViewRotation();
+    //FVector Scale = iActor->GetActorScale();
+
+    TArrayView<FMovieSceneFloatChannel*> FloatChannels = transform_section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+    FloatChannels[0]->SetDefault( new_location.X );
+    FloatChannels[1]->SetDefault( new_location.Y );
+    FloatChannels[2]->SetDefault( new_location.Z );
+
+    FloatChannels[3]->SetDefault( new_rotation.Euler().X );
+    FloatChannels[4]->SetDefault( new_rotation.Euler().Y );
+    FloatChannels[5]->SetDefault( new_rotation.Euler().Z );
+
+    //FloatChannels[6]->SetDefault( Scale.X );
+    //FloatChannels[7]->SetDefault( Scale.Y );
+    //FloatChannels[8]->SetDefault( Scale.Z );
+
+
+//TODO: set all (?) planes ?
+
+
+    ExistingCamera->SetActorLocation( new_location, false );
+    ExistingCamera->SetActorRotation( new_rotation );
+
+    //---
+    // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
+
+    //iSequencer->SetPerspectiveViewportCameraCutEnabled( false );
+
+    // Lock the viewport to this camera
+    if( ExistingCamera && ExistingCamera->GetLevel() )
+    {
+        //GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
+        //GCurrentLevelEditingViewportClient->SetActorLock( ExistingCamera );
+        //GCurrentLevelEditingViewportClient->bLockedCameraView = true;
+        //GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
+        GCurrentLevelEditingViewportClient->Invalidate();
+    }
+    //---
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+//---
 
 #undef LOCTEXT_NAMESPACE

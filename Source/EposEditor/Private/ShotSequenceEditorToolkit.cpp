@@ -126,10 +126,8 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     //    Util.ChangeActorBinding( ToolkitParams.InitialBindingClass );
     //}
 
-    mSequencer->GetCommandBindings()->MapAction(
-        FShotSequenceEditorCommands::Get().CreateCamera,
-        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleCreateCamera )
-    );
+    // with ToolkitCommands       // -> it doesn't work ( ¯\_O_/¯ ?)
+    BindCommands( mSequencer->GetCommandBindings() );
 
     FLevelEditorSequencerIntegrationOptions options;
     options.bRequiresLevelEvents = true;
@@ -152,6 +150,22 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
     levelEditorModule.OnMapChanged().AddRaw( this, &FShotSequenceEditorToolkit::HandleMapChanged );
+}
+
+void
+FShotSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
+{
+    CommandList->MapAction(
+        FShotSequenceEditorCommands::Get().CreateCamera,
+        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleCreateCamera ),
+        FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+    );
+    CommandList->MapAction(
+        FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleSnapCameraToViewport ),
+        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+    );
+
 }
 
 //--- FGCObject interface
@@ -310,6 +324,11 @@ void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, co
 void FShotSequenceEditorToolkit::HandleCreateCamera()
 {
     ShotSequenceHelpers::CreateCameraAndCameraCut( mSequencer );
+}
+
+void FShotSequenceEditorToolkit::HandleSnapCameraToViewport()
+{
+    ShotSequenceHelpers::SnapCameraToViewport( mSequencer );
 }
 
 void FShotSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )
