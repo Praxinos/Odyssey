@@ -193,7 +193,7 @@ ShotSequenceHelpers::CreatePropertyTrack( TSharedPtr<ISequencer> iSequencer, AAc
 
 //static
 void
-ShotSequenceHelpers::CreateDefaultInnerTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceHelpers::CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
 {
     // For binding which has been removed when dropped actor is not supported
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();

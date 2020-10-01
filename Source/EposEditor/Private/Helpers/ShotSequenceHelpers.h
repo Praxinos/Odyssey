@@ -22,20 +22,11 @@ public:
     static ACineCameraActor* GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid );
 
     /**
-    *  Camera track was added, we usually do extra things, like add a Camera Cut tracks
-    *
-    * @param MovieScene MovieScene to add Camera.
-    * @param CameraGuid CameraGuid  Guid of the camera that was added.
-    * @param FrameNumber FrameNumber it's added at.
-    */
-    static void CameraAdded(UMovieScene* MovieScene, FGuid CameraGuid, FFrameNumber FrameNumber);
-
-    /**
     *  Add a Camera track
     *
     * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer );
+    static void CreateCamera( TSharedPtr<ISequencer> iSequencer );
 
     /**
     *  Update the camera location from the viewport (and set 
@@ -43,6 +34,12 @@ public:
     * @param TSharedPtr<ISequencer> iSequencer to update camera.
     */
     static void SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer );
+
+private:
+    static ACineCameraActor* CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid );
+    static void CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber );
+    static void CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static void CreatePlanes( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
 //---
 
@@ -54,7 +51,7 @@ public:
     * @param AActor iActor corresponding to the binding.
     * @param FGuid iBinding  Guid of the track containing the actor.
     */
-    static void CreateDefaultInnerTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
+    static void CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
 
 private:
     static UMovieSceneTrack* CreateTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );

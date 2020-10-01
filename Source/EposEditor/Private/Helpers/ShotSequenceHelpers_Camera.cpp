@@ -4,6 +4,8 @@
 
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
 #include "ISequencer.h"
 #include "LevelEditorActions.h"
 #include "LevelEditorViewport.h"
@@ -15,7 +17,6 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 
-#include "Editor/EditorEngine.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Camera"
 
@@ -56,7 +57,7 @@ ShotSequenceHelpers::GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid 
 
 //static
 void
-ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer ) // From FSequencer::CreateCamera()
+ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -75,11 +76,33 @@ ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer
     if( !World )
         return;
 
+    //---
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = CreateCamera( iSequencer, &camera_guid );
+
+    ShotSequenceHelpers::CameraAdded( iSequencer, camera_guid, camera, iSequencer->GetLocalTime().Time.FloorToFrame() );
+
+    //---
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+}
+
+//static
+ACineCameraActor*
+ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid ) // From FSequencer::CreateCamera()
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
+
+    //---
+
     FGuid CameraGuid;
     ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, &CameraGuid );
 
     if( ExistingCamera )
-        return;
+        return nullptr;
 
     //---
 
@@ -89,12 +112,11 @@ ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer
     FActorSpawnParameters SpawnParams;
     ACineCameraActor* NewCamera = World->SpawnActor<ACineCameraActor>( SpawnParams );
     if( !NewCamera )
-        return;
+        return nullptr;
 
     CameraGuid = iSequencer->CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
-
     if( !CameraGuid.IsValid() )
-        return;
+        return nullptr;
 
     NewCamera->SetActorLocation( GCurrentLevelEditingViewportClient->GetViewLocation(), false );
     NewCamera->SetActorRotation( GCurrentLevelEditingViewportClient->GetViewRotation() );
@@ -119,59 +141,117 @@ ShotSequenceHelpers::CreateCameraAndCameraCut( TSharedPtr<ISequencer> iSequencer
         GCurrentLevelEditingViewportClient->Invalidate();
     }
 
-    ShotSequenceHelpers::CameraAdded( movieScene, CameraGuid, iSequencer->GetLocalTime().Time.FloorToFrame() );
-    //---
-
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    *oGuid = CameraGuid;
+    return NewCamera;
 }
 
 //static
 void
-ShotSequenceHelpers::CameraAdded(UMovieScene* OwnerMovieScene, FGuid CameraGuid, FFrameNumber FrameNumber) // From MovieSceneToolHelpers::CameraAdded()
+ShotSequenceHelpers::CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber)
 {
-	// If there's a cinematic shot track, no need to set this camera to a shot
-	UMovieSceneTrack* CinematicShotTrack = OwnerMovieScene->FindMasterTrack(UMovieSceneCinematicShotTrack::StaticClass());
-	if (CinematicShotTrack)
-		return;
+    CreateCameraCut( iSequencer, CameraGuid, FrameNumber );
 
-	UMovieSceneTrack* CameraCutTrack = OwnerMovieScene->GetCameraCutTrack();
+    CreatePlanes( iSequencer, CameraGuid, iCamera, FrameNumber );
+}
 
-	// If there's a camera cut track with at least one section, no need to change the section
-	if (CameraCutTrack && CameraCutTrack->GetAllSections().Num() > 0)
-	{
+//static
+void
+ShotSequenceHelpers::CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber ) // From MovieSceneToolHelpers::CameraAdded()
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
+
+    //---
+
+    // If there's a cinematic shot track, no need to set this camera to a shot
+    UMovieSceneTrack* CinematicShotTrack = movieScene->FindMasterTrack( UMovieSceneCinematicShotTrack::StaticClass() );
+    if( CinematicShotTrack )
+        return;
+
+    UMovieSceneTrack* CameraCutTrack = movieScene->GetCameraCutTrack();
+
+    // If there's a camera cut track with at least one section, no need to change the section
+    if( CameraCutTrack && CameraCutTrack->GetAllSections().Num() > 0 )
+    {
         UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( CameraCutTrack->GetAllSections()[0] );
 
         CameraCutSection->Modify();
-        CameraCutSection->SetCameraGuid( CameraGuid );
+        CameraCutSection->SetCameraGuid( iCameraGuid );
 
-		return;
-	}
+        return;
+    }
 
-	if (!CameraCutTrack)
-	{
-		CameraCutTrack = OwnerMovieScene->AddCameraCutTrack(UMovieSceneSingleCameraCutTrack::StaticClass());
-	}
+    if( !CameraCutTrack )
+    {
+        CameraCutTrack = movieScene->AddCameraCutTrack( UMovieSceneSingleCameraCutTrack::StaticClass() );
+    }
 
-	if (CameraCutTrack)
-	{
-		UMovieSceneSection* Section = MovieSceneHelpers::FindSectionAtTime(CameraCutTrack->GetAllSections(), FrameNumber);
-		UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>(Section);
+    if( CameraCutTrack )
+    {
+        UMovieSceneSection* Section = MovieSceneHelpers::FindSectionAtTime( CameraCutTrack->GetAllSections(), iFrameNumber );
+        UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
 
-		if (CameraCutSection)
-		{
-			CameraCutSection->Modify();
-			CameraCutSection->SetCameraGuid(CameraGuid);
-		}
-		else
-		{
-			CameraCutTrack->Modify();
+        if( CameraCutSection )
+        {
+            CameraCutSection->Modify();
+            CameraCutSection->SetCameraGuid( iCameraGuid );
+        }
+        else
+        {
+            CameraCutTrack->Modify();
 
-			UMovieSceneSingleCameraCutSection* NewSection = Cast<UMovieSceneSingleCameraCutSection>(CameraCutTrack->CreateNewSection());
-			NewSection->SetRange(OwnerMovieScene->GetPlaybackRange());
-			NewSection->SetCameraGuid(CameraGuid);
-			CameraCutTrack->AddSection(*NewSection);
-		}
-	}
+            UMovieSceneSingleCameraCutSection* NewSection = Cast<UMovieSceneSingleCameraCutSection>( CameraCutTrack->CreateNewSection() );
+            NewSection->SetRange( movieScene->GetPlaybackRange() );
+            NewSection->SetCameraGuid( iCameraGuid );
+            CameraCutTrack->AddSection( *NewSection );
+        }
+    }
+}
+
+//static
+void
+ShotSequenceHelpers::CreatePlanes( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
+{
+    UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
+
+    FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
+
+    //---
+
+    FVector const CamLocation = camera_transform.GetLocation();
+    FVector const CamDir = camera_transform.GetRotation().Vector();
+    FRotator const CamRot = camera_transform.Rotator();
+
+    //---
+
+    // Make a function ComputePlaneLocation(...)
+    float FocusDistance = 200;
+    FVector plane_location = CamLocation + CamDir * FocusDistance;
+
+    // Make a function ComputePlaneScale(...)
+    FVector plane_scale( 1.5f, 1.f, 1.f );
+
+    //---
+
+    UStaticMesh* Mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Engine/BasicShapes/Plane.Plane" ) );
+    check( Mesh );
+
+    FActorSpawnParameters SpawnParams;
+    AStaticMeshActor* plane = World->SpawnActor<AStaticMeshActor>( SpawnParams );
+
+    plane->GetStaticMeshComponent()->SetStaticMesh( Mesh );
+
+    plane->SetActorScale3D( plane_scale );
+    plane->SetActorLocation( plane_location );
+    plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
+    plane->AddActorWorldRotation( CamRot );
+
+    //---
+
+    FGuid planeGuid = iSequencer->CreateBinding( *plane, plane->GetActorLabel() );
+
+    iSequencer->OnActorAddedToSequencer().Broadcast( plane, planeGuid );
 }
 
 //---
@@ -217,7 +297,6 @@ ShotSequenceHelpers::SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer )
 
     if( !transform_section )
         return;
-
 
     //---
 

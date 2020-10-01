@@ -165,7 +165,6 @@ FShotSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList
         FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleSnapCameraToViewport ),
         FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
     );
-
 }
 
 //--- FGCObject interface
@@ -318,12 +317,12 @@ FShotSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
 
 void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
-    ShotSequenceHelpers::CreateDefaultInnerTrack( mSequencer, iActor, iBinding );
+    ShotSequenceHelpers::CreateDefaultTracksForActor( mSequencer, iActor, iBinding );
 }
 
 void FShotSequenceEditorToolkit::HandleCreateCamera()
 {
-    ShotSequenceHelpers::CreateCameraAndCameraCut( mSequencer );
+    ShotSequenceHelpers::CreateCamera( mSequencer );
 }
 
 void FShotSequenceEditorToolkit::HandleSnapCameraToViewport()
