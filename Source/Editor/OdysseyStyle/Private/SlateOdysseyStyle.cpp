@@ -372,6 +372,22 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetPressedPadding( FMargin(0,0) )
         );
 
+    Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
+        .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.2f, 0.2f, 0.2f )))
+        .SetHoveredBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox_Hovered", FMargin(4.0f/16.0f), FLinearColor( 0.1f, 0.1f, 0.1f )))
+        .SetActiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill_Hovered",FMargin(4.0f/16.0f), FLinearColor( 0.3f, 0.3f, 0.3f )))
+        .SetInactiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill",FMargin(4.0f/16.0f,4.0f/16.0f,8.0f/16.0f,4.0f/16.0f), FLinearColor( 0.2f, 0.2f, 0.2f )))
+        .SetArrowsImage(IMAGE_BRUSH("SpinBox/SpinArrows",mIcon12x12))
+    );
+
+    Set("OdysseySpinBoxStyle.TransparentSpinBox",FSpinBoxStyle()
+        .SetBackgroundBrush(FSlateNoResource())
+        .SetHoveredBackgroundBrush(FSlateNoResource())
+        .SetActiveFillBrush(FSlateNoResource())
+        .SetInactiveFillBrush(FSlateNoResource())
+        .SetArrowsImage(FSlateNoResource())
+    );
+
 	//For flipbook
 	Set("FlipbookTimeline.TimelineFrameBackground", new BOX_BRUSH("OdysseyFlipbook/TimelineFrameBackground", FMargin(4.f / 16.f)));
 	Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 16.f)));
