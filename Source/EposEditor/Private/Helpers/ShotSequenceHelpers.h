@@ -41,6 +41,8 @@ private:
     static void CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber );
     static void CreatePlanes( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
+    static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
+
 //---
 
 public:
