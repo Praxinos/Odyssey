@@ -11,7 +11,7 @@
 #define LOCTEXT_NAMESPACE "OdysseyStylusInputSettings"
 
 #if PLATFORM_WINDOWS
-    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_Ink
+    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_Wintab
 #elif PLATFORM_MAC
     #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_NSEvent
 #else

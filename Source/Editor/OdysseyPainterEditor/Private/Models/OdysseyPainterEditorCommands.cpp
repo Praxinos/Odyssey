@@ -40,7 +40,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
    
     UI_COMMAND( RefreshBrush, "Refresh Brush", "Refresh Brush",                                    EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );
 
-    UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::A ) );
+    UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EKeys::F12 ) );
    
     UI_COMMAND( CreateNewLayer, "Create New Layer", "Create new image layer",                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::N ) );
     UI_COMMAND( DuplicateCurrentLayer, "Duplicate Current Layer", "Duplicate current layer",       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::D ) );
