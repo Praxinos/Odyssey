@@ -248,6 +248,15 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 {
     //UE_LOG( LogStylusInput, Log, TEXT( "InputKey Key:%s Event:%d" ), *iKey.GetFName().ToString(), iEvent );
 
+    if( iEvent == EInputEvent::IE_Pressed )
+    {
+        mKeysPressed.Add( iKey );
+    }
+    else if( iEvent == EInputEvent::IE_Released )
+    {
+        mKeysPressed.Remove( iKey );
+    }
+
     mLastKey = iKey;
     mLastEvent = iEvent;
 
@@ -321,6 +330,7 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
 
+    stroke_point.keysDown = mKeysPressed;
   //---
 
     static TQueue< FOdysseyStrokePoint > queue;
@@ -430,6 +440,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
 
     FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
     mCurrentPointInTexture = GetLocalMousePosition( iPointInViewport );
+    mCurrentPointInTexture.keysDown = mKeysPressed;
 
     if( mCurrentToolState == eState::kIdle )
     {
@@ -605,6 +616,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     
     FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
     mCurrentPointInTexture = GetLocalMousePosition( iPointInViewport );
+    mCurrentPointInTexture.keysDown = mKeysPressed;
 
     if( mCurrentToolState == eState::kDrawing )
     {

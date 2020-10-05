@@ -29,6 +29,7 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
                                         , FVector2D     iJolt
                                         , FVector2D     iDeltaPosition
                                         , int           iDeltaTime
+                                        , TArray<FKey>  iKeysDown
                                         )
     : x                             ( iX )
     , y                             ( iY )
@@ -51,6 +52,7 @@ FOdysseyStrokePoint::FOdysseyStrokePoint( float         iX
     , jolt                          ( iJolt )
     , deltaPosition                 ( iDeltaPosition )
     , deltaTime                     ( iDeltaTime )
+    , keysDown                      ( iKeysDown )
 {}
 
 //--------------------------------------------------------------------------------------
@@ -121,6 +123,7 @@ FOdysseyStrokePoint::operator=( const FOdysseyStrokePoint& iRhs )
     jolt                        = iRhs.jolt;
     deltaPosition               = iRhs.deltaPosition;
     deltaTime                   = iRhs.deltaTime;
+    keysDown                    = iRhs.keysDown;
 
     return *this;
 }

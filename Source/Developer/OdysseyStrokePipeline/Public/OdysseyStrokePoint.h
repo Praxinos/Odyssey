@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputCoreTypes.h" 
 
 /////////////////////////////////////////////////////
 // FOdysseyStrokePoint
@@ -32,6 +33,7 @@ public:
                        , FVector2D      iJolt                           = FVector2D(0,0)
                        , FVector2D      iDeltaPosition                  = FVector2D(0,0)
                        , int            iDeltaTime                      = 0
+                       , TArray<FKey>   iKeysDown                       = TArray<FKey>()
                        );
 
 public:
@@ -86,6 +88,7 @@ public: //TODO: rename to m* or even better Get/Set*() ...
     FVector2D       jolt;
     FVector2D       deltaPosition;
     int             deltaTime;
+    TArray<FKey>    keysDown;
 };
 
 //---

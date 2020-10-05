@@ -13,6 +13,7 @@ public class OdysseyPaintEngine : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
+                "InputCore",
                 "Engine",
                 "OdysseyBrush",
                 "OdysseyImaging",

@@ -13,6 +13,7 @@ public class OdysseyBrush : ModuleRules
             new string[] {
                 "Core",
                 "CoreUObject",
+                "InputCore",
                 "Engine",
             }
         );

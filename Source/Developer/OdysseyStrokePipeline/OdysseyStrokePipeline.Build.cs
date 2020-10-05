@@ -13,6 +13,7 @@ public class OdysseyStrokePipeline : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
+                "InputCore",
                 "Engine",
                 "OdysseyMaths",
                 "ULIS",

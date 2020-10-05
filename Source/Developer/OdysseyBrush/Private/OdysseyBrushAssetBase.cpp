@@ -374,6 +374,13 @@ UOdysseyBrushAssetBase::GetDeltaTime()
     return  state.point.deltaTime;
 }
 
+/** Returns the keyboard and mouse keys down at this point */
+TArray<FKey>
+UOdysseyBrushAssetBase::GetKeysDown()
+{
+    return  state.point.keysDown;
+}
+
 
 /*******************************/
 /**       State Getters        */

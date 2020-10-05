@@ -7,6 +7,7 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
+#include "InputCoreTypes.h" 
 #include "Math/Color.h"
 #include "OdysseyStrokePoint.h"
 #include "OdysseyDrawingState.h"
@@ -204,6 +205,10 @@ public:
     /** Get Delta Time in micro seconds between this event and the last */
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     int GetDeltaTime();
+
+    /** Returns the keyboard and mouse keys down at this point */
+    UFUNCTION(BlueprintPure,Category="OdysseyBrush")
+    TArray<FKey> GetKeysDown();
 
 
     /*******************************/
