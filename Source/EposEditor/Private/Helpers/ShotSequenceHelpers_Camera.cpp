@@ -79,6 +79,8 @@ ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer )
 
     //---
 
+    const FScopedTransaction Transaction( LOCTEXT( "CreateStoryCameraHere", "Create Storyboard Camera Here" ) );
+
     FGuid camera_guid;
     ACineCameraActor* camera = CreateCamera( iSequencer, &camera_guid );
 
@@ -106,8 +108,6 @@ ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGu
         return nullptr;
 
     //---
-
-    const FScopedTransaction Transaction( LOCTEXT( "CreateStoryCameraHere", "Create Storyboard Camera Here" ) );
 
     // Set new camera to match viewport
     FActorSpawnParameters SpawnParams;
@@ -152,7 +152,7 @@ ShotSequenceHelpers::CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid Camer
 {
     CreateCameraCut( iSequencer, CameraGuid, FrameNumber );
 
-    CreatePlanes( iSequencer, CameraGuid, iCamera, FrameNumber );
+    CreatePlane( iSequencer, CameraGuid, iCamera, FrameNumber );
 }
 
 //static
@@ -200,12 +200,17 @@ ShotSequenceHelpers::CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid i
         }
         else
         {
-            CameraCutTrack->Modify();
+            UMovieSceneSingleCameraCutTrack* single_cameracut_track = Cast<UMovieSceneSingleCameraCutTrack>( CameraCutTrack );
+            FMovieSceneObjectBindingID binding_id( iCameraGuid, MovieSceneSequenceID::Root, EMovieSceneObjectBindingSpace::Local ); // Like in UMovieSceneSingleCameraCutSection::SetCameraGuid()
 
-            UMovieSceneSingleCameraCutSection* NewSection = Cast<UMovieSceneSingleCameraCutSection>( CameraCutTrack->CreateNewSection() );
-            NewSection->SetRange( movieScene->GetPlaybackRange() );
-            NewSection->SetCameraGuid( iCameraGuid );
-            CameraCutTrack->AddSection( *NewSection );
+            single_cameracut_track->AddNewSingleCameraCut( binding_id, iFrameNumber );
+
+            //CameraCutTrack->Modify();
+
+            //UMovieSceneSingleCameraCutSection* NewSection = Cast<UMovieSceneSingleCameraCutSection>( CameraCutTrack->CreateNewSection() );
+            //NewSection->SetRange( movieScene->GetPlaybackRange() );
+            //NewSection->SetCameraGuid( iCameraGuid );
+            //CameraCutTrack->AddSection( *NewSection );
         }
     }
 }
@@ -278,7 +283,7 @@ ShotSequenceHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, float i
 
 //static
 void
-ShotSequenceHelpers::CreatePlanes( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::CreatePlane( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
     UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
 
@@ -415,5 +420,23 @@ ShotSequenceHelpers::SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer )
 }
 
 //---
+
+//static
+void
+ShotSequenceHelpers::CreatePlane( TSharedPtr<ISequencer> iSequencer )
+{
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, &camera_guid );
+
+    if( !camera )
+        return;
+
+
+    ShotSequenceHelpers::CreatePlane( iSequencer, camera_guid, camera, iSequencer->GetLocalTime().Time.FloorToFrame() );
+
+    //---
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+}
 
 #undef LOCTEXT_NAMESPACE

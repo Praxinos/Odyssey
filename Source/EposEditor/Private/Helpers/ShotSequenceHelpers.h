@@ -35,11 +35,18 @@ public:
     */
     static void SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer );
 
+    /**
+    *  Add a Camera track
+    *
+    * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
+    */
+    static void CreatePlane( TSharedPtr<ISequencer> iSequencer );
+
 private:
     static ACineCameraActor* CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid );
     static void CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber );
     static void CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber );
-    static void CreatePlanes( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
+    static void CreatePlane( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
 

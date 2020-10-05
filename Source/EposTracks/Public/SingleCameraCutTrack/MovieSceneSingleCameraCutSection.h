@@ -69,12 +69,6 @@ public:
     EPOSTRACKS_API virtual void SetStartFrame( TRangeBound<FFrameNumber> NewEndFrame );
     virtual void SetStartFrameAuto();
     /**
-     * Moves the section by a specific amount of time
-     *
-     * @param DeltaTime	The distance in time to move the curve
-     */
-    EPOSTRACKS_API void MoveSection( FFrameNumber DeltaTime );
-    /**
      * Split a section in two at the split time
      *
      * @param SplitTime The time at which to split

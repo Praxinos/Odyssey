@@ -18,5 +18,6 @@ public:
 	virtual void RegisterCommands() override;
 
 	TSharedPtr<FUICommandInfo> CreateCamera;
+	TSharedPtr<FUICommandInfo> CreatePlane;
 	TSharedPtr<FUICommandInfo> SnapCameraToViewport;
 };

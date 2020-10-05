@@ -46,6 +46,10 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCamera );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
 
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+
 	//TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
 	//	+SHorizontalBox::Slot()
 	//	.AutoWidth()

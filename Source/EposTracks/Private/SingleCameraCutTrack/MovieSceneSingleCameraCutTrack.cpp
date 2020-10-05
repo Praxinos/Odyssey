@@ -147,6 +147,12 @@ void UMovieSceneSingleCameraCutTrack::OnSectionMoved(UMovieSceneSection& Section
         CutSection->SetStartFrameAuto();
 
 	MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, false);
+
+    // Test for locking playback out on section out
+    //UMovieScene* OwnerScene = GetTypedOuter<UMovieScene>();
+    //TRange<FFrameNumber> playback_range = OwnerScene->GetPlaybackRange();
+    //playback_range.SetUpperBound( TRangeBound<FFrameNumber>::MinUpper( playback_range.GetUpperBound(), Section.GetRange().GetUpperBound() ) );
+    //OwnerScene->SetPlaybackRange( playback_range );
 }
 #endif
 

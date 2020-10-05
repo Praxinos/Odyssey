@@ -165,6 +165,12 @@ FShotSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList
         FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleSnapCameraToViewport ),
         FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
     );
+    
+    CommandList->MapAction(
+        FShotSequenceEditorCommands::Get().CreatePlane,
+        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleCreatePlane ),
+        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+    );
 }
 
 //--- FGCObject interface
@@ -328,6 +334,11 @@ void FShotSequenceEditorToolkit::HandleCreateCamera()
 void FShotSequenceEditorToolkit::HandleSnapCameraToViewport()
 {
     ShotSequenceHelpers::SnapCameraToViewport( mSequencer );
+}
+
+void FShotSequenceEditorToolkit::HandleCreatePlane()
+{
+    ShotSequenceHelpers::CreatePlane( mSequencer );
 }
 
 void FShotSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

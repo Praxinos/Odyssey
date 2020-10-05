@@ -74,11 +74,6 @@ void UMovieSceneSingleCameraCutSection::SetStartFrameAuto()
     SectionRange.Value.SetLowerBound( bound );
 }
 
-//TODO: Not called because Super::MoveSection() is not virtual !!!
-void UMovieSceneSingleCameraCutSection::MoveSection( FFrameNumber DeltaFrame )
-{
-}
-
 UMovieSceneSection* UMovieSceneSingleCameraCutSection::SplitSection( FQualifiedFrameTime SplitTime, bool bDeleteKeys )
 {
     return nullptr;
