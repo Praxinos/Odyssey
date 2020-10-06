@@ -30,6 +30,8 @@ UMovieSceneSingleCameraCutSection::UMovieSceneSingleCameraCutSection(const FObje
 	EvalOptions.EnableAndSetCompletionMode( EMovieSceneCompletionMode::ProjectDefault );
 
 	SetBlendType(EMovieSceneBlendType::Absolute);
+
+    //bSupportsInfiniteRange = true;
 }
 
 void UMovieSceneSingleCameraCutSection::OnBindingsUpdated(const TMap<FGuid, FGuid>& OldGuidToNewGuidMap)
@@ -58,6 +60,7 @@ void UMovieSceneSingleCameraCutSection::SetRange( const TRange<FFrameNumber>& Ne
     SectionRange.Value = NewRange;
     TRangeBound<FFrameNumber> bound( TRangeBound<FFrameNumber>::Inclusive( 0 ) );
     SectionRange.Value.SetLowerBound( bound );
+    //SectionRange.Value = TRange<FFrameNumber>::All();
 }
 
 void UMovieSceneSingleCameraCutSection::SetStartFrame( TRangeBound<FFrameNumber> NewEndFrame )
