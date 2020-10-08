@@ -8,6 +8,8 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Compilation/MovieSceneCompilerRules.h"
 
+#include "MovieSceneHelpersShift.h"
+
 
 #define LOCTEXT_NAMESPACE "MovieSceneCinematicBoardTrack"
 
@@ -31,7 +33,11 @@ UMovieSceneCinematicBoardTrack::AddSequence( UMovieSceneSequence* iSequence, FFr
 UMovieSceneSubSection*
 UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex )
 {
-    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, iStartTime, iDuration, iRowIndex );
+    FShiftResult shift_result = MovieSceneHelpersShift::GetShiftInfo( Sections, iStartTime, iDuration );
+
+    //---
+
+    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), MovieSceneHelpersShift::RangeSize( shift_result.mNewRange ).Value, iRowIndex );
 
     UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 
@@ -48,7 +54,7 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
     // Once sequences are sorted fixup the surrounding sequences to fix any gaps
-    //MovieSceneHelpers::FixupConsecutiveSections(Sections, *NewSection, false);
+    MovieSceneHelpersShift::ShiftFollowingSections( Sections, newSection, shift_result );
 
     return newSection;
 }
@@ -82,8 +88,9 @@ void
 UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 {
     Sections.Remove( &ioSection );
-    //MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, true);
     MovieSceneHelpers::SortConsecutiveSections( Sections );
+
+    MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, &ioSection );
 
     // @todo Sequencer: The movie scene owned by the section is now abandoned.  Should we offer to delete it?  
 }
@@ -93,6 +100,8 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
 {
     Sections.RemoveAt( iSectionIndex );
     MovieSceneHelpers::SortConsecutiveSections( Sections );
+
+    MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, Sections[iSectionIndex] );
 }
 
 bool
@@ -177,7 +186,11 @@ UMovieSceneCinematicBoardTrack::GetRowSegmentBlender() const
 void
 UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams )
 {
-    //MovieSceneHelpers::FixupConsecutiveSections(Sections, ioSection, false);
+    //if( iParams.MoveType == EPropertyChangeType::ValueSet )
+    //{
+    //    SortSections();
+    //    MovieSceneHelpers::FixupConsecutiveSections( Sections, ioSection, false );
+    //}
 }
 #endif
 
