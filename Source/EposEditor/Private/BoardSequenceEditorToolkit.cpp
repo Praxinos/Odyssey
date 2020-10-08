@@ -15,7 +15,7 @@
 #include "ISequencerModule.h"
 #include "LevelEditor.h"
 #include "LevelEditorSequencerIntegration.h"
-//#include "Misc/TemplateSequenceEditorPlaybackContext.h"
+//#include "Misc/BoardSequenceEditorPlaybackContext.h"
 //#include "Misc/TemplateSequenceEditorSpawnRegister.h"
 //#include "Misc/TemplateSequenceEditorUtil.h"
 #include "Modules/ModuleManager.h"
@@ -116,6 +116,9 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
     //    Util.ChangeActorBinding( ToolkitParams.InitialBindingClass );
     //}
 
+    // with ToolkitCommands       // -> it doesn't work ( ¯\_O_/¯ ?)
+    BindCommands( mSequencer->GetCommandBindings() );
+
     FLevelEditorSequencerIntegrationOptions options;
     options.bRequiresLevelEvents = true;
     options.bRequiresActorEvents = true;
@@ -128,7 +131,7 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
     if( mSequencer->GetSequencerSettings()->GetShowOutlinerInfoColumn() )
     {
         TSharedPtr<FTabManager> levelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
-        if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() )
+        if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() ) // SceneOutliner == WorldOutliner ...
         {
             levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) )->RequestCloseTab();
             levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) );
@@ -137,6 +140,11 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
 
     levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
     levelEditorModule.OnMapChanged().AddRaw( this, &FBoardSequenceEditorToolkit::HandleMapChanged );
+}
+
+void
+FBoardSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
+{
 }
 
 //--- FGCObject interface
@@ -208,90 +216,18 @@ void FBoardSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class 
 
 //TSharedRef<FExtender> FTemplateSequenceEditorToolkit::HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects )
 //{
-//    TSharedRef<FExtender> AddTrackMenuExtender( new FExtender() );
-//    AddTrackMenuExtender->AddMenuExtension(
-//        SequencerMenuExtensionPoints::AddTrackMenu_PropertiesSection,
-//        EExtensionHook::Before,
-//        CommandList,
-//        FMenuExtensionDelegate::CreateRaw( this, &FTemplateSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack, ContextSensitiveObjects ) );
-//
-//    return AddTrackMenuExtender;
 //}
 //
 //void FTemplateSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects )
 //{
-//    // TODO-lchabant: stolen from level sequence.
-//    if( ContextObjects.Num() != 1 )
-//    {
-//        return;
-//    }
-//
-//    AActor* Actor = Cast<AActor>( ContextObjects[0] );
-//    if( Actor == nullptr )
-//    {
-//        return;
-//    }
-//
-//    AddTrackMenuBuilder.BeginSection( "Components", LOCTEXT( "ComponentsSection", "Components" ) );
-//    {
-//        for( UActorComponent* Component : Actor->GetComponents() )
-//        {
-//            if( Component )
-//            {
-//                FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FTemplateSequenceEditorToolkit::HandleAddComponentActionExecute, Component ) );
-//                FText AddComponentLabel = FText::FromString( Component->GetName() );
-//                FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), FText::FromString( Component->GetName() ) );
-//                AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
-//            }
-//        }
-//    }
-//    AddTrackMenuBuilder.EndSection();
 //}
 //
 //void FTemplateSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
 //{
-//    // TODO-lchabant: stolen from level sequence.
-//    const FScopedTransaction Transaction( LOCTEXT( "AddComponent", "Add Component" ) );
-//
-//    FString ComponentName = Component->GetName();
-//
-//    TArray<UActorComponent*> ActorComponents;
-//    ActorComponents.Add( Component );
-//
-//    USelection* SelectedActors = GEditor->GetSelectedActors();
-//    if( SelectedActors && SelectedActors->Num() > 0 )
-//    {
-//        for( FSelectionIterator Iter( *SelectedActors ); Iter; ++Iter )
-//        {
-//            AActor* Actor = CastChecked<AActor>( *Iter );
-//
-//            TArray<UActorComponent*> OutActorComponents;
-//            Actor->GetComponents( OutActorComponents );
-//
-//            for( UActorComponent* ActorComponent : OutActorComponents )
-//            {
-//                if( ActorComponent->GetName() == ComponentName )
-//                {
-//                    ActorComponents.AddUnique( ActorComponent );
-//                }
-//            }
-//        }
-//    }
-//
-//    for( UActorComponent* ActorComponent : ActorComponents )
-//    {
-//        Sequencer->GetHandleToObject( ActorComponent );
-//    }
 //}
 
 void FBoardSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
-    // TODO-lchabant: add default tracks (re-use level sequence toolkit code).
-
-    // Test: this will remove the 'empty' actor track if actor's drop are not managed
-    //UMovieSceneSequence* sequence = mSequencer->GetFocusedMovieSceneSequence();
-    //UMovieScene* movie_scene = sequence->GetMovieScene();
-    //movie_scene->RemovePossessable( iBinding );
 }
 
 void FBoardSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

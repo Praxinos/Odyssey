@@ -9,7 +9,6 @@
 
 #include "Board/BoardSequence.h"
 #include "Shot/ShotSequence.h"
-#include "Shot/ShotSequence.h"
 
 //---
 
@@ -21,11 +20,9 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     FSequencerCustomizationInfo customization;
 
-    // customization.AddMenuExtender ...
-    // customization.ToolbarExtender ...
-
-    // customization.OnReceivedDragOver ...
-    // customization.OnReceivedDrop ...
+    TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
+    ToolbarExtender->AddToolBarExtension( "Curve Editor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendSequencerToolbar ) );
+    customization.ToolbarExtender = ToolbarExtender;
 
     customization.OnAssetsDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerAssetsDrop );
     customization.OnClassesDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerClassesDrop );
@@ -43,47 +40,41 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 
 //---
 
-//bool
-//FBoardSequenceCustomization::OnSequencerReceivedDragOver( const FGeometry& iMyGeometry, const FDragDropEvent& iDragDropEvent, FReply& oReply )
-//{
-//    bool bIsDragSupported = false;
-//
-//    TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
-//    if( Operation.IsValid() && (
-//        ( Operation->IsOfType<FAssetDragDropOp>() && StaticCastSharedPtr<FAssetDragDropOp>( Operation )->GetAssetPaths().Num() <= 1 ) ||
-//        ( Operation->IsOfType<FClassDragDropOp>() && StaticCastSharedPtr<FClassDragDropOp>( Operation )->ClassesToDrop.Num() <= 1 ) ||
-//        ( Operation->IsOfType<FActorDragDropGraphEdOp>() && StaticCastSharedPtr<FActorDragDropGraphEdOp>( Operation )->Actors.Num() <= 1 ) ) )
-//    {
-//        bIsDragSupported = true;
-//    }
-//
-//    OutReply = ( bIsDragSupported ? FReply::Handled() : FReply::Unhandled() );
-//    return true;
-//}
+void
+FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
+{
+    //ToolbarBuilder.AddSeparator();
+
+    //ToolbarBuilder.AddToolBarButton( FBoardSequenceCustomization::Get().CreateCamera );
+
+    //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
+    //	+SHorizontalBox::Slot()
+    //	.AutoWidth()
+    //	.VAlign(VAlign_Center)
+    //	[
+    //		SNew(STextBlock)
+    //		.Text(LOCTEXT("BoundActorClassPicker", "Bound Actor Class"))
+        //]
+        //+SHorizontalBox::Slot()
+        //.AutoWidth()
+        //.VAlign(VAlign_Center)
+        //[
+        //	SNew(SComboButton)
+        //	.OnGetMenuContent_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassMenuContent)
+        //	.ButtonContent()
+        //	[
+        //		SNew(STextBlock)
+        //		.Text_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassName)
+        //	]
+        //];
+
+    //ToolbarBuilder.AddWidget(Widget);
+}
 
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp )
 {
     return ESequencerDropResult::Unhandled; // Process the default behavior for assets
-
-#if 0
-    if( !iAssets.Num() )
-        return ESequencerDropResult::Unhandled;
-
-    TArray<UObject*> valid_assets = iAssets.FilterByPredicate(
-        []( const UObject* iAsset )
-        {
-            return iAsset->IsA( UBoardSequence::StaticClass() )
-                    || iAsset->IsA( UShotSequence::StaticClass() )
-                    /*|| iAsset->IsA( USoundBase::StaticClass() )*/;
-        }
-    );
-
-    if( valid_assets.Num() == iAssets.Num() )   // If every assets are authorized in the board track
-        return ESequencerDropResult::Unhandled; // let's the default behavior of the sequencer processes them
-
-    return ESequencerDropResult::DropDenied;    // Don't process the default behavior of the sequencer
-#endif
 }
 
 ESequencerDropResult

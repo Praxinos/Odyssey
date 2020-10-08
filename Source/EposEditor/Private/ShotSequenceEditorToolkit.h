@@ -70,6 +70,7 @@ private:
     void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
     /** Callback for executing the Add Component action. */
     void HandleAddComponentActionExecute( UActorComponent* Component );
+
     /** Callback for executing the Add Camera command. */
     void HandleCreateCamera();
     /** Callback for executing the Snap Camera command. */

@@ -43,13 +43,4 @@ public:
 
     UPROPERTY()
     UMovieScene* MovieScene;
-
-    //UPROPERTY()
-    //TSoftClassPtr<AActor> BoundActorClass;
-
-    //UPROPERTY()
-    //TSoftObjectPtr<AActor> BoundPreviewActor;
-
-    //UPROPERTY()
-    //TMap<FGuid, FName> BoundActorComponents;
 };

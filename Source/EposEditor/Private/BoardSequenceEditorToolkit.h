@@ -10,7 +10,7 @@
 #include "Toolkits/AssetEditorToolkit.h"
 
 class FToolBarBuilder;
-class FTemplateSequenceEditorPlaybackContext;
+//class FBoardSequenceEditorPlaybackContext;
 class ISequencer;
 class FAssetDragDropOp;
 class FClassDragDropOp;
@@ -64,14 +64,21 @@ public:
 
 private:
 
+    ///** Callback for the menu extensibility manager. */
     //TSharedRef<FExtender> HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects );
+    ///** Callback for the track menu extender. */
     //void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
+    ///** Callback for executing the Add Component action. */
     //void HandleAddComponentActionExecute( UActorComponent* Component );
 
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 
     void OnSequencerReceivedFocus();
+
+private:
+
+    void BindCommands( TSharedPtr<FUICommandList> CommandList );
 
 private:
 
@@ -87,7 +94,7 @@ private:
     /** Handle to the sequencer properties menu extender. */
     //FDelegateHandle mSequencerExtenderHandle;
 
-    //TSharedPtr<FTemplateSequenceEditorPlaybackContext> mPlaybackContext;
+    //TSharedPtr<FBoardSequenceEditorPlaybackContext> mPlaybackContext;
 
     /**	The tab ids for all the tabs used */
     static const FName smSequencerMainTabId;

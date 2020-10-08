@@ -37,37 +37,16 @@ void UBoardSequence::Initialize()
 
 void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& PossessedObject, UObject* Context)
 {
-	//if (UActorComponent* Component = Cast<UActorComponent>(&PossessedObject))
-	//{
-	//	const FName ComponentName = Component->GetFName();
-	//	BoundActorComponents.Add(ObjectId, ComponentName);
-	//}
+    MovieScene->RemovePossessable( ObjectId );
 }
 
 bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContext) const
 {
-	//return Object.IsA<AActor>() || Object.IsA<UActorComponent>();
-    return nullptr;
+    return false;
 }
 
 void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects) const
 {
-	//AActor* Actor = Cast<AActor>(Context);
-	//if (Actor == nullptr)
-	//{
-	//	return;
-	//}
-
-	//const FName* ComponentName = BoundActorComponents.Find(ObjectId);
-	//if (ComponentName == nullptr)
-	//{
-	//	return;
-	//}
-
-	//if (UActorComponent* FoundComponent = FindObject<UActorComponent>(Actor, *ComponentName->ToString(), false))
-	//{
-	//	OutObjects.Add(FoundComponent);
-	//}
 }
 
 UMovieScene* UBoardSequence::GetMovieScene() const
@@ -77,27 +56,19 @@ UMovieScene* UBoardSequence::GetMovieScene() const
 
 UObject* UBoardSequence::GetParentObject(UObject* Object) const
 {
-	//if (UActorComponent* Component = Cast<UActorComponent>(Object))
-	//{
-	//	return Component->GetOwner();
-	//}
-
 	return nullptr;
 }
 
 void UBoardSequence::UnbindPossessableObjects(const FGuid& ObjectId)
 {
-	//BoundActorComponents.Remove(ObjectId);
 }
 
 void UBoardSequence::UnbindObjects(const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context)
 {
-	//BoundActorComponents.Remove(ObjectId);
 }
 
 void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Context)
 {
-	//BoundActorComponents.Remove(ObjectId);
 }
 
 #if WITH_EDITOR
@@ -115,7 +86,6 @@ UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackCla
     }
 
     return ETrackSupport::NotSupported;
-    //return Super::IsTrackSupported( InTrackClass );
 }
 
 //FText UBoardSequence::GetDisplayName() const

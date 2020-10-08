@@ -18,9 +18,14 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     FSequencerCustomizationInfo customization;
 
+    // customization.AddMenuExtender ...
+
     TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
     ToolbarExtender->AddToolBarExtension( "Curve Editor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FShotSequenceCustomization::ExtendSequencerToolbar ) );
     customization.ToolbarExtender = ToolbarExtender;
+
+    // customization.OnReceivedDragOver ...
+    // customization.OnReceivedDrop ...
 
     customization.OnAssetsDrop.BindRaw( this, &FShotSequenceCustomization::OnSequencerAssetsDrop );
     customization.OnClassesDrop.BindRaw( this, &FShotSequenceCustomization::OnSequencerClassesDrop );
