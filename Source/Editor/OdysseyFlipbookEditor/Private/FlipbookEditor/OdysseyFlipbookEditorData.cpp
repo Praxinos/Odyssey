@@ -19,6 +19,7 @@
 FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 {
     if( mDisplaySurface ) {
+        delete mDisplaySurface->Block();
         delete mDisplaySurface;
         mDisplaySurface = NULL;
     }
@@ -90,8 +91,7 @@ FOdysseyFlipbookEditorData::Texture(UTexture2D* iTexture)
     mLayerStack = userData->GetLayerStack();
 
     // Setup Surface
-    mDisplaySurface = new FOdysseySurfaceEditable( mTexture, mLayerStack->GetResultBlock() );
-    mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateSurfaceCallback, static_cast<void*>( mDisplaySurface ) ) );
+    mDisplaySurface = new FOdysseySurfaceEditable( mTexture);
     mDisplaySurface->Invalidate();
 }
 
@@ -102,10 +102,12 @@ FOdysseyFlipbookEditorData::FindOrCreateTextureUserData(UTexture2D* iTexture)
     if( !userData )
     {
         userData = NewObject< UOdysseyTextureAssetUserData >(iTexture, NAME_None, RF_Public);
+        userData->GetLayerStack()->Init(iTexture->GetSizeX(), iTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
         iTexture->AddAssetUserData( userData );
-        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()) );
-        userData->GetLayerStack()->InitFromData( textureData );
-        delete textureData;
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat()) );
+		FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
+		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, textureData));
+        userData->GetLayerStack()->AddLayer(imageLayer);
         iTexture->PostEditChange();
     }
     return userData;

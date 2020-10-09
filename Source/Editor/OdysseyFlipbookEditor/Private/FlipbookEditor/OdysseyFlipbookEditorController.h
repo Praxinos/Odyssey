@@ -8,7 +8,7 @@
 #include "SOdysseyFlipbookTimelineViewEvents.h"
 
 #include "IOdysseyLayer.h"
-#include "OdysseyTree.h"
+#include "OdysseyTreeShared.h"
 
 class FOdysseyFlipbookEditorToolkit;
 class FOdysseyFlipbookEditorData;
@@ -37,7 +37,10 @@ protected:
 	TSharedPtr<FExtender> CreateMenuExtenders(const TSharedRef<FUICommandList>& iToolkitCommands);
 
 public:
-	void OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer);
+	void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
+	void OnLayerStackStructureChanged();
+	void OnLayerStackImageResultChanged();
+	void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 	
 	void OnTimelineScrubStarted();
 	void OnTimelineScrubStopped();

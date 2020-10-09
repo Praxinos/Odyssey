@@ -65,26 +65,25 @@ TSharedRef<SOdysseyLayerStackView> FOdysseyLayerStackModel::GetLayerStackView() 
 
 //HANDLES ----------------------------------
 
-void FOdysseyLayerStackModel::OnDeleteLayer( IOdysseyLayer* iLayerToDelete )
+void FOdysseyLayerStackModel::OnDeleteLayer( TSharedPtr<IOdysseyLayer> iLayerToDelete )
 {
     GetLayerStackData()->DeleteLayer( iLayerToDelete );
-    GetLayerStackData()->ComputeResultBlock();
     mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnMergeLayerDown( IOdysseyLayer* iLayerToMergeDown )
+void FOdysseyLayerStackModel::OnMergeLayerDown(TSharedPtr<IOdysseyLayer> iLayerToMergeDown )
 {
     GetLayerStackData()->MergeDownLayer( iLayerToMergeDown );
     mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnFlattenLayer( IOdysseyLayer* iLayerToMergeDown )
+void FOdysseyLayerStackModel::OnFlattenLayer(TSharedPtr<IOdysseyLayer> iLayerToMergeDown )
 {
     GetLayerStackData()->FlattenLayer( iLayerToMergeDown );
     mLayerStackView->RefreshView();
 }
 
-void FOdysseyLayerStackModel::OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate )
+void FOdysseyLayerStackModel::OnDuplicateLayer(TSharedPtr<IOdysseyLayer> iLayerToDuplicate )
 {
     GetLayerStackData()->DuplicateLayer( iLayerToDuplicate );
     mLayerStackView->RefreshView();

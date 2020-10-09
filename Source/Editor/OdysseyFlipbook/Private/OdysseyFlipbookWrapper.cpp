@@ -244,7 +244,10 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
     // Init Texture and its layerstack with iBlock
     InitTextureWithBlockData(blockPtr, texture, iFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-    userData->GetLayerStack()->InitFromData(blockPtr);
+    userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), iFormat);
+	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, blockPtr));
+	userData->GetLayerStack()->AddLayer(imageLayer);
     texture->AddAssetUserData( userData );
 
     //Init is done
@@ -271,9 +274,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 	::ul3::FPixelValue color(::ul3::FPixelValue::FromRGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, blockPtr->GetBlock(), color, canvasRect );
 
-     UTexture2D* texture = CreateTexture(iName, blockPtr, iFormat);
-
-	delete blockPtr;
+    UTexture2D* texture = CreateTexture(iName, blockPtr, iFormat);
     return texture;
 }
 
@@ -285,15 +286,14 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
     FOdysseyBlock* block = NULL;
     if( textureUserData )
     {
-        textureUserData->GetLayerStack()->ComputeResultBlock();
-        block = textureUserData->GetLayerStack()->GetResultBlock();
+        block = new FOdysseyBlock(iTexture->GetSizeX(), iTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
+        textureUserData->GetLayerStack()->ComputeResultInBlock(block->GetBlock());
         texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
     }
     else
     {
-        block = NewOdysseyBlockFromUTextureData(texture, ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
+        block = NewOdysseyBlockFromUTextureData(iTexture, ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
         texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
-        delete block;
     }
      
     return texture;

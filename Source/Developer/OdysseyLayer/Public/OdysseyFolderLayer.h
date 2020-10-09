@@ -6,40 +6,49 @@
 #include "CoreMinimal.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
+#include "IOdysseyLayerImageBlendingCapability.h"
 #include <ULIS3>
 
 
 /**
  * Implements a layer which is a folder
  */
-class ODYSSEYLAYER_API FOdysseyFolderLayer : public IOdysseyLayer
+class ODYSSEYLAYER_API FOdysseyFolderLayer :
+    public IOdysseyLayer,
+    public IOdysseyLayerImageBlendingCapability
 {
+public:
+    // Layer Is Open State Changed Event
+    // Bool is for the previous value
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerIsOpenChanged, bool);
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyFolderLayer();
+    FOdysseyFolderLayer( const FOdysseyFolderLayer& iLayer);
     FOdysseyFolderLayer( const FName& iName );
 
-
+    virtual FOdysseyFolderLayer* Clone() const override;
+    virtual void Serialize(FArchive &Ar);
+    virtual void Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
+    virtual void RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
+    virtual bool ImplementsCapability(FGuid iGuid) const override;
+    virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) override;
+    
+    virtual void AddNode( TSharedPtr<IOdysseyLayer> iNode, int iIndexEmplace = -1 ) override;
+    virtual void DeleteNode( int iIndex ) override;
 public:
     // Public API
-    ::ul3::eBlendingMode    GetBlendingMode();
-    FText                   GetBlendingModeAsText() const;
-    void                    SetBlendingMode( ::ul3::eBlendingMode iBlendingMode );
-    void                    SetBlendingMode( FText iBlendingMode );
-
-    float GetOpacity() const;
-    void  SetOpacity( float iOpacity );
-
     bool IsOpen() const;
     void SetIsOpen( bool iIsOpen );
 
-    // Overloads for save in archive
-    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );
+    void OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer);
+
+public:
+    FOdysseyLayerIsOpenChanged& IsOpenChangedDelegate();
 
 private:
-    ::ul3::eBlendingMode    mBlendingMode;
-    float                   mOpacity;
     bool                    mIsOpen; // Todo: This should not be here in the model, but it should be part of the view.
+    
+    FOdysseyLayerIsOpenChanged mIsOpenChangedDelegate;
 };
-
-ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer );

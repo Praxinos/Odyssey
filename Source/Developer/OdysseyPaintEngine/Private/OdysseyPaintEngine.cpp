@@ -18,6 +18,8 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
     delete mSmoother;
     delete mSmoothingParameters;
     delete mInterpolator;
+    delete mPreviewBlock;
+    delete mStrokeBlock;
     DeallocInvalidTileMap( mTmpInvalidTileMap );
     DeallocInvalidTileMap( mStrokeInvalidTileMap );
 
@@ -26,12 +28,11 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
-    : mBlock( NULL )
-    , mTempBuffer(NULL)
+    : mEditedBlock( NULL )
+    , mStrokeBlock(NULL)
+	, mPreviewBlock(NULL)
     , mBrushInstance( NULL )
-
-    , mWidth( 0 )
-    , mHeight( 0 )
+    
     , mCountTileX( 0 )
     , mCountTileY( 0 )
 
@@ -81,7 +82,7 @@ FOdysseyPaintEngine::InterruptDelay()
 void
 FOdysseyPaintEngine::Tick()
 {
-    if( !mBrushInstance || !mTempBuffer )
+    if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock )
         return;
 
     //Manage CatchUp if needed
@@ -132,6 +133,7 @@ FOdysseyPaintEngine::Tick()
     }
 
     if (changedTiles.Num() > 0) {
+        BlendStrokeBlockInPreviewBlock(changedTiles);
         mOnStrokeChangedDelegate.Broadcast(changedTiles);
     }
     changedTiles.Reset();
@@ -155,13 +157,14 @@ FOdysseyPaintEngine::Tick()
         if (changedTiles.Num() > 0) 
         {
             mOnStrokeWillEndDelegate.Broadcast(changedTiles);
+            CopyPreviewBlockInEditedBlock(changedTiles);
             mOnStrokeEndDelegate.Broadcast(changedTiles);
         }
         changedTiles.Reset();
 
         ClearInvalidTileMap( mStrokeInvalidTileMap );
 
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect() );
 
         if( mBrushInstance )
             mBrushInstance->CleansePool( ECacheLevel::kStroke );
@@ -177,27 +180,33 @@ FOdysseyPaintEngine::Tick()
 void
 FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
 {
-    mBlock = iBlock;
-    if (!mBlock) {
-        mWidth = -1;
-        mHeight = -1;
-
-		delete mTempBuffer;
-        mTempBuffer = nullptr;
-
+    mEditedBlock = iBlock;
+    if (!mEditedBlock) {
+		delete mStrokeBlock;
+        delete mPreviewBlock;
+        mStrokeBlock = nullptr;
+        mPreviewBlock = nullptr;
         return;
     }
-    mWidth = iBlock->Width();
-    mHeight = iBlock->Height();
 
-    if (!mTempBuffer || mTempBuffer->Size() != mBlock->Size() || mTempBuffer->Format() != mBlock->Format())
+    if (    !mStrokeBlock
+         || !mPreviewBlock
+         || mStrokeBlock->Size() != mEditedBlock->Size()
+         || mPreviewBlock->Size() != mEditedBlock->Size()
+         || mStrokeBlock->Format() != mEditedBlock->Format()
+         || mPreviewBlock->Format() != mEditedBlock->Format() )
     {
-        delete mTempBuffer;
-        mTempBuffer = new FOdysseyBlock(mWidth, mHeight, mBlock->Format());
+        delete mStrokeBlock;
+        delete mPreviewBlock;
+        mStrokeBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
+        mPreviewBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
+
+        ::ul3::FVec2F pos( 0, 0 );
+        ::ul3::Clear(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
+        ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mEditedBlock->GetBlock(), mPreviewBlock->GetBlock(), mPreviewBlock->GetBlock()->Rect(), pos);
 
         ReallocInvalidMaps();
     }
@@ -205,9 +214,15 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
 }
 
 FOdysseyBlock*
-FOdysseyPaintEngine::TempBuffer()
+FOdysseyPaintEngine::StrokeBlock()
 {
-    return mTempBuffer;
+    return mStrokeBlock;
+}
+
+FOdysseyBlock*
+FOdysseyPaintEngine::PreviewBlock()
+{
+    return mPreviewBlock;
 }
 
 void
@@ -219,7 +234,7 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 	//we need to do this before iBrushInstance->ExecuteSelected();
 	//and we cannot use UpdateBrushInstance() as it sends a StateChanged, and we only want this after iBrushInstance->ExecuteSelected();
 	FOdysseyBrushState& state = mBrushInstance->GetState();
-	state.target_temp_buffer = mTempBuffer;
+	state.target_temp_buffer = mStrokeBlock;
 	state.point = FOdysseyStrokePoint();
 	state.color = mColor;
 	state.size_modifier = mSizeModifier;
@@ -468,7 +483,8 @@ void
 FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdysseyStrokePoint& iPreviousPoint )
 {
     if( !mBrushInstance ||
-        !mTempBuffer ||
+        !mStrokeBlock ||
+        !mPreviewBlock ||
         mIsPendingEndStroke )
         return;
 
@@ -499,7 +515,8 @@ void
 FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint )
 {
     if( !mBrushInstance ||
-        !mTempBuffer ||
+        !mStrokeBlock ||
+        !mPreviewBlock ||
         mIsPendingEndStroke )
         return;
 
@@ -615,14 +632,14 @@ FOdysseyPaintEngine::EndStroke()
     if (!mIsRealTime && mIsSmoothingEnabled)
     {
         //Cancel the tempbuffer   
-        if( !mTempBuffer )
+        if( !mStrokeBlock || !mPreviewBlock )
             return;
 
         InterruptDelay();
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
 
         ClearInvalidTileMap( mTmpInvalidTileMap );
         ClearInvalidTileMap( mStrokeInvalidTileMap );
@@ -677,19 +694,15 @@ FOdysseyPaintEngine::EndStroke()
             f();
             mDelayQueue.pop();
         }
-		//InterruptDelay();
-		//Tick();
     }
 
     mIsPendingEndStroke = true;
-
-    //TODO: Apply Smoothing if realtime is on
 }
 
 void
 FOdysseyPaintEngine::AbortStroke()
 {
-    if( !mTempBuffer )
+    if( !mStrokeBlock || !mPreviewBlock )
         return;
 
     mIsPendingEndStroke = false;
@@ -698,7 +711,7 @@ FOdysseyPaintEngine::AbortStroke()
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect());
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
 
     ClearInvalidTileMap( mTmpInvalidTileMap );
     ClearInvalidTileMap( mStrokeInvalidTileMap );
@@ -714,6 +727,67 @@ FOdysseyPaintEngine::AbortStroke()
     mSmoother->Reset();
     mRawStroke.Empty();
     mResultStroke.Empty();
+}
+
+
+void
+FOdysseyPaintEngine::BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects)
+{
+    if (!mStrokeBlock || !mPreviewBlock)
+        return;
+
+    if (iRects.Num() <= 0)
+        return;
+    
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent =  ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+
+    for (int i = 0; i < iRects.Num(); i++)
+	{    
+        ::ul3::FVec2F pos( iRects[i].x, iRects[i].y );
+        ::ul3::Blend( hULIS.ThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , hULIS.HostDeviceInfo()
+                    , ULIS3_NOCB
+                    , mStrokeBlock->GetBlock()
+                    , mPreviewBlock->GetBlock()
+                    , iRects[i]
+                    , pos
+					, ULIS3_NOAA
+                    , mBlendingModeModifier
+                    , mAlphaModeModifier
+                    , mOpacityModifier
+                    );
+    }
+}
+
+
+void
+FOdysseyPaintEngine::CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects)
+{
+    if (!mEditedBlock || !mPreviewBlock)
+        return;
+
+    if (iRects.Num() <= 0)
+        return;
+    
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent =  ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+
+    for (int i = 0; i < iRects.Num(); i++)
+	{    
+        ::ul3::FVec2F pos( iRects[i].x, iRects[i].y );
+        ::ul3::Copy( hULIS.ThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , hULIS.HostDeviceInfo()
+                    , ULIS3_NOCB
+                    , mPreviewBlock->GetBlock()
+                    , mEditedBlock->GetBlock()
+                    , iRects[i]
+                    , pos);               
+    }
 }
 
 void
@@ -744,29 +818,6 @@ FOdysseyPaintEngine::GetColor() const
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
-/* void
-FOdysseyPaintEngine::CheckReallocTempBuffer()
-{
-    if( !mLayerStack )
-        return;
-
-    mWidth = mLayerStack->Width();
-    mHeight = mLayerStack->Height();
-
-    bool realloc = !mTempBuffer || ( mTempBuffer && mTempBuffer->Size() != mLayerStack->Size() );
-
-    if( realloc )
-    {
-        delete mTempBuffer;
-        mTempBuffer = new FOdysseyBlock( mWidth, mHeight, mTextureSourceFormat );
-
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mTempBuffer->GetBlock(), mTempBuffer->GetBlock()->Rect() );
-
-        ReallocInvalidMaps();
-    }
-} */
 
 void
 FOdysseyPaintEngine::ReallocInvalidMaps()
@@ -774,8 +825,8 @@ FOdysseyPaintEngine::ReallocInvalidMaps()
     DeallocInvalidTileMap( mTmpInvalidTileMap );
     DeallocInvalidTileMap( mStrokeInvalidTileMap );
 
-    mCountTileX = ceil( (float)mWidth / TILE_SIZE );
-    mCountTileY = ceil( (float)mHeight / TILE_SIZE );
+    mCountTileX = mEditedBlock ? ceil( (float)mEditedBlock->Width() / TILE_SIZE ) : 0;
+    mCountTileY = mEditedBlock ? ceil( (float)mEditedBlock->Height() / TILE_SIZE ) : 0;
 
     ReallocInvalidTileMap( mTmpInvalidTileMap );
     ReallocInvalidTileMap( mStrokeInvalidTileMap );
@@ -790,7 +841,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     mBrushCursorInvalid = true;
 
     FOdysseyBrushState& state = mBrushInstance->GetState();
-    state.target_temp_buffer = mTempBuffer;
+    state.target_temp_buffer = mStrokeBlock;
     state.point = FOdysseyStrokePoint();
     state.color = mColor;
     state.size_modifier = mSizeModifier;
@@ -896,8 +947,8 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     // Clear invalid rects in brush instance
     mBrushInstance->ClearInvalidRects();
 
-    // Reset brush state target to mTempBuffer
-    state.target_temp_buffer = mTempBuffer;
+    // Reset brush state target to mStrokeBlock
+    state.target_temp_buffer = mStrokeBlock;
 
     // Compute Brush Shift
     int shiftx = xmin;
@@ -988,8 +1039,8 @@ FOdysseyPaintEngine::MakeTileRect( int iTileX, int iTileY )
 {
     return { iTileX * TILE_SIZE,
              iTileY * TILE_SIZE,
-             FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, mWidth ) - iTileX * TILE_SIZE,
-             FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, mHeight ) - iTileY * TILE_SIZE };
+             mEditedBlock ? FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, mEditedBlock->Width() ) - iTileX * TILE_SIZE : 0,
+             mEditedBlock ? FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, mEditedBlock->Height() ) - iTileY * TILE_SIZE : 0 } ;
 }
 
 void

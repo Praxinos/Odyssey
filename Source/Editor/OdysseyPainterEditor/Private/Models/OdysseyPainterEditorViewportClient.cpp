@@ -23,7 +23,6 @@
 #include "Widgets/SViewport.h"
 
 #include "IOdysseyStylusInputModule.h"
-// #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"

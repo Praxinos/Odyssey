@@ -14,7 +14,10 @@
 FOdysseyTextureEditorData::~FOdysseyTextureEditorData()
 {
     if( mDisplaySurface )
+    {
+        delete mDisplaySurface->Block();
         delete mDisplaySurface;
+    }
 }
 
 FOdysseyTextureEditorData::FOdysseyTextureEditorData(UTexture2D* iTexture)
@@ -46,10 +49,10 @@ FOdysseyTextureEditorData::Init()
     if( !userData )
     {
         userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
+        userData->GetLayerStack()->Init(mTexture->GetSizeX(), mTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat()));
         mTexture->AddAssetUserData( userData );
         FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, ULISFormatForUE4PixelFormat(mTexture->GetPixelFormat()) );
-        userData->GetLayerStack()->InitFromData( textureData );
-        delete textureData;
+		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(), textureData));
         mTexture->PostEditChange();
     }
 
@@ -57,8 +60,7 @@ FOdysseyTextureEditorData::Init()
     mLayerStack = userData->GetLayerStack();
 
     // Setup Surface
-    mDisplaySurface = new FOdysseySurfaceEditable(mTexture, mLayerStack->GetResultBlock() );
-    mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateSurfaceCallback, static_cast<void*>( mDisplaySurface ) ) );
+    mDisplaySurface = new FOdysseySurfaceEditable(mTexture);
     mDisplaySurface->Invalidate();
 
     // Support undo/redo

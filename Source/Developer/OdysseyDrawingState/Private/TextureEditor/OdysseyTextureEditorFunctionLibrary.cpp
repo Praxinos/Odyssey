@@ -35,17 +35,17 @@ GetStack( UOdysseyBrushAssetBase* BrushContext )
 }
 
 static
-FOdysseyImageLayer*
+TSharedPtr<FOdysseyImageLayer>
 GetCurrentLayer( FOdysseyLayerStack* iStack )
 {
     if( !iStack )
         return nullptr;
 
-    IOdysseyLayer* layer = iStack->GetCurrentLayer()->GetNodeContent();
+    TSharedPtr<IOdysseyLayer> layer = iStack->GetCurrentLayer();
     check( layer );
     if( layer->GetType() != IOdysseyLayer::eType::kImage )
         return nullptr;
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layer );
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>( layer );
     if( !imageLayer )
         return nullptr;
 
@@ -53,14 +53,14 @@ GetCurrentLayer( FOdysseyLayerStack* iStack )
 }
 
 static
-FOdysseyImageLayer*
+TSharedPtr<FOdysseyImageLayer>
 GetLayerByName( FOdysseyLayerStack* iStack, const FString& iName )
 {
     if( !iStack )
         return nullptr;
 
-    TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    iStack->GetLayers()->DepthFirstSearchTree( &layers, false );
+    TArray< TSharedPtr<IOdysseyLayer> > layers;
+    iStack->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
 
     for( auto layer : layers )
     {
@@ -69,7 +69,7 @@ GetLayerByName( FOdysseyLayerStack* iStack, const FString& iName )
         {
             if( layer->GetType() != IOdysseyLayer::eType::kImage )
                 return nullptr;
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layer );
+            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>( layer );
             if( !imageLayer )
                 return nullptr;
 
@@ -81,21 +81,19 @@ GetLayerByName( FOdysseyLayerStack* iStack, const FString& iName )
 }
 
 static
-FOdysseyImageLayer*
+TSharedPtr<FOdysseyImageLayer>
 GetLayerByIndex( FOdysseyLayerStack* iStack, int iIndex )
 {
     if( !iStack )
         return nullptr;
 
-    FOdysseyNTree< IOdysseyLayer* >* layer_node = iStack->GetCurrentLayerFromIndex( iIndex );
-    if( !layer_node )
-        return nullptr;
-
-    IOdysseyLayer* layer = layer_node->GetNodeContent();
+    TSharedPtr<IOdysseyLayer> layer = iStack->GetLayerFromIndex( iIndex );
     check( layer );
+
     if( layer->GetType() != IOdysseyLayer::eType::kImage )
         return nullptr;
-    FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( layer );
+        
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>( layer );
     if( !imageLayer )
         return nullptr;
 
@@ -123,7 +121,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
     if( !stack )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    FOdysseyImageLayer* layer = GetLayerByIndex( stack, iIndex );
+    TSharedPtr<FOdysseyImageLayer> layer = GetLayerByIndex( stack, iIndex );
     if( !layer )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -163,7 +161,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
     if( !stack )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    FOdysseyImageLayer* layer = GetLayerByName( stack, iName );
+    TSharedPtr<FOdysseyImageLayer> layer = GetLayerByName( stack, iName );
     if( !layer )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -203,7 +201,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
     if( !stack )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    FOdysseyImageLayer* layer = GetCurrentLayer( stack );
+    TSharedPtr<FOdysseyImageLayer> layer = GetCurrentLayer( stack );
     if( !layer )
         return FOdysseyBlockProxy::MakeNullProxy();
 

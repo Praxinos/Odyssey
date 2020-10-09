@@ -31,8 +31,8 @@ FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TShared
 	mController = MakeShareable(new FOdysseyTextureEditorController(mData, mGUI));
 
 	mData->Init();
-	mController->Init(ToolkitCommands);
 	mGUI->Init(mData, mController);
+	mController->Init(ToolkitCommands);
 
 	TArray<UObject*> objectsToEdit;
 	objectsToEdit.Add(iTexture);

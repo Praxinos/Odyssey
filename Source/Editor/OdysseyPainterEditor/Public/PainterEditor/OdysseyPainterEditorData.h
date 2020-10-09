@@ -39,7 +39,7 @@ public:
 
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
-    FOdysseyPaintEngine*        mPaintEngine;       // Owned        // Used by SOdysseyLayerStack
+    FOdysseyPaintEngine*        mPaintEngine;       // Owned        
 	FOdysseyBlock*				mPaintEngineBlock;  // Owned        // Used by PaintEngine
 	UOdysseyBrush*              mBrush;             // NOT Owned
 	UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Exposed Parameters and Brush Preview

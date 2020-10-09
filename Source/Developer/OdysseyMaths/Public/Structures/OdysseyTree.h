@@ -16,6 +16,24 @@ enum class ePosition : char
 template< typename T >
 class FOdysseyNTree
 {
+public:
+    //Events
+    // Tree Node Added Event
+    // - FOdysseyNTree<T>* is the added node
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyTreeNodeAdded, FOdysseyNTree<T>*);
+
+    // Tree Node Removed Event
+    // FOdysseyNTree<T>* is the removed node
+    // FOdysseyNTree<T>* is the previous parent node
+    // int is the index of the removed node in the previous parent node
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyTreeNodeRemoved, FOdysseyNTree<T>*, FOdysseyNTree<T>*, int);
+    
+    // Tree Node Moved Event
+    // FOdysseyNTree<T>* is the moved node
+    // FOdysseyNTree<T>* is the previous parent node
+    // int is the index of the removed node in the previous parent node
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyTreeNodeMoved, FOdysseyNTree<T>*, FOdysseyNTree<T>*, int);
+
 //Construction Destruction
 public:
     FOdysseyNTree( T iNodeContent );
@@ -23,7 +41,6 @@ public:
     
 public:
     FOdysseyNTree<T>* AddNode( T iNodeContent, int iIndexEmplace = -1 );
-    FOdysseyNTree<T>* AddNode( FOdysseyNTree<T>* iNode, int iIndexEmplace = -1 );
 
     void DeleteNode( int iIndex );
     void DeleteNodeIfExist( FOdysseyNTree<T>* iNodeToDelete );
@@ -36,9 +53,8 @@ public:
     int GetIndexInParent() const;
     T GetNodeContent() const;
     T* GetNodeContentPtr() const;
-    void SetNodeContent( T& iNodeContent );
     
-    const TArray<FOdysseyNTree*>* GetNodes() const;
+    TArray<FOdysseyNTree<T>*> GetNodes() const;
     
     void DepthFirstSearchTree( TArray<T>* ioContents, bool iIncludeRoot = true ) const;
     void BreadthFirstSearchTree( TArray<T>* ioContents, bool iIncludeRoot = true ) const;
@@ -48,14 +64,24 @@ public:
     //Check if iParentToSearch is a parent (direct or indirect) of the currentNode
     bool HasForParent( FOdysseyNTree<T>* iParentToSearch ) const;
 
+    FOdysseyTreeNodeAdded& NodeAdded();
+    FOdysseyTreeNodeRemoved& NodeRemoved();
+    FOdysseyTreeNodeMoved& NodeMoved();
+
     // Overloads for save in archive
     friend FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree );
+
+private:
+    FOdysseyNTree<T>* AddNode( FOdysseyNTree<T>* iNode, int iIndexEmplace = -1 );
 
 private:
     T mNodeContent;
     TArray<FOdysseyNTree*> mNodes;
     FOdysseyNTree* mParent;
     
+    FOdysseyTreeNodeAdded mNodeAdded;
+    FOdysseyTreeNodeRemoved mNodeRemoved;
+    FOdysseyTreeNodeMoved mNodeMoved;
 };
 
 //Implementation

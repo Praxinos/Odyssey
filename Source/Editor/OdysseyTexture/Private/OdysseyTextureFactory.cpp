@@ -65,7 +65,7 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     InitTextureWithBlockData(&block, texture, mTextureFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-    userData->GetLayerStack()->Init( texture->Source.GetSizeX(), texture->Source.GetSizeY(), ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
+    userData->GetLayerStack()->Init(texture->GetSizeX(), texture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
     userData->GetLayerStack()->FillCurrentLayerWithColor( color );
     texture->AddAssetUserData( userData );
     texture->PostEditChange();

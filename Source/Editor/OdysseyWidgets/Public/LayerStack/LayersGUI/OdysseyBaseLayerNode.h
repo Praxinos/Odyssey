@@ -57,7 +57,7 @@ public:
      * @param iParentNode    The parent of this node or nullptr if this is a root node
      * @param iParentTree    The tree this node is in
      */
-    IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr );
+    IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, TSharedPtr<IOdysseyLayer> iLayerDataPtr );
 
     /** Virtual destructor. */
     virtual ~IOdysseyBaseLayerNode(){}
@@ -153,7 +153,7 @@ public: // PUBLIC API
     FOdysseyLayerStackTree& GetParentTree() const;
 
     /** Gets the pointer to the data contained in this node */
-    IOdysseyLayer* GetLayerDataPtr() const;
+    TSharedPtr<IOdysseyLayer> GetLayerDataPtr() const;
 
 
 private: // HANDLES
@@ -187,5 +187,5 @@ protected:
     FRequestRenameEvent mRenameRequestedEvent;
 
     /** The interface ptr to the data represented by this node, only used as verification purposes */
-    IOdysseyLayer* mLayerDataPtr;
+    TSharedPtr<IOdysseyLayer> mLayerDataPtr;
 };

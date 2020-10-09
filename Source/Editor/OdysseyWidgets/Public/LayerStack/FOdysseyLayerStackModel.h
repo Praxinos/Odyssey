@@ -60,13 +60,13 @@ public: //DELEGATES
 public:
     //HANDLES
 
-    void OnDeleteLayer( IOdysseyLayer* iLayerToDelete );
+    void OnDeleteLayer(TSharedPtr<IOdysseyLayer> iLayerToDelete );
 
-    void OnMergeLayerDown( IOdysseyLayer* iLayerToMergeDown );
+    void OnMergeLayerDown(TSharedPtr<IOdysseyLayer> iLayerToMergeDown );
     
-    void OnFlattenLayer( IOdysseyLayer* iLayerToMergeDown );
+    void OnFlattenLayer(TSharedPtr<IOdysseyLayer> iLayerToMergeDown );
     
-    void OnDuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
+    void OnDuplicateLayer(TSharedPtr<IOdysseyLayer> iLayerToDuplicate );
 
 private:
     /** Command list for general LayerStack commands (Right-click commands) */

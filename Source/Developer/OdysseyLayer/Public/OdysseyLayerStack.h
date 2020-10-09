@@ -9,8 +9,8 @@
 #include "IOdysseyLayer.h"
 #include "OdysseyImageLayer.h"
 #include "OdysseyFolderLayer.h"
+#include "OdysseyRootLayer.h"
 #include "IOdysseySerializable.h"
-#include "OdysseyTree.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>
 
@@ -19,82 +19,129 @@ class FOdysseyDrawingUndo;
 class ODYSSEYLAYER_API FOdysseyLayerStack
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentLayerChanged, FOdysseyNTree< IOdysseyLayer* >*);
-	DECLARE_MULTICAST_DELEGATE(FOnLayerStackDirty);
+    // Current Layer Changed Event
+    // Params :
+    // - Previous current layer
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackCurrentLayerChanged, TSharedPtr<IOdysseyLayer>);
+
+    // Image Result Changed Event
+    // Params: None
+	DECLARE_MULTICAST_DELEGATE(FOnLayerStackImageResultChanged);
+
+    // Sent when children are changed (added, removed, moved)
+    // Params: None
+	DECLARE_MULTICAST_DELEGATE(FOnLayerStackStructureChanged);
 
 public:
     // Construction / Destruction
     ~FOdysseyLayerStack();
     FOdysseyLayerStack();
-    FOdysseyLayerStack( int iWidth,int iHeight, ::ul3::tFormat iFormat);
+    FOdysseyLayerStack(int iWidth,int iHeight, ::ul3::tFormat iFormat);
+
+    void Init(int iWidth,int iHeight, ::ul3::tFormat iFormat);
 
 public:
-    // Public API
-    void                                Init( int iWidth,int iHeight, ::ul3::tFormat iFormat);
-    void                                InitFromData( FOdysseyBlock* iData );
-    FOdysseyBlock*                      GetResultBlock();
-    void                                ComputeResultBlock();
-    void                                ComputeResultBlock( const ::ul3::FRect& iRect );
-	void                                ComputeResultBlockWithTempBuffer(const ::ul3::FRect&    iRect,
-                                                                         FOdysseyBlock*         iTempBuffer, 
-                                                                         float                  iOpacity    = 1.f, 
-                                                                         ::ul3::eBlendingMode   iMode       = ::ul3::BM_NORMAL,
-                                                                         ::ul3::eAlphaMode      iAlphaMode  = ::ul3::AM_NORMAL);
+    // Public API / Result Computation
 
-    void                                BlendTempBufferOnCurrentBlock( const ::ul3::FRect&  iRect
-                                                                     , FOdysseyBlock*       iTempBuffer
-                                                                     , float                iOpacity    = 1.f
-                                                                     , ::ul3::eBlendingMode iMode       = ::ul3::BM_NORMAL
-                                                                     , ::ul3::eAlphaMode    iAlphaMode  = ::ul3::AM_NORMAL );
-    int                                 Width() const;
-    int                                 Height() const;
-    FVector2D                           Size() const;
+    // Computes the result of all layers into one given block
+    // The given block is cleared at start
+    void ComputeResultInBlock( ::ul3::FBlock* ioBlock );
+
+    // Computes the result of one part defined by iRect of all layers into one given block
+    // The given block is cleared at start
+    void ComputeResultInBlock( ::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect );
+
+    // Computes the result of one part defined by iRect of all layers into one given block
+    // Adds a Temporary buffer above the current layer
+	void ComputeResultInBlockWithBlockAsCurrentLayer(::ul3::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ul3::FRect& iRect);
 
 public:
-    // Public Array Tampon Methods
-    FOdysseyImageLayer*                 AddImageLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, int iAtIndex = -1 );
-    FOdysseyImageLayer*                 AddImageLayer( int iAtIndex = -1 );
-    FOdysseyImageLayer*                 AddImageLayerFromData( FOdysseyBlock* iData, FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName(), int iAtIndex = -1 );
-    FOdysseyImageLayer*                 AddImageLayerFromData( FOdysseyBlock* iData, FName iName = FName(), int iAtIndex = -1 );
-    FOdysseyFolderLayer*                AddFolderLayer( FOdysseyNTree< IOdysseyLayer* >* iPosition, FName iName = FName() ,int iAtIndex = -1 );
-    FOdysseyFolderLayer*                AddFolderLayer( FName iName = FName(), int iAtIndex = -1 );
-    FOdysseyNTree< IOdysseyLayer* >*    GetLayers();
-    FOdysseyNTree< IOdysseyLayer* >*    GetCurrentLayer() const;
+    // Public API / Getters
+
+    // Return layer stack width
+    int         Width() const;
+
+    // Return layer stack height
+    int         Height() const;
+
+	// Return layer stack height
+	int         Format() const;
+
+    // Return layer stack width and height
+    FVector2D   Size() const;
+
+public:
+    // Public API / Layers Management
+    // Adds a Layer to the stack at iIndex in the specified Parent node
+    void                                AddLayer( TSharedPtr<IOdysseyLayer> iLayer, TSharedPtr<IOdysseyLayer> iParent, int iAtIndex = -1 );
+
+    // Adds a Layer to the stack at iIndex in the root node
+    void                                AddLayer( TSharedPtr<IOdysseyLayer> iLayer, int iAtIndex = -1 );
+
+    // Get the Current Layer
+    TSharedPtr<FOdysseyRootLayer>       GetLayerRoot() const;
+
+    // Get the Current Layer
+    TSharedPtr<IOdysseyLayer>           GetCurrentLayer() const;
+
+    // Get the Current Layer Index
     int                                 GetCurrentLayerAsIndex() const;
-    FOdysseyNTree< IOdysseyLayer* >*    GetCurrentLayerFromIndex( int iIndex ) const;
-    void                                SetCurrentLayer( IOdysseyLayer* iLayer );
-    void                                SetCurrentLayer( FOdysseyNTree< IOdysseyLayer* >* iLayer );
-    void                                DeleteLayer( IOdysseyLayer* iLayerToDelete );
-    void                                MergeDownLayer( IOdysseyLayer* iLayerToMergeDown );
-    void                                FlattenLayer( IOdysseyLayer* iLayerToFlatten );
-    void                                DuplicateLayer( IOdysseyLayer* iLayerToDuplicate );
+
+    // Get the layer at Index
+    TSharedPtr<IOdysseyLayer>           GetLayerFromIndex( int iIndex ) const;
+
+    // Sets the Current Layer
+    void                                SetCurrentLayer( TSharedPtr<IOdysseyLayer> iLayer );
+
+    // Deletes a Layer
+    void                                DeleteLayer( TSharedPtr<IOdysseyLayer> iLayerToDelete );
+
+    // Merges the given image layer with the layer under it
+    void                                MergeDownLayer( TSharedPtr<IOdysseyLayer> iLayerToMergeDown );
+
+    // Flatten the foler layer into a single image layer
+    void                                FlattenLayer( TSharedPtr<IOdysseyLayer> iLayerToFlatten );
+
+    //Duplicates the given layer
+    void                                DuplicateLayer( TSharedPtr<IOdysseyLayer> iLayerToDuplicate );
+
+    // Clears the content of the current Layer
     void                                ClearCurrentLayer();
+
+    // Fills the content of the current layer with iColor
     void                                FillCurrentLayerWithColor( const ::ul3::IPixel& iColor );
-    TArray< TSharedPtr< FText > >       GetBlendingModesAsText();
-    ::ul3::tFormat                      GetFormat();
+
+public:
+    //Public API / Callbacks
+
+    FOnLayerStackCurrentLayerChanged&	OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
+    FOnLayerStackImageResultChanged&    OnImageResultChanged() { return mOnImageResultChanged; }
+    FOnLayerStackStructureChanged&      OnStructureChanged() { return mOnStructureChanged; }
+
+public:
+    //Public API / Saving And Loading
 
     // Overloads for save in archive
     friend ODYSSEYLAYER_API FArchive& operator<<( FArchive &Ar,FOdysseyLayerStack* ioSaveLayerStack );
 
-	FOnCurrentLayerChanged&	OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
-    FOnLayerStackDirty& OnLayerStackDirty() { return mOnLayerStackDirty; }
-
 private:
     // Private API
-    FName                               GetNextLayerName();
-    void                                InitResultAndTempBlock(int iWidth, int iHeight, ::ul3::tFormat iFormat);
-    FOdysseyBlock*                      ComputeBlockOfLayers( FOdysseyNTree< IOdysseyLayer* >* iLayers );
+    void                                OnLayerRootImageResultChanged();
+    void                                OnLayerAdded(TSharedPtr<IOdysseyLayer> iNode);
+    void                                OnLayerRemoved(TSharedPtr<IOdysseyLayer> iNode, TSharedPtr<IOdysseyLayer> iOldParent, int iOldIndex);
 
 private:
     // Private Data Members
-    FOdysseyBlock*                      mResultBlock;
-    FOdysseyBlock*                      mTempBlock;
-    FOdysseyNTree< IOdysseyLayer* >*    mLayers;
-    FOdysseyNTree< IOdysseyLayer* >*    mCurrentLayer;
+    int                                 mWidth;
+    int                                 mHeight;
+    ::ul3::tFormat                      mFormat;
+    TSharedPtr<FOdysseyRootLayer>       mLayerRoot;
+    TSharedPtr<IOdysseyLayer>           mCurrentLayer;
     bool                                mIsInitialized;
 
-	FOnCurrentLayerChanged				mOnCurrentLayerChanged;
-    FOnLayerStackDirty                  mOnLayerStackDirty;
+	FOnLayerStackCurrentLayerChanged	mOnCurrentLayerChanged;
+    FOnLayerStackImageResultChanged     mOnImageResultChanged;
+    FOnLayerStackStructureChanged       mOnStructureChanged;
 
 public:
     FOdysseyDrawingUndo*                mDrawingUndo;
@@ -134,5 +181,7 @@ private:
     ::ul3::FBlock* mTileData;
     FString mUndoPath;
     FString mRedoPath;
-    TArray< uint8 > mData; // Format: [ X, Y, W, H, DATA ] [ ... ] for each tile
+    //TArray< uint8 > mData;
+
+	FOdysseyBlock* mData;
 };

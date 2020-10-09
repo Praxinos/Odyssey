@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
-#include "OdysseyLayerStack.h"
 
 #include "OdysseyFlipbook.generated.h"
 

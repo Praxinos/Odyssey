@@ -4,22 +4,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyTreeShared.h"
 
 class FOdysseyBlock;
-class FOdysseyLayerStack;
 
 /**
  * Odyssey Layer
  * An abstract class for a layer, which can be of various types (drawing, sound, folder...)
  */
-class ODYSSEYLAYER_API IOdysseyLayer
+class ODYSSEYLAYER_API IOdysseyLayer : public FOdysseyNTreeShared<IOdysseyLayer>
 {
+public:
+    // Layer Name Changed Event
+    // FName is for the previous value
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerNameChanged, FName);
+
+    // Layer Locked Changed Event
+    // Bool is for the previous value
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerLockChanged, bool);
+
+    // Layer Is Visible Changed Event
+    // Bool is for the previous value
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerVisibilityChanged, bool);
+
 public:
     enum class eType : char
     {
         kInvalid,
         kImage,
         kFolder,
+        kRoot,
     };
 
 public:
@@ -28,27 +42,63 @@ public:
     IOdysseyLayer( const eType type );
     IOdysseyLayer( const FName& iName, const eType type );
 
+    virtual IOdysseyLayer* Clone() const = 0;
+
+protected:
+    IOdysseyLayer( const IOdysseyLayer& iLayer );
+
 public:
+    // Public Getters / Setters
     virtual eType GetType() const;
 
+    //Name
     virtual FName GetName() const;
     virtual FText GetNameAsText() const;
     virtual void  SetName( FName iName );
 
-    virtual bool  IsLocked() const;
+    //IsLocked
+    virtual bool  IsLocked(bool iCheckParent = false) const;
     virtual void  SetIsLocked( bool iIsLocked );
 
-    virtual bool  IsVisible() const;
+    //IsVisible
+    virtual bool  IsVisible(bool iCheckParent = false) const;
     virtual void  SetIsVisible( bool iIsVisible );
 
+    virtual bool  ImplementsCapability(FGuid iGuid) const = 0;
+
+    template< typename T > T* GetCapability()
+    {
+        void* value = GetCapabilityPtrFromGuid(T::GetGuid());
+        return reinterpret_cast<T*>(value);
+    }
+    virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) = 0;
+
+protected:
     // Overloads for save in archive
-    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
+    virtual void Serialize(FArchive &Ar) = 0;
+
+private:
+    void SerializeWithChildren(FArchive &Ar);
+
+    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer*& ioLayer );
+
+public:
+    FOdysseyLayerNameChanged& NameChangedDelegate();
+    FOdysseyLayerLockChanged& LockChangedDelegate();
+    FOdysseyLayerVisibilityChanged& VisibilityChangedDelegate();
+
+public:
+    FName GetNextLayerName();
 
 protected:
     FName         mName;
     bool          mIsLocked;
     bool          mIsVisible;
     eType         mType;
+
+	FOdysseyLayerNameChanged mNameChangedDelegate;
+	FOdysseyLayerLockChanged mLockChangedDelegate;
+	FOdysseyLayerVisibilityChanged mVisibilityChangedDelegate;
 };
 
-ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer** ioSaveImageLayer );
+ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer*& ioSaveImageLayer );

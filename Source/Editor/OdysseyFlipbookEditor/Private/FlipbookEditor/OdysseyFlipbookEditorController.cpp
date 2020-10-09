@@ -16,6 +16,7 @@
 #include "OdysseyFlipbookWrapper.h"
 
 #include "SOdysseySurfaceViewport.h"
+#include "TextureEditor/OdysseyTextureEditorState.h"
 
 #include "PaperFlipbook.h"
 #include "PaperSprite.h"
@@ -34,6 +35,19 @@ FOdysseyFlipbookEditorController::~FOdysseyFlipbookEditorController()
 	if (mData->LayerStack())
 	{
 		mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+        mData->LayerStack()->OnStructureChanged().RemoveAll(this);
+        mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
+
+        TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
+        if ( layer && layer->GetType() != IOdysseyLayer::eType::kImage)
+        {
+            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layer);
+            if (imageLayer)
+            {
+                //Set AlphaLock Delegate
+                imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
+            }
+        }
 	}
 }
 
@@ -63,6 +77,19 @@ FOdysseyFlipbookEditorController::Init(const TSharedRef<FUICommandList>& iToolki
     BindCommands(iToolkitCommands);
 
 	InitLayerStack();
+
+    // Set Image Layer as the current Layer
+    TArray<TSharedPtr<IOdysseyLayer>> layers;
+    mData->LayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
+
+    for (int i = 0; i < layers.Num(); i++)
+    {
+        if (layers[i]->GetType() != IOdysseyLayer::eType::kImage) 
+            continue;
+        
+        mData->LayerStack()->SetCurrentLayer(layers[i]);
+        break;
+    }
 }
 
 void
@@ -75,9 +102,14 @@ FOdysseyFlipbookEditorController::InitLayerStack()
 		return;
 	}
 
-	OnLayerStackCurrentLayerChanged(mData->LayerStack()->GetCurrentLayer());
 	if (!(mData->LayerStack()->OnCurrentLayerChanged().IsBound()))
 		mData->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged);
+
+    if( !(mData->LayerStack()->OnStructureChanged().IsBound()) )
+	    mData->LayerStack()->OnStructureChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackStructureChanged);
+
+    if( !(mData->LayerStack()->OnImageResultChanged().IsBound()) )
+	    mData->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -105,8 +137,12 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3:
 	FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(iChangedTiles);
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
-		mData->LayerStack()->ComputeResultBlockWithTempBuffer(iChangedTiles[i], mData->PaintEngine()->TempBuffer(), mData->PaintEngine()->GetOpacity(), mData->PaintEngine()->GetBlendingMode(), mData->PaintEngine()->GetAlphaMode());
+		mData->LayerStack()->ComputeResultInBlockWithBlockAsCurrentLayer(mData->DisplaySurface()->Block()->GetBlock(), mData->PaintEngine()->PreviewBlock(), iChangedTiles[i]);
 	}
+    for (int i = 0; i < iChangedTiles.Num(); i++)
+	{
+        mData->DisplaySurface()->Block()->GetBlock()->Invalidate(iChangedTiles[i]);
+    }
 }
 
 void
@@ -118,7 +154,7 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3:
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
 		mData->LayerStack()->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
-		mData->LayerStack()->BlendTempBufferOnCurrentBlock(iChangedTiles[i], mData->PaintEngine()->TempBuffer(), mData->PaintEngine()->GetOpacity(), mData->PaintEngine()->GetBlendingMode(), mData->PaintEngine()->GetAlphaMode());
+		//mData->LayerStack()->BlendOnCurrentLayer(mData->PaintEngine()->TempBuffer(), iChangedTiles[i], mData->PaintEngine()->GetOpacity(), mData->PaintEngine()->GetBlendingMode(), mData->PaintEngine()->GetAlphaMode());
 	}
 	mData->LayerStack()->mDrawingUndo->EndRecord();
 }
@@ -128,7 +164,8 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRe
 {
     check(mData->LayerStack());
     FOdysseyPainterEditorController::OnPaintEngineStrokeEnd(iChangedTiles);
-	mData->LayerStack()->ComputeResultBlock();
+	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
 	mData->Texture()->MarkPackageDirty(); 
 }
 
@@ -137,7 +174,8 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeAbort()
 {
     check(mData->LayerStack());
     FOdysseyPainterEditorController::OnPaintEngineStrokeAbort();
-	mData->LayerStack()->ComputeResultBlock();
+	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
 	//TODO: Check how to abort undo recording
 }
 
@@ -190,36 +228,73 @@ FOdysseyFlipbookEditorController::OnKeyframeRemoved()
 }
 
 void
-FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer)
+FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
 {
+    //Remove all delegates for AlphaLock and set alpha lock to a default value
+    if (iOldValue && iOldValue->GetType() == IOdysseyLayer::eType::kImage) {
+        TSharedPtr<FOdysseyImageLayer> oldImageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(iOldValue);
+        if (oldImageLayer)
+        {
+            oldImageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
+            mData->PaintEngine()->SetAlphaModeModifier(mGUI->GetTopTab()->GetAlphaMode());
+        }
+	}
+
+    mData->PaintEngine()->Block(NULL);
+
 	//Add Image Layer Callback
     if( mData->LayerStack()->GetCurrentLayer() == NULL )
-    {
-		mData->PaintEngine()->Block(NULL);
         return;
-    }
 
-	IOdysseyLayer* layer = mData->LayerStack()->GetCurrentLayer()->GetNodeContent();
-
+	TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
 	if (!layer)
-	{
-		mData->PaintEngine()->Block(NULL);
 		return;
-	}
 
-	if (layer->GetType() != IOdysseyLayer::eType::kImage) {
-		mData->PaintEngine()->Block(NULL);
+	if (layer->GetType() != IOdysseyLayer::eType::kImage)
 		return;
-	}
 
-	FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>(layer);
+	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layer);
 	if (!imageLayer)
-	{
-		mData->PaintEngine()->Block(NULL);
 		return;
-	}
 
 	mData->PaintEngine()->Block(imageLayer->GetBlock());
+    mData->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+    
+    //Set AlphaLock Delegate
+    imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged);
+}
+
+void
+FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
+{
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mData->LayerStack()->GetCurrentLayer());
+    mData->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+}
+
+void
+FOdysseyFlipbookEditorController::OnLayerStackStructureChanged()
+{
+    if (mData->Texture())
+    {
+        mData->Texture()->MarkPackageDirty();
+    }
+
+    if( mData->BrushInstance() )
+    {
+        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( mData->LayerStack() );
+        mData->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+    }
+}
+
+void
+FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged()
+{
+    if (mData->Texture())
+    {
+        mData->Texture()->MarkPackageDirty();
+        mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+        mData->DisplaySurface()->Invalidate();
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -243,7 +318,8 @@ FOdysseyFlipbookEditorController::OnClear()
     FOdysseyPainterEditorController::OnClear();
 
 	mData->LayerStack()->ClearCurrentLayer();
-    InvalidateTextureFromData(mData->LayerStack()->GetResultBlock(), mData->Texture());
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
     return FReply::Handled();
 }
 
@@ -265,6 +341,9 @@ FOdysseyFlipbookEditorController::OnFill()
     FOdysseyPainterEditorController::OnFill();
 
 	mData->LayerStack()->FillCurrentLayerWithColor(mData->PaintEngine()->GetColor() );
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
+
     return FReply::Handled();
 }
 
@@ -290,6 +369,8 @@ FOdysseyFlipbookEditorController::OnUndoIliad()
         return FReply::Handled();
     }
 	mData->LayerStack()->mDrawingUndo->LoadData();
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
     return FReply::Handled();
 }
 
@@ -303,6 +384,8 @@ FOdysseyFlipbookEditorController::OnRedoIliad()
         return FReply::Handled();
     }
 	mData->LayerStack()->mDrawingUndo->Redo();
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
     return FReply::Handled();
 }
 
@@ -311,8 +394,11 @@ FOdysseyFlipbookEditorController::OnCreateNewLayer()
 {
     FOdysseyPainterEditorController::OnCreateNewLayer();
 
-    mData->LayerStack()->AddImageLayer(0);
-    mData->LayerStack()->ComputeResultBlock();
+	FName layerName = mData->LayerStack()->GetLayerRoot()->GetNextLayerName();
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, nullptr));
+    mData->LayerStack()->AddLayer(imageLayer);
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
     mGUI->GetLayerStackTab()->RefreshView();}
 
 void
@@ -322,8 +408,9 @@ FOdysseyFlipbookEditorController::OnDuplicateCurrentLayer()
 
     if( mData->LayerStack()->GetCurrentLayer() )
     {
-        mData->LayerStack()->DuplicateLayer( mData->LayerStack()->GetCurrentLayer()->GetNodeContent() );
-        mData->LayerStack()->ComputeResultBlock();
+        mData->LayerStack()->DuplicateLayer( mData->LayerStack()->GetCurrentLayer() );
+        mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+        mData->DisplaySurface()->Invalidate();
         mGUI->GetLayerStackTab()->RefreshView();
     }
 }
@@ -335,8 +422,9 @@ FOdysseyFlipbookEditorController::OnDeleteCurrentLayer()
 
     if( mData->LayerStack()->GetCurrentLayer() )
     {
-        mData->LayerStack()->DeleteLayer( mData->LayerStack()->GetCurrentLayer()->GetNodeContent() );
-        mData->LayerStack()->ComputeResultBlock();
+        mData->LayerStack()->DeleteLayer( mData->LayerStack()->GetCurrentLayer() );
+        mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+        mData->DisplaySurface()->Invalidate();
         mGUI->GetLayerStackTab()->RefreshView();
     }
 }
@@ -356,15 +444,15 @@ FOdysseyFlipbookEditorController::OnExportLayersAsTextures()
 
     if( saveObjectPath != "" )
     {
-        TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-		mData->LayerStack()->GetLayers()->DepthFirstSearchTree( &layers, false );
+		TArray< TSharedPtr<IOdysseyLayer> > layers;
+		mData->LayerStack()->GetLayerRoot()->DepthFirstSearchTree(&layers, false);
 
         for( int i = 0; i < layers.Num(); i++ )
         {
             if( !( layers[i]->GetType() == IOdysseyLayer::eType::kImage ) )
                 continue;
 
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*> ( layers[i] );
+            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer> ( layers[i] );
 
             FString assetPath = FPaths::GetPath( saveObjectPath ) + "/";
             FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
@@ -404,13 +492,16 @@ FOdysseyFlipbookEditorController::OnImportTexturesAsLayers()
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, mData->LayerStack()->GetFormat() );
-		mData->LayerStack()->AddImageLayerFromData( textureBlock, mData->LayerStack()->GetLayers(), FName( *( openedTexture->GetName() ) ) );
-        delete textureBlock;
+        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, ULISFormatForUE4PixelFormat( openedTexture->GetPixelFormat() ) );
+
+		FName layerName = mData->LayerStack()->GetLayerRoot()->GetNextLayerName();
+		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(FName(*(openedTexture->GetName())), textureBlock));
+		mData->LayerStack()->AddLayer(imageLayer);
     }
 
     mGUI->GetLayerStackTab()->RefreshView();
-	mData->LayerStack()->ComputeResultBlock();
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
 }
 
 
@@ -444,7 +535,18 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 		//disconnect the current layerstack
 		if (mData->LayerStack())
 		{
+			TSharedPtr<IOdysseyLayer> currentLayer = mData->LayerStack()->GetCurrentLayer();
+			if (currentLayer->GetType() == IOdysseyLayer::eType::kImage)
+			{
+				TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(currentLayer);
+				if (imageLayer)
+				{
+					imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
+				}
+			}
 			mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+            mData->LayerStack()->OnStructureChanged().RemoveAll(this);
+            mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
 		}
 
 		//Set new keyframe
@@ -452,6 +554,8 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 
 		//Init the new layerstack
 		InitLayerStack();
+
+        OnLayerStackCurrentLayerChanged(nullptr);
 
 		//Refresh Layer stack
 		mGUI->GetLayerStackTab()->RefreshView();

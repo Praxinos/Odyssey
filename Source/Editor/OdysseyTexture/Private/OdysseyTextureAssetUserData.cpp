@@ -8,6 +8,7 @@
 UOdysseyTextureAssetUserData::UOdysseyTextureAssetUserData(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
+    //mLayerStack = new FOdysseyLayerStack(texture->GetSizeX(), texture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
     mLayerStack = new FOdysseyLayerStack();
 }
 

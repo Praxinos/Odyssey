@@ -3,6 +3,9 @@
 
 #include "OdysseyFolderLayer.h"
 
+#include "ULISLoaderModule.h"
+#include <ULIS3>
+
 #define LOCTEXT_NAMESPACE "OdysseyFolderLayer"
 
 //---
@@ -11,63 +14,27 @@ FOdysseyFolderLayer::~FOdysseyFolderLayer()
 {
 }
 
+FOdysseyFolderLayer::FOdysseyFolderLayer( const FOdysseyFolderLayer& iLayer)
+    : IOdysseyLayer(iLayer)
+    , IOdysseyLayerImageBlendingCapability()
+    , mIsOpen( iLayer.mIsOpen )
+{
+}
+
 FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kFolder )
-    , mBlendingMode( ::ul3::BM_NORMAL )
-    , mOpacity( 1.0f )
+    , IOdysseyLayerImageBlendingCapability()
     , mIsOpen( true )
 {
 }
 
+FOdysseyFolderLayer*
+FOdysseyFolderLayer::Clone() const
+{
+    return new FOdysseyFolderLayer(*this);
+}
+
 //---
-
-::ul3::eBlendingMode
-FOdysseyFolderLayer::GetBlendingMode()
-{
-    return mBlendingMode;
-}
-
-void
-FOdysseyFolderLayer::SetBlendingMode( ::ul3::eBlendingMode iBlendingMode )
-{
-    mBlendingMode = iBlendingMode;
-}
-
-void
-FOdysseyFolderLayer::SetBlendingMode( FText iBlendingMode )
-{
-    const int max = static_cast< int >( ::ul3::NUM_BLENDING_MODES );
-    for( uint8 i = 0; i < max; ++i )
-    {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) );
-        if( iBlendingMode.EqualTo( entry ) )
-        {
-            SetBlendingMode( static_cast<::ul3::eBlendingMode>( i ) );
-            return;
-        }
-    }
-}
-
-FText
-FOdysseyFolderLayer::GetBlendingModeAsText() const
-{
-    return FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
-}
-
-float
-FOdysseyFolderLayer::GetOpacity() const
-{
-    return mOpacity;
-}
-
-void
-FOdysseyFolderLayer::SetOpacity( float iOpacity )
-{
-    if( iOpacity < 0.f || iOpacity > 1.f )
-        return;
-
-    mOpacity = iOpacity;
-}
 
 bool
 FOdysseyFolderLayer::IsOpen() const
@@ -78,25 +45,178 @@ FOdysseyFolderLayer::IsOpen() const
 void
 FOdysseyFolderLayer::SetIsOpen( bool iIsOpen )
 {
+    float oldValue = mIsOpen;
     mIsOpen = iIsOpen;
+    mIsOpenChangedDelegate.Broadcast(oldValue);
 }
 
-
-
-FArchive& 
-operator<<(FArchive &Ar, FOdysseyFolderLayer* ioSaveFolderLayer )
+bool
+FOdysseyFolderLayer::ImplementsCapability(FGuid iGuid) const
 {
-    if(!ioSaveFolderLayer)
-        return Ar;
+    return IOdysseyLayerImageBlendingCapability::GetGuids().Contains(iGuid);
+}
 
-    Ar << ioSaveFolderLayer->mName;
-    Ar << ioSaveFolderLayer->mIsLocked;
-    Ar << ioSaveFolderLayer->mIsVisible;
-    int bm = static_cast< int >( ioSaveFolderLayer->mBlendingMode );
-    Ar << bm;
-    Ar << ioSaveFolderLayer->mIsOpen;
-    Ar << ioSaveFolderLayer->mOpacity;
-    return Ar;
+void*
+FOdysseyFolderLayer::GetCapabilityPtrFromGuid(FGuid iGuid)
+{
+    if (IOdysseyLayerImageBlendingCapability::GetGuids().Contains(iGuid))
+        return IOdysseyLayerImageBlendingCapability::GetCapabilityPtrFromGuid(this, iGuid);
+        
+    return nullptr;
+}
+
+void
+FOdysseyFolderLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
+{
+    IOdysseyLayer::AddNode(iLayer, iIndex);
+    bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
+    if (isBlendable)
+    {
+        IOdysseyLayerImageBlendingCapability* layerBlendable = iLayer->GetCapability<IOdysseyLayerImageBlendingCapability>();
+		layerBlendable->ImageResultChangedDelegate().AddRaw(this, &FOdysseyFolderLayer::OnChildImageResultChanged, iLayer);
+        if (iLayer->IsVisible())
+        {
+            mImageResultChangedDelegate.Broadcast();
+        }
+    }
+}
+
+void
+FOdysseyFolderLayer::DeleteNode(int iIndex)
+{
+    TSharedPtr<IOdysseyLayer> layer = GetNode(iIndex);
+    bool isBlendable = layer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
+    if (isBlendable)
+    {
+        IOdysseyLayerImageBlendingCapability* layerBlendable = layer->GetCapability<IOdysseyLayerImageBlendingCapability>();
+		layerBlendable->ImageResultChangedDelegate().RemoveAll(this);
+    }
+
+    IOdysseyLayer::DeleteNode(iIndex);
+
+    if (isBlendable && layer->IsVisible())
+    {
+        mImageResultChangedDelegate.Broadcast();
+    }
+}
+
+void
+FOdysseyFolderLayer::OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer)
+{
+    bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
+    if (isBlendable)
+    {
+        mImageResultChangedDelegate.Broadcast();
+    }
+}
+
+void
+FOdysseyFolderLayer::Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
+{
+    if (!IsVisible())
+        return;
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+
+    ::ul3::FBlock* folderBlock = new ::ul3::FBlock(iRect.w, iRect.h, ioBlock->Format());
+    ::ul3::FVec2F pos( 0, 0 );
+    RenderImage(folderBlock, iRect, pos);
+
+    ::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iRect.w, iRect.h);
+    ::ul3::Blend( hULIS.ThreadPool()
+        , ULIS3_BLOCKING
+        , perfIntent
+        , hULIS.HostDeviceInfo()
+        , ULIS3_NOCB
+        , folderBlock
+        , ioBlock
+        , rect
+        , iPos
+        , ULIS3_NOAA
+        , GetBlendingMode()
+        , ::ul3::AM_NORMAL
+        , GetOpacity() );
+}
+
+void
+FOdysseyFolderLayer::RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
+{
+    if (!IsVisible())
+        return;
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::FRect rect = ::ul3::FRect::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h);
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, ioBlock, rect );
+
+    TArray<TSharedPtr<IOdysseyLayer>> children = GetNodes();
+    for (int i = children.Num() - 1; i >= 0; i--)
+    {
+        TSharedPtr<IOdysseyLayer> child = children[i];
+        if (!child->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid()))
+            continue;
+
+        IOdysseyLayerImageBlendingCapability* layerBlendable = child->GetCapability<IOdysseyLayerImageBlendingCapability>();
+        if (!layerBlendable)
+            continue;
+
+        layerBlendable->Blend(ioBlock, iRect, iPos);
+    }
+}
+
+// Custom serialization version for FOdysseyImageLayer
+struct FOdysseyFolderLayerObjectVersion
+{
+	enum Type
+	{
+		// Before any version changes were made
+		SaveBlendable,
+		
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	const static FGuid GUID;
+
+private:
+	FOdysseyFolderLayerObjectVersion() {}
+};
+
+const FGuid FOdysseyFolderLayerObjectVersion::GUID(0x86E82FF2, 0x93913CF7, 0x85b41FC2, 0x4CCC10D9);
+FCustomVersionRegistration FOdysseyFolderLayerObjectVersionRegistration(FOdysseyFolderLayerObjectVersion::GUID, FOdysseyFolderLayerObjectVersion::LatestVersion, TEXT("FOdysseyFolderLayerObjectVersion::SavePixelFormat"));
+
+void
+FOdysseyFolderLayer::Serialize(FArchive &Ar)
+{
+    IOdysseyLayer::Serialize(Ar);
+
+	//Set the Object Version
+	Ar.UsingCustomVersion(FOdysseyFolderLayerObjectVersion::GUID);
+
+    //Manage old saving order
+    if (Ar.CustomVer(FOdysseyFolderLayerObjectVersion::GUID) < FOdysseyFolderLayerObjectVersion::SaveBlendable)
+    {
+        int bm = static_cast< int >( mBlendingMode );
+        Ar << bm;
+        Ar << mIsOpen;
+        Ar << mOpacity;
+        if (Ar.IsLoading())
+        {
+            mBlendingMode = (::ul3::eBlendingMode)bm;
+        }
+        return;
+    }
+
+    SerializeImageBlendingCapability(Ar);
+    Ar << mIsOpen;
+}
+
+FOdysseyFolderLayer::FOdysseyLayerIsOpenChanged&
+FOdysseyFolderLayer::IsOpenChangedDelegate()
+{
+    return mIsOpenChangedDelegate;
 }
 
 #undef LOCTEXT_NAMESPACE

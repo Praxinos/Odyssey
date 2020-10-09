@@ -33,16 +33,16 @@ public:
 
 
 private:
-    TSharedRef<SWidget> ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
+    TSharedRef<SWidget> ConstructPropertyViewForFolderLayer( TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
 
-    int GetLayerOpacityValue( FOdysseyFolderLayer* iFolderLayer ) const;
-    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
-    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
+    int GetLayerOpacityValue( TSharedPtr<FOdysseyFolderLayer> iFolderLayer ) const;
+    void HandleLayerOpacityValueChanged( int iOpacity, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
+    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode );
 
 private:
     TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> iItem );
-    TSharedRef<SWidget> CreateBlendingModeTextWidget( FOdysseyFolderLayer* iFolderLayer );
-    void HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode);
+    TSharedRef<SWidget> CreateBlendingModeTextWidget( TSharedPtr<FOdysseyFolderLayer> iFolderLayer );
+    void HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode);
 
 
 private:

@@ -16,7 +16,7 @@
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-IOdysseyBaseLayerNode::IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, IOdysseyLayer* iLayerDataPtr )
+IOdysseyBaseLayerNode::IOdysseyBaseLayerNode( FName iNodeName, FOdysseyLayerStackTree& iParentTree, TSharedPtr<IOdysseyLayer> iLayerDataPtr )
     : mVirtualTop( 0.f )
     , mVirtualBottom( 0.f )
     , mParentTree( iParentTree )
@@ -127,8 +127,10 @@ float IOdysseyBaseLayerNode::GetVirtualBottom() const
 void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<IOdysseyBaseLayerNode> iCurrentNode )
 {
     //TODO: make the same thing with callbacks so we don't have to manipulate the layer stack manually here
-    TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
+    
+
+	TArray< TSharedPtr<IOdysseyLayer> > layersData;
+	mParentTree.GetLayerStack().GetLayerStackData()->GetLayerRoot()->DepthFirstSearchTree(&layersData, false);
         
     int indexBase = -1;
     for( int i = 0; i < mParentTree.GetRootNodes().Num(); i++)
@@ -142,24 +144,24 @@ void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<
     if( indexBase == indexTarget )
         return;
         
-    FOdysseyNTree<IOdysseyLayer*>* layerBase = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( layersData[indexBase] );
-    FOdysseyNTree<IOdysseyLayer*>* layerTarget = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( layersData[indexTarget] );
+    TSharedPtr<IOdysseyLayer> layerBase = layersData[indexBase];
+    TSharedPtr<IOdysseyLayer> layerTarget = layersData[indexTarget];
     
     //We can't move a folder inside itself, this would make the tree invalid, so, we prevent it.
-    if( layersData[indexBase]->GetType() == IOdysseyLayer::eType::kFolder && layerTarget->HasForParent(layerBase) )
+    if( layerBase->GetType() == IOdysseyLayer::eType::kFolder && layerTarget->HasForParent(layerBase) )
         return;
     
     if( iItemDropZone == EItemDropZone::BelowItem )
     {
-        layerBase->MoveNodeTo( layerTarget, ePosition::kAfter );
+		layerBase->MoveNodeTo(layerTarget, ePosition::kAfter);
     }
     else if( iItemDropZone == EItemDropZone::AboveItem )
     {
-        layerBase->MoveNodeTo( layerTarget, ePosition::kBefore );
+		layerBase->MoveNodeTo(layerTarget, ePosition::kBefore);
     }
     else if( iItemDropZone == EItemDropZone::OntoItem && layersData[indexTarget]->GetType() == IOdysseyLayer::eType::kFolder )
     {
-        layerBase->MoveNodeTo( layerTarget, ePosition::kIn );
+		layerBase->MoveNodeTo(layerTarget, ePosition::kIn);
     }
     else
     {
@@ -167,7 +169,6 @@ void IOdysseyBaseLayerNode::MoveNodeTo( EItemDropZone iItemDropZone, TSharedRef<
     }
 
 	mParentTree.GetLayerStack().OnUpdated().Broadcast();
-    mParentTree.GetLayerStack().GetLayerStackData()->ComputeResultBlock();
 }
 
 FOdysseyLayerStackModel& IOdysseyBaseLayerNode::GetLayerStack() const
@@ -180,7 +181,7 @@ FOdysseyLayerStackTree& IOdysseyBaseLayerNode::GetParentTree() const
     return mParentTree;
 }
 
-IOdysseyLayer* IOdysseyBaseLayerNode::GetLayerDataPtr() const
+TSharedPtr<IOdysseyLayer> IOdysseyBaseLayerNode::GetLayerDataPtr() const
 {
     return mLayerDataPtr;
 }

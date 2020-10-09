@@ -238,6 +238,36 @@ SOdysseyPaintModifiers::SetAlphaMode( ::ul3::eAlphaMode iValue )
     HandleOnAlphaModeChanged( sel, ESelectInfo::Direct );
 }
 
+int32
+SOdysseyPaintModifiers::GetSize()
+{
+    return mSizeSpinBox->GetValue();
+}
+
+int32
+SOdysseyPaintModifiers::GetOpacity()
+{
+    return mOpacitySpinBox->GetValue();
+}
+
+int32
+SOdysseyPaintModifiers::GetFlow()
+{
+    return mFlowSpinBox->GetValue();
+}
+
+::ul3::eBlendingMode
+SOdysseyPaintModifiers::GetBlendingMode()
+{
+    return mCurrentBlendingMode;
+}
+
+::ul3::eAlphaMode
+SOdysseyPaintModifiers::GetAlphaMode()
+{
+    return mCurrentAlphaMode;
+}
+
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks

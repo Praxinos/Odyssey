@@ -33,16 +33,16 @@ public:
 
 
 private:
-    TSharedRef<SWidget> ConstructPropertyViewForImageLayer( FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
+    TSharedRef<SWidget> ConstructPropertyViewForImageLayer( TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
 
-    int GetLayerOpacityValue( FOdysseyImageLayer* ImageLayer ) const;
-    void HandleLayerOpacityValueChanged( int iOpacity, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
-    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
+    int GetLayerOpacityValue( TSharedPtr<FOdysseyImageLayer> ImageLayer ) const;
+    void HandleLayerOpacityValueChanged( int iOpacity, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
+    void SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode );
 
 private:
     TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> iItem );
-    TSharedRef<SWidget> CreateBlendingModeTextWidget( FOdysseyImageLayer* iImageLayer );
-    void HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyImageLayer* iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode);
+    TSharedRef<SWidget> CreateBlendingModeTextWidget( TSharedPtr<FOdysseyImageLayer> iImageLayer );
+    void HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode);
 
 
 private:

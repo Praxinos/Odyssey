@@ -8,7 +8,6 @@
 #include "UObject/ScriptMacros.h"
 #include "Engine/Texture.h"
 #include "TextureResource.h"
-#include "OdysseyLayerStack.h"
 
 #include "OdysseyTexture.generated.h"
 

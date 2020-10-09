@@ -68,8 +68,11 @@ public:
 
     const ::ul3::FPixelValue& GetColor() const;
 	void Block(FOdysseyBlock* iBlock);
-	FOdysseyBlock* TempBlock();
-	FOdysseyBlock* TempBuffer();
+	FOdysseyBlock* PreviewBlock();
+	FOdysseyBlock* StrokeBlock();
+
+	void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
+	void CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects);
 
     void UpdateBrushCursorPreview();
 
@@ -98,8 +101,10 @@ private:
 
 private:
     // Private Data Members
-	FOdysseyBlock*                      mBlock; // Holds th original block to edit
-	FOdysseyBlock*                      mTempBuffer; //Holds the stroke tiles
+	FOdysseyBlock*                      mEditedBlock; // Holds th original block to edit
+	FOdysseyBlock*                      mStrokeBlock; //Holds the stroke tiles
+    FOdysseyBlock*                      mPreviewBlock; //Holds the stroke tiles
+
     UOdysseyBrushAssetBase*             mBrushInstance;
 
     int                                 mWidth;

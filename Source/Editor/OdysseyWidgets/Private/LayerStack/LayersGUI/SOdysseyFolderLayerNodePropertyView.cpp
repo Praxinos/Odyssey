@@ -28,7 +28,7 @@ void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, T
 
     TSharedRef<SWidget> finalWidget = SNullWidget::NullWidget;
 
-    FOdysseyFolderLayer* folderLayer = static_cast<FOdysseyFolderLayer*> (iNode->GetLayerDataPtr());
+    TSharedPtr<FOdysseyFolderLayer> folderLayer = StaticCastSharedPtr<FOdysseyFolderLayer> (iNode->GetLayerDataPtr());
     TSharedRef<FOdysseyFolderLayerNode> folderNode = StaticCastSharedRef<FOdysseyFolderLayerNode>(iNode);
     finalWidget = ConstructPropertyViewForFolderLayer( folderLayer, odysseyLayerStackPtr, folderNode );
 
@@ -43,9 +43,9 @@ void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, T
 //PRIVATE API
 
 
-TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewForFolderLayer( FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode )
+TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewForFolderLayer( TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode )
 {
-    mBlendingModes = iLayerStack->GetBlendingModesAsText();
+    mBlendingModes = iFolderLayer->GetBlendingModesAsText();
 
     TSharedRef<SWidget>    finalWidget =
         SNew( SVerticalBox )
@@ -108,33 +108,31 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
 
 
 
-int SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue( FOdysseyFolderLayer* iFolderLayer ) const
+int SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue( TSharedPtr<FOdysseyFolderLayer> iFolderLayer ) const
 {
     return iFolderLayer->GetOpacity() * 100;
 }
 
 
-void SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
+void SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
 {
     iFolderLayer->SetOpacity( iOpacity / 100.f );
     iFolderNode->RefreshOpacityText();
 }
 
-void SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
+void SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
 {
     iFolderLayer->SetOpacity( iOpacity / 100.f );
     iFolderNode->RefreshOpacityText();
-    iLayerStack->ComputeResultBlock();
 }
 
 
 //PRIVATE
 
-void SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, FOdysseyFolderLayer* iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode )
+void SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged(TSharedPtr<FText> iNewSelection, ESelectInfo::Type iSelectInfo, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode )
 {
     iFolderLayer->SetBlendingMode( *(iNewSelection.Get() ) );
     iFolderNode->RefreshBlendingModeText();
-    iLayerStack->ComputeResultBlock();
 
     mBlendingModeComboBox->SetContent(
         SNew(   SComboBox<TSharedPtr<FText>> )
@@ -158,7 +156,7 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBo
 }
 
 
-TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::CreateBlendingModeTextWidget( FOdysseyFolderLayer* iFolderLayer)
+TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::CreateBlendingModeTextWidget( TSharedPtr<FOdysseyFolderLayer> iFolderLayer)
 {
       return SNew(STextBlock)
            .Text( iFolderLayer->GetBlendingModeAsText() );

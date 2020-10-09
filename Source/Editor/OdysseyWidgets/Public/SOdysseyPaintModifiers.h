@@ -46,6 +46,14 @@ public:
     void  SetBlendingMode( ::ul3::eBlendingMode iValue );
     void  SetAlphaMode( ::ul3::eAlphaMode iValue );
 
+public:
+    // Public Getters
+    int32  GetSize();
+    int32  GetOpacity();
+    int32  GetFlow();
+    ::ul3::eBlendingMode  GetBlendingMode();
+    ::ul3::eAlphaMode  GetAlphaMode();
+
 private:
     // Private Callbacks
     void HandleSizeSpinBoxChanged( int32 iValue, ETextCommit::Type iType );

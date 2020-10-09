@@ -7,7 +7,7 @@
 #include "OdysseyLayerStack.h"
 #include "LayerStack/LayersGUI/OdysseyFolderLayerNode.h"
 #include "LayerStack/LayersGUI/OdysseyImageLayerNode.h"
-#include "OdysseyTree.h"
+#include "OdysseyTreeShared.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStackTree"
 
@@ -34,15 +34,14 @@ int FOdysseyLayerStackTree::Update()
 		return -1;
 	}
 
-    TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    mLayerStack.GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
-
+	TArray<TSharedPtr<IOdysseyLayer>> layersData;
+	mLayerStack.GetLayerStackData()->GetLayerRoot()->DepthFirstSearchTree(&layersData, false);
     for( int i = 0; i < layersData.Num(); i++ )
     {
         if( layersData[i]->GetType() == IOdysseyLayer::eType::kImage )
-            mRootNodes.Add( MakeShareable(new FOdysseyImageLayerNode( *(static_cast<FOdysseyImageLayer*> (layersData[i])), *this )) );
+            mRootNodes.Add( MakeShareable(new FOdysseyImageLayerNode( StaticCastSharedPtr<FOdysseyImageLayer>(layersData[i]), *this )) );
         else if( layersData[i]->GetType() == IOdysseyLayer::eType::kFolder )
-            mRootNodes.Add( MakeShareable(new FOdysseyFolderLayerNode( *(static_cast<FOdysseyFolderLayer*> (layersData[i])), *this )) );
+            mRootNodes.Add( MakeShareable(new FOdysseyFolderLayerNode( StaticCastSharedPtr<FOdysseyFolderLayer>(layersData[i]), *this )) );
     }
     
     return mLayerStack.GetLayerStackData()->GetCurrentLayerAsIndex();

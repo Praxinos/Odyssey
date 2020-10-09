@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditorController.h"
 
 #include "IOdysseyLayer.h"
-#include "OdysseyTree.h"
+#include "OdysseyTreeShared.h"
 
 class FOdysseyTextureEditorToolkit;
 class FOdysseyTextureEditorData;
@@ -33,8 +33,10 @@ protected:
     virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
 
 public:
-	void OnLayerStackCurrentLayerChanged(FOdysseyNTree< IOdysseyLayer* >* iCurrentLayer);
-	void OnLayerStackDirty();
+	void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
+	void OnLayerStackStructureChanged();
+	void OnLayerStackImageResultChanged();
+	void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     void OnExportLayersAsTextures() override;
     void OnImportTexturesAsLayers() override;

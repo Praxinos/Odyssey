@@ -13,10 +13,7 @@ template< typename T >
 FOdysseyNTree<T>::~FOdysseyNTree()
 {
     for( int i = 0; i < mNodes.Num(); i++ )
-    {
-        mNodes[i]->~FOdysseyNTree();
         delete mNodes[i];
-    }
     
     mNodes.Empty();
 }
@@ -29,12 +26,14 @@ FOdysseyNTree<T>::AddNode( T iNodeContent, int iIndexEmplace )
     {
         mNodes.Add( new FOdysseyNTree<T>( iNodeContent ) );
         mNodes.Last()->mParent = this;
+        BroadcastNodeAdded(mNodes.Last());
         return mNodes.Last();
     }
     else
     {
         mNodes.EmplaceAt( iIndexEmplace, new FOdysseyNTree<T>( iNodeContent ) );
         mNodes[iIndexEmplace]->mParent = this;
+        BroadcastNodeAdded(mNodes[iIndexEmplace]);
         return mNodes[iIndexEmplace];
     }
 }
@@ -63,8 +62,13 @@ void
 FOdysseyNTree<T>::DeleteNode( int iIndex )
 {
     checkf( iIndex >= 0 && iIndex < mNodes.Num(), TEXT("Index out of bounds in DeleteNode of FOdysseyNTree") );
-    mNodes[iIndex]->~FOdysseyNTree();
+    FOdysseyNTree<T>* node = mNodes[i];
+    FOdysseyNTree<T>* parent = node->Parent;
+    int index = node->GetIndexInParent();
+    node->mParent = nullptr;
     mNodes.RemoveAt( iIndex );
+    BroadcastNodeRemoved(node, parent, index);
+    delete node;
 }
 
 template< typename T >
@@ -80,7 +84,9 @@ FOdysseyNTree<T>::DeleteNodeIfExist( FOdysseyNTree<T>* iNodeToDelete )
             DeleteNode( i );
         }
         else
+        {
             mNodes[i]->DeleteNodeIfExist( iNodeToDelete );
+        }
     }
 }
 
@@ -96,56 +102,43 @@ FOdysseyNTree<T>::MoveNodeTo( FOdysseyNTree<T>* iNewPositionInTree, ePosition iP
     if( iPosition == ePosition::kIn )
     {
         //Remove old node
-        int index = -1;
-        for( int i = 0; i < mParent->mNodes.Num(); i++ )
-            if( this == mParent->mNodes[i] )
-                index = i;
-        
+        FOdysseyNTree<T>* parent = mParent;
+        int index = GetIndexInParent();
         mParent->mNodes.RemoveAt(index);
 
         //Place new node
         iNewPositionInTree->AddNode( this );
     
+        BroadcastNodeMoved(this, parent, index);
 
         return this;
     }
     else if( iPosition == ePosition::kAfter )
     {
         //Remove old node
-        int index = -1;
-        for( int i = 0; i < mParent->mNodes.Num(); i++ )
-            if( this == mParent->mNodes[i] )
-                index = i;
-        
-        mParent->mNodes.RemoveAt(index);
+        FOdysseyNTree<T>* parent = mParent;
+        int oldIndex = GetIndexInParent();
+        mParent->mNodes.RemoveAt(oldIndex);
         
         //Place new node
-        index = -1;
-        for( int i = 0; i < iNewPositionInTree->mParent->mNodes.Num(); i++)
-            if( iNewPositionInTree == iNewPositionInTree->mParent->mNodes[i] )
-                index = i;
-        
+        int index = iNewPositionInTree->GetIndexInParent();
         iNewPositionInTree->mParent->AddNode( this, index + 1 );
+        BroadcastNodeMoved(this, parent, oldIndex);
         
         return this;
     }
     else if( iPosition == ePosition::kBefore )
     {
         //Remove old node
-        int index = -1;
-        for( int i = 0; i < mParent->mNodes.Num(); i++ )
-            if( this == mParent->mNodes[i] )
-                index = i;
-        
+        FOdysseyNTree<T>* parent = mParent;
+        int oldIndex = GetIndexInParent();
         mParent->mNodes.RemoveAt(index);
 
         //Place new node
-        index = -1;
-        for( int i = 0; i < iNewPositionInTree->mParent->mNodes.Num(); i++)
-            if( iNewPositionInTree == iNewPositionInTree->mParent->mNodes[i] )
-                index = i;
-        
+        int index = iNewPositionInTree->GetIndexInParent();
         iNewPositionInTree->mParent->AddNode( this, index );
+
+        BroadcastNodeMoved(this, parent, oldIndex);
         
         return this;
     }
@@ -208,19 +201,12 @@ FOdysseyNTree<T>::GetNodeContentPtr() const
     return &mNodeContent;
 }
 
-template< typename T >
-void
-FOdysseyNTree<T>::SetNodeContent( T& iNodeContent )
-{
-    mNodeContent = iNodeContent;
-}
-
 
 template< typename T >
-const TArray<FOdysseyNTree<T>*>*
+TArray<FOdysseyNTree<T>*>
 FOdysseyNTree<T>::GetNodes() const
 {
-    return &mNodes;
+    return mNodes;
 }
 
 template< typename T >
@@ -230,7 +216,7 @@ FOdysseyNTree<T>::DepthFirstSearchTree( TArray<T>* ioContents, bool iIncludeRoot
     if( iIncludeRoot )
         ioContents->Add( mNodeContent );
     
-    if( GetNodes()->Num() == 0 )
+    if( mNodes.Num() == 0 )
         return;
     
     for( int i = 0; i < mNodes.Num(); i++ )
@@ -247,7 +233,7 @@ FOdysseyNTree<T>::BreadthFirstSearchTree( TArray<T>* ioContents, bool iIncludeRo
     if( iIncludeRoot )
         ioContents->Add( mNodeContent );
     
-    if( GetNodes().Num() == 0 )
+    if( mNodes.Num() == 0 )
         return;
     
     for( int i = 0; i < mNodes.Num(); i++ )
@@ -293,36 +279,81 @@ FOdysseyNTree<T>::HasForParent(FOdysseyNTree<T>* iParentToSearch) const
     return false;
 }
 
+template< typename T >
+FOdysseyNTree<T>::FOdysseyTreeNodeAdded&
+BroadcastNodeAdded(FOdysseyNTree<T>* iNode)
+{
+    mNodeAdded.Broadcast(iNode);
+    if (mParent)
+    {
+        mParent->BroadcastNodeAdded(iNode);
+    }
+}
+
+template< typename T >
+FOdysseyNTree<T>::FOdysseyTreeNodeRemoved&
+BroadcastNodeRemoved(FOdysseyNTree<T>* iNode, FOdysseyNTree<T>* iParent, int iIndex)
+{
+    mNodeRemoved.Broadcast(iNode, iParent, iIndex);
+    if (mParent)
+    {
+        mParent->BroadcastNodeRemoved(iNode, iParent, iIndex);
+    }
+}
+
+template< typename T >
+FOdysseyNTree<T>::FOdysseyTreeNodeMoved&
+BroadcastNodeMoved(FOdysseyNTree<T>* iNode, FOdysseyNTree<T>* iParent, int iIndex)
+{
+    mNodeRemoved.Broadcast(iNode, iParent, iIndex);
+    if (mParent)
+    {
+        mParent->BroadcastNodeRemoved(iNode, iParent, iIndex);
+    }
+}
+
+template< typename T >
+FOdysseyNTree<T>::FOdysseyTreeNodeAdded&
+NodeAdded()
+{
+    return mNodeAdded;
+}
+
+template< typename T >
+FOdysseyNTree<T>::FOdysseyTreeNodeRemoved&
+NodeRemoved()
+{
+    return mNodeRemoved;
+}
+
+template< typename T >
+FOdysseyNTree<T>::FOdysseyTreeNodeMoved&
+NodeMoved()
+{
+    return mNodeMoved;
+}
 
 class IOdysseyLayer;
 
-inline FArchive& operator<<(FArchive &Ar, FOdysseyNTree<IOdysseyLayer*>& ioSaveNTree )
+template< typename T >
+inline FArchive& operator<<(FArchive &Ar, FOdysseyNTree<T>& ioSaveNTree )
 {
     if( Ar.IsSaving() )
     {
         int numNodes = ioSaveNTree.mNodes.Num();
-        
         Ar << &(ioSaveNTree.mNodeContent);
-        
         Ar << numNodes;
-
         for( int i = 0; i < numNodes; i++ )
             Ar << (*ioSaveNTree.mNodes[i]);
     }
     else if( Ar.IsLoading() )
     {
         int numNodes;
-        
-        if( ioSaveNTree.mParent ) //The root is empty, we don't load it
-        {
-            Ar << &(ioSaveNTree.mNodeContent);
-        }
-        
+        Ar << ioSaveNTree.mNodeContent;
         Ar << numNodes;
-        
         for( int i = 0; i < numNodes; i++ )
         {
-            FOdysseyNTree<IOdysseyLayer*>* newNode = new FOdysseyNTree<IOdysseyLayer*>(NULL);
+            FOdysseyNTree<T> newNode = new FOdysseyNTree<T>(NULL);
             ioSaveNTree.AddNode( newNode );
             Ar << *newNode;
         }

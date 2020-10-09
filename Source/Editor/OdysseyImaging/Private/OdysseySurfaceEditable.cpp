@@ -24,14 +24,42 @@ CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
     checkf(iBlock->Width() == iTexture->GetSizeX() &&
            iBlock->Height() == iTexture->GetSizeY()
            ,TEXT("Sizes do not match"));
+           
+    ::ul3::tFormat targetFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+	if (iBlock->Format() == targetFormat)
+	{
+		iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iTexture->Source.GetFormat(), iBlock->GetBlock()->DataPtr());
+		return;
+	}
 
-    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iTexture->Source.GetFormat(),iBlock->GetBlock()->DataPtr());
+	::ul3::FBlock* block = new ::ul3::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+	::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iBlock->GetBlock(), block);
+    
+	iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iTexture->Source.GetFormat(), block->DataPtr());
 }
 
 void
 InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
 {
-    iTexture->Source.Init(iBlock->Width(),iBlock->Height(),1,1,iFormat,iBlock->GetBlock()->DataPtr());
+	::ul3::tFormat targetFormat = ULISFormatForUE4TextureSourceFormat(iFormat);
+	if (iBlock->Format() == targetFormat)
+	{
+		iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iFormat, iBlock->GetBlock()->DataPtr());
+		return;
+	}
+
+	::ul3::FBlock* block = new ::ul3::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+	::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iBlock->GetBlock(), block);
+    
+	iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iFormat, block->DataPtr());
 }
 
 FOdysseyBlock*
@@ -218,8 +246,9 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(int iWidth,int iHeight, ::ul3::
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
     mBlock = new FOdysseyBlock(iWidth,iHeight, iFormat, &InvalidateSurfaceCallback, static_cast<void*>(this), true);
+	Invalidate();
     // load texture data from block
-    CopyBlockDataIntoUTexture(mBlock,mTexture);
+    //CopyBlockDataIntoUTexture(mBlock,mTexture);
 }
 
 FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture, FOdysseyBlock* iBlock)
@@ -230,6 +259,8 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture, FOdysseyB
     mTexture->AddToRoot();
 
     mBlock = iBlock;
+
+	mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&InvalidateSurfaceCallback, static_cast<void*>(this)));
 }
 
 FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
@@ -241,7 +272,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
     mTexture->AddToRoot();
 
     // Warning: the block is allocated, then the texture data is copied into it.
-    mBlock = new FOdysseyBlock(mTexture->GetSizeX(),mTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()),&InvalidateSurfaceCallback,static_cast<void*>(this));
+    mBlock = new FOdysseyBlock(mTexture->GetSizeX(),mTexture->GetSizeY(), ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat()),&InvalidateSurfaceCallback,static_cast<void*>(this));
     // load block data from texture
     CopyUTextureDataIntoBlock(mBlock,mTexture);
 }
@@ -266,7 +297,8 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(FOdysseyBlock* iBlock)
     mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&InvalidateSurfaceCallback,static_cast<void*>(this)));
 
     // load texture data from block
-    CopyBlockDataIntoUTexture(mBlock,mTexture);
+    //CopyBlockDataIntoUTexture(mBlock,mTexture);
+	Invalidate();
 }
 
 //--------------------------------------------------------------------------------------

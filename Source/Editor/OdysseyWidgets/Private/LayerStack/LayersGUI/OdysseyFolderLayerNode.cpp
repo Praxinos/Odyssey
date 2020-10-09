@@ -11,8 +11,8 @@
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-FOdysseyFolderLayerNode::FOdysseyFolderLayerNode( FOdysseyFolderLayer& iFolderLayer, FOdysseyLayerStackTree& iParentTree )
-    : IOdysseyBaseLayerNode( iFolderLayer.GetName(), iParentTree, &iFolderLayer )
+FOdysseyFolderLayerNode::FOdysseyFolderLayerNode( TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStackTree& iParentTree )
+    : IOdysseyBaseLayerNode( iFolderLayer->GetName(), iParentTree, iFolderLayer )
 {
     mFolderOpenBrush = FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderOpen" );
     mFolderClosedBrush = FEditorStyle::GetBrush( "ContentBrowser.AssetTreeFolderClosed" );
@@ -27,10 +27,15 @@ float FOdysseyFolderLayerNode::GetNodeHeight() const
 
 FNodePadding FOdysseyFolderLayerNode::GetNodePadding() const
 {
-    TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
+	TSharedPtr<IOdysseyLayer> layer = mLayerDataPtr->GetParent();
+	int parentCount = 0;
+	while (layer)
+	{
+		parentCount++;
+		layer = layer->GetParent();
+	}
     
-    float leftPadding = (mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr )->GetNumberParents() - 1) * 10;
+    float leftPadding = (parentCount - 1) * 10;
         
     return FNodePadding(leftPadding, 4, 4);
 }
@@ -56,7 +61,7 @@ void FOdysseyFolderLayerNode::Drop(const TArray<TSharedRef<IOdysseyBaseLayerNode
 
 const FSlateBrush* FOdysseyFolderLayerNode::GetIconBrush() const
 {
-    FOdysseyFolderLayer* layer = static_cast<FOdysseyFolderLayer*>( GetLayerDataPtr() );
+    TSharedPtr<FOdysseyFolderLayer> layer = StaticCastSharedPtr<FOdysseyFolderLayer>( GetLayerDataPtr() );
 
     if( layer->IsOpen() )
         return mFolderOpenBrush;
@@ -88,7 +93,7 @@ TSharedRef<SWidget> FOdysseyFolderLayerNode::GetCustomIconContent()
 
 TSharedRef<SWidget> FOdysseyFolderLayerNode::GetCustomOutlinerContent()
 {
-    FOdysseyFolderLayer* layer = static_cast<FOdysseyFolderLayer*>( GetLayerDataPtr() );
+    TSharedPtr<FOdysseyFolderLayer> layer = StaticCastSharedPtr<FOdysseyFolderLayer>( GetLayerDataPtr() );
 
     return SNew(SHorizontalBox)
 
@@ -172,15 +177,17 @@ void FOdysseyFolderLayerNode::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 
 bool FOdysseyFolderLayerNode::IsHidden() const
 {
-    FOdysseyNTree<IOdysseyLayer*>* layerNode = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr );
+    TSharedPtr<IOdysseyLayer> layer = mLayerDataPtr->GetParent();
 
-    while( layerNode->GetParent()->GetNodeContent() != NULL )
+    while( layer )
     {
-        if( layerNode->GetParent()->GetNodeContent()->GetType() == IOdysseyLayer::eType::kFolder )
-            if( !static_cast<FOdysseyFolderLayer*>( layerNode->GetParent()->GetNodeContent() )->IsOpen() )
-                return true;
+		if (layer->GetType() == IOdysseyLayer::eType::kFolder)
+		{
+			if (!StaticCastSharedPtr<FOdysseyFolderLayer>(layer)->IsOpen())
+				return true;
+		}
         
-        layerNode = layerNode->GetParent();
+        layer = layer->GetParent();
     }
     
     return false;
@@ -206,7 +213,7 @@ bool FOdysseyFolderLayerNode::HandleDuplicateLayerCanExecute() const
 
 FReply FOdysseyFolderLayerNode::HandleExpand()
 {
-    FOdysseyFolderLayer* layer = static_cast<FOdysseyFolderLayer*>( GetLayerDataPtr() );
+    TSharedPtr<FOdysseyFolderLayer> layer = StaticCastSharedPtr<FOdysseyFolderLayer>( GetLayerDataPtr() );
     layer->SetIsOpen( !layer->IsOpen() );
     
     mParentTree.GetLayerStack().GetLayerStackView()->RefreshView();
@@ -225,7 +232,6 @@ const FSlateBrush* FOdysseyFolderLayerNode::GetVisibilityBrushForLayer() const
 FReply FOdysseyFolderLayerNode::OnToggleVisibility()
 {
     GetLayerDataPtr()->SetIsVisible( !GetLayerDataPtr()->IsVisible() );
-    GetLayerStack().GetLayerStackData()->ComputeResultBlock();
     return FReply::Handled();
 }
 
@@ -244,7 +250,7 @@ void FOdysseyFolderLayerNode::RefreshOpacityText() const
 {
     if( mOpacityText )
     {
-        FOdysseyFolderLayer* layer = static_cast<FOdysseyFolderLayer*>( GetLayerDataPtr() );
+        TSharedPtr<FOdysseyFolderLayer> layer = StaticCastSharedPtr<FOdysseyFolderLayer>( GetLayerDataPtr() );
 
         mOpacityText->DetachWidget();
         mOpacityText->AttachWidget( SNew(STextBlock).Text( FText::AsPercent( layer->GetOpacity() ) ) );
@@ -255,7 +261,7 @@ void FOdysseyFolderLayerNode::RefreshBlendingModeText() const
 {
     if( mBlendingModeText )
     {
-        FOdysseyFolderLayer* layer = static_cast<FOdysseyFolderLayer*>( GetLayerDataPtr() );
+		TSharedPtr<FOdysseyFolderLayer> layer = StaticCastSharedPtr<FOdysseyFolderLayer>( GetLayerDataPtr() );
 
         mBlendingModeText->DetachWidget();
         mBlendingModeText->AttachWidget( SNew(STextBlock).Text( layer->GetBlendingModeAsText() ) );

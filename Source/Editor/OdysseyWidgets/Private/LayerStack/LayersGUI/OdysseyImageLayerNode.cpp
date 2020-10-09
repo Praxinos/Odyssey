@@ -11,13 +11,15 @@
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SSpinBox.h"
 
+#include "OdysseyFolderLayer.h"
+
 #define LOCTEXT_NAMESPACE "FOdysseyImageLayerNode"
 
 
 //CONSTRUCTION/DESTRUCTION --------------------------------------
 
-FOdysseyImageLayerNode::FOdysseyImageLayerNode( FOdysseyImageLayer& iImageLayer, FOdysseyLayerStackTree& iParentTree )
-    : IOdysseyBaseLayerNode( iImageLayer.GetName(), iParentTree, &iImageLayer )
+FOdysseyImageLayerNode::FOdysseyImageLayerNode( TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStackTree& iParentTree )
+    : IOdysseyBaseLayerNode( iImageLayer->GetName(), iParentTree, iImageLayer )
 {
 }
 
@@ -30,12 +32,17 @@ float FOdysseyImageLayerNode::GetNodeHeight() const
 
 FNodePadding FOdysseyImageLayerNode::GetNodePadding() const
 {
-    TArray< IOdysseyLayer* > layersData = TArray<IOdysseyLayer*>();
-    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layersData, false );
-    
-    float leftPadding = (mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr )->GetNumberParents() - 1) * 10;
-        
-    return FNodePadding(leftPadding, 4, 4);
+	TSharedPtr<IOdysseyLayer> layer = mLayerDataPtr->GetParent();
+	int parentCount = 0;
+	while (layer)
+	{
+		parentCount++;
+		layer = layer->GetParent();
+	}
+
+	float leftPadding = (parentCount - 1) * 10;
+
+	return FNodePadding(leftPadding, 4, 4);
 }
 
 TOptional<EItemDropZone> FOdysseyImageLayerNode::CanDrop(FOdysseyLayerStackNodeDragDropOp& iDragDropOp, EItemDropZone iItemDropZone) const
@@ -76,7 +83,7 @@ TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomIconContent()
 
 TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomOutlinerContent()
 {
-    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>( GetLayerDataPtr() );
+    TSharedPtr<FOdysseyImageLayer> layer = StaticCastSharedPtr<FOdysseyImageLayer>( GetLayerDataPtr() );
 
     return SNew(SHorizontalBox)
 
@@ -176,15 +183,17 @@ void FOdysseyImageLayerNode::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 
 bool FOdysseyImageLayerNode::IsHidden() const
 {
-    FOdysseyNTree<IOdysseyLayer*>* layerNode = mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->FindNode( mLayerDataPtr );
+    TSharedPtr<IOdysseyLayer> layer = mLayerDataPtr->GetParent();
 
-    while( layerNode->GetParent()->GetNodeContent() != NULL )
+    while( layer )
     {
-        if( layerNode->GetParent()->GetNodeContent()->GetType() == IOdysseyLayer::eType::kFolder )
-            if( !static_cast<FOdysseyFolderLayer*>( layerNode->GetParent()->GetNodeContent() )->IsOpen() )
-                return true;
+		if (layer->GetType() == IOdysseyLayer::eType::kFolder)
+		{
+			if (!StaticCastSharedPtr<FOdysseyFolderLayer>(layer)->IsOpen())
+				return true;
+		}
         
-        layerNode = layerNode->GetParent();
+        layer = layer->GetParent();
     }
     
     return false;
@@ -201,17 +210,19 @@ bool FOdysseyImageLayerNode::HandleDeleteLayerCanExecute() const
 bool FOdysseyImageLayerNode::HandleMergeLayerDownCanExecute() const
 {
     //We can only merge down to another image layer
-    
-    int currentIndex = mParentTree.GetLayerStack().GetLayerStackData()->GetCurrentLayerAsIndex();
-    
-    if( currentIndex == (mParentTree.GetRootNodes().Num() - 1) )
-        return false;
-        
-    TArray< IOdysseyLayer* > layers = TArray<IOdysseyLayer*>();
-    mParentTree.GetLayerStack().GetLayerStackData()->GetLayers()->DepthFirstSearchTree( &layers, false );
-    
-    return (layers[currentIndex + 1]->GetType() == IOdysseyLayer::eType::kImage);
-    
+	TSharedPtr<IOdysseyLayer> currentLayer = mParentTree.GetLayerStack().GetLayerStackData()->GetCurrentLayer();
+	if (!currentLayer)
+		return false;
+
+	TSharedPtr<IOdysseyLayer> parent = currentLayer->GetParent();
+	if (!parent)
+		return false;
+
+	int index = currentLayer->GetIndexInParent();
+	if (index >= parent->GetNodes().Num() - 1)
+		return false;
+
+	return parent->GetNode(index + 1)->GetType() == IOdysseyLayer::eType::kImage;
 }
 
 bool FOdysseyImageLayerNode::HandleDuplicateLayerCanExecute() const
@@ -231,7 +242,6 @@ const FSlateBrush* FOdysseyImageLayerNode::GetVisibilityBrushForLayer() const
 FReply FOdysseyImageLayerNode::OnToggleVisibility()
 {
     GetLayerDataPtr()->SetIsVisible( !GetLayerDataPtr()->IsVisible() );
-    GetLayerStack().GetLayerStackData()->ComputeResultBlock();
     return FReply::Handled();
 }
 
@@ -248,14 +258,14 @@ FReply FOdysseyImageLayerNode::OnToggleLocked()
 
 const FSlateBrush* FOdysseyImageLayerNode::GetAlphaLockedBrushForLayer() const
 {
-    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*> (GetLayerDataPtr());
+    TSharedPtr<FOdysseyImageLayer> layer = StaticCastSharedPtr<FOdysseyImageLayer> (GetLayerDataPtr());
     
     return layer->IsAlphaLocked() ? FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaLocked16") : FOdysseyStyle::GetBrush("OdysseyLayerStack.AlphaUnlocked16");
 }
 
 FReply FOdysseyImageLayerNode::OnToggleAlphaLocked()
 {
-    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*> (GetLayerDataPtr());
+    TSharedPtr<FOdysseyImageLayer> layer = StaticCastSharedPtr<FOdysseyImageLayer> (GetLayerDataPtr());
 
     layer->SetIsAlphaLocked( !layer->IsAlphaLocked() );
     return FReply::Handled();
@@ -265,7 +275,7 @@ void FOdysseyImageLayerNode::RefreshOpacityText() const
 {
     if( mOpacityText )
     {
-        FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>( GetLayerDataPtr() );
+        TSharedPtr<FOdysseyImageLayer> layer = StaticCastSharedPtr<FOdysseyImageLayer>( GetLayerDataPtr() );
 
         mOpacityText->DetachWidget();
         mOpacityText->AttachWidget( SNew(STextBlock).Text( FText::AsPercent( layer->GetOpacity() ) ) );
@@ -276,7 +286,7 @@ void FOdysseyImageLayerNode::RefreshBlendingModeText() const
 {
     if( mBlendingModeText )
     {
-        FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>( GetLayerDataPtr() );
+        TSharedPtr<FOdysseyImageLayer> layer = StaticCastSharedPtr<FOdysseyImageLayer>( GetLayerDataPtr() );
 
         mBlendingModeText->DetachWidget();
         mBlendingModeText->AttachWidget( SNew(STextBlock).Text( layer->GetBlendingModeAsText() ) );
