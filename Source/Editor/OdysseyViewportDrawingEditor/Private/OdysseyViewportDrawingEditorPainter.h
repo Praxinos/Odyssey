@@ -8,6 +8,8 @@
 #include "OdysseyStrokePoint.h"
 #include "MeshPaintTypes.h"
 #include "Engine/StaticMesh.h"
+#include "OdysseyMeshPaintRendering.h"
+
 
 enum class EOdysseyViewportSelectedMode : uint8
 {
@@ -34,6 +36,23 @@ struct FInstanceTexturePaintSettings
 	{
 		mSelectedTexture = iSrcSettings.mSelectedTexture;
 	}
+};
+
+
+/** Batched element parameters for texture paint shaders used for paint blending and paint mask generation */
+class FOdysseyMeshPaintBatchedElementParameters: public FBatchedElementParameters
+{
+public:
+    /** Binds vertex and pixel shaders for this element */
+    virtual void BindShaders(FRHICommandList& RHICmdList,FGraphicsPipelineStateInitializer& GraphicsPSOInit,ERHIFeatureLevel::Type InFeatureLevel,const FMatrix& InTransform,const float InGamma,const FMatrix& ColorWeights,const FTexture* Texture) override
+    {
+        OdysseyMeshPaintRendering::SetMeshPaintShaders(RHICmdList,GraphicsPSOInit,InFeatureLevel,InTransform,InGamma,ShaderParams);
+    }
+
+public:
+
+    /** Shader parameters */
+    OdysseyMeshPaintRendering::FOdysseyMeshPaintShaderParameters ShaderParams;
 };
 
 class UOdysseyViewportDrawingEditorSettings;
@@ -216,6 +235,12 @@ protected:
 	/** Textures eligible for painting retrieved from the current selection */
 	TArray<FPaintableTexture> mPaintableTextures;
 
+    /** Texture paint: The mesh components that we're currently painting */
+	UMeshComponent* mTexturePaintingCurrentMeshComponent;
+
+	/** The original texture that we're painting */
+	UTexture2D* mPaintingTexture2D;
+
     /** Temporary render target used to draw incremental paint to */
     UTextureRenderTarget2D* mBrushRenderTargetTexture;
 
@@ -230,12 +255,6 @@ protected:
 
 	/** Texture paint: Will hold a list of texture items that we can paint on */
 	TArray<FTextureTargetListInfo> mTexturePaintTargetList;
-	
-	/** Texture paint: The mesh components that we're currently painting */
-	UMeshComponent* mTexturePaintingCurrentMeshComponent;
-
-	/** The original texture that we're painting */
-	UTexture2D* mPaintingTexture2D;
 
 	/** True if we need to generate a texture seam mask used for texture dilation */
 	bool mDoGenerateSeamMask;

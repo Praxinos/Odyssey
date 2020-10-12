@@ -271,12 +271,6 @@ void SOdysseyViewportDrawingEditorWidget::Construct(const FArguments& InArgs, FO
         mLayerStack = userData->GetLayerStack();
         mLayerStack->ComputeResultBlock();
 
-        mDisplaySurface = new FOdysseySurface(mLayerStack->GetResultBlock());
-        mLiveUpdateInfo.main = mDisplaySurface->Texture();
-        mLiveUpdateInfo.live = mPaintModeSettings->mTexturePaintSettings.mPaintTexture;
-        mLiveUpdateInfo.enabled = true;
-        mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) ) );
-
         mLayerStackView->DetachWidget();
         mLayerStackView->AttachWidget( 
 			SNew(SHorizontalBox)
@@ -284,7 +278,7 @@ void SOdysseyViewportDrawingEditorWidget::Construct(const FArguments& InArgs, FO
             + SHorizontalBox::Slot()
 		    [
                 SNew( SOdysseyLayerStackView )
-                .LayerStackData( MakeShareable( mLayerStack ) )
+                .LayerStackData( mLayerStack )
             ]
         );
     }
@@ -659,12 +653,6 @@ SOdysseyViewportDrawingEditorWidget::GetPaintEngine()
     return &mPaintEngine;
 }
 
-FOdysseySurface*
-SOdysseyViewportDrawingEditorWidget::GetSurface()
-{
-    return mDisplaySurface;
-}
-
 void
 SOdysseyViewportDrawingEditorWidget::RefreshLayerStackView()
 {
@@ -687,15 +675,6 @@ SOdysseyViewportDrawingEditorWidget::RefreshLayerStackView()
         mLayerStack = userData->GetLayerStack();
         mLayerStack->ComputeResultBlock();
 
-        if( mDisplaySurface )
-            delete mDisplaySurface;
-
-        mDisplaySurface = new FOdysseySurface(mLayerStack->GetResultBlock());
-        mLiveUpdateInfo.main = mDisplaySurface->Texture();
-        mLiveUpdateInfo.enabled = true;
-        mLiveUpdateInfo.live = mPaintModeSettings->mTexturePaintSettings.mPaintTexture;
-        mDisplaySurface->Block()->GetBlock()->SetOnInvalid( ::ul3::FOnInvalid( &InvalidateLiveSurfaceCallback, static_cast<void*>( &mLiveUpdateInfo ) ) );
-
         mLayerStackView->DetachWidget();
         mLayerStackView->AttachWidget( 
 			SNew(SHorizontalBox)
@@ -703,7 +682,7 @@ SOdysseyViewportDrawingEditorWidget::RefreshLayerStackView()
             + SHorizontalBox::Slot()
 		    [
                 SNew( SOdysseyLayerStackView )
-                .LayerStackData( MakeShareable( mLayerStack ) )
+                .LayerStackData( mLayerStack )
             ]
         );
 

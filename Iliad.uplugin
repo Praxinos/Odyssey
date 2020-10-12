@@ -21,6 +21,11 @@
   ],
   "Modules": [
     {
+      "Name": "OdysseyMeshPaintRendering",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "PostConfigInit"
+    },
+    {
       "Name": "OdysseyBrush",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"

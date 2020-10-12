@@ -13,6 +13,7 @@
 #include "OdysseyViewportDrawingEditorSettings.h"
 
 #include "Modules/ModuleManager.h"
+#include "Interfaces/IPluginManager.h"
 
 IMPLEMENT_MODULE(FOdysseyViewportDrawingEditorModule, OdysseyViewportDrawingEditor );
 
@@ -23,6 +24,9 @@ void FOdysseyViewportDrawingEditorModule::StartupModule()
 		NSLOCTEXT("OdysseyPaintInViewportMode", "OdysseyViewportPaint_ModeName", "Paint in Viewport"),
 		FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
 		true, 200 );
+
+    FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("Iliad"))->GetBaseDir(),TEXT("Shaders"));
+    AddShaderSourceDirectoryMapping(TEXT("/Plugin/Iliad"),PluginShaderDir);
 
 	/** Register detail/property customization */
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");

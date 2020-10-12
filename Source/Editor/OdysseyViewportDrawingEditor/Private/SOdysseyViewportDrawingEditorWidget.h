@@ -120,9 +120,6 @@ private:
 
     SVerticalBox::FSlot*                        mLayerStackView;
 
-    FOdysseySurface*            mDisplaySurface;
-    FOdysseyLiveUpdateInfo      mLiveUpdateInfo;
-
     FOdysseyLayerStack*         mLayerStack;
     FOdysseyPaintEngine         mPaintEngine;
     UOdysseyBrush*              mBrush;

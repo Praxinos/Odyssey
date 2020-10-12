@@ -23,10 +23,11 @@ public class OdysseyViewportDrawingEditor : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                 "AppFramework",
-                "Core", 
+                "Core",
                 "CoreUObject",
                 "DesktopPlatform",
-                "Engine", 
+                "Engine",
+                "Projects",
                 "InputCore",
                 "RenderCore",
                 "RHI",
@@ -42,6 +43,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "MainFrame",
 				"MeshPaint",
                 "OdysseyBrush",
+                "OdysseyMeshPaintRendering",
                 "OdysseyWidgets",
                 "OdysseyLayer",
                 "OdysseyTexture",

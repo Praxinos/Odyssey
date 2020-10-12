@@ -499,7 +499,7 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
                         break;
 					}
 
-                    /*
+                    
                     // Painting textures
                     if((mTexturePaintingCurrentMeshComponent != nullptr) && (mTexturePaintingCurrentMeshComponent != hoveredComponent))
                     {
@@ -520,7 +520,7 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
                             UE_LOG(LogTemp, Display, TEXT("id: %d"), paintRayResultId );
                             break;
                         }
-                    }*/
+                    }
 				}
 			}
 		}
@@ -856,7 +856,14 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
     FCanvas brushPaintCanvas(brushRenderTargetResource,nullptr,0,0,0,featureLevel);
 
     // Parameters for brush paint
-    TRefCountPtr< FMeshPaintBatchedElementParameters > MeshPaintBatchedElementParameters(new FMeshPaintBatchedElementParameters());
+    TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > MeshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
+    {
+        MeshPaintBatchedElementParameters->ShaderParams.CloneTexture = mBrushRenderTargetTexture; //Texture we draw on
+        MeshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
+        MeshPaintBatchedElementParameters->ShaderParams.BrushColor = FLinearColor::Blue;
+    }
+    // Parameters for brush paint
+    /*TRefCountPtr< FMeshPaintBatchedElementParameters > MeshPaintBatchedElementParameters(new FMeshPaintBatchedElementParameters());
     {
         MeshPaintBatchedElementParameters->ShaderParams.CloneTexture = mBrushRenderTargetTexture; //Texture we draw on
         MeshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
@@ -865,13 +872,13 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
         MeshPaintBatchedElementParameters->ShaderParams.BrushDepth = 100;
         MeshPaintBatchedElementParameters->ShaderParams.BrushDepthFalloffRange = 500;
         MeshPaintBatchedElementParameters->ShaderParams.BrushStrength = 100;
-        MeshPaintBatchedElementParameters->ShaderParams.BrushColor = FLinearColor::Transparent;
+        MeshPaintBatchedElementParameters->ShaderParams.BrushColor = FLinearColor::Black;
         MeshPaintBatchedElementParameters->ShaderParams.RedChannelFlag = true;
         MeshPaintBatchedElementParameters->ShaderParams.GreenChannelFlag = true;
         MeshPaintBatchedElementParameters->ShaderParams.BlueChannelFlag = true;
         MeshPaintBatchedElementParameters->ShaderParams.AlphaChannelFlag = true;
         MeshPaintBatchedElementParameters->ShaderParams.GenerateMaskFlag = false;
-    }
+    }*/
 
     FBatchedElements* brushPaintBatchedElements = brushPaintCanvas.GetBatchedElements(FCanvas::ET_Triangle,MeshPaintBatchedElementParameters,nullptr,SE_BLEND_Opaque);
     brushPaintBatchedElements->AddReserveVertices(iInfluencedTriangles.Num() * 3);
