@@ -15,8 +15,6 @@
 #include "EditorStyleSet.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneTimeHelpers.h"
-//#include "Tracks/MovieSceneCameraCutTrack.h"
-//#include "Sections/MovieSceneCameraCutSection.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "CommonMovieSceneTools.h"
 #include "Subsystems/AssetEditorSubsystem.h"
@@ -24,6 +22,9 @@
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+#include "MovieSceneHelpersResize.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
@@ -104,65 +105,65 @@ FCinematicBoardSection::SetSingleTime( double iGlobalTime )
 UCameraComponent* 
 FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID iInnerSequenceID, const FMovieSceneSequenceHierarchy& iHierarchy, IMovieScenePlayer& ioPlayer )
 {
-    //const FMovieSceneSequenceHierarchyNode* Node = Hierarchy.FindNode( InnerSequenceID );
-    //const FMovieSceneSubSequenceData*       SubData = Hierarchy.FindSubData( InnerSequenceID );
-    //if( !ensure( SubData && Node ) )
-    //{
-    //    return nullptr;
-    //}
+    const FMovieSceneSequenceHierarchyNode* Node = iHierarchy.FindNode( iInnerSequenceID );
+    const FMovieSceneSubSequenceData*       SubData = iHierarchy.FindSubData( iInnerSequenceID );
+    if( !ensure( SubData && Node ) )
+    {
+        return nullptr;
+    }
 
-    //UMovieSceneSequence* InnerSequence = SubData->GetSequence();
-    //UMovieScene*         InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
-    //if( !InnerMovieScene )
-    //{
-    //    return nullptr;
-    //}
+    UMovieSceneSequence* InnerSequence = SubData->GetSequence();
+    UMovieScene*         InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
+    if( !InnerMovieScene )
+    {
+        return nullptr;
+    }
 
-    //FFrameNumber InnerTime = ( GlobalTime * SubData->RootToSequenceTransform ).FloorToFrame();
-    //if( !SubData->PlayRange.Value.Contains( InnerTime ) )
-    //{
-    //    return nullptr;
-    //}
+    FFrameNumber InnerTime = ( iGlobalTime * SubData->RootToSequenceTransform ).FloorToFrame();
+    if( !SubData->PlayRange.Value.Contains( InnerTime ) )
+    {
+        return nullptr;
+    }
 
-    //int32 LowestRow = TNumericLimits<int32>::Max();
-    //int32 HighestOverlap = 0;
+    int32 LowestRow = TNumericLimits<int32>::Max();
+    int32 HighestOverlap = 0;
 
-    //UMovieSceneCameraCutSection* ActiveSection = nullptr;
+    UMovieSceneSingleCameraCutSection* ActiveSection = nullptr;
 
-    //if( UMovieSceneCameraCutTrack* CutTrack = Cast<UMovieSceneCameraCutTrack>( InnerMovieScene->GetCameraCutTrack() ) )
-    //{
-    //    for( UMovieSceneSection* ItSection : CutTrack->GetAllSections() )
-    //    {
-    //        UMovieSceneCameraCutSection* CutSection = Cast<UMovieSceneCameraCutSection>( ItSection );
-    //        if( CutSection && CutSection->GetRange().Contains( InnerTime ) )
-    //        {
-    //            bool bSectionWins =
-    //                ( CutSection->GetRowIndex() < LowestRow ) ||
-    //                ( CutSection->GetRowIndex() == LowestRow && CutSection->GetOverlapPriority() > HighestOverlap );
+    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( InnerMovieScene->GetCameraCutTrack() ) )
+    {
+        for( UMovieSceneSection* ItSection : CutTrack->GetAllSections() )
+        {
+            UMovieSceneSingleCameraCutSection* CutSection = Cast<UMovieSceneSingleCameraCutSection>( ItSection );
+            if( CutSection && CutSection->GetRange().Contains( InnerTime ) )
+            {
+                bool bSectionWins =
+                    ( CutSection->GetRowIndex() < LowestRow ) ||
+                    ( CutSection->GetRowIndex() == LowestRow && CutSection->GetOverlapPriority() > HighestOverlap );
 
-    //            if( bSectionWins )
-    //            {
-    //                HighestOverlap = CutSection->GetOverlapPriority();
-    //                LowestRow = CutSection->GetRowIndex();
-    //                ActiveSection = CutSection;
-    //            }
-    //        }
-    //    }
-    //}
+                if( bSectionWins )
+                {
+                    HighestOverlap = CutSection->GetOverlapPriority();
+                    LowestRow = CutSection->GetRowIndex();
+                    ActiveSection = CutSection;
+                }
+            }
+        }
+    }
 
-    //if( ActiveSection )
-    //{
-    //    return ActiveSection->GetFirstCamera( Player, InnerSequenceID );
-    //}
+    if( ActiveSection )
+    {
+        return ActiveSection->GetFirstCamera( ioPlayer, iInnerSequenceID );
+    }
 
-    //for( FMovieSceneSequenceID Child : Node->Children )
-    //{
-    //    UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( GlobalTime, Child, Hierarchy, Player );
-    //    if( CameraComponent )
-    //    {
-    //        return CameraComponent;
-    //    }
-    //}
+    for( FMovieSceneSequenceID Child : Node->Children )
+    {
+        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, Child, iHierarchy, ioPlayer );
+        if( CameraComponent )
+        {
+            return CameraComponent;
+        }
+    }
 
     return nullptr;
 }
@@ -403,5 +404,36 @@ FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& iNew
         sectionObject.SetBoardDisplayName( iNewBoardName.ToString() );
     }
 }
+
+//---
+
+void
+FCinematicBoardSection::BeginResizeSection()
+{
+    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+    sectionObject.StartResizing();
+}
+
+void
+FCinematicBoardSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeFrameNumber )
+{
+    UMovieSceneCinematicBoardSection& section = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+    section.Resizing();
+
+    //FViewportThumbnailSection::ResizeSection( ResizeMode, ResizeFrameNumber );
+
+    UMovieScene* outer_movie_scene = section.GetTypedOuter<UMovieScene>();
+    int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
+
+    if( ResizeMode == ESequencerSectionResizeMode::SSRM_LeadingEdge )
+    {
+        section.SetRange( MovieSceneHelpersResize::GetValidRangeLeading( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
+    }
+    else
+    {
+        section.SetRange( MovieSceneHelpersResize::GetValidRangeTrailing( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
+    }
+};
+
 
 #undef LOCTEXT_NAMESPACE

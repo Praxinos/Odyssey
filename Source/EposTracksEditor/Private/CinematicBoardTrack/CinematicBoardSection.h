@@ -40,6 +40,9 @@ public:
     virtual float   GetSectionHeight() const override;
     virtual FMargin GetContentPadding() const override;
     virtual bool    IsReadOnly() const override;
+    
+    virtual void    BeginResizeSection();
+    virtual void    ResizeSection( ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeFrameNumber );
 
     // FThumbnail interface
     virtual void    SetSingleTime( double iGlobalTime ) override;

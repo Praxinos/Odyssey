@@ -1,0 +1,18 @@
+// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
+// IDDN 
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+class UMovieScene;
+class UMovieSceneSection;
+
+class EPOSTRACKS_API MovieSceneHelpersResize
+{
+public:
+    //static FFrameNumber RangeSize( TRange<FFrameNumber> iRange ); // ...mGap.Size<int32>() doesn't compile -_-
+
+    static TRange<FFrameNumber> GetValidRangeLeading( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold );
+    static TRange<FFrameNumber> GetValidRangeTrailing( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold );
+};

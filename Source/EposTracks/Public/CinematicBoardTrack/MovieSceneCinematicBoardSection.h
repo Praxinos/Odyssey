@@ -20,6 +20,12 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
     /** Default constructor. */
     UMovieSceneCinematicBoardSection();
 
+#if WITH_EDITOR
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+
+    virtual void PreEditChange( FProperty* PropertyAboutToChange ) override;
+#endif
+
 public:
     /** @return The board display name */
     UFUNCTION( BlueprintPure, Category = "Movie Scene Section" )
@@ -48,4 +54,36 @@ private:
     UPROPERTY()
     float mThumbnailReferenceOffset;
 #endif
+
+public:
+    void StartResizing()
+    {
+        mResizing = 0;
+        
+        mSectionRangeBackup = GetTrueRange();
+    }
+    void Resizing()
+    {
+        mResizing++;
+    }
+    void StopResizing()
+    {
+        mResizing = -1;
+
+        mSectionRangeBackup = TRange<FFrameNumber>::Empty();
+    }
+    bool IsResizing() const
+    {
+        return mResizing > 0;
+    }
+
+    FMovieSceneFrameRange GetTrueRangeBackup() const
+    {
+        return mSectionRangeBackup;
+    }
+
+private:
+    int mResizing;
+
+    FMovieSceneFrameRange mSectionRangeBackup;
 };
