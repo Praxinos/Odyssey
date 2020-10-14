@@ -37,7 +37,7 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     //---
 
-    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), MovieSceneHelpersShift::RangeSize( shift_result.mNewRange ).Value, iRowIndex );
+    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), shift_result.mNewRange.Size<FFrameNumber>().Value, iRowIndex );
 
     UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 
@@ -292,17 +292,17 @@ GetMoveInfo( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* 
 
     if( move_result.mInitialGap.IsEmpty() )
     {
-        if( MovieSceneHelpersShift::RangeSize( TRange<FFrameNumber>( 0, sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() ) ) < MovieSceneHelpersShift::RangeSize( iSection->GetTrueRange() ) ) //PATCH: to guess if the section was the first or the last
+        if( TRange<FFrameNumber>( 0, sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() ).Size<FFrameNumber>() < iSection->GetTrueRange().Size<FFrameNumber>() ) //PATCH: to guess if the section was the first or the last
         {
             FFrameNumber section_n_upper = iSection->GetTrueRange().GetUpperBound().GetValue();
-            move_result.mInitialGap = TRange<FFrameNumber>( section_n_upper, section_n_upper + MovieSceneHelpersShift::RangeSize( iSection->GetTrueRange() ) );
+            move_result.mInitialGap = TRange<FFrameNumber>( section_n_upper, section_n_upper + iSection->GetTrueRange().Size<FFrameNumber>() );
 
             move_result.mSectionsBeforeGap = sections_without_selected;
         }
         else
         {
             FFrameNumber section_0_lower = iSection->GetTrueRange().GetLowerBound().GetValue();
-            move_result.mInitialGap = TRange<FFrameNumber>( section_0_lower - MovieSceneHelpersShift::RangeSize( iSection->GetTrueRange() ), section_0_lower );
+            move_result.mInitialGap = TRange<FFrameNumber>( section_0_lower - iSection->GetTrueRange().Size<FFrameNumber>(), section_0_lower );
 
             move_result.mSectionsAfterGap = sections_without_selected;
         }
@@ -310,14 +310,14 @@ GetMoveInfo( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* 
         //if( &ioSection == Sections[0] || ( Sections.Num() >= 2 && &ioSection == Sections[1] ) )
         //{
         //    FFrameNumber section_0_lower = ioSection.GetTrueRange().GetLowerBound().GetValue();
-        //    initial_gap = TRange<FFrameNumber>( section_0_lower - MovieSceneHelpersShift::RangeSize( ioSection.GetTrueRange() ), section_0_lower );
+        //    initial_gap = TRange<FFrameNumber>( section_0_lower - ioSection.GetTrueRange().Size<FFrameNumber>(), section_0_lower );
 
         //    sections_after_gap = sections_without_selected;
         //}
         //else if( &ioSection == Sections.Last() )
         //{
         //    FFrameNumber section_n_upper = ioSection.GetTrueRange().GetUpperBound().GetValue();
-        //    initial_gap = TRange<FFrameNumber>( section_n_upper, section_n_upper + MovieSceneHelpersShift::RangeSize( ioSection.GetTrueRange() ) );
+        //    initial_gap = TRange<FFrameNumber>( section_n_upper, section_n_upper + ioSection.GetTrueRange().Size<FFrameNumber>() );
 
         //    sections_before_gap = sections_without_selected;
         //}
@@ -328,8 +328,8 @@ GetMoveInfo( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* 
     }
 
     move_result.mInitialGapMiddle = ( move_result.mInitialGap.GetLowerBoundValue().Value + move_result.mInitialGap.GetUpperBoundValue().Value ) / 2;
-    move_result.mInitialGapSize = MovieSceneHelpersShift::RangeSize( move_result.mInitialGap );
-    //check( move_result.mInitialGapSize == MovieSceneHelpersShift::RangeSize( iSection->GetTrueRange() ) );
+    move_result.mInitialGapSize = move_result.mInitialGap.Size<FFrameNumber>();
+    //check( move_result.mInitialGapSize == iSection->GetTrueRange().Size<FFrameNumber>() );
 
     return move_result;
 }
@@ -449,12 +449,12 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 if( ioSection.GetTrueRange().GetLowerBoundValue() <= ( sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() + sections_without_selected.Last()->GetTrueRange().GetUpperBoundValue() ) / 2 )
                 {
                     ioSection.MoveSection( sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() - ioSection.GetTrueRange().GetLowerBoundValue() );
-                    ioSection.MoveSection( -MovieSceneHelpersShift::RangeSize( ioSection.GetTrueRange() ) );
+                    ioSection.MoveSection( - ioSection.GetTrueRange().Size<FFrameNumber>() );
                 }
                 else
                 {
                     ioSection.MoveSection( sections_without_selected.Last()->GetTrueRange().GetUpperBoundValue() - ioSection.GetTrueRange().GetUpperBoundValue() );
-                    ioSection.MoveSection( MovieSceneHelpersShift::RangeSize( ioSection.GetTrueRange() ) );
+                    ioSection.MoveSection( ioSection.GetTrueRange().Size<FFrameNumber>() );
                 }
             }
             else

@@ -8,13 +8,6 @@
 //---
 
 //static
-FFrameNumber
-MovieSceneHelpersShift::RangeSize( TRange<FFrameNumber> iRange )
-{
-    return iRange.GetUpperBoundValue() - iRange.GetLowerBoundValue();
-}
-
-//static
 FShiftResult
 MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration )
 {
@@ -65,7 +58,7 @@ MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, F
 
             // If iStartTime is inside the second half -> compute the range after the section
             FShiftResult shift_result;
-            shift_result.mNewRange = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( current_section_range.GetUpperBound() ).GetValue(), current_section_range.GetUpperBoundValue() + RangeSize( current_section_range ) );
+            shift_result.mNewRange = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( current_section_range.GetUpperBound() ).GetValue(), current_section_range.GetUpperBoundValue() + current_section_range.Size<FFrameNumber>() );
             shift_result.mFillGap = false;
             return shift_result;
         }
@@ -93,7 +86,7 @@ MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, F
     if( TRangeBound<FFrameNumber>::MinLower( new_start_bound, first_range.GetLowerBound() ) == new_start_bound )
     {
         FShiftResult shift_result;
-        shift_result.mNewRange = TRange<FFrameNumber>( first_range.GetLowerBound().GetValue() - RangeSize( first_range ), TRangeBound<FFrameNumber>::FlipInclusion( first_range.GetLowerBound() ).GetValue() );
+        shift_result.mNewRange = TRange<FFrameNumber>( first_range.GetLowerBound().GetValue() - first_range.Size<FFrameNumber>(), TRangeBound<FFrameNumber>::FlipInclusion( first_range.GetLowerBound() ).GetValue() );
         shift_result.mFillGap = true;
         shift_result.mGap = TRange<FFrameNumber>( shift_result.mNewRange.GetLowerBound(), first_range.GetLowerBound().GetValue() );
         return shift_result;
@@ -103,7 +96,7 @@ MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, F
     if( TRangeBound<FFrameNumber>::MaxUpper( new_start_bound, TRangeBound<FFrameNumber>::FlipInclusion( last_range.GetUpperBound() ) ) == new_start_bound )
     {
         FShiftResult shift_result;
-        shift_result.mNewRange = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( last_range.GetUpperBound() ).GetValue(), last_range.GetUpperBound().GetValue() + RangeSize( last_range ) );
+        shift_result.mNewRange = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( last_range.GetUpperBound() ).GetValue(), last_range.GetUpperBound().GetValue() + last_range.Size<FFrameNumber>() );
         shift_result.mFillGap = true;
         shift_result.mGap = TRange<FFrameNumber>( last_range.GetUpperBound().GetValue(), shift_result.mNewRange.GetUpperBound().GetValue() );
         return shift_result;
@@ -120,7 +113,7 @@ MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, F
         if( gap_range.Contains( iStartTime ) )
         {
             FShiftResult shift_result;
-            shift_result.mNewRange = TRange<FFrameNumber>( gap_range.GetLowerBound().GetValue(), gap_range.GetLowerBound().GetValue() + RangeSize( previous_section->GetTrueRange() ) );
+            shift_result.mNewRange = TRange<FFrameNumber>( gap_range.GetLowerBound().GetValue(), gap_range.GetLowerBound().GetValue() + previous_section->GetTrueRange().Size<FFrameNumber>() );
             shift_result.mFillGap = true;
             shift_result.mGap = gap_range;
             return shift_result;
@@ -148,11 +141,11 @@ MovieSceneHelpersShift::ShiftFollowingSections( TArray< UMovieSceneSection* > iS
     for( auto section : sections_to_shift )
     {
         // Move the following sections forward of the size of the new section
-        FFrameNumber offset = RangeSize( iNewSection->GetTrueRange() );
+        FFrameNumber offset = iNewSection->GetTrueRange().Size<FFrameNumber>();
         // If the new section is filling a gap
         if( iShiftResult.mFillGap )
             // If the gap is smaller than the new section, adjust the shift offset
-            offset -= RangeSize( iShiftResult.mGap );
+            offset -= iShiftResult.mGap.Size<FFrameNumber>();
         // If the gap is bigger than the new section, do not modify the next section
         offset = FMath::Max( FFrameNumber( 0 ), offset );
 
@@ -177,7 +170,7 @@ MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( TArray< UMovieSceneSe
     for( auto section : sections_to_shift )
     {
         // Just move the following sections backward of the size of the removed section
-        FFrameNumber offset = RangeSize( iNewSection->GetTrueRange() );
+        FFrameNumber offset = iNewSection->GetTrueRange().Size<FFrameNumber>();
 
         section->MoveSection( -offset );
     }

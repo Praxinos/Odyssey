@@ -25,8 +25,6 @@ struct FShiftResult
 class EPOSTRACKS_API MovieSceneHelpersShift
 {
 public:
-    static FFrameNumber RangeSize( TRange<FFrameNumber> iRange ); // ...mGap.Size<int32>() doesn't compile -_-
-
     static FShiftResult GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration );
 
     static void ShiftFollowingSections( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection, FShiftResult iShiftResult );
