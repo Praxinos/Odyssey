@@ -324,6 +324,11 @@ FShotSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
 void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
     ShotSequenceHelpers::CreateDefaultTracksForActor( mSequencer, iActor, iBinding );
+
+    ShotSequenceHelpers::FixCameraBindingOnCameraCut( mSequencer, iActor, iBinding );
+
+    //PATCH: replace standard cameracut track (if exists) by our single cameracut track
+    ShotSequenceHelpers::PatchStandardCameraCutTrack( mSequencer, iActor, iBinding );
 }
 
 void FShotSequenceEditorToolkit::HandleCreateCamera()

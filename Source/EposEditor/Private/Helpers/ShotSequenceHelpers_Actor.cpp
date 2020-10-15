@@ -252,4 +252,70 @@ ShotSequenceHelpers::CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequen
         CreateTrack( iSequencer, iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
 }
 
+void
+ShotSequenceHelpers::FixCameraBindingOnCameraCut( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return;
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( !movieScene )
+        return;
+
+    //---
+
+    // Not a camera, nothing to do
+    if( !iActor->IsA<ACineCameraActor>() )
+        return;
+
+    // No single cameracut track, nothing to do
+    UMovieSceneTrack* track = movieScene->GetCameraCutTrack();
+    UMovieSceneSingleCameraCutTrack* cameracut_track = Cast<UMovieSceneSingleCameraCutTrack>( track );
+    if( !cameracut_track )
+        return;
+
+    if( !cameracut_track->GetAllSections().Num() )
+        return;
+
+    UMovieSceneSection* section = cameracut_track->GetAllSections()[0];
+    UMovieSceneSingleCameraCutSection* cameracut_section = Cast<UMovieSceneSingleCameraCutSection>( section );
+
+    cameracut_section->Modify();
+    cameracut_section->SetCameraGuid( iBinding );
+}
+
+void
+ShotSequenceHelpers::PatchStandardCameraCutTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return;
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( !movieScene )
+        return;
+
+    //---
+
+    // No cameracut track, nothing to do
+    UMovieSceneTrack* track = movieScene->GetCameraCutTrack();
+    if( !track )
+        return;
+
+    // Already a single cameracut track, nothing to do
+    UMovieSceneSingleCameraCutTrack* cameracut_track = Cast<UMovieSceneSingleCameraCutTrack>( track );
+    if( cameracut_track )
+        return;
+
+    // Transform the existing cameracut (not a single one) to a single one
+    movieScene->RemoveCameraCutTrack();
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, &camera_guid );
+
+    //TODO: maybe get the size of the existing section
+    // But as it should only be called in FSequencer::AddActors(), after an auto track creation, it should be ok to replace without taking care to of the existing section
+
+    ShotSequenceHelpers::CreateCameraCut( iSequencer, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
+}
+
 #undef LOCTEXT_NAMESPACE

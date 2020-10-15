@@ -62,6 +62,18 @@ public:
     */
     static void CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
 
+    /**
+    *  Fix the binding of the cameracut track when a new camera is dropped
+    *
+    * @param TSharedPtr<ISequencer> iSequencer to add inner track.
+    * @param AActor iActor corresponding to the binding.
+    * @param FGuid iBinding  Guid of the track containing the actor.
+    */
+    static void FixCameraBindingOnCameraCut( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
+
+    // PATCH
+    static void PatchStandardCameraCutTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
+
 private:
     static UMovieSceneTrack* CreateTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
     static FGuid CreateComponentTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentName );
