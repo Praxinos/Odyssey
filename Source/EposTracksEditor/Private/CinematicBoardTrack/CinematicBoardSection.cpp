@@ -435,5 +435,25 @@ FCinematicBoardSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, F
     }
 };
 
+void
+FCinematicBoardSection::BeginSlipSection()
+{
+}
+
+void
+FCinematicBoardSection::SlipSection( FFrameNumber SlipTime )
+{
+}
+
+void
+FCinematicBoardSection::BeginDilateSection()
+{
+}
+
+void
+FCinematicBoardSection::DilateSection( const TRange<FFrameNumber>& NewRange, float DilationFactor )
+{
+}
+
 
 #undef LOCTEXT_NAMESPACE

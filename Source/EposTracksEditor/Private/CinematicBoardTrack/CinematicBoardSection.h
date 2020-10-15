@@ -43,6 +43,12 @@ public:
     
     virtual void    BeginResizeSection();
     virtual void    ResizeSection( ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeFrameNumber );
+    
+    virtual void    BeginSlipSection();
+    virtual void    SlipSection( FFrameNumber SlipTime );
+
+    virtual void    BeginDilateSection();
+    virtual void    DilateSection( const TRange<FFrameNumber>& NewRange, float DilationFactor );
 
     // FThumbnail interface
     virtual void    SetSingleTime( double iGlobalTime ) override;

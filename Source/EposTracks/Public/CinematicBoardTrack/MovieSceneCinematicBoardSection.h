@@ -56,31 +56,12 @@ private:
 #endif
 
 public:
-    void StartResizing()
-    {
-        mResizing = 0;
-        
-        mSectionRangeBackup = GetTrueRange();
-    }
-    void Resizing()
-    {
-        mResizing++;
-    }
-    void StopResizing()
-    {
-        mResizing = -1;
+    void StartResizing();
+    void Resizing();
+    void StopResizing();
+    bool IsResizing() const;
 
-        mSectionRangeBackup = TRange<FFrameNumber>::Empty();
-    }
-    bool IsResizing() const
-    {
-        return mResizing > 0;
-    }
-
-    FMovieSceneFrameRange GetTrueRangeBackup() const
-    {
-        return mSectionRangeBackup;
-    }
+    FMovieSceneFrameRange GetTrueRangeBackup() const;
 
 private:
     int mResizing;

@@ -65,6 +65,37 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 
 #endif
 
+void
+UMovieSceneCinematicBoardSection::StartResizing()
+{
+    mResizing = 0;
+
+    mSectionRangeBackup = GetTrueRange();
+}
+void
+UMovieSceneCinematicBoardSection::Resizing()
+{
+    mResizing++;
+}
+void
+UMovieSceneCinematicBoardSection::StopResizing()
+{
+    mResizing = -1;
+
+    mSectionRangeBackup = TRange<FFrameNumber>::Empty();
+}
+bool
+UMovieSceneCinematicBoardSection::IsResizing() const
+{
+    return mResizing > 0;
+}
+
+FMovieSceneFrameRange
+UMovieSceneCinematicBoardSection::GetTrueRangeBackup() const
+{
+    return mSectionRangeBackup;
+}
+
 //---
 
 FString
