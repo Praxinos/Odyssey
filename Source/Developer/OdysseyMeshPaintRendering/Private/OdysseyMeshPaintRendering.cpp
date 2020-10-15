@@ -105,6 +105,8 @@ namespace OdysseyMeshPaintRendering
 
     IMPLEMENT_SHADER_TYPE( ,TOdysseyMeshPaintPixelShader,TEXT("/Plugins/Iliad/Private/OdysseyMeshPaintShader.usf"),TEXT("MainPS"),SF_Pixel);
 
+    typedef FSimpleElementVertexDeclaration FMeshPaintDilateVertexDeclaration;
+    TGlobalResource< FMeshPaintDilateVertexDeclaration > GMeshPaintDilateVertexDeclaration;
 
 	/** Binds the mesh paint vertex and pixel shaders to the graphics device */
 	void SetMeshPaintShaders( FRHICommandList& iRHICmdList, FGraphicsPipelineStateInitializer& iGraphicsPSOInit, 
@@ -116,6 +118,7 @@ namespace OdysseyMeshPaintRendering
         TShaderMapRef< TOdysseyMeshPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
 		TShaderMapRef< TOdysseyMeshPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
 
+        iGraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GMeshPaintDilateVertexDeclaration.VertexDeclarationRHI;
         iGraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
 		iGraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();
 		iGraphicsPSOInit.PrimitiveType = PT_TriangleList;

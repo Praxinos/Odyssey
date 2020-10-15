@@ -13,6 +13,12 @@ void MainPS( float4 InPosition : SV_POSITION,
 		   float3 InWorldSpaceVertexPosition : TEXCOORD1,
 		   out float4 OutColor : SV_Target0)
 {
+    //InCloneTextureCoordinates is in UV coordinates (0...1)
+    
+    float2 coord;
+    coord.x = 0.5;
+    coord.y = 0.5;
+    
 	float4 OldColor = Texture2DSample(s_CloneTexture, s_CloneTextureSampler, InCloneTextureCoordinates );
 
 	float4x4 WorldToBrushMatrix = c_WorldToBrushMatrix;
@@ -25,13 +31,54 @@ void MainPS( float4 InPosition : SV_POSITION,
    	// Start by using the old color
 	float4 NewColor = OldColor;
     
-	float4 BrushColor = c_BrushColor;
+    // Is the brush close enough to the vertex to paint?
+ 	float DistanceToVertex2D = length( BrushSpaceVertexPosition2D );
+ 	if( DistanceToVertex2D <= 10 )
+	{
+		// OK the vertex is overlapping the brush in 2D space, but is it too close or
+		// two far (depth wise) to be influenced?
+ 		float VertexDepthToBrush = abs( BrushSpaceVertexPosition.z );
+ 		if( VertexDepthToBrush <= 10 )
+		{
+			// Compute amount of paint to apply
+			float PaintAmount = 1.0f;
+
+			// Apply radial-based falloff
+			{
+				// Compute the actual distance
+				float InnerBrushRadius = 10 - 5;
+				if( DistanceToVertex2D > InnerBrushRadius )
+				{
+					float RadialBasedFalloff = ( DistanceToVertex2D - InnerBrushRadius ) / 5;
+					PaintAmount *= 1.0f - RadialBasedFalloff;
+				}
+			}
+
+			// Apply depth-based falloff
+			{
+				float InnerBrushDepth = 10 - 5;
+				if( VertexDepthToBrush > InnerBrushDepth )
+				{
+					float DepthBasedFalloff = ( VertexDepthToBrush - InnerBrushDepth ) / 5;
+					PaintAmount *= 1.0f - DepthBasedFalloff;
+				}
+			}
+
+			PaintAmount *= 1;
+
+			float4 BrushColor = c_BrushColor;
+
+			NewColor.a = lerp(OldColor.a, BrushColor.a, PaintAmount);
+			NewColor.r = lerp(OldColor.r * OldColor.a, BrushColor.r * BrushColor.a, PaintAmount);
+			NewColor.g = lerp(OldColor.g * OldColor.a, BrushColor.g * BrushColor.a, PaintAmount);
+			NewColor.b = lerp(OldColor.b * OldColor.a, BrushColor.b * BrushColor.a, PaintAmount);
+			if (NewColor.a > 0.0f)
+			{
+				NewColor.rgb /= NewColor.a;
+			}
+		}
+	}
     
-	NewColor.a = BrushColor.a;
-	NewColor.r = BrushColor.r;
-	NewColor.g = BrushColor.g;
-	NewColor.b = BrushColor.b;
-        
 	OutColor = NewColor;
 }
 
