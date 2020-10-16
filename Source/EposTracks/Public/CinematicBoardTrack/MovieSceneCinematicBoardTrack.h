@@ -51,4 +51,13 @@ public:
 #if WITH_EDITORONLY_DATA
     virtual FText GetDefaultDisplayName() const override;
 #endif
+
+private:
+    TMap<UMovieSceneSection*, TRange<FFrameNumber>> mPreviousMove;
+    TMap<UMovieSceneSection*, TRange<FFrameNumber>> mLastGapMove;
+
+    friend uint32 GetTypeHash( const UMovieSceneSection* iSection )
+    {
+        return GetTypeHash( iSection->GetFullName() );
+    }
 };

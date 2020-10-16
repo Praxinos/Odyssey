@@ -191,8 +191,9 @@ UMovieSceneCinematicBoardTrack::GetRowSegmentBlender() const
 
 struct FMoveResult
 {
+    bool                        mForward;
+    bool                        mBackward;
     FFrameNumber                mReferenceFrame;
-    TRange<FFrameNumber>        mReferenceSectionRange;
 
     TRange<FFrameNumber>        mInitialGap;
     FFrameNumber                mInitialGapMiddle;
@@ -201,8 +202,9 @@ struct FMoveResult
     TArray<UMovieSceneSection*> mSectionsAfterGap;
 
     FMoveResult()
-        : mReferenceFrame( 0 )
-        , mReferenceSectionRange()
+        : mForward( false )
+        , mBackward( false )
+        , mReferenceFrame( 0 )
         , mInitialGap( TRange<FFrameNumber>::Empty() )
         , mInitialGapMiddle( 0 )
         , mInitialGapSize( 0 )
@@ -212,194 +214,167 @@ struct FMoveResult
     }
 };
 
-TRange<FFrameNumber>
-FindGap( TArray< UMovieSceneSection* > iSections )
-{
-    TRange<FFrameNumber> gap( TRange<FFrameNumber>::Empty() );
-
-    for( int i = 0; i < iSections.Num(); i++ )
-    {
-        UMovieSceneSection* current_section = iSections[i];
-        TRangeBound<FFrameNumber> current_upper_bound = current_section->GetTrueRange().GetUpperBound();
-
-        if( !iSections.IsValidIndex( i + 1 ) )
-            continue;
-
-        UMovieSceneSection* next_section = iSections[i + 1];
-        TRangeBound<FFrameNumber> next_lower_bound = next_section->GetTrueRange().GetLowerBound();
-        if( current_upper_bound.GetValue() != next_lower_bound.GetValue() )
-        {
-            gap = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( current_upper_bound ), TRangeBound<FFrameNumber>::FlipInclusion( next_lower_bound ) );
-        }
-    }
-
-    return gap;
-}
-
 FMoveResult
-GetMoveInfo( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iSection )
+GetMoveInfo( TArray< UMovieSceneSection* > iSections, TMap<UMovieSceneSection*, TRange<FFrameNumber>> iPreviousMove, TMap<UMovieSceneSection*, TRange<FFrameNumber>> iLastGapMove, const UMovieSceneCinematicBoardSection* iSection )
 {
     FMoveResult move_result;
 
-    // Get reference (iSection) stuff
-    move_result.mReferenceSectionRange = iSection->GetTrueRange();
-    TArray<TRange<FFrameNumber>> ranges = move_result.mReferenceSectionRange.Split( ( move_result.mReferenceSectionRange.GetLowerBoundValue().Value + move_result.mReferenceSectionRange.GetUpperBoundValue().Value ) / 2 );
-    if( ranges.Num() != 2 )
-        move_result.mReferenceFrame = move_result.mReferenceSectionRange.GetLowerBoundValue();
-    else
-        move_result.mReferenceFrame = ranges[0].GetUpperBoundValue();
+    TRange<FFrameNumber>* previous_range = iPreviousMove.Find( iSection );
 
-    // Get all sections without the current one
-    TArray<UMovieSceneSection*> sections_without_selected;
+    if( iSection->GetInclusiveStartFrame() > previous_range->GetLowerBoundValue() )
+        move_result.mForward = true;
+    else if( iSection->GetInclusiveStartFrame() < previous_range->GetLowerBoundValue() )
+        move_result.mBackward = true;
+    else
+        return move_result;
+
+    if( move_result.mForward )
+        move_result.mReferenceFrame = iSection->GetExclusiveEndFrame();
+    else
+        move_result.mReferenceFrame = iSection->GetInclusiveStartFrame();
+
+    //---
+
+    move_result.mInitialGap = *iLastGapMove.Find( iSection );
+    move_result.mInitialGapMiddle = ( move_result.mInitialGap.GetLowerBoundValue() + move_result.mInitialGap.GetUpperBoundValue() ) / 2;
+    move_result.mInitialGapSize = move_result.mInitialGap.Size<FFrameNumber>();
+
+    //---
+
     for( int i = 0; i < iSections.Num(); i++ )
     {
         if( iSections[i] == iSection )
             continue;
 
-        sections_without_selected.Add( iSections[i] );
-    }
+        UMovieSceneSection* section = iSections[i];
+        FFrameNumber section_middle = ( section->GetInclusiveStartFrame() + section->GetExclusiveEndFrame() ) / 2;
 
-    //---
-
-    if( !sections_without_selected.Num() )
-        return move_result; // Nothing to do
-
-    //---
-
-    // Compute gap stuff
-    bool is_before_gap = true;
-    for( int i = 0; i < sections_without_selected.Num(); i++ )
-    {
-        UMovieSceneSection* current_section = sections_without_selected[i];
-        TRangeBound<FFrameNumber> current_upper_bound = current_section->GetTrueRange().GetUpperBound();
-
-        if( is_before_gap )
-            move_result.mSectionsBeforeGap.Add( current_section );
+        if( section_middle < move_result.mInitialGapMiddle )
+            move_result.mSectionsBeforeGap.Add( section );
         else
-            move_result.mSectionsAfterGap.Add( current_section );
-
-        if( !sections_without_selected.IsValidIndex( i + 1 ) )
-            continue;
-
-        UMovieSceneSection* next_section = sections_without_selected[i + 1];
-        TRangeBound<FFrameNumber> next_lower_bound = next_section->GetTrueRange().GetLowerBound();
-        if( current_upper_bound.GetValue() != next_lower_bound.GetValue() )
-        {
-            move_result.mInitialGap = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( current_upper_bound ), TRangeBound<FFrameNumber>::FlipInclusion( next_lower_bound ) );
-            is_before_gap = false;
-        }
+            move_result.mSectionsAfterGap.Add( section );
     }
 
-    if( move_result.mInitialGap.IsEmpty() )
-    {
-        if( TRange<FFrameNumber>( 0, sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() ).Size<FFrameNumber>() < iSection->GetTrueRange().Size<FFrameNumber>() ) //PATCH: to guess if the section was the first or the last
-        {
-            FFrameNumber section_n_upper = iSection->GetTrueRange().GetUpperBound().GetValue();
-            move_result.mInitialGap = TRange<FFrameNumber>( section_n_upper, section_n_upper + iSection->GetTrueRange().Size<FFrameNumber>() );
 
-            move_result.mSectionsBeforeGap = sections_without_selected;
-        }
-        else
-        {
-            FFrameNumber section_0_lower = iSection->GetTrueRange().GetLowerBound().GetValue();
-            move_result.mInitialGap = TRange<FFrameNumber>( section_0_lower - iSection->GetTrueRange().Size<FFrameNumber>(), section_0_lower );
+    Algo::Reverse( move_result.mSectionsBeforeGap );
 
-            move_result.mSectionsAfterGap = sections_without_selected;
-        }
-
-        //if( &ioSection == Sections[0] || ( Sections.Num() >= 2 && &ioSection == Sections[1] ) )
-        //{
-        //    FFrameNumber section_0_lower = ioSection.GetTrueRange().GetLowerBound().GetValue();
-        //    initial_gap = TRange<FFrameNumber>( section_0_lower - ioSection.GetTrueRange().Size<FFrameNumber>(), section_0_lower );
-
-        //    sections_after_gap = sections_without_selected;
-        //}
-        //else if( &ioSection == Sections.Last() )
-        //{
-        //    FFrameNumber section_n_upper = ioSection.GetTrueRange().GetUpperBound().GetValue();
-        //    initial_gap = TRange<FFrameNumber>( section_n_upper, section_n_upper + ioSection.GetTrueRange().Size<FFrameNumber>() );
-
-        //    sections_before_gap = sections_without_selected;
-        //}
-        //else
-        //{
-        //    check( false );
-        //}
-    }
-
-    move_result.mInitialGapMiddle = ( move_result.mInitialGap.GetLowerBoundValue().Value + move_result.mInitialGap.GetUpperBoundValue().Value ) / 2;
-    move_result.mInitialGapSize = move_result.mInitialGap.Size<FFrameNumber>();
-    //check( move_result.mInitialGapSize == iSection->GetTrueRange().Size<FFrameNumber>() );
+    //UE_LOG( LogTemp, Warning, TEXT( "previous range: [%d, %d) - current range: [%d, %d) - forward %d backward %d - ref frame: %d - gap: [%d, %d, %d) - sections before %d after %d" )
+    //                                                                                                                                                , previous_range->GetLowerBoundValue().Value, previous_range->GetUpperBoundValue().Value, iSection->GetInclusiveStartFrame().Value, iSection->GetExclusiveEndFrame().Value
+    //                                                                                                                                                , move_result.mForward, move_result.mBackward, move_result.mReferenceFrame.Value
+    //                                                                                                                                                , move_result.mInitialGap.GetLowerBoundValue().Value, move_result.mInitialGap.GetUpperBoundValue().Value, move_result.mInitialGapMiddle.Value
+    //                                                                                                                                                , move_result.mSectionsBeforeGap.Num(), move_result.mSectionsAfterGap.Num() );
 
     return move_result;
 }
 
 void
-FixMoveSections( TArray< UMovieSceneSection* > ioSections, UMovieSceneSection* iSection, FMoveResult iMoveResult )
+FixMoveSections( TArray< UMovieSceneSection* >& ioSections, TMap<UMovieSceneSection*, TRange<FFrameNumber>>& iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
 {
-    if( iMoveResult.mInitialGap.IsEmpty() )
-        return; // Nothing to do
-
-    for( auto current_section : ioSections )
+    // If the reference frame is at the right of the gap,
+    // process only every sections 'AfterGap'
+    if( iMoveResult.mReferenceFrame > iMoveResult.mInitialGapMiddle )
     {
-        if( current_section == iSection )
-            continue;
-
-        TRange<FFrameNumber> current_section_range( current_section->GetTrueRange() );
-
-        if( iMoveResult.mReferenceFrame > iMoveResult.mInitialGapMiddle )
+        // Find the section (if any) corresponding to the reference frame
+        UMovieSceneSection* section_containing_reference_frame = nullptr;
+        TArray<TRange<FFrameNumber>> ranges;
+        for( auto section : iMoveResult.mSectionsAfterGap )
         {
-            TArray<TRange<FFrameNumber>> ranges = current_section_range.Split( ( current_section_range.GetLowerBoundValue().Value + current_section_range.GetUpperBoundValue().Value ) / 2 );
-            if( ranges[0].Contains( iMoveResult.mReferenceFrame ) )
+            if( section->IsTimeWithinSection( iMoveResult.mReferenceFrame ) )
             {
-                for( int j = 0; j < iMoveResult.mSectionsAfterGap.Num(); j++ )
-                {
-                    UMovieSceneSection* current_section_to_shift = iMoveResult.mSectionsAfterGap[j];
-                    if( current_section_to_shift == current_section )
-                        break;
-
-                    current_section_to_shift->MoveSection( -iMoveResult.mInitialGapSize );
-                }
-            }
-            else if( ranges.Num() >= 2 && ranges[1].Contains( iMoveResult.mReferenceFrame ) )
-            {
-                for( int j = 0; j < iMoveResult.mSectionsAfterGap.Num(); j++ )
-                {
-                    UMovieSceneSection* current_section_to_shift = iMoveResult.mSectionsAfterGap[j];
-                    current_section_to_shift->MoveSection( -iMoveResult.mInitialGapSize );
-
-                    if( current_section_to_shift == current_section )
-                        break;
-                }
+                section_containing_reference_frame = section;
+                ranges = section->GetTrueRange().Split( ( section->GetInclusiveStartFrame() + section->GetExclusiveEndFrame() ) / 2 );
+                break;
             }
         }
-        else if( iMoveResult.mReferenceFrame < iMoveResult.mInitialGapMiddle )
+
+        if( ranges.Num() && ranges[0].Contains( iMoveResult.mReferenceFrame ) )
         {
-            TArray<TRange<FFrameNumber>> ranges = current_section_range.Split( ( current_section_range.GetLowerBoundValue().Value + current_section_range.GetUpperBoundValue().Value ) / 2 );
-            if( ranges[0].Contains( iMoveResult.mReferenceFrame ) )
+            // Move every 'after gap' sections before (and excluding) the referenced one
+            for( auto section_after_gap : iMoveResult.mSectionsAfterGap )
             {
-                for( int j = iMoveResult.mSectionsBeforeGap.Num() - 1; j >= 0; j-- )
-                {
-                    UMovieSceneSection* current_section_to_shift = iMoveResult.mSectionsBeforeGap[j];
-                    current_section_to_shift->MoveSection( iMoveResult.mInitialGapSize );
+                if( section_after_gap == section_containing_reference_frame )
+                    break;
 
-                    if( current_section_to_shift == current_section )
-                        break;
-                }
+                TRange<FFrameNumber>* gap = iLastGapMove.Find( iSection );
+                FFrameNumber gap_shift = section_after_gap->GetTrueRange().Size<FFrameNumber>();
+                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() + gap_shift, gap->GetUpperBoundValue() + gap_shift );
+
+                section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
             }
-            else if( ranges.Num() >= 2 && ranges[1].Contains( iMoveResult.mReferenceFrame ) )
+        }
+        else if( ranges.Num() >= 2 && ranges[1].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'after gap' sections before (and including) the referenced one
+            for( auto section_after_gap : iMoveResult.mSectionsAfterGap )
             {
-                for( int j = iMoveResult.mSectionsBeforeGap.Num() - 1; j >= 0; j-- )
-                {
-                    UMovieSceneSection* current_section_to_shift = iMoveResult.mSectionsBeforeGap[j];
-                    if( current_section_to_shift == current_section )
-                        break;
+                TRange<FFrameNumber>* gap = iLastGapMove.Find( iSection );
+                FFrameNumber gap_shift = section_after_gap->GetTrueRange().Size<FFrameNumber>();
+                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() + gap_shift, gap->GetUpperBoundValue() + gap_shift );
 
-                    current_section_to_shift->MoveSection( iMoveResult.mInitialGapSize );
-                }
+                section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
+
+                if( section_after_gap == section_containing_reference_frame )
+                    break;
             }
         }
     }
+    // If the reference frame is at the left of the gap,
+    // process only every sections 'BeforeGap'
+    else if( iMoveResult.mReferenceFrame < iMoveResult.mInitialGapMiddle )
+    {
+        // Find the section (if any) corresponding to the reference frame
+        UMovieSceneSection* section_containing_reference_frame = nullptr;
+        TArray<TRange<FFrameNumber>> ranges;
+        for( auto section : iMoveResult.mSectionsBeforeGap )
+        {
+            if( section->IsTimeWithinSection( iMoveResult.mReferenceFrame ) )
+            {
+                section_containing_reference_frame = section;
+                ranges = section->GetTrueRange().Split( ( section->GetInclusiveStartFrame() + section->GetExclusiveEndFrame() ) / 2 );
+                break;
+            }
+        }
+
+        if( ranges.Num() && ranges[0].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'before gap' sections after (and including) the referenced one
+            for( auto section_before_gap : iMoveResult.mSectionsBeforeGap )
+            {
+                TRange<FFrameNumber>* gap = iLastGapMove.Find( iSection );
+                FFrameNumber gap_shift = section_before_gap->GetTrueRange().Size<FFrameNumber>();
+                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() - gap_shift, gap->GetUpperBoundValue() - gap_shift );
+
+                section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
+
+                if( section_before_gap == section_containing_reference_frame )
+                    break;
+            }
+        }
+        else if( ranges.Num() >= 2 && ranges[1].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'before gap' sections after (and excluding) the referenced one
+            for( auto section_before_gap : iMoveResult.mSectionsBeforeGap )
+            {
+                if( section_before_gap == section_containing_reference_frame )
+                    break;
+
+                TRange<FFrameNumber>* gap = iLastGapMove.Find( iSection );
+                FFrameNumber gap_shift = section_before_gap->GetTrueRange().Size<FFrameNumber>();
+                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() - gap_shift, gap->GetUpperBoundValue() - gap_shift );
+
+                section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
+            }
+        }
+    }
+
+    MovieSceneHelpers::SortConsecutiveSections( ioSections );
+}
+
+void
+FixPostMoveSections( TArray< UMovieSceneSection* >& ioSections, TMap<UMovieSceneSection*, TRange<FFrameNumber>>& iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
+{
+    TRange<FFrameNumber>* gap = iLastGapMove.Find( iSection );
+    iSection->SetRange( *gap );
 
     MovieSceneHelpers::SortConsecutiveSections( ioSections );
 }
@@ -423,46 +398,37 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             board_section->StopResizing();
         }
     }
-    else // Everything else is considered as Moving
+    else
     {
-        FMoveResult move_result = GetMoveInfo( Sections, &ioSection );
-        FixMoveSections( Sections, &ioSection, move_result );
-
-        if( iParams.MoveType == EPropertyChangeType::ValueSet )
+        if( board_section->GuessStartMoving() )
         {
-            // Get all sections without the current one
-            TArray<UMovieSceneSection*> sections_without_selected;
-            for( int i = 0; i < Sections.Num(); i++ )
+            TRange<FFrameNumber>& previous_range = mPreviousMove.FindOrAdd( board_section );
+            previous_range = board_section->GetRangeBackup();
+            TRange<FFrameNumber>& last_gap = mLastGapMove.FindOrAdd( board_section );
+            last_gap = board_section->GetRangeBackup();
+
+            board_section->Moving();
+        }
+
+        if( board_section->IsMoving() )
+        {
+            FMoveResult move_result = GetMoveInfo( Sections, mPreviousMove, mLastGapMove, board_section );
+            FixMoveSections( Sections, mLastGapMove, &ioSection, move_result );
+
+            if( iParams.MoveType == EPropertyChangeType::ValueSet )
             {
-                if( Sections[i] == &ioSection )
-                    continue;
+                move_result = GetMoveInfo( Sections, mPreviousMove, mLastGapMove, board_section );
+                FixPostMoveSections( Sections, mLastGapMove, &ioSection, move_result );
 
-                sections_without_selected.Add( Sections[i] );
-            }
-
-            if( !sections_without_selected.Num() )
-                return;
-
-            TRange<FFrameNumber> new_gap = FindGap( sections_without_selected );
-            if( new_gap.IsEmpty() )
-            {
-                if( ioSection.GetTrueRange().GetLowerBoundValue() <= ( sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() + sections_without_selected.Last()->GetTrueRange().GetUpperBoundValue() ) / 2 )
-                {
-                    ioSection.MoveSection( sections_without_selected[0]->GetTrueRange().GetLowerBoundValue() - ioSection.GetTrueRange().GetLowerBoundValue() );
-                    ioSection.MoveSection( - ioSection.GetTrueRange().Size<FFrameNumber>() );
-                }
-                else
-                {
-                    ioSection.MoveSection( sections_without_selected.Last()->GetTrueRange().GetUpperBoundValue() - ioSection.GetTrueRange().GetUpperBoundValue() );
-                    ioSection.MoveSection( ioSection.GetTrueRange().Size<FFrameNumber>() );
-                }
+                board_section->StopMoving();
+                mPreviousMove.Remove( board_section );
             }
             else
             {
-                ioSection.SetRange( new_gap );
+                board_section->Moving();
+                TRange<FFrameNumber>& previous_range = mPreviousMove.FindOrAdd( board_section );
+                previous_range = board_section->GetTrueRange();
             }
-
-            MovieSceneHelpers::SortConsecutiveSections( Sections );
         }
     }
 }

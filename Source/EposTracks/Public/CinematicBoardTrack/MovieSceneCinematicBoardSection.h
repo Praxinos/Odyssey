@@ -55,16 +55,37 @@ private:
     float mThumbnailReferenceOffset;
 #endif
 
+//---
+
+public:
+    TRange<FFrameNumber> GetRangeBackup() const;
+
+private:
+    TRange<FFrameNumber> mSectionRangeBackup;
+
+//---
+
 public:
     void StartResizing();
     void Resizing();
     void StopResizing();
-    bool IsResizing() const;
 
-    FMovieSceneFrameRange GetTrueRangeBackup() const;
+    bool IsResizing() const;
 
 private:
     int mResizing;
 
-    FMovieSceneFrameRange mSectionRangeBackup;
+//---
+
+public:
+    bool GuessStartMoving(); //PATCH
+
+    void StartMoving();
+    void Moving();
+    void StopMoving();
+
+    bool IsMoving() const;
+
+private:
+    int mMoving;
 };
