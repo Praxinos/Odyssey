@@ -102,111 +102,129 @@ public:
     /** State Stroke Point Getters */
     /*******************************/
 
-    /** Get X */
+    //Gets the X axis of the stylus or mouse on ILIAD canvas.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetX();
 
-    /** Get Y */
+    //Gets the Y axis of the stylus or mouse on ILIAD canvas.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetY();
 
-    /** Get Z */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetZ();
+    /** Gets Z */
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetZ();
 
-    /** Get Pressure */
+    //Gets stylus pressure on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Returns normalized Float (0 = no pressure | 1 = max pressure).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetPressure();
 
-    /** Get Altitude */
+    //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Returns Float (angle).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetAltitude();
 
-    /** Get Altitude Normalized */
+    //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Returns normalized Float (0.5 = 45° | 1 = 90°).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetAltitudeNormalized();
 
-    /** Get Azimuth */
+    //Gets stylus azimtuh on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Returns Float (angle).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetAzimuth();
 
-    /** Get Azimuth Normalized */
+    //Gets stylus azimuth on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Returns normalized Float (0.5 = 180° | 1 = 360°).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetAzimuthNormalized();
 
-    /** Get Twist */
+    //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Only works with specific stylus !
+    //Returns Float (angle).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetTwist();
 
-    /** Get Twist Normalized */
+    //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Only works with specific stylus !
+    //Returns normalize Float (0.5 = 180° | 1 = 360°).
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetTwistNormalized();
 
-    /** Get Pitch */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetPitch();
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetPitch();
 
-    /** Get Pitch Normalized */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetPitchNormalized();
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetPitchNormalized();
 
-    /** Get Roll */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetRoll();
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetRoll();
 
-    /** Get Roll Normalized */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetRollNormalized();
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetRollNormalized();
 
-    /** Get Yaw */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetYaw();
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetYaw();
 
-    /** Get Yaw Normalized */
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
-    float  GetYawNormalized();
+    //Won't work.
+    //UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    //float  GetYawNormalized();
 
-    /** Get distance travelled */
+    //Gets distance travelled along the stroke.
+    //Returns a Float in pixels.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetDistanceAlongStroke();
 
-    /** Get Direction Vector Tangent */
+    //Gets Direction Vector Tangent.
+    //Returns a Vector 2D.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetDirectionVectorTangent();
 
-    /** Get Direction Vector Normal */
+    //Gets Direction Vector Normal.
+    //Returns a Vector 2D.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetDirectionVectorNormal();
 
-    /** Get Direction Angle Tangent as Degrees */
+    //Gets Direction Angle Tangent as Degrees.
+    //Returns an angle as a Float.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetDirectionAngleTangentDeg();
 
-    /** Get Direction Angle Normal as Degrees */
+    //Gets Direction Angle Normal as Degrees
+    //Returns an angle as a float.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetDirectionAngleNormalDeg();
 
-    /** Get Speed */
+    //Gets Speed.
+    //Returns a Vector 2D.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetSpeed();
 
-    /** Get Acceleration */
+    //Gets Acceleration.
+    //Returns a Vector 2D.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetAcceleration();
 
-    /** Get Jolt */
+    //Gets Jolt .
+    //Returns a Vector 2D.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetJolt();
 
-    /** Get Delta Position between this event and the last */
+    //Gets Delta Position between this event and the last.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FVector2D GetDeltaPosition();
 
-    /** Get Delta Time in micro seconds between this event and the last */
+    //Gets Delta Time in micro seconds between this event and the last.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     int GetDeltaTime();
 
-    /** Returns the keyboard and mouse keys down at this point */
+    //Returns the keyboard and mouse keys down at this point.
     UFUNCTION(BlueprintPure,Category="OdysseyBrush")
     TArray<FKey> GetKeysDown();
 
@@ -215,63 +233,69 @@ public:
     /**       State Getters        */
     /*******************************/
 
-    /** Get Color */
+    //Gets color from Color Selector and Color Sliders.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     FOdysseyBrushColor  GetColor();
 
-    /** Get Size Modifier */
+    //Gets size from Top Bar.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetSizeModifier();
 
-    /** Get Opacity Modifier */
+    //Gets opacity from Top Bar.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetOpacityModifier();
 
-    /** Get Flow Modifier */
+    //Gets flow from Top Bar.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetFlowModifier();
 
-    /** Get Step */
+    //Gets step from Stroke Options.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetStep();
 
-    /** Get Smoothing Strength */
+    //Gets smoothing strength from Stroke Options.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     float  GetSmoothingStrength();
 
-    /** Get Current Stroke Point Index */
+    //Gets index of each stamp applied in the stroke.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     int  GetCurrentStrokePointIndex();
 
-    /** Get Current Canvas Width */
+    //Gets width of the Texture asset currently modified.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     int  GetCanvasWidth();
 
-    /** Get Current Canvas Height */
+    //Gets height of the Texture asset currently modified.
     UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
     int  GetCanvasHeight();
 
-    /** Get Stroke Block */
+    //Gets Stroke Block.
     UFUNCTION( BlueprintCallable, Category = "OdysseyBrush" )
     FOdysseyBlockProxy GetStrokeBlock( int X, int Y, int Width, int Height, ECacheLevel Cache );
 
 public:
     // Odyssey Brush Native events
+    
+    //Event is triggered when the brush is loaded.
     UFUNCTION(BlueprintNativeEvent)
     void OnSelected();
 
     UFUNCTION(BlueprintNativeEvent)
     void OnTick();
-
+    
+    //Event is triggered at each step of the stroke.
     UFUNCTION(BlueprintNativeEvent)
     void OnStep();
 
+    //Event is triggered when anything is changed in ILIAD interface (variables or modifiers).
     UFUNCTION(BlueprintNativeEvent)
     void OnStateChanged();
 
+    //Event is triggered when stroke begins on the canvas (after clicking or touching the tablet with the stylus tip).
     UFUNCTION(BlueprintNativeEvent)
     void OnStrokeBegin();
 
+    //Event is triggered when the stroke ends (when the click or stylus is dropped)
     UFUNCTION(BlueprintNativeEvent)
     void OnStrokeEnd();
 

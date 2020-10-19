@@ -91,11 +91,13 @@ class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary : public UBlueprintFunc
     GENERATED_BODY()
 
 public:
+    //Converts Texture 2D to Odyssey Block Proxy.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", DisplayName = "To OdysseyBlockProxy (Texture2D)", CompactNodeTitle = "->", BlueprintAutocast ) )
     static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, UOdysseyBrushAssetBase* BrushContext );
-
+    
+    //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
@@ -103,7 +105,8 @@ public:
                                                , FOdysseyBlockProxy Sample
                                                , FOdysseyBrushColor Color
                                                , ECacheLevel Cache = ECacheLevel::kStep );
-
+    
+    //Creates an empty Odyssey Block Proxy.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="InitializeData, Cache" ) )
@@ -114,6 +117,10 @@ public:
                                          , bool InitializeData = true
                                          , ECacheLevel Cache = ECacheLevel::kStep );
 
+    //Blends two Odyssey Block Proxy on Top and Back.
+    //If Top is bigger than Back = Back will crop Top.
+    //If Top is smaller than Back = Both will be visible.
+    //X | Y are an offset to pan Top.
     UFUNCTION(BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
@@ -129,25 +136,32 @@ public:
 
     //---
 
+    //Returns the Width of an Odyssey Block Proxy as an Integer.
     UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
+    //Returns the Height of an Odyssey Block Proxy as an Integer.
     UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetHeight( FOdysseyBlockProxy Sample );
 
     //---
 
+    //Requires a Font to return an Array of Odyssey Block Proxy.
+    //This node turns the Font into a big block that contains all characters in the font.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, ECacheLevel Cache = ECacheLevel::kState );
     
+    //Requires a Font and a String to return an Array of Odyssey Block Proxy.
+    //This node find the correspondance between letters from the String and characters from the Font.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy" )
     static TArray< FOdysseyFontCharacter > GetFontCharacterInfo( const UFont* Font, const FString& String );
 
     //---
     
+    //This node automatically picks the color up at position on the canvas. 
     UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 };

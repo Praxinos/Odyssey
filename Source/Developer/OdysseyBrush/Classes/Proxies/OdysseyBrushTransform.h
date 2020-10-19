@@ -50,71 +50,87 @@ class ODYSSEYBRUSH_API UOdysseyTransformProxyLibrary : public UBlueprintFunction
     GENERATED_BODY()
 
 public:
+    //Sends a neutral value.
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix MakeIdentityMatrix();
 
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix MakeTranslationMatrix( float DeltaX, float DeltaY );
-
+    
+    //Requires an angle (float) to generate a rotation.
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix MakeRotationMatrix( float Angle );
 
+    // Requires a normalized float (0.5 = 50% | 1 = 100%) to rescale a Matrix on X and Y axis.
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix MakeScaleMatrix( float ScaleX, float ScaleY );
 
+    //Requires a normalized float (0.5 = 50% | 1 = 100%) to shear a Matrix on X and Y axis.
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix MakeShearMatrix( float ShearX, float ShearY );
-
+    
+    //Composes a Matrix with several Matrices.
     UFUNCTION(BlueprintPure, Category="OdysseyTransform")
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
     
     //TOTEST with multiple matrix to check associativity
+    //Waiting for Epic debug.
     //UFUNCTION(BlueprintPure, meta=(CommutativeAssociativeBinaryOperator = "true"), Category="OdysseyTransform")
     //static FOdysseyMatrix ComposeMatrixMatrix2( const FOdysseyMatrix& A, const FOdysseyMatrix& B ) { return ComposeMatrix( A, B ); }
     
-    UFUNCTION(BlueprintPure, meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ), Category="OdysseyTransform")
+    //Requires an Odyssey Matrix input and an Odyssey Block Proxy to transform.
+    UFUNCTION(BlueprintPure, meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ), Category="OdyssseyTransform")
     static FOdysseyBlockProxy Transform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
+    //Requires an angle (Float) to rotate an Odyssey Block Proxy.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy Rotate( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
+    //Requires a normalized Float (0.5 = 50% | 1 = 100%) to rescale an Odyssey Block Proxy uniformly.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy ScaleUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
+    //Requires a normalized Float (0.5 = 50% | 1 = 100%) to rescale an Odyssey Block Proxy on X and Y axis.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy ScaleXY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
+    //Requires a normalized Float (0.5 = 50% | 1 = 100%) to shear an Odyssey Block Proxy.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy Shear( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
-
+    
+    //Requires a Float in pixels to resize an Odyssey Block Proxy uniformly.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy ResizeUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
-
+    
+    //Requires a Float in pixels to resize an Odyssey Block Proxy on X and Y axis.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy Resize( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
-
+    
+    //Flips an Odyssey Block Proxy on horizontal axis.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy FlipX( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
+    //Flips an Odyssey Block Proxy on vertical axis.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
     static FOdysseyBlockProxy FlipY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
-
+    
+    //Flips an Odyssey Block Proxy on horizontal and vertical axis.
     UFUNCTION(BlueprintPure
              , Category="OdysseyTransform"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )

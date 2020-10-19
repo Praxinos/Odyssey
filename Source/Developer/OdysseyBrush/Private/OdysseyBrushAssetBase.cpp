@@ -183,11 +183,11 @@ UOdysseyBrushAssetBase::GetY()
 
 
 /** Get Z */
-float
-UOdysseyBrushAssetBase::GetZ()
-{
-    return  state.point.z;
-}
+//float
+//UOdysseyBrushAssetBase::GetZ()
+//{
+//    return  state.point.z;
+//}
 
 
 /** Get Pressure */
@@ -248,52 +248,52 @@ UOdysseyBrushAssetBase::GetTwistNormalized()
 
 
 /** Get Pitch */
-float
-UOdysseyBrushAssetBase::GetPitch()
-{
-    return  state.point.pitch;
-}
+//float
+//UOdysseyBrushAssetBase::GetPitch()
+//{
+//    return  state.point.pitch;
+//}
 
 
 /** Get Pitch Normalized */
-float
-UOdysseyBrushAssetBase::GetPitchNormalized()
-{
-    return  GetPitch() / 360.f;
-}
+//float
+//UOdysseyBrushAssetBase::GetPitchNormalized()
+//{
+//    return  GetPitch() / 360.f;
+//}
 
 
 /** Get Roll */
-float
-UOdysseyBrushAssetBase::GetRoll()
-{
-    return  state.point.roll;
-}
+//float
+//UOdysseyBrushAssetBase::GetRoll()
+//{
+//    return  state.point.roll;
+//}
 
 
 /** Get Roll Normalized */
-float
-UOdysseyBrushAssetBase::GetRollNormalized()
-{
-    return  GetRoll() / 360.f;
-}
+//float
+//UOdysseyBrushAssetBase::GetRollNormalized()
+//{
+//    return  GetRoll() / 360.f;
+//}
 
 
 /** Get Yaw */
-float
-UOdysseyBrushAssetBase::GetYaw()
-{
-    return  state.point.yaw;
-}
+//float
+//UOdysseyBrushAssetBase::GetYaw()
+//{
+//    return  state.point.yaw;
+//}
 
 
 
 /** Get Yaw Normalized */
-float
-UOdysseyBrushAssetBase::GetYawNormalized()
-{
-    return  GetYaw() / 360.f;
-}
+//float
+//UOdysseyBrushAssetBase::GetYawNormalized()
+//{
+//    return  GetYaw() / 360.f;
+//}
 
 
 /** Get distance travelled */

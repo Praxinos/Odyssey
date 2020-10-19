@@ -21,24 +21,28 @@ class ODYSSEYBRUSH_API UOdysseyBrushFunctionLibrary : public UBlueprintFunctionL
 public:
     // Odyssey Brush Blueprint Callable Methods
 
-    /** Debug Stamp, stamps a basic shape with the current modifiers parameters. */
+    //Debug Stamp, stamps a basic shape with the current modifiers parameters. Is also pressure sensitive.
     UFUNCTION( BlueprintCallable
              , Category="OdysseyBrushFunctionLibrary"
              , meta = ( DefaultToSelf="BrushContext" ) )
     static  void  DebugStamp( UOdysseyBrushAssetBase* BrushContext );
 
-    /** Simple Stamp ( may be faster than alternatives ). */
+    //Deprecated : use Stamp instead.
+    //Simple version of Stamp, without Blend and Alpha options.
     UFUNCTION( BlueprintCallable
              , Category="OdysseyBrushFunctionLibrary"
              , meta = ( DefaultToSelf="BrushContext" ) )
     static  void  SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false );
 
-    /** Deprecated Stamp */
+    //Node that reunites all the necessary information to create a stamp.
+    //Must be connected to an Event (i.e. "Event on Step").
+    //Requires 3 mandatory input to work : Odyssey Block Proxy and X|Y coordinates.
     UFUNCTION( BlueprintCallable
             , Category="OdysseyBrushFunctionLibrary"
             , meta = ( DefaultToSelf="BrushContext" ) )
     static  void  Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
+    //Node that converts polar coordinates (radius,angle) to cartesian coordinates (x,y).
     UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
     static  void  GenerateOrbitDelta( float AngleRad, float  Radius, float& DeltaX, float& DeltaY );
 };

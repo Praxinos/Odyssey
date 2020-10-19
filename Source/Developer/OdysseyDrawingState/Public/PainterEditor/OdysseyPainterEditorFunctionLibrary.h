@@ -21,12 +21,15 @@ class ODYSSEYDRAWINGSTATE_API UOdysseyPainterEditorFunctionLibrary
     GENERATED_BODY()
 
 public:
+    //Gets zoom value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category = "OdysseyPainterEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static float GetViewportZoom( UOdysseyBrushAssetBase* BrushContext );
     
+    //Gets rotation value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category = "OdysseyPainterEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static float GetViewportRotation( UOdysseyBrushAssetBase* BrushContext );
     
+    //Gets pan value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category = "OdysseyPainterEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
     static FVector2D GetViewportPan( UOdysseyBrushAssetBase* BrushContext );
 };
