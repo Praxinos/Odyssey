@@ -133,6 +133,7 @@ FOdysseyPaintEngine::Tick()
     }
 
     if (changedTiles.Num() > 0) {
+        CopyEditedBlockInPreviewBlock(changedTiles);
         BlendStrokeBlockInPreviewBlock(changedTiles);
         mOnStrokeChangedDelegate.Broadcast(changedTiles);
     }
@@ -788,6 +789,34 @@ FOdysseyPaintEngine::CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects)
                     , ULIS3_NOCB
                     , mPreviewBlock->GetBlock()
                     , mEditedBlock->GetBlock()
+                    , iRects[i]
+                    , pos);               
+    }
+}
+
+
+void
+FOdysseyPaintEngine::CopyEditedBlockInPreviewBlock(TArray<::ul3::FRect>& iRects)
+{
+    if (!mEditedBlock || !mPreviewBlock)
+        return;
+
+    if (iRects.Num() <= 0)
+        return;
+    
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent =  ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+
+    for (int i = 0; i < iRects.Num(); i++)
+	{    
+        ::ul3::FVec2F pos( iRects[i].x, iRects[i].y );
+        ::ul3::Copy( hULIS.ThreadPool()
+                    , ULIS3_BLOCKING
+                    , perfIntent
+                    , hULIS.HostDeviceInfo()
+                    , ULIS3_NOCB
+                    , mEditedBlock->GetBlock()
+                    , mPreviewBlock->GetBlock()
                     , iRects[i]
                     , pos);               
     }
