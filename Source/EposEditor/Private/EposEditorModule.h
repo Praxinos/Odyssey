@@ -40,5 +40,6 @@ private:
     TSharedPtr<FBoardSequenceActions>   mBoardSequenceTypeActions;
     TSharedPtr<FShotSequenceActions>    mShotSequenceTypeActions;
 
-    USequencerSettings* mSettings;
+    USequencerSettings* mSettingsBoard;
+    USequencerSettings* mSettingsShot;
 };

@@ -20,6 +20,11 @@ UMovieSceneCinematicBoardSection::UMovieSceneCinematicBoardSection()
 
     //UMovieSceneEasingExternalCurve* DefaultEaseOut = CreateDefaultSubobject<UMovieSceneEasingExternalCurve>( "EaseOutFunctionNull" );
     //Easing.EaseOut = DefaultEaseOut;
+
+    Easing.bManualEaseIn = true;
+    Easing.ManualEaseInDuration = 0;
+    Easing.bManualEaseOut = true;
+    Easing.ManualEaseOutDuration = 0;
 }
 
 //void UMovieSceneCinematicBoardSection::PostInitProperties()
