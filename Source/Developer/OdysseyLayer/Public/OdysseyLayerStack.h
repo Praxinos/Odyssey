@@ -23,6 +23,11 @@ public:
     // Params :
     // - Previous current layer
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackCurrentLayerChanged, TSharedPtr<IOdysseyLayer>);
+    
+    // Root Layer Changed Event
+    // Params :
+    // - Previous Root layer
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackRootLayerChanged, TSharedPtr<FOdysseyRootLayer>);
 
     // Image Result Changed Event
     // Params: None
@@ -36,9 +41,8 @@ public:
     // Construction / Destruction
     ~FOdysseyLayerStack();
     FOdysseyLayerStack();
-    FOdysseyLayerStack(int iWidth,int iHeight, ::ul3::tFormat iFormat);
 
-    void Init(int iWidth,int iHeight, ::ul3::tFormat iFormat);
+    void Init(int iWidth,int iHeight, ::ul3::tFormat iOutputFormat);
 
 public:
     // Public API / Result Computation
@@ -64,8 +68,11 @@ public:
     // Return layer stack height
     int         Height() const;
 
-	// Return layer stack height
+	// Return layer stack format
 	int         Format() const;
+
+	// Return layer stack output format
+	int         OutputFormat() const;
 
     // Return layer stack width and height
     FVector2D   Size() const;
@@ -80,6 +87,9 @@ public:
 
     // Get the Current Layer
     TSharedPtr<FOdysseyRootLayer>       GetLayerRoot() const;
+
+    // Set the Current Layer
+    void                                SetLayerRoot(TSharedPtr<FOdysseyRootLayer> iLayerRoot);
 
     // Get the Current Layer
     TSharedPtr<IOdysseyLayer>           GetCurrentLayer() const;
@@ -115,6 +125,7 @@ public:
     //Public API / Callbacks
 
     FOnLayerStackCurrentLayerChanged&	OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
+    FOnLayerStackRootLayerChanged&	    OnRootLayerChanged() { return mOnRootLayerChanged; }
     FOnLayerStackImageResultChanged&    OnImageResultChanged() { return mOnImageResultChanged; }
     FOnLayerStackStructureChanged&      OnStructureChanged() { return mOnStructureChanged; }
 
@@ -135,11 +146,13 @@ private:
     int                                 mWidth;
     int                                 mHeight;
     ::ul3::tFormat                      mFormat;
+	::ul3::tFormat                      mOutputFormat;
     TSharedPtr<FOdysseyRootLayer>       mLayerRoot;
     TSharedPtr<IOdysseyLayer>           mCurrentLayer;
     bool                                mIsInitialized;
 
 	FOnLayerStackCurrentLayerChanged	mOnCurrentLayerChanged;
+    FOnLayerStackRootLayerChanged	    mOnRootLayerChanged;
     FOnLayerStackImageResultChanged     mOnImageResultChanged;
     FOnLayerStackStructureChanged       mOnStructureChanged;
 
@@ -181,7 +194,7 @@ private:
     ::ul3::FBlock* mTileData;
     FString mUndoPath;
     FString mRedoPath;
-    //TArray< uint8 > mData;
+    TArray< uint8 > mData;
 
-	FOdysseyBlock* mData;
+	//FOdysseyBlock* mData;
 };

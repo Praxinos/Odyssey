@@ -65,7 +65,12 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     InitTextureWithBlockData(&block, texture, mTextureFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-    userData->GetLayerStack()->Init(texture->GetSizeX(), texture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat()));
+	::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat());
+    userData->GetLayerStack()->Init(mTextureWidth, mTextureHeight, format);
+
+	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(mTextureWidth, mTextureHeight), userData->GetLayerStack()->Format()));
+	userData->GetLayerStack()->AddLayer(imageLayer);
     userData->GetLayerStack()->FillCurrentLayerWithColor( color );
     texture->AddAssetUserData( userData );
     texture->PostEditChange();

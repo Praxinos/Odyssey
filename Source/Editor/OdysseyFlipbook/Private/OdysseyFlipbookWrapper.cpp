@@ -235,19 +235,19 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
     
     //Create texture
     UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
-    
-    //Set texture format
-    texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
+    //Set texture format
+    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D; //Needed so that UE doesn't add some filter on it
     // Init Texture and its layerstack with iBlock
     InitTextureWithBlockData(blockPtr, texture, iFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
     userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), iFormat);
+
 	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
+
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, blockPtr));
 	userData->GetLayerStack()->AddLayer(imageLayer);
+
     texture->AddAssetUserData( userData );
 
     //Init is done
@@ -266,7 +266,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
 UTexture2D*
 FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor)
 {
-     FOdysseyBlock* blockPtr = new FOdysseyBlock( iWidth, iHeight, ULISFormatForUE4TextureSourceFormat(iFormat), nullptr, nullptr, true );
+    FOdysseyBlock* blockPtr = new FOdysseyBlock( iWidth, iHeight, ULISFormatForUE4TextureSourceFormat(iFormat), nullptr, nullptr, true );
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, iWidth, iHeight );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -274,28 +274,92 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 	::ul3::FPixelValue color(::ul3::FPixelValue::FromRGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, blockPtr->GetBlock(), color, canvasRect );
 
-    UTexture2D* texture = CreateTexture(iName, blockPtr, iFormat);
+    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    FString PackageName = FPaths::GetPath( mFlipbook->GetPathName() ) + "/";
+    FString AssetName = iName; //mFlipbook->GetName() + "_Texture";
+    AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
+
+    UPackage* package = CreatePackage( nullptr, *PackageName );
+    
+    //Create texture
+    UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
+
+    // Init Texture
+    InitTextureWithBlockData(blockPtr, texture, iFormat);
+    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+	texture->UpdateResource();
+
+    //Create Layer Stack
+    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
+    userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForUE4TextureSourceFormat(iFormat));
+    delete blockPtr;
+
+    // Create Layer
+	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
+    FOdysseyBlock* layerBlock = NewOdysseyBlockFromUTextureData(texture, userData->GetLayerStack()->Format());
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, layerBlock));
+	userData->GetLayerStack()->AddLayer(imageLayer);
+
+    texture->AddAssetUserData( userData );
+
+    //Init is done
+    texture->PostEditChange();
+
+	FAssetRegistryModule::AssetCreated(texture);
+	UPackage::SavePackage(package, texture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);
+
+	package->MarkAsFullyLoaded();
+	texture->MarkPackageDirty();
+
     return texture;
 }
 
+//Duplicate the given texture
 UTexture2D*
 FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
 {
-    UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-    UTexture2D* texture = NULL;
-    FOdysseyBlock* block = NULL;
-    if( textureUserData )
+    UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    
+
+    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+    UTexture2D* texture = CreateTexture(iTexture->GetSizeX(), iTexture->GetSizeY(), iTexture->Source.GetFormat(), iName, FLinearColor( 0.f, 0.f, 0.f, 0.f ));
+    UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(texture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+
+    FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iTexture, format);
+    CopyBlockDataIntoUTexture(block, texture);
+    delete block;
+    block = nullptr;
+    if( srcTextureUserData )
     {
-        block = new FOdysseyBlock(iTexture->GetSizeX(), iTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
-        textureUserData->GetLayerStack()->ComputeResultInBlock(block->GetBlock());
-        texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
+        TSharedPtr<FOdysseyRootLayer> layerRoot = MakeShareable(srcTextureUserData->GetLayerStack()->GetLayerRoot()->Clone());
+		IOdysseyLayer::CloneChildren(srcTextureUserData->GetLayerStack()->GetLayerRoot(), layerRoot);
+        textureUserData->GetLayerStack()->SetLayerRoot(layerRoot);
+
+        //Set the current layer
+        TArray< TSharedPtr<IOdysseyLayer> > layers;
+        textureUserData->GetLayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
+        for (int i = 0; i < layers.Num(); i++)
+        {
+            if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
+            {
+                textureUserData->GetLayerStack()->SetCurrentLayer(layers[i]);
+                break;
+            }
+        }
     }
     else
     {
-        block = NewOdysseyBlockFromUTextureData(iTexture, ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
-        texture = CreateTexture(iName, block, iTexture->Source.GetFormat());
+        TArray< TSharedPtr<IOdysseyLayer> > layers;
+        textureUserData->GetLayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
+        
+        TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>( layers[0] );
+
+        block = NewOdysseyBlockFromUTextureData(iTexture, textureUserData->GetLayerStack()->Format());
+        imageLayer->SetBlock(block, false, true);
     }
-     
+
+	texture->UpdateResource();
+
     return texture;
 }
 

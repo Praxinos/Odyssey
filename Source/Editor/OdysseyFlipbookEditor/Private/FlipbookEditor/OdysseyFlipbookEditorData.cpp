@@ -19,7 +19,6 @@
 FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 {
     if( mDisplaySurface ) {
-        delete mDisplaySurface->Block();
         delete mDisplaySurface;
         mDisplaySurface = NULL;
     }
@@ -57,11 +56,11 @@ FOdysseyFlipbookEditorData::Init()
 void
 FOdysseyFlipbookEditorData::Texture(UTexture2D* iTexture)
 {
+	//Sync current texture with surface data
+	SyncTextureWithSurfaceBlock();
+
     // Apply current Texture properties backup
     ApplyPropertiesBackup();
-
-    //Sync current texture with surface data
-    SyncTextureWithSurfaceBlock();
 
 	//Remove Surface
 	if (mDisplaySurface)
@@ -101,13 +100,21 @@ FOdysseyFlipbookEditorData::FindOrCreateTextureUserData(UTexture2D* iTexture)
     UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
     if( !userData )
     {
+        //Init user data
+        ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
         userData = NewObject< UOdysseyTextureAssetUserData >(iTexture, NAME_None, RF_Public);
-        userData->GetLayerStack()->Init(iTexture->GetSizeX(), iTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat()));
+        userData->GetLayerStack()->Init(iTexture->GetSizeX(), iTexture->GetSizeY(), format);
         iTexture->AddAssetUserData( userData );
-        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat()) );
+
+        //Create image layer
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, userData->GetLayerStack()->Format() );
 		FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, textureData));
+
+        //Add Layer
         userData->GetLayerStack()->AddLayer(imageLayer);
+
+        // Notify for changes
         iTexture->PostEditChange();
     }
     return userData;

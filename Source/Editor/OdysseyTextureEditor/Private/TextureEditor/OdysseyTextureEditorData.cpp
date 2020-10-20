@@ -15,7 +15,6 @@ FOdysseyTextureEditorData::~FOdysseyTextureEditorData()
 {
     if( mDisplaySurface )
     {
-        delete mDisplaySurface->Block();
         delete mDisplaySurface;
     }
 }
@@ -48,10 +47,11 @@ FOdysseyTextureEditorData::Init()
     UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
     if( !userData )
     {
+        ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
         userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
-        userData->GetLayerStack()->Init(mTexture->GetSizeX(), mTexture->GetSizeY(), ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat()));
+        userData->GetLayerStack()->Init(mTexture->GetSizeX(), mTexture->GetSizeY(), format);
         mTexture->AddAssetUserData( userData );
-        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, ULISFormatForUE4PixelFormat(mTexture->GetPixelFormat()) );
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, userData->GetLayerStack()->Format());
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(), textureData));
         mTexture->PostEditChange();
     }

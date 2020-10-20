@@ -78,18 +78,22 @@ FOdysseyFlipbookEditorController::Init(const TSharedRef<FUICommandList>& iToolki
 
 	InitLayerStack();
 
-    // Set Image Layer as the current Layer
-    TArray<TSharedPtr<IOdysseyLayer>> layers;
-    mData->LayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
 
-    for (int i = 0; i < layers.Num(); i++)
-    {
-        if (layers[i]->GetType() != IOdysseyLayer::eType::kImage) 
-            continue;
-        
-        mData->LayerStack()->SetCurrentLayer(layers[i]);
-        break;
-    }
+	if (mData->LayerStack())
+	{
+		// Set Image Layer as the current Layer
+		TArray<TSharedPtr<IOdysseyLayer>> layers;
+		mData->LayerStack()->GetLayerRoot()->DepthFirstSearchTree(&layers, false);
+
+		for (int i = 0; i < layers.Num(); i++)
+		{
+			if (layers[i]->GetType() != IOdysseyLayer::eType::kImage)
+				continue;
+
+			mData->LayerStack()->SetCurrentLayer(layers[i]);
+			break;
+		}
+	}
 }
 
 void
@@ -243,7 +247,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
     mData->PaintEngine()->Block(NULL);
 
 	//Add Image Layer Callback
-    if( mData->LayerStack()->GetCurrentLayer() == NULL )
+    if( !mData->LayerStack() || mData->LayerStack()->GetCurrentLayer() == NULL )
         return;
 
 	TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
@@ -395,7 +399,10 @@ FOdysseyFlipbookEditorController::OnCreateNewLayer()
     FOdysseyPainterEditorController::OnCreateNewLayer();
 
 	FName layerName = mData->LayerStack()->GetLayerRoot()->GetNextLayerName();
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, nullptr));
+    int w = mData->LayerStack()->Width();
+    int h = mData->LayerStack()->Height();
+    ::ul3::tFormat format = mData->LayerStack()->Format();
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(w, h), format));
     mData->LayerStack()->AddLayer(imageLayer);
     mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
     mData->DisplaySurface()->Invalidate();
@@ -492,7 +499,7 @@ FOdysseyFlipbookEditorController::OnImportTexturesAsLayers()
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, ULISFormatForUE4PixelFormat( openedTexture->GetPixelFormat() ) );
+        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, mData->LayerStack()->Format() );
 
 		FName layerName = mData->LayerStack()->GetLayerRoot()->GetNextLayerName();
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(FName(*(openedTexture->GetName())), textureBlock));

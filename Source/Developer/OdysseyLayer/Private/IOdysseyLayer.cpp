@@ -17,12 +17,6 @@ IOdysseyLayer::IOdysseyLayer( const IOdysseyLayer& iLayer )
     , mIsVisible( iLayer.mIsVisible )
     , mType( iLayer.mType )
 {
-    TArray<TSharedPtr<IOdysseyLayer>> children = GetNodes();
-    for(int i = 0; i < children.Num(); i++)
-    {
-        TSharedPtr<IOdysseyLayer> layer = MakeShareable(children[i]->Clone());
-        AddNode(layer);
-    }
 }
 
 IOdysseyLayer::IOdysseyLayer( const eType type )
@@ -39,6 +33,19 @@ IOdysseyLayer::IOdysseyLayer( const FName& iName, const eType type )
     , mIsVisible( true )
     , mType( type )
 {
+}
+
+void
+IOdysseyLayer::CloneChildren(TSharedPtr<IOdysseyLayer> iSrc, TSharedPtr<IOdysseyLayer> ioDst)
+{
+	TArray<TSharedPtr<IOdysseyLayer>> layers;
+	TArray<TSharedPtr<IOdysseyLayer>> children = iSrc->GetNodes();
+	for (int i = 0; i < children.Num(); i++)
+	{
+		TSharedPtr<IOdysseyLayer> layer = MakeShareable(children[i]->Clone());
+		CloneChildren(children[i], layer);
+		ioDst->AddNode(layer);
+	}
 }
 
 //---

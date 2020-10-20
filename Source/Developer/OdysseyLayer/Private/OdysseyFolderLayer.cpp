@@ -31,7 +31,7 @@ FOdysseyFolderLayer::FOdysseyFolderLayer( const FName& iName )
 FOdysseyFolderLayer*
 FOdysseyFolderLayer::Clone() const
 {
-    return new FOdysseyFolderLayer(*this);
+	return new FOdysseyFolderLayer(*this);
 }
 
 //---

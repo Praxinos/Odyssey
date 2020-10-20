@@ -8,7 +8,7 @@
 /////////////////////////////////////////////////////
 // Utlity
 void
-CopyUTextureDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
+CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 {
     checkf(iBlock->Width() == iTexture->GetSizeX() &&
            iBlock->Height() == iTexture->GetSizeY()
@@ -16,6 +16,23 @@ CopyUTextureDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 
     iTexture->Source.GetMipData(iBlock->GetArray(),0);
     iBlock->ResyncData();
+}
+
+void
+CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
+{
+    checkf(iBlock->Width() == iTexture->GetSizeX() &&
+           iBlock->Height() == iTexture->GetSizeY()
+           ,TEXT("Sizes do not match"));
+
+	const FTexture2DMipMap& Mip = iTexture->GetPlatformMips()[0];
+	const void* Data = Mip.BulkData.LockReadOnly();
+	FMemory::Memcpy(iBlock->GetArray().GetData(),
+		Data,
+		iBlock->GetArray().Num()
+	);
+	Mip.BulkData.Unlock();
+	iBlock->ResyncData();
 }
 
 void
@@ -68,7 +85,7 @@ NewOdysseyBlockFromUTextureData(UTexture2D* iTexture, ::ul3::tFormat iFormat)
     ::ul3::tFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
 
     FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),sourceFormat);
-    CopyUTextureDataIntoBlock(block,iTexture);
+	CopyUTextureSourceDataIntoBlock(block,iTexture);
 
     if (sourceFormat == iFormat)
         return block;
@@ -274,7 +291,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
     // Warning: the block is allocated, then the texture data is copied into it.
     mBlock = new FOdysseyBlock(mTexture->GetSizeX(),mTexture->GetSizeY(), ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat()),&InvalidateSurfaceCallback,static_cast<void*>(this));
     // load block data from texture
-    CopyUTextureDataIntoBlock(mBlock,mTexture);
+	CopyUTexturePixelDataIntoBlock(mBlock,mTexture);
 }
 
 FOdysseySurfaceEditable::FOdysseySurfaceEditable(FOdysseyBlock* iBlock)

@@ -297,7 +297,7 @@ FOdysseyTextureEditorController::OnImportTexturesAsLayers()
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, ULISFormatForUE4PixelFormat( openedTexture->GetPixelFormat() ) );
+        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, mData->LayerStack()->Format() );
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(FName(*(openedTexture->GetName())), textureBlock));
 		mData->LayerStack()->AddLayer( imageLayer );
     }
@@ -388,7 +388,11 @@ FOdysseyTextureEditorController::OnCreateNewLayer()
 {
     FOdysseyPainterEditorController::OnCreateNewLayer();
 
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(mData->LayerStack()->GetLayerRoot()->GetNextLayerName(), nullptr));
+    FName name = mData->LayerStack()->GetLayerRoot()->GetNextLayerName();
+    int w = mData->LayerStack()->Width();
+    int h = mData->LayerStack()->Height();
+    ::ul3::tFormat format = mData->LayerStack()->Format();
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(name, FVector2D(w, h), format));
     mData->LayerStack()->AddLayer(imageLayer, 0);
 	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
 	mData->DisplaySurface()->Invalidate();

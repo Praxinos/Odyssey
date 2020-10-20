@@ -41,7 +41,7 @@ public:
 public:
     // Public API
     FOdysseyBlock* GetBlock() const;
-    void SetBlock(FOdysseyBlock* iBlock, bool iSendEvents = true);
+    void SetBlock(FOdysseyBlock* iBlock, bool iSendEvents = true, bool iDestroyPreviousBlock = true);
 
     bool  IsAlphaLocked() const;
     void  SetIsAlphaLocked(bool iIsAlphaLocked);

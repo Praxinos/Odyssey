@@ -14,11 +14,11 @@
         case TSF_Invalid:   ret = 0;                    break;
         case TSF_G8:        ret = ULIS3_FORMAT_G8;      break;
         case TSF_BGRA8:     ret = ULIS3_FORMAT_BGRA8;   break;
-        case TSF_BGRE8:     ret = ULIS3_FORMAT_BGR8;    break;
+        case TSF_BGRE8:     ret = ULIS3_FORMAT_BGRA8;   break;
         case TSF_RGBA16:    ret = ULIS3_FORMAT_RGBA16;  break;
         case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBA16;  break;
         case TSF_RGBA8:     ret = ULIS3_FORMAT_RGBA8;   break;
-        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGB8;    break;
+        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGBA8;   break;
         case TSF_MAX:       ret = 0;                    break;
         default:            ret = 0;                    break;
     }
@@ -28,6 +28,9 @@
 
 ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat )
 {
+	//TODO: if there is no correspondance between PF_* and ULIS3_* formats
+	//		Then we should use a decompress/compress system to translate it to a viable ULIS3_* format
+
     ::ul3::tFormat ret = 0;
     switch( iFormat ) {
         case PF_Unknown:			ret = ULIS3_FORMAT_BGRA8;   break;

@@ -43,6 +43,7 @@ public:
     IOdysseyLayer( const FName& iName, const eType type );
 
     virtual IOdysseyLayer* Clone() const = 0;
+	static void CloneChildren(TSharedPtr<IOdysseyLayer> iSrc, TSharedPtr<IOdysseyLayer> ioDst);
 
 protected:
     IOdysseyLayer( const IOdysseyLayer& iLayer );

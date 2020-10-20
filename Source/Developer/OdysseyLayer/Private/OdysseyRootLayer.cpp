@@ -16,7 +16,6 @@ FOdysseyRootLayer::~FOdysseyRootLayer()
 FOdysseyRootLayer::FOdysseyRootLayer( const FOdysseyRootLayer& iLayer)
     : IOdysseyLayer(iLayer)
     , IOdysseyLayerImageRenderingCapability(iLayer)
-
 {
 }
 

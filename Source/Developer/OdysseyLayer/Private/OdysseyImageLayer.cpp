@@ -79,12 +79,19 @@ FOdysseyImageLayer::GetBlock() const
 }
 
 void
-FOdysseyImageLayer::SetBlock(FOdysseyBlock* iBlock, bool iSendEvents)
+FOdysseyImageLayer::SetBlock(FOdysseyBlock* iBlock, bool iSendEvents, bool iDestroyPreviousBlock)
 {
-    mBlock = iBlock;
+    FOdysseyBlock* block = mBlock;
+    mBlock = iBlock;   
+
     if (iSendEvents)
     {
         mImageResultChangedDelegate.Broadcast();
+    }
+
+    if (iDestroyPreviousBlock)
+    {
+        delete block;
     }
 }
 

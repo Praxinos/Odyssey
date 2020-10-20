@@ -52,9 +52,12 @@ void FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryExecute()
 {
     FOdysseyLayerStackModel* model = static_cast<FOdysseyLayerStackModel*>(&mLayerStackRef.Get());
     TSharedPtr<IOdysseyLayer> currentLayer = model->GetLayerStackData()->GetCurrentLayer();
+	int w = model->GetLayerStackData()->Width();
+	int h = model->GetLayerStackData()->Height();
+	::ul3::tFormat format = model->GetLayerStackData()->Format();
 
 	FName layerName = model->GetLayerStackData()->GetLayerRoot()->GetNextLayerName();
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, nullptr));
+	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(w, h), format));
     if( currentLayer )
     {
         if( currentLayer->GetType() == IOdysseyLayer::eType::kFolder )

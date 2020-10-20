@@ -31,6 +31,7 @@ FOdysseyLayerStack::FOdysseyLayerStack()
     : mWidth( -1 )
     , mHeight( -1 )
     , mFormat(0)
+	, mOutputFormat(0)
     , mLayerRoot(MakeShareable(new  FOdysseyRootLayer()))
     , mCurrentLayer( mLayerRoot )
 {
@@ -44,7 +45,8 @@ FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ul3::tFormat iFormat)
 {
     mWidth = iWidth;
     mHeight = iHeight;
-    mFormat = ComputationFormatForResultFormat(iFormat);
+    mOutputFormat = iFormat;
+	mFormat = ComputationFormatForResultFormat(iFormat);
 
     //TODO: Move outside one day
     mDrawingUndo = new  FOdysseyDrawingUndo( this );
@@ -61,51 +63,75 @@ FOdysseyLayerStack::ComputeResultInBlock( ::ul3::FBlock* ioBlock )
     ComputeResultInBlock(ioBlock, canvasRect);
 }
 
+void ConvToPos(::ul3::FBlock* iSrc, ::ul3::FBlock* ioDst, const ::ul3::FVec2F& iPos)
+{
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+	::ul3::FBlock* tmpBlock = new ::ul3::FBlock(iSrc->Width(), iSrc->Height(), ioDst->Format());
+	::ul3::Conv(hULIS.ThreadPool()
+		, ULIS3_BLOCKING
+		, perfIntent
+		, hULIS.HostDeviceInfo()
+		, ULIS3_NOCB
+		, iSrc
+		, tmpBlock);
+
+	::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iSrc->Width(), iSrc->Height());
+	::ul3::Copy(hULIS.ThreadPool()
+		, ULIS3_BLOCKING
+		, perfIntent
+		, hULIS.HostDeviceInfo()
+		, ULIS3_NOCB
+		, tmpBlock
+		, ioDst
+		, rect
+		, iPos);
+
+	delete tmpBlock;
+}
+
 void
 FOdysseyLayerStack::ComputeResultInBlock( ::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect ) 
 {
-    //Clear the block at iRect
+	::ul3::FVec2F pos(iRect.x, iRect.y);
+	::ul3::FVec2F convPos(iRect.x, iRect.y);
+	::ul3::FVec2F outputPos(iRect.x, iRect.y);
 
-    //Check for format
-    ::ul3::FVec2F pos( iRect.x, iRect.y );
-    ::ul3::FBlock* convBlock = nullptr;
-    if (ioBlock->Format() != mFormat)
-    {
-        convBlock = new ::ul3::FBlock(iRect.w, iRect.h, mFormat);
-        pos.x = 0;
-        pos.y = 0;
-    }
+	//Set the output block
+	::ul3::FBlock* output = ioBlock;
+	if (ioBlock->Format() != mOutputFormat)
+	{
+		output = new ::ul3::FBlock(iRect.w, iRect.h, mOutputFormat);
+		outputPos.x = 0;
+		outputPos.y = 0;
+		convPos.x = 0;
+		convPos.y = 0;
+	}
 
-	mLayerRoot->RenderImage(convBlock ? convBlock : ioBlock, iRect, pos);
+	//convBlock
+	::ul3::FBlock* convBlock = output;
+	if (mFormat != mOutputFormat)
+	{
+		convBlock = new ::ul3::FBlock(iRect.w, iRect.h, mFormat);
+		convPos.x = 0;
+		convPos.y = 0;
+	}
 
-    if (convBlock)
-    {
-		IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-		uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::FBlock* convBlock2 = new ::ul3::FBlock(convBlock->Width(), convBlock->Height(), ioBlock->Format());
-        ::ul3::Conv( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , convBlock
-            , convBlock2 );
+	mLayerRoot->RenderImage(convBlock, iRect, convPos);
 
-        ::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iRect.w, iRect.h);
-        ::ul3::FVec2F dstPos(iRect.x, iRect.y);
-        ::ul3::Copy( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , convBlock2
-            , ioBlock
-            , rect
-            , dstPos );
-        
-        delete convBlock;
-        delete convBlock2;
-    }
+	if (convBlock != output)
+	{
+		//Copy convblock (0, 0) to output (outputPos)
+		ConvToPos(convBlock, output, outputPos);
+		delete convBlock;
+	}
+
+	if (output != ioBlock)
+	{
+		//Copy output (0, 0) to ioBlock (pos)
+		ConvToPos(output, ioBlock, pos);
+		delete output;
+	}
 }
 
 void
@@ -123,9 +149,9 @@ FOdysseyLayerStack::ComputeResultInBlockWithBlockAsCurrentLayer(::ul3::FBlock* i
 
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mCurrentLayer);
     FOdysseyBlock* block = imageLayer->GetBlock();
-    imageLayer->SetBlock(iTempBlock, false);
+    imageLayer->SetBlock(iTempBlock, false, false);
     ComputeResultInBlock(ioBlock, iRect);
-    imageLayer->SetBlock(block, false);
+    imageLayer->SetBlock(block, false, false);
 }
 
 int
@@ -150,6 +176,12 @@ FOdysseyLayerStack::Format() const
 	return mFormat;
 }
 
+int
+FOdysseyLayerStack::OutputFormat() const
+{
+	return mOutputFormat;
+}
+
 FVector2D
 FOdysseyLayerStack::Size() const
 {
@@ -163,7 +195,14 @@ void
 FOdysseyLayerStack::AddLayer( TSharedPtr<IOdysseyLayer> iLayer, TSharedPtr<IOdysseyLayer> iParent, int iIndex )
 {
     //TODO: Adding a layer should only add a layer, not set the currentlayer aswell
-    iParent->AddNode(iLayer, iIndex);
+	if (iParent)
+	{
+		iParent->AddNode(iLayer, iIndex);
+	}
+	else
+	{
+		mLayerRoot->AddNode(iLayer, iIndex);
+	}
     SetCurrentLayer(iLayer);
 }
 
@@ -179,6 +218,26 @@ TSharedPtr<FOdysseyRootLayer>
 FOdysseyLayerStack::GetLayerRoot() const
 {
     return mLayerRoot;
+}
+
+void
+FOdysseyLayerStack::SetLayerRoot(TSharedPtr<FOdysseyRootLayer> iLayerRoot)
+{
+    TSharedPtr<FOdysseyRootLayer> oldValue = mLayerRoot;
+
+    mLayerRoot->ImageResultChangedDelegate().RemoveAll(this);
+    mLayerRoot->NodeAdded().RemoveAll(this);
+    mLayerRoot->NodeRemoved().RemoveAll(this);
+
+    mLayerRoot = iLayerRoot;
+
+    mLayerRoot->ImageResultChangedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRootImageResultChanged);
+    mLayerRoot->NodeAdded().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
+    mLayerRoot->NodeRemoved().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
+
+	mOnRootLayerChanged.Broadcast(oldValue);
+    
+    SetCurrentLayer(mLayerRoot);
 }
 
 TSharedPtr<IOdysseyLayer>
@@ -282,7 +341,7 @@ void FOdysseyLayerStack::FlattenLayer(TSharedPtr<IOdysseyLayer> iLayer)
     TSharedPtr<FOdysseyFolderLayer> folderLayer = StaticCastSharedPtr<FOdysseyFolderLayer>(iLayer);
 	TSharedPtr<IOdysseyLayer> parent = folderLayer->GetParent();
     int index = folderLayer->GetIndexInParent();
-    TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(iLayer->GetName(), nullptr));
+    TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(iLayer->GetName(), FVector2D(Width(), Height()), Format()) );
 
     ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, Width(), Height());
     ::ul3::FVec2F pos( 0, 0 );
@@ -298,6 +357,7 @@ void FOdysseyLayerStack::DuplicateLayer(TSharedPtr<IOdysseyLayer> iLayer)
     int index = iLayer->GetIndexInParent();
 
     TSharedPtr<IOdysseyLayer> clone = MakeShareable(iLayer->Clone());
+	IOdysseyLayer::CloneChildren(iLayer, clone);
     clone->SetName(FName(*(iLayer->GetName().ToString() + FString("_Copy"))));
 
     AddLayer(clone, parent, index + 1);
@@ -393,14 +453,26 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
     
     if (Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat)
     {
-        Ar << ioSaveLayerStack->mFormat;
+        Ar << ioSaveLayerStack->mOutputFormat;
     }
     else
     {
-		ioSaveLayerStack->mFormat = ULIS3_FORMAT_BGRA8;
+		ioSaveLayerStack->mOutputFormat = ULIS3_FORMAT_BGRA8;
     }
 
-	ioSaveLayerStack->Init(ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mFormat);
+	ioSaveLayerStack->Init(ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mOutputFormat);
+
+	//Set the current layer to the first image layer
+	TArray< TSharedPtr<IOdysseyLayer> > layers;
+	layer->DepthFirstSearchTree(&layers, false);
+	for (int i = 0; i < layers.Num(); i++)
+	{
+		if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
+		{
+			ioSaveLayerStack->SetCurrentLayer(layers[i]);
+			break;
+		}
+	}
 	
     return Ar;
 }
@@ -412,12 +484,14 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
 {
     mLayerStackPtr = iLayerStack;
 
-    //mData = TArray<uint8>();
-	mData = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
+    mData = TArray<uint8>();
+	FOdysseyBlock* tmp = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
+    mCurrentIndex = 0;
 
     //We reserve the maximum memory needed for a undo
 
-    //mData.Reserve(iLayerStack->GetResultBlock()->GetBlock()->BytesTotal());
+    mData.Reserve(tmp->GetBlock()->BytesTotal());
+	delete tmp;
 
     static int numberUndoStack = 1;
 
@@ -430,7 +504,7 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
 
 FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
 {
-	delete mData;
+	//delete mData;
 }
 
 void
@@ -444,7 +518,8 @@ FOdysseyDrawingUndo::StartRecord()
     if(mCurrentIndex == 0)
     {
         Clear();
-    } else if(mCurrentIndex < mUndosPositions.Num() - 1)
+    }
+    else if(mCurrentIndex < mUndosPositions.Num() - 1)
     {
         mUndosPositions.SetNum(mCurrentIndex + 1);
         mNumberBlocksUndo.SetNum(mCurrentIndex + 1);
@@ -581,7 +656,7 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
     mNumberBlocksRedo[mCurrentIndex]++;
 
     // Why is mTileData not deleted here ??
-    //delete  mTileData;
+    delete  mTileData;
 
     return true;
 }
@@ -661,7 +736,7 @@ FOdysseyDrawingUndo::LoadData()
             SaveDataRedo(address,tileX,tileY,sizeX,sizeY);
         }
 
-        Ar << mData->GetArray();
+        Ar << mData;
 
         //Should be out of this loop
         TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
@@ -684,20 +759,19 @@ FOdysseyDrawingUndo::LoadData()
         //Useless, I just want mTileData at the right size for the next undo, to change
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        if(i == 0)
-            mTileData = ::ul3::XCopy( hULIS.ThreadPool()
-                                    , ULIS3_BLOCKING
-                                    , perfIntent
-                                    , hULIS.HostDeviceInfo()
-                                    , ULIS3_NOCB
-                                    , imageLayer->GetBlock()->GetBlock()
-                                    , ::ul3::FRect( tileX, tileY, sizeX, sizeY ) );
+		mTileData = ::ul3::XCopy(hULIS.ThreadPool()
+			, ULIS3_BLOCKING
+			, perfIntent
+			, hULIS.HostDeviceInfo()
+			, ULIS3_NOCB
+			, imageLayer->GetBlock()->GetBlock()
+			, ::ul3::FRect(tileX, tileY, sizeX, sizeY));
 
-        if(mData->GetArray().Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
+        if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
-            for(int j = 0; j < mData->GetArray().Num(); j++)
+            for(int j = 0; j < mData.Num(); j++)
             {
-                *(mTileData->DataPtr() + j) = mData->GetArray()[j];
+                *(mTileData->DataPtr() + j) = mData[j];
             }
 
             ::ul3::Copy( hULIS.ThreadPool()
@@ -712,15 +786,14 @@ FOdysseyDrawingUndo::LoadData()
             imageLayer->ImageResultChangedDelegate().Broadcast();
             // mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX,tileY,sizeX,sizeY));
         }
+
+		delete mTileData;
     }
 
     if(bSaveForRedo)
     {
         EndRecordRedo();
     }
-
-    if( mNumberBlocksUndo[mCurrentIndex] != 0)
-        delete mTileData;
 
     return true;
 }
@@ -747,7 +820,7 @@ FOdysseyDrawingUndo::Redo()
         Ar << tileY;
         Ar << sizeX;
         Ar << sizeY;
-        Ar << mData->GetArray();
+        Ar << mData;
 
         //Should be out of this loop
         TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
@@ -780,11 +853,11 @@ FOdysseyDrawingUndo::Redo()
                                     , ::ul3::FRect( tileX, tileY, sizeX, sizeY ) );
         }
 
-        if(mData->GetArray().Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
+        if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
-            for(int j = 0; j < mData->GetArray().Num(); j++)
+            for(int j = 0; j < mData.Num(); j++)
             {
-                *(mTileData->DataPtr() + j) = mData->GetArray()[j];
+                *(mTileData->DataPtr() + j) = mData[j];
             }
 
             ::ul3::Copy( hULIS.ThreadPool()
