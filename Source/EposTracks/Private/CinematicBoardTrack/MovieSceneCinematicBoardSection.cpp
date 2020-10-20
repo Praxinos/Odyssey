@@ -4,14 +4,62 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Generators/MovieSceneEasingCurves.h"
 #include "MovieSceneHelpersResize.h"
+#include "MovieSceneSection.h"
 
 //---
 
 UMovieSceneCinematicBoardSection::UMovieSceneCinematicBoardSection()
     : UMovieSceneSubSection()
 {
+    SetBlendType( EMovieSceneBlendType::Absolute );
+
+    //UMovieSceneEasingExternalCurve* DefaultEaseIn = CreateDefaultSubobject<UMovieSceneEasingExternalCurve>( "EaseInFunctionNull" );
+    //Easing.EaseIn = DefaultEaseIn;
+
+    //UMovieSceneEasingExternalCurve* DefaultEaseOut = CreateDefaultSubobject<UMovieSceneEasingExternalCurve>( "EaseOutFunctionNull" );
+    //Easing.EaseOut = DefaultEaseOut;
 }
+
+//void UMovieSceneCinematicBoardSection::PostInitProperties()
+//{
+//    Super::PostInitProperties();
+
+    //UMovieSceneBuiltInEasingFunction* DefaultEaseIn = NewObject<UMovieSceneBuiltInEasingFunction>( this, UMovieSceneBuiltInEasingFunction::StaticClass(), "EaseInFunctionNull" );
+    //DefaultEaseIn->SetFlags( RF_Public ); //@todo Need to be marked public. GLEO occurs when transform sections are added to actor sequence blueprints. Are these not being duplicated properly?
+    //DefaultEaseIn->Type = EMovieSceneBuiltInEasing::Linear;
+    //Easing.EaseIn = DefaultEaseIn;
+
+    //UMovieSceneBuiltInEasingFunction* DefaultEaseOut = NewObject<UMovieSceneBuiltInEasingFunction>( this, UMovieSceneBuiltInEasingFunction::StaticClass(), "EaseOutFunctionNull" );
+    //DefaultEaseOut->SetFlags( RF_Public ); //@todo Need to be marked public. GLEO occurs when transform sections are added to actor sequence blueprints. Are these not being duplicated properly?
+    //DefaultEaseOut->Type = EMovieSceneBuiltInEasing::Linear;
+    //Easing.EaseOut = DefaultEaseOut;
+
+    //UMovieSceneEasingExternalCurve* NewEasingFunctionIn = NewObject<UMovieSceneEasingExternalCurve>( this, UMovieSceneEasingExternalCurve::StaticClass() );
+    //Easing.EaseIn = NewEasingFunctionIn;
+
+    //UMovieSceneEasingExternalCurve* NewEasingFunctionOut = NewObject<UMovieSceneEasingExternalCurve>( this, UMovieSceneEasingExternalCurve::StaticClass() );
+    //Easing.EaseOut = NewEasingFunctionOut;
+
+    //TScriptInterface<IMovieSceneEasingFunction>& EaseObject = Easing.EaseIn;
+    //if( !EaseObject.GetObject() || EaseObject.GetObject()->GetClass() != UMovieSceneEasingExternalCurve::StaticClass() )
+    //{
+    //    UObject* NewEasingFunction = NewObject<UObject>( this, UMovieSceneEasingExternalCurve::StaticClass() );
+    //    //NewEasingFunction->SetFlags( RF_Public );
+    //    EaseObject.SetObject( NewEasingFunction );
+    //    EaseObject.SetInterface( Cast<IMovieSceneEasingFunction>( NewEasingFunction ) );
+    //}
+
+    //EaseObject = Easing.EaseOut;
+    //if( !EaseObject.GetObject() || EaseObject.GetObject()->GetClass() != UMovieSceneEasingExternalCurve::StaticClass() )
+    //{
+    //    UObject* NewEasingFunction = NewObject<UObject>( this, UMovieSceneEasingExternalCurve::StaticClass() );
+    //    //NewEasingFunction->SetFlags( RF_Public );
+    //    EaseObject.SetObject( NewEasingFunction );
+    //    EaseObject.SetInterface( Cast<IMovieSceneEasingFunction>( NewEasingFunction ) );
+    //}
+//}
 
 #if WITH_EDITOR
 

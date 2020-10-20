@@ -20,6 +20,9 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
     /** Default constructor. */
     UMovieSceneCinematicBoardSection();
 
+//public:
+    //virtual void PostInitProperties();
+
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
