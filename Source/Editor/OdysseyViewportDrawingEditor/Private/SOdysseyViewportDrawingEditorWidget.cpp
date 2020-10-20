@@ -262,14 +262,18 @@ void SOdysseyViewportDrawingEditorWidget::Construct(const FArguments& InArgs, FO
         {
             userData = NewObject< UOdysseyTextureAssetUserData >(mPaintModeSettings->mTexturePaintSettings.mPaintTexture, NAME_None, RF_Public);
             mPaintModeSettings->mTexturePaintSettings.mPaintTexture->AddAssetUserData( userData );
-            FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mPaintModeSettings->mTexturePaintSettings.mPaintTexture );
-            userData->GetLayerStack()->InitFromData( textureData );
+            FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mPaintModeSettings->mTexturePaintSettings.mPaintTexture, userData->GetLayerStack()->Format() );
+            ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mPaintModeSettings->mTexturePaintSettings.mPaintTexture->Source.GetFormat());
+            userData->GetLayerStack()->Init(mPaintModeSettings->mTexturePaintSettings.mPaintTexture->GetSizeX(),mPaintModeSettings->mTexturePaintSettings.mPaintTexture->GetSizeY(),format);
             delete textureData;
             mPaintModeSettings->mTexturePaintSettings.mPaintTexture->PostEditChange();
         }
     
         mLayerStack = userData->GetLayerStack();
-        mLayerStack->ComputeResultBlock();
+
+        // Setup Surface
+        mDisplaySurface = new FOdysseySurfaceEditable(mPaintModeSettings->mTexturePaintSettings.mPaintTexture);
+        mDisplaySurface->Invalidate();
 
         mLayerStackView->DetachWidget();
         mLayerStackView->AttachWidget( 
@@ -462,10 +466,14 @@ SOdysseyViewportDrawingEditorWidget::OnBrushCompiled( UBlueprint* iBrush )
 void
 SOdysseyViewportDrawingEditorWidget::OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
-	for (int i = 0; i < iChangedTiles.Num(); i++)
-	{
-		mLayerStack->ComputeResultBlockWithTempBuffer(iChangedTiles[i], mPaintEngine.TempBuffer(), mPaintEngine.GetOpacity(), mPaintEngine.GetBlendingMode(), mPaintEngine.GetAlphaMode());
-	}
+    for(int i = 0; i < iChangedTiles.Num(); i++)
+    {
+        mLayerStack->ComputeResultInBlockWithBlockAsCurrentLayer(mDisplaySurface->Block()->GetBlock(), mPaintEngine.PreviewBlock(), iChangedTiles[i]);
+    }
+    for(int i = 0; i < iChangedTiles.Num(); i++)
+    {
+        mDisplaySurface->Block()->GetBlock()->Invalidate(iChangedTiles[i]);
+    }
 }
 
 void
@@ -475,21 +483,24 @@ SOdysseyViewportDrawingEditorWidget::OnPaintEngineStrokeWillEnd(const TArray<::u
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
 		mLayerStack->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
-        mLayerStack->BlendTempBufferOnCurrentBlock(iChangedTiles[i], mPaintEngine.TempBuffer(), mPaintEngine.GetOpacity(), mPaintEngine.GetBlendingMode(), mPaintEngine.GetAlphaMode());
+        //mLayerStack->BlendTempBufferOnCurrentBlock(iChangedTiles[i], mPaintEngine.TempBuffer(), mPaintEngine.GetOpacity(), mPaintEngine.GetBlendingMode(), mPaintEngine.GetAlphaMode());
 	}
+    mLayerStack->mDrawingUndo->EndRecord();
 }
 
 void
 SOdysseyViewportDrawingEditorWidget::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
 {
-	mLayerStack->mDrawingUndo->EndRecord();
-	mLayerStack->ComputeResultBlock();
+	mLayerStack->ComputeResultInBlock(mDisplaySurface->Block()->GetBlock());
+    mDisplaySurface->Invalidate();
+    mPaintModeSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
 }
 
 void
 SOdysseyViewportDrawingEditorWidget::OnPaintEngineStrokeAbort()
 {
-	mLayerStack->ComputeResultBlock();
+    mLayerStack->ComputeResultInBlock(mDisplaySurface->Block()->GetBlock());
+    mDisplaySurface->Invalidate();
 }
 
 //--------------------------------------------------------------------------------------
@@ -664,16 +675,24 @@ SOdysseyViewportDrawingEditorWidget::RefreshLayerStackView()
         UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mPaintModeSettings->mTexturePaintSettings.mPaintTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
         if( !userData )
         {
-            userData = NewObject< UOdysseyTextureAssetUserData >(mPaintModeSettings->mTexturePaintSettings.mPaintTexture, NAME_None, RF_Public);
-            mPaintModeSettings->mTexturePaintSettings.mPaintTexture->AddAssetUserData( userData );
-            FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mPaintModeSettings->mTexturePaintSettings.mPaintTexture );
-            userData->GetLayerStack()->InitFromData( textureData );
+            userData = NewObject< UOdysseyTextureAssetUserData >(mPaintModeSettings->mTexturePaintSettings.mPaintTexture,NAME_None,RF_Public);
+            mPaintModeSettings->mTexturePaintSettings.mPaintTexture->AddAssetUserData(userData);
+            FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData(mPaintModeSettings->mTexturePaintSettings.mPaintTexture,userData->GetLayerStack()->Format());
+            ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mPaintModeSettings->mTexturePaintSettings.mPaintTexture->Source.GetFormat());
+            userData->GetLayerStack()->Init(mPaintModeSettings->mTexturePaintSettings.mPaintTexture->GetSizeX(),mPaintModeSettings->mTexturePaintSettings.mPaintTexture->GetSizeY(),format);
             delete textureData;
             mPaintModeSettings->mTexturePaintSettings.mPaintTexture->PostEditChange();
         }
     
         mLayerStack = userData->GetLayerStack();
-        mLayerStack->ComputeResultBlock();
+
+        // Setup Surface
+        if( mDisplaySurface )
+            delete mDisplaySurface;
+
+        mDisplaySurface = new FOdysseySurfaceEditable(mPaintModeSettings->mTexturePaintSettings.mPaintTexture);
+        mDisplaySurface->Invalidate();
+
 
         mLayerStackView->DetachWidget();
         mLayerStackView->AttachWidget( 
@@ -687,9 +706,9 @@ SOdysseyViewportDrawingEditorWidget::RefreshLayerStackView()
         );
 
 
-        if( mLayerStack->GetCurrentLayer()->GetNodeContent()->GetType() == IOdysseyLayer::eType::kImage )
+        if( mLayerStack->GetCurrentLayer()->GetType() == IOdysseyLayer::eType::kImage )
         {
-            FOdysseyImageLayer* imageLayer = static_cast<FOdysseyImageLayer*>( mLayerStack->GetCurrentLayer()->GetNodeContent() );
+            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mLayerStack->GetCurrentLayer());
 	        mPaintEngine.Block( imageLayer->GetBlock());
         }
         else

@@ -41,7 +41,6 @@ public:
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine*        mPaintEngine;       // Owned        
-	FOdysseyBlock*				mPaintEngineBlock;  // Owned        // Used by PaintEngine
 	UOdysseyBrush*              mBrush;             // NOT Owned
 	UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Parameters and Brush Preview
 	::ul3::FPixelValue			mPaintColor;

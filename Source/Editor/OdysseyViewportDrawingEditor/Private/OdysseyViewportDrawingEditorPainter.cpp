@@ -89,7 +89,7 @@ void FOdysseyViewportDrawingEditorPainter::Init()
 	/** Setup necessary data */
 	mBrushSettings = DuplicateObject<UPaintBrushSettings>(GetMutableDefault<UPaintBrushSettings>(), GetTransientPackage());
 	mBrushSettings->AddToRoot();
-    mBrushSettings->SetBrushRadius(1);
+    mBrushSettings->SetBrushRadius(10);
 	mPaintSettings = UOdysseyViewportDrawingEditorSettings::Get();
 	FOdysseyViewportDrawingEditorCommands::Register();
 	mUICommandList = TSharedPtr<FUICommandList>(new FUICommandList());
@@ -852,6 +852,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
         meshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
         meshPaintBatchedElementParameters->ShaderParams.BrushColor = FLinearColor(mWidget->GetPaintEngine()->GetColor().RF(), mWidget->GetPaintEngine()->GetColor().GF(), mWidget->GetPaintEngine()->GetColor().BF(), mWidget->GetPaintEngine()->GetColor().AF() );
     }
+
     // Parameters for brush paint
     /*TRefCountPtr< FMeshPaintBatchedElementParameters > MeshPaintBatchedElementParameters(new FMeshPaintBatchedElementParameters());
     {
@@ -1013,7 +1014,10 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
 
             //The texture inside should be the texture of the brush, it may work
             brushPaintBatchedElements->AddTriangle(v0,v1,v2,meshPaintBatchedElementParameters,SE_BLEND_Opaque);
+            FMatrix BrushSpaceVertexPosition = FMatrix(FVector(col0.R), FVector(col0.G), FVector(col0.B), FVector(1.0f)) * worldToBrushMatrix;
             //brushPaintBatchedElements->AddTriangleExtensive(v0,v1,v2, MeshPaintBatchedElementParameters, textureData->PaintingTexture2D->Resource,SE_BLEND_Opaque);
+            UE_LOG(LogTemp, Display, TEXT("%s"), *(BrushSpaceVertexPosition.ToString()));
+
         }
 
         // Brush Mask triangle
