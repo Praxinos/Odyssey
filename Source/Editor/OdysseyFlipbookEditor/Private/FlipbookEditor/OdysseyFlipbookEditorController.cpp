@@ -322,8 +322,7 @@ FOdysseyFlipbookEditorController::OnClear()
     FOdysseyPainterEditorController::OnClear();
 
 	mData->LayerStack()->ClearCurrentLayer();
-    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
-    mData->DisplaySurface()->Invalidate();
+
     return FReply::Handled();
 }
 

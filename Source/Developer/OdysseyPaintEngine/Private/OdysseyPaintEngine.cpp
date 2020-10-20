@@ -488,6 +488,9 @@ FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdys
         mIsPendingEndStroke )
         return;
 
+	//TODO: Maybe find another way to keep the preview block uptodate, because this is potentially heavy
+	UpdatePreviewBlock();
+
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
 
     mRawStroke.Add( iPoint );
@@ -788,6 +791,28 @@ FOdysseyPaintEngine::CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects)
                     , iRects[i]
                     , pos);               
     }
+}
+
+void
+FOdysseyPaintEngine::UpdatePreviewBlock()
+{
+	if (!mEditedBlock || !mPreviewBlock)
+		return;
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+	::ul3::FRect rect(0, 0, mEditedBlock->Width(), mEditedBlock->Height());
+
+	::ul3::FVec2F pos(0, 0);
+	::ul3::Copy(hULIS.ThreadPool()
+		, ULIS3_BLOCKING
+		, perfIntent
+		, hULIS.HostDeviceInfo()
+		, ULIS3_NOCB
+		, mEditedBlock->GetBlock()
+		, mPreviewBlock->GetBlock()
+		, rect
+		, pos);
 }
 
 void

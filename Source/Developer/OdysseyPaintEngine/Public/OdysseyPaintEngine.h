@@ -73,6 +73,7 @@ public:
 
 	void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
 	void CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects);
+	void UpdatePreviewBlock();
 
     void UpdateBrushCursorPreview();
 
