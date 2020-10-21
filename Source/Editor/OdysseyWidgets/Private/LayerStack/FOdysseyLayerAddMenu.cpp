@@ -70,13 +70,13 @@ void FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryExecute()
 			else
 			{
 				TSharedPtr<IOdysseyLayer> parent = currentLayer->GetParent();
-				model->GetLayerStackData()->AddLayer(imageLayer, parent, imageLayer->GetIndexInParent());
+				model->GetLayerStackData()->AddLayer(imageLayer, parent, currentLayer->GetIndexInParent());
 			}
         }
         else
         {
 			TSharedPtr<IOdysseyLayer> parent = currentLayer->GetParent();
-            model->GetLayerStackData()->AddLayer(imageLayer, parent, imageLayer->GetIndexInParent());
+            model->GetLayerStackData()->AddLayer(imageLayer, parent, currentLayer->GetIndexInParent());
         }
     }
     else
