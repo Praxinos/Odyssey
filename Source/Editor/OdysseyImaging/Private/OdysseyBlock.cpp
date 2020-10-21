@@ -41,6 +41,7 @@
         case PF_G16:				ret = ULIS3_FORMAT_G16;		break;
 		case PF_A8R8G8B8:			ret = ULIS3_FORMAT_ARGB8;   break;
         case PF_B8G8R8A8:			ret = ULIS3_FORMAT_BGRA8;   break;
+		case PF_FloatRGBA:			ret = ULIS3_FORMAT_RGBAF;	break;
         case PF_A32B32G32R32F:		ret = ULIS3_FORMAT_ABGRF;	break;
 		case PF_R32G32B32A32_UINT:	ret = ULIS3_FORMAT_RGBA32;	break;
         case PF_R16G16B16A16_UINT:	ret = ULIS3_FORMAT_RGBA16;	break;

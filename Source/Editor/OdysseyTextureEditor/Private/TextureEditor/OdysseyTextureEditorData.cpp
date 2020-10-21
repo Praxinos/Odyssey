@@ -32,16 +32,7 @@ FOdysseyTextureEditorData::Init()
 	FTextureFormatSettings textureFormatSettings;
 	mTexture->GetLayerFormatSettings(0, textureFormatSettings);
 
-	// Backup Texture properties
-	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup, textureFormatSettings };
-    
-	// Overwrite Texture properties
-	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-	mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-
-	textureFormatSettings.CompressionNone = 1;
-	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
-	mTexture->UpdateResource();
+	PrepareTextureProperties();
     
     // Get or Create Texture userData
     UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
@@ -79,6 +70,18 @@ FOdysseyTextureEditorData::SyncTextureAndInvalidate()
     InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
 }
 
+void
+FOdysseyTextureEditorData::PrepareTextureProperties()
+{
+	// Create new Texture Properties Backup
+	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup };
+
+	// Overwrite Texture properties
+	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+	mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+	mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+	mTexture->UpdateResource();
+}
 
 void
 FOdysseyTextureEditorData::ApplyPropertiesBackup()
@@ -86,7 +89,6 @@ FOdysseyTextureEditorData::ApplyPropertiesBackup()
 	mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
 	mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
 	mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
-	mTexture->SetLayerFormatSettings(0, mPropertiesBackup.mTextureFormatSettings);
     mTexture->UpdateResource();
 }
 

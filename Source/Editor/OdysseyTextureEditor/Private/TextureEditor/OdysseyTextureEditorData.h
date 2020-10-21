@@ -39,6 +39,7 @@ public:
 
 public:
 	void SyncTextureAndInvalidate();
+	void PrepareTextureProperties();
 	void ApplyPropertiesBackup();
 
 private:
