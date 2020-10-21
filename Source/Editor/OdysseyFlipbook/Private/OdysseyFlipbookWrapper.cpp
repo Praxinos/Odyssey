@@ -325,12 +325,13 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
     UTexture2D* texture = CreateTexture(iTexture->GetSizeX(), iTexture->GetSizeY(), iTexture->Source.GetFormat(), iName, FLinearColor( 0.f, 0.f, 0.f, 0.f ));
     UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(texture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
 
-    FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iTexture, format);
-    CopyBlockDataIntoUTexture(block, texture);
-    delete block;
-    block = nullptr;
     if( srcTextureUserData )
     {
+        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iTexture, format);
+        srcTextureUserData->GetLayerStack()->ComputeResultInBlock(block->GetBlock());
+        CopyBlockDataIntoUTexture(block, texture);
+        delete block;
+
         TSharedPtr<FOdysseyRootLayer> layerRoot = MakeShareable(srcTextureUserData->GetLayerStack()->GetLayerRoot()->Clone());
 		IOdysseyLayer::CloneChildren(srcTextureUserData->GetLayerStack()->GetLayerRoot(), layerRoot);
         textureUserData->GetLayerStack()->SetLayerRoot(layerRoot);
@@ -349,6 +350,11 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
     }
     else
     {
+        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iTexture, format);
+        CopyBlockDataIntoUTexture(block, texture);
+        delete block;
+        block = nullptr;
+
         TArray< TSharedPtr<IOdysseyLayer> > layers;
         textureUserData->GetLayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
         
