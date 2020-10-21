@@ -44,6 +44,8 @@ public:
 
     void OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer);
 
+    virtual void SetIsVisible(bool iIsVisible) override;
+
 public:
     FOdysseyLayerIsOpenChanged& IsOpenChangedDelegate();
 

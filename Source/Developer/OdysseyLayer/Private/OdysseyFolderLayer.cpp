@@ -219,4 +219,11 @@ FOdysseyFolderLayer::IsOpenChangedDelegate()
     return mIsOpenChangedDelegate;
 }
 
+void
+FOdysseyFolderLayer::SetIsVisible(bool iIsVisible)
+{
+    IOdysseyLayer::SetIsVisible(iIsVisible);
+    mImageResultChangedDelegate.Broadcast();
+}
+
 #undef LOCTEXT_NAMESPACE
