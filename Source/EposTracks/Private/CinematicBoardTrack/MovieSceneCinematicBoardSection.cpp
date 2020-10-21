@@ -127,6 +127,8 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 
 #endif
 
+//---
+
 void
 UMovieSceneCinematicBoardSection::StartResizing()
 {
@@ -152,9 +154,10 @@ UMovieSceneCinematicBoardSection::IsResizing() const
     return mResizing > 0;
 }
 
+//---
 
 bool
-UMovieSceneCinematicBoardSection::GuessStartMoving()
+UMovieSceneCinematicBoardSection::GuessStartMoving( TRange<FFrameNumber>& oRangeBackup )
 {
     if( IsMoving() )
         return false;
@@ -174,7 +177,8 @@ UMovieSceneCinematicBoardSection::GuessStartMoving()
     if( !sections_without_selected.Num() )
     {
         StartMoving(); // Backup value is not valid, but shouldn't be a problem for this case, where there is only 1 section and it is moving
-        //mSectionRangeBackup = ;
+        mSectionRangeBackup = GetTrueRange(); // wrong, but doesn't impact after as there is no previous/next sections
+        oRangeBackup = mSectionRangeBackup;
 
         return true;
     }
@@ -201,6 +205,7 @@ UMovieSceneCinematicBoardSection::GuessStartMoving()
     {
         StartMoving();
         mSectionRangeBackup = gap;
+        oRangeBackup = mSectionRangeBackup;
 
         return true;
     }
@@ -210,6 +215,7 @@ UMovieSceneCinematicBoardSection::GuessStartMoving()
     {
         StartMoving();
         mSectionRangeBackup = first_range;
+        oRangeBackup = mSectionRangeBackup;
 
         return true;
     }
@@ -217,6 +223,7 @@ UMovieSceneCinematicBoardSection::GuessStartMoving()
     TRange<FFrameNumber> last_range( sections_without_selected.Last()->GetExclusiveEndFrame(), sections_without_selected.Last()->GetExclusiveEndFrame() + GetTrueRange().Size<FFrameNumber>() );
     StartMoving();
     mSectionRangeBackup = last_range;
+    oRangeBackup = mSectionRangeBackup;
 
     return true;
 }
@@ -247,12 +254,6 @@ bool
 UMovieSceneCinematicBoardSection::IsMoving() const
 {
     return mMoving > 0;
-}
-
-TRange<FFrameNumber>
-UMovieSceneCinematicBoardSection::GetRangeBackup() const
-{
-    return mSectionRangeBackup;
 }
 
 //---

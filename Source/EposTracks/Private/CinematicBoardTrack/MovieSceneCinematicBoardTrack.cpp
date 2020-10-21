@@ -212,11 +212,11 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
     }
     else
     {
-        if( board_section->GuessStartMoving() )
+        TRange<FFrameNumber> range_backup;
+        if( board_section->GuessStartMoving( range_backup ) ) //TODO: certainly add all this stuff inside CinematiqueBoardSection.h/cpp once there will be a BeginMoveSection()/MoveSection()
         {
-            //TODO: certainly add all this stuff inside CinematiqueBoardSection.h/cpp once there will be a BeginMoveSection()/MoveSection()
-            mPreviousMove.FindOrAdd( board_section ) = board_section->GetRangeBackup();
-            mLastGapMove.FindOrAdd( board_section ) = board_section->GetRangeBackup();
+            mPreviousMove.FindOrAdd( board_section ) = range_backup;
+            mLastGapMove.FindOrAdd( board_section ) = range_backup;
             mCacheOverlapPriority.FindOrAdd( board_section ) = board_section->GetOverlapPriority();
 
             board_section->SetOverlapPriority( 1337 /* totally arbitrary */ );

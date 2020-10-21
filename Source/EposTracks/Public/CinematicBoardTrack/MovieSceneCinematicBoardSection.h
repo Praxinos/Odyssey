@@ -60,9 +60,6 @@ private:
 
 //---
 
-public:
-    TRange<FFrameNumber> GetRangeBackup() const;
-
 private:
     TRange<FFrameNumber> mSectionRangeBackup;
 
@@ -81,7 +78,7 @@ private:
 //---
 
 public:
-    bool GuessStartMoving(); //PATCH
+    bool GuessStartMoving( TRange<FFrameNumber>& iRangeBackup ); //PATCH
 
     void StartMoving();
     void Moving();
