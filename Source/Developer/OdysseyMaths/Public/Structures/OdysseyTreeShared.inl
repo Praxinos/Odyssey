@@ -18,7 +18,7 @@ template< typename tDerived >
 void
 FOdysseyNTreeShared<tDerived>::AddNode( TSharedPtr<tDerived> iNode, int iIndexEmplace )
 {
-	TSharedPtr<FOdysseyNTreeShared<tDerived>> parent = AsShared();
+	TSharedPtr<FOdysseyNTreeShared<tDerived>> parent = this->AsShared();
     iNode->mParent = TWeakPtr<tDerived>(StaticCastSharedPtr<tDerived>(parent));
     if( iIndexEmplace < 0 || iIndexEmplace >= mNodes.Num() )
     {
@@ -78,7 +78,7 @@ FOdysseyNTreeShared<tDerived>::MoveNodeTo( TSharedPtr<tDerived> iNode, ePosition
     }
 
 	
-	TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = AsShared();
+	TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
 	TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
 
     if( iPosition == ePosition::kIn )
@@ -182,7 +182,7 @@ FOdysseyNTreeShared<tDerived>::DepthFirstSearchTree( TArray<TSharedPtr<tDerived>
 {
 	if (iIncludeRoot)
 	{
-		TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = AsShared();
+		TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
 		TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
 		ioContents->Add(self);
 	}
@@ -202,7 +202,7 @@ FOdysseyNTreeShared<tDerived>::BreadthFirstSearchTree( TArray<TSharedPtr<tDerive
 {
 	if (iIncludeRoot)
 	{
-		TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = AsShared();
+		TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
 		TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
 		ioContents->Add(self);
 	}
