@@ -475,6 +475,14 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight,
 
     //---
 
+    if (!state.target_temp_buffer)
+    {
+        FOdysseyBlock* defaultBlock = new FOdysseyBlock( iWidth, iHeight, ULIS3_FORMAT_RGBA8, nullptr, nullptr, true );
+        FOdysseyBlockProxy prox( defaultBlock, op );
+        StoreInPool( iCache, op, prox );
+        return prox;
+    }
+
     FOdysseyBlock* src = state.target_temp_buffer;
     FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true );
 

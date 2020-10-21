@@ -28,8 +28,8 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
 
     //---
 
-
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, BrushContext->GetState().target_temp_buffer->Format());
+    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, defaultFormat);
     
     FOdysseyBlock* block = NewOdysseyBlockFromUTextureData( Texture, format );
 
@@ -95,8 +95,8 @@ UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushCon
         return  BrushContext->RetrieveInPool( Cache, op );
 
     //---
-
-    ::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, BrushContext->GetState().target_temp_buffer->Format());
+    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, defaultFormat);
 
     FOdysseyBlock* tmp = new  FOdysseyBlock( Width, Height, format, nullptr, nullptr, InitializeData );
 
@@ -132,7 +132,8 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
         return  BrushContext->RetrieveInPool( Cache, op );
 
     //---
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, BrushContext->GetState().target_temp_buffer->Format());
+    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, defaultFormat);
 
     FOdysseyBlock* dst = new FOdysseyBlock(Back.m->GetBlock()->Width(), Back.m->GetBlock()->Height(), format, nullptr, nullptr, false );
 
@@ -205,7 +206,8 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrush
     
     check( iFont->Textures.Num() )
 
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, iBrushContext->GetState().target_temp_buffer->Format());
+    ::ul3::tFormat defaultFormat = iBrushContext->GetState().target_temp_buffer ? iBrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, defaultFormat);
     
     for( auto texture : iFont->Textures )
     {

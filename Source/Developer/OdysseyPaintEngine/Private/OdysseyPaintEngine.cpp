@@ -187,6 +187,7 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
         delete mPreviewBlock;
         mStrokeBlock = nullptr;
         mPreviewBlock = nullptr;
+		UpdateBrushInstance();
         return;
     }
 

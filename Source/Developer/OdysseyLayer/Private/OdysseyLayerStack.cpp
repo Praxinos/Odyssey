@@ -287,7 +287,7 @@ FOdysseyLayerStack::DeleteLayer(TSharedPtr<IOdysseyLayer> iLayer)
     TSharedPtr<IOdysseyLayer> parent = iLayer->GetParent();
     int index = iLayer->GetIndexInParent();
 
-    if (mCurrentLayer || mCurrentLayer->HasForParent(iLayer))
+    if (mCurrentLayer == iLayer || mCurrentLayer->HasForParent(iLayer))
     {
         TArray<TSharedPtr<IOdysseyLayer>> children = parent->GetNodes();
         int childrenCount = children.Num();

@@ -39,7 +39,7 @@ FOdysseyFlipbookEditorController::~FOdysseyFlipbookEditorController()
         mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
 
         TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
-        if ( layer && layer->GetType() != IOdysseyLayer::eType::kImage)
+        if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
         {
             TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layer);
             if (imageLayer)

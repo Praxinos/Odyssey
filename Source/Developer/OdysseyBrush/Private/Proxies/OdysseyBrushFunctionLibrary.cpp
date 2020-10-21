@@ -19,7 +19,7 @@
 void
 UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
 {
-    if( !BrushContext )
+    if( !BrushContext || !BrushContext->GetState().target_temp_buffer)
         return;
 
     int size = ::ul3::FMaths::Max( BrushContext->GetSizeModifier() * BrushContext->GetPressure(), 1.f );
@@ -68,7 +68,7 @@ UOdysseyBrushFunctionLibrary::DebugStamp( UOdysseyBrushAssetBase* BrushContext )
 void
 UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing )
 {
-    if( !BrushContext ) return;
+    if( !BrushContext || !BrushContext->GetState().target_temp_buffer) return;
     if( !Sample.m )     return;
 
     FOdysseyBlock* block = Sample.m;
@@ -126,7 +126,7 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext,
 void
 UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode )
 {
-    if( !BrushContext ) return;
+    if( !BrushContext || !BrushContext->GetState().target_temp_buffer ) return;
     if( !Sample.m )     return;
 
     FOdysseyBlock* block = Sample.m;
