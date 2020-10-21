@@ -55,6 +55,7 @@ public:
 private:
     TMap<UMovieSceneSection*, TRange<FFrameNumber>> mPreviousMove;
     TMap<UMovieSceneSection*, TRange<FFrameNumber>> mLastGapMove;
+    TMap<UMovieSceneSection*, int32>                mCacheOverlapPriority;
 
     friend uint32 GetTypeHash( const UMovieSceneSection* iSection )
     {

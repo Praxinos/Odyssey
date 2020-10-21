@@ -214,8 +214,12 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
     {
         if( board_section->GuessStartMoving() )
         {
+            //TODO: certainly add all this stuff inside CinematiqueBoardSection.h/cpp once there will be a BeginMoveSection()/MoveSection()
             mPreviousMove.FindOrAdd( board_section ) = board_section->GetRangeBackup();
             mLastGapMove.FindOrAdd( board_section ) = board_section->GetRangeBackup();
+            mCacheOverlapPriority.FindOrAdd( board_section ) = board_section->GetOverlapPriority();
+
+            board_section->SetOverlapPriority( 1337 /* totally arbitrary */ );
 
             board_section->Moving();
         }
@@ -236,14 +240,19 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 check( previous_range );
                 last_gap = mLastGapMove.Find( board_section );
                 check( last_gap );
+                int32* cache_priority = mCacheOverlapPriority.Find( board_section );
+                check( cache_priority );
 
                 move_result = MovieSceneHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
                 MovieSceneHelpersMove::FixPostMoveSections( Sections, *last_gap, &ioSection, move_result );
+
+                board_section->SetOverlapPriority( *cache_priority );
 
                 board_section->StopMoving();
 
                 mPreviousMove.Remove( board_section );
                 mLastGapMove.Remove( board_section );
+                mCacheOverlapPriority.Remove( board_section );
 
                 UpdateEasing();
                 //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
