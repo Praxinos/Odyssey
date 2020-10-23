@@ -14,6 +14,10 @@ public class OdysseyImaging : ModuleRules
                 "Core",
                 "CoreUObject",
                 "Engine",
+                "ImageCore",
+                "RenderCore",
+                "TargetPlatform",
+                "TextureCompressor"
              }
         );
 

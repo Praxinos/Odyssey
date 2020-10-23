@@ -135,14 +135,21 @@ FOdysseyFlipbookEditorData::SyncTextureWithSurfaceBlock()
 void
 FOdysseyFlipbookEditorData::PrepareTextureProperties()
 {
+    FTextureFormatSettings textureFormatSettings;
+	mTexture->GetLayerFormatSettings(0, textureFormatSettings);
+
 	// Create new Texture Properties Backup
-	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup };
-    
+	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup, textureFormatSettings };
+
 	// Overwrite Texture properties
-	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-    mTexture->UpdateResource();
+	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
+    
+    textureFormatSettings.CompressionNone = 1;
+	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
+
+	// mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+	// mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+	mTexture->UpdateResource();
 }
 
 void
@@ -150,8 +157,9 @@ FOdysseyFlipbookEditorData::ApplyPropertiesBackup()
 {
 	if (mTexture) {
 		mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
-		mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
-		mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
+        mTexture->SetLayerFormatSettings(0, mPropertiesBackup.mTextureFormatSettings);
+        // mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
+        // mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
         mTexture->UpdateResource();
 	}
 }

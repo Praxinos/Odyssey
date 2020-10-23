@@ -20,6 +20,7 @@ struct FTexturePropertiesBackup
     TextureMipGenSettings       mTextureMipGenBackup;
     TextureCompressionSettings  mTextureCompressionBackup;
     TextureGroup                mTextureGroupBackup;
+	FTextureFormatSettings      mTextureFormatSettings;
 };
 
 /**

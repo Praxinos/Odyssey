@@ -16,7 +16,7 @@
         case TSF_BGRA8:     ret = ULIS3_FORMAT_BGRA8;   break;
         case TSF_BGRE8:     ret = ULIS3_FORMAT_BGRA8;   break;
         case TSF_RGBA16:    ret = ULIS3_FORMAT_RGBA16;  break;
-        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBA16;  break;
+        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBAF;   break;
         case TSF_RGBA8:     ret = ULIS3_FORMAT_RGBA8;   break;
         case TSF_RGBE8:     ret = ULIS3_FORMAT_RGBA8;   break;
         case TSF_MAX:       ret = 0;                    break;
@@ -53,7 +53,7 @@
 		case PF_R16G16B16A16_SNORM:		ret = ULIS3_FORMAT_RGBA16;   break;
         default:					ret = 0;                    break;
     }
-    checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
+    // checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
     return ret;
 }
 
