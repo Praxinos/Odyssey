@@ -24,6 +24,9 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     ToolbarExtender->AddToolBarExtension( "Curve Editor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendSequencerToolbar ) );
     customization.ToolbarExtender = ToolbarExtender;
 
+    //customization.OnReceivedDragOver.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDragOver );
+    //customization.OnReceivedDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDrop );
+
     customization.OnAssetsDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerAssetsDrop );
     customization.OnClassesDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerClassesDrop );
     customization.OnActorsDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerActorsDrop );
@@ -71,9 +74,32 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     //ToolbarBuilder.AddWidget(Widget);
 }
 
+//bool
+//FBoardSequenceCustomization::OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply )
+//{
+//    oReply = FReply::Unhandled();
+//
+//    return false;
+//}
+//
+//bool
+//FBoardSequenceCustomization::OnSequencerReceiveDrop( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply )
+//{
+//    oReply = FReply::Unhandled();
+//
+//    return false;
+//}
+
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp )
 {
+    // Maybe we can store data, and then get them inside tracks through (like in sequencer.cpp ?)
+    //   ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
+    //   TSharedPtr<FSequencerCustomizationManager> Manager = SequencerModule.GetSequencerCustomizationManager();
+    //   ...
+    // because once an asset is dropped on a NOT supported track, it goes through here, where we can store iDragDropOp.X/Y,
+    // and get them again when we go inside CinematicBoardTrackEditor:HandleAssetAdded() where the information is not given
+
     return ESequencerDropResult::Unhandled; // Process the default behavior for assets
 }
 
@@ -88,3 +114,5 @@ FBoardSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<
 {
     return ESequencerDropResult::DropDenied;    // Don't accept actors
 }
+
+#undef LOCTEXT_NAMESPACE

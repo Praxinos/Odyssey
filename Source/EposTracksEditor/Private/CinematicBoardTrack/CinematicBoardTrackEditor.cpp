@@ -16,6 +16,7 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "EditorStyleSet.h"
 #include "LevelEditorViewport.h"
+#include "CommonMovieSceneTools.h"
 #include "MovieSceneToolHelpers.h"
 #include "FCPXML/FCPXMLMovieSceneTranslator.h"
 #include "SequencerUtilities.h"
@@ -336,7 +337,11 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovie
 
         if( sequence )
         {
-            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, iRowIndex ) );
+            FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
+            FTimeToPixel conv( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
+            TOptional<FFrameNumber> dropped_frame( conv.PixelToFrame( geometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() ).X ).RoundToFrame() );
+
+            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, iRowIndex, dropped_frame ) );
 
             anyDropped = true;
         }
@@ -701,7 +706,8 @@ FCinematicBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute( const FAs
         UMovieSceneSequence* movieSceneSequence = CastChecked<UMovieSceneSequence>( iAssetData.GetAsset() );
 
         int32 rowIndex = INDEX_NONE;
-        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, movieSceneSequence, rowIndex ) );
+        TOptional<FFrameNumber> dropped_frame;
+        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, movieSceneSequence, rowIndex, dropped_frame ) );
     }
 }
 
@@ -715,7 +721,7 @@ FCinematicBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed( cons
 }
 
 FKeyPropertyResult
-FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex )
+FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame )
 {
     FKeyPropertyResult keyPropertyResult;
 
@@ -742,7 +748,7 @@ FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSe
         const FFrameRate outerFrameRate = boardTrack->GetTypedOuter<UMovieScene>()->GetTickResolution();
         const int32      outerDuration = innerDuration.ConvertTo( outerFrameRate ).FrameNumber.Value;
 
-        UMovieSceneSubSection* newSection = boardTrack->AddSequenceOnRow( iMovieSceneSequence, iKeyTime, outerDuration, iRowIndex );
+        UMovieSceneSubSection* newSection = boardTrack->AddSequenceOnRow( iMovieSceneSequence, iDroppedFrame.IsSet() ? iDroppedFrame.GetValue() : iKeyTime, outerDuration, iRowIndex );
         keyPropertyResult.bTrackModified = true;
 
         GetSequencer()->EmptySelection();

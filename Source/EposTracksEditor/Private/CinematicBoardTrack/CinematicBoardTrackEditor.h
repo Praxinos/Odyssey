@@ -147,7 +147,7 @@ private:
     UMovieSceneCinematicBoardTrack* FindOrCreateCinematicBoardTrack();
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
-    FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex );
+    FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame );
 
     /** Delegate for boards button lock state */
     ECheckBoxState AreBoardsLocked() const;
