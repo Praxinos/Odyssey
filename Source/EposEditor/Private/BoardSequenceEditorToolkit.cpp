@@ -25,6 +25,10 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 
+#include "BoardSequenceEditorCommands.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Settings/EposSequencerSettings.h"
+
 #define LOCTEXT_NAMESPACE "BoardSequenceEditor"
 
 const FName FBoardSequenceEditorToolkit::smSequencerMainTabId( TEXT( "Sequencer_SequencerMain" ) );
@@ -145,6 +149,24 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
 void
 FBoardSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
+    UEposSequencerSettings* settings = Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() );
+
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShots,
+        FExecuteAction::CreateSP( this, &FBoardSequenceEditorToolkit::HandleArrangeShots )
+    );
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
+        FExecuteAction::CreateLambda([=] { settings->SetArrangeShots( EArrangeShots::OnOneRow ); HandleArrangeShots(); } ),
+        FCanExecuteAction::CreateLambda([this] { return true; }),
+        FIsActionChecked::CreateLambda([=] { return settings->GetArrangeShots() == EArrangeShots::OnOneRow; } )
+    );
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
+        FExecuteAction::CreateLambda([=] { settings->SetArrangeShots( EArrangeShots::OnTwoRowsShifted ); HandleArrangeShots(); } ),
+        FCanExecuteAction::CreateLambda([this] { return true; }),
+        FIsActionChecked::CreateLambda([=] { return settings->GetArrangeShots() == EArrangeShots::OnTwoRowsShifted; } )
+    );
 }
 
 //--- FGCObject interface
@@ -225,6 +247,37 @@ void FBoardSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class 
 //void FTemplateSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
 //{
 //}
+
+void
+FBoardSequenceEditorToolkit::HandleArrangeShots()
+{
+    auto track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !track )
+        return;
+
+    UEposSequencerSettings* settings = Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() );
+
+    auto sections = track->GetAllSections();
+    for( int i = 0; i < sections.Num(); i++ )
+    {
+        auto section = sections[i];
+
+        section->Modify();
+
+        switch( settings->GetArrangeShots() )
+        {
+            case EArrangeShots::OnOneRow:
+                section->SetRowIndex( 0 );
+                break;
+            default:
+            case EArrangeShots::OnTwoRowsShifted:
+                section->SetRowIndex( i % 2 );
+                break;
+        }
+    }
+
+    mSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
 
 void FBoardSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {

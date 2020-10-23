@@ -12,9 +12,11 @@
 #include "AssetTools/BoardSequenceActions.h"
 #include "AssetTools/ShotSequenceActions.h"
 #include "Board/BoardSequence.h"
+#include "BoardSequenceEditorCommands.h"
 #include "Customization/BoardSequenceCustomization.h"
 #include "Customization/ShotSequenceCustomization.h"
 #include "Settings/EposEditorSettings.h"
+#include "Settings/EposSequencerSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
 #include "Styles/EposEditorStyle.h"
@@ -65,6 +67,7 @@ FEposEditorModule::AddReferencedObjects( FReferenceCollector& Collector )
 void
 FEposEditorModule::RegisterCommands()
 {
+    FBoardSequenceEditorCommands::Register();
     FShotSequenceEditorCommands::Register();
 }
 
@@ -72,6 +75,7 @@ void
 FEposEditorModule::UnregisterCommands()
 {
     FShotSequenceEditorCommands::Unregister();
+    FBoardSequenceEditorCommands::Unregister();
 }
 
 //---
@@ -123,7 +127,7 @@ FEposEditorModule::RegisterSettings()
                                         LOCTEXT( "EposEditorSettingsShotDescription", "Configure the look and feel of the Epos Editor (ShotSequence)." ),
                                         mSettingsBoard );
 
-    mSettingsShot = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "BoardSequenceEditor" ) ); // Don't know how to use/manage them -> Inside Config directory.
+    mSettingsShot = USequencerSettingsContainer::GetOrCreate<UEposSequencerSettings>( TEXT( "BoardSequenceEditor" ) ); // Don't know how to use/manage them -> Inside Config directory.
 
     SettingsModule->RegisterSettings( "Editor", "ContentEditors", "BoardSequenceEditor",
                                         LOCTEXT( "EposEditorSettingsBoardName", "Epos Editor (BoardSequence)" ),
@@ -139,7 +143,8 @@ FEposEditorModule::UnregisterSettings()
         return;
 
     SettingsModule->UnregisterSettings( "Project", "Plugins", "Epos" );
-    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "EposEditor" );
+    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "ShotSequenceEditor" );
+    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "BoardSequenceEditor" );
 }
 
 //---

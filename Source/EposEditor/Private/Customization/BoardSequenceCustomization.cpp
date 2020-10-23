@@ -3,12 +3,11 @@
 
 #include "Customization/BoardSequenceCustomization.h"
 
-#include "TrackEditors/AudioTrackEditor.h"
-#include "Tracks/MovieSceneAudioTrack.h"
-#include "Sound/SoundBase.h"
-
 #include "Board/BoardSequence.h"
-#include "Shot/ShotSequence.h"
+#include "BoardSequenceEditorCommands.h"
+#include "Settings/EposSequencerSettings.h"
+
+#define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
 
 //---
 
@@ -46,32 +45,77 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
-    //ToolbarBuilder.AddSeparator();
+    ToolbarBuilder.AddSeparator();
 
-    //ToolbarBuilder.AddToolBarButton( FBoardSequenceCustomization::Get().CreateCamera );
+    TAttribute<FText> ArrangeShotsName;
+    ArrangeShotsName.Bind( TAttribute<FText>::FGetter::CreateLambda( [&]
+    {
+        switch( Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() )->GetArrangeShots() )
+        {
+            case EArrangeShots::OnOneRow:
+                return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetLabel();
+            default:
+            case EArrangeShots::OnTwoRowsShifted:
+                return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetLabel();
+        }
+    } ) );
 
-    //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
-    //	+SHorizontalBox::Slot()
-    //	.AutoWidth()
-    //	.VAlign(VAlign_Center)
-    //	[
-    //		SNew(STextBlock)
-    //		.Text(LOCTEXT("BoundActorClassPicker", "Bound Actor Class"))
-        //]
-        //+SHorizontalBox::Slot()
-        //.AutoWidth()
-        //.VAlign(VAlign_Center)
-        //[
-        //	SNew(SComboButton)
-        //	.OnGetMenuContent_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassMenuContent)
-        //	.ButtonContent()
-        //	[
-        //		SNew(STextBlock)
-        //		.Text_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassName)
-        //	]
-        //];
+    TAttribute<FSlateIcon> ArrangeShotsIcon;
+    ArrangeShotsIcon.Bind( TAttribute<FSlateIcon>::FGetter::CreateLambda( [&]
+    {
+        switch( Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() )->GetArrangeShots() )
+        {
+            case EArrangeShots::OnOneRow:
+                return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetIcon();
+            default:
+            case EArrangeShots::OnTwoRowsShifted:
+                return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetIcon();
+        }
+    } ) );
 
-    //ToolbarBuilder.AddWidget(Widget);
+    TAttribute<FText> ArrangeShotsToolTip;
+    ArrangeShotsToolTip.Bind( TAttribute<FText>::FGetter::CreateLambda( [&]
+    {
+        switch( Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() )->GetArrangeShots() )
+        {
+            case EArrangeShots::OnOneRow:
+                return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetDescription();
+            default:
+            case EArrangeShots::OnTwoRowsShifted:
+                return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetDescription();
+        }
+    } ) );
+
+    ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().ArrangeShots
+                                     , NAME_None
+                                     , ArrangeShotsName
+                                     , ArrangeShotsToolTip
+                                     , ArrangeShotsIcon );
+
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeArrangeShotsMenu ),
+        LOCTEXT( "ArrangeShots", "Arrange Shots" ),
+        LOCTEXT( "ArrangeShotsToolTip", "Arrange Shots Options" ),
+        TAttribute<FSlateIcon>(),
+        true );
+
+    ToolbarBuilder.AddSeparator();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeArrangeShotsMenu()
+{
+    FMenuBuilder MenuBuilder( false, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.BeginSection( "ArrangeShots", LOCTEXT( "ArrangeShotsHeader", "Arrange Shots" ) );
+    {
+        MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow );
+        MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows );
+    }
+    MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
 }
 
 //bool

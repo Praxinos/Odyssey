@@ -71,6 +71,9 @@ private:
     ///** Callback for executing the Add Component action. */
     //void HandleAddComponentActionExecute( UActorComponent* Component );
 
+    /** Callback for executing the Arrange Shots command. */
+    void HandleArrangeShots();
+
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "SequencerCustomizationManager.h"
+#include "Widgets/SWidget.h"
 
 class UBoardSequence;
 
@@ -20,6 +21,7 @@ public:
 
 private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
+    TSharedRef<SWidget> MakeArrangeShotsMenu();
 
     //bool OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );
     //bool OnSequencerReceiveDrop( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );

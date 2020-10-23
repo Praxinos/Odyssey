@@ -46,6 +46,10 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
 
+    //Set( "BoardSequenceEditor.ArrangeShots.Small", new IMAGE_BRUSH( "IconArrangeShots_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsOnOneRow.Small", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows.Small", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon24x24 ) );
+
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }
 
