@@ -338,8 +338,8 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovie
         if( sequence )
         {
             FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
-            FTimeToPixel conv( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
-            TOptional<FFrameNumber> dropped_frame( conv.PixelToFrame( geometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() ).X ).RoundToFrame() );
+            FTimeToPixel converter( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
+            TOptional<FFrameNumber> dropped_frame( converter.PixelToFrame( geometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() ).X ).RoundToFrame() );
 
             AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, iRowIndex, dropped_frame ) );
 
