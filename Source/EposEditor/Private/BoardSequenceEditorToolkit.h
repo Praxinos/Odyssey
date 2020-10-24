@@ -12,7 +12,7 @@
 #include "Settings/EposEditorSettings.h"
 
 class FToolBarBuilder;
-//class FBoardSequenceEditorPlaybackContext;
+class FEposEditorPlaybackContext;
 class ISequencer;
 class FAssetDragDropOp;
 class FClassDragDropOp;
@@ -102,7 +102,7 @@ private:
     /** Handle to the sequencer properties menu extender. */
     //FDelegateHandle mSequencerExtenderHandle;
 
-    //TSharedPtr<FBoardSequenceEditorPlaybackContext> mPlaybackContext;
+    TSharedPtr<FEposEditorPlaybackContext> mPlaybackContext;
 
     /**	The tab ids for all the tabs used */
     static const FName smSequencerMainTabId;

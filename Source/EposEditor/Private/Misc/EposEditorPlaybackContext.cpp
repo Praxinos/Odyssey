@@ -1,12 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Misc/ShotSequenceEditorPlaybackContext.h"
+#include "Misc/EposEditorPlaybackContext.h"
 #include "Editor.h"
 
-#define LOCTEXT_NAMESPACE "ShotSequenceEditorPlaybackContext"
+#define LOCTEXT_NAMESPACE "EposEditorPlaybackContext"
 
 UObject*
-FShotSequenceEditorPlaybackContext::GetPlaybackContext() const
+FEposEditorPlaybackContext::GetPlaybackContext() const
 {
 	UWorld* Context = mWeakCurrentContext.Get();
 	if (Context)
@@ -19,7 +19,7 @@ FShotSequenceEditorPlaybackContext::GetPlaybackContext() const
 }
 
 UWorld*
-FShotSequenceEditorPlaybackContext::ComputePlaybackContext()
+FEposEditorPlaybackContext::ComputePlaybackContext()
 {
 	const bool isSimulatingInEditor = GEditor && GEditor->bIsSimulatingInEditor;
 

@@ -27,6 +27,7 @@
 
 #include "BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Misc/EposEditorPlaybackContext.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceEditor"
 
@@ -81,7 +82,7 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
         );
 
     mBoardSequence = iBoardSequence;
-    //PlaybackContext = MakeShared<FTemplateSequenceEditorPlaybackContext>();
+    mPlaybackContext = MakeShared<FEposEditorPlaybackContext>();
 
     // Mode sould always be world-centric (don't know how to have a standalone one)
     // in this case, SequencerDefs::ShotSequencerAppIdentifier & StandaloneDefaultLayout is not useful
@@ -102,7 +103,7 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
         sequencerInitParams.HostCapabilities.bSupportsCurveEditor = true;
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
 
-        //sequencerInitParams.PlaybackContext.Bind( PlaybackContext.ToSharedRef(), &FTemplateSequenceEditorPlaybackContext::GetPlaybackContext );
+        sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposEditorPlaybackContext::GetPlaybackContext );
 
         sequencerInitParams.ViewParams.UniqueName = "EposSequenceEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;

@@ -10,7 +10,7 @@ class UWorld;
 /**
  * Class that manages the current UWorld context that a level-sequence editor should use for playback
  */
-class FShotSequenceEditorPlaybackContext : public TSharedFromThis<FShotSequenceEditorPlaybackContext>
+class FEposEditorPlaybackContext : public TSharedFromThis<FEposEditorPlaybackContext>
 {
 public:
 

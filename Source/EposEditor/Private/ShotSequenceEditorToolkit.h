@@ -10,7 +10,7 @@
 #include "Toolkits/AssetEditorToolkit.h"
 
 class FToolBarBuilder;
-class FShotSequenceEditorPlaybackContext;
+class FEposEditorPlaybackContext;
 class ISequencer;
 class FAssetDragDropOp;
 class FClassDragDropOp;
@@ -101,7 +101,7 @@ private:
     /** Handle to the sequencer properties menu extender. */
     FDelegateHandle mSequencerExtenderHandle;
 
-    TSharedPtr<FShotSequenceEditorPlaybackContext> mPlaybackContext;
+    TSharedPtr<FEposEditorPlaybackContext> mPlaybackContext;
 
     /**	The tab ids for all the tabs used */
     static const FName smSequencerMainTabId;
