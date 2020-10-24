@@ -4,10 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Board/BoardSequence.h"
 #include "UObject/GCObject.h"
 #include "Styling/ISlateStyle.h"
 #include "Toolkits/AssetEditorToolkit.h"
+
+#include "Board/BoardSequence.h"
+#include "Settings/EposEditorSettings.h"
 
 class FToolBarBuilder;
 //class FBoardSequenceEditorPlaybackContext;
@@ -19,7 +21,9 @@ class FActorDragDropGraphEdOp;
 /**
  * Implements an Editor toolkit for template sequences.
  */
-class FBoardSequenceEditorToolkit : public FAssetEditorToolkit, public FGCObject
+class FBoardSequenceEditorToolkit 
+    : public FAssetEditorToolkit
+    , public FGCObject
 {
 public:
 
@@ -72,6 +76,7 @@ private:
     //void HandleAddComponentActionExecute( UActorComponent* Component );
 
     /** Callback for executing the Arrange Shots command. */
+    void HandleArrangeShots( EArrangeShots iArrangeShots );
     void HandleArrangeShots();
 
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );

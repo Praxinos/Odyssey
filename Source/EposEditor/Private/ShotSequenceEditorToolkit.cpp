@@ -111,7 +111,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
         sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FShotSequenceEditorPlaybackContext::GetPlaybackContext );
 
-        sequencerInitParams.ViewParams.UniqueName = "ShotSequenceEditor";
+        sequencerInitParams.ViewParams.UniqueName = "EposSequenceEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;
         sequencerInitParams.ViewParams.OnReceivedFocus.BindRaw( this, &FShotSequenceEditorToolkit::OnSequencerReceivedFocus );
     }
@@ -126,7 +126,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     //    Util.ChangeActorBinding( ToolkitParams.InitialBindingClass );
     //}
 
-    // with ToolkitCommands       // -> it doesn't work ( ¯\_O_/¯ ?)
+    // with ToolkitCommands, it's for shortcuts only
     BindCommands( mSequencer->GetCommandBindings() );
 
     FLevelEditorSequencerIntegrationOptions options;

@@ -52,6 +52,5 @@ private:
     TSharedPtr<FUICommandList>          mCommandList;
     TSharedPtr<FExtender>               mCinematicsMenuExtender;
 
-    USequencerSettings*                 mSettingsBoard;
-    USequencerSettings*                 mSettingsShot;
+    USequencerSettings*                 mSequencerSettings;
 };

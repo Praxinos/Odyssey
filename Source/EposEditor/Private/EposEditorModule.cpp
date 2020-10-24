@@ -17,7 +17,6 @@
 #include "Customization/BoardSequenceCustomization.h"
 #include "Customization/ShotSequenceCustomization.h"
 #include "Settings/EposEditorSettings.h"
-#include "Settings/EposSequencerSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
 #include "Styles/EposEditorStyle.h"
@@ -29,8 +28,7 @@ EAssetTypeCategories::Type FEposEditorModule::mEposAssetCategory;
 //---
 
 FEposEditorModule::FEposEditorModule()
-    : mSettingsBoard( nullptr )
-    , mSettingsShot( nullptr )
+    : mSequencerSettings( nullptr )
 {
 }
 
@@ -61,10 +59,8 @@ FEposEditorModule::ShutdownModule()
 void
 FEposEditorModule::AddReferencedObjects( FReferenceCollector& Collector )
 {
-    if( mSettingsBoard )
-        Collector.AddReferencedObject( mSettingsBoard );
-    if( mSettingsShot )
-        Collector.AddReferencedObject( mSettingsShot );
+    if( mSequencerSettings )
+        Collector.AddReferencedObject( mSequencerSettings );
 }
 
 //---
@@ -199,19 +195,12 @@ FEposEditorModule::RegisterSettings()
 
     //---
 
-    mSettingsBoard = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "ShotSequenceEditor" ) ); // Don't know how to use/manage them -> Inside Config directory.
+    mSequencerSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequenceEditor" ) ); // May be initialized via Config directory.
 
-    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "ShotSequenceEditor",
-                                        LOCTEXT( "EposEditorSettingsShotName", "Epos Editor (ShotSequence)" ),
-                                        LOCTEXT( "EposEditorSettingsShotDescription", "Configure the look and feel of the Epos Editor (ShotSequence)." ),
-                                        mSettingsBoard );
-
-    mSettingsShot = USequencerSettingsContainer::GetOrCreate<UEposSequencerSettings>( TEXT( "BoardSequenceEditor" ) ); // Don't know how to use/manage them -> Inside Config directory.
-
-    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "BoardSequenceEditor",
-                                        LOCTEXT( "EposEditorSettingsBoardName", "Epos Editor (BoardSequence)" ),
-                                        LOCTEXT( "EposEditorSettingsBoardDescription", "Configure the look and feel of the Epos Editor (BoardSequence)." ),
-                                        mSettingsShot );
+    SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposSequenceEditor" /* Name used inside toolkit UniqueName */,
+                                        LOCTEXT( "EposEditorSettingsName", "Epos Sequencer Editor" ),
+                                        LOCTEXT( "EposEditorSettingsDescription", "Configure the look and feel of the Epos Sequencer Editor." ),
+                                        mSequencerSettings );
 }
 
 void
@@ -222,8 +211,7 @@ FEposEditorModule::UnregisterSettings()
         return;
 
     SettingsModule->UnregisterSettings( "Project", "Plugins", "Epos" );
-    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "ShotSequenceEditor" );
-    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "BoardSequenceEditor" );
+    SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "EposSequenceEditor" );
 }
 
 //---

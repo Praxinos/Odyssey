@@ -5,14 +5,14 @@
 
 #include "Board/BoardSequence.h"
 #include "BoardSequenceEditorCommands.h"
-#include "Settings/EposSequencerSettings.h"
+#include "Settings/EposEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
 
 //---
 
 void
-FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder )
+FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) // This is called each time the focused sequence changed (ie. when double-clicking on a section to go inside its subsequence)
 {
     mSequencer = &ioBuilder.GetSequencer();
     mBoardSequence = Cast<UBoardSequence>( &ioBuilder.GetFocusedSequence() );
@@ -48,9 +48,9 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddSeparator();
 
     TAttribute<FText> ArrangeShotsName;
-    ArrangeShotsName.Bind( TAttribute<FText>::FGetter::CreateLambda( [&]
+    ArrangeShotsName.Bind( TAttribute<FText>::FGetter::CreateLambda( []
     {
-        switch( Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() )->GetArrangeShots() )
+        switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeShots::OnOneRow:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetLabel();
@@ -61,9 +61,9 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     } ) );
 
     TAttribute<FSlateIcon> ArrangeShotsIcon;
-    ArrangeShotsIcon.Bind( TAttribute<FSlateIcon>::FGetter::CreateLambda( [&]
+    ArrangeShotsIcon.Bind( TAttribute<FSlateIcon>::FGetter::CreateLambda( []
     {
-        switch( Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() )->GetArrangeShots() )
+        switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeShots::OnOneRow:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetIcon();
@@ -74,9 +74,9 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     } ) );
 
     TAttribute<FText> ArrangeShotsToolTip;
-    ArrangeShotsToolTip.Bind( TAttribute<FText>::FGetter::CreateLambda( [&]
+    ArrangeShotsToolTip.Bind( TAttribute<FText>::FGetter::CreateLambda( []
     {
-        switch( Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() )->GetArrangeShots() )
+        switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeShots::OnOneRow:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetDescription();
@@ -86,11 +86,12 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         }
     } ) );
 
-    ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().ArrangeShots
-                                     , NAME_None
-                                     , ArrangeShotsName
-                                     , ArrangeShotsToolTip
-                                     , ArrangeShotsIcon );
+    ToolbarBuilder.AddToolBarButton( 
+        FBoardSequenceEditorCommands::Get().ArrangeShots,
+        NAME_None,
+        ArrangeShotsName,
+        ArrangeShotsToolTip,
+        ArrangeShotsIcon );
 
     ToolbarBuilder.AddComboButton(
         FUIAction(),

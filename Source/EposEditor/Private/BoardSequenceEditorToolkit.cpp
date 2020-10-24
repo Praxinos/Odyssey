@@ -27,7 +27,6 @@
 
 #include "BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "Settings/EposSequencerSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceEditor"
 
@@ -105,7 +104,7 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
 
         //sequencerInitParams.PlaybackContext.Bind( PlaybackContext.ToSharedRef(), &FTemplateSequenceEditorPlaybackContext::GetPlaybackContext );
 
-        sequencerInitParams.ViewParams.UniqueName = "BoardSequenceEditor";
+        sequencerInitParams.ViewParams.UniqueName = "EposSequenceEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;
         sequencerInitParams.ViewParams.OnReceivedFocus.BindRaw( this, &FBoardSequenceEditorToolkit::OnSequencerReceivedFocus );
     }
@@ -120,7 +119,7 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
     //    Util.ChangeActorBinding( ToolkitParams.InitialBindingClass );
     //}
 
-    // with ToolkitCommands       // -> it doesn't work ( ¯\_O_/¯ ?)
+    // with ToolkitCommands, it's for shortcuts only
     BindCommands( mSequencer->GetCommandBindings() );
 
     FLevelEditorSequencerIntegrationOptions options;
@@ -149,7 +148,7 @@ void FBoardSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, co
 void
 FBoardSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
-    UEposSequencerSettings* settings = Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() );
+    const UEposEditorSettings* settings = GetDefault<UEposEditorSettings>();
 
     CommandList->MapAction(
         FBoardSequenceEditorCommands::Get().ArrangeShots,
@@ -157,15 +156,15 @@ FBoardSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandLis
     );
     CommandList->MapAction(
         FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-        FExecuteAction::CreateLambda([=] { settings->SetArrangeShots( EArrangeShots::OnOneRow ); HandleArrangeShots(); } ),
+        FExecuteAction::CreateSP( this, &FBoardSequenceEditorToolkit::HandleArrangeShots, EArrangeShots::OnOneRow ),
         FCanExecuteAction::CreateLambda([this] { return true; }),
-        FIsActionChecked::CreateLambda([=] { return settings->GetArrangeShots() == EArrangeShots::OnOneRow; } )
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeShots::OnOneRow; } )
     );
     CommandList->MapAction(
         FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-        FExecuteAction::CreateLambda([=] { settings->SetArrangeShots( EArrangeShots::OnTwoRowsShifted ); HandleArrangeShots(); } ),
+        FExecuteAction::CreateSP( this, &FBoardSequenceEditorToolkit::HandleArrangeShots, EArrangeShots::OnTwoRowsShifted ),
         FCanExecuteAction::CreateLambda([this] { return true; }),
-        FIsActionChecked::CreateLambda([=] { return settings->GetArrangeShots() == EArrangeShots::OnTwoRowsShifted; } )
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeShots::OnTwoRowsShifted; } )
     );
 }
 
@@ -249,13 +248,22 @@ void FBoardSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class 
 //}
 
 void
+FBoardSequenceEditorToolkit::HandleArrangeShots( EArrangeShots iArrangeShots )
+{
+    UEposEditorSettings* settings = GetMutableDefault<UEposEditorSettings>();
+    settings->BoardTrackSettings.ArrangeShots = iArrangeShots;
+
+    HandleArrangeShots();
+}
+
+void
 FBoardSequenceEditorToolkit::HandleArrangeShots()
 {
     auto track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     if( !track )
         return;
 
-    UEposSequencerSettings* settings = Cast<UEposSequencerSettings>( mSequencer->GetSequencerSettings() );
+    const UEposEditorSettings* settings = GetDefault<UEposEditorSettings>();
 
     auto sections = track->GetAllSections();
     for( int i = 0; i < sections.Num(); i++ )
@@ -264,7 +272,7 @@ FBoardSequenceEditorToolkit::HandleArrangeShots()
 
         section->Modify();
 
-        switch( settings->GetArrangeShots() )
+        switch( settings->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeShots::OnOneRow:
                 section->SetRowIndex( 0 );

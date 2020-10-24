@@ -12,27 +12,41 @@
 //---
 
 USTRUCT()
+struct FBoardSettings
+{
+	GENERATED_BODY()
+};
+
+UENUM()
+enum class EArrangeShots : uint8
+{
+    /** Origin. */
+    OnOneRow UMETA( DisplayName = "On a single row" ),
+
+    /** Place in Front of Camera. */
+    OnTwoRowsShifted UMETA( DisplayName = "On 2 rows shifted" ),
+};
+
+USTRUCT()
 struct FBoardTrackSettings
 {
 	GENERATED_BODY()
 
+	/** Select the way to arrange board sections. */
 	UPROPERTY(config, EditAnywhere, Category=BoardTrackSettings)
-	int NewEmptyBoardSectionLength;
-};
-
-USTRUCT()
-struct FBoardSettings
-{
-	GENERATED_BODY()
-
-	UPROPERTY(config, EditAnywhere, Category=BoardTrack)
-	FBoardTrackSettings BoardTrackSettings;
+	EArrangeShots ArrangeShots;
 };
 
 //---
 
 USTRUCT()
 struct FShotSettings
+{
+    GENERATED_BODY()
+};
+
+USTRUCT()
+struct FShotTrackSettings
 {
     GENERATED_BODY()
 };
@@ -51,12 +65,20 @@ class UEposEditorSettings
 public:
 
 	UEposEditorSettings(const FObjectInitializer& ObjectInitializer);
-
+    
 	/** Specifies Board stuff. */
 	UPROPERTY(config, EditAnywhere, Category=Board)
 	FBoardSettings BoardSettings;
+    
+	/** Specifies Board track stuff. */
+	UPROPERTY(config, EditAnywhere, Category=BoardTrack)
+	FBoardTrackSettings BoardTrackSettings;
 
 	/** Specifies Shot stuff. */
 	UPROPERTY(config, EditAnywhere, Category=Shot)
 	FShotSettings ShotSettings;
+
+	/** Specifies Shot track stuff. */
+	UPROPERTY(config, EditAnywhere, Category=ShotTrack)
+	FShotTrackSettings ShotTrackSettings;
 };
