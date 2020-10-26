@@ -17,6 +17,10 @@ public:
 	/** Initialize commands */
 	virtual void RegisterCommands() override;
 
+public:
+
+	TSharedPtr<FUICommandInfo> NewShotWithSettings;
+
 	TSharedPtr<FUICommandInfo> CreateCamera;
 	TSharedPtr<FUICommandInfo> CreatePlane;
 	TSharedPtr<FUICommandInfo> SnapCameraToViewport;

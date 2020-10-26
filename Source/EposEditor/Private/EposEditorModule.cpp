@@ -6,6 +6,7 @@
 #include "AssetToolsModule.h"
 #include "ISequencerModule.h"
 #include "ISettingsModule.h"
+#include "LevelEditor.h"
 #include "Modules/ModuleManager.h"
 #include "SequencerSettings.h"
 
@@ -40,6 +41,7 @@ FEposEditorModule::StartupModule()
 {
     RegisterCommands();
     RegisterAssetTools();
+    RegisterMenuExtensions();
     RegisterSettings();
     RegisterSequenceCustomizations();
 }
@@ -49,6 +51,7 @@ FEposEditorModule::ShutdownModule()
 {
     UnregisterSequenceCustomizations();
     UnregisterSettings();
+    UnregisterMenuExtensions();
     UnregisterAssetTools();
     UnregisterCommands();
 }
@@ -113,6 +116,71 @@ FEposEditorModule::UnregisterAssetTools()
     IAssetTools& AssetTools = AssetToolsModule->Get();
     AssetTools.UnregisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );
     AssetTools.UnregisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
+}
+
+//static
+void
+FEposEditorModule::OnCreateNewAssetWithSettings( UClass* iClass )
+{
+    // Create a new level sequence
+    IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+
+    UObject* NewAsset = nullptr;
+
+    // Attempt to create a new asset
+    for( auto factory : AssetTools.GetNewAssetFactories() )
+    {
+        if( factory->CanCreateNew() && factory->ImportPriority >= 0 && factory->SupportedClass == iClass )
+        {
+            NewAsset = AssetTools.CreateAssetWithDialog( iClass, factory );
+            break;
+        }
+    }
+
+    if( !NewAsset )
+        return;
+
+    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset( NewAsset );
+}
+
+void
+FEposEditorModule::RegisterMenuExtensions()
+{
+    mCommandList = MakeShareable( new FUICommandList );
+    mCommandList->MapAction( 
+        FBoardSequenceEditorCommands::Get().NewBoardWithSettings,
+        FExecuteAction::CreateStatic( &FEposEditorModule::OnCreateNewAssetWithSettings, UBoardSequence::StaticClass() )
+    );
+    mCommandList->MapAction( 
+        FShotSequenceEditorCommands::Get().NewShotWithSettings,
+        FExecuteAction::CreateStatic( &FEposEditorModule::OnCreateNewAssetWithSettings, UShotSequence::StaticClass() )
+    );
+
+    mCinematicsMenuExtender = MakeShareable( new FExtender );
+    mCinematicsMenuExtender->AddMenuExtension( "LevelEditorNewCinematics", EExtensionHook::After, mCommandList, FMenuExtensionDelegate::CreateStatic( []( FMenuBuilder& MenuBuilder )
+    {
+        MenuBuilder.BeginSection( "CinematicsEpos", LOCTEXT( "CinematicsEpos", "Epos" ) );
+        {
+            MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().NewBoardWithSettings );
+            MenuBuilder.AddMenuEntry( FShotSequenceEditorCommands::Get().NewShotWithSettings );
+        }
+        MenuBuilder.EndSection();
+    } ) );
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    LevelEditorModule.GetAllLevelEditorToolbarCinematicsMenuExtenders().Add( mCinematicsMenuExtender );
+}
+
+void
+FEposEditorModule::UnregisterMenuExtensions()
+{
+    FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>( "LevelEditor" );
+    if( !LevelEditorModule )
+        return;
+
+    LevelEditorModule->GetAllLevelEditorToolbarCinematicsMenuExtenders().Remove( mCinematicsMenuExtender );
+    mCinematicsMenuExtender = nullptr;
+    mCommandList = nullptr;
 }
 
 //---

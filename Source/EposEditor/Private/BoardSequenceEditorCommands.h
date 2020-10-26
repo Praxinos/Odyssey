@@ -17,6 +17,10 @@ public:
 	/** Initialize commands */
 	virtual void RegisterCommands() override;
 
+public:
+
+	TSharedPtr<FUICommandInfo> NewBoardWithSettings;
+
 	TSharedPtr<FUICommandInfo> ArrangeShots;
 	TSharedPtr<FUICommandInfo> ArrangeShotsOnOneRow;
 	TSharedPtr<FUICommandInfo> ArrangeShotsOnTwoRows;

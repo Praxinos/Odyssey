@@ -15,6 +15,7 @@ class FEposEditorModule : public IModuleInterface, public FGCObject
 public:
     FEposEditorModule();
 
+public:
     static EAssetTypeCategories::Type GetAssetCategory();
 
 public:
@@ -32,6 +33,11 @@ private:
     void RegisterAssetTools();
     void UnregisterAssetTools();
 
+    void RegisterMenuExtensions();
+    void UnregisterMenuExtensions();
+
+    static void OnCreateNewAssetWithSettings( UClass* iClass );
+
     void RegisterSettings();
     void UnregisterSettings();
 
@@ -43,6 +49,9 @@ private:
     TSharedPtr<FBoardSequenceActions>   mBoardSequenceTypeActions;
     TSharedPtr<FShotSequenceActions>    mShotSequenceTypeActions;
 
-    USequencerSettings* mSettingsBoard;
-    USequencerSettings* mSettingsShot;
+    TSharedPtr<FUICommandList>          mCommandList;
+    TSharedPtr<FExtender>               mCinematicsMenuExtender;
+
+    USequencerSettings*                 mSettingsBoard;
+    USequencerSettings*                 mSettingsShot;
 };
