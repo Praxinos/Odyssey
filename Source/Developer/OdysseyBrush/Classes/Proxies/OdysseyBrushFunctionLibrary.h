@@ -28,11 +28,10 @@ public:
              , meta = ( DefaultToSelf="BrushContext" ) )
     static  void  DebugStamp( UOdysseyBrushAssetBase* BrushContext );
 
-    //Deprecated : use Stamp instead.
     //Simple version of Stamp, without Blend and Alpha options.
     UFUNCTION( BlueprintCallable
              , Category="OdysseyBrushFunctionLibrary"
-             , meta = ( DefaultToSelf="BrushContext" ) )
+             , meta = ( DefaultToSelf="BrushContext", DeprecatedFunction, DeprecationMessage = "Use Stamp" ) )
     static  void  SimpleStamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false );
 
     //Node that reunites all the necessary information to create a stamp.
