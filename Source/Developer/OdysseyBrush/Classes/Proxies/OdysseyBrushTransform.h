@@ -79,7 +79,7 @@ public:
     //static FOdysseyMatrix ComposeMatrixMatrix2( const FOdysseyMatrix& A, const FOdysseyMatrix& B ) { return ComposeMatrix( A, B ); }
     
     //Requires an Odyssey Matrix input and an Odyssey Block Proxy to transform.
-    UFUNCTION(BlueprintPure, meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ), Category="OdyssseyTransform")
+    UFUNCTION(BlueprintPure, meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ), Category="OdysseyTransform")
     static FOdysseyBlockProxy Transform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour, ECacheLevel Cache = ECacheLevel::kStep );
 
     //Requires an angle (Float) to rotate an Odyssey Block Proxy.
