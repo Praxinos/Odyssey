@@ -3,12 +3,15 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AssetTools/BoardSequenceActions.h"
+
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
+
 #include "Board/BoardSequence.h"
 #include "BoardSequenceEditorToolkit.h"
+#include "EposEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "AssetTypeActions"
+#define LOCTEXT_NAMESPACE "BoardAssetTypeActions"
 
 
 /* FBoardSequenceActions constructors
@@ -25,7 +28,7 @@ FBoardSequenceActions::FBoardSequenceActions( const TSharedRef<ISlateStyle>& iSt
 uint32
 FBoardSequenceActions::GetCategories()
 {
-    return EAssetTypeCategories::Animation;
+    return EAssetTypeCategories::Animation | FEposEditorModule::GetAssetCategory();
 }
 
 FText

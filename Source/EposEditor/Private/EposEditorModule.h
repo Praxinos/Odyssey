@@ -15,6 +15,8 @@ class FEposEditorModule : public IModuleInterface, public FGCObject
 public:
     FEposEditorModule();
 
+    static EAssetTypeCategories::Type GetAssetCategory();
+
 public:
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
@@ -37,6 +39,7 @@ private:
     void UnregisterSequenceCustomizations();
 
 private:
+    static EAssetTypeCategories::Type   mEposAssetCategory;
     TSharedPtr<FBoardSequenceActions>   mBoardSequenceTypeActions;
     TSharedPtr<FShotSequenceActions>    mShotSequenceTypeActions;
 

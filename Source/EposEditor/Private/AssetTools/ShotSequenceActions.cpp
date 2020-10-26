@@ -3,12 +3,15 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AssetTools/ShotSequenceActions.h"
+
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
+
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorToolkit.h"
+#include "EposEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "AssetTypeActions"
+#define LOCTEXT_NAMESPACE "ShotAssetTypeActions"
 
 
 /* FShotSequenceActions constructors
@@ -24,7 +27,7 @@ FShotSequenceActions::FShotSequenceActions( const TSharedRef<ISlateStyle>& iStyl
 
 uint32 FShotSequenceActions::GetCategories()
 {
-    return EAssetTypeCategories::Animation;
+    return EAssetTypeCategories::Animation | FEposEditorModule::GetAssetCategory();
 }
 
 FText

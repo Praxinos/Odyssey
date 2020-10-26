@@ -9,7 +9,7 @@
 #include "BoardSequence.generated.h"
 
 /*
- * Movie scene animation that represents the first level of the board.
+ * Movie scene animation that represents the hierarchical levels of the storyboard.
  */
 UCLASS( BlueprintType )
 class EPOS_API UBoardSequence : public UMovieSceneSequence

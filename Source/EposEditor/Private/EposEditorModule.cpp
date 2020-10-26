@@ -23,6 +23,8 @@
 
 #define LOCTEXT_NAMESPACE "FEposEditorModule"
 
+EAssetTypeCategories::Type FEposEditorModule::mEposAssetCategory;
+
 //---
 
 FEposEditorModule::FEposEditorModule()
@@ -80,10 +82,19 @@ FEposEditorModule::UnregisterCommands()
 
 //---
 
+//static
+EAssetTypeCategories::Type
+FEposEditorModule::GetAssetCategory()
+{
+    return mEposAssetCategory;
+}
+
 void
 FEposEditorModule::RegisterAssetTools()
 {
     IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+
+    mEposAssetCategory = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "EPOS" ) ), LOCTEXT( "EposAssetsCategory", "EPOS" ) );
 
     mBoardSequenceTypeActions = MakeShared<FBoardSequenceActions>( FEposEditorStyle::Get() );
     AssetTools.RegisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );

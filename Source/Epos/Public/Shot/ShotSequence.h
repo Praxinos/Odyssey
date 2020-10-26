@@ -10,7 +10,7 @@
 #include "ShotSequence.generated.h"
 
 /*
- * Movie scene animation that represents the first level of the storyboard.
+ * Movie scene animation that represents the last level of the storyboard.
  */
 UCLASS( BlueprintType )
 class EPOS_API UShotSequence : public UMovieSceneSequence
