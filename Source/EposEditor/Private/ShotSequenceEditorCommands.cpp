@@ -7,7 +7,7 @@
 #define LOCTEXT_NAMESPACE "ShotSequenceEditorCommands"
 
 FShotSequenceEditorCommands::FShotSequenceEditorCommands()
-	: TCommands<FShotSequenceEditorCommands>("ShotSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("ShotSequenceEditorStyle", "Epos Editor"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
+	: TCommands<FShotSequenceEditorCommands>("ShotSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("ShotSequenceEditorStyle", "Epos Editor (Shot)"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
 {
 }
 

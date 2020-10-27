@@ -1,13 +1,10 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "ShotSequenceEditorToolkit.h"
+#include "EposEditorToolkit.h"
 
-#include "Actor.h"
-#include "CineCameraActor.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
-#include "Containers/ArrayBuilder.h"
 #include "DragAndDrop/ActorDragDropGraphEdOp.h"
 #include "DragAndDrop/AssetDragDropOp.h"
 #include "DragAndDrop/ClassDragDropOp.h"
@@ -18,42 +15,43 @@
 #include "ISequencerModule.h"
 #include "LevelEditor.h"
 #include "LevelEditorSequencerIntegration.h"
+//#include "Misc/BoardSequenceEditorPlaybackContext.h"
 //#include "Misc/TemplateSequenceEditorSpawnRegister.h"
 //#include "Misc/TemplateSequenceEditorUtil.h"
 #include "Modules/ModuleManager.h"
 #include "ScopedTransaction.h"
 #include "SequencerSettings.h"
-#include "Tracks/MovieScene3DTransformTrack.h"
-#include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 
+#include "BoardSequenceEditorCommands.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Helpers/ShotSequenceHelpers.h"
 #include "Misc/EposEditorPlaybackContext.h"
 #include "ShotSequenceEditorCommands.h"
 
-#define LOCTEXT_NAMESPACE "ShotSequenceEditor"
+#define LOCTEXT_NAMESPACE "EposEditorToolkit"
 
-const FName FShotSequenceEditorToolkit::smSequencerMainTabId( TEXT( "Sequencer_SequencerMain" ) );
+const FName FEposEditorToolkit::smSequencerMainTabId( TEXT( "Sequencer_SequencerMain" ) );
 
 namespace SequencerDefs
 {
-    static const FName sgShotSequencerAppIdentifier( TEXT( "ShotSequencerApp" ) );
+    static const FName sgEposSequencerAppIdentifier( TEXT( "EposSequencerApp" ) );
 }
 
-FShotSequenceEditorToolkit::FShotSequenceEditorToolkit( const TSharedRef<ISlateStyle>& iStyle )
-    : mShotSequence( nullptr )
+FEposEditorToolkit::FEposEditorToolkit( const TSharedRef<ISlateStyle>& iStyle )
+    : mBoardSequence( nullptr )
     , mStyle( iStyle )
 {
     // register sequencer menu extenders
     ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
     int32 NewIndex = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().Add(
-        FAssetEditorExtender::CreateRaw( this, &FShotSequenceEditorToolkit::HandleMenuExtensibilityGetExtender ) );
+        FAssetEditorExtender::CreateRaw( this, &FEposEditorToolkit::HandleMenuExtensibilityGetExtender ) );
     mSequencerExtenderHandle = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates()[NewIndex].GetHandle();
 }
 
-FShotSequenceEditorToolkit::~FShotSequenceEditorToolkit()
+FEposEditorToolkit::~FEposEditorToolkit()
 {
     FLevelEditorSequencerIntegration::Get().RemoveSequencer( mSequencer.ToSharedRef() );
 
@@ -74,10 +72,10 @@ FShotSequenceEditorToolkit::~FShotSequenceEditorToolkit()
     } );
 }
 
-void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UShotSequence* iShotSequence )
+void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UBoardSequence* iBoardSequence, UShotSequence* iShotSequence )
 {
     // create tab layout
-    const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout( "Standalone_ShotSequenceEditor" )
+    const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout( "Standalone_EposEditor" )
         ->AddArea
         (
             FTabManager::NewPrimaryArea()
@@ -88,6 +86,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
             )
         );
 
+    mBoardSequence = iBoardSequence;
     mShotSequence = iShotSequence;
     mPlaybackContext = MakeShared<FEposEditorPlaybackContext>();
 
@@ -95,7 +94,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     // in this case, SequencerDefs::ShotSequencerAppIdentifier & StandaloneDefaultLayout is not useful
     const bool bCreateDefaultStandaloneMenu = true;
     const bool bCreateDefaultToolbar = false;
-    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, SequencerDefs::sgShotSequencerAppIdentifier, StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, mShotSequence );
+    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, SequencerDefs::sgEposSequencerAppIdentifier, StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, mBoardSequence ? Cast<UObject>( mBoardSequence ) : Cast<UObject>( mShotSequence ) );
 
     //TSharedRef<FTemplateSequenceEditorSpawnRegister> SpawnRegister = MakeShareable( new FTemplateSequenceEditorSpawnRegister() );
     //SpawnRegister->SetSequencer( Sequencer );
@@ -103,7 +102,7 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     // Initialize sequencer.
     FSequencerInitParams sequencerInitParams;
     {
-        sequencerInitParams.RootSequence = mShotSequence;
+        sequencerInitParams.RootSequence = mBoardSequence ? Cast<UMovieSceneSequence>( mBoardSequence ) : Cast<UMovieSceneSequence>( mShotSequence );
         sequencerInitParams.bEditWithinLevelEditor = true;
         sequencerInitParams.ToolkitHost = iInitToolkitHost;
         //sequencerInitParams.SpawnRegister = SpawnRegister;
@@ -114,16 +113,16 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
         sequencerInitParams.ViewParams.UniqueName = "EposSequenceEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;
-        sequencerInitParams.ViewParams.OnReceivedFocus.BindRaw( this, &FShotSequenceEditorToolkit::OnSequencerReceivedFocus );
+        sequencerInitParams.ViewParams.OnReceivedFocus.BindRaw( this, &FEposEditorToolkit::OnSequencerReceivedFocus );
     }
 
     mSequencer = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" ).CreateSequencer( sequencerInitParams );
 
-    mSequencer->OnActorAddedToSequencer().AddSP( this, &FShotSequenceEditorToolkit::HandleActorAddedToSequencer );
+    mSequencer->OnActorAddedToSequencer().AddSP( this, &FEposEditorToolkit::HandleActorAddedToSequencer );
 
     //if( ToolkitParams.InitialBindingClass != nullptr )
     //{
-    //    FTemplateSequenceEditorUtil Util( ShotSequence, *Sequencer.Get() );
+    //    FTemplateSequenceEditorUtil Util( BoardSequence, *Sequencer.Get() );
     //    Util.ChangeActorBinding( ToolkitParams.InitialBindingClass );
     //}
 
@@ -150,46 +149,68 @@ void FShotSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     }
 
     levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
-    levelEditorModule.OnMapChanged().AddRaw( this, &FShotSequenceEditorToolkit::HandleMapChanged );
+    levelEditorModule.OnMapChanged().AddRaw( this, &FEposEditorToolkit::HandleMapChanged );
 }
 
 void
-FShotSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
+FEposEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
     CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShots,
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots )
+    );
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeShots::OnOneRow ),
+        FCanExecuteAction::CreateLambda([this] { return true; }),
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeShots::OnOneRow; } )
+    );
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeShots::OnTwoRowsShifted ),
+        FCanExecuteAction::CreateLambda([this] { return true; }),
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeShots::OnTwoRowsShifted; } )
+    );
+
+    //---
+    
+    CommandList->MapAction(
         FShotSequenceEditorCommands::Get().CreateCamera,
-        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleCreateCamera ),
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleCreateCamera ),
         FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
     );
     CommandList->MapAction(
         FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleSnapCameraToViewport ),
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleSnapCameraToViewport ),
         FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
     );
     
     CommandList->MapAction(
         FShotSequenceEditorCommands::Get().CreatePlane,
-        FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleCreatePlane ),
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleCreatePlane ),
         FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
     );
 }
 
 //--- FGCObject interface
 
-void
-FShotSequenceEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollector )
+void 
+FEposEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollector )
 {
-    iCollector.AddReferencedObject( mShotSequence );
+    if( mBoardSequence )
+        iCollector.AddReferencedObject( mBoardSequence );
+    if( mShotSequence )
+        iCollector.AddReferencedObject( mShotSequence );
 }
 
 //--- FAssetEditorToolkit interface
 
-bool FShotSequenceEditorToolkit::OnRequestClose()
+bool FEposEditorToolkit::OnRequestClose()
 {
     return true;
 }
 
-bool FShotSequenceEditorToolkit::CanFindInContentBrowser() const
+bool FEposEditorToolkit::CanFindInContentBrowser() const
 {
     // False so that sequencer doesn't take over Find In Content Browser functionality and always find the level sequence asset.
     return false;
@@ -197,28 +218,28 @@ bool FShotSequenceEditorToolkit::CanFindInContentBrowser() const
 
 //--- IToolkit interface
 
-FText FShotSequenceEditorToolkit::GetBaseToolkitName() const
+FText FEposEditorToolkit::GetBaseToolkitName() const
 {
-    return LOCTEXT( "AppLabel", "Shot Sequence Editor" );
+    return LOCTEXT( "AppLabel", "Epos Editor" );
 }
 
-FName FShotSequenceEditorToolkit::GetToolkitFName() const
+FName FEposEditorToolkit::GetToolkitFName() const
 {
-    static FName sSequencerName( "ShotSequenceEditor" );
+    static FName sSequencerName( "EposEditor" );
     return sSequencerName;
 }
 
-FString FShotSequenceEditorToolkit::GetWorldCentricTabPrefix() const
+FString FEposEditorToolkit::GetWorldCentricTabPrefix() const
 {
     return LOCTEXT( "WorldCentricTabPrefix", "Sequencer " ).ToString();
 }
 
-FLinearColor FShotSequenceEditorToolkit::GetWorldCentricTabColorScale() const
+FLinearColor FEposEditorToolkit::GetWorldCentricTabColorScale() const
 {
     return FLinearColor( 0.7, 0.0f, 0.2f, 0.5f );
 }
 
-void FShotSequenceEditorToolkit::RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
+void FEposEditorToolkit::RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
 {
     if( IsWorldCentricAssetEditor() )
     {
@@ -228,7 +249,7 @@ void FShotSequenceEditorToolkit::RegisterTabSpawners( const TSharedRef<class FTa
     checkf( false, TEXT( "should never go here as it should always be world-centric" ) );
 }
 
-void FShotSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
+void FEposEditorToolkit::UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
 {
     if( !IsWorldCentricAssetEditor() )
     {
@@ -242,20 +263,20 @@ void FShotSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class F
 //---
 
 TSharedRef<FExtender>
-FShotSequenceEditorToolkit::HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects )
+FEposEditorToolkit::HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects )
 {
     TSharedRef<FExtender> AddTrackMenuExtender( new FExtender() );
     AddTrackMenuExtender->AddMenuExtension(
         SequencerMenuExtensionPoints::AddTrackMenu_PropertiesSection,
         EExtensionHook::Before,
         CommandList,
-        FMenuExtensionDelegate::CreateRaw( this, &FShotSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack, ContextSensitiveObjects ) );
+        FMenuExtensionDelegate::CreateRaw( this, &FEposEditorToolkit::HandleTrackMenuExtensionAddTrack, ContextSensitiveObjects ) );
 
     return AddTrackMenuExtender;
 }
 
 void
-FShotSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects )
+FEposEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects )
 {
     // TODO-lchabant: stolen from level sequence.
     if( ContextObjects.Num() != 1 )
@@ -275,7 +296,7 @@ FShotSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddT
         {
             if( Component )
             {
-                FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FShotSequenceEditorToolkit::HandleAddComponentActionExecute, Component ) );
+                FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleAddComponentActionExecute, Component ) );
                 FText AddComponentLabel = FText::FromString( Component->GetName() );
                 FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), FText::FromString( Component->GetName() ) );
                 AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
@@ -286,7 +307,7 @@ FShotSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddT
 }
 
 void
-FShotSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
+FEposEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component )
 {
     // TODO-lchabant: stolen from level sequence.
     const FScopedTransaction Transaction( LOCTEXT( "AddComponent", "Add Component" ) );
@@ -322,7 +343,68 @@ FShotSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
     }
 }
 
-void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
+//---
+
+void
+FEposEditorToolkit::HandleArrangeShots( EArrangeShots iArrangeShots )
+{
+    UEposEditorSettings* settings = GetMutableDefault<UEposEditorSettings>();
+    settings->BoardTrackSettings.ArrangeShots = iArrangeShots;
+
+    HandleArrangeShots();
+}
+
+void
+FEposEditorToolkit::HandleArrangeShots()
+{
+    auto track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !track )
+        return;
+
+    const UEposEditorSettings* settings = GetDefault<UEposEditorSettings>();
+
+    auto sections = track->GetAllSections();
+    for( int i = 0; i < sections.Num(); i++ )
+    {
+        auto section = sections[i];
+
+        section->Modify();
+
+        switch( settings->BoardTrackSettings.ArrangeShots )
+        {
+            case EArrangeShots::OnOneRow:
+                section->SetRowIndex( 0 );
+                break;
+            default:
+            case EArrangeShots::OnTwoRowsShifted:
+                section->SetRowIndex( i % 2 );
+                break;
+        }
+    }
+
+    mSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
+
+//---
+
+void FEposEditorToolkit::HandleCreateCamera()
+{
+    ShotSequenceHelpers::CreateCamera( mSequencer );
+}
+
+void FEposEditorToolkit::HandleSnapCameraToViewport()
+{
+    ShotSequenceHelpers::SnapCameraToViewport( mSequencer );
+}
+
+void FEposEditorToolkit::HandleCreatePlane()
+{
+    ShotSequenceHelpers::CreatePlane( mSequencer );
+}
+
+//---
+
+void FEposEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
     ShotSequenceHelpers::CreateDefaultTracksForActor( mSequencer, iActor, iBinding );
 
@@ -332,22 +414,7 @@ void FShotSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, co
     ShotSequenceHelpers::PatchStandardCameraCutTrack( mSequencer, iActor, iBinding );
 }
 
-void FShotSequenceEditorToolkit::HandleCreateCamera()
-{
-    ShotSequenceHelpers::CreateCamera( mSequencer );
-}
-
-void FShotSequenceEditorToolkit::HandleSnapCameraToViewport()
-{
-    ShotSequenceHelpers::SnapCameraToViewport( mSequencer );
-}
-
-void FShotSequenceEditorToolkit::HandleCreatePlane()
-{
-    ShotSequenceHelpers::CreatePlane( mSequencer );
-}
-
-void FShotSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )
+void FEposEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )
 {
     if( ( iMapChangeType == EMapChangeType::LoadMap || iMapChangeType == EMapChangeType::NewMap || iMapChangeType == EMapChangeType::TearDownWorld ) )
     {
@@ -356,7 +423,7 @@ void FShotSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChange
     }
 }
 
-void FShotSequenceEditorToolkit::OnSequencerReceivedFocus()
+void FEposEditorToolkit::OnSequencerReceivedFocus()
 {
     if( mSequencer.IsValid() )
     {

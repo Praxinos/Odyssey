@@ -10,6 +10,7 @@
 
 #include "Board/BoardSequence.h"
 #include "Settings/EposEditorSettings.h"
+#include "Shot/ShotSequence.h"
 
 class FToolBarBuilder;
 class FEposEditorPlaybackContext;
@@ -21,7 +22,7 @@ class FActorDragDropGraphEdOp;
 /**
  * Implements an Editor toolkit for template sequences.
  */
-class FBoardSequenceEditorToolkit 
+class FEposEditorToolkit 
     : public FAssetEditorToolkit
     , public FGCObject
 {
@@ -32,10 +33,10 @@ public:
      *
      * @param InStyle The style set to use.
      */
-    FBoardSequenceEditorToolkit( const TSharedRef<ISlateStyle>& iStyle );
+    FEposEditorToolkit( const TSharedRef<ISlateStyle>& iStyle );
 
     /** Virtual destructor */
-    virtual ~FBoardSequenceEditorToolkit();
+    virtual ~FEposEditorToolkit();
 
 public:
 
@@ -47,7 +48,7 @@ public:
      * @param BoardSequence The animation to edit.
      * @param TrackEditorDelegates Delegates to call to create auto-key handlers for this sequencer.
      */
-    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UBoardSequence* iBoardSequence );
+    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UBoardSequence* iBoardSequence, UShotSequence* iShotSequence );
 
 public:
 
@@ -68,16 +69,29 @@ public:
 
 private:
 
-    ///** Callback for the menu extensibility manager. */
-    //TSharedRef<FExtender> HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects );
-    ///** Callback for the track menu extender. */
-    //void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
-    ///** Callback for executing the Add Component action. */
-    //void HandleAddComponentActionExecute( UActorComponent* Component );
+    /** Callback for the menu extensibility manager. */
+    TSharedRef<FExtender> HandleMenuExtensibilityGetExtender( const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects );
+    /** Callback for the track menu extender. */
+    void HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddTrackMenuBuilder, TArray<UObject*> ContextObjects );
+    /** Callback for executing the Add Component action. */
+    void HandleAddComponentActionExecute( UActorComponent* Component );
+
+    //---
+
+    /** Callback for executing the Add Camera command. */
+    void HandleCreateCamera();
+    /** Callback for executing the Snap Camera command. */
+    void HandleSnapCameraToViewport();
+    /** Callback for executing the Add Plane command. */
+    void HandleCreatePlane();
+
+    //---
 
     /** Callback for executing the Arrange Shots command. */
     void HandleArrangeShots( EArrangeShots iArrangeShots );
     void HandleArrangeShots();
+
+    //---
 
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
@@ -92,6 +106,8 @@ private:
 
     /** Board sequence for our edit operation. */
     UBoardSequence* mBoardSequence;
+    /** Shot sequence for our edit operation. */
+    UShotSequence* mShotSequence;
 
     /** The sequencer used by this editor. */
     TSharedPtr<ISequencer> mSequencer;
@@ -100,7 +116,7 @@ private:
     TSharedRef<ISlateStyle> mStyle;
 
     /** Handle to the sequencer properties menu extender. */
-    //FDelegateHandle mSequencerExtenderHandle;
+    FDelegateHandle mSequencerExtenderHandle;
 
     TSharedPtr<FEposEditorPlaybackContext> mPlaybackContext;
 

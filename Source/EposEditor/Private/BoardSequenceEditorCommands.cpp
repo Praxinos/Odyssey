@@ -7,7 +7,7 @@
 #define LOCTEXT_NAMESPACE "BoardSequenceEditorCommands"
 
 FBoardSequenceEditorCommands::FBoardSequenceEditorCommands()
-	: TCommands<FBoardSequenceEditorCommands>("BoardSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("BoardSequenceEditorStyle", "Epos Editor"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
+	: TCommands<FBoardSequenceEditorCommands>("BoardSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("BoardSequenceEditorStyle", "Epos Editor (Board)"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
 {
 }
 

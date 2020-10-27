@@ -8,7 +8,7 @@
 #include "Engine/Engine.h"
 
 #include "Shot/ShotSequence.h"
-#include "ShotSequenceEditorToolkit.h"
+#include "EposEditorToolkit.h"
 #include "EposEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "ShotAssetTypeActions"
@@ -76,8 +76,8 @@ FShotSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShared
 
         if( ShotSequence != nullptr )
         {
-            TSharedRef<FShotSequenceEditorToolkit> Toolkit = MakeShareable( new FShotSequenceEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, ShotSequence );
+            TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
+            Toolkit->Initialize( Mode, iEditWithinLevelEditor, nullptr, ShotSequence );
         }
     }
 }

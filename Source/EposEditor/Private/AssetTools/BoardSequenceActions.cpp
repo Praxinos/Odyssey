@@ -8,7 +8,7 @@
 #include "Engine/Engine.h"
 
 #include "Board/BoardSequence.h"
-#include "BoardSequenceEditorToolkit.h"
+#include "EposEditorToolkit.h"
 #include "EposEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "BoardAssetTypeActions"
@@ -77,8 +77,8 @@ FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShare
 
         if( BoardSequence != nullptr )
         {
-            TSharedRef<FBoardSequenceEditorToolkit> Toolkit = MakeShareable( new FBoardSequenceEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, BoardSequence );
+            TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
+            Toolkit->Initialize( Mode, iEditWithinLevelEditor, BoardSequence, nullptr );
         }
     }
 }
