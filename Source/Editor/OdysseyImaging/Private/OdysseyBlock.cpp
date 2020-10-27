@@ -13,12 +13,12 @@
     switch( iFormat ) {
         case TSF_Invalid:   ret = 0;                    break;
         case TSF_G8:        ret = ULIS3_FORMAT_G8;      break;
-        case TSF_BGRA8:     ret = ULIS3_FORMAT_BGRA8;   break;
-        case TSF_BGRE8:     ret = ULIS3_FORMAT_BGRA8;   break;
+        case TSF_BGRA8:     ret = ULIS3_FORMAT_BGRA8;   break; 
+        case TSF_BGRE8:     ret = ULIS3_FORMAT_BGRA8;   break; //TODO: Change to BGRE ULIS FORMAT
         case TSF_RGBA16:    ret = ULIS3_FORMAT_RGBA16;  break;
-        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBAF;   break;
+        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBA16;  break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see UE4 implementation)
         case TSF_RGBA8:     ret = ULIS3_FORMAT_RGBA8;   break;
-        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGBA8;   break;
+        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGBA8;   break; //TODO: Change to RGBE ULIS FORMAT
         case TSF_MAX:       ret = 0;                    break;
         default:            ret = 0;                    break;
     }
@@ -28,9 +28,6 @@
 
 ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat )
 {
-	//TODO: if there is no correspondance between PF_* and ULIS3_* formats
-	//		Then we should use a decompress/compress system to translate it to a viable ULIS3_* format
-
     ::ul3::tFormat ret = 0;
     switch( iFormat ) {
         case PF_Unknown:			ret = ULIS3_FORMAT_BGRA8;   break;
@@ -41,16 +38,13 @@
         case PF_G16:				ret = ULIS3_FORMAT_G16;		break;
 		case PF_A8R8G8B8:			ret = ULIS3_FORMAT_ARGB8;   break;
         case PF_B8G8R8A8:			ret = ULIS3_FORMAT_BGRA8;   break;
-		case PF_FloatRGBA:			ret = ULIS3_FORMAT_RGBAF;	break;
         case PF_A32B32G32R32F:		ret = ULIS3_FORMAT_ABGRF;	break;
 		case PF_R32G32B32A32_UINT:	ret = ULIS3_FORMAT_RGBA32;	break;
         case PF_R16G16B16A16_UINT:	ret = ULIS3_FORMAT_RGBA16;	break;
 		case PF_R16_UINT:			ret = ULIS3_FORMAT_G16;		break;
         case PF_R32_UINT:			ret = ULIS3_FORMAT_G32;		break;
         case PF_R8G8B8A8_UINT:		ret = ULIS3_FORMAT_RGBA8;   break;
-		case PF_R8G8B8A8_SNORM:		ret = ULIS3_FORMAT_RGBA8;   break;
-		case PF_R16G16B16A16_UNORM:		ret = ULIS3_FORMAT_RGBA16;   break;
-		case PF_R16G16B16A16_SNORM:		ret = ULIS3_FORMAT_RGBA16;   break;
+		case PF_R16G16B16A16_UNORM:	ret = ULIS3_FORMAT_RGBA16;  break;
         default:					ret = 0;                    break;
     }
     // checkf( ret, TEXT( "Error, bad format !" ) ); // Crash

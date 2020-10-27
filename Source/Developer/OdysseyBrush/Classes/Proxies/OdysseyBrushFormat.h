@@ -15,9 +15,29 @@ UENUM( BlueprintType )
 enum  class  EOdysseyBlockFormat : uint8
 {
     kAuto  UMETA( DisplayName="Auto" ),
-    kRGBA8 UMETA( DisplayName="RGBA8" ),
-    kBGRA8 UMETA( DisplayName="BGRA8" ),
-    kGrey8 UMETA( DisplayName="Grey8" )
+    kRGB UMETA( DisplayName="RGB" ),
+    kRGBA UMETA( DisplayName="RGBA" ),
+    kGrey UMETA( DisplayName="Grey" ),
+    kGreyA UMETA( DisplayName="GreyA" ),
+    kHSL UMETA( DisplayName="HSL" ),
+    kHSLA UMETA( DisplayName="HSLA" ),
+    kHSV UMETA( DisplayName="HSV" ),
+    kHSVA UMETA( DisplayName="HSVA" ),
+    kLab UMETA( DisplayName="Lab" ),
+    kLabA UMETA( DisplayName="LabA" )
 };
 
-::ul3::tFormat ULISFormatFromOdysseyBlockFormat(EOdysseyBlockFormat iFormat, ::ul3::tFormat iAutoFormat);
+/////////////////////////////////////////////////////
+// EOdysseyBlockFormat Enum
+UENUM( BlueprintType )
+enum  class  EOdysseyBlockFormatPrecision : uint8
+{
+    kAuto  UMETA( DisplayName="Auto" ),
+    k8 UMETA( DisplayName="8 bits" ),
+    k16 UMETA( DisplayName="16 bits" ),
+    k32 UMETA( DisplayName="32 bits" ),
+    kFloat UMETA( DisplayName="32 bits floating-point" ),
+    kDouble UMETA( DisplayName="64 bits floating-point" )
+};
+
+::ul3::tFormat ULISFormatFromOdysseyBlockFormat(EOdysseyBlockFormat iFormat, EOdysseyBlockFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat);
