@@ -489,8 +489,12 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight,
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-    ::ul3::FRect src_rect( iX, iY, iWidth, iHeight );
-    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, ::ul3::FVec2I( 0, 0 ) );
+    ::ul3::FRect given_rect( iX, iY, iWidth, iHeight );
+
+	//be sure we copy only the needed part
+	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
+    ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
+    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
     FOdysseyBlockProxy prox( dst, op );
     StoreInPool( iCache, op, prox );
