@@ -128,7 +128,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true );
+    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -172,7 +172,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true );
+    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -216,7 +216,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true );
+    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;

@@ -70,6 +70,6 @@ struct FRectF    //PATCH: until ::ulis3::FRectF
     float h;
 };
 
-FRectF ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
+FRectF ComputeRectWithPivot(TSharedPtr<FOdysseyBlock> iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
 //::ul3::FRect ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
 

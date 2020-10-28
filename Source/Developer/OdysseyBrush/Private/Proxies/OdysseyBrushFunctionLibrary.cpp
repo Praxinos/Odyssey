@@ -71,7 +71,7 @@ UOdysseyBrushFunctionLibrary::SimpleStamp( UOdysseyBrushAssetBase* BrushContext,
     if( !BrushContext || !BrushContext->GetState().target_temp_buffer) return;
     if( !Sample.m )     return;
 
-    FOdysseyBlock* block = Sample.m;
+	TSharedPtr<FOdysseyBlock> block = Sample.m;
     FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
     //::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -129,7 +129,7 @@ UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdys
     if( !BrushContext || !BrushContext->GetState().target_temp_buffer ) return;
     if( !Sample.m )     return;
 
-    FOdysseyBlock* block = Sample.m;
+	TSharedPtr<FOdysseyBlock> block = Sample.m;
     FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
     //::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();

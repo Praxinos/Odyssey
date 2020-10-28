@@ -91,7 +91,7 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), Transform.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
         if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
 
@@ -99,7 +99,7 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , Transform.GetValue() ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -135,7 +135,7 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::DegToRadF( Angle ) ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
         if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
@@ -144,7 +144,7 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -181,7 +181,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( Scale, Scale ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
         if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
@@ -190,7 +190,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -226,7 +226,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ScaleX, ScaleY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
         if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
@@ -235,7 +235,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -273,7 +273,7 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
         ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
         if( box.Area() <= 0 ) return  FOdysseyBlockProxy::MakeNullProxy();
@@ -282,7 +282,7 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -318,7 +318,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         int src_width  = src->Width();
         int src_height = src->Height();
         float max = FMath::Max( src_width, src_height );
@@ -332,7 +332,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
@@ -368,7 +368,7 @@ UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOd
     }
     else
     {
-        FOdysseyBlock* src = Sample.m;
+		TSharedPtr<FOdysseyBlock> src = Sample.m;
         float src_width  = src->Width();
         float src_height = src->Height();
         float ratioX = SizeX / src_width;
@@ -382,7 +382,7 @@ UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOd
                                                                                                                                  , static_cast< float >( -box.y ) )
                                                                                   , mat ) );
 
-        FOdysseyBlock* dst = new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( box.w, box.h, src->Format(), nullptr, nullptr, true ));
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;

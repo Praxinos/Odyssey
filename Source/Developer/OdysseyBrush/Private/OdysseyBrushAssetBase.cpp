@@ -28,7 +28,7 @@ FOdysseyBrushPoolCache::Retrieve( const  FString&  iKey )  const
 
 
 void
-FOdysseyBrushPoolCache::Store( const  FString&  iKey, const  FOdysseyBlockProxy& iValue )
+FOdysseyBrushPoolCache::Store( const  FString&  iKey, const FOdysseyBlockProxy& iValue )
 {
     pool.Emplace( iKey, iValue );
 }
@@ -38,7 +38,7 @@ void
 FOdysseyBrushPoolCache::Cleanse()
 {
     for( auto it : pool )
-        delete  it.Value.m;
+        it.Value.m.Reset();
 
     pool.Empty();
 }
@@ -477,14 +477,14 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight,
 
     if (!state.target_temp_buffer)
     {
-        FOdysseyBlock* defaultBlock = new FOdysseyBlock( iWidth, iHeight, ULIS3_FORMAT_RGBA8, nullptr, nullptr, true );
+        TSharedPtr<FOdysseyBlock> defaultBlock = MakeShareable(new FOdysseyBlock( iWidth, iHeight, ULIS3_FORMAT_RGBA8, nullptr, nullptr, true ));
         FOdysseyBlockProxy prox( defaultBlock, op );
         StoreInPool( iCache, op, prox );
         return prox;
     }
 
     FOdysseyBlock* src = state.target_temp_buffer;
-    FOdysseyBlock* dst = new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true );
+    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -496,6 +496,7 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight,
     ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
+    
     FOdysseyBlockProxy prox( dst, op );
     StoreInPool( iCache, op, prox );
     return prox;

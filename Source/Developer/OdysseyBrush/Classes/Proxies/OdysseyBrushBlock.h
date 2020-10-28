@@ -30,7 +30,7 @@ struct ODYSSEYBRUSH_API FOdysseyBlockProxy
         , valid(    false   )
     {}
 
-    FOdysseyBlockProxy( FOdysseyBlock* iBlock, const  FString& iId )
+    FOdysseyBlockProxy( TSharedPtr<FOdysseyBlock> iBlock, const  FString& iId )
         : m(        iBlock  )
         , id(       iId     )
         , valid(    true    )
@@ -43,9 +43,9 @@ struct ODYSSEYBRUSH_API FOdysseyBlockProxy
         return  FOdysseyBlockProxy();
     }
 
-    FOdysseyBlock*  m;
-    FString         id;
-    bool            valid;
+    TSharedPtr<FOdysseyBlock>   m;
+    FString                     id;
+    bool                        valid;
 };
 
 

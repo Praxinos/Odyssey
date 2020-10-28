@@ -15,7 +15,7 @@ ODYSSEYIMAGING_API EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFor
 /////////////////////////////////////////////////////
 // FOdysseyBlock
 // Block Wrapper for Odyssey
-class ODYSSEYIMAGING_API FOdysseyBlock
+class ODYSSEYIMAGING_API FOdysseyBlock : public TSharedFromThis<FOdysseyBlock>
 {
 public:
     // Construction / Destruction

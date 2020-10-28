@@ -9,7 +9,7 @@
 // Utilities
 FRectF
 //::ul3::FRect
-ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
+ComputeRectWithPivot(TSharedPtr<FOdysseyBlock> iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
 {
     int width = iBlock->Width();
     int height = iBlock->Height();
