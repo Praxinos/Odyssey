@@ -10,8 +10,8 @@
 
 #include "ArrangeSectionsType.h"
 #include "EposTracksModule.h"
-#include "SectionsHelpersShift.h"
-#include "SectionsHelpersMove.h"
+#include "Helpers/SectionsHelpersShift.h"
+#include "Helpers/SectionsHelpersMove.h"
 
 
 #define LOCTEXT_NAMESPACE "MovieSceneCinematicBoardTrack"

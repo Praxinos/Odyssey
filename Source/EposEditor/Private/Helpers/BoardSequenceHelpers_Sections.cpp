@@ -7,7 +7,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 
-#include "Helpers/ArrangeSectionsHelpers.h"
+#include "Helpers/SectionsHelpersArrange.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposEditorSettings.h"
 

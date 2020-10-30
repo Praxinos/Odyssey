@@ -22,7 +22,7 @@
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
-#include "SectionsHelpersResize.h"
+#include "Helpers/SectionsHelpersResize.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
