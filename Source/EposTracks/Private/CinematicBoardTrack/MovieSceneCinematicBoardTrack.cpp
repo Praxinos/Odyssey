@@ -9,6 +9,7 @@
 #include "Compilation/MovieSceneCompilerRules.h"
 
 #include "ArrangeSections.h"
+#include "EposTracksModule.h"
 #include "SectionsHelpersShift.h"
 #include "SectionsHelpersMove.h"
 
