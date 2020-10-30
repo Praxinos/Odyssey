@@ -8,7 +8,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Compilation/MovieSceneCompilerRules.h"
 
-#include "ArrangeSections.h"
+#include "ArrangeSectionsType.h"
 #include "EposTracksModule.h"
 #include "SectionsHelpersShift.h"
 #include "SectionsHelpersMove.h"

@@ -3,7 +3,7 @@
 
 #include "Customization/BoardSequenceCustomization.h"
 
-#include "ArrangeSections.h"
+#include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
 #include "BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"

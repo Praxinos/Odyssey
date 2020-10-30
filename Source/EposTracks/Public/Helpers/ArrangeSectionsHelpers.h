@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ArrangeSections.h"
+#include "ArrangeSectionsType.h"
 
 class UMovieSceneTrack;
 

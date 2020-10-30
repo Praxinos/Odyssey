@@ -7,9 +7,9 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 
+#include "Helpers/ArrangeSectionsHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposEditorSettings.h"
-#include "ArrangeSections.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceHelpers_Sections"
 

@@ -5,9 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+
 //#include "Board/BoardSequence.h"
 //#include "Shot/ShotSequence.h"
-#include "ArrangeSections.h"
+#include "ArrangeSectionsType.h"
+
 #include "EposEditorSettings.generated.h"
 
 //---
