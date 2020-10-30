@@ -9,7 +9,7 @@
 
 //static
 FShiftResult
-MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration )
+SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration )
 {
     if( !iSections.Num() )
     {
@@ -126,7 +126,7 @@ MovieSceneHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, F
 
 //static
 void
-MovieSceneHelpersShift::ShiftFollowingSections( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection, FShiftResult iShiftResult )
+SectionsHelpersShift::ShiftFollowingSections( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection, FShiftResult iShiftResult )
 {
     TArray< UMovieSceneSection* > sections_to_shift;
     for( auto section : iSections )
@@ -155,7 +155,7 @@ MovieSceneHelpersShift::ShiftFollowingSections( TArray< UMovieSceneSection* > iS
 
 //static
 void
-MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection )
+SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection )
 {
     TArray< UMovieSceneSection* > sections_to_shift;
     for( auto section : iSections )

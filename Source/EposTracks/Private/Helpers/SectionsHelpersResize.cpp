@@ -9,7 +9,7 @@
 
 //static
 TRange<FFrameNumber>
-MovieSceneHelpersResize::GetValidRangeLeading( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold )
+SectionsHelpersResize::GetValidRangeLeading( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold )
 {
     int32 current_index = INDEX_NONE;
     if( !iSections.Find( iSection, current_index ) )
@@ -34,7 +34,7 @@ MovieSceneHelpersResize::GetValidRangeLeading( TArray<UMovieSceneSection*> iSect
 
 //static
 TRange<FFrameNumber>
-MovieSceneHelpersResize::GetValidRangeTrailing( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold )
+SectionsHelpersResize::GetValidRangeTrailing( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold )
 {
     int32 current_index = INDEX_NONE;
     if( !iSections.Find( iSection, current_index ) )

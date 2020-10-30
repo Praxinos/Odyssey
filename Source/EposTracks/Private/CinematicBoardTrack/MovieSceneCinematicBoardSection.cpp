@@ -51,7 +51,7 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
             int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
             UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
 
-            SetRange( MovieSceneHelpersResize::GetValidRangeTrailing( outer_track->GetAllSections(), this, section_range.GetUpperBoundValue(), IntervalSnapThreshold ) );
+            SetRange( SectionsHelpersResize::GetValidRangeTrailing( outer_track->GetAllSections(), this, section_range.GetUpperBoundValue(), IntervalSnapThreshold ) );
 
             mResizing = 0;
             Resizing();
@@ -62,7 +62,7 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
             int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
             UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
 
-            SetRange( MovieSceneHelpersResize::GetValidRangeLeading( outer_track->GetAllSections(), this, section_range.GetLowerBoundValue(), IntervalSnapThreshold ) );
+            SetRange( SectionsHelpersResize::GetValidRangeLeading( outer_track->GetAllSections(), this, section_range.GetLowerBoundValue(), IntervalSnapThreshold ) );
 
             mResizing = 0;
             Resizing();

@@ -20,20 +20,10 @@ struct FMoveResult
     TArray<UMovieSceneSection*> mSectionsBeforeGap;
     TArray<UMovieSceneSection*> mSectionsAfterGap;
 
-    FMoveResult()
-        : mForward( false )
-        , mBackward( false )
-        , mReferenceFrame( 0 )
-        , mInitialGap( TRange<FFrameNumber>::Empty() )
-        , mInitialGapMiddle( 0 )
-        , mInitialGapSize( 0 )
-        , mSectionsBeforeGap()
-        , mSectionsAfterGap()
-    {
-    }
+    FMoveResult();
 };
 
-class EPOSTRACKS_API MovieSceneHelpersMove
+class EPOSTRACKS_API SectionsHelpersMove
 {
 public:
     static FMoveResult GetMoveInfo( TArray< UMovieSceneSection* > iSections, TRange<FFrameNumber> iPreviousMove, TRange<FFrameNumber> iLastGapMove, const UMovieSceneSection* iSection );

@@ -8,9 +8,23 @@
 
 //---
 
+FMoveResult::FMoveResult()
+    : mForward( false )
+    , mBackward( false )
+    , mReferenceFrame( 0 )
+    , mInitialGap( TRange<FFrameNumber>::Empty() )
+    , mInitialGapMiddle( 0 )
+    , mInitialGapSize( 0 )
+    , mSectionsBeforeGap()
+    , mSectionsAfterGap()
+{
+}
+
+//---
+
 //static
 FMoveResult
-MovieSceneHelpersMove::GetMoveInfo( TArray< UMovieSceneSection* > iSections, TRange<FFrameNumber> iPreviousMove, TRange<FFrameNumber> iLastGapMove, const UMovieSceneSection* iSection )
+SectionsHelpersMove::GetMoveInfo( TArray< UMovieSceneSection* > iSections, TRange<FFrameNumber> iPreviousMove, TRange<FFrameNumber> iLastGapMove, const UMovieSceneSection* iSection )
 {
     FMoveResult move_result;
 
@@ -57,7 +71,7 @@ MovieSceneHelpersMove::GetMoveInfo( TArray< UMovieSceneSection* > iSections, TRa
 
 //static
 void
-MovieSceneHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber>* ioLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
+SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber>* ioLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
 {
     // If the reference frame is at the right of the gap,
     // process only every sections 'AfterGap'
@@ -161,7 +175,7 @@ MovieSceneHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSection
 
 //static
 void
-MovieSceneHelpersMove::FixPostMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber> iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
+SectionsHelpersMove::FixPostMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber> iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
 {
     iSection->SetRange( iLastGapMove );
 

@@ -22,7 +22,7 @@ struct FShiftResult
     }
 };
 
-class EPOSTRACKS_API MovieSceneHelpersShift
+class EPOSTRACKS_API SectionsHelpersShift
 {
 public:
     static FShiftResult GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration );

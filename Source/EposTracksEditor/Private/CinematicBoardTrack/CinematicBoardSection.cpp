@@ -427,11 +427,11 @@ FCinematicBoardSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, F
 
     if( ResizeMode == ESequencerSectionResizeMode::SSRM_LeadingEdge )
     {
-        section.SetRange( MovieSceneHelpersResize::GetValidRangeLeading( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
+        section.SetRange( SectionsHelpersResize::GetValidRangeLeading( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
     }
     else
     {
-        section.SetRange( MovieSceneHelpersResize::GetValidRangeTrailing( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
+        section.SetRange( SectionsHelpersResize::GetValidRangeTrailing( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
     }
 };
 

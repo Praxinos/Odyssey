@@ -8,7 +8,7 @@
 class UMovieScene;
 class UMovieSceneSection;
 
-class EPOSTRACKS_API MovieSceneHelpersResize
+class EPOSTRACKS_API SectionsHelpersResize
 {
 public:
     //static FFrameNumber RangeSize( TRange<FFrameNumber> iRange ); // ...mGap.Size<int32>() doesn't compile -_-

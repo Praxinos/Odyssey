@@ -39,7 +39,7 @@ UMovieSceneCinematicBoardTrack::AddSequence( UMovieSceneSequence* iSequence, FFr
 UMovieSceneSubSection*
 UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex )
 {
-    FShiftResult shift_result = MovieSceneHelpersShift::GetShiftInfo( Sections, iStartTime, iDuration );
+    FShiftResult shift_result = SectionsHelpersShift::GetShiftInfo( Sections, iStartTime, iDuration );
 
     //---
 
@@ -60,7 +60,7 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
     // Once sequences are sorted fixup the surrounding sequences to fix any gaps
-    MovieSceneHelpersShift::ShiftFollowingSections( Sections, newSection, shift_result );
+    SectionsHelpersShift::ShiftFollowingSections( Sections, newSection, shift_result );
 
     // Should be done again as after the first one, at least 2 sections (new one and the one at this place) have the same start
     MovieSceneHelpers::SortConsecutiveSections( Sections );
@@ -101,7 +101,7 @@ UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
     Sections.Remove( &ioSection );
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
-    MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, &ioSection );
+    SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, &ioSection );
 
     FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
 
@@ -116,7 +116,7 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
     Sections.RemoveAt( iSectionIndex );
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
-    MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, deleted_section ); // maybe deleted_section is not need, just remove all the gap ?
+    SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, deleted_section ); // maybe deleted_section is not need, just remove all the gap ?
 
     FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
 }
@@ -241,8 +241,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             TRange<FFrameNumber>* last_gap = mLastGapMove.Find( board_section );
             check( last_gap );
 
-            FMoveResult move_result = MovieSceneHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
-            MovieSceneHelpersMove::FixMoveSections( Sections, last_gap, &ioSection, move_result );
+            FMoveResult move_result = SectionsHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
+            SectionsHelpersMove::FixMoveSections( Sections, last_gap, &ioSection, move_result );
 
             if( iParams.MoveType == EPropertyChangeType::ValueSet )
             {
@@ -253,8 +253,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 int32* cache_priority = mCacheOverlapPriority.Find( board_section );
                 check( cache_priority );
 
-                move_result = MovieSceneHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
-                MovieSceneHelpersMove::FixPostMoveSections( Sections, *last_gap, &ioSection, move_result );
+                move_result = SectionsHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
+                SectionsHelpersMove::FixPostMoveSections( Sections, *last_gap, &ioSection, move_result );
 
                 board_section->SetOverlapPriority( *cache_priority );
 
