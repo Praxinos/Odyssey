@@ -3,8 +3,12 @@
 
 #include "Customization/BoardSequenceCustomization.h"
 
+#include "ArrangeSections.h"
 #include "Board/BoardSequence.h"
 #include "BoardSequenceEditorCommands.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposTracksModule.h"
+#include "Helpers/BoardSequenceHelpers.h"
 #include "Settings/EposEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
@@ -16,6 +20,10 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 {
     mSequencer = &ioBuilder.GetSequencer();
     mBoardSequence = Cast<UBoardSequence>( &ioBuilder.GetFocusedSequence() );
+
+    mArrangeSectionsHandle = FEposTracksModule::GetCustomizationManager().Register( FOnArrangeSections::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer ) );
+
+    //---
 
     FSequencerCustomizationInfo customization;
 
@@ -36,6 +44,8 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 void
 FBoardSequenceCustomization::UnregisterSequencerCustomization()
 {
+    FEposTracksModule::GetCustomizationManager().Unregister( mArrangeSectionsHandle );
+
     mSequencer = nullptr;
     mBoardSequence = nullptr;
 }
@@ -52,10 +62,10 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     {
         switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
-            case EArrangeShots::OnOneRow:
+            case EArrangeSections::OnOneRow:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetLabel();
             default:
-            case EArrangeShots::OnTwoRowsShifted:
+            case EArrangeSections::OnTwoRowsShifted:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetLabel();
         }
     } ) );
@@ -65,10 +75,10 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     {
         switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
-            case EArrangeShots::OnOneRow:
+            case EArrangeSections::OnOneRow:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetIcon();
             default:
-            case EArrangeShots::OnTwoRowsShifted:
+            case EArrangeSections::OnTwoRowsShifted:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetIcon();
         }
     } ) );
@@ -78,10 +88,10 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     {
         switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
-            case EArrangeShots::OnOneRow:
+            case EArrangeSections::OnOneRow:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetDescription();
             default:
-            case EArrangeShots::OnTwoRowsShifted:
+            case EArrangeSections::OnTwoRowsShifted:
                 return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetDescription();
         }
     } ) );

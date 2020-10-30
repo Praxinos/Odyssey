@@ -33,4 +33,6 @@ private:
 private:
     ISequencer*     mSequencer;
     UBoardSequence* mBoardSequence;
+
+    FDelegateHandle mArrangeSectionsHandle;
 };

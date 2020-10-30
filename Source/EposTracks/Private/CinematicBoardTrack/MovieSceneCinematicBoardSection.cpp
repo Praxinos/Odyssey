@@ -5,7 +5,7 @@
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Generators/MovieSceneEasingCurves.h"
-#include "MovieSceneHelpersResize.h"
+#include "SectionsHelpersResize.h"
 #include "MovieSceneSection.h"
 
 //---

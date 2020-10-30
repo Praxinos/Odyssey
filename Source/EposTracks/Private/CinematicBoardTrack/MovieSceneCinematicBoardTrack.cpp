@@ -8,8 +8,9 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Compilation/MovieSceneCompilerRules.h"
 
-#include "MovieSceneHelpersShift.h"
-#include "MovieSceneHelpersMove.h"
+#include "ArrangeSections.h"
+#include "SectionsHelpersShift.h"
+#include "SectionsHelpersMove.h"
 
 
 #define LOCTEXT_NAMESPACE "MovieSceneCinematicBoardTrack"
@@ -208,6 +209,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
         if( iParams.MoveType == EPropertyChangeType::ValueSet )
         {
             board_section->StopResizing();
+
+            FEposTracksModule::GetCustomizationManager().ExecuteArrangeSections();
         }
     }
     else
@@ -257,6 +260,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 UpdateEasing();
                 //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
                 // as FixPostMoveSections() may move the current section and OnEndDrag() won't call it (=Notify())
+
+                FEposTracksModule::GetCustomizationManager().ExecuteArrangeSections();
             }
             else
             {

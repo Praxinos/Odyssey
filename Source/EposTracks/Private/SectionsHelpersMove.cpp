@@ -1,7 +1,7 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "MovieSceneHelpersMove.h"
+#include "SectionsHelpersMove.h"
 
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"

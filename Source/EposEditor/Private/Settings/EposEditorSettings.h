@@ -7,6 +7,7 @@
 #include "UObject/Object.h"
 //#include "Board/BoardSequence.h"
 //#include "Shot/ShotSequence.h"
+#include "ArrangeSections.h"
 #include "EposEditorSettings.generated.h"
 
 //---
@@ -17,16 +18,6 @@ struct FBoardSettings
 	GENERATED_BODY()
 };
 
-UENUM()
-enum class EArrangeShots : uint8
-{
-    /** Origin. */
-    OnOneRow UMETA( DisplayName = "On a single row" ),
-
-    /** Place in Front of Camera. */
-    OnTwoRowsShifted UMETA( DisplayName = "On 2 rows shifted" ),
-};
-
 USTRUCT()
 struct FBoardTrackSettings
 {
@@ -34,7 +25,7 @@ struct FBoardTrackSettings
 
 	/** Select the way to arrange board sections. */
 	UPROPERTY(config, EditAnywhere, Category=BoardTrackSettings)
-	EArrangeShots ArrangeShots;
+	EArrangeSections ArrangeShots;
 };
 
 //---

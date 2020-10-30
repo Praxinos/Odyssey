@@ -88,8 +88,7 @@ private:
     //---
 
     /** Callback for executing the Arrange Shots command. */
-    void HandleArrangeShots( EArrangeShots iArrangeShots );
-    void HandleArrangeShots();
+    void HandleArrangeShots( EArrangeSections iArrangeShots );
 
     //---
 

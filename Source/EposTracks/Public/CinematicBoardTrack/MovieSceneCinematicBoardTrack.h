@@ -8,6 +8,7 @@
 #include "Misc/InlineValue.h"
 #include "Tracks/MovieSceneSubTrack.h"
 #include "Compilation/MovieSceneSegmentCompiler.h"
+
 #include "MovieSceneCinematicBoardTrack.generated.h"
 
 class UMovieSceneSequence;

@@ -16,6 +16,15 @@ void FEposTracksModule::ShutdownModule()
     // we call this function before unloading the module.
 }
 
+//---
+
+//static
+FCustomizationManager& 
+FEposTracksModule::GetCustomizationManager()
+{
+    return FModuleManager::LoadModuleChecked<FEposTracksModule>( "EposTracks" ).mCustomizationManager;
+}
+
 #undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE( FEposTracksModule, EposTracks )

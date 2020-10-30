@@ -27,6 +27,7 @@
 
 #include "BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Helpers/BoardSequenceHelpers.h"
 #include "Helpers/ShotSequenceHelpers.h"
 #include "Misc/EposEditorPlaybackContext.h"
 #include "ShotSequenceEditorCommands.h"
@@ -157,19 +158,19 @@ FEposEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
     CommandList->MapAction(
         FBoardSequenceEditorCommands::Get().ArrangeShots,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots )
+        FExecuteAction::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer.Get() )
     );
     CommandList->MapAction(
         FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeShots::OnOneRow ),
-        FCanExecuteAction::CreateLambda([this] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeShots::OnOneRow; } )
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeSections::OnOneRow ),
+        FCanExecuteAction::CreateLambda([] { return true; }),
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
     );
     CommandList->MapAction(
         FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeShots::OnTwoRowsShifted ),
-        FCanExecuteAction::CreateLambda([this] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeShots::OnTwoRowsShifted; } )
+        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeSections::OnTwoRowsShifted ),
+        FCanExecuteAction::CreateLambda([] { return true; }),
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
     );
 
     //---
@@ -346,43 +347,13 @@ FEposEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component 
 //---
 
 void
-FEposEditorToolkit::HandleArrangeShots( EArrangeShots iArrangeShots )
+FEposEditorToolkit::HandleArrangeShots( EArrangeSections iArrangeShots )
 {
     UEposEditorSettings* settings = GetMutableDefault<UEposEditorSettings>();
     settings->BoardTrackSettings.ArrangeShots = iArrangeShots;
+    settings->SaveConfig();
 
-    HandleArrangeShots();
-}
-
-void
-FEposEditorToolkit::HandleArrangeShots()
-{
-    auto track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-    if( !track )
-        return;
-
-    const UEposEditorSettings* settings = GetDefault<UEposEditorSettings>();
-
-    auto sections = track->GetAllSections();
-    for( int i = 0; i < sections.Num(); i++ )
-    {
-        auto section = sections[i];
-
-        section->Modify();
-
-        switch( settings->BoardTrackSettings.ArrangeShots )
-        {
-            case EArrangeShots::OnOneRow:
-                section->SetRowIndex( 0 );
-                break;
-            default:
-            case EArrangeShots::OnTwoRowsShifted:
-                section->SetRowIndex( i % 2 );
-                break;
-        }
-    }
-
-    mSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+    BoardSequenceHelpers::ArrangeSections( mSequencer.Get() );
 }
 
 //---
