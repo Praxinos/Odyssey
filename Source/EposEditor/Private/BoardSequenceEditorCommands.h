@@ -21,7 +21,7 @@ public:
 
 	TSharedPtr<FUICommandInfo> NewBoardWithSettings;
 
-	TSharedPtr<FUICommandInfo> ArrangeShots;
+	TSharedPtr<FUICommandInfo> ArrangeShotsManually;
 	TSharedPtr<FUICommandInfo> ArrangeShotsOnOneRow;
 	TSharedPtr<FUICommandInfo> ArrangeShotsOnTwoRows;
 };

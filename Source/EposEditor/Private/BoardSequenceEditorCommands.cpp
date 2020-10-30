@@ -16,7 +16,7 @@ FBoardSequenceEditorCommands::RegisterCommands()
 {
     UI_COMMAND( NewBoardWithSettings,   "New Board", "Create a new board with settings", EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_COMMAND( ArrangeShots,           "Arrange Shots", "Arrange shots in multiple ways", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( ArrangeShotsManually,   "Arrange Shots Manually", "Arrange shots manually", EUserInterfaceActionType::RadioButton, FInputChord() );
     UI_COMMAND( ArrangeShotsOnOneRow,   "Arrange Shots On One Row", "Arrange shots on a single row", EUserInterfaceActionType::RadioButton, FInputChord() );
     UI_COMMAND( ArrangeShotsOnTwoRows,  "Arrange Shots On Two Rows", "Arrange shots on 2 rows and shifted each other", EUserInterfaceActionType::RadioButton, FInputChord() );
 }

@@ -25,6 +25,7 @@ FEposEditorStyle::FEposEditorStyle()
 {
     const FVector2D Icon16x16( 16.0f, 16.0f );
     const FVector2D Icon24x24( 24.0f, 24.0f );
+    const FVector2D Icon48x48( 48.0f, 48.0f );
     const FVector2D Icon64x64( 64.0f, 64.0f );
 
     TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
@@ -46,8 +47,11 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
 
-    //Set( "BoardSequenceEditor.ArrangeShots.Small", new IMAGE_BRUSH( "IconArrangeShots_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsManually", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon48x48 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsManually.Small", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.ArrangeShotsOnOneRow.Small", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows.Small", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon24x24 ) );
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
