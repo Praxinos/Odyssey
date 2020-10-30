@@ -65,6 +65,8 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
     // Should be done again as after the first one, at least 2 sections (new one and the one at this place) have the same start
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
+    FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+
     return newSection;
 }
 
@@ -101,6 +103,8 @@ UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 
     MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, &ioSection );
 
+    FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+
     // @todo Sequencer: The movie scene owned by the section is now abandoned.  Should we offer to delete it?  
 }
 
@@ -113,6 +117,8 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
     MovieSceneHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, deleted_section ); // maybe deleted_section is not need, just remove all the gap ?
+
+    FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
 }
 
 bool
