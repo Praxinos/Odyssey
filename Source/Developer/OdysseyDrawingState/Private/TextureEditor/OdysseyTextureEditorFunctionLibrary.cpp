@@ -103,17 +103,10 @@ GetLayerByIndex( FOdysseyLayerStack* iStack, int iIndex )
 
 //static
 FOdysseyBlockProxy
-UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* iBrushContext, int iIndex, int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* iBrushContext, int iIndex, int iX, int iY, int iWidth, int iHeight )
 {
     if( !iBrushContext )
         return FOdysseyBlockProxy::MakeNullProxy();
-
-    //---
-
-    FString op = "LayerBlock_Index-" + FString::FromInt( iIndex ) + "_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
-
-    if( iBrushContext->KeyExistsInPool( iCache, op ) )
-        return iBrushContext->RetrieveInPool( iCache, op );
 
     //---
 
@@ -128,7 +121,8 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( iWidth, iHeight, src->Format() ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -140,24 +134,15 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
     ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
-    FOdysseyBlockProxy prox( dst, op );
-    iBrushContext->StoreInPool( iCache, op, prox );
-    return prox;
+    return FOdysseyBlockProxy(dst);
 }
 
 //static
 FOdysseyBlockProxy
-UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetBase* iBrushContext, const FString& iName, int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetBase* iBrushContext, const FString& iName, int iX, int iY, int iWidth, int iHeight )
 {
     if( !iBrushContext )
         return FOdysseyBlockProxy::MakeNullProxy();
-
-    //---
-
-    FString op = "LayerBlock_" + iName + "_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
-
-    if( iBrushContext->KeyExistsInPool( iCache, op ) )
-        return iBrushContext->RetrieveInPool( iCache, op );
 
     //---
 
@@ -172,7 +157,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( iWidth, iHeight, src->Format() ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -184,24 +169,15 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
     ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
-    FOdysseyBlockProxy prox( dst, op );
-    iBrushContext->StoreInPool( iCache, op, prox );
-    return prox;
+    return FOdysseyBlockProxy(dst);
 }
 
 //static
 FOdysseyBlockProxy
-UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* iBrushContext, int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* iBrushContext, int iX, int iY, int iWidth, int iHeight )
 {
     if( !iBrushContext )
         return FOdysseyBlockProxy::MakeNullProxy();
-
-    //---
-
-    FString op = "LayerBlock_Current_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
-
-    if( iBrushContext->KeyExistsInPool( iCache, op ) )
-        return iBrushContext->RetrieveInPool( iCache, op );
 
     //---
 
@@ -216,7 +192,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( iWidth, iHeight, src->Format() ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -228,9 +204,7 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
     ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
-    FOdysseyBlockProxy prox( dst, op );
-    iBrushContext->StoreInPool( iCache, op, prox );
-    return prox;
+    return FOdysseyBlockProxy(dst);
 }
 
 #if 0
@@ -255,6 +229,7 @@ UOdysseyTextureEditorFunctionLibrary::GetResultBlock( UOdysseyBrushAssetBase* Br
     FOdysseyBlock* block = stack->GetResultBlock();
     //const FOdysseyBlock* block = s->LayerStack()->GetResultBlock();
     FString id( "blabla" );
-    return FOdysseyBlockProxy( block, id );
+
+    return FOdysseyBlockProxy(block);
 }
 #endif

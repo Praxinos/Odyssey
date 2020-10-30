@@ -129,10 +129,10 @@ UOdysseyBrushAssetBase::KeyExistsInPool(  ECacheLevel iLevel, const  FString&  i
 void
 UOdysseyBrushAssetBase::StoreInPool(      ECacheLevel iLevel, const  FString&  iKey, const  FOdysseyBlockProxy&  iValue )
 {
-    if( KeyExistsInPool( iLevel, iKey ) )
+    /* if( KeyExistsInPool( iLevel, iKey ) )
        return;
 
-    pools[ (int)iLevel ].Store( iKey, iValue );
+    pools[ (int)iLevel ].Store( iKey, iValue ); */
 }
 
 
@@ -466,25 +466,16 @@ UOdysseyBrushAssetBase::GetCanvasHeight()
 
 /** Get Stroke Buffer*/
 FOdysseyBlockProxy
-UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight, ECacheLevel iCache )
+UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight )
 {
-    FString op = "StrokeBlock_" + FString::FromInt( iX ) + "_" + FString::FromInt( iY ) + "_" + FString::FromInt( iWidth ) + "_" + FString::FromInt( iHeight );
+	FOdysseyBlock* src = state.target_temp_buffer;
+	::ul3::tFormat format = src ? src->Format() : ULIS3_FORMAT_RGBA8;
+	
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(iWidth, iHeight, format));
+    ::ul3::ClearRaw(dst->GetBlock());
 
-    if( KeyExistsInPool( iCache, op ) )
-        return RetrieveInPool( iCache, op );
-
-    //---
-
-    if (!state.target_temp_buffer)
-    {
-        TSharedPtr<FOdysseyBlock> defaultBlock = MakeShareable(new FOdysseyBlock( iWidth, iHeight, ULIS3_FORMAT_RGBA8, nullptr, nullptr, true ));
-        FOdysseyBlockProxy prox( defaultBlock, op );
-        StoreInPool( iCache, op, prox );
-        return prox;
-    }
-
-    FOdysseyBlock* src = state.target_temp_buffer;
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( iWidth, iHeight, src->Format(), nullptr, nullptr, true ));
+    if (!src)
+        return FOdysseyBlockProxy(dst);
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
@@ -496,10 +487,7 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight,
     ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
-    
-    FOdysseyBlockProxy prox( dst, op );
-    StoreInPool( iCache, op, prox );
-    return prox;
+	return FOdysseyBlockProxy(dst);
 }
 
 //--------------------------------------------------------------------------------------

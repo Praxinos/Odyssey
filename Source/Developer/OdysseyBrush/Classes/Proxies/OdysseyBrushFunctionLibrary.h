@@ -36,7 +36,7 @@ public:
 
     //Node that reunites all the necessary information to create a stamp.
     //Must be connected to an Event (i.e. "Event on Step").
-    //Requires 3 mandatory input to work : Odyssey Block Proxy and X|Y coordinates.
+    //Requires 3 mandatory input to work : Odyssey Block Reference and X|Y coordinates.
     UFUNCTION( BlueprintCallable
             , Category="OdysseyBrushFunctionLibrary"
             , meta = ( DefaultToSelf="BrushContext" ) )

@@ -14,6 +14,7 @@ ODYSSEYIMAGING_API void CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock, UT
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture);
 ODYSSEYIMAGING_API void InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat);
 ODYSSEYIMAGING_API FOdysseyBlock* NewOdysseyBlockFromUTextureData(UTexture2D* iTexture, ::ul3::tFormat iFormat);
+ODYSSEYIMAGING_API void FillOdysseyBlockFromUTextureData(FOdysseyBlock* ioBlock, UTexture2D* iTexture, ::ul3::tFormat iFormat);
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceEditable* iSurface);
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceEditable* iSurface,int iX1,int iY1,int iX2,int iY2);
 ODYSSEYIMAGING_API void InvalidateTextureFromData(const FOdysseyBlock* iData,UTexture2D* iTexture);

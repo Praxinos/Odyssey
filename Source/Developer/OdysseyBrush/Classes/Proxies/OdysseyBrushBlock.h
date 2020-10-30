@@ -18,22 +18,18 @@ class  UFont;
 class  UOdysseyBrushAssetBase;
 
 /////////////////////////////////////////////////////
-// Odyssey Block Proxy
-USTRUCT(BlueprintType)
+// Odyssey Block Reference
+USTRUCT(BlueprintType, meta = (DisplayName = "Odyssey Block Reference"))
 struct ODYSSEYBRUSH_API FOdysseyBlockProxy
 {
     GENERATED_BODY()
 
     FOdysseyBlockProxy()
         : m(        0       )
-        , id(       "None"  )
-        , valid(    false   )
     {}
 
-    FOdysseyBlockProxy( TSharedPtr<FOdysseyBlock> iBlock, const  FString& iId )
+    FOdysseyBlockProxy( TSharedPtr<FOdysseyBlock> iBlock )
         : m(        iBlock  )
-        , id(       iId     )
-        , valid(    true    )
     {}
 
     static
@@ -44,8 +40,6 @@ struct ODYSSEYBRUSH_API FOdysseyBlockProxy
     }
 
     TSharedPtr<FOdysseyBlock>   m;
-    FString                     id;
-    bool                        valid;
 };
 
 
@@ -92,73 +86,69 @@ class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary : public UBlueprintFunc
     GENERATED_BODY()
 
 public:
-    //Converts Texture 2D to Odyssey Block Proxy.
+    //Converts Texture 2D to Odyssey Block Reference.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
-             , meta = ( DefaultToSelf="BrushContext", DisplayName = "To OdysseyBlockProxy (Texture2D)", CompactNodeTitle = "->", BlueprintAutocast ) )
-    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyBlockFormat Format, EOdysseyBlockFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext);
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "To Odyssey Block Reference (Texture2D)", BlueprintAutocast ) )
+    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext);
 
     //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
-             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
-    static FOdysseyBlockProxy FillPreserveAlpha( UOdysseyBrushAssetBase* BrushContext
-                                               , FOdysseyBlockProxy Sample
-                                               , FOdysseyBrushColor Color
-                                               , ECacheLevel Cache = ECacheLevel::kStep );
+             , meta = ( DefaultToSelf="BrushContext", DeprecatedFunction, DeprecationMessage = "Use Fill" ) )
+    static FOdysseyBlockProxy FillPreserveAlpha(  UOdysseyBrushAssetBase* BrushContext
+                                                , FOdysseyBlockProxy Sample
+                                                , FOdysseyBrushColor Color );
     
-    //Creates an empty Odyssey Block Proxy.
+    //Creates an empty Odyssey Block Reference.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
-             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="InitializeData, Cache" ) )
+             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="InitializeData" ) )
     static FOdysseyBlockProxy CreateBlock( UOdysseyBrushAssetBase* BrushContext
                                          , int Width = 256
                                          , int Height = 256
-                                         , EOdysseyBlockFormat Format = EOdysseyBlockFormat::kAuto
-										 , EOdysseyBlockFormatPrecision Precision = EOdysseyBlockFormatPrecision::kAuto
-                                         , const FString& ID = "NewDynamicBlock"
-                                         , bool InitializeData = true
-                                         , ECacheLevel Cache = ECacheLevel::kStep );
+                                         , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
+										 , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
+                                         , bool InitializeData = true );
 
-    //Blends two Odyssey Block Proxy on Top and Back.
+    //Blends two Odyssey Block Reference on Top and Back.
     //If Top is bigger than Back = Back will crop Top.
     //If Top is smaller than Back = Both will be visible.
     //X | Y are an offset to pan Top.
     UFUNCTION(BlueprintPure
              , Category="OdysseyBlockProxy"
-             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
+             , meta = ( DefaultToSelf="BrushContext" ) )
     static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
                                    , FOdysseyBlockProxy Top
                                    , FOdysseyBlockProxy Back
                                    , int X = 0
                                    , int Y = 0
                                    , float Opacity = 1.f
-								   , EOdysseyBlockFormat Format = EOdysseyBlockFormat::kAuto
-								   , EOdysseyBlockFormatPrecision Precision = EOdysseyBlockFormatPrecision::kAuto
+								   , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
+								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
-                                   , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal
-                                   , ECacheLevel Cache = ECacheLevel::kState);
+                                   , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
     //---
 
-    //Returns the Width of an Odyssey Block Proxy as an Integer.
+    //Returns the Width of an Odyssey Block Reference as an Integer.
     UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
-    //Returns the Height of an Odyssey Block Proxy as an Integer.
+    //Returns the Height of an Odyssey Block Reference as an Integer.
     UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
     static int GetHeight( FOdysseyBlockProxy Sample );
 
     //---
 
-    //Requires a Font to return an Array of Odyssey Block Proxy.
+    //Requires a Font to return an Array of Odyssey Block Reference.
     //This node turns the Font into a big block that contains all characters in the font.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy"
-             , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="Cache" ) )
-    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, EOdysseyBlockFormat Format = EOdysseyBlockFormat::kAuto, EOdysseyBlockFormatPrecision Precision = EOdysseyBlockFormatPrecision::kAuto, ECacheLevel Cache = ECacheLevel::kState );
+             , meta = ( DefaultToSelf="BrushContext" ) )
+    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto );
     
-    //Requires a Font and a String to return an Array of Odyssey Block Proxy.
+    //Requires a Font and a String to return an Array of Odyssey Block Reference.
     //This node find the correspondance between letters from the String and characters from the Font.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockProxy" )

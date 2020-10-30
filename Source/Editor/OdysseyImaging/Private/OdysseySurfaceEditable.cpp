@@ -93,22 +93,40 @@ InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETex
 FOdysseyBlock*
 NewOdysseyBlockFromUTextureData(UTexture2D* iTexture, ::ul3::tFormat iFormat)
 {
-    ::ul3::tFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+    FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),iFormat);
+	FillOdysseyBlockFromUTextureData(block,iTexture, iFormat);
+    return block;
+}
 
-    FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),sourceFormat);
-	CopyUTextureSourceDataIntoBlock(block,iTexture);
+void
+FillOdysseyBlockFromUTextureData(FOdysseyBlock* ioBlock, UTexture2D* iTexture, ::ul3::tFormat iFormat)
+{
+	if (!ioBlock)
+		return;
 
-    if (sourceFormat == iFormat)
-        return block;
+	if (ioBlock->Width() != iTexture->GetSizeX() || ioBlock->Height() != iTexture->GetSizeY() || ioBlock->Format() != iFormat)
+	{
+		ioBlock->Reallocate(iTexture->GetSizeX(), iTexture->GetSizeY(), iFormat);
+	}
 
-    FOdysseyBlock* ret = new FOdysseyBlock(block->Width(),block->Height(),iFormat);
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Conv( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), ret->GetBlock() );
-    delete block;
+	//::ul3::FBlock* dst = ioBlock->Block();
 
-    return ret;
+	::ul3::tFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+	if (iFormat == sourceFormat)
+	{
+		CopyUTextureSourceDataIntoBlock(ioBlock,iTexture);
+	}
+	else
+	{
+		FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),sourceFormat);
+		CopyUTextureSourceDataIntoBlock(block,iTexture);
+
+		IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+		::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
+		::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+		::ul3::Conv( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), ioBlock->GetBlock() );
+		delete block;
+	}
 }
 
 void

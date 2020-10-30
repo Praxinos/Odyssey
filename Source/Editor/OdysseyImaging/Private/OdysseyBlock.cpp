@@ -131,6 +131,28 @@ FOdysseyBlock::GetBlock() const
     return mBlock;
 }
 
+void
+FOdysseyBlock::Reallocate(  int							iWidth
+						, int                           iHeight
+						, ::ul3::tFormat                iFormat
+						, ::ul3::fpInvalidateFunction   iInvFunc
+						, void*                         iInvInfo
+						, bool                          iInitializeData)
+{
+	// Retrieve spec info from ULIS format hash.
+	::ul3::FFormatInfo fmt(iFormat);
+
+	// Allocate and fill array ( primary data rep )
+	if (iInitializeData)
+		mArray.SetNumZeroed(iWidth * iHeight * fmt.BPP);
+	else
+		mArray.SetNumUninitialized(iWidth * iHeight * fmt.BPP);
+
+	// Allocate block from external array data
+	delete mBlock;
+	mBlock = new ::ul3::FBlock(mArray.GetData(), iWidth, iHeight, iFormat, nullptr, ::ul3::FOnInvalid(iInvFunc, iInvInfo), ::ul3::FOnCleanup(&::ul3::OnCleanup_DoNothing));
+}
+
 int
 FOdysseyBlock::Width() const
 {

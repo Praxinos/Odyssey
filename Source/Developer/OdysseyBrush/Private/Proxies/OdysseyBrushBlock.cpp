@@ -13,29 +13,21 @@
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyBlockFormat Format, EOdysseyBlockFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext )
+UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext )
 {
     if( !BrushContext )
-        return  FOdysseyBlockProxy::MakeNullProxy();
+        return FOdysseyBlockProxy::MakeNullProxy();
+
     if( !Texture )
-        return  FOdysseyBlockProxy::MakeNullProxy();
-
-    FString op = "Conv_" + Texture->GetName();
-    ECacheLevel level = ECacheLevel::kSuper;
-
-    if( BrushContext->KeyExistsInPool( level, op ) )
-        return BrushContext->RetrieveInPool( level, op );
+        return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
 
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
 	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
     
-    TSharedPtr<FOdysseyBlock> block = MakeShareable(NewOdysseyBlockFromUTextureData( Texture, format ));
-
-    FOdysseyBlockProxy prox( block, op );
-    BrushContext->StoreInPool( level, op, prox );
-    return prox;
+    TSharedRef<FOdysseyBlock> dst = MakeShareable(NewOdysseyBlockFromUTextureData( Texture, format ));
+    return FOdysseyBlockProxy(dst);
 }
 
 
@@ -43,34 +35,29 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
 FOdysseyBlockProxy
 UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* BrushContext
                                                     , FOdysseyBlockProxy Source
-                                                    , FOdysseyBrushColor Color
-                                                    , ECacheLevel Cache )
+                                                    , FOdysseyBrushColor Color )
 {
     if( !BrushContext )
-        return  FOdysseyBlockProxy::MakeNullProxy();
-    if( !Source.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    ::ul3::FPixelValue color = ::ul3::Conv( Color.GetValue(), Source.m->Format() );
-    FString colorID = FString::FromBlob( ( const uint8* )color.Ptr(), color.Depth() );
-    FString op = "FillPreserveAlpha_" + colorID + "_" + Source.id;
-
-    if( BrushContext->KeyExistsInPool( Cache, op ) )
-        return  BrushContext->RetrieveInPool( Cache, op );
+    if( !Source.m )
+        return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
 
 	TSharedPtr<FOdysseyBlock> src = Source.m;
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( src->Width(), src->Height(), src->Format() ));
+    ::ul3::tFormat format = src->Format();
+    ::ul3::FPixelValue color = ::ul3::Conv( Color.GetValue(), format );
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(src->Width(), src->Height(), format));
+
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = src->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src->GetBlock()->Rect(), ::ul3::FVec2I( 0, 0 ) );
     ::ul3::FillPreserveAlpha( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, dst->GetBlock(), color, dst->GetBlock()->Rect() );
 
-    FOdysseyBlockProxy prox( dst, op );
-    BrushContext->StoreInPool( Cache, op, prox );
-    return prox;
+    return FOdysseyBlockProxy(dst);
 }
 
 
@@ -79,31 +66,23 @@ FOdysseyBlockProxy
 UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushContext
                                               , int Width
                                               , int Height
-                                              , EOdysseyBlockFormat Format
-                                              , EOdysseyBlockFormatPrecision Precision
-                                              , const FString& ID
-                                              , bool InitializeData
-                                              , ECacheLevel Cache )
+                                              , EOdysseyPixelFormat Format
+                                              , EOdysseyPixelFormatPrecision Precision
+                                              , bool InitializeData )
 {
     if( !BrushContext )
         return FOdysseyBlockProxy::MakeNullProxy();
+
     if( Width < 1 || Height < 1 )
         return FOdysseyBlockProxy::MakeNullProxy();
-
-    FString op = "Create_" + ID + "_" + FString::FromInt( Width ) + "_" + FString::FromInt( Height );
-
-    if( BrushContext->KeyExistsInPool( Cache, op ) )
-        return  BrushContext->RetrieveInPool( Cache, op );
 
     //---
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
 	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
 
-    TSharedPtr<FOdysseyBlock> tmp = MakeShareable(new  FOdysseyBlock( Width, Height, format, nullptr, nullptr, InitializeData ));
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Width, Height, format, nullptr, nullptr, InitializeData ));
 
-    FOdysseyBlockProxy prox( tmp, op );
-    BrushContext->StoreInPool( Cache, op, prox );
-    return prox;
+    return FOdysseyBlockProxy(dst);
 }
 
 
@@ -115,29 +94,25 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
                                         , int X
                                         , int Y
                                         , float Opacity
-										, EOdysseyBlockFormat Format
-                                        , EOdysseyBlockFormatPrecision Precision
+										, EOdysseyPixelFormat Format
+                                        , EOdysseyPixelFormatPrecision Precision
                                         , EOdysseyBlendingMode BlendingMode
-                                        , EOdysseyAlphaMode AlphaMode
-                                        , ECacheLevel Cache)
+                                        , EOdysseyAlphaMode AlphaMode)
 {
     if( !BrushContext )
-        return  FOdysseyBlockProxy::MakeNullProxy();
+        return FOdysseyBlockProxy::MakeNullProxy();
+
     if( !Top.m )
-        return  FOdysseyBlockProxy::MakeNullProxy();;
+        return FOdysseyBlockProxy::MakeNullProxy();
+
     if( !Back.m )
-        return  FOdysseyBlockProxy::MakeNullProxy();;
-
-    FString op = "Blend_" + Top.id + "_" + Back.id + "_" + FString::SanitizeFloat( Opacity ) + "_" + FString::FromInt( (int32)BlendingMode ) + "_" + FString::FromInt( (int32)AlphaMode );
-
-    if( BrushContext->KeyExistsInPool( Cache, op ) )
-        return  BrushContext->RetrieveInPool( Cache, op );
+        return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
 	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
 
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(Back.m->GetBlock()->Width(), Back.m->GetBlock()->Height(), format, nullptr, nullptr, false ));
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Back.m->GetBlock()->Width(), Back.m->GetBlock()->Height(), format ));
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = Top.m->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -148,7 +123,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
 
 	if (source->Format() != format)
 	{
-		::ul3::FBlock* conv = new ::ul3::FBlock(back->Width(), back->Height(), format);
+		::ul3::FBlock* conv = new ::ul3::FBlock(source->Width(), source->Height(), format);
 		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, conv);
 		source = conv;
 	}
@@ -169,9 +144,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
 	if (Back.m->GetBlock() != back)
 		delete back;
 
-    FOdysseyBlockProxy prox( dst, op );
-    BrushContext->StoreInPool( Cache, op, prox );
-    return  prox;
+    return FOdysseyBlockProxy(dst);
 }
 
 
@@ -198,7 +171,7 @@ UOdysseyBlockProxyFunctionLibrary::GetHeight( FOdysseyBlockProxy Sample )
 
 //static
 TArray< FOdysseyBlockProxy >
-UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrushContext, const UFont* iFont, EOdysseyBlockFormat Format, EOdysseyBlockFormatPrecision Precision, ECacheLevel iCache)
+UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrushContext, const UFont* iFont, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
 {
     TArray< FOdysseyBlockProxy > blocks;
     if( !iBrushContext )
@@ -213,19 +186,8 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrush
     
     for( auto texture : iFont->Textures )
     {
-        //blocks.Add( Conv_TextureToOdysseyBlockProxy( texture, iBrushContext ) ); // It doesn't work as the cache only use texture name which can be the same for several texture
-
-        FString op = "FontBlocks_" + iFont->GetName() + "_" + texture->GetName();
-
-        if( iBrushContext->KeyExistsInPool( iCache, op ) )
-        {
-            blocks.Add( iBrushContext->RetrieveInPool( iCache, op ) );
-            continue;
-        }
-
         TSharedPtr<FOdysseyBlock> block = MakeShareable(NewOdysseyBlockFromUTextureData( texture, format));
-        FOdysseyBlockProxy prox( block, iFont->GetName() );
-        iBrushContext->StoreInPool( iCache, op, prox );
+        FOdysseyBlockProxy prox( block );
         blocks.Add( prox );
     }
     

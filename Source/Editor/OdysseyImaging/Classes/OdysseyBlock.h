@@ -36,6 +36,13 @@ private:
 
 public:
     // Public API
+	void						Reallocate(   int							iWidth
+											, int                           iHeight
+											, ::ul3::tFormat                iFormat
+											, ::ul3::fpInvalidateFunction   iInvFunc = nullptr
+											, void*                         iInvInfo = nullptr
+											, bool                          iInitializeData = false);
+
     TArray64< uint8 >&          GetArray();
     const TArray64< uint8 >&    GetArray() const;
     ::ul3::FBlock*              GetBlock();

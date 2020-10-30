@@ -10,9 +10,9 @@
 #include "OdysseyBrushFormat.generated.h"
 
 /////////////////////////////////////////////////////
-// EOdysseyBlockFormat Enum
+// EOdysseyPixelFormat Enum
 UENUM( BlueprintType )
-enum  class  EOdysseyBlockFormat : uint8
+enum  class  EOdysseyPixelFormat : uint8
 {
     kAuto  UMETA( DisplayName="Auto" ),
     kRGB UMETA( DisplayName="RGB" ),
@@ -28,9 +28,9 @@ enum  class  EOdysseyBlockFormat : uint8
 };
 
 /////////////////////////////////////////////////////
-// EOdysseyBlockFormat Enum
+// EOdysseyPixelFormat Enum
 UENUM( BlueprintType )
-enum  class  EOdysseyBlockFormatPrecision : uint8
+enum  class  EOdysseyPixelFormatPrecision : uint8
 {
     kAuto  UMETA( DisplayName="Auto" ),
     k8 UMETA( DisplayName="8 bits" ),
@@ -40,4 +40,4 @@ enum  class  EOdysseyBlockFormatPrecision : uint8
     kDouble UMETA( DisplayName="64 bits floating-point" )
 };
 
-::ul3::tFormat ULISFormatFromOdysseyBlockFormat(EOdysseyBlockFormat iFormat, EOdysseyBlockFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat);
+::ul3::tFormat ULISFormatFromOdysseyBlockFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat);

@@ -44,6 +44,7 @@ FOdysseyTextureEditorData::Init()
         mTexture->AddAssetUserData( userData );
         FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, userData->GetLayerStack()->Format());
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(), textureData));
+        userData->GetLayerStack()->AddLayer(imageLayer);
         mTexture->PostEditChange();
     }
 

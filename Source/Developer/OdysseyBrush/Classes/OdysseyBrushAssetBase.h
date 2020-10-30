@@ -270,8 +270,8 @@ public:
     int  GetCanvasHeight();
 
     //Gets Stroke Block.
-    UFUNCTION( BlueprintCallable, Category = "OdysseyBrush" )
-    FOdysseyBlockProxy GetStrokeBlock( int X, int Y, int Width, int Height, ECacheLevel Cache );
+    UFUNCTION( BlueprintCallable, Category = "OdysseyBrush")
+    FOdysseyBlockProxy GetStrokeBlock( int X, int Y, int Width, int Height );
 
 public:
     // Odyssey Brush Native events

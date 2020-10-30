@@ -40,8 +40,18 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
     static FOdysseyBrushColor MakeDebugColor();
 
+    /* Format Management */
+
+    /*//Get the Odyssey Brush Color Pixel Format
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
+    static EOdysseyPixelFormat GetFormat();
+
+    //Get the Odyssey Brush Color Pixel Precision
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
+    static EOdysseyPixelFormatPrecision GetPrecision();*/
+
     /* Make */
-    
+
     //Make Odyssey Brush color from RGBA values (Integers).
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
     static FOdysseyBrushColor MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A = 255 );
