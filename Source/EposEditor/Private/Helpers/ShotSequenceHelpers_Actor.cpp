@@ -21,7 +21,7 @@
 
 //static
 UMovieSceneTrack*
-ShotSequenceHelpers::CreateTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
+ShotSequenceHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
 {
     if( !iBinding.IsValid() )
         return nullptr;
@@ -110,7 +110,7 @@ ShotSequenceHelpers::CreateTrack( TSharedPtr<ISequencer> iSequencer, AActor* iAc
 
 //static
 FGuid
-ShotSequenceHelpers::CreateComponentTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentName )
+ShotSequenceHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
 {
     for( UActorComponent* Component : iActor->GetComponents() )
     {
@@ -132,7 +132,7 @@ ShotSequenceHelpers::CreateComponentTrack( TSharedPtr<ISequencer> iSequencer, AA
 
 //static
 void
-ShotSequenceHelpers::CreatePropertyTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath )
+ShotSequenceHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath )
 {
     TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
     UObject* PropertyOwner = iActor;
@@ -193,7 +193,7 @@ ShotSequenceHelpers::CreatePropertyTrack( TSharedPtr<ISequencer> iSequencer, AAc
 
 //static
 void
-ShotSequenceHelpers::CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     // For binding which has been removed when dropped actor is not supported
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
@@ -253,7 +253,7 @@ ShotSequenceHelpers::CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequen
 }
 
 void
-ShotSequenceHelpers::FixCameraBindingOnCameraCut( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -285,7 +285,7 @@ ShotSequenceHelpers::FixCameraBindingOnCameraCut( TSharedPtr<ISequencer> iSequen
 }
 
 void
-ShotSequenceHelpers::PatchStandardCameraCutTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )

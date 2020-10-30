@@ -78,20 +78,6 @@ private:
 
     //---
 
-    /** Callback for executing the Add Camera command. */
-    void HandleCreateCamera();
-    /** Callback for executing the Snap Camera command. */
-    void HandleSnapCameraToViewport();
-    /** Callback for executing the Add Plane command. */
-    void HandleCreatePlane();
-
-    //---
-
-    /** Callback for executing the Arrange Shots command. */
-    void HandleArrangeShots( EArrangeSections iArrangeShots );
-
-    //---
-
     void HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding );
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );
 

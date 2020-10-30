@@ -28,4 +28,15 @@ BoardSequenceHelpers::ArrangeSections( ISequencer* iSequencer )
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 }
 
+//static
+void
+BoardSequenceHelpers::SetArrangeSections( ISequencer* iSequencer, EArrangeSections iArrangeSections )
+{
+    UEposEditorSettings* settings = GetMutableDefault<UEposEditorSettings>();
+    settings->BoardTrackSettings.ArrangeShots = iArrangeSections;
+    settings->SaveConfig();
+
+    BoardSequenceHelpers::ArrangeSections( iSequencer );
+}
+
 #undef LOCTEXT_NAMESPACE

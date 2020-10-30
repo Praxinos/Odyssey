@@ -156,41 +156,6 @@ void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TShar
 void
 FEposEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
-    CommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().ArrangeShots,
-        FExecuteAction::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer.Get() )
-    );
-    CommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeSections::OnOneRow ),
-        FCanExecuteAction::CreateLambda([] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
-    );
-    CommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleArrangeShots, EArrangeSections::OnTwoRowsShifted ),
-        FCanExecuteAction::CreateLambda([] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
-    );
-
-    //---
-    
-    CommandList->MapAction(
-        FShotSequenceEditorCommands::Get().CreateCamera,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleCreateCamera ),
-        FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
-    );
-    CommandList->MapAction(
-        FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleSnapCameraToViewport ),
-        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
-    );
-    
-    CommandList->MapAction(
-        FShotSequenceEditorCommands::Get().CreatePlane,
-        FExecuteAction::CreateSP( this, &FEposEditorToolkit::HandleCreatePlane ),
-        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
-    );
 }
 
 //--- FGCObject interface
@@ -346,43 +311,14 @@ FEposEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Component 
 
 //---
 
-void
-FEposEditorToolkit::HandleArrangeShots( EArrangeSections iArrangeShots )
-{
-    UEposEditorSettings* settings = GetMutableDefault<UEposEditorSettings>();
-    settings->BoardTrackSettings.ArrangeShots = iArrangeShots;
-    settings->SaveConfig();
-
-    BoardSequenceHelpers::ArrangeSections( mSequencer.Get() );
-}
-
-//---
-
-void FEposEditorToolkit::HandleCreateCamera()
-{
-    ShotSequenceHelpers::CreateCamera( mSequencer );
-}
-
-void FEposEditorToolkit::HandleSnapCameraToViewport()
-{
-    ShotSequenceHelpers::SnapCameraToViewport( mSequencer );
-}
-
-void FEposEditorToolkit::HandleCreatePlane()
-{
-    ShotSequenceHelpers::CreatePlane( mSequencer );
-}
-
-//---
-
 void FEposEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
-    ShotSequenceHelpers::CreateDefaultTracksForActor( mSequencer, iActor, iBinding );
+    ShotSequenceHelpers::CreateDefaultTracksForActor( mSequencer.Get(), iActor, iBinding );
 
-    ShotSequenceHelpers::FixCameraBindingOnCameraCut( mSequencer, iActor, iBinding );
+    ShotSequenceHelpers::FixCameraBindingOnCameraCut( mSequencer.Get(), iActor, iBinding );
 
     //PATCH: replace standard cameracut track (if exists) by our single cameracut track
-    ShotSequenceHelpers::PatchStandardCameraCutTrack( mSequencer, iActor, iBinding );
+    ShotSequenceHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
 }
 
 void FEposEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

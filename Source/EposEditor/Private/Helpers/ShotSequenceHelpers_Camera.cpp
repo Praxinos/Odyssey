@@ -23,7 +23,7 @@
 
 //static
 ACineCameraActor*
-ShotSequenceHelpers::GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid )
+ShotSequenceHelpers::GetCamera( ISequencer* iSequencer, FGuid* oGuid )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -58,7 +58,7 @@ ShotSequenceHelpers::GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid 
 
 //static
 void
-ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer )
+ShotSequenceHelpers::CreateCamera( ISequencer* iSequencer )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -93,7 +93,7 @@ ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer )
 
 //static
 ACineCameraActor*
-ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid ) // From FSequencer::CreateCamera()
+ShotSequenceHelpers::CreateCamera( ISequencer* iSequencer, FGuid* oGuid ) // From FSequencer::CreateCamera()
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     UMovieScene* movieScene = sequence->GetMovieScene();
@@ -148,7 +148,7 @@ ShotSequenceHelpers::CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGu
 
 //static
 void
-ShotSequenceHelpers::CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber)
+ShotSequenceHelpers::CameraAdded( ISequencer* iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber)
 {
     CreateCameraCut( iSequencer, CameraGuid, FrameNumber );
 
@@ -157,7 +157,7 @@ ShotSequenceHelpers::CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid Camer
 
 //static
 void
-ShotSequenceHelpers::CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber ) // From MovieSceneToolHelpers::CameraAdded()
+ShotSequenceHelpers::CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber ) // From MovieSceneToolHelpers::CameraAdded()
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     UMovieScene* movieScene = sequence->GetMovieScene();
@@ -283,7 +283,7 @@ ShotSequenceHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, float i
 
 //static
 void
-ShotSequenceHelpers::CreatePlane( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
     UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
 
@@ -334,7 +334,7 @@ ShotSequenceHelpers::CreatePlane( TSharedPtr<ISequencer> iSequencer, FGuid iCame
 
 //static
 void
-ShotSequenceHelpers::SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer )
+ShotSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -423,7 +423,7 @@ ShotSequenceHelpers::SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer )
 
 //static
 void
-ShotSequenceHelpers::CreatePlane( TSharedPtr<ISequencer> iSequencer )
+ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer )
 {
     FGuid camera_guid;
     ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, &camera_guid );

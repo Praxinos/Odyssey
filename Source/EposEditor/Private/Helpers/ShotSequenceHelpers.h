@@ -19,34 +19,34 @@ public:
     *
     * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
     */
-    static ACineCameraActor* GetCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid );
+    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oGuid );
 
     /**
     *  Add a Camera track
     *
     * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCamera( TSharedPtr<ISequencer> iSequencer );
+    static void CreateCamera( ISequencer* iSequencer );
 
     /**
     *  Update the camera location from the viewport (and set 
     *
     * @param TSharedPtr<ISequencer> iSequencer to update camera.
     */
-    static void SnapCameraToViewport( TSharedPtr<ISequencer> iSequencer );
+    static void SnapCameraToViewport( ISequencer* iSequencer );
 
     /**
     *  Add a Camera track
     *
     * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
     */
-    static void CreatePlane( TSharedPtr<ISequencer> iSequencer );
+    static void CreatePlane( ISequencer* iSequencer );
 
 private:
-    static ACineCameraActor* CreateCamera( TSharedPtr<ISequencer> iSequencer, FGuid* oGuid );
-    static void CameraAdded( TSharedPtr<ISequencer> iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber );
-    static void CreateCameraCut( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber );
-    static void CreatePlane( TSharedPtr<ISequencer> iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
+    static ACineCameraActor* CreateCamera( ISequencer* iSequencer, FGuid* oGuid );
+    static void CameraAdded( ISequencer* iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber );
+    static void CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static void CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
 
@@ -60,7 +60,7 @@ public:
     * @param AActor iActor corresponding to the binding.
     * @param FGuid iBinding  Guid of the track containing the actor.
     */
-    static void CreateDefaultTracksForActor( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
+    static void CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
 
     /**
     *  Fix the binding of the cameracut track when a new camera is dropped
@@ -69,13 +69,13 @@ public:
     * @param AActor iActor corresponding to the binding.
     * @param FGuid iBinding  Guid of the track containing the actor.
     */
-    static void FixCameraBindingOnCameraCut( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
+    static void FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
 
     // PATCH
-    static void PatchStandardCameraCutTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid iBinding );
+    static void PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
 
 private:
-    static UMovieSceneTrack* CreateTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
-    static FGuid CreateComponentTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentName );
-    static void CreatePropertyTrack( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath );
+    static UMovieSceneTrack* CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
+    static FGuid CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName );
+    static void CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath );
 };

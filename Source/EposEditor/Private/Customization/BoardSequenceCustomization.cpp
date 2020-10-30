@@ -21,7 +21,11 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     mSequencer = &ioBuilder.GetSequencer();
     mBoardSequence = Cast<UBoardSequence>( &ioBuilder.GetFocusedSequence() );
 
+    //---
+
     mArrangeSectionsHandle = FEposTracksModule::GetCustomizationManager().Register( FOnArrangeSections::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer ) );
+
+    BindCommands( mSequencer->GetCommandBindings() );
 
     //---
 
@@ -46,8 +50,33 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 {
     FEposTracksModule::GetCustomizationManager().Unregister( mArrangeSectionsHandle );
 
+    //---
+
     mSequencer = nullptr;
     mBoardSequence = nullptr;
+}
+
+//---
+
+void
+FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> CommandList )
+{
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShots,
+        FExecuteAction::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer )
+    );
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
+        FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnOneRow ),
+        FCanExecuteAction::CreateLambda([] { return true; }),
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
+    );
+    CommandList->MapAction(
+        FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
+        FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnTwoRowsShifted ),
+        FCanExecuteAction::CreateLambda([] { return true; }),
+        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
+    );
 }
 
 //---
@@ -128,6 +157,8 @@ FBoardSequenceCustomization::MakeArrangeShotsMenu()
 
     return MenuBuilder.MakeWidget();
 }
+
+//---
 
 //bool
 //FBoardSequenceCustomization::OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply )

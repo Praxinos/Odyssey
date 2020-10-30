@@ -3,6 +3,7 @@
 
 #include "Customization/ShotSequenceCustomization.h"
 
+#include "Helpers/ShotSequenceHelpers.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
 
@@ -15,6 +16,12 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 {
     mSequencer = &ioBuilder.GetSequencer();
     mShotSequence = Cast<UShotSequence>( &ioBuilder.GetFocusedSequence() );
+
+    //---
+
+    BindCommands( mSequencer->GetCommandBindings() );
+
+    //---
 
     FSequencerCustomizationInfo customization;
 
@@ -39,6 +46,29 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
 {
     mSequencer = nullptr;
     mShotSequence = nullptr;
+}
+
+//---
+
+void
+FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> CommandList )
+{
+    CommandList->MapAction(
+        FShotSequenceEditorCommands::Get().CreateCamera,
+        FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreateCamera, mSequencer ),
+        FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+    );
+    CommandList->MapAction(
+        FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+        FExecuteAction::CreateStatic( &ShotSequenceHelpers::SnapCameraToViewport, mSequencer ),
+        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+    );
+    
+    CommandList->MapAction(
+        FShotSequenceEditorCommands::Get().CreatePlane,
+        FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreatePlane, mSequencer ),
+        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+    );
 }
 
 //---

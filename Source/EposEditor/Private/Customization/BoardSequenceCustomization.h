@@ -8,12 +8,15 @@
 #include "SequencerCustomizationManager.h"
 #include "Widgets/SWidget.h"
 
+#include "ArrangeSectionsType.h"
+
 class UBoardSequence;
 
 /**
  * The sequencer customization for board sequences.
  */
-class FBoardSequenceCustomization : public ISequencerCustomization
+class FBoardSequenceCustomization 
+    : public ISequencerCustomization
 {
 public:
     virtual void RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) override;
@@ -23,6 +26,9 @@ private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeArrangeShotsMenu();
 
+    void BindCommands( TSharedPtr<FUICommandList> CommandList );
+
+private:
     //bool OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );
     //bool OnSequencerReceiveDrop( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );
 
