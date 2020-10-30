@@ -1,14 +1,14 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "Customization/BoardSequenceCustomization.h"
+#include "Board/BoardSequenceCustomization.h"
 
 #include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
-#include "BoardSequenceEditorCommands.h"
+#include "Board/BoardSequenceEditorCommands.h"
+#include "BoardHelpers/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposTracksModule.h"
-#include "Helpers/BoardSequenceHelpers.h"
 #include "Settings/EposEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"

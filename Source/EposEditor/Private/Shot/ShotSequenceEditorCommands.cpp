@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "ShotSequenceEditorCommands.h"
+#include "Shot/ShotSequenceEditorCommands.h"
 
 #include "Styles/EposEditorStyle.h"
 

@@ -2,22 +2,22 @@
 // IDDN 
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "AssetTools/BoardSequenceActions.h"
+#include "Shot/ShotSequenceActions.h"
 
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
 
-#include "Board/BoardSequence.h"
+#include "Shot/ShotSequence.h"
 #include "EposEditorToolkit.h"
 #include "EposEditorModule.h"
 
-#define LOCTEXT_NAMESPACE "BoardAssetTypeActions"
+#define LOCTEXT_NAMESPACE "ShotAssetTypeActions"
 
 
-/* FBoardSequenceActions constructors
+/* FShotSequenceActions constructors
  *****************************************************************************/
 
-FBoardSequenceActions::FBoardSequenceActions( const TSharedRef<ISlateStyle>& iStyle )
+FShotSequenceActions::FShotSequenceActions( const TSharedRef<ISlateStyle>& iStyle )
     : mStyle( iStyle )
 {
 }
@@ -25,32 +25,31 @@ FBoardSequenceActions::FBoardSequenceActions( const TSharedRef<ISlateStyle>& iSt
 /* IAssetTypeActions interface
  *****************************************************************************/
 
-uint32
-FBoardSequenceActions::GetCategories()
+uint32 FShotSequenceActions::GetCategories()
 {
     return EAssetTypeCategories::Animation | FEposEditorModule::GetAssetCategory();
 }
 
 FText
-FBoardSequenceActions::GetName() const
+FShotSequenceActions::GetName() const
 {
-    return NSLOCTEXT( "AssetTypeActions", "AssetTypeActions_BoardSequence", "Board Sequence" );
+    return NSLOCTEXT( "AssetTypeActions", "AssetTypeActions_ShotSequence", "Shot Sequence" );
 }
 
 UClass*
-FBoardSequenceActions::GetSupportedClass() const
+FShotSequenceActions::GetSupportedClass() const
 {
-    return UBoardSequence::StaticClass();
+    return UShotSequence::StaticClass();
 }
 
 FColor
-FBoardSequenceActions::GetTypeColor() const
+FShotSequenceActions::GetTypeColor() const
 {
     return FColor( 200, 80, 128 );
 }
 
 void
-FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TSharedPtr<IToolkitHost> iEditWithinLevelEditor )
+FShotSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TSharedPtr<IToolkitHost> iEditWithinLevelEditor )
 {
     UWorld* WorldContext = nullptr;
     for( const FWorldContext& Context : GEngine->GetWorldContexts() )
@@ -73,31 +72,31 @@ FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShare
 
     for( auto ObjIt = iObjects.CreateConstIterator(); ObjIt; ++ObjIt )
     {
-        UBoardSequence* BoardSequence = Cast<UBoardSequence>( *ObjIt );
+        UShotSequence* ShotSequence = Cast<UShotSequence>( *ObjIt );
 
-        if( BoardSequence != nullptr )
+        if( ShotSequence != nullptr )
         {
             TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, BoardSequence, nullptr );
+            Toolkit->Initialize( Mode, iEditWithinLevelEditor, nullptr, ShotSequence );
         }
     }
 }
 
 bool
-FBoardSequenceActions::ShouldForceWorldCentric()
+FShotSequenceActions::ShouldForceWorldCentric()
 {
     // @todo sequencer: Hack to force world-centric mode for Sequencer
     return true;
 }
 
 bool
-FBoardSequenceActions::CanLocalize() const
+FShotSequenceActions::CanLocalize() const
 {
     return false;
 }
 
 bool
-FBoardSequenceActions::HasActions( const TArray<UObject*>& iObjects ) const
+FShotSequenceActions::HasActions( const TArray<UObject*>& iObjects ) const
 {
     return false;
 }

@@ -1,12 +1,13 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "Factories/ShotSequenceFactoryNew.h"
+#include "Shot/ShotSequenceFactoryNew.h"
 
-#include "Shot/ShotSequence.h"
 #include "MovieScene.h"
 #include "MovieSceneToolsProjectSettings.h"
 #include "ISequencer.h"
+
+#include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceFactory"
 

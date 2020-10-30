@@ -1,10 +1,10 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "Customization/ShotSequenceCustomization.h"
+#include "Shot/ShotSequenceCustomization.h"
 
-#include "Helpers/ShotSequenceHelpers.h"
 #include "Shot/ShotSequence.h"
+#include "ShotHelpers/ShotSequenceHelpers.h"
 #include "ShotSequenceEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceCustomization"

@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "BoardSequenceEditorCommands.h"
+#include "Board/BoardSequenceEditorCommands.h"
 
 #include "Styles/EposEditorStyle.h"
 

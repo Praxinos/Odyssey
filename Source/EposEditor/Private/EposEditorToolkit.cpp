@@ -25,12 +25,12 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 
-#include "BoardSequenceEditorCommands.h"
+#include "Board/BoardSequenceEditorCommands.h"
+#include "BoardHelpers/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "Helpers/BoardSequenceHelpers.h"
-#include "Helpers/ShotSequenceHelpers.h"
 #include "Misc/EposEditorPlaybackContext.h"
-#include "ShotSequenceEditorCommands.h"
+#include "Shot/ShotSequenceEditorCommands.h"
+#include "ShotHelpers/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposEditorToolkit"
 

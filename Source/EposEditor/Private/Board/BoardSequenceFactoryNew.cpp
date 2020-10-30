@@ -1,11 +1,12 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "Factories/BoardSequenceFactoryNew.h"
+#include "Board/BoardSequenceFactoryNew.h"
 
-#include "Board/BoardSequence.h"
 #include "MovieScene.h"
 #include "MovieSceneToolsProjectSettings.h"
+
+#include "Board/BoardSequence.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceFactory"
 

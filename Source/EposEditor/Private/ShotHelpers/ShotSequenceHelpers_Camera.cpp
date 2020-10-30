@@ -18,7 +18,6 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 
-
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Camera"
 
 //static
