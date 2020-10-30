@@ -1,12 +1,12 @@
 // Copyright © 2020 Praxinos, Inc. All Rights Reserved.
 // IDDN 
 
-#include "CustomizationManager.h"
+#include "TracksCustomizationManager.h"
 
 //---
 
 FDelegateHandle
-FCustomizationManager::Register( FOnArrangeSections iOnArrangeSections )
+FTracksCustomizationManager::Register( FOnArrangeSections iOnArrangeSections )
 {
     mArrangeSections = iOnArrangeSections;
 
@@ -14,14 +14,14 @@ FCustomizationManager::Register( FOnArrangeSections iOnArrangeSections )
 }
 
 void
-FCustomizationManager::Unregister( FDelegateHandle iHandle )
+FTracksCustomizationManager::Unregister( FDelegateHandle iHandle )
 {
     if( iHandle == mArrangeSections.GetHandle() )
         mArrangeSections.Unbind();
 }
 
 void
-FCustomizationManager::ExecuteArrangeSections()
+FTracksCustomizationManager::ExecuteArrangeSections()
 {
     mArrangeSections.ExecuteIfBound();
 }

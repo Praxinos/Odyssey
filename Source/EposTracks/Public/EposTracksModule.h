@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-#include "CustomizationManager.h"
+#include "TracksCustomizationManager.h"
 
 class FEposTracksModule
     : public IModuleInterface
@@ -17,8 +17,8 @@ public:
     virtual void ShutdownModule() override;
 
 public:
-    static EPOSTRACKS_API FCustomizationManager& GetCustomizationManager();
+    static EPOSTRACKS_API FTracksCustomizationManager& GetTracksCustomizationManager();
 
 private:
-    FCustomizationManager mCustomizationManager;
+    FTracksCustomizationManager mTracksCustomizationManager;
 };

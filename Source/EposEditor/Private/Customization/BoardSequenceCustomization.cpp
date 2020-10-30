@@ -23,7 +23,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     //---
 
-    mArrangeSectionsHandle = FEposTracksModule::GetCustomizationManager().Register( FOnArrangeSections::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer ) );
+    mArrangeSectionsHandle = FEposTracksModule::GetTracksCustomizationManager().Register( FOnArrangeSections::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer ) );
 
     BindCommands( mSequencer->GetCommandBindings() );
 
@@ -48,7 +48,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 void
 FBoardSequenceCustomization::UnregisterSequencerCustomization()
 {
-    FEposTracksModule::GetCustomizationManager().Unregister( mArrangeSectionsHandle );
+    FEposTracksModule::GetTracksCustomizationManager().Unregister( mArrangeSectionsHandle );
 
     //---
 

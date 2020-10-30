@@ -211,7 +211,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
         {
             board_section->StopResizing();
 
-            FEposTracksModule::GetCustomizationManager().ExecuteArrangeSections();
+            FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
         }
     }
     else
@@ -262,7 +262,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
                 // as FixPostMoveSections() may move the current section and OnEndDrag() won't call it (=Notify())
 
-                FEposTracksModule::GetCustomizationManager().ExecuteArrangeSections();
+                FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
             }
             else
             {

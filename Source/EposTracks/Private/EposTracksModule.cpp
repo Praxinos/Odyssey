@@ -19,10 +19,10 @@ void FEposTracksModule::ShutdownModule()
 //---
 
 //static
-FCustomizationManager& 
-FEposTracksModule::GetCustomizationManager()
+FTracksCustomizationManager&
+FEposTracksModule::GetTracksCustomizationManager()
 {
-    return FModuleManager::LoadModuleChecked<FEposTracksModule>( "EposTracks" ).mCustomizationManager;
+    return FModuleManager::LoadModuleChecked<FEposTracksModule>( "EposTracks" ).mTracksCustomizationManager;
 }
 
 #undef LOCTEXT_NAMESPACE

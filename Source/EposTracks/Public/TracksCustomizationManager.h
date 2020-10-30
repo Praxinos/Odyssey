@@ -9,7 +9,7 @@
 
 DECLARE_DELEGATE( FOnArrangeSections );
 
-class EPOSTRACKS_API FCustomizationManager
+class EPOSTRACKS_API FTracksCustomizationManager
 {
 public:
     FDelegateHandle Register( FOnArrangeSections iOnArrangeSections );
