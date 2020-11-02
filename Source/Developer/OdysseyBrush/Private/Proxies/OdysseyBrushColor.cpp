@@ -71,6 +71,21 @@ UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Make
+
+//static
+EOdysseyPixelFormat
+UOdysseyBrushColorFunctionLibrary::GetFormat(FOdysseyBrushColor Color)
+{
+    return OdysseyPixelFormatFromULISFormat(Color.GetValue().Format());
+}
+
+//static
+EOdysseyPixelFormatPrecision
+UOdysseyBrushColorFunctionLibrary::GetPrecision(FOdysseyBrushColor Color)
+{
+    return OdysseyPixelFormatPrecisionFromULISFormat(Color.GetValue().Format());
+}
+
 //static
 FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A )

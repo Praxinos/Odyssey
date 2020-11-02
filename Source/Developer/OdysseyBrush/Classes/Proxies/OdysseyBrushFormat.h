@@ -40,4 +40,6 @@ enum  class  EOdysseyPixelFormatPrecision : uint8
     kDouble UMETA( DisplayName="64 bits floating-point" )
 };
 
-::ul3::tFormat ULISFormatFromOdysseyBlockFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat);
+::ul3::tFormat ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat);
+EOdysseyPixelFormat OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat);
+EOdysseyPixelFormatPrecision OdysseyPixelFormatPrecisionFromULISFormat(::ul3::tFormat iFormat);

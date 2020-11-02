@@ -4,7 +4,7 @@
 #include "Proxies/OdysseyBrushFormat.h"
 
 ::ul3::tFormat
-ULISFormatFromOdysseyBlockFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat)
+ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat)
 {
 	if (iFormat == EOdysseyPixelFormat::kAuto && iPrecision == EOdysseyPixelFormatPrecision::kAuto)
 		return iAutoFormat;
@@ -57,4 +57,50 @@ ULISFormatFromOdysseyBlockFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelForma
 		default: break;
 	}
 	return format;
+}
+
+EOdysseyPixelFormat
+OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat)
+{
+	//erase
+	iFormat &= ULIS3_E_TYPE & ULIS3_E_DEPTH); //TODO: Remove the last parenthesis once ULIS is patched
+
+	//set 8bits
+	iFormat |= ULIS3_W_TYPE(ULIS3_TYPE_UINT8) | ULIS3_W_DEPTH(1);
+
+	switch (iFormat)
+	{
+		case ULIS3_FORMAT_RGB8: return EOdysseyPixelFormat::kRGB;
+		case ULIS3_FORMAT_G8: return EOdysseyPixelFormat::kGrey;
+		case ULIS3_FORMAT_HSL8: return EOdysseyPixelFormat::kHSL;
+		case ULIS3_FORMAT_HSV8: return EOdysseyPixelFormat::kHSV;
+		case ULIS3_FORMAT_Lab8: return EOdysseyPixelFormat::kLab;
+		case ULIS3_FORMAT_BGRA8: return EOdysseyPixelFormat::kRGBA;
+		case ULIS3_FORMAT_RGBA16: return EOdysseyPixelFormat::kRGBA;
+		case ULIS3_FORMAT_GA8: return EOdysseyPixelFormat::kGreyA;
+		case ULIS3_FORMAT_HSLA8: return EOdysseyPixelFormat::kHSLA;
+		case ULIS3_FORMAT_HSVA8: return EOdysseyPixelFormat::kHSVA;
+		case ULIS3_FORMAT_LabA8: return EOdysseyPixelFormat::kLabA;
+
+		default: break;
+	}
+
+	return EOdysseyPixelFormat::kRGB;
+}
+
+EOdysseyPixelFormatPrecision
+OdysseyPixelFormatPrecisionFromULISFormat(::ul3::tFormat iFormat)
+{
+	switch(ULIS3_R_TYPE(iFormat))
+	{
+		case ULIS3_TYPE_UINT8: return EOdysseyPixelFormatPrecision::k8;
+		case ULIS3_TYPE_UINT16: return EOdysseyPixelFormatPrecision::k16;
+		case ULIS3_TYPE_UINT32: return EOdysseyPixelFormatPrecision::k32;
+		case ULIS3_TYPE_UFLOAT: return EOdysseyPixelFormatPrecision::kFloat;
+		case ULIS3_TYPE_UDOUBLE: return EOdysseyPixelFormatPrecision::kDouble;
+
+		default: break;
+	}
+	
+	return EOdysseyPixelFormatPrecision::k8;
 }

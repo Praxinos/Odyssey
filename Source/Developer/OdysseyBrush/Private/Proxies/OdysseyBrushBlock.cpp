@@ -24,7 +24,7 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
     //---
 
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
     
     TSharedRef<FOdysseyBlock> dst = MakeShareable(NewOdysseyBlockFromUTextureData( Texture, format ));
     return FOdysseyBlockProxy(dst);
@@ -79,7 +79,7 @@ UOdysseyBlockProxyFunctionLibrary::Fill( UOdysseyBrushAssetBase* BrushContext
 
     //---
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Sample.m->GetBlock()->Width(), Sample.m->GetBlock()->Height(), format ));
 
@@ -122,7 +122,7 @@ UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushCon
 
     //---
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Width, Height, format, nullptr, nullptr, InitializeData ));
 
@@ -154,7 +154,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
 
     //---
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Back.m->GetBlock()->Width(), Back.m->GetBlock()->Height(), format ));
 
@@ -226,7 +226,7 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrush
     check( iFont->Textures.Num() )
 
     ::ul3::tFormat defaultFormat = iBrushContext->GetState().target_temp_buffer ? iBrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
     
     for( auto texture : iFont->Textures )
     {

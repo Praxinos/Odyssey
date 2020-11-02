@@ -5,6 +5,9 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/ObjectMacros.h"
 #include <ULIS3>
+
+#include "OdysseyBrushFormat.h"
+
 #include "OdysseyBrushColor.generated.h"
 
 /////////////////////////////////////////////////////
@@ -42,13 +45,13 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
 
     /* Format Management */
 
-    /*//Get the Odyssey Brush Color Pixel Format
+    //Get the Odyssey Brush Color Pixel Format
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
-    static EOdysseyPixelFormat GetFormat();
+    static EOdysseyPixelFormat GetFormat(FOdysseyBrushColor Color);
 
     //Get the Odyssey Brush Color Pixel Precision
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
-    static EOdysseyPixelFormatPrecision GetPrecision();*/
+    static EOdysseyPixelFormatPrecision GetPrecision(FOdysseyBrushColor Color);
 
     /* Make */
 
