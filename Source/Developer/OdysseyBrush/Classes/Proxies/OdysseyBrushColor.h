@@ -46,11 +46,11 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     /* Format Management */
 
     //Get the Odyssey Brush Color Pixel Format
-    UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushColor", meta = ( DisplayName="Get OdysseyBrushColor Format" ))
     static EOdysseyPixelFormat GetFormat(FOdysseyBrushColor Color);
 
     //Get the Odyssey Brush Color Pixel Precision
-    UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushColor", meta = ( DisplayName="Get OdysseyBrushColor Precision" ))
     static EOdysseyPixelFormatPrecision GetPrecision(FOdysseyBrushColor Color);
 
     /* Make */

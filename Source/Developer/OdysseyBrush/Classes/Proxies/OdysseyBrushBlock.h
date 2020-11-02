@@ -103,7 +103,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext" ) )
-    static FOdysseyBlockProxy Fill( UOdysseyBrushAssetBase* BrushContext
+    static FOdysseyBlockProxy FillBlock( UOdysseyBrushAssetBase* BrushContext
                                     , FOdysseyBrushColor Color
                                     , FOdysseyBlockProxy Back
                                     , float Opacity = 1.f
@@ -129,7 +129,7 @@ public:
     //X | Y are an offset to pan Top.
     UFUNCTION(BlueprintPure
              , Category="OdysseyBlockReference"
-             , meta = ( DefaultToSelf="BrushContext" ) )
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Blend Block" ) )
     static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
                                    , FOdysseyBlockProxy Top
                                    , FOdysseyBlockProxy Back
@@ -144,11 +144,11 @@ public:
     //---
 
     //Returns the Width of an Odyssey Block Reference as an Integer.
-    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Width" ) )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
     //Returns the Height of an Odyssey Block Reference as an Integer.
-    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Height" ) )
     static int GetHeight( FOdysseyBlockProxy Sample );
 
     //---
