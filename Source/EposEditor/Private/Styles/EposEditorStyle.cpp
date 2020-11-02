@@ -36,23 +36,26 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "EposEditor.Tabs.Sequencer", new IMAGE_BRUSH( "SequencerTab_16x", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
 
     // asset thumbnail
-    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH( "BoardSequence_16x", Icon16x16 ) );
+    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH( "BoardSequence_16x", Icon16x16 ) );
     Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH( "BoardSequence_64x", Icon64x64 ) );
-    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_16x", Icon16x16 ) );
+    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH( "ShotSequence_16x", Icon16x16 ) );
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_64x", Icon64x64 ) );
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "IconCinematicBoardTrack_16x", Icon16x16 ) );
 
+    Set( "ShotSequenceEditor.CreateCamera", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreateCamera.Small", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.CreatePlane", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
 
     Set( "BoardSequenceEditor.ArrangeShotsManually", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.ArrangeShotsManually.Small", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon24x24 ) );
     Set( "BoardSequenceEditor.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.ArrangeShotsOnOneRow.Small", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon24x24 ) );
-    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon48x48 ) );
-    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows.Small", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon48x48 ) );          // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows.Small", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon24x24 ) );    // in the toolbar, stretch to the size Icon..x..
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }
