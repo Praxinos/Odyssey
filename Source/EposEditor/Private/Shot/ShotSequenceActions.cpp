@@ -77,7 +77,7 @@ FShotSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShared
         if( ShotSequence != nullptr )
         {
             TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, nullptr, ShotSequence );
+            Toolkit->Initialize( Mode, iEditWithinLevelEditor, ShotSequence );
         }
     }
 }

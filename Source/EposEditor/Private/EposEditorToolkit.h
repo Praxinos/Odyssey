@@ -8,9 +8,7 @@
 #include "Styling/ISlateStyle.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-#include "Board/BoardSequence.h"
 #include "Settings/EposEditorSettings.h"
-#include "Shot/ShotSequence.h"
 
 class FToolBarBuilder;
 class FEposEditorPlaybackContext;
@@ -18,6 +16,7 @@ class ISequencer;
 class FAssetDragDropOp;
 class FClassDragDropOp;
 class FActorDragDropGraphEdOp;
+class UMovieSceneSequence;
 
 /**
  * Implements an Editor toolkit for template sequences.
@@ -48,7 +47,7 @@ public:
      * @param BoardSequence The animation to edit.
      * @param TrackEditorDelegates Delegates to call to create auto-key handlers for this sequencer.
      */
-    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UBoardSequence* iBoardSequence, UShotSequence* iShotSequence );
+    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UMovieSceneSequence* iSequence );
 
 public:
 
@@ -89,10 +88,8 @@ private:
 
 private:
 
-    /** Board sequence for our edit operation. */
-    UBoardSequence* mBoardSequence;
-    /** Shot sequence for our edit operation. */
-    UShotSequence* mShotSequence;
+    /** Board or Shot sequence for our edit operation. */
+    UMovieSceneSequence* mSequence;
 
     /** The sequencer used by this editor. */
     TSharedPtr<ISequencer> mSequencer;

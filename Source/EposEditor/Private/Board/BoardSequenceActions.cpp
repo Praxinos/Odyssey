@@ -78,7 +78,7 @@ FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShare
         if( BoardSequence != nullptr )
         {
             TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, BoardSequence, nullptr );
+            Toolkit->Initialize( Mode, iEditWithinLevelEditor, BoardSequence );
         }
     }
 }

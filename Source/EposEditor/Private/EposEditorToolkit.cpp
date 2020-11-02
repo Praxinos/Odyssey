@@ -42,7 +42,7 @@ namespace SequencerDefs
 }
 
 FEposEditorToolkit::FEposEditorToolkit( const TSharedRef<ISlateStyle>& iStyle )
-    : mBoardSequence( nullptr )
+    : mSequence( nullptr )
     , mStyle( iStyle )
 {
     // register sequencer menu extenders
@@ -73,7 +73,7 @@ FEposEditorToolkit::~FEposEditorToolkit()
     } );
 }
 
-void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UBoardSequence* iBoardSequence, UShotSequence* iShotSequence )
+void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UMovieSceneSequence* iSequence )
 {
     // create tab layout
     const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout( "Standalone_EposEditor" )
@@ -87,15 +87,14 @@ void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TShar
             )
         );
 
-    mBoardSequence = iBoardSequence;
-    mShotSequence = iShotSequence;
+    mSequence = iSequence;
     mPlaybackContext = MakeShared<FEposEditorPlaybackContext>();
 
     // Mode sould always be world-centric (don't know how to have a standalone one)
     // in this case, SequencerDefs::ShotSequencerAppIdentifier & StandaloneDefaultLayout is not useful
     const bool bCreateDefaultStandaloneMenu = true;
     const bool bCreateDefaultToolbar = false;
-    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, SequencerDefs::sgEposSequencerAppIdentifier, StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, mBoardSequence ? Cast<UObject>( mBoardSequence ) : Cast<UObject>( mShotSequence ) );
+    FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, SequencerDefs::sgEposSequencerAppIdentifier, StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, mSequence );
 
     //TSharedRef<FTemplateSequenceEditorSpawnRegister> SpawnRegister = MakeShareable( new FTemplateSequenceEditorSpawnRegister() );
     //SpawnRegister->SetSequencer( Sequencer );
@@ -103,7 +102,7 @@ void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TShar
     // Initialize sequencer.
     FSequencerInitParams sequencerInitParams;
     {
-        sequencerInitParams.RootSequence = mBoardSequence ? Cast<UMovieSceneSequence>( mBoardSequence ) : Cast<UMovieSceneSequence>( mShotSequence );
+        sequencerInitParams.RootSequence = mSequence;
         sequencerInitParams.bEditWithinLevelEditor = true;
         sequencerInitParams.ToolkitHost = iInitToolkitHost;
         //sequencerInitParams.SpawnRegister = SpawnRegister;
@@ -163,10 +162,8 @@ FEposEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 void 
 FEposEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollector )
 {
-    if( mBoardSequence )
-        iCollector.AddReferencedObject( mBoardSequence );
-    if( mShotSequence )
-        iCollector.AddReferencedObject( mShotSequence );
+    if( mSequence )
+        iCollector.AddReferencedObject( mSequence );
 }
 
 //--- FAssetEditorToolkit interface
