@@ -49,9 +49,9 @@ public class EposTracksEditor : ModuleRules
 				"RenderCore",
                 "MovieSceneTracks",
                 "EditorWidgets",
+                "Projects",
                 //
                 "Epos",
-                "EposEditor",
                 "EposTracks",
             }
 			);

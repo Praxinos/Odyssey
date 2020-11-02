@@ -1,0 +1,59 @@
+// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
+// IDDN 
+
+#include "Styles/EposTracksEditorStyle.h"
+
+#include "Brushes/SlateBorderBrush.h"
+#include "Brushes/SlateBoxBrush.h"
+#include "Brushes/SlateImageBrush.h"
+#include "Fonts/SlateFontInfo.h"
+#include "Interfaces/IPluginManager.h"
+#include "Layout/Margin.h"
+#include "Misc/Paths.h"
+#include "Styling/SlateStyleRegistry.h"
+
+#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
+
+//---
+
+TSharedPtr<FEposTracksEditorStyle> FEposTracksEditorStyle::smSingleton;
+
+//---
+
+FEposTracksEditorStyle::FEposTracksEditorStyle()
+    : FSlateStyleSet( "EposTracksEditorStyle" )
+{
+    const FVector2D Icon16x16( 16.0f, 16.0f );
+    const FVector2D Icon24x24( 24.0f, 24.0f );
+    const FVector2D Icon48x48( 48.0f, 48.0f );
+    const FVector2D Icon64x64( 64.0f, 64.0f );
+
+    TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
+    check( epos_plugin.IsValid() );
+    SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
+
+    Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "IconCinematicBoardTrack_16x", Icon16x16 ) );
+
+    FSlateStyleRegistry::RegisterSlateStyle( *this );
+}
+
+FEposTracksEditorStyle::~FEposTracksEditorStyle()
+{
+    FSlateStyleRegistry::UnRegisterSlateStyle( *this );
+}
+
+//---
+
+//static
+TSharedRef<FEposTracksEditorStyle>
+FEposTracksEditorStyle::Get()
+{
+    if( !smSingleton.IsValid() )
+        smSingleton = MakeShareable( new FEposTracksEditorStyle );
+
+    return smSingleton.ToSharedRef();
+}
+
+//---
+
+#undef IMAGE_BRUSH

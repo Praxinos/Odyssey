@@ -40,7 +40,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposTracksEditorHelpers.h"
 #include "Shot/ShotSequence.h"
-#include "Styles/EposEditorStyle.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardTrackEditor"
 
@@ -94,7 +94,7 @@ FCinematicBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddMenuEntry(
         LOCTEXT( "AddCinematicBoardTrack", "Board Track" ),
         LOCTEXT( "AddCinematicBoardTooltip", "Adds a board track." ),
-        FSlateIcon( FEposEditorStyle::Get()->GetStyleSetName(), "Sequencer.Tracks.CinematicBoard" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "Sequencer.Tracks.CinematicBoard" ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryExecute ),
             FCanExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryCanExecute )
@@ -281,7 +281,7 @@ FCinematicBoardTrackEditor::Tick( float iDeltaTime )
 const FSlateBrush*
 FCinematicBoardTrackEditor::GetIconBrush() const
 {
-    return FEposEditorStyle::Get()->GetBrush( "Sequencer.Tracks.CinematicBoard" );
+    return FEposTracksEditorStyle::Get()->GetBrush( "Sequencer.Tracks.CinematicBoard" );
 }
 
 bool
