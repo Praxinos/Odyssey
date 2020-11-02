@@ -60,6 +60,50 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* Br
     return FOdysseyBlockProxy(dst);
 }
 
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::Fill( UOdysseyBrushAssetBase* BrushContext
+                                        , FOdysseyBlockProxy Sample
+                                        , FOdysseyBrushColor Color
+                                        , float Opacity
+										, EOdysseyPixelFormat Format
+                                        , EOdysseyPixelFormatPrecision Precision
+                                        , EOdysseyBlendingMode BlendingMode
+                                        , EOdysseyAlphaMode AlphaMode)
+{
+    if( !BrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    if( !Sample.m )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    //---
+    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyBlockFormat(Format, Precision, defaultFormat);
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Sample.m->GetBlock()->Width(), Sample.m->GetBlock()->Height(), format ));
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = Sample.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+	::ul3::FBlock* back = Sample.m->GetBlock();
+
+	if (back->Format() != format)
+	{
+		::ul3::FBlock* conv = new ::ul3::FBlock(back->Width(), back->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, conv);
+		back = conv;
+	}
+
+    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, dst->GetBlock(), back->Rect(), ::ul3::FVec2I( 0, 0 ) );
+    ::ul3::BlendColor( hULIS.ThreadPool(), /* ULIS3_BLOCKING, */ perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Color.GetValue(), dst->GetBlock(), back->Rect(), static_cast< ::ul3::eBlendingMode >( BlendingMode ), static_cast< ::ul3::eAlphaMode >( AlphaMode ), Opacity);
+
+	if (Sample.m->GetBlock() != back)
+		delete back;
+
+    return FOdysseyBlockProxy(dst);
+}
+
 
 //static
 FOdysseyBlockProxy

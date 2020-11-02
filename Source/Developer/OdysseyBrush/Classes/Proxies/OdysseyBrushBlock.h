@@ -88,21 +88,34 @@ class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary : public UBlueprintFunc
 public:
     //Converts Texture 2D to Odyssey Block Reference.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockProxy"
+             , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext", DisplayName = "To Odyssey Block Reference (Texture2D)", BlueprintAutocast ) )
     static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext);
 
     //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockProxy"
+             , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext", DeprecatedFunction, DeprecationMessage = "Use Fill" ) )
     static FOdysseyBlockProxy FillPreserveAlpha(  UOdysseyBrushAssetBase* BrushContext
                                                 , FOdysseyBlockProxy Sample
                                                 , FOdysseyBrushColor Color );
-    
+
+    //Applies a color on the whole given Sample. Requires an Odyssey Brush Color input.
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockReference"
+             , meta = ( DefaultToSelf="BrushContext" ) )
+    static FOdysseyBlockProxy Fill( UOdysseyBrushAssetBase* BrushContext
+                                    , FOdysseyBlockProxy Sample
+                                    , FOdysseyBrushColor Color
+                                    , float Opacity = 1.f
+                                    , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
+                                    , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
+                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
+                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+
     //Creates an empty Odyssey Block Reference.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockProxy"
+             , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext", AdvancedDisplay="InitializeData" ) )
     static FOdysseyBlockProxy CreateBlock( UOdysseyBrushAssetBase* BrushContext
                                          , int Width = 256
@@ -116,7 +129,7 @@ public:
     //If Top is smaller than Back = Both will be visible.
     //X | Y are an offset to pan Top.
     UFUNCTION(BlueprintPure
-             , Category="OdysseyBlockProxy"
+             , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext" ) )
     static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
                                    , FOdysseyBlockProxy Top
@@ -132,11 +145,11 @@ public:
     //---
 
     //Returns the Width of an Odyssey Block Reference as an Integer.
-    UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference" )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
     //Returns the Height of an Odyssey Block Reference as an Integer.
-    UFUNCTION( BlueprintPure, Category="OdysseyBlockProxy" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference" )
     static int GetHeight( FOdysseyBlockProxy Sample );
 
     //---
@@ -144,19 +157,19 @@ public:
     //Requires a Font to return an Array of Odyssey Block Reference.
     //This node turns the Font into a big block that contains all characters in the font.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockProxy"
+             , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext" ) )
     static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto );
     
     //Requires a Font and a String to return an Array of Odyssey Block Reference.
     //This node find the correspondance between letters from the String and characters from the Font.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockProxy" )
+             , Category="OdysseyBlockReference" )
     static TArray< FOdysseyFontCharacter > GetFontCharacterInfo( const UFont* Font, const FString& String );
 
     //---
     
     //This node automatically picks the color up at position on the canvas. 
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockProxy")
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 };
