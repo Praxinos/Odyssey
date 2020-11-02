@@ -9,6 +9,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushFormat.h"
 #include "Proxies/OdysseyBrushBlending.h"
+#include "Proxies/OdysseyBrushRect.h"
 
 #include "OdysseyBrushBlock.generated.h"
 
@@ -103,18 +104,30 @@ public:
                                                 , FOdysseyBlockProxy Sample
                                                 , FOdysseyBrushColor Color );
 
-    //Applies a color on the whole given Sample. Requires an Odyssey Brush Color input.
+    //Blends a color on the whole given Sample. Requires an Odyssey Brush Color input.
+	UFUNCTION(BlueprintPure
+		, Category = "OdysseyBlockReference"
+		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Blend Block With Color"))
+		static FOdysseyBlockProxy BlendColor(UOdysseyBrushAssetBase* BrushContext
+			, FOdysseyBrushColor Color
+			, FOdysseyBlockProxy Back
+			, FOdysseyBrushRect Area
+			, float Opacity = 1.f
+			, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
+			, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
+			, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
+			, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+
+    //Fills the given Sample with thge given Color. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockReference"
-             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Blend Block With Color" ) )
-    static FOdysseyBlockProxy BlendColor( UOdysseyBrushAssetBase* BrushContext
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Fill Block With Color" ) )
+    static FOdysseyBlockProxy Fill( UOdysseyBrushAssetBase* BrushContext
+                                    , FOdysseyBlockProxy Block
                                     , FOdysseyBrushColor Color
-                                    , FOdysseyBlockProxy Back
-                                    , float Opacity = 1.f
+                                    , FOdysseyBrushRect Area
                                     , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
-                                    , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
-                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
-                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+                                    , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision);
 
     //Creates an empty Odyssey Block Reference.
     UFUNCTION( BlueprintPure
@@ -127,6 +140,14 @@ public:
 										 , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
                                          , bool InitializeData = true );
 
+    //Crops the Odyssey Block Reference according to the given Rect.
+    UFUNCTION( BlueprintPure
+             , Category="OdysseyBlockReference"
+             , meta = ( DefaultToSelf="BrushContext" ) )
+    static FOdysseyBlockProxy CropBlock( UOdysseyBrushAssetBase* BrushContext
+                                         , FOdysseyBlockProxy Block
+                                         , FOdysseyBrushRect Area);
+
     //Blends two Odyssey Block Reference on Top and Back.
     //If Top is bigger than Back = Back will crop Top.
     //If Top is smaller than Back = Both will be visible.
@@ -137,8 +158,9 @@ public:
     static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
                                    , FOdysseyBlockProxy Top
                                    , FOdysseyBlockProxy Back
-                                   , int X = 0
-                                   , int Y = 0
+                                   , FOdysseyBrushRect TopArea
+                                   , UPARAM(DisplayName="Offset X") int X = 0
+                                   , UPARAM(DisplayName="Offset Y") int Y = 0
                                    , float Opacity = 1.f
 								   , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
 								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
