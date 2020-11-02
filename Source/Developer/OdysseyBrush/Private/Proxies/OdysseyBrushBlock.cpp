@@ -63,8 +63,8 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* Br
 //static
 FOdysseyBlockProxy
 UOdysseyBlockProxyFunctionLibrary::Fill( UOdysseyBrushAssetBase* BrushContext
-                                        , FOdysseyBlockProxy Sample
                                         , FOdysseyBrushColor Color
+                                        , FOdysseyBlockProxy Sample
                                         , float Opacity
 										, EOdysseyPixelFormat Format
                                         , EOdysseyPixelFormatPrecision Precision

@@ -104,8 +104,8 @@ public:
              , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext" ) )
     static FOdysseyBlockProxy Fill( UOdysseyBrushAssetBase* BrushContext
-                                    , FOdysseyBlockProxy Sample
                                     , FOdysseyBrushColor Color
+                                    , FOdysseyBlockProxy Back
                                     , float Opacity = 1.f
                                     , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
                                     , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
