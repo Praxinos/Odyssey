@@ -167,9 +167,6 @@ FOdysseyPaintEngine::Tick()
 
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect() );
 
-        if( mBrushInstance )
-            mBrushInstance->CleansePool( ECacheLevel::kStroke );
-
         mInterpolator->Reset();
         mSmoother->Reset();
         mRawStroke.Empty();
@@ -584,7 +581,6 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
                 mBrushInstance->ExecuteStrokeBegin();
 
             mBrushInstance->ExecuteStep();
-            mBrushInstance->CleansePool( ECacheLevel::kStep );
 
             auto invalid_rects = mBrushInstance->GetInvalidRects();
             for( int j = 0; j < invalid_rects.Num(); ++j )
@@ -648,13 +644,6 @@ FOdysseyPaintEngine::EndStroke()
 
         ClearInvalidTileMap( mTmpInvalidTileMap );
         ClearInvalidTileMap( mStrokeInvalidTileMap );
-
-        if( mBrushInstance )
-        {
-            mBrushInstance->CleansePool( ECacheLevel::kStep );
-            mBrushInstance->CleansePool( ECacheLevel::kSubstroke );
-            mBrushInstance->CleansePool( ECacheLevel::kStroke );
-        }
 
         mInterpolator->Reset();
         mSmoother->Reset();
@@ -720,13 +709,6 @@ FOdysseyPaintEngine::AbortStroke()
 
     ClearInvalidTileMap( mTmpInvalidTileMap );
     ClearInvalidTileMap( mStrokeInvalidTileMap );
-
-    if( mBrushInstance )
-    {
-        mBrushInstance->CleansePool( ECacheLevel::kStep );
-        mBrushInstance->CleansePool( ECacheLevel::kSubstroke );
-        mBrushInstance->CleansePool( ECacheLevel::kStroke );
-    }
 
     mInterpolator->Reset();
     mSmoother->Reset();
@@ -908,8 +890,6 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     state.smoothing_strength = mSmoothingParameters->GetStrength();
     state.currentPointIndex = 0;
     state.currentStroke = &mResultStroke;
-
-    mBrushInstance->CleansePool( ECacheLevel::kState );
 
     mBrushInstance->ExecuteStateChanged();
 }

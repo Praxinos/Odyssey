@@ -14,8 +14,6 @@ FOdysseyPainterEditorData::~FOdysseyPainterEditorData()
 {
 	if (mBrushInstance)
 	{
-		mBrushInstance->CleansePool(ECacheLevel::kSuper);
-		mBrushInstance->CleansePools();
 		mBrushInstance->RemoveFromRoot();
 		mBrushInstance = NULL;
 	}

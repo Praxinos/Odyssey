@@ -15,7 +15,6 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
-#include "Proxies/OdysseyBrushCache.h"
 #include <ULIS3>
 #include "OdysseyBrushAssetBase.generated.h"
 
@@ -44,23 +43,6 @@ struct  FOdysseyBrushState
 
 
 /////////////////////////////////////////////////////
-// FOdysseyBrushPoolCache
-class ODYSSEYBRUSH_API FOdysseyBrushPoolCache
-{
-public:
-    // Public API
-    bool                        KeyExists(  const  FString&  iKey )  const;
-    const  FOdysseyBlockProxy&  Retrieve(   const  FString&  iKey )  const;
-    void                        Store(      const  FString&  iKey, const  FOdysseyBlockProxy&  iValue );
-    void                        Cleanse();
-
-private:
-    // Private Data Members
-    TMap< FString, FOdysseyBlockProxy >  pool;
-};
-
-
-/////////////////////////////////////////////////////
 // BrushAssetBase
 /**
  * BrushAssetBase
@@ -84,12 +66,6 @@ public:
     const TArray< ::ul3::FRect >&   GetInvalidRects() const;
     void                            PushInvalidRect( const  ::ul3::FRect& iRect );
     void                            ClearInvalidRects();
-
-    bool                            KeyExistsInPool(    ECacheLevel iLevel, const  FString&  iKey )  const;
-    void                            StoreInPool(        ECacheLevel iLevel, const  FString&  iKey, const  FOdysseyBlockProxy&  iValue );
-    FOdysseyBlockProxy              RetrieveInPool(     ECacheLevel iLevel, const  FString&  iKey )  const;
-    void                            CleansePool(        ECacheLevel iLevel );
-    void                            CleansePools();
 
     void                            AddOrReplaceState( const FName& iKey, FOdysseyDrawingState* iState );
     FOdysseyDrawingState*           FindState( const FName& iKey ); //TODO: maybe not needed ?
@@ -324,7 +300,6 @@ private:
     FOdysseyBrushState                      state;
     TMap< FName, FOdysseyDrawingState* >    mStates;
     TArray< ::ul3::FRect >                  invalid_rects;
-    TArray< FOdysseyBrushPoolCache >        pools;
 
 public:
     UPROPERTY(EditAnywhere,Category="Overrides")

@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 
 #include "Proxies/OdysseyBrushBlock.h"
-#include "Proxies/OdysseyBrushCache.h"
 
 #include "OdysseyTextureEditorFunctionLibrary.generated.h"
 

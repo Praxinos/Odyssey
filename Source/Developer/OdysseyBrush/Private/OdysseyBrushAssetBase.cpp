@@ -10,41 +10,6 @@
 #include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////
-// FOdysseyBrushPoolCache
-
-
-bool
-FOdysseyBrushPoolCache::KeyExists( const  FString&  iKey )  const
-{
-    return  pool.Contains( iKey );
-}
-
-
-const  FOdysseyBlockProxy&
-FOdysseyBrushPoolCache::Retrieve( const  FString&  iKey )  const
-{
-    return  *pool.Find( iKey );
-}
-
-
-void
-FOdysseyBrushPoolCache::Store( const  FString&  iKey, const FOdysseyBlockProxy& iValue )
-{
-    pool.Emplace( iKey, iValue );
-}
-
-
-void
-FOdysseyBrushPoolCache::Cleanse()
-{
-    for( auto it : pool )
-        it.Value.m.Reset();
-
-    pool.Empty();
-}
-
-
-/////////////////////////////////////////////////////
 // BrushAssetBase
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Constructor
@@ -53,17 +18,11 @@ FOdysseyBrushPoolCache::Cleanse()
 UOdysseyBrushAssetBase::UOdysseyBrushAssetBase( const  FObjectInitializer&  ObjectInitializer )
     : Super( ObjectInitializer )
 {
-    pools.Add( FOdysseyBrushPoolCache() );  // kStep
-    pools.Add( FOdysseyBrushPoolCache() );  // kSubstroke
-    pools.Add( FOdysseyBrushPoolCache() );  // kStroke
-    pools.Add( FOdysseyBrushPoolCache() );  // kState
-    pools.Add( FOdysseyBrushPoolCache() );  // kSuper
 }
 
 
 UOdysseyBrushAssetBase::~UOdysseyBrushAssetBase()
 {
-    CleansePools();
 }
 
 
@@ -117,49 +76,6 @@ UOdysseyBrushAssetBase::ClearInvalidRects()
 {
     invalid_rects.Empty();
 }
-
-
-bool
-UOdysseyBrushAssetBase::KeyExistsInPool(  ECacheLevel iLevel, const  FString&  iKey )  const
-{
-    return  pools[ (int)iLevel ].KeyExists( iKey );
-}
-
-
-void
-UOdysseyBrushAssetBase::StoreInPool(      ECacheLevel iLevel, const  FString&  iKey, const  FOdysseyBlockProxy&  iValue )
-{
-    /* if( KeyExistsInPool( iLevel, iKey ) )
-       return;
-
-    pools[ (int)iLevel ].Store( iKey, iValue ); */
-}
-
-
-FOdysseyBlockProxy
-UOdysseyBrushAssetBase::RetrieveInPool(   ECacheLevel iLevel, const  FString&  iKey )  const
-{
-    if( !KeyExistsInPool( iLevel, iKey ) )
-       return  FOdysseyBlockProxy::MakeNullProxy();
-
-    return  pools[ (int)iLevel ].Retrieve( iKey );
-}
-
-
-void
-UOdysseyBrushAssetBase::CleansePool( ECacheLevel iLevel )
-{
-    pools[ (int)iLevel ].Cleanse();
-}
-
-
-void
-UOdysseyBrushAssetBase::CleansePools()
-{
-    for( int i = 0; i < pools.Num(); ++i )
-        pools[ i ].Cleanse();
-}
-
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------- OdysseyBrushBlueprint Getters
