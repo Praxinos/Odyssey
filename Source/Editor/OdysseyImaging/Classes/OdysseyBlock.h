@@ -50,7 +50,7 @@ public:
     int                         Width() const;
     int                         Height() const;
     FVector2D                   Size() const;
-    ::ul3::tFormat              Format() const;
+    ::ul3::tFormat              Format() const; 
     // ETextureSourceFormat        GetUE4TextureSourceFormat() const;
     // EPixelFormat				GetUE4PixelFormat() const;
     // uint32                      GetULISFormat() const;

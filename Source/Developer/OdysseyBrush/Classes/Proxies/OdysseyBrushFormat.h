@@ -14,7 +14,7 @@
 UENUM( BlueprintType )
 enum  class  EOdysseyPixelFormat : uint8
 {
-    kAuto  UMETA( DisplayName="Auto" ),
+    kCanvasFormat  UMETA( DisplayName="Canvas Format" ),
     kRGB UMETA( DisplayName="RGB" ),
     kRGBA UMETA( DisplayName="RGBA" ),
     kGrey UMETA( DisplayName="Grey" ),
@@ -32,7 +32,7 @@ enum  class  EOdysseyPixelFormat : uint8
 UENUM( BlueprintType )
 enum  class  EOdysseyPixelFormatPrecision : uint8
 {
-    kAuto  UMETA( DisplayName="Auto" ),
+    kCanvasPrecision  UMETA( DisplayName="Canvas Precision" ),
     k8 UMETA( DisplayName="8 bits" ),
     k16 UMETA( DisplayName="16 bits" ),
     k32 UMETA( DisplayName="32 bits" ),

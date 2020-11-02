@@ -6,13 +6,13 @@
 ::ul3::tFormat
 ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision, ::ul3::tFormat iAutoFormat)
 {
-	if (iFormat == EOdysseyPixelFormat::kAuto && iPrecision == EOdysseyPixelFormatPrecision::kAuto)
+	if (iFormat == EOdysseyPixelFormat::kCanvasFormat && iPrecision == EOdysseyPixelFormatPrecision::kCanvasPrecision)
 		return iAutoFormat;
 
 	::ul3::tFormat format = iAutoFormat;
 	switch (iFormat)
 	{
-		case EOdysseyPixelFormat::kAuto: format = iAutoFormat; break;
+		case EOdysseyPixelFormat::kCanvasFormat: format = iAutoFormat; break;
 
 		case EOdysseyPixelFormat::kRGB: format = ULIS3_FORMAT_RGB8; break;
 		case EOdysseyPixelFormat::kGrey: format = ULIS3_FORMAT_G8; break;
@@ -38,7 +38,7 @@ ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelForma
 	if (iPrecision == EOdysseyPixelFormatPrecision::k8)
 		return format;
 
-	if (iPrecision == EOdysseyPixelFormatPrecision::kAuto &&
+	if (iPrecision == EOdysseyPixelFormatPrecision::kCanvasPrecision &&
 		iAutoFormat & ULIS3_W_TYPE( ULIS3_TYPE_UINT8 ) &&
 		iAutoFormat & ULIS3_W_DEPTH( 2 ))
 		return format;
@@ -48,7 +48,7 @@ ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelForma
 
 	switch (iPrecision)
 	{
-		case EOdysseyPixelFormatPrecision::kAuto: format |= ULIS3_W_TYPE(ULIS3_R_TYPE(iAutoFormat)) | ULIS3_W_DEPTH(ULIS3_R_DEPTH(iAutoFormat)); break;
+		case EOdysseyPixelFormatPrecision::kCanvasPrecision: format |= ULIS3_W_TYPE(ULIS3_R_TYPE(iAutoFormat)) | ULIS3_W_DEPTH(ULIS3_R_DEPTH(iAutoFormat)); break;
 		case EOdysseyPixelFormatPrecision::k16: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT16) | ULIS3_W_DEPTH(2); break;
 		case EOdysseyPixelFormatPrecision::k32: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT32) | ULIS3_W_DEPTH(4); break;
 		case EOdysseyPixelFormatPrecision::kFloat: format |= ULIS3_W_TYPE(ULIS3_TYPE_UFLOAT) | ULIS3_W_DEPTH(4); break;

@@ -30,6 +30,50 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
     return FOdysseyBlockProxy(dst);
 }
 
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Block, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+
+    TSharedPtr<FOdysseyBlock> conv = MakeShareable(new FOdysseyBlock(Block.m->Width(), Block.m->Height(), format));
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    if (format == Block.m->Format())
+    {
+        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), conv->GetBlock(), Block.m->GetBlock()->Rect(), ::ul3::FVec2I(0, 0));
+    }
+	else
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), conv->GetBlock());
+	}
+    return FOdysseyBlockProxy(conv);
+}
+
+//static
+EOdysseyPixelFormat
+UOdysseyBlockProxyFunctionLibrary::GetFormat(FOdysseyBlockProxy Block)
+{
+    if (!Block.m)
+        return EOdysseyPixelFormat::kCanvasFormat;
+
+    return OdysseyPixelFormatFromULISFormat(Block.m->Format());
+}
+
+//static
+EOdysseyPixelFormatPrecision
+UOdysseyBlockProxyFunctionLibrary::GetPrecision(FOdysseyBlockProxy Block)
+{
+    if (!Block.m)
+        return EOdysseyPixelFormatPrecision::kCanvasPrecision;
+
+    return OdysseyPixelFormatPrecisionFromULISFormat(Block.m->Format());
+}
 
 //static
 FOdysseyBlockProxy
@@ -62,7 +106,7 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* Br
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::FillBlock( UOdysseyBrushAssetBase* BrushContext
+UOdysseyBlockProxyFunctionLibrary::BlendColor( UOdysseyBrushAssetBase* BrushContext
                                         , FOdysseyBrushColor Color
                                         , FOdysseyBlockProxy Sample
                                         , float Opacity

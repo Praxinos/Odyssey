@@ -91,6 +91,10 @@ public:
              , meta = ( DefaultToSelf="BrushContext", DisplayName = "To Odyssey Block Reference (Texture2D)", BlueprintAutocast ) )
     static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext);
 
+    //Convert the Odyssey Block Reference to the specified Format and Precision
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Convert Block to Format" ))
+    static FOdysseyBlockProxy ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Block, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision);
+
     //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockReference"
@@ -102,13 +106,13 @@ public:
     //Applies a color on the whole given Sample. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockReference"
-             , meta = ( DefaultToSelf="BrushContext" ) )
-    static FOdysseyBlockProxy FillBlock( UOdysseyBrushAssetBase* BrushContext
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Blend Block With Color" ) )
+    static FOdysseyBlockProxy BlendColor( UOdysseyBrushAssetBase* BrushContext
                                     , FOdysseyBrushColor Color
                                     , FOdysseyBlockProxy Back
                                     , float Opacity = 1.f
-                                    , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
-                                    , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
+                                    , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
+                                    , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
                                     , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
                                     , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
@@ -119,8 +123,8 @@ public:
     static FOdysseyBlockProxy CreateBlock( UOdysseyBrushAssetBase* BrushContext
                                          , int Width = 256
                                          , int Height = 256
-                                         , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
-										 , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
+                                         , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
+										 , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
                                          , bool InitializeData = true );
 
     //Blends two Odyssey Block Reference on Top and Back.
@@ -136,8 +140,8 @@ public:
                                    , int X = 0
                                    , int Y = 0
                                    , float Opacity = 1.f
-								   , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto
-								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto
+								   , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
+								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
@@ -158,7 +162,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockReference"
              , meta = ( DefaultToSelf="BrushContext" ) )
-    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kAuto, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kAuto );
+    static TArray< FOdysseyBlockProxy > GetFontBlocks( UOdysseyBrushAssetBase* BrushContext, const UFont* Font, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision );
     
     //Requires a Font and a String to return an Array of Odyssey Block Reference.
     //This node find the correspondance between letters from the String and characters from the Font.
@@ -171,4 +175,14 @@ public:
     //This node automatically picks the color up at position on the canvas. 
     UFUNCTION(BlueprintPure, Category="OdysseyBlockReference")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
+
+    /* Format Management */
+
+    //Get the Odyssey Block Reference Pixel Format
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Format" ))
+    static EOdysseyPixelFormat GetFormat(FOdysseyBlockProxy Block);
+
+    //Get the Odyssey Block Reference Pixel Precision
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Precision" ))
+    static EOdysseyPixelFormatPrecision GetPrecision(FOdysseyBlockProxy Block);
 };

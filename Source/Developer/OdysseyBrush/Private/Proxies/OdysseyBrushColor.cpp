@@ -88,9 +88,43 @@ UOdysseyBrushColorFunctionLibrary::GetPrecision(FOdysseyBrushColor Color)
 
 //static
 FOdysseyBrushColor
+UOdysseyBrushColorFunctionLibrary::SetAlpha(FOdysseyBrushColor Color, float Alpha)
+{
+	::ul3::FPixelValue value = Color.GetValue();
+	value.SetAlphaF(Alpha);
+    return value;
+}
+
+//static
+float
+UOdysseyBrushColorFunctionLibrary::GetAlpha(FOdysseyBrushColor Color)
+{
+    return Color.GetValue().AlphaF();
+}
+
+//static
+FOdysseyBrushColor
+UOdysseyBrushColorFunctionLibrary::ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+{
+    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+    ::ul3::FPixelValue result = ::ul3::Conv( Color.GetValue(), format );
+    return result;
+}
+
+//static
+FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGB( int R, int G, int B, int A )
 {
     return  FOdysseyBrushColor::FromTemp( ::ul3::FPixelValue::FromRGBA8( R, G, B, A ) );
+}
+
+
+//static
+FOdysseyBrushColor
+UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGrey( int Grey, int A )
+{
+    return  FOdysseyBrushColor::FromTemp( ::ul3::FPixelValue::FromGreyA8( Grey, A ) );
 }
  
 
@@ -124,6 +158,14 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromRGBF( float R, float G, float B, float A )
 {
     return  FOdysseyBrushColor::FromTemp( ::ul3::FPixelValue::FromRGBAF( R, G, B, A ) );
+}
+
+
+//static
+FOdysseyBrushColor
+UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGreyF( float Grey, float A )
+{
+    return  FOdysseyBrushColor::FromTemp( ::ul3::FPixelValue::FromGreyAF( Grey, A ) );
 }
 
 
@@ -166,6 +208,16 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoRGB( const  FOdysse
     R = conv.R8();
     G = conv.G8();
     B = conv.B8();
+    A = conv.A8();
+}
+
+
+//static
+void
+UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoGrey( const  FOdysseyBrushColor& Color, int& Grey, int& A )
+{
+    ::ul3::FPixelValue conv = ::ul3::Conv( Color.GetValue(), ULIS3_FORMAT_GA8 );
+    Grey = conv.Grey8();
     A = conv.A8();
 }
 
@@ -218,6 +270,16 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoRGBF( const  FOdyss
     R = conv.RF();
     G = conv.GF();
     B = conv.BF();
+    A = conv.AF();
+}
+
+
+//static
+void
+UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoGreyF( const  FOdysseyBrushColor& Color, float& Grey, float& A )
+{
+    ::ul3::FPixelValue conv = ::ul3::Conv( Color.GetValue(), ULIS3_FORMAT_GAF );
+    Grey = conv.GreyF();
     A = conv.AF();
 }
 
