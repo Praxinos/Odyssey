@@ -95,6 +95,7 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
 
@@ -134,6 +135,7 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
 
@@ -172,6 +174,7 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -209,6 +212,7 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
 
@@ -248,6 +252,7 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -291,6 +296,7 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
     
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
 
@@ -336,6 +342,7 @@ UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOd
 
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();

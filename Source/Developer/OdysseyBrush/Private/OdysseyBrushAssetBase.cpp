@@ -388,10 +388,12 @@ UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight 
 	::ul3::tFormat format = src ? src->Format() : ULIS3_FORMAT_RGBA8;
 	
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(iWidth, iHeight, format));
-    ::ul3::ClearRaw(dst->GetBlock());
 
     if (!src)
+    {
+        ::ul3::ClearRaw(dst->GetBlock());
         return FOdysseyBlockProxy(dst);
+    }
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
