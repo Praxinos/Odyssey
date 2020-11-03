@@ -55,7 +55,7 @@ private:
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushSelector(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Mesh Selector tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnMeshSelector(const FSpawnTabArgs& iArgs);
-	// Callback for spawning the Brush Exposed Parameters tab.
+	// Callback for spawning the Brush Parameters tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushExposedParameters(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Viewport tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnViewport(const FSpawnTabArgs& iArgs);

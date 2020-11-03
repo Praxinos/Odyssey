@@ -273,7 +273,7 @@ FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
 
     // BrushExposedParameters
     iTabManager->RegisterTabSpawner( smBrushExposedParametersTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnBrushExposedParameters ) )
-        .SetDisplayName( LOCTEXT( "BrushExposedParametersTab", "Brush Exposed Parameters" ) )
+        .SetDisplayName( LOCTEXT( "BrushExposedParametersTab", "Brush Parameters" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ) );
 
@@ -742,7 +742,7 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnBrushExposedParameters( const FSp
     check( iArgs.GetTabId() == smBrushExposedParametersTabId );
 
     return SNew( SDockTab )
-        .Label( LOCTEXT( "BrushExposedParametersTitle", "Brush Exposed Parameters" ) )
+        .Label( LOCTEXT( "BrushExposedParametersTitle", "Brush Parameters" ) )
         [
             mBrushExposedParametersTab.ToSharedRef()
         ];

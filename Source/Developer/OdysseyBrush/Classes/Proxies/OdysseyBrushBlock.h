@@ -156,13 +156,13 @@ public:
     //X | Y are an offset to pan Top.
     UFUNCTION(BlueprintPure
              , Category="OdysseyBlockReference"
-             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Blend Block" ) )
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Blend Blocks" ) )
     static FOdysseyBlockProxy Blend( UOdysseyBrushAssetBase* BrushContext
                                    , FOdysseyBlockProxy Top
                                    , FOdysseyBlockProxy Back
                                    , FOdysseyBrushRect TopArea
-                                   , UPARAM(DisplayName="Offset X") int X = 0
-                                   , UPARAM(DisplayName="Offset Y") int Y = 0
+                                   , UPARAM(DisplayName="Top Offset X") int X = 0
+                                   , UPARAM(DisplayName="Top Offset Y") int Y = 0
                                    , float Opacity = 1.f
 								   , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
 								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision

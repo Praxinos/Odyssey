@@ -22,21 +22,21 @@ class ODYSSEYDRAWINGSTATE_API UOdysseyTextureEditorFunctionLibrary
 public:
     //Creates and Odyssey Block Reference with current layer.
     //X | Y input are an offset.
-    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyBlockReference", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* BrushContext, int X, int Y, int Width, int Height );
     
     //Creates and Odyssey Block Reference with a layer to be identified with its name (to be entered in a string).
     //X | Y input are an offset.
-    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyBlockReference", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetBlockOfLayerByName( UOdysseyBrushAssetBase* BrushContext, const FString& Name, int X, int Y, int Width, int Height );
     
     //Creates and Odyssey Block Reference with a layer to be identified with an index, depending on the layer position in the layer stack (1 = top layer).
     //X | Y input are an offset.
-    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyBlockReference", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* BrushContext, int Index, int X, int Y, int Width, int Height );
     
 #if 0
-    UFUNCTION( BlueprintPure, Category = "OdysseyTextureEditorFunctionLibrary", meta = (DefaultToSelf="BrushContext") )
+    UFUNCTION( BlueprintPure, Category = "OdysseyBlockReference", meta = (DefaultToSelf="BrushContext") )
     static FOdysseyBlockProxy GetResultBlock( UOdysseyBrushAssetBase* BrushContext );
 #endif
 };
