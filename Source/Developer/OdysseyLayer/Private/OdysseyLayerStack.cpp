@@ -464,17 +464,19 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
 		ioSaveLayerStack->mOutputFormat = ULIS3_FORMAT_BGRA8;
     }
 
-	ioSaveLayerStack->Init(ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mOutputFormat);
-
-	//Set the current layer to the first image layer
-	TArray< TSharedPtr<IOdysseyLayer> > layers;
-	layer->DepthFirstSearchTree(&layers, false);
-	for (int i = 0; i < layers.Num(); i++)
+	if (Ar.IsLoading())
 	{
-		if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
+		ioSaveLayerStack->Init(ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mOutputFormat);
+		//Set the current layer to the first image layer
+		TArray< TSharedPtr<IOdysseyLayer> > layers;
+		layer->DepthFirstSearchTree(&layers, false);
+		for (int i = 0; i < layers.Num(); i++)
 		{
-			ioSaveLayerStack->SetCurrentLayer(layers[i]);
-			break;
+			if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
+			{
+				ioSaveLayerStack->SetCurrentLayer(layers[i]);
+				break;
+			}
 		}
 	}
 	
