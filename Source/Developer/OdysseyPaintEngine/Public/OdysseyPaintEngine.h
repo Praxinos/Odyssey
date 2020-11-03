@@ -86,6 +86,16 @@ public: //DELEGATES
 
 private:
     // Private API
+    void SmoothingCatchUpTick();
+    void ExecuteDelayQueue();
+    TArray<::ul3::FRect> GetTmpInvalidTiles();
+    TArray<::ul3::FRect> GetStrokeInvalidTiles();
+    void ClearStrokeBlock();
+    void ResetStroke();
+    void UpdateInvalidMaps();
+    void EndStrokeTick();
+    void SmoothingEndStroke();
+
     // void CheckReallocTempBuffer();
     void ReallocInvalidMaps();
     void UpdateBrushInstance();

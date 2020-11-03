@@ -80,13 +80,8 @@ FOdysseyPaintEngine::InterruptDelay()
 }
 
 void
-FOdysseyPaintEngine::Tick()
+FOdysseyPaintEngine::SmoothingCatchUpTick()
 {
-    if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock )
-        return;
-
-    //Manage CatchUp if needed
-
     if (mIsSmoothingEnabled && mSmoothingParameters->GetCatchUp() && mSmoother->CanCatchUp() && mRawStroke.Num() > 0)
     {
 		long long max_time = 1000 / 60;
@@ -98,9 +93,11 @@ FOdysseyPaintEngine::Tick()
             PushStroke(newPoint);
         }
     }
+}
 
-    mBrushInstance->ExecuteTick();
-
+void
+FOdysseyPaintEngine::ExecuteDelayQueue()
+{
     auto start_time = std::chrono::steady_clock::now();
     long long max_time = 1000 / 60;
     while( !mDelayQueue.empty() )
@@ -113,11 +110,12 @@ FOdysseyPaintEngine::Tick()
         if( delta > max_time )
             break;
     }
+}
 
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    TArray<::ul3::FRect> changedTiles;
+TArray<::ul3::FRect>
+FOdysseyPaintEngine::GetTmpInvalidTiles()
+{
+    TArray<::ul3::FRect> tiles;
     for( int k = 0; k < mCountTileY; ++k )
     {
         for( int l = 0; l < mCountTileX; ++l )
@@ -127,51 +125,194 @@ FOdysseyPaintEngine::Tick()
                 ::ul3::FRect rect = MakeTileRect(l, k);
                 ::ul3::FVec2F pos(rect.x, rect.y);
                 ::ul3::FVec2I posi(pos.x, pos.y);
-                changedTiles.Add(rect);
+                tiles.Add(rect);
             }
         }
     }
+    return tiles;
+}
 
-    if (changedTiles.Num() > 0) {
+TArray<::ul3::FRect>
+FOdysseyPaintEngine::GetStrokeInvalidTiles()
+{
+    TArray<::ul3::FRect> tiles;
+    for( int k = 0; k < mCountTileY; ++k )
+    {
+        for( int l = 0; l < mCountTileX; ++l )
+        {
+            if (!mStrokeInvalidTileMap[k][l])
+                continue;
+			tiles.Add(MakeTileRect(l, k));
+        }
+    }
+    return tiles;
+}
+
+void
+FOdysseyPaintEngine::ClearStrokeBlock()
+{
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect() );
+}
+
+void
+FOdysseyPaintEngine::ResetStroke()
+{
+    mInterpolator->Reset();
+    mSmoother->Reset();
+    mRawStroke.Empty();
+    mResultStroke.Empty();
+    mIsPendingEndStroke = false;
+}
+
+void
+FOdysseyPaintEngine::UpdateInvalidMaps()
+{
+    auto invalid_rects = mBrushInstance->GetInvalidRects();
+    for( int j = 0; j < invalid_rects.Num(); ++j )
+    {
+        const ::ul3::FRect& rect = invalid_rects[j];
+        float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
+        float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
+        float wf = float( rect.w ) / TILE_SIZE;
+        float hf = float( rect.h ) / TILE_SIZE;
+        int x = xf;
+        int y = yf;
+        int w = FMath::Min( mCountTileX, int( ceil( xf + wf ) ) ) - x;
+        int h = FMath::Min( mCountTileY, int( ceil( yf + hf ) ) ) - y;
+        ::ul3::FRect tileRect = { x, y, w, h };
+        SetMapWithRect( mTmpInvalidTileMap, tileRect, true );
+        SetMapWithRect( mStrokeInvalidTileMap, tileRect, true );
+    }
+}
+
+void
+FOdysseyPaintEngine::EndStrokeTick()
+{
+    SmoothingEndStroke();
+
+    mBrushInstance->ExecuteStrokeEnd();
+    UpdateInvalidMaps();
+    mBrushInstance->ClearInvalidRects();
+
+    //Refresh Preview Block
+	TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
+    if (changedTiles.Num() > 0)
+    {
         CopyEditedBlockInPreviewBlock(changedTiles);
         BlendStrokeBlockInPreviewBlock(changedTiles);
         mOnStrokeChangedDelegate.Broadcast(changedTiles);
     }
-    changedTiles.Reset();
-
     ClearInvalidTileMap( mTmpInvalidTileMap );
 
-    if( mIsPendingEndStroke && mDelayQueue.empty() )
+    //Refresh Edited Block
+    changedTiles = GetStrokeInvalidTiles();
+    if (changedTiles.Num() > 0) 
     {
-        mBrushInstance->ExecuteStrokeEnd();
+        mOnStrokeWillEndDelegate.Broadcast(changedTiles);
+        CopyPreviewBlockInEditedBlock(changedTiles);
+        mOnStrokeEndDelegate.Broadcast(changedTiles);
+    }
+    changedTiles.Reset();
 
-        for( int k = 0; k < mCountTileY; ++k )
-        {
-            for( int l = 0; l < mCountTileX; ++l )
-            {
-                if (!mStrokeInvalidTileMap[k][l])
-                    continue;
-                changedTiles.Add(MakeTileRect(l, k));
-            }
-        }
+    ClearInvalidTileMap( mStrokeInvalidTileMap );
+    
+    ClearStrokeBlock();
 
-        if (changedTiles.Num() > 0) 
-        {
-            mOnStrokeWillEndDelegate.Broadcast(changedTiles);
-            CopyPreviewBlockInEditedBlock(changedTiles);
-            mOnStrokeEndDelegate.Broadcast(changedTiles);
-        }
-        changedTiles.Reset();
+    ResetStroke();
+}
 
+void
+FOdysseyPaintEngine::SmoothingEndStroke()
+{
+    if (!mIsRealTime && mIsSmoothingEnabled)
+    {
+        //Cancel the tempbuffer   
+        if( !mStrokeBlock || !mPreviewBlock )
+            return;
+
+        InterruptDelay();
+
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
+
+        ClearInvalidTileMap( mTmpInvalidTileMap );
         ClearInvalidTileMap( mStrokeInvalidTileMap );
-
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect() );
 
         mInterpolator->Reset();
         mSmoother->Reset();
-        mRawStroke.Empty();
         mResultStroke.Empty();
-        mIsPendingEndStroke = false;
+
+        if (mRawStroke.Num() <= 0)
+            return;
+
+        //BeginStroke
+        mSmoother->AddPoint(mRawStroke[0]);
+        
+        for (int i = 0; i < mInterpolator->MinimumRequiredPoints(); i++)
+        {
+            mInterpolator->AddPoint( mRawStroke[i] );
+        }
+
+        TArray< FOdysseyStrokePoint > firstPoints;
+        firstPoints.Add(mRawStroke[0]);
+        AddResultPoints(firstPoints);
+
+        //Steps
+        for (int i = 1; i < mRawStroke.Num(); i++)
+        {
+            mSmoother->AddPoint(mRawStroke[i]);
+
+            if( !mSmoother->IsReady() )
+                continue;
+
+            mInterpolator->AddPoint( mSmoother->ComputePoint() );
+
+			if (!mInterpolator->IsReady())
+				continue;
+
+            TArray< FOdysseyStrokePoint > points = ComputeInterpolation();
+            AddResultPoints(points);
+        }
+
+        //Execute everything in the queue at once to avoid glitches
+        while( !mDelayQueue.empty() )
+        {
+            std::function<void() >& f = mDelayQueue.front();
+            f();
+            mDelayQueue.pop();
+        }
+    }
+}
+
+void
+FOdysseyPaintEngine::Tick()
+{
+    if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock )
+        return;
+
+    SmoothingCatchUpTick();
+
+    mBrushInstance->ExecuteTick();
+
+    ExecuteDelayQueue();
+
+    //Refresh the tiles
+    TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
+    if (changedTiles.Num() > 0)
+    {
+        CopyEditedBlockInPreviewBlock(changedTiles);
+        BlendStrokeBlockInPreviewBlock(changedTiles);
+        mOnStrokeChangedDelegate.Broadcast(changedTiles);
+    }
+    ClearInvalidTileMap( mTmpInvalidTileMap );
+    
+    //End the stroke if we need to
+    if( mIsPendingEndStroke && mDelayQueue.empty() )
+    {
+        EndStrokeTick();
     }
 }
 
@@ -582,22 +723,8 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
 
             mBrushInstance->ExecuteStep();
 
-            auto invalid_rects = mBrushInstance->GetInvalidRects();
-            for( int j = 0; j < invalid_rects.Num(); ++j )
-            {
-                const ::ul3::FRect& rect = invalid_rects[j];
-                float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
-                float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
-                float wf = float( rect.w ) / TILE_SIZE;
-                float hf = float( rect.h ) / TILE_SIZE;
-                int x = xf;
-                int y = yf;
-                int w = FMath::Min( mCountTileX, int( ceil( xf + wf ) ) ) - x;
-                int h = FMath::Min( mCountTileY, int( ceil( yf + hf ) ) ) - y;
-                ::ul3::FRect tileRect = { x, y, w, h };
-                SetMapWithRect( mTmpInvalidTileMap, tileRect, true );
-                SetMapWithRect( mStrokeInvalidTileMap, tileRect, true );
-            }
+            UpdateInvalidMaps();
+
             mBrushInstance->ClearInvalidRects();
         } );
     }
@@ -630,66 +757,6 @@ FOdysseyPaintEngine::ComputeInterpolation()
 void
 FOdysseyPaintEngine::EndStroke()
 {
-    if (!mIsRealTime && mIsSmoothingEnabled)
-    {
-        //Cancel the tempbuffer   
-        if( !mStrokeBlock || !mPreviewBlock )
-            return;
-
-        InterruptDelay();
-
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
-
-        ClearInvalidTileMap( mTmpInvalidTileMap );
-        ClearInvalidTileMap( mStrokeInvalidTileMap );
-
-        mInterpolator->Reset();
-        mSmoother->Reset();
-        mResultStroke.Empty();
-
-        if (mRawStroke.Num() <= 0)
-            return;
-
-        //BeginStroke
-        mSmoother->AddPoint(mRawStroke[0]);
-        
-        for (int i = 0; i < mInterpolator->MinimumRequiredPoints(); i++)
-        {
-            mInterpolator->AddPoint( mRawStroke[i] );
-        }
-
-        TArray< FOdysseyStrokePoint > firstPoints;
-        firstPoints.Add(mRawStroke[0]);
-        AddResultPoints(firstPoints);
-
-        //Steps
-        for (int i = 1; i < mRawStroke.Num(); i++)
-        {
-            mSmoother->AddPoint(mRawStroke[i]);
-
-            if( !mSmoother->IsReady() )
-                continue;
-
-            mInterpolator->AddPoint( mSmoother->ComputePoint() );
-
-			if (!mInterpolator->IsReady())
-				continue;
-
-            TArray< FOdysseyStrokePoint > points = ComputeInterpolation();
-            AddResultPoints(points);
-        }
-
-        //Execute everything in the queue at once to avoid glitches
-        while( !mDelayQueue.empty() )
-        {
-            std::function<void() >& f = mDelayQueue.front();
-            f();
-            mDelayQueue.pop();
-        }
-    }
-
     mIsPendingEndStroke = true;
 }
 
