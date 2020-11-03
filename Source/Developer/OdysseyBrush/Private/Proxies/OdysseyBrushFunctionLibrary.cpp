@@ -179,16 +179,5 @@ UOdysseyBrushFunctionLibrary::Stamp( UOdysseyBrushAssetBase* BrushContext, FOdys
     BrushContext->PushInvalidRect( invalidRectI );
 }
 
-
-//static
-void
-UOdysseyBrushFunctionLibrary::GenerateOrbitDelta( float AngleRad, float  Radius, float& DeltaX, float& DeltaY )
-{
-    float cosa = cos( AngleRad );
-    float sina = sin( AngleRad );
-    DeltaX = cosa * Radius;
-    DeltaY = sina * Radius;
-}
-
 #undef LOCTEXT_NAMESPACE
 

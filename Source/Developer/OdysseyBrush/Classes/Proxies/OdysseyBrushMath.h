@@ -1,0 +1,24 @@
+// Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
+// IDDN FR.001.250001.002.S.P.2019.000.00000
+
+#pragma once
+
+#include "CoreTypes.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "UObject/ObjectMacros.h"
+#include "OdysseyBrushMath.generated.h"
+
+UCLASS(meta=(ScriptName="OdysseyBrushMathLibrary"))
+class ODYSSEYBRUSH_API UOdysseyBrushMathLibrary : public UBlueprintFunctionLibrary
+{
+    GENERATED_BODY()
+
+public:
+    //Node that converts polar coordinates (radius,angle) to cartesian coordinates (x,y).
+    UFUNCTION( BlueprintPure, Category="OdysseyBrushMath" )
+    static  void  ConvertPolarToCartesianCoordinate( float AngleRad, float  Radius, float& DeltaX, float& DeltaY );
+
+    //Node that converts cartesian coordinates (x,y) to polar coordinates (radius,angle).
+    UFUNCTION( BlueprintPure, Category="OdysseyBrushMath" )
+    static  void  ConvertCartesianToPolarCoordinate( float DeltaX, float DeltaY, float& AngleRad, float& Radius );
+};

@@ -41,8 +41,4 @@ public:
             , Category="OdysseyBrushStamps"
             , meta = ( DefaultToSelf="BrushContext" ) )
     static  void  Stamp( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
-
-    //Node that converts polar coordinates (radius,angle) to cartesian coordinates (x,y).
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushFunctionLibrary" )
-    static  void  GenerateOrbitDelta( float AngleRad, float  Radius, float& DeltaX, float& DeltaY );
 };
