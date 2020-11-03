@@ -51,6 +51,10 @@ FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ul3::tFormat iFormat)
     //TODO: Move outside one day
     mDrawingUndo = new  FOdysseyDrawingUndo( this );
 
+	mLayerRoot->ImageResultChangedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+	mLayerRoot->NodeAdded().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+	mLayerRoot->NodeRemoved().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+
     mLayerRoot->ImageResultChangedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRootImageResultChanged);
     mLayerRoot->NodeAdded().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
     mLayerRoot->NodeRemoved().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
@@ -723,6 +727,7 @@ FOdysseyDrawingUndo::LoadData()
     FMemoryReader Ar = FMemoryReader(TheBinaryArray);
     Ar.Seek(mUndosPositions[mCurrentIndex]);
 
+	TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
     for(int i = 0; i < mNumberBlocksUndo[mCurrentIndex]; i++)
     {
         Ar << address;
@@ -738,8 +743,6 @@ FOdysseyDrawingUndo::LoadData()
 
         Ar << mData;
 
-        //Should be out of this loop
-        TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
 		TArray< TSharedPtr<IOdysseyLayer> > layers;
         mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers,false);
 
@@ -783,12 +786,14 @@ FOdysseyDrawingUndo::LoadData()
                        , imageLayer->GetBlock()->GetBlock()
                        , ::ul3::FRect( 0, 0, sizeX, sizeY )
                        , ::ul3::FVec2I( tileX, tileY ) );
-            imageLayer->ImageResultChangedDelegate().Broadcast();
             // mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX,tileY,sizeX,sizeY));
         }
 
 		delete mTileData;
     }
+
+	if (imageLayer)
+		imageLayer->ImageResultChangedDelegate().Broadcast();
 
     if(bSaveForRedo)
     {
@@ -813,6 +818,7 @@ FOdysseyDrawingUndo::Redo()
     FMemoryReader Ar = FMemoryReader(TheBinaryArray);
     Ar.Seek(mUndosPositions[mCurrentIndex]);
 
+	TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
     for(int i = 0; i < mNumberBlocksRedo[mCurrentIndex]; i++)
     {
         Ar << address;
@@ -822,8 +828,6 @@ FOdysseyDrawingUndo::Redo()
         Ar << sizeY;
         Ar << mData;
 
-        //Should be out of this loop
-        TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
 		TArray< TSharedPtr<IOdysseyLayer> > layers;
         mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers,false);
 
@@ -869,10 +873,11 @@ FOdysseyDrawingUndo::Redo()
                        , imageLayer->GetBlock()->GetBlock()
                        , ::ul3::FRect( 0, 0, sizeX, sizeY )
                        , ::ul3::FVec2I( tileX, tileY ) );
-            imageLayer->ImageResultChangedDelegate().Broadcast();
-            // mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX,tileY,sizeX,sizeY));
         }
     }
+
+	if (imageLayer)
+		imageLayer->ImageResultChangedDelegate().Broadcast();
 
     if(mCurrentIndex < (mUndosPositions.Num() - 1))
         mCurrentIndex++;
