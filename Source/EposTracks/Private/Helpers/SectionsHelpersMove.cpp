@@ -98,9 +98,8 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
                 if( section_after_gap == section_containing_reference_frame )
                     break;
 
-                TRange<FFrameNumber>* gap = ioLastGapMove;
                 FFrameNumber gap_shift = section_after_gap->GetTrueRange().Size<FFrameNumber>();
-                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() + gap_shift, gap->GetUpperBoundValue() + gap_shift );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() + gap_shift, ioLastGapMove->GetUpperBoundValue() + gap_shift );
 
                 section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
             }
@@ -110,9 +109,8 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
             // Move every 'after gap' sections before (and including) the referenced one
             for( auto section_after_gap : iMoveResult.mSectionsAfterGap )
             {
-                TRange<FFrameNumber>* gap = ioLastGapMove;
                 FFrameNumber gap_shift = section_after_gap->GetTrueRange().Size<FFrameNumber>();
-                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() + gap_shift, gap->GetUpperBoundValue() + gap_shift );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() + gap_shift, ioLastGapMove->GetUpperBoundValue() + gap_shift );
 
                 section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
 
@@ -143,9 +141,8 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
             // Move every 'before gap' sections after (and including) the referenced one
             for( auto section_before_gap : iMoveResult.mSectionsBeforeGap )
             {
-                TRange<FFrameNumber>* gap = ioLastGapMove;
                 FFrameNumber gap_shift = section_before_gap->GetTrueRange().Size<FFrameNumber>();
-                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() - gap_shift, gap->GetUpperBoundValue() - gap_shift );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() - gap_shift, ioLastGapMove->GetUpperBoundValue() - gap_shift );
 
                 section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
 
@@ -161,9 +158,8 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
                 if( section_before_gap == section_containing_reference_frame )
                     break;
 
-                TRange<FFrameNumber>* gap = ioLastGapMove;
                 FFrameNumber gap_shift = section_before_gap->GetTrueRange().Size<FFrameNumber>();
-                *gap = TRange<FFrameNumber>( gap->GetLowerBoundValue() - gap_shift, gap->GetUpperBoundValue() - gap_shift );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() - gap_shift, ioLastGapMove->GetUpperBoundValue() - gap_shift );
 
                 section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
             }

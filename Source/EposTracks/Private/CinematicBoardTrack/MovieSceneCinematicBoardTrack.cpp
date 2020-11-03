@@ -236,27 +236,22 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
         if( board_section->IsMoving() )
         {
-            TRange<FFrameNumber>* previous_range = mPreviousMove.Find( board_section );
-            check( previous_range );
-            TRange<FFrameNumber>* last_gap = mLastGapMove.Find( board_section );
-            check( last_gap );
+            TRange<FFrameNumber>& previous_range = mPreviousMove.FindChecked( board_section );
+            TRange<FFrameNumber>& last_gap = mLastGapMove.FindChecked( board_section );
 
-            FMoveResult move_result = SectionsHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
-            SectionsHelpersMove::FixMoveSections( Sections, last_gap, &ioSection, move_result );
+            FMoveResult move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
+            SectionsHelpersMove::FixMoveSections( Sections, &last_gap, &ioSection, move_result );
 
             if( iParams.MoveType == EPropertyChangeType::ValueSet )
             {
-                previous_range = mPreviousMove.Find( board_section );
-                check( previous_range );
-                last_gap = mLastGapMove.Find( board_section );
-                check( last_gap );
-                int32* cache_priority = mCacheOverlapPriority.Find( board_section );
-                check( cache_priority );
+                previous_range = mPreviousMove.FindChecked( board_section );
+                last_gap = mLastGapMove.FindChecked( board_section );
+                int32& cache_priority = mCacheOverlapPriority.FindChecked( board_section );
 
-                move_result = SectionsHelpersMove::GetMoveInfo( Sections, *previous_range, *last_gap, board_section );
-                SectionsHelpersMove::FixPostMoveSections( Sections, *last_gap, &ioSection, move_result );
+                move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
+                SectionsHelpersMove::FixPostMoveSections( Sections, last_gap, &ioSection, move_result );
 
-                board_section->SetOverlapPriority( *cache_priority );
+                board_section->SetOverlapPriority( cache_priority );
 
                 board_section->StopMoving();
 
