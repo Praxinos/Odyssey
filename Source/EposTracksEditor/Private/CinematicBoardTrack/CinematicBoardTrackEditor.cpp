@@ -426,7 +426,7 @@ FCinematicBoardTrackEditor::InsertBoard()
     UMovieSceneSubSection* newBoard = CreateBoardInternal( newBoardName, newBoardStartTime.FrameNumber );
     if( newBoard )
     {
-        newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+        //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
     }
 
     GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
@@ -478,8 +478,8 @@ FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iS
     UMovieSceneSubSection* newBoard = CreateBoardInternal( newBoardName, startTime, iSection );
     if( newBoard )
     {
-        newBoard->SetRange( iSection->GetRange() );
-        newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+        //newBoard->SetRange( iSection->GetRange() );
+        //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
         newBoard->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
         newBoard->Parameters.TimeScale = iSection->Parameters.TimeScale;
         newBoard->SetPreRollFrames( iSection->GetPreRollFrames() );
