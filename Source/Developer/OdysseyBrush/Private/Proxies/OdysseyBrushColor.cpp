@@ -104,6 +104,21 @@ UOdysseyBrushColorFunctionLibrary::GetAlpha(FOdysseyBrushColor Color)
 
 //static
 FOdysseyBrushColor
+UOdysseyBrushColorFunctionLibrary::Lerp(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+{
+	::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+
+	FOdysseyBrushColor result;
+	::ul3::FPixelValue v1 = ::ul3::Conv(Color1.GetValue(), format);
+	::ul3::FPixelValue v2 = ::ul3::Conv(Color2.GetValue(), format);
+	::ul3::FPixelValue r = ::ul3::MixNative(Value, &v1, &v2);
+	result.SetValue(r);
+	return result;
+}
+
+//static
+FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
 {
     ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
@@ -149,6 +164,13 @@ FOdysseyBrushColor
 UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromCMYK( int C, int M, int Y, int K, int A )
 {
     return  FOdysseyBrushColor::FromTemp( ::ul3::FPixelValue::FromCMYKA8( C, M, Y, K, A ) );
+}
+
+//static
+FOdysseyBrushColor
+UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromLab(int L, int A, int B, int Alpha)
+{
+	return  FOdysseyBrushColor::FromTemp(::ul3::FPixelValue::FromLabA8(L, A, B, Alpha));
 }
 
 //--------------------------------------------------------------------------------------
@@ -258,6 +280,16 @@ UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoCMYK( const  FOdyss
     A = conv.A8();
 }
 
+//static
+void
+UOdysseyBrushColorFunctionLibrary::BreakOdysseyBrushColorIntoLabA(const  FOdysseyBrushColor& Color, int& L, int& A, int& B, int& Alpha)
+{
+	::ul3::FPixelValue conv = ::ul3::Conv(Color.GetValue(), ULIS3_FORMAT_LabA8);
+	L = conv.L8();
+	A = conv.a8();
+	B = conv.b8();
+	Alpha = conv.A8();
+}
 
 
 //--------------------------------------------------------------------------------------

@@ -299,6 +299,440 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
     return FOdysseyBlockProxy(dst);
 }
 
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustAlpha( FOdysseyBlockProxy Block
+                                                , UCurveFloat* Curve
+                                                , bool PreserveNullAlpha)
+{
+    if (!Block.m)
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+	if (!Curve)
+	{
+		Curve = NewObject<UCurveFloat>();
+		Curve->FloatCurve.AddKey(0.0f, 0.0f);
+		Curve->FloatCurve.AddKey(1.0f, 1.0f);
+	}
+
+    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format() ));
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+    ::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), dst->GetBlock(), [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+    {
+        ::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+        if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+            dstProxy.SetAlphaF(0.0f);
+        else
+            dstProxy.SetAlphaF(Curve->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+    return FOdysseyBlockProxy(dst);
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustRGBA(FOdysseyBlockProxy Block
+											, UCurveFloat* CurveR
+											, UCurveFloat* CurveG
+											, UCurveFloat* CurveB
+											, UCurveFloat* CurveAlpha
+											, bool PreserveNullAlpha)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
+	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
+
+	if (!CurveR) CurveR = defaultCurve.Get();
+	if (!CurveG) CurveG = defaultCurve.Get();
+	if (!CurveB) CurveB = defaultCurve.Get();
+	if (!CurveAlpha) CurveAlpha = defaultCurve.Get();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format()));
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* src = Block.m->GetBlock();
+	::ul3::FBlock* filterDst = dst->GetBlock();
+
+	EOdysseyPixelFormatPrecision precision = OdysseyPixelFormatPrecisionFromULISFormat(src->Format());
+	::ul3::tFormat format = (EOdysseyPixelFormat::kRGBA, precision, ULIS3_FORMAT_RGBAF);
+
+	if (src->Format() != format)
+	{
+		src = new  ::ul3::FBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), src);
+		filterDst = src;
+	}
+
+	::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src, filterDst, [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+	{
+		::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+		dstProxy.SetRF(CurveR->GetFloatValue(srcProxy.RF()));
+		dstProxy.SetGF(CurveG->GetFloatValue(srcProxy.GF()));
+		dstProxy.SetBF(CurveB->GetFloatValue(srcProxy.BF()));
+
+		if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+			dstProxy.SetAlphaF(0.0f);
+		else
+			dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+	if (filterDst != dst->GetBlock())
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, filterDst, dst->GetBlock());
+	}
+
+	if (src != Block.m->GetBlock())
+		delete src;
+
+	return FOdysseyBlockProxy(dst);
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustGreyA(FOdysseyBlockProxy Block
+											, UCurveFloat* CurveGrey
+											, UCurveFloat* CurveAlpha
+											, bool PreserveNullAlpha)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
+	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
+
+	if (!CurveGrey) CurveGrey = defaultCurve.Get();
+	if (!CurveAlpha) CurveAlpha = defaultCurve.Get();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format()));
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* src = Block.m->GetBlock();
+	::ul3::FBlock* filterDst = dst->GetBlock();
+
+	EOdysseyPixelFormatPrecision precision = OdysseyPixelFormatPrecisionFromULISFormat(src->Format());
+	::ul3::tFormat format = (EOdysseyPixelFormat::kGreyA, precision, ULIS3_FORMAT_GAF);
+
+	if (src->Format() != format)
+	{
+		src = new  ::ul3::FBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), src);
+		filterDst = src;
+	}
+
+	::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src, filterDst, [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+	{
+		::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+		dstProxy.SetGreyF(CurveGrey->GetFloatValue(srcProxy.GreyF()));
+
+		if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+			dstProxy.SetAlphaF(0.0f);
+		else
+			dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+	if (filterDst != dst->GetBlock())
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, filterDst, dst->GetBlock());
+	}
+
+	if (src != Block.m->GetBlock())
+		delete src;
+
+	return FOdysseyBlockProxy(dst);
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustHSVA(FOdysseyBlockProxy Block
+											, UCurveFloat* CurveH
+											, UCurveFloat* CurveS
+											, UCurveFloat* CurveV
+											, UCurveFloat* CurveAlpha
+											, bool PreserveNullAlpha)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
+	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
+
+	if (!CurveH) CurveH = defaultCurve.Get();
+	if (!CurveS) CurveS = defaultCurve.Get();
+	if (!CurveV) CurveV = defaultCurve.Get();
+	if (!CurveAlpha) CurveAlpha = defaultCurve.Get();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format()));
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* src = Block.m->GetBlock();
+	::ul3::FBlock* filterDst = dst->GetBlock();
+
+	EOdysseyPixelFormatPrecision precision = OdysseyPixelFormatPrecisionFromULISFormat(src->Format());
+	::ul3::tFormat format = (EOdysseyPixelFormat::kHSVA, precision, ULIS3_FORMAT_HSVAF);
+
+	if (src->Format() != format)
+	{
+		src = new  ::ul3::FBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), src);
+		filterDst = src;
+	}
+
+	::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src, filterDst, [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+	{
+		::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+		dstProxy.SetHueF(CurveH->GetFloatValue(srcProxy.HueF()));
+		dstProxy.SetSaturationF(CurveS->GetFloatValue(srcProxy.SaturationF()));
+		dstProxy.SetValueF(CurveV->GetFloatValue(srcProxy.ValueF()));
+
+		if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+			dstProxy.SetAlphaF(0.0f);
+		else
+			dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+	if (filterDst != dst->GetBlock())
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, filterDst, dst->GetBlock());
+	}
+
+	if (src != Block.m->GetBlock())
+		delete src;
+
+	return FOdysseyBlockProxy(dst);
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustHSLA(FOdysseyBlockProxy Block
+											, UCurveFloat* CurveH
+											, UCurveFloat* CurveS
+											, UCurveFloat* CurveL
+											, UCurveFloat* CurveAlpha
+											, bool PreserveNullAlpha)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
+	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
+
+	if (!CurveH) CurveH = defaultCurve.Get();
+	if (!CurveS) CurveS = defaultCurve.Get();
+	if (!CurveL) CurveL = defaultCurve.Get();
+	if (!CurveAlpha) CurveAlpha = defaultCurve.Get();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format()));
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* src = Block.m->GetBlock();
+	::ul3::FBlock* filterDst = dst->GetBlock();
+
+	EOdysseyPixelFormatPrecision precision = OdysseyPixelFormatPrecisionFromULISFormat(src->Format());
+	::ul3::tFormat format = (EOdysseyPixelFormat::kHSLA, precision, ULIS3_FORMAT_HSLAF);
+
+	if (src->Format() != format)
+	{
+		src = new  ::ul3::FBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), src);
+		filterDst = src;
+	}
+
+	::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src, filterDst, [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+	{
+		::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+		dstProxy.SetHueF(CurveH->GetFloatValue(srcProxy.HueF()));
+		dstProxy.SetSaturationF(CurveS->GetFloatValue(srcProxy.SaturationF()));
+		dstProxy.SetLightnessF(CurveL->GetFloatValue(srcProxy.LightnessF()));
+
+		if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+			dstProxy.SetAlphaF(0.0f);
+		else
+			dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+	if (filterDst != dst->GetBlock())
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, filterDst, dst->GetBlock());
+	}
+
+	if (src != Block.m->GetBlock())
+		delete src;
+
+	return FOdysseyBlockProxy(dst);
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustCMYKA(FOdysseyBlockProxy Block
+											, UCurveFloat* CurveC
+											, UCurveFloat* CurveM
+											, UCurveFloat* CurveY
+											, UCurveFloat* CurveK
+											, UCurveFloat* CurveAlpha
+											, bool PreserveNullAlpha)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
+	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
+
+	if (!CurveC) CurveC = defaultCurve.Get();
+	if (!CurveM) CurveM = defaultCurve.Get();
+	if (!CurveY) CurveY = defaultCurve.Get();
+	if (!CurveK) CurveK = defaultCurve.Get();
+	if (!CurveAlpha) CurveAlpha = defaultCurve.Get();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format()));
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* src = Block.m->GetBlock();
+	::ul3::FBlock* filterDst = dst->GetBlock();
+
+	EOdysseyPixelFormatPrecision precision = OdysseyPixelFormatPrecisionFromULISFormat(src->Format());
+	::ul3::tFormat format = (EOdysseyPixelFormat::kCMYKA, precision, ULIS3_FORMAT_CMYKAF);
+
+	if (src->Format() != format)
+	{
+		src = new  ::ul3::FBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), src);
+		filterDst = src;
+	}
+
+	::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src, filterDst, [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+	{
+		::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+		dstProxy.SetCyanF(CurveC->GetFloatValue(srcProxy.CyanF()));
+		dstProxy.SetMagentaF(CurveM->GetFloatValue(srcProxy.MagentaF()));
+		dstProxy.SetYellowF(CurveY->GetFloatValue(srcProxy.YellowF()));
+		dstProxy.SetKeyF(CurveK->GetFloatValue(srcProxy.KeyF()));
+
+		if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+			dstProxy.SetAlphaF(0.0f);
+		else
+			dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+	if (filterDst != dst->GetBlock())
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, filterDst, dst->GetBlock());
+	}
+
+	if (src != Block.m->GetBlock())
+		delete src;
+
+	return FOdysseyBlockProxy(dst);
+}
+
+
+//static
+FOdysseyBlockProxy
+UOdysseyBlockProxyFunctionLibrary::AdjustLabA(FOdysseyBlockProxy Block
+											, UCurveFloat* CurveL
+											, UCurveFloat* CurveA
+											, UCurveFloat* CurveB
+											, UCurveFloat* CurveAlpha
+											, bool PreserveNullAlpha)
+{
+	if (!Block.m)
+		return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
+	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
+
+	if (!CurveL) CurveL = defaultCurve.Get();
+	if (!CurveA) CurveA = defaultCurve.Get();
+	if (!CurveB) CurveB = defaultCurve.Get();
+	if (!CurveAlpha) CurveAlpha = defaultCurve.Get();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), Block.m->Format()));
+
+	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+	::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
+	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+	::ul3::FBlock* src = Block.m->GetBlock();
+	::ul3::FBlock* filterDst = dst->GetBlock();
+
+	EOdysseyPixelFormatPrecision precision = OdysseyPixelFormatPrecisionFromULISFormat(src->Format());
+	::ul3::tFormat format = (EOdysseyPixelFormat::kLabA, precision, ULIS3_FORMAT_LabAF);
+
+	if (src->Format() != format)
+	{
+		src = new  ::ul3::FBlock(Block.m->GetBlock()->Width(), Block.m->GetBlock()->Height(), format);
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), src);
+		filterDst = src;
+	}
+
+	::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src, filterDst, [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
+	{
+		::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
+		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
+
+		dstProxy.SetLF(CurveL->GetFloatValue(srcProxy.LF()));
+		dstProxy.SetaF(CurveA->GetFloatValue(srcProxy.aF()));
+		dstProxy.SetbF(CurveB->GetFloatValue(srcProxy.bF()));
+
+		if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
+			dstProxy.SetAlphaF(0.0f);
+		else
+			dstProxy.SetAlphaF(CurveAlpha->GetFloatValue(srcProxy.AlphaF()));
+	});
+
+	if (filterDst != dst->GetBlock())
+	{
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, filterDst, dst->GetBlock());
+	}
+
+	if (src != Block.m->GetBlock())
+		delete src;
+
+	return FOdysseyBlockProxy(dst);
+}
 
 //static
 int

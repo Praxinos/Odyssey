@@ -61,6 +61,10 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor", meta = ( DisplayName="Get OdysseyBrushColor Alpha" ))
     static float GetAlpha(FOdysseyBrushColor Color);
 
+	//Interpolates an OdysseyBrushColor between 2 colors
+	UFUNCTION(BlueprintPure, Category = "OdysseyBrushColor", meta = (DisplayName = "Lerp (OdysseyBrushColor)"))
+	static FOdysseyBrushColor Lerp(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision);
+
     //Convert the Odyssey Brush Color to the specified Format and Precision
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor", meta = ( DisplayName="Convert OdysseyBrushColor to Format" ))
     static FOdysseyBrushColor ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision);
@@ -86,6 +90,10 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     //Make Odyssey Brush color from CMYKA values (Integers).
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
     static FOdysseyBrushColor MakeOdysseyBrushColorFromCMYK( int C, int M, int Y, int K, int A = 255 );
+
+	//Make Odyssey Brush color from LabA values (Integers).
+	UFUNCTION(BlueprintPure, Category = "OdysseyBrushColor")
+	static FOdysseyBrushColor MakeOdysseyBrushColorFromLab(int L, int A, int B, int Alpha = 255);
 
     /* Make F */
     
@@ -134,6 +142,10 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     //Breaks Odyssey Brush Color input into CMYKA (Integers).
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor")
     static void BreakOdysseyBrushColorIntoCMYK( const  FOdysseyBrushColor& Color, int& C, int& M, int& Y, int& K, int& A );
+
+	//Breaks Odyssey Brush Color input into LABA (Integers).
+	UFUNCTION(BlueprintPure, Category = "OdysseyBrushColor")
+	static void BreakOdysseyBrushColorIntoLabA(const  FOdysseyBrushColor& Color, int& L, int& A, int& B, int& Alpha);
 
     /* Break F */
     

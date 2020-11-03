@@ -6,6 +6,8 @@
 #include "CoreTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/ObjectMacros.h"
+#include "Curves/CurveFloat.h"
+
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushFormat.h"
 #include "Proxies/OdysseyBrushBlending.h"
@@ -166,6 +168,95 @@ public:
 								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision
                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+
+    //Adjust the alpha component of each pixel in the given Block according to the given curve
+    //Abscissa represents the actual alpha value.
+    //Ordinate represents the adjusted alpha value.
+    UFUNCTION(BlueprintPure
+             , Category="OdysseyBlockReference"
+             , meta = ( DefaultToSelf="BrushContext", DisplayName = "Adjust Block Alpha" ) )
+    static FOdysseyBlockProxy AdjustAlpha( FOdysseyBlockProxy Block
+                                         , UCurveFloat* Curve
+                                         , bool PreserveNullAlpha = true);
+
+	//Adjust the RGBA components of each pixel in the given Block according to the given curves
+	//Abscissa represents the actual component value.
+	//Ordinate represents the adjusted component value.
+	UFUNCTION(BlueprintPure
+			, Category = "OdysseyBlockReference"
+			, meta = (DefaultToSelf = "BrushContext", DisplayName = "Adjust Block RGBA"))
+	static FOdysseyBlockProxy AdjustRGBA(FOdysseyBlockProxy Block
+		, UCurveFloat* CurveR
+		, UCurveFloat* CurveG
+		, UCurveFloat* CurveB
+		, UCurveFloat* CurveAlpha
+		, bool PreserveNullAlpha = true);
+
+
+	//Adjust the GreyA components of each pixel in the given Block according to the given curves
+	//Abscissa represents the actual component value.
+	//Ordinate represents the adjusted component value.
+	UFUNCTION(BlueprintPure
+		, Category = "OdysseyBlockReference"
+		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Adjust Block GreyA"))
+		static FOdysseyBlockProxy AdjustGreyA(FOdysseyBlockProxy Block
+			, UCurveFloat* CurveGrey
+			, UCurveFloat* CurveAlpha
+			, bool PreserveNullAlpha = true);
+
+
+	//Adjust the HSVA components of each pixel in the given Block according to the given curves
+	//Abscissa represents the actual component value.
+	//Ordinate represents the adjusted component value.
+	UFUNCTION(BlueprintPure
+		, Category = "OdysseyBlockReference"
+		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Adjust Block HSVA"))
+		static FOdysseyBlockProxy AdjustHSVA(FOdysseyBlockProxy Block
+			, UCurveFloat* CurveH
+			, UCurveFloat* CurveS
+			, UCurveFloat* CurveV
+			, UCurveFloat* CurveAlpha
+			, bool PreserveNullAlpha = true);
+
+	//Adjust the HSLA components of each pixel in the given Block according to the given curves
+	//Abscissa represents the actual component value.
+	//Ordinate represents the adjusted component value.
+	UFUNCTION(BlueprintPure
+		, Category = "OdysseyBlockReference"
+		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Adjust Block HSLA"))
+		static FOdysseyBlockProxy AdjustHSLA(FOdysseyBlockProxy Block
+			, UCurveFloat* CurveH
+			, UCurveFloat* CurveS
+			, UCurveFloat* CurveL
+			, UCurveFloat* CurveAlpha
+			, bool PreserveNullAlpha = true);
+
+	//Adjust the CMYKA components of each pixel in the given Block according to the given curves
+	//Abscissa represents the actual component value.
+	//Ordinate represents the adjusted component value.
+	UFUNCTION(BlueprintPure
+		, Category = "OdysseyBlockReference"
+		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Adjust Block CMYKA"))
+		static FOdysseyBlockProxy AdjustCMYKA(FOdysseyBlockProxy Block
+			, UCurveFloat* CurveC
+			, UCurveFloat* CurveM
+			, UCurveFloat* CurveY
+			, UCurveFloat* CurveK
+			, UCurveFloat* CurveAlpha
+			, bool PreserveNullAlpha = true);
+
+	//Adjust the LabA components of each pixel in the given Block according to the given curves
+	//Abscissa represents the actual component value.
+	//Ordinate represents the adjusted component value.
+	UFUNCTION(BlueprintPure
+		, Category = "OdysseyBlockReference"
+		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Adjust Block LabA"))
+		static FOdysseyBlockProxy AdjustLabA(FOdysseyBlockProxy Block
+			, UCurveFloat* CurveL
+			, UCurveFloat* CurveA
+			, UCurveFloat* CurveB
+			, UCurveFloat* CurveAlpha
+			, bool PreserveNullAlpha = true);
 
     //---
 

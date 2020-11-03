@@ -18,6 +18,7 @@ ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelForma
 		case EOdysseyPixelFormat::kGrey: format = ULIS3_FORMAT_G8; break;
 		case EOdysseyPixelFormat::kHSL: format = ULIS3_FORMAT_HSL8; break;
 		case EOdysseyPixelFormat::kHSV: format = ULIS3_FORMAT_HSV8; break;
+		case EOdysseyPixelFormat::kCMYK: format = ULIS3_FORMAT_CMYK8; break;
 		case EOdysseyPixelFormat::kLab: format = ULIS3_FORMAT_Lab8; break;
 
 		case EOdysseyPixelFormat::kRGBA:
@@ -29,6 +30,7 @@ ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelForma
 		case EOdysseyPixelFormat::kGreyA: format = ULIS3_FORMAT_GA8; break;
 		case EOdysseyPixelFormat::kHSLA: format = ULIS3_FORMAT_HSLA8; break;
 		case EOdysseyPixelFormat::kHSVA: format = ULIS3_FORMAT_HSVA8; break;
+		case EOdysseyPixelFormat::kCMYKA: format = ULIS3_FORMAT_CMYKA8; break;
 		case EOdysseyPixelFormat::kLabA: format = ULIS3_FORMAT_LabA8; break;
 
 		default: break;
@@ -74,12 +76,14 @@ OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat)
 		case ULIS3_FORMAT_G8: return EOdysseyPixelFormat::kGrey;
 		case ULIS3_FORMAT_HSL8: return EOdysseyPixelFormat::kHSL;
 		case ULIS3_FORMAT_HSV8: return EOdysseyPixelFormat::kHSV;
+		case ULIS3_FORMAT_CMYK8: return EOdysseyPixelFormat::kCMYK;
 		case ULIS3_FORMAT_Lab8: return EOdysseyPixelFormat::kLab;
 		case ULIS3_FORMAT_BGRA8: return EOdysseyPixelFormat::kRGBA;
 		case ULIS3_FORMAT_RGBA16: return EOdysseyPixelFormat::kRGBA;
 		case ULIS3_FORMAT_GA8: return EOdysseyPixelFormat::kGreyA;
 		case ULIS3_FORMAT_HSLA8: return EOdysseyPixelFormat::kHSLA;
 		case ULIS3_FORMAT_HSVA8: return EOdysseyPixelFormat::kHSVA;
+		case ULIS3_FORMAT_CMYKA8: return EOdysseyPixelFormat::kCMYKA;
 		case ULIS3_FORMAT_LabA8: return EOdysseyPixelFormat::kLabA;
 
 		default: break;
