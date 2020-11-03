@@ -128,6 +128,7 @@ public:
                                     , FOdysseyBlockProxy Block
                                     , FOdysseyBrushColor Color
                                     , FOdysseyBrushRect Area
+                                    , bool PreserveAlpha = false
                                     , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kCanvasFormat
                                     , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::kCanvasPrecision);
 
