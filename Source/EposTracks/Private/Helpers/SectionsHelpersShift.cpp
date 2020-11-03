@@ -14,7 +14,7 @@ SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFr
     if( !iSections.Num() )
     {
         FShiftResult shift_result;
-        shift_result.mNewRange = TRange<FFrameNumber>( iStartTime, iStartTime + iDuration );
+        shift_result.mNewRange = TRange<FFrameNumber>( 0, 0 + iDuration );
         shift_result.mFillGap = true;
         shift_result.mGap = shift_result.mNewRange; // It doesn't go in the loop ShiftFollowingSections()
         return shift_result;
