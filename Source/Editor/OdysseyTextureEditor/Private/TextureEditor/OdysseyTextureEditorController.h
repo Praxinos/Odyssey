@@ -36,6 +36,7 @@ public:
 	void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
 	void OnLayerStackStructureChanged();
 	void OnLayerStackImageResultChanged();
+    void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
 	void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     void OnExportLayersAsTextures() override;

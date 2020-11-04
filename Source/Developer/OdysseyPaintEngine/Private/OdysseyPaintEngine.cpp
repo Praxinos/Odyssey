@@ -28,7 +28,8 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
-    : mEditedBlock( NULL )
+    : mIsLocked(false)
+    , mEditedBlock( NULL )
     , mStrokeBlock(NULL)
 	, mPreviewBlock(NULL)
     , mBrushInstance( NULL )
@@ -290,7 +291,7 @@ FOdysseyPaintEngine::SmoothingEndStroke()
 void
 FOdysseyPaintEngine::Tick()
 {
-    if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock )
+    if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock || mIsLocked )
         return;
 
     SmoothingCatchUpTick();
@@ -363,6 +364,12 @@ FOdysseyBlock*
 FOdysseyPaintEngine::PreviewBlock()
 {
     return mPreviewBlock;
+}
+
+void
+FOdysseyPaintEngine::SetLock(bool iValue)
+{
+    mIsLocked = iValue;
 }
 
 void
@@ -625,7 +632,8 @@ FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdys
     if( !mBrushInstance ||
         !mStrokeBlock ||
         !mPreviewBlock ||
-        mIsPendingEndStroke )
+        mIsPendingEndStroke ||
+        mIsLocked )
         return;
 
 	//TODO: Maybe find another way to keep the preview block uptodate, because this is potentially heavy
@@ -660,7 +668,8 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint )
     if( !mBrushInstance ||
         !mStrokeBlock ||
         !mPreviewBlock ||
-        mIsPendingEndStroke )
+        mIsPendingEndStroke ||
+        mIsLocked )
         return;
 
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
@@ -757,13 +766,20 @@ FOdysseyPaintEngine::ComputeInterpolation()
 void
 FOdysseyPaintEngine::EndStroke()
 {
+    if( !mBrushInstance ||
+        !mStrokeBlock ||
+        !mPreviewBlock ||
+        mIsPendingEndStroke ||
+        mIsLocked )
+        return;
+        
     mIsPendingEndStroke = true;
 }
 
 void
 FOdysseyPaintEngine::AbortStroke()
 {
-    if( !mStrokeBlock || !mPreviewBlock )
+    if( !mStrokeBlock || !mPreviewBlock || mIsLocked )
         return;
 
     mIsPendingEndStroke = false;

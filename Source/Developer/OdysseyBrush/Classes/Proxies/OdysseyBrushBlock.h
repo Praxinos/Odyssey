@@ -110,7 +110,7 @@ public:
 	UFUNCTION(BlueprintPure
 		, Category = "OdysseyBlockReference"
 		, meta = (DefaultToSelf = "BrushContext", DisplayName = "Blend Block With Color"))
-		static FOdysseyBlockProxy BlendColor(UOdysseyBrushAssetBase* BrushContext
+	static FOdysseyBlockProxy BlendColor(UOdysseyBrushAssetBase* BrushContext
 			, FOdysseyBrushColor Color
 			, FOdysseyBlockProxy Back
 			, FOdysseyBrushRect Area

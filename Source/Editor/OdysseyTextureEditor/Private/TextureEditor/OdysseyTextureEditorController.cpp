@@ -24,6 +24,7 @@ FOdysseyTextureEditorController::~FOdysseyTextureEditorController()
     mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
     mData->LayerStack()->OnStructureChanged().RemoveAll(this);
     mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
+	mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
 
 	TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
 	if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
@@ -67,6 +68,8 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
     if( !(mData->LayerStack()->OnImageResultChanged().IsBound()) )
 	    mData->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackImageResultChanged);
 
+    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()) )
+	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
     	
     // Set Image Layer as the current Layer
     TArray<TSharedPtr<IOdysseyLayer>> layers;
@@ -205,6 +208,7 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdy
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged);
+    mData->PaintEngine()->SetLock( imageLayer->IsLocked() );
 }
 
 void
@@ -212,6 +216,15 @@ FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldVal
 {
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mData->LayerStack()->GetCurrentLayer());
     mData->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+}
+
+void
+FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
+{
+    if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
+    {
+        mData->PaintEngine()->SetLock(iLayer->IsLocked());
+    }
 }
 
 void

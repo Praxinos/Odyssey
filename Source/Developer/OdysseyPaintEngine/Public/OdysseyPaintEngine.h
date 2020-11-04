@@ -33,6 +33,8 @@ public:
 
 public:
     // Public API
+    void SetLock(bool iValue);
+
     void InterruptDelay();
     void Tick();
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
@@ -113,6 +115,8 @@ private:
 
 private:
     // Private Data Members
+    bool                                mIsLocked;
+
 	FOdysseyBlock*                      mEditedBlock; // Holds th original block to edit
 	FOdysseyBlock*                      mStrokeBlock; //Holds the stroke tiles
     FOdysseyBlock*                      mPreviewBlock; //Holds the stroke tiles
