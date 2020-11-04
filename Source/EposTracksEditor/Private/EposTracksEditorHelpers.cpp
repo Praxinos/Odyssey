@@ -4,11 +4,18 @@
 #include "EposTracksEditorHelpers.h"
 
 #include "AssetRegistryModule.h"
+#include "AssetToolsModule.h"
+#include "IAssetTools.h"
+#include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Shot/ShotSequence.h"
+
+#define LOCTEXT_NAMESPACE "EposTracksEditorHelpers"
 
 // Same functions as in MovieSceneToolHelpers.cpp
 // Convert ULevelSequence/UMovieSceneCinematicShotSection to UBoardSequence/UMovieSceneCinematicBoardSection
@@ -90,7 +97,6 @@ EposTracksEditorHelpers::GenerateNewBoardPath( UMovieScene* iSequenceMovieScene,
     return newShotPath;
 }
 
-
 FString
 EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime )
 {
@@ -167,3 +173,183 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
     // Default case
     return MovieSceneToolHelpers::ComposeShotName( projectSettings->ShotPrefix, projectSettings->FirstShotNumber, projectSettings->FirstTakeNumber );
 }
+
+//---
+
+//static
+UMovieSceneCinematicBoardTrack*
+EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return nullptr;
+
+    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
+    if( !focusedMovieScene )
+        return nullptr;
+
+    if( focusedMovieScene->IsReadOnly() )
+    {
+        return nullptr;
+    }
+
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( boardTrack != nullptr )
+    {
+        return boardTrack;
+    }
+
+    const FScopedTransaction transaction( LOCTEXT( "AddCinematicBoardTrack_Transaction", "Add Board Track" ) );
+    focusedMovieScene->Modify();
+
+    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
+    ensure( newTrack );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+
+    return newTrack;
+}
+
+//static
+UMovieSceneSubSection*
+EposTracksEditorHelpers::CreateBoardInternal( ISequencer* iSequencer, FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneCinematicBoardSection* iBoardToDuplicate )
+{
+    FString newBoardPath;
+
+    if( iBoardToDuplicate != nullptr )
+    {
+        // If duplicating a board, use that board's path
+        newBoardPath = FPaths::GetPath( iBoardToDuplicate->GetSequence()->GetPathName() );
+    }
+    else
+    {
+        newBoardPath = EposTracksEditorHelpers::GenerateNewBoardPath( iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewBoardName );
+    }
+
+    // Create a new level sequence asset with the appropriate name
+    IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+
+    UObject* newAsset = nullptr;
+    for( TObjectIterator<UClass> It; It; ++It )
+    {
+        UClass* currentClass = *It;
+        if( currentClass->IsChildOf( UFactory::StaticClass() ) && !( currentClass->HasAnyClassFlags( CLASS_Abstract ) ) )
+        {
+            UFactory* factory = Cast<UFactory>( currentClass->GetDefaultObject() );
+            if( factory->CanCreateNew() && factory->ImportPriority >= 0 && ( factory->SupportedClass == UBoardSequence::StaticClass() || factory->SupportedClass == UShotSequence::StaticClass() ) )
+            {
+                if( iBoardToDuplicate != nullptr )
+                {
+                    newAsset = assetTools.DuplicateAssetWithDialog( ioNewBoardName, newBoardPath, iBoardToDuplicate->GetSequence() );
+                }
+                else
+                {
+                    if( factory->SupportedClass == UBoardSequence::StaticClass() )
+                        newAsset = assetTools.CreateAssetWithDialog( ioNewBoardName, newBoardPath, UBoardSequence::StaticClass(), factory );
+                    else
+                        newAsset = assetTools.CreateAssetWithDialog( ioNewBoardName, newBoardPath, UShotSequence::StaticClass(), factory );
+
+                }
+                break;
+            }
+        }
+    }
+
+    if( newAsset == nullptr )
+    {
+        return nullptr;
+    }
+
+    UMovieSceneSequence* newSequence = Cast<UMovieSceneSequence>( newAsset );
+
+    int32 duration = UE::MovieScene::DiscreteSize( iBoardToDuplicate ? iBoardToDuplicate->GetRange() : newSequence->GetMovieScene()->GetPlaybackRange() );
+
+    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+
+    // Create a board section. 
+    UMovieSceneSubSection* newSection = boardTrack->AddSequence( newSequence, iNewBoardStartTime, duration );
+
+    return newSection;
+}
+
+//---
+
+//static
+void
+EposTracksEditorHelpers::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    const FScopedTransaction transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
+
+    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+    FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), iFrameNumber );
+
+    UMovieSceneSubSection* newBoard = EposTracksEditorHelpers::CreateBoardInternal( iSequencer, newBoardName, iFrameNumber );
+    if( newBoard )
+    {
+        //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+    }
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    iSequencer->EmptySelection();
+    iSequencer->SelectSection( newBoard );
+    iSequencer->ThrobSectionSelection();
+}
+
+//static
+void
+EposTracksEditorHelpers::InsertFiller( ISequencer* iSequencer )
+{
+    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
+
+    const FScopedTransaction transaction( LOCTEXT( "InsertFiller_Transaction", "Insert Filler" ) );
+
+    FQualifiedFrameTime currentTime = iSequencer->GetLocalTime();
+
+    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+
+    int32 duration = ( projectSettings->DefaultDuration * currentTime.Rate ).FrameNumber.Value;
+
+    UMovieSceneSequence* nullSequence = nullptr;
+
+    UMovieSceneSubSection* newSection = boardTrack->AddSequence( nullSequence, currentTime.Time.FrameNumber, duration );
+
+    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
+
+    newBoardSection->SetBoardDisplayName( FText( LOCTEXT( "Filler", "Filler" ) ).ToString() );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    iSequencer->EmptySelection();
+    iSequencer->SelectSection( newSection );
+    iSequencer->ThrobSectionSelection();
+}
+
+//static
+void
+EposTracksEditorHelpers::DuplicateBoard( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection )
+{
+    const FScopedTransaction transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
+
+    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+
+    FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
+    FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), startTime );
+
+    // Duplicate the board and put it on the next available row
+    UMovieSceneSubSection* newBoard = EposTracksEditorHelpers::CreateBoardInternal( iSequencer, newBoardName, startTime, iSection );
+    if( newBoard )
+    {
+        //newBoard->SetRange( iSection->GetRange() );
+        //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+        newBoard->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
+        newBoard->Parameters.TimeScale = iSection->Parameters.TimeScale;
+        newBoard->SetPreRollFrames( iSection->GetPreRollFrames() );
+
+        iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+        iSequencer->EmptySelection();
+        iSequencer->SelectSection( newBoard );
+        iSequencer->ThrobSectionSelection();
+    }
+}
+
+
+#undef LOCTEXT_NAMESPACE

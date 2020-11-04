@@ -68,14 +68,10 @@ public:
     virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
     virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
 
-    /*
-     * Insert board.
-     */
+    /** Insert board. */
     void InsertBoard();
 
-    /*
-     * Insert filler.
-     */
+    /** Insert filler. */
     void InsertFiller();
 
     /*
@@ -113,18 +109,6 @@ public:
     */
     //void SwitchTake( UObject* iTakeObject );
 
-private:
-
-    /*
-     * Create board
-     *
-     * @param NewBoardName The new board name.
-     * @param NewBoardStartTime The time to start the new board at.
-     * @param BoardToDuplicate The board to duplicate.
-     * @return The new board.
-     */
-    UMovieSceneSubSection* CreateBoardInternal( FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneCinematicBoardSection* iBoardToDuplicate = nullptr );
-
 
 private:
 
@@ -142,9 +126,6 @@ private:
 
     /** Callback for executing a menu entry in the "Add Board" combo button when enter pressed. */
     void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData );
-
-    /** Find or create a cinematic board track in the currently focused movie scene. */
-    UMovieSceneCinematicBoardTrack* FindOrCreateCinematicBoardTrack();
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
     FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame );
