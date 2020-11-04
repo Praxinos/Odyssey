@@ -37,6 +37,7 @@ FOdysseyFlipbookEditorController::~FOdysseyFlipbookEditorController()
 		mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
         mData->LayerStack()->OnStructureChanged().RemoveAll(this);
         mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
+	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
 
         TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
         if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
@@ -114,6 +115,9 @@ FOdysseyFlipbookEditorController::InitLayerStack()
 
     if( !(mData->LayerStack()->OnImageResultChanged().IsBound()) )
 	    mData->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged);
+
+    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()) )
+	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsLockedChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -273,6 +277,15 @@ FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldVa
 {
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mData->LayerStack()->GetCurrentLayer());
     mData->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+}
+
+void
+FOdysseyFlipbookEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
+{
+    if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
+    {
+        mData->PaintEngine()->SetLock(iLayer->IsLocked());
+    }
 }
 
 void
@@ -553,6 +566,7 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 			mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
             mData->LayerStack()->OnStructureChanged().RemoveAll(this);
             mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
+	        mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);;
 		}
 
 		//Set new keyframe
