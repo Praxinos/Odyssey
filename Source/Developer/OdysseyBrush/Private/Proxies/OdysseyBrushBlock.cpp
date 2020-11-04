@@ -176,24 +176,20 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor( UOdysseyBrushAssetBase* BrushCont
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = Sample.m->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-	::ul3::FBlock* back = Sample.m->GetBlock();
 
-	if (back->Format() != format)
+	if (Sample.m->Format() != format)
 	{
-		::ul3::FBlock* conv = new ::ul3::FBlock(back->Width(), back->Height(), format);
-		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, conv);
-		back = conv;
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Sample.m->GetBlock(), dst->GetBlock());
+	}
+	else
+	{
+		::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Sample.m->GetBlock(), dst->GetBlock(), dst->GetBlock()->Rect(), ::ul3::FVec2I( 0, 0 ) );
 	}
 
-    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, dst->GetBlock(), back->Rect(), ::ul3::FVec2I( 0, 0 ) );
-
-    if( !Area.IsInitialized() || Area.Width() > 0 || Area.Height() > 0 )
+    if( !Area.IsInitialized() || (Area.Width() > 0 && Area.Height() > 0) )
     {
         ::ul3::BlendColor( hULIS.ThreadPool(), /* ULIS3_BLOCKING, */ perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Color.GetValue(), dst->GetBlock(), Area.IsInitialized() ? Area.GetValue() : dst->GetBlock()->Rect(), static_cast< ::ul3::eBlendingMode >( BlendingMode ), static_cast< ::ul3::eAlphaMode >( AlphaMode ), Opacity);
     }
-
-	if (Sample.m->GetBlock() != back)
-		delete back;
 
     return FOdysseyBlockProxy(dst);
 }
