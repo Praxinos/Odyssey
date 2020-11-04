@@ -72,6 +72,8 @@ public:
     void           OnExportLayersAsTextures() override;
     void           OnImportTexturesAsLayers() override;
 
+	virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
+
 protected:
 	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;

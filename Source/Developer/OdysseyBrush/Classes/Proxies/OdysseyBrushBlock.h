@@ -101,7 +101,7 @@ public:
     //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
              , Category="OdysseyBlockReference"
-             , meta = ( DefaultToSelf="BrushContext", DeprecatedFunction, DeprecationMessage = "Use Fill" ) )
+             , meta = ( DefaultToSelf="BrushContext", DeprecatedFunction, DeprecationMessage = "Use Fill Block With Color" ) )
     static FOdysseyBlockProxy FillPreserveAlpha(  UOdysseyBrushAssetBase* BrushContext
                                                 , FOdysseyBlockProxy Sample
                                                 , FOdysseyBrushColor Color );

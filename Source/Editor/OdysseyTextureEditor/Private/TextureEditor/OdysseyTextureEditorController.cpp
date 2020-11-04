@@ -219,6 +219,22 @@ FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldVal
 }
 
 void
+FOdysseyTextureEditorController::HandleAlphaModeModifierChanged( int32 iValue )
+{
+    if (!mData->LayerStack())
+        return;
+
+    if (!mData->LayerStack()->GetCurrentLayer())
+        return;
+
+    if( !( mData->LayerStack()->GetCurrentLayer()->GetType() == IOdysseyLayer::eType::kImage ) )
+        return;
+
+	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mData->LayerStack()->GetCurrentLayer());
+    mData->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+}
+
+void
 FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
 {
     if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))

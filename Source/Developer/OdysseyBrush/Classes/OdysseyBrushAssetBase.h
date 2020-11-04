@@ -194,11 +194,11 @@ public:
     FVector2D GetJolt();
 
     //Gets Delta Position between this event and the last.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
     FVector2D GetDeltaPosition();
 
     //Gets Delta Time in micro seconds between this event and the last.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrush" )
+    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
     int GetDeltaTime();
 
     //Returns the keyboard and mouse keys down at this point.
@@ -259,8 +259,8 @@ public:
     FOdysseyBrushRect GetCanvasRect();
 
     //Gets Stroke Block.
-    UFUNCTION( BlueprintCallable, Category = "OdysseyBrush")
-    FOdysseyBlockProxy GetStrokeBlock( int X, int Y, int Width, int Height );
+    UFUNCTION( BlueprintCallable, Category = "OdysseyBrushStroke")
+    FOdysseyBlockProxy GetStrokeBlock( FOdysseyBrushRect Area );
 
 public:
     // Odyssey Brush Native events

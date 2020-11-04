@@ -409,27 +409,35 @@ UOdysseyBrushAssetBase::GetCanvasRect()
 
 /** Get Stroke Buffer*/
 FOdysseyBlockProxy
-UOdysseyBrushAssetBase::GetStrokeBlock( int iX, int iY, int iWidth, int iHeight )
+UOdysseyBrushAssetBase::GetStrokeBlock( FOdysseyBrushRect Area )
 {
-	FOdysseyBlock* src = state.target_temp_buffer;
-	::ul3::tFormat format = src ? src->Format() : ULIS3_FORMAT_RGBA8;
-	
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(iWidth, iHeight, format));
+    if (Area.IsInitialized() && (Area.Width() <= 0 || Area.Height() <=0))
+        return FOdysseyBlockProxy::MakeNullProxy();
 
-    if (!src)
+    if (!state.target_temp_buffer)
     {
-        ::ul3::ClearRaw(dst->GetBlock());
-        return FOdysseyBlockProxy(dst);
+        if (Area.IsInitialized())
+        {
+            TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(Area.Width(), Area.Height(), ULIS3_FORMAT_RGBA8));
+            ::ul3::ClearRaw(dst->GetBlock());
+            return dst;
+        }
+        return FOdysseyBlockProxy::MakeNullProxy();
     }
-
+        
+	FOdysseyBlock* src = state.target_temp_buffer;
+	::ul3::tFormat format = src->Format();
+	
+    ::ul3::FRect rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(rect.w, rect.h, format));
+    
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 MT_bit = rect.h > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-    ::ul3::FRect given_rect( iX, iY, iWidth, iHeight );
 
 	//be sure we copy only the needed part
-	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
-    ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
+	::ul3::FRect src_rect = rect & src->GetBlock()->Rect();
+    ::ul3::FVec2I dst_pos(src_rect.x - rect.x, src_rect.y - rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
 	return FOdysseyBlockProxy(dst);

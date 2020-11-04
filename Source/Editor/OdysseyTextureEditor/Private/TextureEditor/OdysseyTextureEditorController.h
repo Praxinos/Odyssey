@@ -56,6 +56,8 @@ public:
     virtual void   OnDuplicateCurrentLayer() override;
     virtual void   OnDeleteCurrentLayer() override;
 
+    virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
+
 protected:
 	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;

@@ -12,7 +12,7 @@
 
 //static
 void
-UOdysseyBrushMathLibrary::ConvertPolarToCartesianCoordinate( float AngleRad, float  Radius, float& DeltaX, float& DeltaY )
+UOdysseyBrushMathLibrary::ConvertPolarToCartesianCoordinates( float AngleRad, float  Radius, float& DeltaX, float& DeltaY )
 {
     float cosa = cos( AngleRad );
     float sina = sin( AngleRad );
@@ -22,7 +22,7 @@ UOdysseyBrushMathLibrary::ConvertPolarToCartesianCoordinate( float AngleRad, flo
 
 //static
 void
-UOdysseyBrushMathLibrary::ConvertCartesianToPolarCoordinate( float DeltaX, float DeltaY, float& AngleRad, float& Radius )
+UOdysseyBrushMathLibrary::ConvertCartesianToPolarCoordinates( float DeltaX, float DeltaY, float& AngleRad, float& Radius )
 {
     AngleRad = atan2(DeltaY, DeltaX);
     Radius = sqrt(DeltaY * DeltaY + DeltaX * DeltaX);

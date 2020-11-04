@@ -50,7 +50,7 @@ class ODYSSEYBRUSH_API UOdysseyTransformProxyLibrary : public UBlueprintFunction
 
 public:
     //Sends a neutral value.
-    UFUNCTION(BlueprintPure, Category="OdysseyTransform")
+    UFUNCTION(BlueprintPure, Category="OdysseyMatrix")
     static FOdysseyMatrix MakeIdentityMatrix();
 
     UFUNCTION(BlueprintPure, Category="OdysseyMatrix")
