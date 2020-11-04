@@ -25,7 +25,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     mArrangeSectionsHandle = FEposTracksModule::GetTracksCustomizationManager().Register( FOnArrangeSections::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer ) );
 
-    BindCommands( mSequencer->GetCommandBindings() );
+    ProcessCommands( mSequencer->GetCommandBindings(), kMap );
 
     //---
 
@@ -50,6 +50,8 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 {
     FEposTracksModule::GetTracksCustomizationManager().Unregister( mArrangeSectionsHandle );
 
+    ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+
     //---
 
     mSequencer = nullptr;
@@ -59,26 +61,46 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 //---
 
 void
-FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> CommandList )
+FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap )
 {
-    CommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().ArrangeShotsManually,
-        FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::Manually ),
-        FCanExecuteAction::CreateLambda([] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
-    );
-    CommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-        FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnOneRow ),
-        FCanExecuteAction::CreateLambda([] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
-    );
-    CommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-        FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnTwoRowsShifted ),
-        FCanExecuteAction::CreateLambda([] { return true; }),
-        FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
-    );
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FBoardSequenceEditorCommands::Get().ArrangeShotsManually,
+            FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::Manually ),
+            FCanExecuteAction::CreateLambda([] { return true; }),
+            FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
+        );
+    else
+        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsManually );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
+            FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnOneRow ),
+            FCanExecuteAction::CreateLambda([] { return true; }),
+            FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
+        );
+    else
+        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
+            FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnTwoRowsShifted ),
+            FCanExecuteAction::CreateLambda([] { return true; }),
+            FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
+        );
+    else
+        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows );
+
+    //---
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
+            FExecuteAction::CreateStatic( &BoardSequenceHelpers::NewSectionWithBoardAtCurrentFrame, mSequencer ) );
+    else
+        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
 }
 
 //---
@@ -130,6 +152,10 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         ArrangeShotsName,
         ArrangeShotsToolTip,
         ArrangeShotsIcon );
+
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
 
     ToolbarBuilder.AddSeparator();
 }

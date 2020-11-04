@@ -26,7 +26,12 @@ private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeArrangeShotsMenu();
 
-    void BindCommands( TSharedPtr<FUICommandList> CommandList );
+    enum EMapping
+    {
+        kMap,
+        kUnmap,
+    };
+    void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
 
 private:
     //bool OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );

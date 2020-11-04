@@ -22,7 +22,12 @@ public:
 private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
 
-    void BindCommands( TSharedPtr<FUICommandList> CommandList );
+    enum EMapping
+    {
+        kMap,
+        kUnmap,
+    };
+    void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
 
 private:
     ESequencerDropResult OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp );

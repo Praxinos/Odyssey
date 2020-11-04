@@ -55,6 +55,9 @@ FEposEditorStyle::FEposEditorStyle()
     Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon48x48 ) );          // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
     Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows.Small", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon24x24 ) );    // in the toolbar, stretch to the size Icon..x..
 
+    Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon48x48 ) );
+    Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon24x24 ) );
+
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }
 

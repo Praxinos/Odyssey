@@ -19,6 +19,8 @@ FBoardSequenceEditorCommands::RegisterCommands()
     UI_COMMAND( ArrangeShotsManually,   "Arrange Shots Manually", "Arrange shots manually", EUserInterfaceActionType::RadioButton, FInputChord() );
     UI_COMMAND( ArrangeShotsOnOneRow,   "Arrange Shots On One Row", "Arrange shots on a single row", EUserInterfaceActionType::RadioButton, FInputChord() );
     UI_COMMAND( ArrangeShotsOnTwoRows,  "Arrange Shots On Two Rows", "Arrange shots on 2 rows and shifted each other", EUserInterfaceActionType::RadioButton, FInputChord() );
+
+    UI_COMMAND( NewSectionWithBoardAtCurrentFrame,  "Create a new board at current frame", "Create a new board inside a new section at the current frame", EUserInterfaceActionType::RadioButton, FInputChord() );
 }
 
 #undef LOCTEXT_NAMESPACE

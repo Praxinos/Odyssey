@@ -7,6 +7,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 
+#include "EposTracksEditorHelpers.h"
 #include "Helpers/SectionsHelpersArrange.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposEditorSettings.h"
@@ -37,6 +38,13 @@ BoardSequenceHelpers::SetArrangeSections( ISequencer* iSequencer, EArrangeSectio
     settings->SaveConfig();
 
     BoardSequenceHelpers::ArrangeSections( iSequencer );
+}
+
+//static
+void
+BoardSequenceHelpers::NewSectionWithBoardAtCurrentFrame( ISequencer* iSequencer )
+{
+    EposTracksEditorHelpers::InsertBoard( iSequencer, iSequencer->GetLocalTime().Time.FrameNumber );
 }
 
 #undef LOCTEXT_NAMESPACE

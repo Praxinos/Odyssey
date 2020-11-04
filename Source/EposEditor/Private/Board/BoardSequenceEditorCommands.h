@@ -24,4 +24,6 @@ public:
 	TSharedPtr<FUICommandInfo> ArrangeShotsManually;
 	TSharedPtr<FUICommandInfo> ArrangeShotsOnOneRow;
 	TSharedPtr<FUICommandInfo> ArrangeShotsOnTwoRows;
+
+	TSharedPtr<FUICommandInfo> NewSectionWithBoardAtCurrentFrame;
 };

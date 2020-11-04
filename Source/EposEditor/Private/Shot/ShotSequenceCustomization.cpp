@@ -19,7 +19,7 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     //---
 
-    BindCommands( mSequencer->GetCommandBindings() );
+    ProcessCommands( mSequencer->GetCommandBindings(), kMap );
 
     //---
 
@@ -44,6 +44,8 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 void
 FShotSequenceCustomization::UnregisterSequencerCustomization()
 {
+    ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
+
     mSequencer = nullptr;
     mShotSequence = nullptr;
 }
@@ -51,24 +53,34 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
 //---
 
 void
-FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> CommandList )
+FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap )
 {
-    CommandList->MapAction(
-        FShotSequenceEditorCommands::Get().CreateCamera,
-        FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreateCamera, mSequencer ),
-        FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
-    );
-    CommandList->MapAction(
-        FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-        FExecuteAction::CreateStatic( &ShotSequenceHelpers::SnapCameraToViewport, mSequencer ),
-        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
-    );
-    
-    CommandList->MapAction(
-        FShotSequenceEditorCommands::Get().CreatePlane,
-        FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreatePlane, mSequencer ),
-        FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
-    );
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().CreateCamera,
+            FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreateCamera, mSequencer ),
+            FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+            FExecuteAction::CreateStatic( &ShotSequenceHelpers::SnapCameraToViewport, mSequencer ),
+            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().CreatePlane,
+            FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreatePlane, mSequencer ),
+            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
 }
 
 //---

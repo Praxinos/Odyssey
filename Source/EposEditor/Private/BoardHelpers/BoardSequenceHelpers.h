@@ -26,4 +26,11 @@ public:
     * @param EArrangeSections iArrangeSections is the new value.
     */
     static void SetArrangeSections( ISequencer* iSequencer, EArrangeSections iArrangeSections );
+
+    /**
+    *  Create a new board inside a new section at the current frame
+    *
+    * @param ISequencer* iSequencer to add section and board.
+    */
+    static void NewSectionWithBoardAtCurrentFrame( ISequencer* iSequencer );
 };

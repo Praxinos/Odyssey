@@ -51,6 +51,7 @@ public class EposEditor : ModuleRules
 				//
 				"Epos",
 				"EposTracks",
+				"EposTracksEditor",
 			}
 			);
 		
