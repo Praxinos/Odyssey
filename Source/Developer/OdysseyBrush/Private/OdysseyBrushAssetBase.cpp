@@ -379,6 +379,33 @@ UOdysseyBrushAssetBase::GetCanvasHeight()
         return  0;
 }
 
+EOdysseyPixelFormat
+UOdysseyBrushAssetBase::GetCanvasFormat()
+{
+    if (!state.target_temp_buffer)
+        return EOdysseyPixelFormat::kCanvasFormat;
+
+    return OdysseyPixelFormatFromULISFormat(state.target_temp_buffer->Format());
+}
+
+EOdysseyPixelFormatPrecision
+UOdysseyBrushAssetBase::GetCanvasPrecision()
+{
+    if (!state.target_temp_buffer)
+        return EOdysseyPixelFormatPrecision::kCanvasPrecision;
+
+    return OdysseyPixelFormatPrecisionFromULISFormat(state.target_temp_buffer->Format());
+}
+
+//static
+FOdysseyBrushRect
+UOdysseyBrushAssetBase::GetCanvasRect()
+{
+    if (!state.target_temp_buffer)
+        return FOdysseyBrushRect();
+
+    return FOdysseyBrushRect(state.target_temp_buffer->GetBlock()->Rect());
+}
 
 /** Get Stroke Buffer*/
 FOdysseyBlockProxy

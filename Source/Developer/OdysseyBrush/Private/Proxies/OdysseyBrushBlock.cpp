@@ -846,3 +846,13 @@ UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy iBlock
 
     return true;
 }
+
+//static
+FOdysseyBrushRect
+UOdysseyBlockProxyFunctionLibrary::GetRect(FOdysseyBlockProxy Block)
+{
+	if (!Block.m)
+		return FOdysseyBrushRect();
+
+	return FOdysseyBrushRect(Block.m->GetBlock()->Rect());
+}

@@ -299,4 +299,8 @@ public:
     //Get the Odyssey Block Reference Pixel Precision
     UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Precision" ))
     static EOdysseyPixelFormatPrecision GetPrecision(FOdysseyBlockProxy Block);
+
+    //Get the Odyssey Block Reference Rectangle
+    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Rectangle" ))
+    static FOdysseyBrushRect GetRect(FOdysseyBlockProxy Block);
 };

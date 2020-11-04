@@ -103,9 +103,12 @@ GetLayerByIndex( FOdysseyLayerStack* iStack, int iIndex )
 
 //static
 FOdysseyBlockProxy
-UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* iBrushContext, int iIndex, int iX, int iY, int iWidth, int iHeight )
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAssetBase* iBrushContext, int iIndex, FOdysseyBrushRect Area )
 {
     if( !iBrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    if( Area.IsInitialized() && (Area.Width() <= 0 || Area.Height() <= 0) )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
@@ -121,15 +124,15 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( iWidth, iHeight, src->Format() ));
+    ::ul3::FRect given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 MT_bit = given_rect.h > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
-    ::ul3::FRect given_rect( iX, iY, iWidth, iHeight );
 
-	//be sure we copy only the needed part
+	//be sure we copy only the needed part //TODO: Should be done directly in ULIS
 	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
     ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
@@ -139,9 +142,12 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
 
 //static
 FOdysseyBlockProxy
-UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetBase* iBrushContext, const FString& iName, int iX, int iY, int iWidth, int iHeight )
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetBase* iBrushContext, const FString& iName, FOdysseyBrushRect Area )
 {
     if( !iBrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    if( Area.IsInitialized() && (Area.Width() <= 0 || Area.Height() <= 0) )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
@@ -157,12 +163,13 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( iWidth, iHeight, src->Format() ));
+    ::ul3::FRect given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 MT_bit = given_rect.h > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
-    ::ul3::FRect given_rect( iX, iY, iWidth, iHeight );
 
 	//be sure we copy only the needed part
 	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
@@ -174,9 +181,12 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
 
 //static
 FOdysseyBlockProxy
-UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* iBrushContext, int iX, int iY, int iWidth, int iHeight )
+UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* iBrushContext, FOdysseyBrushRect Area )
 {
     if( !iBrushContext )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    if( Area.IsInitialized() && (Area.Width() <= 0 || Area.Height() <= 0) )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
@@ -192,12 +202,13 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( iWidth, iHeight, src->Format() ));
+    ::ul3::FRect given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = iHeight > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 MT_bit = given_rect.h > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
-    ::ul3::FRect given_rect( iX, iY, iWidth, iHeight );
 
 	//be sure we copy only the needed part
 	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();

@@ -15,6 +15,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
+#include "Proxies/OdysseyBrushRect.h"
 #include <ULIS3>
 #include "OdysseyBrushAssetBase.generated.h"
 
@@ -244,6 +245,18 @@ public:
     //Gets height of the Texture asset currently modified.
     UFUNCTION( BlueprintPure, Category="OdysseyBrushCanvas" )
     int  GetCanvasHeight();
+
+    //Get the Canvas Pixel Format
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushCanvas")
+    EOdysseyPixelFormat GetCanvasFormat();
+
+    //Get the Canvas Pixel Precision
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushCanvas")
+    EOdysseyPixelFormatPrecision GetCanvasPrecision();
+
+    //Get the Canvas Rectangle
+    UFUNCTION(BlueprintPure, Category="OdysseyBrushCanvas", meta = ( DisplayName="Get Canvas Rectangle" ))
+    FOdysseyBrushRect GetCanvasRect();
 
     //Gets Stroke Block.
     UFUNCTION( BlueprintCallable, Category = "OdysseyBrush")
