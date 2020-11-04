@@ -17,12 +17,12 @@
   "Modules": [
     {
       "Name": "Epos",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
       "Name": "EposTracks",
-      "Type": "Runtime",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
     {
