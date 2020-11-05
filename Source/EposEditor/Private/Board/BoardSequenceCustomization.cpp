@@ -6,10 +6,10 @@
 #include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
-#include "BoardHelpers/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposTracksEditorHelpers.h"
 #include "EposTracksModule.h"
-#include "Settings/EposEditorSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
 
@@ -23,7 +23,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     //---
 
-    mArrangeSectionsHandle = FEposTracksModule::GetTracksCustomizationManager().Register( FOnArrangeSections::CreateStatic( &BoardSequenceHelpers::ArrangeSections, mSequencer ) );
+    mArrangeSectionsHandle = FEposTracksModule::GetTracksCustomizationManager().Register( FOnArrangeSections::CreateRaw( this, &FBoardSequenceCustomization::ArrangeSections ) );
 
     ProcessCommands( mSequencer->GetCommandBindings(), kMap );
 
@@ -66,9 +66,9 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsManually,
-            FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::Manually ),
+            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SetArrangeSections, EArrangeSections::Manually ),
             FCanExecuteAction::CreateLambda([] { return true; }),
-            FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
+            FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsManually );
@@ -76,9 +76,9 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-            FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnOneRow ),
+            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SetArrangeSections, EArrangeSections::OnOneRow ),
             FCanExecuteAction::CreateLambda([] { return true; }),
-            FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
+            FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow );
@@ -86,9 +86,9 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-            FExecuteAction::CreateStatic( &BoardSequenceHelpers::SetArrangeSections, mSequencer, EArrangeSections::OnTwoRowsShifted ),
+            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SetArrangeSections, EArrangeSections::OnTwoRowsShifted ),
             FCanExecuteAction::CreateLambda([] { return true; }),
-            FIsActionChecked::CreateLambda([] { return GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
+            FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksEditorSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows );
@@ -98,9 +98,27 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
-            FExecuteAction::CreateStatic( &BoardSequenceHelpers::NewSectionWithBoardAtCurrentFrame, mSequencer ) );
+            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame ) );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+}
+
+void
+FBoardSequenceCustomization::ArrangeSections()
+{
+    EposTracksEditorHelpers::ArrangeSections( mSequencer );
+}
+
+void
+FBoardSequenceCustomization::SetArrangeSections( EArrangeSections iArrangeSections )
+{
+    EposTracksEditorHelpers::SetArrangeSections( mSequencer, iArrangeSections );
+}
+
+void
+FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame()
+{
+    EposTracksEditorHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
 }
 
 //---
@@ -113,7 +131,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     TAttribute<FText> ArrangeShotsName;
     ArrangeShotsName.Bind( TAttribute<FText>::FGetter::CreateLambda( []
     {
-        switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
+        switch( GetDefault<UEposTracksEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeSections::OnOneRow:            return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetLabel();
             case EArrangeSections::OnTwoRowsShifted:    return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetLabel();
@@ -125,7 +143,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     TAttribute<FSlateIcon> ArrangeShotsIcon;
     ArrangeShotsIcon.Bind( TAttribute<FSlateIcon>::FGetter::CreateLambda( []
     {
-        switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
+        switch( GetDefault<UEposTracksEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeSections::OnOneRow:            return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetIcon();
             case EArrangeSections::OnTwoRowsShifted:    return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetIcon();
@@ -137,7 +155,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     TAttribute<FText> ArrangeShotsToolTip;
     ArrangeShotsToolTip.Bind( TAttribute<FText>::FGetter::CreateLambda( []
     {
-        switch( GetDefault<UEposEditorSettings>()->BoardTrackSettings.ArrangeShots )
+        switch( GetDefault<UEposTracksEditorSettings>()->BoardTrackSettings.ArrangeShots )
         {
             case EArrangeSections::OnOneRow:            return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetDescription();
             case EArrangeSections::OnTwoRowsShifted:    return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetDescription();

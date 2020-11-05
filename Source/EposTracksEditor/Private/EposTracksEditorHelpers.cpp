@@ -13,6 +13,8 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Helpers/SectionsHelpersArrange.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "EposTracksEditorHelpers"
@@ -350,6 +352,35 @@ EposTracksEditorHelpers::DuplicateBoard( ISequencer* iSequencer, UMovieSceneCine
         iSequencer->ThrobSectionSelection();
     }
 }
+
+//---
+
+//static
+void
+EposTracksEditorHelpers::ArrangeSections( ISequencer* iSequencer )
+{
+    auto track = iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !track )
+        return;
+
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+
+    SectionsHelpersArrange::Arrange( track, settings->BoardTrackSettings.ArrangeShots );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
+
+//static
+void
+EposTracksEditorHelpers::SetArrangeSections( ISequencer* iSequencer, EArrangeSections iArrangeSections )
+{
+    UEposTracksEditorSettings* settings = GetMutableDefault<UEposTracksEditorSettings>();
+    settings->BoardTrackSettings.ArrangeShots = iArrangeSections;
+    settings->SaveConfig();
+
+    EposTracksEditorHelpers::ArrangeSections( iSequencer );
+}
+
 
 
 #undef LOCTEXT_NAMESPACE

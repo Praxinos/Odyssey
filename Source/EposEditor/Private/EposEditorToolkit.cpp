@@ -26,7 +26,6 @@
 #include "Widgets/Text/STextBlock.h"
 
 #include "Board/BoardSequenceEditorCommands.h"
-#include "BoardHelpers/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Misc/EposEditorPlaybackContext.h"
 #include "Shot/ShotSequenceEditorCommands.h"

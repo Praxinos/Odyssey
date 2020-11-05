@@ -6,5 +6,4 @@
 UEposEditorSettings::UEposEditorSettings( const FObjectInitializer& ObjectInitializer )
     : Super( ObjectInitializer )
 {
-    BoardTrackSettings.ArrangeShots = EArrangeSections::OnTwoRowsShifted;
 }

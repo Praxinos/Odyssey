@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ArrangeSectionsType.h"
 
 class ISequencer;
 class UMovieScene;
@@ -73,4 +74,21 @@ private:
      */
     static UMovieSceneSubSection* CreateBoardInternal( ISequencer* iSequencer, FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneCinematicBoardSection* iBoardToDuplicate = nullptr );
 
+public:
+
+    /*
+     * Arrange sections of board track.
+     *
+     * @param iSequencer The sequencer
+     * @param Section The section to duplicate
+     */
+    static void ArrangeSections( ISequencer* iSequencer );
+
+    /*
+     * Set 'arrange sections' settings.
+     *
+     * @param iSequencer The sequencer
+     * @param iArrangeSections The new value
+     */
+    static void SetArrangeSections( ISequencer* iSequencer, EArrangeSections iArrangeSections );
 };

@@ -9,7 +9,7 @@
 
 //static
 void
-FArrangeSectionsHelpers::Arrange( UMovieSceneTrack* iTrack, EArrangeSections iArrangeShots )
+SectionsHelpersArrange::Arrange( UMovieSceneTrack* iTrack, EArrangeSections iArrangeShots )
 {
     auto sections = iTrack->GetAllSections();
 

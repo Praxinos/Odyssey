@@ -33,6 +33,10 @@ private:
     };
     void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
 
+    void ArrangeSections();
+    void SetArrangeSections( EArrangeSections iArrangeSections );
+    void NewSectionWithBoardAtCurrentFrame();
+
 private:
     //bool OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );
     //bool OnSequencerReceiveDrop( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );

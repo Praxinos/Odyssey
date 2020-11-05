@@ -6,8 +6,6 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 
-#include "ArrangeSectionsType.h"
-
 #include "EposEditorSettings.generated.h"
 
 //---
@@ -18,26 +16,10 @@ struct FBoardSettings
 	GENERATED_BODY()
 };
 
-USTRUCT()
-struct FBoardTrackSettings
-{
-	GENERATED_BODY()
-
-	/** Select the way to arrange board sections. */
-	UPROPERTY(config, EditAnywhere, Category=BoardTrackSettings)
-	EArrangeSections ArrangeShots;
-};
-
 //---
 
 USTRUCT()
 struct FShotSettings
-{
-    GENERATED_BODY()
-};
-
-USTRUCT()
-struct FShotTrackSettings
 {
     GENERATED_BODY()
 };
@@ -61,15 +43,7 @@ public:
 	UPROPERTY(config, EditAnywhere, Category=Board)
 	FBoardSettings BoardSettings;
     
-	/** Specifies Board track stuff. */
-	UPROPERTY(config, EditAnywhere, Category=BoardTrack)
-	FBoardTrackSettings BoardTrackSettings;
-
 	/** Specifies Shot stuff. */
 	UPROPERTY(config, EditAnywhere, Category=Shot)
 	FShotSettings ShotSettings;
-
-	/** Specifies Shot track stuff. */
-	UPROPERTY(config, EditAnywhere, Category=ShotTrack)
-	FShotTrackSettings ShotTrackSettings;
 };

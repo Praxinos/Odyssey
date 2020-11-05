@@ -15,6 +15,13 @@ public:
     virtual void ShutdownModule() override;
 
 private:
+    void RegisterTrackEditors();
+    void UnregisterTrackEditors();
+
+    void RegisterSettings();
+    void UnregisterSettings();
+
+private:
     FDelegateHandle CinematicBoardTrackCreateEditorHandle;
     FDelegateHandle SingleCameraCutTrackCreateEditorHandle;
 };
