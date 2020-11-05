@@ -330,15 +330,17 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha( FOdysseyBlockProxy Block
     ::ul3::uint32 MT_bit = Block.m->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
 
+	::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), dst->GetBlock(), Block.m->GetBlock()->Rect(), ::ul3::FVec2I(0, 0));
+
     ::ul3::FilterInto(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), dst->GetBlock(), [&](const ::ul3::FBlock* iSrcBlock, const ::ul3::tByte* iSrcPtr, ::ul3::FBlock* iDstBlock, ::ul3::tByte* iDstPtr)
     {
         ::ul3::FPixelProxy srcProxy(iSrcPtr, iSrcBlock->Format());
 		::ul3::FPixelProxy dstProxy(iDstPtr, iDstBlock->Format());
 
-        if (PreserveNullAlpha && srcProxy.AlphaF() == 0.0f)
-            dstProxy.SetAlphaF(0.0f);
+        if (PreserveNullAlpha && srcProxy.Alpha8() == 0.0f)
+            dstProxy.SetAlpha8(0.0f);
         else
-            dstProxy.SetAlphaF(Curve->GetFloatValue(srcProxy.AlphaF()));
+            dstProxy.SetAlpha8(Curve->GetFloatValue(srcProxy.Alpha8() / 255.f)*255);
 	});
 
     return FOdysseyBlockProxy(dst);
