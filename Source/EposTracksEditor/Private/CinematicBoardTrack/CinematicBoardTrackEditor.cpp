@@ -496,7 +496,7 @@ FCinematicBoardTrackEditor::InsertFiller()
 void
 FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iSection )
 {
-    EposTracksEditorHelpers::DuplicateBoard( GetSequencer().Get(), iSection );
+    EposTracksEditorHelpers::DuplicateSection( GetSequencer().Get(), iSection );
 }
 
 void

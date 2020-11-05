@@ -29,6 +29,14 @@ public:
     static void InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /*
+     * Insert Shot.
+     *
+     * @param iSequencer The sequencer
+     * @param iFrameNumber The start frame of the new board
+     */
+    static void InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /*
      * Insert Filler.
      *
      * @param iSequencer The sequencer
@@ -41,7 +49,7 @@ public:
      * @param iSequencer The sequencer
      * @param Section The section to duplicate
      */
-    static void DuplicateBoard( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection );
+    static void DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection );
 
 private:
 
@@ -72,8 +80,18 @@ private:
      * @param BoardToDuplicate The board to duplicate.
      * @return The new board.
      */
-    static UMovieSceneSubSection* CreateBoardInternal( ISequencer* iSequencer, FString& ioNewBoardName, FFrameNumber iNewBoardStartTime, UMovieSceneCinematicBoardSection* iBoardToDuplicate = nullptr );
+    template<typename SequenceClass>
+    static UMovieSceneSubSection* CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewAssetName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate = nullptr );
 
+    /*
+     * Insert Board.
+     *
+     * @param iSequencer The sequencer
+     * @param iFrameNumber The start frame of the new board
+     */
+    template<typename SequenceClass>
+    static void InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    
 public:
 
     /*
