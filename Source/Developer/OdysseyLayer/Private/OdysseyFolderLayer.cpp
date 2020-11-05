@@ -45,7 +45,7 @@ FOdysseyFolderLayer::IsOpen() const
 void
 FOdysseyFolderLayer::SetIsOpen( bool iIsOpen )
 {
-    float oldValue = mIsOpen;
+    bool oldValue = mIsOpen;
     mIsOpen = iIsOpen;
     mIsOpenChangedDelegate.Broadcast(oldValue);
 }
