@@ -51,8 +51,8 @@
 #define ULIS3_E_REVERSE     ( ~( 0x1 << 13 ) )
 #define ULIS3_E_SWAP        ( ~( 0x1 << 14 ) )
 #define ULIS3_E_ALPHA       ( ~( 0x1 << 15 ) )
-#define ULIS3_E_DEPTH       ( ~( 0xF << 16 )
-#define ULIS3_E_EXTRA       ( ~( 0xFFF << 20 )
+#define ULIS3_E_DEPTH       ( ~( 0xF << 16 ) )
+#define ULIS3_E_EXTRA       ( ~( 0xFFF << 20 ) )
 
 #define ULIS3_R_TYPE( i )       ( i & 0xF )
 #define ULIS3_R_CHANNELS( i )   ( ( i >> 4 ) & 0xF )

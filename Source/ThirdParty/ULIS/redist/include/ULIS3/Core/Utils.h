@@ -32,12 +32,12 @@ template<> constexpr uint16     ULIS3_FORCEINLINE ConvType< uint8,  uint16  >( u
 template<> constexpr uint32     ULIS3_FORCEINLINE ConvType< uint8,  uint32  >( uint8 iValue  )  { return iValue * 0x1010101;                                                        }
 template<> constexpr ufloat     ULIS3_FORCEINLINE ConvType< uint8,  ufloat  >( uint8 iValue  )  { return iValue / (ufloat)0xFF;                                                     }
 template<> constexpr udouble    ULIS3_FORCEINLINE ConvType< uint8,  udouble >( uint8 iValue  )  { return iValue / (udouble)0xFF;                                                    }
-template<> constexpr uint8      ULIS3_FORCEINLINE ConvType< uint16, uint8   >( uint16 iValue )  { return ( iValue + 1 + ( iValue>>8 ) ) >> 8;                                       }
+template<> constexpr uint8      ULIS3_FORCEINLINE ConvType< uint16, uint8   >( uint16 iValue )  { return iValue >> 8;                                                               }
 template<> constexpr uint32     ULIS3_FORCEINLINE ConvType< uint16, uint32  >( uint16 iValue )  { return iValue * 0x10001;                                                          }
 template<> constexpr ufloat     ULIS3_FORCEINLINE ConvType< uint16, ufloat  >( uint16 iValue )  { return iValue / (ufloat)0xFFFF;                                                   }
 template<> constexpr udouble    ULIS3_FORCEINLINE ConvType< uint16, udouble >( uint16 iValue )  { return iValue / (udouble)0xFFFF;                                                  }
 template<> constexpr uint8      ULIS3_FORCEINLINE ConvType< uint32, uint8   >( uint32 iValue )  { return iValue >> 24;                                                              }
-template<> constexpr uint16     ULIS3_FORCEINLINE ConvType< uint32, uint16  >( uint32 iValue )  { return ( iValue + 1 + ( iValue>>16 ) ) >> 16;                                     }
+template<> constexpr uint16     ULIS3_FORCEINLINE ConvType< uint32, uint16  >( uint32 iValue )  { return iValue >> 16;                                                              }
 template<> constexpr ufloat     ULIS3_FORCEINLINE ConvType< uint32, ufloat  >( uint32 iValue )  { return iValue / (ufloat)0xFFFFFFFF;                                               }
 template<> constexpr udouble    ULIS3_FORCEINLINE ConvType< uint32, udouble >( uint32 iValue )  { return iValue / (udouble)0xFFFFFFFF;                                              }
 template<> constexpr uint8      ULIS3_FORCEINLINE ConvType< ufloat,  uint8  >( ufloat iValue  ) { return uint8(  iValue * 0xFF       );                                             }
