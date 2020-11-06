@@ -10,11 +10,11 @@
 #include "OdysseyBrushFormat.generated.h"
 
 /////////////////////////////////////////////////////
-// EOdysseyPixelFormat Enum
+// EOdysseyColorModel Enum
 UENUM( BlueprintType )
-enum  class  EOdysseyPixelFormat : uint8
+enum  class  EOdysseyColorModel : uint8
 {
-    kUninitializedFormat UMETA( DisplayName="kUninitializedFormat", Hidden ),
+    kUninitializedColorModel UMETA( DisplayName="kUninitializedColorModel", Hidden ),
     kRGB UMETA( DisplayName="RGB" ),
     kRGBA UMETA(DisplayName = "RGBA"),
     kGrey UMETA( DisplayName="Grey" ),
@@ -30,11 +30,11 @@ enum  class  EOdysseyPixelFormat : uint8
 };
 
 /////////////////////////////////////////////////////
-// EOdysseyPixelFormat Enum
+// EOdysseyColorModel Enum
 UENUM( BlueprintType )
-enum  class  EOdysseyPixelFormatPrecision : uint8
+enum  class  EOdysseyChannelDepth : uint8
 {
-    kUninitializedPrecision UMETA( DisplayName="kUninitializedPrecision", Hidden ),
+    kUninitializedChannelDepth UMETA( DisplayName="kUninitializedChannelDepth", Hidden ),
     k8 UMETA( DisplayName="8 bits" ),
     k16 UMETA( DisplayName="16 bits" ),
     k32 UMETA( DisplayName="32 bits" ),
@@ -42,6 +42,6 @@ enum  class  EOdysseyPixelFormatPrecision : uint8
     kDouble UMETA( DisplayName="64 bits floating-point" )
 };
 
-::ul3::tFormat ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision);
-EOdysseyPixelFormat OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat);
-EOdysseyPixelFormatPrecision OdysseyPixelFormatPrecisionFromULISFormat(::ul3::tFormat iFormat);
+::ul3::tFormat ULISFormatFromModelAndDepth(EOdysseyColorModel iColorModel, EOdysseyChannelDepth iChannelDepth);
+EOdysseyColorModel OdysseyColorModelFromULISFormat(::ul3::tFormat iFormat);
+EOdysseyChannelDepth OdysseyChannelDepthFromULISFormat(::ul3::tFormat iFormat);

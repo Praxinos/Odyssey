@@ -379,22 +379,22 @@ UOdysseyBrushAssetBase::GetCanvasHeight()
         return  0;
 }
 
-EOdysseyPixelFormat
-UOdysseyBrushAssetBase::GetCanvasFormat()
+EOdysseyColorModel
+UOdysseyBrushAssetBase::GetCanvasColorModel()
 {
     if (!state.target_temp_buffer)
-        return EOdysseyPixelFormat::kRGBA;
+        return EOdysseyColorModel::kRGBA;
 
-    return OdysseyPixelFormatFromULISFormat(state.target_temp_buffer->Format());
+    return OdysseyColorModelFromULISFormat(state.target_temp_buffer->Format());
 }
 
-EOdysseyPixelFormatPrecision
-UOdysseyBrushAssetBase::GetCanvasPrecision()
+EOdysseyChannelDepth
+UOdysseyBrushAssetBase::GetCanvasChannelDepth()
 {
     if (!state.target_temp_buffer)
-        return EOdysseyPixelFormatPrecision::k8;
+        return EOdysseyChannelDepth::k8;
 
-    return OdysseyPixelFormatPrecisionFromULISFormat(state.target_temp_buffer->Format());
+    return OdysseyChannelDepthFromULISFormat(state.target_temp_buffer->Format());
 }
 
 //static

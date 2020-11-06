@@ -48,7 +48,7 @@ class ODYSSEYBRUSH_API UOdysseyBrushRectFunctionLibrary : public UBlueprintFunct
     GENERATED_UCLASS_BODY()
 
     //Create an Odyssey Rectangle from its X, Y, W and H components.
-    UFUNCTION(BlueprintPure, Category="OdysseyBrushRect", meta = (DisplayName="Make Odyssey Rectangle"))
+    UFUNCTION(BlueprintPure, Category="Odyssey|Math", meta = (DisplayName="Make Odyssey Rectangle"))
     static FOdysseyBrushRect MakeFromXYWH(int X, int Y, int Width, int Height);
 };
 

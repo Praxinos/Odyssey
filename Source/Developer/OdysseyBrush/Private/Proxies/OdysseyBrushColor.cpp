@@ -73,17 +73,17 @@ UOdysseyBrushColorFunctionLibrary::MakeDebugColor()
 //--------------------------------------------------------------------------------- Make
 
 //static
-EOdysseyPixelFormat
-UOdysseyBrushColorFunctionLibrary::GetFormat(FOdysseyBrushColor Color)
+EOdysseyColorModel
+UOdysseyBrushColorFunctionLibrary::GetColorModel(FOdysseyBrushColor Color)
 {
-    return OdysseyPixelFormatFromULISFormat(Color.GetValue().Format());
+    return OdysseyColorModelFromULISFormat(Color.GetValue().Format());
 }
 
 //static
-EOdysseyPixelFormatPrecision
-UOdysseyBrushColorFunctionLibrary::GetPrecision(FOdysseyBrushColor Color)
+EOdysseyChannelDepth
+UOdysseyBrushColorFunctionLibrary::GetChannelDepth(FOdysseyBrushColor Color)
 {
-    return OdysseyPixelFormatPrecisionFromULISFormat(Color.GetValue().Format());
+    return OdysseyChannelDepthFromULISFormat(Color.GetValue().Format());
 }
 
 //static
@@ -104,9 +104,9 @@ UOdysseyBrushColorFunctionLibrary::GetAlpha(FOdysseyBrushColor Color)
 
 //static
 FOdysseyBrushColor
-UOdysseyBrushColorFunctionLibrary::Lerp(FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+UOdysseyBrushColorFunctionLibrary::Lerp(FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyColorModel ColorModel, EOdysseyChannelDepth ChannelDepth)
 {
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
+	::ul3::tFormat format = ULISFormatFromModelAndDepth(ColorModel, ChannelDepth);
 
 	FOdysseyBrushColor result;
 	::ul3::FPixelValue v1 = ::ul3::Conv(Color1.GetValue(), format);
@@ -118,9 +118,9 @@ UOdysseyBrushColorFunctionLibrary::Lerp(FOdysseyBrushColor Color1, FOdysseyBrush
 
 //static
 FOdysseyBrushColor
-UOdysseyBrushColorFunctionLibrary::ConvertToFormat(FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+UOdysseyBrushColorFunctionLibrary::ConvertToFormat(FOdysseyBrushColor Color, EOdysseyColorModel ColorModel, EOdysseyChannelDepth ChannelDepth)
 {
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
+	::ul3::tFormat format = ULISFormatFromModelAndDepth(ColorModel, ChannelDepth);
     ::ul3::FPixelValue result = ::ul3::Conv( Color.GetValue(), format );
     return result;
 }

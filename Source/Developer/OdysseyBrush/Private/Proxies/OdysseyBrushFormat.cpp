@@ -4,54 +4,54 @@
 #include "Proxies/OdysseyBrushFormat.h"
 
 ::ul3::tFormat
-ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelFormatPrecision iPrecision)
+ULISFormatFromModelAndDepth(EOdysseyColorModel iColorModel, EOdysseyChannelDepth iChannelDepth)
 {
 	::ul3::tFormat format = ULIS3_FORMAT_BGRA8;
-	switch (iFormat)
+	switch (iColorModel)
 	{
-		case EOdysseyPixelFormat::kRGB: format = ULIS3_FORMAT_RGB8; break;
-		case EOdysseyPixelFormat::kGrey: format = ULIS3_FORMAT_G8; break;
-		case EOdysseyPixelFormat::kHSL: format = ULIS3_FORMAT_HSL8; break;
-		case EOdysseyPixelFormat::kHSV: format = ULIS3_FORMAT_HSV8; break;
-		case EOdysseyPixelFormat::kCMYK: format = ULIS3_FORMAT_CMYK8; break;
-		case EOdysseyPixelFormat::kLab: format = ULIS3_FORMAT_Lab8; break;
+		case EOdysseyColorModel::kRGB: format = ULIS3_FORMAT_RGB8; break;
+		case EOdysseyColorModel::kGrey: format = ULIS3_FORMAT_G8; break;
+		case EOdysseyColorModel::kHSL: format = ULIS3_FORMAT_HSL8; break;
+		case EOdysseyColorModel::kHSV: format = ULIS3_FORMAT_HSV8; break;
+		case EOdysseyColorModel::kCMYK: format = ULIS3_FORMAT_CMYK8; break;
+		case EOdysseyColorModel::kLab: format = ULIS3_FORMAT_Lab8; break;
 
-		case EOdysseyPixelFormat::kRGBA:
+		case EOdysseyColorModel::kRGBA:
 		{
 			//Force GBRA8 because RGBA8 is deprecated in ETextureSourceFormat. This will preserve performance most of the time
-			format = iPrecision == EOdysseyPixelFormatPrecision::k8 ? ULIS3_FORMAT_BGRA8 : ULIS3_FORMAT_RGBA8;
+			format = iChannelDepth == EOdysseyChannelDepth::k8 ? ULIS3_FORMAT_BGRA8 : ULIS3_FORMAT_RGBA8;
 		}
 		break;
-		case EOdysseyPixelFormat::kGreyA: format = ULIS3_FORMAT_GA8; break;
-		case EOdysseyPixelFormat::kHSLA: format = ULIS3_FORMAT_HSLA8; break;
-		case EOdysseyPixelFormat::kHSVA: format = ULIS3_FORMAT_HSVA8; break;
-		case EOdysseyPixelFormat::kCMYKA: format = ULIS3_FORMAT_CMYKA8; break;
-		case EOdysseyPixelFormat::kLabA: format = ULIS3_FORMAT_LabA8; break;
+		case EOdysseyColorModel::kGreyA: format = ULIS3_FORMAT_GA8; break;
+		case EOdysseyColorModel::kHSLA: format = ULIS3_FORMAT_HSLA8; break;
+		case EOdysseyColorModel::kHSVA: format = ULIS3_FORMAT_HSVA8; break;
+		case EOdysseyColorModel::kCMYKA: format = ULIS3_FORMAT_CMYKA8; break;
+		case EOdysseyColorModel::kLabA: format = ULIS3_FORMAT_LabA8; break;
 
 		default: break;
 	}
 
-	//if 8 bits precision, then no work to do
-	if (iPrecision == EOdysseyPixelFormatPrecision::k8)
+	//if 8 bits channel depth, then no work to do
+	if (iChannelDepth == EOdysseyChannelDepth::k8)
 		return format;
 
 	//erase
 	format &= ULIS3_E_TYPE & ULIS3_E_DEPTH;
 
-	switch (iPrecision)
+	switch (iChannelDepth)
 	{
-		case EOdysseyPixelFormatPrecision::k16: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT16) | ULIS3_W_DEPTH(2); break;
-		case EOdysseyPixelFormatPrecision::k32: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT32) | ULIS3_W_DEPTH(4); break;
-		case EOdysseyPixelFormatPrecision::kFloat: format |= ULIS3_W_TYPE(ULIS3_TYPE_UFLOAT) | ULIS3_W_DEPTH(4); break;
-		case EOdysseyPixelFormatPrecision::kDouble: format |= ULIS3_W_TYPE(ULIS3_TYPE_UDOUBLE) | ULIS3_W_DEPTH(8); break;
+		case EOdysseyChannelDepth::k16: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT16) | ULIS3_W_DEPTH(2); break;
+		case EOdysseyChannelDepth::k32: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT32) | ULIS3_W_DEPTH(4); break;
+		case EOdysseyChannelDepth::kFloat: format |= ULIS3_W_TYPE(ULIS3_TYPE_UFLOAT) | ULIS3_W_DEPTH(4); break;
+		case EOdysseyChannelDepth::kDouble: format |= ULIS3_W_TYPE(ULIS3_TYPE_UDOUBLE) | ULIS3_W_DEPTH(8); break;
 
 		default: break;
 	}
 	return format;
 }
 
-EOdysseyPixelFormat
-OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat)
+EOdysseyColorModel
+OdysseyColorModelFromULISFormat(::ul3::tFormat iFormat)
 {
 	//erase
 	iFormat &= ULIS3_E_TYPE & ULIS3_E_DEPTH;
@@ -61,39 +61,39 @@ OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat)
 
 	switch (iFormat)
 	{
-		case ULIS3_FORMAT_RGB8: return EOdysseyPixelFormat::kRGB;
-		case ULIS3_FORMAT_G8: return EOdysseyPixelFormat::kGrey;
-		case ULIS3_FORMAT_HSL8: return EOdysseyPixelFormat::kHSL;
-		case ULIS3_FORMAT_HSV8: return EOdysseyPixelFormat::kHSV;
-		case ULIS3_FORMAT_CMYK8: return EOdysseyPixelFormat::kCMYK;
-		case ULIS3_FORMAT_Lab8: return EOdysseyPixelFormat::kLab;
-		case ULIS3_FORMAT_BGRA8: return EOdysseyPixelFormat::kRGBA;
-		case ULIS3_FORMAT_RGBA16: return EOdysseyPixelFormat::kRGBA;
-		case ULIS3_FORMAT_GA8: return EOdysseyPixelFormat::kGreyA;
-		case ULIS3_FORMAT_HSLA8: return EOdysseyPixelFormat::kHSLA;
-		case ULIS3_FORMAT_HSVA8: return EOdysseyPixelFormat::kHSVA;
-		case ULIS3_FORMAT_CMYKA8: return EOdysseyPixelFormat::kCMYKA;
-		case ULIS3_FORMAT_LabA8: return EOdysseyPixelFormat::kLabA;
+		case ULIS3_FORMAT_RGB8: return EOdysseyColorModel::kRGB;
+		case ULIS3_FORMAT_G8: return EOdysseyColorModel::kGrey;
+		case ULIS3_FORMAT_HSL8: return EOdysseyColorModel::kHSL;
+		case ULIS3_FORMAT_HSV8: return EOdysseyColorModel::kHSV;
+		case ULIS3_FORMAT_CMYK8: return EOdysseyColorModel::kCMYK;
+		case ULIS3_FORMAT_Lab8: return EOdysseyColorModel::kLab;
+		case ULIS3_FORMAT_BGRA8: return EOdysseyColorModel::kRGBA;
+		case ULIS3_FORMAT_RGBA16: return EOdysseyColorModel::kRGBA;
+		case ULIS3_FORMAT_GA8: return EOdysseyColorModel::kGreyA;
+		case ULIS3_FORMAT_HSLA8: return EOdysseyColorModel::kHSLA;
+		case ULIS3_FORMAT_HSVA8: return EOdysseyColorModel::kHSVA;
+		case ULIS3_FORMAT_CMYKA8: return EOdysseyColorModel::kCMYKA;
+		case ULIS3_FORMAT_LabA8: return EOdysseyColorModel::kLabA;
 
 		default: break;
 	}
 
-	return EOdysseyPixelFormat::kRGB;
+	return EOdysseyColorModel::kRGB;
 }
 
-EOdysseyPixelFormatPrecision
-OdysseyPixelFormatPrecisionFromULISFormat(::ul3::tFormat iFormat)
+EOdysseyChannelDepth
+OdysseyChannelDepthFromULISFormat(::ul3::tFormat iFormat)
 {
 	switch(ULIS3_R_TYPE(iFormat))
 	{
-		case ULIS3_TYPE_UINT8: return EOdysseyPixelFormatPrecision::k8;
-		case ULIS3_TYPE_UINT16: return EOdysseyPixelFormatPrecision::k16;
-		case ULIS3_TYPE_UINT32: return EOdysseyPixelFormatPrecision::k32;
-		case ULIS3_TYPE_UFLOAT: return EOdysseyPixelFormatPrecision::kFloat;
-		case ULIS3_TYPE_UDOUBLE: return EOdysseyPixelFormatPrecision::kDouble;
+		case ULIS3_TYPE_UINT8: return EOdysseyChannelDepth::k8;
+		case ULIS3_TYPE_UINT16: return EOdysseyChannelDepth::k16;
+		case ULIS3_TYPE_UINT32: return EOdysseyChannelDepth::k32;
+		case ULIS3_TYPE_UFLOAT: return EOdysseyChannelDepth::kFloat;
+		case ULIS3_TYPE_UDOUBLE: return EOdysseyChannelDepth::kDouble;
 
 		default: break;
 	}
 	
-	return EOdysseyPixelFormatPrecision::k8;
+	return EOdysseyChannelDepth::k8;
 }

@@ -80,129 +80,129 @@ public:
     /*******************************/
 
     //Gets the X axis of the stylus or mouse on ILIAD canvas.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushCanvas" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     float  GetX();
 
     //Gets the Y axis of the stylus or mouse on ILIAD canvas.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushCanvas" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     float  GetY();
 
     /** Gets Z */
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushCanvas" )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     //float  GetZ();
 
     //Gets stylus pressure on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Returns normalized Float (0 = no pressure | 1 = max pressure).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Pressure", KeyWords = "Tablet") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Pressure", KeyWords = "Tablet") )
     float  GetPressure();
 
     //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Returns Float (angle).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Altitude", KeyWords = "Tablet Tilt") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Altitude", KeyWords = "Tablet Tilt") )
     float  GetAltitude();
 
     //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Returns normalized Float (0.5 = 45° | 1 = 90°).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Altitude Normalized", KeyWords = "Tablet") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Altitude Normalized", KeyWords = "Tablet") )
     float  GetAltitudeNormalized();
 
     //Gets stylus azimtuh on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Returns Float (angle).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Azimuth", KeyWords = "Tablet") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Azimuth", KeyWords = "Tablet") )
     float  GetAzimuth();
 
     //Gets stylus azimuth on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Returns normalized Float (0.5 = 180° | 1 = 360°).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Azimuth Normalized", KeyWords = "Tablet" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Azimuth Normalized", KeyWords = "Tablet" ) )
     float  GetAzimuthNormalized();
 
     //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Only works with specific stylus !
     //Returns Float (angle).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Twist", KeyWords = "Tablet" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Twist", KeyWords = "Tablet" ) )
     float  GetTwist();
 
     //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
     //Only works with specific stylus !
     //Returns normalize Float (0.5 = 180° | 1 = 360°).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Twist Normalized", KeyWords = "Tablet" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Twist Normalized", KeyWords = "Tablet" ) )
     float  GetTwistNormalized();
 
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Pitch", KeyWords = "Tablet") )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Pitch", KeyWords = "Tablet") )
     //float  GetPitch();
 
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Pitch Normalized", KeyWords = "Tablet") )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Pitch Normalized", KeyWords = "Tablet") )
     //float  GetPitchNormalized();
 
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Roll", KeyWords = "Tablet") )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Roll", KeyWords = "Tablet") )
     //float  GetRoll();
 
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Roll Normalized", KeyWords = "Tablet") )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Roll Normalized", KeyWords = "Tablet") )
     //float  GetRollNormalized();
 
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Yaw", KeyWords = "Tablet") )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Yaw", KeyWords = "Tablet") )
     //float  GetYaw();
 
     //Won't work.
-    //UFUNCTION( BlueprintPure, Category="OdysseyBrushInput", meta = ( DisplayName = "Get Stylus Yaw Normalized", KeyWords = "Tablet") )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Yaw Normalized", KeyWords = "Tablet") )
     //float  GetYawNormalized();
 
     //Gets distance travelled along the stroke.
     //Returns a Float in pixels.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     float  GetDistanceAlongStroke();
 
     //Gets Direction Vector Tangent.
     //Returns a Vector 2D.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     FVector2D GetDirectionVectorTangent();
 
     //Gets Direction Vector Normal.
     //Returns a Vector 2D.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     FVector2D GetDirectionVectorNormal();
 
     //Gets Direction Angle Tangent as Degrees.
     //Returns an angle as a Float.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     float  GetDirectionAngleTangentDeg();
 
     //Gets Direction Angle Normal as Degrees
     //Returns an angle as a float.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     float  GetDirectionAngleNormalDeg();
 
     //Gets Speed.
     //Returns a Vector 2D.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     FVector2D GetSpeed();
 
     //Gets Acceleration.
     //Returns a Vector 2D.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     FVector2D GetAcceleration();
 
     //Gets Jolt .
     //Returns a Vector 2D.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     FVector2D GetJolt();
 
     //Gets Delta Position between this event and the last.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     FVector2D GetDeltaPosition();
 
     //Gets Delta Time in micro seconds between this event and the last.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     int GetDeltaTime();
 
     //Returns the keyboard and mouse keys down at this point.
-    UFUNCTION(BlueprintPure,Category="OdysseyBrushInput")
+    UFUNCTION(BlueprintPure,Category="Odyssey|Input")
     TArray<FKey> GetKeysDown();
 
 
@@ -211,68 +211,68 @@ public:
     /*******************************/
 
     //Gets color from Color Selector and Color Sliders.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushModifiers", meta = ( DisplayName = "Get Color Modifier" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Color Modifier" ) )
     FOdysseyBrushColor  GetColor();
 
     //Gets size from Top Bar.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushModifiers" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
     float  GetSizeModifier();
 
     //Gets opacity from Top Bar.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushModifiers" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
     float  GetOpacityModifier();
 
     //Gets flow from Top Bar.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushModifiers" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers" )
     float  GetFlowModifier();
 
     //Gets step from Stroke Options.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushModifiers", meta = ( DisplayName = "Get Step Modifier" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Step Modifier" ) )
     float  GetStep();
 
     //Gets smoothing strength from Stroke Options.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushModifiers", meta = ( DisplayName = "Get Smoothing Strength Modifier" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = ( DisplayName = "Get Smoothing Strength Modifier" ) )
     float  GetSmoothingStrength();
 
     //Gets index of each stamp applied in the stroke.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushStroke" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke" )
     int  GetCurrentStrokePointIndex();
 
     //Gets width of the Texture asset currently modified.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushCanvas" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     int  GetCanvasWidth();
 
     //Gets height of the Texture asset currently modified.
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushCanvas" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     int  GetCanvasHeight();
 
-    //Get the Canvas Pixel Format
-    UFUNCTION(BlueprintPure, Category="OdysseyBrushCanvas")
-    EOdysseyPixelFormat GetCanvasFormat();
+    //Get the Canvas Color Model
+    UFUNCTION(BlueprintPure, Category="Odyssey|Canvas")
+    EOdysseyColorModel GetCanvasColorModel();
 
-    //Get the Canvas Pixel Precision
-    UFUNCTION(BlueprintPure, Category="OdysseyBrushCanvas")
-    EOdysseyPixelFormatPrecision GetCanvasPrecision();
+    //Get the Canvas Channel Depth
+    UFUNCTION(BlueprintPure, Category="Odyssey|Canvas")
+    EOdysseyChannelDepth GetCanvasChannelDepth();
 
     //Get the Canvas Rectangle
-    UFUNCTION(BlueprintPure, Category="OdysseyBrushCanvas", meta = ( DisplayName="Get Canvas Rectangle" ))
+    UFUNCTION(BlueprintPure, Category="Odyssey|Canvas", meta = ( DisplayName="Get Canvas Rectangle" ))
     FOdysseyBrushRect GetCanvasRect();
 
     //Gets Stroke Block.
-    UFUNCTION( BlueprintPure, Category = "OdysseyBrushStroke")
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Stroke")
     FOdysseyBlockProxy GetStrokeBlock( FOdysseyBrushRect Area );
 
 public:
     // Odyssey Brush Stamps    
 
     //Debug Stamp, stamps a basic shape with the current modifiers parameters. Is also pressure sensitive.
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushStamps", meta = (HideSelfPin) )
+    UFUNCTION( BlueprintCallable, Category="Odyssey|Stamps", meta = (HideSelfPin) )
     void  DebugStamp();
 
     //Node that reunites all the necessary information to create a stamp.
     //Must be connected to an Event (i.e. "Event on Step").
     //Requires 3 mandatory input to work : Odyssey Block Reference and X|Y coordinates.
-    UFUNCTION( BlueprintCallable, Category="OdysseyBrushStamps", meta = ( DefaultToSelf="Target", HideSelfPin, HidePin="Target") )
+    UFUNCTION( BlueprintCallable, Category="Odyssey|Stamps", meta = ( DefaultToSelf="Target", HideSelfPin, HidePin="Target") )
     void  Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
 public:

@@ -90,58 +90,58 @@ class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary : public UBlueprintFunc
 public:
     //Converts Texture 2D to Odyssey Block Reference.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference"
+             , Category="Odyssey|Block"
              , meta = ( DisplayName = "To Odyssey Block Reference (Texture2D)", BlueprintAutocast ) )
-    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8);
+    static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8);
 
-    //Convert the Odyssey Block Reference to the specified Format and Precision
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Convert Block to Format" ))
-    static FOdysseyBlockProxy ConvertToFormat(FOdysseyBlockProxy Block, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8);
+    //Convert the Odyssey Block Reference to the specified Color Model and Channel Depth
+    UFUNCTION(BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Convert Block to Format" ))
+    static FOdysseyBlockProxy ConvertToFormat(FOdysseyBlockProxy Block, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8);
 
     //Applies a color on sample's alpha channel. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference"
+             , Category="Odyssey|Block"
              , meta = ( DeprecatedFunction, DeprecationMessage = "Use Fill Block With Color" ) )
     static FOdysseyBlockProxy FillPreserveAlpha(FOdysseyBlockProxy Sample
                                                 , FOdysseyBrushColor Color );
 
     //Blends a color on the whole given Sample. Requires an Odyssey Brush Color input.
 	UFUNCTION(BlueprintPure
-		, Category = "OdysseyBlockReference"
+		, Category = "Odyssey|Block"
 		, meta = (DisplayName = "Blend Block With Color"))
 	static FOdysseyBlockProxy BlendColor( FOdysseyBrushColor Color
 			, FOdysseyBlockProxy Back
 			, FOdysseyBrushRect Area
 			, float Opacity = 1.f
-			, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA
-			, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8
+			, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
+			, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
 			, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
 			, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
     //Fills the given Sample with thge given Color. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference"
+             , Category="Odyssey|Block"
              , meta = ( DisplayName = "Fill Block With Color" ) )
     static FOdysseyBlockProxy Fill( FOdysseyBlockProxy Block
                                     , FOdysseyBrushColor Color
                                     , FOdysseyBrushRect Area
                                     , bool PreserveAlpha = false
-                                    , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA
-                                    , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8);
+                                    , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
+                                    , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8);
 
     //Creates an empty Odyssey Block Reference.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference"
+             , Category="Odyssey|Block"
              , meta = ( AdvancedDisplay="InitializeData" ) )
     static FOdysseyBlockProxy CreateBlock( int Width = 256
                                          , int Height = 256
-                                         , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA
-										 , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8
+                                         , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
+										 , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
                                          , bool InitializeData = true );
 
     //Crops the Odyssey Block Reference according to the given Rect.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference" )
+             , Category="Odyssey|Block" )
     static FOdysseyBlockProxy CropBlock( FOdysseyBlockProxy Block
                                          , FOdysseyBrushRect Area);
 
@@ -150,7 +150,7 @@ public:
     //If Top is smaller than Back = Both will be visible.
     //X | Y are an offset to pan Top.
     UFUNCTION(BlueprintPure
-             , Category="OdysseyBlockReference"
+             , Category="Odyssey|Block"
              , meta = ( DisplayName = "Blend Blocks" ) )
     static FOdysseyBlockProxy Blend( FOdysseyBlockProxy Top
                                    , FOdysseyBlockProxy Back
@@ -158,8 +158,8 @@ public:
                                    , UPARAM(DisplayName="Top Offset X") int X = 0
                                    , UPARAM(DisplayName="Top Offset Y") int Y = 0
                                    , float Opacity = 1.f
-								   , EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA
-								   , EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8
+								   , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
+								   , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
@@ -167,7 +167,7 @@ public:
     //Abscissa represents the actual alpha value.
     //Ordinate represents the adjusted alpha value.
     UFUNCTION(BlueprintPure
-             , Category="OdysseyBlockReference"
+             , Category="Odyssey|Block"
              , meta = ( DisplayName = "Adjust Block Alpha" ) )
     static FOdysseyBlockProxy AdjustAlpha( FOdysseyBlockProxy Block
                                          , UCurveFloat* Curve
@@ -177,7 +177,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-			, Category = "OdysseyBlockReference"
+			, Category = "Odyssey|Block"
 			, meta = (DisplayName = "Adjust Block RGBA"))
 	static FOdysseyBlockProxy AdjustRGBA(FOdysseyBlockProxy Block
 		, UCurveFloat* CurveR
@@ -191,7 +191,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "OdysseyBlockReference"
+		, Category = "Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block GreyA"))
 		static FOdysseyBlockProxy AdjustGreyA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveGrey
@@ -203,7 +203,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "OdysseyBlockReference"
+		, Category = "Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block HSVA"))
 		static FOdysseyBlockProxy AdjustHSVA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveH
@@ -216,7 +216,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "OdysseyBlockReference"
+		, Category = "Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block HSLA"))
 		static FOdysseyBlockProxy AdjustHSLA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveH
@@ -229,7 +229,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "OdysseyBlockReference"
+		, Category = "Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block CMYKA"))
 		static FOdysseyBlockProxy AdjustCMYKA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveC
@@ -243,7 +243,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "OdysseyBlockReference"
+		, Category = "Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block LabA"))
 		static FOdysseyBlockProxy AdjustLabA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveL
@@ -255,11 +255,11 @@ public:
     //---
 
     //Returns the Width of an Odyssey Block Reference as an Integer.
-    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Width" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Width" ) )
     static int GetWidth( FOdysseyBlockProxy Sample );
 
     //Returns the Height of an Odyssey Block Reference as an Integer.
-    UFUNCTION( BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Height" ) )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Height" ) )
     static int GetHeight( FOdysseyBlockProxy Sample );
 
     //---
@@ -267,32 +267,32 @@ public:
     //Requires a Font to return an Array of Odyssey Block Reference.
     //This node turns the Font into a big block that contains all characters in the font.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference" )
-    static TArray< FOdysseyBlockProxy > GetFontBlocks( const UFont* Font, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8 );
+             , Category="Odyssey|Block" )
+    static TArray< FOdysseyBlockProxy > GetFontBlocks( const UFont* Font, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8 );
     
     //Requires a Font and a String to return an Array of Odyssey Block Reference.
     //This node find the correspondance between letters from the String and characters from the Font.
     UFUNCTION( BlueprintPure
-             , Category="OdysseyBlockReference" )
+             , Category="Odyssey|Block" )
     static TArray< FOdysseyFontCharacter > GetFontCharacterInfo( const UFont* Font, const FString& String );
 
     //---
     
     //This node automatically picks the color up at position on the canvas. 
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Block")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 
     /* Format Management */
 
-    //Get the Odyssey Block Reference Pixel Format
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Format" ))
-    static EOdysseyPixelFormat GetFormat(FOdysseyBlockProxy Block);
+    //Get the Odyssey Block Reference Color Model
+    UFUNCTION(BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Color Model" ))
+    static EOdysseyColorModel GetColorModel(FOdysseyBlockProxy Block);
 
-    //Get the Odyssey Block Reference Pixel Precision
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Precision" ))
-    static EOdysseyPixelFormatPrecision GetPrecision(FOdysseyBlockProxy Block);
+    //Get the Odyssey Block Reference Channel Depth
+    UFUNCTION(BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Channel Depth" ))
+    static EOdysseyChannelDepth GetChannelDepth(FOdysseyBlockProxy Block);
 
     //Get the Odyssey Block Reference Rectangle
-    UFUNCTION(BlueprintPure, Category="OdysseyBlockReference", meta = ( DisplayName="Get Block Rectangle" ))
+    UFUNCTION(BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Rectangle" ))
     static FOdysseyBrushRect GetRect(FOdysseyBlockProxy Block);
 };

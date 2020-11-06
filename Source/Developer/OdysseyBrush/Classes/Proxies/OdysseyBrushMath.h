@@ -15,10 +15,10 @@ class ODYSSEYBRUSH_API UOdysseyBrushMathLibrary : public UBlueprintFunctionLibra
 
 public:
     //Node that converts polar coordinates (radius,angle) to cartesian coordinates (x,y).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushMath" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Math" )
     static  void  ConvertPolarToCartesianCoordinates( float AngleRad, float  Radius, float& DeltaX, float& DeltaY );
 
     //Node that converts cartesian coordinates (x,y) to polar coordinates (radius,angle).
-    UFUNCTION( BlueprintPure, Category="OdysseyBrushMath" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Math" )
     static  void  ConvertCartesianToPolarCoordinates( float DeltaX, float DeltaY, float& AngleRad, float& Radius );
 };
