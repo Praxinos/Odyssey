@@ -57,6 +57,8 @@ FEposEditorStyle::FEposEditorStyle()
 
     Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon48x48 ) );
+    Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon24x24 ) );
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }

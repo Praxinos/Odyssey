@@ -60,7 +60,7 @@ private:
      * @param NewBoardName The new board name
      * @return The new board path
      */
-    static FString GenerateNewBoardPath( UMovieScene* iSequenceMovieScene, FString& ioNewBoardName );
+    static FString GenerateNewSequencePath( UMovieScene* iSequenceMovieScene, FString& ioNewBoardName );
 
     /**
      * Generate a new board name
@@ -69,7 +69,8 @@ private:
      * @param Time The time to generate the new board name at
      * @return The new board name
      */
-    static FString GenerateNewBoardName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime );
+    template<typename SequenceClass>
+    static FString GenerateNewSectionName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime );
 
     /*
      * Create board
@@ -81,7 +82,7 @@ private:
      * @return The new board.
      */
     template<typename SequenceClass>
-    static UMovieSceneSubSection* CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewAssetName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate = nullptr );
+    static UMovieSceneSubSection* CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate = nullptr );
 
     /*
      * Insert Board.

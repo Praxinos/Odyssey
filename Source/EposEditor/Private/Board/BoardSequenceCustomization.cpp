@@ -101,6 +101,13 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
             FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame ) );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
+            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::NewSectionWithShotAtCurrentFrame ) );
+    else
+        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
 }
 
 void
@@ -119,6 +126,11 @@ void
 FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame()
 {
     EposTracksEditorHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
+}
+void
+FBoardSequenceCustomization::NewSectionWithShotAtCurrentFrame()
+{
+    EposTracksEditorHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
 }
 
 //---
@@ -174,6 +186,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+    ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
 
     ToolbarBuilder.AddSeparator();
 }

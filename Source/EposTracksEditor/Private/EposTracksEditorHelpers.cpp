@@ -39,15 +39,11 @@ static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FS
 }
 }
 
+//static
 FString
-EposTracksEditorHelpers::GenerateNewBoardPath( UMovieScene* iSequenceMovieScene, FString& ioNewBoardName )
+EposTracksEditorHelpers::GenerateNewSequencePath( UMovieScene* iSequenceMovieScene, FString& ioNewSequenceName )
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
-
-    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-
-    TArray<FAssetData> objectList;
-    assetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetFName(), objectList );
 
     UObject* sequenceAsset = iSequenceMovieScene->GetOuter();
     UPackage* sequencePackage = sequenceAsset->GetOutermost();
@@ -58,37 +54,44 @@ EposTracksEditorHelpers::GenerateNewBoardPath( UMovieScene* iSequenceMovieScene,
     FString newShotPrefix;
     uint32 newShotNumber = INDEX_NONE;
     uint32 newTakeNumber = INDEX_NONE;
-    MovieSceneToolHelpers::ParseShotName( ioNewBoardName, newShotPrefix, newShotNumber, newTakeNumber );
+    MovieSceneToolHelpers::ParseShotName( ioNewSequenceName, newShotPrefix, newShotNumber, newTakeNumber );
 
-    FString newShotDirectory = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, INDEX_NONE );
-    FString newShotPath = sequencePath;
+    FString newShotPath = sequencePackageName;
+    //FString newShotDirectory = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, INDEX_NONE );
+    //FString newShotPath = sequencePath;
 
-    FString shotDirectory = projectSettings->ShotDirectory;
-    if( !shotDirectory.IsEmpty() )
-    {
-        newShotPath /= shotDirectory;
-    }
-    newShotPath /= newShotDirectory; // put this in the shot directory, ie. /Game/cine/max/shots/shot0010
+    //FString shotDirectory = projectSettings->ShotDirectory;
+    //if( !shotDirectory.IsEmpty() )
+    //{
+    //    newShotPath /= shotDirectory;
+    //}
+    //newShotPath /= newShotDirectory; // put this in the shot directory, ie. /Game/cine/max/shots/shot0010
 
     // Make sure this shot path is unique
+    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+    TArray<FAssetData> objectList;
+    assetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetFName(), objectList );
+    assetRegistryModule.Get().GetAssetsByClass( UShotSequence::StaticClass()->GetFName(), objectList );
+
     FString newPackageName = newShotPath;
-    newPackageName /= ioNewBoardName; // ie. /Game/cine/max/shots/shot0010/shot0010_001
+    newPackageName /= ioNewSequenceName; // ie. /Game/cine/max/shots/shot0010/shot0010_001
     if( !IsPackageNameUnique( objectList, newPackageName ) )
     {
         while( 1 )
         {
             newShotNumber += projectSettings->ShotIncrement;
-            ioNewBoardName = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, newTakeNumber );
-            newShotDirectory = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, INDEX_NONE );
-            newShotPath = sequencePath;
-            if( !shotDirectory.IsEmpty() )
-            {
-                newShotPath /= shotDirectory;
-            }
-            newShotPath /= newShotDirectory;
+            ioNewSequenceName = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, newTakeNumber );
+            newShotPath = sequencePackageName;
+            //newShotDirectory = MovieSceneToolHelpers::ComposeShotName( newShotPrefix, newShotNumber, INDEX_NONE );
+            //newShotPath = sequencePath;
+            //if( !shotDirectory.IsEmpty() )
+            //{
+            //    newShotPath /= shotDirectory;
+            //}
+            //newShotPath /= newShotDirectory;
 
             newPackageName = newShotPath;
-            newPackageName /= ioNewBoardName;
+            newPackageName /= ioNewSequenceName;
             if( IsPackageNameUnique( objectList, newPackageName ) )
             {
                 break;
@@ -99,8 +102,10 @@ EposTracksEditorHelpers::GenerateNewBoardPath( UMovieScene* iSequenceMovieScene,
     return newShotPath;
 }
 
+template<typename SequenceClass>
+//static
 FString
-EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime )
+EposTracksEditorHelpers::GenerateNewSectionName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime )
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
@@ -132,6 +137,8 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
         }
     }
 
+    FString prefix = ( SequenceClass::StaticClass() == UBoardSequence::StaticClass() ) ? TEXT( "board" ) : TEXT( "shot" );
+
     // There aren't any shots, let's create the first shot name
     if( beforeShot == nullptr || nextShot == nullptr )
     {
@@ -140,7 +147,8 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
     // This is the last shot
     else if( beforeShot == nextShot )
     {
-        FString nextShotPrefix = projectSettings->ShotPrefix;
+        FString nextShotPrefix = prefix;
+        //FString nextShotPrefix = projectSettings->ShotPrefix;
         uint32 nextShotNumber = projectSettings->FirstShotNumber;
         uint32 nextTakeNumber = projectSettings->FirstTakeNumber;
 
@@ -153,11 +161,13 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
     // This is in between two shots
     else
     {
-        FString beforeShotPrefix = projectSettings->ShotPrefix;
+        FString beforeShotPrefix = prefix;
+        //FString beforeShotPrefix = projectSettings->ShotPrefix;
         uint32 beforeShotNumber = projectSettings->FirstShotNumber;
         uint32 beforeTakeNumber = projectSettings->FirstTakeNumber;
 
-        FString nextShotPrefix = projectSettings->ShotPrefix;
+        FString nextShotPrefix = prefix;
+        //FString nextShotPrefix = projectSettings->ShotPrefix;
         uint32 nextShotNumber = projectSettings->FirstShotNumber;
         uint32 nextTakeNumber = projectSettings->FirstTakeNumber;
 
@@ -173,7 +183,8 @@ EposTracksEditorHelpers::GenerateNewBoardName( const TArray<UMovieSceneSection*>
     }
 
     // Default case
-    return MovieSceneToolHelpers::ComposeShotName( projectSettings->ShotPrefix, projectSettings->FirstShotNumber, projectSettings->FirstTakeNumber );
+    return MovieSceneToolHelpers::ComposeShotName( prefix, projectSettings->FirstShotNumber, projectSettings->FirstTakeNumber );
+    //return MovieSceneToolHelpers::ComposeShotName( projectSettings->ShotPrefix, projectSettings->FirstShotNumber, projectSettings->FirstTakeNumber );
 }
 
 //---
@@ -215,7 +226,7 @@ EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer
 template<typename SequenceClass>
 //static
 UMovieSceneSubSection*
-EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewAssetName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
+EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
 {
     FString newBoardPath;
 
@@ -226,7 +237,8 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
     }
     else
     {
-        newBoardPath = EposTracksEditorHelpers::GenerateNewBoardPath( iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewAssetName );
+        newBoardPath = EposTracksEditorHelpers::GenerateNewSequencePath( iSequencer->GetRootMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
+        //newBoardPath = EposTracksEditorHelpers::GenerateNewBoardPath( iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
     }
 
     // Create a new level sequence asset with the appropriate name
@@ -239,15 +251,17 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
         if( currentClass->IsChildOf( UFactory::StaticClass() ) && !( currentClass->HasAnyClassFlags( CLASS_Abstract ) ) )
         {
             UFactory* factory = Cast<UFactory>( currentClass->GetDefaultObject() );
-            if( factory->CanCreateNew() && factory->ImportPriority >= 0 && ( factory->SupportedClass == UBoardSequence::StaticClass() || factory->SupportedClass == UShotSequence::StaticClass() ) )
+            if( factory->CanCreateNew() && factory->ImportPriority >= 0 && factory->SupportedClass == SequenceClass::StaticClass() )
             {
                 if( iSectionToDuplicate != nullptr )
                 {
-                    newAsset = assetTools.DuplicateAssetWithDialog( ioNewAssetName, newBoardPath, iSectionToDuplicate->GetSequence() );
+                    newAsset = assetTools.DuplicateAsset( ioNewSequenceName, newBoardPath, iSectionToDuplicate->GetSequence() );
+                    //newAsset = assetTools.DuplicateAssetWithDialog( ioNewSequenceName, newBoardPath, iSectionToDuplicate->GetSequence() );
                 }
                 else
                 {
-                    newAsset = assetTools.CreateAssetWithDialog( ioNewAssetName, newBoardPath, SequenceClass::StaticClass(), factory );
+                    newAsset = assetTools.CreateAsset( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
+                    //newAsset = assetTools.CreateAssetWithDialog( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
 
                 }
                 break;
@@ -280,7 +294,7 @@ EposTracksEditorHelpers::InsertSequence( ISequencer* iSequencer, FFrameNumber iF
     const FScopedTransaction transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
 
     UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
-    FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), iFrameNumber );
+    FString newBoardName = EposTracksEditorHelpers::GenerateNewSectionName<SequenceClass>( boardTrack->GetAllSections(), iFrameNumber );
 
     UMovieSceneSubSection* newBoard = EposTracksEditorHelpers::CreateSequenceInternal<SequenceClass>( iSequencer, newBoardName, iFrameNumber );
     if( newBoard )
@@ -350,7 +364,11 @@ EposTracksEditorHelpers::DuplicateSection( ISequencer* iSequencer, UMovieSceneCi
     UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
 
     FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
-    FString newBoardName = EposTracksEditorHelpers::GenerateNewBoardName( boardTrack->GetAllSections(), startTime );
+    FString newBoardName;
+    if( subsequence->IsA<UBoardSequence>() )
+        newBoardName = EposTracksEditorHelpers::GenerateNewSectionName<UBoardSequence>( boardTrack->GetAllSections(), startTime );
+    else
+        newBoardName = EposTracksEditorHelpers::GenerateNewSectionName<UShotSequence>( boardTrack->GetAllSections(), startTime );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* newBoard;

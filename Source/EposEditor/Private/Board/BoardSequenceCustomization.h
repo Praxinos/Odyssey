@@ -36,6 +36,7 @@ private:
     void ArrangeSections();
     void SetArrangeSections( EArrangeSections iArrangeSections );
     void NewSectionWithBoardAtCurrentFrame();
+    void NewSectionWithShotAtCurrentFrame();
 
 private:
     //bool OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );
