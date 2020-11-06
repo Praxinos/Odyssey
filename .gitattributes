@@ -15,7 +15,7 @@
 
 # Custom .gitattributes for a c++ repo.
 
-*.inl      text diff=c
+*.inl      text diff=c whitespace=trailing-space,space-before-tab,tab-in-indent
 
 ##---
 
@@ -25,8 +25,8 @@
 
 # Documents
 *.bibtex   text diff=bibtex
-*.doc	        diff=astextplain
-*.DOC	        diff=astextplain
+*.doc           diff=astextplain
+*.DOC           diff=astextplain
 *.docx          diff=astextplain
 *.DOCX          diff=astextplain
 *.dot           diff=astextplain
@@ -34,7 +34,7 @@
 *.pdf           diff=astextplain
 *.PDF           diff=astextplain
 *.rtf           diff=astextplain
-*.RTF	        diff=astextplain
+*.RTF           diff=astextplain
 *.md       text
 *.tex      text diff=tex
 *.adoc     text
@@ -98,15 +98,15 @@
 # Basic .gitattributes for a c++ repo.
 
 # Sources
-*.c     text diff=c
-*.cc    text diff=cpp
-*.cxx   text diff=cpp
-*.cpp   text diff=cpp
-*.c++   text diff=cpp
-*.hpp   text diff=cpp
-*.h     text diff=c
-*.h++   text diff=cpp
-*.hh    text diff=cpp
+*.c     text diff=c     whitespace=trailing-space,space-before-tab,tab-in-indent
+*.cc    text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
+*.cxx   text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
+*.cpp   text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
+*.c++   text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
+*.hpp   text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
+*.h     text diff=c     whitespace=trailing-space,space-before-tab,tab-in-indent
+*.h++   text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
+*.hh    text diff=cpp   whitespace=trailing-space,space-before-tab,tab-in-indent
 
 # Compiled Object files
 *.slo   binary
@@ -141,7 +141,7 @@
 # Auto detect text files and perform LF normalization
 # https://www.davidlaing.com/2012/09/19/customise-your-gitattributes-to-become-a-git-ninja/
 
-*.cs text diff=csharp
+*.cs text diff=csharp whitespace=trailing-space,space-before-tab,tab-in-indent
 
 #--- 
 
