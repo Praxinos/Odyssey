@@ -132,7 +132,14 @@ UOdysseyBlockProxyFunctionLibrary::Fill( UOdysseyBrushAssetBase* BrushContext
 
     if( Area.IsInitialized() || PreserveAlpha)
     {
-        ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), dst->GetBlock(), Block.m->GetBlock()->Rect(), ::ul3::FVec2I( 0, 0 ) );
+		if (Block.m->Format() != dst->Format())
+		{
+        	::ul3::Conv( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), dst->GetBlock() );
+		}
+		else
+		{
+			::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, Block.m->GetBlock(), dst->GetBlock(), Block.m->GetBlock()->Rect(), ::ul3::FVec2I( 0, 0 ) );
+		}
     }
 
     if( !Area.IsInitialized() || Area.Width() > 0 || Area.Height() > 0 )
