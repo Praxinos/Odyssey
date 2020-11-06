@@ -259,8 +259,21 @@ public:
     FOdysseyBrushRect GetCanvasRect();
 
     //Gets Stroke Block.
-    UFUNCTION( BlueprintCallable, Category = "OdysseyBrushStroke")
+    UFUNCTION( BlueprintPure, Category = "OdysseyBrushStroke")
     FOdysseyBlockProxy GetStrokeBlock( FOdysseyBrushRect Area );
+
+public:
+    // Odyssey Brush Stamps    
+
+    //Debug Stamp, stamps a basic shape with the current modifiers parameters. Is also pressure sensitive.
+    UFUNCTION( BlueprintCallable, Category="OdysseyBrushStamps", meta = (HideSelfPin) )
+    void  DebugStamp();
+
+    //Node that reunites all the necessary information to create a stamp.
+    //Must be connected to an Event (i.e. "Event on Step").
+    //Requires 3 mandatory input to work : Odyssey Block Reference and X|Y coordinates.
+    UFUNCTION( BlueprintCallable, Category="OdysseyBrushStamps", meta = ( DefaultToSelf="Target", HideSelfPin, HidePin="Target") )
+    void  Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
 public:
     // Odyssey Brush Native events

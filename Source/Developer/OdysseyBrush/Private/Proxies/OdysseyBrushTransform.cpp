@@ -24,7 +24,8 @@ FOdysseyMatrix::ID() const
 }
 
 const ::ul3::FTransform2D&
-FOdysseyMatrix::GetValue() const {
+FOdysseyMatrix::GetValue() const
+{
     return  m;
 }
 
@@ -80,10 +81,8 @@ UOdysseyTransformProxyLibrary::ComposeMatrix( const FOdysseyMatrix& First, const
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-    
+UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -119,10 +118,8 @@ UOdysseyTransformProxyLibrary::Transform( UOdysseyBrushAssetBase* BrushContext, 
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-    
+UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -160,9 +157,8 @@ UOdysseyTransformProxyLibrary::Rotate( UOdysseyBrushAssetBase* BrushContext, FOd
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
+UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -198,9 +194,8 @@ UOdysseyTransformProxyLibrary::ScaleUniform( UOdysseyBrushAssetBase* BrushContex
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
+UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 		
@@ -237,10 +232,8 @@ UOdysseyTransformProxyLibrary::ScaleXY( UOdysseyBrushAssetBase* BrushContext, FO
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
+UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -276,10 +269,8 @@ UOdysseyTransformProxyLibrary::Shear( UOdysseyBrushAssetBase* BrushContext, FOdy
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
+UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -322,10 +313,8 @@ UOdysseyTransformProxyLibrary::ResizeUniform( UOdysseyBrushAssetBase* BrushConte
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod ) {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
+UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod )
+{
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -366,21 +355,24 @@ UOdysseyTransformProxyLibrary::Resize( UOdysseyBrushAssetBase* BrushContext, FOd
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::FlipX( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod ) {
-    return  ScaleXY( BrushContext, Sample, -1, 1, ResamplingMethod );
+UOdysseyTransformProxyLibrary::FlipX( FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod )
+{
+    return  ScaleXY( Sample, -1, 1, ResamplingMethod );
 }
 
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::FlipY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod ) {
-    return  ScaleXY( BrushContext, Sample, 1, -1, ResamplingMethod );
+UOdysseyTransformProxyLibrary::FlipY( FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod )
+{
+    return  ScaleXY( Sample, 1, -1, ResamplingMethod );
 }
 
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::FlipXY( UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod ) {
-    return  ScaleXY( BrushContext, Sample, -1, -1, ResamplingMethod );
+UOdysseyTransformProxyLibrary::FlipXY( FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod )
+{
+    return  ScaleXY( Sample, -1, -1, ResamplingMethod );
 }
 

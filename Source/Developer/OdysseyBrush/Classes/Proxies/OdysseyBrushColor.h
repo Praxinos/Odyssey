@@ -63,11 +63,11 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
 
 	//Interpolates an OdysseyBrushColor between 2 colors
 	UFUNCTION(BlueprintPure, Category = "OdysseyBrushColor", meta = (DisplayName = "Lerp (OdysseyBrushColor)"))
-	static FOdysseyBrushColor Lerp(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision);
+	static FOdysseyBrushColor Lerp(FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8);
 
     //Convert the Odyssey Brush Color to the specified Format and Precision
     UFUNCTION(BlueprintPure, Category="OdysseyBrushColor", meta = ( DisplayName="Convert OdysseyBrushColor to Format" ))
-    static FOdysseyBrushColor ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision);
+    static FOdysseyBrushColor ConvertToFormat(FOdysseyBrushColor Color, EOdysseyPixelFormat Format = EOdysseyPixelFormat::kRGBA, EOdysseyPixelFormatPrecision Precision = EOdysseyPixelFormatPrecision::k8);
 
     /* Make */
 

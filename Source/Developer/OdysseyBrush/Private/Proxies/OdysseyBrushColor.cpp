@@ -104,10 +104,9 @@ UOdysseyBrushColorFunctionLibrary::GetAlpha(FOdysseyBrushColor Color)
 
 //static
 FOdysseyBrushColor
-UOdysseyBrushColorFunctionLibrary::Lerp(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+UOdysseyBrushColorFunctionLibrary::Lerp(FOdysseyBrushColor Color1, FOdysseyBrushColor Color2, float Value, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
 {
-	::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
 
 	FOdysseyBrushColor result;
 	::ul3::FPixelValue v1 = ::ul3::Conv(Color1.GetValue(), format);
@@ -119,10 +118,9 @@ UOdysseyBrushColorFunctionLibrary::Lerp(UOdysseyBrushAssetBase* BrushContext, FO
 
 //static
 FOdysseyBrushColor
-UOdysseyBrushColorFunctionLibrary::ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+UOdysseyBrushColorFunctionLibrary::ConvertToFormat(FOdysseyBrushColor Color, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
 {
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
     ::ul3::FPixelValue result = ::ul3::Conv( Color.GetValue(), format );
     return result;
 }

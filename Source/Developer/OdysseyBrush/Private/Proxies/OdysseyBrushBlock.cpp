@@ -13,32 +13,26 @@
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision, UOdysseyBrushAssetBase* BrushContext )
+UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision )
 {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
     if( !Texture )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
 
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
-    
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);    
     TSharedRef<FOdysseyBlock> dst = MakeShareable(NewOdysseyBlockFromUTextureData( Texture, format ));
     return FOdysseyBlockProxy(dst);
 }
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::ConvertToFormat(UOdysseyBrushAssetBase* BrushContext, FOdysseyBlockProxy Block, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+UOdysseyBlockProxyFunctionLibrary::ConvertToFormat(FOdysseyBlockProxy Block, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
 {
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+    ::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
 
     TSharedPtr<FOdysseyBlock> conv = MakeShareable(new FOdysseyBlock(Block.m->Width(), Block.m->Height(), format));
 	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -60,7 +54,7 @@ EOdysseyPixelFormat
 UOdysseyBlockProxyFunctionLibrary::GetFormat(FOdysseyBlockProxy Block)
 {
     if (!Block.m)
-        return EOdysseyPixelFormat::kCanvasFormat;
+        return EOdysseyPixelFormat::kRGBA;
 
     return OdysseyPixelFormatFromULISFormat(Block.m->Format());
 }
@@ -70,20 +64,16 @@ EOdysseyPixelFormatPrecision
 UOdysseyBlockProxyFunctionLibrary::GetPrecision(FOdysseyBlockProxy Block)
 {
     if (!Block.m)
-        return EOdysseyPixelFormatPrecision::kCanvasPrecision;
+        return EOdysseyPixelFormatPrecision::k8;
 
     return OdysseyPixelFormatPrecisionFromULISFormat(Block.m->Format());
 }
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* BrushContext
-                                                    , FOdysseyBlockProxy Source
+UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source
                                                     , FOdysseyBrushColor Color )
 {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
     if( !Source.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -106,22 +96,17 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( UOdysseyBrushAssetBase* Br
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Fill( UOdysseyBrushAssetBase* BrushContext
-                                        , FOdysseyBlockProxy Block
+UOdysseyBlockProxyFunctionLibrary::Fill( FOdysseyBlockProxy Block
                                         , FOdysseyBrushColor Color
                                         , FOdysseyBrushRect Area
 										, bool PreserveAlpha
                                         , EOdysseyPixelFormat Format
                                         , EOdysseyPixelFormatPrecision Precision)
 {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
     if( !Block.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock( Block.m->Width(), Block.m->Height(), format ));
     ::ul3::FPixelValue color = ::ul3::Conv( Color.GetValue(), format );
@@ -158,8 +143,7 @@ UOdysseyBlockProxyFunctionLibrary::Fill( UOdysseyBrushAssetBase* BrushContext
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::BlendColor( UOdysseyBrushAssetBase* BrushContext
-                                        , FOdysseyBrushColor Color
+UOdysseyBlockProxyFunctionLibrary::BlendColor( FOdysseyBrushColor Color
                                         , FOdysseyBlockProxy Sample
 										, FOdysseyBrushRect Area
                                         , float Opacity
@@ -168,15 +152,11 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor( UOdysseyBrushAssetBase* BrushCont
                                         , EOdysseyBlendingMode BlendingMode
                                         , EOdysseyAlphaMode AlphaMode )
 {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Sample.m->GetBlock()->Width(), Sample.m->GetBlock()->Height(), format ));
 
@@ -204,22 +184,17 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor( UOdysseyBrushAssetBase* BrushCont
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushContext
-                                              , int Width
+UOdysseyBlockProxyFunctionLibrary::CreateBlock( int Width
                                               , int Height
                                               , EOdysseyPixelFormat Format
                                               , EOdysseyPixelFormatPrecision Precision
                                               , bool InitializeData )
 {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
     if( Width < 1 || Height < 1 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Width, Height, format, nullptr, nullptr, InitializeData ));
 
@@ -228,8 +203,7 @@ UOdysseyBlockProxyFunctionLibrary::CreateBlock( UOdysseyBrushAssetBase* BrushCon
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::CropBlock( UOdysseyBrushAssetBase* BrushContext
-                                         , FOdysseyBlockProxy Block
+UOdysseyBlockProxyFunctionLibrary::CropBlock( FOdysseyBlockProxy Block
                                          , FOdysseyBrushRect Area)
 {
     if (!Block.m)
@@ -251,8 +225,7 @@ UOdysseyBlockProxyFunctionLibrary::CropBlock( UOdysseyBrushAssetBase* BrushConte
 
 //static
 FOdysseyBlockProxy
-UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
-                                        , FOdysseyBlockProxy Top
+UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
                                         , FOdysseyBlockProxy Back
                                         , FOdysseyBrushRect TopArea
                                         , int OffsetX
@@ -263,9 +236,6 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
                                         , EOdysseyBlendingMode BlendingMode
                                         , EOdysseyAlphaMode AlphaMode)
 {
-    if( !BrushContext )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
     if( !Top.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -273,8 +243,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( UOdysseyBrushAssetBase* BrushContext
         return FOdysseyBlockProxy::MakeNullProxy();
 
     //---
-    ::ul3::tFormat defaultFormat = BrushContext->GetState().target_temp_buffer ? BrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
 
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Back.m->GetBlock()->Width(), Back.m->GetBlock()->Height(), format ));
 
@@ -775,18 +744,15 @@ UOdysseyBlockProxyFunctionLibrary::GetHeight( FOdysseyBlockProxy Sample )
 
 //static
 TArray< FOdysseyBlockProxy >
-UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( UOdysseyBrushAssetBase* iBrushContext, const UFont* iFont, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
+UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( const UFont* iFont, EOdysseyPixelFormat Format, EOdysseyPixelFormatPrecision Precision)
 {
     TArray< FOdysseyBlockProxy > blocks;
-    if( !iBrushContext )
-        return blocks;
     if( iFont->FontCacheType == EFontCacheType::Runtime )
         return blocks;
     
     check( iFont->Textures.Num() )
 
-    ::ul3::tFormat defaultFormat = iBrushContext->GetState().target_temp_buffer ? iBrushContext->GetState().target_temp_buffer->Format() : ULIS3_FORMAT_RGBA8;
-	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision, defaultFormat);
+	::ul3::tFormat format = ULISFormatFromOdysseyPixelFormat(Format, Precision);
     
     for( auto texture : iFont->Textures )
     {
