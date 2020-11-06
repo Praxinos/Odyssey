@@ -46,7 +46,7 @@ ULISFormatFromOdysseyPixelFormat(EOdysseyPixelFormat iFormat, EOdysseyPixelForma
 		return format;
 
 	//erase
-	format &= ULIS3_E_TYPE & ULIS3_E_DEPTH); //TODO: Remove the last parenthesis once ULIS is patched
+	format &= ULIS3_E_TYPE & ULIS3_E_DEPTH;
 
 	switch (iPrecision)
 	{
@@ -65,7 +65,7 @@ EOdysseyPixelFormat
 OdysseyPixelFormatFromULISFormat(::ul3::tFormat iFormat)
 {
 	//erase
-	iFormat &= ULIS3_E_TYPE & ULIS3_E_DEPTH); //TODO: Remove the last parenthesis once ULIS is patched
+	iFormat &= ULIS3_E_TYPE & ULIS3_E_DEPTH;
 
 	//set 8bits
 	iFormat |= ULIS3_W_TYPE(ULIS3_TYPE_UINT8) | ULIS3_W_DEPTH(1);
