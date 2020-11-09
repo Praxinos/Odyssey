@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -50,7 +50,7 @@ public:
     // Only one entry should have an invalid guid
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences;
-    
+
     // The map will contain multiple staticmesh actor (planes) and all their multiple components
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences;

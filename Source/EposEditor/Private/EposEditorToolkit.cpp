@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "EposEditorToolkit.h"
 
@@ -158,7 +158,7 @@ FEposEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 
 //--- FGCObject interface
 
-void 
+void
 FEposEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollector )
 {
     if( mSequence )

@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Shot/ShotSequenceEditorCommands.h"
 
@@ -7,7 +8,7 @@
 #define LOCTEXT_NAMESPACE "ShotSequenceEditorCommands"
 
 FShotSequenceEditorCommands::FShotSequenceEditorCommands()
-	: TCommands<FShotSequenceEditorCommands>("ShotSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("ShotSequenceEditorStyle", "Epos Editor (Shot)"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
+    : TCommands<FShotSequenceEditorCommands>("ShotSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("ShotSequenceEditorStyle", "Epos Editor (Shot)"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
 {
 }
 

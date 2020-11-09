@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Board/BoardSequence.h"
 #include "Components/ActorComponent.h"
@@ -16,23 +16,23 @@
 //---
 
 UBoardSequence::UBoardSequence(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-	, MovieScene(nullptr)
+    : Super(ObjectInitializer)
+    , MovieScene(nullptr)
 {
-	//bParentContextsAreSignificant = true;
+    //bParentContextsAreSignificant = true;
 }
 
 void UBoardSequence::Initialize()
 {
-	MovieScene = NewObject<UMovieScene>(this, NAME_None, RF_Transactional);
+    MovieScene = NewObject<UMovieScene>(this, NAME_None, RF_Transactional);
 
-	MovieScene->SetEvaluationType(EMovieSceneEvaluationType::WithSubFrames);
+    MovieScene->SetEvaluationType(EMovieSceneEvaluationType::WithSubFrames);
 
-	FFrameRate TickResolution(24000, 1);
-	MovieScene->SetTickResolutionDirectly(TickResolution);
+    FFrameRate TickResolution(24000, 1);
+    MovieScene->SetTickResolutionDirectly(TickResolution);
 
-	FFrameRate DisplayRate(24, 1);
-	MovieScene->SetDisplayRate(DisplayRate);
+    FFrameRate DisplayRate(24, 1);
+    MovieScene->SetDisplayRate(DisplayRate);
 }
 
 void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& PossessedObject, UObject* Context)
@@ -51,12 +51,12 @@ void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context,
 
 UMovieScene* UBoardSequence::GetMovieScene() const
 {
-	return MovieScene;
+    return MovieScene;
 }
 
 UObject* UBoardSequence::GetParentObject(UObject* Object) const
 {
-	return nullptr;
+    return nullptr;
 }
 
 void UBoardSequence::UnbindPossessableObjects(const FGuid& ObjectId)
@@ -76,7 +76,7 @@ void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Contex
 ETrackSupport
 UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
-    if( InTrackClass == UMovieSceneCinematicBoardTrack::StaticClass() || 
+    if( InTrackClass == UMovieSceneCinematicBoardTrack::StaticClass() ||
         InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() || //TMP
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
@@ -90,34 +90,34 @@ UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackCla
 
 //FText UBoardSequence::GetDisplayName() const
 //{
-//	return UMovieSceneSequence::GetDisplayName();
+//  return UMovieSceneSequence::GetDisplayName();
 //}
 //
 //void UBoardSequence::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
 //{
-//	Super::GetAssetRegistryTags(OutTags);
+//  Super::GetAssetRegistryTags(OutTags);
 //
-//	if (BoundActorClass != nullptr)
-//	{
-//		FAssetRegistryTag Tag("BoundActorClass", BoundActorClass->GetName(), FAssetRegistryTag::TT_Alphabetical);
-//		OutTags.Add(Tag);
-//	}
-//	else
-//	{
-//		OutTags.Emplace("BoundActorClass", "(None)", FAssetRegistryTag::TT_Alphabetical);
-//	}
+//  if (BoundActorClass != nullptr)
+//  {
+//      FAssetRegistryTag Tag("BoundActorClass", BoundActorClass->GetName(), FAssetRegistryTag::TT_Alphabetical);
+//      OutTags.Add(Tag);
+//  }
+//  else
+//  {
+//      OutTags.Emplace("BoundActorClass", "(None)", FAssetRegistryTag::TT_Alphabetical);
+//  }
 //}
 //
 //void UBoardSequence::GetAssetRegistryTagMetadata(TMap<FName, FAssetRegistryTagMetadata>& OutMetadata) const
 //{
-//	Super::GetAssetRegistryTagMetadata(OutMetadata);
+//  Super::GetAssetRegistryTagMetadata(OutMetadata);
 //
-//	OutMetadata.Add(
-//		"BoundActorClass",
-//		FAssetRegistryTagMetadata()
-//			.SetDisplayName(NSLOCTEXT("TemplateSequence", "BoundActorClass_Label", "Bound Actor Class"))
-//			.SetTooltip(NSLOCTEXT("TemplateSequence", "BoundActorClass_Tooltip", "The type of actor bound to this template sequence"))
-//		);
+//  OutMetadata.Add(
+//      "BoundActorClass",
+//      FAssetRegistryTagMetadata()
+//          .SetDisplayName(NSLOCTEXT("TemplateSequence", "BoundActorClass_Label", "Bound Actor Class"))
+//          .SetTooltip(NSLOCTEXT("TemplateSequence", "BoundActorClass_Tooltip", "The type of actor bound to this template sequence"))
+//      );
 //}
 //
 #endif

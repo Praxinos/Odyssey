@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -14,37 +15,36 @@ namespace UE { namespace MovieScene { struct FCameraCutAnimator; } }
 UCLASS()
 class UMovieSceneSingleCameraCutTrackInstance : public UMovieSceneTrackInstance
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 private:
-	virtual void OnAnimate() override;
-	virtual void OnInputAdded(const FMovieSceneTrackInstanceInput& InInput) override;
-	virtual void OnInputRemoved(const FMovieSceneTrackInstanceInput& InInput) override;
-	virtual void OnEndUpdateInputs() override;
-	virtual void OnDestroyed() override;
+    virtual void OnAnimate() override;
+    virtual void OnInputAdded(const FMovieSceneTrackInstanceInput& InInput) override;
+    virtual void OnInputRemoved(const FMovieSceneTrackInstanceInput& InInput) override;
+    virtual void OnEndUpdateInputs() override;
+    virtual void OnDestroyed() override;
 
 private:
-	struct FCameraCutCache
-	{
-		TWeakObjectPtr<> LastLockedCamera;
-	};
+    struct FCameraCutCache
+    {
+        TWeakObjectPtr<> LastLockedCamera;
+    };
 
-	struct FCameraCutInputInfo
-	{
-		FMovieSceneTrackInstanceInput Input;
-		float GlobalStartTime = 0.f;
-	};
+    struct FCameraCutInputInfo
+    {
+        FMovieSceneTrackInstanceInput Input;
+        float GlobalStartTime = 0.f;
+    };
 
-	struct FCameraCutUseData
-	{
-		int32 UseCount = 0;
-		bool bValid = false;
-	};
+    struct FCameraCutUseData
+    {
+        int32 UseCount = 0;
+        bool bValid = false;
+    };
 
-	FCameraCutCache CameraCutCache;
-	TMap<IMovieScenePlayer*, FCameraCutUseData> PlayerUseCounts;
-	TArray<FCameraCutInputInfo> SortedInputInfos;
+    FCameraCutCache CameraCutCache;
+    TMap<IMovieScenePlayer*, FCameraCutUseData> PlayerUseCounts;
+    TArray<FCameraCutInputInfo> SortedInputInfos;
 
-	friend struct UE::MovieScene::FCameraCutAnimator;
+    friend struct UE::MovieScene::FCameraCutAnimator;
 };
-

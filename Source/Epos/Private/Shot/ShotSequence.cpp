@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Shot/ShotSequence.h"
 #include "CineCameraActor.h"
@@ -115,7 +115,7 @@ UObject* UShotSequence::GetParentObject( UObject* Object ) const
 {
     if( UActorComponent* Component = Cast<UActorComponent>( Object ) )
     {
-    	return Component->GetOwner();
+        return Component->GetOwner();
     }
 
     return nullptr;
@@ -200,12 +200,12 @@ UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClas
 
 //FText UShotSequence::GetDisplayName() const
 //{
-//	return UMovieSceneSequence::GetDisplayName();
+//  return UMovieSceneSequence::GetDisplayName();
 //}
 
 void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const
 {
-	Super::GetAssetRegistryTags( OutTags );
+    Super::GetAssetRegistryTags( OutTags );
 
     if( CameraBindingIdToReferences.Num() )
     {
@@ -260,7 +260,7 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
 
 void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const
 {
-	Super::GetAssetRegistryTagMetadata( OutMetadata );
+    Super::GetAssetRegistryTagMetadata( OutMetadata );
 
     OutMetadata.Add(
         "Camera",

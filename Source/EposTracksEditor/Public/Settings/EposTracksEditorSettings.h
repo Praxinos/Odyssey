@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -15,11 +15,11 @@
 USTRUCT()
 struct FBoardTrackSettings
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-	/** Select the way to arrange board sections. */
-	UPROPERTY(config, EditAnywhere, Category=BoardTrackSettings)
-	EArrangeSections ArrangeShots;
+    /** Select the way to arrange board sections. */
+    UPROPERTY(config, EditAnywhere, Category=BoardTrackSettings)
+    EArrangeSections ArrangeShots;
 };
 
 //---
@@ -37,19 +37,19 @@ struct FShotTrackSettings
  */
 UCLASS(config=EposTracks)
 class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
-	: public UObject
+    : public UObject
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
 
-	UEposTracksEditorSettings(const FObjectInitializer& ObjectInitializer);
-    
-	/** Specifies Board track stuff. */
-	UPROPERTY(config, EditAnywhere, Category=BoardTrack)
-	FBoardTrackSettings BoardTrackSettings;
+    UEposTracksEditorSettings(const FObjectInitializer& ObjectInitializer);
 
-	/** Specifies Shot track stuff. */
-	UPROPERTY(config, EditAnywhere, Category=ShotTrack)
-	FShotTrackSettings ShotTrackSettings;
+    /** Specifies Board track stuff. */
+    UPROPERTY(config, EditAnywhere, Category=BoardTrack)
+    FBoardTrackSettings BoardTrackSettings;
+
+    /** Specifies Shot track stuff. */
+    UPROPERTY(config, EditAnywhere, Category=ShotTrack)
+    FShotTrackSettings ShotTrackSettings;
 };

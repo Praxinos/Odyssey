@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "EposEditorModule.h"
 
@@ -143,11 +143,11 @@ void
 FEposEditorModule::RegisterMenuExtensions()
 {
     mCommandList = MakeShareable( new FUICommandList );
-    mCommandList->MapAction( 
+    mCommandList->MapAction(
         FBoardSequenceEditorCommands::Get().NewBoardWithSettings,
         FExecuteAction::CreateStatic( &FEposEditorModule::OnCreateNewAssetWithSettings, UBoardSequence::StaticClass() )
     );
-    mCommandList->MapAction( 
+    mCommandList->MapAction(
         FShotSequenceEditorCommands::Get().NewShotWithSettings,
         FExecuteAction::CreateStatic( &FEposEditorModule::OnCreateNewAssetWithSettings, UShotSequence::StaticClass() )
     );

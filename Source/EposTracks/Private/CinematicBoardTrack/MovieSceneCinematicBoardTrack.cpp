@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 
@@ -105,7 +105,7 @@ UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 
     FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
 
-    // @todo Sequencer: The movie scene owned by the section is now abandoned.  Should we offer to delete it?  
+    // @todo Sequencer: The movie scene owned by the section is now abandoned.  Should we offer to delete it?
 }
 
 void

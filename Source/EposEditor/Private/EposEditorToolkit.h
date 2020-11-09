@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -21,7 +21,7 @@ class UMovieSceneSequence;
 /**
  * Implements an Editor toolkit for template sequences.
  */
-class FEposEditorToolkit 
+class FEposEditorToolkit
     : public FAssetEditorToolkit
     , public FGCObject
 {
@@ -102,6 +102,6 @@ private:
 
     TSharedPtr<FEposEditorPlaybackContext> mPlaybackContext;
 
-    /**	The tab ids for all the tabs used */
+    /** The tab ids for all the tabs used */
     static const FName smSequencerMainTabId;
 };

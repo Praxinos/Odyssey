@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright Â© laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -7,21 +7,21 @@
 #include "Framework/Commands/Commands.h"
 
 class FShotSequenceEditorCommands
-	: public TCommands<FShotSequenceEditorCommands>
+    : public TCommands<FShotSequenceEditorCommands>
 {
 public:
 
-	/** Default constructor. */
+    /** Default constructor. */
     FShotSequenceEditorCommands();
 
-	/** Initialize commands */
-	virtual void RegisterCommands() override;
+    /** Initialize commands */
+    virtual void RegisterCommands() override;
 
 public:
 
-	TSharedPtr<FUICommandInfo> NewShotWithSettings;
+    TSharedPtr<FUICommandInfo> NewShotWithSettings;
 
-	TSharedPtr<FUICommandInfo> CreateCamera;
-	TSharedPtr<FUICommandInfo> CreatePlane;
-	TSharedPtr<FUICommandInfo> SnapCameraToViewport;
+    TSharedPtr<FUICommandInfo> CreateCamera;
+    TSharedPtr<FUICommandInfo> CreatePlane;
+    TSharedPtr<FUICommandInfo> SnapCameraToViewport;
 };

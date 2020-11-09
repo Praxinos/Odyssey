@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Board/BoardSequenceEditorCommands.h"
 
@@ -7,7 +8,7 @@
 #define LOCTEXT_NAMESPACE "BoardSequenceEditorCommands"
 
 FBoardSequenceEditorCommands::FBoardSequenceEditorCommands()
-	: TCommands<FBoardSequenceEditorCommands>("BoardSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("BoardSequenceEditorStyle", "Epos Editor (Board)"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
+    : TCommands<FBoardSequenceEditorCommands>("BoardSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("BoardSequenceEditorStyle", "Epos Editor (Board)"), NAME_None, FEposEditorStyle::Get()->GetStyleSetName() )
 {
 }
 

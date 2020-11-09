@@ -1,10 +1,18 @@
+# IDDN FR.001.250001.004.S.X.2019.000.00000
+# EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
+
+# https://github.com/alexkaratarakis/gitattributes
+
+#---
+
 # Common settings that generally should always be used with your language specific settings
 
 # Auto detect text files and perform LF normalization
 # https://www.davidlaing.com/2012/09/19/customise-your-gitattributes-to-become-a-git-ninja/
+
 *          text=auto
 
-##---
+#---
 
 # Basic .gitattributes for a unreal plugin repo.
 
@@ -12,12 +20,13 @@
 *.ini      text eol=lf
 
 *.uasset   binary
+*.umap   binary
 
 # Custom .gitattributes for a c++ repo.
 
 *.inl      text diff=c whitespace=trailing-space,space-before-tab,tab-in-indent
 
-##---
+#---
 
 #
 # The above will handle all files NOT found below
@@ -93,7 +102,7 @@
 .gitattributes export-ignore
 .gitignore     export-ignore
 
-##---
+#---
 
 # Basic .gitattributes for a c++ repo.
 
@@ -134,7 +143,7 @@
 *.out   binary
 *.app   binary
 
-#--- 
+#---
 
 # Basic .gitattributes for a c# repo.
 
@@ -143,7 +152,7 @@
 
 *.cs text diff=csharp whitespace=trailing-space,space-before-tab,tab-in-indent
 
-#--- 
+#---
 
 # Basic .gitattributes for a python repo.
 

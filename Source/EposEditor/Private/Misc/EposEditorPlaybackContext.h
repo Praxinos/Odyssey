@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -14,12 +15,12 @@ class FEposEditorPlaybackContext : public TSharedFromThis<FEposEditorPlaybackCon
 {
 public:
 
-	UObject* GetPlaybackContext() const;
+    UObject* GetPlaybackContext() const;
 
 private:
 
-	static UWorld* ComputePlaybackContext();
-	
-	/** Mutable cached context pointer */
-	mutable TWeakObjectPtr<UWorld> mWeakCurrentContext;
+    static UWorld* ComputePlaybackContext();
+
+    /** Mutable cached context pointer */
+    mutable TWeakObjectPtr<UWorld> mWeakCurrentContext;
 };

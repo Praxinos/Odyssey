@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -17,28 +18,28 @@ public:
     /**
     *  Find a Camera from the camera track
     *
-    * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
     static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oGuid );
 
     /**
     *  Add a Camera track
     *
-    * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
     static void CreateCamera( ISequencer* iSequencer );
 
     /**
-    *  Update the camera location from the viewport (and set 
+    *  Update the camera location from the viewport
     *
-    * @param TSharedPtr<ISequencer> iSequencer to update camera.
+    * @param ISequencer iSequencer to update camera.
     */
     static void SnapCameraToViewport( ISequencer* iSequencer );
 
     /**
     *  Add a Camera track
     *
-    * @param TSharedPtr<ISequencer> iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
     static void CreatePlane( ISequencer* iSequencer );
 

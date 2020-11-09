@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 
@@ -55,9 +55,9 @@ FCinematicBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSc
 bool
 FCinematicBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache& iRHS ) const
 {
-    return mInnerFrameRate != iRHS.mInnerFrameRate 
-        || mInnerFrameOffset != iRHS.mInnerFrameOffset 
-        || mSectionStartFrame != iRHS.mSectionStartFrame 
+    return mInnerFrameRate != iRHS.mInnerFrameRate
+        || mInnerFrameOffset != iRHS.mInnerFrameOffset
+        || mSectionStartFrame != iRHS.mSectionStartFrame
         || mTimeScale != iRHS.mTimeScale;
 }
 
@@ -102,7 +102,7 @@ FCinematicBoardSection::SetSingleTime( double iGlobalTime )
     sectionObject.SetThumbnailReferenceOffset( iGlobalTime - referenceOffsetSeconds );
 }
 
-UCameraComponent* 
+UCameraComponent*
 FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID iInnerSequenceID, const FMovieSceneSequenceHierarchy& iHierarchy, IMovieScenePlayer& ioPlayer )
 {
     const FMovieSceneSequenceHierarchyNode* Node = iHierarchy.FindNode( iInnerSequenceID );
@@ -191,26 +191,26 @@ FCinematicBoardSection::GetViewCamera()
     const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
 
     check( thisSequenceNode );
-    
-	// Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-	const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
-		[hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
-		{
-			const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
-			return subData && subData->DeterministicSequenceID == targetSequenceID;
-		}
-	);
-	
-	if( innerSequenceID )
-	{
-		UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, *innerSequenceID, *hierarchy, *sequencer );
-		if( cameraComponent )
-		{
-			return cameraComponent;
-		}
-	}
 
-	return nullptr;
+    // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
+    const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
+        [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
+        {
+            const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
+            return subData && subData->DeterministicSequenceID == targetSequenceID;
+        }
+    );
+
+    if( innerSequenceID )
+    {
+        UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, *innerSequenceID, *hierarchy, *sequencer );
+        if( cameraComponent )
+        {
+            return cameraComponent;
+        }
+    }
+
+    return nullptr;
 }
 
 bool

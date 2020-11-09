@@ -1,5 +1,5 @@
-// Copyright © 2020 Praxinos, Inc. All Rights Reserved.
-// IDDN 
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Shot/ShotSequenceCustomization.h"
 
@@ -97,28 +97,28 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
 
-	//TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
-	//	+SHorizontalBox::Slot()
-	//	.AutoWidth()
-	//	.VAlign(VAlign_Center)
-	//	[
-	//		SNew(STextBlock)
-	//		.Text(LOCTEXT("BoundActorClassPicker", "Bound Actor Class"))
-		//]
-		//+SHorizontalBox::Slot()
-		//.AutoWidth()
-		//.VAlign(VAlign_Center)
-		//[
-		//	SNew(SComboButton)
-		//	.OnGetMenuContent_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassMenuContent)
-		//	.ButtonContent()
-		//	[
-		//		SNew(STextBlock)
-		//		.Text_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassName)
-		//	]
-		//];
-	
-	//ToolbarBuilder.AddWidget(Widget);
+    //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
+    //  +SHorizontalBox::Slot()
+    //  .AutoWidth()
+    //  .VAlign(VAlign_Center)
+    //  [
+    //      SNew(STextBlock)
+    //      .Text(LOCTEXT("BoundActorClassPicker", "Bound Actor Class"))
+        //]
+        //+SHorizontalBox::Slot()
+        //.AutoWidth()
+        //.VAlign(VAlign_Center)
+        //[
+        //  SNew(SComboButton)
+        //  .OnGetMenuContent_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassMenuContent)
+        //  .ButtonContent()
+        //  [
+        //      SNew(STextBlock)
+        //      .Text_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassName)
+        //  ]
+        //];
+
+    //ToolbarBuilder.AddWidget(Widget);
 }
 
 //---
