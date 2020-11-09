@@ -102,7 +102,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="Odyssey|Block"
              , meta = ( DeprecatedFunction, DeprecationMessage = "Use Fill Block With Color" ) )
-    static FOdysseyBlockProxy FillPreserveAlpha(FOdysseyBlockProxy Sample
+    static FOdysseyBlockProxy FillPreserveAlpha(UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample
                                                 , FOdysseyBrushColor Color );
 
     //Blends a color on the whole given Sample. Requires an Odyssey Brush Color input.
@@ -256,11 +256,11 @@ public:
 
     //Returns the Width of an Odyssey Block Reference as an Integer.
     UFUNCTION( BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Width" ) )
-    static int GetWidth( FOdysseyBlockProxy Sample );
+    static int GetWidth( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample );
 
     //Returns the Height of an Odyssey Block Reference as an Integer.
     UFUNCTION( BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Height" ) )
-    static int GetHeight( FOdysseyBlockProxy Sample );
+    static int GetHeight( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample );
 
     //---
 
