@@ -72,6 +72,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
     
+    //Returns the resulting recatngle of a matrix as if it were applied on the given Rectangle with the given ResamplingMethod
+    static FOdysseyBrushRect GetMatrixResultRect( const FOdysseyMatrix& Matrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod );
+
     //TOTEST with multiple matrix to check associativity
     //Waiting for Epic debug.
     //UFUNCTION(BlueprintPure, meta=(CommutativeAssociativeBinaryOperator = "true"), Category="Odyssey|Matrix")

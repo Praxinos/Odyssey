@@ -301,6 +301,14 @@ public:
     UFUNCTION(BlueprintNativeEvent)
     void OnStrokeEnd();
 
+    //Event is triggered when a subdivision of the stroke stroke begins on the canvas.
+    UFUNCTION(BlueprintNativeEvent)
+    void OnSubStrokeBegin();
+
+    //Event is triggered when a subdivision of the stroke ends (when the click or stylus is dropped)
+    UFUNCTION(BlueprintNativeEvent)
+    void OnSubStrokeEnd();
+
 public:
     // Odyssey Brush Public Driving Methods
     /* Run the stamp action */
@@ -320,6 +328,12 @@ public:
 
     /* Run the stroke end action */
     void ExecuteStrokeEnd();
+
+    /* Run the stroke begin action */
+    void ExecuteSubStrokeBegin();
+
+    /* Run the stroke end action */
+    void ExecuteSubStrokeEnd();
 
 private:
     // Private Members Data

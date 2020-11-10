@@ -717,12 +717,12 @@ FOdysseyPaintEngine::ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint
 void
 FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoints)
 {
+
     int currentIndexBasis = mResultStroke.Num();
     mResultStroke.Append( iPoints );
     for( int i = currentIndexBasis; i < mResultStroke.Num(); i++ )
     {
-        auto point = mResultStroke[i];
-        mDelayQueue.emplace( [this, i, point]()
+        mDelayQueue.emplace( [this, i, point = mResultStroke[i], currentIndexBasis]()
         {
             FOdysseyBrushState& state = mBrushInstance->GetState();
             state.point = point;
@@ -730,10 +730,26 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
             if( i == 0 )
                 mBrushInstance->ExecuteStrokeBegin();
 
+            if( i == currentIndexBasis )
+                mBrushInstance->ExecuteSubStrokeBegin();
+
             mBrushInstance->ExecuteStep();
 
             UpdateInvalidMaps();
 
+            mBrushInstance->ClearInvalidRects();
+        } );
+    }
+
+    if (currentIndexBasis < mResultStroke.Num())
+    {
+        mDelayQueue.emplace( [this, i = mResultStroke.Num() - 1, point = mResultStroke.Last()]()
+        {
+            FOdysseyBrushState& state = mBrushInstance->GetState();
+            state.point = point;
+            state.currentPointIndex = i;
+            mBrushInstance->ExecuteSubStrokeEnd();
+            UpdateInvalidMaps();
             mBrushInstance->ClearInvalidRects();
         } );
     }

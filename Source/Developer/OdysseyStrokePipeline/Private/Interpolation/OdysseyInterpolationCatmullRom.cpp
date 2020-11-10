@@ -64,6 +64,7 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoi
     {
         for( float i = next; i <= length; i += mStep )
         {
+            //Get prev and next element of the LUT
             ::ul3::FCatmullRomLUTElement prevElement;
             ::ul3::FCatmullRomLUTElement nextElement;
             for( int j = iLastSelectedLUTIndex; j < LUT.size() - 1; ++j )
@@ -76,14 +77,27 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoi
                 }
             }
 
+            //Pos of the prev element from 0% to 100% of the whole LUT
             float prevPosParam = prevElement.length / length;
+
+            //Pos of the prev element from 0% to 100% of the whole LUT
             float nextPosParam = nextElement.length / length;
+
+            //Pos of the current element from 0% to 100% of the whole LUT
             float currPosParam = i / length;
+
+            //the length of the section between prev and next element, in percent of the global LUT
             float posParamDelta = nextPosParam - prevPosParam;
+
+            //the amount to lerp between prev and next elements
             float currPosParamDelta = ( posParamDelta == 0 ) ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
+
+            //The lerp of the position
             ::ul3::FVec2F posU = prevElement.position + ( nextElement.position - prevElement.position ) * currPosParamDelta;
             FVector2D pos( posU.x, posU.y );
-            FOdysseyStrokePoint point = FOdysseyStrokePoint::Lerp( mInputPoints[1], mInputPoints[2], currPosParamDelta );
+
+            //Lerp the point parameters between input1 and input2 points
+            FOdysseyStrokePoint point = FOdysseyStrokePoint::Lerp( mInputPoints[1], mInputPoints[2], currPosParam);
             point.x = pos.X;
             point.y = pos.Y;
             mResultPoints.Add( point );

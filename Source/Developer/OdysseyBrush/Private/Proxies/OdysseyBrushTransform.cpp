@@ -80,23 +80,33 @@ UOdysseyTransformProxyLibrary::ComposeMatrix( const FOdysseyMatrix& First, const
 
 
 //static
+FOdysseyBrushRect
+UOdysseyTransformProxyLibrary::GetMatrixResultRect( const FOdysseyMatrix& Matrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod )
+{
+    ::ul3::FRect box = ::ul3::TransformAffineMetrics( Rectangle.GetValue(), Matrix.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    return FOdysseyBrushRect(box);
+}
+
+
+//static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod )
 {
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
     TSharedPtr<FOdysseyBlock> src = Sample.m;
     ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), Transform.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
+    if( -box.x >= box.w || -box.y >= box.h )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.x + box.w, box.y + box.h, src->Format() ));
     ::ul3::ClearRaw(dst->GetBlock());
 
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
+    //::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -110,7 +120,7 @@ UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMat
                             , src->GetBlock()
                             , dst->GetBlock()
                             , src->GetBlock()->Rect()
-                            , fixedTransform
+                            , Transform.GetValue()
                             , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
 
     return FOdysseyBlockProxy(dst);
@@ -125,16 +135,28 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
 
     
     TSharedPtr<FOdysseyBlock> src = Sample.m;
-    ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::DegToRadF( Angle ) ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    int src_width  = src->Width();
+    int src_height = src->Height();
+
+    ::ul3::FTransform2D fixedTransform(
+        ::ul3::FTransform2D::ComposeTransforms(
+            ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::DegToRadF( Angle ) ),
+            ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
+        )
+    );
+
+    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), fixedTransform, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
+    fixedTransform = ::ul3::FTransform2D::ComposeTransforms(::ul3::FTransform2D::MakeTranslationTransform(static_cast<float>(-box.x), static_cast<float>(-box.y)), fixedTransform);
+
+    box = ::ul3::TransformAffineMetrics(src->GetBlock()->Rect(), fixedTransform, static_cast<::ul3::eResamplingMethod>(ResamplingMethod));
+    if (box.Area() <= 0)
+        return FOdysseyBlockProxy::MakeNullProxy();
+
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
     ::ul3::ClearRaw(dst->GetBlock());
-
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -280,16 +302,25 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
     float max = FMath::Max( src_width, src_height );
     float ratio = Size / max;
 
-    ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ratio, ratio ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    ::ul3::FTransform2D fixedTransform(
+        ::ul3::FTransform2D::ComposeTransforms(
+            ::ul3::FTransform2D::MakeScaleTransform( ratio, ratio ),
+            ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
+        )
+    );
+
+    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), fixedTransform, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
+    fixedTransform = ::ul3::FTransform2D::ComposeTransforms(::ul3::FTransform2D::MakeTranslationTransform(static_cast<float>(-box.x), static_cast<float>(-box.y)), fixedTransform);
+
+    box = ::ul3::TransformAffineMetrics(src->GetBlock()->Rect(), fixedTransform, static_cast<::ul3::eResamplingMethod>(ResamplingMethod));
+    if (box.Area() <= 0)
+        return FOdysseyBlockProxy::MakeNullProxy();
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
     ::ul3::ClearRaw(dst->GetBlock());
-    
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
@@ -324,16 +355,26 @@ UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, f
     float ratioX = SizeX / src_width;
     float ratioY = SizeY / src_height;
 
-    ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ratioX, ratioY ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    ::ul3::FTransform2D fixedTransform(
+        ::ul3::FTransform2D::ComposeTransforms(
+            ::ul3::FTransform2D::MakeScaleTransform( ratioX, ratioY ),
+            ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
+        )
+    );
+
+    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), fixedTransform, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
+    fixedTransform = ::ul3::FTransform2D::ComposeTransforms(::ul3::FTransform2D::MakeTranslationTransform(static_cast<float>(-box.x), static_cast<float>(-box.y)), fixedTransform);
+
+    box = ::ul3::TransformAffineMetrics(src->GetBlock()->Rect(), fixedTransform, static_cast<::ul3::eResamplingMethod>(ResamplingMethod));
+    if (box.Area() <= 0)
+        return FOdysseyBlockProxy::MakeNullProxy();
     
 	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
     ::ul3::ClearRaw(dst->GetBlock());
 
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
     ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;

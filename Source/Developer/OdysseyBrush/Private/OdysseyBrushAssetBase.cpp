@@ -582,6 +582,16 @@ UOdysseyBrushAssetBase::OnStrokeEnd_Implementation()
 {
 }
 
+void
+UOdysseyBrushAssetBase::OnSubStrokeBegin_Implementation()
+{
+}
+
+void
+UOdysseyBrushAssetBase::OnSubStrokeEnd_Implementation()
+{
+}
+
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------- Odyssey Brush Public Driving Methods
@@ -630,5 +640,21 @@ UOdysseyBrushAssetBase::ExecuteStrokeEnd()
 {
     FEditorScriptExecutionGuard ScriptGuard;
     OnStrokeEnd();
+}
+
+
+void
+UOdysseyBrushAssetBase::ExecuteSubStrokeBegin()
+{
+    FEditorScriptExecutionGuard ScriptGuard;
+    OnSubStrokeBegin();
+}
+
+
+void
+UOdysseyBrushAssetBase::ExecuteSubStrokeEnd()
+{
+    FEditorScriptExecutionGuard ScriptGuard;
+    OnSubStrokeEnd();
 }
 
