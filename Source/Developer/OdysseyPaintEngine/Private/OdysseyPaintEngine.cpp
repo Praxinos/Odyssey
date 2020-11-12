@@ -294,11 +294,11 @@ FOdysseyPaintEngine::Tick()
     if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock || mIsLocked )
         return;
 
+    ExecuteDelayQueue();
+
     SmoothingCatchUpTick();
 
     mBrushInstance->ExecuteTick();
-
-    ExecuteDelayQueue();
 
     //Refresh the tiles
     TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
