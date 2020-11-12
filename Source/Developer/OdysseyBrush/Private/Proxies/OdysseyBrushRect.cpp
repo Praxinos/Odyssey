@@ -116,4 +116,23 @@ UOdysseyBrushRectFunctionLibrary::MakeFromXYWH(int X, int Y, int W, int H)
     return  FOdysseyBrushRect( X, Y, W, H );
 }
 
+//static
+void
+UOdysseyBrushRectFunctionLibrary::BreakToXYWH(FOdysseyBrushRect Rectangle, int& X, int& Y, int& Width, int& Height)
+{
+    if (!Rectangle.IsInitialized())
+    {
+        X = 0;
+        Y = 0;
+        Width = 0;
+        Height = 0;
+        return;
+    }
+    const ::ul3::FRect& rect = Rectangle.GetValue();
+    X = rect.x;
+    Y = rect.y;
+    Width = rect.w;
+    Height = rect.h;
+}
+
 #undef LOCTEXT_NAMESPACE

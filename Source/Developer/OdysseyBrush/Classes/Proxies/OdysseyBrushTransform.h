@@ -73,6 +73,7 @@ public:
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
     
     //Returns the resulting recatngle of a matrix as if it were applied on the given Rectangle with the given ResamplingMethod
+    UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyBrushRect GetMatrixResultRect( const FOdysseyMatrix& Matrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod );
 
     //TOTEST with multiple matrix to check associativity
@@ -82,7 +83,7 @@ public:
     
     //Requires an Odyssey Matrix input and an Odyssey Block Reference to transform.
     UFUNCTION(BlueprintPure, meta = ( KeyWords = "Matrix"), Category="Odyssey|Transform")
-    static FOdysseyBlockProxy Transform( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
+    static FOdysseyBlockProxy Transform( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
 
     //Requires an angle (Float) to rotate an Odyssey Block Reference.
     UFUNCTION(BlueprintPure

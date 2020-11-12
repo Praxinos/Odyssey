@@ -90,21 +90,24 @@ UOdysseyTransformProxyLibrary::GetMatrixResultRect( const FOdysseyMatrix& Matrix
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, EResamplingMethod ResamplingMethod )
+UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, int Width, int Height, EResamplingMethod ResamplingMethod )
 {
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
+    if( Width <= 0 || Height <= 0 )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
     TSharedPtr<FOdysseyBlock> src = Sample.m;
+	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Width, Height, src->Format() ));
+    ::ul3::ClearRaw(dst->GetBlock());
+
     ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), Transform.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
     if( box.Area() <= 0 )
-        return FOdysseyBlockProxy::MakeNullProxy();
+        return FOdysseyBlockProxy(dst);
 
-    if( -box.x >= box.w || -box.y >= box.h )
-        return FOdysseyBlockProxy::MakeNullProxy();
-
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.x + box.w, box.y + box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
+    if( box.x + box.w <= 0 || box.y + box.h <= 0 )
+        return FOdysseyBlockProxy(dst);
 
     //::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
 
