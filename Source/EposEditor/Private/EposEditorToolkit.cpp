@@ -19,13 +19,16 @@
 //#include "Misc/TemplateSequenceEditorSpawnRegister.h"
 //#include "Misc/TemplateSequenceEditorUtil.h"
 #include "Modules/ModuleManager.h"
+#include "MovieSceneSequence.h"
 #include "ScopedTransaction.h"
 #include "SequencerSettings.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 
+#include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Misc/EposEditorPlaybackContext.h"
 #include "Shot/ShotSequenceEditorCommands.h"
@@ -72,7 +75,7 @@ FEposEditorToolkit::~FEposEditorToolkit()
     } );
 }
 
-void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UMovieSceneSequence* iSequence )
+void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UMovieSceneSequence* > iSequences )
 {
     // create tab layout
     const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout( "Standalone_EposEditor" )
@@ -86,7 +89,7 @@ void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TShar
             )
         );
 
-    mSequence = iSequence;
+    mSequence = iSequences[0]; // =Root
     mPlaybackContext = MakeShared<FEposEditorPlaybackContext>();
 
     // Mode sould always be world-centric (don't know how to have a standalone one)
@@ -116,6 +119,8 @@ void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TShar
     }
 
     mSequencer = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" ).CreateSequencer( sequencerInitParams );
+
+    GoToFocusedSequence( iSequences );
 
     mSequencer->OnActorAddedToSequencer().AddSP( this, &FEposEditorToolkit::HandleActorAddedToSequencer );
 
@@ -149,6 +154,37 @@ void FEposEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TShar
 
     levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
     levelEditorModule.OnMapChanged().AddRaw( this, &FEposEditorToolkit::HandleMapChanged );
+}
+
+void FEposEditorToolkit::GoToFocusedSequence( TArray< UMovieSceneSequence* > iSequences )
+{
+    check( mSequencer );
+    check( iSequences.Num() );
+
+    for( int i = 0; i < iSequences.Num() - 1; i++ )
+    {
+        UBoardSequence* sequence = Cast<UBoardSequence>( iSequences[i] );
+        if( !sequence )
+            continue;
+        UMovieSceneSequence* child_sequence = iSequences[i + 1]; // May be a Board or Shot sequence
+        if( !child_sequence )
+            continue;
+
+        UMovieSceneTrack* track = sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        if( !track )
+            continue;
+
+        for( auto section : track->GetAllSections() )
+        {
+            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+            UMovieSceneSequence* sub_sequence = board_section->GetSequence();
+            if( !sub_sequence )
+                continue;
+
+            if( sub_sequence->GetFullName() == child_sequence->GetFullName() )
+                mSequencer->FocusSequenceInstance( *board_section );
+        }
+    }
 }
 
 void

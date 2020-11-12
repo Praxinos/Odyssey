@@ -44,10 +44,12 @@ public:
      *
      * @param Mode Asset editing mode for this editor (standalone or world-centric).
      * @param InitToolkitHost When Mode is WorldCentric, this is the level editor instance to spawn this editor within.
-     * @param BoardSequence The animation to edit.
+     * @param iSequences The animation to edit.
      * @param TrackEditorDelegates Delegates to call to create auto-key handlers for this sequencer.
      */
-    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, UMovieSceneSequence* iSequence );
+    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UMovieSceneSequence* > iSequences );
+
+    void GoToFocusedSequence( TArray< UMovieSceneSequence* > iSequences );
 
 public:
 

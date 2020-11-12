@@ -5,7 +5,9 @@
 
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
+#include "Toolkits/ToolkitManager.h"
 
+#include "BoardHelpers.h"
 #include "Shot/ShotSequence.h"
 #include "EposEditorToolkit.h"
 #include "EposEditorModule.h"
@@ -71,12 +73,25 @@ FShotSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShared
 
     for( auto ObjIt = iObjects.CreateConstIterator(); ObjIt; ++ObjIt )
     {
-        UShotSequence* ShotSequence = Cast<UShotSequence>( *ObjIt );
+        UShotSequence* shot_sequence = Cast<UShotSequence>( *ObjIt );
+        if( !shot_sequence )
+            continue;
 
-        if( ShotSequence != nullptr )
+        TArray< UMovieSceneSequence* > shot_sequences = BoardHelpers::FindParents( shot_sequence );
+        if( !shot_sequences.Num() )
+            continue;
+
+        TSharedPtr< IToolkit > toolkit = FToolkitManager::Get().FindEditorForAsset( shot_sequences[0] );
+        TSharedPtr<FEposEditorToolkit> existing_toolkit = StaticCastSharedPtr< FEposEditorToolkit >( toolkit );
+        if( existing_toolkit )
         {
-            TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, ShotSequence );
+            existing_toolkit->GoToFocusedSequence( shot_sequences );
+            existing_toolkit->BringToolkitToFront();
+        }
+        else
+        {
+            TSharedRef<FEposEditorToolkit> new_toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
+            new_toolkit->Initialize( Mode, iEditWithinLevelEditor, shot_sequences );
         }
     }
 }

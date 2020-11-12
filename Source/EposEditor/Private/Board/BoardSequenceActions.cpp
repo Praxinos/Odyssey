@@ -5,7 +5,9 @@
 
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
+#include "Toolkits/ToolkitManager.h"
 
+#include "BoardHelpers.h"
 #include "Board/BoardSequence.h"
 #include "EposEditorToolkit.h"
 #include "EposEditorModule.h"
@@ -72,12 +74,25 @@ FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShare
 
     for( auto ObjIt = iObjects.CreateConstIterator(); ObjIt; ++ObjIt )
     {
-        UBoardSequence* BoardSequence = Cast<UBoardSequence>( *ObjIt );
+        UBoardSequence* board_sequence = Cast<UBoardSequence>( *ObjIt );
+        if( !board_sequence )
+            continue;
 
-        if( BoardSequence != nullptr )
+        TArray< UMovieSceneSequence* > board_sequences = BoardHelpers::FindParents( board_sequence );
+        if( !board_sequences.Num() )
+            continue;
+
+        TSharedPtr< IToolkit > toolkit = FToolkitManager::Get().FindEditorForAsset( board_sequences[0] );
+        TSharedPtr<FEposEditorToolkit> existing_toolkit = StaticCastSharedPtr< FEposEditorToolkit >( toolkit );
+        if( existing_toolkit )
         {
-            TSharedRef<FEposEditorToolkit> Toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
-            Toolkit->Initialize( Mode, iEditWithinLevelEditor, BoardSequence );
+            existing_toolkit->GoToFocusedSequence( board_sequences ); // board_sequences >= 2, as when double-clicking on the 'root' asset (which is already opened), this method is not called at all (this is managed/checked above, inside UAssetEditorSubsystem::OpenEditorForAsset(...))
+            existing_toolkit->BringToolkitToFront();
+        }
+        else
+        {
+            TSharedRef<FEposEditorToolkit> new_toolkit = MakeShareable( new FEposEditorToolkit( mStyle ) );
+            new_toolkit->Initialize( Mode, iEditWithinLevelEditor, board_sequences );
         }
     }
 }
