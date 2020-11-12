@@ -296,9 +296,13 @@ FOdysseyPaintEngine::Tick()
 
     ExecuteDelayQueue();
 
-    SmoothingCatchUpTick();
-
+    //Execute Tick and Update invalid maps in case of drawing in the tick event
     mBrushInstance->ExecuteTick();
+    UpdateInvalidMaps();
+    mBrushInstance->ClearInvalidRects();
+
+    //TODO: find a way si that drawing in tick is commited to the EditedBlock when needed (on save, on block change, o, brush changed etc....)
+    //TODO: find a way to have updated OdysseyPoint in ticks events
 
     //Refresh the tiles
     TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
