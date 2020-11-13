@@ -60,7 +60,7 @@ private:
      * @param NewBoardName The new board name
      * @return The new board path
      */
-    static FString GenerateNewSequencePath( UMovieScene* iSequenceMovieScene, FString& ioNewBoardName );
+    static FString GenerateNewSequencePath( UMovieScene* iRootMovieScene, UMovieScene* iFocusedMovieScene, FString& ioNewBoardName );
 
     /**
      * Generate a new board name

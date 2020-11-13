@@ -41,15 +41,37 @@ static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FS
 
 //static
 FString
-EposTracksEditorHelpers::GenerateNewSequencePath( UMovieScene* iSequenceMovieScene, FString& ioNewSequenceName )
+EposTracksEditorHelpers::GenerateNewSequencePath( UMovieScene* iRootMovieScene, UMovieScene* iFocusedMovieScene, FString& ioNewSequenceName )
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
-    UObject* sequenceAsset = iSequenceMovieScene->GetOuter();
-    UPackage* sequencePackage = sequenceAsset->GetOutermost();
+    UObject* sequenceAsset = iRootMovieScene->GetOuter();
+    //UObject* sequenceAsset = iFocusedMovieScene->GetOuter();
+    UPackage* sequencePackage = sequenceAsset->GetPackage();
     FString sequencePackageName = sequencePackage->GetName(); // ie. /Game/cine/max/master
-    int32 lastSlashPos = sequencePackageName.Find( TEXT( "/" ), ESearchCase::IgnoreCase, ESearchDir::FromEnd );
-    FString sequencePath = sequencePackageName.Left( lastSlashPos );
+    //int32 lastSlashPos = sequencePackageName.Find( TEXT( "/" ), ESearchCase::IgnoreCase, ESearchDir::FromEnd );
+    //FString sequencePath = sequencePackageName.Left( lastSlashPos );
+
+    UMovieSceneCinematicBoardTrack* track = iFocusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( track )
+    {
+        TArray<UMovieSceneSection*> sections = track->GetAllSections();
+        TArray<FString> section_paths;
+        for( auto section : sections )
+        {
+            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+            UObject* subsequenceAsset = board_section->GetSequence()->GetOuter();
+            UPackage* subsequencePackage = subsequenceAsset->GetPackage();
+            FString subsequencePackageName = subsequencePackage->GetName();
+            int32 lastSlashPos = subsequencePackageName.Find( TEXT( "/" ), ESearchCase::IgnoreCase, ESearchDir::FromEnd );
+            FString sequencePath = subsequencePackageName.Left( lastSlashPos );
+            section_paths.Add( sequencePath );
+        }
+        if( section_paths.Num() )
+        {
+            sequencePackageName = section_paths[0]; //TODO: improve by selecting the most relevent
+        }
+    }
 
     FString newShotPrefix;
     uint32 newShotNumber = INDEX_NONE;
@@ -109,43 +131,81 @@ EposTracksEditorHelpers::GenerateNewSectionName( const TArray<UMovieSceneSection
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
-    UMovieSceneCinematicBoardSection* beforeShot = nullptr;
-    UMovieSceneCinematicBoardSection* nextShot = nullptr;
+    //UMovieSceneCinematicBoardSection* beforeShot = nullptr;
+    //UMovieSceneCinematicBoardSection* nextShot = nullptr;
 
-    FFrameNumber minEndDiff = TNumericLimits<int32>::Max();
-    FFrameNumber minStartDiff = TNumericLimits<int32>::Max();
+    //FFrameNumber minEndDiff = TNumericLimits<int32>::Max();
+    //FFrameNumber minStartDiff = TNumericLimits<int32>::Max();
 
-    for( auto section : iAllSections )
+    //for( auto section : iAllSections )
+    //{
+    //    if( section->HasEndFrame() && section->GetExclusiveEndFrame() >= iTime )
+    //    {
+    //        FFrameNumber endDiff = section->GetExclusiveEndFrame() - iTime;
+    //        if( minEndDiff > endDiff )
+    //        {
+    //            minEndDiff = endDiff;
+    //            beforeShot = Cast<UMovieSceneCinematicBoardSection>( section );
+    //        }
+    //    }
+    //    if( section->HasStartFrame() && section->GetInclusiveStartFrame() <= iTime )
+    //    {
+    //        FFrameNumber startDiff = iTime - section->GetInclusiveStartFrame();
+    //        if( minStartDiff > startDiff )
+    //        {
+    //            minStartDiff = startDiff;
+    //            nextShot = Cast<UMovieSceneCinematicBoardSection>( section );
+    //        }
+    //    }
+    //}
+
+    int32 beforeShotIndex = INDEX_NONE;
+    int32 nextShotIndex = INDEX_NONE;
+
+    for( int i = 0; i < iAllSections.Num(); i++ )
     {
-        if( section->HasEndFrame() && section->GetExclusiveEndFrame() >= iTime )
+        UMovieSceneSection* current_section = iAllSections[i];
+        TRange<FFrameNumber> current_section_range( current_section->GetTrueRange() );
+
+        if( current_section->IsTimeWithinSection( iTime ) )
         {
-            FFrameNumber endDiff = section->GetExclusiveEndFrame() - iTime;
-            if( minEndDiff > endDiff )
+            TArray<TRange<FFrameNumber>> ranges = current_section->GetTrueRange().Split( ( current_section->GetInclusiveStartFrame().Value + current_section->GetExclusiveEndFrame().Value ) / 2 );
+            // Can't split the section
+            if( ranges.Num() != 2 )
             {
-                minEndDiff = endDiff;
-                beforeShot = Cast<UMovieSceneCinematicBoardSection>( section );
+                beforeShotIndex = i;
+                nextShotIndex = ( current_section == iAllSections.Last() ) ? INDEX_NONE : i + 1;
+                break;
             }
-        }
-        if( section->HasStartFrame() && section->GetInclusiveStartFrame() <= iTime )
-        {
-            FFrameNumber startDiff = iTime - section->GetInclusiveStartFrame();
-            if( minStartDiff > startDiff )
+
+            if( ranges[0].Contains( iTime ) )
             {
-                minStartDiff = startDiff;
-                nextShot = Cast<UMovieSceneCinematicBoardSection>( section );
+                beforeShotIndex = ( i == 0 ) ? INDEX_NONE : i - 1;
+                nextShotIndex = i;
+                break;
             }
+
+            beforeShotIndex = i;
+            nextShotIndex = ( current_section == iAllSections.Last() ) ? INDEX_NONE : i + 1;
+            break;
         }
     }
+
+    UMovieSceneCinematicBoardSection* beforeShot = nullptr;
+    if( iAllSections.IsValidIndex( beforeShotIndex ) )
+        beforeShot = Cast<UMovieSceneCinematicBoardSection>( iAllSections[beforeShotIndex] );
+    UMovieSceneCinematicBoardSection* nextShot = nullptr;
+    if( iAllSections.IsValidIndex( nextShotIndex ) )
+        nextShot = Cast<UMovieSceneCinematicBoardSection>( iAllSections[nextShotIndex] );
 
     FString prefix = ( SequenceClass::StaticClass() == UBoardSequence::StaticClass() ) ? TEXT( "board" ) : TEXT( "shot" );
 
     // There aren't any shots, let's create the first shot name
-    if( beforeShot == nullptr || nextShot == nullptr )
+    if( beforeShot == nullptr && nextShot == nullptr )
     {
         // Default case
     }
-    // This is the last shot
-    else if( beforeShot == nextShot )
+    else if( beforeShot == nullptr )
     {
         FString nextShotPrefix = prefix;
         //FString nextShotPrefix = projectSettings->ShotPrefix;
@@ -154,8 +214,25 @@ EposTracksEditorHelpers::GenerateNewSectionName( const TArray<UMovieSceneSection
 
         if( MovieSceneToolHelpers::ParseShotName( nextShot->GetBoardDisplayName(), nextShotPrefix, nextShotNumber, nextTakeNumber ) )
         {
-            uint32 newShotNumber = nextShotNumber + projectSettings->ShotIncrement;
-            return MovieSceneToolHelpers::ComposeShotName( nextShotPrefix, newShotNumber, projectSettings->FirstTakeNumber );
+            uint32 newShotNumber = nextShotNumber - projectSettings->ShotIncrement;
+            if( newShotNumber < 0 )
+                newShotNumber = nextShotNumber / 2;
+            prefix = ( nextShotPrefix == TEXT( "board" ) || nextShotPrefix == TEXT( "shot" ) ) ? prefix : nextShotPrefix;
+            return MovieSceneToolHelpers::ComposeShotName( prefix, newShotNumber, projectSettings->FirstTakeNumber );
+        }
+    }
+    else if( nextShot == nullptr )
+    {
+        FString beforeShotPrefix = prefix;
+        //FString beforeShotPrefix = projectSettings->ShotPrefix;
+        uint32 beforeShotNumber = projectSettings->FirstShotNumber;
+        uint32 beforeTakeNumber = projectSettings->FirstTakeNumber;
+
+        if( MovieSceneToolHelpers::ParseShotName( beforeShot->GetBoardDisplayName(), beforeShotPrefix, beforeShotNumber, beforeTakeNumber ) )
+        {
+            uint32 newShotNumber = beforeShotNumber + projectSettings->ShotIncrement;
+            prefix = ( beforeShotPrefix == TEXT( "board" ) || beforeShotPrefix == TEXT( "shot" ) ) ? prefix : beforeShotPrefix;
+            return MovieSceneToolHelpers::ComposeShotName( prefix, newShotNumber, projectSettings->FirstTakeNumber );
         }
     }
     // This is in between two shots
@@ -177,7 +254,8 @@ EposTracksEditorHelpers::GenerateNewSectionName( const TArray<UMovieSceneSection
             if( beforeShotNumber < nextShotNumber )
             {
                 uint32 newShotNumber = beforeShotNumber + ( ( nextShotNumber - beforeShotNumber ) / 2 ); // what if we can't find one? or conflicts with another?
-                return MovieSceneToolHelpers::ComposeShotName( beforeShotPrefix, newShotNumber, projectSettings->FirstTakeNumber );
+                prefix = ( nextShotPrefix == TEXT( "board" ) || nextShotPrefix == TEXT( "shot" ) ) ? prefix : nextShotPrefix;
+                return MovieSceneToolHelpers::ComposeShotName( prefix, newShotNumber, projectSettings->FirstTakeNumber );
             }
         }
     }
@@ -237,8 +315,7 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
     }
     else
     {
-        newBoardPath = EposTracksEditorHelpers::GenerateNewSequencePath( iSequencer->GetRootMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
-        //newBoardPath = EposTracksEditorHelpers::GenerateNewBoardPath( iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
+        newBoardPath = EposTracksEditorHelpers::GenerateNewSequencePath( iSequencer->GetRootMovieSceneSequence()->GetMovieScene(), iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
     }
 
     // Create a new level sequence asset with the appropriate name
@@ -255,13 +332,11 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
             {
                 if( iSectionToDuplicate != nullptr )
                 {
-                    newAsset = assetTools.DuplicateAsset( ioNewSequenceName, newBoardPath, iSectionToDuplicate->GetSequence() );
-                    //newAsset = assetTools.DuplicateAssetWithDialog( ioNewSequenceName, newBoardPath, iSectionToDuplicate->GetSequence() );
+                    newAsset = assetTools.DuplicateAssetWithDialog( ioNewSequenceName, newBoardPath, iSectionToDuplicate->GetSequence() );
                 }
                 else
                 {
-                    newAsset = assetTools.CreateAsset( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
-                    //newAsset = assetTools.CreateAssetWithDialog( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
+                    newAsset = assetTools.CreateAssetWithDialog( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
 
                 }
                 break;
