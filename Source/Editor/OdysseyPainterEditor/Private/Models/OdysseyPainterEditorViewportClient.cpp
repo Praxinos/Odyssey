@@ -695,6 +695,37 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
     mCurrentToolState = eState::kIdle;
 }
 
+
+void
+FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+{
+    //If we don't have a surface, then we don't interact with anything
+    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    {
+        return;
+    }
+
+
+    FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
+    mCurrentPointInTexture.x = iX;
+    mCurrentPointInTexture.y = iY;
+    mCurrentPointInTexture = GetLocalMousePosition(mCurrentPointInTexture);
+    mCurrentPointInTexture.keysDown = mKeysPressed;
+
+    if (mCurrentToolState == eState::kIdle)
+    {
+        auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+
+        // if( paintengine->GetStokePaintOnTick() )
+        //     return;
+
+        if (long(mCurrentPointInTexture.x) == long(lastPointInTexture.x) && long(mCurrentPointInTexture.y) == long(lastPointInTexture.y))
+            return;
+
+        paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
+    }
+}
+
 EMouseCursor::Type
 FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, int32 iY )
 {

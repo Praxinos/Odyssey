@@ -63,6 +63,7 @@ public:
 
     void BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdysseyStrokePoint& iPreviousPoint );
     void PushStroke( const FOdysseyStrokePoint& iPoint );
+    void SetCurrentStrokePoint(const FOdysseyStrokePoint& iPoint);
     void EndStroke();
     void AbortStroke();
     void TriggerStateChanged();

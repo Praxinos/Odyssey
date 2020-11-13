@@ -4,6 +4,7 @@
 #include "Proxies/OdysseyBrushBlock.h"
 
 #include "Engine/Font.h"
+#include "UObject/StrongObjectPtr.h"
 
 #include "OdysseySurfaceEditable.h"
 #include "OdysseyBrushAssetBase.h"
@@ -335,7 +336,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustRGBA(FOdysseyBlockProxy Block
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	TStrongObjectPtr<UCurveFloat> defaultCurve( NewObject<UCurveFloat>() ); //Retains the pointer
 	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
 	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
 
@@ -400,7 +401,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustGreyA(FOdysseyBlockProxy Block
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
 	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
 	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
 
@@ -463,7 +464,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSVA(FOdysseyBlockProxy Block
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
 	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
 	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
 
@@ -530,7 +531,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSLA(FOdysseyBlockProxy Block
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
 	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
 	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
 
@@ -598,7 +599,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustCMYKA(FOdysseyBlockProxy Block
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
 	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
 	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
 
@@ -667,7 +668,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustLabA(FOdysseyBlockProxy Block
 	if (!Block.m)
 		return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<UCurveFloat> defaultCurve = MakeShareable(NewObject<UCurveFloat>()); //Retains the pointer
+	TStrongObjectPtr<UCurveFloat> defaultCurve(NewObject<UCurveFloat>()); //Retains the pointer
 	defaultCurve->FloatCurve.AddKey(0.0f, 0.0f);
 	defaultCurve->FloatCurve.AddKey(1.0f, 1.0f);
 

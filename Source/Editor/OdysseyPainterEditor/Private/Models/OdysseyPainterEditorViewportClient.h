@@ -87,6 +87,7 @@ public:
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual void MouseEnter( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual void MouseLeave( FViewport* iViewport ) override;
+    virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
 
     virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;

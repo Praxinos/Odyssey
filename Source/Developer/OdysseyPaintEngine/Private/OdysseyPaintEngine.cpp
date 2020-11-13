@@ -701,6 +701,14 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint )
 }
 
 void
+FOdysseyPaintEngine::SetCurrentStrokePoint(const FOdysseyStrokePoint& iPoint)
+{
+    if (!mBrushInstance)
+        return;
+    mBrushInstance->GetState().point = iPoint;
+}
+
+void
 FOdysseyPaintEngine::ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint, const FOdysseyStrokePoint& iPreviousPoint)
 {
     ioPoint.deltaPosition = FVector2D( ioPoint.x - iPreviousPoint.x, ioPoint.y - iPreviousPoint.y );
