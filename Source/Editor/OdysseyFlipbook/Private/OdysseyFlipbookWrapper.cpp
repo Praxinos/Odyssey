@@ -94,8 +94,6 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
     CreateEmptyKeyFrame(iIndex + 1);
     SetKeyFrameLength(iIndex + 1, keyframe.FrameRun);
 
-
-
     //Create the sprite and add it to the keyframe
     UPaperSprite* sprite = GetKeyframeSprite(iIndex);
     if (sprite)
@@ -108,15 +106,17 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
     }
 
     //Create the texture and add it to the keyframe
-    UTexture2D* texture = GetKeyframeTexture(iIndex);
-    if(texture)
+    UTexture2D* srcTexture = GetKeyframeTexture(iIndex);
+    if(srcTexture)
     {
-        texture = *oTexture = CreateTexture(mFlipbook->GetName() + "_Texture", texture);
-        
+        UTexture2D* texture = *oTexture = CreateTexture(srcTexture->GetSizeX(), srcTexture->GetSizeY(), srcTexture->Source.GetFormat(), mFlipbook->GetName() + "_Texture", FLinearColor( 0.f, 0.f, 0.f, 0.f ));
         if (!texture)
             return false;
 
         SetKeyframeTexture(iIndex + 1, texture);
+
+        //Do the copy only when we are sure the current texture is not srcTexture anymore
+        CopyTextureContent(srcTexture, texture);
     }
 
 	return true;
@@ -315,21 +315,18 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 }
 
 //Duplicate the given texture
-UTexture2D*
-FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
+void
+FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture)
 {
-    UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-    
-
-    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-    UTexture2D* texture = CreateTexture(iTexture->GetSizeX(), iTexture->GetSizeY(), iTexture->Source.GetFormat(), iName, FLinearColor( 0.f, 0.f, 0.f, 0.f ));
-    UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(texture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iSrcTexture->Source.GetFormat());
+    UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(iDstTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(iSrcTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
 
     if( srcTextureUserData )
     {
-        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iTexture, format);
+        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iSrcTexture, format);
         srcTextureUserData->GetLayerStack()->ComputeResultInBlock(block->GetBlock());
-        CopyBlockDataIntoUTexture(block, texture);
+        CopyBlockDataIntoUTexture(block, iDstTexture);
         delete block;
 
         TSharedPtr<FOdysseyRootLayer> layerRoot = MakeShareable(srcTextureUserData->GetLayerStack()->GetLayerRoot()->Clone());
@@ -350,8 +347,8 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
     }
     else
     {
-        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iTexture, format);
-        CopyBlockDataIntoUTexture(block, texture);
+        FOdysseyBlock* block = NewOdysseyBlockFromUTextureData(iSrcTexture, format);
+        CopyBlockDataIntoUTexture(block, iDstTexture);
         delete block;
         block = nullptr;
 
@@ -360,13 +357,11 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, UTexture2D* iTexture)
         
         TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>( layers[0] );
 
-        block = NewOdysseyBlockFromUTextureData(iTexture, textureUserData->GetLayerStack()->Format());
+        block = NewOdysseyBlockFromUTextureData(iSrcTexture, textureUserData->GetLayerStack()->Format());
         imageLayer->SetBlock(block, false, true);
     }
 
-	texture->UpdateResource();
-
-    return texture;
+	iDstTexture->UpdateResource();
 }
 
 UPaperSprite*

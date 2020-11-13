@@ -152,6 +152,9 @@ FOdysseyPaintEngine::GetStrokeInvalidTiles()
 void
 FOdysseyPaintEngine::ClearStrokeBlock()
 {
+    if (!mStrokeBlock)
+        return;
+
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect() );
@@ -194,34 +197,15 @@ FOdysseyPaintEngine::EndStrokeTick()
     SmoothingEndStroke();
 
     mBrushInstance->ExecuteStrokeEnd();
+    mOnStrokeEndDelegate.Broadcast();
     UpdateInvalidMaps();
     mBrushInstance->ClearInvalidRects();
 
     //Refresh Preview Block
-	TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
-    if (changedTiles.Num() > 0)
-    {
-        CopyEditedBlockInPreviewBlock(changedTiles);
-        BlendStrokeBlockInPreviewBlock(changedTiles);
-        mOnStrokeChangedDelegate.Broadcast(changedTiles);
-    }
-    ClearInvalidTileMap( mTmpInvalidTileMap );
+    UpdatePreviewBlockTiles();
 
     //Refresh Edited Block
-    changedTiles = GetStrokeInvalidTiles();
-    if (changedTiles.Num() > 0) 
-    {
-        mOnStrokeWillEndDelegate.Broadcast(changedTiles);
-        CopyPreviewBlockInEditedBlock(changedTiles);
-        mOnStrokeEndDelegate.Broadcast(changedTiles);
-    }
-    changedTiles.Reset();
-
-    ClearInvalidTileMap( mStrokeInvalidTileMap );
-    
-    ClearStrokeBlock();
-
-    ResetStroke();
+    Flush();
 }
 
 void
@@ -289,6 +273,40 @@ FOdysseyPaintEngine::SmoothingEndStroke()
 }
 
 void
+FOdysseyPaintEngine::Flush()
+{
+    UpdateEditedBlockTiles();
+    ClearStrokeBlock();
+    ResetStroke();
+}
+
+void
+FOdysseyPaintEngine::UpdatePreviewBlockTiles()
+{
+    TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
+    if (changedTiles.Num() > 0)
+    {
+        CopyEditedBlockInPreviewBlock(changedTiles);
+        BlendStrokeBlockInPreviewBlock(changedTiles);
+        mOnPreviewBlockTilesChangedDelegate.Broadcast(changedTiles);
+    }
+    ClearInvalidTileMap(mTmpInvalidTileMap);
+}
+
+void
+FOdysseyPaintEngine::UpdateEditedBlockTiles()
+{
+    TArray<::ul3::FRect> changedTiles = GetStrokeInvalidTiles();
+    if (changedTiles.Num() > 0)
+    {
+        mOnEditedBlockTilesWillChangeDelegate.Broadcast(changedTiles);
+        CopyPreviewBlockInEditedBlock(changedTiles);
+        mOnEditedBlockTilesChangedDelegate.Broadcast(changedTiles);
+    }
+    ClearInvalidTileMap(mStrokeInvalidTileMap);
+}
+
+void
 FOdysseyPaintEngine::Tick()
 {
     if( !mBrushInstance || !mStrokeBlock || !mPreviewBlock || mIsLocked )
@@ -301,18 +319,8 @@ FOdysseyPaintEngine::Tick()
     UpdateInvalidMaps();
     mBrushInstance->ClearInvalidRects();
 
-    //TODO: find a way si that drawing in tick is commited to the EditedBlock when needed (on save, on block change, o, brush changed etc....)
-    //TODO: find a way to have updated OdysseyPoint in ticks events
-
     //Refresh the tiles
-    TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
-    if (changedTiles.Num() > 0)
-    {
-        CopyEditedBlockInPreviewBlock(changedTiles);
-        BlendStrokeBlockInPreviewBlock(changedTiles);
-        mOnStrokeChangedDelegate.Broadcast(changedTiles);
-    }
-    ClearInvalidTileMap( mTmpInvalidTileMap );
+    UpdatePreviewBlockTiles();
     
     //End the stroke if we need to
     if( mIsPendingEndStroke && mDelayQueue.empty() )
@@ -324,6 +332,11 @@ FOdysseyPaintEngine::Tick()
 void
 FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
 {
+    if (mEditedBlock == iBlock)
+        return;
+
+    Flush();
+
     mEditedBlock = iBlock;
     if (!mEditedBlock) {
 		delete mStrokeBlock;
@@ -379,6 +392,11 @@ FOdysseyPaintEngine::SetLock(bool iValue)
 void
 FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 {
+    if (iBrushInstance == mBrushInstance)
+        return;
+
+    Flush();
+
 	mBrushInstance = iBrushInstance;
 	mBrushCursorInvalid = true;
 
@@ -641,7 +659,9 @@ FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdys
         return;
 
 	//TODO: Maybe find another way to keep the preview block uptodate, because this is potentially heavy
-	UpdatePreviewBlock();
+    // But for now it's only in the begin stroke, so it should be ok
+    Flush();
+    CopyEditedBlockInPreviewBlock();
 
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
 
@@ -729,7 +749,6 @@ FOdysseyPaintEngine::ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint
 void
 FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoints)
 {
-
     int currentIndexBasis = mResultStroke.Num();
     mResultStroke.Append( iPoints );
     for( int i = currentIndexBasis; i < mResultStroke.Num(); i++ )
@@ -740,15 +759,18 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
             state.point = point;
             state.currentPointIndex = i;
             if( i == 0 )
+            {
                 mBrushInstance->ExecuteStrokeBegin();
+                mOnStrokeBeginDelegate.Broadcast();
+            }
 
             if( i == currentIndexBasis )
                 mBrushInstance->ExecuteSubStrokeBegin();
 
             mBrushInstance->ExecuteStep();
+            mOnStrokeStepDelegate.Broadcast();
 
             UpdateInvalidMaps();
-
             mBrushInstance->ClearInvalidRects();
         } );
     }
@@ -917,7 +939,7 @@ FOdysseyPaintEngine::CopyEditedBlockInPreviewBlock(TArray<::ul3::FRect>& iRects)
 }
 
 void
-FOdysseyPaintEngine::UpdatePreviewBlock()
+FOdysseyPaintEngine::CopyEditedBlockInPreviewBlock()
 {
 	if (!mEditedBlock || !mPreviewBlock)
 		return;
@@ -952,6 +974,7 @@ FOdysseyPaintEngine::InterruptStrokeAndStampInPlace()
     if( mDelayQueue.empty() )
         return;
 
+    Flush();
     EndStroke();
     InterruptDelay();
     Tick();

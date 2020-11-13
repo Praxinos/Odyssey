@@ -58,9 +58,9 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
     FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 
 	//Add PaintEngine Callbacks
-	GetData()->PaintEngine()->OnStrokeChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeChanged);
-	GetData()->PaintEngine()->OnStrokeWillEnd().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeWillEnd);
-	GetData()->PaintEngine()->OnStrokeEnd().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeEnd);
+	GetData()->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged);
+	GetData()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
+	GetData()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
 	GetData()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
 }
 
@@ -303,17 +303,17 @@ FOdysseyPainterEditorController::GetComboBoxTabletAPISelectedAsText() const
 
 
 void
-FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
 }
 
 void
-FOdysseyPainterEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles)
 {
 }
 
 void
-FOdysseyPainterEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
 }
 

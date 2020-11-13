@@ -46,6 +46,7 @@ FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TShared
 void
 FOdysseyTextureEditorToolkit::SaveAsset_Execute()
 {
+	mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
 
     FAssetEditorToolkit::SaveAsset_Execute();
@@ -54,6 +55,7 @@ FOdysseyTextureEditorToolkit::SaveAsset_Execute()
 void
 FOdysseyTextureEditorToolkit::SaveAssetAs_Execute()
 {
+	mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
 
 	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
@@ -76,6 +78,7 @@ FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
 bool
 FOdysseyTextureEditorToolkit::OnRequestClose()
 {
+	mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
 	mData->ApplyPropertiesBackup();
 

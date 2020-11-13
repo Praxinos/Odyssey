@@ -41,9 +41,9 @@ public:
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() = 0;
 
 public:
-	virtual void OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles);
-	virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles);
-	virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles);
+	virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
+	virtual void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles);
+	virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
 	virtual void OnPaintEngineStrokeAbort();
 
     virtual void OnAboutIliad();

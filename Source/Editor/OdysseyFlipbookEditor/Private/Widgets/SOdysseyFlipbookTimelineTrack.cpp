@@ -195,6 +195,13 @@ SOdysseyFlipbookTimelineTrack::DuplicateFrame(int32 iIndex)
 	UPaperSprite* createdSprite = NULL;
 	if (!mFlipbookWrapper->DuplicateKeyFrame(iIndex, &createdTexture, &createdSprite))
 		return;
+
+	//TODO: Instead of duplicating a keyframe directly, follow this:
+	// - Create empty keyframe
+	// - Move to the new keyframe
+	// - Copy the previous keyframe content (layers and everything)
+	//
+	// This will ensure that any modifications on the source keyframe will be done before copying it.
 	
 	FPaperFlipbookKeyFrame keyframe = mFlipbookWrapper->Flipbook()->GetKeyFrameChecked(iIndex + 1);
 	InsertFrame(iIndex + 1, createdTexture, keyframe.FrameRun);

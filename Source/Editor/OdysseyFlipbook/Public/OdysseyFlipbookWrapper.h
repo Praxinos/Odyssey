@@ -80,8 +80,8 @@ public:
 private:
     void CreateEmptyKeyFrame(int32 iIndex);
     UTexture2D* CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor);
-    UTexture2D* CreateTexture(FString iName, UTexture2D* iTexture);
     UTexture2D* CreateTexture(FString iName, FOdysseyBlock* iBlock, ETextureSourceFormat iFormat);
+    void CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture);
 
     UPaperSprite* CreateSprite(FString iName);
     void OnGlobalObjectPropertyChanged(UObject* iObject, FPropertyChangedEvent& iPropertyChangedEvent);

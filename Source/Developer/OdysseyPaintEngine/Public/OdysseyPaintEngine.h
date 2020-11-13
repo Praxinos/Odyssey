@@ -18,10 +18,14 @@ class UOdysseyBrushAssetBase;
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeChanged, const TArray<::ul3::FRect>&);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeWillEnd, const TArray<::ul3::FRect>&);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeEnd, const TArray<::ul3::FRect>&);
+    DECLARE_MULTICAST_DELEGATE(FOnStrokeBegin);
+	DECLARE_MULTICAST_DELEGATE(FOnStrokeStep);
+	DECLARE_MULTICAST_DELEGATE(FOnStrokeEnd);
 	DECLARE_MULTICAST_DELEGATE(FOnStrokeAbort);
+
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreviewBlockTilesChanged, const TArray<::ul3::FRect>&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesWillChange, const TArray<::ul3::FRect>&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesChanged, const TArray<::ul3::FRect>&);
 
 private:
     typedef bool** InvalidTileMap;
@@ -33,6 +37,7 @@ public:
 
 public:
     // Public API
+    void Flush();
     void SetLock(bool iValue);
 
     void InterruptDelay();
@@ -77,15 +82,21 @@ public:
 	void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
 	void CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects);
     void CopyEditedBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
-	void UpdatePreviewBlock();
+	void CopyEditedBlockInPreviewBlock();
+    void UpdatePreviewBlockTiles();
+    void UpdateEditedBlockTiles();
 
     void UpdateBrushCursorPreview();
 
 public: //DELEGATES
-	FOnStrokeChanged&	OnStrokeChanged()	{ return mOnStrokeChangedDelegate; }
-	FOnStrokeWillEnd&   OnStrokeWillEnd()   { return mOnStrokeWillEndDelegate; }
-	FOnStrokeEnd&		OnStrokeEnd()		{ return mOnStrokeEndDelegate; }
-	FOnStrokeAbort&		OnStrokeAbort()		{ return mOnStrokeAbortDelegate; }
+    FOnStrokeBegin& OnStrokeBegin() { return mOnStrokeBeginDelegate; }
+	FOnStrokeStep& OnStrokeStep() { return mOnStrokeStepDelegate; }
+	FOnStrokeEnd& OnStrokeEnd() { return mOnStrokeEndDelegate; }
+	FOnStrokeAbort& OnStrokeAbort() { return mOnStrokeAbortDelegate; }
+
+    FOnPreviewBlockTilesChanged& OnPreviewBlockTilesChanged() { return mOnPreviewBlockTilesChangedDelegate; }
+    FOnEditedBlockTilesWillChange& OnEditedBlockTilesWillChange() { return mOnEditedBlockTilesWillChangeDelegate; }
+    FOnEditedBlockTilesChanged& OnEditedBlockTilesChanged() { return mOnEditedBlockTilesChangedDelegate; }
 
 private:
     // Private API
@@ -158,10 +169,14 @@ private:
 
     std::queue<std::function<void()>>   mDelayQueue;
 
-	FOnStrokeChanged					mOnStrokeChangedDelegate;
-	FOnStrokeEnd						mOnStrokeWillEndDelegate;
-	FOnStrokeEnd						mOnStrokeEndDelegate;
-	FOnStrokeAbort						mOnStrokeAbortDelegate;
+    FOnStrokeBegin                      mOnStrokeBeginDelegate;
+	FOnStrokeStep                       mOnStrokeStepDelegate;
+	FOnStrokeEnd                        mOnStrokeEndDelegate;
+	FOnStrokeAbort                      mOnStrokeAbortDelegate;
+
+    FOnPreviewBlockTilesChanged         mOnPreviewBlockTilesChangedDelegate;
+    FOnEditedBlockTilesWillChange       mOnEditedBlockTilesWillChangeDelegate; //TODO: Remove once the undo will be moved from Layerstack to PaintEngine
+    FOnEditedBlockTilesChanged          mOnEditedBlockTilesChangedDelegate;
 
     std::chrono::steady_clock::time_point mLastStrokeTimePoint;
 

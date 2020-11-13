@@ -139,10 +139,10 @@ FOdysseyFlipbookEditorController::CreateMenuExtenders(const TSharedRef<FUIComman
 }
 
 void
-FOdysseyFlipbookEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyFlipbookEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     check(mData->LayerStack());
-	FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(iChangedTiles);
+	FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged(iChangedTiles);
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
 		mData->LayerStack()->ComputeResultInBlockWithBlockAsCurrentLayer(mData->DisplaySurface()->Block()->GetBlock(), mData->PaintEngine()->PreviewBlock(), iChangedTiles[i]);
@@ -154,10 +154,10 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3:
 }
 
 void
-FOdysseyFlipbookEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyFlipbookEditorController::OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles)
 {
     check(mData->LayerStack());
-    FOdysseyPainterEditorController::OnPaintEngineStrokeWillEnd(iChangedTiles);
+    FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange(iChangedTiles);
 	mData->LayerStack()->mDrawingUndo->StartRecord();
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
@@ -168,10 +168,10 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3:
 }
 
 void
-FOdysseyFlipbookEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyFlipbookEditorController::OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     check(mData->LayerStack());
-    FOdysseyPainterEditorController::OnPaintEngineStrokeEnd(iChangedTiles);
+    FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(iChangedTiles);
 	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
     mData->DisplaySurface()->Invalidate();
 	mData->Texture()->MarkPackageDirty(); 
@@ -324,6 +324,7 @@ FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged()
 {
     if (mData->Texture())
     {
+        mData->PaintEngine()->Flush();
         mData->Texture()->MarkPackageDirty();
         mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
         mData->DisplaySurface()->Invalidate();
@@ -400,6 +401,7 @@ FOdysseyFlipbookEditorController::OnUndoIliad()
     {
         return FReply::Handled();
     }
+    
 	mData->LayerStack()->mDrawingUndo->LoadData();
     mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
     mData->DisplaySurface()->Invalidate();
@@ -415,6 +417,7 @@ FOdysseyFlipbookEditorController::OnRedoIliad()
     {
         return FReply::Handled();
     }
+    
 	mData->LayerStack()->mDrawingUndo->Redo();
     mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
     mData->DisplaySurface()->Invalidate();

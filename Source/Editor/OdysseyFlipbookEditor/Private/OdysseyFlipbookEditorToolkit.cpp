@@ -151,6 +151,7 @@ FOdysseyFlipbookEditorToolkit::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyfra
 void
 FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 {
+	mData->PaintEngine()->Flush();
 	mData->SyncTextureWithSurfaceBlock();
 
 	//Small trick
@@ -218,6 +219,7 @@ FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
 bool
 FOdysseyFlipbookEditorToolkit::OnRequestClose()
 {
+	mData->PaintEngine()->Flush();
 	mData->SyncTextureWithSurfaceBlock();
 	mData->ApplyPropertiesBackup();
 

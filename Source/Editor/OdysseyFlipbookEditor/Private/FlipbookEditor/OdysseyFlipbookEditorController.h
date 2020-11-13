@@ -55,9 +55,9 @@ public:
 	FOnKeyframeRemoved& OnKeyframeRemoved();
 	
 public:
-	virtual void OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
-	virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles) override;
-	virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles) override;
+	virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
+	virtual void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles) override;
+	virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineStrokeAbort() override;
 
 	virtual FReply OnClear() override;

@@ -132,11 +132,10 @@ FOdysseyTextureEditorController::OnBrushCompiled( UBlueprint* iBrush )
     }
 }
 
-
 void
-FOdysseyTextureEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyTextureEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
-    FOdysseyPainterEditorController::OnPaintEngineStrokeChanged(iChangedTiles);
+    FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged(iChangedTiles);
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
 		mData->LayerStack()->ComputeResultInBlockWithBlockAsCurrentLayer(mData->DisplaySurface()->Block()->GetBlock(), mData->PaintEngine()->PreviewBlock(), iChangedTiles[i]);
@@ -148,9 +147,9 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeChanged(const TArray<::ul3::
 }
 
 void
-FOdysseyTextureEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles)
 {
-    FOdysseyPainterEditorController::OnPaintEngineStrokeWillEnd(iChangedTiles);
+    FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange(iChangedTiles);
 	mData->LayerStack()->mDrawingUndo->StartRecord();
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
@@ -161,9 +160,9 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::
 }
 
 void
-FOdysseyTextureEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
-    FOdysseyPainterEditorController::OnPaintEngineStrokeEnd(iChangedTiles);
+    FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(iChangedTiles);
 	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
 	mData->DisplaySurface()->Invalidate();
 	mData->Texture()->MarkPackageDirty();
@@ -258,6 +257,7 @@ FOdysseyTextureEditorController::OnLayerStackStructureChanged()
 void
 FOdysseyTextureEditorController::OnLayerStackImageResultChanged()
 {
+    mData->PaintEngine()->Flush();
     mData->Texture()->MarkPackageDirty();
     mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
 	mData->DisplaySurface()->Invalidate();
