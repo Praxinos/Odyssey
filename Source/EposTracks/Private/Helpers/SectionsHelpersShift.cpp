@@ -11,6 +11,8 @@
 FShiftResult
 SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration )
 {
+    iStartTime = FMath::Max( FFrameNumber( 0 ), iStartTime );
+
     if( !iSections.Num() )
     {
         FShiftResult shift_result;
