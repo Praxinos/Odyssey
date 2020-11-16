@@ -172,8 +172,8 @@ FOdysseyFlipbookEditorController::OnPaintEngineEditedBlockTilesChanged(const TAr
 {
     check(mData->LayerStack());
     FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(iChangedTiles);
-	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
-    mData->DisplaySurface()->Invalidate();
+	// mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    // mData->DisplaySurface()->Invalidate();
 	mData->Texture()->MarkPackageDirty(); 
 }
 

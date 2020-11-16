@@ -71,14 +71,32 @@ void ConvToPos(::ul3::FBlock* iSrc, ::ul3::FBlock* ioDst, const ::ul3::FVec2F& i
 {
 	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
 	uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-	::ul3::FBlock* tmpBlock = new ::ul3::FBlock(iSrc->Width(), iSrc->Height(), ioDst->Format());
+
+    ::ul3::FBlock* convDstBlock = ioDst;
+    ::ul3::FBlock* convSrcBlock = iSrc;
+    if (iSrc->Width() != ioDst->Width() || iSrc->Height() != ioDst->Height())
+    {
+	    convDstBlock = new ::ul3::FBlock(iSrc->Width(), iSrc->Height(), ioDst->Format());
+    }
+
+    if (iSrc->HasAlpha() && !ioDst->HasAlpha())
+    {
+        convSrcBlock = new ::ul3::FBlock(iSrc->Width(), iSrc->Height(), iSrc->Format());
+        // ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, convSrcBlock, ::ul3::FPixelValue::FromGreyA8(0), convSrcBlock->Rect());
+        
+
+        //Use a copy and a Premultiply to accomplish the same behaviour as a Fill background with black if we keep only non alpha components
+        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iSrc, convSrcBlock, iSrc->Rect(), ::ul3::FVec2F(0, 0));
+        ::ul3::Premultiply(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, convSrcBlock);
+    }
+
 	::ul3::Conv(hULIS.ThreadPool()
 		, ULIS3_BLOCKING
 		, perfIntent
 		, hULIS.HostDeviceInfo()
 		, ULIS3_NOCB
-		, iSrc
-		, tmpBlock);
+		, convSrcBlock
+		, convDstBlock);
 
 	::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iSrc->Width(), iSrc->Height());
 	::ul3::Copy(hULIS.ThreadPool()
@@ -86,12 +104,16 @@ void ConvToPos(::ul3::FBlock* iSrc, ::ul3::FBlock* ioDst, const ::ul3::FVec2F& i
 		, perfIntent
 		, hULIS.HostDeviceInfo()
 		, ULIS3_NOCB
-		, tmpBlock
+		, convDstBlock
 		, ioDst
 		, rect
 		, iPos);
 
-	delete tmpBlock;
+    if (convDstBlock != ioDst)
+        delete convDstBlock;
+    
+    if (convSrcBlock != iSrc)
+        delete convSrcBlock;
 }
 
 void

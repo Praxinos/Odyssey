@@ -163,8 +163,8 @@ void
 FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(iChangedTiles);
-	mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
-	mData->DisplaySurface()->Invalidate();
+	// mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+	// mData->DisplaySurface()->Invalidate();
 	mData->Texture()->MarkPackageDirty();
 }
 
