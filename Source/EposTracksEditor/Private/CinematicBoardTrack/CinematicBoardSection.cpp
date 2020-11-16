@@ -22,6 +22,7 @@
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -425,13 +426,17 @@ FCinematicBoardSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, F
     UMovieScene* outer_movie_scene = section.GetTypedOuter<UMovieScene>();
     int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
 
+    auto track = outer_movie_scene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+
     if( ResizeMode == ESequencerSectionResizeMode::SSRM_LeadingEdge )
     {
-        section.SetRange( SectionsHelpersResize::GetValidRangeLeading( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
+        auto new_range = SectionsHelpersResize::GetValidRangeLeading( track->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold );
+        section.SetRange( new_range );
     }
     else
     {
-        section.SetRange( SectionsHelpersResize::GetValidRangeTrailing( outer_movie_scene->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold ) );
+        auto new_range = SectionsHelpersResize::GetValidRangeTrailing( track->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold );
+        section.SetRange( new_range );
     }
 };
 
