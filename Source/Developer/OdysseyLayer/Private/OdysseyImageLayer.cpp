@@ -340,7 +340,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
         Ar << width;
         Ar << height;
 
-		::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(ETextureSourceFormat::TSF_BGRA8);
+		::ul3::tFormat format = ULIS3_FORMAT_BGRA8;
 		if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat)
 		{
 			Ar << format;

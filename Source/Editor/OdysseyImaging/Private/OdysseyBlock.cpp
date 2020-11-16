@@ -7,6 +7,165 @@
 /////////////////////////////////////////////////////
 // Utlity
 
+int UE4TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
+{
+    switch (iFormat) {
+
+    case TSF_G8:        return 1;
+    case TSF_BGRA8:     return 4;
+    case TSF_BGRE8:     return 4;
+    case TSF_RGBA16:    return 8;
+    case TSF_RGBA16F:   return 8;
+    case TSF_RGBA8:     return 4;
+    case TSF_RGBE8:     return 4;
+
+    case TSF_Invalid:
+    case TSF_MAX:
+    default:                                        break;
+    }
+    return 0;
+}
+
+bool UE4TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iFormat )
+{
+    switch( iFormat )
+    {
+        case TSF_BGRE8:
+        case TSF_RGBA16F:
+        case TSF_RGBE8:
+            return true;
+        default:
+        break;
+    }
+    return false;
+}
+
+void
+ConvertUE4TextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat)
+{
+    switch( iFormat )
+    {
+        case TSF_BGRE8:
+        {
+            FColor* bgre = (FColor*)(iSrc);
+            ::ul3::FBlock* dst = new ::ul3::FBlock(oDst, iWidth, iHeight, ULIS3_FORMAT_RGBF);
+            ::ul3::FPixelProxy proxy(oDst, ULIS3_FORMAT_RGBF);
+            for (int y = 0; y < iHeight; y++)
+            {
+                for (int x = 0; x < iWidth; x++)
+                {
+                    int i = y * iWidth + x;
+                    proxy.SetPtr(dst->PixelPtr(x, y));
+                    FLinearColor rgba = bgre[i].FromRGBE();
+                    proxy.SetRF(rgba.R);
+                    proxy.SetGF(rgba.G);
+                    proxy.SetBF(rgba.B);
+                }
+            }
+            delete dst;
+        }
+        break;
+
+        case TSF_RGBE8:
+        {
+            FColor* rgbe = (FColor*)(iSrc);
+            ::ul3::FBlock* dst = new ::ul3::FBlock(oDst, iWidth, iHeight, ULIS3_FORMAT_RGBF);
+            ::ul3::FPixelProxy proxy(oDst, ULIS3_FORMAT_RGBF);
+            for (int y = 0; y < iHeight; y++)
+            {
+                for (int x = 0; x < iWidth; x++)
+                {
+                    int i = y * iWidth + x;
+                    FColor bgre(rgbe[i].B, rgbe[i].G, rgbe[i].R, rgbe[i].A);
+                    proxy.SetPtr(dst->PixelPtr(x, y));
+                    FLinearColor rgba = bgre.FromRGBE();
+                    proxy.SetRF(rgba.R);
+                    proxy.SetGF(rgba.G);
+                    proxy.SetBF(rgba.B);
+                }
+            }
+            delete dst;
+        }
+        break;
+
+        case TSF_RGBA16F:
+        {
+            FFloat16Color* rgba16 = (FFloat16Color*)(iSrc);
+            FLinearColor* rgbaf = (FLinearColor*)(oDst);
+            int size = iWidth * iHeight;
+            for (int i = 0; i < size; i++)
+            {
+                rgbaf[i] = FLinearColor(rgba16[i]);
+            }
+        }
+        break;
+        
+        default:
+        break;
+    }
+}
+
+void
+ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat)
+{
+    switch( iFormat )
+    {
+        case TSF_BGRE8:
+        {
+            ::ul3::FBlock* src = new ::ul3::FBlock((uint8*)iSrc, iWidth, iHeight, ULIS3_FORMAT_RGBF);
+            ::ul3::FPixelProxy proxy(iSrc, ULIS3_FORMAT_RGBF);
+            FColor* bgre = (FColor*)(oDst);
+            for (int y = 0; y < iHeight; y++)
+            {
+                for (int x = 0; x < iWidth; x++)
+                {
+                    int i = y * iWidth + x;
+                    proxy.SetPtr(src->PixelPtr(x, y));
+                    FLinearColor rgba(proxy.RF(), proxy.GF(), proxy.BF(), 1.0f);
+                    bgre[i] = rgba.ToRGBE();
+                }
+            }
+            delete src;
+        }
+        break;
+
+        case TSF_RGBE8:
+        {
+            ::ul3::FBlock* src = new ::ul3::FBlock((uint8*)iSrc, iWidth, iHeight, ULIS3_FORMAT_RGBF);
+            ::ul3::FPixelProxy proxy(iSrc, ULIS3_FORMAT_RGBF);
+            FColor* rgbe = (FColor*)(oDst);
+            for (int y = 0; y < iHeight; y++)
+            {
+                for (int x = 0; x < iWidth; x++)
+                {
+                    int i = y * iWidth + x;
+                    proxy.SetPtr(src->PixelPtr(x, y));
+                    FLinearColor rgba(proxy.RF(), proxy.GF(), proxy.BF(), 1.0f);
+                    FColor bgre = rgba.ToRGBE();
+                    rgbe[i] = FColor(bgre.B, bgre.G, bgre.R, bgre.A);
+                }
+            }
+            delete src;
+        }
+        break;
+
+        case TSF_RGBA16F:
+        {
+            FLinearColor* rgbaf = (FLinearColor*)(iSrc);
+            FFloat16Color* rgba16 = (FFloat16Color*)(oDst);
+            int size = iWidth * iHeight;
+            for (int i = 0; i < size; i++)
+            {
+                rgba16[i] = FFloat16Color(rgbaf[i]);
+            }
+        }
+        break;
+        
+        default:
+        break;
+    }
+}
+
 ::ul3::tFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
 {
     ::ul3::tFormat ret = 0;
@@ -14,11 +173,11 @@
         case TSF_Invalid:   ret = 0;                    break;
         case TSF_G8:        ret = ULIS3_FORMAT_G8;      break;
         case TSF_BGRA8:     ret = ULIS3_FORMAT_BGRA8;   break; 
-        case TSF_BGRE8:     ret = ULIS3_FORMAT_BGRA8;   break; //TODO: Change to BGRE ULIS FORMAT
+        case TSF_BGRE8:     ret = ULIS3_FORMAT_RGBF;   break;
         case TSF_RGBA16:    ret = ULIS3_FORMAT_RGBA16;  break;
-        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBA16;  break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see UE4 implementation)
+        case TSF_RGBA16F:   ret = ULIS3_FORMAT_RGBAF;   break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see UE4 implementation)
         case TSF_RGBA8:     ret = ULIS3_FORMAT_RGBA8;   break;
-        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGBA8;   break; //TODO: Change to RGBE ULIS FORMAT
+        case TSF_RGBE8:     ret = ULIS3_FORMAT_RGBF;   break;
         case TSF_MAX:       ret = 0;                    break;
         default:            ret = 0;                    break;
     }

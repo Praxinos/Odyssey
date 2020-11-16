@@ -25,8 +25,18 @@ CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
            iBlock->Height() == iTexture->GetSizeY()
            ,TEXT("Sizes do not match"));
 
-    iTexture->Source.GetMipData(iBlock->GetArray(),0);
-    iBlock->ResyncData();
+	if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
+	{
+		TArray64<uint8> src;
+		src.SetNumUninitialized(iTexture->Source.CalcMipSize(0));
+		iTexture->Source.GetMipData(src,0);
+		ConvertUE4TextureSourceFormatToULISFormat(src.GetData(), iBlock->GetArray().GetData(), iBlock->Width(), iBlock->Height(), iTexture->Source.GetFormat());
+	}
+	else
+	{
+		iTexture->Source.GetMipData(iBlock->GetArray(),0);
+	}
+	iBlock->ResyncData();
 }
 
 void
@@ -47,47 +57,47 @@ CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 }
 
 void
+InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
+{
+	::ul3::tFormat targetFormat = ULISFormatForUE4TextureSourceFormat(iFormat);
+	const ::ul3::FBlock* block = iBlock->GetBlock();
+	if (iBlock->Format() != targetFormat)
+	{
+		::ul3::FBlock* convblock = new ::ul3::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
+
+		IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+		::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
+		::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iBlock->GetBlock(), convblock);
+		block = convblock;
+	}
+
+	if (UE4TextureSourceFormatNeedsConversionToULISFormat(iFormat))
+	{
+		TArray64<uint8> dst;
+		dst.SetNumUninitialized(iBlock->Width() * iBlock->Height() * UE4TextureSourceFormatBytesPerPixel(iFormat));
+		ConvertULISFormatToUE4TextureSourceFormat(block->DataPtr(), dst.GetData(), iBlock->Width(), iBlock->Height(), iFormat);
+		iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iFormat, dst.GetData());
+	}
+	else
+	{
+		iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iFormat, block->DataPtr());
+	}
+
+	if (block != iBlock->GetBlock())
+	{
+		delete block;
+	}
+}
+
+void
 CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
 {
     checkf(iBlock->Width() == iTexture->GetSizeX() &&
            iBlock->Height() == iTexture->GetSizeY()
            ,TEXT("Sizes do not match"));
            
-    ::ul3::tFormat targetFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-	if (iBlock->Format() == targetFormat)
-	{
-		iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iTexture->Source.GetFormat(), iBlock->GetBlock()->DataPtr());
-		return;
-	}
-
-	::ul3::FBlock* block = new ::ul3::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
-
-	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-	::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
-	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-	::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iBlock->GetBlock(), block);
-    
-	iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iTexture->Source.GetFormat(), block->DataPtr());
-}
-
-void
-InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
-{
-	::ul3::tFormat targetFormat = ULISFormatForUE4TextureSourceFormat(iFormat);
-	if (iBlock->Format() == targetFormat)
-	{
-		iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iFormat, iBlock->GetBlock()->DataPtr());
-		return;
-	}
-
-	::ul3::FBlock* block = new ::ul3::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
-
-	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-	::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
-	::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-	::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iBlock->GetBlock(), block);
-    
-	iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iFormat, block->DataPtr());
+	InitTextureWithBlockData(iBlock, iTexture, iTexture->Source.GetFormat());
 }
 
 FOdysseyBlock*
@@ -406,6 +416,65 @@ static void GetBuildSettingsForRunningPlatform(
 //END COPIED FROM TextureDerivedData.cpp
 
 void
+InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
+{
+	ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
+	const ITextureFormat* TextureFormat = NULL;
+	if (TPM)
+	{
+		TArray<FTextureBuildSettings> buildSettings;
+		GetBuildSettingsForRunningPlatform(*iTexture, buildSettings);
+
+		FTextureFormatSettings FormatSettings;
+		iTexture->GetLayerFormatSettings(0, FormatSettings);
+
+		TextureFormat = TPM->FindTextureFormat(buildSettings[0].TextureFormatName);
+
+		FImage* sourceRawImage = new FImage();
+		sourceRawImage->SizeX = iRect.w;
+		sourceRawImage->SizeY = iRect.h;
+		sourceRawImage->NumSlices = iTexture->Source.GetNumSlices();
+		sourceRawImage->Format = GetRawImageFormatFromTextureSourceFormat(iTexture->Source.GetFormat());//TODO: check format and convert if needed
+		sourceRawImage->GammaSpace = FormatSettings.SRGB ? (iTexture->bUseLegacyGamma ? EGammaSpace::Pow22 : EGammaSpace::sRGB) : EGammaSpace::Linear;
+
+		if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
+		{
+			//TArray64<uint8> dst;
+			//dst.SetNumUninitialized((iTexture->Source.CalcMipSize(0) * w) / (iTexture->GetSizeX() * iTexture->GetSizeY()) );
+			int rowSize = (iTexture->Source.CalcMipSize(0) * iRect.w) / (iTexture->GetSizeX() * iTexture->GetSizeY());
+			sourceRawImage->RawData.SetNumUninitialized(rowSize * iRect.h);
+			for(int i = 0; i < iRect.h; i++)
+			{
+				ConvertULISFormatToUE4TextureSourceFormat(iData->PixelPtr(iRect.x, iRect.y + i), sourceRawImage->RawData.GetData() + rowSize * i, iRect.w, 1, iTexture->Source.GetFormat());
+				//sourceRawImage->RawData.Append(dst.GetData(), dst.Num());
+			}
+		}
+		else
+		{
+			for(int i = 0; i < iRect.h; i++)
+			{
+				sourceRawImage->RawData.Append(iData->PixelPtr(iRect.x, iRect.y + i), iData->BytesPerPixel() * iRect.w);
+			}
+		}
+
+		FCompressedImage2D* dstRawImage = new FCompressedImage2D();
+		TextureFormat->CompressImage(*sourceRawImage, buildSettings[0], true, *dstRawImage);
+
+		// Update Region
+		FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x, iRect.y, 0, 0, iRect.w, iRect.h);
+		TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [dstRawImage](uint8*, const FUpdateTextureRegion2D* Regions) {
+			delete Regions;
+			delete dstRawImage;
+		};
+
+		int blockBytes = GPixelFormats[dstRawImage->PixelFormat].BlockBytes;
+		iTexture->UpdateTextureRegions(0, 1, region, dstRawImage->SizeX * blockBytes, blockBytes, dstRawImage->RawData.GetData(), dataCleanupFunc);
+
+		delete sourceRawImage;
+	}
+}
+
+void
 InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
 {
     checkf(iData,TEXT("Error"));
@@ -428,85 +497,48 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
     // Considering only one region is an assumption that works but you have to be more carefull with several regions.
     
     ::ul3::tFormat platformFormat = ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat());
-    if (platformFormat != 0 && iData->Format() == platformFormat)
-    {
-		FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x, y, x, y, w, h);
-		TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [&](uint8*, const FUpdateTextureRegion2D* Regions) {
-			delete Regions;
-		};
-		uint32 bpp = iData->BytesPerPixel();
-		uint32 pitch = iData->BytesPerScanLine();
-        iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(iData->DataPtr()),dataCleanupFunc);
-    }
-    else if (platformFormat != 0)
+	if (platformFormat == 0)
+	{
+		InvalidateTextureFromSourceData(iData, iTexture, iRect);
+		return;
+	}
+		
+	// default params if platforForamt == iData->Format()
+	const ::ul3::FBlock* srcBlock = iData;
+	FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x, y, x, y, w, h);
+	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [srcBlock, iData](uint8*, const FUpdateTextureRegion2D* Regions) {
+		delete Regions;
+		if (srcBlock != iData)
+			delete srcBlock;
+	};
+	uint32 bpp = iData->BytesPerPixel();
+	uint32 pitch = iData->BytesPerScanLine();
+
+    if (srcBlock->Format() != platformFormat)
     {
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 MT_bit = iData->Height() > 256 ? ULIS3_PERF_MT : 0;
+        ::ul3::uint32 MT_bit = srcBlock->Height() > 256 ? ULIS3_PERF_MT : 0;
         ::ul3::uint32 perfIntent = MT_bit | 0;
 
-        ::ul3::FBlock* block = new ::ul3::FBlock(w, h, iData->Format());
-		::ul3::FBlock* conv = new ::ul3::FBlock(w, h, platformFormat);
+        ::ul3::FBlock* block = new ::ul3::FBlock(w, h, srcBlock->Format());
         ::ul3::FVec2I pos(0, 0);
-		FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x, y, 0, 0, w, h);
-        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iData, block, iRect, pos);
-        ::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block, conv);
+        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, srcBlock, block, iRect, pos);
 
-		uint32 bpp = conv->BytesPerPixel();
-		uint32 pitch = conv->BytesPerScanLine();
+		::ul3::FBlock* conv = new ::ul3::FBlock(w, h, platformFormat);
+		srcBlock = conv;
+        ::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block, conv);
 
         delete block;
 
-		TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [conv](uint8*, const FUpdateTextureRegion2D* Regions) {
-			delete Regions;
-			if (conv)
-				delete conv;
-		};
-        iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(conv->DataPtr()),dataCleanupFunc);
-        // conv destruction is handled in dataCleanupFunc
+		bpp = srcBlock->BytesPerPixel();
+		pitch = srcBlock->BytesPerScanLine();
+		
+		delete region;
+		region = new FUpdateTextureRegion2D(x, y, 0, 0, w, h);
+        // srcBlock destruction is handled in dataCleanupFunc
     }
-	else //Convert from sourceFormat
-	{
-		::ul3::tFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-		ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
-		const ITextureFormat* TextureFormat = NULL;
-		if (TPM)
-		{
-			TArray<FTextureBuildSettings> buildSettings;
-			GetBuildSettingsForRunningPlatform(*iTexture, buildSettings);
-
-			FTextureFormatSettings FormatSettings;
-			iTexture->GetLayerFormatSettings(0, FormatSettings);
-
-			TextureFormat = TPM->FindTextureFormat(buildSettings[0].TextureFormatName);
-
-			FImage* sourceRawImage = new FImage();
-			sourceRawImage->SizeX = w;
-			sourceRawImage->SizeY = h;
-			sourceRawImage->NumSlices = iTexture->Source.GetNumSlices();
-			sourceRawImage->Format = GetRawImageFormatFromTextureSourceFormat(iTexture->Source.GetFormat());
-			sourceRawImage->GammaSpace = FormatSettings.SRGB ? (iTexture->bUseLegacyGamma ? EGammaSpace::Pow22 : EGammaSpace::sRGB) : EGammaSpace::Linear;
-
-			for(int i = 0; i < h; i++)
-			{
-				sourceRawImage->RawData.Append(iData->PixelPtr(x, y + i), iData->BytesPerPixel() * w);
-			}
-
-			FCompressedImage2D* dstRawImage = new FCompressedImage2D();
-			TextureFormat->CompressImage(*sourceRawImage, buildSettings[0], true, *dstRawImage);
-
-			// Update Region
-			FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(x, y, 0, 0, w, h);
-			TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [dstRawImage](uint8*, const FUpdateTextureRegion2D* Regions) {
-				delete Regions;
-				delete dstRawImage;
-			};
-
-			int blockBytes = GPixelFormats[dstRawImage->PixelFormat].BlockBytes;
-			iTexture->UpdateTextureRegions(0, 1, region, dstRawImage->SizeX * blockBytes, blockBytes, dstRawImage->RawData.GetData(), dataCleanupFunc);
-
-			delete sourceRawImage;
-		}
-	}
+	
+    iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(srcBlock->DataPtr()),dataCleanupFunc);
 }
 
 void

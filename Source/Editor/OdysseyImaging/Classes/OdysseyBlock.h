@@ -8,6 +8,11 @@
 #include <ULIS3>
 
 //
+ODYSSEYIMAGING_API int UE4TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat);
+ODYSSEYIMAGING_API bool UE4TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iFormat );
+ODYSSEYIMAGING_API void ConvertUE4TextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat);
+ODYSSEYIMAGING_API void ConvertULISFormatToUE4TextureSourceFormat(const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat);
+
 ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat );
 ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat );
 ODYSSEYIMAGING_API EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFormat );
