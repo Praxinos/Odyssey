@@ -12,6 +12,7 @@
 
 UMovieSceneCinematicBoardSection::UMovieSceneCinematicBoardSection()
     : UMovieSceneSubSection()
+    , mResizing( -1 )
 {
     SetBlendType( EMovieSceneBlendType::Absolute );
 
@@ -94,6 +95,9 @@ UMovieSceneCinematicBoardSection::StartResizing()
 void
 UMovieSceneCinematicBoardSection::Resizing()
 {
+    if( mResizing < 0 )
+        return;
+
     mResizing++;
 }
 void
