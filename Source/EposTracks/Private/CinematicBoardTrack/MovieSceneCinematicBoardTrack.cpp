@@ -10,8 +10,9 @@
 
 #include "ArrangeSectionsType.h"
 #include "EposTracksModule.h"
-#include "Helpers/SectionsHelpersShift.h"
 #include "Helpers/SectionsHelpersMove.h"
+#include "Helpers/SectionsHelpersResize.h"
+#include "Helpers/SectionsHelpersShift.h"
 
 
 #define LOCTEXT_NAMESPACE "MovieSceneCinematicBoardTrack"
@@ -211,7 +212,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
     if( board_section->IsResizing() )
     {
-        MovieSceneHelpers::FixupConsecutiveSections( Sections, ioSection, false );
+        SectionsHelpersResize::FixupConsecutiveSections( Sections, &ioSection );
 
         if( iParams.MoveType == EPropertyChangeType::ValueSet )
         {

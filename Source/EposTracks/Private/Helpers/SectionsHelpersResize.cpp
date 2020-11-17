@@ -3,6 +3,7 @@
 
 #include "Helpers/SectionsHelpersResize.h"
 
+#include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
 
 //---
@@ -52,4 +53,40 @@ SectionsHelpersResize::GetValidRangeTrailing( TArray<UMovieSceneSection*> iSecti
     }
 
     return TRange<FFrameNumber>( iSection->GetRange().GetLowerBound(), TRangeBound<FFrameNumber>::Exclusive( iNewFrame ) );
+}
+
+
+//static
+void
+SectionsHelpersResize::FixupConsecutiveSections( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection )
+{
+    MovieSceneHelpers::SortConsecutiveSections( iSections );
+
+    int32 current_index = INDEX_NONE;
+    if( !iSections.Find( iSection, current_index ) )
+        return;
+
+    UMovieSceneSection* previous_section = nullptr;
+    UMovieSceneSection* next_section = nullptr;
+
+    if( iSections.IsValidIndex( current_index - 1 ) )
+        previous_section = iSections[current_index - 1];
+    if( iSections.IsValidIndex( current_index + 1 ) )
+        next_section = iSections[current_index + 1];
+
+    if( previous_section && previous_section->GetExclusiveEndFrame() != iSection->GetInclusiveStartFrame() )
+    {
+        auto previous_new_range = TRange<FFrameNumber>( previous_section->GetRange().GetLowerBound(), TRangeBound<FFrameNumber>::Exclusive( iSection->GetInclusiveStartFrame() ) );
+        previous_section->SetRange( previous_new_range );
+    }
+
+    if( next_section )
+    {
+        FFrameNumber diff = iSection->GetExclusiveEndFrame() - next_section->GetInclusiveStartFrame();
+        for( int i = current_index + 1; i < iSections.Num(); i++ )
+        {
+            auto section = iSections[i];
+            section->MoveSection( diff );
+        }
+    }
 }

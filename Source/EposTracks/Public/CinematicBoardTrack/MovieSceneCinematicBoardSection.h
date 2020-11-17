@@ -62,6 +62,16 @@ private:
 
 //---
 
+private:
+    bool IsContentResizable( const UMovieSceneSection* iSection ) const;
+
+    bool IsResizableLeadingEdge(); // should be const ... doesn't work with TArray::Find() ...
+    bool IsResizableTrailingEdge(); // should be const ...
+
+public:
+    void ResizeLeadingEdge( FFrameNumber iNewFrame );
+    void ResizeTrailingEdge( FFrameNumber iNewFrame );
+
 public:
     void StartResizing();
     void Resizing();

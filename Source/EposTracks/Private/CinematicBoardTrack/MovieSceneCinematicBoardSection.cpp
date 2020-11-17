@@ -7,6 +7,7 @@
 #include "Generators/MovieSceneEasingCurves.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "MovieSceneSection.h"
+#include "MovieSceneSequence.h"
 
 //---
 
@@ -48,22 +49,14 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
         }
         else if( mSectionRangeBackup.GetLowerBoundValue() == section_range.GetLowerBoundValue() )
         {
-            UMovieScene* outer_movie_scene = GetTypedOuter<UMovieScene>();
-            int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
-            UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
-
-            SetRange( SectionsHelpersResize::GetValidRangeTrailing( outer_track->GetAllSections(), this, section_range.GetUpperBoundValue(), IntervalSnapThreshold ) );
+            ResizeTrailingEdge( section_range.GetUpperBoundValue() );
 
             mResizing = 0;
             Resizing();
         }
         else if( mSectionRangeBackup.GetUpperBoundValue() == section_range.GetUpperBoundValue() )
         {
-            UMovieScene* outer_movie_scene = GetTypedOuter<UMovieScene>();
-            int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
-            UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
-
-            SetRange( SectionsHelpersResize::GetValidRangeLeading( outer_track->GetAllSections(), this, section_range.GetLowerBoundValue(), IntervalSnapThreshold ) );
+            ResizeLeadingEdge( section_range.GetLowerBoundValue() );
 
             mResizing = 0;
             Resizing();
@@ -84,6 +77,84 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 #endif
 
 //---
+
+void
+UMovieSceneCinematicBoardSection::ResizeLeadingEdge( FFrameNumber iNewFrame )
+{
+    if( !IsResizableLeadingEdge() )
+        return;
+
+    UMovieScene* outer_movie_scene = GetTypedOuter<UMovieScene>();
+    int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
+    UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
+
+    auto new_range = SectionsHelpersResize::GetValidRangeLeading( outer_track->GetAllSections(), this, iNewFrame, IntervalSnapThreshold );
+    //SetRange( new_range );
+    FFrameNumber diff = new_range.GetLowerBoundValue() - GetInclusiveStartFrame();
+    MoveSection( diff );
+}
+
+void
+UMovieSceneCinematicBoardSection::ResizeTrailingEdge( FFrameNumber iNewFrame )
+{
+    if( !IsResizableTrailingEdge() )
+        return;
+
+    UMovieScene* outer_movie_scene = GetTypedOuter<UMovieScene>();
+    int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
+    UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
+
+    auto new_range = SectionsHelpersResize::GetValidRangeTrailing( outer_track->GetAllSections(), this, iNewFrame, IntervalSnapThreshold );
+    SetRange( new_range );
+}
+
+bool
+UMovieSceneCinematicBoardSection::IsContentResizable( const UMovieSceneSection* iSection ) const
+{
+    auto section = Cast<const UMovieSceneCinematicBoardSection>( iSection );
+    if( !section )
+        return false;
+
+    const UMovieSceneSequence* subsequence = section->GetSequence();
+    if( !subsequence )
+        return true;
+
+    const UMovieScene* submoviescene = subsequence->GetMovieScene();
+    if( !submoviescene )
+        return true;
+
+    FName class_name = subsequence->GetClass()->GetFName();
+    if( class_name == TEXT( "BoardSequence" ) )
+    {
+        return submoviescene->GetMasterTracks().Num() == 0 && submoviescene->GetBindings().Num() == 0;
+    }
+    else
+    {
+        check( class_name == TEXT( "ShotSequence" ) );
+        return true;
+    }
+}
+
+bool
+UMovieSceneCinematicBoardSection::IsResizableLeadingEdge()
+{
+    UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
+    auto sections = outer_track->GetAllSections();
+
+    int32 current_index = INDEX_NONE;
+    if( !sections.Find( this, current_index ) )
+        return false;
+    if( !sections.IsValidIndex( current_index - 1 ) )
+        return false;
+
+    auto previous_section = sections[current_index - 1];
+    return IsContentResizable( previous_section );
+}
+bool
+UMovieSceneCinematicBoardSection::IsResizableTrailingEdge()
+{
+    return IsContentResizable( this );
+}
 
 void
 UMovieSceneCinematicBoardSection::StartResizing()

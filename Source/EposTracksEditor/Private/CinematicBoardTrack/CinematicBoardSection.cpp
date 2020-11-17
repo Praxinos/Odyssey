@@ -419,8 +419,8 @@ FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted( const FText& iNew
 void
 FCinematicBoardSection::BeginResizeSection()
 {
-    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
-    sectionObject.StartResizing();
+    UMovieSceneCinematicBoardSection& section = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+    section.StartResizing();
 }
 
 void
@@ -431,21 +431,10 @@ FCinematicBoardSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, F
 
     //FViewportThumbnailSection::ResizeSection( ResizeMode, ResizeFrameNumber );
 
-    UMovieScene* outer_movie_scene = section.GetTypedOuter<UMovieScene>();
-    int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
-
-    auto track = outer_movie_scene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-
     if( ResizeMode == ESequencerSectionResizeMode::SSRM_LeadingEdge )
-    {
-        auto new_range = SectionsHelpersResize::GetValidRangeLeading( track->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold );
-        section.SetRange( new_range );
-    }
+        section.ResizeLeadingEdge( ResizeFrameNumber );
     else
-    {
-        auto new_range = SectionsHelpersResize::GetValidRangeTrailing( track->GetAllSections(), &section, ResizeFrameNumber, IntervalSnapThreshold );
-        section.SetRange( new_range );
-    }
+        section.ResizeTrailingEdge( ResizeFrameNumber );
 };
 
 void
