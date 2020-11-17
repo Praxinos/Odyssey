@@ -15,6 +15,7 @@
 #include "Interfaces/ITargetPlatform.h"
 #include "Interfaces/ITextureFormat.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
+#include "RHI.h"
 #include <ULIS3>
 
 /////////////////////////////////////////////////////

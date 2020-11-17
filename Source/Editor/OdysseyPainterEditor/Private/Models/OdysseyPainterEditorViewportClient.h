@@ -95,7 +95,7 @@ public:
 
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
 	
-    virtual EMouseCaptureMode                   CaptureMouseOnClick() override;
+    virtual EMouseCaptureMode GetMouseCaptureMode() const override;
     
 public:
     // FGCObject API

@@ -745,7 +745,7 @@ FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCur
 }
 
 EMouseCaptureMode
-FOdysseyPainterEditorViewportClient::CaptureMouseOnClick()
+FOdysseyPainterEditorViewportClient::GetMouseCaptureMode() const
 {
     //No Capture, the capture is managed by FOdysseySceneViewport
     //Because this capture activates HighPrecisionMouseMovements, which is applying acceleration to the mouse (on Mac at least)

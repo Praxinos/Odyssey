@@ -231,7 +231,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
     FString AssetName = iName; //mFlipbook->GetName() + "_Texture";
     AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
 
-    UPackage* package = CreatePackage( nullptr, *PackageName );
+    UPackage* package = CreatePackage( *PackageName );
     
     //Create texture
     UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
@@ -279,7 +279,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     FString AssetName = iName; //mFlipbook->GetName() + "_Texture";
     AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
 
-    UPackage* package = CreatePackage( nullptr, *PackageName );
+    UPackage* package = CreatePackage( *PackageName );
     
     //Create texture
     UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
@@ -372,7 +372,7 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
     FString AssetName = iName;
     AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
 
-    UPackage* package = CreatePackage( nullptr, *PackageName );
+    UPackage* package = CreatePackage( *PackageName );
     
     UPaperSprite* sprite = NewObject<UPaperSprite>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
 

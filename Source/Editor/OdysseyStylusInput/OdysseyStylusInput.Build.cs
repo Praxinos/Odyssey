@@ -9,8 +9,10 @@ namespace UnrealBuildTool.Rules
 		public OdysseyStylusInput(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+			// bAddDefaultIncludePaths = true;
 
-            PublicIncludePaths.AddRange(
+
+			PublicIncludePaths.AddRange(
 				new string[] {
                     Path.Combine(ModuleDirectory, "Public", "Settings")
 					// ... add public include paths required here ...
@@ -35,38 +37,14 @@ namespace UnrealBuildTool.Rules
 				}
 				);
 
-
-
-            if (Target.Platform == UnrealTargetPlatform.Win64 || Target.Platform == UnrealTargetPlatform.Win32)
+            if (Target.Platform == UnrealTargetPlatform.Mac)
             {
-                PublicIncludePaths.AddRange(
-                    new string[] {
-                        Path.Combine(ModuleDirectory, "Public", "Settings", "Windows" )
-                    }
-                );
-            }
-            else if (Target.Platform == UnrealTargetPlatform.Mac)
-            {
-                PublicIncludePaths.AddRange(
-                    new string[] {
-                        Path.Combine(ModuleDirectory, "Public", "Settings", "Mac" )
-                    }
-                );
-
                 //We need ApplicationCore for Mac for this module
                 PrivateDependencyModuleNames.AddRange(
                     new string[]
                     {
                         "ApplicationCore"
                     }       
-                );
-            }
-            else
-            {
-                PublicIncludePaths.AddRange(
-                    new string[] {
-                    Path.Combine(ModuleDirectory, "Public", "Settings", "Generic" )
-                    }
                 );
             }
                 

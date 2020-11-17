@@ -16,6 +16,7 @@ public class OdysseyImaging : ModuleRules
                 "Engine",
                 "ImageCore",
                 "RenderCore",
+                "RHI",
                 "TargetPlatform",
                 "TextureCompressor"
              }
