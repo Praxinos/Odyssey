@@ -65,5 +65,12 @@ void SOdysseyBrushSelector::OnObjectChanged( const FAssetData& AssetData )
     OnBrushChanged.ExecuteIfBound( current_brush );
 }
 
+void
+SOdysseyBrushSelector::SelectBrush(UOdysseyBrush* iBrush)
+{
+    current_brush = iBrush;
+    OnBrushChanged.ExecuteIfBound(current_brush);
+}
+
 
 #undef LOCTEXT_NAMESPACE

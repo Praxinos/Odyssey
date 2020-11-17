@@ -62,6 +62,9 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
 	GetData()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
 	GetData()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
 	GetData()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
+
+	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    GetGUI()->GetBrushSelectorTab()->SelectBrush(settings.BrushDefaults.DefaultBrush);
 }
 
 const TArray<TSharedPtr<FExtender>>&

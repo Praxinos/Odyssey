@@ -30,6 +30,7 @@ public:
     // Construction / Destruction
     ~SOdysseyBrushSelector();
     void Construct(const FArguments& InArgs);
+    void SelectBrush(UOdysseyBrush* iBrush);
 
 private:
     // Private internal callbacks

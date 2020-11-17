@@ -8,6 +8,8 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
+#include "OdysseyBrushBlueprint.h"
+
 #include "OdysseyPainterEditorSettings.generated.h"
 
 /**
@@ -26,6 +28,19 @@ enum EOdysseyPainterEditorVolumeViewMode
 {
     kOdysseyPainterEditorVolumeViewMode_DepthSlices UMETA(DisplayName="Depth Slices"),
     kOdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume"),
+};
+
+USTRUCT(BlueprintType)
+struct ODYSSEYPAINTEREDITOR_API FBrushDefaults
+{
+    GENERATED_USTRUCT_BODY()
+
+public:
+    FBrushDefaults();
+
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Brush, meta = (AllowPrivateAccess = "true", DisplayThumbnail = "true", DisplayName = "Default Brush", AllowedClasses="OdysseyBrush"))
+    UOdysseyBrush* DefaultBrush;
 };
 
 /**
@@ -83,4 +98,8 @@ public:
     /** If true, displays a border around the texture. */
     UPROPERTY(config)
     bool TextureBorderEnabled;
+
+    /** Defines the defaults values of the brush being used when opening the editor */
+    UPROPERTY(config, EditAnywhere, Category=Defaults )
+    FBrushDefaults BrushDefaults;
 };

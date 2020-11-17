@@ -5,6 +5,13 @@
 
 #include "Editor.h"
 #include "Editor/EditorEngine.h"
+#include "EngineUtils.h"
+
+FBrushDefaults::FBrushDefaults()
+    : DefaultBrush( nullptr )
+{
+    DefaultBrush = LoadObject<UOdysseyBrush>(nullptr, TEXT("/Iliad/Brushes/Penbrush.Penbrush"));
+}
 
 UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
@@ -19,5 +26,6 @@ UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectIniti
     , FitToViewport( true )
     , TextureBorderColor( FColor::White )
     , TextureBorderEnabled( false )
+    , BrushDefaults()
 {
 }
