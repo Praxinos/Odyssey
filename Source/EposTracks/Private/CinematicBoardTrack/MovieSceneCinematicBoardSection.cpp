@@ -8,6 +8,7 @@
 #include "Helpers/SectionsHelpersResize.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
+#include "MovieSceneTimeHelpers.h"
 
 //---
 
@@ -61,7 +62,7 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
             mResizing = 0;
             Resizing();
         }
-        else if( mSectionRangeBackup.Size<FFrameNumber>() == GetTrueRange().Size<FFrameNumber>() )
+        else if( UE::MovieScene::DiscreteSize( mSectionRangeBackup ) == UE::MovieScene::DiscreteSize( GetTrueRange() ) )
         {
             mMoving = 0;
             Moving();
@@ -241,7 +242,7 @@ UMovieSceneCinematicBoardSection::GuessStartMoving( TRange<FFrameNumber>& oRange
     }
 
     TRange<FFrameNumber> first_range( 0, sections_without_selected[0]->GetInclusiveStartFrame() );
-    if( !first_range.IsEmpty() && first_range.Size<FFrameNumber>() >= GetTrueRange().Size<FFrameNumber>() )
+    if( !first_range.IsEmpty() && UE::MovieScene::DiscreteSize( first_range ) >= UE::MovieScene::DiscreteSize( GetTrueRange() ) )
     {
         StartMoving();
         mSectionRangeBackup = first_range;
@@ -250,7 +251,7 @@ UMovieSceneCinematicBoardSection::GuessStartMoving( TRange<FFrameNumber>& oRange
         return true;
     }
 
-    TRange<FFrameNumber> last_range( sections_without_selected.Last()->GetExclusiveEndFrame(), sections_without_selected.Last()->GetExclusiveEndFrame() + GetTrueRange().Size<FFrameNumber>() );
+    TRange<FFrameNumber> last_range( sections_without_selected.Last()->GetExclusiveEndFrame(), sections_without_selected.Last()->GetExclusiveEndFrame() + UE::MovieScene::DiscreteSize( GetTrueRange() ) );
     StartMoving();
     mSectionRangeBackup = last_range;
     oRangeBackup = mSectionRangeBackup;

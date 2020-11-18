@@ -5,6 +5,7 @@
 
 #include "MovieSceneSequence.h"
 #include "MovieSceneCommonHelpers.h"
+#include "MovieSceneTimeHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Compilation/MovieSceneCompilerRules.h"
 
@@ -44,7 +45,7 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     //---
 
-    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), shift_result.mNewRange.Size<FFrameNumber>().Value, iRowIndex );
+    UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( shift_result.mNewRange ), iRowIndex );
 
     UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 

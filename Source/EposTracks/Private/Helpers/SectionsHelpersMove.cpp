@@ -5,6 +5,7 @@
 
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
+#include "MovieSceneTimeHelpers.h"
 
 //---
 
@@ -44,7 +45,7 @@ SectionsHelpersMove::GetMoveInfo( TArray< UMovieSceneSection* > iSections, TRang
 
     move_result.mInitialGap = iLastGapMove;
     move_result.mInitialGapMiddle = ( move_result.mInitialGap.GetLowerBoundValue() + move_result.mInitialGap.GetUpperBoundValue() ) / 2;
-    move_result.mInitialGapSize = move_result.mInitialGap.Size<FFrameNumber>();
+    move_result.mInitialGapSize = UE::MovieScene::DiscreteSize( move_result.mInitialGap );
 
     //---
 
@@ -98,7 +99,7 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
                 if( section_after_gap == section_containing_reference_frame )
                     break;
 
-                FFrameNumber gap_shift = section_after_gap->GetTrueRange().Size<FFrameNumber>();
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_after_gap->GetTrueRange() );
                 *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() + gap_shift, ioLastGapMove->GetUpperBoundValue() + gap_shift );
 
                 section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
@@ -109,7 +110,7 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
             // Move every 'after gap' sections before (and including) the referenced one
             for( auto section_after_gap : iMoveResult.mSectionsAfterGap )
             {
-                FFrameNumber gap_shift = section_after_gap->GetTrueRange().Size<FFrameNumber>();
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_after_gap->GetTrueRange() );
                 *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() + gap_shift, ioLastGapMove->GetUpperBoundValue() + gap_shift );
 
                 section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
@@ -141,7 +142,7 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
             // Move every 'before gap' sections after (and including) the referenced one
             for( auto section_before_gap : iMoveResult.mSectionsBeforeGap )
             {
-                FFrameNumber gap_shift = section_before_gap->GetTrueRange().Size<FFrameNumber>();
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_before_gap->GetTrueRange() );
                 *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() - gap_shift, ioLastGapMove->GetUpperBoundValue() - gap_shift );
 
                 section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
@@ -158,7 +159,7 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
                 if( section_before_gap == section_containing_reference_frame )
                     break;
 
-                FFrameNumber gap_shift = section_before_gap->GetTrueRange().Size<FFrameNumber>();
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_before_gap->GetTrueRange() );
                 *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() - gap_shift, ioLastGapMove->GetUpperBoundValue() - gap_shift );
 
                 section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
