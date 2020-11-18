@@ -351,12 +351,21 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
 
     UMovieSceneSequence* newSequence = Cast<UMovieSceneSequence>( newAsset );
 
-    int32 duration = UE::MovieScene::DiscreteSize( iSectionToDuplicate ? iSectionToDuplicate->GetRange() : newSequence->GetMovieScene()->GetPlaybackRange() );
-
     UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
 
+    int32 section_duration;
+    if( iSectionToDuplicate )
+        section_duration = UE::MovieScene::DiscreteSize( iSectionToDuplicate->GetRange() );
+    else if( !boardTrack->GetAllSections().Num() )
+        section_duration = UE::MovieScene::DiscreteSize( iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange() );
+    else
+        section_duration = UE::MovieScene::DiscreteSize( newSequence->GetMovieScene()->GetPlaybackRange() );
+
     // Create a board section.
-    UMovieSceneSubSection* newSection = boardTrack->AddSequence( newSequence, iNewSectionStartTime, duration );
+    UMovieSceneSubSection* newSection = boardTrack->AddSequence( newSequence, iNewSectionStartTime, section_duration );
+
+    // Set the playback length of the subsequence to match its section length
+    newSequence->GetMovieScene()->SetPlaybackRange( 0, UE::MovieScene::DiscreteSize( newSection->GetTrueRange() ) );
 
     return newSection;
 }
