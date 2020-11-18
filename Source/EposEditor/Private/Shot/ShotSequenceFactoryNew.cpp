@@ -30,7 +30,7 @@ UObject* UShotSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iPa
     const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
     FFrameRate TickResolution = NewShotSequence->GetMovieScene()->GetTickResolution();
-    NewShotSequence->GetMovieScene()->SetPlaybackRange( ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame(), ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
+    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0 /* ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame() */, ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
 
     return NewShotSequence;
 }

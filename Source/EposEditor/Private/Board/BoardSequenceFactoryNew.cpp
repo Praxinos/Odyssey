@@ -29,7 +29,7 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
     const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();
-    NewBoardSequence->GetMovieScene()->SetPlaybackRange( ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame(), ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
+    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0 /* ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame() */, ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
 
     return NewBoardSequence;
 }
