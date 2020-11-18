@@ -20,10 +20,12 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Editor.h"
 
+#include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Helpers/SectionsHelpersResize.h"
+#include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
@@ -252,10 +254,16 @@ FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) co
 {
     static const FSlateBrush* filmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
 
-    ioPainter.LayerId = ioPainter.PaintSectionBackground();
+    const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+
+    if( sectionObject.GetSequence() && sectionObject.GetSequence()->IsA<UBoardSequence>() )
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( FLinearColor( 0.5, 0, 0, 0.5 ) );
+    else if( sectionObject.GetSequence() && sectionObject.GetSequence()->IsA<UShotSequence>() )
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( FLinearColor( 0, 0, 0.5, 0.5 ) );
+    else
+        ioPainter.LayerId = ioPainter.PaintSectionBackground();
 
     FVector2D localSectionSize = ioPainter.SectionGeometry.GetLocalSize();
-    const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
     // Paint fancy-looking film border.
     FSlateDrawElement::MakeBox(
