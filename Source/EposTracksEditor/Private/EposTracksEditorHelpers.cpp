@@ -37,6 +37,36 @@ static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FS
     }
     return true;
 }
+
+static
+TArray<FString>
+FindSubsequencePaths( TArray<UMovieSceneSection*> iSections )
+{
+    TArray<FString> section_paths;
+    for( auto section : iSections )
+    {
+        UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+
+        FString sequencePath = FPaths::GetPath( board_section->GetSequence()->GetPathName() );
+        if( sequencePath.IsEmpty() )
+            continue;
+
+        section_paths.Add( sequencePath );
+    }
+
+    return section_paths;
+}
+
+static
+FString
+FindMostReleventSubsequencePath( TArray<UMovieSceneSection*> iSections )
+{
+    TArray<FString> section_paths = FindSubsequencePaths( iSections );
+    if( !section_paths.Num() )
+        return FString();
+
+    return section_paths[0]; //TODO: improve by selecting the most relevent
+}
 }
 
 //static
@@ -55,21 +85,10 @@ EposTracksEditorHelpers::GenerateNewSequencePath( UMovieScene* iRootMovieScene, 
     UMovieSceneCinematicBoardTrack* track = iFocusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     if( track )
     {
-        TArray<UMovieSceneSection*> sections = track->GetAllSections();
-        TArray<FString> section_paths;
-        for( auto section : sections )
+        FString most_relevent_path = FindMostReleventSubsequencePath( track->GetAllSections() );
+        if( !most_relevent_path.IsEmpty() )
         {
-            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-            UObject* subsequenceAsset = board_section->GetSequence()->GetOuter();
-            UPackage* subsequencePackage = subsequenceAsset->GetPackage();
-            FString subsequencePackageName = subsequencePackage->GetName();
-            int32 lastSlashPos = subsequencePackageName.Find( TEXT( "/" ), ESearchCase::IgnoreCase, ESearchDir::FromEnd );
-            FString sequencePath = subsequencePackageName.Left( lastSlashPos );
-            section_paths.Add( sequencePath );
-        }
-        if( section_paths.Num() )
-        {
-            sequencePackageName = section_paths[0]; //TODO: improve by selecting the most relevent
+            sequencePackageName = most_relevent_path;
         }
     }
 
@@ -306,6 +325,8 @@ template<typename SequenceClass>
 UMovieSceneSubSection*
 EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
 {
+    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+
     FString newBoardPath;
 
     if( iSectionToDuplicate != nullptr )
@@ -336,7 +357,10 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
                 }
                 else
                 {
-                    newAsset = assetTools.CreateAssetWithDialog( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
+                    if( FindMostReleventSubsequencePath( boardTrack->GetAllSections() ).IsEmpty() )
+                        newAsset = assetTools.CreateAssetWithDialog( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
+                    else
+                        newAsset = assetTools.CreateAsset( ioNewSequenceName, newBoardPath, SequenceClass::StaticClass(), factory );
 
                 }
                 break;
@@ -350,8 +374,6 @@ EposTracksEditorHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString
     }
 
     UMovieSceneSequence* newSequence = Cast<UMovieSceneSequence>( newAsset );
-
-    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
 
     int32 section_duration;
     if( iSectionToDuplicate )
