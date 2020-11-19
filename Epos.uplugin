@@ -16,7 +16,7 @@
   "Installed": false,
   "Modules": [
     {
-      "Name": "Epos",
+      "Name": "EposSequence",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
@@ -26,7 +26,7 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "EposEditor",
+      "Name": "EposSequenceEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     },
