@@ -22,7 +22,6 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-
     virtual void PreEditChange( FProperty* PropertyAboutToChange ) override;
 #endif
 
@@ -63,14 +62,17 @@ private:
 //---
 
 private:
-    bool IsContentResizable( const UMovieSceneSection* iSection ) const;
+    bool IsSequenceResizable( const UMovieSceneSection* iSection ) const;
+    void ResizeSequence();
 
     bool IsResizableLeadingEdge(); // should be const ... doesn't work with TArray::Find() ...
     bool IsResizableTrailingEdge(); // should be const ...
 
 public:
-    void ResizeLeadingEdge( FFrameNumber iNewFrame );
-    void ResizeTrailingEdge( FFrameNumber iNewFrame );
+    void SetRangeAndResizeSequence( TRange<FFrameNumber> iNewRange );
+
+    bool ResizeLeadingEdge( FFrameNumber iNewFrame );
+    bool ResizeTrailingEdge( FFrameNumber iNewFrame );
 
 public:
     void StartResizing();

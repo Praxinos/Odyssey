@@ -4,6 +4,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposMovieSceneSequence.h"
 #include "Generators/MovieSceneEasingCurves.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "MovieSceneSection.h"
@@ -50,17 +51,29 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
         }
         else if( mSectionRangeBackup.GetLowerBoundValue() == section_range.GetLowerBoundValue() )
         {
-            ResizeTrailingEdge( section_range.GetUpperBoundValue() );
-
-            mResizing = 0;
-            Resizing();
+            bool resized = ResizeTrailingEdge( section_range.GetUpperBoundValue() );
+            if( resized )
+            {
+                mResizing = 0;
+                Resizing();
+            }
+            else
+            {
+                SetRange( mSectionRangeBackup );
+            }
         }
         else if( mSectionRangeBackup.GetUpperBoundValue() == section_range.GetUpperBoundValue() )
         {
-            ResizeLeadingEdge( section_range.GetLowerBoundValue() );
-
-            mResizing = 0;
-            Resizing();
+            bool resized = ResizeLeadingEdge( section_range.GetLowerBoundValue() );
+            if( resized )
+            {
+                mResizing = 0;
+                Resizing();
+            }
+            else
+            {
+                SetRange( mSectionRangeBackup );
+            }
         }
         else if( UE::MovieScene::DiscreteSize( mSectionRangeBackup ) == UE::MovieScene::DiscreteSize( GetTrueRange() ) )
         {
@@ -80,10 +93,34 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 //---
 
 void
+UMovieSceneCinematicBoardSection::SetRangeAndResizeSequence( TRange<FFrameNumber> iNewRange )
+{
+    if( UE::MovieScene::DiscreteSize( GetTrueRange() ) == UE::MovieScene::DiscreteSize( iNewRange ) )
+    {
+        SetRange( iNewRange );
+    }
+    else
+    {
+        SetRange( iNewRange );
+        ResizeSequence();
+    }
+}
+
+void
+UMovieSceneCinematicBoardSection::ResizeSequence()
+{
+    UEposMovieSceneSequence* subsequence = Cast<UEposMovieSceneSequence>( GetSequence() );
+    if( !subsequence )
+        return;
+
+    subsequence->Resize( UE::MovieScene::DiscreteSize( GetTrueRange() ) );
+}
+
+bool
 UMovieSceneCinematicBoardSection::ResizeLeadingEdge( FFrameNumber iNewFrame )
 {
     if( !IsResizableLeadingEdge() )
-        return;
+        return false;
 
     UMovieScene* outer_movie_scene = GetTypedOuter<UMovieScene>();
     int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
@@ -93,13 +130,15 @@ UMovieSceneCinematicBoardSection::ResizeLeadingEdge( FFrameNumber iNewFrame )
     //SetRange( new_range );
     FFrameNumber diff = new_range.GetLowerBoundValue() - GetInclusiveStartFrame();
     MoveSection( diff );
+
+    return true;
 }
 
-void
+bool
 UMovieSceneCinematicBoardSection::ResizeTrailingEdge( FFrameNumber iNewFrame )
 {
     if( !IsResizableTrailingEdge() )
-        return;
+        return false;
 
     UMovieScene* outer_movie_scene = GetTypedOuter<UMovieScene>();
     int32 IntervalSnapThreshold = FMath::RoundToInt( ( outer_movie_scene->GetTickResolution() / outer_movie_scene->GetDisplayRate() ).AsDecimal() );
@@ -107,33 +146,24 @@ UMovieSceneCinematicBoardSection::ResizeTrailingEdge( FFrameNumber iNewFrame )
 
     auto new_range = SectionsHelpersResize::GetValidRangeTrailing( outer_track->GetAllSections(), this, iNewFrame, IntervalSnapThreshold );
     SetRange( new_range );
+
+    ResizeSequence();
+
+    return true;
 }
 
 bool
-UMovieSceneCinematicBoardSection::IsContentResizable( const UMovieSceneSection* iSection ) const
+UMovieSceneCinematicBoardSection::IsSequenceResizable( const UMovieSceneSection* iSection ) const
 {
-    auto section = Cast<const UMovieSceneCinematicBoardSection>( iSection );
-    if( !section )
+    const UMovieSceneSubSection* subsection = Cast<const UMovieSceneSubSection>( iSection );
+    if( !subsection )
         return false;
 
-    const UMovieSceneSequence* subsequence = section->GetSequence();
+    const UEposMovieSceneSequence* subsequence = Cast<UEposMovieSceneSequence>( subsection->GetSequence() );
     if( !subsequence )
         return true;
 
-    const UMovieScene* submoviescene = subsequence->GetMovieScene();
-    if( !submoviescene )
-        return true;
-
-    FName class_name = subsequence->GetClass()->GetFName();
-    if( class_name == TEXT( "BoardSequence" ) )
-    {
-        return submoviescene->GetMasterTracks().Num() == 0 && submoviescene->GetBindings().Num() == 0;
-    }
-    else
-    {
-        check( class_name == TEXT( "ShotSequence" ) );
-        return true;
-    }
+    return subsequence->IsResizable();
 }
 
 bool
@@ -148,13 +178,12 @@ UMovieSceneCinematicBoardSection::IsResizableLeadingEdge()
     if( !sections.IsValidIndex( current_index - 1 ) )
         return false;
 
-    auto previous_section = sections[current_index - 1];
-    return IsContentResizable( previous_section );
+    return IsSequenceResizable( sections[current_index - 1] );
 }
 bool
 UMovieSceneCinematicBoardSection::IsResizableTrailingEdge()
 {
-    return IsContentResizable( this );
+    return IsSequenceResizable( this );
 }
 
 void

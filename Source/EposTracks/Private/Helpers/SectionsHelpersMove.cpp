@@ -174,6 +174,8 @@ SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections,
 void
 SectionsHelpersMove::FixPostMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber> iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
 {
+    check( UE::MovieScene::DiscreteSize( iSection->GetTrueRange() ) == UE::MovieScene::DiscreteSize( iLastGapMove ) );
+
     iSection->SetRange( iLastGapMove );
 
     MovieSceneHelpers::SortConsecutiveSections( ioSections );

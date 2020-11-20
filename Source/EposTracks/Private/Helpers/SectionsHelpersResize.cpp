@@ -3,6 +3,7 @@
 
 #include "Helpers/SectionsHelpersResize.h"
 
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
 
@@ -77,7 +78,8 @@ SectionsHelpersResize::FixupConsecutiveSections( TArray<UMovieSceneSection*> iSe
     if( previous_section && previous_section->GetExclusiveEndFrame() != iSection->GetInclusiveStartFrame() )
     {
         auto previous_new_range = TRange<FFrameNumber>( previous_section->GetRange().GetLowerBound(), TRangeBound<FFrameNumber>::Exclusive( iSection->GetInclusiveStartFrame() ) );
-        previous_section->SetRange( previous_new_range );
+        auto previous_board_section = Cast<UMovieSceneCinematicBoardSection>( previous_section );
+        previous_board_section->SetRangeAndResizeSequence( previous_new_range );
     }
 
     if( next_section )
