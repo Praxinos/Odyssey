@@ -4,9 +4,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class EposSequence : ModuleRules
+public class EposMovieScene : ModuleRules
 {
-    public EposSequence(ReadOnlyTargetRules Target) : base(Target)
+    public EposMovieScene(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -41,11 +41,6 @@ public class EposSequence : ModuleRules
                 // [RUNTIME] custom engine dependencies
                 "MovieScene",
                 "MovieSceneTracks",
-                "LevelSequence",
-                "CinematicCamera",
-                // [RUNTIME] custom plugin dependencies
-                "EposMovieScene",
-                "EposTracks",
             }
             );
 

@@ -119,5 +119,31 @@ UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackCla
 //          .SetTooltip(NSLOCTEXT("TemplateSequence", "BoundActorClass_Tooltip", "The type of actor bound to this template sequence"))
 //      );
 //}
-//
+
+#endif
+
+//---
+
+bool
+UBoardSequence::IsResizable() const //override
+{
+    return !GetMovieScene() || GetMovieScene()->GetMasterTracks().Num() == 0 && GetMovieScene()->GetBindings().Num() == 0;
+}
+
+void
+UBoardSequence::Resize( int32 iNewDuration ) //override
+{
+    auto new_range = TRange<FFrameNumber>( 0, iNewDuration );
+
+    GetMovieScene()->SetPlaybackRange( new_range );
+}
+
+#ifdef WITH_EDITOR
+
+FLinearColor
+UBoardSequence::GetColorTint() const //override
+{
+    return FLinearColor( 0.5, 0, 0, 0.5 );
+}
+
 #endif

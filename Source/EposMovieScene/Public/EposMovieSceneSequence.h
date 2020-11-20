@@ -1,0 +1,34 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
+
+#pragma once
+
+#include "MovieSceneSequence.h"
+#include "MovieScene.h"
+#include "UObject/SoftObjectPtr.h"
+
+#include "EposMovieSceneSequence.generated.h"
+
+/*
+ * Movie scene animation that represents the hierarchical levels of the storyboard.
+ */
+UCLASS( BlueprintType )
+class EPOSMOVIESCENE_API UEposMovieSceneSequence
+    : public UMovieSceneSequence
+{
+public:
+    GENERATED_BODY()
+
+    UEposMovieSceneSequence( const FObjectInitializer& ObjectInitializer );
+
+public:
+
+    virtual bool IsResizable() const PURE_VIRTUAL( UEposMovieSceneSequence::IsResizable, return true; );
+
+    virtual void Resize( int32 iNewDuration ) PURE_VIRTUAL( UEposMovieSceneSequence::Resize, );
+
+//#if WITH_EDITORONLY_DATA // Like for UMovieSceneTrack, but as it as not data, WITH_EDITOR should be enough (?)
+#if WITH_EDITOR
+    virtual FLinearColor GetColorTint() const PURE_VIRTUAL( UEposMovieSceneSequence::GetColorTint, return FLinearColor(); );
+#endif
+};

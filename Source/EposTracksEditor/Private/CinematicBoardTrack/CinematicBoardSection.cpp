@@ -24,6 +24,7 @@
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposMovieSceneSequence.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -256,10 +257,9 @@ FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) co
 
     const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
-    if( sectionObject.GetSequence() && sectionObject.GetSequence()->IsA<UBoardSequence>() )
-        ioPainter.LayerId = ioPainter.PaintSectionBackground( FLinearColor( 0.5, 0, 0, 0.5 ) );
-    else if( sectionObject.GetSequence() && sectionObject.GetSequence()->IsA<UShotSequence>() )
-        ioPainter.LayerId = ioPainter.PaintSectionBackground( FLinearColor( 0, 0, 0.5, 0.5 ) );
+    const UEposMovieSceneSequence* subsequence = Cast< UEposMovieSceneSequence>( sectionObject.GetSequence() );
+    if( subsequence )
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( subsequence->GetColorTint() );
     else
         ioPainter.LayerId = ioPainter.PaintSectionBackground();
 

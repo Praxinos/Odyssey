@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
   "Version": 1,
-  "VersionName": "0.1.425",
+  "VersionName": "0.1.426",
   "FriendlyName": "Epos",
   "Description": "",
   "Category": "Other",
@@ -15,6 +15,11 @@
   "IsExperimentalVersion": false,
   "Installed": false,
   "Modules": [
+    {
+      "Name": "EposMovieScene",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
     {
       "Name": "EposSequence",
       "Type": "UncookedOnly",

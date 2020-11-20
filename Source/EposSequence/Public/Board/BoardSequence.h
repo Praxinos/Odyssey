@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "MovieSceneSequence.h"
+#include "EposMovieSceneSequence.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 #include "BoardSequence.generated.h"
@@ -12,7 +12,8 @@
  * Movie scene animation that represents the hierarchical levels of the storyboard.
  */
 UCLASS( BlueprintType )
-class EPOSSEQUENCE_API UBoardSequence : public UMovieSceneSequence
+class EPOSSEQUENCE_API UBoardSequence
+    : public UEposMovieSceneSequence
 {
 public:
     GENERATED_BODY()
@@ -37,6 +38,14 @@ public:
 //
 //    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
 //    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
+#endif
+
+    //~ UEposMovieSceneSequence interface
+    virtual bool IsResizable() const override;
+    virtual void Resize( int32 iNewDuration ) override;
+
+#ifdef WITH_EDITOR
+    virtual FLinearColor GetColorTint() const override;
 #endif
 
 public:

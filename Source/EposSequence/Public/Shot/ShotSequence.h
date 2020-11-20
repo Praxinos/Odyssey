@@ -4,7 +4,7 @@
 #pragma once
 
 #include "LevelSequenceBindingReference.h"
-#include "MovieSceneSequence.h"
+#include "EposMovieSceneSequence.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 #include "ShotSequence.generated.h"
@@ -13,7 +13,8 @@
  * Movie scene animation that represents the last level of the storyboard.
  */
 UCLASS( BlueprintType )
-class EPOSSEQUENCE_API UShotSequence : public UMovieSceneSequence
+class EPOSSEQUENCE_API UShotSequence
+    : public UEposMovieSceneSequence
 {
 public:
     GENERATED_BODY()
@@ -39,6 +40,14 @@ public:
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
     virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
+#endif
+
+    //~ UEposMovieSceneSequence interface
+    virtual bool IsResizable() const override;
+    virtual void Resize( int32 iNewDuration ) override;
+
+#ifdef WITH_EDITOR
+    virtual FLinearColor GetColorTint() const override;
 #endif
 
 public:

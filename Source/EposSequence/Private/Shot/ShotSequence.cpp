@@ -278,3 +278,42 @@ void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMe
 }
 
 #endif
+
+//---
+
+bool
+UShotSequence::IsResizable() const //override
+{
+    return true;
+}
+
+void
+UShotSequence::Resize( int32 iNewDuration ) //override
+{
+    auto new_range = TRange<FFrameNumber>( 0, iNewDuration );
+
+    GetMovieScene()->SetPlaybackRange( new_range );
+
+    UMovieSceneTrack* track = GetMovieScene()->GetCameraCutTrack();
+    if( track )
+    {
+        auto sections = track->GetAllSections();
+        if( sections.Num() )
+        {
+            check( sections.Num() == 1 )
+
+            UMovieSceneSection* section = sections[0];
+            section->SetRange( new_range );
+        }
+    }
+}
+
+#ifdef WITH_EDITOR
+
+FLinearColor
+UShotSequence::GetColorTint() const //override
+{
+    return FLinearColor( 0, 0, 0.5, 0.5 );
+}
+
+#endif
