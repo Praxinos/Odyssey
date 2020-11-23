@@ -89,6 +89,8 @@ private:
     void OnPreSpriteTextureChanged(UPaperSprite* iSprite, const FEditPropertyChain& iEditPropertyChain);
     void OnSpriteTextureChanged(UPaperSprite* iSprite, FPropertyChangedEvent& iPropertyChangedEvent);
 
+    void SetSpriteTexture(UPaperSprite* iSprite, UTexture2D* iTexture);
+
 private:
 	UPaperFlipbook* mFlipbook;
 

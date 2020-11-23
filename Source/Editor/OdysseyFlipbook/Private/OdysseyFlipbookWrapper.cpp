@@ -70,14 +70,13 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
     if (!sprite)
         return false;
 
-    SetKeyframeSprite(iIndex, sprite);
-
     //Create the texture and add it to the keyframe
     UTexture2D* texture = *oTexture = CreateTexture(width, height, textureFormat, defaultName + "_Texture", backgroundColor);
     if (!texture)
         return false;
 
-    SetKeyframeTexture(iIndex, texture);
+    SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
+    SetKeyframeSprite(iIndex, sprite);
 	return true;
 }
 
@@ -102,21 +101,20 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
         if (!sprite)
             return false;
 
+        //Create the texture and add it to the keyframe
+        UTexture2D* srcTexture = GetKeyframeTexture(iIndex);
+        if (sprite && srcTexture)
+        {
+            UTexture2D* texture = *oTexture = CreateTexture(srcTexture->GetSizeX(), srcTexture->GetSizeY(), srcTexture->Source.GetFormat(), mFlipbook->GetName() + "_Texture", FLinearColor(0.f, 0.f, 0.f, 0.f));
+            if (!texture)
+                return false;
+
+            CopyTextureContent(srcTexture, texture);
+
+            SetSpriteTexture(sprite, texture);  //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
+        }
+
         SetKeyframeSprite(iIndex + 1, sprite);
-    }
-
-    //Create the texture and add it to the keyframe
-    UTexture2D* srcTexture = GetKeyframeTexture(iIndex);
-    if(srcTexture)
-    {
-        UTexture2D* texture = *oTexture = CreateTexture(srcTexture->GetSizeX(), srcTexture->GetSizeY(), srcTexture->Source.GetFormat(), mFlipbook->GetName() + "_Texture", FLinearColor( 0.f, 0.f, 0.f, 0.f ));
-        if (!texture)
-            return false;
-
-        SetKeyframeTexture(iIndex + 1, texture);
-
-        //Do the copy only when we are sure the current texture is not srcTexture anymore
-        CopyTextureContent(srcTexture, texture);
     }
 
 	return true;
@@ -152,16 +150,16 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
 	{
         sprite = *oSprite = CreateSprite(defaultName + "_Sprite");
 		if (!sprite)
-			return false;
-
-        SetKeyframeSprite(iIndex, sprite);
+			return false;        
 	}
 
 	texture = *oTexture = CreateTexture(width, height, textureFormat, defaultName + "_Texture", backgroundColor);
 	if (!texture)
 		return false;
 
-    SetKeyframeTexture(iIndex, texture);
+    SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
+    SetKeyframeSprite(iIndex, sprite);
+
 	return true;
 }
 
@@ -423,12 +421,20 @@ FOdysseyFlipbookWrapper::SetKeyframeTexture(int32 iIndex, UTexture2D* iTexture)
     if (!sprite)
         return;
 
+    SetSpriteTexture(sprite, iTexture);
+}
+
+void
+FOdysseyFlipbookWrapper::SetSpriteTexture(UPaperSprite* iSprite, UTexture2D* iTexture)
+{
     //Set the texture in the existing sprite
-	UClass* spriteClass = sprite->StaticClass();
+    UClass* spriteClass = iSprite->StaticClass();
     FSoftObjectProperty* sourceTextureProperty = FindFProperty<FSoftObjectProperty>(spriteClass, "SourceTexture");
-    sourceTextureProperty->SetObjectPropertyValue(sourceTextureProperty->ContainerPtrToValuePtr<UPaperSprite>(sprite), iTexture);
-    
-	sprite->MarkPackageDirty();
+    sourceTextureProperty->SetObjectPropertyValue(sourceTextureProperty->ContainerPtrToValuePtr<UPaperSprite>(iSprite), iTexture);
+
+    FPropertyChangedEvent event(sourceTextureProperty, EPropertyChangeType::ValueSet);
+    iSprite->PostEditChangeProperty(event);
+    iSprite->MarkPackageDirty();
 }
 
 UTexture2D*
