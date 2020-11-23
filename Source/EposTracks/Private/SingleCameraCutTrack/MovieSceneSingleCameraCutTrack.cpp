@@ -33,6 +33,7 @@ UMovieSceneSingleCameraCutSection* UMovieSceneSingleCameraCutTrack::AddNewSingle
     Modify();
 
     FFrameNumber NewSectionEndTime = FindEndTimeForCameraCut(StartTime);
+    check( StartTime <= NewSectionEndTime );
 
     // If there's an existing section, just swap the camera guid
     UMovieSceneSingleCameraCutSection* ExistingSection = nullptr;

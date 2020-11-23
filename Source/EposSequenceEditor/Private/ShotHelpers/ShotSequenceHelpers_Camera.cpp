@@ -157,7 +157,7 @@ ShotSequenceHelpers::CameraAdded( ISequencer* iSequencer, FGuid CameraGuid, cons
 
 //static
 void
-ShotSequenceHelpers::CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber ) // From MovieSceneToolHelpers::CameraAdded()
+ShotSequenceHelpers::CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid, FFrameNumber /*iFrameNumber*/ ) // From MovieSceneToolHelpers::CameraAdded()
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     UMovieScene* movieScene = sequence->GetMovieScene();
@@ -190,7 +190,7 @@ ShotSequenceHelpers::CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid,
 
     if( CameraCutTrack )
     {
-        UMovieSceneSection* Section = MovieSceneHelpers::FindSectionAtTime( CameraCutTrack->GetAllSections(), iFrameNumber );
+        UMovieSceneSection* Section = MovieSceneHelpers::FindSectionAtTime( CameraCutTrack->GetAllSections(), 0 /*iFrameNumber*/ );
         UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
 
         if( CameraCutSection )
@@ -203,7 +203,7 @@ ShotSequenceHelpers::CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid,
             UMovieSceneSingleCameraCutTrack* single_cameracut_track = Cast<UMovieSceneSingleCameraCutTrack>( CameraCutTrack );
             FMovieSceneObjectBindingID binding_id( iCameraGuid, MovieSceneSequenceID::Root, EMovieSceneObjectBindingSpace::Local ); // Like in UMovieSceneSingleCameraCutSection::SetCameraGuid()
 
-            single_cameracut_track->AddNewSingleCameraCut( binding_id, iFrameNumber );
+            single_cameracut_track->AddNewSingleCameraCut( binding_id, 0 /*iFrameNumber*/ );
 
             //CameraCutTrack->Modify();
 
