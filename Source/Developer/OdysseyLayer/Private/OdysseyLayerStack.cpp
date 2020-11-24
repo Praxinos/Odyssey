@@ -475,7 +475,7 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
 
     //WARNING: Here loading the root layer is not creating a new pointer for it in operator <<
 	// This is a special behaviour only for the root layer
-	IOdysseyLayer* layer = static_cast<IOdysseyLayer*>(ioSaveLayerStack->mLayerRoot.Get());
+	TSharedPtr<IOdysseyLayer> layer = ioSaveLayerStack->mLayerRoot;
 	Ar << (layer);
     
     if (Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat)

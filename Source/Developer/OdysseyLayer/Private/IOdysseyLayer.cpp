@@ -166,8 +166,7 @@ IOdysseyLayer::SerializeWithChildren(FArchive &Ar)
         Ar << numNodes;
         for (int i = 0; i < numNodes; i++)
         {
-			IOdysseyLayer* child = children[i].Get();
-            Ar << child;
+            Ar << children[i];
         }
     }
     else if (Ar.IsLoading())
@@ -176,15 +175,15 @@ IOdysseyLayer::SerializeWithChildren(FArchive &Ar)
         Ar << numNodes;
         for (int i = 0; i < numNodes; i++)
         {
-            IOdysseyLayer* layer = nullptr;
+            TSharedPtr<IOdysseyLayer> layer;
             Ar << layer;
-            AddNode(MakeShareable(layer));
+            AddNode(layer);
         }
     }
 }
 
 FArchive&
-operator<<(FArchive &Ar, IOdysseyLayer*& ioLayer )
+operator<<(FArchive &Ar, TSharedPtr<IOdysseyLayer>& ioLayer )
 {
     //ES: For compatibility reasons
     if (ioLayer && ioLayer->mType == IOdysseyLayer::eType::kRoot )
@@ -205,11 +204,11 @@ operator<<(FArchive &Ar, IOdysseyLayer*& ioLayer )
         switch(layerType)
         {
             case IOdysseyLayer::eType::kImage :
-                ioLayer = new FOdysseyImageLayer( FName(), NULL );
+                ioLayer = MakeShareable(new FOdysseyImageLayer( FName(), NULL ));
             break;
 
             case IOdysseyLayer::eType::kFolder :
-                ioLayer = new FOdysseyFolderLayer( FName() );
+                ioLayer = MakeShareable(new FOdysseyFolderLayer( FName() ));
             break;
         }
         ioLayer->SerializeWithChildren(Ar);

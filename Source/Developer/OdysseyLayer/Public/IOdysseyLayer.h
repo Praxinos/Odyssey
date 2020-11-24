@@ -86,7 +86,7 @@ protected:
 private:
     void SerializeWithChildren(FArchive &Ar);
 
-    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer*& ioLayer );
+    friend ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, TSharedPtr<IOdysseyLayer>& ioLayer );
 
 public:
     FOdysseyLayerNameChanged& NameChangedDelegate();
@@ -109,4 +109,4 @@ protected:
 	FOdysseyLayerChildIsLockedChanged mChildIsLockedChangedDelegate;
 };
 
-ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, IOdysseyLayer*& ioSaveImageLayer );
+ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, TSharedPtr<IOdysseyLayer>& ioSaveImageLayer );
