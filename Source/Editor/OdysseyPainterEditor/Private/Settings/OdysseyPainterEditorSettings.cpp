@@ -10,7 +10,7 @@
 FBrushDefaults::FBrushDefaults()
     : DefaultBrush( nullptr )
 {
-    DefaultBrush = LoadObject<UOdysseyBrush>(nullptr, TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush.Penbrush"));
+    DefaultBrush = LoadObject<UOdysseyBrush>(nullptr, TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1"));
 }
 
 UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectInitializer& iObjectInitializer )
