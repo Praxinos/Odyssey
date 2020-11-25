@@ -243,6 +243,9 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
     if( !Back.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
+	if (TopArea.IsInitialized() && (TopArea.Width() <= 0 || TopArea.Height() <= 0) )
+		return FOdysseyBlockProxy::MakeNullProxy();
+
     //---
 	::ul3::tFormat format = ULISFormatFromModelAndDepth(ColorModel, ChannelDepth);
 
@@ -255,10 +258,21 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
 	::ul3::FBlock* source = Top.m->GetBlock();
 	::ul3::FBlock* back = Back.m->GetBlock();
 
+	if (TopArea.IsInitialized())
+	{
+		::ul3::FBlock* areaBlock = new ::ul3::FBlock(TopArea.Width(), TopArea.Height(), source->Format());
+		::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, areaBlock, TopArea.GetValue(), ::ul3::FVec2I( 0, 0 ));
+		source = areaBlock;	
+	}
+
 	if (source->Format() != format)
 	{
 		::ul3::FBlock* conv = new ::ul3::FBlock(source->Width(), source->Height(), format);
 		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, conv);
+		if (source != Top.m->GetBlock())
+		{
+			delete source;
+		}
 		source = conv;
 	}
 
@@ -270,11 +284,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend( FOdysseyBlockProxy Top
 	}
 
     ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, back, dst->GetBlock(), back->Rect(), ::ul3::FVec2I( 0, 0 ) );
-
-    if( !TopArea.IsInitialized() || TopArea.Width() > 0 || TopArea.Height() > 0 )
-    {
-        ::ul3::Blend( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, dst->GetBlock(), source->Rect(), ::ul3::FVec2F( OffsetX, OffsetY ), ULIS3_AA, static_cast< ::ul3::eBlendingMode >( BlendingMode ), static_cast< ::ul3::eAlphaMode >( AlphaMode ), Opacity );
-    }
+    ::ul3::Blend( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, source, dst->GetBlock(), source->Rect(), ::ul3::FVec2F( OffsetX, OffsetY ), ULIS3_AA, static_cast< ::ul3::eBlendingMode >( BlendingMode ), static_cast< ::ul3::eAlphaMode >( AlphaMode ), Opacity );
 
 	if (Top.m->GetBlock() != source)
 		delete source;

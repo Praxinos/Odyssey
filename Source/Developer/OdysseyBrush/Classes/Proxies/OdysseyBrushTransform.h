@@ -32,7 +32,7 @@ private:
 
 /////////////////////////////////////////////////////
 // Odyssey Resampling
-UENUM( BlueprintType )
+UENUM( BlueprintType, meta = (DisplayName="EOdysseyResamplingMethod") )
 enum  class  EResamplingMethod : uint8
 {
     kNearestNeighbour   UMETA( DisplayName="Nearest Neighbour" ),

@@ -11,7 +11,7 @@
 class FOdysseyBlock;
 /////////////////////////////////////////////////////
 // Pivot Enum
-UENUM( BlueprintType )
+UENUM( BlueprintType, meta=(DisplayName="EHandlePositionReference"))
 enum  class  EPivotReference : uint8
 {
     kTopLeft        UMETA( DisplayName="Top Left" ),
@@ -28,7 +28,7 @@ enum  class  EPivotReference : uint8
 
 /////////////////////////////////////////////////////
 // Pivot Enum
-UENUM( BlueprintType )
+UENUM( BlueprintType, meta=(DisplayName="EHandlePositionOffsetMode") )
 enum  class  EPivotOffsetMode : uint8
 {
     kRelative       UMETA( DisplayName="Relative fraction" ),
@@ -39,7 +39,7 @@ enum  class  EPivotOffsetMode : uint8
 
 /////////////////////////////////////////////////////
 // Odyssey Brush Pivot
-USTRUCT( BlueprintType )
+USTRUCT( BlueprintType, meta=(DisplayName="FHandlePosition") )
 struct ODYSSEYBRUSH_API FOdysseyPivot
 {
     GENERATED_BODY()
@@ -50,13 +50,13 @@ struct ODYSSEYBRUSH_API FOdysseyPivot
         , Offset(       FVector2D(0,0) )
     {}
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyPivot" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyHandlePositionReference" )
     EPivotReference     Reference;
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyPivot" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyHandlePositionReference" )
     EPivotOffsetMode    OffsetMode;
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyPivot" )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyHandlePositionReference" )
     FVector2D           Offset;
 };
 
