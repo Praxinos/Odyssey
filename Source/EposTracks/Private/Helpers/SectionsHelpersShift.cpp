@@ -185,26 +185,3 @@ SectionsHelpersShift::OrganizeSections( TArray< UMovieSceneSection* > iSections 
         previous_section = section;
     }
 }
-
-//static
-void
-SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection )
-{
-    TArray< UMovieSceneSection* > sections_to_shift;
-    for( auto section : iSections )
-    {
-        if( section == iNewSection )
-            continue;
-
-        if( TRangeBound<FFrameNumber>::MaxLower( iNewSection->GetTrueRange().GetLowerBound(), section->GetTrueRange().GetLowerBound() ) == section->GetTrueRange().GetLowerBound() )
-            sections_to_shift.Add( section );
-    }
-
-    for( auto section : sections_to_shift )
-    {
-        // Just move the following sections backward of the size of the removed section
-        FFrameNumber offset = UE::MovieScene::DiscreteSize( iNewSection->GetTrueRange() );
-
-        section->MoveSection( -offset );
-    }
-}

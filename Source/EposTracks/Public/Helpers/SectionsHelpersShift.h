@@ -28,7 +28,6 @@ public:
     static FShiftResult GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration );
 
     static void ShiftFollowingSections( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection, FShiftResult iShiftResult );
-    static void ShiftFollowingSectionsAfterDelete( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection );
 
     /** Move all sections to make consecutives each other (previous end bound == next start bound) by the order inside the array */
     static void OrganizeSections( TArray< UMovieSceneSection* > iSections );

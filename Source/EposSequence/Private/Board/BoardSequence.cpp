@@ -10,12 +10,12 @@
 #include "MovieScene.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "MovieSceneTimeHelpers.h"
-#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 
 #include "BoardHelpers.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Helpers/SectionsHelpersShift.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h" //TMP
 
@@ -153,10 +153,16 @@ UBoardSequence::Resize( int32 iNewDuration ) //override
 //---
 
 void
+UBoardSequence::SectionAddedOrRemoved( UMovieSceneSection* iSection ) //override
+{
+    ResizeParentSequenceRecursively();
+}
+
+void
 UBoardSequence::SectionResized( UMovieSceneSection* iSection ) //override
 {
     ResizeChildSequence( iSection );
-    ResizeParentSequenceRecursively( iSection );
+    ResizeParentSequenceRecursively();
 }
 
 void
@@ -174,13 +180,12 @@ UBoardSequence::ResizeChildSequence( UMovieSceneSection* iSection )
 }
 
 void
-UBoardSequence::ResizeParentSequenceRecursively( UMovieSceneSection* iSection )
+UBoardSequence::ResizeParentSequenceRecursively()
 {
     TArray< UEposMovieSceneSequence* > parents = BoardHelpers::FindParents( this );
     Algo::Reverse( parents ); // this > childN > ... > child1 > Root
 
     UEposMovieSceneSequence* child_sequence = 0;
-    UMovieSceneSection* child_section = iSection;
     for( auto parent_sequence : parents )
     {
         if( !child_sequence )
@@ -193,7 +198,7 @@ UBoardSequence::ResizeParentSequenceRecursively( UMovieSceneSection* iSection )
         if( !parent_section )
             break;
 
-        UMovieSceneTrack* child_track = child_section->GetTypedOuter<UMovieSceneTrack>();
+        UMovieSceneTrack* child_track = GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
         check( child_track );
 
         auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
@@ -215,7 +220,6 @@ UBoardSequence::ResizeParentSequenceRecursively( UMovieSceneSection* iSection )
         //---
 
         child_sequence = parent_sequence;
-        child_section = parent_section;
     }
 }
 

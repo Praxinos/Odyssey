@@ -61,14 +61,16 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     // When a new sequence is added, sort all sequences to ensure they are in the correct order
     MovieSceneHelpers::SortConsecutiveSections( Sections );
-
     // Once sequences are sorted fixup the surrounding sequences to fix any gaps
     SectionsHelpersShift::ShiftFollowingSections( Sections, newSection, shift_result );
-
     // Should be done again as after the first one, at least 2 sections (new one and the one at this place) have the same start
     MovieSceneHelpers::SortConsecutiveSections( Sections );
 
     FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+
+    UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+    check( outer_sequence );
+    outer_sequence->SectionAddedOrRemoved( newSection );
 
     return newSection;
 }
@@ -102,11 +104,15 @@ void
 UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 {
     Sections.Remove( &ioSection );
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
 
-    SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, &ioSection );
+    MovieSceneHelpers::SortConsecutiveSections( Sections );
+    SectionsHelpersShift::OrganizeSections( Sections );
 
     FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+
+    UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+    check( outer_sequence );
+    outer_sequence->SectionAddedOrRemoved( nullptr );
 
     // @todo Sequencer: The movie scene owned by the section is now abandoned.  Should we offer to delete it?
 }
@@ -117,11 +123,15 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
     UMovieSceneSection* deleted_section = Sections[iSectionIndex];
 
     Sections.RemoveAt( iSectionIndex );
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
 
-    SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( Sections, deleted_section ); // maybe deleted_section is not need, just remove all the gap ?
+    MovieSceneHelpers::SortConsecutiveSections( Sections );
+    SectionsHelpersShift::OrganizeSections( Sections );
 
     FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+
+    UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+    check( outer_sequence );
+    outer_sequence->SectionAddedOrRemoved( nullptr );
 }
 
 bool
