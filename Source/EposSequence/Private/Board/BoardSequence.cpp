@@ -2,15 +2,21 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Board/BoardSequence.h"
+
 #include "Components/ActorComponent.h"
 #include "GameFramework/Actor.h"
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
+#include "Sections/MovieSceneSubSection.h"
+#include "MovieSceneTimeHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
+
+#include "BoardHelpers.h"
+#include "Helpers/SectionsHelpersShift.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h" //TMP
 
 //---
@@ -133,9 +139,84 @@ UBoardSequence::IsResizable() const //override
 void
 UBoardSequence::Resize( int32 iNewDuration ) //override
 {
+    //check( IsResizable() ); // I don't know if SectionResized() should call this function recursively, if not, the line can be uncomment
+
     auto new_range = TRange<FFrameNumber>( 0, iNewDuration );
 
-    GetMovieScene()->SetPlaybackRange( new_range );
+    UMovieScene* movie_scene = GetMovieScene();
+    if( !movie_scene )
+        return;
+
+    movie_scene->SetPlaybackRange( new_range );
+}
+
+//---
+
+void
+UBoardSequence::SectionResized( UMovieSceneSection* iSection ) //override
+{
+    ResizeChildSequence( iSection );
+    ResizeParentSequenceRecursively( iSection );
+}
+
+void
+UBoardSequence::ResizeChildSequence( UMovieSceneSection* iSection )
+{
+    UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( iSection );
+    if( !subsection )
+        return;
+
+    UEposMovieSceneSequence* subsequence = Cast<UEposMovieSceneSequence>( subsection->GetSequence() );
+    if( !subsequence )
+        return;
+
+    subsequence->Resize( UE::MovieScene::DiscreteSize( subsection->GetTrueRange() ) );
+}
+
+void
+UBoardSequence::ResizeParentSequenceRecursively( UMovieSceneSection* iSection )
+{
+    TArray< UEposMovieSceneSequence* > parents = BoardHelpers::FindParents( this );
+    Algo::Reverse( parents ); // this > childN > ... > child1 > Root
+
+    UEposMovieSceneSequence* child_sequence = 0;
+    UMovieSceneSection* child_section = iSection;
+    for( auto parent_sequence : parents )
+    {
+        if( !child_sequence )
+        {
+            child_sequence = parent_sequence;
+            continue;
+        }
+
+        UMovieSceneSection* parent_section = BoardHelpers::FindParentSectionOfSequence( parent_sequence, child_sequence );
+        if( !parent_section )
+            break;
+
+        UMovieSceneTrack* child_track = child_section->GetTypedOuter<UMovieSceneTrack>();
+        check( child_track );
+
+        auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
+        int32 child_full_duration = UE::MovieScene::DiscreteSize( child_full_range );
+        auto range = parent_section->GetTrueRange();
+        auto new_range = TRange<FFrameNumber>( range.GetLowerBoundValue(), range.GetLowerBoundValue() + child_full_duration );
+        parent_section->SetRange( new_range );
+
+        //---
+
+        UMovieSceneTrack* parent_track = parent_section->GetTypedOuter<UMovieSceneTrack>();
+        check( parent_track );
+
+        SectionsHelpersShift::OrganizeSections( parent_track->GetAllSections() );
+
+        auto new_full_range = TRange<FFrameNumber>( parent_track->GetAllSections()[0]->GetInclusiveStartFrame(), parent_track->GetAllSections().Last()->GetExclusiveEndFrame() );
+        parent_sequence->Resize( UE::MovieScene::DiscreteSize( new_full_range ) );
+
+        //---
+
+        child_sequence = parent_sequence;
+        child_section = parent_section;
+    }
 }
 
 #ifdef WITH_EDITOR

@@ -30,6 +30,7 @@
 #include "Board/BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposMovieSceneSequence.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Shot/ShotSequenceEditorCommands.h"
 #include "ShotHelpers/ShotSequenceHelpers.h"
@@ -75,7 +76,7 @@ FEposSequenceEditorToolkit::~FEposSequenceEditorToolkit()
     } );
 }
 
-void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UMovieSceneSequence* > iSequences )
+void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UEposMovieSceneSequence* > iSequences )
 {
     // create tab layout
     const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout( "Standalone_EposEditor" )
@@ -156,7 +157,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     levelEditorModule.OnMapChanged().AddRaw( this, &FEposSequenceEditorToolkit::HandleMapChanged );
 }
 
-void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UMovieSceneSequence* > iSequences )
+void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSequence* > iSequences )
 {
     check( mSequencer );
     check( iSequences.Num() );
@@ -166,7 +167,7 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UMovieSceneSequenc
         UBoardSequence* sequence = Cast<UBoardSequence>( iSequences[i] );
         if( !sequence )
             continue;
-        UMovieSceneSequence* child_sequence = iSequences[i + 1]; // May be a Board or Shot sequence
+        UEposMovieSceneSequence* child_sequence = iSequences[i + 1]; // May be a Board or Shot sequence
         if( !child_sequence )
             continue;
 
@@ -177,7 +178,7 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UMovieSceneSequenc
         for( auto section : track->GetAllSections() )
         {
             UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-            UMovieSceneSequence* sub_sequence = board_section->GetSequence();
+            UEposMovieSceneSequence* sub_sequence = Cast<UEposMovieSceneSequence>( board_section->GetSequence() );
             if( !sub_sequence )
                 continue;
 

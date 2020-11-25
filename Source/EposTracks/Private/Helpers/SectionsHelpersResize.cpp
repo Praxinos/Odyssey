@@ -58,14 +58,14 @@ SectionsHelpersResize::GetValidRangeTrailing( TArray<UMovieSceneSection*> iSecti
 
 
 //static
-void
+UMovieSceneSection*
 SectionsHelpersResize::FixupConsecutiveSections( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection )
 {
     MovieSceneHelpers::SortConsecutiveSections( iSections );
 
     int32 current_index = INDEX_NONE;
     if( !iSections.Find( iSection, current_index ) )
-        return;
+        return nullptr;
 
     UMovieSceneSection* previous_section = nullptr;
     UMovieSceneSection* next_section = nullptr;
@@ -79,7 +79,7 @@ SectionsHelpersResize::FixupConsecutiveSections( TArray<UMovieSceneSection*> iSe
     {
         auto previous_new_range = TRange<FFrameNumber>( previous_section->GetRange().GetLowerBound(), TRangeBound<FFrameNumber>::Exclusive( iSection->GetInclusiveStartFrame() ) );
         auto previous_board_section = Cast<UMovieSceneCinematicBoardSection>( previous_section );
-        previous_board_section->SetRangeAndResizeSequence( previous_new_range );
+        previous_board_section->SetRange( previous_new_range );
     }
 
     if( next_section )
@@ -91,4 +91,6 @@ SectionsHelpersResize::FixupConsecutiveSections( TArray<UMovieSceneSection*> iSe
             section->MoveSection( diff );
         }
     }
+
+    return previous_section;
 }

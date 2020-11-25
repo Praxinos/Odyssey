@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+class UEposMovieSceneSequence;
+class UMovieSceneSection;
 class UMovieSceneSequence;
 
 /**
@@ -20,7 +22,7 @@ public:
      * @param iSequence The child sequence
      * @return All the parent hierarchy
      */
-    static TArray< UMovieSceneSequence* > FindParents( UMovieSceneSequence* iSequence );
+    static TArray< UEposMovieSceneSequence* > FindParents( UEposMovieSceneSequence* iSequence );
 
 private:
 
@@ -30,5 +32,8 @@ private:
      * @param iSequence The child sequence
      * @return Its parent
      */
-    static UMovieSceneSequence* FindParent( UMovieSceneSequence* iSequence );
+    static UEposMovieSceneSequence* FindParent( UEposMovieSceneSequence* iSequence );
+
+public:
+    static UMovieSceneSection* FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence );
 };

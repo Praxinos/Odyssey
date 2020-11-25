@@ -77,7 +77,7 @@ FShotSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShared
         if( !shot_sequence )
             continue;
 
-        TArray< UMovieSceneSequence* > shot_sequences = BoardHelpers::FindParents( shot_sequence );
+        TArray< UEposMovieSceneSequence* > shot_sequences = BoardHelpers::FindParents( shot_sequence );
         if( !shot_sequences.Num() )
             continue;
 

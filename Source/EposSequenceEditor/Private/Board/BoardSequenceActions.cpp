@@ -78,7 +78,7 @@ FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShare
         if( !board_sequence )
             continue;
 
-        TArray< UMovieSceneSequence* > board_sequences = BoardHelpers::FindParents( board_sequence );
+        TArray< UEposMovieSceneSequence* > board_sequences = BoardHelpers::FindParents( board_sequence );
         if( !board_sequences.Num() )
             continue;
 

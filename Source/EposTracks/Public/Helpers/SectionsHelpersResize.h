@@ -14,5 +14,5 @@ public:
     static TRange<FFrameNumber> GetValidRangeLeading( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold );
     static TRange<FFrameNumber> GetValidRangeTrailing( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection, FFrameNumber iNewFrame, int32 iThreshold );
 
-    static void FixupConsecutiveSections( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection );
+    static UMovieSceneSection* FixupConsecutiveSections( TArray<UMovieSceneSection*> iSections, UMovieSceneSection* iSection );
 };

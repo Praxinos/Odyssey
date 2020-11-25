@@ -44,9 +44,15 @@ public:
     virtual bool IsResizable() const override;
     virtual void Resize( int32 iNewDuration ) override;
 
+    virtual void SectionResized( UMovieSceneSection* iSection ) override;
+
 #ifdef WITH_EDITOR
     virtual FLinearColor GetColorTint() const override;
 #endif
+
+private:
+    virtual void ResizeChildSequence( UMovieSceneSection* iSection );
+    virtual void ResizeParentSequenceRecursively( UMovieSceneSection* iSection );
 
 public:
 

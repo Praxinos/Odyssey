@@ -158,6 +158,36 @@ SectionsHelpersShift::ShiftFollowingSections( TArray< UMovieSceneSection* > iSec
 
 //static
 void
+SectionsHelpersShift::OrganizeSections( TArray< UMovieSceneSection* > iSections )
+{
+    UMovieSceneSection* first_section = nullptr;
+    if( iSections.Num() )
+    {
+        first_section = iSections[0];
+        first_section->MoveSection( -first_section->GetInclusiveStartFrame() );
+    }
+
+    UMovieSceneSection* previous_section = nullptr;
+    for( auto section : iSections )
+    {
+        if( section == first_section )
+        {
+            previous_section = section;
+            continue;
+        }
+
+        FFrameNumber offset = section->GetInclusiveStartFrame() - previous_section->GetExclusiveEndFrame();
+
+        section->MoveSection( -offset );
+
+        //---
+
+        previous_section = section;
+    }
+}
+
+//static
+void
 SectionsHelpersShift::ShiftFollowingSectionsAfterDelete( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection )
 {
     TArray< UMovieSceneSection* > sections_to_shift;

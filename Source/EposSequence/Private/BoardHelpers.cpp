@@ -10,17 +10,18 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposMovieSceneSequence.h"
 
 //---
 
 //static
-TArray< UMovieSceneSequence* >
-BoardHelpers::FindParents( UMovieSceneSequence* iSequence )
+TArray< UEposMovieSceneSequence* >
+BoardHelpers::FindParents( UEposMovieSceneSequence* iSequence )
 {
-    TArray< UMovieSceneSequence* > parents;
+    TArray< UEposMovieSceneSequence* > parents;
 
-    UMovieSceneSequence* child = iSequence;
-    UMovieSceneSequence* parent = FindParent( child );
+    UEposMovieSceneSequence* child = iSequence;
+    UEposMovieSceneSequence* parent = FindParent( child );
 
     parents.Add( child );
 
@@ -38,10 +39,11 @@ BoardHelpers::FindParents( UMovieSceneSequence* iSequence )
 }
 
 //static
-UMovieSceneSequence*
-BoardHelpers::FindParent( UMovieSceneSequence* iSequence )
+UEposMovieSceneSequence*
+BoardHelpers::FindParent( UEposMovieSceneSequence* iSequence )
 {
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+
     TArray<FAssetData> objectList;
     assetRegistryModule.Get().GetAssetsByClass( UBoardSequence::StaticClass()->GetFName(), objectList );
 
@@ -67,6 +69,30 @@ BoardHelpers::FindParent( UMovieSceneSequence* iSequence )
             if( sub_sequence->GetFullName() == iSequence->GetFullName() )
                 return sequence;
         }
+    }
+
+    return nullptr;
+}
+
+//---
+
+//static
+UMovieSceneSection*
+BoardHelpers::FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence )
+{
+    UMovieSceneTrack* track = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !track )
+        return nullptr;
+
+    for( auto section : track->GetAllSections() )
+    {
+        UMovieSceneSubSection* current_subsection = Cast<UMovieSceneSubSection>( section );
+        UMovieSceneSequence* sub_sequence = current_subsection->GetSequence();
+        if( !sub_sequence )
+            continue;
+
+        if( sub_sequence->GetFullName() == iChildSequence->GetFullName() )
+            return current_subsection;
     }
 
     return nullptr;

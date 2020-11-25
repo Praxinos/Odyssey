@@ -24,8 +24,9 @@ public:
 public:
 
     virtual bool IsResizable() const PURE_VIRTUAL( UEposMovieSceneSequence::IsResizable, return true; );
-
     virtual void Resize( int32 iNewDuration ) PURE_VIRTUAL( UEposMovieSceneSequence::Resize, );
+
+    virtual void SectionResized( UMovieSceneSection* iSection ) PURE_VIRTUAL( UEposMovieSceneSequence::SectionResized, );
 
 //#if WITH_EDITORONLY_DATA // Like for UMovieSceneTrack, but as it as not data, WITH_EDITOR should be enough (?)
 #if WITH_EDITOR

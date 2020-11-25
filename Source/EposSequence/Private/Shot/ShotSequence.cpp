@@ -2,6 +2,7 @@
 // EPOS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Shot/ShotSequence.h"
+
 #include "CineCameraActor.h"
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMeshActor.h"
@@ -9,9 +10,12 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
+#include "Sections/MovieSceneSubSection.h"
+#include "MovieSceneTimeHelpers.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
+
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 //---
@@ -290,11 +294,17 @@ UShotSequence::IsResizable() const //override
 void
 UShotSequence::Resize( int32 iNewDuration ) //override
 {
+    check( IsResizable() );
+
     auto new_range = TRange<FFrameNumber>( 0, iNewDuration );
 
-    GetMovieScene()->SetPlaybackRange( new_range );
+    UMovieScene* movie_scene = GetMovieScene();
+    if( !movie_scene )
+        return;
 
-    UMovieSceneTrack* track = GetMovieScene()->GetCameraCutTrack();
+    movie_scene->SetPlaybackRange( new_range );
+
+    UMovieSceneTrack* track = movie_scene->GetCameraCutTrack();
     if( track )
     {
         auto sections = track->GetAllSections();
@@ -306,6 +316,14 @@ UShotSequence::Resize( int32 iNewDuration ) //override
             section->SetRange( new_range );
         }
     }
+}
+
+//---
+
+void
+UShotSequence::SectionResized( UMovieSceneSection* iSection ) //override
+{
+    checkNoEntry();
 }
 
 #ifdef WITH_EDITOR

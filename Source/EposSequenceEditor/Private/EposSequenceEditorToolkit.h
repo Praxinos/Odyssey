@@ -16,7 +16,7 @@ class ISequencer;
 class FAssetDragDropOp;
 class FClassDragDropOp;
 class FActorDragDropGraphEdOp;
-class UMovieSceneSequence;
+class UEposMovieSceneSequence;
 
 /**
  * Implements an Editor toolkit for template sequences.
@@ -47,9 +47,9 @@ public:
      * @param iSequences The animation to edit.
      * @param TrackEditorDelegates Delegates to call to create auto-key handlers for this sequencer.
      */
-    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UMovieSceneSequence* > iSequences );
+    void Initialize( const EToolkitMode::Type iMode, const TSharedPtr<IToolkitHost>& iInitToolkitHost, TArray< UEposMovieSceneSequence* > iSequences );
 
-    void GoToFocusedSequence( TArray< UMovieSceneSequence* > iSequences );
+    void GoToFocusedSequence( TArray< UEposMovieSceneSequence* > iSequences );
 
 public:
 
@@ -91,7 +91,7 @@ private:
 private:
 
     /** Board or Shot sequence for our edit operation. */
-    UMovieSceneSequence* mSequence;
+    UEposMovieSceneSequence* mSequence;
 
     /** The sequencer used by this editor. */
     TSharedPtr<ISequencer> mSequencer;

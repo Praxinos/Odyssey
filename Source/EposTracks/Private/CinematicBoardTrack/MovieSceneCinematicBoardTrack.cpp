@@ -10,6 +10,7 @@
 #include "Compilation/MovieSceneCompilerRules.h"
 
 #include "ArrangeSectionsType.h"
+#include "EposMovieSceneSequence.h"
 #include "EposTracksModule.h"
 #include "Helpers/SectionsHelpersMove.h"
 #include "Helpers/SectionsHelpersResize.h"
@@ -213,10 +214,14 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
     if( board_section->IsResizing() )
     {
-        SectionsHelpersResize::FixupConsecutiveSections( Sections, &ioSection );
+        UMovieSceneSection* previous_section = SectionsHelpersResize::FixupConsecutiveSections( Sections, &ioSection );
 
         if( iParams.MoveType == EPropertyChangeType::ValueSet )
         {
+            UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+            check( outer_sequence );
+            outer_sequence->SectionResized( board_section->IsResizingLeading() ? previous_section : board_section );
+
             board_section->StopResizing();
 
             FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
