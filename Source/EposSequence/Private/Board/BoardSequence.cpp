@@ -198,11 +198,15 @@ UBoardSequence::ResizeParentSequenceRecursively()
         if( !parent_section )
             break;
 
-        UMovieSceneTrack* child_track = GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-        check( child_track );
+        int32 child_full_duration = UE::MovieScene::DiscreteSize( parent_section->GetTrueRange() );
 
-        auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
-        int32 child_full_duration = UE::MovieScene::DiscreteSize( child_full_range );
+        UMovieSceneTrack* child_track = GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        if( child_track && child_track->GetAllSections().Num() )
+        {
+            auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
+            child_full_duration = UE::MovieScene::DiscreteSize( child_full_range );
+        }
+
         auto range = parent_section->GetTrueRange();
         auto new_range = TRange<FFrameNumber>( range.GetLowerBoundValue(), range.GetLowerBoundValue() + child_full_duration );
         parent_section->SetRange( new_range );
