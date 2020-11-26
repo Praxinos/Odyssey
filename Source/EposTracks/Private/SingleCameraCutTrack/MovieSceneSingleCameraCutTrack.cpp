@@ -2,14 +2,17 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+
 #include "Tracks/MovieSceneSpawnTrack.h"
 #include "MovieScene.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneTimeHelpers.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "Evaluation/MovieSceneEvaluationTrack.h"
 #include "Compilation/MovieSceneCompilerRules.h"
 #include "IMovieSceneTracksModule.h"
+
+#include "EposMovieSceneSequence.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "MovieSceneSingleCameraCutTrack"
 
@@ -66,6 +69,10 @@ UMovieSceneSingleCameraCutSection* UMovieSceneSingleCameraCutTrack::AddNewSingle
     // Once CameraCuts are sorted fixup the surrounding CameraCuts to fix any gaps
     MovieSceneHelpers::FixupConsecutiveSections(Sections, *NewSection, false);
 
+    UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+    check( outer_sequence );
+    outer_sequence->SectionAddedOrRemoved( nullptr );
+
     return NewSection;
 }
 
@@ -117,6 +124,10 @@ void UMovieSceneSingleCameraCutTrack::RemoveSection(UMovieSceneSection& Section)
 
     MovieSceneHelpers::FixupConsecutiveBlendingSections(Sections, Section, true);
 
+    UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+    check( outer_sequence );
+    outer_sequence->SectionAddedOrRemoved( nullptr );
+
     // @todo Sequencer: The movie scene owned by the section is now abandoned.  Should we offer to delete it?
 }
 
@@ -127,6 +138,10 @@ void UMovieSceneSingleCameraCutTrack::RemoveSectionAt(int32 SectionIndex)
 
     Sections.RemoveAt(SectionIndex);
     MovieSceneHelpers::SortConsecutiveSections(Sections);
+
+    UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+    check( outer_sequence );
+    outer_sequence->SectionAddedOrRemoved( nullptr );
 }
 
 void UMovieSceneSingleCameraCutTrack::RemoveAllAnimationData()
@@ -143,18 +158,29 @@ FText UMovieSceneSingleCameraCutTrack::GetDefaultDisplayName() const
 
 
 #if WITH_EDITOR
-void UMovieSceneSingleCameraCutTrack::OnSectionMoved(UMovieSceneSection& Section, const FMovieSceneSectionMovedParams& Params)
+void UMovieSceneSingleCameraCutTrack::OnSectionMoved(UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams)
 {
-    if( UMovieSceneSingleCameraCutSection* CutSection = Cast<UMovieSceneSingleCameraCutSection>( &Section ) )
-        CutSection->SetStartFrameAuto();
+    UMovieSceneSingleCameraCutSection* cut_section = Cast<UMovieSceneSingleCameraCutSection>( &ioSection );
+    if( !cut_section )
+        return;
 
-    MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, false);
+    cut_section->SetStartFrameAuto();
+
+    //MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, false);
 
     // Test for locking playback out on section out
     //UMovieScene* OwnerScene = GetTypedOuter<UMovieScene>();
     //TRange<FFrameNumber> playback_range = OwnerScene->GetPlaybackRange();
     //playback_range.SetUpperBound( TRangeBound<FFrameNumber>::MinUpper( playback_range.GetUpperBound(), Section.GetRange().GetUpperBound() ) );
     //OwnerScene->SetPlaybackRange( playback_range );
+
+    // At this moment, we can only resize the only section
+    if( iParams.MoveType == EPropertyChangeType::ValueSet )
+    {
+        UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
+        check( outer_sequence );
+        outer_sequence->SectionResized( cut_section );
+    }
 }
 #endif
 

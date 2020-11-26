@@ -236,5 +236,43 @@ UCameraComponent* FSingleCameraCutSection::GetViewCamera()
     return nullptr;
 }
 
+//---
+
+void
+FSingleCameraCutSection::BeginResizeSection()
+{
+}
+
+void
+FSingleCameraCutSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeFrameNumber )
+{
+    UMovieSceneSingleCameraCutSection* section = Cast<UMovieSceneSingleCameraCutSection>( Section );
+
+    //FViewportThumbnailSection::ResizeSection( ResizeMode, ResizeFrameNumber );
+
+    if( ResizeMode == ESequencerSectionResizeMode::SSRM_TrailingEdge )
+        section->SetRange( TRange<FFrameNumber>( 0, ResizeFrameNumber ) );
+};
+
+void
+FSingleCameraCutSection::BeginSlipSection()
+{
+}
+
+void
+FSingleCameraCutSection::SlipSection( FFrameNumber SlipTime )
+{
+}
+
+void
+FSingleCameraCutSection::BeginDilateSection()
+{
+}
+
+void
+FSingleCameraCutSection::DilateSection( const TRange<FFrameNumber>& NewRange, float DilationFactor )
+{
+}
+
 
 #undef LOCTEXT_NAMESPACE

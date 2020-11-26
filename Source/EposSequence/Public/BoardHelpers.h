@@ -36,4 +36,12 @@ private:
 
 public:
     static UMovieSceneSection* FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence );
+
+    //---
+
+public:
+
+    static void ResizeChildSequence( UMovieSceneSection* iSection );
+
+    static void ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequence );
 };

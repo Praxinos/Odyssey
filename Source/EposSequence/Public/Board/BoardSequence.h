@@ -51,10 +51,6 @@ public:
     virtual FLinearColor GetColorTint() const override;
 #endif
 
-private:
-    virtual void ResizeChildSequence( UMovieSceneSection* iSection );
-    virtual void ResizeParentSequenceRecursively();
-
 public:
 
     UPROPERTY()

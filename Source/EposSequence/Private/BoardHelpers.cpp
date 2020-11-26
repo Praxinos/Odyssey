@@ -6,11 +6,14 @@
 #include "AssetRegistryModule.h"
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
+#include "MovieSceneTimeHelpers.h"
+#include "Sections/MovieSceneSubSection.h"
 
 #include "Board/BoardSequence.h"
-#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
+#include "Helpers/SectionsHelpersShift.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 //---
 
@@ -61,7 +64,7 @@ BoardHelpers::FindParent( UEposMovieSceneSequence* iSequence )
 
         for( auto section : track->GetAllSections() )
         {
-            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+            UMovieSceneSubSection* board_section = Cast<UMovieSceneSubSection>( section );
             UMovieSceneSequence* sub_sequence = board_section->GetSequence();
             if( !sub_sequence )
                 continue;
@@ -96,4 +99,73 @@ BoardHelpers::FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence,
     }
 
     return nullptr;
+}
+
+//---
+
+//static
+void
+BoardHelpers::ResizeChildSequence( UMovieSceneSection* iSection )
+{
+    UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( iSection );
+    if( !subsection )
+        return;
+
+    UEposMovieSceneSequence* subsequence = Cast<UEposMovieSceneSequence>( subsection->GetSequence() );
+    if( !subsequence )
+        return;
+
+    subsequence->Resize( UE::MovieScene::DiscreteSize( subsection->GetTrueRange() ) );
+}
+
+//static
+void
+BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequence )
+{
+    TArray< UEposMovieSceneSequence* > parents = BoardHelpers::FindParents( iSequence );
+    Algo::Reverse( parents ); // this > childN > ... > child1 > Root
+
+    UEposMovieSceneSequence* child_sequence = 0;
+    for( auto parent_sequence : parents )
+    {
+        if( !child_sequence )
+        {
+            child_sequence = parent_sequence;
+            continue;
+        }
+
+        UMovieSceneSection* parent_section = BoardHelpers::FindParentSectionOfSequence( parent_sequence, child_sequence );
+        if( !parent_section )
+            break;
+
+        int32 child_full_duration = UE::MovieScene::DiscreteSize( parent_section->GetTrueRange() );
+
+        UMovieSceneTrack* child_track = child_sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        if( !child_track )
+            child_track = child_sequence->GetMovieScene()->GetCameraCutTrack();
+
+        if( child_track && child_track->GetAllSections().Num() )
+        {
+            auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
+            child_full_duration = UE::MovieScene::DiscreteSize( child_full_range );
+        }
+
+        auto range = parent_section->GetTrueRange();
+        auto new_range = TRange<FFrameNumber>( range.GetLowerBoundValue(), range.GetLowerBoundValue() + child_full_duration );
+        parent_section->SetRange( new_range );
+
+        //---
+
+        UMovieSceneTrack* parent_track = parent_section->GetTypedOuter<UMovieSceneTrack>();
+        check( parent_track );
+
+        SectionsHelpersShift::OrganizeSections( parent_track->GetAllSections() );
+
+        auto new_full_range = TRange<FFrameNumber>( parent_track->GetAllSections()[0]->GetInclusiveStartFrame(), parent_track->GetAllSections().Last()->GetExclusiveEndFrame() );
+        parent_sequence->Resize( UE::MovieScene::DiscreteSize( new_full_range ) );
+
+        //---
+
+        child_sequence = parent_sequence;
+    }
 }

@@ -16,6 +16,7 @@
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 
+#include "BoardHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 //---
@@ -323,7 +324,13 @@ UShotSequence::Resize( int32 iNewDuration ) //override
 void
 UShotSequence::SectionResized( UMovieSceneSection* iSection ) //override
 {
-    checkNoEntry();
+    BoardHelpers::ResizeParentSequenceRecursively( this );
+}
+
+void
+UShotSequence::SectionAddedOrRemoved( UMovieSceneSection* iSection ) //override
+{
+    BoardHelpers::ResizeParentSequenceRecursively( this );
 }
 
 #ifdef WITH_EDITOR
