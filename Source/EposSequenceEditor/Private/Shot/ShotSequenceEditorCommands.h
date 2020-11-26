@@ -19,8 +19,6 @@ public:
 
 public:
 
-    TSharedPtr<FUICommandInfo> NewShotWithSettings;
-
     TSharedPtr<FUICommandInfo> CreateCamera;
     TSharedPtr<FUICommandInfo> CreatePlane;
     TSharedPtr<FUICommandInfo> SnapCameraToViewport;

@@ -19,7 +19,7 @@ public:
 
 public:
 
-    TSharedPtr<FUICommandInfo> NewBoardWithSettings;
+    TSharedPtr<FUICommandInfo> NewStoryboardWithSettings;
 
     TSharedPtr<FUICommandInfo> ArrangeShotsManually;
     TSharedPtr<FUICommandInfo> ArrangeShotsOnOneRow;

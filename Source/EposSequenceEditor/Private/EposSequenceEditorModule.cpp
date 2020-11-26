@@ -144,12 +144,8 @@ FEposSequenceEditorModule::RegisterMenuExtensions()
 {
     mCommandList = MakeShareable( new FUICommandList );
     mCommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().NewBoardWithSettings,
+        FBoardSequenceEditorCommands::Get().NewStoryboardWithSettings,
         FExecuteAction::CreateStatic( &FEposSequenceEditorModule::OnCreateNewAssetWithSettings, UBoardSequence::StaticClass() )
-    );
-    mCommandList->MapAction(
-        FShotSequenceEditorCommands::Get().NewShotWithSettings,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorModule::OnCreateNewAssetWithSettings, UShotSequence::StaticClass() )
     );
 
     mCinematicsMenuExtender = MakeShareable( new FExtender );
@@ -157,8 +153,7 @@ FEposSequenceEditorModule::RegisterMenuExtensions()
     {
         MenuBuilder.BeginSection( "CinematicsEpos", LOCTEXT( "CinematicsEpos", "Epos" ) );
         {
-            MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().NewBoardWithSettings );
-            MenuBuilder.AddMenuEntry( FShotSequenceEditorCommands::Get().NewShotWithSettings );
+            MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().NewStoryboardWithSettings );
         }
         MenuBuilder.EndSection();
     } ) );
