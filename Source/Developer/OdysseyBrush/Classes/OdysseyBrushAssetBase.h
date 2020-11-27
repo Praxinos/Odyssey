@@ -273,7 +273,7 @@ public:
     //Must be connected to an Event (i.e. "Event on Step").
     //Requires 3 mandatory input to work : Odyssey Block Reference and X|Y coordinates.
     UFUNCTION( BlueprintCallable, Category="Odyssey|Stamps", meta = ( DefaultToSelf="Target", HideSelfPin, HidePin="Target") )
-    void  Stamp( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
+    void  Stamp( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, UPARAM(DisplayName="Handle Position") FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal );
 
 public:
     // Odyssey Brush Native events
