@@ -11,7 +11,7 @@
 class FOdysseyBlock;
 /////////////////////////////////////////////////////
 // Pivot Enum
-UENUM( BlueprintType, meta=(DisplayName="EHandlePositionReference"))
+UENUM( BlueprintType, meta=(DisplayName="EOdysseyHandlePositionReference"))
 enum  class  EPivotReference : uint8
 {
     kTopLeft        UMETA( DisplayName="Top Left" ),
@@ -28,7 +28,7 @@ enum  class  EPivotReference : uint8
 
 /////////////////////////////////////////////////////
 // Pivot Enum
-UENUM( BlueprintType, meta=(DisplayName="EHandlePositionOffsetMode") )
+UENUM( BlueprintType, meta=(DisplayName="EOdysseyHandlePositionOffsetMode") )
 enum  class  EPivotOffsetMode : uint8
 {
     kRelative       UMETA( DisplayName="Relative fraction" ),
