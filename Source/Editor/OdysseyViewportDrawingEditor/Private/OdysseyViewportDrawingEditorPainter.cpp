@@ -394,6 +394,9 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 
 bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraOrigin, const TArrayView<TPair<FVector, FVector>>& iRays, EMeshPaintAction iPaintAction, float iPaintStrength)
 {
+    if( !mPaintSettings->mTexturePaintSettings.mPaintTexture )
+        return false;
+
 	TArray<FHitResult> paintRayResults;
 	paintRayResults.AddDefaulted(iRays.Num());
 	
@@ -1435,9 +1438,9 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 		if (mPaintableTextures.Num() > 0)
 		{
 			newTexture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
+            mPaintSettings->mTexturePaintSettings.mPaintTexture = newTexture;
+            mController->OnEditedTextureChanged(newTexture);
 		}
-		mPaintSettings->mTexturePaintSettings.mPaintTexture = newTexture;
-        mController->OnEditedTextureChanged(newTexture);
 	}
 }
 

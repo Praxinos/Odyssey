@@ -151,6 +151,8 @@ FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort()
 
 void FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
 {
+    UE_LOG(LogTemp, Display, TEXT("LAYER CHANGED"));
+
     //Remove all delegates for AlphaLock and set alpha lock to a default value
     if(iOldValue && iOldValue->GetType() == IOdysseyLayer::eType::kImage) {
         TSharedPtr<FOdysseyImageLayer> oldImageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(iOldValue);

@@ -136,6 +136,7 @@ FOdysseyPaintEngine3D::StrokeBlock3D()
 void 
 FOdysseyPaintEngine3D::UpdateTmpTileMapFromTriangles(TArray<FTexturePaintTriangleInfo>& iTriangles)
 {
+    // TODO: This is a basic algorithm, not a full fledge optimized tile to triangle update
     if( iTriangles.Num() == 0 )
         return;
 
