@@ -27,12 +27,12 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesWillChange, const TArray<::ul3::FRect>&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesChanged, const TArray<::ul3::FRect>&);
 
-private:
+protected:
     typedef bool** InvalidTileMap;
 
 public:
     // Construction / Destruction
-    ~FOdysseyPaintEngine();
+    virtual ~FOdysseyPaintEngine();
     FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryRef = 0 );
 
 public:
@@ -41,7 +41,7 @@ public:
     void SetLock(bool iValue);
 
     void InterruptDelay();
-    void Tick();
+    virtual void Tick();
     void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
     void SetColor( const ::ul3::FPixelValue& iColor );
     void SetSizeModifier( float iValue );
@@ -75,11 +75,11 @@ public:
     void InterruptStrokeAndStampInPlace();
 
     const ::ul3::FPixelValue& GetColor() const;
-	void Block(FOdysseyBlock* iBlock);
+	virtual void Block(FOdysseyBlock* iBlock);
 	FOdysseyBlock* PreviewBlock();
 	FOdysseyBlock* StrokeBlock();
 
-	void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
+	virtual void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
 	void CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects);
     void CopyEditedBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
 	void CopyEditedBlockInPreviewBlock();
@@ -98,8 +98,8 @@ public: //DELEGATES
     FOnEditedBlockTilesWillChange& OnEditedBlockTilesWillChange() { return mOnEditedBlockTilesWillChangeDelegate; }
     FOnEditedBlockTilesChanged& OnEditedBlockTilesChanged() { return mOnEditedBlockTilesChangedDelegate; }
 
-private:
-    // Private API
+protected:
+    // Protected API
     void SmoothingCatchUpTick();
     void ExecuteDelayQueue();
     TArray<::ul3::FRect> GetTmpInvalidTiles();
@@ -125,8 +125,8 @@ private:
     void ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint, const FOdysseyStrokePoint& iPreviousPoint);
     void AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoints);
 
-private:
-    // Private Data Members
+protected:
+    // protected Data Members
     bool                                mIsLocked;
 
 	FOdysseyBlock*                      mEditedBlock; // Holds th original block to edit

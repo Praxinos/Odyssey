@@ -20,7 +20,8 @@ public class OdysseyPaintEngine : ModuleRules
                 "OdysseyLayer",
                 "OdysseyStrokePipeline",
                 "OdysseyMaths",
-                "OdysseyTransaction"
+                "OdysseyTransaction",
+                "MeshPaint"
              }
         );
 

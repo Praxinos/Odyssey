@@ -8,6 +8,7 @@
 #include "Engine/TextureLODSettings.h"
 #include "Engine/TextureCube.h"
 #include "Engine/Texture2DArray.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Engine/VolumeTexture.h"
 #include "VT/VirtualTextureBuildSettings.h"
 #include "Interfaces/ITargetPlatformManagerModule.h"
@@ -48,12 +49,26 @@ CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 
 	const FTexture2DMipMap& Mip = iTexture->GetPlatformMips()[0];
 	const void* Data = Mip.BulkData.LockReadOnly();
-	FMemory::Memcpy(iBlock->GetArray().GetData(),
-		Data,
-		iBlock->GetArray().Num()
-	);
-	Mip.BulkData.Unlock();
-	iBlock->ResyncData();
+    if( Data )
+    {
+        FMemory::Memcpy(iBlock->GetArray().GetData(),
+            Data,
+            iBlock->GetArray().Num()
+        );
+    }
+    Mip.BulkData.Unlock();
+    iBlock->ResyncData();
+}
+
+void
+CopyURenderTargetPixelDataIntoBlock(FOdysseyBlock* iBlock, UTextureRenderTarget2D* iRenderTarget)
+{
+    checkf(iBlock->Width() == iRenderTarget->GetSurfaceWidth()  &&
+           iBlock->Height() == iRenderTarget->GetSurfaceHeight()
+           ,TEXT("Sizes do not match"));
+
+    FTextureRenderTargetResource* renderTargetResource = iRenderTarget->GameThread_GetRenderTargetResource();
+
 }
 
 void

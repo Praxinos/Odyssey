@@ -1,12 +1,15 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class OdysseyViewportDrawingEditor : ModuleRules
 {
     public OdysseyViewportDrawingEditor(ReadOnlyTargetRules Target) : base(Target)
     {
-		PrivateIncludePathModuleNames.AddRange(
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PrivateIncludePathModuleNames.AddRange(
             new string[] {
                 "AssetRegistry",
                 "AssetTools"
@@ -32,7 +35,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "RenderCore",
                 "RHI",
                 "Slate",
-				"SlateCore",
+                "SlateCore",
                 "EditorStyle",
                 "UnrealEd",
                 "RawMesh",
@@ -41,13 +44,14 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "VREditor",
                 "PropertyEditor",
                 "MainFrame",
-				"MeshPaint",
+                "MeshPaint",
                 "OdysseyBrush",
                 "OdysseyMeshPaintRendering",
                 "OdysseyWidgets",
                 "OdysseyLayer",
                 "OdysseyTexture",
                 "OdysseyImaging",
+                "OdysseyTransaction",
                 "OdysseyPaintEngine",
                 "OdysseyStrokePipeline",
                 "OdysseyStylusInput",
@@ -55,13 +59,13 @@ public class OdysseyViewportDrawingEditor : ModuleRules
             }
         );
 
-        /*CircularlyReferencedDependentModules.AddRange(
-            new string[]
-            {
-                "ViewportInteraction",
-                "VREditor"
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Private", "Models"),
+                Path.Combine(ModuleDirectory, "Private", "ViewportDrawingEditor"),
+                Path.Combine(ModuleDirectory, "Private", "Settings"),
             }
-        );*/
+        );
 
         PrivateIncludePathModuleNames.AddRange(
 			new string[]

@@ -3,21 +3,13 @@
 #pragma once
 
 #include "IMeshPainter.h"
-#include "SOdysseyViewportDrawingEditorWidget.h"
+#include "OdysseyViewportDrawingEditorGUI.h"
+#include "OdysseyViewportDrawingEditorController.h"
 #include "IStylusState.h"
 #include "OdysseyStrokePoint.h"
 #include "MeshPaintTypes.h"
 #include "Engine/StaticMesh.h"
 #include "OdysseyMeshPaintRendering.h"
-
-
-enum class EOdysseyViewportSelectedMode : uint8
-{
-    kBrushSettings,
-    kStrokeOptions,
-    kLayerStack,
-    kPerformanceOptions
-};
 
 /** Struct to hold MeshPaint settings on a per mesh basis */
 struct FInstanceTexturePaintSettings
@@ -74,17 +66,18 @@ class FOdysseyViewportDrawingEditorPainter : public IMeshPainter
 {
 	friend class FTexturePaintSettingsCustomization;
 	friend class FVertexPaintSettingsCustomization;
-	friend class SOdysseyViewportDrawingEditorWidget;
+	friend class SOdysseyViewportDrawingEditorGUI;
 protected:
 	FOdysseyViewportDrawingEditorPainter();
 	~FOdysseyViewportDrawingEditorPainter();
 	void Init();
 
 	void RegisterTexturePaintCommands();
+
 public:
 	static FOdysseyViewportDrawingEditorPainter* Get();
 	TSharedPtr<FUICommandList> GetUICommandList();
-    EOdysseyViewportSelectedMode GetSelectedMode() const;
+    TSharedPtr<FOdysseyViewportDrawingEditorController> GetController() const;
 	
 	/** Begin IMeshPainter overrides */
 	virtual void Render(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
@@ -223,7 +216,10 @@ private:
 
 protected:	
     /** Widget representing the state and settings for the painter */
-	TSharedPtr<SOdysseyViewportDrawingEditorWidget> mWidget;
+	TSharedPtr<SOdysseyViewportDrawingEditorGUI> mWidget;
+
+    /** Widget representing the state and settings for the painter */
+    TSharedPtr<FOdysseyViewportDrawingEditorController> mController;
 
 	/** Painting settings */
 	UOdysseyViewportDrawingEditorSettings* mPaintSettings;
@@ -240,6 +236,12 @@ protected:
 
 	/** The original texture that we're painting */
 	UTexture2D* mPaintingTexture2D;
+
+    /** The temporary texture in which we store the strokeBuffer pixels */
+    UTexture2D* mStrokeBufferTexture2D;
+
+    /** The strokeBuffer pixels applied to 3D */
+    UTexture2D* mStrokeBufferTexture3D;
 
     /** Temporary render target used to draw incremental paint to */
     UTextureRenderTarget2D* mBrushRenderTargetTexture;
@@ -286,5 +288,5 @@ protected:
 
     FOdysseyStrokePoint* mLastEvent;
 
-    EOdysseyViewportSelectedMode mSelectedMode;
+    FVector2D mBeginPosition;
 };

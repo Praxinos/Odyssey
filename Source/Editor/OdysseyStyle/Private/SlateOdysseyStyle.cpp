@@ -381,10 +381,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         );
 
     Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
-        .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.2f, 0.2f, 0.2f )))
-        .SetHoveredBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox_Hovered", FMargin(4.0f/16.0f), FLinearColor( 0.1f, 0.1f, 0.1f )))
-        .SetActiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill_Hovered",FMargin(4.0f/16.0f), FLinearColor( 0.3f, 0.3f, 0.3f )))
-        .SetInactiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill",FMargin(4.0f/16.0f,4.0f/16.0f,8.0f/16.0f,4.0f/16.0f), FLinearColor( 0.2f, 0.2f, 0.2f )))
+        .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))
+        .SetInactiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill",FMargin(4.0f/16.0f,4.0f/16.0f,8.0f/16.0f,4.0f/16.0f),FLinearColor(0.1f,0.1f,0.1f)))
+        .SetHoveredBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox_Hovered", FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))
+        .SetActiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill_Hovered",FMargin(4.0f/16.0f), FLinearColor( 0.25f, 0.25f, 0.25f )))
         .SetArrowsImage(IMAGE_BRUSH("SpinBox/SpinArrows",mIcon12x12))
     );
 

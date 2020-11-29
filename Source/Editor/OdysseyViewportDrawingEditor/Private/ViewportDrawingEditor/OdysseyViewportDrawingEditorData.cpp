@@ -1,0 +1,123 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#include "OdysseyViewportDrawingEditorData.h"
+
+#include "ULISLoaderModule.h"
+#include "OdysseyTextureAssetUserData.h"
+
+/////////////////////////////////////////////////////
+// FOdysseyViewportDrawingEditorData
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+FOdysseyViewportDrawingEditorData::~FOdysseyViewportDrawingEditorData()
+{
+    if(mBrushInstance)
+    {
+        mBrushInstance->RemoveFromRoot();
+        mBrushInstance = NULL;
+    }
+
+    if(mDisplaySurface)
+    {
+        delete mDisplaySurface;
+    }
+
+    delete mPaintEngine;
+}
+
+FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
+    : mTexture( NULL )
+    , mLayerStack( NULL )
+    , mDisplaySurface( NULL )
+    , mPaintEngine(new FOdysseyPaintEngine3D())
+    , mBrush(NULL)
+    , mBrushInstance(NULL)
+{
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Initialization
+void
+FOdysseyViewportDrawingEditorData::Init(UTexture2D* iTexture)
+{
+    // Get or Create Texture userData
+    if( iTexture )
+    {
+        mTexture = iTexture;
+        UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+        if(!userData)
+        {
+            ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
+            userData = NewObject< UOdysseyTextureAssetUserData >(mTexture,NAME_None,RF_Public);
+            userData->GetLayerStack()->Init(mTexture->GetSizeX(),mTexture->GetSizeY(),format);
+            mTexture->AddAssetUserData(userData);
+            FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData(mTexture,userData->GetLayerStack()->Format());
+            TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(),textureData));
+            userData->GetLayerStack()->AddLayer(imageLayer);
+            mTexture->PostEditChange();
+        }
+
+        // Get Texture LayerStack
+        mLayerStack = userData->GetLayerStack();
+
+        // Setup Surface
+        if( mDisplaySurface )
+            delete mDisplaySurface;
+
+        mDisplaySurface = new FOdysseySurfaceEditable(mTexture);
+        mDisplaySurface->Invalidate();
+    }
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Getters Setters
+
+UTexture2D*
+FOdysseyViewportDrawingEditorData::Texture()
+{
+    return mTexture;
+}
+
+FOdysseyLayerStack*					
+FOdysseyViewportDrawingEditorData::LayerStack()
+{
+    return mLayerStack;
+}
+
+FOdysseySurfaceEditable*            
+FOdysseyViewportDrawingEditorData::DisplaySurface()
+{
+    return mDisplaySurface;
+}
+
+FOdysseyPaintEngine3D*		        
+FOdysseyViewportDrawingEditorData::PaintEngine()
+{
+    return mPaintEngine;
+}
+
+UOdysseyBrush*                      
+FOdysseyViewportDrawingEditorData::Brush()
+{
+    return mBrush;
+}
+
+UOdysseyBrushAssetBase*             
+FOdysseyViewportDrawingEditorData::BrushInstance()
+{
+    return mBrushInstance;
+}
+
+
+void						        
+FOdysseyViewportDrawingEditorData::Brush(UOdysseyBrush* iBrush)
+{
+    mBrush = iBrush;
+}
+
+void						        
+FOdysseyViewportDrawingEditorData::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance)
+{
+    mBrushInstance = iBrushInstance;
+}

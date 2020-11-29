@@ -67,40 +67,39 @@ namespace OdysseyMeshPaintRendering
 		TOdysseyMeshPaintPixelShader( const ShaderMetaType::CompiledShaderInitializerType& Initializer )
 			: FGlobalShader( Initializer )
 		{
-			CloneTextureParameter.Bind( Initializer.ParameterMap, TEXT( "s_CloneTexture" ) );
-            CloneTextureParameterSampler.Bind(Initializer.ParameterMap,TEXT("s_CloneTextureSampler"));
 			WorldToBrushMatrixParameter.Bind( Initializer.ParameterMap, TEXT( "c_WorldToBrushMatrix" ) );
-			BrushColorParameter.Bind( Initializer.ParameterMap, TEXT( "c_BrushColor" ) );
-
+            Stroke2DParameter.Bind(Initializer.ParameterMap,TEXT( "s_Stroke2D" ));
+            TextureHitPointParameter.Bind(Initializer.ParameterMap,TEXT("c_TextureHitPoint"));
 		}
 
 		void SetParameters(FRHICommandList& RHICmdList, const float InGamma, const FOdysseyMeshPaintShaderParameters& InShaderParams )
 		{
 			FRHIPixelShader* ShaderRHI = RHICmdList.GetBoundPixelShader();
 
-			SetTextureParameter(
-				RHICmdList, 
-				ShaderRHI,
-				CloneTextureParameter,
-				CloneTextureParameterSampler,
-				TStaticSamplerState< SF_Point, AM_Clamp, AM_Clamp, AM_Clamp >::GetRHI(),
-				InShaderParams.CloneTexture->GetRenderTargetResource()->TextureRHI );
+            SetTextureParameter(
+                RHICmdList,
+                ShaderRHI,
+                Stroke2DParameter,
+                TextureParameterSampler,
+                TStaticSamplerState< SF_Point,AM_Clamp,AM_Clamp,AM_Clamp >::GetRHI(),
+                InShaderParams.Stroke2D->Resource->TextureRHI);
 
 			SetShaderValue(RHICmdList, ShaderRHI, WorldToBrushMatrixParameter, InShaderParams.WorldToBrushMatrix );
 
-			SetShaderValue(RHICmdList, ShaderRHI, BrushColorParameter, InShaderParams.BrushColor );
+            SetShaderValue(RHICmdList,ShaderRHI,TextureHitPointParameter,InShaderParams.TextureHitPoint);
 		}
 
 	private:
-		/** Texture that is a clone of the destination render target before we start drawing */
-		LAYOUT_FIELD(FShaderResourceParameter, CloneTextureParameter);
-        LAYOUT_FIELD(FShaderResourceParameter,CloneTextureParameterSampler);
+		/** Sampler Texture that is a clone of the destination render target before we start drawing */
+        LAYOUT_FIELD(FShaderResourceParameter,TextureParameterSampler);
+
+        /** Reference colors for the application in 3D */
+        LAYOUT_FIELD(FShaderResourceParameter,Stroke2DParameter);
 
 		/** Brush -> World matrix */
 		LAYOUT_FIELD(FShaderParameter, WorldToBrushMatrixParameter);
 
-		/** Brush color */
-		LAYOUT_FIELD(FShaderParameter, BrushColorParameter);
+        LAYOUT_FIELD(FShaderParameter,TextureHitPointParameter);
 	};
 
     IMPLEMENT_SHADER_TYPE( ,TOdysseyMeshPaintPixelShader,TEXT("/Plugins/Iliad/Private/OdysseyMeshPaintShader.usf"),TEXT("MainPS"),SF_Pixel);

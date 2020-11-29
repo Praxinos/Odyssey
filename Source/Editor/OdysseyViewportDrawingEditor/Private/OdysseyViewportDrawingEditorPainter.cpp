@@ -49,16 +49,16 @@
 FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
     : mTexturePaintingCurrentMeshComponent(nullptr),
 	mPaintingTexture2D(nullptr),
+    mStrokeBufferTexture2D(nullptr),
     mBrushRenderTargetTexture(nullptr),
     mBrushMaskRenderTargetTexture(nullptr),
 	mDoRestoreRenTargets(false),
 	mDoRefreshCachedData(true),
     mLastEvent( nullptr ),
-    mSelectedMode( EOdysseyViewportSelectedMode::kBrushSettings )
+    mBeginPosition(0,0)
 {
     mInputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     mInputSubsystem->AddMessageHandler( *this );
-    //InputSubsystem->OnStylusInputChanged().BindRaw( this, &FOdysseyViewportDrawingEditorPainter::OnStylusInputChanged );
 }
 
 FOdysseyViewportDrawingEditorPainter::~FOdysseyViewportDrawingEditorPainter()
@@ -66,9 +66,6 @@ FOdysseyViewportDrawingEditorPainter::~FOdysseyViewportDrawingEditorPainter()
 	FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
 	Cleanup();
 	mComponentToTexturePaintSettingsMap.Empty();
-
-    //InputSubsystem->OnStylusInputChanged().Unbind();
-    //InputSubsystem->RemoveMessageHandler( *this );*/
 }
 
 FOdysseyViewportDrawingEditorPainter* FOdysseyViewportDrawingEditorPainter::Get()
@@ -86,16 +83,23 @@ FOdysseyViewportDrawingEditorPainter* FOdysseyViewportDrawingEditorPainter::Get(
 
 void FOdysseyViewportDrawingEditorPainter::Init()
 {
-	/** Setup necessary data */
-	mBrushSettings = DuplicateObject<UPaintBrushSettings>(GetMutableDefault<UPaintBrushSettings>(), GetTransientPackage());
-	mBrushSettings->AddToRoot();
-    mBrushSettings->SetBrushRadius(10);
-	mPaintSettings = UOdysseyViewportDrawingEditorSettings::Get();
-	FOdysseyViewportDrawingEditorCommands::Register();
-	mUICommandList = TSharedPtr<FUICommandList>(new FUICommandList());
-	RegisterTexturePaintCommands();
-	mWidget = SNew(SOdysseyViewportDrawingEditorWidget, this);
-	FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this, &FOdysseyViewportDrawingEditorPainter::UpdatePaintTargets);
+    mWidget =  MakeShareable( new SOdysseyViewportDrawingEditorGUI() );
+    TSharedPtr<FOdysseyViewportDrawingEditorData> data = MakeShareable( new FOdysseyViewportDrawingEditorData() );
+    mController = MakeShareable( new FOdysseyViewportDrawingEditorController( data, mWidget ));
+
+    /** Setup necessary data */
+    mBrushSettings = DuplicateObject<UPaintBrushSettings>(GetMutableDefault<UPaintBrushSettings>(),GetTransientPackage());
+    mBrushSettings->AddToRoot();
+    mBrushSettings->SetBrushRadius(50);
+    mPaintSettings = UOdysseyViewportDrawingEditorSettings::Get();
+    FOdysseyViewportDrawingEditorCommands::Register();
+    mUICommandList = TSharedPtr<FUICommandList>(new FUICommandList());
+    RegisterTexturePaintCommands();
+    FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorPainter::UpdatePaintTargets);
+
+    mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
+    mWidget->Init(this);
+    mController->Init();
 }
 
 void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
@@ -107,38 +111,38 @@ void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
 
 	mUICommandList->MapAction(
 		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyBrushSettingsView,
-		FExecuteAction::CreateRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSetOdysseyBrushSettingsView),
+		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyBrushSettingsView),
 		FCanExecuteAction(),
     	FIsActionChecked::CreateLambda([=]
 	    {
-		    return GetSelectedMode() == EOdysseyViewportSelectedMode::kBrushSettings;
+		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kBrushSettings;
         }));
 
 	mUICommandList->MapAction(
 		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyStrokeOptions,
-		FExecuteAction::CreateRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSetOdysseyStrokeOptionsView),
+		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyStrokeOptionsView),
 		FCanExecuteAction(),
     	FIsActionChecked::CreateLambda([=]
 	    {
-		    return GetSelectedMode() == EOdysseyViewportSelectedMode::kStrokeOptions;
+		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kStrokeOptions;
         }));
 
 	mUICommandList->MapAction(
 		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyLayerStackView,
-		FExecuteAction::CreateRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSetOdysseyLayerStackView),
+		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyLayerStackView),
 		FCanExecuteAction(),
     	FIsActionChecked::CreateLambda([=]
 	    {
-		    return GetSelectedMode() == EOdysseyViewportSelectedMode::kLayerStack;
+		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kLayerStack;
         }));
 
 	mUICommandList->MapAction(
 		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyPerformanceOptions,
-		FExecuteAction::CreateRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSetOdysseyPerformanceOptionsView),
+		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyPerformanceOptionsView),
 		FCanExecuteAction(),
     	FIsActionChecked::CreateLambda([=]
 	    {
-		    return GetSelectedMode() == EOdysseyViewportSelectedMode::kPerformanceOptions;
+		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kPerformanceOptions;
         }));
 }
 
@@ -180,8 +184,8 @@ UMeshPaintSettings* FOdysseyViewportDrawingEditorPainter::GetPainterSettings()
 }
 
 TSharedPtr<class SWidget> FOdysseyViewportDrawingEditorPainter::GetWidget()
-{	
-	return mWidget;
+{
+    return mWidget->GetMainWidget();
 }
 
 TSharedPtr<FUICommandList> FOdysseyViewportDrawingEditorPainter::GetUICommandList()
@@ -189,11 +193,10 @@ TSharedPtr<FUICommandList> FOdysseyViewportDrawingEditorPainter::GetUICommandLis
 	return mUICommandList;
 }
 
-EOdysseyViewportSelectedMode FOdysseyViewportDrawingEditorPainter::GetSelectedMode() const
+TSharedPtr<FOdysseyViewportDrawingEditorController> FOdysseyViewportDrawingEditorPainter::GetController() const
 {
-    return mSelectedMode;
+    return mController;
 }
-
 
 
 bool FOdysseyViewportDrawingEditorPainter::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
@@ -209,7 +212,8 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureChanged(const FAssetData&
 	{
         mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
         texture->TemporarilyDisableStreaming();
-        mWidget->RefreshLayerStackView();
+
+        mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
 		// Loop through our list of textures and see which one the user wants to select
 		for (int32 targetIndex = 0; targetIndex < mTexturePaintTargetList.Num(); targetIndex++)
 		{
@@ -225,7 +229,6 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureChanged(const FAssetData&
 		}
 
 	}
-    UE_LOG(LogTemp, Display, TEXT("%s"), *(mPaintSettings->mTexturePaintSettings.mPaintTexture->GetName()) );
 }
 
 void FOdysseyViewportDrawingEditorPainter::RegisterCommands(TSharedRef<FUICommandList> CommandList)
@@ -365,7 +368,26 @@ void FOdysseyViewportDrawingEditorPainter::AddReferencedObjects(FReferenceCollec
 
 void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 {
-    mWidget->GetPaintEngine()->EndStroke();
+    mBeginPosition = FVector2D(0,0);
+    mController->GetData()->PaintEngine()->EndStroke();
+    /*
+    CopyUTexturePixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock(),mStrokeBufferTexture2D);
+    TArray<::ul3::FRect> rects;
+    ::ul3::FRect rect = ::ul3::FRect(0,0,1023,1023);
+    rects.Add(rect);
+    mController->GetData()->PaintEngine()->BlendStrokeBlockInPreviewBlock(rects);
+    mController->GetData()->PaintEngine()->EndStroke();
+
+    InvalidateTextureFromData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture2D);
+
+    for(TMap< UTexture2D*,FPaintTexture2DData >::TIterator It(mPaintTargetData); It; ++It)
+    {
+        FPaintTexture2DData* textureData = &It.Value();
+        if(textureData)
+        {
+            TexturePaintHelpers::CopyTextureToRenderTargetTexture(mStrokeBufferTexture2D,textureData->PaintRenderTargetTexture,GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        }
+    }*/
 
 	IMeshPainter::FinishPainting();	
 }
@@ -432,14 +454,14 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
             FVector2D coord;
             UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord);
 
-            /*if( mLastEvent )
+            if( mLastEvent )
             {
                 mLastEvent->x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
                 mLastEvent->y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
 
-                mWidget->GetPaintEngine()->Tick();
-                mWidget->GetPaintEngine()->PushStroke(*mLastEvent);
-            }*/
+                mController->GetData()->PaintEngine()->Tick();
+                mController->GetData()->PaintEngine()->PushStroke(*mLastEvent);
+            }
 
 		}
 
@@ -507,7 +529,7 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
                         for(int32 paintRayResultId : paintRayResultIds)
                         {
                             PaintTexture(paintRayResults[paintRayResultId],trianglePaintInfoArray,*meshAdapter);
-                            UE_LOG(LogTemp, Display, TEXT("id: %d"), paintRayResultId );
+                            //UE_LOG(LogTemp, Display, TEXT("id: %d"), paintRayResultId );
                             break;
                         }
                     }
@@ -735,50 +757,13 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingTexture(UMeshComponent* 
                     mBrushRenderTargetTexture = nullptr;
                     mBrushRenderTargetTexture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
                     const bool bForceLinearGamma = true;
-                    mBrushRenderTargetTexture->ClearColor = FLinearColor::Black;
+                    mBrushRenderTargetTexture->ClearColor = FLinearColor::Transparent;
                     mBrushRenderTargetTexture->bNeedsTwoCopies = true;
                     mBrushRenderTargetTexture->InitCustomFormat(brushTargetTextureWidth,brushTargetTextureHeight,PF_A16B16G16R16,bForceLinearGamma);
                     mBrushRenderTargetTexture->UpdateResourceImmediate();
                     mBrushRenderTargetTexture->AddressX = textureData->PaintRenderTargetTexture->AddressX;
                     mBrushRenderTargetTexture->AddressY = textureData->PaintRenderTargetTexture->AddressY;
                 }
-
-                /*if(mPaintSettings->mTexturePaintSettings.mEnableSeamPainting)
-                {
-                    // Create the rendertarget used to store a mask for our paint delta area 
-                    if(BrushMaskRenderTargetTexture == nullptr ||
-                        BrushMaskRenderTargetTexture->GetSurfaceWidth() != BrushTargetTextureWidth ||
-                        BrushMaskRenderTargetTexture->GetSurfaceHeight() != BrushTargetTextureHeight)
-                    {
-                        BrushMaskRenderTargetTexture = nullptr;
-                        BrushMaskRenderTargetTexture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
-                        const bool bForceLinearGamma = true;
-                        BrushMaskRenderTargetTexture->ClearColor = FLinearColor::Black;
-                        BrushMaskRenderTargetTexture->bNeedsTwoCopies = true;
-                        BrushMaskRenderTargetTexture->InitCustomFormat(BrushTargetTextureWidth,BrushTargetTextureHeight,PF_B8G8R8A8,bForceLinearGamma);
-                        BrushMaskRenderTargetTexture->UpdateResourceImmediate();
-                        BrushMaskRenderTargetTexture->AddressX = TextureData->PaintRenderTargetTexture->AddressX;
-                        BrushMaskRenderTargetTexture->AddressY = TextureData->PaintRenderTargetTexture->AddressY;
-                    }
-
-                    // Create the rendertarget used to store a texture seam mask
-                    if(SeamMaskRenderTargetTexture == nullptr ||
-                        SeamMaskRenderTargetTexture->GetSurfaceWidth() != TextureWidth ||
-                        SeamMaskRenderTargetTexture->GetSurfaceHeight() != TextureHeight)
-                    {
-                        SeamMaskRenderTargetTexture = nullptr;
-                        SeamMaskRenderTargetTexture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
-                        const bool bForceLinearGamma = true;
-                        SeamMaskRenderTargetTexture->ClearColor = FLinearColor::Black;
-                        SeamMaskRenderTargetTexture->bNeedsTwoCopies = true;
-                        SeamMaskRenderTargetTexture->InitCustomFormat(BrushTargetTextureWidth,BrushTargetTextureHeight,PF_B8G8R8A8,bForceLinearGamma);
-                        SeamMaskRenderTargetTexture->UpdateResourceImmediate();
-                        SeamMaskRenderTargetTexture->AddressX = TextureData->PaintRenderTargetTexture->AddressX;
-                        SeamMaskRenderTargetTexture->AddressY = TextureData->PaintRenderTargetTexture->AddressY;
-                    }
-
-                    bGenerateSeamMask = true;
-                }*/
 
                 bStartedPainting = true;
             }
@@ -803,6 +788,23 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingTexture(UMeshComponent* 
 
         check(texture2D != nullptr);
         mPaintingTexture2D = texture2D;
+
+        mStrokeBufferTexture2D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
+        mStrokeBufferTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        mStrokeBufferTexture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        mStrokeBufferTexture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+        mStrokeBufferTexture2D->UpdateResource();
+        mStrokeBufferTexture2D->PostEditChange();
+
+        mStrokeBufferTexture3D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
+        mStrokeBufferTexture3D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        mStrokeBufferTexture3D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        mStrokeBufferTexture3D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+        mStrokeBufferTexture3D->UpdateResource();
+        mStrokeBufferTexture3D->PostEditChange();
+
         // OK, now we need to make sure our render target is filled in with data
         TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
     }
@@ -816,10 +818,12 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
         return;
     }
 
-    UE_LOG(LogTemp, Display, TEXT("triangles: %d"), iInfluencedTriangles.Num() );
+    if( mBeginPosition == FVector2D(0,0))
+        mBeginPosition = FVector2D(mLastEvent->x / mPaintingTexture2D->GetSizeX(), mLastEvent->y / mPaintingTexture2D->GetSizeY());
+
+    //UE_LOG(LogTemp, Display, TEXT("triangles: %d"), iInfluencedTriangles.Num() );
 
     const auto featureLevel = GEditor->GetEditorWorldContext().World()->FeatureLevel;
-
 
     FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
     check(textureData != nullptr && textureData->PaintRenderTargetTexture != nullptr);
@@ -827,7 +831,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
     // Copy the current image to the brush rendertarget texture.
     {
         check(mBrushRenderTargetTexture != nullptr);
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintRenderTargetTexture,mBrushRenderTargetTexture,featureLevel);
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,mBrushRenderTargetTexture,featureLevel);
     }
 
     const bool bEnableSeamPainting = false;
@@ -840,82 +844,28 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
     // dereference these pointers.  We're just passing them along to other functions that will use them on the render
     // thread.  The only thing we're allowed to do is check to see if they are nullptr or not.
     FTextureRenderTargetResource* brushRenderTargetResource = mBrushRenderTargetTexture->GameThread_GetRenderTargetResource();
+    //mStrokeBufferTexture3D->Resource->TextureRHI = brushRenderTargetResource->GetRenderTargetTexture();
+
     check(brushRenderTargetResource != nullptr);
 
     // Create a canvas for the brush render target.
     FCanvas brushPaintCanvas(brushRenderTargetResource,nullptr,0,0,0,featureLevel);
 
+    InvalidateTextureFromData(mController->GetData()->PaintEngine()->StrokeBlock(), mStrokeBufferTexture2D);
+
     // Parameters for brush paint
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
     {
-        meshPaintBatchedElementParameters->ShaderParams.CloneTexture = mBrushRenderTargetTexture; //Texture we draw on
+        meshPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferTexture2D;
         meshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
-        meshPaintBatchedElementParameters->ShaderParams.BrushColor = FLinearColor(mWidget->GetPaintEngine()->GetColor().RF(), mWidget->GetPaintEngine()->GetColor().GF(), mWidget->GetPaintEngine()->GetColor().BF(), mWidget->GetPaintEngine()->GetColor().AF() );
+        meshPaintBatchedElementParameters->ShaderParams.TextureHitPoint = mBeginPosition;
     }
-
-    // Parameters for brush paint
-    /*TRefCountPtr< FMeshPaintBatchedElementParameters > MeshPaintBatchedElementParameters(new FMeshPaintBatchedElementParameters());
-    {
-        MeshPaintBatchedElementParameters->ShaderParams.CloneTexture = mBrushRenderTargetTexture; //Texture we draw on
-        MeshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
-        MeshPaintBatchedElementParameters->ShaderParams.BrushRadius = 1000; //max X or Y of the texture we draw ?
-        MeshPaintBatchedElementParameters->ShaderParams.BrushRadialFalloffRange = 100;
-        MeshPaintBatchedElementParameters->ShaderParams.BrushDepth = 100;
-        MeshPaintBatchedElementParameters->ShaderParams.BrushDepthFalloffRange = 500;
-        MeshPaintBatchedElementParameters->ShaderParams.BrushStrength = 100;
-        MeshPaintBatchedElementParameters->ShaderParams.BrushColor = FLinearColor::Black;
-        MeshPaintBatchedElementParameters->ShaderParams.RedChannelFlag = true;
-        MeshPaintBatchedElementParameters->ShaderParams.GreenChannelFlag = true;
-        MeshPaintBatchedElementParameters->ShaderParams.BlueChannelFlag = true;
-        MeshPaintBatchedElementParameters->ShaderParams.AlphaChannelFlag = true;
-        MeshPaintBatchedElementParameters->ShaderParams.GenerateMaskFlag = false;
-    }*/
 
     FBatchedElements* brushPaintBatchedElements = brushPaintCanvas.GetBatchedElements(FCanvas::ET_Triangle,meshPaintBatchedElementParameters,nullptr,SE_BLEND_Opaque);
     brushPaintBatchedElements->AddReserveVertices(iInfluencedTriangles.Num() * 3);
     brushPaintBatchedElements->AddReserveTriangles(iInfluencedTriangles.Num(),nullptr,SE_BLEND_Opaque);
 
     FHitProxyId brushPaintHitProxyId = brushPaintCanvas.GetHitProxyId();
-
-    /*TSharedPtr<FCanvas> BrushMaskCanvas;
-    TRefCountPtr< FMeshPaintBatchedElementParameters > MeshPaintMaskBatchedElementParameters;
-    FBatchedElements* BrushMaskBatchedElements = nullptr;
-    FHitProxyId BrushMaskHitProxyId;
-    FTextureRenderTargetResource* BrushMaskRenderTargetResource = nullptr;*/
-
-    /*if(bEnableSeamPainting)
-    {
-        BrushMaskRenderTargetResource = BrushMaskRenderTargetTexture->GameThread_GetRenderTargetResource();
-        check(BrushMaskRenderTargetResource != nullptr);
-
-        // Create a canvas for the brush mask rendertarget and clear it to black.
-        BrushMaskCanvas = TSharedPtr<FCanvas>(new FCanvas(BrushMaskRenderTargetResource,nullptr,0,0,0,FeatureLevel));
-        BrushMaskCanvas->Clear(FLinearColor::Black);
-
-        // Parameters for the mask
-        MeshPaintMaskBatchedElementParameters = TRefCountPtr< FMeshPaintBatchedElementParameters >(new FMeshPaintBatchedElementParameters());
-        {
-            MeshPaintMaskBatchedElementParameters->ShaderParams.CloneTexture = TextureData->PaintRenderTargetTexture;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.WorldToBrushMatrix = WorldToBrushMatrix;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BrushRadius = InParams.InnerBrushRadius + InParams.BrushRadialFalloffRange;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BrushRadialFalloffRange = InParams.BrushRadialFalloffRange;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BrushDepth = InParams.InnerBrushDepth + InParams.BrushDepthFalloffRange;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BrushDepthFalloffRange = InParams.BrushDepthFalloffRange;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BrushStrength = InParams.BrushStrength;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BrushColor = InParams.BrushColor;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.RedChannelFlag = InParams.bWriteRed;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.GreenChannelFlag = InParams.bWriteGreen;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.BlueChannelFlag = InParams.bWriteBlue;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.AlphaChannelFlag = InParams.bWriteAlpha;
-            MeshPaintMaskBatchedElementParameters->ShaderParams.GenerateMaskFlag = true;
-        }
-
-        BrushMaskBatchedElements = BrushMaskCanvas->GetBatchedElements(FCanvas::ET_Triangle,MeshPaintMaskBatchedElementParameters,nullptr,SE_BLEND_Opaque);
-        BrushMaskBatchedElements->AddReserveVertices(InInfluencedTriangles.Num() * 3);
-        BrushMaskBatchedElements->AddReserveTriangles(InInfluencedTriangles.Num(),nullptr,SE_BLEND_Opaque);
-
-        BrushMaskHitProxyId = BrushMaskCanvas->GetHitProxyId();
-    }*/
 
     // Process the influenced triangles - storing off a large list is much slower than processing in a single loop
     for(int32 curIndex = 0; curIndex < iInfluencedTriangles.Num(); ++curIndex)
@@ -988,7 +938,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
         FVector4 vert1(curTriangle.TrianglePoints[1].X,curTriangle.TrianglePoints[1].Y,0,1);
         FVector4 vert2(curTriangle.TrianglePoints[2].X,curTriangle.TrianglePoints[2].Y,0,1);
 
-        UE_LOG(LogTemp,Display,TEXT("------------------------------------"));
+        //UE_LOG(LogTemp,Display,TEXT("------------------------------------"));
         /*UE_LOG(LogTemp,Display,TEXT("vert0x: %lf, vert0y: %lf,vert0z: %lf, vert0w: %lf"),vert0.X,vert0.Y,vert0.Z,vert0.W);
         UE_LOG(LogTemp,Display, TEXT("vert1x: %lf, vert1y: %lf,vert1z: %lf, vert1w: %lf"), vert1.X, vert1.Y, vert1.Z, vert1.W);
         UE_LOG(LogTemp,Display,TEXT("vert2x: %lf, vert2y: %lf,vert2z: %lf, vert2w: %lf"),vert2.X,vert2.Y,vert2.Z,vert2.W);*/
@@ -1008,27 +958,13 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
             int32 v0 = brushPaintBatchedElements->AddVertex(vert0,curTriangle.TriUVs[0],col0,brushPaintHitProxyId);
             int32 v1 = brushPaintBatchedElements->AddVertex(vert1,curTriangle.TriUVs[1],col1,brushPaintHitProxyId);
             int32 v2 = brushPaintBatchedElements->AddVertex(vert2,curTriangle.TriUVs[2],col2,brushPaintHitProxyId);
-            UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[0]x: %lf, curTriangle.TriUVs[0]y: %lf"),curTriangle.TriUVs[0].X,curTriangle.TriUVs[0].Y);
+            /*UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[0]x: %lf, curTriangle.TriUVs[0]y: %lf"),curTriangle.TriUVs[0].X,curTriangle.TriUVs[0].Y);
             UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[1]x: %lf, curTriangle.TriUVs[1]y: %lf"),curTriangle.TriUVs[1].X,curTriangle.TriUVs[1].Y);
-            UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[2]x: %lf, curTriangle.TriUVs[2]y: %lf"),curTriangle.TriUVs[2].X,curTriangle.TriUVs[2].Y);
+            UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[2]x: %lf, curTriangle.TriUVs[2]y: %lf"),curTriangle.TriUVs[2].X,curTriangle.TriUVs[2].Y);*/
 
             //The texture inside should be the texture of the brush, it may work
             brushPaintBatchedElements->AddTriangle(v0,v1,v2,meshPaintBatchedElementParameters,SE_BLEND_Opaque);
-            FMatrix BrushSpaceVertexPosition = FMatrix(FVector(col0.R), FVector(col0.G), FVector(col0.B), FVector(1.0f)) * worldToBrushMatrix;
-            //brushPaintBatchedElements->AddTriangleExtensive(v0,v1,v2, MeshPaintBatchedElementParameters, textureData->PaintingTexture2D->Resource,SE_BLEND_Opaque);
-            UE_LOG(LogTemp, Display, TEXT("%s"), *(BrushSpaceVertexPosition.ToString()));
-
         }
-
-        // Brush Mask triangle
-        /*if(bEnableSeamPainting)
-        {
-            int32 V0 = BrushMaskBatchedElements->AddVertex(vert0,curTriangle.TriUVs[0],col0,BrushMaskHitProxyId);
-            int32 V1 = BrushMaskBatchedElements->AddVertex(vert1,curTriangle.TriUVs[1],col1,BrushMaskHitProxyId);
-            int32 V2 = BrushMaskBatchedElements->AddVertex(vert2,curTriangle.TriUVs[2],col2,BrushMaskHitProxyId);
-
-            BrushMaskBatchedElements->AddTriangle(V0,V1,V2,MeshPaintMaskBatchedElementParameters,SE_BLEND_Opaque);
-        }*/
     }
 
     // Tell the rendering thread to draw any remaining batched elements
@@ -1047,129 +983,29 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
                 brushRenderTargetResource->GetRenderTargetTexture(),	// Source texture
                 brushRenderTargetResource->TextureRHI,
                 FResolveParams());										// Resolve parameters
+
         });
     }
 
+    //mBrushRenderTargetTexture->bGPUSharedFlag = true;
 
-    /*if(bEnableSeamPainting)
-    {
-        BrushMaskCanvas->Flush_GameThread(true);
+    //brushRenderTargetResource->ReadPixelsPtr((FColor*)(mController->GetData()->PaintEngine()->StrokeBlock3D()->GetArray().GetData()));
+    //mBrushRenderTargetTexture->UpdateTexture2D(mStrokeBufferTexture3D, ETextureSourceFormat::TSF_RGBA16 );
+    //CopyURenderTargetPixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock3D()->GetArray().GetData(), mBrushRenderTargetTexture);
+    //CopyUTexturePixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock3D(), mStrokeBufferTexture2D);
+    /*TArray<::ul3::FRect> rects;
+    ::ul3::FRect rect = ::ul3::FRect(0,0,1023,1023);
+    rects.Add(rect);
+    mController->GetData()->PaintEngine()->BlendStrokeBlockInPreviewBlock(rects);
+    mController->OnPaintEngineStrokeChanged(rects);*/
 
-        {
-            ENQUEUE_RENDER_COMMAND(UpdateMeshPaintRTCommand2)(
-                [BrushMaskRenderTargetResource](FRHICommandListImmediate& RHICmdList)
-            {
-                // Copy (resolve) the rendered image from the frame buffer to its render target texture
-                RHICmdList.CopyToResolveTarget(
-                    BrushMaskRenderTargetResource->GetRenderTargetTexture(),		// Source texture
-                    BrushMaskRenderTargetResource->TextureRHI,
-                    FResolveParams());									// Resolve parameters
-            });
+    //mController->GetData()->PaintEngine()->UpdateTmpTileMapFromTriangles( iInfluencedTriangles );
 
-        }
-    }*/
-
-    if(!bEnableSeamPainting)
-    {
-        // Seam painting is not enabled so we just copy our delta paint info to the paint target.
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mBrushRenderTargetTexture,textureData->PaintRenderTargetTexture,featureLevel);
-    } 
-    /*else
-    {
-
-        // Constants used for generating quads across entire paint rendertarget
-        const float MinU = 0.0f;
-        const float MinV = 0.0f;
-        const float MaxU = 1.0f;
-        const float MaxV = 1.0f;
-        const float MinX = 0.0f;
-        const float MinY = 0.0f;
-        const float MaxX = textureData->PaintRenderTargetTexture->GetSurfaceWidth();
-        const float MaxY = textureData->PaintRenderTargetTexture->GetSurfaceHeight();
-
-        if(bGenerateSeamMask == true)
-        {
-            // Generate the texture seam mask.  This is a slow operation when the object has many triangles so we only do it
-            //  once when painting is started.
-
-            FPaintTexture2DData* SeamTextureData = GetPaintTargetData(PaintSettings->TexturePaintSettings.PaintTexture);
-
-            TexturePaintHelpers::GenerateSeamMask(TexturePaintingCurrentMeshComponent,InParams.UVChannel,SeamMaskRenderTargetTexture,PaintSettings->TexturePaintSettings.PaintTexture,SeamTextureData != nullptr ? SeamTextureData->PaintRenderTargetTexture : nullptr);
-            bGenerateSeamMask = false;
-        }
-
-        FTextureRenderTargetResource* RenderTargetResource = TextureData->PaintRenderTargetTexture->GameThread_GetRenderTargetResource();
-        check(RenderTargetResource != nullptr);
-        // Dilate the paint stroke into the texture seams.
-        {
-            // Create a canvas for the render target.
-            FCanvas Canvas3(RenderTargetResource,nullptr,0,0,0,FeatureLevel);
-
-
-            TRefCountPtr< FMeshPaintDilateBatchedElementParameters > MeshPaintDilateBatchedElementParameters(new FMeshPaintDilateBatchedElementParameters());
-            {
-                MeshPaintDilateBatchedElementParameters->ShaderParams.Texture0 = BrushRenderTargetTexture;
-                MeshPaintDilateBatchedElementParameters->ShaderParams.Texture1 = SeamMaskRenderTargetTexture;
-                MeshPaintDilateBatchedElementParameters->ShaderParams.Texture2 = BrushMaskRenderTargetTexture;
-                MeshPaintDilateBatchedElementParameters->ShaderParams.WidthPixelOffset = (float)(1.0f / TextureData->PaintRenderTargetTexture->GetSurfaceWidth());
-                MeshPaintDilateBatchedElementParameters->ShaderParams.HeightPixelOffset = (float)(1.0f / TextureData->PaintRenderTargetTexture->GetSurfaceHeight());
-
-            }
-
-            // Draw a quad to copy the texture over to the render target
-            TArray< FCanvasUVTri >	TriangleList;
-            FCanvasUVTri SingleTri;
-            SingleTri.V0_Pos = FVector2D(MinX,MinY);
-            SingleTri.V0_UV = FVector2D(MinU,MinV);
-            SingleTri.V0_Color = FLinearColor::White;
-
-            SingleTri.V1_Pos = FVector2D(MaxX,MinY);
-            SingleTri.V1_UV = FVector2D(MaxU,MinV);
-            SingleTri.V1_Color = FLinearColor::White;
-
-            SingleTri.V2_Pos = FVector2D(MaxX,MaxY);
-            SingleTri.V2_UV = FVector2D(MaxU,MaxV);
-            SingleTri.V2_Color = FLinearColor::White;
-            TriangleList.Add(SingleTri);
-
-            SingleTri.V0_Pos = FVector2D(MaxX,MaxY);
-            SingleTri.V0_UV = FVector2D(MaxU,MaxV);
-            SingleTri.V0_Color = FLinearColor::White;
-
-            SingleTri.V1_Pos = FVector2D(MinX,MaxY);
-            SingleTri.V1_UV = FVector2D(MinU,MaxV);
-            SingleTri.V1_Color = FLinearColor::White;
-
-            SingleTri.V2_Pos = FVector2D(MinX,MinY);
-            SingleTri.V2_UV = FVector2D(MinU,MinV);
-            SingleTri.V2_Color = FLinearColor::White;
-            TriangleList.Add(SingleTri);
-
-            FCanvasTriangleItem TriItemList(TriangleList,nullptr);
-            TriItemList.BatchedElementParameters = MeshPaintDilateBatchedElementParameters;
-            TriItemList.BlendMode = SE_BLEND_Opaque;
-            Canvas3.DrawItem(TriItemList);
-
-
-            // Tell the rendering thread to draw any remaining batched elements
-            Canvas3.Flush_GameThread(true);
-
-        }
-
-        {
-            ENQUEUE_RENDER_COMMAND(UpdateMeshPaintRTCommand3)(
-                [RenderTargetResource](FRHICommandListImmediate& RHICmdList)
-            {
-                // Copy (resolve) the rendered image from the frame buffer to its render target texture
-                RHICmdList.CopyToResolveTarget(
-                    RenderTargetResource->GetRenderTargetTexture(),		// Source texture
-                    RenderTargetResource->TextureRHI,
-                    FResolveParams());									// Resolve parameters
-            });
-
-        }
-
-    }*/
+    //CopyUTexturePixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock3D(), mPaintingTexture2D);
+    //mController->GetData()->PaintEngine()->Tick();
+    
+    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,textureData->PaintRenderTargetTexture,featureLevel);
+    
     FlushRenderingCommands();
 }
 
@@ -1467,6 +1303,10 @@ void FOdysseyViewportDrawingEditorPainter::Refresh()
 	Cleanup();
 
 	mDoRefreshCachedData = true;
+
+    mController->ClearLayerStackDelegates();
+    mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
+    mController->Init();
 }
 
 void FOdysseyViewportDrawingEditorPainter::Cleanup()
@@ -1597,7 +1437,7 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 			newTexture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
 		}
 		mPaintSettings->mTexturePaintSettings.mPaintTexture = newTexture;
-        mWidget->RefreshLayerStackView();
+        mController->OnEditedTextureChanged(newTexture);
 	}
 }
 
@@ -1646,7 +1486,7 @@ TArray<ComponentClass*> FOdysseyViewportDrawingEditorPainter::GetSelectedCompone
 
 void
 FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
-{
+{    
     if( mLastEvent )
         delete mLastEvent;
 
@@ -1664,32 +1504,8 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
     //TODO Add queue here to handle all events when PaintInternal() is called
 }
 
-void
-FOdysseyViewportDrawingEditorPainter::OnSetOdysseyBrushSettingsView()
-{
-    mSelectedMode = EOdysseyViewportSelectedMode::kBrushSettings;
-}
-
-void
-FOdysseyViewportDrawingEditorPainter::OnSetOdysseyStrokeOptionsView()
-{
-    mSelectedMode = EOdysseyViewportSelectedMode::kStrokeOptions;
-}
-
-void
-FOdysseyViewportDrawingEditorPainter::OnSetOdysseyLayerStackView()
-{
-    mSelectedMode = EOdysseyViewportSelectedMode::kLayerStack;
-}
-
-void
-FOdysseyViewportDrawingEditorPainter::OnSetOdysseyPerformanceOptionsView()
-{
-    mSelectedMode = EOdysseyViewportSelectedMode::kPerformanceOptions;
-}
-
 template TArray<UStaticMeshComponent*> FOdysseyViewportDrawingEditorPainter::GetSelectedComponents<UStaticMeshComponent>() const;
 template TArray<USkeletalMeshComponent*> FOdysseyViewportDrawingEditorPainter::GetSelectedComponents<USkeletalMeshComponent>() const;
 template TArray<UMeshComponent*> FOdysseyViewportDrawingEditorPainter::GetSelectedComponents<UMeshComponent>() const;
 
-#undef LOCTEXT_NAMESPACE // "PaintModePainter"
+#undef LOCTEXT_NAMESPACE

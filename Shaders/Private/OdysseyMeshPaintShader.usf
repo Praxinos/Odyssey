@@ -1,33 +1,30 @@
 #include "/Engine/Private/common.ush"
 
-/** Texture containing a clone of the texture we're currently rendering to. */
-Texture2D s_CloneTexture;
-SamplerState s_CloneTextureSampler;
+Texture2D s_Stroke2D;
+SamplerState s_TextureSampler;
 
 float4x4 c_WorldToBrushMatrix;
-
-float4 c_BrushColor;
+float2 c_TextureHitPoint;
 
 void MainPS( float4 InPosition : SV_POSITION,
 		   float2 InCloneTextureCoordinates : TEXCOORD0,
 		   float3 InWorldSpaceVertexPosition : TEXCOORD1,
 		   out float4 OutColor : SV_Target0)
 {
+    //InPosition.xy is in texture coordinates (0...1024)
     //InCloneTextureCoordinates is in UV coordinates (0...1)
     
-    float2 coord;
-    coord.x = 0.5;
-    coord.y = 0.5;
-    
-	float4 OldColor = Texture2DSample(s_CloneTexture, s_CloneTextureSampler, InCloneTextureCoordinates );
-
 	float4x4 WorldToBrushMatrix = c_WorldToBrushMatrix;
 
 	// Project the pixel into the plane of the brush
 	float3 WorldSpaceVertexPosition = InWorldSpaceVertexPosition;
 	float3 BrushSpaceVertexPosition = mul(float4( WorldSpaceVertexPosition, 1.0f ), WorldToBrushMatrix).xyz;
-	float2 BrushSpaceVertexPosition2D = BrushSpaceVertexPosition.xy;
+	float2 BrushSpaceVertexPosition2D = BrushSpaceVertexPosition.xy / 1024;
+        
+    float4 NewColor = Texture2DSample(s_Stroke2D, s_TextureSampler, InCloneTextureCoordinates);
+    OutColor = NewColor;
     
+    /*
    	// Start by using the old color
 	float4 NewColor = OldColor;
     
@@ -79,7 +76,7 @@ void MainPS( float4 InPosition : SV_POSITION,
 		}
 	}
     
-	OutColor = NewColor;
+	OutColor = NewColor;*/
 }
 
 

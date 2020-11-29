@@ -12,12 +12,11 @@ namespace OdysseyMeshPaintRendering
 	/** Batched element parameters for mesh paint shaders */
 	struct FOdysseyMeshPaintShaderParameters
 	{
-
 	public:
-		UTextureRenderTarget2D* CloneTexture;
+        UTexture2D* Stroke2D;
 
 		FMatrix WorldToBrushMatrix;
-		FLinearColor BrushColor;
+        FVector2D TextureHitPoint;
 	};
 
 
