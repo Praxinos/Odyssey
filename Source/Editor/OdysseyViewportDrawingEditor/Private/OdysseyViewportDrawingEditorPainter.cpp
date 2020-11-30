@@ -314,6 +314,9 @@ const FHitResult FOdysseyViewportDrawingEditorPainter::GetHitResult(const FVecto
 
 void FOdysseyViewportDrawingEditorPainter::ActorSelected(AActor* iActor)
 {
+    if( mPaintSettings->mTexturePaintSettings.mPaintTexture )
+        CommitAllPaintedTextures();
+
 	TInlineComponentArray<UMeshComponent*> meshComponents;
 	iActor->GetComponents<UMeshComponent>(meshComponents);
 	
@@ -1114,8 +1117,6 @@ void FOdysseyViewportDrawingEditorPainter::CommitAllPaintedTextures()
 {
 	if (mPaintTargetData.Num() > 0)
 	{
-		check(mPaintingTexture2D == nullptr);
-
 		FScopedTransaction transaction(LOCTEXT("MeshPaintMode_TexturePaint_Transaction", "Texture Paint"));
 
 		GWarn->BeginSlowTask(LOCTEXT("BeginMeshPaintMode_TexturePaint_CommitTask", "Committing Texture Paint Changes"), true);

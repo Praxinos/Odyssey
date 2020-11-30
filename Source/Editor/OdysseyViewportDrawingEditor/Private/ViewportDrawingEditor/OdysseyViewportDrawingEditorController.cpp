@@ -42,16 +42,16 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
     if( mData->Texture() )
     {
         if(!(mData->PaintEngine()->OnPreviewBlockTilesChanged().IsBound()))
-            GetData()->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEnginePreviewBlockTilesChanged);
+            mData->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEnginePreviewBlockTilesChanged);
 
         if(!(mData->PaintEngine()->OnEditedBlockTilesWillChange().IsBound()))
-            GetData()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesWillChange);
+            mData->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesWillChange);
 
         if(!(mData->PaintEngine()->OnEditedBlockTilesChanged().IsBound()))
-            GetData()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesChanged);
+            mData->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesChanged);
 
         if(!(mData->PaintEngine()->OnStrokeAbort().IsBound()))
-            GetData()->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort);
+            mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort);
 
         // Set LayerStack CB
         if(!(mData->LayerStack()->OnCurrentLayerChanged().IsBound()))
@@ -151,8 +151,6 @@ FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort()
 
 void FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
 {
-    UE_LOG(LogTemp, Display, TEXT("LAYER CHANGED"));
-
     //Remove all delegates for AlphaLock and set alpha lock to a default value
     if(iOldValue && iOldValue->GetType() == IOdysseyLayer::eType::kImage) {
         TSharedPtr<FOdysseyImageLayer> oldImageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(iOldValue);
