@@ -41,10 +41,20 @@ FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
 void
 FOdysseyViewportDrawingEditorData::Init(UTexture2D* iTexture)
 {
-    // Get or Create Texture userData
     if( iTexture )
     {
+        //Data edited texture changed, so we reset unload the texture and reset its properties
+        if( mTexture )
+        {
+            mPaintEngine->Flush();
+            SyncTextureAndInvalidate();
+            ApplyPropertiesBackup();
+        }
+
         mTexture = iTexture;
+
+        PrepareTextureProperties();
+
         UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
         if(!userData)
         {
@@ -120,4 +130,42 @@ void
 FOdysseyViewportDrawingEditorData::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance)
 {
     mBrushInstance = iBrushInstance;
+}
+
+
+void
+FOdysseyViewportDrawingEditorData::SyncTextureAndInvalidate()
+{
+    CopyBlockDataIntoUTexture(mDisplaySurface->Block(),mTexture);
+    InvalidateTextureFromData(mDisplaySurface->Block(),mTexture);
+}
+
+void
+FOdysseyViewportDrawingEditorData::PrepareTextureProperties()
+{
+    FTextureFormatSettings textureFormatSettings;
+    mTexture->GetLayerFormatSettings(0,textureFormatSettings);
+
+    // Create new Texture Properties Backup
+    mPropertiesBackup ={mTexture->MipGenSettings,mTexture->CompressionSettings,mTexture->LODGroup,textureFormatSettings};
+
+    // Overwrite Texture properties
+    mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
+
+    textureFormatSettings.CompressionNone = 1;
+    mTexture->SetLayerFormatSettings(0,textureFormatSettings);
+
+    // mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    // mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+    mTexture->UpdateResource();
+}
+
+void
+FOdysseyViewportDrawingEditorData::ApplyPropertiesBackup()
+{
+    mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
+    mTexture->SetLayerFormatSettings(0,mPropertiesBackup.mTextureFormatSettings);
+    // mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
+    // mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
+    mTexture->UpdateResource();
 }

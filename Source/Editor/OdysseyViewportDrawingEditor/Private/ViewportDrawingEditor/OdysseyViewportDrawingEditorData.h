@@ -11,6 +11,14 @@ class UOdysseyBrush;
 class UOdysseyBrushAssetBase;
 class FOdysseySurfaceEditable;
 
+struct FTexturePropertiesBackup
+{
+    TextureMipGenSettings       mTextureMipGenBackup;
+    TextureCompressionSettings  mTextureCompressionBackup;
+    TextureGroup                mTextureGroupBackup;
+    FTextureFormatSettings      mTextureFormatSettings;
+};
+
 /**
  * Implements an Editor toolkit for textures.
  */
@@ -35,6 +43,11 @@ public:
     void						        Brush(UOdysseyBrush* iBrush);
     void						        BrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
 
+public:
+    void SyncTextureAndInvalidate();
+    void PrepareTextureProperties();
+    void ApplyPropertiesBackup();
+
 private:
     UTexture2D*                   mTexture;
     FOdysseyLayerStack*           mLayerStack;
@@ -42,4 +55,5 @@ private:
     FOdysseyPaintEngine3D*        mPaintEngine;
     UOdysseyBrush*                mBrush;
     UOdysseyBrushAssetBase*       mBrushInstance;
+    FTexturePropertiesBackup      mPropertiesBackup;
 };
