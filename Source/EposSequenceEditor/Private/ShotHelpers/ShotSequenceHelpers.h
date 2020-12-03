@@ -57,7 +57,7 @@ public:
     /**
     *  Create all default inner sub tracks of added actor
     *
-    * @param TSharedPtr<ISequencer> iSequencer to add inner track.
+    * @param ISequencer iSequencer to add inner track.
     * @param AActor iActor corresponding to the binding.
     * @param FGuid iBinding  Guid of the track containing the actor.
     */
@@ -66,7 +66,7 @@ public:
     /**
     *  Fix the binding of the cameracut track when a new camera is dropped
     *
-    * @param TSharedPtr<ISequencer> iSequencer to add inner track.
+    * @param ISequencer iSequencer to add inner track.
     * @param AActor iActor corresponding to the binding.
     * @param FGuid iBinding  Guid of the track containing the actor.
     */

@@ -3,14 +3,18 @@
 
 #include "ShotSequenceHelpers.h"
 
+#include "AssetToolsModule.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
+#include "Factories/MaterialInstanceConstantFactoryNew.h"
+#include "Factories/Texture2dFactoryNew.h"
 #include "ISequencer.h"
 #include "LevelEditorActions.h"
 #include "LevelEditorViewport.h"
+#include "Materials/MaterialInstanceConstant.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
@@ -281,6 +285,49 @@ ShotSequenceHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, float i
     //return FVector( 1.5f, 1.f, 1.f );
 }
 
+static
+UMaterialInstanceConstant*
+CreateMaterialInstanceConstantAsset( UMovieSceneSequence* iSequence, FString& oPackageName, FString& oAssetName )
+{
+    UMaterial* material = LoadObject<UMaterial>( nullptr, TEXT( "/Epos/M_Plane_Basic.M_Plane_Basic" ) );
+    if( !material )
+        return nullptr;
+
+    UPackage* package = iSequence->GetPackage();
+    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
+
+    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    Module.Get().CreateUniqueAssetName( package_name, "_Inst", oPackageName, oAssetName );
+
+    UMaterialInstanceConstantFactoryNew* factory = NewObject<UMaterialInstanceConstantFactoryNew>();
+    factory->InitialParent = material;
+
+    FString package_path = FPackageName::GetLongPackagePath( oPackageName );
+    UObject* new_object = Module.Get().CreateAsset( oAssetName, package_path, UMaterialInstanceConstant::StaticClass(), factory );
+
+    return Cast<UMaterialInstanceConstant>( new_object );
+}
+
+static
+UTexture2D*
+CreateTexture2DAsset( UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName )
+{
+    UTexture2D* texture_transparent = LoadObject<UTexture2D>( nullptr, TEXT( "/Epos/T_Transparent" ) );
+    if( !texture_transparent )
+        return nullptr;
+
+    UPackage* package = iMaterial->GetPackage();
+    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/M_Plane_Basic_Inst
+
+    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    Module.Get().CreateUniqueAssetName( package_name, "_Texture", oPackageName, oAssetName );
+
+    FString package_path = FPackageName::GetLongPackagePath( oPackageName );
+    UObject* new_object = Module.Get().DuplicateAsset( oAssetName, package_path, texture_transparent );
+
+    return Cast<UTexture2D>( new_object );
+}
+
 //static
 void
 ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
@@ -305,18 +352,54 @@ ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, con
 
     //---
 
-    UStaticMesh* Mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Epos/S_1_Unit_Plane.S_1_Unit_Plane" ) );
-    check( Mesh );
-    UMaterial* material = LoadObject<UMaterial>( nullptr, TEXT( "/Epos/M_SimpleUnlitTranslucent.M_SimpleUnlitTranslucent" ) );
-    check( material );
+    UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Epos/S_1_Unit_Plane.S_1_Unit_Plane" ) );
+    check( plane_mesh );
+
+    //---
+
+    FString new_material_package_name;
+    FString new_material_asset_name;
+    UMaterialInstanceConstant* new_material = CreateMaterialInstanceConstantAsset( iSequencer->GetFocusedMovieSceneSequence(), new_material_package_name, new_material_asset_name );
+    if( !new_material )
+        return;
+
+    FString new_texture_package_name;
+    FString new_texture_asset_name;
+    UTexture2D* new_texture = CreateTexture2DAsset( iSequencer->GetFocusedMovieSceneSequence(), new_material, new_texture_package_name, new_texture_asset_name );
+    if( !new_texture )
+        return;
+
+    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
+
+    FStaticParameterSet static_params;
+    new_material->GetStaticParameterValues( static_params );
+    for( auto& parameter : static_params.StaticSwitchParameters )
+        parameter.bOverride = true;
+    new_material->UpdateStaticPermutation( static_params );
+
+    // Maybe needed to compute all cases during creation, but not for now
+    //for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
+    //{
+    //    UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
+    //    for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
+    //    {
+    //        static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
+    //        UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
+    //        new_material->UpdateStaticPermutation( static_params );
+    //    }
+    //}
+
+    //---
+
+    //---
 
     FActorSpawnParameters SpawnParams;
     AStaticMeshActor* plane = World->SpawnActor<AStaticMeshActor>( SpawnParams );
 
-    plane->GetStaticMeshComponent()->SetStaticMesh( Mesh );
-    UMaterialInstanceDynamic* mid = plane->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamicFromMaterial( 0, material );
-    //if( mid )
-    //    mid->SetVectorParameterValue( FName( TEXT( "Color" ) ), FocusSettings.DebugFocusPlaneColor.ReinterpretAsLinear() );
+    plane->GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
+    plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
+
+    //---
 
     plane->SetActorScale3D( plane_scale );
     plane->SetActorLocation( plane_location );
