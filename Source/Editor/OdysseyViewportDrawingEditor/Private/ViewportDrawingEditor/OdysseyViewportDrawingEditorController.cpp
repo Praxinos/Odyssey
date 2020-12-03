@@ -175,6 +175,7 @@ void FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged(TS
         return;
 
     mData->PaintEngine()->Block(imageLayer->GetBlock());
+    UE_LOG(LogTemp, Display, TEXT("%s"), *(imageLayer->GetNameAsText().ToString()));
     mData->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mGUI->GetPaintModifiers()->GetAlphaMode());
 
     //Set AlphaLock Delegate
@@ -290,6 +291,7 @@ FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTex
     {
         mData->Init(iTexture);
         mGUI->RefreshLayerStackView(mData->LayerStack());
+        Init();
     }
 }
 

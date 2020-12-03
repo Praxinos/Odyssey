@@ -1440,7 +1440,7 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 		{
 			newTexture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
             mPaintSettings->mTexturePaintSettings.mPaintTexture = newTexture;
-            mController->OnEditedTextureChanged(newTexture);
+            mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
 		}
 	}
 }
