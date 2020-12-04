@@ -11,6 +11,7 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SHeader.h"
+#include "Widgets/Layout/SExpandableArea.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "PropertyCustomizationHelpers.h"
 #include "OdysseyViewportDrawingEditorPainter.h"
@@ -90,8 +91,9 @@ TSharedPtr<SWidget> SOdysseyViewportDrawingEditorGUI::CreateTabSelectorWidget(FO
 	toolbar.SetStyle(&FEditorStyle::Get(), "FoliageEditToolbar");
 	{
 		toolbar.AddToolBarButton(FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyBrushSettingsView);
-		toolbar.AddToolBarButton(FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyStrokeOptions);
+		toolbar.AddToolBarButton(FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyStrokeOptionsView);
 		toolbar.AddToolBarButton(FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyLayerStackView);
+        toolbar.AddToolBarButton(FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyToolsView);
 	}
 
 	return
@@ -139,145 +141,269 @@ void SOdysseyViewportDrawingEditorGUI::CreateMainWidget(FOdysseyViewportDrawingE
 				    .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 				    [
 					    SNew(SVerticalBox)	
-			            /** Texture paint action buttons widget */
                         + SVerticalBox::Slot()
                         .AutoHeight()
                         [
+
+                            // Brush Selector Widget -----------
+
 						    SNew(SVerticalBox)
                             .Visibility(this, &SOdysseyViewportDrawingEditorGUI::GetBrushSettingsWidgetVisibility )
                    		    + SVerticalBox::Slot()
                             .Padding(StandardPadding)
 			                .AutoHeight()
 						    [
-                                SNew(SHeader)
-						        [
-							        SNew(STextBlock)
-							        .Text(LOCTEXT("BrushSelector", "Brush Selector"))
-						        ]
-                            ]
-                   		    + SVerticalBox::Slot()
-			                .AutoHeight()
-						    [
-                                mBrushSelector.ToSharedRef()
-                            ]
-                   		    + SVerticalBox::Slot()
-                            .Padding(StandardPadding)
-			                .AutoHeight()
-						    [
-                                SNew(SHeader)
-						        [
-							        SNew(STextBlock)
-							        .Text(LOCTEXT("PaintModifiers", "Paint Modifiers"))
-						        ]
-                            ]
-                   		    + SVerticalBox::Slot()
-			                .AutoHeight()
-						    [
-                                mPaintModifiers.ToSharedRef()
-                            ]
-                   		    + SVerticalBox::Slot()
-                            .Padding(StandardPadding)
-			                .AutoHeight()
-						    [
-                                SNew(SHeader)
-						        [
-							        SNew(STextBlock)
-							        .Text(LOCTEXT("ExposedParameters", "Exposed Parameters"))
-						        ]
-                            ]
-                   		    + SVerticalBox::Slot()
-			                .AutoHeight()
-						    [
-                                mBrushExposedParameters.ToSharedRef()
-                            ]
-                   		    + SVerticalBox::Slot()
-                            .Padding(StandardPadding)
-			                .AutoHeight()
-						    [
-                                SNew(SHeader)
-						        [
-							        SNew(STextBlock)
-							        .Text(LOCTEXT("ColorSelector", "Color Selector"))
-						        ]
-                            ]
-                   		    + SVerticalBox::Slot()
-			                .AutoHeight()
-						    [
-                                SNew(SBox)
-                                .HeightOverride(256)
+                                SNew(SExpandableArea)
+                                .HeaderContent()
                                 [
-                                    mColorSelector.ToSharedRef()
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("BrushSelector","Brush Selector"))
+                                ]
+                                .BodyContent()
+                                [
+                                    mBrushSelector.ToSharedRef()
                                 ]
                             ]
                    		    + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
 			                .AutoHeight()
 						    [
-                                mColorSliders.ToSharedRef()
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("PaintModifiers","Paint Modifiers"))
+                                ]
+                                .BodyContent()
+                                [
+                                    mPaintModifiers.ToSharedRef()
+                                ]
+                            ]
+                   		    + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+			                .AutoHeight()
+						    [
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("ExposedParameters","Exposed Parameters"))
+                                ]
+                                .BodyContent()
+                                [
+                                    mBrushExposedParameters.ToSharedRef()
+                                ]
+                            ]
+                   		    + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+			                .AutoHeight()
+						    [
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("ColorSelector","Color Selector"))
+                                ]
+                                .BodyContent()
+                                [
+                                    SNew(SVerticalBox)
+                                    + SVerticalBox::Slot()
+                                    .AutoHeight()
+                                    [
+                                        SNew(SBox)
+                                        .HeightOverride(256)
+                                        [
+                                            mColorSelector.ToSharedRef()
+                                        ]
+                                    ]
+                                    + SVerticalBox::Slot()
+                                    .AutoHeight()
+                                    [
+                                        mColorSliders.ToSharedRef()
+                                    ]
+                                ]
                             ]
                         ]
+
+                        // Stroke Options Widget ----------------
+
                    		+ SVerticalBox::Slot()
                         .Padding(StandardPadding)
 			            .AutoHeight()
 						[
-                            SNew(SHeader)
-                            .Visibility(this, &SOdysseyViewportDrawingEditorGUI::GetStrokeOptionsWidgetVisibility )
-						    [
-							    SNew(STextBlock)
-							    .Text(LOCTEXT("StrokeOptions", "Stroke Options"))
-						    ]
-                        ]
-                        + SVerticalBox::Slot()
-                        .AutoHeight()
-                        [
-						    SNew(SHorizontalBox)
-                            .Visibility(this, &SOdysseyViewportDrawingEditorGUI::GetStrokeOptionsWidgetVisibility )
-                   		    + SHorizontalBox::Slot()
-						    [
-                                mStrokeOptions.ToSharedRef()
+                            SNew(SVerticalBox)
+                            .Visibility(this,&SOdysseyViewportDrawingEditorGUI::GetStrokeOptionsWidgetVisibility)
+                            + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+                            .AutoHeight()
+                            [
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("StrokeOptions","Stroke Options"))
+                                ]
+                                .BodyContent()
+                                [
+                                    mStrokeOptions.ToSharedRef()
+                                ]
                             ]
                         ]
+
+                        // Layer Stack Widget ------------------
+
                    		+ SVerticalBox::Slot()
                         .Padding(StandardPadding)
 			            .AutoHeight()
 						[
-                            SNew(SHeader)
-                            .Visibility( this, &SOdysseyViewportDrawingEditorGUI::GetLayerStackWidgetVisibility )
-						    [
-							    SNew(STextBlock)
-							    .Text(LOCTEXT("LayerStack", "Layer Stack"))
-						    ]
+                            SNew(SVerticalBox)
+                            .Visibility(this,&SOdysseyViewportDrawingEditorGUI::GetLayerStackWidgetVisibility)
+                            + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+                            .AutoHeight()
+                            [
+                               SNew(SExpandableArea)
+                               .HeaderContent()
+                               [
+                                   SNew(STextBlock)
+                                   .Text(LOCTEXT("LayerStack","Layer Stack"))
+                               ]
+                               .BodyContent()
+                               [
+                                   SNew(SVerticalBox)
+                                   + SVerticalBox::Slot()
+                                   .AutoHeight()
+                                   .Expose(mLayerStackView)
+                                   [
+                                       SNullWidget::NullWidget
+                                   ]
+                               ]
+                            ]
+                            + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+                            .AutoHeight()
+                            [
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("Texture to edit","Texture to edit"))
+                                ]
+                                .BodyContent()
+                                [
+                                    SNew(SObjectPropertyEntryBox)
+                                    .ObjectPath(this,&SOdysseyViewportDrawingEditorGUI::PaintTexturePath)
+                                    .AllowedClass(UTexture2D::StaticClass())
+                                    .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::ShouldFilterTextureAsset))
+                                    .OnObjectChanged(FOnSetObject::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::PaintTextureChanged))
+                                    .DisplayUseSelected(false)
+                                    //.ThumbnailPool(iCustomizationUtils.GetThumbnailPool())
+                                ]
+                            ]
                         ]
-                        + SVerticalBox::Slot()
-                        .AutoHeight()
-                        .Expose( mLayerStackView )
-                        [
-                            SNullWidget::NullWidget
-                        ]
+
+                        // Tools Widgets
+
                         + SVerticalBox::Slot()
                         .Padding(StandardPadding)
                         .AutoHeight()
                         [
-                            SNew(SHeader)
-                            .Visibility(this,&SOdysseyViewportDrawingEditorGUI::GetLayerStackWidgetVisibility)
+                            SNew(SVerticalBox)
+                            .Visibility(this,&SOdysseyViewportDrawingEditorGUI::GetToolsWidgetVisibility)
+                            + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+                            .AutoHeight()
                             [
-                                SNew(STextBlock)
-                                .Text(LOCTEXT("Texture to edit","Texture to edit"))
-                            ]
-                        ]
-                        + SVerticalBox::Slot()
-                        .AutoHeight()
-                        [
-                            SNew(SHorizontalBox)
-                            .Visibility(this,&SOdysseyViewportDrawingEditorGUI::GetLayerStackWidgetVisibility)
-                            + SHorizontalBox::Slot()
-                            [
-                                SNew(SObjectPropertyEntryBox)
-                                .ObjectPath(this, &SOdysseyViewportDrawingEditorGUI::PaintTexturePath )
-                                .AllowedClass(UTexture2D::StaticClass())
-                                .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::ShouldFilterTextureAsset))
-                                .OnObjectChanged(FOnSetObject::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::PaintTextureChanged))
-                                .DisplayUseSelected(false)
-                                //.ThumbnailPool(iCustomizationUtils.GetThumbnailPool())
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("Tools","Tools"))
+                                ]
+                                .BodyContent()
+                                [
+                                    SNew(SScrollBox)
+                                    .Orientation(Orient_Vertical)
+                                    .ScrollBarAlwaysVisible(false)
+                                    +SScrollBox::Slot()
+                                    [
+                                        SNew(SExpandableArea)
+                                        .HeaderContent()
+                                        [
+                                            SNew(STextBlock)
+                                            .Text(LOCTEXT("Utils","Utils"))
+                                            .Font(FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle"))
+                                            .ShadowOffset(FVector2D(1.0f,1.0f))
+                                        ]
+                                        .BodyContent()
+                                        [
+                                            SNew(SWrapBox)
+                                            .UseAllottedWidth(true)
+                                            +SWrapBox::Slot()
+                                            [
+                                                SNew(SButton)
+                                                .ButtonStyle(FCoreStyle::Get(),"NoBorder")
+                                                .OnClicked_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnClear)
+                                                [
+                                                    SNew(SImage)
+                                                    .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Shredder32"))
+                                                ]
+                                            ]
+                                            +SWrapBox::Slot()
+                                            [
+                                                SNew(SButton)
+                                                .ButtonStyle(FCoreStyle::Get(),"NoBorder")
+                                                .OnClicked_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnFill)
+                                                [
+                                                    SNew(SImage)
+                                                    .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.PaintBucket32"))
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                    +SScrollBox::Slot()
+                                    [
+                                        SNew(SExpandableArea)
+                                        .HeaderContent()
+                                        [
+                                            SNew(STextBlock)
+                                            .Text(LOCTEXT("UndoRedo  (Experimental)","UndoRedo  (Experimental)"))
+                                            .Font(FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle"))
+                                            .ShadowOffset(FVector2D(1.0f,1.0f))
+                                        ]
+                                        .BodyContent()
+                                        [
+                                            SNew(SWrapBox)
+                                            .UseAllottedWidth(true)
+                                            +SWrapBox::Slot()
+                                            [
+                                                SNew(SButton)
+                                                .ButtonStyle(FCoreStyle::Get(),"NoBorder")
+                                                .OnClicked_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnUndoIliad)
+                                                [
+                                                    SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo32"))
+                                                ]
+                                            ]
+                                            +SWrapBox::Slot()
+                                            [
+                                                SNew(SButton)
+                                                .ButtonStyle(FCoreStyle::Get(),"NoBorder")
+                                                .OnClicked_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnRedoIliad)
+                                                [
+                                                    SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
+                                                ]
+                                            ]
+                                            +SWrapBox::Slot()
+                                            [
+                                                SNew(SButton)
+                                                .Text(LOCTEXT("Clear Undo History","Clear Undo History"))
+                                                .ToolTipText(LOCTEXT("Clear Undos tooltip","If the undo/redo is slow, clear the cache by clicking this button"))
+                                                .VAlign(EVerticalAlignment::VAlign_Center)
+                                                .OnClicked_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnClearUndo)
+                                            ]
+                                        ]
+                                    ]
+                                ]
                             ]
                         ]
 		            ]
@@ -325,6 +451,15 @@ SOdysseyViewportDrawingEditorGUI::GetStrokeOptionsWidgetVisibility() const
 	    return EVisibility::Collapsed;
 }
 
+EVisibility
+SOdysseyViewportDrawingEditorGUI::GetToolsWidgetVisibility() const
+{
+    if( mSelectedView == EOdysseyViewportSelectedView::kTools )
+        return EVisibility::Visible;
+    else
+        return EVisibility::Collapsed;
+}
+
 void
 SOdysseyViewportDrawingEditorGUI::OnSetOdysseyBrushSettingsView()
 {
@@ -344,9 +479,9 @@ SOdysseyViewportDrawingEditorGUI::OnSetOdysseyLayerStackView()
 }
 
 void
-SOdysseyViewportDrawingEditorGUI::OnSetOdysseyPerformanceOptionsView()
+SOdysseyViewportDrawingEditorGUI::OnSetOdysseyToolsView()
 {
-    mSelectedView = EOdysseyViewportSelectedView::kPerformanceOptions;
+    mSelectedView = EOdysseyViewportSelectedView::kTools;
 }
 
 TSharedPtr<SWidget>&

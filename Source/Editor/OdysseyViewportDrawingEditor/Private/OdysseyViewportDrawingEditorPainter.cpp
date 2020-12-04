@@ -119,7 +119,7 @@ void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
         }));
 
 	mUICommandList->MapAction(
-		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyStrokeOptions,
+		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyStrokeOptionsView,
 		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyStrokeOptionsView),
 		FCanExecuteAction(),
     	FIsActionChecked::CreateLambda([=]
@@ -136,13 +136,13 @@ void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
 		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kLayerStack;
         }));
 
-	mUICommandList->MapAction(
-		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyPerformanceOptions,
-		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyPerformanceOptionsView),
-		FCanExecuteAction(),
-    	FIsActionChecked::CreateLambda([=]
-	    {
-		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kPerformanceOptions;
+    mUICommandList->MapAction(
+        FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyToolsView,
+        FExecuteAction::CreateRaw(mController->GetGUI().Get(),&SOdysseyViewportDrawingEditorGUI::OnSetOdysseyToolsView),
+        FCanExecuteAction(),
+        FIsActionChecked::CreateLambda([=]
+        {
+            return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kTools;
         }));
 }
 

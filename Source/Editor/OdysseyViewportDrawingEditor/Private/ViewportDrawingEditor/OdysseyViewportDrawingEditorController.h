@@ -47,6 +47,13 @@ public:
     void OnBrushCompiled(UBlueprint* iBrush);
     void OnEditedTextureChanged(UTexture2D* iTexture);
 
+    // Tools Actions
+    FReply OnClear();
+    FReply OnFill();
+    FReply OnUndoIliad();
+    FReply OnRedoIliad();
+    FReply OnClearUndo();
+
     // Brush Handlers
     void HandleBrushParameterChanged();
 

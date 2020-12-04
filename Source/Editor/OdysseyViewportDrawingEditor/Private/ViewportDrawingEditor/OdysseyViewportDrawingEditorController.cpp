@@ -295,6 +295,82 @@ FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTex
     }
 }
 
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------ Tools Actions
+
+FReply
+FOdysseyViewportDrawingEditorController::OnClear()
+{
+    if(mData->LayerStack()->GetCurrentLayer() == NULL)
+        return FReply::Handled();
+
+    //Record
+    mData->LayerStack()->mDrawingUndo->StartRecord();
+    mData->LayerStack()->mDrawingUndo->SaveData(0,0,mData->LayerStack()->Width(),mData->LayerStack()->Height());
+    mData->LayerStack()->mDrawingUndo->EndRecord();
+    //EndRecord
+
+    GetData()->PaintEngine()->AbortStroke();
+
+    mData->LayerStack()->ClearCurrentLayer();
+
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyViewportDrawingEditorController::OnFill()
+{
+    if(mData->LayerStack()->GetCurrentLayer() == NULL)
+        return FReply::Handled();
+
+    //Record
+    mData->LayerStack()->mDrawingUndo->StartRecord();
+    mData->LayerStack()->mDrawingUndo->SaveData(0,0,mData->LayerStack()->Width(),mData->LayerStack()->Height());
+    mData->LayerStack()->mDrawingUndo->EndRecord();
+    //EndRecord
+
+    GetData()->PaintEngine()->AbortStroke();
+
+    mData->LayerStack()->FillCurrentLayerWithColor(mData->PaintEngine()->GetColor());
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
+
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyViewportDrawingEditorController::OnUndoIliad()
+{
+    GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    mData->LayerStack()->mDrawingUndo->LoadData();
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
+
+    return FReply::Handled();
+}
+
+
+FReply
+FOdysseyViewportDrawingEditorController::OnRedoIliad()
+{
+    GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    mData->LayerStack()->mDrawingUndo->Redo();
+    mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+    mData->DisplaySurface()->Invalidate();
+
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyViewportDrawingEditorController::OnClearUndo()
+{
+    mData->LayerStack()->mDrawingUndo->Clear();
+    return FReply::Handled();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Brush Handlers
 void

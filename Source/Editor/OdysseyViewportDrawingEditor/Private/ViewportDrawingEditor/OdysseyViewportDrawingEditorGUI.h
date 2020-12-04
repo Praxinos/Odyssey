@@ -30,7 +30,7 @@ enum class EOdysseyViewportSelectedView: uint8
     kBrushSettings,
     kStrokeOptions,
     kLayerStack,
-    kPerformanceOptions
+    kTools
 };
 
 /** Widget representing the state / functionality and settings for PaintModePainter*/
@@ -58,12 +58,13 @@ private:
     EVisibility GetBrushSettingsWidgetVisibility() const;
     EVisibility GetLayerStackWidgetVisibility() const;
     EVisibility GetStrokeOptionsWidgetVisibility() const;
+    EVisibility GetToolsWidgetVisibility() const;
 
 public:
     void OnSetOdysseyBrushSettingsView();
     void OnSetOdysseyStrokeOptionsView();
     void OnSetOdysseyLayerStackView();
-    void OnSetOdysseyPerformanceOptionsView();
+    void OnSetOdysseyToolsView();
 
 public:
     TSharedPtr<SWidget>&                         GetMainWidget();

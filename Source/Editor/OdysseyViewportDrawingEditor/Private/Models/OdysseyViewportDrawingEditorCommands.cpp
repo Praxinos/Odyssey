@@ -15,9 +15,9 @@ void FOdysseyViewportDrawingEditorCommands::RegisterCommands()
 	Commands.Add(SaveTexturePaint);
 
 	UI_COMMAND( SetOdysseyBrushSettingsView, "BrushSettings", "Brush Settings", EUserInterfaceActionType::ToggleButton, FInputChord() );
-	UI_COMMAND( SetOdysseyStrokeOptions, "StrokeOptions", "Stroke Options", EUserInterfaceActionType::ToggleButton, FInputChord() );
+	UI_COMMAND( SetOdysseyStrokeOptionsView, "StrokeOptions", "Stroke Options", EUserInterfaceActionType::ToggleButton, FInputChord() );
 	UI_COMMAND( SetOdysseyLayerStackView, "LayerStack", "Layer Stack", EUserInterfaceActionType::ToggleButton, FInputChord() );
-	UI_COMMAND( SetOdysseyPerformanceOptions, "PerformanceOptions", "Performance Options", EUserInterfaceActionType::ToggleButton, FInputChord() );
+	UI_COMMAND( SetOdysseyToolsView, "Tools", "Tools", EUserInterfaceActionType::ToggleButton, FInputChord() );
 }
 
 #undef LOCTEXT_NAMESPACE
