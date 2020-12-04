@@ -416,7 +416,7 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 	state.currentPointIndex = 0;
 	state.currentStroke = &mResultStroke;
 
-    if( iBrushInstance != nullptr && mBrushInstance != iBrushInstance )
+    if( iBrushInstance != nullptr )
         iBrushInstance->ExecuteSelected();
 
     UpdateBrushInstance();
