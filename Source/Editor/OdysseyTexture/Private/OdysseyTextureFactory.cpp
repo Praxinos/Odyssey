@@ -7,10 +7,13 @@
 #include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
 
+#include "ULISLoaderModule.h"
 #include "OdysseyBlock.h"
 #include "OdysseySurfaceEditable.h"
 #include "OdysseyTexture.h"
 #include "SOdysseyTextureConfigureWindow.h"
+
+#include <ULIS3>
 
 /////////////////////////////////////////////////////
 // UOdysseyTextureFactory
@@ -57,10 +60,10 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
 
     //TODO: should fill the default native texture for the thumbnail
 
-    //::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mTextureWidth, mTextureHeight );
-    //uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    //IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    //::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block.GetBlock(), color, canvasRect );
+    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mTextureWidth, mTextureHeight );
+    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block.GetBlock(), color, canvasRect );
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     InitTextureWithBlockData(&block, texture, mTextureFormat);
