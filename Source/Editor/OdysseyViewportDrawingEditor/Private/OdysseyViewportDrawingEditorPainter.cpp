@@ -824,7 +824,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
         return;
     }
 
-    if( mBeginPosition == FVector2D(0,0))
+    if( mBeginPosition == FVector2D(0,0) && mLastEvent)
         mBeginPosition = FVector2D(mLastEvent->x / mPaintingTexture2D->GetSizeX(), mLastEvent->y / mPaintingTexture2D->GetSizeY());
 
     //UE_LOG(LogTemp, Display, TEXT("triangles: %d"), iInfluencedTriangles.Num() );
