@@ -262,27 +262,6 @@ void SOdysseyViewportDrawingEditorGUI::CreateMainWidget(FOdysseyViewportDrawingE
                             .Padding(StandardPadding)
                             .AutoHeight()
                             [
-                               SNew(SExpandableArea)
-                               .HeaderContent()
-                               [
-                                   SNew(STextBlock)
-                                   .Text(LOCTEXT("LayerStack","Layer Stack"))
-                               ]
-                               .BodyContent()
-                               [
-                                   SNew(SVerticalBox)
-                                   + SVerticalBox::Slot()
-                                   .AutoHeight()
-                                   .Expose(mLayerStackView)
-                                   [
-                                       SNullWidget::NullWidget
-                                   ]
-                               ]
-                            ]
-                            + SVerticalBox::Slot()
-                            .Padding(StandardPadding)
-                            .AutoHeight()
-                            [
                                 SNew(SExpandableArea)
                                 .HeaderContent()
                                 [
@@ -298,6 +277,27 @@ void SOdysseyViewportDrawingEditorGUI::CreateMainWidget(FOdysseyViewportDrawingE
                                     .OnObjectChanged(FOnSetObject::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::PaintTextureChanged))
                                     .DisplayUseSelected(false)
                                     //.ThumbnailPool(iCustomizationUtils.GetThumbnailPool())
+                                ]
+                            ]
+                            + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+                            .AutoHeight()
+                            [
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("LayerStack","Layer Stack"))
+                                ]
+                                .BodyContent()
+                                [
+                                    SNew(SVerticalBox)
+                                    + SVerticalBox::Slot()
+                                    .AutoHeight()
+                                    .Expose(mLayerStackView)
+                                    [
+                                        SNullWidget::NullWidget
+                                    ]
                                 ]
                             ]
                         ]

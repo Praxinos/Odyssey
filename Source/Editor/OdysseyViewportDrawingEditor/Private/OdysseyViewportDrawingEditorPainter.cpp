@@ -51,7 +51,6 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
 	mPaintingTexture2D(nullptr),
     mStrokeBufferTexture2D(nullptr),
     mBrushRenderTargetTexture(nullptr),
-    mBrushMaskRenderTargetTexture(nullptr),
 	mDoRestoreRenTargets(false),
 	mDoRefreshCachedData(true),
     mLastEvent( nullptr ),

@@ -246,9 +246,6 @@ protected:
     /** Temporary render target used to draw incremental paint to */
     UTextureRenderTarget2D* mBrushRenderTargetTexture;
 
-    /** Temporary render target used to store a mask of the affected paint region, updated every time we add incremental texture paint */
-    UTextureRenderTarget2D* mBrushMaskRenderTargetTexture;
-
 	/** Cached / stored instance texture paint settings for selected components */
 	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
 
