@@ -59,16 +59,16 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
     BindCommands(iToolkitCommands);
 
 	// Set LayerStack CB
-    if( !(mData->LayerStack()->OnCurrentLayerChanged().IsBound()) )
+    if( !(mData->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)) )
 	    mData->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged);
 
-    if( !(mData->LayerStack()->OnStructureChanged().IsBound()) )
+    if( !(mData->LayerStack()->OnStructureChanged().IsBoundToObject(this)) )
 	    mData->LayerStack()->OnStructureChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackStructureChanged);
 
-    if( !(mData->LayerStack()->OnImageResultChanged().IsBound()) )
+    if( !(mData->LayerStack()->OnImageResultChanged().IsBoundToObject(this)) )
 	    mData->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackImageResultChanged);
 
-    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()) )
+    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
 	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
     	
     // Set Image Layer as the current Layer

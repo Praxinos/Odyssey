@@ -46,26 +46,26 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
     //Add PaintEngine Callbacks
     if( mData->Texture() )
     {
-        if(!(mData->PaintEngine()->OnPreviewBlockTilesChanged().IsBound()))
+        if(!(mData->PaintEngine()->OnPreviewBlockTilesChanged().IsBoundToObject(this)))
             mData->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEnginePreviewBlockTilesChanged);
 
-        if(!(mData->PaintEngine()->OnEditedBlockTilesWillChange().IsBound()))
+        if(!(mData->PaintEngine()->OnEditedBlockTilesWillChange().IsBoundToObject(this)))
             mData->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesWillChange);
 
-        if(!(mData->PaintEngine()->OnEditedBlockTilesChanged().IsBound()))
+        if(!(mData->PaintEngine()->OnEditedBlockTilesChanged().IsBoundToObject(this)))
             mData->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesChanged);
 
-        if(!(mData->PaintEngine()->OnStrokeAbort().IsBound()))
+        if(!(mData->PaintEngine()->OnStrokeAbort().IsBoundToObject(this)))
             mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort);
 
         // Set LayerStack CB
-        if(!(mData->LayerStack()->OnCurrentLayerChanged().IsBound()))
+        if(!(mData->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)))
             mData->LayerStack()->OnCurrentLayerChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged);
 
-        if(!(mData->LayerStack()->OnStructureChanged().IsBound()))
+        if(!(mData->LayerStack()->OnStructureChanged().IsBoundToObject(this)))
             mData->LayerStack()->OnStructureChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnLayerStackStructureChanged);
 
-        if(!(mData->LayerStack()->OnImageResultChanged().IsBound()))
+        if(!(mData->LayerStack()->OnImageResultChanged().IsBoundToObject(this)))
             mData->LayerStack()->OnImageResultChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnLayerStackImageResultChanged);
 
         if(!(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()))

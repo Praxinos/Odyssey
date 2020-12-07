@@ -138,15 +138,25 @@ protected:
 
 protected:  
     
-    void StartPaintingTexture(UMeshComponent* iMeshComponent,const IMeshPaintGeometryAdapter& iGeometryInfo);
+    void StartPaintingTextureBased(UMeshComponent* iMeshComponent,const IMeshPaintGeometryAdapter& iGeometryInfo);
     
     /** Paints on a texture */
-    void PaintTexture(const FHitResult& iHitResult,
+    void PaintTextureBased(const FHitResult& iHitResult,
         TArray<FTexturePaintTriangleInfo>& iInfluencedTriangles,
         const IMeshPaintGeometryAdapter& iGeometryInfo);
 
-    void FinishPaintingTexture();
+    void FinishPaintingTextureBased();
 
+protected:
+
+    void StartPaintingMeshBased(UMeshComponent* iMeshComponent,const IMeshPaintGeometryAdapter& iGeometryInfo);
+
+    /** Paints on a texture */
+    void PaintMeshBased(const FHitResult& iHitResult,
+        TArray<FTexturePaintTriangleInfo>& iInfluencedTriangles,
+        const IMeshPaintGeometryAdapter& iGeometryInfo);
+
+    void FinishPaintingMeshBased();
 
 	/**
 	* Used to get a reference to data entry associated with the texture.  Will create a new entry if one is not found.

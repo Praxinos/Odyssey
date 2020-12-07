@@ -344,12 +344,12 @@ void FOdysseyViewportDrawingEditorPainter::ActorDeselected(AActor* iActor)
 	for (UMeshComponent* meshComponent : meshComponents)
 	{
         //todo: SAVE EACH TEXTURE HERE
-		/*if (IMeshPaintGeometryAdapter* adapter = mComponentToAdapterMap.FindRef(meshComponent).Get())
+		if (IMeshPaintGeometryAdapter* adapter = mComponentToAdapterMap.FindRef(meshComponent).Get())
 		{	
 			MeshPaintHelpers::ClearMeshTextureOverrides(*adapter, meshComponent);
 			FInstanceTexturePaintSettings& settings = AddOrRetrieveInstanceTexturePaintSettings(meshComponent);
 			settings.mSelectedTexture = mPaintSettings->mTexturePaintSettings.mPaintTexture;
-		}*/
+		}
 	}
 
 	Refresh();
@@ -380,6 +380,7 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 {
     mBeginPosition = FVector2D(0,0);
     mController->GetData()->PaintEngine()->EndStroke();
+
     /*
     CopyUTexturePixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock(),mStrokeBufferTexture2D);
     TArray<::ul3::FRect> rects;
@@ -529,19 +530,19 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
                     if((mTexturePaintingCurrentMeshComponent != nullptr) && (mTexturePaintingCurrentMeshComponent != hoveredComponent))
                     {
                         // Mesh has changed, so finish up with our previous texture
-                        FinishPaintingTexture();
+                        FinishPaintingTextureBased();
                     }
 
                     if(mTexturePaintingCurrentMeshComponent == nullptr)
                     {
-                        StartPaintingTexture(hoveredComponent,*meshAdapter);
+                        StartPaintingTextureBased(hoveredComponent,*meshAdapter);
                     }
                     
                     if(mTexturePaintingCurrentMeshComponent != nullptr)
                     {
                         for(int32 paintRayResultId : paintRayResultIds)
                         {
-                            PaintTexture(paintRayResults[paintRayResultId],trianglePaintInfoArray,*meshAdapter);
+                            PaintTextureBased(paintRayResults[paintRayResultId],trianglePaintInfoArray,*meshAdapter);
                             //UE_LOG(LogTemp, Display, TEXT("id: %d"), paintRayResultId );
                             break;
                         }
@@ -685,7 +686,7 @@ int32 FOdysseyViewportDrawingEditorPainter::GetMaxUVIndexToPaint() const
 	return 0;
 }
 
-void FOdysseyViewportDrawingEditorPainter::StartPaintingTexture(UMeshComponent* iMeshComponent,const IMeshPaintGeometryAdapter& iGeometryInfo)
+void FOdysseyViewportDrawingEditorPainter::StartPaintingTextureBased(UMeshComponent* iMeshComponent,const IMeshPaintGeometryAdapter& iGeometryInfo)
 {
     check(iMeshComponent != nullptr);
     check(mTexturePaintingCurrentMeshComponent == nullptr);
@@ -823,7 +824,218 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingTexture(UMeshComponent* 
     }
 }
 
-void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitResult,TArray<FTexturePaintTriangleInfo>& iInfluencedTriangles,const IMeshPaintGeometryAdapter& iGeometryInfo)
+void FOdysseyViewportDrawingEditorPainter::PaintTextureBased(const FHitResult& iHitResult,TArray<FTexturePaintTriangleInfo>& iInfluencedTriangles,const IMeshPaintGeometryAdapter& iGeometryInfo)
+{
+    // We bail early if there are no influenced triangles
+    if(iInfluencedTriangles.Num() <= 0)
+    {
+        return;
+    }
+
+    if( mBeginPosition == FVector2D(0,0) && mLastEvent)
+        mBeginPosition = FVector2D(mLastEvent->x / mPaintingTexture2D->GetSizeX(), mLastEvent->y / mPaintingTexture2D->GetSizeY());
+
+    const auto featureLevel = GEditor->GetEditorWorldContext().World()->FeatureLevel;
+
+    FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
+    check(textureData != nullptr && textureData->PaintRenderTargetTexture != nullptr);
+
+    textureData->bIsPaintingTexture2DModified = true;
+        
+    TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,textureData->PaintRenderTargetTexture,featureLevel);
+    
+    FlushRenderingCommands();
+}
+
+void FOdysseyViewportDrawingEditorPainter::FinishPaintingTextureBased()
+{
+    if(mTexturePaintingCurrentMeshComponent != nullptr)
+    {
+        check(mPaintingTexture2D != nullptr);
+
+        FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
+        check(textureData);
+
+        // Commit to the texture source art but don't do any compression, compression is saved for the CommitAllPaintedTextures function.
+        if(textureData->bIsPaintingTexture2DModified == true)
+        {
+            const int32 texWidth = textureData->PaintRenderTargetTexture->SizeX;
+            const int32 texHeight = textureData->PaintRenderTargetTexture->SizeY;
+            TArray< FColor > texturePixels;
+            texturePixels.AddUninitialized(texWidth * texHeight);
+
+            FlushRenderingCommands();
+            // NOTE: You are normally not allowed to dereference this pointer on the game thread! Normally you can only pass the pointer around and
+            //  check for NULLness.  We do it in this context, however, and it is only ok because this does not happen every frame and we make sure to flush the
+            //  rendering thread.
+            FTextureRenderTargetResource* renderTargetResource = textureData->PaintRenderTargetTexture->GameThread_GetRenderTargetResource();
+            check(renderTargetResource != nullptr);
+            renderTargetResource->ReadPixels(texturePixels);
+
+            {
+                FScopedTransaction transaction(LOCTEXT("MeshPaintMode_TexturePaint_Transaction","Texture Paint"));
+
+                // For undo
+                textureData->PaintingTexture2D->SetFlags(RF_Transactional);
+                textureData->PaintingTexture2D->Modify();
+
+                // Store source art
+                FColor* colors = (FColor*)textureData->PaintingTexture2D->Source.LockMip(0);
+                check(textureData->PaintingTexture2D->Source.CalcMipSize(0) == texturePixels.Num() * sizeof(FColor));
+                FMemory::Memcpy(colors,texturePixels.GetData(),texturePixels.Num() * sizeof(FColor));
+                textureData->PaintingTexture2D->Source.UnlockMip(0);
+
+                // If render target gamma used was 1.0 then disable SRGB for the static texture
+                textureData->PaintingTexture2D->SRGB = FMath::Abs(renderTargetResource->GetDisplayGamma() - 1.0f) >= KINDA_SMALL_NUMBER;
+
+                textureData->PaintingTexture2D->bHasBeenPaintedInEditor = true;
+            }
+        }
+
+        mPaintingTexture2D = nullptr;
+        mTexturePaintingCurrentMeshComponent = nullptr;
+    }
+}
+
+void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent* iMeshComponent,const IMeshPaintGeometryAdapter& iGeometryInfo)
+{
+    check(iMeshComponent != nullptr);
+    check(mTexturePaintingCurrentMeshComponent == nullptr);
+    check(mPaintingTexture2D == nullptr);
+
+    const auto featureLevel = iMeshComponent->GetWorld()->FeatureLevel;
+
+    UTexture2D* texture2D = mPaintSettings->mTexturePaintSettings.mPaintTexture;
+    if(texture2D == nullptr)
+    {
+        return;
+    }
+
+    bool bStartedPainting = false;
+    FPaintTexture2DData* textureData = GetPaintTargetData(texture2D);
+
+    // Check all the materials on the mesh to see if the user texture is there
+    int32 materialIndex = 0;
+    UMaterialInterface* materialToCheck = iMeshComponent->GetMaterial(materialIndex);
+
+    while(materialToCheck != nullptr)
+    {
+        bool bIsTextureUsed = TexturePaintHelpers::DoesMeshComponentUseTexture(iMeshComponent,texture2D);
+
+        if(!bIsTextureUsed && (textureData != nullptr) && (textureData->PaintRenderTargetTexture != nullptr))
+        {
+            bIsTextureUsed = TexturePaintHelpers::DoesMeshComponentUseTexture(iMeshComponent,textureData->PaintRenderTargetTexture);
+        }
+
+        if(bIsTextureUsed && !bStartedPainting)
+        {
+            bool bIsSourceTextureStreamedIn = texture2D->IsFullyStreamedIn();
+
+            if(!bIsSourceTextureStreamedIn)
+            {
+                // We found that this texture is used in one of the meshes materials but not fully loaded, we will
+                //   attempt to fully stream in the texture before we try to do anything with it.
+                texture2D->SetForceMipLevelsToBeResident(30.0f);
+                texture2D->WaitForStreaming();
+
+                // We do a quick sanity check to make sure it is streamed fully streamed in now.
+                bIsSourceTextureStreamedIn = texture2D->IsFullyStreamedIn();
+            }
+
+            if(bIsSourceTextureStreamedIn)
+            {
+                const int32 textureWidth = texture2D->Source.GetSizeX();
+                const int32 textureHeight = texture2D->Source.GetSizeY();
+
+                if(textureData == nullptr)
+                {
+                    textureData = AddPaintTargetData(texture2D);
+                }
+                check(textureData != nullptr);
+
+                // Create our render target texture
+                if(textureData->PaintRenderTargetTexture == nullptr ||
+                    textureData->PaintRenderTargetTexture->GetSurfaceWidth() != textureWidth ||
+                    textureData->PaintRenderTargetTexture->GetSurfaceHeight() != textureHeight)
+                {
+                    textureData->PaintRenderTargetTexture = nullptr;
+                    textureData->PaintRenderTargetTexture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
+                    textureData->PaintRenderTargetTexture->bNeedsTwoCopies = true;
+                    const bool bForceLinearGamma = true;
+                    textureData->PaintRenderTargetTexture->InitCustomFormat(textureWidth,textureHeight,PF_A16B16G16R16,bForceLinearGamma);
+                    textureData->PaintRenderTargetTexture->UpdateResourceImmediate();
+
+                    //Duplicate the texture we are painting and store it in the transient package. This texture is a backup of the data incase we want to revert before commiting.
+                    textureData->PaintingTexture2DDuplicate = (UTexture2D*)StaticDuplicateObject(texture2D,GetTransientPackage(),*FString::Printf(TEXT("%s_TEMP"),*texture2D->GetName()));
+                }
+                textureData->PaintRenderTargetTexture->AddressX = texture2D->AddressX;
+                textureData->PaintRenderTargetTexture->AddressY = texture2D->AddressY;
+
+                const int32 brushTargetTextureWidth = textureWidth;
+                const int32 brushTargetTextureHeight = textureHeight;
+
+                // Create the rendertarget used to store our paint delta
+                if(mBrushRenderTargetTexture == nullptr ||
+                    mBrushRenderTargetTexture->GetSurfaceWidth() != brushTargetTextureWidth ||
+                    mBrushRenderTargetTexture->GetSurfaceHeight() != brushTargetTextureHeight)
+                {
+                    mBrushRenderTargetTexture = nullptr;
+                    mBrushRenderTargetTexture = NewObject<UTextureRenderTarget2D>(GetTransientPackage(),NAME_None,RF_Transient);
+                    const bool bForceLinearGamma = true;
+                    mBrushRenderTargetTexture->ClearColor = FLinearColor::Transparent;
+                    mBrushRenderTargetTexture->bNeedsTwoCopies = true;
+                    mBrushRenderTargetTexture->InitCustomFormat(brushTargetTextureWidth,brushTargetTextureHeight,PF_A16B16G16R16,bForceLinearGamma);
+                    mBrushRenderTargetTexture->UpdateResourceImmediate();
+                    mBrushRenderTargetTexture->AddressX = textureData->PaintRenderTargetTexture->AddressX;
+                    mBrushRenderTargetTexture->AddressY = textureData->PaintRenderTargetTexture->AddressY;
+                }
+
+                bStartedPainting = true;
+            }
+        }
+
+        // @todo MeshPaint: Here we override the textures on the mesh with the render target.  The problem is that other meshes in the scene that use
+        //    this texture do not get the override. Do we want to extend this to all other selected meshes or maybe even to all meshes in the scene?
+        if(bIsTextureUsed && bStartedPainting && !textureData->PaintingMaterials.Contains(materialToCheck))
+        {
+            textureData->PaintingMaterials.AddUnique(materialToCheck);
+
+            iGeometryInfo.ApplyOrRemoveTextureOverride(texture2D,textureData->PaintRenderTargetTexture);
+        }
+
+        materialIndex++;
+        materialToCheck = iMeshComponent->GetMaterial(materialIndex);
+    }
+
+    if(bStartedPainting)
+    {
+        mTexturePaintingCurrentMeshComponent = iMeshComponent;
+
+        check(texture2D != nullptr);
+        mPaintingTexture2D = texture2D;
+
+        mStrokeBufferTexture2D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
+        mStrokeBufferTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        mStrokeBufferTexture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        mStrokeBufferTexture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+        mStrokeBufferTexture2D->UpdateResource();
+        mStrokeBufferTexture2D->PostEditChange();
+
+        mStrokeBufferTexture3D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
+        mStrokeBufferTexture3D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        mStrokeBufferTexture3D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        mStrokeBufferTexture3D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+        mStrokeBufferTexture3D->UpdateResource();
+        mStrokeBufferTexture3D->PostEditChange();
+
+        // OK, now we need to make sure our render target is filled in with data
+        TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
+    }
+}
+
+void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHitResult,TArray<FTexturePaintTriangleInfo>& iInfluencedTriangles,const IMeshPaintGeometryAdapter& iGeometryInfo)
 {
     // We bail early if there are no influenced triangles
     if(iInfluencedTriangles.Num() <= 0)
@@ -1022,7 +1234,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintTexture(const FHitResult& iHitRe
     FlushRenderingCommands();
 }
 
-void FOdysseyViewportDrawingEditorPainter::FinishPaintingTexture()
+void FOdysseyViewportDrawingEditorPainter::FinishPaintingMeshBased()
 {
     if(mTexturePaintingCurrentMeshComponent != nullptr)
     {

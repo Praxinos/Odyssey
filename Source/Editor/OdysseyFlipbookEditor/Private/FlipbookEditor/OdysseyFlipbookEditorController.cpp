@@ -107,16 +107,16 @@ FOdysseyFlipbookEditorController::InitLayerStack()
 		return;
 	}
 
-	if (!(mData->LayerStack()->OnCurrentLayerChanged().IsBound()))
+	if (!(mData->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)))
 		mData->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged);
 
-    if( !(mData->LayerStack()->OnStructureChanged().IsBound()) )
+    if( !(mData->LayerStack()->OnStructureChanged().IsBoundToObject(this)) )
 	    mData->LayerStack()->OnStructureChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackStructureChanged);
 
-    if( !(mData->LayerStack()->OnImageResultChanged().IsBound()) )
+    if( !(mData->LayerStack()->OnImageResultChanged().IsBoundToObject(this)) )
 	    mData->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged);
 
-    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()) )
+    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
 	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsLockedChanged);
 }
 
