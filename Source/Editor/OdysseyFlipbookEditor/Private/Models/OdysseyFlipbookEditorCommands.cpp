@@ -30,7 +30,7 @@ FOdysseyFlipbookEditorCommands::RegisterCommands()
     UI_COMMAND(ToggleLooping, "Toggle Looping", "Toggles the playback looping mode", EUserInterfaceActionType::ToggleButton, FInputChord( EModifierKey::Shift, EKeys::L ));
 
 	//UI_COMMAND(PickNewSpriteForKeyFrame, "Pick New Sprite", "Picks a new sprite for this key frame.", EUserInterfaceActionType::Button, FInputChord());
-	UI_COMMAND(EditSpriteForKeyFrame, "Edit Sprite", "Opens the sprite for this key frame in the Sprite Editor.", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::E ));
+	//UI_COMMAND(EditSpriteForKeyFrame, "Edit Sprite", "Opens the sprite for this key frame in the Sprite Editor.", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::E ));
 	UI_COMMAND(ShowSpriteInContentBrowser, "Show in Content Browser", "Shows the sprite for this key frame in the Content Browser.", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::B ));
 }
 

@@ -48,6 +48,12 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
 
 	for (int32 index = 0; index < iFlipbook->GetNumKeyFrames(); ++index)
 	{
+		UPaperSprite* sprite = flipbookWrapper->GetKeyframeSprite(index);
+        if (!sprite)
+            continue;
+
+		objectsToEdit.Add(sprite);
+
 		UTexture2D* texture = flipbookWrapper->GetKeyframeTexture(index);
         if (!texture)
             continue;
@@ -100,7 +106,7 @@ FOdysseyFlipbookEditorToolkit::SetTimelineNavigationShortcuts(TSharedPtr<SWidget
 void
 FOdysseyFlipbookEditorToolkit::OnSpriteCreated(UPaperSprite* iSprite)
 {
-	//AddEditingObject(iSprite);
+	AddEditingObject(iSprite);
 }
 
 
@@ -157,38 +163,38 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 	//Small trick
 	//We want to save all sprites, but we don't want to be considered the actual sprite editor
 	//So we set ourselves as editing all sprites just before saving and cancel this just after saving
-	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
+	/* for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
 		UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(i);
 		if (!sprite)
 			continue;
 
 		AddEditingObject(sprite);
-	}
+	} */
 
     FAssetEditorToolkit::SaveAsset_Execute();
 
-	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
+	/* for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
 		UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(i);
 		if (!sprite)
 			continue;
 
 		RemoveEditingObject(sprite);
-	}
+	} */
 }
 
 void
 FOdysseyFlipbookEditorToolkit::SaveAssetAs_Execute()
 {	
-	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
+	/* for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
 		UTexture2D* texture = mData->FlipbookWrapper()->GetKeyframeTexture(i);
 		if (!texture)
 			continue;
 
 		RemoveEditingObject(texture);
-	}
+	} */
 
 	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
@@ -198,14 +204,14 @@ FOdysseyFlipbookEditorToolkit::SaveAssetAs_Execute()
 
 	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
 
-	for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
+	/* for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
 		UTexture2D* texture = mData->FlipbookWrapper()->GetKeyframeTexture(i);
 		if (!texture)
 			continue;
 
 		AddEditingObject(texture);
-	}
+	} */
 }
 
 void

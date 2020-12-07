@@ -216,11 +216,11 @@ SOdysseyFlipbookTimelineTrack::ShowKeyFrameSpriteInContentBrowser(int32 iIndex)
 	mFlipbookWrapper->ShowKeyFrameSpriteInContentBrowser(iIndex);
 }
 
-void
+/* void
 SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame(int32 iIndex)
 {
 	mFlipbookWrapper->OpenKeyFrameSpriteEditor(iIndex);
-}
+} */
 
 void
 SOdysseyFlipbookTimelineTrack::OnFramesMoved(TArray<int32> iSrcIndexes, int32 iDstIndex)
@@ -272,7 +272,7 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 	frameCommandList->MapAction(FGenericCommands::Get().Duplicate, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DuplicateFrame, iFrameIndex));
 	frameCommandList->MapAction(FGenericCommands::Get().Delete, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DeleteFrame, iFrameIndex));
 	frameCommandList->MapAction(flipbookCommands.ShowSpriteInContentBrowser, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::ShowKeyFrameSpriteInContentBrowser, iFrameIndex));
-	frameCommandList->MapAction(flipbookCommands.EditSpriteForKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame, iFrameIndex));
+	// frameCommandList->MapAction(flipbookCommands.EditSpriteForKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::EditSpriteForKeyFrame, iFrameIndex));
 	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrame, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, mFlipbookWrapper->Flipbook()->GetNumKeyFrames()), FCanExecuteAction());
 	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameBefore, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex), FCanExecuteAction());
 	frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameAfter, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex + 1), FCanExecuteAction());
@@ -294,7 +294,7 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
 		const FText SpriteSectionTitle = LOCTEXT("OdysseyTimelineSpriteActionsHeader", "Sprite Actions");
 		MenuBuilder.BeginSection("SpriteActions", SpriteSectionTitle);
 		MenuBuilder.AddMenuEntry(flipbookCommands.ShowSpriteInContentBrowser);
-		MenuBuilder.AddMenuEntry(flipbookCommands.EditSpriteForKeyFrame);
+		//MenuBuilder.AddMenuEntry(flipbookCommands.EditSpriteForKeyFrame);
 		/* MenuBuilder.AddSubMenu(
 			flipbookCommands.PickNewSpriteFrame->GetLabel(),
 			flipbookCommands.PickNewSpriteFrame->GetDescription(),

@@ -53,7 +53,7 @@ private:
 	void DuplicateFrame(int32 iIndex);
 	void DeleteFrame(int32 iIndex);
 	void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
-	void EditSpriteForKeyFrame(int32 iIndex);
+	// void EditSpriteForKeyFrame(int32 iIndex);
 	void AddNewKeyframe(int32 iIndex);
 
 private:

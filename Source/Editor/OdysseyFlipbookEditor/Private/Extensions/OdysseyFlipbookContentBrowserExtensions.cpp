@@ -16,6 +16,7 @@
 #include "Misc/PackageName.h"
 #include "Modules/ModuleManager.h"
 #include "Textures/SlateIcon.h"
+#include "PaperSprite.h"
 
 #include "IOdysseyFlipbookEditorModule.h"
 
@@ -98,9 +99,37 @@ FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
 		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
 		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
 		if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
-		{
 			continue;
-		}
+
+        bool editorFound = false;
+
+        for (int i = 0; i < Flipbook->GetNumKeyFrames(); i++)
+        {
+            UPaperSprite* sprite = Flipbook->GetKeyFrameChecked(i).Sprite;
+            if (!sprite)
+                continue;
+
+            if (AssetEditorSubsystem->FindEditorForAsset(sprite, true) != nullptr)
+            {
+                editorFound = true;
+                break;
+            }
+
+            UTexture2D* texture = sprite->GetSourceTexture();
+            if (!texture)
+                continue;
+
+            if (AssetEditorSubsystem->FindEditorForAsset(sprite, true) != nullptr)
+            {
+                editorFound = true;
+                break;
+            }
+        }
+
+        if (editorFound)
+            continue;
+
+
         IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );
         odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( EToolkitMode::Standalone, NULL, Flipbook );
     }
