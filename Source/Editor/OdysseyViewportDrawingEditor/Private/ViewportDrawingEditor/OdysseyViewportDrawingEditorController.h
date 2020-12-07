@@ -13,7 +13,8 @@
  * Implements an Editor Controller for the paint in viewport.
  */
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorController :
-	public TSharedFromThis<FOdysseyViewportDrawingEditorController>
+	public TSharedFromThis<FOdysseyViewportDrawingEditorController>,
+    public IAssetEditorInstance
 {
 public:
     // Construction / Destruction
@@ -30,6 +31,22 @@ public:
 public:
     TSharedPtr<FOdysseyViewportDrawingEditorData> GetData();
     TSharedPtr<SOdysseyViewportDrawingEditorGUI> GetGUI();
+
+public:
+    //IAssetEditorInstance
+	virtual FName GetEditorName() const;
+	virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr);
+	virtual bool CloseWindow();
+	virtual bool IsPrimaryEditor() const;
+	virtual void InvokeTab(const struct FTabId& TabId);
+	virtual FName GetToolbarTabId() const;
+	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager();
+	virtual double GetLastActivationTime();
+	virtual void RemoveEditingAsset(UObject* Asset);
+
+public:
+    void EdModeEnter();
+    void EdModeExit();
 
 public:
     void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);

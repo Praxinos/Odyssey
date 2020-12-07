@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyViewportDrawingEditorController.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyViewportDrawingEditorController
@@ -9,6 +10,10 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyViewportDrawingEditorController::~FOdysseyViewportDrawingEditorController()
 {
+    if (mData->Texture())
+    {
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( mData->Texture(), this );
+    }
     mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
     mData->LayerStack()->OnStructureChanged().RemoveAll(this);
     mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
@@ -287,9 +292,19 @@ FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
 void
 FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTexture)
 {
+    if (mData->Texture() == iTexture)
+        return;
+    
+    if (mData->Texture())
+    {
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed( mData->Texture(), this );
+    }
+
     if( iTexture )
     {
         mData->Init(iTexture);
+        
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( mData->Texture(), this );
         mGUI->RefreshLayerStackView(mData->LayerStack());
         Init();
     }
@@ -485,4 +500,80 @@ void
 FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged(bool iValue)
 {
     mData->PaintEngine()->SetSmoothingCatchUp(iValue);
+}
+
+FName
+FOdysseyViewportDrawingEditorController::GetEditorName() const
+{
+    return FName("OdysseyViewportDrawingEditor");
+}
+
+void
+FOdysseyViewportDrawingEditorController::FocusWindow(UObject* ObjectToFocusOn)
+{
+    //---
+}
+
+bool
+FOdysseyViewportDrawingEditorController::CloseWindow()
+{
+    //---
+
+	return true;
+}
+
+bool
+FOdysseyViewportDrawingEditorController::IsPrimaryEditor() const
+{
+    return true; //I don't know what this means
+}
+
+void
+FOdysseyViewportDrawingEditorController::InvokeTab(const struct FTabId& TabId)
+{
+    //---
+}
+
+FName
+FOdysseyViewportDrawingEditorController::GetToolbarTabId() const
+{
+    return NAME_None;
+}
+
+TSharedPtr<class FTabManager>
+FOdysseyViewportDrawingEditorController::GetAssociatedTabManager()
+{
+    return TSharedPtr<class FTabManager>();
+}
+
+double
+FOdysseyViewportDrawingEditorController::GetLastActivationTime()
+{
+    return 0.0;
+}
+
+void
+FOdysseyViewportDrawingEditorController::RemoveEditingAsset(UObject* Asset)
+{
+    //---
+}
+
+void
+FOdysseyViewportDrawingEditorController::EdModeEnter()
+{
+    UObject* texture = mData->Texture();
+    if (texture)
+    {
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( texture, this);
+    }
+}
+
+void
+FOdysseyViewportDrawingEditorController::EdModeExit()
+{
+    UObject* texture = mData->Texture();
+    if (texture)
+    {
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
+    }
 }

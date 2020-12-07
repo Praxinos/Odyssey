@@ -271,10 +271,10 @@ void SOdysseyViewportDrawingEditorGUI::CreateMainWidget(FOdysseyViewportDrawingE
                                 .BodyContent()
                                 [
                                     SNew(SObjectPropertyEntryBox)
-                                    .ObjectPath(this,&SOdysseyViewportDrawingEditorGUI::PaintTexturePath)
+                                    .ObjectPath(this, &SOdysseyViewportDrawingEditorGUI::PaintTexturePath)
                                     .AllowedClass(UTexture2D::StaticClass())
-                                    .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::ShouldFilterTextureAsset))
-                                    .OnObjectChanged(FOnSetObject::CreateRaw(iPainter,&FOdysseyViewportDrawingEditorPainter::PaintTextureChanged))
+                                    .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(iPainter, &FOdysseyViewportDrawingEditorPainter::ShouldFilterTextureAsset))
+                                    .OnObjectChanged(FOnSetObject::CreateRaw(iPainter, &FOdysseyViewportDrawingEditorPainter::PaintTextureChanged))
                                     .DisplayUseSelected(false)
                                     //.ThumbnailPool(iCustomizationUtils.GetThumbnailPool())
                                 ]

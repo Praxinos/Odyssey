@@ -91,14 +91,21 @@ void
 FEditTextureExtension::EditTextures( TArray<UTexture2D*>& iTextures )
 {
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+    bool warningDisplayed = false;
     for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
     {
         UTexture2D* texture = *textureIt;
 
 		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
 		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
-		if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-		{
+        if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+        {
+            if (!warningDisplayed)
+            {
+                FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Texture Already Opened");
+                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
+                warningDisplayed = true;
+            }
 			continue;
 		}
         IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>( "OdysseyTextureEditor" );

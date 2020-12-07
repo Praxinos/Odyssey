@@ -89,17 +89,25 @@ FEditFlipbookExtension::Execute()
 }
 
 void
+EditFlipbooksWarning()
+{
+    FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Flipbook Already Opened");
+    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The flipbook or one of its sprite or textures is already opened in an other editor. Please close the editor before opening the flipbook with ILIAD."), &Title);
+}
+
+void
 FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
 {
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+    bool warningDisplayed = false;
     for( auto FlipbookIt = iFlipbooks.CreateConstIterator(); FlipbookIt; ++FlipbookIt )
     {
 		UPaperFlipbook* Flipbook = *FlipbookIt;
 
 		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
 		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
-		if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
-			continue;
+        if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
+            continue;
 
         bool editorFound = false;
 
@@ -119,7 +127,7 @@ FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
             if (!texture)
                 continue;
 
-            if (AssetEditorSubsystem->FindEditorForAsset(sprite, true) != nullptr)
+            if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
             {
                 editorFound = true;
                 break;
@@ -127,7 +135,14 @@ FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
         }
 
         if (editorFound)
+        {
+            if (!warningDisplayed)
+            {
+                EditFlipbooksWarning();
+                warningDisplayed = true;
+            }
             continue;
+        }
 
 
         IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );

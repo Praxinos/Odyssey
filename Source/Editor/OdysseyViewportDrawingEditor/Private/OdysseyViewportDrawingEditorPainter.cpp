@@ -209,6 +209,15 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureChanged(const FAssetData&
 
 	if (texture)
 	{
+		//check
+		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+		if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+		{
+			FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Selected Texture Already Opened");
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+			return;
+		}
+
         mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
         texture->TemporarilyDisableStreaming();
 
@@ -226,7 +235,6 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureChanged(const FAssetData&
 				textureTarget.bIsSelected = false;
 			}
 		}
-
 	}
 }
 
@@ -1437,9 +1445,23 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 		UTexture2D* newTexture = nullptr;
 		if (mPaintableTextures.Num() > 0)
 		{
-			newTexture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
-            mPaintSettings->mTexturePaintSettings.mPaintTexture = newTexture;
-            mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
+			for (int i = 0; i < mPaintableTextures.Num(); i++)
+			{
+				UTexture2D* texture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
+				UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+				if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+				{
+					if (i == 0)
+					{
+						FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Selected Texture Already Opened");
+						FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+					}
+					continue;
+				}
+
+				mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
+				mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
+			}
 		}
 	}
 }

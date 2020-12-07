@@ -460,10 +460,14 @@ FOdysseyFlipbookEditorController::OnDeleteCurrentLayer()
 
     if( mData->LayerStack()->GetCurrentLayer() )
     {
-        mData->LayerStack()->DeleteLayer( mData->LayerStack()->GetCurrentLayer() );
-        mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
-        mData->DisplaySurface()->Invalidate();
-        mGUI->GetLayerStackTab()->RefreshView();
+        FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Deleting current layer");
+        if (FMessageDialog::Open(EAppMsgType::OkCancel, LOCTEXT("DeletingCurrentLayer", "Are you sure you want to delete this layer ?"), &Title) == EAppReturnType::Ok)
+        {
+            mData->LayerStack()->DeleteLayer(mData->LayerStack()->GetCurrentLayer());
+            mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+            mData->DisplaySurface()->Invalidate();
+            mGUI->GetLayerStackTab()->RefreshView();
+        }
     }
 }
 

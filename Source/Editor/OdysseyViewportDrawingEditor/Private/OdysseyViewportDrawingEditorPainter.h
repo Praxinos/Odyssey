@@ -111,7 +111,7 @@ protected:
 
 	/** Checks whether or not the given asset should not be shown in the list of textures to paint on */
 	bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
-
+	
 	/** Callback for when the user changes the texture to paint on */
 	void PaintTextureChanged(const FAssetData& iAssetData);
 	

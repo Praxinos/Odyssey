@@ -20,6 +20,8 @@ public:
 	/** Destructor */
 	virtual ~FOdysseyViewportDrawingEditorEdMode() {}
 	virtual void Initialize() override;
+	virtual void Enter() override;
+	virtual void Exit() override;
 	virtual TSharedPtr< FModeToolkit> GetToolkit() override;
 
 	// IMeshPaintEdMode interface.

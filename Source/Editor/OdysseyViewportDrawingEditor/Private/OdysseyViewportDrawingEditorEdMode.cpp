@@ -33,3 +33,15 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 {
 	return GetWorld() ? GetWorld()->FeatureLevel >= ERHIFeatureLevel::SM5 : false;
 }
+
+void FOdysseyViewportDrawingEditorEdMode::Enter()
+{
+	FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeEnter();
+	IMeshPaintEdMode::Enter();
+}
+
+void FOdysseyViewportDrawingEditorEdMode::Exit()
+{
+	FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeExit();
+	IMeshPaintEdMode::Exit();
+}
