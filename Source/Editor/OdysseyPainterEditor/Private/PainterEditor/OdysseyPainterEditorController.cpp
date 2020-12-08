@@ -381,12 +381,8 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
 
 		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetData()->Brush()->GeneratedClass);
 		brushInstance->AddToRoot();
-		GetData()->BrushInstance(brushInstance);
 
-        GetData()->PaintEngine()->SetBrushInstance(GetData()->BrushInstance());
-        GetGUI()->GetBrushExposedParametersTab()->Refresh(GetData()->BrushInstance());
-
-        FOdysseyBrushPreferencesOverrides& overrides = GetData()->BrushInstance()->Preferences;
+        FOdysseyBrushPreferencesOverrides& overrides = brushInstance->Preferences;
         if( overrides.bOverride_Step )          GetGUI()->GetStrokeOptionsTab()->SetStrokeStep( overrides.Step );
         if( overrides.bOverride_Adaptative )    GetGUI()->GetStrokeOptionsTab()->SetStrokeAdaptative( overrides.SizeAdaptative );
         if( overrides.bOverride_PaintOnTick )   GetGUI()->GetStrokeOptionsTab()->SetStrokePaintOnTick( overrides.PaintOnTick );
@@ -401,6 +397,10 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
         if( overrides.bOverride_Flow )          GetGUI()->GetTopTab()->SetFlow( overrides.Flow );
         if( overrides.bOverride_BlendingMode )  GetGUI()->GetTopTab()->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
         if( overrides.bOverride_AlphaMode )     GetGUI()->GetTopTab()->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
+
+        GetData()->BrushInstance(brushInstance);
+        GetData()->PaintEngine()->SetBrushInstance(brushInstance);
+        GetGUI()->GetBrushExposedParametersTab()->Refresh(brushInstance);
 
         //---
 
