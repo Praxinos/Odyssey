@@ -377,19 +377,17 @@ ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, con
         parameter.bOverride = true;
     new_material->UpdateStaticPermutation( static_params );
 
-    // Maybe needed to compute all cases during creation, but not for now
-    //for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
-    //{
-    //    UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
-    //    for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
-    //    {
-    //        static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
-    //        UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
-    //        new_material->UpdateStaticPermutation( static_params );
-    //    }
-    //}
-
-    //---
+    // Needed to compute all cases during creation, to have all shaders computed
+    for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
+    {
+        UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
+        for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
+        {
+            static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
+            UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
+            new_material->UpdateStaticPermutation( static_params );
+        }
+    }
 
     //---
 
