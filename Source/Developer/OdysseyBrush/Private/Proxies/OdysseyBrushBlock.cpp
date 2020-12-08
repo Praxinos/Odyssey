@@ -806,6 +806,23 @@ UOdysseyBlockProxyFunctionLibrary::GetFontCharacterInfo( const UFont* iFont, con
 }
 
 //static
+void
+UOdysseyBlockProxyFunctionLibrary::GetCharactersSize( const UFont* iFont, const FString& iString, TArray<float>& oWidth, TArray<float>& oHeight )
+{
+    oWidth.Empty();
+    oHeight.Empty();
+
+    for( auto character : iString )
+    {
+        float width;
+        float height;
+        iFont->GetCharSize( character, width, height );
+        oWidth.Add( width );
+        oHeight.Add( height );
+    }
+}
+
+//static
 bool
 UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy iBlock, float iX, float iY, FOdysseyBrushColor& oColor )
 {

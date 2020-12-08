@@ -276,6 +276,12 @@ public:
              , Category="Odyssey|Block" )
     static TArray< FOdysseyFontCharacter > GetFontCharacterInfo( const UFont* Font, const FString& String );
 
+    //Requires a Font and a String to return Arrays of width/height of each character.
+    //This node compute the box of each character corresponding to the font.
+    UFUNCTION( BlueprintPure
+             , Category = "Odyssey|Block" )
+    static void GetCharactersSize( const UFont* Font, const FString& String, TArray<float>& Width, TArray<float>& Height );
+
     //---
     
     //This node automatically picks the color up at position on the canvas. 
