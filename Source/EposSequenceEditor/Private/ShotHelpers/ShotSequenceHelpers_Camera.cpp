@@ -380,11 +380,11 @@ ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, con
     // Needed to compute all cases during creation, to have all shaders computed
     for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
     {
-        UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
+        //UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
         for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
         {
             static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
-            UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
+            //UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
             new_material->UpdateStaticPermutation( static_params );
         }
     }
@@ -442,12 +442,8 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer )
     if( !transform_track )
         return;
 
-    //---
-
     if( !transform_track->GetAllSections().Num() )
         return;
-
-    //---
 
     UMovieSceneSection* section = transform_track->GetAllSections()[0];
     UMovieScene3DTransformSection* transform_section = Cast<UMovieScene3DTransformSection>( section );
@@ -461,25 +457,62 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer )
     FRotator new_rotation = GCurrentLevelEditingViewportClient->GetViewRotation();
     //FVector Scale = iActor->GetActorScale();
 
-    TArrayView<FMovieSceneFloatChannel*> FloatChannels = transform_section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
-    FloatChannels[0]->SetDefault( new_location.X );
-    FloatChannels[1]->SetDefault( new_location.Y );
-    FloatChannels[2]->SetDefault( new_location.Z );
-
-    FloatChannels[3]->SetDefault( new_rotation.Euler().X );
-    FloatChannels[4]->SetDefault( new_rotation.Euler().Y );
-    FloatChannels[5]->SetDefault( new_rotation.Euler().Z );
-
-    //FloatChannels[6]->SetDefault( Scale.X );
-    //FloatChannels[7]->SetDefault( Scale.Y );
-    //FloatChannels[8]->SetDefault( Scale.Z );
+    ExistingCamera->SetActorLocation( new_location, false );
+    ExistingCamera->SetActorRotation( new_rotation );
 
 
 //TODO: set all (?) planes ?
 
 
-    ExistingCamera->SetActorLocation( new_location, false );
-    ExistingCamera->SetActorRotation( new_rotation );
+    //---
+
+    TArrayView<FMovieSceneFloatChannel*> FloatChannels = transform_section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+
+    if( FloatChannels[0]->GetNumKeys() == 1 &&
+        FloatChannels[1]->GetNumKeys() == 1 &&
+        FloatChannels[2]->GetNumKeys() == 1 &&
+        FloatChannels[3]->GetNumKeys() == 1 &&
+        FloatChannels[4]->GetNumKeys() == 1 &&
+        FloatChannels[5]->GetNumKeys() == 1 )
+    {
+        AddKeyToChannel( FloatChannels[0], FloatChannels[0]->GetTimes()[0], ExistingCamera->GetActorLocation().X, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[1], FloatChannels[1]->GetTimes()[0], ExistingCamera->GetActorLocation().Y, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[2], FloatChannels[2]->GetTimes()[0], ExistingCamera->GetActorLocation().Z, iSequencer->GetKeyInterpolation() );
+
+        AddKeyToChannel( FloatChannels[3], FloatChannels[3]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().X, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[4], FloatChannels[4]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Y, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[5], FloatChannels[5]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Z, iSequencer->GetKeyInterpolation() );
+    }
+    else
+    {
+        AddKeyToChannel( FloatChannels[0], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorLocation().X, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[1], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorLocation().Y, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[2], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorLocation().Z, iSequencer->GetKeyInterpolation() );
+
+        AddKeyToChannel( FloatChannels[3], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorRotation().Euler().X, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[4], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorRotation().Euler().Y, iSequencer->GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[5], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorRotation().Euler().Z, iSequencer->GetKeyInterpolation() );
+    }
+
+    //AddKeyToChannel( FloatChannels[6], 0, Scale.X, iSequencer->GetKeyInterpolation() );
+    //AddKeyToChannel( FloatChannels[7], 0, Scale.Y, iSequencer->GetKeyInterpolation() );
+    //AddKeyToChannel( FloatChannels[8], 0, Scale.Z, iSequencer->GetKeyInterpolation() );
+
+    //FloatChannels[0]->SetDefault( new_location.X );
+    //FloatChannels[1]->SetDefault( new_location.Y );
+    //FloatChannels[2]->SetDefault( new_location.Z );
+
+    //FloatChannels[3]->SetDefault( new_rotation.Euler().X );
+    //FloatChannels[4]->SetDefault( new_rotation.Euler().Y );
+    //FloatChannels[5]->SetDefault( new_rotation.Euler().Z );
+
+    ////FloatChannels[6]->SetDefault( Scale.X );
+    ////FloatChannels[7]->SetDefault( Scale.Y );
+    ////FloatChannels[8]->SetDefault( Scale.Z );
+
+
+//TODO: set all (?) key planes ?
+
 
     //---
     // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )

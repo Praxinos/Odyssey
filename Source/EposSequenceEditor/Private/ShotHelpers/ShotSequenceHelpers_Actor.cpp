@@ -5,18 +5,22 @@
 
 #include "Actor.h"
 #include "Channels/MovieSceneFloatChannel.h"
+#include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "Containers/ArrayBuilder.h"
+#include "Engine/StaticMeshActor.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "Sections/MovieScene3DTransformSection.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
+
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Actors"
 
@@ -78,26 +82,55 @@ ShotSequenceHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const 
             }
 
             TArrayView<FMovieSceneFloatChannel*> FloatChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
-            FloatChannels[0]->SetDefault( Location.X );
-            FloatChannels[1]->SetDefault( Location.Y );
-            FloatChannels[2]->SetDefault( Location.Z );
 
-            FloatChannels[3]->SetDefault( Rotation.Euler().X );
-            FloatChannels[4]->SetDefault( Rotation.Euler().Y );
-            FloatChannels[5]->SetDefault( Rotation.Euler().Z );
+            AddKeyToChannel( FloatChannels[0], 0, Location.X, iSequencer->GetKeyInterpolation() );
+            AddKeyToChannel( FloatChannels[1], 0, Location.Y, iSequencer->GetKeyInterpolation() );
+            AddKeyToChannel( FloatChannels[2], 0, Location.Z, iSequencer->GetKeyInterpolation() );
 
-            FloatChannels[6]->SetDefault( Scale.X );
-            FloatChannels[7]->SetDefault( Scale.Y );
-            FloatChannels[8]->SetDefault( Scale.Z );
+            AddKeyToChannel( FloatChannels[3], 0, Rotation.Euler().X, iSequencer->GetKeyInterpolation() );
+            AddKeyToChannel( FloatChannels[4], 0, Rotation.Euler().Y, iSequencer->GetKeyInterpolation() );
+            AddKeyToChannel( FloatChannels[5], 0, Rotation.Euler().Z, iSequencer->GetKeyInterpolation() );
+
+            AddKeyToChannel( FloatChannels[6], 0, Scale.X, iSequencer->GetKeyInterpolation() );
+            AddKeyToChannel( FloatChannels[7], 0, Scale.Y, iSequencer->GetKeyInterpolation() );
+            AddKeyToChannel( FloatChannels[8], 0, Scale.Z, iSequencer->GetKeyInterpolation() );
+
+            //FloatChannels[0]->SetDefault( Location.X );
+            //FloatChannels[1]->SetDefault( Location.Y );
+            //FloatChannels[2]->SetDefault( Location.Z );
+
+            //FloatChannels[3]->SetDefault( Rotation.Euler().X );
+            //FloatChannels[4]->SetDefault( Rotation.Euler().Y );
+            //FloatChannels[5]->SetDefault( Rotation.Euler().Z );
+
+            //FloatChannels[6]->SetDefault( Scale.X );
+            //FloatChannels[7]->SetDefault( Scale.Y );
+            //FloatChannels[8]->SetDefault( Scale.Z );
         }
 
         if( NewTrack->IsA<UMovieScenePrimitiveMaterialTrack>() )
         {
             UMovieScenePrimitiveMaterialTrack* material_track = Cast< UMovieScenePrimitiveMaterialTrack >( NewTrack );
-            check( material_track );
+
+            auto material_section = Cast<UMovieScenePrimitiveMaterialSection>( NewSection );
 
             material_track->MaterialIndex = iMaterialTrackIndex;
             material_track->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( material_track->MaterialIndex ) ) );
+
+            //---
+
+            AStaticMeshActor* actor = Cast< AStaticMeshActor >( iActor );
+            FMovieSceneObjectPathChannelKeyValue material_objectpath;
+            if( actor )
+            {
+                UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->MaterialIndex );
+                material_objectpath = material;
+            }
+
+            TArrayView<FMovieSceneObjectPathChannel*> MaterialChannels = material_section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+            check( MaterialChannels.Num() == 1 );
+
+            UE::MovieScene::AddKeyToChannel( MaterialChannels[0], 0, material_objectpath, iSequencer->GetKeyInterpolation() );
         }
 
         if( iSequencer->GetInfiniteKeyAreas() )
