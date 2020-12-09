@@ -574,6 +574,7 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
     UObject* texture = mData->Texture();
     if (texture)
     {
+        ClearLayerStackDelegates();
         GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
     }
 }

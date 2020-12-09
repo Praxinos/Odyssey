@@ -380,6 +380,8 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 {
     mBeginPosition = FVector2D(0,0);
     mController->GetData()->PaintEngine()->EndStroke();
+    
+    mPaintSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
 
     /*
     CopyUTexturePixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock(),mStrokeBufferTexture2D);
@@ -473,7 +475,6 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
                 mLastEvent->x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
                 mLastEvent->y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
 
-                mController->GetData()->PaintEngine()->Tick();
                 mController->GetData()->PaintEngine()->PushStroke(*mLastEvent);
             }
 
@@ -1611,6 +1612,13 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 	{
 		mPaintTargetData.Empty();
 	}
+
+    if( mPaintingTexture2D )
+    {
+        mController->GetData()->PaintEngine()->Tick();
+        FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
+        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+    }
 }
 
 
