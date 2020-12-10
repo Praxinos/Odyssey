@@ -34,6 +34,7 @@ public:
         SLATE_EVENT( FOnInt32ValueChanged, OnFlowChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnBlendingModeChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnAlphaModeChanged )
+        SLATE_ATTRIBUTE(bool, VerticalAspect)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );

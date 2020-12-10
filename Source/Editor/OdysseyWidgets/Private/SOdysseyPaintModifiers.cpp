@@ -24,178 +24,355 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mCurrentAlphaMode = ::ul3::AM_NORMAL;
     mAlphaModes = GetAlphaModesAsText();
 
-    ChildSlot
-    [
-        SNew( SBox )
-            .HeightOverride( 25 )
-            [
-                SNew( SHorizontalBox )
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
+    if( InArgs._VerticalAspect.Get())
+    {
+        ChildSlot
+        [
+            SNew( SBox )
                 [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Size", "Size:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mSizeSpinBox, SSpinBox< int > )
-                            //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                            .MinValue( 1 )
-                            .MaxValue( 1000 )
-                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
-                            .Delta( 1 )
-                        ]
-                    ]
-                ]
+                    SNew( SVerticalBox )
 
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
+                    +SVerticalBox::Slot()
+                    .Padding( FMargin( 2.f, 3.f ) )
                     [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
                         [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Opacity", "Opacity:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mOpacitySpinBox, SSpinBox< int > )
-                            //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                            .MinValue( 0 )
-                            .MaxValue( 100 )
-                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
-                        ]
-                    ]
-                ]
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Flow", "Flow:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mFlowSpinBox, SSpinBox< int > )
-                            //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                            .MinValue( 0 )
-                            .MaxValue( 100 )
-                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
-                        ]
-                    ]
-                ]
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Blend", "Blend:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                            .OptionsSource(&mBlendingModes)
-                            .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem)
-                            .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
-                            .Content()
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
                             [
-                                CreateBlendingModeTextWidget( mBlendingModes[0] )
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Size", "Size:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mSizeSpinBox, SSpinBox< int > )
+                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
+                                .MinValue( 1 )
+                                .MaxValue( 1000 )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                                .Delta( 1 )
+                            ]
+                        ]
+                    ]
+
+                    +SVerticalBox::Slot()
+                    .Padding(FMargin(2.f,3.f))
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Opacity", "Opacity:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mOpacitySpinBox, SSpinBox< int > )
+                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
+                                .MinValue( 0 )
+                                .MaxValue( 100 )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
+                            ]
+                        ]
+                    ]
+
+                    +SVerticalBox::Slot()
+                    .Padding(FMargin(2.f,3.f))
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Flow", "Flow:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mFlowSpinBox, SSpinBox< int > )
+                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
+                                .MinValue( 0 )
+                                .MaxValue( 100 )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
+                            ]
+                        ]
+                    ]
+
+                    +SVerticalBox::Slot()
+                    .Padding(FMargin(2.f,3.f))
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Blend", "Blend:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+                                .OptionsSource(&mBlendingModes)
+                                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem)
+                                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
+                                .Content()
+                                [
+                                    CreateBlendingModeTextWidget( mBlendingModes[0] )
+                                ]
+                            ]
+                        ]
+                    ]
+
+
+                    +SVerticalBox::Slot()
+                    .Padding(FMargin(2.f,3.f))
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Alpha", "Alpha:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
+                                .IsFocusable( false )
+                                .OptionsSource(&mAlphaModes)
+                                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
+                                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                                .Content()
+                                [
+                                    CreateAlphaModeTextWidget( mAlphaModes[0] )
+                                ]
                             ]
                         ]
                     ]
                 ]
-
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
+        ];
+    }
+    else
+    {
+        ChildSlot
+        [
+            SNew( SBox )
+                .HeightOverride( 25 )
                 [
                     SNew( SHorizontalBox )
+
                     +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
+                    .HAlign( HAlign_Fill )
                     [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
                         [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Alpha", "Alpha:" ) )
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Size", "Size:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mSizeSpinBox, SSpinBox< int > )
+                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
+                                .MinValue( 1 )
+                                .MaxValue( 1000 )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                                .Delta( 1 )
+                            ]
                         ]
                     ]
+
                     +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
+                    .HAlign( HAlign_Fill )
                     [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
                         [
-                            SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
-                            .IsFocusable( false )
-                            .OptionsSource(&mAlphaModes)
-                            .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
-                            .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
-                            .Content()
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
                             [
-                                CreateAlphaModeTextWidget( mAlphaModes[0] )
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Opacity", "Opacity:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mOpacitySpinBox, SSpinBox< int > )
+                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
+                                .MinValue( 0 )
+                                .MaxValue( 100 )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
+                            ]
+                        ]
+                    ]
+
+                    +SHorizontalBox::Slot()
+                    .HAlign( HAlign_Fill )
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Flow", "Flow:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mFlowSpinBox, SSpinBox< int > )
+                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
+                                .MinValue( 0 )
+                                .MaxValue( 100 )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
+                            ]
+                        ]
+                    ]
+
+                    +SHorizontalBox::Slot()
+                    .HAlign( HAlign_Fill )
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Blend", "Blend:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+                                .OptionsSource(&mBlendingModes)
+                                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem)
+                                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
+                                .Content()
+                                [
+                                    CreateBlendingModeTextWidget( mBlendingModes[0] )
+                                ]
+                            ]
+                        ]
+                    ]
+
+
+                    +SHorizontalBox::Slot()
+                    .HAlign( HAlign_Fill )
+                    [
+                        SNew( SHorizontalBox )
+                        +SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign( VAlign_Center )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Left )
+                            [
+                                SNew( STextBlock )
+                                .Text( LOCTEXT( "Alpha", "Alpha:" ) )
+                            ]
+                        ]
+                        +SHorizontalBox::Slot()
+                        .VAlign( VAlign_Center )
+                        .Padding( 6.f, 0.f )
+                        [
+                            SNew( SBox )
+                            .HAlign( HAlign_Fill )
+                            [
+                                SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
+                                .IsFocusable( false )
+                                .OptionsSource(&mAlphaModes)
+                                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
+                                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                                .Content()
+                                [
+                                    CreateAlphaModeTextWidget( mAlphaModes[0] )
+                                ]
                             ]
                         ]
                     ]
                 ]
-            ]
-    ];
+        ];
+    }
 }
 
 

@@ -59,7 +59,8 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnOpacityChanged_Raw       (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleOpacityModifierChanged)
         .OnFlowChanged_Raw          (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleFlowModifierChanged)
         .OnBlendingModeChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleBlendingModeModifierChanged)
-        .OnAlphaModeChanged_Raw     (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleAlphaModeModifierChanged);
+        .OnAlphaModeChanged_Raw     (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleAlphaModeModifierChanged)
+        .VerticalAspect( true );
 
     mBrushExposedParameters = SNew(SOdysseyBrushExposedParameters)
         .OnParameterChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleBrushParameterChanged);
