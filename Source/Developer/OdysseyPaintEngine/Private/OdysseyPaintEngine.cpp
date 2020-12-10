@@ -400,6 +400,9 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 	mBrushInstance = iBrushInstance;
 	mBrushCursorInvalid = true;
 
+    if (!mBrushInstance)
+        return;
+
 	//we need to do this before iBrushInstance->ExecuteSelected();
 	//and we cannot use UpdateBrushInstance() as it sends a StateChanged, and we only want this after iBrushInstance->ExecuteSelected();
 	FOdysseyBrushState& state = mBrushInstance->GetState();
@@ -416,9 +419,7 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 	state.currentPointIndex = 0;
 	state.currentStroke = &mResultStroke;
 
-    if( iBrushInstance != nullptr )
-        iBrushInstance->ExecuteSelected();
-
+    iBrushInstance->ExecuteSelected();
     UpdateBrushInstance();
 }
 

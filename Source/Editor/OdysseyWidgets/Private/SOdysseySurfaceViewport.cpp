@@ -18,6 +18,8 @@
 #include "OdysseyBlock.h"
 #include "OdysseyStyleSet.h"
 
+#include <ULIS3>
+
 
 
 #define MaxZoom 16.0
@@ -135,7 +137,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
             .VAlign(VAlign_Center)
             [
                 SNew(STextBlock)
-                .Text( this, &SOdysseySurfaceViewport::HandleSurfaceSizeTextValue )
+                .Text( this, &SOdysseySurfaceViewport::HandleSurfaceInfosTextValue )
             ]
             + SHorizontalBox::Slot()
             .HAlign(HAlign_Left)
@@ -469,11 +471,36 @@ SOdysseySurfaceViewport::HandleRotationValue( ) const
 }
 
 FText
-SOdysseySurfaceViewport::HandleSurfaceSizeTextValue( ) const
+SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
 {
-    if (!Surface || !Surface->Texture())
+    if (!Surface || !Surface->Texture() /* || !Surface->Block() */)
         return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
-    return FText::Format( NSLOCTEXT("Texture Size","Texture Size","{0}x{1} px"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ) );
+
+    /* ::ul3::FFormatMetrics format(Surface->Block()->Format());
+    FText formatName;
+    switch(format.CM)
+    {
+        CM_GREY: formatName = FText::FromString("Grey"); break;
+        CM_RGB: formatName = FText::FromString("RGB"); break;
+        CM_HSV:	formatName = FText::FromString("HSV"); break;
+        CM_HSL:	formatName = FText::FromString("HSL"); break;
+        CM_CMY:	formatName = FText::FromString("CMY"); break;
+        CM_CMYK: formatName = FText::FromString("CMYK"); break;
+        CM_YUV: formatName = FText::FromString("YUV"); break;
+        CM_Lab:	formatName = FText::FromString("Lab"); break;
+        CM_XYZ:	formatName = FText::FromString("XYZ"); break;
+        CM_Yxy: formatName = FText::FromString("Yxy"); break;
+
+        default: break;
+    }
+
+    if (Surface->Block()->HasAlpha())
+    {
+        formatName = formatName.Join("", FText::FromString("A"));
+    } */
+
+    //return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px | {2} {3} bits"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ), formatName, FText::AsNumber(format.BPC) );
+    return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ));
 }
 
 

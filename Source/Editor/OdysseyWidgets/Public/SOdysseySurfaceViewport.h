@@ -68,7 +68,7 @@ private:
     void            HandleViewportReset();
     void            HandleRotationChanged( int newRotation );
     int             HandleRotationValue() const;
-    FText           HandleSurfaceSizeTextValue() const;
+    FText           HandleSurfaceInfosTextValue() const;
 
 
 

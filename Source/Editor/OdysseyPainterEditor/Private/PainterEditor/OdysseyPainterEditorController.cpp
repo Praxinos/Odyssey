@@ -491,9 +491,6 @@ FOdysseyPainterEditorController::HandleViewportColorPicked(const FVector2D& iPos
 
 	const ::ul3::FPixelValue& color = GetData()->DisplaySurface()->Block()->GetBlock()->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
 
-	if (GetGUI()->GetColorSelectorTab())
-		GetGUI()->GetColorSelectorTab()->SetColor(color);
-
     GetData()->PaintColor(color);
 	GetData()->PaintEngine()->SetColor(color);
 }
