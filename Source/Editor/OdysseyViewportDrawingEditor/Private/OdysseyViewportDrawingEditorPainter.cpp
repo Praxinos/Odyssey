@@ -44,7 +44,7 @@
 
 #include "PackageTools.h"
 
-#define LOCTEXT_NAMESPACE "PaintModePainter"
+#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorPainter"
 
 FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
     : mTexturePaintingCurrentMeshComponent(nullptr),
@@ -468,9 +468,8 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
 			bUsed = true;
             
             FVector2D coord;
-            UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord);
 
-            if( mLastEvent )
+            if( mLastEvent && UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord ) )
             {
                 mLastEvent->x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
                 mLastEvent->y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
@@ -1188,7 +1187,6 @@ void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHit
             UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[1]x: %lf, curTriangle.TriUVs[1]y: %lf"),curTriangle.TriUVs[1].X,curTriangle.TriUVs[1].Y);
             UE_LOG(LogTemp,Display,TEXT("curTriangle.TriUVs[2]x: %lf, curTriangle.TriUVs[2]y: %lf"),curTriangle.TriUVs[2].X,curTriangle.TriUVs[2].Y);*/
 
-            //The texture inside should be the texture of the brush, it may work
             brushPaintBatchedElements->AddTriangle(v0,v1,v2,meshPaintBatchedElementParameters,SE_BLEND_Opaque);
         }
     }

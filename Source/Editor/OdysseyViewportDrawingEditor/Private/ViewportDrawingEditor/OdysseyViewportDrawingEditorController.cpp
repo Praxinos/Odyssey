@@ -3,6 +3,9 @@
 
 #include "OdysseyViewportDrawingEditorController.h"
 #include "Subsystems/AssetEditorSubsystem.h"
+#include "PhysicsEngine/PhysicsSettings.h"
+
+#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorController"
 
 /////////////////////////////////////////////////////
 // FOdysseyViewportDrawingEditorController
@@ -561,6 +564,12 @@ FOdysseyViewportDrawingEditorController::RemoveEditingAsset(UObject* Asset)
 void
 FOdysseyViewportDrawingEditorController::EdModeEnter()
 {
+    if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
+    {
+        FText Title = LOCTEXT("TitleCollisionUVNoSupport","CollisionUVNoSupport");
+        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("Enable FindCollisionUV","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
+    }
+
     UObject* texture = mData->Texture();
     if (texture)
     {
@@ -578,3 +587,5 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
         GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
     }
 }
+
+#undef LOCTEXT_NAMESPACE
