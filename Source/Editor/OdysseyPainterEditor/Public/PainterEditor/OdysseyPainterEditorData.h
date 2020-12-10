@@ -32,10 +32,12 @@ public:
 	UOdysseyBrush*                      Brush();
 	UOdysseyBrushAssetBase*             BrushInstance();
 	bool                                DrawBrushPreview();
+	::ul3::FPixelValue                  PaintColor() const;
 
 	void						 Brush(UOdysseyBrush* iBrush);
 	void						 BrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
 	void                         DrawBrushPreview(bool iDrawBrushPreview);
+	void                         PaintColor(::ul3::FPixelValue iColor);
 
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
@@ -43,6 +45,7 @@ private:
 	FOdysseyBlock*				mPaintEngineBlock;  // Owned        // Used by PaintEngine
 	UOdysseyBrush*              mBrush;             // NOT Owned
 	UOdysseyBrushAssetBase*     mBrushInstance;     // Owned        // Used by PaintEngine and Brush Parameters and Brush Preview
+	::ul3::FPixelValue			mPaintColor;
 	bool                        mDrawBrushPreview;
 };
 

@@ -370,6 +370,7 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
     {
 		GetData()->BrushInstance()->RemoveFromRoot();
 		GetData()->BrushInstance(NULL);
+        GetData()->PaintEngine()->SetBrushInstance(NULL);
     }
 
     if(GetData()->Brush())
@@ -490,31 +491,35 @@ FOdysseyPainterEditorController::HandleViewportColorPicked(const FVector2D& iPos
 
 	const ::ul3::FPixelValue& color = GetData()->DisplaySurface()->Block()->GetBlock()->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
 
-	if (GetGUI()->GetColorSlidersTab())
-		GetGUI()->GetColorSlidersTab()->SetColor(color);
-
 	if (GetGUI()->GetColorSelectorTab())
 		GetGUI()->GetColorSelectorTab()->SetColor(color);
 
+    GetData()->PaintColor(color);
 	GetData()->PaintEngine()->SetColor(color);
 }
 
 void
 FOdysseyPainterEditorController::HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor )
 {
-    if( GetGUI()->GetColorSlidersTab() )
-		GetGUI()->GetColorSlidersTab()->SetColor( iColor );
-
+    GetData()->PaintColor(iColor);
 	GetData()->PaintEngine()->SetColor( iColor );
 }
 
 void
-FOdysseyPainterEditorController::HandleSlidersColorChanged( const ::ul3::FPixelValue& iColor )
+FOdysseyPainterEditorController::HandleSlidersColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
 {
-    if( GetGUI()->GetColorSelectorTab() )
-		GetGUI()->GetColorSelectorTab()->SetColor( iColor );
+    /* if( GetGUI()->GetColorSelectorTab() )
+		GetGUI()->GetColorSelectorTab()->SetColor( iColor ); */
 
-	GetData()->PaintEngine()->SetColor( iColor );
+    if (iEventState == eOdysseyEventState::kAdjust || iEventState == eOdysseyEventState::kSet || iEventState == eOdysseyEventState::kAbort )
+    {
+        GetData()->PaintColor(iColor);
+    }
+
+    if (iEventState == eOdysseyEventState::kSet)
+    {
+	    GetData()->PaintEngine()->SetColor( iColor );
+    }
 }
 
 //--------------------------------------------------------------------------------------

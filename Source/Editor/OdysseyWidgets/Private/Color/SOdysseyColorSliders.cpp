@@ -27,7 +27,8 @@ static FSlateColorBrush sliders_header_brush = FSlateColorBrush( FLinearColor( F
 void
 SOdysseyColorSliders::Construct( const FArguments& InArgs )
 {
-    OnColorChangedCallback = InArgs._OnColorChanged;
+    mColor = InArgs._Color;
+    OnColorChangeCallback = InArgs._OnColorChange;
     ChildSlot
     [
         SNew( SVerticalBox )
@@ -61,13 +62,11 @@ SOdysseyColorSliders::Construct( const FArguments& InArgs )
     GenerateMenu();
     combo_button->SetMenuContent( combo_menu.ToSharedRef() );
     GenerateContents();
-
-    bDisableNextCallback = false;
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
-void
+/* void
 SOdysseyColorSliders::SetColor( const ::ul3::FPixelValue& iColor )
 {
     if( bDisableNextCallback ) {
@@ -79,20 +78,21 @@ SOdysseyColorSliders::SetColor( const ::ul3::FPixelValue& iColor )
     {
         sliders_options[i]->widget->SetColor( iColor );
     }
-}
+} */
 
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks
+
 void
 SOdysseyColorSliders::GenerateMenu()
 {
-    sliders_options.Add( MakeShared< FSliderOption >( "RGB",    true,   SNew( FOdysseyGroupChannelSlider_RGB  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
-    sliders_options.Add( MakeShared< FSliderOption >( "HSV",    true,   SNew( FOdysseyGroupChannelSlider_HSV  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
-    sliders_options.Add( MakeShared< FSliderOption >( "HSL",    false,  SNew( FOdysseyGroupChannelSlider_HSL  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
-    sliders_options.Add( MakeShared< FSliderOption >( "CMYK",   false,  SNew( FOdysseyGroupChannelSlider_CMYK ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
-    //sliders_options.Add( MakeShared< FSliderOption >( "YUV",    false,  SNew( FOdysseyGroupChannelSlider_YUV  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
-    sliders_options.Add( MakeShared< FSliderOption >( "LabD65", true,   SNew( FOdysseyGroupChannelSlider_Lab  ).HeightOverride( 20 ).OnColorChanged( this, &SOdysseyColorSliders::HandleColorChanged ) ) );
+    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_RGB>( "RGB", true ) );
+    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_HSV>( "HSV", true ) );
+    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_HSL>( "HSL", false ) );
+    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_CMYK>( "CMYK", false ) );
+    //sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_YUV>( "YUV", false ) );
+    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_Lab>( "LabD65", true ) );
 
     combo_menu = SNew( SVerticalBox );
     for( int i = 0; i < sliders_options.Num(); ++i )
@@ -127,18 +127,18 @@ SOdysseyColorSliders::ItemChanged( int index, ECheckBoxState iState )
 {
     bool checked = iState == ECheckBoxState::Checked ? true : false;
     sliders_options[index]->enabled = checked;
-    GenerateContents();
+    // GenerateContents();
 }
 
 
 void
 SOdysseyColorSliders::GenerateContents()
 {
-    contents->ClearChildren();
+    //contents->ClearChildren();
     for( int i = 0; i < sliders_options.Num(); ++i )
     {
-        if( !sliders_options[i]->enabled )
-            continue;
+        //if( !sliders_options[i]->enabled )
+            //continue;
 
         contents->AddSlot()
             .Padding( 2, 2, 2, 4 )
@@ -146,18 +146,6 @@ SOdysseyColorSliders::GenerateContents()
                 sliders_options[i]->widget.ToSharedRef()
             ];
     }
-}
-
-
-void
-SOdysseyColorSliders::HandleColorChanged( const ::ul3::FPixelValue& iColor )
-{
-    for( int i = 0; i < sliders_options.Num(); ++i )
-    {
-        sliders_options[i]->widget->SetColor( iColor );
-    }
-    bDisableNextCallback = true;
-    OnColorChangedCallback.ExecuteIfBound( iColor );
 }
 
 #undef LOCTEXT_NAMESPACE

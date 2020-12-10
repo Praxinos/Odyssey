@@ -5,6 +5,7 @@
 
 #include <ULIS3>
 #include "OdysseyStylusInputSettings.h"
+#include "OdysseyEventState.h"
 
 class FOdysseyPainterEditorToolkit;
 class FOdysseyPainterEditorData;
@@ -87,7 +88,7 @@ public:
     // Color Handlers
 	virtual void HandleViewportColorPicked(const FVector2D& iPositionInTexture);
     virtual void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
-    virtual void HandleSlidersColorChanged( const ::ul3::FPixelValue& iColor );
+    virtual void HandleSlidersColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
 
     // Modifiers Handlers
     virtual void HandleSizeModifierChanged( int32 iValue );

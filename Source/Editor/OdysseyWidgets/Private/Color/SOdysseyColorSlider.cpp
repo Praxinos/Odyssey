@@ -18,12 +18,11 @@ void
 IOdysseyChannelSlider::Construct( const FArguments& InArgs )
 {
     ODYSSEY_LEAF_WIDGET_FORWARD_CONSTRUCT_ARGS
-    OnChannelChangedCallback = InArgs._OnChannelChanged;
     Init();
 }
 
 IOdysseyChannelSlider::IOdysseyChannelSlider( uint32 iFormat )
-    : mColor( iFormat )
+    : mFormat( iFormat )
 {
 }
 
@@ -34,7 +33,7 @@ IOdysseyChannelSlider::Init()
     cursor_t = 0;
     cursor_pos = FVector2D( 0, 0 );
     cursor_size = FVector2D( 1, 1 );
-    bMarkedAsInvalid = false;
+    // bMarkedAsInvalid = false;
 }
 
 //--------------------------------------------------------------------------------------
@@ -50,14 +49,15 @@ IOdysseyChannelSlider::OnPaint( const FPaintArgs& Args
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
 
-    if( bMarkedAsInvalid )
-    {
+    // if( bMarkedAsInvalid )
+    // {
         PaintInternalBuffer();
-        bMarkedAsInvalid = false;
-    }
+        // bMarkedAsInvalid = false;
+    // }
 
     FVector2D decal = ExternalSize / 2 - InternalSize / 2;
-    cursor_pos = decal + FVector2D( ( InternalSize.X - cursor_size.X ) * cursor_t, 0 );
+    float prop = GetProportionForColor(mColor.Get());
+    cursor_pos = decal + FVector2D( ( InternalSize.X - cursor_size.X ) * prop, 0 );
 
     FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry( decal, InternalSize ), ItemBrush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
     FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry( cursor_pos, cursor_size ), cursor_brush.Get(), ESlateDrawEffect::None, FLinearColor( 1, 1, 1, 1 ) );
@@ -107,7 +107,7 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Public IOdysseyChannelSlider API
-void
+/* void
 IOdysseyChannelSlider::SetColor( const ::ul3::FPixelValue& iColor )
 {
     if( mColor == iColor )
@@ -116,28 +116,27 @@ IOdysseyChannelSlider::SetColor( const ::ul3::FPixelValue& iColor )
     SetColor_Imp( iColor );
     cursor_t = GetProportionForColor_Imp( mColor );
     bMarkedAsInvalid = true;
-    OnChannelChangedCallback.ExecuteIfBound( cursor_t );
 }
+*/
 
-
-void
+/* void
 IOdysseyChannelSlider::SetPosition( float iPos )
 {
     if( iPos == cursor_t )
         return;
 
     cursor_t = iPos;
-    ::ul3::Conv( GetColorForProportion( cursor_t ), mColor );
+    FPixelValue value = ::ul3::Conv( GetColorForProportion( cursor_t ), mFormat );
     bMarkedAsInvalid = true;
-    OnChannelChangedCallback.ExecuteIfBound( cursor_t );
-}
+    //OnColorChangeCallback.ExecuteIfBound( cursor_t );
+} */
 
 
-float
+/* float
 IOdysseyChannelSlider::GetPosition() const
 {
     return  cursor_t;
-}
+} */
 
 
 //--------------------------------------------------------------------------------------
@@ -145,7 +144,8 @@ IOdysseyChannelSlider::GetPosition() const
 FReply
 IOdysseyChannelSlider::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-    ProcessMouseAction( MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ) );
+    cursor_t = GetProportionForMousePosition(MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ));
+    OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kStart, GetColorForProportion(cursor_t) );
     return FReply::Handled().CaptureMouse(SharedThis(this));
 }
 
@@ -153,10 +153,12 @@ IOdysseyChannelSlider::OnMouseButtonDown(const FGeometry& MyGeometry, const FPoi
 FReply
 IOdysseyChannelSlider::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-    if( HasMouseCapture() )
-        return FReply::Handled().ReleaseMouseCapture();
-
-    return FReply::Unhandled();
+    if( !HasMouseCapture() )
+        return FReply::Unhandled();
+    
+    cursor_t = GetProportionForMousePosition(MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ));
+    OnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kSet, GetColorForProportion(cursor_t) );
+    return FReply::Handled().ReleaseMouseCapture();
 }
 
 
@@ -166,26 +168,39 @@ IOdysseyChannelSlider::OnMouseMove(const FGeometry& MyGeometry, const FPointerEv
     if( !HasMouseCapture() )
         return FReply::Unhandled();
 
-    ProcessMouseAction( MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ) );
+    float pos = GetProportionForMousePosition(MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ));
+    if (pos == cursor_t)
+        return FReply::Handled();
+
+    cursor_t = pos;
+    OnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kAdjust, GetColorForProportion(cursor_t) );
 
     return FReply::Handled();
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------- Private Event Handling
-void
-IOdysseyChannelSlider::ProcessMouseAction( FVector2D iPos )
+
+float
+IOdysseyChannelSlider::GetProportionForMousePosition( FVector2D iPos ) const
 {
-    SetPosition( FMath::Clamp( ( iPos.X - cursor_size.X / 2 ) / ( InternalSize.X - cursor_size.X ), 0.f, 1.f ) );
+    return FMath::Clamp( ( iPos.X - cursor_size.X / 2 ) / ( InternalSize.X - cursor_size.X ), 0.f, 1.f );
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Private IOdysseyChannelSlider API
 
+float
+IOdysseyChannelSlider::GetProportionForColor( const ::ul3::FPixelValue& iColor ) const
+{
+    ::ul3::FPixelValue color = ::ul3::Conv( iColor, mFormat );
+    return GetProportionForColor_Imp(color);
+}
+
 ::ul3::FPixelValue
 IOdysseyChannelSlider::GetColorForProportion( float t ) const
 {
-    ::ul3::FPixelValue result( mColor );
+    ::ul3::FPixelValue result = ::ul3::Conv( mColor.Get(), mFormat );
     SetColorForProportion_Imp( result, t );
     result.SetAlphaF( 1.f );
     return result;

@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyPainterEditorGUI.h"
+
 
 #include "Widgets/Text/SMultiLineEditableText.h"
 
@@ -391,7 +391,8 @@ void
 FOdysseyPainterEditorGUI::CreateColorSlidersTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mColorSlidersTab = SNew( SOdysseyColorSliders )
-        .OnColorChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleSlidersColorChanged );
+		.Color(iData.ToSharedRef(), &FOdysseyPainterEditorData::PaintColor)
+        .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleSlidersColorChange );
 }
 
 void

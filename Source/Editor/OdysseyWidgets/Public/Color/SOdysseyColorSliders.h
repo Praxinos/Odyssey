@@ -18,32 +18,34 @@
 #include "Widgets/Layout/SScrollBox.h"
 #include <ULIS3>
 
-class IOdysseyGroupChannelSlider;
+#include "SOdysseyColorSlider.h"
 
-DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
+//class IOdysseyGroupChannelSlider;
+//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
 
 class ODYSSEYWIDGETS_API SOdysseyColorSliders : public SCompoundWidget
 {
     typedef SCompoundWidget tSuperClass;
 
-struct FSliderOption
-{
-    FString name;
-    bool enabled;
-    TSharedPtr< IOdysseyGroupChannelSlider > widget;
-    FSliderOption( const FString& iName, bool iEnabled, TSharedPtr< IOdysseyGroupChannelSlider > iWidget )
-        : name( iName )
-        , enabled( iEnabled )
-        , widget( iWidget )
-    {}
-};
+    struct FSliderOption
+    {
+        FString name;
+        bool enabled;
+        TSharedPtr< IOdysseyGroupChannelSlider > widget;
+        FSliderOption( const FString& iName, bool iEnabled, TSharedPtr< IOdysseyGroupChannelSlider > iWidget )
+            : name( iName )
+            , enabled( iEnabled )
+            , widget( iWidget )
+        {}
+    };
 
     typedef TSharedPtr< FSliderOption > FSliderOptionItem;
 
 public:
     SLATE_BEGIN_ARGS( SOdysseyColorSliders )
         {}
-    SLATE_EVENT( FOnColorChanged, OnColorChanged )
+    SLATE_ATTRIBUTE(::ul3::FPixelValue, Color)
+    SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
 public:
@@ -52,22 +54,37 @@ public:
 
 public:
     // Public Callbacks
-    void SetColor( const ::ul3::FPixelValue& iColor );
+    // void SetColor( const ::ul3::FPixelValue& iColor );
+
+
 
 private:
     // Private Callbacks
     void GenerateMenu();
     void ItemChanged( int index, ECheckBoxState iState );
-
     void GenerateContents();
-    void HandleColorChanged( const ::ul3::FPixelValue& iColor );
+
+    template<class T>
+    FSliderOptionItem
+    GenerateSliderOption(FString iName, bool iEnabled)
+    {
+        FSliderOption* sliderOption = new FSliderOption(iName, iEnabled, nullptr);
+
+        sliderOption->widget = SNew(T/*FOdysseyGroupChannelSlider_RGB*/)
+            .HeightOverride(20)
+            .Color(mColor)
+            .OnColorChange(OnColorChangeCallback)
+            .Visibility_Lambda([sliderOption]() { return sliderOption->enabled ? EVisibility::Visible : EVisibility::Collapsed; });
+
+        return MakeShareable(sliderOption);
+    }
 
 private:
     // Private data members
+    TAttribute<::ul3::FPixelValue> mColor;
     TArray< FSliderOptionItem > sliders_options;
     TSharedPtr< SComboButton > combo_button;
     TSharedPtr< SVerticalBox > combo_menu;
     TSharedPtr< SScrollBox > contents;
-    FOnColorChanged OnColorChangedCallback;
-    bool bDisableNextCallback;
+    FOnColorChange OnColorChangeCallback;
 };

@@ -426,7 +426,8 @@ void
 FOdysseyPaintEngine::SetColor( const ::ul3::FPixelValue& iColor )
 {
     InterruptStrokeAndStampInPlace();
-    ::ul3::Conv( iColor, mColor );
+    mColor = iColor; //No need for any conversion here
+    //::ul3::Conv( iColor, mColor );
     UpdateBrushInstance();
 }
 
