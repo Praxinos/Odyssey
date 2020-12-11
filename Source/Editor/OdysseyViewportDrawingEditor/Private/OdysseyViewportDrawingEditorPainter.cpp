@@ -591,14 +591,14 @@ void FOdysseyViewportDrawingEditorPainter::Reset()
 	ApplyForcedLODIndex(-1);
 
 	// If the user has pending changes and the editor is not exiting, we want to do the commit for all the modified textures.
-	/*if ((GetNumberOfPendingPaintChanges() > 0) && !IsEngineExitRequested())
+	if ((GetNumberOfPendingPaintChanges() > 0) && !IsEngineExitRequested())
 	{
 		CommitAllPaintedTextures();
 	}
 	else
 	{
 		ClearAllTextureOverrides();
-	}*/
+	}
 
 	mPaintTargetData.Empty();
 
@@ -1615,7 +1615,8 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
     {
         mController->GetData()->PaintEngine()->Tick();
         FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
-        TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+        if( textureData )
+            TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
     }
 }
 

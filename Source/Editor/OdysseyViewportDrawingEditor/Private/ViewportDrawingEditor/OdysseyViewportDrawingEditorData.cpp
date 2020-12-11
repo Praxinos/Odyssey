@@ -33,6 +33,7 @@ FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
     , mPaintEngine(new FOdysseyPaintEngine3D())
     , mBrush(NULL)
     , mBrushInstance(NULL)
+    , mPaintColor(::ul3::FPixelValue::FromRGBA8(0,0,0))
 {
 }
 
@@ -119,6 +120,12 @@ FOdysseyViewportDrawingEditorData::BrushInstance()
     return mBrushInstance;
 }
 
+::ul3::FPixelValue
+FOdysseyViewportDrawingEditorData::PaintColor() const
+{
+    return mPaintColor;
+}
+
 
 void						        
 FOdysseyViewportDrawingEditorData::Brush(UOdysseyBrush* iBrush)
@@ -130,6 +137,12 @@ void
 FOdysseyViewportDrawingEditorData::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance)
 {
     mBrushInstance = iBrushInstance;
+}
+
+void
+FOdysseyViewportDrawingEditorData::PaintColor(::ul3::FPixelValue iColor)
+{
+    mPaintColor = iColor;
 }
 
 

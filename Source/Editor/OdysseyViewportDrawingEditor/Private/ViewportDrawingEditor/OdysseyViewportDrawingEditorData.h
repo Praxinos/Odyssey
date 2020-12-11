@@ -39,9 +39,11 @@ public:
     FOdysseyPaintEngine3D*		        PaintEngine();
     UOdysseyBrush*                      Brush();
     UOdysseyBrushAssetBase*             BrushInstance();
+    ::ul3::FPixelValue                  PaintColor() const;
 
     void						        Brush(UOdysseyBrush* iBrush);
     void						        BrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
+    void                                PaintColor(::ul3::FPixelValue iColor);
 
 public:
     void SyncTextureAndInvalidate();
@@ -55,5 +57,6 @@ private:
     FOdysseyPaintEngine3D*        mPaintEngine;
     UOdysseyBrush*                mBrush;
     UOdysseyBrushAssetBase*       mBrushInstance;
+    ::ul3::FPixelValue			  mPaintColor;
     FTexturePropertiesBackup      mPropertiesBackup;
 };

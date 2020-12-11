@@ -76,7 +76,7 @@ public:
 
     // Color Handlers
     void HandleSelectorColorChanged(const ::ul3::FPixelValue& iColor);
-    void HandleSlidersColorChanged(const ::ul3::FPixelValue& iColor);
+    void HandleSlidersColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
 
     // Modifiers Handlers
     void HandleSizeModifierChanged(int32 iValue);
