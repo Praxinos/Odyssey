@@ -42,6 +42,7 @@ FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
 void
 FOdysseyViewportDrawingEditorData::Init(UTexture2D* iTexture)
 {
+    // Get or Create Texture userData
     if( iTexture )
     {
         //Data edited texture changed, so we reset unload the texture and reset its properties

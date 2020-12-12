@@ -107,8 +107,6 @@ protected:
 	void GatherTextureTriangles(IMeshPaintGeometryAdapter* iAdapter, int32 iTriangleIndex, const int32 iVertexIndices[3], TArray<FTexturePaintTriangleInfo>* iTriangleInfo, TArray<FTexturePaintMeshSectionInfo>* iSectionInfos, int32 iUVChannelIndex);
 
 protected:
-	bool CanSaveModifiedTextures() const;
-
 	/** Checks whether or not the given asset should not be shown in the list of textures to paint on */
 	bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
 	

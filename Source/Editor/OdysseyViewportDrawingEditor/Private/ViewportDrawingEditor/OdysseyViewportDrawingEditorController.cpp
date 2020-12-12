@@ -528,6 +528,15 @@ bool
 FOdysseyViewportDrawingEditorController::CloseWindow()
 {
     //---
+    if( mData->Texture() )
+    {
+        mData->PaintEngine()->Flush();
+        mData->SyncTextureAndInvalidate();
+        mData->ApplyPropertiesBackup();
+
+        //TODO: Move in the right place
+        mData->LayerStack()->mDrawingUndo->Clear();
+    }
 
 	return true;
 }
@@ -591,6 +600,13 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
     if (texture)
     {
         ClearLayerStackDelegates();
+        mData->PaintEngine()->Flush();
+        mData->SyncTextureAndInvalidate();
+        mData->ApplyPropertiesBackup();
+
+        //TODO: Move in the right place
+        mData->LayerStack()->mDrawingUndo->Clear();
+
         GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
     }
 }

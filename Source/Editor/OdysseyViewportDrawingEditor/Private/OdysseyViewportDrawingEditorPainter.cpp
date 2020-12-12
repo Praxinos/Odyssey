@@ -104,11 +104,6 @@ void FOdysseyViewportDrawingEditorPainter::Init()
 void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
 {
 	mUICommandList->MapAction(
-        FOdysseyViewportDrawingEditorCommands::Get().SaveTexturePaint,
-        FUIAction(FExecuteAction::CreateRaw(this, &FOdysseyViewportDrawingEditorPainter::SaveModifiedTextures), 
-        FCanExecuteAction::CreateRaw(this, &FOdysseyViewportDrawingEditorPainter::CanSaveModifiedTextures)));
-
-	mUICommandList->MapAction(
 		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyBrushSettingsView,
 		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyBrushSettingsView),
 		FCanExecuteAction(),
@@ -213,8 +208,8 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureChanged(const FAssetData&
 		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 		if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
 		{
-			FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Selected Texture Already Opened");
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+			FText Title = LOCTEXT("SelectedTextureAlreadyOpenedTitle", "Selected Texture Already Opened");
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("Selected Texture Already Opened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
 			return;
 		}
 
@@ -381,7 +376,7 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
     mBeginPosition = FVector2D(0,0);
     mController->GetData()->PaintEngine()->EndStroke();
     
-    mPaintSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
+    //mPaintSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
 
     /*
     CopyUTexturePixelDataIntoBlock(mController->GetData()->PaintEngine()->StrokeBlock(),mStrokeBufferTexture2D);
@@ -403,6 +398,7 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
     }*/
 
 	IMeshPainter::FinishPainting();	
+	FinishPaintingTextureBased();
 }
 
 bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraOrigin, const TArrayView<TPair<FVector, FVector>>& iRays, EMeshPaintAction iPaintAction, float iPaintStrength)
@@ -803,22 +799,6 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingTextureBased(UMeshCompon
         check(texture2D != nullptr);
         mPaintingTexture2D = texture2D;
 
-        mStrokeBufferTexture2D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
-        mStrokeBufferTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        mStrokeBufferTexture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        mStrokeBufferTexture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-        mStrokeBufferTexture2D->UpdateResource();
-        mStrokeBufferTexture2D->PostEditChange();
-
-        mStrokeBufferTexture3D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
-        mStrokeBufferTexture3D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        mStrokeBufferTexture3D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        mStrokeBufferTexture3D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-        mStrokeBufferTexture3D->UpdateResource();
-        mStrokeBufferTexture3D->PostEditChange();
-
         // OK, now we need to make sure our render target is filled in with data
         TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
     }
@@ -852,45 +832,6 @@ void FOdysseyViewportDrawingEditorPainter::FinishPaintingTextureBased()
     if(mTexturePaintingCurrentMeshComponent != nullptr)
     {
         check(mPaintingTexture2D != nullptr);
-
-        FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
-        check(textureData);
-
-        // Commit to the texture source art but don't do any compression, compression is saved for the CommitAllPaintedTextures function.
-        if(textureData->bIsPaintingTexture2DModified == true)
-        {
-            const int32 texWidth = textureData->PaintRenderTargetTexture->SizeX;
-            const int32 texHeight = textureData->PaintRenderTargetTexture->SizeY;
-            TArray< FColor > texturePixels;
-            texturePixels.AddUninitialized(texWidth * texHeight);
-
-            FlushRenderingCommands();
-            // NOTE: You are normally not allowed to dereference this pointer on the game thread! Normally you can only pass the pointer around and
-            //  check for NULLness.  We do it in this context, however, and it is only ok because this does not happen every frame and we make sure to flush the
-            //  rendering thread.
-            FTextureRenderTargetResource* renderTargetResource = textureData->PaintRenderTargetTexture->GameThread_GetRenderTargetResource();
-            check(renderTargetResource != nullptr);
-            renderTargetResource->ReadPixels(texturePixels);
-
-            {
-                FScopedTransaction transaction(LOCTEXT("MeshPaintMode_TexturePaint_Transaction","Texture Paint"));
-
-                // For undo
-                textureData->PaintingTexture2D->SetFlags(RF_Transactional);
-                textureData->PaintingTexture2D->Modify();
-
-                // Store source art
-                FColor* colors = (FColor*)textureData->PaintingTexture2D->Source.LockMip(0);
-                check(textureData->PaintingTexture2D->Source.CalcMipSize(0) == texturePixels.Num() * sizeof(FColor));
-                FMemory::Memcpy(colors,texturePixels.GetData(),texturePixels.Num() * sizeof(FColor));
-                textureData->PaintingTexture2D->Source.UnlockMip(0);
-
-                // If render target gamma used was 1.0 then disable SRGB for the static texture
-                textureData->PaintingTexture2D->SRGB = FMath::Abs(renderTargetResource->GetDisplayGamma() - 1.0f) >= KINDA_SMALL_NUMBER;
-
-                textureData->PaintingTexture2D->bHasBeenPaintedInEditor = true;
-            }
-        }
 
         mPaintingTexture2D = nullptr;
         mTexturePaintingCurrentMeshComponent = nullptr;
@@ -1506,18 +1447,6 @@ void FOdysseyViewportDrawingEditorPainter::SaveModifiedTextures()
 	}
 }
 
-bool FOdysseyViewportDrawingEditorPainter::CanSaveModifiedTextures() const
-{
-	/** Check whether or not the current selected paint texture requires saving */
-	bool bRequiresSaving = false;
-	const UTexture2D* selectedTexture = mPaintSettings->mTexturePaintSettings.mPaintTexture;
-	if (nullptr != selectedTexture)
-	{
-		bRequiresSaving = selectedTexture->GetOutermost()->IsDirty();
-	}
-	return bRequiresSaving;
-}
-
 void FOdysseyViewportDrawingEditorPainter::Refresh()
 {
 	// Ensure that we call OnRemoved while adapter/components are still valid
@@ -1611,12 +1540,12 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 		mPaintTargetData.Empty();
 	}
 
-    if( mPaintingTexture2D )
+    if( mController->GetData()->Texture() )
     {
         mController->GetData()->PaintEngine()->Tick();
-        FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
+        FPaintTexture2DData* textureData = GetPaintTargetData(mController->GetData()->Texture());
         if( textureData )
-            TexturePaintHelpers::CopyTextureToRenderTargetTexture(mPaintingTexture2D,textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+            TexturePaintHelpers::CopyTextureToRenderTargetTexture(mController->GetData()->Texture(),textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
     }
 }
 

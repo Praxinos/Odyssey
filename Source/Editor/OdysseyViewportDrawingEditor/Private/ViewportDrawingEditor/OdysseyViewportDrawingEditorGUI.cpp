@@ -208,21 +208,26 @@ void SOdysseyViewportDrawingEditorGUI::CreateMainWidget(FOdysseyViewportDrawingE
                                 ]
                                 .BodyContent()
                                 [
-                                    SNew(SVerticalBox)
-                                    + SVerticalBox::Slot()
-                                    .AutoHeight()
+                                    SNew(SBox)
+                                    .HeightOverride(256)
                                     [
-                                        SNew(SBox)
-                                        .HeightOverride(256)
-                                        [
-                                            mColorSelector.ToSharedRef()
-                                        ]
+                                        mColorSelector.ToSharedRef()
                                     ]
-                                    + SVerticalBox::Slot()
-                                    .AutoHeight()
-                                    [
-                                        mColorSliders.ToSharedRef()
-                                    ]
+                                ]
+                            ]
+                            + SVerticalBox::Slot()
+                            .Padding(StandardPadding)
+                            .AutoHeight()
+                            [
+                                SNew(SExpandableArea)
+                                .HeaderContent()
+                                [
+                                    SNew(STextBlock)
+                                    .Text(LOCTEXT("ColorSliders","Color Sliders"))
+                                ]
+                                .BodyContent()
+                                [
+                                    mColorSliders.ToSharedRef()
                                 ]
                             ]
                         ]
