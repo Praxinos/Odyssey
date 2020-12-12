@@ -21,7 +21,7 @@ void FOdysseyViewportDrawingEditorModule::StartupModule()
 {
 	FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
 		FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
-		NSLOCTEXT("OdysseyPaintInViewportMode", "OdysseyViewportPaint_ModeName", "Iliad Paint in Viewport"),
+		NSLOCTEXT("OdysseyPaintInViewportMode", "OdysseyViewportPaint_ModeName", "Iliad"),
 		FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
 		true, 200 );
 
