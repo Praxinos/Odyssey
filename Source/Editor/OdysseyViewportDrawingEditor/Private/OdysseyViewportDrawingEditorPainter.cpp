@@ -143,7 +143,7 @@ void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
 void FOdysseyViewportDrawingEditorPainter::Render(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
 {
 	/** Render viewport interactors */
-	RenderInteractors(iView, iViewport, iPDI, false);
+	//RenderInteractors(iView, iViewport, iPDI, false);
 }
 
 bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection)
