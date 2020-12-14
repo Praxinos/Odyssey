@@ -143,9 +143,8 @@ private:
     mutable FLinearColor sat_tint;
     mutable FLinearColor lum_tint;
 
-    // mutable ::ul3::FPixelValue* colorA;
-
-    mutable bool bMarkedAsInvalidated;
+    mutable bool bMarkedAsInvalid;
+    mutable ::ul3::FPixelValue mDisplayedColor;
 
     FOnColorChange OnColorChangeCallback;
     TAttribute<::ul3::FPixelValue> mColor;

@@ -151,6 +151,7 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
 
     triangle_buffer_size = FVector2D( 1, 1 );
     mEditMode = eEditMode::kNone;
+    bMarkedAsInvalid = false;
     Init();
 
     // colorA = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
@@ -227,8 +228,13 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
     
-    UpdateColor();
-    PaintInternalBuffer();
+    if (bMarkedAsInvalid || mDisplayedColor != mColor.Get())
+    {
+        UpdateColor();
+        PaintInternalBuffer();
+        bMarkedAsInvalid = false;
+        mDisplayedColor = mColor.Get();
+    }
 
     // WheelBG
     FSlateDrawElement::MakeBox( OutDrawElements,
@@ -360,6 +366,7 @@ SOdysseyAdvancedColorWheel::InitInternalBuffers() const
     ItemBrush->ImageSize.X = surface->Width();
     ItemBrush->ImageSize.Y = surface->Height();
     ItemBrush->DrawAs = ESlateBrushDrawType::Image;
+    bMarkedAsInvalid = true;
 }
 
 void

@@ -18,6 +18,7 @@ void
 IOdysseyChannelSlider::Construct( const FArguments& InArgs )
 {
     ODYSSEY_LEAF_WIDGET_FORWARD_CONSTRUCT_ARGS
+    bMarkedAsInvalid = false;
     Init();
 }
 
@@ -33,7 +34,6 @@ IOdysseyChannelSlider::Init()
     cursor_t = 0;
     cursor_pos = FVector2D( 0, 0 );
     cursor_size = FVector2D( 1, 1 );
-    // bMarkedAsInvalid = false;
 }
 
 //--------------------------------------------------------------------------------------
@@ -49,11 +49,12 @@ IOdysseyChannelSlider::OnPaint( const FPaintArgs& Args
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
 
-    // if( bMarkedAsInvalid )
-    // {
+    if (bMarkedAsInvalid || mDisplayedColor != mColor.Get())
+    {
         PaintInternalBuffer();
-        // bMarkedAsInvalid = false;
-    // }
+        bMarkedAsInvalid = false;
+        mDisplayedColor = mColor.Get();
+    }
 
     FVector2D decal = ExternalSize / 2 - InternalSize / 2;
     float prop = GetProportionForColor(mColor.Get());
@@ -78,11 +79,12 @@ IOdysseyChannelSlider::InitInternalBuffers() const
     cursor_brush->ImageSize.X = surface->Width();
     cursor_brush->ImageSize.Y = surface->Height();
     cursor_brush->DrawAs = ESlateBrushDrawType::Image;
+    bMarkedAsInvalid = true;
 }
 
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
-{
+{   
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     ::ul3::uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );

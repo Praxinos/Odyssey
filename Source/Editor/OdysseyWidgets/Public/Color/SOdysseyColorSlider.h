@@ -95,6 +95,7 @@ private:
     mutable FVector2D cursor_size;
     float cursor_t;
     mutable FVector2D cursor_pos;
+    mutable ::ul3::FPixelValue mDisplayedColor;
     mutable bool bMarkedAsInvalid;
 };
 
