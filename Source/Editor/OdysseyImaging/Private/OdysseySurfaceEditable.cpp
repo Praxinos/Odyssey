@@ -484,6 +484,9 @@ InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,
 
 		int blockBytes = GPixelFormats[dstRawImage->PixelFormat].BlockBytes;
 		iTexture->UpdateTextureRegions(0, 1, region, dstRawImage->SizeX * blockBytes, blockBytes, dstRawImage->RawData.GetData(), dataCleanupFunc);
+		FRenderCommandFence fence;
+		fence.BeginFence();
+		fence.Wait();
 
 		delete sourceRawImage;
 	}
@@ -549,11 +552,15 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
 		pitch = srcBlock->BytesPerScanLine();
 		
 		delete region;
+		
 		region = new FUpdateTextureRegion2D(x, y, 0, 0, w, h);
         // srcBlock destruction is handled in dataCleanupFunc
     }
 	
     iTexture->UpdateTextureRegions(0,1,region,pitch,bpp,const_cast<uint8*>(srcBlock->DataPtr()),dataCleanupFunc);
+	FRenderCommandFence fence;
+	fence.BeginFence();
+	fence.Wait();
 }
 
 void
