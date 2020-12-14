@@ -574,14 +574,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
 
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-
-            if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
-                position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
-            {
-				// TODO: 
-				mOnPickColor.Broadcast(position_in_texture);
-                // mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
-            }
+			mOnPickColor.Broadcast(eOdysseyEventState::kAdjust, position_in_texture);
 
             return true;
         }
@@ -591,11 +584,19 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
         {
             mCurrentToolState = eState::kPick;
+
+            FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
+            FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+			mOnPickColor.Broadcast(eOdysseyEventState::kSet, position_in_texture);
             return true;
         }
         else if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Released )
         {
             mCurrentToolState = eState::kIdle;
+
+            FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
+            FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
+			mOnPickColor.Broadcast(eOdysseyEventState::kSet, position_in_texture);
             return true;
         }
     }
@@ -664,9 +665,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() &&
             position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() )
         {
-			//TODO:
-			mOnPickColor.Broadcast(position_in_texture);
-            // mOnPickColor.Broadcast(mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Block()->GetBlock()->PixelValue(position_in_texture.X, position_in_texture.Y));
+			mOnPickColor.Broadcast(eOdysseyEventState::kAdjust, position_in_texture);
         }
     }
 }

@@ -12,6 +12,7 @@
 #include "UObject/GCObject.h"
 
 #include "OdysseyStrokePoint.h"
+#include "OdysseyEventState.h"
 
 #include <ULIS3>
 
@@ -59,7 +60,7 @@ class FOdysseyPainterEditorViewportClient
     , public IStylusMessageHandler
 {
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPickColor, const FVector2D&)
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
 
 public:
     enum class eState

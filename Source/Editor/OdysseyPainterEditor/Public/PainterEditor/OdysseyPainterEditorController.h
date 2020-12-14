@@ -86,7 +86,7 @@ public:
     virtual void HandleBrushParameterChanged();
 
     // Color Handlers
-	virtual void HandleViewportColorPicked(const FVector2D& iPositionInTexture);
+	virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
     // virtual void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
     virtual void HandlePaintColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
 

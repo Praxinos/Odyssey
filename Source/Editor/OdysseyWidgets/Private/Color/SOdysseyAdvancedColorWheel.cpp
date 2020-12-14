@@ -151,7 +151,6 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
 
     triangle_buffer_size = FVector2D( 1, 1 );
     mEditMode = eEditMode::kNone;
-    bMarkedAsInvalidated = false;
     Init();
 
     // colorA = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
@@ -166,48 +165,11 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
 void
 SOdysseyAdvancedColorWheel::UpdateColor() const
 {
-    // ::ul3::FPixelValue T_color = ::ul3::Conv( mColor.Get(), ULIS3_FORMAT_RGBA8 );
-    /* if( (*colorA) == T_color )
-        return; */
-
     float u, v, w;
-    // float Rr, Rg, Rb;
-    // float Br, Bg, Bb;
     ::ul3::FPixelValue hsv_color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_HSVAF );
     float hue = hsv_color.HueF();
     float sat = hsv_color.SaturationF();
     float value = hsv_color.ValueF();
-    /* ::ul3::FPixelValue A_color = ::ul3::FPixelValue::FromRGBAF( 1, 1, 1 );
-    ::ul3::FPixelValue B_color = ::ul3::Conv( ::ul3::FPixelValue::FromHSVAF( hue, 1, 1 ), ULIS3_FORMAT_RGBAF );
-    ::ul3::FPixelValue C_color = ::ul3::FPixelValue::FromRGBAF( 0, 0, 0 );
-    ::ul3::FPixelValue R_color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_RGBAF );
-    Rr = R_color.RedF();
-    Rg = R_color.GreenF();
-    Rb = R_color.BlueF();
-    Br = B_color.RedF();
-    Bg = B_color.GreenF();
-    Bb = B_color.BlueF();
-    int sextant = hue * 6;
-    int sol = 0;
-    if( sextant == 0 || sextant == 3 ) sol = 2;
-    if( sextant == 1 || sextant == 4 ) sol = 1;
-    if( sextant == 2 || sextant == 5 ) sol = 0;
-
-    if( sol == 2 )
-    {
-        u = ( Rr * Bb - Rb * Br ) / ( Bb - Br ); //Value max
-        v = ( Rr - Rb ) / ( Br - Bb ); //sat
-    }
-    else if( sol == 1 )
-    {
-        u = ( Rb * Bg - Rg * Bb ) / ( Bg - Bb );
-        v = ( Rb - Rg ) / ( Bb - Bg );
-    }
-    else
-    {
-        u = ( Rg * Br - Rr * Bg ) / ( Br - Bg );
-        v = ( Rg - Rr ) / ( Bg - Br );
-    } */
 
     u = value * (1.0f - sat);
     v = sat * value;
@@ -220,10 +182,6 @@ SOdysseyAdvancedColorWheel::UpdateColor() const
     hue_deg = hue * 360;
     hue_rad = -hue_deg * PI / 180.f;
     triangle_cursor_barycentric_position = FVector( u, v, w );
-
-    // colorA->AssignMemoryUnsafe( T_color );
-    // bMarkedAsInvalidated = true;
-    // OnColorChangeCallback.ExecuteIfBound( *colorA );
 
     UpdateGeometry();
     UpdateTint();
@@ -268,7 +226,6 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
                            , bool bParentEnabled ) const
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
-    // if( bMarkedAsInvalidated )
     
     UpdateColor();
     PaintInternalBuffer();
@@ -408,12 +365,8 @@ SOdysseyAdvancedColorWheel::InitInternalBuffers() const
 void
 SOdysseyAdvancedColorWheel::PaintInternalBuffer( int iReason ) const
 {
-    if( bMarkedAsInvalidated )
-        ::ul3::ClearRaw( surface->Block()->GetBlock() );
-
     PaintTriangle();
     surface->Invalidate();
-    bMarkedAsInvalidated = false;
 }
 
 
@@ -554,11 +507,6 @@ SOdysseyAdvancedColorWheel::ProcessEditHueAction( FVector2D iPos )
     float shifted_hue = -hue_rad;
     if( shifted_hue < 0 ) shifted_hue+= 2 * PI;
     hue_deg = shifted_hue * 180 / PI;
-
-    // bMarkedAsInvalidated = true;
-    // UpdateColor();
-    // UpdateGeometry();
-    // UpdateTint();
 }
 
 
@@ -567,9 +515,6 @@ SOdysseyAdvancedColorWheel::ProcessEditTriangleAction( FVector2D iPos )
 {
     FVector barycentric = GetBarycentricCoordinates( triangle_Point1, triangle_Point2, triangle_Point3, iPos );
     triangle_cursor_barycentric_position = ClampBarycentricCoordinates(barycentric);
-    // UpdateColor();
-    // UpdateGeometry();
-    // UpdateTint();
 }
 
 
@@ -643,9 +588,6 @@ SOdysseyAdvancedColorWheel::UpdateTint() const
 SOdysseyAdvancedColorWheel::GetColorResult() const
 {
     // Bake tints
-    // ::ul3::FPixelValue Color1 = ::ul3::FPixelValue::FromRGBA8( 255, 255, 255 );             // pure white
-    // ::ul3::FPixelValue Color2 = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 ); // pure hue, max sat
-    // ::ul3::FPixelValue Color3 = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 );                   // pure black
     float u = triangle_cursor_barycentric_position.X;
     float v = triangle_cursor_barycentric_position.Y;
     float w = triangle_cursor_barycentric_position.Z;
@@ -654,17 +596,7 @@ SOdysseyAdvancedColorWheel::GetColorResult() const
     float value = 1 - w;
     float sat = value != 0 ? v / value : 0.0f;
 
-    /* int R  = ( u * Color1.Red8()   + v * Color2.Red8()   + w * Color3.Red8()   );
-    int G  = ( u * Color1.Green8() + v * Color2.Green8() + w * Color3.Green8() );
-    int B  = ( u * Color1.Blue8()  + v * Color2.Blue8()  + w * Color3.Blue8()  ); */
     return ::ul3::FPixelValue::FromHSVAF( hue, sat, value, 255 );
-
-    /* if( (*colorA) != result )
-    {
-        bMarkedAsInvalidated = true;
-        OnColorChangeCallback.ExecuteIfBound( result );
-    }
-    colorA->AssignMemoryUnsafe( result ); */
 }
 
 #undef LOCTEXT_NAMESPACE

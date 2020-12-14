@@ -484,34 +484,29 @@ FOdysseyPainterEditorController::HandleBrushParameterChanged()
 //----------------------------------------------------------------------- Color Handlers
 
 void
-FOdysseyPainterEditorController::HandleViewportColorPicked(const FVector2D& iPositionInTexture)
+FOdysseyPainterEditorController::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
 {
 	if (!GetData()->DisplaySurface())
 		return;
 
-	const ::ul3::FPixelValue& color = GetData()->DisplaySurface()->Block()->GetBlock()->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
-
-    GetData()->PaintColor(color);
-	GetData()->PaintEngine()->SetColor(color);
+    ::ul3::FBlock* block = GetData()->DisplaySurface()->Block()->GetBlock();
+    if (iPositionInTexture.X >= 0 && iPositionInTexture.X < block->Width() &&
+        iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
+    {
+        const ::ul3::FPixelValue& color = block->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
+        GetData()->PaintColor(color);
+    }
+        
+    if (iEventState == eOdysseyEventState::kSet)
+    {
+        GetData()->PaintEngine()->SetColor(GetData()->PaintColor());
+    }
 }
-
-/* void
-FOdysseyPainterEditorController::HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor )
-{
-    GetData()->PaintColor(iColor);
-	GetData()->PaintEngine()->SetColor( iColor );
-} */
 
 void
 FOdysseyPainterEditorController::HandlePaintColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
 {
-    /* if( GetGUI()->GetColorSelectorTab() )
-		GetGUI()->GetColorSelectorTab()->SetColor( iColor ); */
-
-    if (iEventState == eOdysseyEventState::kAdjust || iEventState == eOdysseyEventState::kSet || iEventState == eOdysseyEventState::kAbort )
-    {
-        GetData()->PaintColor(iColor);
-    }
+    GetData()->PaintColor(iColor);
 
     if (iEventState == eOdysseyEventState::kSet)
     {
