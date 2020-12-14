@@ -382,9 +382,8 @@ void
 FOdysseyPainterEditorGUI::CreateColorSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mColorSelectorTab = SNew( SOdysseyColorSelector )
-        .OnColorChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleSelectorColorChanged );
-
-	mColorSelectorTab->SetColor(::ul3::FPixelValue::FromRGBA8(0, 0, 0));
+		.Color(iData.ToSharedRef(), &FOdysseyPainterEditorData::PaintColor)
+        .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandlePaintColorChange);
 }
 
 void
@@ -392,7 +391,7 @@ FOdysseyPainterEditorGUI::CreateColorSlidersTab(TSharedPtr<FOdysseyPainterEditor
 {
     mColorSlidersTab = SNew( SOdysseyColorSliders )
 		.Color(iData.ToSharedRef(), &FOdysseyPainterEditorData::PaintColor)
-        .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleSlidersColorChange );
+        .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandlePaintColorChange);
 }
 
 void

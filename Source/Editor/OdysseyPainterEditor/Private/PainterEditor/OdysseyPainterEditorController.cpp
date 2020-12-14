@@ -495,15 +495,15 @@ FOdysseyPainterEditorController::HandleViewportColorPicked(const FVector2D& iPos
 	GetData()->PaintEngine()->SetColor(color);
 }
 
-void
+/* void
 FOdysseyPainterEditorController::HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor )
 {
     GetData()->PaintColor(iColor);
 	GetData()->PaintEngine()->SetColor( iColor );
-}
+} */
 
 void
-FOdysseyPainterEditorController::HandleSlidersColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
+FOdysseyPainterEditorController::HandlePaintColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
 {
     /* if( GetGUI()->GetColorSelectorTab() )
 		GetGUI()->GetColorSelectorTab()->SetColor( iColor ); */

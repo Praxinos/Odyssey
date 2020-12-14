@@ -73,7 +73,8 @@ HexStringToDecimal( const FString& iStr )
 void
 SOdysseyColorSelector::Construct( const FArguments& InArgs )
 {
-    OnColorChangedCallback = InArgs._OnColorChanged;
+    mColor = InArgs._Color;
+    mOnColorChangeCallback = InArgs._OnColorChange;
     options.Add(MakeShareable(new FString("Color Wheel")));
     CurrentItem = options[0];
 
@@ -119,7 +120,8 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
                 .MinDesiredHeight(  150 )
                 .MaxDesiredWidth(   800 )
                 .MaxDesiredHeight(  800 )
-                .OnColorChanged( this, &SOdysseyColorSelector::HandleWheelColorChangedCallback )
+                .Color(mColor)
+                .OnColorChange( mOnColorChangeCallback )
             ]
             +SOverlay::Slot()
             .HAlign( HAlign_Left )
@@ -132,7 +134,7 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
                 .Visibility( this, &SOdysseyColorSelector::GetHexBoxVisibility )
                 [
                     SAssignNew( hex_editable_text_box, SEditableTextBox )
-                    .Text( FText::FromString( "000000" ) )
+                    .Text( this, &SOdysseyColorSelector::GetColorHex )
                     .BackgroundColor( hex_box_bg_brush )
                     .ForegroundColor( hex_box_fg_brush )
                     .Justification( ETextJustify::Center )
@@ -146,15 +148,6 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
             ]
         ]
     ];
-}
-
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------- Public Callbacks
-void
-SOdysseyColorSelector::SetColor( const ::ul3::FPixelValue& iColor )
-{
-    adv_color_wheel->SetColor( iColor );
 }
 
 
@@ -257,8 +250,10 @@ SOdysseyColorSelector::HexBoxOnTextChanged( const FText& iText )
             res.Append( &cchar, 1 );
     }
 
-    if( !res.Equals( str ) )
-        hex_editable_text_box->SetText( FText::FromString( res ) );
+    /* if( !res.Equals( str ) )
+        hex_editable_text_box->SetText( FText::FromString( res ) ); */
+
+    //Adjust
 }
 
 
@@ -273,7 +268,7 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
         res.Append( &filler, 1 );
     }
 
-    hex_editable_text_box->SetText( FText::FromString( res ) );
+    // hex_editable_text_box->SetText( FText::FromString( res ) );
     FString str_r = res.Mid( 0, 2 );
     FString str_g = res.Mid( 2, 2 );
     FString str_b = res.Mid( 4, 2 );
@@ -281,27 +276,30 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int g = HexStringToDecimal( str_g );
     int b = HexStringToDecimal( str_b );
     ::ul3::FPixelValue newColor = ::ul3::FPixelValue::FromRGBA8( r, g, b );
-    adv_color_wheel->SetColor( newColor );
+
+    //adv_color_wheel->SetColor( newColor );
+
+    //Set or Abort + start / adjust if needed
 }
 
 
-void
-SOdysseyColorSelector::HandleWheelColorChangedCallback( const ::ul3::FPixelValue& iColor )
+FText
+SOdysseyColorSelector::GetColorHex() const
 {
     //Can be null so we have to check
-    if( !hex_editable_text_box )
-        return;
-
-    uint8 r = iColor.Red8();
-    uint8 g = iColor.Green8();
-    uint8 b = iColor.Blue8();
+    ::ul3::FPixelValue color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_RGBA8);
+    uint8 r = color.Red8();
+    uint8 g = color.Green8();
+    uint8 b = color.Blue8();
     FString str_r = DecimalToHexString( r );
     FString str_g = DecimalToHexString( g );
     FString str_b = DecimalToHexString( b );
     FString cat = str_r + str_g + str_b;
 
-    hex_editable_text_box->SetText( FText::FromString( cat ) );
-    OnColorChangedCallback.ExecuteIfBound( iColor );
+    // hex_editable_text_box->SetText( FText::FromString( cat ) );
+    // OnColorChangedCallback.ExecuteIfBound( iColor );
+
+    return FText::FromString( cat );
 }
 
 

@@ -13,9 +13,11 @@
 #include "Layout/Children.h"
 #include "Widgets/SPanel.h"
 #include "SOdysseyLeafWidget.h"
+#include "OdysseyEventState.h"
 #include <ULIS3>
 
-DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
+//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
+DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ul3::FPixelValue& );
 
 
 /////////////////////////////////////////////////////
@@ -37,7 +39,8 @@ public:
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ARGS
         {}
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES
-        SLATE_EVENT( FOnColorChanged, OnColorChanged )
+        SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )
+        SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
 public:
@@ -93,6 +96,7 @@ private:
     void  UpdateGeometry() const;
     void  UpdateTint() const;
     void  UpdateColor() const;
+    ::ul3::FPixelValue GetColorResult() const;
 
 private:
     // Painting Utilities
@@ -125,8 +129,8 @@ private:
 
     eEditMode mEditMode;
 
-    float hue_rad;
-    int hue_deg;
+    mutable float hue_rad;
+    mutable int hue_deg;
 
     mutable FVector triangle_cursor_barycentric_position;
     mutable FVector2D hue_cursor_direction;
@@ -139,9 +143,11 @@ private:
     mutable FLinearColor sat_tint;
     mutable FLinearColor lum_tint;
 
-    mutable ::ul3::FPixelValue* colorA;
+    // mutable ::ul3::FPixelValue* colorA;
 
     mutable bool bMarkedAsInvalidated;
 
-    FOnColorChanged OnColorChangedCallback;
+    FOnColorChange OnColorChangeCallback;
+    TAttribute<::ul3::FPixelValue> mColor;
+
 };

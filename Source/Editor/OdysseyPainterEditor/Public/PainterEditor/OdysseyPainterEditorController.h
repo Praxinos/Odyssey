@@ -87,8 +87,8 @@ public:
 
     // Color Handlers
 	virtual void HandleViewportColorPicked(const FVector2D& iPositionInTexture);
-    virtual void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
-    virtual void HandleSlidersColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
+    // virtual void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
+    virtual void HandlePaintColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
 
     // Modifiers Handlers
     virtual void HandleSizeModifierChanged( int32 iValue );

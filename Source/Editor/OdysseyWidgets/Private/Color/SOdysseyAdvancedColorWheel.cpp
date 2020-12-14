@@ -126,7 +126,7 @@ BarycentricToCartesianCoordinates( FVector2D A, FVector2D B, FVector2D C, FVecto
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 SOdysseyAdvancedColorWheel::~SOdysseyAdvancedColorWheel() {
-    delete colorA;
+    //delete colorA;
 }
 
 void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
@@ -146,51 +146,47 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
     TriangleCursorBG        = FOdysseyStyle::GetBrush("AdvancedColorWheel.TriangleCursorBG");
     CursorOverlay           = FOdysseyStyle::GetBrush("AdvancedColorWheel.CursorOverlay");
 
-    OnColorChangedCallback = InArgs._OnColorChanged;
+    mColor = InArgs._Color;
+    OnColorChangeCallback = InArgs._OnColorChange;
 
     triangle_buffer_size = FVector2D( 1, 1 );
     mEditMode = eEditMode::kNone;
     bMarkedAsInvalidated = false;
     Init();
 
-    colorA = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
-    ::ul3::FPixelValue start_color = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0, 255 );
-    SetColor( start_color );
+    // colorA = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
+    // ::ul3::FPixelValue start_color = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0, 255 );
+    // SetColor( start_color );
 }
 
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Public Callback API
+
 void
-SOdysseyAdvancedColorWheel::SetColor( const ::ul3::FPixelValue& iColor )
+SOdysseyAdvancedColorWheel::UpdateColor() const
 {
-    ::ul3::FPixelValue T_color = ::ul3::Conv( iColor, ULIS3_FORMAT_RGBA8 );
-    if( (*colorA) == T_color )
-        return;
+    // ::ul3::FPixelValue T_color = ::ul3::Conv( mColor.Get(), ULIS3_FORMAT_RGBA8 );
+    /* if( (*colorA) == T_color )
+        return; */
 
     float u, v, w;
-    float Rr, Rg, Rb;
-    float Ar, Ag, Ab;
-    float Br, Bg, Bb;
-    float Cr, Cg, Cb;
-    ::ul3::FPixelValue hsv_color = ::ul3::Conv( iColor, ULIS3_FORMAT_HSVAF );
+    // float Rr, Rg, Rb;
+    // float Br, Bg, Bb;
+    ::ul3::FPixelValue hsv_color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_HSVAF );
     float hue = hsv_color.HueF();
-    ::ul3::FPixelValue A_color = ::ul3::FPixelValue::FromRGBAF( 1, 1, 1 );
+    float sat = hsv_color.SaturationF();
+    float value = hsv_color.ValueF();
+    /* ::ul3::FPixelValue A_color = ::ul3::FPixelValue::FromRGBAF( 1, 1, 1 );
     ::ul3::FPixelValue B_color = ::ul3::Conv( ::ul3::FPixelValue::FromHSVAF( hue, 1, 1 ), ULIS3_FORMAT_RGBAF );
     ::ul3::FPixelValue C_color = ::ul3::FPixelValue::FromRGBAF( 0, 0, 0 );
-    ::ul3::FPixelValue R_color = ::ul3::Conv( iColor, ULIS3_FORMAT_RGBAF );
+    ::ul3::FPixelValue R_color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_RGBAF );
     Rr = R_color.RedF();
     Rg = R_color.GreenF();
     Rb = R_color.BlueF();
-    Ar = A_color.RedF();
-    Ag = A_color.GreenF();
-    Ab = A_color.BlueF();
     Br = B_color.RedF();
     Bg = B_color.GreenF();
     Bb = B_color.BlueF();
-    Cr = C_color.RedF();
-    Cg = C_color.GreenF();
-    Cb = C_color.BlueF();
     int sextant = hue * 6;
     int sol = 0;
     if( sextant == 0 || sextant == 3 ) sol = 2;
@@ -199,8 +195,8 @@ SOdysseyAdvancedColorWheel::SetColor( const ::ul3::FPixelValue& iColor )
 
     if( sol == 2 )
     {
-        u = ( Rr * Bb - Rb * Br ) / ( Bb - Br );
-        v = ( Rr - Rb ) / ( Br - Bb );
+        u = ( Rr * Bb - Rb * Br ) / ( Bb - Br ); //Value max
+        v = ( Rr - Rb ) / ( Br - Bb ); //sat
     }
     else if( sol == 1 )
     {
@@ -211,9 +207,12 @@ SOdysseyAdvancedColorWheel::SetColor( const ::ul3::FPixelValue& iColor )
     {
         u = ( Rg * Br - Rr * Bg ) / ( Br - Bg );
         v = ( Rg - Rr ) / ( Bg - Br );
-    }
+    } */
 
-    w = 1 - ( u + v );
+    u = value * (1.0f - sat);
+    v = sat * value;
+
+    w = 1 - ( u + v ); //Value min
 
     float sum = u + v + w;
     checkf( sum == 1.f, TEXT("Bad Conversion Occured") );
@@ -222,9 +221,9 @@ SOdysseyAdvancedColorWheel::SetColor( const ::ul3::FPixelValue& iColor )
     hue_rad = -hue_deg * PI / 180.f;
     triangle_cursor_barycentric_position = FVector( u, v, w );
 
-    colorA->AssignMemoryUnsafe( T_color );
-    bMarkedAsInvalidated = true;
-    OnColorChangedCallback.ExecuteIfBound( *colorA );
+    // colorA->AssignMemoryUnsafe( T_color );
+    // bMarkedAsInvalidated = true;
+    // OnColorChangeCallback.ExecuteIfBound( *colorA );
 
     UpdateGeometry();
     UpdateTint();
@@ -269,8 +268,10 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
                            , bool bParentEnabled ) const
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
-    if( bMarkedAsInvalidated )
-        PaintInternalBuffer();
+    // if( bMarkedAsInvalidated )
+    
+    UpdateColor();
+    PaintInternalBuffer();
 
     // WheelBG
     FSlateDrawElement::MakeBox( OutDrawElements,
@@ -486,6 +487,7 @@ SOdysseyAdvancedColorWheel::OnMouseButtonDown(const FGeometry& MyGeometry, const
 {
     mEditMode = eEditMode::kNone;
     StartProcessMouseAction( MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ) - clamp_shift );
+    OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kStart, GetColorResult() );
     return FReply::Handled().CaptureMouse(SharedThis(this));
 }
 
@@ -495,7 +497,10 @@ SOdysseyAdvancedColorWheel::OnMouseButtonUp(const FGeometry& MyGeometry, const F
 {
     mEditMode = eEditMode::kNone;
     if( HasMouseCapture() )
+    {
+        OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kSet, GetColorResult() );
         return FReply::Handled().ReleaseMouseCapture();
+    }
 
     return FReply::Unhandled();
 }
@@ -508,6 +513,7 @@ SOdysseyAdvancedColorWheel::OnMouseMove(const FGeometry& MyGeometry, const FPoin
         return FReply::Unhandled();
 
     ProcessMouseAction( MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ) - clamp_shift );
+    OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kAdjust, GetColorResult() );
 
     return FReply::Handled();
 }
@@ -549,10 +555,10 @@ SOdysseyAdvancedColorWheel::ProcessEditHueAction( FVector2D iPos )
     if( shifted_hue < 0 ) shifted_hue+= 2 * PI;
     hue_deg = shifted_hue * 180 / PI;
 
-    bMarkedAsInvalidated = true;
-    UpdateColor();
-    UpdateGeometry();
-    UpdateTint();
+    // bMarkedAsInvalidated = true;
+    // UpdateColor();
+    // UpdateGeometry();
+    // UpdateTint();
 }
 
 
@@ -561,9 +567,9 @@ SOdysseyAdvancedColorWheel::ProcessEditTriangleAction( FVector2D iPos )
 {
     FVector barycentric = GetBarycentricCoordinates( triangle_Point1, triangle_Point2, triangle_Point3, iPos );
     triangle_cursor_barycentric_position = ClampBarycentricCoordinates(barycentric);
-    UpdateColor();
-    UpdateGeometry();
-    UpdateTint();
+    // UpdateColor();
+    // UpdateGeometry();
+    // UpdateTint();
 }
 
 
@@ -623,36 +629,42 @@ SOdysseyAdvancedColorWheel::UpdateGeometry() const
 void
 SOdysseyAdvancedColorWheel::UpdateTint() const
 {
-    result_tint = FLinearColor( FColor( colorA->Red8(), colorA->Green8(), colorA->Blue8() ) );
+    ::ul3::FPixelValue color = ::ul3::Conv( mColor.Get(), ULIS3_FORMAT_RGBA8 );
+    result_tint = FLinearColor( FColor( color.Red8(), color.Green8(), color.Blue8() ) );
     ::ul3::FPixelValue hsv_tint = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 );
     hue_tint = FLinearColor( FColor( hsv_tint.Red8(), hsv_tint.Green8(), hsv_tint.Blue8() ) );
-    ::ul3::FPixelValue HSVColor = ::ul3::Conv( *colorA, ULIS3_FORMAT_HSVA8 );
+    ::ul3::FPixelValue HSVColor = ::ul3::Conv( color, ULIS3_FORMAT_HSVA8 );
     sat_tint = FLinearColor( FColor( HSVColor.Value8(), HSVColor.Value8(), HSVColor.Value8(), HSVColor.Saturation8() ) );
     lum_tint = FLinearColor( FColor( HSVColor.Value8(), HSVColor.Value8(), HSVColor.Value8(), 255 ) );
 }
 
 
-void
-SOdysseyAdvancedColorWheel::UpdateColor() const
+::ul3::FPixelValue
+SOdysseyAdvancedColorWheel::GetColorResult() const
 {
     // Bake tints
-    ::ul3::FPixelValue Color1 = ::ul3::FPixelValue::FromRGBA8( 255, 255, 255 );             // pure white
-    ::ul3::FPixelValue Color2 = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 ); // pure hue, max sat
-    ::ul3::FPixelValue Color3 = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 );                   // pure black
-    float a = triangle_cursor_barycentric_position.X;
-    float b = triangle_cursor_barycentric_position.Y;
-    float c = triangle_cursor_barycentric_position.Z;
-    int R  = ( a * Color1.Red8()   + b * Color2.Red8()   + c * Color3.Red8()   );
-    int G  = ( a * Color1.Green8() + b * Color2.Green8() + c * Color3.Green8() );
-    int B  = ( a * Color1.Blue8()  + b * Color2.Blue8()  + c * Color3.Blue8()  );
-    ::ul3::FPixelValue result( ULIS3_FORMAT_RGBA8, { R, G, B, 255 } );
+    // ::ul3::FPixelValue Color1 = ::ul3::FPixelValue::FromRGBA8( 255, 255, 255 );             // pure white
+    // ::ul3::FPixelValue Color2 = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 ); // pure hue, max sat
+    // ::ul3::FPixelValue Color3 = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 );                   // pure black
+    float u = triangle_cursor_barycentric_position.X;
+    float v = triangle_cursor_barycentric_position.Y;
+    float w = triangle_cursor_barycentric_position.Z;
 
-    if( (*colorA) != result )
+    float hue = hue_deg / 360.f;
+    float value = 1 - w;
+    float sat = value != 0 ? v / value : 0.0f;
+
+    /* int R  = ( u * Color1.Red8()   + v * Color2.Red8()   + w * Color3.Red8()   );
+    int G  = ( u * Color1.Green8() + v * Color2.Green8() + w * Color3.Green8() );
+    int B  = ( u * Color1.Blue8()  + v * Color2.Blue8()  + w * Color3.Blue8()  ); */
+    return ::ul3::FPixelValue::FromHSVAF( hue, sat, value, 255 );
+
+    /* if( (*colorA) != result )
     {
         bMarkedAsInvalidated = true;
-        OnColorChangedCallback.ExecuteIfBound( result );
+        OnColorChangeCallback.ExecuteIfBound( result );
     }
-    colorA->AssignMemoryUnsafe( result );
+    colorA->AssignMemoryUnsafe( result ); */
 }
 
 #undef LOCTEXT_NAMESPACE

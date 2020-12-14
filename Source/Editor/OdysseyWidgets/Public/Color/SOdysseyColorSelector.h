@@ -30,7 +30,8 @@ class ODYSSEYWIDGETS_API SOdysseyColorSelector : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS( SOdysseyColorSelector )
         {}
-    SLATE_EVENT( FOnColorChanged, OnColorChanged )
+    SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )
+    SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
 public:
@@ -39,7 +40,7 @@ public:
 
 public:
     // Public Callbacks
-    void SetColor( const ::ul3::FPixelValue& iColor );
+    //void SetColor( const ::ul3::FPixelValue& iColor );
 
 private:
     // Private Callbacks
@@ -55,7 +56,7 @@ private:
     FReply HexBoxOnKeyChar( const FGeometry&, const FCharacterEvent& iEvent ) const;
     void HexBoxOnTextChanged( const FText& iText );
     void HexBoxOnTextCommited( const FText&, ETextCommit::Type );
-    void HandleWheelColorChangedCallback( const ::ul3::FPixelValue& iColor );
+    FText GetColorHex() const;
 
 private:
     // Private data members
@@ -63,5 +64,7 @@ private:
     TArray< FComboItemType > options;
     FComboItemType CurrentItem;
     TSharedPtr< SEditableTextBox > hex_editable_text_box;
-    FOnColorChanged OnColorChangedCallback;
+
+    TAttribute<::ul3::FPixelValue> mColor;
+    FOnColorChange mOnColorChangeCallback;
 };
