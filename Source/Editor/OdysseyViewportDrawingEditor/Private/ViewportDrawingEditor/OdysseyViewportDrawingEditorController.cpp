@@ -400,27 +400,15 @@ FOdysseyViewportDrawingEditorController::HandleBrushParameterChanged()
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Color Handlers
+
 void
-FOdysseyViewportDrawingEditorController::HandleSelectorColorChanged(const ::ul3::FPixelValue& iColor)
+FOdysseyViewportDrawingEditorController::HandlePaintColorChange(eOdysseyEventState::Type iEventState,const ::ul3::FPixelValue& iColor)
 {
     GetData()->PaintColor(iColor);
-    GetData()->PaintEngine()->SetColor(iColor);
-}
 
-void
-FOdysseyViewportDrawingEditorController::HandleSlidersColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
-{
-    /* if( GetGUI()->GetColorSelectorTab() )
-		GetGUI()->GetColorSelectorTab()->SetColor( iColor ); */
-
-    if (iEventState == eOdysseyEventState::kAdjust || iEventState == eOdysseyEventState::kSet || iEventState == eOdysseyEventState::kAbort )
+    if(iEventState == eOdysseyEventState::kSet)
     {
-        GetData()->PaintColor(iColor);
-    }
-
-    if (iEventState == eOdysseyEventState::kSet)
-    {
-	    GetData()->PaintEngine()->SetColor( iColor );
+        GetData()->PaintEngine()->SetColor(iColor);
     }
 }
 

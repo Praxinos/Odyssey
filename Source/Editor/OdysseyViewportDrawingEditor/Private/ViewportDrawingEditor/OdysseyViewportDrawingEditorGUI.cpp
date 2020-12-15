@@ -66,11 +66,12 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnParameterChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleBrushParameterChanged);
 
     mColorSelector = SNew(SOdysseyColorSelector)
-        .OnColorChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSelectorColorChanged);
+        .Color(iPainter->GetController()->GetData().ToSharedRef(),&FOdysseyViewportDrawingEditorData::PaintColor)
+        .OnColorChange_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandlePaintColorChange);
 
     mColorSliders = SNew(SOdysseyColorSliders)
         .Color(iPainter->GetController()->GetData().ToSharedRef(),&FOdysseyViewportDrawingEditorData::PaintColor)
-        .OnColorChange_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSlidersColorChange);
+        .OnColorChange_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandlePaintColorChange);
 
     mStrokeOptions = SNew(SOdysseyStrokeOptions)
         .OnStrokeStepChanged_Raw        (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged)
