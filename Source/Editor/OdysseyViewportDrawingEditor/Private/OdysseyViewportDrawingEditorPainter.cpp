@@ -102,6 +102,9 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
     mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
     mWidget->Init(this);
     mController->Init();
+
+    //Select default brush
+    mController->GetGUI()->GetBrushSelector()->SelectBrush(LoadObject<UOdysseyBrush>(nullptr,TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")));
 }
 
 void FOdysseyViewportDrawingEditorPainter::Finalize()

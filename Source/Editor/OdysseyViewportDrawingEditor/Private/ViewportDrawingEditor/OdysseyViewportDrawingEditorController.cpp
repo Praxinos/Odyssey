@@ -61,8 +61,6 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
         if(!(mData->PaintEngine()->OnStrokeAbort().IsBoundToObject(this)))
             mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort);
 
-        GetGUI()->GetBrushSelector()->SelectBrush(LoadObject<UOdysseyBrush>(nullptr, TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")));
-
         // Set LayerStack CB
         if(!(mData->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)))
             mData->LayerStack()->OnCurrentLayerChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged);
