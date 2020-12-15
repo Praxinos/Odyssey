@@ -2,7 +2,8 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "SingleCameraCutTrack/SingleCameraCutSection.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+
+#include "Channels/MovieSceneFloatChannel.h"
 #include "Textures/SlateIcon.h"
 #include "Framework/Commands/UIAction.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -17,7 +18,9 @@
 #include "EditorStyleSet.h"
 #include "EngineUtils.h"
 #include "Camera/CameraComponent.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
 
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "FSingleCameraCutSection"
 
@@ -25,7 +28,8 @@
 /* FCameraCutSection structors
  *****************************************************************************/
 
-FSingleCameraCutSection::FSingleCameraCutSection(TSharedPtr<ISequencer> InSequencer, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool, UMovieSceneSection& InSection) : FViewportThumbnailSection(InSequencer, InThumbnailPool, InSection)
+FSingleCameraCutSection::FSingleCameraCutSection(TSharedPtr<ISequencer> InSequencer, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool, UMovieSceneSection& InSection)
+    : FKeyThumbnailSection(InSequencer, InThumbnailPool, InSection)
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 }
@@ -48,6 +52,49 @@ void FSingleCameraCutSection::SetSingleTime(double GlobalTime)
     }
 }
 
+TArray<double> FSingleCameraCutSection::GetKeys() const //override
+{
+    UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
+    TSharedPtr<ISequencer> Sequencer = SequencerPtr.Pin();
+    TArray<double> keys;
+
+    UMovieScene* movieScene = CameraCutSection->GetTypedOuter<UMovieScene>();
+    if( !movieScene )
+        return keys;
+
+    UMovieSceneTrack* track = movieScene->FindTrack<UMovieScene3DTransformTrack>( CameraCutSection->GetCameraBindingID().GetGuid() );
+    if( !track )
+        return keys;
+
+    TArray<UMovieSceneSection*> sections = track->GetAllSections();
+
+    for( auto section : sections )
+    {
+        TArray<FFrameNumber> keys_as_frame;
+        TArrayView<FMovieSceneFloatChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+        for( int i = 0; i < 6; i++ )
+        {
+            TArrayView<const FFrameNumber> times = channels[i]->GetTimes();
+            for( auto time : times )
+            {
+                keys_as_frame.AddUnique( time );
+            }
+        }
+
+        for( auto key : keys_as_frame )
+        {
+            FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution();
+
+            if( TimeSpace == ETimeSpace::Global )
+                keys.AddUnique( key / TickResolution );
+            else
+                checkNoEntry(); // Should never go here as TimeSpace seems to only be settable inside child class
+        }
+    }
+
+    return keys;
+}
+
 void FSingleCameraCutSection::Tick(const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
     UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>(Section);
@@ -56,20 +103,20 @@ void FSingleCameraCutSection::Tick(const FGeometry& AllottedGeometry, const FGeo
         if (GetDefault<UMovieSceneUserThumbnailSettings>()->bDrawSingleThumbnails && CameraCutSection->HasStartFrame())
         {
             double ReferenceOffsetSeconds = CameraCutSection->GetInclusiveStartFrame() / CameraCutSection->GetTypedOuter<UMovieScene>()->GetTickResolution() + CameraCutSection->GetThumbnailReferenceOffset();
-            ThumbnailCache.SetSingleReferenceFrame(ReferenceOffsetSeconds);
+            KeyThumbnailCache.SetSingleReferenceFrame(ReferenceOffsetSeconds);
         }
         else
         {
-            ThumbnailCache.SetSingleReferenceFrame(TOptional<double>());
+            KeyThumbnailCache.SetSingleReferenceFrame(TOptional<double>());
         }
     }
 
-    FViewportThumbnailSection::Tick(AllottedGeometry, ClippedGeometry, InCurrentTime, InDeltaTime);
+    FKeyThumbnailSection::Tick(AllottedGeometry, ClippedGeometry, InCurrentTime, InDeltaTime);
 }
 
 void FSingleCameraCutSection::BuildSectionContextMenu(FMenuBuilder& MenuBuilder, const FGuid& ObjectBinding)
 {
-    FViewportThumbnailSection::BuildSectionContextMenu(MenuBuilder, ObjectBinding);
+    FKeyThumbnailSection::BuildSectionContextMenu(MenuBuilder, ObjectBinding);
 
     UWorld* World = GEditor->GetEditorWorldContext().World();
 
@@ -165,7 +212,7 @@ FText FSingleCameraCutSection::GetSectionTitle() const
 
 float FSingleCameraCutSection::GetSectionHeight() const
 {
-    return FViewportThumbnailSection::GetSectionHeight() + 10.f;
+    return FKeyThumbnailSection::GetSectionHeight() + 10.f;
 }
 
 FMargin FSingleCameraCutSection::GetContentPadding() const
@@ -175,10 +222,8 @@ FMargin FSingleCameraCutSection::GetContentPadding() const
 
 int32 FSingleCameraCutSection::OnPaintSection(FSequencerSectionPainter& InPainter) const
 {
-    static const FSlateBrush* FilmBorder = FEditorStyle::GetBrush("Sequencer.Section.FilmBorder");
-
     InPainter.LayerId = InPainter.PaintSectionBackground();
-    return FViewportThumbnailSection::OnPaintSection(InPainter);
+    return FKeyThumbnailSection::OnPaintSection(InPainter);
 }
 
 FText FSingleCameraCutSection::HandleThumbnailTextBlockText() const
@@ -247,8 +292,6 @@ void
 FSingleCameraCutSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeFrameNumber )
 {
     UMovieSceneSingleCameraCutSection* section = Cast<UMovieSceneSingleCameraCutSection>( Section );
-
-    //FViewportThumbnailSection::ResizeSection( ResizeMode, ResizeFrameNumber );
 
     if( ResizeMode == ESequencerSectionResizeMode::SSRM_TrailingEdge )
         section->SetRange( TRange<FFrameNumber>( 0, ResizeFrameNumber ) );

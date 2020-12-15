@@ -5,7 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "Layout/Margin.h"
-#include "Sections/ThumbnailSection.h"
+
+#include "SingleCameraCutTrack/KeyThumbnailSection.h"
 
 class AActor;
 class FMenuBuilder;
@@ -16,7 +17,7 @@ class FTrackEditorThumbnailPool;
  * CameraCut section, which paints and ticks the appropriate section.
  */
 class FSingleCameraCutSection
-    : public FViewportThumbnailSection
+    : public FKeyThumbnailSection
 {
 public:
 
@@ -29,11 +30,11 @@ public:
 public:
 
     // ISequencerSection interface
-    virtual void Tick(const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-    virtual void BuildSectionContextMenu(FMenuBuilder& MenuBuilder, const FGuid& ObjectBinding) override;
-    virtual FText GetSectionTitle() const override;
-    virtual float GetSectionHeight() const override;
-    virtual int32 OnPaintSection(FSequencerSectionPainter& InPainter) const override;
+    virtual void    Tick(const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+    virtual void    BuildSectionContextMenu(FMenuBuilder& MenuBuilder, const FGuid& ObjectBinding) override;
+    virtual FText   GetSectionTitle() const override;
+    virtual float   GetSectionHeight() const override;
+    virtual int32   OnPaintSection(FSequencerSectionPainter& InPainter) const override;
     virtual FMargin GetContentPadding() const override;
 
     virtual void    BeginResizeSection();
@@ -45,10 +46,14 @@ public:
     virtual void    BeginDilateSection();
     virtual void    DilateSection( const TRange<FFrameNumber>& NewRange, float DilationFactor );
 
-    // FThumbnail interface
-
+    // FThumbnailSection interface
     virtual void SetSingleTime(double GlobalTime) override;
     virtual FText HandleThumbnailTextBlockText() const override;
+
+    // FKeyThumbnailSection interface
+    virtual TArray<double> GetKeys() const override;
+
+    // IViewportThumbnailClient interface
     virtual UCameraComponent* GetViewCamera() override;
 
 private:
