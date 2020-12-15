@@ -52,15 +52,15 @@ FOdysseyViewportDrawingEditorPainter::~FOdysseyViewportDrawingEditorPainter()
 }
 
 FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
-    : mTexturePaintingCurrentMeshComponent(nullptr),
+    : mPaintSettings(UOdysseyViewportDrawingEditorSettings::Get()), 
+    mTexturePaintingCurrentMeshComponent(nullptr),
 	mPaintingTexture2D(nullptr),
     mStrokeBufferTexture2D(nullptr),
     mBrushRenderTargetTexture(nullptr),
 	mDoRestoreRenTargets(false),
 	mDoRefreshCachedData(true),
-    mLastEvent( nullptr ),
-	mPaintSettings(UOdysseyViewportDrawingEditorSettings::Get()),
 	mUICommandList(MakeShareable(new FUICommandList())),
+    mLastEvent(nullptr),
 	mBeginPosition(0, 0)
 {
 }
