@@ -11,6 +11,7 @@
 #include "PropertyEditorModule.h"
 
 #include "OdysseyViewportDrawingEditorSettings.h"
+#include "OdysseyViewportDrawingEditorCommands.h"
 
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
@@ -32,6 +33,8 @@ void FOdysseyViewportDrawingEditorModule::StartupModule()
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
 	FModuleManager::Get().LoadModule("MeshPaint");
+
+	FOdysseyViewportDrawingEditorCommands::Register();
 }
 
 void FOdysseyViewportDrawingEditorModule::ShutdownModule()

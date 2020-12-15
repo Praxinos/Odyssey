@@ -15,7 +15,7 @@ FOdysseyViewportDrawingEditorController::~FOdysseyViewportDrawingEditorControlle
 {
     if (mData->Texture())
     {
-        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( mData->Texture(), this );
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed( mData->Texture(), this );
     }
     mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
     mData->LayerStack()->OnStructureChanged().RemoveAll(this);
