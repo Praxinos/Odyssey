@@ -345,6 +345,7 @@ void FOdysseyViewportDrawingEditorPainter::AddReferencedObjects(FReferenceCollec
 {
 	iCollector.AddReferencedObject(mTexturePaintingCurrentMeshComponent);
 	iCollector.AddReferencedObject(mPaintingTexture2D);
+    iCollector.AddReferencedObject(mBrushRenderTargetTexture);
 	iCollector.AddReferencedObjects(mPaintableComponents);
 	for (TMap< UTexture2D*, FPaintTexture2DData >::TIterator It(mPaintTargetData); It; ++It)
 	{
