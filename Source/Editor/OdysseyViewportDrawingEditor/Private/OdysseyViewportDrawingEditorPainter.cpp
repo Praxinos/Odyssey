@@ -791,7 +791,17 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingTextureBased(UMeshCompon
         mPaintingTexture2D = texture2D;
 
         // OK, now we need to make sure our render target is filled in with data
-        TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
+        // TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
+
+		if (textureData->PaintingTexture2D->Source.IsValid())
+		{
+			TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+		}
+		else
+		{
+			check(textureData->PaintingTexture2D->IsFullyStreamedIn());
+			TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+		}
     }
 }
 
@@ -963,7 +973,18 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mStrokeBufferTexture3D->PostEditChange();
 
         // OK, now we need to make sure our render target is filled in with data
-        TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
+        //TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D,textureData->PaintRenderTargetTexture);
+
+
+		if (textureData->PaintingTexture2D->Source.IsValid())
+		{
+			TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+		}
+		else
+		{
+			check(textureData->PaintingTexture2D->IsFullyStreamedIn());
+			TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+		}
     }
 }
 
@@ -1297,7 +1318,7 @@ void FOdysseyViewportDrawingEditorPainter::CommitAllPaintedTextures()
 				//  rendering thread.
 				FTextureRenderTargetResource* renderTargetResource = textureData->PaintRenderTargetTexture->GameThread_GetRenderTargetResource();
 				check(renderTargetResource != nullptr);
-				renderTargetResource->ReadPixels(texturePixels);
+				renderTargetResource->ReadPixels(texturePixels); //RGBA
 
 				{
 					// For undo
@@ -1306,8 +1327,15 @@ void FOdysseyViewportDrawingEditorPainter::CommitAllPaintedTextures()
 
 					// Store source art
 					FColor* colors = (FColor*)textureData->PaintingTexture2D->Source.LockMip(0);
-					check(textureData->PaintingTexture2D->Source.CalcMipSize(0) == texturePixels.Num() * sizeof(FColor));
-					FMemory::Memcpy(colors, texturePixels.GetData(), texturePixels.Num() * sizeof(FColor));
+
+					::ul3::FBlock* srcblock = new ::ul3::FBlock((::ul3::tByte*)texturePixels.GetData(), textureData->PaintingTexture2D->Source.GetSizeX(), textureData->PaintingTexture2D->Source.GetSizeY(), ULIS3_FORMAT_BGRA8);
+					::ul3::FBlock* dstblock = new ::ul3::FBlock((::ul3::tByte*)colors, textureData->PaintingTexture2D->Source.GetSizeX(), textureData->PaintingTexture2D->Source.GetSizeY(), ULISFormatForUE4TextureSourceFormat(textureData->PaintingTexture2D->Source.GetFormat()));
+					
+
+					delete srcblock; srcblock = nullptr;
+					delete dstblock; dstblock = nullptr;
+					// check(textureData->PaintingTexture2D->Source.CalcMipSize(0) == texturePixels.Num() * sizeof(FColor));
+					//FMemory::Memcpy(colors, texturePixels.GetData(), texturePixels.Num() * sizeof(FColor));
 					textureData->PaintingTexture2D->Source.UnlockMip(0);
 
 					// If render target gamma used was 1.0 then disable SRGB for the static texture
@@ -1513,7 +1541,16 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 					}
 
 					//Use the duplicate texture here because as we modify the texture and do undo's, it will be different over the original.
-					TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture);
+					// TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture);
+					if (textureData->PaintingTexture2D->Source.IsValid())
+					{
+						TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+					}
+					else
+					{
+						check(textureData->PaintingTexture2D->IsFullyStreamedIn());
+						TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+					}
 
 				}
 			}
