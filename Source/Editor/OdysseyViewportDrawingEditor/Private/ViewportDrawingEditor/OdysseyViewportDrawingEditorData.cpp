@@ -42,44 +42,49 @@ FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
 void
 FOdysseyViewportDrawingEditorData::Init(UTexture2D* iTexture)
 {
-    // Get or Create Texture userData
-    if( iTexture )
+    if (iTexture == mTexture)
+        return;
+
+    //Data edited texture changed, so we reset unload the texture and reset its properties
+    if( mTexture )
     {
-        //Data edited texture changed, so we reset unload the texture and reset its properties
-        if( mTexture )
-        {
-            mPaintEngine->Flush();
-            SyncTextureAndInvalidate();
-            ApplyPropertiesBackup();
-        }
-
-        mTexture = iTexture;
-
-        PrepareTextureProperties();
-
-        UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-        if(!userData)
-        {
-            ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
-            userData = NewObject< UOdysseyTextureAssetUserData >(mTexture,NAME_None,RF_Public);
-            userData->GetLayerStack()->Init(mTexture->GetSizeX(),mTexture->GetSizeY(),format);
-            mTexture->AddAssetUserData(userData);
-            FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData(mTexture,userData->GetLayerStack()->Format());
-            TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(),textureData));
-            userData->GetLayerStack()->AddLayer(imageLayer);
-            mTexture->PostEditChange();
-        }
-
-        // Get Texture LayerStack
-        mLayerStack = userData->GetLayerStack();
+        mPaintEngine->Flush();
+        SyncTextureAndInvalidate();
+        ApplyPropertiesBackup();
 
         // Setup Surface
-        if( mDisplaySurface )
+        if (mDisplaySurface)
             delete mDisplaySurface;
-
-        mDisplaySurface = new FOdysseySurfaceEditable(mTexture);
-        mDisplaySurface->Invalidate();
     }
+
+    mTexture = iTexture;
+
+    if (!iTexture)
+    {
+        mLayerStack = nullptr;
+        return;
+    }
+
+    PrepareTextureProperties();
+
+    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    if(!userData)
+    {
+        ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
+        userData = NewObject< UOdysseyTextureAssetUserData >(mTexture,NAME_None,RF_Public);
+        userData->GetLayerStack()->Init(mTexture->GetSizeX(),mTexture->GetSizeY(),format);
+        mTexture->AddAssetUserData(userData);
+        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData(mTexture,userData->GetLayerStack()->Format());
+        TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(),textureData));
+        userData->GetLayerStack()->AddLayer(imageLayer);
+        mTexture->PostEditChange();
+    }
+
+    // Get Texture LayerStack
+    mLayerStack = userData->GetLayerStack();
+
+    mDisplaySurface = new FOdysseySurfaceEditable(mTexture);
+    mDisplaySurface->Invalidate();
 }
 
 //--------------------------------------------------------------------------------------
@@ -150,13 +155,19 @@ FOdysseyViewportDrawingEditorData::PaintColor(::ul3::FPixelValue iColor)
 void
 FOdysseyViewportDrawingEditorData::SyncTextureAndInvalidate()
 {
-    CopyBlockDataIntoUTexture(mDisplaySurface->Block(),mTexture);
-    InvalidateTextureFromData(mDisplaySurface->Block(),mTexture);
+    if (!mDisplaySurface)
+        return;
+
+    CopyBlockDataIntoUTexture(mDisplaySurface->Block(), mTexture);
+    InvalidateTextureFromData(mDisplaySurface->Block(), mTexture);
 }
 
 void
 FOdysseyViewportDrawingEditorData::PrepareTextureProperties()
 {
+    if (!mTexture)
+        return;
+
     FTextureFormatSettings textureFormatSettings;
     mTexture->GetLayerFormatSettings(0,textureFormatSettings);
 
@@ -177,6 +188,9 @@ FOdysseyViewportDrawingEditorData::PrepareTextureProperties()
 void
 FOdysseyViewportDrawingEditorData::ApplyPropertiesBackup()
 {
+    if (!mTexture)
+        return;
+
     mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
     mTexture->SetLayerFormatSettings(0,mPropertiesBackup.mTextureFormatSettings);
     // mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;

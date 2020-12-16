@@ -1595,10 +1595,6 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 				}
 
 				mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
-				 /* mController->ClearLayerStackDelegates();
-				mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
-				mController->Init(); */
-				mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
 				break;
 			}
 		}
@@ -1621,22 +1617,12 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 						continue;
 
 					mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
-					/* mController->ClearLayerStackDelegates();
-					mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
-					mController->Init(); */
-					mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
 					break;
 				}
 			}
 		}
-		else
-		{
-			/* mController->ClearLayerStackDelegates();
-			mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
-			mController->Init(); */
-			mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
-		}
 	}
+	mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
 }
 
 void FOdysseyViewportDrawingEditorPainter::ResetPaintingState()
