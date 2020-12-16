@@ -22,5 +22,10 @@ UOdysseyFlipbookFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNa
     UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(UPaperFlipbookFactory::FactoryCreateNew( UPaperFlipbook::StaticClass(), iParent, iName, iFlags, iContext, iWarn ));
     FScopedFlipbookMutator mutator(flipbook);
 	mutator.FramesPerSecond = 24.0f;
+    // mutator.GetSourceFlipbook()->DefaultMaterial = ;
+
+    UClass* flipbookClass = flipbook->StaticClass();
+    FObjectProperty* defaultMaterialProperty = FindFProperty<FObjectProperty>(flipbookClass, "DefaultMaterial");
+    defaultMaterialProperty->SetObjectPropertyValue(defaultMaterialProperty->ContainerPtrToValuePtr<UPaperFlipbook>(flipbook), LoadObject<UMaterialInterface>(nullptr, TEXT("/Iliad/Animation2D/DefaultFlipbookMaterialInstance.DefaultFlipbookMaterialInstance")));
     return flipbook;
 }
