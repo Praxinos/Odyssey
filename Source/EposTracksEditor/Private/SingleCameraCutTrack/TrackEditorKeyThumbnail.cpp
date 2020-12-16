@@ -27,46 +27,42 @@
 
 FTrackEditorKeyThumbnailCache::FTrackEditorKeyThumbnailCache( const TSharedPtr<FTrackEditorThumbnailPool>& InThumbnailPool, IViewportThumbnailClient* InViewportThumbnailClient )
     : FTrackEditorThumbnailCache( InThumbnailPool, InViewportThumbnailClient )
-    //: ViewportThumbnailClient( InViewportThumbnailClient )
-    //, CustomThumbnailClient( nullptr )
-    //, ThumbnailPool( InThumbnailPool )
+    , CameraViewRatio( 1.f )
 {
-    //check( ViewportThumbnailClient );
-
-    //LastComputationTime = 0;
-    //bForceRedraw = false;
-    //bNeedsNewThumbnails = false;
 }
 
 
 FTrackEditorKeyThumbnailCache::FTrackEditorKeyThumbnailCache( const TSharedPtr<FTrackEditorThumbnailPool>& InThumbnailPool, ICustomThumbnailClient* InCustomThumbnailClient )
     : FTrackEditorThumbnailCache( InThumbnailPool, InCustomThumbnailClient )
-    //: ViewportThumbnailClient( nullptr )
-    //, CustomThumbnailClient( InCustomThumbnailClient )
-    //, ThumbnailPool( InThumbnailPool )
+    , CameraViewRatio( 1.f )
 {
-    //check( CustomThumbnailClient );
-
-    //LastComputationTime = 0;
-    //bForceRedraw = false;
-    //bNeedsNewThumbnails = false;
 }
 
 
 FTrackEditorKeyThumbnailCache::~FTrackEditorKeyThumbnailCache()
 {
-    //TSharedPtr<FTrackEditorThumbnailPool> PinnedPool = ThumbnailPool.Pin();
-    //if( PinnedPool.IsValid() )
-    //{
-    //    PinnedPool->RemoveThumbnailsNeedingRedraw( Thumbnails );
-    //}
 }
 
+void FTrackEditorKeyThumbnailCache::ForceRedraw()
+{
+    Super::ForceRedraw();
+}
 
-//void FTrackEditorKeyThumbnailCache::SetSingleReferenceFrame( TOptional<double> InReferenceFrame )
-//{
-//    CurrentCache.SingleReferenceFrame = InReferenceFrame;
-//}
+void FTrackEditorKeyThumbnailCache::SetSingleReferenceFrame( TOptional<double> InReferenceFrame )
+{
+    Super::SetSingleReferenceFrame( InReferenceFrame );
+}
+
+TOptional<double> FTrackEditorKeyThumbnailCache::GetSingleReferenceFrame() const
+{
+    return Super::GetSingleReferenceFrame();
+}
+
+const TArray<TSharedPtr<FTrackEditorThumbnail>>& FTrackEditorKeyThumbnailCache::GetThumbnails() const
+{
+    return Super::GetThumbnails();
+}
+
 
 void FTrackEditorKeyThumbnailCache::Update( const TRange<double>& NewRange, const TRange<double>& VisibleRange, TArray<double> Keys, const FIntPoint& AllottedSize, const FIntPoint& InDesiredSize, EThumbnailQuality Quality, double InCurrentTime )
 {
@@ -93,162 +89,25 @@ void FTrackEditorKeyThumbnailCache::Update( const TRange<double>& NewRange, cons
 }
 
 
-//FIntPoint FTrackEditorKeyThumbnailCache::CalculateTextureSize( const FMinimalViewInfo& ViewInfo ) const
-//{
-//    float DesiredRatio = ViewInfo.AspectRatio;
-//
-//    if( CurrentCache.DesiredSize.X <= 0 || CurrentCache.DesiredSize.Y <= 0 )
-//    {
-//        return FIntPoint( 0, 0 );
-//    }
-//
-//    float SizeRatio = float( CurrentCache.DesiredSize.X ) / CurrentCache.DesiredSize.Y;
-//
-//    float X = CurrentCache.DesiredSize.X;
-//    float Y = CurrentCache.DesiredSize.Y;
-//
-//    if( SizeRatio > DesiredRatio )
-//    {
-//        // Take width
-//        Y = CurrentCache.DesiredSize.X / DesiredRatio;
-//    }
-//    else if( SizeRatio < DesiredRatio )
-//    {
-//        // Take height
-//        X = CurrentCache.DesiredSize.Y * DesiredRatio;
-//    }
-//
-//    float Scale;
-//    switch( CurrentCache.Quality )
-//    {
-//        case EThumbnailQuality::Draft:    Scale = 0.5f;   break;
-//        case EThumbnailQuality::Best:     Scale = 2.f;    break;
-//        default:                          Scale = 1.f;    break;
-//    }
-//
-//    return FIntPoint(
-//        FMath::RoundToInt( X * Scale ),
-//        FMath::RoundToInt( Y * Scale )
-//    );
-//}
+FIntPoint FTrackEditorKeyThumbnailCache::CalculateTextureSize( const FMinimalViewInfo& ViewInfo ) const
+{
+    return Super::CalculateTextureSize( ViewInfo );
+}
+
+void FTrackEditorKeyThumbnailCache::DrawThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail )
+{
+    Super::DrawThumbnail( TrackEditorThumbnail );
+}
+void FTrackEditorKeyThumbnailCache::DrawViewportThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail )
+{
+    Super::DrawViewportThumbnail( TrackEditorThumbnail );
+}
 
 bool FTrackEditorKeyThumbnailCache::ShouldRegenerateEverything() const
 {
-    //if( bForceRedraw )
-    //{
-    //    return true;
-    //}
-
-    //const float PreviousScale = PreviousCache.TimeRange.Size<float>() / PreviousCache.AllottedSize.X;
-    //const float CurrentScale = CurrentCache.TimeRange.Size<float>() / CurrentCache.AllottedSize.X;
-    //const float Threshold = PreviousScale * 0.01f;
-
-    //return PreviousCache.DesiredSize != CurrentCache.DesiredSize || !FMath::IsNearlyEqual( PreviousScale, CurrentScale, Threshold );
-
-    return FTrackEditorThumbnailCache::ShouldRegenerateEverything() || CurrentCacheKey != PreviousCacheKey;
+    return Super::ShouldRegenerateEverything() || CurrentCacheKey != PreviousCacheKey;
 }
 
-//void FTrackEditorKeyThumbnailCache::DrawThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail )
-//{
-//    if( CustomThumbnailClient )
-//    {
-//        CustomThumbnailClient->Draw( TrackEditorThumbnail );
-//    }
-//    else if( ViewportThumbnailClient )
-//    {
-//        ViewportThumbnailClient->PreDraw( TrackEditorThumbnail );
-//
-//        DrawViewportThumbnail( TrackEditorThumbnail );
-//
-//        ViewportThumbnailClient->PostDraw( TrackEditorThumbnail );
-//    }
-//
-//    FSlateTextureRenderTarget2DResource* pSlateResource = TrackEditorThumbnail.GetRenderTarget();
-//    if( pSlateResource != nullptr )
-//    {
-//        FThreadSafeBool* bHasFinishedDrawingPtr = &TrackEditorThumbnail.bHasFinishedDrawing;
-//        ENQUEUE_RENDER_COMMAND( SetFinishedDrawing )(
-//            [bHasFinishedDrawingPtr, pSlateResource]( FRHICommandList& RHICmdList )
-//        {
-//            FRHITexture* InTexture = pSlateResource->GetTextureRHI();
-//            RHICmdList.Transition( FRHITransitionInfo( InTexture, ERHIAccess::RTV, ERHIAccess::SRVMask ) );
-//            *bHasFinishedDrawingPtr = true;
-//        }
-//        );
-//    }
-//}
-//void FTrackEditorKeyThumbnailCache::DrawViewportThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail )
-//{
-//    check( ViewportThumbnailClient );
-//
-//    UCameraComponent* PreviewCameraComponent = ViewportThumbnailClient->GetViewCamera();
-//    if( !PreviewCameraComponent )
-//    {
-//        return;
-//    }
-//
-//    FMinimalViewInfo ViewInfo;
-//    PreviewCameraComponent->GetCameraView( FApp::GetDeltaTime(), ViewInfo );
-//
-//    FIntPoint RTSize = CalculateTextureSize( ViewInfo );
-//    if( RTSize.X <= 0 || RTSize.Y <= 0 )
-//    {
-//        return;
-//    }
-//
-//    TrackEditorThumbnail.bIgnoreAlpha = true;
-//    TrackEditorThumbnail.ResizeRenderTarget( RTSize );
-//
-//    UWorld* World = PreviewCameraComponent->GetWorld();
-//
-//    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( TrackEditorThumbnail.GetRenderTarget(), World->Scene, FEngineShowFlags( ESFIM_Game ) )
-//                                        .SetWorldTimes( FApp::GetCurrentTime() - GStartTime, FApp::GetDeltaTime(), FApp::GetCurrentTime() - GStartTime )
-//                                        .SetResolveScene( true ) );
-//
-//    // Screen percentage is not supported in thumbnail.
-//    ViewFamily.EngineShowFlags.ScreenPercentage = false;
-//
-//    switch( CurrentCache.Quality )
-//    {
-//        case EThumbnailQuality::Draft:
-//            ViewFamily.EngineShowFlags.DisableAdvancedFeatures();
-//            ViewFamily.EngineShowFlags.SetPostProcessing( false );
-//            break;
-//
-//        case EThumbnailQuality::Normal:
-//        case EThumbnailQuality::Best:
-//            ViewFamily.EngineShowFlags.SetMotionBlur( false );
-//            break;
-//    }
-//
-//    FSceneViewInitOptions ViewInitOptions;
-//
-//    ViewInitOptions.BackgroundColor = FLinearColor::Black;
-//    ViewInitOptions.SetViewRectangle( FIntRect( FIntPoint::ZeroValue, RTSize ) );
-//    ViewInitOptions.ViewFamily = &ViewFamily;
-//
-//    ViewInitOptions.ViewOrigin = ViewInfo.Location;
-//    ViewInitOptions.ViewRotationMatrix = FInverseRotationMatrix( ViewInfo.Rotation ) * FMatrix(
-//        FPlane( 0, 0, 1, 0 ),
-//        FPlane( 1, 0, 0, 0 ),
-//        FPlane( 0, 1, 0, 0 ),
-//        FPlane( 0, 0, 0, 1 ) );
-//
-//    ViewInitOptions.ProjectionMatrix = ViewInfo.CalculateProjectionMatrix();
-//
-//    FSceneView* NewView = new FSceneView( ViewInitOptions );
-//    ViewFamily.Views.Add( NewView );
-//
-//    const float GlobalResolutionFraction = 1.f;
-//    const bool  AllowPostProcessSettingsScreenPercentage = false;
-//    ViewFamily.SetScreenPercentageInterface( new FLegacyScreenPercentageDriver( ViewFamily, GlobalResolutionFraction, AllowPostProcessSettingsScreenPercentage ) );
-//
-//    FCanvas Canvas( TrackEditorThumbnail.GetRenderTarget(), nullptr, FApp::GetCurrentTime() - GStartTime, FApp::GetDeltaTime(), FApp::GetCurrentTime() - GStartTime, World->Scene->GetFeatureLevel() );
-//    Canvas.Clear( FLinearColor::Transparent );
-//
-//    GetRendererModule().BeginRenderingViewFamily( &Canvas, &ViewFamily );
-//}
-//
 
 void FTrackEditorKeyThumbnailCache::Revalidate( double InCurrentTime )
 {
@@ -284,6 +143,19 @@ void FTrackEditorKeyThumbnailCache::Revalidate( double InCurrentTime )
 
 void FTrackEditorKeyThumbnailCache::ComputeNewThumbnails()
 {
+    UCameraComponent* PreviewCameraComponent = ViewportThumbnailClient->GetViewCamera();
+    if( !PreviewCameraComponent )
+    {
+        return;
+    }
+
+    FMinimalViewInfo ViewInfo;
+    PreviewCameraComponent->GetCameraView( FApp::GetDeltaTime(), ViewInfo );
+
+    CameraViewRatio = ViewInfo.AspectRatio;
+
+    //---
+
     ThumbnailsNeedingRedraw.Reset();
 
     if( CurrentCache.SingleReferenceFrame.IsSet() )
@@ -423,6 +295,7 @@ void FTrackEditorKeyThumbnailCache::GenerateFront( const TRange<double>& Boundar
             continue;
 
         FIntPoint TextureSize = CurrentCache.DesiredSize;
+        TextureSize.X = FMath::Min( TextureSize.X, int( CurrentCache.DesiredSize.Y * CameraViewRatio ) );
 
         TRange<double> TimeRange( key, key + TextureSize.X * TimePerPx );
 
@@ -431,7 +304,6 @@ void FTrackEditorKeyThumbnailCache::GenerateFront( const TRange<double>& Boundar
             TextureSize,
             TimeRange,
             key
-            //EvalPosition
         ) );
 
         Thumbnails.Insert( NewThumbnail, 0 );
@@ -455,6 +327,7 @@ void FTrackEditorKeyThumbnailCache::GenerateBack( const TRange<double>& Boundary
             key -= DELTA;
 
         FIntPoint TextureSize = CurrentCache.DesiredSize;
+        TextureSize.X = FMath::Min( TextureSize.X, int( CurrentCache.DesiredSize.Y * CameraViewRatio ) );
 
         TRange<double> TimeRange( key, key + TextureSize.X * TimePerPx );
         // If already thumbnails, the last one is shifted
@@ -477,7 +350,6 @@ void FTrackEditorKeyThumbnailCache::GenerateBack( const TRange<double>& Boundary
             TextureSize,
             TimeRange,
             key
-            //EvalPosition
         ) );
 
         NewThumbnail->SortOrder = TimeRange.Overlaps( CurrentCache.VisibleRange ) ? 1 : 10;
@@ -488,10 +360,7 @@ void FTrackEditorKeyThumbnailCache::GenerateBack( const TRange<double>& Boundary
 }
 
 
-//void FTrackEditorKeyThumbnailCache::Setup()
-//{
-//    if( CustomThumbnailClient )
-//    {
-//        CustomThumbnailClient->Setup();
-//    }
-//}
+void FTrackEditorKeyThumbnailCache::Setup()
+{
+    Super::Setup();
+}

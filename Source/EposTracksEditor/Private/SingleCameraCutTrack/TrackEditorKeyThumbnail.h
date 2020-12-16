@@ -47,17 +47,26 @@ struct FKeyThumbnailCacheData
     TArray<double> Keys;
 };
 
-class EPOSTRACKSEDITOR_API FTrackEditorKeyThumbnailCache
-    // Be carefull, because there is no virtual inside this base class (specially for the destructor)
-    // That's also why intermediate functions (ComputeNewThumbnails()/UpdateSingleThumbnail()/...) must also be inherited (otherwise those functions (which call each other) will call the base class ones)
-    // But this avoid to duplicate all the functions
-    : public FTrackEditorThumbnailCache
+// Duplicate of Source\Editor\MovieSceneTools\Public\TrackEditorThumbnail\TrackEditorThumbnail.h as it was not intended to be inherit (no virtual)
+// - 'override' all methods
+// - only inherit to not have to rewrite all the members and call Super::...() for methods which don't need to be modified
+class FTrackEditorKeyThumbnailCache
+    : FTrackEditorThumbnailCache
 {
+    typedef FTrackEditorThumbnailCache Super;
+
 public:
     FTrackEditorKeyThumbnailCache( const TSharedPtr<FTrackEditorThumbnailPool>& ThumbnailPool, IViewportThumbnailClient* InViewportThumbnailClient );
     FTrackEditorKeyThumbnailCache( const TSharedPtr<FTrackEditorThumbnailPool>& ThumbnailPool, ICustomThumbnailClient* InCustomThumbnailClient );
 
     ~FTrackEditorKeyThumbnailCache();
+
+    void ForceRedraw();
+
+    void SetSingleReferenceFrame( TOptional<double> InReferenceFrame );
+    TOptional<double> GetSingleReferenceFrame() const;
+
+    const TArray<TSharedPtr<FTrackEditorThumbnail>>& GetThumbnails() const;
 
     void Update( const TRange<double>& NewRange, const TRange<double>& VisibleRange, TArray<double> Keys, const FIntPoint& AllottedSize, const FIntPoint& InDesiredSize, EThumbnailQuality InQuality, double InCurrentTime );
 
@@ -65,9 +74,9 @@ public:
 
 protected:
 
-    //void DrawThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail );
-    //void DrawViewportThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail );
-    //FIntPoint CalculateTextureSize( const FMinimalViewInfo& ViewInfo ) const;
+    void DrawThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail );
+    void DrawViewportThumbnail( FTrackEditorThumbnail& TrackEditorThumbnail );
+    FIntPoint CalculateTextureSize( const FMinimalViewInfo& ViewInfo ) const;
 
     bool ShouldRegenerateEverything() const;
 
@@ -79,8 +88,12 @@ protected:
     void GenerateFront( const TRange<double>& Boundary );
     void GenerateBack( const TRange<double>& Boundary );
 
+    void Setup();
+
 protected:
 
     FKeyThumbnailCacheData CurrentCacheKey;
     FKeyThumbnailCacheData PreviousCacheKey;
+
+    float CameraViewRatio;
 };

@@ -468,22 +468,22 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer )
 
     TArrayView<FMovieSceneFloatChannel*> FloatChannels = transform_section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
 
-    if( FloatChannels[0]->GetNumKeys() == 1 &&
-        FloatChannels[1]->GetNumKeys() == 1 &&
-        FloatChannels[2]->GetNumKeys() == 1 &&
-        FloatChannels[3]->GetNumKeys() == 1 &&
-        FloatChannels[4]->GetNumKeys() == 1 &&
-        FloatChannels[5]->GetNumKeys() == 1 )
-    {
-        AddKeyToChannel( FloatChannels[0], FloatChannels[0]->GetTimes()[0], ExistingCamera->GetActorLocation().X, iSequencer->GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[1], FloatChannels[1]->GetTimes()[0], ExistingCamera->GetActorLocation().Y, iSequencer->GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[2], FloatChannels[2]->GetTimes()[0], ExistingCamera->GetActorLocation().Z, iSequencer->GetKeyInterpolation() );
+    //if( FloatChannels[0]->GetNumKeys() == 1 &&
+    //    FloatChannels[1]->GetNumKeys() == 1 &&
+    //    FloatChannels[2]->GetNumKeys() == 1 &&
+    //    FloatChannels[3]->GetNumKeys() == 1 &&
+    //    FloatChannels[4]->GetNumKeys() == 1 &&
+    //    FloatChannels[5]->GetNumKeys() == 1 )
+    //{
+    //    AddKeyToChannel( FloatChannels[0], FloatChannels[0]->GetTimes()[0], ExistingCamera->GetActorLocation().X, iSequencer->GetKeyInterpolation() );
+    //    AddKeyToChannel( FloatChannels[1], FloatChannels[1]->GetTimes()[0], ExistingCamera->GetActorLocation().Y, iSequencer->GetKeyInterpolation() );
+    //    AddKeyToChannel( FloatChannels[2], FloatChannels[2]->GetTimes()[0], ExistingCamera->GetActorLocation().Z, iSequencer->GetKeyInterpolation() );
 
-        AddKeyToChannel( FloatChannels[3], FloatChannels[3]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().X, iSequencer->GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[4], FloatChannels[4]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Y, iSequencer->GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[5], FloatChannels[5]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Z, iSequencer->GetKeyInterpolation() );
-    }
-    else
+    //    AddKeyToChannel( FloatChannels[3], FloatChannels[3]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().X, iSequencer->GetKeyInterpolation() );
+    //    AddKeyToChannel( FloatChannels[4], FloatChannels[4]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Y, iSequencer->GetKeyInterpolation() );
+    //    AddKeyToChannel( FloatChannels[5], FloatChannels[5]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Z, iSequencer->GetKeyInterpolation() );
+    //}
+    //else
     {
         AddKeyToChannel( FloatChannels[0], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorLocation().X, iSequencer->GetKeyInterpolation() );
         AddKeyToChannel( FloatChannels[1], iSequencer->GetLocalTime().Time.FloorToFrame(), ExistingCamera->GetActorLocation().Y, iSequencer->GetKeyInterpolation() );
