@@ -105,7 +105,7 @@ void FOdysseyLayerAddMenu::HandleAddFolderLayerMenuEntryExecute()
             TSharedPtr<FOdysseyFolderLayer> folder = StaticCastSharedPtr<FOdysseyFolderLayer>(currentLayer);
 			if (folder->IsOpen())
 			{
-				model->GetLayerStackData()->AddLayer(currentLayer, 0);
+				model->GetLayerStackData()->AddLayer(folderLayer, currentLayer, 0);
 			}
 			else
 			{
