@@ -72,8 +72,6 @@ class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSubsystem :
 {
 	GENERATED_BODY()
 public:
-	UOdysseyStylusInputSubsystem(const  FObjectInitializer& ObjectInitializer);
-
 	// UEditorSubsystem implementation
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;

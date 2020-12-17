@@ -64,11 +64,6 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface() { return 
 
 // TODO: Other platforms
 
-UOdysseyStylusInputSubsystem::UOdysseyStylusInputSubsystem(const  FObjectInitializer& ObjectInitializer)
-{
-	int a = 0;
-}
-
 void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

@@ -155,7 +155,7 @@ FOdysseyViewportDrawingEditorData::PaintColor(::ul3::FPixelValue iColor)
 void
 FOdysseyViewportDrawingEditorData::SyncTextureAndInvalidate()
 {
-    if (!mDisplaySurface)
+    if (!mDisplaySurface || !mTexture)
         return;
 
     CopyBlockDataIntoUTexture(mDisplaySurface->Block(), mTexture);
