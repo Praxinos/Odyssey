@@ -466,6 +466,8 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer )
 
     //---
 
+    transform_section->Modify();
+
     TArrayView<FMovieSceneFloatChannel*> FloatChannels = transform_section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
 
     //if( FloatChannels[0]->GetNumKeys() == 1 &&
