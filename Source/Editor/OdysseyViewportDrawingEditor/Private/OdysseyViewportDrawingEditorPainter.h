@@ -11,6 +11,8 @@
 #include "Engine/StaticMesh.h"
 #include "OdysseyMeshPaintRendering.h"
 
+#include "IOdysseyStylusInputModule.h"
+
 class UOdysseyViewportDrawingEditorSettings;
 class IMeshPaintGeometryAdapter;
 struct FAssetData;
@@ -101,6 +103,8 @@ public:
 
 	/** Returns the number of texture that require a commit. */
 	int32 GetNumberOfPendingPaintChanges() const;
+
+	void OnStylusInputChanged(TSharedPtr<IStylusInputInterfaceInternal> iStylusInput);
 	
 public:
 	/** Begin IMeshPainter overrides */
@@ -314,7 +318,11 @@ protected:
 	/** UI command list object */
 	TSharedPtr<FUICommandList> mUICommandList;
 
-    FOdysseyStrokePoint* mLastEvent;
+    FOdysseyStrokePoint mLastEvent;
+	FOdysseyStrokePoint mPreviousEvent;
+
+	bool mIsCapturedByStylus;
+	std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     FVector2D mBeginPosition;
 };

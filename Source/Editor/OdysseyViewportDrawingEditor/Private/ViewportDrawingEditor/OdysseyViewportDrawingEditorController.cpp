@@ -334,6 +334,11 @@ FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
 void
 FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTexture)
 {
+    //PATCH: this ensures that when we change the selected actor but we still edit the samle texture, the texture is synched
+    // it avoids the texture to refresh itself to a previous state
+    mData->PaintEngine()->Flush();
+    mData->SyncTextureAndInvalidate();
+
     if (mData->Texture() == iTexture)
         return;
     

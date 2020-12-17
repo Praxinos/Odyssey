@@ -64,13 +64,20 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface() { return 
 
 // TODO: Other platforms
 
+UOdysseyStylusInputSubsystem::UOdysseyStylusInputSubsystem(const  FObjectInitializer& ObjectInitializer)
+{
+	int a = 0;
+}
+
 void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
 	UE_LOG(LogStylusInput, Log, TEXT("Initializing StylusInput subsystem."));
 
-	InputInterface = CreateStylusInputInterface();
+	const UOdysseyStylusInputSettings& settings = *GetDefault<UOdysseyStylusInputSettings>();
+	SetStylusInputDriver(settings.GetStylusDriver());
+	//InputInterface = CreateStylusInputInterface();
 
 	if (!InputInterface.IsValid())
 	{
@@ -100,6 +107,63 @@ void UOdysseyStylusInputSubsystem::SetStylusInputInterface( TSharedPtr<IStylusIn
 
     OnStylusInputChangedCB.ExecuteIfBound( InputInterface );
 }
+
+void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDriver iDriver)
+{
+	InputInterface.Reset();
+
+	switch (iDriver)
+	{
+		case OdysseyStylusInputDriver_None:
+			InputInterface = nullptr;
+			break;
+	#if PLATFORM_WINDOWS
+		case OdysseyStylusInputDriver_Ink:
+			InputInterface = CreateStylusInputInterface();
+			break;
+		case OdysseyStylusInputDriver_Wintab:
+			InputInterface = CreateStylusInputInterfaceWintab();
+			break;
+	#elif PLATFORM_MAC
+		case OdysseyStylusInputDriver_NSEvent:
+			InputInterface = CreateStylusInputInterfaceNSEvent();
+			break;
+	#endif
+		default:
+			InputInterface = nullptr;
+	}
+
+	OnStylusInputChangedCB.ExecuteIfBound(InputInterface);
+}
+
+/*
+	TSharedPtr<IStylusInputInterfaceInternal> stylus_input;
+
+	switch( StylusInputDriver )
+	{
+		case OdysseyStylusInputDriver_None:
+			stylus_input = nullptr;
+			break;
+	#if PLATFORM_WINDOWS
+		case OdysseyStylusInputDriver_Ink:
+			stylus_input = CreateStylusInputInterface();
+			break;
+		case OdysseyStylusInputDriver_Wintab:
+			stylus_input = CreateStylusInputInterfaceWintab();
+			break;
+	#elif PLATFORM_MAC
+		case OdysseyStylusInputDriver_NSEvent:
+			stylus_input = CreateStylusInputInterfaceNSEvent();
+			break;
+	#endif
+		default:
+			stylus_input = nullptr;
+	}
+
+
+	if( !stylus_input.IsValid() )
+		StylusInputDriver = OdysseyStylusInputDriver_None;
+	*/
 
 void UOdysseyStylusInputSubsystem::Deinitialize()
 {

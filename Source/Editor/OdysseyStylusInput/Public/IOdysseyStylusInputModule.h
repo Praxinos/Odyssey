@@ -12,6 +12,8 @@
 #include "Modules/ModuleManager.h"
 #include "Widgets/Docking/SDockTab.h"
 
+#include "OdysseyStylusInputDriver.h"
+
 #include "IOdysseyStylusInputModule.generated.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogStylusInput, Log, All);
@@ -70,11 +72,14 @@ class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSubsystem :
 {
 	GENERATED_BODY()
 public:
+	UOdysseyStylusInputSubsystem(const  FObjectInitializer& ObjectInitializer);
+
 	// UEditorSubsystem implementation
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
 	void SetStylusInputInterface( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
+	void SetStylusInputDriver(EOdysseyStylusInputDriver iDriver);
 	FOnStylusInputChanged& OnStylusInputChanged();
 
 	/** Retrieve the input device that is at the given index, or nullptr if not found. Corresponds to the StylusIndex in IStylusMessageHandler. */

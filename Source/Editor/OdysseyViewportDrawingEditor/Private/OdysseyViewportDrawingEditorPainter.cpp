@@ -36,7 +36,6 @@
 #include "EditorWorldExtension.h"
 
 #include "Framework/Commands/UICommandList.h"
-#include "IOdysseyStylusInputModule.h"
 #include "OdysseyViewportDrawingEditorCommands.h"
 #include "OdysseyViewportDrawingEditorSettings.h"
 #include "MeshPaintAdapterFactory.h"
@@ -60,7 +59,7 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
 	mDoRestoreRenTargets(false),
 	mDoRefreshCachedData(true),
 	mUICommandList(MakeShareable(new FUICommandList())),
-    mLastEvent(nullptr),
+	mIsCapturedByStylus(false),
 	mBeginPosition(0, 0)
 {
 }
@@ -89,6 +88,7 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
 	// Handle Stylus SubSystem
 	UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 	inputSubsystem->AddMessageHandler(*this);
+	inputSubsystem->OnStylusInputChanged().BindRaw(this, &FOdysseyViewportDrawingEditorPainter::OnStylusInputChanged);
 
     /** Setup necessary data */
     mBrushSettings = DuplicateObject<UPaintBrushSettings>(GetMutableDefault<UPaintBrushSettings>(),GetTransientPackage());
@@ -105,6 +105,11 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
 
     //Select default brush
     mController->GetGUI()->GetBrushSelector()->SelectBrush(LoadObject<UOdysseyBrush>(nullptr,TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")));
+}
+
+void
+FOdysseyViewportDrawingEditorPainter::OnStylusInputChanged(TSharedPtr<IStylusInputInterfaceInternal> iStylusInput)
+{
 }
 
 void FOdysseyViewportDrawingEditorPainter::Finalize()
@@ -167,6 +172,8 @@ void FOdysseyViewportDrawingEditorPainter::Render(const FSceneView* iView, FView
 
 bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Paint 1"));
+
 	// Determine paint action according to whether or not shift is held down
 	const EMeshPaintAction paintAction = (iViewport->KeyState(EKeys::LeftShift) || iViewport->KeyState(EKeys::RightShift)) ? EMeshPaintAction::Erase : EMeshPaintAction::Paint;
 	
@@ -178,6 +185,7 @@ bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVe
 
 bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVector& iCameraOrigin, const TArrayView<TPair<FVector, FVector>>& iRays)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Paint 2"));
 	// Determine paint action according to whether or not shift is held down
 	const EMeshPaintAction paintAction = (iViewport->KeyState(EKeys::LeftShift) || iViewport->KeyState(EKeys::RightShift)) ? EMeshPaintAction::Erase : EMeshPaintAction::Paint;
 
@@ -403,7 +411,7 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
 	TMap<UMeshComponent*, TArray<int32>> hoveredComponents;
 
 	const bool bIsPainting = (iPaintAction == EMeshPaintAction::Paint);
-	const float strengthScale = iPaintStrength;
+	// const float strengthScale = iPaintStrength;
 
 	bool bPaintApplied = false;
 
@@ -456,12 +464,30 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
             
             FVector2D coord;
 
-            if( mLastEvent && UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord ) )
+            if( UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord ) )
             {
-                mLastEvent->x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
-                mLastEvent->y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
+				auto end_time = std::chrono::steady_clock::now();
+				auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - mStylusLastEventTime).count();
 
-                mController->GetData()->PaintEngine()->PushStroke(*mLastEvent);
+				if (!mIsCapturedByStylus && delta >= 500)
+				{
+					//force mouse values
+					mLastEvent = FOdysseyStrokePoint::DefaultPoint();
+				}
+
+				//WARNING: Be aware that we change the meaning of mLastEvent x and y here, as they were the stylus event x and y, now they are the x and y position in the texture
+				// this new meaning is then propagated to mPreviousEvent in OnStylusStateChanged()
+				mLastEvent.x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
+				mLastEvent.y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
+
+				if (IsPainting())
+				{
+					mController->GetData()->PaintEngine()->PushStroke(mLastEvent);
+				}
+				else
+				{
+					mController->GetData()->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
+				}
             }
 
 		}
@@ -813,8 +839,8 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureBased(const FHitResult& i
         return;
     }
 
-    if( mBeginPosition == FVector2D(0,0) && mLastEvent)
-        mBeginPosition = FVector2D(mLastEvent->x / mPaintingTexture2D->GetSizeX(), mLastEvent->y / mPaintingTexture2D->GetSizeY());
+    if( mBeginPosition == FVector2D(0,0))
+        mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->GetSizeX(), mLastEvent.y / mPaintingTexture2D->GetSizeY());
 
     const auto featureLevel = GEditor->GetEditorWorldContext().World()->FeatureLevel;
 
@@ -996,8 +1022,8 @@ void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHit
         return;
     }
 
-    if( mBeginPosition == FVector2D(0,0) && mLastEvent)
-        mBeginPosition = FVector2D(mLastEvent->x / mPaintingTexture2D->GetSizeX(), mLastEvent->y / mPaintingTexture2D->GetSizeY());
+    if( mBeginPosition == FVector2D(0,0))
+        mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->GetSizeX(), mLastEvent.y / mPaintingTexture2D->GetSizeY());
 
     //UE_LOG(LogTemp, Display, TEXT("triangles: %d"), iInfluencedTriangles.Num() );
 
@@ -1708,10 +1734,9 @@ TArray<ComponentClass*> FOdysseyViewportDrawingEditorPainter::GetSelectedCompone
 void
 FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {    
-    if( mLastEvent )
-        delete mLastEvent;
+	mPreviousEvent = mLastEvent;
 
-    mLastEvent = new FOdysseyStrokePoint ( 0
+    mLastEvent = FOdysseyStrokePoint ( 0
                                       , 0
                                       , iState.GetZ()
                                       , iState.GetPressure()
@@ -1721,6 +1746,8 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
                                       , 0 //iState.GetPitch()
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
+
+	mStylusLastEventTime = std::chrono::steady_clock::now();
 
     //TODO Add queue here to handle all events when PaintInternal() is called
 }

@@ -42,9 +42,16 @@ UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEven
     }
 }
 
+EOdysseyStylusInputDriver
+UOdysseyStylusInputSettings::GetStylusDriver() const
+{
+    return StylusInputDriver;
+}
+
 void
 UOdysseyStylusInputSettings::RefreshStylusInputDriver()
 {
+    /*
     TSharedPtr<IStylusInputInterfaceInternal> stylus_input;
     
     switch( StylusInputDriver )
@@ -71,9 +78,11 @@ UOdysseyStylusInputSettings::RefreshStylusInputDriver()
 
     if( !stylus_input.IsValid() )
         StylusInputDriver = OdysseyStylusInputDriver_None;
+    */
 
     UOdysseyStylusInputSubsystem* input_subsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    input_subsystem->SetStylusInputInterface( stylus_input );
+    //input_subsystem->SetStylusInputInterface( stylus_input );
+    input_subsystem->SetStylusInputDriver(StylusInputDriver);
 }
 
 //static
