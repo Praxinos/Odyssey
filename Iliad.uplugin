@@ -111,11 +111,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyViewportDrawingEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyWidgets",
       "Type": "Editor",
       "LoadingPhase": "Default"
