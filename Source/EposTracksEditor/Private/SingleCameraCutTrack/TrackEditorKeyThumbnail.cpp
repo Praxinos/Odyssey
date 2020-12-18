@@ -266,8 +266,7 @@ void FTrackEditorKeyThumbnailCache::UpdateFilledThumbnails()
 
     if( !Boundary.IsEmpty() )
     {
-        GenerateFront( Boundary );
-        GenerateBack( Boundary );
+        Generate( Boundary );
     }
 
     if( Thumbnails.Num() )
@@ -280,51 +279,26 @@ void FTrackEditorKeyThumbnailCache::UpdateFilledThumbnails()
 }
 
 
-void FTrackEditorKeyThumbnailCache::GenerateFront( const TRange<double>& Boundary )
-{
-    if( !Thumbnails.Num() )
-        return;
-
-    const double TimePerPx = CurrentCache.TimeRange.Size<double>() / CurrentCache.AllottedSize.X;
-    double EndTime = Thumbnails[0]->GetTimeRange().GetLowerBoundValue();
-    TRange<double> effective_boundary( Boundary.GetLowerBoundValue(), EndTime );
-
-    for( auto key : CurrentCacheKey.Keys )
-    {
-        if( !effective_boundary.Contains( key ) && !FMath::IsNearlyEqual( effective_boundary.GetLowerBoundValue(), key ) && !FMath::IsNearlyEqual( effective_boundary.GetUpperBoundValue(), key ) )
-            continue;
-
-        FIntPoint TextureSize = CurrentCache.DesiredSize;
-        TextureSize.X = FMath::Min( TextureSize.X, int( CurrentCache.DesiredSize.Y * CameraViewRatio ) );
-
-        TRange<double> TimeRange( key, key + TextureSize.X * TimePerPx );
-
-        TSharedPtr<FTrackEditorThumbnail> NewThumbnail = MakeShareable( new FTrackEditorThumbnail(
-            FOnThumbnailDraw::CreateRaw( this, &FTrackEditorKeyThumbnailCache::DrawThumbnail ),
-            TextureSize,
-            TimeRange,
-            key
-        ) );
-
-        Thumbnails.Insert( NewThumbnail, 0 );
-        ThumbnailsNeedingRedraw.Add( NewThumbnail );
-    }
-}
-
-
-void FTrackEditorKeyThumbnailCache::GenerateBack( const TRange<double>& Boundary )
+void FTrackEditorKeyThumbnailCache::Generate( const TRange<double>& Boundary )
 {
     const double TimePerPx = CurrentCache.TimeRange.Size<double>() / CurrentCache.AllottedSize.X;
-    double StartTime = Thumbnails.Num() ? Thumbnails.Last()->GetTimeRange().GetUpperBoundValue() : Boundary.GetLowerBoundValue();
-    TRange<double> effective_boundary( StartTime, Boundary.GetUpperBoundValue() );
 
-    for( auto key : CurrentCacheKey.Keys )
+    for( int i = 0; i < CurrentCacheKey.Keys.Num(); i++ )
     {
-        if( !effective_boundary.Contains( key ) && !FMath::IsNearlyEqual( effective_boundary.GetLowerBoundValue(), key ) && !FMath::IsNearlyEqual( effective_boundary.GetUpperBoundValue(), key ) )
+        double key = CurrentCacheKey.Keys[i];
+
+        if( !Boundary.Contains( key ) && !FMath::IsNearlyEqual( Boundary.GetLowerBoundValue(), key ) && !FMath::IsNearlyEqual( Boundary.GetUpperBoundValue(), key ) )
             continue;
 
-        if( FMath::IsNearlyEqual( effective_boundary.GetUpperBoundValue(), key ) )
+        //PATCH
+        // For the last key (The one at the end of the section)
+        // It needs to be shifted to be considered inside the section by the sequencer
+        if( i == CurrentCacheKey.Keys.Num() - 1 )
             key -= DELTA;
+
+        auto already_in = [&]( const TSharedPtr<FTrackEditorThumbnail>& iThumbnail ) { return FMath::IsNearlyEqual( iThumbnail->GetEvalPosition(), key ); };
+        if( Thumbnails.ContainsByPredicate( already_in ) )
+            continue;
 
         FIntPoint TextureSize = CurrentCache.DesiredSize;
         TextureSize.X = FMath::Min( TextureSize.X, int( CurrentCache.DesiredSize.Y * CameraViewRatio ) );

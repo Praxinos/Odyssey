@@ -85,8 +85,9 @@ protected:
     void UpdateSingleThumbnail();
     void UpdateFilledThumbnails();
 
-    void GenerateFront( const TRange<double>& Boundary );
-    void GenerateBack( const TRange<double>& Boundary );
+    void Generate( const TRange<double>& Boundary );
+    void GenerateFront( const TRange<double>& Boundary ) { checkNoEntry(); }
+    void GenerateBack( const TRange<double>& Boundary ) { checkNoEntry(); }
 
     void Setup();
 
