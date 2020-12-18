@@ -9,6 +9,8 @@
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 
+#include "SingleCameraCutTrack/KeyThumbnailSection.h"
+
 class FCinematicBoardTrackEditor;
 class FMenuBuilder;
 class FSequencerSectionPainter;
@@ -19,7 +21,7 @@ class UMovieSceneCinematicBoardSection;
  * Board section, which paints and ticks the appropriate section.
  */
 class FCinematicBoardSection
-    : public TSubSectionMixin<FViewportThumbnailSection>
+    : public TSubSectionMixin<FKeyThumbnailSection>
 {
 public:
 
@@ -32,7 +34,6 @@ public:
 public:
 
     // ISequencerSection interface
-
     virtual void    Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime ) override;
     virtual int32   OnPaintSection( FSequencerSectionPainter& ioPainter ) const override;
     virtual void    BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding ) override;
@@ -50,11 +51,16 @@ public:
     virtual void    BeginDilateSection();
     virtual void    DilateSection( const TRange<FFrameNumber>& NewRange, float DilationFactor );
 
-    // FThumbnail interface
+    // FThumbnailSection interface
     virtual void    SetSingleTime( double iGlobalTime ) override;
     virtual FText   HandleThumbnailTextBlockText() const override;
     virtual void    HandleThumbnailTextBlockTextCommitted( const FText& iNewThumbnailName, ETextCommit::Type iCommitType ) override;
+
+    // IViewportThumbnailClient interface
     virtual UCameraComponent* GetViewCamera() override;
+
+    // FKeyThumbnailSection interface
+    virtual TArray<double> GetKeys() const override;
 
 private:
 

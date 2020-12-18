@@ -3,6 +3,8 @@
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 
+#include "Channels/MovieSceneFloatChannel.h"
+#include "Channels/MovieSceneChannelProxy.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "Rendering/DrawElements.h"
 #include "Textures/SlateIcon.h"
@@ -19,6 +21,7 @@
 #include "CommonMovieSceneTools.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Editor.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
@@ -89,7 +92,7 @@ FCinematicBoardSection::GetSectionTitle() const
 float
 FCinematicBoardSection::GetSectionHeight() const
 {
-    return FViewportThumbnailSection::GetSectionHeight() + 2 * 9.f;
+    return FKeyThumbnailSection::GetSectionHeight() + 2 * 9.f;
 }
 
 FMargin
@@ -224,6 +227,65 @@ FCinematicBoardSection::IsReadOnly() const
     return false;
 }
 
+TArray<double>
+FCinematicBoardSection::GetKeys() const //override
+{
+    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
+    TArray<double> keys;
+
+    UMovieSceneSequence* innerMovieSceneSequence = BoardSection->GetSequence();
+    if( !innerMovieSceneSequence )
+        return keys;
+
+    UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
+    if( !innerMovieScene )
+        return keys;
+
+    UMovieSceneTrack* cameracut_track = innerMovieScene->GetCameraCutTrack();
+    if( !cameracut_track )
+        return keys;
+
+    TArray<UMovieSceneSection*> cameracut_sections = cameracut_track->GetAllSections();
+    if( !cameracut_sections.Num() )
+        return keys;
+
+    UMovieSceneSingleCameraCutSection* cameracut_section = Cast<UMovieSceneSingleCameraCutSection>( cameracut_sections[0] );
+    if( !cameracut_section )
+        return keys;
+
+    UMovieSceneTrack* track = innerMovieScene->FindTrack<UMovieScene3DTransformTrack>( cameracut_section->GetCameraBindingID().GetGuid() );
+    if( !track )
+        return keys;
+
+    TArray<UMovieSceneSection*> sections = track->GetAllSections();
+
+    for( auto section : sections )
+    {
+        TArray<FFrameNumber> keys_as_frame;
+        TArrayView<FMovieSceneFloatChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+        for( int i = 0; i < 6; i++ )
+        {
+            TArrayView<const FFrameNumber> times = channels[i]->GetTimes();
+            for( auto time : times )
+            {
+                keys_as_frame.AddUnique( time );
+            }
+        }
+
+        for( auto key : keys_as_frame )
+        {
+            FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution();
+
+            if( TimeSpace == ETimeSpace::Global )
+                keys.AddUnique( key / TickResolution );
+
+            check( TimeSpace != ETimeSpace::Local ); // Should never go here as TimeSpace seems to only be settable inside child class
+        }
+    }
+
+    return keys;
+}
+
 void
 FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime )
 {
@@ -247,7 +309,7 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
         ThumbnailCache.SetSingleReferenceFrame( TOptional<double>() );
     }
 
-    FViewportThumbnailSection::Tick( iAllottedGeometry, iClippedGeometry, iCurrentTime, iDeltaTime );
+    FKeyThumbnailSection::Tick( iAllottedGeometry, iClippedGeometry, iCurrentTime, iDeltaTime );
 }
 
 int32
@@ -283,7 +345,7 @@ FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) co
     );
 
     // Paint the thumbnails.
-    FViewportThumbnailSection::OnPaintSection( ioPainter );
+    FKeyThumbnailSection::OnPaintSection( ioPainter );
 
     // Paint the sub-sequence information/looping boundaries/etc.
 
@@ -298,7 +360,7 @@ FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) co
 void
 FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding )
 {
-    FViewportThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
+    FKeyThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
 
     UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
@@ -428,8 +490,6 @@ FCinematicBoardSection::ResizeSection( ESequencerSectionResizeMode ResizeMode, F
 {
     UMovieSceneCinematicBoardSection& section = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     section.Resizing();
-
-    //FViewportThumbnailSection::ResizeSection( ResizeMode, ResizeFrameNumber );
 
     if( ResizeMode == ESequencerSectionResizeMode::SSRM_LeadingEdge )
         section.ResizeLeadingEdge( ResizeFrameNumber );
