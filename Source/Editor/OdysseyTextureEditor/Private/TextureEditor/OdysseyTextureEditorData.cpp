@@ -78,10 +78,11 @@ FOdysseyTextureEditorData::PrepareTextureProperties()
 	mTexture->GetLayerFormatSettings(0, textureFormatSettings);
 
 	// Create new Texture Properties Backup
-	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->CompressionSettings, mTexture->LODGroup, textureFormatSettings };
+	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->MaxTextureSize, textureFormatSettings };
 
 	// Overwrite Texture properties
 	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
+    mTexture->MaxTextureSize = 0;
     
     textureFormatSettings.CompressionNone = 1;
 	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
@@ -96,6 +97,7 @@ FOdysseyTextureEditorData::ApplyPropertiesBackup()
 {
 	mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
     mTexture->SetLayerFormatSettings(0, mPropertiesBackup.mTextureFormatSettings);
+    mTexture->MaxTextureSize = mPropertiesBackup.mTextureMaxTextureSize;
 	// mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
 	// mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
     mTexture->UpdateResource();
