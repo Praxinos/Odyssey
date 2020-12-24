@@ -603,7 +603,7 @@ SOdysseyAdvancedColorWheel::GetColorResult() const
     float value = 1 - w;
     float sat = value != 0 ? v / value : 0.0f;
 
-    return ::ul3::FPixelValue::FromHSVAF( hue, sat, value, 255 );
+    return ::ul3::FPixelValue::FromHSVAF( hue, sat, value, 1.0f );
 }
 
 #undef LOCTEXT_NAMESPACE
