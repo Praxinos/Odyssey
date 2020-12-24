@@ -143,6 +143,7 @@ FOdysseyFlipbookEditorData::PrepareTextureProperties()
 
 	// Overwrite Texture properties
 	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
+    mTexture->MaxTextureSize = 0;
     
     textureFormatSettings.CompressionNone = 1;
 	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
