@@ -103,7 +103,7 @@ FOdysseyFlipbookEditorData::FindOrCreateTextureUserData(UTexture2D* iTexture)
         //Init user data
         ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
         userData = NewObject< UOdysseyTextureAssetUserData >(iTexture, NAME_None, RF_Public);
-        userData->GetLayerStack()->Init(iTexture->GetSizeX(), iTexture->GetSizeY(), format);
+        userData->GetLayerStack()->Init(iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY(), format);
         iTexture->AddAssetUserData( userData );
 
         //Create image layer

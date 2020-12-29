@@ -187,6 +187,9 @@ ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int i
 
 ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat )
 {
+    //FORCE use of pixel Source format
+    return 0;
+
     ::ul3::tFormat ret = 0;
     switch( iFormat ) {
         case PF_Unknown:			ret = ULIS3_FORMAT_BGRA8;   break;

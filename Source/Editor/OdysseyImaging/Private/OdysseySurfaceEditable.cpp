@@ -23,8 +23,8 @@
 void
 CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 {
-    checkf(iBlock->Width() == iTexture->GetSizeX() &&
-           iBlock->Height() == iTexture->GetSizeY()
+    checkf(iBlock->Width() == iTexture->Source.GetSizeX() &&
+           iBlock->Height() == iTexture->Source.GetSizeY()
            ,TEXT("Sizes do not match"));
 
 	if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
@@ -109,8 +109,8 @@ InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETex
 void
 CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
 {
-    checkf(iBlock->Width() == iTexture->GetSizeX() &&
-           iBlock->Height() == iTexture->GetSizeY()
+    checkf(iBlock->Width() == iTexture->Source.GetSizeX() &&
+           iBlock->Height() == iTexture->Source.GetSizeY()
            ,TEXT("Sizes do not match"));
            
 	InitTextureWithBlockData(iBlock, iTexture, iTexture->Source.GetFormat());
@@ -119,7 +119,7 @@ CopyBlockDataIntoUTexture(const FOdysseyBlock* iBlock,UTexture2D* iTexture)
 FOdysseyBlock*
 NewOdysseyBlockFromUTextureData(UTexture2D* iTexture, ::ul3::tFormat iFormat)
 {
-    FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),iFormat);
+    FOdysseyBlock* block = new FOdysseyBlock(iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(),iFormat);
 	FillOdysseyBlockFromUTextureData(block,iTexture, iFormat);
     return block;
 }
@@ -130,9 +130,9 @@ FillOdysseyBlockFromUTextureData(FOdysseyBlock* ioBlock, UTexture2D* iTexture, :
 	if (!ioBlock)
 		return;
 
-	if (ioBlock->Width() != iTexture->GetSizeX() || ioBlock->Height() != iTexture->GetSizeY() || ioBlock->Format() != iFormat)
+	if (ioBlock->Width() != iTexture->Source.GetSizeX() || ioBlock->Height() != iTexture->Source.GetSizeY() || ioBlock->Format() != iFormat)
 	{
-		ioBlock->Reallocate(iTexture->GetSizeX(), iTexture->GetSizeY(), iFormat);
+		ioBlock->Reallocate(iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY(), iFormat);
 	}
 
 	//::ul3::FBlock* dst = ioBlock->Block();
@@ -144,7 +144,7 @@ FillOdysseyBlockFromUTextureData(FOdysseyBlock* ioBlock, UTexture2D* iTexture, :
 	}
 	else
 	{
-		FOdysseyBlock* block = new FOdysseyBlock(iTexture->GetSizeX(),iTexture->GetSizeY(),sourceFormat);
+		FOdysseyBlock* block = new FOdysseyBlock(iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(),sourceFormat);
 		CopyUTextureSourceDataIntoBlock(block,iTexture);
 
 		IULISLoaderModule& hULIS = IULISLoaderModule::Get();
@@ -384,7 +384,7 @@ static void GetBuildSettingsForRunningPlatform(
 	)
 {
 	// Compress to whatever formats the active target platforms want
-	ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
+	static ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
 	if (TPM)
 	{
 		ITargetPlatform* CurrentPlatform = NULL;
@@ -432,9 +432,9 @@ static void GetBuildSettingsForRunningPlatform(
 //END COPIED FROM TextureDerivedData.cpp
 
 void
-InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
+InvalidateTextureFromSourceData_Old(const ::ul3::FBlock* iData, UTexture2D* iTexture, const ::ul3::FRect& iRect)
 {
-	ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
+	static ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
 	const ITextureFormat* TextureFormat = NULL;
 	if (TPM)
 	{
@@ -456,8 +456,8 @@ InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,
 		if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
 		{
 			//TArray64<uint8> dst;
-			//dst.SetNumUninitialized((iTexture->Source.CalcMipSize(0) * w) / (iTexture->GetSizeX() * iTexture->GetSizeY()) );
-			int rowSize = (iTexture->Source.CalcMipSize(0) * iRect.w) / (iTexture->GetSizeX() * iTexture->GetSizeY());
+			//dst.SetNumUninitialized((iTexture->Source.CalcMipSize(0) * w) / (iTexture->Source.GetSizeX() * iTexture->Source.GetSizeY()) );
+			int rowSize = (iTexture->Source.CalcMipSize(0) * iRect.w) / (iTexture->Source.GetSizeX() * iTexture->Source.GetSizeY());
 			sourceRawImage->RawData.SetNumUninitialized(rowSize * iRect.h);
 			for(int i = 0; i < iRect.h; i++)
 			{
@@ -494,14 +494,85 @@ InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,
 }
 
 void
+InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
+{
+	static ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
+	static ITextureCompressorModule* Compressor = /* InCompressor ? InCompressor : */ &FModuleManager::LoadModuleChecked<ITextureCompressorModule>("TextureCompressor");
+	if (!TPM || !Compressor)
+		return;
+
+	const ITextureFormat* TextureFormat = NULL;
+	
+	TArray<FTextureBuildSettings> buildSettings;
+	GetBuildSettingsForRunningPlatform(*iTexture, buildSettings);
+
+	FTextureFormatSettings FormatSettings;
+	iTexture->GetLayerFormatSettings(0, FormatSettings);
+
+	TArray<FImage> TileImages;
+	FImage* sourceRawImage = new(TileImages) FImage(); //TileImages destructor will destroy that correctly ?
+	sourceRawImage->SizeX = iRect.w;
+	sourceRawImage->SizeY = iRect.h;
+	sourceRawImage->NumSlices = iTexture->Source.GetNumSlices() > 0 ? iTexture->Source.GetNumSlices() : 1;
+	sourceRawImage->Format = GetRawImageFormatFromTextureSourceFormat(iTexture->Source.GetFormat());//TODO: check format and convert if needed
+	sourceRawImage->GammaSpace = FormatSettings.SRGB ? (iTexture->bUseLegacyGamma ? EGammaSpace::Pow22 : EGammaSpace::sRGB) : EGammaSpace::Linear;
+
+	if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
+	{
+		//TArray64<uint8> dst;
+		//dst.SetNumUninitialized((iTexture->Source.CalcMipSize(0) * w) / (iTexture->Source.GetSizeX() * iTexture->Source.GetSizeY()) );
+		int w = iTexture->Source.IsValid() ? iTexture->Source.GetSizeX() : iTexture->GetSizeX();
+		int h = iTexture->Source.IsValid() ? iTexture->Source.GetSizeY() : iTexture->GetSizeY();
+		int rowSize = (iTexture->Source.CalcMipSize(0) * iRect.w) / (w * h);
+		sourceRawImage->RawData.SetNumUninitialized(rowSize * iRect.h);
+		for(int i = 0; i < iRect.h; i++)
+		{
+			ConvertULISFormatToUE4TextureSourceFormat(iData->PixelPtr(iRect.x, iRect.y + i), sourceRawImage->RawData.GetData() + rowSize * i, iRect.w, 1, iTexture->Source.GetFormat());
+			//sourceRawImage->RawData.Append(dst.GetData(), dst.Num());
+		}
+	}
+	else
+	{
+		int rowSize = iData->BytesPerPixel() * iRect.w; 
+		sourceRawImage->RawData.SetNumUninitialized( rowSize * iRect.h);
+		for(int i = 0; i < iRect.h; i++)
+		{
+			FMemory::Memcpy(sourceRawImage->RawData.GetData() + rowSize * i, iData->PixelPtr(iRect.x, iRect.y + i), rowSize);
+			// sourceRawImage->RawData.Append(iData->PixelPtr(iRect.x, iRect.y + i), iData->BytesPerPixel() * iRect.w);
+		}
+	}
+
+	//FCompressedImage2D* dstRawImage = new FCompressedImage2D();
+	TArray<FCompressedImage2D> CompressedMip;
+	TArray<FImage> EmptyList;
+	uint32 NumMipsInTail, ExtData;
+	if (!ensure(Compressor->BuildTexture(TileImages, EmptyList, buildSettings[0], CompressedMip, NumMipsInTail, ExtData)))
+		return;
+
+	// Update Region
+	FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x, iRect.y, 0, 0, iRect.w, iRect.h);
+	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [](uint8*, const FUpdateTextureRegion2D* Regions) {
+		delete Regions;
+	};
+
+	int blockBytes = GPixelFormats[CompressedMip[0].PixelFormat].BlockBytes;
+	iTexture->UpdateTextureRegions(0, 1, region, CompressedMip[0].SizeX * blockBytes, blockBytes, CompressedMip[0].RawData.GetData(), dataCleanupFunc);
+	FRenderCommandFence fence;
+	fence.BeginFence();
+	fence.Wait();
+}
+
+void
 InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
 {
+	// std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     checkf(iData,TEXT("Error"));
     checkf(iTexture,TEXT("Error"));
 
-    checkf(iData->Width() == iTexture->GetSizeX() &&
-           iData->Height() == iTexture->GetSizeY()
-           ,TEXT("Sizes do not match"));
+    /* checkf(iData->Width() == iTexture->Source.GetSizeX() &&
+           iData->Height() == iTexture->Source.GetSizeY()
+           ,TEXT("Sizes do not match")); */
 
     int x = iRect.x;
     int y = iRect.y;
@@ -518,7 +589,10 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
     ::ul3::tFormat platformFormat = ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat());
 	if (platformFormat == 0)
 	{
+		//InvalidateTextureFromSourceData_Old(iData, iTexture, iRect);
 		InvalidateTextureFromSourceData(iData, iTexture, iRect);
+		// std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+		// UE_LOG(LogTemp, Warning, TEXT("Time difference 0 = %ld �s"), std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count());
 		return;
 	}
 		
@@ -532,6 +606,9 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
 	};
 	uint32 bpp = iData->BytesPerPixel();
 	uint32 pitch = iData->BytesPerScanLine();
+
+	//TODO:
+	//sourceRawImage->GammaSpace = FormatSettings.SRGB ? (iTexture->bUseLegacyGamma ? EGammaSpace::Pow22 : EGammaSpace::sRGB) : EGammaSpace::Linear;
 
     if (srcBlock->Format() != platformFormat)
     {
@@ -562,6 +639,8 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
 	FRenderCommandFence fence;
 	fence.BeginFence();
 	fence.Wait();
+	// std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	// UE_LOG(LogTemp, Warning, TEXT("Time difference 0 = %ld �s"), std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count());
 }
 
 void
@@ -665,7 +744,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
     // Warning: the block is allocated, then the texture data is copied into it.
     ::ul3::tFormat platformFormat = ULISFormatForUE4PixelFormat(iTexture->GetPixelFormat());
 	::ul3::tFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-    mBlock = new FOdysseyBlock(mTexture->GetSizeX(),mTexture->GetSizeY(), platformFormat != 0 ? platformFormat : sourceFormat, &InvalidateSurfaceCallback,static_cast<void*>(this));
+    mBlock = new FOdysseyBlock(mTexture->Source.GetSizeX(),mTexture->Source.GetSizeY(), platformFormat != 0 ? platformFormat : sourceFormat, &InvalidateSurfaceCallback,static_cast<void*>(this));
 	if (platformFormat == 0)
 	{
 		CopyUTextureSourceDataIntoBlock(mBlock, mTexture);

@@ -68,7 +68,7 @@ OdysseyColorModelFromULISFormat(::ul3::tFormat iFormat)
 		case ULIS3_FORMAT_CMYK8: return EOdysseyColorModel::kCMYK;
 		case ULIS3_FORMAT_Lab8: return EOdysseyColorModel::kLab;
 		case ULIS3_FORMAT_BGRA8: return EOdysseyColorModel::kRGBA;
-		case ULIS3_FORMAT_RGBA16: return EOdysseyColorModel::kRGBA;
+		case ULIS3_FORMAT_RGBA8: return EOdysseyColorModel::kRGBA;
 		case ULIS3_FORMAT_GA8: return EOdysseyColorModel::kGreyA;
 		case ULIS3_FORMAT_HSLA8: return EOdysseyColorModel::kHSLA;
 		case ULIS3_FORMAT_HSVA8: return EOdysseyColorModel::kHSVA;

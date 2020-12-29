@@ -105,7 +105,7 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
         UTexture2D* srcTexture = GetKeyframeTexture(iIndex);
         if (sprite && srcTexture)
         {
-            UTexture2D* texture = *oTexture = CreateTexture(srcTexture->GetSizeX(), srcTexture->GetSizeY(), srcTexture->Source.GetFormat(), mFlipbook->GetName() + "_Texture", FLinearColor(0.f, 0.f, 0.f, 0.f));
+            UTexture2D* texture = *oTexture = CreateTexture(srcTexture->Source.GetSizeX(), srcTexture->Source.GetSizeY(), srcTexture->Source.GetFormat(), mFlipbook->GetName() + "_Texture", FLinearColor(0.f, 0.f, 0.f, 0.f));
             if (!texture)
                 return false;
 

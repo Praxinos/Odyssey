@@ -198,8 +198,9 @@ FOdysseyPaintEngine::EndStrokeTick()
 
     mBrushInstance->ExecuteStrokeEnd();
     mOnStrokeEndDelegate.Broadcast();
-    UpdateInvalidMaps();
-    mBrushInstance->ClearInvalidRects();
+    
+    // UpdateInvalidMaps();
+    // mBrushInstance->ClearInvalidRects();
 
     //Refresh Preview Block
     UpdatePreviewBlockTiles();
@@ -283,6 +284,9 @@ FOdysseyPaintEngine::Flush()
 void
 FOdysseyPaintEngine::UpdatePreviewBlockTiles()
 {
+    UpdateInvalidMaps();
+    mBrushInstance->ClearInvalidRects();
+
     TArray<::ul3::FRect> changedTiles = GetTmpInvalidTiles();
     if (changedTiles.Num() > 0)
     {
@@ -316,8 +320,9 @@ FOdysseyPaintEngine::Tick()
 
     //Execute Tick and Update invalid maps in case of drawing in the tick event
     mBrushInstance->ExecuteTick();
-    UpdateInvalidMaps();
-    mBrushInstance->ClearInvalidRects();
+    
+    // UpdateInvalidMaps();
+    // mBrushInstance->ClearInvalidRects();
 
     //Refresh the tiles
     UpdatePreviewBlockTiles();
@@ -772,8 +777,8 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
             mBrushInstance->ExecuteStep();
             mOnStrokeStepDelegate.Broadcast();
 
-            UpdateInvalidMaps();
-            mBrushInstance->ClearInvalidRects();
+            // UpdateInvalidMaps();
+            // mBrushInstance->ClearInvalidRects();
         } );
     }
 
@@ -785,8 +790,8 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
             state.point = point;
             state.currentPointIndex = i;
             mBrushInstance->ExecuteSubStrokeEnd();
-            UpdateInvalidMaps();
-            mBrushInstance->ClearInvalidRects();
+            // UpdateInvalidMaps();
+            // mBrushInstance->ClearInvalidRects();
         } );
     }
 }

@@ -628,8 +628,8 @@ void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, 
         return;
     }
 
-    uint32 ImportedWidth = Surface->Width();
-    uint32 ImportedHeight = Surface->Height();
+    uint32 ImportedWidth = Surface->Texture()->GetSizeX(); //Get the displayed size of the texture instead of its Source size
+    uint32 ImportedHeight = Surface->Texture()->GetSizeY();
 
     Width = ImportedWidth;
     Height = ImportedHeight;
@@ -686,8 +686,8 @@ void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, 
     }
     else
     {
-        Width = Surface->Width() * GetZoom();
-        Height = Surface->Height() * GetZoom();
+        Width = Surface->Texture()->GetSizeX() * GetZoom();
+        Height = Surface->Texture()->GetSizeY() * GetZoom();
     }
 }
 

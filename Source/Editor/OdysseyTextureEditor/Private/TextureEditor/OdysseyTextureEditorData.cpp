@@ -40,7 +40,7 @@ FOdysseyTextureEditorData::Init()
     {
         ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
         userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
-        userData->GetLayerStack()->Init(mTexture->GetSizeX(), mTexture->GetSizeY(), format);
+        userData->GetLayerStack()->Init(mTexture->Source.GetSizeX(), mTexture->Source.GetSizeY(), format);
         mTexture->AddAssetUserData( userData );
         FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, userData->GetLayerStack()->Format());
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName(), textureData));

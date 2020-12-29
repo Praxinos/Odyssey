@@ -840,7 +840,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureBased(const FHitResult& i
     }
 
     if( mBeginPosition == FVector2D(0,0))
-        mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->GetSizeX(), mLastEvent.y / mPaintingTexture2D->GetSizeY());
+        mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->Source.GetSizeX(), mLastEvent.y / mPaintingTexture2D->Source.GetSizeY());
 
     const auto featureLevel = GEditor->GetEditorWorldContext().World()->FeatureLevel;
 
@@ -1023,7 +1023,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHit
     }
 
     if( mBeginPosition == FVector2D(0,0))
-        mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->GetSizeX(), mLastEvent.y / mPaintingTexture2D->GetSizeY());
+        mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->Source.GetSizeX(), mLastEvent.y / mPaintingTexture2D->Source.GetSizeY());
 
     //UE_LOG(LogTemp, Display, TEXT("triangles: %d"), iInfluencedTriangles.Num() );
 

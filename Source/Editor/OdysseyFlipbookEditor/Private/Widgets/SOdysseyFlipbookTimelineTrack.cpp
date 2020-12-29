@@ -98,8 +98,8 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
 	TSharedPtr<SWidget> contentWidget = nullptr;
 	if (iTexture)
 	{
-		float w = iTexture->GetSizeX();
-		float h = iTexture->GetSizeY();
+		float w = iTexture->Source.GetSizeX();
+		float h = iTexture->Source.GetSizeY();
 		if (w > h)
 		{
 			float ratio = 64.f / w;

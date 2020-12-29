@@ -60,7 +60,7 @@ FOdysseySurfaceReadOnly::Width()
 {
 	if (!mTexture)
 		return 0;
-    return mTexture->GetSizeX();
+    return mTexture->Source.GetSizeX();
 }
 
 int
@@ -68,5 +68,5 @@ FOdysseySurfaceReadOnly::Height()
 {
 	if (!mTexture)
 		return 0;
-    return mTexture->GetSizeY();
+    return mTexture->Source.GetSizeY();
 }
