@@ -494,14 +494,163 @@ InvalidateTextureFromSourceData_Old(const ::ul3::FBlock* iData, UTexture2D* iTex
 }
 
 void
-InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
+InvalidateTextureFromSourceDataNew(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
 {
-	static ITargetPlatformManagerModule* TPM = GetTargetPlatformManager();
-	static ITextureCompressorModule* Compressor = /* InCompressor ? InCompressor : */ &FModuleManager::LoadModuleChecked<ITextureCompressorModule>("TextureCompressor");
-	if (!TPM || !Compressor)
+	/*
+	 * Okay here is the idea
+	 * We need to send our data the best way possible to the graphics card and send it according to all the texture parameters
+	 * For that we use the Compressor->BuildTexture() Method to apply the texture parameters to our input data
+	 * 
+	 * The problem is, Compressor->BuildTexture() is made assuming we are giving it the whole texture image.
+	 * But we want to send it only a small part of that image and BuildTexture can lead to image resizing according to the MaxTextureResolution of the BuildSettings parameter.
+	 * 
+	 * What we do here is the following :
+	 * - If MaxTextureResolution is 0 or equals the Texture Full Size, then we don't need to worry about the part we are giving to the BuildTexture
+	 * - If MaxTextureResolution > 0 and < Texture Full Size, then we need to ajust MaxTextureResolution to make it resize our image part as intended
+	 * - If the resulting MaxTextureResolution < 1, then we need to take a bigger part of the image than expected in order to have a MaxTextureResolution == 1
+	 * 
+	 * Also this is possible because MaxTextureSize is always a power of two and is only applied if iTexture also has PowerOfTwo sizes
+	 * 
+	 * There will be adjustments to make to iRect x y w h values
+	 * This is clearly a big Patch and should be provided by Epic Games in the first place.
+	 */
+
+	//Get Compressor Module
+	static ITextureCompressorModule* Compressor = &FModuleManager::LoadModuleChecked<ITextureCompressorModule>("TextureCompressor");
+	if (!Compressor)
 		return;
 
-	const ITextureFormat* TextureFormat = NULL;
+	//Get Texture BuildSettings
+	TArray<FTextureBuildSettings> buildSettings;
+	GetBuildSettingsForRunningPlatform(*iTexture, buildSettings);
+
+	//Compute Texture Full Size
+	uint32 textureFullWidth = iTexture->Source.GetSizeX();
+	uint32 textureFullHeight = iTexture->Source.GetSizeY();
+	switch (static_cast<const ETexturePowerOfTwoSetting::Type>(buildSettings[0].PowerOfTwoMode))
+	{
+		case ETexturePowerOfTwoSetting::None:
+			break;
+
+		case ETexturePowerOfTwoSetting::PadToPowerOfTwo:
+			textureFullWidth = FMath::RoundUpToPowerOfTwo(textureFullWidth);
+			textureFullHeight = FMath::RoundUpToPowerOfTwo(textureFullHeight);
+			break;
+
+		case ETexturePowerOfTwoSetting::PadToSquarePowerOfTwo:
+			textureFullWidth = textureFullHeight = FMath::Max(FMath::RoundUpToPowerOfTwo(textureFullWidth), FMath::RoundUpToPowerOfTwo(textureFullHeight));
+			break;
+
+		default:
+			checkf(false, TEXT("Unknown entry in ETexturePowerOfTwoSetting::Type"));
+			break;
+	}
+
+	//Adjust the build settings if needed
+	::ul3::FRect srcRect = iRect;
+	::ul3::FRect dstRect = iRect;
+	if (buildSettings[0].MaxTextureResolution > 0 && (buildSettings[0].MaxTextureResolution < textureFullWidth || buildSettings[0].MaxTextureResolution < textureFullHeight))
+	{
+		uint32 ratio = FMath::Max(textureFullWidth, textureFullHeight) / buildSettings[0].MaxTextureResolution;
+
+		//Be sure to pad our Rect to a power of two, as we know that we are in a power of two context this lead to no errors
+		//We assume that iRect x and y are already rounded to a power of to as usually tiles à 64 pixels wide so every tile position is in power of two
+
+		srcRect.x = (srcRect.x / ratio) * ratio; //round down x to a multiple of ratio, works because we are using integers
+		srcRect.y = (srcRect.y / ratio) * ratio; //round down y to a multiple of ratio, works because we are using integers
+		srcRect.w = FMath::Max(ratio, FMath::RoundUpToPowerOfTwo(iRect.x + srcRect.w - srcRect.x));
+		srcRect.h = FMath::Max(ratio, FMath::RoundUpToPowerOfTwo(iRect.y + srcRect.h - srcRect.y));
+
+		//the following is ok as ration and iTexture->GetSizeX() are always powers of two
+		if ((uint32)srcRect.x + srcRect.w > textureFullWidth)
+		{
+			srcRect.x = textureFullWidth - srcRect.w;
+		}
+
+		if ((uint32)srcRect.y + srcRect.h > textureFullHeight)
+		{
+			srcRect.y = textureFullHeight - srcRect.w;
+		}
+		
+		//Finally set the temporary MaxTextureResolution
+		buildSettings[0].MaxTextureResolution = FMath::Max(srcRect.w, srcRect.h) / ratio;
+
+		dstRect.x = srcRect.x / ratio;
+		dstRect.y = srcRect.y / ratio;
+		dstRect.w = srcRect.w / ratio;
+		dstRect.h = srcRect.h / ratio;
+
+		//Once all of this is done we have to clamp the srcRect Width and Height to keep them inside our input data boundaries
+		if (srcRect.x + srcRect.w > iTexture->Source.GetSizeX())
+		{
+			srcRect.w = iTexture->Source.GetSizeX() - srcRect.x;
+		}
+
+		if (srcRect.y + srcRect.h > iTexture->Source.GetSizeY())
+		{
+			srcRect.h = iTexture->Source.GetSizeY() - srcRect.y;
+		}
+	}
+
+	//Create the source Image containing the Texture Source Data we need to Refresh
+	TArray<FImage> TileImages;
+	FImage* sourceRawImage = new(TileImages) FImage(); //TileImages destructor will destroy that correctly ?
+	sourceRawImage->SizeX = srcRect.w;
+	sourceRawImage->SizeY = srcRect.h;
+	sourceRawImage->NumSlices = iTexture->Source.GetNumSlices() > 0 ? iTexture->Source.GetNumSlices() : 1;
+	sourceRawImage->Format = GetRawImageFormatFromTextureSourceFormat(iTexture->Source.GetFormat());
+	sourceRawImage->GammaSpace = buildSettings[0].GetGammaSpace();
+
+	//Fill the source Image with our Data and convert it from our format to the Texture Source format if needed
+	//TODO: Find a way to avoid
+	if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
+	{
+		int w = iTexture->Source.IsValid() ? iTexture->Source.GetSizeX() : iTexture->GetSizeX();
+		int h = iTexture->Source.IsValid() ? iTexture->Source.GetSizeY() : iTexture->GetSizeY();
+		int rowSize = (iTexture->Source.CalcMipSize(0) * srcRect.w) / (w * h);
+		sourceRawImage->RawData.SetNumUninitialized(rowSize * srcRect.h);
+		for(int i = 0; i < srcRect.h; i++)
+		{
+			ConvertULISFormatToUE4TextureSourceFormat(iData->PixelPtr(srcRect.x, srcRect.y + i), sourceRawImage->RawData.GetData() + rowSize * i, srcRect.w, 1, iTexture->Source.GetFormat());
+		}
+	}
+	else
+	{
+		int rowSize = iData->BytesPerPixel() * srcRect.w; 
+		sourceRawImage->RawData.SetNumUninitialized( rowSize * srcRect.h);
+		for(int i = 0; i < srcRect.h; i++)
+		{
+			FMemory::Memcpy(sourceRawImage->RawData.GetData() + rowSize * i, iData->PixelPtr(srcRect.x, srcRect.y + i), rowSize);
+		}
+	}
+
+	//Apply the texture parameters to retrieve the data to send to the graphics card
+	TArray<FCompressedImage2D> CompressedMip;
+	TArray<FImage> EmptyList;
+	uint32 NumMipsInTail, ExtData;
+	if (!ensure(Compressor->BuildTexture(TileImages, EmptyList, buildSettings[0], CompressedMip, NumMipsInTail, ExtData)))
+		return;
+
+	//Send the image data to the graphics card and wait for it to finish
+	//FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x * CompressedMip[0].SizeX / iRect.w, iRect.y * CompressedMip[0].SizeY / iRect.h, 0, 0, CompressedMip[0].SizeX, CompressedMip[0].SizeY);
+	FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(dstRect.x, dstRect.y, 0, 0, dstRect.w, dstRect.h);
+	int blockBytes = GPixelFormats[CompressedMip[0].PixelFormat].BlockBytes;
+	iTexture->UpdateTextureRegions(0, 1, region, CompressedMip[0].SizeX * blockBytes, blockBytes, CompressedMip[0].RawData.GetData(), [](uint8*, const FUpdateTextureRegion2D* Regions) {});
+	FRenderCommandFence fence;
+	fence.BeginFence();
+	fence.Wait();
+
+	//cleanup
+	delete region;
+}
+
+
+void
+InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const ::ul3::FRect& iRect)
+{
+	static ITextureCompressorModule* Compressor = /* InCompressor ? InCompressor : */ &FModuleManager::LoadModuleChecked<ITextureCompressorModule>("TextureCompressor");
+	if (!Compressor)
+		return;
 	
 	TArray<FTextureBuildSettings> buildSettings;
 	GetBuildSettingsForRunningPlatform(*iTexture, buildSettings);
@@ -550,6 +699,14 @@ InvalidateTextureFromSourceData(const ::ul3::FBlock* iData,UTexture2D* iTexture,
 		return;
 
 	// Update Region
+
+	//TODO: Take CompressedMip size to use MaximumTextureSize
+	//FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x, iRect.y, 0, 0, CompressedMip[0].SizeX, CompressedMip[0].SizeY);
+
+	// float xRatio = ;
+	// float yRatio = ;
+	//FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x * CompressedMip[0].SizeX / iRect.w, iRect.y * CompressedMip[0].SizeY / iRect.h, 0, 0, CompressedMip[0].SizeX, CompressedMip[0].SizeY);
+
 	FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x, iRect.y, 0, 0, iRect.w, iRect.h);
 	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> dataCleanupFunc = [](uint8*, const FUpdateTextureRegion2D* Regions) {
 		delete Regions;
@@ -590,7 +747,8 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
 	if (platformFormat == 0)
 	{
 		//InvalidateTextureFromSourceData_Old(iData, iTexture, iRect);
-		InvalidateTextureFromSourceData(iData, iTexture, iRect);
+		//InvalidateTextureFromSourceData(iData, iTexture, iRect);
+		InvalidateTextureFromSourceDataNew(iData, iTexture, iRect);
 		// std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 		// UE_LOG(LogTemp, Warning, TEXT("Time difference 0 = %ld �s"), std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count());
 		return;

@@ -928,7 +928,7 @@ FOdysseyPaintEngine::CopyEditedBlockInPreviewBlock(TArray<::ul3::FRect>& iRects)
         return;
     
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent =  ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
 
     for (int i = 0; i < iRects.Num(); i++)
 	{    

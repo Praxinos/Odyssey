@@ -139,11 +139,10 @@ FOdysseyFlipbookEditorData::PrepareTextureProperties()
 	mTexture->GetLayerFormatSettings(0, textureFormatSettings);
 
 	// Create new Texture Properties Backup
-	mPropertiesBackup = { mTexture->MipGenSettings, mTexture->MaxTextureSize, textureFormatSettings };
+	mPropertiesBackup = { mTexture->MipGenSettings, textureFormatSettings.CompressionNone };
 
 	// Overwrite Texture properties
 	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
-    mTexture->MaxTextureSize = 0;
     
     textureFormatSettings.CompressionNone = 1;
 	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
@@ -158,10 +157,12 @@ FOdysseyFlipbookEditorData::ApplyPropertiesBackup()
 {
 	if (mTexture) {
 		mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
-        mTexture->SetLayerFormatSettings(0, mPropertiesBackup.mTextureFormatSettings);
-        mTexture->MaxTextureSize = mPropertiesBackup.mTextureMaxTextureSize;
-        // mTexture->CompressionSettings = mPropertiesBackup.mTextureCompressionBackup;
-        // mTexture->LODGroup = mPropertiesBackup.mTextureGroupBackup;
+        
+        FTextureFormatSettings textureFormatSettings;
+        mTexture->GetLayerFormatSettings(0,textureFormatSettings);
+        textureFormatSettings.CompressionNone = mPropertiesBackup.mTextureCompressionNone;
+        mTexture->SetLayerFormatSettings(0, textureFormatSettings);
+
         mTexture->UpdateResource();
 	}
 }
