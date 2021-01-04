@@ -635,6 +635,7 @@ InvalidateTextureFromSourceDataNew(const ::ul3::FBlock* iData,UTexture2D* iTextu
 	//FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(iRect.x * CompressedMip[0].SizeX / iRect.w, iRect.y * CompressedMip[0].SizeY / iRect.h, 0, 0, CompressedMip[0].SizeX, CompressedMip[0].SizeY);
 	FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D(dstRect.x, dstRect.y, 0, 0, dstRect.w, dstRect.h);
 	int blockBytes = GPixelFormats[CompressedMip[0].PixelFormat].BlockBytes;
+	iTexture->TemporarilyDisableStreaming(); //Verify that we are not streaming to avoid regions to be wrong. This can do an extra call to UpdateResources which is heavy, but called only if TemporarilyDisableStreaming() hasn't been called before on this texture or if someone from outside disabled it.
 	iTexture->UpdateTextureRegions(0, 1, region, CompressedMip[0].SizeX * blockBytes, blockBytes, CompressedMip[0].RawData.GetData(), [](uint8*, const FUpdateTextureRegion2D* Regions) {});
 	FRenderCommandFence fence;
 	fence.BeginFence();

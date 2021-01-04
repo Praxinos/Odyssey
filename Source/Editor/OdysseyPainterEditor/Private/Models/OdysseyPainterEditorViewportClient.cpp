@@ -147,7 +147,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Figure out the size we need
     uint32 width, height;
     mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
-    const float mipLevel = 1;
+    const float mipLevel = 0; //should be -1, but as we are editing only the first mipmap, then the other mipmaps are not updated and so we cannot use -1 to have automatic mipmap selection.
 
     TRefCountPtr<FBatchedElementParameters> batchedElementParameters;
 

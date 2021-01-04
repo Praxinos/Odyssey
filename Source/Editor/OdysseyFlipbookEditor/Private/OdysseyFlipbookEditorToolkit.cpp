@@ -159,6 +159,7 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 {
 	mData->PaintEngine()->Flush();
 	mData->SyncTextureWithSurfaceBlock();
+	mData->ApplyPropertiesBackup();
 
 	//Small trick
 	//We want to save all sprites, but we don't want to be considered the actual sprite editor
@@ -173,6 +174,8 @@ FOdysseyFlipbookEditorToolkit::SaveAsset_Execute()
 	} */
 
     FAssetEditorToolkit::SaveAsset_Execute();
+
+	mData->PrepareTextureProperties();
 
 	/* for (int i = 0; i < mData->FlipbookWrapper()->Flipbook()->GetNumKeyFrames(); i++)
 	{
@@ -195,12 +198,17 @@ FOdysseyFlipbookEditorToolkit::SaveAssetAs_Execute()
 
 		RemoveEditingObject(texture);
 	} */
+	mData->PaintEngine()->Flush();
+	mData->SyncTextureWithSurfaceBlock();
+	mData->ApplyPropertiesBackup();
 
 	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 	FDelegateHandle openAssetHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddRaw(this, &FOdysseyFlipbookEditorToolkit::OpenAsset);
 
     FAssetEditorToolkit::SaveAssetAs_Execute();
+
+	mData->PrepareTextureProperties();
 
 	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
 

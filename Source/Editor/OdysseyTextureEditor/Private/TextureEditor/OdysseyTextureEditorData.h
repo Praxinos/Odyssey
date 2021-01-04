@@ -12,7 +12,6 @@ class UOdysseyBrush;
 
 struct FTexturePropertiesBackup
 {
-    TextureMipGenSettings       mTextureMipGenBackup;
     uint8 mTextureCompressionNone;
 };
 

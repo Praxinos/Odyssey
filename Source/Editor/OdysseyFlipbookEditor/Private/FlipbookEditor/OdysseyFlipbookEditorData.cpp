@@ -139,24 +139,18 @@ FOdysseyFlipbookEditorData::PrepareTextureProperties()
 	mTexture->GetLayerFormatSettings(0, textureFormatSettings);
 
 	// Create new Texture Properties Backup
-	mPropertiesBackup = { mTexture->MipGenSettings, textureFormatSettings.CompressionNone };
-
-	// Overwrite Texture properties
-	mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
+	mPropertiesBackup = { textureFormatSettings.CompressionNone };
     
     textureFormatSettings.CompressionNone = 1;
 	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
-
-	// mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-	// mTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 	mTexture->UpdateResource();
+    mTexture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
 }
 
 void
 FOdysseyFlipbookEditorData::ApplyPropertiesBackup()
 {
 	if (mTexture) {
-		mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
         
         FTextureFormatSettings textureFormatSettings;
         mTexture->GetLayerFormatSettings(0,textureFormatSettings);

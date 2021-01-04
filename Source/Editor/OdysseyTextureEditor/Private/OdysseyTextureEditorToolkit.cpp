@@ -48,8 +48,11 @@ FOdysseyTextureEditorToolkit::SaveAsset_Execute()
 {
 	mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
+	mData->ApplyPropertiesBackup();
 
     FAssetEditorToolkit::SaveAsset_Execute();
+	
+	mData->PrepareTextureProperties();
 }
 
 void
@@ -57,12 +60,15 @@ FOdysseyTextureEditorToolkit::SaveAssetAs_Execute()
 {
 	mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
+	mData->ApplyPropertiesBackup();
 
 	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 	FDelegateHandle openAssetHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddRaw(this, &FOdysseyTextureEditorToolkit::OpenAsset);
 
 	FAssetEditorToolkit::SaveAssetAs_Execute();
+
+	mData->PrepareTextureProperties();
 
 	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
 }

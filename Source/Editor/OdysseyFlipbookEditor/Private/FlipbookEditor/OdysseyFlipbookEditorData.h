@@ -17,7 +17,6 @@ class FOdysseyFlipbookWrapper;
 
 struct FTexturePropertiesBackup
 {
-    TextureMipGenSettings       mTextureMipGenBackup;
     uint8 mTextureCompressionNone;
 };
 
