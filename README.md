@@ -4,10 +4,25 @@
 [![UE4](https://img.shields.io/badge/UE4-4.25+-orange)](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
 [![Release](https://img.shields.io/github/release/Praxinos/Iliad.svg)](https://github.com/Praxinos/Iliad/releases)
 
-# Iliad
-Painting plugin with Blueprint brushes for Unreal Engine
+## 
+<br>
 
-# Links
+<p align="center">
+    <img src="Meta/git/logo.png">
+</p>
+
+## Overview
+**Iliad** is a digital-painting plugin for Unreal Engine 4.  
+It comes with a dedicated interface to create and edit textures directly within the engine, eliminating the need for a workflow with multiple software.  
+Express your art and experience new creative possibilities with a powerful blueprint-based nodal brush engine.  
+Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).  
+
+**Iliad** can be used for many purposes, including:
+- Editing 2D textures used in materials ( as diffuse, specular, normal, etc. ) and see the result in real-time on 3D assets in the viewport.
+- Creating 2D images like tile sets or sprites for 2D video games.
+- Drawing sketches for storyboard, design or illustration.
+
+## Links
 [Official Repository](https://github.com/Praxinos/Iliad)  
 [Marketplace](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)  
 [Developer Documentation](https://praxinos.coop/Documentation/Iliad/Developer/html/)  
@@ -16,3 +31,7 @@ Painting plugin with Blueprint brushes for Unreal Engine
 [Iliad on Discord](https://discordapp.com/invite/gEd6pj7)  
 [Praxinos on Patreon](https://www.patreon.com/praxinos)  
 
+## Workflow
+<p align="center">
+    <img src="Meta/git/workflow.png">
+</p>
