@@ -413,7 +413,7 @@ FReply
 FOdysseyViewportDrawingEditorController::OnUndoIliad()
 {
     GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
-    if (!mData->LayerStack())
+    if (mData->LayerStack())
     {
         mData->LayerStack()->mDrawingUndo->LoadData();
         mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
@@ -428,7 +428,7 @@ FReply
 FOdysseyViewportDrawingEditorController::OnRedoIliad()
 {
     GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
-    if (!mData->LayerStack())
+    if (mData->LayerStack())
     {
         mData->LayerStack()->mDrawingUndo->Redo();
         mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
@@ -441,7 +441,7 @@ FOdysseyViewportDrawingEditorController::OnRedoIliad()
 FReply
 FOdysseyViewportDrawingEditorController::OnClearUndo()
 {
-    if (!mData->LayerStack())
+    if (mData->LayerStack())
     {
         mData->LayerStack()->mDrawingUndo->Clear();
     }
@@ -582,7 +582,7 @@ FOdysseyViewportDrawingEditorController::CloseWindow()
 
         //TODO: Move in the right place
 
-        if (!mData->LayerStack())
+        if (mData->LayerStack())
         {
             mData->LayerStack()->mDrawingUndo->Clear();
         }
@@ -656,7 +656,7 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
 
         //TODO: Move in the right place
 
-        if (!mData->LayerStack())
+        if (mData->LayerStack())
         {
             mData->LayerStack()->mDrawingUndo->Clear();
         }

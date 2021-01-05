@@ -105,6 +105,8 @@ public:
 	int32 GetNumberOfPendingPaintChanges() const;
 
 	void OnStylusInputChanged(TSharedPtr<IStylusInputInterfaceInternal> iStylusInput);
+
+    bool IsCapturedByStylus() { return mIsCapturedByStylus; }
 	
 public:
 	/** Begin IMeshPainter overrides */
@@ -328,4 +330,6 @@ protected:
 	std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     FVector2D mBeginPosition;
+
+    TArray<FKey>                            mKeysPressed;
 };

@@ -35,7 +35,40 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
 
 bool FOdysseyViewportDrawingEditorEdMode::ProcessCapturedMouseMoves(FEditorViewportClient* InViewportClient,FViewport* InViewport,const TArrayView<FIntPoint>& CapturedMouseMoves)
 {
-    return true;
+    //If we draw by using the stylus, we ignore the mouse events here
+    FOdysseyViewportDrawingEditorPainter* painter = (FOdysseyViewportDrawingEditorPainter*)MeshPainter;
+    if(painter->IsCapturedByStylus())
+        return false;
+
+    // We only care about perspective viewpo1rts
+    bool bPaintApplied = false;
+    if(InViewportClient->IsPerspective())
+    {
+        if(MeshPainter->IsPainting() && CapturedMouseMoves.Num() > 0)
+        {
+            // Compute a world space ray from the screen space mouse coordinates
+            FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
+                InViewportClient->Viewport,
+                InViewportClient->GetScene(),
+                InViewportClient->EngineShowFlags)
+                .SetRealtimeUpdate(InViewportClient->IsRealtime()));
+            FSceneView* View = InViewportClient->CalcSceneView(&ViewFamily);
+
+            TArray<TPair<FVector,FVector>> Rays;
+            Rays.Reserve(CapturedMouseMoves.Num());
+
+            FEditorViewportClient* Client = (FEditorViewportClient*)InViewport->GetClient();
+            for(int32 i = 0; i < CapturedMouseMoves.Num(); ++i)
+            {
+                FViewportCursorLocation MouseViewportRay(View,Client,CapturedMouseMoves[i].X,CapturedMouseMoves[i].Y);
+                Rays.Emplace(TPair<FVector,FVector>(MouseViewportRay.GetOrigin(),MouseViewportRay.GetDirection()));
+            }
+
+            bPaintApplied = MeshPainter->Paint(InViewport,View->ViewMatrices.GetViewOrigin(),Rays);
+        }
+    }
+
+    return bPaintApplied;
 }
 
 

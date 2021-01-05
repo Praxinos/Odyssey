@@ -41,8 +41,6 @@
 #include "MeshPaintAdapterFactory.h"
 #include "IMeshPaintGeometryAdapter.h"
 
-#include "Widgets/SViewport.h"
-
 #include "PackageTools.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorPainter"
@@ -480,15 +478,16 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
 				// this new meaning is then propagated to mPreviousEvent in OnStylusStateChanged()
 				mLastEvent.x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
 				mLastEvent.y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
+                mLastEvent.keysDown = mKeysPressed;
 
 				if (IsPainting())
 				{
 					mController->GetData()->PaintEngine()->PushStroke(mLastEvent);
 				}
-				else
+				/*else
 				{
 					mController->GetData()->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
-				}
+				}*/
             }
 
 		}
@@ -1604,9 +1603,22 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 
 bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InViewportClient,FViewport* InViewport,FKey InKey,EInputEvent InEvent)
 {
-    InViewport->CaptureMouse( false );
     UE_LOG(LogTemp, Display, TEXT("INPUTKEY PAINTER"));
     UE_LOG(LogTemp,Display,TEXT("Viewport: %p, %p, %p, %p"), InViewport, InViewportClient->Viewport, InViewport->GetClient(), InViewportClient);
+
+    if(InEvent == EInputEvent::IE_Pressed)
+    {
+        mKeysPressed.Add(InKey);
+        UE_LOG(LogTemp, Display, TEXT("Added %s"), *(InKey.ToString()) );
+    } 
+    else if(InEvent == EInputEvent::IE_Released)
+    {
+        mKeysPressed.Remove(InKey);
+        UE_LOG(LogTemp,Display,TEXT("Removed %s"), *(InKey.ToString()));
+    }
+
+    if( mIsCapturedByStylus )
+        return true;
 
     mFocusedViewport = InViewport;
 
@@ -1622,7 +1634,7 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
     if(!bIsAltDown && InViewportClient->IsPerspective())
     {
         // Does the user want to paint right now?
-        const bool bUserWantsPaint = bIsLeftButtonDown && !bIsRightButtonDown && !bIsAltDown;
+        const bool bUserWantsPaint = bIsLeftButtonDown;
         bool bPaintApplied = false;
 
         // Stop current tracking if the user is no longer painting
@@ -1631,7 +1643,8 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
         {
             bHandled = true;
             FinishPainting();
-        } else if(!IsPainting() && bUserWantsPaint && !InViewportClient->IsMovingCamera())
+        } 
+        else if(!IsPainting() && bUserWantsPaint && !InViewportClient->IsMovingCamera())
         {
             bHandled = true;
 
@@ -1648,7 +1661,8 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
             // Paint!
             bPaintApplied = Paint(InViewport,View->ViewMatrices.GetViewOrigin(),MouseViewportRay.GetOrigin(),MouseViewportRay.GetDirection());
 
-        } else if(IsPainting() && bUserWantsPaint)
+        } 
+        else if(IsPainting() && bUserWantsPaint)
         {
             bHandled = true;
         }
@@ -1656,7 +1670,8 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
         if(!bPaintApplied && !IsPainting())
         {
             bHandled = false;
-        } else
+        } 
+        else
         {
             InViewportClient->bLockFlightCamera = true;
         }
@@ -1665,7 +1680,7 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
         // the editor viewport to start panning/dollying the camera
         {
             const bool bIsOtherMouseButtonEvent = (InKey == EKeys::MiddleMouseButton || InKey == EKeys::RightMouseButton);
-            const bool bCtrlButtonEvent = (InKey == EKeys::LeftControl || InKey == EKeys::RightControl);
+            const bool bCtrlButtonEvent = (InKey == EKeys::LeftControl || InKey == EKeys::RightControl || InKey == EKeys::LeftCommand || InKey == EKeys::RightCommand);
             const bool bShiftButtonEvent = (InKey == EKeys::LeftShift || InKey == EKeys::RightShift);
             const bool bAltButtonEvent = (InKey == EKeys::LeftAlt || InKey == EKeys::RightAlt);
             if(IsPainting() && (bIsOtherMouseButtonEvent || bShiftButtonEvent || bAltButtonEvent))
@@ -1676,7 +1691,8 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
             if(bCtrlButtonEvent && !IsPainting())
             {
                 bHandled = false;
-            } else if(bIsCtrlDown)
+            } 
+            else if(bIsCtrlDown)
             {
                 //default to assuming this is a paint command
                 bHandled = true;
@@ -1687,10 +1703,15 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
                     bHandled = false;
                 }
 
-                // If we are not painting, we will let the CTRL-Z and CTRL-Y key presses through to support undo/redo.
-                if(!IsPainting() && (InKey == EKeys::Z || InKey == EKeys::Y))
+                //We can't change those shortcuts, but for accessibility, we have ctrl Z and ctrl Y working for Undo/redo for Iliad strokes
+                if(!IsPainting() && (InKey == EKeys::Z && (InEvent == IE_Pressed)) )
                 {
-                    bHandled = false;
+                    mController->OnUndoIliad();
+                }
+
+                if(!IsPainting() && (InKey == EKeys::Y && (InEvent == IE_Pressed)) )
+                {
+                    mController->OnRedoIliad();
                 }
             }
         }
@@ -1858,9 +1879,9 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
                                       , 0 //iState.GetPitch()
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
-
-    //stroke_point.keysDown = mKeysPressed;
   //---
+
+    UE_LOG(LogTemp, Display, TEXT("Pressure: %lf"), iState.GetPressure());
 
     static bool stylusWasDown = false;
     static bool is_dragging = false;
@@ -1873,16 +1894,16 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
     
     if( isDownEvent )
     {
-        //InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
         mIsCapturedByStylus = true;
     }
     else if( isUpEvent )
     {
-        //InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+        FinishPainting();
         mIsCapturedByStylus = false;
     }
     else if( iState.IsStylusDown() && mFocusedViewport )
     {
+        mFocusedViewport->CaptureMouse( false );
         FEditorViewportClient* viewportClient = (FEditorViewportClient*)mFocusedViewport->GetClient();
         // Compute a world space ray from the screen space mouse coordinates
         FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
@@ -1900,18 +1921,12 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
         UE_LOG(LogTemp, Display, TEXT("%lf, %lf"), iState.GetPosition().X , iState.GetPosition().Y )
 
         Paint(mFocusedViewport,view->ViewMatrices.GetViewOrigin(),mouseViewportRay.GetOrigin(),mouseViewportRay.GetDirection());
+        mFocusedViewport->CaptureMouse(true);
         //CapturedMouseMoveWithStrokePoint( stroke_point );*/
     }
-    /*else
-    {
-		// Register the point in texture when hovering the canvas
-		mCurrentPointInTexture = GetLocalMousePosition(stroke_point);
-    }*/
 
-    /*
+    
     mStylusLastEventTime = std::chrono::steady_clock::now();
-    mLastKey = EKeys::Invalid;
-    mLastEvent = EInputEvent::IE_MAX;*/
 }
 
 template TArray<UStaticMeshComponent*> FOdysseyViewportDrawingEditorPainter::GetSelectedComponents<UStaticMeshComponent>() const;
