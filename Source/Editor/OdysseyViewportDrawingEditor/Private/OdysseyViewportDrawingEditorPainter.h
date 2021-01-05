@@ -117,6 +117,7 @@ public:
 	virtual void Reset() override;
 	virtual TSharedPtr<IMeshPaintGeometryAdapter> GetMeshAdapterForComponent(const UMeshComponent* iComponent) override;
 	virtual void Tick(FEditorViewportClient* iViewportClient, float iDeltaTime) override;
+    virtual bool InputKey(FEditorViewportClient* InViewportClient,FViewport* InViewport,FKey InKey,EInputEvent InEvent) override;
 	virtual const FHitResult GetHitResult(const FVector& iOrigin, const FVector& iDirection) override;
 	virtual void ActorSelected(AActor* iActor) override;
 	virtual void ActorDeselected(AActor* iActor) override;
@@ -317,6 +318,8 @@ protected:
 
 	/** UI command list object */
 	TSharedPtr<FUICommandList> mUICommandList;
+
+    FViewport* mFocusedViewport;
 
     FOdysseyStrokePoint mLastEvent;
 	FOdysseyStrokePoint mPreviousEvent;

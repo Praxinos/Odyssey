@@ -29,6 +29,17 @@ bool FOdysseyViewportDrawingEditorEdMode::InputKey(FEditorViewportClient* iViewp
 	return IMeshPaintEdMode::InputKey( iViewportClient, iViewport, iKey, iEvent);
 }
 
+void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
+{
+}
+
+bool FOdysseyViewportDrawingEditorEdMode::ProcessCapturedMouseMoves(FEditorViewportClient* InViewportClient,FViewport* InViewport,const TArrayView<FIntPoint>& CapturedMouseMoves)
+{
+    return true;
+}
+
+
+
 bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 {
 	return GetWorld() ? GetWorld()->FeatureLevel >= ERHIFeatureLevel::SM5 : false;

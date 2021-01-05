@@ -41,6 +41,8 @@
 #include "MeshPaintAdapterFactory.h"
 #include "IMeshPaintGeometryAdapter.h"
 
+#include "Widgets/SViewport.h"
+
 #include "PackageTools.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorPainter"
@@ -59,6 +61,7 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
 	mDoRestoreRenTargets(false),
 	mDoRefreshCachedData(true),
 	mUICommandList(MakeShareable(new FUICommandList())),
+    mFocusedViewport( nullptr ),
 	mIsCapturedByStylus(false),
 	mBeginPosition(0, 0)
 {
@@ -172,8 +175,6 @@ void FOdysseyViewportDrawingEditorPainter::Render(const FSceneView* iView, FView
 
 bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVector& iCameraOrigin, const FVector& iRayOrigin, const FVector& iRayDirection)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Paint 1"));
-
 	// Determine paint action according to whether or not shift is held down
 	const EMeshPaintAction paintAction = (iViewport->KeyState(EKeys::LeftShift) || iViewport->KeyState(EKeys::RightShift)) ? EMeshPaintAction::Erase : EMeshPaintAction::Paint;
 	
@@ -185,7 +186,6 @@ bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVe
 
 bool FOdysseyViewportDrawingEditorPainter::Paint(FViewport* iViewport, const FVector& iCameraOrigin, const TArrayView<TPair<FVector, FVector>>& iRays)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Paint 2"));
 	// Determine paint action according to whether or not shift is held down
 	const EMeshPaintAction paintAction = (iViewport->KeyState(EKeys::LeftShift) || iViewport->KeyState(EKeys::RightShift)) ? EMeshPaintAction::Erase : EMeshPaintAction::Paint;
 
@@ -373,6 +373,7 @@ void FOdysseyViewportDrawingEditorPainter::AddReferencedObjects(FReferenceCollec
 void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 {
     mBeginPosition = FVector2D(0,0);
+    mFocusedViewport = nullptr;
     mController->GetData()->PaintEngine()->EndStroke();
     
     //mPaintSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
@@ -841,6 +842,8 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureBased(const FHitResult& i
 
     if( mBeginPosition == FVector2D(0,0))
         mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->Source.GetSizeX(), mLastEvent.y / mPaintingTexture2D->Source.GetSizeY());
+
+    UE_LOG(LogTemp, Display, TEXT("PaintTextureBased"));
 
     const auto featureLevel = GEditor->GetEditorWorldContext().World()->FeatureLevel;
 
@@ -1599,6 +1602,103 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
     }
 }
 
+bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InViewportClient,FViewport* InViewport,FKey InKey,EInputEvent InEvent)
+{
+    InViewport->CaptureMouse( false );
+    UE_LOG(LogTemp, Display, TEXT("INPUTKEY PAINTER"));
+    UE_LOG(LogTemp,Display,TEXT("Viewport: %p, %p, %p, %p"), InViewport, InViewportClient->Viewport, InViewport->GetClient(), InViewportClient);
+
+    mFocusedViewport = InViewport;
+
+    bool bHandled = false;
+
+    const bool bIsLeftButtonDown = (InKey == EKeys::LeftMouseButton && InEvent != IE_Released) || InViewport->KeyState(EKeys::LeftMouseButton);
+    const bool bIsRightButtonDown = (InKey == EKeys::RightMouseButton && InEvent != IE_Released) || InViewport->KeyState(EKeys::RightMouseButton);
+    const bool bIsCtrlDown = ((InKey == EKeys::LeftControl || InKey == EKeys::RightControl) && InEvent != IE_Released) || InViewport->KeyState(EKeys::LeftControl) || InViewport->KeyState(EKeys::RightControl);
+    const bool bIsShiftDown = ((InKey == EKeys::LeftShift || InKey == EKeys::RightShift) && InEvent != IE_Released) || InViewport->KeyState(EKeys::LeftShift) || InViewport->KeyState(EKeys::RightShift);
+    const bool bIsAltDown = ((InKey == EKeys::LeftAlt || InKey == EKeys::RightAlt) && InEvent != IE_Released) || InViewport->KeyState(EKeys::LeftAlt) || InViewport->KeyState(EKeys::RightAlt);
+
+    // When painting we only care about perspective viewports
+    if(!bIsAltDown && InViewportClient->IsPerspective())
+    {
+        // Does the user want to paint right now?
+        const bool bUserWantsPaint = bIsLeftButtonDown && !bIsRightButtonDown && !bIsAltDown;
+        bool bPaintApplied = false;
+
+        // Stop current tracking if the user is no longer painting
+        if( IsPainting() && !bUserWantsPaint &&
+            (InKey == EKeys::LeftMouseButton || InKey == EKeys::RightMouseButton || InKey == EKeys::LeftAlt || InKey == EKeys::RightAlt))
+        {
+            bHandled = true;
+            FinishPainting();
+        } else if(!IsPainting() && bUserWantsPaint && !InViewportClient->IsMovingCamera())
+        {
+            bHandled = true;
+
+            // Compute a world space ray from the screen space mouse coordinates
+            FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
+                InViewportClient->Viewport,
+                InViewportClient->GetScene(),
+                InViewportClient->EngineShowFlags)
+                .SetRealtimeUpdate(InViewportClient->IsRealtime()));
+
+            FSceneView* View = InViewportClient->CalcSceneView(&ViewFamily);
+            const FViewportCursorLocation MouseViewportRay(View,(FEditorViewportClient*)InViewport->GetClient(),InViewport->GetMouseX(),InViewport->GetMouseY());
+
+            // Paint!
+            bPaintApplied = Paint(InViewport,View->ViewMatrices.GetViewOrigin(),MouseViewportRay.GetOrigin(),MouseViewportRay.GetDirection());
+
+        } else if(IsPainting() && bUserWantsPaint)
+        {
+            bHandled = true;
+        }
+
+        if(!bPaintApplied && !IsPainting())
+        {
+            bHandled = false;
+        } else
+        {
+            InViewportClient->bLockFlightCamera = true;
+        }
+
+        // Also absorb other mouse buttons, and Ctrl/Alt/Shift events that occur while we're painting as these would cause
+        // the editor viewport to start panning/dollying the camera
+        {
+            const bool bIsOtherMouseButtonEvent = (InKey == EKeys::MiddleMouseButton || InKey == EKeys::RightMouseButton);
+            const bool bCtrlButtonEvent = (InKey == EKeys::LeftControl || InKey == EKeys::RightControl);
+            const bool bShiftButtonEvent = (InKey == EKeys::LeftShift || InKey == EKeys::RightShift);
+            const bool bAltButtonEvent = (InKey == EKeys::LeftAlt || InKey == EKeys::RightAlt);
+            if(IsPainting() && (bIsOtherMouseButtonEvent || bShiftButtonEvent || bAltButtonEvent))
+            {
+                bHandled = true;
+            }
+
+            if(bCtrlButtonEvent && !IsPainting())
+            {
+                bHandled = false;
+            } else if(bIsCtrlDown)
+            {
+                //default to assuming this is a paint command
+                bHandled = true;
+
+                // Allow Ctrl+B to pass through so we can support the finding of a selected static mesh in the content browser.
+                if(!(bShiftButtonEvent || bAltButtonEvent || bIsOtherMouseButtonEvent) && ((InKey == EKeys::B) && (InEvent == IE_Pressed)))
+                {
+                    bHandled = false;
+                }
+
+                // If we are not painting, we will let the CTRL-Z and CTRL-Y key presses through to support undo/redo.
+                if(!IsPainting() && (InKey == EKeys::Z || InKey == EKeys::Y))
+                {
+                    bHandled = false;
+                }
+            }
+        }
+    }
+
+    return bHandled;
+}
+
 
 FInstanceTexturePaintSettings& FOdysseyViewportDrawingEditorPainter::AddOrRetrieveInstanceTexturePaintSettings(UMeshComponent* iComponent)
 {
@@ -1734,12 +1834,24 @@ TArray<ComponentClass*> FOdysseyViewportDrawingEditorPainter::GetSelectedCompone
 void
 FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {    
-	mPreviousEvent = mLastEvent;
+    //If we don't have a surface, then we don't interact with anything
+    if (!mPaintingTexture2D)
+        return;
 
-    mLastEvent = FOdysseyStrokePoint ( 0
+    if(!iWidget.IsValid() )
+        return;
+
+    mPreviousEvent = mLastEvent;
+
+    UE_LOG(LogTemp, Display, TEXT("OnStylusStateChanged"));
+
+    //---
+	
+    mLastEvent = FOdysseyStrokePoint(   0
                                       , 0
                                       , iState.GetZ()
                                       , iState.GetPressure()
+                                      , iState.GetTimer()
                                       , iState.GetAltitude()
                                       , iState.GetAzimuth()
                                       , iState.GetTwist()
@@ -1747,9 +1859,59 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
 
-	mStylusLastEventTime = std::chrono::steady_clock::now();
+    //stroke_point.keysDown = mKeysPressed;
+  //---
 
-    //TODO Add queue here to handle all events when PaintInternal() is called
+    static bool stylusWasDown = false;
+    static bool is_dragging = false;
+
+    bool isDownEvent = !stylusWasDown && iState.IsStylusDown();
+    bool isUpEvent = stylusWasDown && !iState.IsStylusDown();
+    bool isMoveEvent = stylusWasDown == iState.IsStylusDown();
+
+    stylusWasDown = iState.IsStylusDown();
+    
+    if( isDownEvent )
+    {
+        //InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Pressed );
+        mIsCapturedByStylus = true;
+    }
+    else if( isUpEvent )
+    {
+        //InputKeyWithStrokePoint( stroke_point, 0, EKeys::LeftMouseButton, EInputEvent::IE_Released );
+        mIsCapturedByStylus = false;
+    }
+    else if( iState.IsStylusDown() && mFocusedViewport )
+    {
+        FEditorViewportClient* viewportClient = (FEditorViewportClient*)mFocusedViewport->GetClient();
+        // Compute a world space ray from the screen space mouse coordinates
+        FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
+            mFocusedViewport,
+            viewportClient->GetScene(),
+            viewportClient->EngineShowFlags)
+            .SetRealtimeUpdate(viewportClient->IsRealtime()));
+
+        FSceneView* view = viewportClient->CalcSceneView(&viewFamily);
+
+        float scaleDPI = iWidget.Pin().Get()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+        FVector2D positionInViewport = iWidget.Pin().Get()->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
+
+        const FViewportCursorLocation mouseViewportRay(view,viewportClient, positionInViewport.X , positionInViewport.Y);
+        UE_LOG(LogTemp, Display, TEXT("%lf, %lf"), iState.GetPosition().X , iState.GetPosition().Y )
+
+        Paint(mFocusedViewport,view->ViewMatrices.GetViewOrigin(),mouseViewportRay.GetOrigin(),mouseViewportRay.GetDirection());
+        //CapturedMouseMoveWithStrokePoint( stroke_point );*/
+    }
+    /*else
+    {
+		// Register the point in texture when hovering the canvas
+		mCurrentPointInTexture = GetLocalMousePosition(stroke_point);
+    }*/
+
+    /*
+    mStylusLastEventTime = std::chrono::steady_clock::now();
+    mLastKey = EKeys::Invalid;
+    mLastEvent = EInputEvent::IE_MAX;*/
 }
 
 template TArray<UStaticMeshComponent*> FOdysseyViewportDrawingEditorPainter::GetSelectedComponents<UStaticMeshComponent>() const;
