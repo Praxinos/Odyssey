@@ -566,6 +566,7 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 	if (mGUI->GetTimelineTab()->IsScrubbing())
 	{
 		mData->PreviewSurface()->Texture(texture);
+        mGUI->GetTextureDetailsTab()->SetTexture(texture);
 		mGUI->GetViewportTab()->SetSurface(mData->PreviewSurface());
 		return;
 	}
@@ -605,6 +606,9 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 
 		//Set display Surface
 		mGUI->GetViewportTab()->SetSurface(mData->DisplaySurface());
+        
+        //Set the new texture in the texture details panel
+        mGUI->GetTextureDetailsTab()->SetTexture(texture);
 	}
 }
 

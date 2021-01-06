@@ -39,11 +39,14 @@ public:
 	void PrepareTextureProperties();
 	void ApplyPropertiesBackup();
 
+    void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
+
 private:
     UTexture2D*                 mTexture;
     FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
 	FOdysseySurfaceEditable*    mDisplaySurface;
 
     FTexturePropertiesBackup    mPropertiesBackup;
+	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
 };
 

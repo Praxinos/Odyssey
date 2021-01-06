@@ -15,6 +15,7 @@
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
+#include "SOdysseyTextureDetails.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyFlipbookEditorGUI.generated.h"
@@ -60,6 +61,7 @@ public:
 public:
     // Getters
     TSharedPtr<SOdysseyLayerStackView>& GetLayerStackTab();
+	TSharedPtr<SOdysseyTextureDetails>& GetTextureDetailsTab();
 	TSharedPtr<SOdysseyFlipbookTimelineView>& GetTimelineTab();
 
 public:
@@ -77,6 +79,7 @@ private:
     // Internal widget creation
     void CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
     void CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+	void CreateTextureDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
     void CreateDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 private:
@@ -88,18 +91,23 @@ private:
 	// Callback for spawning the Timeline tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iArgs);
 
+	// Callback for spawning the TextureDetails tab.
+	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
+
 	// Callback for spawning the Details tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnDetails(const FSpawnTabArgs& iArgs);
 
 private:
     //Tabs
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
+	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
 	TSharedPtr<SOdysseyFlipbookTimelineView>    mTimelineTab;
 	TSharedPtr<SOdysseyFlipbookPropertiesTabBody>    mDetailsTab;
 
 private:
     /** Tabs IDs */
     static const FName smLayerStackTabId;
+	static const FName smTextureDetailsTabId;
 	static const FName smTimelineTabId;
 	static const FName smDetailsTabId;
 };

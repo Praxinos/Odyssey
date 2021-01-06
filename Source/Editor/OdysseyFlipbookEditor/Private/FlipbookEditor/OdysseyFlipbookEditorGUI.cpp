@@ -16,6 +16,7 @@
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
 /*static*/const FName FOdysseyFlipbookEditorGUI::smLayerStackTabId( TEXT( "OdysseyFlipbookEditor_LayerStack" ) );
+/*static*/const FName FOdysseyFlipbookEditorGUI::smTextureDetailsTabId( TEXT( "OdysseyFlipbookEditor_TextureDetails" ) );
 /*static*/const FName FOdysseyFlipbookEditorGUI::smTimelineTabId( TEXT( "OdysseyFlipbookEditor_Timeline" ) );
 /*static*/const FName FOdysseyFlipbookEditorGUI::smDetailsTabId( TEXT( "OdysseyFlipbookEditor_Details" ) );
 
@@ -95,6 +96,7 @@ FOdysseyFlipbookEditorGUI::Init(TSharedPtr<FOdysseyFlipbookEditorData>& iData, T
 	PerformanceOptions(performanceOptions);
 
 	CreateLayerStackTab(iData, iController);
+	CreateTextureDetailsTab(iData, iController);
 	CreateTimelineTab(iData, iController);
 	CreateDetailsTab(iData, iController);
 
@@ -140,7 +142,19 @@ FOdysseyFlipbookEditorGUI::CreateRightSection()
 			// Layer Stack
 			->AddTab(smLayerStackTabId, ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.6f)
+			->SetSizeCoefficient(0.2f)
+		)
+		->Split
+		(
+			FTabManager::NewStack()
+			// Undo History
+			//->AddTab( UndoHistoryTabId, ETabState::ClosedTab )
+			//->SetHideTabWell( false )
+			//->SetSizeCoefficient( 0.6f )
+			// Layer Stack
+			->AddTab(smTextureDetailsTabId, ETabState::OpenedTab)
+			->SetHideTabWell(false)
+			->SetSizeCoefficient(0.4f)
 		);
 }
 
@@ -160,6 +174,11 @@ FOdysseyFlipbookEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabMana
         .SetDisplayName( LOCTEXT( "LayerStackTab", "LayerStack" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
         .SetIcon( FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" ) );
+	// Texture Details
+    iTabManager->RegisterTabSpawner( smTextureDetailsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTextureDetails ) )
+        .SetDisplayName( LOCTEXT( "TextureDetailsTab", "TextureDetails" ) )
+        .SetGroup(iWorkspaceMenuCategoryRef)
+        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ) );
     // Timeline
     iTabManager->RegisterTabSpawner( smTimelineTabId, FOnSpawnTab::CreateSP( this, &FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline ) )
         .SetDisplayName( LOCTEXT( "TimelineTab", "Timeline" ) )
@@ -176,6 +195,7 @@ void
 FOdysseyFlipbookEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager )
 {
     iTabManager->UnregisterTabSpawner( smLayerStackTabId );
+    iTabManager->UnregisterTabSpawner( smTextureDetailsTabId );
     iTabManager->UnregisterTabSpawner( smTimelineTabId );
     // iTabManager->UnregisterTabSpawner( smDetailsTabId );
 }
@@ -188,6 +208,13 @@ FOdysseyFlipbookEditorGUI::CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditor
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
         .LayerStackData_Raw( iData.Get(), &FOdysseyFlipbookEditorData::LayerStack );
+}
+
+void
+FOdysseyFlipbookEditorGUI::CreateTextureDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
+{
+    mTextureDetailsTab = SNew( SOdysseyTextureDetails )
+        .Texture( iData->Texture() );
 }
 
 void
@@ -220,6 +247,13 @@ FOdysseyFlipbookEditorGUI::GetLayerStackTab()
 	return mLayerStackTab;
 }
 
+
+TSharedPtr<SOdysseyTextureDetails>&
+FOdysseyFlipbookEditorGUI::GetTextureDetailsTab()
+{
+	return mTextureDetailsTab;
+}
+
 TSharedPtr<SOdysseyFlipbookTimelineView>&
 FOdysseyFlipbookEditorGUI::GetTimelineTab()
 {
@@ -238,6 +272,19 @@ FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& 
         .Label( LOCTEXT( "LayerStackTitle", "LayerStack" ) )
         [
             mLayerStackTab.ToSharedRef()
+        ];
+
+}
+
+TSharedRef<SDockTab>
+FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs)
+{
+    check( iArgs.GetTabId() == smTextureDetailsTabId );
+
+    return SNew( SDockTab )
+        .Label( LOCTEXT( "TextureDetailsTitle", "TextureDetails" ) )
+        [
+            mTextureDetailsTab.ToSharedRef()
         ];
 
 }

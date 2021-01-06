@@ -68,6 +68,8 @@ public:
     
     void PrepareTextureProperties();
 
+    void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
+
 private:
     TSharedPtr<FOdysseyFlipbookWrapper>             mFlipbookWrapper;
     UTexture2D*                 mTexture;
@@ -84,5 +86,6 @@ private:
     FTexturePropertiesBackup    mPropertiesBackup;
 
     TWeakPtr<FOdysseyFlipbookEditorToolkit> mToolkit;
+	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
 };
 

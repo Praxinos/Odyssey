@@ -235,9 +235,10 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
     UTexture2D* texture = NewObject<UTexture2D>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
 
     //Set texture format
-    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D; //Needed so that UE doesn't add some filter on it
+
     // Init Texture and its layerstack with iBlock
     InitTextureWithBlockData(blockPtr, texture, iFormat);
+
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
     userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), iFormat);
 
@@ -249,7 +250,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
     texture->AddAssetUserData( userData );
 
     //Init is done
-    texture->PostEditChange();
+    texture->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
 	texture->UpdateResource();
 
 	FAssetRegistryModule::AssetCreated(texture);
@@ -284,8 +285,6 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 
     // Init Texture
     InitTextureWithBlockData(blockPtr, texture, iFormat);
-    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-	texture->UpdateResource();
 
     //Create Layer Stack
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
@@ -301,7 +300,8 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
     texture->AddAssetUserData( userData );
 
     //Init is done
-    texture->PostEditChange();
+    texture->PostEditChange(); //This make sure that every properties are compatible with each other and with the size of our texture
+	texture->UpdateResource(); 
 
 	FAssetRegistryModule::AssetCreated(texture);
 	UPackage::SavePackage(package, texture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *AssetName);

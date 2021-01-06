@@ -14,6 +14,7 @@
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
+#include "SOdysseyTextureDetails.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyTextureEditorGUI.generated.h"
@@ -58,6 +59,7 @@ public:
 public:
     // Getters
     TSharedPtr<SOdysseyLayerStackView>& GetLayerStackTab();
+	TSharedPtr<SOdysseyTextureDetails>& GetTextureDetailsTab();
 
 public:
 	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef) override;
@@ -73,18 +75,24 @@ protected:
 private:
     // Internal widget creation
     void CreateLayerStackTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void CreateTextureDetailsTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 private:
 	// Spawner callbacks
 	// Callback for spawning the LayerStack tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 
+	// Callback for spawning the TextureDetails tab.
+	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
+
 private:
     //Tabs
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
+	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
 
 private:
     /** Tabs IDs */
     static const FName smLayerStackTabId;
+	static const FName smTextureDetailsTabId;
 };
 

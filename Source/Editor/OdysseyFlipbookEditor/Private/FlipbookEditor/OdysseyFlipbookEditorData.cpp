@@ -18,6 +18,8 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 {
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
+
     if( mDisplaySurface ) {
         delete mDisplaySurface;
         mDisplaySurface = NULL;
@@ -37,6 +39,7 @@ FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbo
 	, mPreviewSurface(new FOdysseySurfaceReadOnly(NULL))
     , mToolkit( iToolkit )
 {
+    mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -196,4 +199,14 @@ FOdysseySurfaceReadOnly*
 FOdysseyFlipbookEditorData::PreviewSurface()
 {
 	return mPreviewSurface;
+}
+
+void
+FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain)
+{
+	if (mTexture == Cast<UTexture2D>(iObject))
+    {
+        //Texture properties will change, we need to SyncTextureWithBlock
+        CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
+    }
 }

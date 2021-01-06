@@ -13,6 +13,8 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditorData::~FOdysseyTextureEditorData()
 {
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
+
     if( mDisplaySurface )
     {
         delete mDisplaySurface;
@@ -22,6 +24,7 @@ FOdysseyTextureEditorData::~FOdysseyTextureEditorData()
 FOdysseyTextureEditorData::FOdysseyTextureEditorData(UTexture2D* iTexture)
     : mTexture( iTexture )
 {
+    mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyTextureEditorData::OnPreGlobalObjectPropertyChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -68,7 +71,7 @@ void
 FOdysseyTextureEditorData::SyncTextureAndInvalidate()
 {
     CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    InvalidateTextureFromData( mDisplaySurface->Block(), mTexture );
+    mTexture->UpdateResource();
 }
 
 void
@@ -116,4 +119,14 @@ FOdysseySurfaceEditable*
 FOdysseyTextureEditorData::DisplaySurface()
 {
 	return mDisplaySurface;
+}
+
+void
+FOdysseyTextureEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain)
+{
+	if (mTexture == Cast<UTexture2D>(iObject))
+    {
+        //Texture properties will change, we need to SyncTextureWithBlock
+        CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
+    }
 }

@@ -45,6 +45,8 @@ namespace UnrealBuildTool.Rules
                     "Slate",
                     "SlateCore",
                     "UnrealEd",
+					"TextureEditor", //To use TextureEditorSettings in SOdysseyTextureDetails //we could also copy TextureEditorSettings content
+					"RHI" //To have access to GPixelFormats
                     //"AppFramework", // For SColorPicker inside OdysseyTextureFactory.cpp
 					// "Core",
 					// "MainFrame",
