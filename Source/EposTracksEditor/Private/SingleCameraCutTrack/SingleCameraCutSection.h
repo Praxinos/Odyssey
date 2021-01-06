@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Layout/Margin.h"
 
-#include "SingleCameraCutTrack/KeyThumbnailSection.h"
+#include "KeyThumbnail/KeyThumbnailSection.h"
 
 class AActor;
 class FMenuBuilder;

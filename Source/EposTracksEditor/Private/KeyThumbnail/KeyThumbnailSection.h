@@ -7,7 +7,7 @@
 #include "Layout/Margin.h"
 #include "Sections/ThumbnailSection.h"
 
-#include "SingleCameraCutTrack/TrackEditorKeyThumbnail.h"
+#include "KeyThumbnail/TrackEditorKeyThumbnail.h"
 
 class AActor;
 class FMenuBuilder;

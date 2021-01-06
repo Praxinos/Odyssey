@@ -9,7 +9,7 @@
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 
-#include "SingleCameraCutTrack/KeyThumbnailSection.h"
+#include "KeyThumbnail/KeyThumbnailSection.h"
 
 class FCinematicBoardTrackEditor;
 class FMenuBuilder;
