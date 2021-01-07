@@ -117,6 +117,7 @@ protected:
     void DeallocInvalidTileMap( InvalidTileMap& ioMap );
     void ReallocInvalidTileMap( InvalidTileMap& ioMap );
     void ClearInvalidTileMap( InvalidTileMap ioMap );
+    void CopyInvalidTileMap(InvalidTileMap iSrcMap, InvalidTileMap ioDstMap);
 
     ::ul3::FRect MakeTileRect( int iTileX, int iTileY );
     void SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue );

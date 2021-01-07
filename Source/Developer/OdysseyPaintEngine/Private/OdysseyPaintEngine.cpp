@@ -225,6 +225,7 @@ FOdysseyPaintEngine::SmoothingEndStroke()
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
 
         ClearInvalidTileMap( mTmpInvalidTileMap );
+        CopyInvalidTileMap(mStrokeInvalidTileMap, mTmpInvalidTileMap);
         ClearInvalidTileMap( mStrokeInvalidTileMap );
 
         mInterpolator->Reset();
@@ -1206,6 +1207,18 @@ FOdysseyPaintEngine::ClearInvalidTileMap( InvalidTileMap ioMap )
         for( int l = 0; l < mCountTileX; ++l )
         {
             ioMap[k][l] = false;
+        }
+    }
+}
+
+void
+FOdysseyPaintEngine::CopyInvalidTileMap( InvalidTileMap iSrcMap, InvalidTileMap ioDstMap )
+{
+    for( int k = 0; k < mCountTileY; ++k )
+    {
+        for( int l = 0; l < mCountTileX; ++l )
+        {
+            ioDstMap[k][l] = iSrcMap[k][l];
         }
     }
 }
