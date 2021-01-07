@@ -40,6 +40,8 @@ bool FOdysseyViewportDrawingEditorEdMode::ProcessCapturedMouseMoves(FEditorViewp
     if(painter->IsCapturedByStylus())
         return false;
 
+    UE_LOG(LogTemp, Display, TEXT("CaptureMouseMove"))
+
     // We only care about perspective viewpo1rts
     bool bPaintApplied = false;
     if(InViewportClient->IsPerspective())

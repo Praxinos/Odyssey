@@ -60,6 +60,7 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
 	mDoRefreshCachedData(true),
 	mUICommandList(MakeShareable(new FUICommandList())),
     mFocusedViewport( nullptr ),
+    mIsGoingToDraw( false ),
 	mIsCapturedByStylus(false),
 	mBeginPosition(0, 0)
 {
@@ -373,6 +374,7 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
     mBeginPosition = FVector2D(0,0);
     mFocusedViewport = nullptr;
     mController->GetData()->PaintEngine()->EndStroke();
+    mIsGoingToDraw = false;
     
     //mPaintSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
 
@@ -463,31 +465,38 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
             
             FVector2D coord;
 
-            if( UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord ) )
+            if( mIsGoingToDraw )
             {
-				auto end_time = std::chrono::steady_clock::now();
-				auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - mStylusLastEventTime).count();
+                if( UGameplayStatics::FindCollisionUV( bestTraceResult, 0, coord ) )
+                {
+				    auto end_time = std::chrono::steady_clock::now();
+				    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - mStylusLastEventTime).count();
 
-				if (!mIsCapturedByStylus && delta >= 500)
-				{
-					//force mouse values
-					mLastEvent = FOdysseyStrokePoint::DefaultPoint();
-				}
+				    if (!mIsCapturedByStylus && delta >= 500)
+				    {
+					    //force mouse values
+					    mLastEvent = FOdysseyStrokePoint::DefaultPoint();
+				    }
 
-				//WARNING: Be aware that we change the meaning of mLastEvent x and y here, as they were the stylus event x and y, now they are the x and y position in the texture
-				// this new meaning is then propagated to mPreviousEvent in OnStylusStateChanged()
-				mLastEvent.x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
-				mLastEvent.y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
-                mLastEvent.keysDown = mKeysPressed;
+				    //WARNING: Be aware that we change the meaning of mLastEvent x and y here, as they were the stylus event x and y, now they are the x and y position in the texture
+				    // this new meaning is then propagated to mPreviousEvent in OnStylusStateChanged()
+				    mLastEvent.x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
+				    mLastEvent.y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
+                    mLastEvent.keysDown = mKeysPressed;
 
-				if (IsPainting())
-				{
-					mController->GetData()->PaintEngine()->PushStroke(mLastEvent);
-				}
-				/*else
-				{
-					mController->GetData()->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
-				}*/
+				    if (IsPainting())
+				    {
+					    mController->GetData()->PaintEngine()->PushStroke(mLastEvent);
+				    }
+				    else
+				    {
+					    mController->GetData()->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
+				    }
+                }
+            }
+            else
+            {
+                mIsGoingToDraw = true;
             }
 
 		}
@@ -1867,7 +1876,6 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
     UE_LOG(LogTemp, Display, TEXT("OnStylusStateChanged"));
 
     //---
-	
     mLastEvent = FOdysseyStrokePoint(   0
                                       , 0
                                       , iState.GetZ()

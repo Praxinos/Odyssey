@@ -326,6 +326,7 @@ protected:
     FOdysseyStrokePoint mLastEvent;
 	FOdysseyStrokePoint mPreviousEvent;
 
+    bool mIsGoingToDraw;
 	bool mIsCapturedByStylus;
 	std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
