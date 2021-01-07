@@ -12,6 +12,10 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyViewportDrawingEditorData::~FOdysseyViewportDrawingEditorData()
 {
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
+    UPackage::PreSavePackageEvent.Remove(mOnPackagePreSaveHandle);
+    UPackage::PackageSavedEvent.Remove(mOnPackageSavedHandle);
+
     if(mBrushInstance)
     {
         mBrushInstance->RemoveFromRoot();
@@ -35,6 +39,10 @@ FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
     , mBrushInstance(NULL)
     , mPaintColor(::ul3::FPixelValue::FromRGBA8(0,0,0))
 {
+    mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPreGlobalObjectPropertyChanged);
+
+    /* FDelegateHandle */ mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPackagePreSave);
+    /* FDelegateHandle */ mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPackageSaved);
 }
 
 //--------------------------------------------------------------------------------------
@@ -196,4 +204,41 @@ FOdysseyViewportDrawingEditorData::ApplyPropertiesBackup()
     mTexture->SetLayerFormatSettings(0, textureFormatSettings);
     
     mTexture->UpdateResource();
+}
+
+void
+FOdysseyViewportDrawingEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject,const FEditPropertyChain& iEditPropertyChain)
+{
+    if(mTexture == Cast<UTexture2D>(iObject))
+    {
+        //Texture properties will change, we need to SyncTextureWithBlock
+        CopyBlockDataIntoUTexture(mDisplaySurface->Block(),mTexture);
+    }
+}
+
+void
+FOdysseyViewportDrawingEditorData::OnPackagePreSave(UPackage* iPackage)
+{
+    if(!mTexture)
+        return;
+
+    UPackage* package = CastChecked<UPackage>(mTexture->GetOuter());
+    if(package != iPackage)
+        return;
+
+    PaintEngine()->Flush();
+    SyncTextureAndInvalidate();
+    ApplyPropertiesBackup();
+}
+
+void
+FOdysseyViewportDrawingEditorData::OnPackageSaved(const FString& iPackageFilename,UObject* iOuter)
+{
+    if(!mTexture)
+        return;
+
+    if(mTexture->GetOuter() != iOuter)
+        return;
+
+    PrepareTextureProperties();
 }

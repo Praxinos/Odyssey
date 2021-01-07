@@ -48,6 +48,10 @@ public:
     void PrepareTextureProperties();
     void ApplyPropertiesBackup();
 
+    void OnPreGlobalObjectPropertyChanged(UObject* iObject,const FEditPropertyChain& iEditPropertyChain);
+    void OnPackagePreSave(UPackage* iPackage);
+    void OnPackageSaved(const FString& iPackageFilename,UObject* iOuter);
+
 private:
     UTexture2D*                   mTexture;
     FOdysseyLayerStack*           mLayerStack;
@@ -57,4 +61,8 @@ private:
     UOdysseyBrushAssetBase*       mBrushInstance;
     ::ul3::FPixelValue			  mPaintColor;
     FTexturePropertiesBackup      mPropertiesBackup;
+
+    FDelegateHandle mOnPrePropertyChangedDelegateHandle;
+    FDelegateHandle mOnPackagePreSaveHandle;
+    FDelegateHandle mOnPackageSavedHandle;
 };
