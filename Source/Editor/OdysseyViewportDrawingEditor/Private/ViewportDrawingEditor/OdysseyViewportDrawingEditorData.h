@@ -13,7 +13,6 @@ class FOdysseySurfaceEditable;
 
 struct FTexturePropertiesBackup
 {
-    TextureMipGenSettings       mTextureMipGenBackup;
     uint8 mTextureCompressionNone;
 };
 

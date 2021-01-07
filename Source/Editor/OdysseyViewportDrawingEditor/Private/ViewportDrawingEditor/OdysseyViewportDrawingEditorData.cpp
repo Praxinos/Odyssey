@@ -180,14 +180,14 @@ FOdysseyViewportDrawingEditorData::PrepareTextureProperties()
     mTexture->GetLayerFormatSettings(0,textureFormatSettings);
 
     // Create new Texture Properties Backup
-    mPropertiesBackup = { mTexture->MipGenSettings, textureFormatSettings.CompressionNone };
+    mPropertiesBackup = { textureFormatSettings.CompressionNone };
 
     // Overwrite Texture properties
-    mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps; //Mandatory or can lead to display not refreshing because it displays a mipmap instead of the texture itself (I guess)
     textureFormatSettings.CompressionNone = 1;
 
     mTexture->SetLayerFormatSettings(0,textureFormatSettings);
     mTexture->UpdateResource();
+    mTexture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
 }
 
 void
@@ -195,8 +195,6 @@ FOdysseyViewportDrawingEditorData::ApplyPropertiesBackup()
 {
     if (!mTexture)
         return;
-
-    mTexture->MipGenSettings = mPropertiesBackup.mTextureMipGenBackup;
 
     FTextureFormatSettings textureFormatSettings;
     mTexture->GetLayerFormatSettings(0,textureFormatSettings);
