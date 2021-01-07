@@ -19,6 +19,8 @@
 FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 {
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
+    UPackage::PreSavePackageEvent.Remove(mOnPackagePreSaveHandle);
+    UPackage::PackageSavedEvent.Remove(mOnPackageSavedHandle);
 
     if( mDisplaySurface ) {
         delete mDisplaySurface;
@@ -40,6 +42,8 @@ FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbo
     , mToolkit( iToolkit )
 {
     mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged);
+    /* FDelegateHandle */ mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this, &FOdysseyFlipbookEditorData::OnPackagePreSave);
+	/* FDelegateHandle */ mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this, &FOdysseyFlipbookEditorData::OnPackageSaved);
 }
 
 //--------------------------------------------------------------------------------------
@@ -131,7 +135,7 @@ FOdysseyFlipbookEditorData::SyncTextureWithSurfaceBlock()
 {
     if (mTexture) {
         CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture);
-        InvalidateTextureFromData( mDisplaySurface->Block(), mTexture);
+        mTexture->UpdateResource();
     }
 }
 
@@ -209,4 +213,31 @@ FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject, c
         //Texture properties will change, we need to SyncTextureWithBlock
         CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
     }
+}
+
+void
+FOdysseyFlipbookEditorData::OnPackagePreSave(UPackage* iPackage)
+{
+    if (!mTexture)
+        return;
+
+    UPackage* package = CastChecked<UPackage>(mTexture->GetOuter());
+    if (package != iPackage)
+        return;
+
+    PaintEngine()->Flush();
+    SyncTextureWithSurfaceBlock();
+	ApplyPropertiesBackup();
+}
+
+void
+FOdysseyFlipbookEditorData::OnPackageSaved(const FString& iPackageFilename, UObject* iOuter)
+{
+    if (!mTexture)
+        return;
+
+    if (mTexture->GetOuter() != iOuter)
+        return;
+
+    PrepareTextureProperties();
 }

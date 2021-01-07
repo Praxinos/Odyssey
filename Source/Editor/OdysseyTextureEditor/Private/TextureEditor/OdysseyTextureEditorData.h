@@ -40,6 +40,8 @@ public:
 	void ApplyPropertiesBackup();
 
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
+    void OnPackagePreSave(UPackage* iPackage);
+    void OnPackageSaved(const FString& iPackageFilename, UObject* iOuter);
 
 private:
     UTexture2D*                 mTexture;
@@ -48,5 +50,7 @@ private:
 
     FTexturePropertiesBackup    mPropertiesBackup;
 	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
+    FDelegateHandle mOnPackagePreSaveHandle;
+    FDelegateHandle mOnPackageSavedHandle;
 };
 

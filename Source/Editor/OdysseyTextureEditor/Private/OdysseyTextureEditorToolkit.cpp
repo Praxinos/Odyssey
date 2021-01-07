@@ -46,21 +46,21 @@ FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TShared
 void
 FOdysseyTextureEditorToolkit::SaveAsset_Execute()
 {
-	mData->PaintEngine()->Flush();
+	/* mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
-	mData->ApplyPropertiesBackup();
+	mData->ApplyPropertiesBackup(); */
 
     FAssetEditorToolkit::SaveAsset_Execute();
 	
-	mData->PrepareTextureProperties();
+	// mData->PrepareTextureProperties();
 }
 
 void
 FOdysseyTextureEditorToolkit::SaveAssetAs_Execute()
 {
-	mData->PaintEngine()->Flush();
+	/* mData->PaintEngine()->Flush();
 	mData->SyncTextureAndInvalidate();
-	mData->ApplyPropertiesBackup();
+	mData->ApplyPropertiesBackup(); */
 
 	//PATCH: Intercept Open request to open the asset in iliad instead of the default editor
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
@@ -68,7 +68,7 @@ FOdysseyTextureEditorToolkit::SaveAssetAs_Execute()
 
 	FAssetEditorToolkit::SaveAssetAs_Execute();
 
-	mData->PrepareTextureProperties();
+	// mData->PrepareTextureProperties();
 
 	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
 }

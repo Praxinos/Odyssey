@@ -14,6 +14,8 @@
 FOdysseyTextureEditorData::~FOdysseyTextureEditorData()
 {
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
+    UPackage::PreSavePackageEvent.Remove(mOnPackagePreSaveHandle);
+    UPackage::PackageSavedEvent.Remove(mOnPackageSavedHandle);
 
     if( mDisplaySurface )
     {
@@ -25,6 +27,9 @@ FOdysseyTextureEditorData::FOdysseyTextureEditorData(UTexture2D* iTexture)
     : mTexture( iTexture )
 {
     mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyTextureEditorData::OnPreGlobalObjectPropertyChanged);
+
+    /* FDelegateHandle */ mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this, &FOdysseyTextureEditorData::OnPackagePreSave);
+	/* FDelegateHandle */ mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this, &FOdysseyTextureEditorData::OnPackageSaved);
 }
 
 //--------------------------------------------------------------------------------------
@@ -129,4 +134,31 @@ FOdysseyTextureEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject, co
         //Texture properties will change, we need to SyncTextureWithBlock
         CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
     }
+}
+
+void
+FOdysseyTextureEditorData::OnPackagePreSave(UPackage* iPackage)
+{
+    if (!mTexture)
+        return;
+
+    UPackage* package = CastChecked<UPackage>(mTexture->GetOuter());
+    if (package != iPackage)
+        return;
+
+    PaintEngine()->Flush();
+	SyncTextureAndInvalidate();
+	ApplyPropertiesBackup();
+}
+
+void
+FOdysseyTextureEditorData::OnPackageSaved(const FString& iPackageFilename, UObject* iOuter)
+{
+    if (!mTexture)
+        return;
+
+    if (mTexture->GetOuter() != iOuter)
+        return;
+
+    PrepareTextureProperties();
 }
