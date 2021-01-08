@@ -80,6 +80,7 @@ public:
     void           OnZoomIn();
     void           OnZoomOut();
     void           OnRefreshBrush();
+    void           OnAddBrushSize(int32 iValue);
     void           OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode);
     void           OnSwitchTabletAPI();
 

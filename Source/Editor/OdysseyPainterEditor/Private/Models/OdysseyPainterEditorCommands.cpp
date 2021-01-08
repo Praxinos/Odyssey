@@ -39,7 +39,9 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( ZoomOut, "Zoom Out", "Zoom out",                                                   EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
    
     UI_COMMAND( RefreshBrush, "Refresh Brush", "Refresh Brush",                                    EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );
-
+    
+    UI_COMMAND( IncreaseBrushSize, "Increase Brush Size", "Increase Brush Size by 1",              EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
+    UI_COMMAND( DecreaseBrushSize, "Decrease Brush Size", "Decrease Brush Size by 1",              EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
     UI_COMMAND( SetAlphaModeNormal, "Set Alpha Mode to Normal", "Set Alpha Mode to Normal",        EUserInterfaceActionType::Button, FInputChord( EKeys::B ) );
     UI_COMMAND( SetAlphaModeErase, "Set Alpha Mode to Erase", "Set Alpha Mode to Erase",           EUserInterfaceActionType::Button, FInputChord( EKeys::E ) );
     UI_COMMAND( SetAlphaModeTop, "Set Alpha Mode to Top", "Set Alpha Mode to Top",                 EUserInterfaceActionType::Button, FInputChord() );

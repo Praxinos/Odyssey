@@ -224,6 +224,16 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
         FOdysseyPainterEditorCommands::Get().RefreshBrush,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRefreshBrush ),
         FCanExecuteAction() );
+        
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().IncreaseBrushSize,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnAddBrushSize, 1 ),
+        FCanExecuteAction() );
+        
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().DecreaseBrushSize,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnAddBrushSize, -1 ),
+        FCanExecuteAction() );
 
     iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().SetAlphaModeNormal,
@@ -774,6 +784,13 @@ FOdysseyPainterEditorController::OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode)
 {
     //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
     GetGUI()->GetTopTab()->SetAlphaMode(iAlphaMode);
+}
+
+void
+FOdysseyPainterEditorController::OnAddBrushSize(int32 iValue)
+{
+    //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
+    GetGUI()->GetTopTab()->SetSize(GetGUI()->GetTopTab()->GetSize() + iValue);
 }
 
 

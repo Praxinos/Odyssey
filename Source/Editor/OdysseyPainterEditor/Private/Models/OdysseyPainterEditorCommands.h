@@ -135,6 +135,12 @@ public:
     TSharedPtr<FUICommandInfo> RefreshBrush;
 
     //Top Bar actions
+    /** Action to increase size by 1 */
+    TSharedPtr<FUICommandInfo> IncreaseBrushSize;
+
+    /** Action to decrease size by 1 */
+    TSharedPtr<FUICommandInfo> DecreaseBrushSize;
+
     /** Action to switch to Normal alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeNormal;
 
