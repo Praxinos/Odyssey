@@ -38,7 +38,7 @@ bool FOdysseyViewportDrawingEditorEdMode::ProcessCapturedMouseMoves(FEditorViewp
     //If we draw by using the stylus, we ignore the mouse events here
     FOdysseyViewportDrawingEditorPainter* painter = (FOdysseyViewportDrawingEditorPainter*)MeshPainter;
     if(painter->IsCapturedByStylus())
-        return false;
+        return true;
 
     UE_LOG(LogTemp, Display, TEXT("CaptureMouseMove"))
 
