@@ -167,7 +167,7 @@ FOdysseyViewportDrawingEditorData::SyncTextureAndInvalidate()
         return;
 
     CopyBlockDataIntoUTexture(mDisplaySurface->Block(), mTexture);
-    InvalidateTextureFromData(mDisplaySurface->Block(), mTexture);
+    mTexture->UpdateResource();
 }
 
 void
