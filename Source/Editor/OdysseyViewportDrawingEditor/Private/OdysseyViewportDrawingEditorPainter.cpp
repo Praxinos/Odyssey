@@ -1903,15 +1903,16 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
     if( isDownEvent )
     {
         mIsCapturedByStylus = true;
+        mFocusedViewport->CaptureMouse(false);
     }
     else if( isUpEvent )
     {
+        mFocusedViewport->CaptureMouse(true);
         FinishPainting();
         mIsCapturedByStylus = false;
     }
     else if( iState.IsStylusDown() && mFocusedViewport )
     {
-        mFocusedViewport->CaptureMouse( false );
         FEditorViewportClient* viewportClient = (FEditorViewportClient*)mFocusedViewport->GetClient();
         // Compute a world space ray from the screen space mouse coordinates
         FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
@@ -1929,7 +1930,6 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
         UE_LOG(LogTemp, Display, TEXT("%lf, %lf"), iState.GetPosition().X , iState.GetPosition().Y )
 
         Paint(mFocusedViewport,view->ViewMatrices.GetViewOrigin(),mouseViewportRay.GetOrigin(),mouseViewportRay.GetDirection());
-        mFocusedViewport->CaptureMouse(true);
         //CapturedMouseMoveWithStrokePoint( stroke_point );*/
     }
 
