@@ -48,6 +48,7 @@
 FOdysseyViewportDrawingEditorPainter::~FOdysseyViewportDrawingEditorPainter()
 {
 	Finalize();
+    delete mTemporaryViewportClient;
 }
 
 FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
@@ -60,6 +61,7 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
 	mDoRefreshCachedData(true),
 	mUICommandList(MakeShareable(new FUICommandList())),
     mFocusedViewport( nullptr ),
+    mTemporaryViewportClient(new FOdysseyViewportDrawingEditorViewportClient() ),
     mIsGoingToDraw( false ),
 	mIsCapturedByStylus(false),
 	mBeginPosition(0, 0)
@@ -1626,10 +1628,17 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
         UE_LOG(LogTemp,Display,TEXT("Removed %s"), *(InKey.ToString()));
     }
 
-    if( mIsCapturedByStylus )
-        return true;
-
     mFocusedViewport = InViewport;
+
+    if(InEvent == EInputEvent::IE_Pressed && InKey == EKeys::LeftMouseButton)
+    {
+        mTemporaryViewportClient->SetViewport(mFocusedViewport);
+        mTemporaryViewportClient->SetViewportClient(mFocusedViewport->GetClient());
+        mFocusedViewport->SetViewportClient(mTemporaryViewportClient);
+    }
+
+    if(mIsCapturedByStylus)
+        return true;
 
     bool bHandled = false;
 

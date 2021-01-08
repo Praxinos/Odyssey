@@ -10,6 +10,7 @@
 #include "MeshPaintTypes.h"
 #include "Engine/StaticMesh.h"
 #include "OdysseyMeshPaintRendering.h"
+#include "OdysseyViewportDrawingEditorViewportClient.h"
 
 #include "IOdysseyStylusInputModule.h"
 
@@ -322,6 +323,8 @@ protected:
 	TSharedPtr<FUICommandList> mUICommandList;
 
     FViewport* mFocusedViewport;
+    //PATCH: Temporary viewportClient created for overriding highPrecision mouse events (useful for mac)
+    FOdysseyViewportDrawingEditorViewportClient* mTemporaryViewportClient;
 
     FOdysseyStrokePoint mLastEvent;
 	FOdysseyStrokePoint mPreviousEvent;

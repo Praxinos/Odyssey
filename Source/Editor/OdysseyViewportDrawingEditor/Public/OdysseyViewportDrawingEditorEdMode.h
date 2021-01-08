@@ -27,6 +27,7 @@ public:
 	// IMeshPaintEdMode interface.
 	virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent) override;
     virtual void Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI) override;
+    virtual bool MouseMove(FEditorViewportClient* ViewportClient,FViewport* Viewport,int32 x,int32 y);
     virtual bool ProcessCapturedMouseMoves(FEditorViewportClient* InViewportClient,FViewport* InViewport,const TArrayView<FIntPoint>& CapturedMouseMoves) override;
 
 	bool IsEditingEnabled() const;
