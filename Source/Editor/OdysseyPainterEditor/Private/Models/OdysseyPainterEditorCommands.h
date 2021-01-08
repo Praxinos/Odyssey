@@ -134,6 +134,34 @@ public:
     /** Action to refresh the brush back to its original overidden parameters */
     TSharedPtr<FUICommandInfo> RefreshBrush;
 
+    //Top Bar actions
+    /** Action to switch to Normal alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeNormal;
+
+    /** Action to switch to Erase alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeErase;
+    
+    /** Action to switch to Top alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeTop;
+
+    /** Action to switch to Back alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeBack;
+    
+    /** Action to switch to Sub alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeSub;
+    
+    /** Action to switch to Add alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeAdd;
+
+    /** Action to switch to Mul alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeMul;
+
+    /** Action to switch to Min alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeMin;
+
+    /** Action to switch to Max alpha mode */
+    TSharedPtr<FUICommandInfo> SetAlphaModeMax;
+
 
     //Switch tablet API
 

@@ -80,6 +80,7 @@ public:
     void           OnZoomIn();
     void           OnZoomOut();
     void           OnRefreshBrush();
+    void           OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode);
     void           OnSwitchTabletAPI();
 
     // Brush Handlers

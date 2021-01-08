@@ -40,6 +40,16 @@ FOdysseyPainterEditorCommands::RegisterCommands()
    
     UI_COMMAND( RefreshBrush, "Refresh Brush", "Refresh Brush",                                    EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );
 
+    UI_COMMAND( SetAlphaModeNormal, "Set Alpha Mode to Normal", "Set Alpha Mode to Normal",        EUserInterfaceActionType::Button, FInputChord( EKeys::B ) );
+    UI_COMMAND( SetAlphaModeErase, "Set Alpha Mode to Erase", "Set Alpha Mode to Erase",           EUserInterfaceActionType::Button, FInputChord( EKeys::E ) );
+    UI_COMMAND( SetAlphaModeTop, "Set Alpha Mode to Top", "Set Alpha Mode to Top",                 EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetAlphaModeBack, "Set Alpha Mode to Back", "Set Alpha Mode to Back",              EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetAlphaModeSub, "Set Alpha Mode to Sub", "Set Alpha Mode to Sub",                 EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetAlphaModeAdd, "Set Alpha Mode to Add", "Set Alpha Mode to Add",                 EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetAlphaModeMul, "Set Alpha Mode to Mul", "Set Alpha Mode to Mul",                 EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetAlphaModeMin, "Set Alpha Mode to Min", "Set Alpha Mode to Min",                 EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SetAlphaModeMax, "Set Alpha Mode to Max", "Set Alpha Mode to Max",                 EUserInterfaceActionType::Button, FInputChord() );
+
     UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EKeys::F12 ) );
    
     UI_COMMAND( CreateNewLayer, "Create New Layer", "Create new image layer",                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::N ) );

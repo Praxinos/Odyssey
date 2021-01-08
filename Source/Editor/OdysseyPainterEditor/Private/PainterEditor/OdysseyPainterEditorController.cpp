@@ -225,6 +225,51 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRefreshBrush ),
         FCanExecuteAction() );
 
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeNormal,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_NORMAL ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeErase,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_ERASE ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeTop,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_TOP ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeBack,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_BACK ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeSub,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_SUB ),
+        FCanExecuteAction() );
+        
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeAdd,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_ADD ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeMul,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_MUL ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeMin,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_MIN ),
+        FCanExecuteAction() );
+
+    iToolkitCommands->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetAlphaModeMax,
+        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetAlphaMode, ::ul3::eAlphaMode::AM_MAX ),
+        FCanExecuteAction() );
+
 	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().SwitchTabletAPI,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSwitchTabletAPI ),
@@ -722,6 +767,13 @@ FOdysseyPainterEditorController::OnRefreshBrush()
 {
     if( GetData()->Brush() )
         OnBrushSelected( GetData()->Brush() );
+}
+
+void
+FOdysseyPainterEditorController::OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode)
+{
+    //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
+    GetGUI()->GetTopTab()->SetAlphaMode(iAlphaMode);
 }
 
 
