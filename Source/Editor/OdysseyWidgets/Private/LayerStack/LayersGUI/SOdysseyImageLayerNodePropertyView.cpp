@@ -23,6 +23,8 @@ SOdysseyImageLayerNodePropertyView::~SOdysseyImageLayerNodePropertyView()
 
 void SOdysseyImageLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode )
 {
+    mTmpLayerOpacity = -1;
+
     FOdysseyLayerStack* odysseyLayerStackPtr = iNode->GetLayerStack().GetLayerStackData();
     IOdysseyLayer::eType layerType = iNode->GetLayerDataPtr()->GetType();
 
@@ -109,18 +111,20 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
 
 int SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue( TSharedPtr<FOdysseyImageLayer> iImageLayer ) const
 {
-    return iImageLayer->GetOpacity() * 100;
+    return mTmpLayerOpacity >= 0.0f ? mTmpLayerOpacity : iImageLayer->GetOpacity() * 100;
 }
 
 
 void SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
 {
-    iImageLayer->SetOpacity( iOpacity / 100.f );
-    iImageNode->RefreshOpacityText();
+    // iImageLayer->SetOpacity( iOpacity / 100.f );
+    // iImageNode->RefreshOpacityText();
+    mTmpLayerOpacity = iOpacity;
 }
 
 void SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
 {
+    mTmpLayerOpacity = -1;
     iImageLayer->SetOpacity( iOpacity / 100.f );
     iImageNode->RefreshOpacityText();
 }

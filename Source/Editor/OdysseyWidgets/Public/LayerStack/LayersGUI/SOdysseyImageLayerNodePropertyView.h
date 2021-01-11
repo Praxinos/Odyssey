@@ -50,4 +50,5 @@ private:
     TArray< TSharedPtr<FText> > mBlendingModes;
 
     TSharedPtr<SComboBox<TSharedPtr<FText> > > mBlendingModeComboBox;
+    int mTmpLayerOpacity;
 };
