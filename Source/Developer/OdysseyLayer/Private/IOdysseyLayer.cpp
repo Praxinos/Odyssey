@@ -80,18 +80,18 @@ IOdysseyLayer::SetName( FName iName )
 bool
 IOdysseyLayer::IsLocked(bool iCheckParent) const
 {
-	if (!iCheckParent)
+	if (!iCheckParent || mIsLocked)
 		return mIsLocked;
 
 	TSharedPtr<IOdysseyLayer> layer = GetParent();
 	while (layer)
 	{
-		if (!layer->IsLocked())
-			return false;
+		if (layer->IsLocked(true))
+			return true;
 
 		layer = layer->GetParent();
 	}
-	return true;
+	return false;
 }
 
 void
@@ -113,13 +113,13 @@ IOdysseyLayer::SetIsLocked( bool iIsLocked )
 bool
 IOdysseyLayer::IsVisible(bool iCheckParent) const
 {
-	if (!iCheckParent)
+	if (!iCheckParent || !mIsVisible)
 		return mIsVisible;
 
 	TSharedPtr<IOdysseyLayer> layer = GetParent();
 	while (layer)
 	{
-		if (!layer->IsVisible())
+		if (!layer->IsVisible(true))
 			return false;
 
 		layer = layer->GetParent();
@@ -130,9 +130,17 @@ IOdysseyLayer::IsVisible(bool iCheckParent) const
 void
 IOdysseyLayer::SetIsVisible( bool iIsVisible )
 {
-    bool oldValue = mIsLocked;
+    bool oldValue = mIsVisible;
     mIsVisible = iIsVisible;
     mVisibilityChangedDelegate.Broadcast(oldValue);
+
+    TSharedPtr<IOdysseyLayer> layer = GetParent();
+    TSharedPtr<IOdysseyLayer> self = SharedThis(this);
+    while (layer)
+    {
+        layer->ChildIsVisibleChangedDelegate().Broadcast(self, oldValue);
+        layer = layer->GetParent();
+    }
 }
 
 FName
@@ -238,4 +246,10 @@ IOdysseyLayer::FOdysseyLayerChildIsLockedChanged&
 IOdysseyLayer::ChildIsLockedChangedDelegate()
 {
     return mChildIsLockedChangedDelegate;
+}
+
+IOdysseyLayer::FOdysseyLayerChildIsVisibleChanged&
+IOdysseyLayer::ChildIsVisibleChangedDelegate()
+{
+    return mChildIsVisibleChangedDelegate;
 }

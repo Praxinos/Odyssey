@@ -25,6 +25,7 @@ FOdysseyTextureEditorController::~FOdysseyTextureEditorController()
     mData->LayerStack()->OnStructureChanged().RemoveAll(this);
     mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
 	mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+    mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
 
 	TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
 	if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
@@ -70,6 +71,9 @@ FOdysseyTextureEditorController::Init(const TSharedRef<FUICommandList>& iToolkit
 
     if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
 	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
+        
+    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
+	    mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged);
     	
     // Set Image Layer as the current Layer
     TArray<TSharedPtr<IOdysseyLayer>> layers;
@@ -207,7 +211,7 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdy
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged);
-    mData->PaintEngine()->SetLock( imageLayer->IsLocked() );
+    mData->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
 }
 
 void
@@ -238,7 +242,16 @@ FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer
 {
     if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
     {
-        mData->PaintEngine()->SetLock(iLayer->IsLocked());
+        mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
+    }
+}
+
+void
+FOdysseyTextureEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
+{
+    if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
+    {
+        mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
 }
 

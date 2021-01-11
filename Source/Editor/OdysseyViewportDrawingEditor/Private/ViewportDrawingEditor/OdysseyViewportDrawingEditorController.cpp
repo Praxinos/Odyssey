@@ -26,6 +26,7 @@ FOdysseyViewportDrawingEditorController::~FOdysseyViewportDrawingEditorControlle
             mData->LayerStack()->OnStructureChanged().RemoveAll(this);
             mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
             mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+            mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
         }
 
         mData.Reset();
@@ -85,6 +86,9 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
 
             if (!(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()))
                 mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsLockedChanged);
+        
+            if( !(mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
+                mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged);
 
             // Set Image Layer as the current Layer
             TArray<TSharedPtr<IOdysseyLayer>> layers;
@@ -111,6 +115,7 @@ FOdysseyViewportDrawingEditorController::ClearLayerStackDelegates(/*const TShare
         mData->LayerStack()->OnStructureChanged().RemoveAll(this);
         mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
         mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+        mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
     }
 }
 
@@ -220,7 +225,7 @@ void FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged(TS
 
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnCurrentLayerIsAlphaLockedChanged);
-    mData->PaintEngine()->SetLock(imageLayer->IsLocked());
+    mData->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
 }
 
 void FOdysseyViewportDrawingEditorController::OnLayerStackStructureChanged()
@@ -256,7 +261,16 @@ void FOdysseyViewportDrawingEditorController::OnLayerIsLockedChanged(TSharedPtr<
 {
     if(mData->LayerStack() && iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
     {
-        mData->PaintEngine()->SetLock(iLayer->IsLocked());
+        mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
+    }
+}
+
+void
+FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
+{
+    if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
+    {
+        mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
 }
 

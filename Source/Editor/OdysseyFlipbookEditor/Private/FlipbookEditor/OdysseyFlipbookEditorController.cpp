@@ -38,6 +38,7 @@ FOdysseyFlipbookEditorController::~FOdysseyFlipbookEditorController()
         mData->LayerStack()->OnStructureChanged().RemoveAll(this);
         mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
 	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+        mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
 
         TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
         if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
@@ -118,6 +119,9 @@ FOdysseyFlipbookEditorController::InitLayerStack()
 
     if( !(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
 	    mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsLockedChanged);
+        
+    if( !(mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
+	    mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsVisibleChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -270,6 +274,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged);
+    mData->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
 }
 
 void
@@ -300,7 +305,16 @@ FOdysseyFlipbookEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLaye
 {
     if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
     {
-        mData->PaintEngine()->SetLock(iLayer->IsLocked());
+        mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
+    }
+}
+
+void
+FOdysseyFlipbookEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
+{
+    if (iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
+    {
+        mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
 }
 
@@ -590,7 +604,8 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 			mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
             mData->LayerStack()->OnStructureChanged().RemoveAll(this);
             mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
-	        mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);;
+	        mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+            mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
 		}
 
 		//Set new keyframe

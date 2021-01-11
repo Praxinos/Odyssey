@@ -41,6 +41,7 @@ public:
 	void OnLayerStackStructureChanged();
 	void OnLayerStackImageResultChanged();
 	void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
+    void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
 	void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 	
 	void OnTimelineScrubStarted();

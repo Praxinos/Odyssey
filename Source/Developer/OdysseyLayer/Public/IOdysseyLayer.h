@@ -32,6 +32,11 @@ public:
     // Bool is for the previous value
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyLayerChildIsLockedChanged, TSharedPtr<IOdysseyLayer>, bool);
 
+    // Layer Child Is Visible Changed Event
+    // TSharedPtr<IOdysseyLayer> is the child that changed
+    // Bool is for the previous value
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyLayerChildIsVisibleChanged, TSharedPtr<IOdysseyLayer>, bool);
+
 public:
     enum class eType : char
     {
@@ -93,6 +98,7 @@ public:
     FOdysseyLayerLockChanged& LockChangedDelegate();
     FOdysseyLayerVisibilityChanged& VisibilityChangedDelegate();
     FOdysseyLayerChildIsLockedChanged& ChildIsLockedChangedDelegate();
+    FOdysseyLayerChildIsVisibleChanged& ChildIsVisibleChangedDelegate();
 
 public:
     FName GetNextLayerName();
@@ -107,6 +113,7 @@ protected:
 	FOdysseyLayerLockChanged mLockChangedDelegate;
 	FOdysseyLayerVisibilityChanged mVisibilityChangedDelegate;
 	FOdysseyLayerChildIsLockedChanged mChildIsLockedChangedDelegate;
+    FOdysseyLayerChildIsVisibleChanged mChildIsVisibleChangedDelegate;
 };
 
 ODYSSEYLAYER_API FArchive& operator<<(FArchive &Ar, TSharedPtr<IOdysseyLayer>& ioSaveImageLayer );
