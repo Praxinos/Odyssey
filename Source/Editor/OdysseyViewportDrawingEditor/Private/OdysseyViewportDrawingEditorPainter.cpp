@@ -118,12 +118,18 @@ FOdysseyViewportDrawingEditorPainter::OnStylusInputChanged(TSharedPtr<IStylusInp
 
 void FOdysseyViewportDrawingEditorPainter::Finalize()
 {
+    mWidget.Reset(); mWidget = 0;
+    mController.Reset(); mController = 0; //Resetting the controller also reset the data inside it. Should work differently
+
+    UnregisterTexturePaintCommands();
+
 	UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    inputSubsystem->OnStylusInputChanged().Unbind();
 	inputSubsystem->RemoveMessageHandler(*this);
 
-	FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
-
 	mBrushSettings->RemoveFromRoot();
+
+    FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
 
 	Cleanup(); //Why ?
 	mComponentToTexturePaintSettingsMap.Empty(); //Why ?

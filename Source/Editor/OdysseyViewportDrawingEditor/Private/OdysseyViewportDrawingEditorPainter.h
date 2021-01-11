@@ -79,6 +79,7 @@ protected:
 	/** constructor */
 	FOdysseyViewportDrawingEditorPainter();
 
+public:
 	/** Initialization method (called by Get() static method) */
 	void Initialize();
 

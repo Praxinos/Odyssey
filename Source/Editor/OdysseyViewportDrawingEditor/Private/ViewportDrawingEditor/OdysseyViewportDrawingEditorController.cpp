@@ -13,17 +13,23 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyViewportDrawingEditorController::~FOdysseyViewportDrawingEditorController()
 {
-    if (mData->Texture())
+    if( mData )
     {
-        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed( mData->Texture(), this );
-    }
+        if(mData->Texture())
+        {
+            GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(mData->Texture(),this);
+        }
 
-    if (mData->LayerStack())
-    {
-        mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-        mData->LayerStack()->OnStructureChanged().RemoveAll(this);
-        mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
-        mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+        if(mData->LayerStack())
+        {
+            mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+            mData->LayerStack()->OnStructureChanged().RemoveAll(this);
+            mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
+            mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+        }
+
+        mData.Reset();
+        mData = 0;
     }
 }
 
@@ -113,7 +119,6 @@ FOdysseyViewportDrawingEditorController::GetData()
 {
     return mData;
 }
-
 
 TSharedPtr<SOdysseyViewportDrawingEditorGUI> 
 FOdysseyViewportDrawingEditorController::GetGUI()
@@ -662,7 +667,6 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
         }
 
         GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
-        OnEditedTextureChanged( nullptr );
     }
 }
 

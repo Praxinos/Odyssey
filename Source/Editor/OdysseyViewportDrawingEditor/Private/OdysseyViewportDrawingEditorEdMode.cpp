@@ -82,12 +82,14 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 
 void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
+    FOdysseyViewportDrawingEditorPainter::Get()->Initialize();
 	FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeEnter();
 	IMeshPaintEdMode::Enter();
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()
 {
-	FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeExit();
+    FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeExit();
+    FOdysseyViewportDrawingEditorPainter::Get()->Finalize();
 	IMeshPaintEdMode::Exit();
 }
