@@ -662,6 +662,7 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
         }
 
         GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
+        OnEditedTextureChanged( nullptr );
     }
 }
 
