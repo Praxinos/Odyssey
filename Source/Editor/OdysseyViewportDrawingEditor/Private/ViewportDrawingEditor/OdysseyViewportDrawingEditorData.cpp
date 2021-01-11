@@ -207,6 +207,9 @@ FOdysseyViewportDrawingEditorData::ApplyPropertiesBackup()
 void
 FOdysseyViewportDrawingEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject,const FEditPropertyChain& iEditPropertyChain)
 {
+    if( !mTexture )
+        return;
+
     if(mTexture == Cast<UTexture2D>(iObject))
     {
         //Texture properties will change, we need to SyncTextureWithBlock
