@@ -107,6 +107,9 @@ BoardHelpers::FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence,
 void
 BoardHelpers::ResizeChildSequence( UMovieSceneSection* iSection )
 {
+    UEposMovieSceneSequence* sequence = iSection->GetTypedOuter<UEposMovieSceneSequence>();
+    check( sequence );
+
     UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( iSection );
     if( !subsection )
         return;
@@ -115,7 +118,9 @@ BoardHelpers::ResizeChildSequence( UMovieSceneSection* iSection )
     if( !subsequence )
         return;
 
-    subsequence->Resize( UE::MovieScene::DiscreteSize( subsection->GetTrueRange() ) );
+    FFrameTime new_size = FFrameRate::TransformTime( UE::MovieScene::DiscreteSize( subsection->GetTrueRange() ), sequence->GetMovieScene()->GetTickResolution(), subsequence->GetMovieScene()->GetTickResolution() );
+
+    subsequence->Resize( new_size.FloorToFrame().Value );
 }
 
 //static
@@ -148,6 +153,9 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
         {
             auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
             child_full_duration = UE::MovieScene::DiscreteSize( child_full_range );
+
+            FFrameTime convert_duration = FFrameRate::TransformTime( child_full_duration, child_sequence->GetMovieScene()->GetTickResolution(), parent_sequence->GetMovieScene()->GetTickResolution() );
+            child_full_duration = convert_duration.FloorToFrame().Value;
         }
 
         auto range = parent_section->GetTrueRange();

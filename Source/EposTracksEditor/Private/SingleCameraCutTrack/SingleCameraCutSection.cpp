@@ -20,6 +20,7 @@
 #include "Camera/CameraComponent.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "FSingleCameraCutSection"
@@ -56,40 +57,21 @@ TArray<double> FSingleCameraCutSection::GetKeys() const //override
 {
     UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
     TSharedPtr<ISequencer> Sequencer = SequencerPtr.Pin();
+
     TArray<double> keys;
 
-    UMovieScene* movieScene = CameraCutSection->GetTypedOuter<UMovieScene>();
-    if( !movieScene )
+    UMovieSceneSequence* moviescene_sequence = CameraCutSection->GetTypedOuter<UMovieSceneSequence>();
+    if( !moviescene_sequence )
         return keys;
 
-    UMovieSceneTrack* track = movieScene->FindTrack<UMovieScene3DTransformTrack>( CameraCutSection->GetCameraBindingID().GetGuid() );
-    if( !track )
-        return keys;
+    TArray<FFrameNumber> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetKeys( moviescene_sequence );
 
-    TArray<UMovieSceneSection*> sections = track->GetAllSections();
-
-    for( auto section : sections )
+    for( auto key : keys_as_frame )
     {
-        TArray<FFrameNumber> keys_as_frame;
-        TArrayView<FMovieSceneFloatChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
-        for( int i = 0; i < 6; i++ )
-        {
-            TArrayView<const FFrameNumber> times = channels[i]->GetTimes();
-            for( auto time : times )
-            {
-                keys_as_frame.AddUnique( time );
-            }
-        }
+        FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution();
 
-        for( auto key : keys_as_frame )
-        {
-            FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution();
-
-            if( TimeSpace == ETimeSpace::Global )
-                keys.AddUnique( key / TickResolution );
-            else
-                checkNoEntry(); // Should never go here as TimeSpace seems to only be settable inside child class
-        }
+        if( ensure( TimeSpace == ETimeSpace::Global ) ) // Should never be LocalSpace, it seems to only be settable inside child class
+            keys.AddUnique( key / TickResolution );
     }
 
     return keys;

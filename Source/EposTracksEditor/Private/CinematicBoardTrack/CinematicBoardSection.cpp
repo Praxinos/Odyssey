@@ -30,8 +30,9 @@
 #include "EposMovieSceneSequence.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "Shot/ShotSequence.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
@@ -250,58 +251,34 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
     if( !innerMovieSceneSequence )
         return keys;
 
-    UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
-    if( !innerMovieScene )
-        return keys;
-
     // if we are on a shot subsequence
-    UMovieSceneTrack* cameracut_track = innerMovieScene->GetCameraCutTrack();
-    if( cameracut_track )
+    if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
-        TArray<UMovieSceneSection*> cameracut_sections = cameracut_track->GetAllSections();
-        if( !cameracut_sections.Num() )
-            return keys;
-
-        UMovieSceneSingleCameraCutSection* cameracut_section = Cast<UMovieSceneSingleCameraCutSection>( cameracut_sections[0] );
-        if( !cameracut_section )
-            return keys;
-
-        UMovieSceneTrack* track = innerMovieScene->FindTrack<UMovieScene3DTransformTrack>( cameracut_section->GetCameraBindingID().GetGuid() );
-        if( !track )
-            return keys;
-
-        for( auto section : track->GetAllSections() )
-        {
-            TArrayView<FMovieSceneFloatChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
-            for( int i = 0; i < 6; i++ )
-            {
-                TArrayView<const FFrameNumber> times = channels[i]->GetTimes();
-                for( auto time : times )
-                {
-                    TRange<FFrameNumber> range( cameracut_section->GetTrueRange() );
-                    range.SetUpperBound( TRangeBound<FFrameNumber>::FlipInclusion( range.GetUpperBound() ) ); // Special case when a key is on the frame just on the exclusive upper bound value to render it
-                    if( range.Contains( time ) )
-                        keys.AddUnique( time );
-                }
-            }
-        }
-
-        return keys;
+        return MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
     }
 
     // if we are on a board subsequence
-    UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-    if( !board_track )
-        return keys;
-
-    for( auto section : board_track->GetAllSections() )
+    if( innerMovieSceneSequence->IsA<UBoardSequence>() )
     {
-        UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( section );
-        TArray<FFrameNumber> section_keys;
-        section_keys = FindKeysRecursive( BoardSection );
-        section_keys = ShiftKeys( section_keys, section->GetInclusiveStartFrame() );
+        UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
+        if( !innerMovieScene )
+            return keys;
 
-        keys.Append( section_keys );
+        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        if( !board_track )
+            return keys;
+
+        for( auto section : board_track->GetAllSections() )
+        {
+            UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( section );
+            TArray<FFrameNumber> section_keys;
+            section_keys = FindKeysRecursive( BoardSection );
+            section_keys = ShiftKeys( section_keys, section->GetInclusiveStartFrame() );
+
+            keys.Append( section_keys );
+        }
+
+        return keys;
     }
 
     return keys;
@@ -321,10 +298,8 @@ FCinematicBoardSection::GetKeys() const //override
     {
         FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution(); //TODO: what to do when each subsequence have different tick resolution ? recurse with time instead of framenumber ?
 
-        if( TimeSpace == ETimeSpace::Global )
+        if( ensure( TimeSpace == ETimeSpace::Global ) ) // Should never be LocalSpace, it seems to only be settable inside child class
             keys.AddUnique( key / TickResolution );
-
-        check( TimeSpace != ETimeSpace::Local ); // Should never go here as TimeSpace seems to only be settable inside child class
     }
 
     return keys;
