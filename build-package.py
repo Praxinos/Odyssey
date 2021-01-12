@@ -51,12 +51,9 @@ def GetArguments():
     default_upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
     if gOperatingSystem == 'darwin':
         default_upload_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
-    default_ulis_binaries_path = ( default_input_path / 'Source' / 'ThirdParty' / 'ULIS' ).resolve()
-    #if gOperatingSystem == 'darwin':
-        #default_ulis_binaries_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
     
     # Example with full parameters used
-    # $(WORK)> 4.25\Iliad\build-package.py --input-dir "C:\Users\Mike\work\4.25\Iliad" --output-dir "C:\Users\Mike\work\4.25\package2" --ulis-binaries "P:\Praxinos\Developpement\Ulis\Binaries\20200703-ULIS\ULIS" -u --upload-dir "C:\Users\Mike\work\4.25\upload2" -s test-script-parameters
+    # $(WORK)> 4.25\Iliad\build-package.py --input-dir "C:\Users\Mike\work\4.25\Iliad" --output-dir "C:\Users\Mike\work\4.25\package2" -u --upload-dir "C:\Users\Mike\work\4.25\upload2" -s test-script-parameters
 
     parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
     parser.add_argument( '-i', '--input-dir', default=f'{default_input_path}', help=f'the input path\nit must contains a uplugin file' )
@@ -64,7 +61,6 @@ def GetArguments():
     parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
     parser.add_argument( '-p', '--upload-dir', default=f'{default_upload_path}', help=f'the upload path\nsuffix folders will be append to it' )
     parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
-    parser.add_argument( '-l', '--ulis-binaries', default=f'{default_ulis_binaries_path}', help=f'the path where ALL ulis binaries (win64/mac) are on pcloud' )
     parser.add_argument( '-m', '--marketplace', action="store_true", help=f'package for the marketplace (without binaries)' )
     args = parser.parse_args()
     
@@ -165,29 +161,6 @@ def ProcessArgumentForOutputPath( iArgs, iIntermediateFolders ):
     
     return output_path
 
-# Get Ulis binaries directory (from pcloud by default)
-def ProcessArgumentForUlisBinariesPath( iArgs ):
-    ulis_binaries_path = Path( iArgs.ulis_binaries ).resolve()
-
-    cs_pathfiles = [ entry for entry in ulis_binaries_path.glob( 'ULIS.Build.cs' ) if entry.is_file() ]
-    if not cs_pathfiles:
-        date_pathfiles = sorted( [ entry for entry in ulis_binaries_path.glob( '*-ULIS' ) if entry.is_dir() ] )
-        if not date_pathfiles:
-            print( Fore.RED + f'no ulis version (with date) path in: {ulis_binaries_path}' )
-            sys.exit( 15 )
-        ulis_binaries_path = ulis_binaries_path / date_pathfiles[-1] / 'ULIS'
-        if not ulis_binaries_path.is_dir():
-            print( Fore.RED + f'ULIS is not a directory: {ulis_binaries_path}' )
-            sys.exit( 16 )
-        cs_pathfiles = [ entry for entry in ulis_binaries_path.glob( 'ULIS.Build.cs' ) if entry.is_file() ]
-        if not cs_pathfiles:
-            print( Fore.RED + f'no cs file in: {ulis_binaries_path}' )
-            sys.exit( 17 )
-
-    print( Fore.GREEN + f'Ulis binaries path: {ulis_binaries_path}' )
-    
-    return ulis_binaries_path
-
 # Get upload package directory
 def ProcessArgumentForUploadPath( iArgs, iIntermediateFolders ):
     if not iArgs.upload:
@@ -283,21 +256,6 @@ def PostBuildFixPlatforms( iArgs, iOutputPath ):
     with uplugin_pathfile.open( 'w' ) as outfile:
         json.dump( uplugin_data, outfile )
 
-#---
-
-# Update Ulis binaries in the final package from (by default) pcloud with windows/mac files
-def PostBuildUpdateUlisBinaries( iArgs, iOutputPath, iUlisBinariesPath ):
-    thirdparty_ulis = iOutputPath / 'Source' / 'ThirdParty' / 'ULIS'
-    shutil.rmtree( thirdparty_ulis, ignore_errors=True )
-    shutil.copytree( iUlisBinariesPath, thirdparty_ulis )
-
-    for entry in thirdparty_ulis.rglob( '*' ):
-        if entry.is_dir() and entry.name == 'Debug':
-            print( Fore.RED + f'There is Debug folder in: {iUlisBinariesPath}' )
-            sys.exit( 50 )
-
-#---
-
 # Cleaning
 def Clean( iArgs, iOutputPath ):
     # Remove binaries only for marketplace, otherwise it's for internal testing and binaries are needed to not have to compile the plugin again
@@ -342,7 +300,6 @@ intermediate_folders            = GetIntermediateFolders( args, uplugin_pathfile
 zip_name                        = GetZipName( args, uplugin_pathfile, plugin_name )
 output_path                     = ProcessArgumentForOutputPath( args, intermediate_folders )
 upload_path                     = ProcessArgumentForUploadPath( args, intermediate_folders )
-ulis_binaries_path              = ProcessArgumentForUlisBinariesPath( args )
 ProcessArgumentForMarketplace( args )
 
 #---
@@ -352,7 +309,6 @@ Build( uplugin_pathfile, output_path )
 #---
 
 PostBuildFixPlatforms( args, output_path )                              # For marketplace package, the uplugin file must know all the os supported
-PostBuildUpdateUlisBinaries( args, output_path, ulis_binaries_path )    # Replace the Ulis binaries of the generated package (which comes from the local binaries) by the ones on pcloud which contains both windows/mac builds
 
 #---
 
