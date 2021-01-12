@@ -489,7 +489,13 @@ private:
     // Callbacks
     void SendColorChangeEvent( eOdysseyEventState::Type iState, const ::ul3::FPixelValue& iValue )
     {
-        while (mEventState != iState )
+        if (mEventState == iState && mEventState == eOdysseyEventState::kAdjust)
+        {
+            mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kAdjust, iValue);
+            return;
+        }
+
+        while (mEventState != iState)
         {
             switch(mEventState)
             {

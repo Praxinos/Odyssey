@@ -23,7 +23,8 @@ IOdysseyChannelSlider::Construct( const FArguments& InArgs )
 }
 
 IOdysseyChannelSlider::IOdysseyChannelSlider( uint32 iFormat )
-    : mFormat( iFormat )
+    : mFormat( iFormat ),
+      cursor_brush( MakeUnique< FSlateBrush >() )
 {
 }
 
@@ -73,20 +74,22 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 {
     tSuperClass::InitInternalBuffers();
     cursor_size = FVector2D( 8, InternalSize.Y );
-    cursor_surface = MakeUnique< FOdysseySurfaceEditable >( cursor_size.X, cursor_size.Y );
-    cursor_brush = MakeUnique< FSlateBrush >();
-    cursor_brush->SetResourceObject( cursor_surface->Texture() );
-    cursor_brush->ImageSize.X = surface->Width();
-    cursor_brush->ImageSize.Y = surface->Height();
-    cursor_brush->DrawAs = ESlateBrushDrawType::Image;
-    bMarkedAsInvalid = true;
+    if (!cursor_surface || cursor_size.X != cursor_surface->Width() || cursor_size.Y != cursor_surface->Height())
+    {
+        cursor_surface = MakeUnique< FOdysseySurfaceEditable >(cursor_size.X, cursor_size.Y);
+        cursor_brush->SetResourceObject(cursor_surface->Texture());
+        cursor_brush->ImageSize.X = cursor_surface->Width();
+        cursor_brush->ImageSize.Y = cursor_surface->Height();
+        cursor_brush->DrawAs = ESlateBrushDrawType::Image;
+    }
+    //bMarkedAsInvalid = true;
 }
 
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {   
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );
 
     int range = InternalSize.X - 2;
