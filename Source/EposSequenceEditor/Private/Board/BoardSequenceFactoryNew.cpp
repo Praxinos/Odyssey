@@ -7,6 +7,7 @@
 #include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
+#include "Settings/EposSequenceEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceFactory"
 
@@ -23,7 +24,9 @@ UBoardSequenceFactoryNew::UBoardSequenceFactoryNew( const FObjectInitializer& iO
 UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
     auto NewBoardSequence = NewObject<UBoardSequence>( iParent, iName, iFlags | RF_Transactional );
-    NewBoardSequence->Initialize();
+
+    const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
+    NewBoardSequence->Initialize( SequenceSettings->BoardSettings.DefaultTickFrameRate, SequenceSettings->BoardSettings.DefaultDisplayFrameRate );
 
     // Set up some sensible defaults
     const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();

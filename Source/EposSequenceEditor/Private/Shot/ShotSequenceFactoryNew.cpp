@@ -7,6 +7,7 @@
 #include "MovieSceneToolsProjectSettings.h"
 #include "ISequencer.h"
 
+#include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceFactory"
@@ -24,7 +25,9 @@ UShotSequenceFactoryNew::UShotSequenceFactoryNew( const FObjectInitializer& iObj
 UObject* UShotSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
     auto NewShotSequence = NewObject<UShotSequence>( iParent, iName, iFlags | RF_Transactional );
-    NewShotSequence->Initialize();
+
+    const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
+    NewShotSequence->Initialize( SequenceSettings->ShotSettings.DefaultTickFrameRate, SequenceSettings->ShotSettings.DefaultDisplayFrameRate );
 
     // Set up some sensible defaults
     const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();

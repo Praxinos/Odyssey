@@ -21,7 +21,7 @@ public:
 
     UShotSequence( const FObjectInitializer& ObjectInitializer );
 
-    void Initialize();
+    void Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate );
 
     //~ UMovieSceneSequence interface
     virtual void BindPossessableObject( const FGuid& ObjectId, UObject& PossessedObject, UObject* Context ) override;

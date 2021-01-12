@@ -3,7 +3,18 @@
 
 #include "Settings/EposSequenceEditorSettings.h"
 
-UEposSequenceEditorSettings::UEposSequenceEditorSettings( const FObjectInitializer& ObjectInitializer )
-    : Super( ObjectInitializer )
+UEposSequenceEditorSettings::UEposSequenceEditorSettings()
+{
+}
+
+FBoardSettings::FBoardSettings()
+    : DefaultTickFrameRate( 24000, 1000 )
+    , DefaultDisplayFrameRate( 24, 1 )
+{
+}
+
+FShotSettings::FShotSettings()
+    : DefaultTickFrameRate( 24000, 1000 )
+    , DefaultDisplayFrameRate( 24, 1 )
 {
 }

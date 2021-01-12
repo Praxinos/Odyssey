@@ -14,6 +14,15 @@ USTRUCT()
 struct FBoardSettings
 {
     GENERATED_BODY()
+
+public:
+    FBoardSettings();
+
+    UPROPERTY(config, EditAnywhere, Category=Board)
+    FFrameRate DefaultTickFrameRate;
+
+    UPROPERTY(config, EditAnywhere, Category=Shot)
+    FFrameRate DefaultDisplayFrameRate;
 };
 
 //---
@@ -22,6 +31,15 @@ USTRUCT()
 struct FShotSettings
 {
     GENERATED_BODY()
+
+public:
+    FShotSettings();
+
+    UPROPERTY(config, EditAnywhere, Category=Shot)
+    FFrameRate DefaultTickFrameRate;
+
+    UPROPERTY(config, EditAnywhere, Category=Shot)
+    FFrameRate DefaultDisplayFrameRate;
 };
 
 //---
@@ -36,8 +54,7 @@ class UEposSequenceEditorSettings
     GENERATED_BODY()
 
 public:
-
-    UEposSequenceEditorSettings(const FObjectInitializer& ObjectInitializer);
+    UEposSequenceEditorSettings();
 
     /** Specifies Board stuff. */
     UPROPERTY(config, EditAnywhere, Category=Board)

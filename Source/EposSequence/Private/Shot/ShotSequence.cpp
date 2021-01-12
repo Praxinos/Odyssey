@@ -28,17 +28,15 @@ UShotSequence::UShotSequence( const FObjectInitializer& ObjectInitializer )
     bParentContextsAreSignificant = true;
 }
 
-void UShotSequence::Initialize()
+void UShotSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
 {
     MovieScene = NewObject<UMovieScene>( this, NAME_None, RF_Transactional );
 
     MovieScene->SetEvaluationType( EMovieSceneEvaluationType::WithSubFrames );
 
-    FFrameRate TickResolution( 24000, 1 );
-    MovieScene->SetTickResolutionDirectly( TickResolution );
+    MovieScene->SetTickResolutionDirectly( iTickRate );
 
-    FFrameRate DisplayRate( 24, 1 );
-    MovieScene->SetDisplayRate( DisplayRate );
+    MovieScene->SetDisplayRate( iDisplayRate );
 }
 
 void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& PossessedObject, UObject* Context )
