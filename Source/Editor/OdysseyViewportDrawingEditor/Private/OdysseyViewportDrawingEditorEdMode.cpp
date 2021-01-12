@@ -44,8 +44,6 @@ bool FOdysseyViewportDrawingEditorEdMode::MouseMove(FEditorViewportClient* iView
     // We only care about perspective viewpo1rts
     bool bPaintApplied = false;
 
-    UE_LOG(LogTemp, Display, TEXT("MouseMoves"));
-
     if(iViewportClient->IsPerspective())
     {
             if(MeshPainter->IsPainting() )

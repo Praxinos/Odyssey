@@ -860,8 +860,6 @@ void FOdysseyViewportDrawingEditorPainter::PaintTextureBased(const FHitResult& i
     if( mBeginPosition == FVector2D(0,0))
         mBeginPosition = FVector2D(mLastEvent.x / mPaintingTexture2D->Source.GetSizeX(), mLastEvent.y / mPaintingTexture2D->Source.GetSizeY());
 
-    UE_LOG(LogTemp, Display, TEXT("PaintTextureBased"));
-
     const auto featureLevel = GEditor->GetEditorWorldContext().World()->FeatureLevel;
 
     FPaintTexture2DData* textureData = GetPaintTargetData(mPaintingTexture2D);
@@ -1621,18 +1619,13 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 
 bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InViewportClient,FViewport* InViewport,FKey InKey,EInputEvent InEvent)
 {
-    UE_LOG(LogTemp, Display, TEXT("INPUTKEY PAINTER"));
-    UE_LOG(LogTemp,Display,TEXT("Viewport: %p, %p, %p, %p"), InViewport, InViewportClient->Viewport, InViewport->GetClient(), InViewportClient);
-
     if(InEvent == EInputEvent::IE_Pressed)
     {
         mKeysPressed.Add(InKey);
-        UE_LOG(LogTemp, Display, TEXT("Added %s"), *(InKey.ToString()) );
     } 
     else if(InEvent == EInputEvent::IE_Released)
     {
         mKeysPressed.Remove(InKey);
-        UE_LOG(LogTemp,Display,TEXT("Removed %s"), *(InKey.ToString()));
     }
 
     mFocusedViewport = InViewport;
@@ -1889,8 +1882,6 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
 
     mPreviousEvent = mLastEvent;
 
-    UE_LOG(LogTemp, Display, TEXT("OnStylusStateChanged"));
-
     //---
     mLastEvent = FOdysseyStrokePoint(   0
                                       , 0
@@ -1904,8 +1895,6 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
                                       , 0 // iState.GetRoll()
                                       , 0 ); // iState.GetYaw() );
   //---
-
-    UE_LOG(LogTemp, Display, TEXT("Pressure: %lf"), iState.GetPressure());
 
     static bool stylusWasDown = false;
     static bool is_dragging = false;
@@ -1943,7 +1932,6 @@ FOdysseyViewportDrawingEditorPainter::OnStylusStateChanged( const TWeakPtr<SWidg
         FVector2D positionInViewport = iWidget.Pin().Get()->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
 
         const FViewportCursorLocation mouseViewportRay(view,viewportClient, positionInViewport.X , positionInViewport.Y);
-        UE_LOG(LogTemp, Display, TEXT("%lf, %lf"), iState.GetPosition().X , iState.GetPosition().Y )
 
         Paint(mFocusedViewport,view->ViewMatrices.GetViewOrigin(),mouseViewportRay.GetOrigin(),mouseViewportRay.GetDirection());
         //CapturedMouseMoveWithStrokePoint( stroke_point );*/
