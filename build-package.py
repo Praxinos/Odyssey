@@ -17,7 +17,7 @@ init( autoreset=True )
 
 #---
 
-gVersionUE = '4.25'
+gVersionUE = '4.26'
 
 gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
@@ -45,15 +45,15 @@ def GetArguments():
                     if action.option_strings or action.nargs in defaulting_nargs:
                         help += '\n' + Fore.BLACK + Style.BRIGHT + '(default: %(default)s)' + Style.RESET_ALL
             return help
-            
+
     default_input_path = Path.cwd().resolve()
     default_output_path = ( default_input_path / '..' / 'package' ).resolve()
     default_upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
     if gOperatingSystem == 'darwin':
         default_upload_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
-    default_ulis_binaries_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
-    if gOperatingSystem == 'darwin':
-        default_ulis_binaries_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
+    default_ulis_binaries_path = ( default_input_path / 'Source' / 'ThirdParty' / 'ULIS' ).resolve()
+    #if gOperatingSystem == 'darwin':
+        #default_ulis_binaries_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Ulis' / 'Binaries'
     
     # Example with full parameters used
     # $(WORK)> 4.25\Iliad\build-package.py --input-dir "C:\Users\Mike\work\4.25\Iliad" --output-dir "C:\Users\Mike\work\4.25\package2" --ulis-binaries "P:\Praxinos\Developpement\Ulis\Binaries\20200703-ULIS\ULIS" -u --upload-dir "C:\Users\Mike\work\4.25\upload2" -s test-script-parameters
