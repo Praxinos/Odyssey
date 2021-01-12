@@ -89,7 +89,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
 
 TSharedPtr<SWidget> SOdysseyViewportDrawingEditorGUI::CreateTabSelectorWidget(FOdysseyViewportDrawingEditorPainter* iPainter)
 {
-	FToolBarBuilder toolbar(iPainter->GetUICommandList(), FMultiBoxCustomization::None, nullptr, Orient_Vertical);
+    FVerticalToolBarBuilder toolbar( iPainter->GetUICommandList(), FMultiBoxCustomization::None );
 	toolbar.SetLabelVisibility(EVisibility::Collapsed);
 	toolbar.SetStyle(&FEditorStyle::Get(), "FoliageEditToolbar");
 	{
