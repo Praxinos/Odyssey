@@ -21,12 +21,12 @@
   ],
   "Modules": [
     {
-      "Name": "OdysseyMeshPaintRendering",
+      "Name": "OdysseyBrush",
       "Type": "UncookedOnly",
-      "LoadingPhase": "PostConfigInit"
+      "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyBrush",
+      "Name": "OdysseyDrawingState",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
@@ -39,6 +39,11 @@
       "Name": "OdysseyMaths",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyMeshPaintRendering",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "PostConfigInit"
     },
     {
       "Name": "OdysseyPaintEngine",
@@ -66,16 +71,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyImaging",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyStylusInput",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyBrushEditor",
       "Type": "Editor",
       "LoadingPhase": "PostEngineInit"
@@ -91,12 +86,22 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseyImaging",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyPainterEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyStyle",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyStylusInput",
       "Type": "Editor",
       "LoadingPhase": "Default"
     },

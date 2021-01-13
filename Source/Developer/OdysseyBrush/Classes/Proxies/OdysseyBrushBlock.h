@@ -51,22 +51,22 @@ struct FOdysseyFontCharacter
 {
     GENERATED_BODY()
 
-    UPROPERTY( BlueprintReadWrite )
+    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
     int32 StartU;
 
-    UPROPERTY( BlueprintReadWrite )
+    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
     int32 StartV;
 
-    UPROPERTY( BlueprintReadWrite )
+    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
     int32 USize;
 
-    UPROPERTY( BlueprintReadWrite )
+    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
     int32 VSize;
 
-    UPROPERTY( BlueprintReadWrite )
+    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
     uint8 TextureIndex;
 
-    UPROPERTY( BlueprintReadWrite )
+    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
     int32 VerticalOffset;
 
     FOdysseyFontCharacter()

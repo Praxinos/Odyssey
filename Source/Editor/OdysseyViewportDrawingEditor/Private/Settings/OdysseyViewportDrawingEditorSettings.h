@@ -44,7 +44,7 @@ public:
 		: mPaintTexture(nullptr) {}
 
 	/** Texture to which Painting should be Applied */
-	UPROPERTY(EditAnywhere, meta=(DisplayThumbnail="true"))
+	UPROPERTY(EditAnywhere, Category = "Odyssey Viewport Drawing Editor", meta=(DisplayThumbnail="true"))
 	UTexture2D* mPaintTexture;
 };
 
@@ -57,6 +57,6 @@ public:
 
 	static UOdysseyViewportDrawingEditorSettings* Get();
 
-	UPROPERTY(EditAnywhere, Config, meta=(ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, Category = "Odyssey Viewport Drawing Editor", Config, meta=(ShowOnlyInnerProperties))
 	FOdysseyViewportDrawingEditorTexturePaintSettings mTexturePaintSettings;
 };
