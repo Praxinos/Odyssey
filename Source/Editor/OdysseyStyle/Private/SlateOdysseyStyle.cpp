@@ -176,9 +176,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "About.Youtube", new IMAGE_BRUSH( "About/youtube", FVector2D( 30, 30 ) ) );
     Set( "About.Twitter", new IMAGE_BRUSH( "About/twitter", FVector2D( 30, 30 ) ) );
     Set( "About.Instagram", new IMAGE_BRUSH( "About/instagram", FVector2D( 30, 30 ) ) );
-    Set( "About.Discord", new IMAGE_BRUSH( "About/discord", FVector2D( 30, 30 ) ) );
-    Set( "About.UserDoc", new IMAGE_BRUSH( "About/userDoc", FVector2D( 30, 30 ) ) );
-    Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
+    //Set( "About.Discord", new IMAGE_BRUSH( "About/discord", FVector2D( 30, 30 ) ) );
+    //Set( "About.UserDoc", new IMAGE_BRUSH( "About/userDoc", FVector2D( 30, 30 ) ) );
+    //Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
     Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
     Set( "About.Iliad", new IMAGE_BRUSH( "About/iliad", FVector2D( 128, 128 ) ) );
 
@@ -361,11 +361,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
             .SetEvenRowBackgroundHoveredBrush( IMAGE_BRUSH( "TableRow/base_color_row_16", mIcon16x16, FLinearColor( 0.5f, 0.5f, 0.5f ) ) )
             .SetOddRowBackgroundBrush( IMAGE_BRUSH( "TableRow/base_color_row_hovered_16", mIcon16x16, FLinearColor( 0.2f, 0.2f, 0.2f ) ) )
             .SetOddRowBackgroundHoveredBrush( IMAGE_BRUSH( "TableRow/base_color_row_16", mIcon16x16, FLinearColor( 0.2f, 0.2f, 0.2f ) ) )
-            .SetSelectorFocusedBrush( BORDER_BRUSH( "", FMargin( 4.f / 16.f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetActiveBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetActiveHoveredBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetInactiveBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
-            .SetInactiveHoveredBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            //.SetSelectorFocusedBrush( BORDER_BRUSH( "", FMargin( 4.f / 16.f ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            //.SetActiveBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            //.SetActiveHoveredBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            //.SetInactiveBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
+            //.SetInactiveHoveredBrush( IMAGE_BRUSH( "", FVector2D( 8, 8 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )
             .SetTextColor( mDefaultForeground )
             .SetSelectedTextColor( mDefaultForeground )
             .SetDropIndicator_Above( BOX_BRUSH( "TableRow/drop_zone_indicator_above_16", FMargin( 10.0f / 16.0f, 10.0f / 16.0f, 0, 0 ), FLinearColor( 0.701f, 0.225f, 0.003f ) ) )

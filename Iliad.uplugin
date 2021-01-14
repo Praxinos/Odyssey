@@ -78,12 +78,12 @@
     {
       "Name": "OdysseyFlipbook",
       "Type": "Editor",
-      "LoadingPhase": "Default"
+      "LoadingPhase": "PostDefault"
     },
     {
       "Name": "OdysseyFlipbookEditor",
       "Type": "Editor",
-      "LoadingPhase": "Default"
+      "LoadingPhase": "PostDefault"
     },
     {
       "Name": "OdysseyImaging",
