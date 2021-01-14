@@ -577,7 +577,7 @@ FOdysseyPainterEditorGUI::CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& 
 			.HeaderContent()
 			[
 				SNew( STextBlock )
-				.Text( LOCTEXT( "UndoRedo  (Experimental)", "UndoRedo  (Experimental)" ) )
+				.Text( LOCTEXT( "UndoRedo", "UndoRedo" ) )
 				.Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
 				.ShadowOffset( FVector2D( 1.0f, 1.0f ) )
 			]
