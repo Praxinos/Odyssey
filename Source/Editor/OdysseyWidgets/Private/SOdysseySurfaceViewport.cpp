@@ -62,6 +62,13 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
             FIsActionChecked::CreateSP(this, &SOdysseySurfaceViewport::IsZoomMenuFitChecked)
             );
         ZoomMenuBuilder.AddMenuEntry(LOCTEXT("ZoomFitAction", "Scale To Fit"), LOCTEXT("ZoomFillActionHint", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
+
+        /*FUIAction AutoFilterAction(
+        FExecuteAction::CreateSP(this,&SOdysseySurfaceViewport::HandleAutoFilterClicked),
+        FCanExecuteAction(),
+        FIsActionChecked::CreateSP(this,&SOdysseySurfaceViewport::IsAutoFilterChecked)
+        );
+        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("AutoFilterAction","Auto filter"),LOCTEXT("AutoFilterActionHint","Select the best filter (Nearest Neighbour or Bilinear) for the texture depending on the zoom level"),FSlateIcon(),AutoFilterAction,NAME_None,EUserInterfaceActionType::ToggleButton);*/
     }
 
 
@@ -419,6 +426,12 @@ SOdysseySurfaceViewport::HandleZoomMenuFitClicked()
 }
 
 void
+SOdysseySurfaceViewport::HandleAutoFilterClicked()
+{
+    ToggleAutoFilter();
+}
+
+void
 SOdysseySurfaceViewport::HandleRotationLeft()
 {
     RotateLeft();
@@ -444,6 +457,11 @@ SOdysseySurfaceViewport::IsZoomMenuFitChecked() const
     return GetFitToViewport();
 }
 
+bool
+SOdysseySurfaceViewport::IsAutoFilterChecked() const
+{
+    return mIsAutoFilter;
+}
 
 FText
 SOdysseySurfaceViewport::HandleZoomPercentageText( ) const
@@ -533,6 +551,24 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
     Zoom = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
     SetFitToViewport( false );
 
+    if( GetSurface() )
+    {
+        if( Zoom >= 1.0 && GetSurface()->Texture()->Filter != TextureFilter::TF_Nearest )
+        {
+            GetSurface()->Texture()->Filter = TextureFilter::TF_Nearest;
+            GetSurface()->Texture()->PostEditChange();
+            FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>( GetSurface() );
+            surfaceEditable->Invalidate();
+        }
+        else if( Zoom < 1.0 && GetSurface()->Texture()->Filter != TextureFilter::TF_Bilinear )
+        {
+            GetSurface()->Texture()->Filter = TextureFilter::TF_Bilinear;
+            GetSurface()->Texture()->PostEditChange();
+            FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>(GetSurface());
+            surfaceEditable->Invalidate();
+        }
+    }
+
     mOnParameterChanged.Broadcast();
 }
 
@@ -570,6 +606,12 @@ SOdysseySurfaceViewport::ToggleFitToViewport()
 {
     bool bFitToViewport = GetFitToViewport();
     SetFitToViewport(!bFitToViewport);
+}
+
+void
+SOdysseySurfaceViewport::ToggleAutoFilter()
+{
+    mIsAutoFilter = !mIsAutoFilter;
 }
 
 

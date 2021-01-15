@@ -970,6 +970,8 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
         return 1.0;
     }
 
+    //mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->Invalidate();
+
     double zoom = 1.0;
     bool fitToViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetFitToViewport();
 

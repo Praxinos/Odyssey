@@ -59,7 +59,9 @@ private:
     EVisibility     HandleVerticalScrollBarVisibility( ) const;
     void            HandleZoomMenuEntryClicked( double ZoomValue );
     void            HandleZoomMenuFitClicked();
+    void            HandleAutoFilterClicked();
     bool            IsZoomMenuFitChecked() const;
+    bool            IsAutoFilterChecked() const;
     FText           HandleZoomPercentageText( ) const;
     void            HandleZoomSliderChanged( float NewValue );
     float           HandleZoomSliderValue( ) const;
@@ -81,6 +83,7 @@ public:
     bool            GetFitToViewport() const;
     void            SetFitToViewport( bool bFitToViewport );
     void            ToggleFitToViewport();
+    void            ToggleAutoFilter();
     double          GetRotationInDegrees() const;
     void            SetRotationInDegrees(double RotationValue);
     FVector2D       GetPan() const;
@@ -107,6 +110,7 @@ private:
     double                      Rotation;
     FVector2D                   Pan;
     bool                        IsFitToViewport;
+    bool                        mIsAutoFilter;
     uint32                      PreviewEffectiveTextureWidth;
     uint32                      PreviewEffectiveTextureHeight;
 
