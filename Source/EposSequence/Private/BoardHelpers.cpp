@@ -80,7 +80,7 @@ BoardHelpers::FindParent( UEposMovieSceneSequence* iSequence )
 //---
 
 //static
-UMovieSceneSection*
+UMovieSceneSubSection*
 BoardHelpers::FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence )
 {
     UMovieSceneTrack* track = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
@@ -118,9 +118,10 @@ BoardHelpers::ResizeChildSequence( UMovieSceneSection* iSection )
     if( !subsequence )
         return;
 
-    FFrameTime new_size = FFrameRate::TransformTime( UE::MovieScene::DiscreteSize( subsection->GetTrueRange() ), sequence->GetMovieScene()->GetTickResolution(), subsequence->GetMovieScene()->GetTickResolution() );
+    TRange<FFrameNumber> inner_range( ( subsection->GetInclusiveStartFrame() * subsection->OuterToInnerTransform() ).FloorToFrame(), ( subsection->GetExclusiveEndFrame() * subsection->OuterToInnerTransform() ).FloorToFrame() );
+    int32 new_size = UE::MovieScene::DiscreteSize( inner_range );
 
-    subsequence->Resize( new_size.FloorToFrame().Value );
+    subsequence->Resize( new_size );
 }
 
 //static
@@ -139,7 +140,7 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
             continue;
         }
 
-        UMovieSceneSection* parent_section = BoardHelpers::FindParentSectionOfSequence( parent_sequence, child_sequence );
+        UMovieSceneSubSection* parent_section = BoardHelpers::FindParentSectionOfSequence( parent_sequence, child_sequence );
         if( !parent_section )
             break;
 
@@ -152,10 +153,11 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
         if( child_track && child_track->GetAllSections().Num() )
         {
             auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
-            child_full_duration = UE::MovieScene::DiscreteSize( child_full_range );
 
-            FFrameTime convert_duration = FFrameRate::TransformTime( child_full_duration, child_sequence->GetMovieScene()->GetTickResolution(), parent_sequence->GetMovieScene()->GetTickResolution() );
-            child_full_duration = convert_duration.FloorToFrame().Value;
+            const FMovieSceneSequenceTransform InnerToOuterTransform = parent_section->OuterToInnerTransform().InverseLinearOnly();
+            TRange<FFrameNumber> child_full_range_in_outer( ( child_full_range.GetLowerBoundValue() * InnerToOuterTransform ).FloorToFrame(), ( child_full_range.GetUpperBoundValue() * InnerToOuterTransform ).FloorToFrame() );
+
+            child_full_duration = UE::MovieScene::DiscreteSize( child_full_range_in_outer );
         }
 
         auto range = parent_section->GetTrueRange();

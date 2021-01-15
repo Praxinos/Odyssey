@@ -8,6 +8,7 @@
 class UEposMovieSceneSequence;
 class UMovieSceneSection;
 class UMovieSceneSequence;
+class UMovieSceneSubSection;
 
 /**
  * Implements actions for UBoardSequence assets.
@@ -35,7 +36,7 @@ private:
     static UEposMovieSceneSequence* FindParent( UEposMovieSceneSequence* iSequence );
 
 public:
-    static UMovieSceneSection* FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence );
+    static UMovieSceneSubSection* FindParentSectionOfSequence( UMovieSceneSequence* iParentSequence, UMovieSceneSequence* iChildSequence );
 
     //---
 

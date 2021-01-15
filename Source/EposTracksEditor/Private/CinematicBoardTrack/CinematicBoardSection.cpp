@@ -229,23 +229,10 @@ FCinematicBoardSection::IsReadOnly() const
 }
 
 static
-TArray<FQualifiedFrameTime>
-ShiftKeys( TArray<FQualifiedFrameTime> iKeys, int32 iShift )
-{
-    TArray<FQualifiedFrameTime> keys;
-    for( auto key : iKeys )
-    {
-        keys.Add( FQualifiedFrameTime( key.Time + iShift, key.Rate ) );
-    }
-
-    return keys;
-}
-
-static
-TArray<FQualifiedFrameTime>
+TArray<FFrameTime>
 FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
 {
-    TArray<FQualifiedFrameTime> keys;
+    TArray<FFrameTime> keys;
 
     UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
     if( !innerMovieSceneSequence )
@@ -255,9 +242,13 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
     if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
         TArray<FFrameNumber> subkeys = MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
+
+        const FMovieSceneSequenceTransform InnerToOuterTransform = iBoardSection->OuterToInnerTransform().InverseLinearOnly();
         for( auto subkey : subkeys )
-            keys.Add( FQualifiedFrameTime( FFrameRate::TransformTime( subkey, innerMovieSceneSequence->GetMovieScene()->GetTickResolution(), iBoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() ), iBoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() ) );
-        keys = ShiftKeys( keys, iBoardSection->GetInclusiveStartFrame().Value );
+        {
+            const FFrameTime key = subkey * InnerToOuterTransform;
+            keys.Add( key );
+        }
 
         return keys;
     }
@@ -273,19 +264,22 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
         if( !board_track )
             return keys;
 
+        TArray<FFrameTime> subkeys;
         for( auto section : board_track->GetAllSections() )
         {
             UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-            TArray<FQualifiedFrameTime> section_keys;
+            TArray<FFrameTime> section_keys;
             section_keys = FindKeysRecursive( board_section );
 
-            keys.Append( section_keys );
+            subkeys.Append( section_keys );
         }
 
-        for( auto& key : keys )
-            key = FQualifiedFrameTime( FFrameRate::TransformTime( key.Time, innerMovieSceneSequence->GetMovieScene()->GetTickResolution(), iBoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() ), iBoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() );
-
-        keys = ShiftKeys( keys, iBoardSection->GetInclusiveStartFrame().Value );
+        const FMovieSceneSequenceTransform InnerToOuterTransform = iBoardSection->OuterToInnerTransform().InverseLinearOnly();
+        for( auto subkey : subkeys )
+        {
+            const FFrameTime key = subkey * InnerToOuterTransform;
+            keys.Add( key );
+        }
 
         return keys;
     }
@@ -300,12 +294,13 @@ FCinematicBoardSection::GetKeys() const //override
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FQualifiedFrameTime> keys_as_frame = FindKeysRecursive( BoardSection );
+    TArray<FFrameTime> keys_as_frame = FindKeysRecursive( BoardSection );
 
     TArray<double> keys;
     for( auto key : keys_as_frame )
     {
-        keys.AddUnique( key.AsSeconds() );
+        FQualifiedFrameTime time( key, BoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() );
+        keys.AddUnique( time.AsSeconds() );
     }
 
     return keys;

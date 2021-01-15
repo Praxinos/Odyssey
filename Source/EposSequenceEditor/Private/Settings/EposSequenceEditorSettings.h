@@ -56,6 +56,12 @@ class UEposSequenceEditorSettings
 public:
     UEposSequenceEditorSettings();
 
+    //TODO: add everything inside UMovieSceneToolsProjectSettings here ? or inherit from it ?
+    // it is used inside:
+    // ./Source/EposSequenceEditor/Private/Board/BoardSequenceFactoryNew.cpp
+    // ./Source/EposSequenceEditor/Private/Shot/ShotSequenceFactoryNew.cpp
+    // ./Source/EposTracksEditor/Private/EposTracksEditorHelpers.cpp
+
     /** Specifies Board stuff. */
     UPROPERTY(config, EditAnywhere, Category=Board)
     FBoardSettings BoardSettings;
