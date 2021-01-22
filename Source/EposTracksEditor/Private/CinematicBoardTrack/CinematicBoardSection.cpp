@@ -22,6 +22,8 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Editor.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
+#include "Engine/StaticMeshActor.h"
+#include "CineCameraActor.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
@@ -33,6 +35,11 @@
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionCamera.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionLayout.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionPlanes.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionThumbnails.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionTitle.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
@@ -87,13 +94,19 @@ FCinematicBoardSection::~FCinematicBoardSection()
 FText
 FCinematicBoardSection::GetSectionTitle() const
 {
-    return GetRenameVisibility() == EVisibility::Visible ? FText::GetEmpty() : HandleThumbnailTextBlockText();
+    return FText::GetEmpty(); // Now manage inside Title widget and don't want to be displayed at a position defined by the 'mother' SSequencerSection
+    //return GetRenameVisibility() == EVisibility::Visible ? FText::GetEmpty() : HandleThumbnailTextBlockText();
 }
 
 float
 FCinematicBoardSection::GetSectionHeight() const
 {
-    return FKeyThumbnailSection::GetSectionHeight() + 2 * 9.f;
+    TSharedRef<const FCinematicBoardSection> me = SharedThis( this );
+
+    return SCinematicBoardSectionTitle::GetHeight( me )
+            + SCinematicBoardSectionCamera::GetHeight( me )
+            + SCinematicBoardSectionThumbnails::GetHeight( me )
+            + SCinematicBoardSectionPlanes::GetHeight( me );
 }
 
 FMargin
@@ -110,25 +123,117 @@ FCinematicBoardSection::SetSingleTime( double iGlobalTime )
     sectionObject.SetThumbnailReferenceOffset( iGlobalTime - referenceOffsetSeconds );
 }
 
-UCameraComponent*
-FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID iInnerSequenceID, const FMovieSceneSequenceHierarchy& iHierarchy, IMovieScenePlayer& ioPlayer )
+bool
+FCinematicBoardSection::IsReadOnly() const
 {
-    const FMovieSceneSequenceHierarchyNode* Node = iHierarchy.FindNode( iInnerSequenceID );
-    const FMovieSceneSubSequenceData*       SubData = iHierarchy.FindSubData( iInnerSequenceID );
+    // Overridden to false regardless of movie scene section read only state so that we can double click into the sub section
+    return false;
+}
+
+//---
+
+FCinematicBoardSection::FInnerSequenceResult::FInnerSequenceResult()
+    : mInnerSequenceID()
+    , mHierarchy( nullptr )
+    , mPlayer( nullptr )
+    , mNode( nullptr )
+    , mSubData( nullptr )
+    , mInnerMovieSceneSequence( nullptr )
+    , mInnerMovieScene( nullptr )
+{
+}
+
+FCinematicBoardSection::FInnerSequenceResult::FInnerSequenceResult( const FMovieSceneSequenceID& iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer )
+    : mInnerSequenceID( iID )
+    , mHierarchy( iHierarchy )
+    , mPlayer( ioPlayer )
+    , mNode( nullptr )
+    , mSubData( nullptr )
+    , mInnerMovieSceneSequence( nullptr )
+    , mInnerMovieScene( nullptr )
+{
+}
+
+bool
+FCinematicBoardSection::FInnerSequenceResult::IsValid() const
+{
+    return mInnerSequenceID.IsValid();
+}
+
+bool
+FCinematicBoardSection::FInnerSequenceResult::IsFilled() const
+{
+    return !!mInnerMovieScene;
+}
+
+//-
+
+FCinematicBoardSection::FInnerSequenceResult
+FCinematicBoardSection::GetInnerSequenceID( const UMovieSceneSubSection* iSubSection ) const
+{
+    TSharedPtr<ISequencer> sequencer = GetSequencer();
+    if( !sequencer.IsValid() )
+        return FInnerSequenceResult();
+
+    const UMovieSceneSubSection&            sectionObject = iSubSection ? *iSubSection : GetSectionObjectAs<UMovieSceneSubSection>();
+    const FMovieSceneSequenceID             thisSequenceID = sequencer->GetFocusedTemplateID();
+    const FMovieSceneSequenceID             targetSequenceID = sectionObject.GetSequenceID();
+    const FMovieSceneSequenceHierarchy*     hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
+
+    if( !hierarchy )
+        return FInnerSequenceResult();
+
+    const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
+
+    check( thisSequenceNode );
+
+    // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
+    const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
+        [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
+        {
+            const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
+            return subData && subData->DeterministicSequenceID == targetSequenceID;
+        }
+    );
+
+    if( !innerSequenceID )
+        return FInnerSequenceResult();
+
+    FInnerSequenceResult result( *innerSequenceID, hierarchy, sequencer.Get() );
+    return result;
+}
+
+void
+FCinematicBoardSection::FillInnerSequenceResult( FInnerSequenceResult& ioInnerSequenceResult ) const
+{
+    if( !ioInnerSequenceResult.IsValid() )
+        return;
+
+    const FMovieSceneSequenceHierarchyNode* Node = ioInnerSequenceResult.mHierarchy->FindNode( ioInnerSequenceResult.mInnerSequenceID );
+    const FMovieSceneSubSequenceData*       SubData = ioInnerSequenceResult.mHierarchy->FindSubData( ioInnerSequenceResult.mInnerSequenceID );
     if( !ensure( SubData && Node ) )
-    {
-        return nullptr;
-    }
+        return;
 
     UMovieSceneSequence* InnerSequence = SubData->GetSequence();
     UMovieScene*         InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
     if( !InnerMovieScene )
-    {
-        return nullptr;
-    }
+        return;
 
-    FFrameNumber InnerTime = ( iGlobalTime * SubData->RootToSequenceTransform ).FloorToFrame();
-    if( !SubData->PlayRange.Value.Contains( InnerTime ) )
+    ioInnerSequenceResult.mNode = Node;
+    ioInnerSequenceResult.mSubData = SubData;
+    ioInnerSequenceResult.mInnerMovieSceneSequence = InnerSequence;
+    ioInnerSequenceResult.mInnerMovieScene = InnerMovieScene;
+}
+
+UCameraComponent*
+FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceResult iInnerSequenceResult )
+{
+    FillInnerSequenceResult( iInnerSequenceResult );
+    if( !iInnerSequenceResult.IsFilled() )
+        return nullptr;
+
+    FFrameNumber InnerTime = ( iGlobalTime * iInnerSequenceResult.mSubData->RootToSequenceTransform ).FloorToFrame();
+    if( !iInnerSequenceResult.mSubData->PlayRange.Value.Contains( InnerTime ) )
     {
         return nullptr;
     }
@@ -138,7 +243,7 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
 
     UMovieSceneSingleCameraCutSection* ActiveSection = nullptr;
 
-    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( InnerMovieScene->GetCameraCutTrack() ) )
+    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( iInnerSequenceResult.mInnerMovieScene->GetCameraCutTrack() ) )
     {
         for( UMovieSceneSection* ItSection : CutTrack->GetAllSections() )
         {
@@ -161,12 +266,14 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
 
     if( ActiveSection )
     {
-        return ActiveSection->GetFirstCamera( ioPlayer, iInnerSequenceID );
+        return ActiveSection->GetFirstCamera( *iInnerSequenceResult.mPlayer, iInnerSequenceResult.mInnerSequenceID );
     }
 
-    for( FMovieSceneSequenceID Child : Node->Children )
+    for( FMovieSceneSequenceID Child : iInnerSequenceResult.mNode->Children )
     {
-        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, Child, iHierarchy, ioPlayer );
+        FInnerSequenceResult result( Child, iInnerSequenceResult.mHierarchy, iInnerSequenceResult.mPlayer );
+
+        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, result );
         if( CameraComponent )
         {
             return CameraComponent;
@@ -179,53 +286,15 @@ FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID
 UCameraComponent*
 FCinematicBoardSection::GetViewCamera()
 {
-    TSharedPtr<ISequencer> sequencer = GetSequencer();
-    if( !sequencer.IsValid() )
-    {
+    FInnerSequenceResult result = GetInnerSequenceID();
+    if( !result.IsValid() )
         return nullptr;
-    }
 
-
-    const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
-    const FMovieSceneSequenceID             thisSequenceID = sequencer->GetFocusedTemplateID();
-    const FMovieSceneSequenceID             targetSequenceID = sectionObject.GetSequenceID();
-    const FMovieSceneSequenceHierarchy*     hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
-
-    if( !hierarchy )
-    {
-        return nullptr;
-    }
-
-    const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
-
-    check( thisSequenceNode );
-
-    // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-    const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
-        [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
-        {
-            const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
-            return subData && subData->DeterministicSequenceID == targetSequenceID;
-        }
-    );
-
-    if( innerSequenceID )
-    {
-        UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, *innerSequenceID, *hierarchy, *sequencer );
-        if( cameraComponent )
-        {
-            return cameraComponent;
-        }
-    }
+    UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( GetSequencer()->GetGlobalTime().Time.FrameNumber, result );
+    if( cameraComponent )
+        return cameraComponent;
 
     return nullptr;
-}
-
-bool
-FCinematicBoardSection::IsReadOnly() const
-{
-    // Overridden to false regardless of movie scene section read only state so that we can double click into the sub section
-    return false;
 }
 
 static
@@ -306,6 +375,113 @@ FCinematicBoardSection::GetKeys() const //override
     return keys;
 }
 
+int
+FCinematicBoardSection::GetMaxPlaneBindings() const
+{
+    UMovieSceneTrack* track = GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>();
+
+    int count = 0;
+    for( auto section : track->GetAllSections() )
+    {
+        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+        TArray<FMovieScenePossessable> bindings = GetPlaneBindings( *subsection );
+
+        count = FMath::Max( count, bindings.Num() );
+    }
+
+    return count;
+}
+
+TArray<FMovieScenePossessable>
+FCinematicBoardSection::GetPlaneBindings() const
+{
+    return GetPlaneBindings( GetSubSectionObject() );
+}
+
+TArray<FMovieScenePossessable>
+FCinematicBoardSection::GetPlaneBindings( const UMovieSceneSubSection& iSection ) const
+{
+    TArray<FMovieScenePossessable> bindings;
+
+    FInnerSequenceResult result = GetInnerSequenceID( &iSection );
+    if( !result.IsValid() )
+        return bindings;
+
+    FillInnerSequenceResult( result );
+    if( !result.IsFilled() )
+        return bindings;
+
+    AStaticMeshActor* plane = nullptr;
+    for( int i = 0; i < result.mInnerMovieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = result.mInnerMovieScene->GetPossessable( i );
+
+        for( auto Object : GetSequencer()->FindBoundObjects( possessable.GetGuid(), result.mInnerSequenceID ) )
+        {
+            plane = Cast<AStaticMeshActor>( Object.Get() );
+            if( plane )
+                bindings.Add( possessable );
+        }
+    }
+
+    return bindings;
+}
+
+FMovieScenePossessable
+FCinematicBoardSection::GetCameraBinding() const
+{
+    FMovieScenePossessable binding;
+
+    FInnerSequenceResult result = GetInnerSequenceID();
+    if( !result.IsValid() )
+        return binding;
+
+    FillInnerSequenceResult( result );
+    if( !result.IsFilled() )
+        return binding;
+
+    ACineCameraActor* camera = nullptr;
+    for( int i = 0; i < result.mInnerMovieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = result.mInnerMovieScene->GetPossessable( i );
+
+        for( auto Object : GetSequencer()->FindBoundObjects( possessable.GetGuid(), result.mInnerSequenceID ) )
+        {
+            camera = Cast<ACineCameraActor>( Object.Get() );
+            if( camera )
+                return possessable;
+        }
+    }
+
+    return binding;
+}
+
+TSharedRef<SWidget>
+FCinematicBoardSection::GenerateSectionWidget()
+{
+    TSharedRef<FCinematicBoardSection> me = SharedThis( this );
+
+    return SNew( SCinematicBoardSectionLayout, me )
+        .Title()
+        [
+            SAssignNew( mWidgetTitle, SCinematicBoardSectionTitle, me )
+            .Name( this, &FCinematicBoardSection::HandleThumbnailTextBlockText )
+        ]
+        .Camera()
+        [
+            SNew( SCinematicBoardSectionCamera, me )
+            .Binding( GetCameraBinding() )
+        ]
+        .Thumbnails()
+        [
+            SNew( SCinematicBoardSectionThumbnails, me )
+        ]
+        .Planes()
+        [
+            SNew( SCinematicBoardSectionPlanes, me )
+        ];
+}
+
 void
 FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometry& iClippedGeometry, const double iCurrentTime, const float iDeltaTime )
 {
@@ -333,10 +509,22 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
 }
 
 int32
+FCinematicBoardSection::OnPaintSectionThumbnails( FSequencerSectionPainter& ioPainter ) const
+{
+    FKeyThumbnailSection::OnPaintSection( ioPainter );
+
+    return ioPainter.LayerId;
+}
+
+const FSequencerSectionPainter*
+FCinematicBoardSection::GetRootPainter( const FPaintArgs& ) const
+{
+    return mRootPainter;
+}
+
+int32
 FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
 {
-    static const FSlateBrush* filmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
-
     const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 
     const UEposMovieSceneSequence* subsequence = Cast< UEposMovieSceneSequence>( sectionObject.GetSequence() );
@@ -345,34 +533,9 @@ FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) co
     else
         ioPainter.LayerId = ioPainter.PaintSectionBackground();
 
-    FVector2D localSectionSize = ioPainter.SectionGeometry.GetLocalSize();
+    //---
 
-    // Paint fancy-looking film border.
-    FSlateDrawElement::MakeBox(
-        ioPainter.DrawElements,
-        ioPainter.LayerId++,
-        ioPainter.SectionGeometry.ToPaintGeometry( FVector2D( localSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, 4.f ) ) ),
-        filmBorder,
-        ioPainter.bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect
-    );
-
-    FSlateDrawElement::MakeBox(
-        ioPainter.DrawElements,
-        ioPainter.LayerId++,
-        ioPainter.SectionGeometry.ToPaintGeometry( FVector2D( localSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, localSectionSize.Y - 11.f ) ) ),
-        filmBorder,
-        ioPainter.bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect
-    );
-
-    // Paint the thumbnails.
-    FKeyThumbnailSection::OnPaintSection( ioPainter );
-
-    // Paint the sub-sequence information/looping boundaries/etc.
-
-    FSubSectionPainterParams subSectionPainterParams( GetContentPadding() );
-    subSectionPainterParams.bShowTrackNum = false;
-
-    FSubSectionPainterUtil::PaintSection( GetSequencer(), sectionObject, ioPainter, subSectionPainterParams );
+    mRootPainter = &ioPainter;
 
     return ioPainter.LayerId;
 }
@@ -426,7 +589,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
             LOCTEXT( "RenameBoard", "Rename Board" ),
             FText::Format( LOCTEXT( "RenameBoardTooltip", "Rename {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( this, &FCinematicBoardSection::EnterRename ) )
+            FUIAction( FExecuteAction::CreateSP( mWidgetTitle.ToSharedRef(), &SCinematicBoardSectionTitle::EnterRename ) )
         );
     }
     ioMenuBuilder.EndSection();
