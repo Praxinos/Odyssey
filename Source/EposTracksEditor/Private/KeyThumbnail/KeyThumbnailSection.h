@@ -41,6 +41,7 @@ public:
     virtual void BuildSectionContextMenu( FMenuBuilder& MenuBuilder, const FGuid& ObjectBinding ) override;
     virtual int32 OnPaintSection( FSequencerSectionPainter& InPainter ) const override;
 
+    virtual void BuildKeys() = 0;
     virtual TArray<double> GetKeys() const = 0;
 
 protected:
@@ -49,4 +50,7 @@ protected:
         This list replace the original one inside FThumbnailSection
     */
     FTrackEditorKeyThumbnailCache KeyThumbnailCache;
+
+private:
+    double mLastCurrentTime;
 };

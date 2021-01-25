@@ -51,6 +51,7 @@ public:
     virtual FText HandleThumbnailTextBlockText() const override;
 
     // FKeyThumbnailSection interface
+    virtual void BuildKeys() override;
     virtual TArray<double> GetKeys() const override;
 
     // IViewportThumbnailClient interface
@@ -66,4 +67,7 @@ private:
 
     /** Callback for executing a "Set Camera" menu entry in the context menu. */
     void HandleSetCameraMenuEntryExecute(AActor* InCamera);
+
+private:
+    TArray<double> mKeys;
 };

@@ -53,16 +53,16 @@ void FSingleCameraCutSection::SetSingleTime(double GlobalTime)
     }
 }
 
-TArray<double> FSingleCameraCutSection::GetKeys() const //override
+void FSingleCameraCutSection::BuildKeys() //override
 {
     UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
     TSharedPtr<ISequencer> Sequencer = SequencerPtr.Pin();
 
-    TArray<double> keys;
+    mKeys.Empty( mKeys.Num() );
 
     UMovieSceneSequence* moviescene_sequence = CameraCutSection->GetTypedOuter<UMovieSceneSequence>();
     if( !moviescene_sequence )
-        return keys;
+        return;
 
     TArray<FFrameNumber> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetKeys( moviescene_sequence );
 
@@ -71,10 +71,13 @@ TArray<double> FSingleCameraCutSection::GetKeys() const //override
         FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution();
 
         if( ensure( TimeSpace == ETimeSpace::Global ) ) // Should never be LocalSpace, it seems to only be settable inside child class
-            keys.AddUnique( key / TickResolution );
+            mKeys.AddUnique( key / TickResolution );
     }
+}
 
-    return keys;
+TArray<double> FSingleCameraCutSection::GetKeys() const //override
+{
+    return mKeys;
 }
 
 void FSingleCameraCutSection::Tick(const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime)

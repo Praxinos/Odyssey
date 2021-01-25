@@ -62,6 +62,7 @@ public:
     virtual UCameraComponent* GetViewCamera() override;
 
     // FKeyThumbnailSection interface
+    virtual void BuildKeys() override;
     virtual TArray<double> GetKeys() const override; //TODO: maybe move it to UMovieScene*Section ? but what to do with TimeSpace ?
 
     //---
@@ -73,6 +74,9 @@ private:
 
     /** Add board takes menu */
     //void AddTakesMenu( FMenuBuilder& ioMenuBuilder );
+
+private:
+    TArray<double> mKeys;
 
 private:
     // Store data about a subsequence using the hierarchy to get camera/planes/...

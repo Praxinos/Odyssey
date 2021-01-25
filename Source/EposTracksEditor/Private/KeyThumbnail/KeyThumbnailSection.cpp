@@ -30,6 +30,7 @@
 FKeyThumbnailSection::FKeyThumbnailSection( TSharedPtr<ISequencer> InSequencer, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool, UMovieSceneSection& InSection )
     : FViewportThumbnailSection( InSequencer, InThumbnailPool, InSection )
     , KeyThumbnailCache( InThumbnailPool, this )
+    , mLastCurrentTime( 0.0 )
 {
     GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().Remove( RedrawThumbnailDelegateHandle );
     RedrawThumbnailDelegateHandle = GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().AddRaw( this, &FKeyThumbnailSection::RedrawThumbnails );
@@ -227,6 +228,12 @@ void FKeyThumbnailSection::Tick( const FGeometry& AllottedGeometry, const FGeome
 
         FIntPoint AllocatedSize = AllottedGeometry.GetLocalSize().IntPoint();
         AllocatedSize.X = FMath::Max( AllocatedSize.X, 1 );
+
+        if( InCurrentTime - mLastCurrentTime > 0.5 )
+        {
+            mLastCurrentTime = InCurrentTime;
+            BuildKeys();
+        }
 
         KeyThumbnailCache.Update( GetTotalRange(), GetVisibleRange(), GetKeys(), AllocatedSize, Settings->ThumbnailSize, Settings->Quality, InCurrentTime );
     }

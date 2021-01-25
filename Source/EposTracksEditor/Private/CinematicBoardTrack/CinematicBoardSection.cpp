@@ -297,6 +297,8 @@ FCinematicBoardSection::GetViewCamera()
     return nullptr;
 }
 
+//---
+
 static
 TArray<FFrameTime>
 FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
@@ -356,8 +358,8 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
     return keys;
 }
 
-TArray<double>
-FCinematicBoardSection::GetKeys() const //override
+void
+FCinematicBoardSection::BuildKeys() //override
 {
     UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
 
@@ -365,15 +367,21 @@ FCinematicBoardSection::GetKeys() const //override
 
     TArray<FFrameTime> keys_as_frame = FindKeysRecursive( BoardSection );
 
-    TArray<double> keys;
+    mKeys.Empty( mKeys.Num() );
     for( auto key : keys_as_frame )
     {
         FQualifiedFrameTime time( key, BoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() );
-        keys.AddUnique( time.AsSeconds() );
+        mKeys.AddUnique( time.AsSeconds() );
     }
-
-    return keys;
 }
+
+TArray<double>
+FCinematicBoardSection::GetKeys() const //override
+{
+    return mKeys;
+}
+
+//---
 
 int
 FCinematicBoardSection::GetMaxPlaneBindings() const
