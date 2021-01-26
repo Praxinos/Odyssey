@@ -16,7 +16,7 @@
 float
 SCinematicBoardSectionTitle::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
 {
-    return FEditorStyle::GetFontStyle( "NormalFont" ).Size + 8.f;
+    return SequencerSectionConstants::DefaultSectionHeight + 5.f;
 }
 
 void
@@ -27,12 +27,10 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
     mName = InArgs._Name;
 
     ChildSlot
+    .HAlign( EHorizontalAlignment::HAlign_Center )
     [
-        SNew( SBorder )
-        .HAlign( EHorizontalAlignment::HAlign_Center )
-        .BorderImage( FEditorStyle::GetBrush( "ToolPanel.GroupBorder" ) )
-        .BorderBackgroundColor( FLinearColor( .5f, .5f, .5f ) )
-        .Padding( 3 )
+        SNew( SBox )
+        .HeightOverride( GetHeight( iBoardSection ) )
         [
             SAssignNew( mWidgetName, SInlineEditableTextBlock )
             .Text( mName )
@@ -41,6 +39,25 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
             .OnTextCommitted( mBoardSection.ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
         ]
     ];
+}
+
+int32
+SCinematicBoardSectionTitle::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
+
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId++,
+        AllottedGeometry.ToPaintGeometry( AllottedGeometry.GetLocalSize(), FSlateLayoutTransform() ),
+        background_brush,
+        ESlateDrawEffect::None,
+        background_brush->GetTint( InWidgetStyle ) * FLinearColor( .5f, .5f, .5f ) // Same grey as TimeSlider widget
+    );
+
+    //---
+
+    return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }
 
 void

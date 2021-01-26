@@ -15,27 +15,44 @@
 float
 SCinematicBoardSectionPlane::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
 {
-    return FEditorStyle::GetFontStyle( "NormalFont" ).Size + 8.f;
+    return SequencerSectionConstants::DefaultSectionHeight + 5.f;
 }
 
-void SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+void
+SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
-
-    static FSlateColorBrush brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
 
     mBinding = InArgs._Binding;
 
     ChildSlot
     [
-        SNew( SBorder )
-        .BorderImage( &brush )
-        //.Padding( 5 )
+        SNew( SBox )
+        .HeightOverride( GetHeight( iBoardSection ) )
         [
             SNew( STextBlock )
             .Text( FText::FromString( mBinding.GetName() ) )
         ]
     ];
+}
+
+int32
+SCinematicBoardSectionPlane::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId++,
+        AllottedGeometry.ToPaintGeometry( AllottedGeometry.GetLocalSize(), FSlateLayoutTransform() ),
+        &background_brush,
+        ESlateDrawEffect::None,
+        background_brush.GetTint( InWidgetStyle )
+    );
+
+    //---
+
+    return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }
 
 //---
@@ -47,7 +64,8 @@ SCinematicBoardSectionPlanes::GetHeight( TSharedRef<const FCinematicBoardSection
     return iBoardSection->GetMaxPlaneBindings() * SCinematicBoardSectionPlane::GetHeight( iBoardSection );
 }
 
-void SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+void
+SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
 

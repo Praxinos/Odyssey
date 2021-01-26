@@ -17,13 +17,10 @@
 float
 SCinematicBoardSectionThumbnails::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
 {
-    float height = FEditorStyle::GetFontStyle( "NormalFont" ).Size + 8.f;
-
     auto* Settings = GetDefault<UMovieSceneUserThumbnailSettings>();
-    if( Settings->bDrawThumbnails )
-        height = Settings->ThumbnailSize.Y;
+    float height = Settings->bDrawThumbnails ? Settings->ThumbnailSize.Y : SequencerSectionConstants::DefaultSectionHeight;
 
-    return height + 2 * 15.f /* top/bottom film-border */;
+    return height + 2 * SequencerSectionConstants::DefaultSectionHeight /* top/bottom film-border */;
 }
 
 void
@@ -46,6 +43,7 @@ SCinematicBoardSectionThumbnails::GetHeight() const
 
 //---
 
+static
 FTimeToPixel
 ConstructTimeConverterForSection( const FGeometry& InSectionGeometry, const UMovieSceneSection& InSection )
 {
