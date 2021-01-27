@@ -30,6 +30,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
+#include "Helpers/SectionsHelpersConvert.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
@@ -312,14 +313,9 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
     // if we are on a shot subsequence
     if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
-        TArray<FFrameNumber> subkeys = MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
+        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
 
-        const FMovieSceneSequenceTransform InnerToOuterTransform = iBoardSection->OuterToInnerTransform().InverseLinearOnly();
-        for( auto subkey : subkeys )
-        {
-            const FFrameTime key = subkey * InnerToOuterTransform;
-            keys.Add( key );
-        }
+        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
 
         return keys;
     }
@@ -345,12 +341,7 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
             subkeys.Append( section_keys );
         }
 
-        const FMovieSceneSequenceTransform InnerToOuterTransform = iBoardSection->OuterToInnerTransform().InverseLinearOnly();
-        for( auto subkey : subkeys )
-        {
-            const FFrameTime key = subkey * InnerToOuterTransform;
-            keys.Add( key );
-        }
+        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
 
         return keys;
     }
@@ -365,14 +356,10 @@ FCinematicBoardSection::BuildKeys() //override
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameTime> keys_as_frame = FindKeysRecursive( BoardSection );
-
     mKeys.Empty( mKeys.Num() );
-    for( auto key : keys_as_frame )
-    {
-        FQualifiedFrameTime time( key, BoardSection->GetTypedOuter<UMovieScene>()->GetTickResolution() );
-        mKeys.AddUnique( time.AsSeconds() );
-    }
+
+    TArray<FFrameTime> keys_as_frame = FindKeysRecursive( BoardSection );
+    mKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
 TArray<double>

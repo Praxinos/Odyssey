@@ -10,5 +10,5 @@ class UMovieSceneSequence;
 class EPOSTRACKS_API MovieSceneSingleCameraCutHelpers
 {
 public:
-    static TArray<FFrameNumber> GetKeys( UMovieSceneSequence* iShotSequence );
+    static TArray<FFrameTime> GetKeys( UMovieSceneSequence* iShotSequence );
 };

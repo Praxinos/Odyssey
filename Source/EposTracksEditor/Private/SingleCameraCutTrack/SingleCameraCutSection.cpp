@@ -20,6 +20,7 @@
 #include "Camera/CameraComponent.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 
+#include "Helpers/SectionsHelpersConvert.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
@@ -64,15 +65,10 @@ void FSingleCameraCutSection::BuildKeys() //override
     if( !moviescene_sequence )
         return;
 
-    TArray<FFrameNumber> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetKeys( moviescene_sequence );
+    check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    for( auto key : keys_as_frame )
-    {
-        FFrameRate TickResolution = Section->GetTypedOuter<UMovieScene>()->GetTickResolution();
-
-        if( ensure( TimeSpace == ETimeSpace::Global ) ) // Should never be LocalSpace, it seems to only be settable inside child class
-            mKeys.AddUnique( key / TickResolution );
-    }
+    TArray<FFrameTime> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetKeys( moviescene_sequence );
+    mKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
 TArray<double> FSingleCameraCutSection::GetKeys() const //override

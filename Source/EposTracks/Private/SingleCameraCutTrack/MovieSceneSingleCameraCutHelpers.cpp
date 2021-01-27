@@ -13,10 +13,10 @@
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 //static
-TArray<FFrameNumber>
+TArray<FFrameTime>
 MovieSceneSingleCameraCutHelpers::GetKeys( UMovieSceneSequence* iSequence )
 {
-    TArray<FFrameNumber> keys;
+    TArray<FFrameTime> keys;
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
     if( !movie_scene )
