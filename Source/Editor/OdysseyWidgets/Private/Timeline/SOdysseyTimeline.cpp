@@ -153,18 +153,39 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	
 	const float linePosition = ( mScrubPosition - offset) * frameSize;
 
-	TArray<FVector2D> LinePoints;
+	/* TArray<FVector2D> LinePoints;
 	LinePoints.Add(FVector2D(linePosition, 0.f));
-	LinePoints.Add(FVector2D(linePosition, AllottedGeometry.GetLocalSize().Y));
+	LinePoints.Add(FVector2D(linePosition, AllottedGeometry.GetLocalSize().Y)); */
+	
+	FLinearColor lineColor = FLinearColor::Red;
+	lineColor.A = 0.3f;
 
-	FSlateDrawElement::MakeLines(
+	FSlateDrawElement::MakeBox(
+		OutDrawElements,
+		LayerId,
+		AllottedGeometry.ToPaintGeometry(FVector2D(linePosition - 8.0f, 0.f), FVector2D(17.0f, height)),
+		GenericBrush,
+		ESlateDrawEffect::None,
+		lineColor
+	);
+
+	FSlateDrawElement::MakeBox(
+		OutDrawElements,
+		LayerId,
+		AllottedGeometry.ToPaintGeometry(FVector2D(linePosition - 1.0f, 0.f), FVector2D(3.0f, height)),
+		GenericBrush,
+		ESlateDrawEffect::None,
+		FLinearColor::Red
+	);
+
+	/* FSlateDrawElement::MakeLines(
 		OutDrawElements,
 		LayerId,
 		AllottedGeometry.ToPaintGeometry(),
 		LinePoints,
 		ESlateDrawEffect::None,
 		FLinearColor::Red
-	);
+	); */
 
 	return LayerId;
 }
