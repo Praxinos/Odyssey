@@ -35,33 +35,65 @@ void SOdysseyTimeline::Construct(const FArguments& InArgs)
 		.Orientation(Orient_Horizontal)
 		.AlwaysShowScrollbar(false);
 
+	SAssignNew(mScrollBarV, SScrollBar)
+		.Orientation(Orient_Vertical)
+		.AlwaysShowScrollbar(false);
+
 	SAssignNew(mScrollBoxH, SScrollBox)
 		.Orientation(Orient_Horizontal)
 		.ExternalScrollbar(mScrollBarH)
 		.OnUserScrolled(this, &SOdysseyTimeline::OnScrollBarUserScrolled)
 		+ SScrollBox::Slot()
+		.VAlign(VAlign_Top)
 		[
 			SNew(SBox)
 			.MinDesiredWidth(this, &SOdysseyTimeline::GetScrollBoxHWidth)
+			.Clipping(EWidgetClipping::ClipToBoundsAlways)
 			[
 				mContent.ToSharedRef()
 			]
 		];
 
+	SAssignNew(mScrollBoxV, SScrollBox)
+		.Orientation(Orient_Vertical)
+		.ExternalScrollbar(mScrollBarV)
+		+ SScrollBox::Slot()
+		.VAlign(VAlign_Top)
+		[
+			SNew(SBox)
+			.MinDesiredWidth(this, &SOdysseyTimeline::GetScrollBoxVHeight)
+			.Clipping(EWidgetClipping::ClipToBoundsAlways)
+			[
+				mScrollBoxH.ToSharedRef()
+			]
+		];
+
 	ChildSlot
-	.Padding(0.f ,defaultHeight, 0.f, 0.f)
+	.Padding(0.f, defaultHeight, 0.f, 0.f) // padding to draw the header
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
+		SNew(SHorizontalBox)
+		.Clipping(EWidgetClipping::ClipToBounds)
+		+ SHorizontalBox::Slot()
+		.FillWidth(1.0f) //content fills the remaining width
 		[
-			mScrollBoxH.ToSharedRef()
+			SNew(SVerticalBox)
+			.Clipping(EWidgetClipping::ClipToBounds)
+			+ SVerticalBox::Slot()
+			.FillHeight(1.0f) //content fills the remaining height
+			[
+				mScrollBoxV.ToSharedRef()
+			]
+			+ SVerticalBox::Slot()
+			.Padding(0.0f, 1.0f, 0.0f, 0.0f)
+			.AutoHeight() //scrollbar takes all the space it needs
+			[
+				mScrollBarH.ToSharedRef()
+			]
 		]
-		+ SVerticalBox::Slot() //Spacer
-		+ SVerticalBox::Slot()
-		.AutoHeight()
+		+ SHorizontalBox::Slot()
+		.AutoWidth() //scrollbar takes all the space it needs
 		[
-			mScrollBarH.ToSharedRef()
+			mScrollBarV.ToSharedRef()
 		]
 	];
 }
@@ -350,6 +382,16 @@ SOdysseyTimeline::GetScrollBoxHWidth() const
 		return FOptionalSize(0.0f);
 
 	float hSize = mScrollBoxH->GetCachedGeometry().GetLocalSize().X - 1.0f;
+	return FOptionalSize(hSize);
+}
+
+FOptionalSize
+SOdysseyTimeline::GetScrollBoxVHeight() const
+{
+	if (!mScrollBoxV.IsValid())
+		return FOptionalSize(0.0f);
+
+	float hSize = mScrollBoxV->GetCachedGeometry().GetLocalSize().Y - 1.0f;
 	return FOptionalSize(hSize);
 }
 

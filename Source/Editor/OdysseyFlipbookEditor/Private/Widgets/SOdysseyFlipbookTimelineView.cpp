@@ -139,6 +139,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
         ]
 
 		+ SVerticalBox::Slot()
+        .FillHeight(1.0f)
 		.Padding(0, 0, 0, 0)
 		[
 			SAssignNew(mTimelineWidget, SOdysseyTimeline)
