@@ -51,6 +51,7 @@ private:
 
 private:
     //Play/Stop Methods
+    void PlayOrPause(bool iBackward);
     void Play(bool iBackward);
     void Pause();
     void Stop();

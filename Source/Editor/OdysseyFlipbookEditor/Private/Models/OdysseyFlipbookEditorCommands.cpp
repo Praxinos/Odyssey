@@ -17,8 +17,8 @@ FOdysseyFlipbookEditorCommands::RegisterCommands()
 	UI_COMMAND(AddNewKeyFrameBefore, "Insert Key Frame Before", "Adds a new key frame to the flipbook before the selection.", EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::I ));
 	UI_COMMAND(AddNewKeyFrameAfter, "Insert Key Frame After", "Adds a new key frame to the flipbook after the selection.", EUserInterfaceActionType::Button, FInputChord( EKeys::I ));
 
-	UI_COMMAND(PlayForward, "Play Forward", "Plays the Flipbook forward", EUserInterfaceActionType::Button, FInputChord());
-    UI_COMMAND(PlayBackward, "Play Backward", "Plays the Flipbook backward", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(PlayForward, "Play Forward / Pause", "Plays the Flipbook forward or pauses if already playing forward", EUserInterfaceActionType::Button, FInputChord());
+    UI_COMMAND(PlayBackward, "Play Backward / Pause", "Plays the Flipbook backward or pauses if already playing backward", EUserInterfaceActionType::Button, FInputChord());
     UI_COMMAND(Pause, "Pause", "Pauses the Flipbook playback", EUserInterfaceActionType::Button, FInputChord( EKeys::SpaceBar ));
     UI_COMMAND(Stop, "Stop", "Stops the Flipbook playback", EUserInterfaceActionType::Button, FInputChord());
     UI_COMMAND(PreviousFrame, "Go To Previous Frame", "Moves the playback position to the previous frame", EUserInterfaceActionType::Button, FInputChord( EKeys::Left ));

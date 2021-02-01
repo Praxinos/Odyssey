@@ -327,6 +327,18 @@ SOdysseyFlipbookTimelineView::OnScrubPositionChanged(float iOldPosition)
 }
 
 void
+SOdysseyFlipbookTimelineView::PlayOrPause(bool iBackward)
+{
+    if (mIsPlaying && mIsPlayingBackward == iBackward)
+    {
+        Pause();
+        return;
+    }
+
+    Play(iBackward);
+}
+
+void
 SOdysseyFlipbookTimelineView::Play(bool iBackward)
 {
     //Allow playing in the other direction when we are already playing in a direction
@@ -770,8 +782,8 @@ SOdysseyFlipbookTimelineView::BindCommands(const TSharedRef<FUICommandList>& iCo
 	iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrame)));
     iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrameAfter, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameAfter)));
     iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrameBefore, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameBefore)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayForward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Play, false)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayBackward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Play, true)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayForward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::PlayOrPause, false)));
+    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayBackward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::PlayOrPause, true)));
     iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().Pause, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Pause)));
     iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().Stop, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Stop)));
     iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PreviousFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousFrame)));
