@@ -13,16 +13,6 @@
 
 //---
 
-//static
-float
-SCinematicBoardSectionThumbnails::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
-{
-    auto* Settings = GetDefault<UMovieSceneUserThumbnailSettings>();
-    float height = Settings->bDrawThumbnails ? Settings->ThumbnailSize.Y : SequencerSectionConstants::DefaultSectionHeight;
-
-    return height + 2 * SequencerSectionConstants::DefaultSectionHeight /* top/bottom film-border */;
-}
-
 void
 SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
@@ -31,14 +21,19 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     ChildSlot
     [
         SNew( SBox )
-        .HeightOverride( this, &SCinematicBoardSectionThumbnails::GetHeight )
     ];
 }
 
-FOptionalSize
-SCinematicBoardSectionThumbnails::GetHeight() const
+FVector2D
+SCinematicBoardSectionThumbnails::ComputeDesiredSize( float ) const //override
 {
-    return GetHeight( mBoardSection.ToSharedRef() );
+    FVector2D size = GetDesiredSize();
+
+    auto* Settings = GetDefault<UMovieSceneUserThumbnailSettings>();
+    size.Y = Settings->bDrawThumbnails ? Settings->ThumbnailSize.Y : SequencerSectionConstants::DefaultSectionHeight;
+    size.Y = size.Y + 2 * SequencerSectionConstants::DefaultSectionHeight /* top/bottom film-border */;
+
+    return size;
 }
 
 //---
@@ -141,7 +136,7 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     //---
 
-    mBoardSection->OnPaintSectionThumbnails( painter );
+    painter.LayerId = mBoardSection->FKeyThumbnailSection::OnPaintSection( painter );
 
     //---
 

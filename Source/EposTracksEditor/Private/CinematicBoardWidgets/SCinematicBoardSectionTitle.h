@@ -14,13 +14,8 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionTitle
     : public SCompoundWidget
 {
 public:
-    static float GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection );
-
-public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionTitle )
-        : _Name()
         {}
-        SLATE_ATTRIBUTE( FText, Name )
     SLATE_END_ARGS()
 
     // Construct the widget
@@ -32,10 +27,12 @@ public:
 public:
     virtual void EnterRename();
 
+protected:
+    // SWidget overrides.
+    virtual FVector2D ComputeDesiredSize( float ) const override;
+
 private:
     TSharedPtr<FCinematicBoardSection> mBoardSection;
 
     TSharedPtr<SInlineEditableTextBlock> mWidgetName;
-
-    TAttribute<FText> mName;
 };

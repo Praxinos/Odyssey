@@ -11,13 +11,6 @@
 
 //---
 
-//static
-float
-SCinematicBoardSectionPlane::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
-{
-    return SequencerSectionConstants::DefaultSectionHeight + 5.f;
-}
-
 void
 SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
@@ -28,7 +21,6 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
     ChildSlot
     [
         SNew( SBox )
-        .HeightOverride( GetHeight( iBoardSection ) )
         [
             SNew( STextBlock )
             .Text( FText::FromString( mBinding.GetName() ) )
@@ -36,9 +28,21 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
     ];
 }
 
+FVector2D
+SCinematicBoardSectionPlane::ComputeDesiredSize( float ) const //override
+{
+    FVector2D size = GetDesiredSize();
+    size.Y = SequencerSectionConstants::DefaultSectionHeight + 5.f;
+
+    return size;
+}
+
 int32
 SCinematicBoardSectionPlane::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
+    if( !mBinding.GetGuid().IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
     static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
 
     FSlateDrawElement::MakeBox(
@@ -57,13 +61,6 @@ SCinematicBoardSectionPlane::OnPaint( const FPaintArgs& Args, const FGeometry& A
 
 //---
 
-//static
-float
-SCinematicBoardSectionPlanes::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
-{
-    return iBoardSection->GetMaxPlaneBindings() * SCinematicBoardSectionPlane::GetHeight( iBoardSection );
-}
-
 void
 SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
@@ -72,13 +69,23 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     TArray<FMovieScenePossessable> possessables( mBoardSection->GetPlaneBindings() );
 
     TSharedRef<SVerticalBox> planes = SNew( SVerticalBox );
-    for( int i = 0; i < possessables.Num(); i++ )
+    for( int i = 0; i < mBoardSection->GetMaxPlaneBindings(); i++ )
     {
         planes->AddSlot()
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlane, mBoardSection.ToSharedRef() )
-            .Binding( possessables[i] )
+            .Binding( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() )
+
+            // This doesn't work because this vertical box won't have the same size for all sections
+            // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
+            // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
+            //!possessables.IsValidIndex( i )
+            //?
+            //SNullWidget::NullWidget
+            //:
+            //SNew( SCinematicBoardSectionPlane, mBoardSection.ToSharedRef() )
+            //.Binding( possessables[i] )
         ];
     }
 

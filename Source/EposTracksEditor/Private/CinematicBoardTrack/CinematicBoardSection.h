@@ -15,6 +15,7 @@ class FCinematicBoardTrackEditor;
 class FMenuBuilder;
 class FSequencerSectionPainter;
 class FTrackEditorThumbnailPool;
+class SCinematicBoardSectionLayout;
 class SCinematicBoardSectionTitle;
 class UMovieSceneCinematicBoardSection;
 
@@ -64,11 +65,6 @@ public:
     // FKeyThumbnailSection interface
     virtual void BuildKeys() override;
     virtual TArray<double> GetKeys() const override; //TODO: maybe move it to UMovieScene*Section ? but what to do with TimeSpace ?
-
-    //---
-
-    // Draw the thumbnails by calling Super::OnPaintSection(...)
-    int32 OnPaintSectionThumbnails( FSequencerSectionPainter& ioPainter ) const;
 
 private:
 
@@ -123,6 +119,7 @@ private:
     friend class SCinematicBoardSectionThumbnails;
     friend class SCinematicBoardSectionPlanes;
 
+    TSharedPtr<SCinematicBoardSectionLayout> mWidgetLayout;
     TSharedPtr<SCinematicBoardSectionTitle> mWidgetTitle;
 
 public:

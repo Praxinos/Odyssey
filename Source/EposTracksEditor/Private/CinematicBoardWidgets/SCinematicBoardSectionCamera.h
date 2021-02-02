@@ -13,13 +13,8 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionCamera
     : public SCompoundWidget
 {
 public:
-    static float GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection );
-
-public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionCamera )
-        : _Binding()
         {}
-        SLATE_ARGUMENT( FMovieScenePossessable, Binding )
     SLATE_END_ARGS()
 
     // Construct the widget
@@ -30,8 +25,10 @@ public:
 
 public:
 
+protected:
+    // SWidget overrides.
+    virtual FVector2D ComputeDesiredSize( float ) const override;
+
 private:
     TSharedPtr<FCinematicBoardSection> mBoardSection;
-
-    FMovieScenePossessable mBinding;
 };

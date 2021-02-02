@@ -102,12 +102,10 @@ FCinematicBoardSection::GetSectionTitle() const
 float
 FCinematicBoardSection::GetSectionHeight() const
 {
-    TSharedRef<const FCinematicBoardSection> me = SharedThis( this );
+    if( !mWidgetLayout.IsValid() )
+        return 50.f; // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
 
-    return SCinematicBoardSectionTitle::GetHeight( me )
-            + SCinematicBoardSectionCamera::GetHeight( me )
-            + SCinematicBoardSectionThumbnails::GetHeight( me )
-            + SCinematicBoardSectionPlanes::GetHeight( me );
+    return mWidgetLayout->GetDesiredSize().Y;
 }
 
 FMargin
@@ -456,16 +454,14 @@ FCinematicBoardSection::GenerateSectionWidget()
 {
     TSharedRef<FCinematicBoardSection> me = SharedThis( this );
 
-    return SNew( SCinematicBoardSectionLayout, me )
+    return SAssignNew( mWidgetLayout, SCinematicBoardSectionLayout, me )
         .Title()
         [
             SAssignNew( mWidgetTitle, SCinematicBoardSectionTitle, me )
-            .Name( this, &FCinematicBoardSection::HandleThumbnailTextBlockText )
         ]
         .Camera()
         [
             SNew( SCinematicBoardSectionCamera, me )
-            .Binding( GetCameraBinding() )
         ]
         .Thumbnails()
         [
@@ -501,14 +497,6 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
     }
 
     FKeyThumbnailSection::Tick( iAllottedGeometry, iClippedGeometry, iCurrentTime, iDeltaTime );
-}
-
-int32
-FCinematicBoardSection::OnPaintSectionThumbnails( FSequencerSectionPainter& ioPainter ) const
-{
-    FKeyThumbnailSection::OnPaintSection( ioPainter );
-
-    return ioPainter.LayerId;
 }
 
 const FSequencerSectionPainter*

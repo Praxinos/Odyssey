@@ -11,31 +11,29 @@
 
 //---
 
-//static
-float
-SCinematicBoardSectionCamera::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
-{
-    return SequencerSectionConstants::DefaultSectionHeight + 5.f;
-}
-
 void
 SCinematicBoardSectionCamera::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
 
-    mBinding = InArgs._Binding;
-
     ChildSlot
     [
         SNew( SBox )
-        .HeightOverride( GetHeight( iBoardSection ) )
         //[
         //    SNew( STextBlock )
-        //    .Text( FText::FromString( mBinding.GetName() ) )
+        //    .Text( GetBindingName() ) )
         //]
     ];
 }
 
+FVector2D
+SCinematicBoardSectionCamera::ComputeDesiredSize( float ) const //override
+{
+    FVector2D size = GetDesiredSize();
+    size.Y = SequencerSectionConstants::DefaultSectionHeight + 5.f;
+
+    return size;
+}
 
 static
 FTimeToPixel

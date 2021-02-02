@@ -13,9 +13,6 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionThumbnails
     : public SCompoundWidget
 {
 public:
-    static float GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection );
-
-public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionThumbnails )
         {}
     SLATE_END_ARGS()
@@ -29,7 +26,8 @@ public:
 public:
 
 protected:
-    FOptionalSize GetHeight() const;
+    // SWidget overrides.
+    virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
     TSharedPtr<FCinematicBoardSection>    mBoardSection;

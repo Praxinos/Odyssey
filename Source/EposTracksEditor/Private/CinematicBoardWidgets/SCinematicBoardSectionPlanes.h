@@ -13,9 +13,6 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlane
     : public SCompoundWidget
 {
 public:
-    static float GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection );
-
-public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionPlane )
         : _Binding()
         {}
@@ -30,6 +27,10 @@ public:
 
 public:
 
+protected:
+    // SWidget overrides.
+    virtual FVector2D ComputeDesiredSize( float ) const override;
+
 private:
     TSharedPtr<FCinematicBoardSection> mBoardSection;
 
@@ -41,9 +42,6 @@ private:
 class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlanes
     : public SCompoundWidget
 {
-public:
-    static float GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection );
-
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionPlanes )
         {}

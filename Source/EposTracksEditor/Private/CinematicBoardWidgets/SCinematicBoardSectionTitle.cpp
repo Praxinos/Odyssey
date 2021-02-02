@@ -12,33 +12,32 @@
 
 //---
 
-//static
-float
-SCinematicBoardSectionTitle::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
-{
-    return SequencerSectionConstants::DefaultSectionHeight + 5.f;
-}
-
 void
 SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
 
-    mName = InArgs._Name;
-
     ChildSlot
     .HAlign( EHorizontalAlignment::HAlign_Center )
     [
         SNew( SBox )
-        .HeightOverride( GetHeight( iBoardSection ) )
         [
             SAssignNew( mWidgetName, SInlineEditableTextBlock )
-            .Text( mName )
+            .Text( mBoardSection.ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockText )
             .ColorAndOpacity( FLinearColor( .75f, .75f, .75f ) )
             .ShadowOffset( FVector2D( 1, 1 ) )
             .OnTextCommitted( mBoardSection.ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
         ]
     ];
+}
+
+FVector2D
+SCinematicBoardSectionTitle::ComputeDesiredSize( float ) const //override
+{
+    FVector2D size = GetDesiredSize();
+    size.Y = SequencerSectionConstants::DefaultSectionHeight + 5.f;
+
+    return size;
 }
 
 int32

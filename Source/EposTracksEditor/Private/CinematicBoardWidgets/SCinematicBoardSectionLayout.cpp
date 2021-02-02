@@ -11,16 +11,6 @@
 
 //---
 
-//static
-float
-SCinematicBoardSectionLayout::GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection )
-{
-    return SCinematicBoardSectionTitle::GetHeight( iBoardSection )
-        + SCinematicBoardSectionCamera::GetHeight( iBoardSection )
-        + SCinematicBoardSectionThumbnails::GetHeight( iBoardSection )
-        + SCinematicBoardSectionPlanes::GetHeight( iBoardSection );
-}
-
 void
 SCinematicBoardSectionLayout::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
@@ -29,7 +19,7 @@ SCinematicBoardSectionLayout::Construct( const FArguments& InArgs, TSharedRef<FC
     ChildSlot
     // Because in ...\Sequencer\Private\DisplayNodes\SequencerTrackNode.cpp - FSequencerTrackNode::GetNodeHeight(), there is an additional padding 2 * SequencerNodeConstants::CommonPadding for the 'mother' section
     // and VAlign can't be used, because f.e., one shot section with planes and one board section without, the content of the board section won't be at the same level as in shot section
-    .Padding( 0.f, 4.f )
+    //.Padding( 0.f, 4.f )
     [
         SNew(SVerticalBox)
         + SVerticalBox::Slot()

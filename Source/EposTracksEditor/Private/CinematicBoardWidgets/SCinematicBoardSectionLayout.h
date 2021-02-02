@@ -13,9 +13,6 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionLayout
     : public SCompoundWidget
 {
 public:
-    static float GetHeight( TSharedRef<const FCinematicBoardSection> iBoardSection );
-
-public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionLayout )
         {}
         SLATE_NAMED_SLOT( FArguments, Title )
