@@ -64,6 +64,10 @@ SOdysseyBrushExposedParameters::NotifyPreChange( FProperty* PropertyAboutToChang
 void
 SOdysseyBrushExposedParameters::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged )
 {
+    //Call the callback only if the change is not an interactive change (while moving a slider), but when it is a real change (when releasing a slider)
+    if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive)
+        return;
+
     OnParameterChangedCallback.ExecuteIfBound();
 }
 
