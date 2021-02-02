@@ -23,7 +23,7 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorToolkit();
     FOdysseyFlipbookEditorToolkit();
-	void Init(const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UPaperFlipbook* iFlipbook);
+	void Init(const FName& iAppIdentifier, UPaperFlipbook* iFlipbook);
 
 protected:
     //FAssetEditorToolkit override

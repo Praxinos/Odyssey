@@ -1,11 +1,12 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
+#include "OdysseyPainterEditorModule.h"
+
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
 #include "ISettingsModule.h"
 #include "LevelEditor.h"
-#include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
@@ -29,41 +30,47 @@ public:
    FOdysseyPainterEditorModule
 -----------------------------------------------------------------------------*/
 
-class FOdysseyPainterEditorModule
-    : public IModuleInterface
+
+void
+FOdysseyPainterEditorModule::StartupModule()
 {
-public:
-    // IModuleInterface interface
+    // Perform test
+    SimpleTestFramework f;
+    f.RunTest();
 
-    virtual void StartupModule() override
-    {
-        // Perform test
-        SimpleTestFramework f;
-        f.RunTest();
+    RegisterSettings();
+}
 
-        // register settings
-        ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+void
+FOdysseyPainterEditorModule::ShutdownModule()
+{
+    UnregisterSettings();
+}
 
-        if( settingsModule )
-        {
-            settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADPainterEditor"
-                                              , LOCTEXT( "OdysseyPainterEditorSettingsName", "ILIAD Painter Editor" )
-                                              , LOCTEXT( "OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
-                                              , GetMutableDefault<UOdysseyPainterEditorSettings>() );
-        }
-    }
+void
+FOdysseyPainterEditorModule::RegisterSettings()
+{
+    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
-    virtual void ShutdownModule() override
-    {
-        // unregister settings
-        ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+    if( !settingsModule )
+        return;
 
-        if( settingsModule )
-        {
-            settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyPainterEditor" );
-        }
-    }
-};
+    settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADPainterEditor"
+                                        , LOCTEXT( "OdysseyPainterEditorSettingsName", "ILIAD Painter Editor" )
+                                        , LOCTEXT( "OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+                                        , GetMutableDefault<UOdysseyPainterEditorSettings>() );
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterSettings()
+{
+    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+
+    if( !settingsModule )
+        return;
+        
+    settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyPainterEditor" );
+}
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );
 

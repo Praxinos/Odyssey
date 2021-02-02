@@ -7,12 +7,9 @@
 #include "OdysseyPainterEditorData.h"
 #include "OdysseyPainterEditorGUI.h"
 
-#include <ULIS3>
-
-class UTexture;
-
 /**
- * Implements an Editor toolkit for textures.
+ * Implements an Editor toolkit for the Painter Editor.
+ * The toolkit is the main entry point for the Painter Editor
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolkit
     : public FAssetEditorToolkit
@@ -24,7 +21,8 @@ public:
     FOdysseyPainterEditorToolkit();
 
 public:
-    void InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit);
+    //void InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit);
+    void InitPainterEditorToolkit(const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit); //TODO: Rename to Init() if possible
 
 protected:
     // FAssetEditorToolkit interface
@@ -42,12 +40,5 @@ protected:
 
 private:
 	void InitializeExtenders();
-    
-public:
-	/* void BeginTransaction(const FText& iSessionName);
-	void MarkTransactionAsDirty();
-	void EndTransaction();
-
-    void SetColor( const ::ul3::FPixelValue& iColor ); */
 };
 

@@ -27,7 +27,7 @@ FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit()
 }
 
 void
-FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UPaperFlipbook* iFlipbook)
+FOdysseyFlipbookEditorToolkit::Init(const FName& iAppIdentifier, UPaperFlipbook* iFlipbook)
 {
 	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook));
 	mOnSpriteTextureChangedHandle = flipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditorToolkit::OnSpriteTextureChanged);
@@ -61,7 +61,7 @@ FOdysseyFlipbookEditorToolkit::Init(const EToolkitMode::Type iMode, const TShare
         objectsToEdit.Add(texture);
 	}
 
-	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iMode, iInitToolkitHost, iAppIdentifier, objectsToEdit);
+	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iAppIdentifier, objectsToEdit);
 
 	TSharedPtr<SDockTab> OwnerTab = GetTabManager()->GetOwnerTab();
 	TSharedPtr<SWindow> parentWindow = NULL;
@@ -227,7 +227,7 @@ FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
 {
 	UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(iObject);
 	IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-	odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor(EToolkitMode::Standalone, NULL, flipbook);
+	odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor(flipbook);
 }
 
 bool

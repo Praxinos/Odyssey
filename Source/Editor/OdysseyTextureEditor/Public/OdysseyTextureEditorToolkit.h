@@ -23,7 +23,7 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorToolkit();
     FOdysseyTextureEditorToolkit();
-	void Init(const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UTexture2D* iTexture);
+	void Init(const FName& iAppIdentifier, UTexture2D* iTexture);
 protected:
     //FAssetEditorToolkit override
     virtual void SaveAsset_Execute() override;

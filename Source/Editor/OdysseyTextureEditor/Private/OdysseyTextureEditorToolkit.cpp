@@ -24,7 +24,7 @@ FOdysseyTextureEditorToolkit::FOdysseyTextureEditorToolkit()
 }
 
 void
-FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, UTexture2D* iTexture)
+FOdysseyTextureEditorToolkit::Init(const FName& iAppIdentifier, UTexture2D* iTexture)
 {
 	mData = MakeShareable(new FOdysseyTextureEditorData(iTexture));
 	mGUI = MakeShareable(new FOdysseyTextureEditorGUI());
@@ -37,7 +37,7 @@ FOdysseyTextureEditorToolkit::Init(const EToolkitMode::Type iMode, const TShared
 	TArray<UObject*> objectsToEdit;
 	objectsToEdit.Add(iTexture);
 
-	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iMode, iInitToolkitHost, iAppIdentifier, objectsToEdit);
+	FOdysseyPainterEditorToolkit::InitPainterEditorToolkit(iAppIdentifier, objectsToEdit);
 }
 
 //--------------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
 {
 	UTexture2D* texture = Cast<UTexture2D>(iObject);
 	IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>("OdysseyTextureEditor");
-	odysseyTextureEditorModule->CreateOdysseyTextureEditor(EToolkitMode::Standalone, NULL, texture);
+	odysseyTextureEditorModule->CreateOdysseyTextureEditor(texture);
 }
 
 bool

@@ -6,26 +6,29 @@
 class FOdysseyTextureEditorModule
 	: public IOdysseyTextureEditorModule
 {
-public:
-    virtual TSharedRef<FOdysseyTextureEditorToolkit> CreateOdysseyTextureEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UTexture2D* iTexture ) override;
-
-	TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
 
 public:
+	// IOdysseyTextureEditorModule interface
+    virtual TSharedRef<FOdysseyTextureEditorToolkit> CreateOdysseyTextureEditor( UTexture2D* iTexture ) override;
+
     // IModuleInterface interface
     virtual void StartupModule() override;
 
     virtual void ShutdownModule() override;
-    
-private:
-    void RegisterAssetTypeAction(IAssetTools& ioAssetTools, TSharedRef<IAssetTypeActions> iAction);
 
+public:
+	//Getters
+	TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
+
+private:
+    void RegisterAssetTypeActions();
+	void UnregisterAssetTypeActions();
+	void RegisterSettings();
+	void UnregisterSettings();
     
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TArray< TSharedPtr<IAssetTypeActions> > mCreatedAssetTypeActions;
-
-	EAssetTypeCategories::Type mOdysseyPainterCategory;
+	TArray< TSharedPtr<IAssetTypeActions> > mTypeActions;
 
 	// Holds the menu extensibility manager.
 	TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;

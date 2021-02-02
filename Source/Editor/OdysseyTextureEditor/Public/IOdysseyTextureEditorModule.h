@@ -14,5 +14,5 @@ class IOdysseyTextureEditorModule
 	, public IHasMenuExtensibility
 {
 public:
-    virtual TSharedRef<FOdysseyTextureEditorToolkit> CreateOdysseyTextureEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UTexture2D* iTexture ) = 0;
+    virtual TSharedRef<FOdysseyTextureEditorToolkit> CreateOdysseyTextureEditor( UTexture2D* iTexture ) = 0;
 };

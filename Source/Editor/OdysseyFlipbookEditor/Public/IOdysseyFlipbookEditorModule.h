@@ -14,5 +14,5 @@ class IOdysseyFlipbookEditorModule
 	, public IHasMenuExtensibility
 {
 public:
-    virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UPaperFlipbook* iFlipbook ) = 0;
+    virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook ) = 0;
 };
