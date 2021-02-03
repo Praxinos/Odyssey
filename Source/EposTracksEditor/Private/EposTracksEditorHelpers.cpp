@@ -231,7 +231,7 @@ EposTracksEditorHelpers::GenerateNewSectionName( const TArray<UMovieSceneSection
         uint32 nextShotNumber = projectSettings->FirstShotNumber;
         uint32 nextTakeNumber = projectSettings->FirstTakeNumber;
 
-        if( MovieSceneToolHelpers::ParseShotName( nextShot->GetBoardDisplayName(), nextShotPrefix, nextShotNumber, nextTakeNumber ) )
+        if( MovieSceneToolHelpers::ParseShotName( nextShot->GetBoardDisplayName(), nextShotPrefix, nextShotNumber, nextTakeNumber ) ) //TODO: use certainly nextShot->GetBoardDisplayName() AND nextShot->SubSequence()->GetDisplayName() as nextShot->GetBoardDisplayName() may be empty !
         {
             uint32 newShotNumber = nextShotNumber - projectSettings->ShotIncrement;
             if( newShotNumber < 0 )

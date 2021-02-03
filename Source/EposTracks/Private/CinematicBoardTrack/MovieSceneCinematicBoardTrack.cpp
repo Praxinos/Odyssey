@@ -50,14 +50,14 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 
-#if WITH_EDITOR
-
-    if( iSequence != nullptr )
-    {
-        newBoardSection->SetBoardDisplayName( iSequence->GetDisplayName().ToString() );
-    }
-
-#endif
+//#if WITH_EDITOR
+//
+//    if( iSequence != nullptr )
+//    {
+//        newBoardSection->SetBoardDisplayName( iSequence->GetDisplayName().ToString() );
+//    }
+//
+//#endif
 
     // When a new sequence is added, sort all sequences to ensure they are in the correct order
     MovieSceneHelpers::SortConsecutiveSections( Sections );

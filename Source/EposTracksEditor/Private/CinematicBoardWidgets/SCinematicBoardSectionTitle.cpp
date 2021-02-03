@@ -20,24 +20,47 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
     ChildSlot
     .HAlign( EHorizontalAlignment::HAlign_Center )
     [
-        SNew( SBox )
+        SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign( EHorizontalAlignment::HAlign_Center )
+        .Padding( 0.f, 4.f )
         [
             SAssignNew( mWidgetName, SInlineEditableTextBlock )
-            .Text( mBoardSection.ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockText )
-            .ColorAndOpacity( FLinearColor( .75f, .75f, .75f ) )
+            .Text_Lambda( [this] { return HandleText(); } )
+            .ColorAndOpacity_Lambda( [this] { return HandleTextColor(); } )
             .ShadowOffset( FVector2D( 1, 1 ) )
             .OnTextCommitted( mBoardSection.ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
         ]
     ];
 }
 
-FVector2D
-SCinematicBoardSectionTitle::ComputeDesiredSize( float ) const //override
+FText
+SCinematicBoardSectionTitle::HandleText() const
 {
-    FVector2D size = GetDesiredSize();
-    size.Y = SequencerSectionConstants::DefaultSectionHeight + 5.f;
+    UMovieSceneSubSection& subsection = mBoardSection->GetSubSectionObject();
+    FText section_text = mBoardSection->HandleThumbnailTextBlockText();
+    FText sequence_text = subsection.GetSequence()->GetDisplayName();
 
-    return size;
+    return !section_text.IsEmpty()
+        ?
+        section_text
+        :
+        FText::Format( FText::FromString( "<{0}>" ), sequence_text );
+}
+
+FLinearColor
+SCinematicBoardSectionTitle::HandleTextColor() const
+{
+    UMovieSceneSubSection& subsection = mBoardSection->GetSubSectionObject();
+    FText section_text = mBoardSection->HandleThumbnailTextBlockText();
+    FText sequence_text = subsection.GetSequence()->GetDisplayName();
+
+    return !section_text.IsEmpty()
+        ?
+        FLinearColor( .75f, .75f, .75f )
+        :
+        FLinearColor( .25f, .25f, .25f );
 }
 
 int32

@@ -28,8 +28,8 @@ public:
     virtual void EnterRename();
 
 protected:
-    // SWidget overrides.
-    virtual FVector2D ComputeDesiredSize( float ) const override;
+    FText           HandleText() const;
+    FLinearColor    HandleTextColor() const;
 
 private:
     TSharedPtr<FCinematicBoardSection> mBoardSection;
