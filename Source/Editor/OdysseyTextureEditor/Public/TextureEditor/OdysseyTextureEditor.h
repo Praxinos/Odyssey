@@ -14,7 +14,7 @@ class FOdysseyTextureEditorController;
  * Implements an Editor for textures.
  */
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditor
-    : public TOdysseyPainterEditor<UTexture2D>
+    : public FOdysseyPainterEditor
 {
 public:
     // Construction / Destruction
@@ -22,7 +22,7 @@ public:
     FOdysseyTextureEditor();
 
 public:
-    virtual void Init();
+    void InitWithTexture(UTexture2D* iTexture);
 
 public:
     virtual bool OnCloseRequested();

@@ -14,7 +14,7 @@ class FOdysseyFlipbookEditorController;
  * Implements an Editor for flipbooks.
  */
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
-    : public TOdysseyPainterEditor<UPaperFlipbook>
+    : public FOdysseyPainterEditor
 {
 public:
     // Construction / Destruction
@@ -22,10 +22,9 @@ public:
     FOdysseyFlipbookEditor();
 
 public:
-    virtual void Init();
+    void InitWithFlipbook(UPaperFlipbook* iFlipbook);
 
 public:
-    virtual TArray<UObject*> GetAllEditedObjects() override;
     virtual void OnToolkitInitialized() override;
     virtual bool OnCloseRequested();
     virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const override;

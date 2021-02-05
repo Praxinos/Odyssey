@@ -25,18 +25,18 @@ FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
-	TOdysseyPainterEditor<UPaperFlipbook>()
+	FOdysseyPainterEditor()
 {
 }
 
 void
-FOdysseyFlipbookEditor::Init()
+FOdysseyFlipbookEditor::InitWithFlipbook(UPaperFlipbook* iFlipbook)
 {
-	TOdysseyPainterEditor<UPaperFlipbook>::Init();
+	FOdysseyPainterEditor::Init();
 
 	//----
 
-	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(mEditedObject));
+	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook));
 	mOnSpriteTextureChangedHandle = flipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditor::OnSpriteTextureChanged);
 
 	//----
@@ -69,32 +69,6 @@ FOdysseyFlipbookEditor::OnToolkitInitialized()
 	}
 
 	SetTimelineNavigationShortcuts(parentWindow);
-}
-
-TArray<UObject*>
-FOdysseyFlipbookEditor::GetAllEditedObjects()
-{
-	TArray<UObject*> objects;
-	objects.Add(mEditedObject);
-
-	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(mEditedObject));
-
-	for (int32 index = 0; index < mEditedObject->GetNumKeyFrames(); ++index)
-	{
-		UPaperSprite* sprite = flipbookWrapper->GetKeyframeSprite(index);
-        if (!sprite)
-            continue;
-
-		objects.Add(sprite);
-
-		UTexture2D* texture = flipbookWrapper->GetKeyframeTexture(index);
-        if (!texture)
-            continue;
-            
-        objects.Add(texture);
-	}
-
-	return objects;
 }
 
 void

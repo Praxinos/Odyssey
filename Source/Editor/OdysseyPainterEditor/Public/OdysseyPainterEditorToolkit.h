@@ -3,7 +3,7 @@
 
 #pragma once
 
-class IOdysseyPainterEditor;
+class FOdysseyPainterEditor;
 
 /**
  * Implements an Editor toolkit for the Painter Editor.
@@ -18,7 +18,7 @@ public:
     FOdysseyPainterEditorToolkit(const FName& iAppIdentifier);
 
 public:
-    void Init(TSharedPtr<IOdysseyPainterEditor> iEditor);
+    void Init(TSharedPtr<FOdysseyPainterEditor> iEditor, UObject* iEditedObject);
 
 public:
     virtual void AddEditingObject(UObject* Object);
@@ -41,13 +41,17 @@ protected:
 
 protected:
 	virtual void OpenAsset(UObject* iObject) = 0;
+    virtual TArray<UObject*> GetAllEditedObjects();
 
 private:
 	void InitMenu();
 
+
 private:
-    TSharedPtr<IOdysseyPainterEditor> mEditor;
+    TSharedPtr<FOdysseyPainterEditor> mEditor;
 
     FName mAppIdentifier;
+
+protected:
     UObject* mEditedObject;
 };

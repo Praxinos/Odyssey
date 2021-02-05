@@ -3,6 +3,36 @@
 
 #include "OdysseyPainterEditor.h"
 
-IOdysseyPainterEditor::~IOdysseyPainterEditor()
+FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
+
+}
+
+FOdysseyPainterEditor::FOdysseyPainterEditor()
+{
+
+}
+
+void
+FOdysseyPainterEditor::Init()
+{
+
+}
+
+TSharedPtr<FOdysseyPainterEditorToolkit>
+FOdysseyPainterEditor::GetToolkit()
+{
+    return mToolkit.Pin();
+}
+
+void
+FOdysseyPainterEditor::SetToolkit(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit)
+{
+    mToolkit = iToolkit;
+}
+
+void
+FOdysseyPainterEditor::OnToolkitInitialized()
+{
+
 }

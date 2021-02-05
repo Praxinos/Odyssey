@@ -25,7 +25,7 @@ public:
     FOdysseyTextureEditorToolkit();
 
 protected:
-	void OpenAsset(UObject* iObject);
+	virtual void OpenAsset(UObject* iObject) override;
 
 public:
     // IToolkit interface

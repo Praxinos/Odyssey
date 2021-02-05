@@ -117,12 +117,14 @@ FOdysseyTextureEditorModule::UnregisterSettings()
 TSharedRef<FOdysseyTextureEditorToolkit>
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
-	TSharedPtr<FOdysseyTextureEditor> editor( new FOdysseyTextureEditor() );
-    TSharedRef<FOdysseyTextureEditorToolkit> toolkit( new FOdysseyTextureEditorToolkit() );
+	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable( new FOdysseyTextureEditor() );
+    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit() );
+	
+	editor->SetToolkit(toolkit);
+	editor->InitWithTexture(iTexture);
 
-    editor->EditObject(iTexture);
-    toolkit->Init(editor);
-    return toolkit;
+    toolkit->Init(editor, iTexture);
+    return toolkit.ToSharedRef();
 }
 
 TSharedPtr<FExtensibilityManager>

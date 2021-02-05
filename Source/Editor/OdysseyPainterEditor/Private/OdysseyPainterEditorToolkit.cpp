@@ -17,18 +17,18 @@ FOdysseyPainterEditorToolkit::~FOdysseyPainterEditorToolkit()
 
 FOdysseyPainterEditorToolkit::FOdysseyPainterEditorToolkit(const FName& iAppIdentifier) :
     mEditor(nullptr),
-    mAppIdentifier(iAppIdentifier)
+    mAppIdentifier(iAppIdentifier),
+    mEditedObject(nullptr)
 {
 }
 
 void
-FOdysseyPainterEditorToolkit::Init(TSharedPtr<IOdysseyPainterEditor> iEditor)
+FOdysseyPainterEditorToolkit::Init(TSharedPtr<FOdysseyPainterEditor> iEditor, UObject* iEditedObject)
 {
     mEditor = iEditor;
-    mEditor->SetToolkit(SharedThis(this));
-    mEditor->Init();
+    mEditedObject = iEditedObject;
     
-    TArray<UObject*> editedObjects = mEditor->GetAllEditedObjects();
+    TArray<UObject*> editedObjects = GetAllEditedObjects();
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, false, editedObjects);
     InitMenu();
 
@@ -58,13 +58,13 @@ FOdysseyPainterEditorToolkit::OnRequestClose()
 FText
 FOdysseyPainterEditorToolkit::GetToolkitName() const
 {
-	return GetLabelForObject(mEditor->GetEditedObject());
+	return GetLabelForObject(mEditedObject);
 }
 
 FText
 FOdysseyPainterEditorToolkit::GetToolkitToolTipText() const
 {
-	return GetToolTipTextForObject(mEditor->GetEditedObject());
+	return GetToolTipTextForObject(mEditedObject);
 }
 
 FLinearColor
@@ -123,6 +123,14 @@ void
 FOdysseyPainterEditorToolkit::RemoveEditingObject(UObject* Object)
 {
     FAssetEditorToolkit::RemoveEditingObject(Object);
+}
+
+TArray<UObject*>
+FOdysseyPainterEditorToolkit::GetAllEditedObjects()
+{
+    TArray<UObject*> objects;
+    objects.Add(mEditedObject);
+    return objects;
 }
 
 #undef LOCTEXT_NAMESPACE

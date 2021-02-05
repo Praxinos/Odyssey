@@ -20,18 +20,18 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
-	TOdysseyPainterEditor<UTexture2D>()
+	FOdysseyPainterEditor()
 {
 }
 
 void
-FOdysseyTextureEditor::Init()
+FOdysseyTextureEditor::InitWithTexture(UTexture2D* iTexture)
 {
-	TOdysseyPainterEditor<UTexture2D>::Init();
+	FOdysseyPainterEditor::Init();
 
 	//----
 
-	mData = MakeShareable(new FOdysseyTextureEditorData(mEditedObject));
+	mData = MakeShareable(new FOdysseyTextureEditorData(iTexture));
 	mGUI = MakeShareable(new FOdysseyTextureEditorGUI());
 	mController = MakeShareable(new FOdysseyTextureEditorController(mData, mGUI));
 
