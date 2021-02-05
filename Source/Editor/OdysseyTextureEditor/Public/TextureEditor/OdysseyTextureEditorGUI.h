@@ -3,14 +3,13 @@
 
 #pragma once
 
-#include "OdysseyFlipbookEditorData.h"
+#include "OdysseyTextureEditorData.h"
 
 #include "Brush/SOdysseyBrushExposedParameters.h"
 #include "Brush/SOdysseyBrushSelector.h"
 #include "Color/SOdysseyColorSelector.h"
 #include "Color/SOdysseyColorSliders.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
-#include "SOdysseyFlipbookTimelineView.h"
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyPerformanceOptions.h"
@@ -18,51 +17,49 @@
 #include "SOdysseyTextureDetails.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
-#include "OdysseyFlipbookEditorGUI.generated.h"
+#include "OdysseyTextureEditorGUI.generated.h"
 
 class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
-class FOdysseyFlipbookEditorController;
-class SOdysseyFlipbookPropertiesTabBody;
+class FOdysseyTextureEditorController;
 
 /////////////////////////////////////////////////////
 // FOdysseyPerformanceOptions
 USTRUCT()
-struct FOdysseyFlipbookPerformanceOptions : public FOdysseyPerformanceOptions
+struct FOdysseyTexturePerformanceOptions : public FOdysseyPerformanceOptions
 {
 	GENERATED_BODY()
 
-		FOdysseyFlipbookPerformanceOptions()
+		FOdysseyTexturePerformanceOptions()
 	{}
 
 	virtual void NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged) override;
 
 	virtual const UStruct* GetScriptStruct() override {
-		return FOdysseyFlipbookPerformanceOptions::StaticStruct();
+		return FOdysseyTexturePerformanceOptions::StaticStruct();
 	}
 };
 
 /**
- * Implements an Editor toolkit for Flipbooks.
+ * Implements an Editor toolkit for textures.
  */
-class FOdysseyFlipbookEditorGUI :
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI :
 	public FOdysseyPainterEditorGUI
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyFlipbookEditorGUI();
-    FOdysseyFlipbookEditorGUI();
+    virtual ~FOdysseyTextureEditorGUI();
+    FOdysseyTextureEditorGUI();
 
 public:
     //Init
-	void Init(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+	void Init(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 public:
     // Getters
     TSharedPtr<SOdysseyLayerStackView>& GetLayerStackTab();
 	TSharedPtr<SOdysseyTextureDetails>& GetTextureDetailsTab();
-	TSharedPtr<SOdysseyFlipbookTimelineView>& GetTimelineTab();
 
 public:
 	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef) override;
@@ -77,38 +74,25 @@ protected:
 
 private:
     // Internal widget creation
-    void CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-    void CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-	void CreateTextureDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-    void CreateDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+    void CreateLayerStackTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void CreateTextureDetailsTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 private:
 	// Spawner callbacks
-
 	// Callback for spawning the LayerStack tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 
-	// Callback for spawning the Timeline tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iArgs);
-
 	// Callback for spawning the TextureDetails tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
-
-	// Callback for spawning the Details tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnDetails(const FSpawnTabArgs& iArgs);
 
 private:
     //Tabs
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
 	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
-	TSharedPtr<SOdysseyFlipbookTimelineView>    mTimelineTab;
-	TSharedPtr<SOdysseyFlipbookPropertiesTabBody>    mDetailsTab;
 
 private:
     /** Tabs IDs */
     static const FName smLayerStackTabId;
 	static const FName smTextureDetailsTabId;
-	static const FName smTimelineTabId;
-	static const FName smDetailsTabId;
 };
 

@@ -18,7 +18,7 @@ class FOdysseyImageLayer;
 /**
  * Implements an Editor Controller for Flipbooks.
  */
-class FOdysseyFlipbookEditorController :
+class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorController :
 	public FOdysseyPainterEditorController
 {
 public:

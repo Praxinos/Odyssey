@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorController.h"
-#include "OdysseyPainterEditorData.h"
-#include "OdysseyPainterEditorGUI.h"
+class IOdysseyPainterEditor;
 
 /**
  * Implements an Editor toolkit for the Painter Editor.
@@ -13,32 +11,43 @@
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolkit
     : public FAssetEditorToolkit
-    , public FEditorUndoClient
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorToolkit();
-    FOdysseyPainterEditorToolkit();
+    FOdysseyPainterEditorToolkit(const FName& iAppIdentifier);
 
 public:
-    //void InitPainterEditorToolkit( const EToolkitMode::Type iMode, const TSharedPtr< class IToolkitHost >& iInitToolkitHost, const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit);
-    void InitPainterEditorToolkit(const FName& iAppIdentifier, TArray<UObject*>& iObjectsToEdit); //TODO: Rename to Init() if possible
+    void Init(TSharedPtr<IOdysseyPainterEditor> iEditor);
+
+public:
+    virtual void AddEditingObject(UObject* Object);
+    virtual void RemoveEditingObject(UObject* Object);
 
 protected:
     // FAssetEditorToolkit interface
-    virtual void RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
+    virtual void SaveAssetAs_Execute() override;
+    virtual bool OnRequestClose() override;
+    virtual FText GetToolkitName() const override;
+    virtual FText GetToolkitToolTipText() const override;
+    virtual FLinearColor GetWorldCentricTabColorScale() const override;
+
+	/** Called to check to see if there's an asset capable of being reimported */
+	virtual bool CanReimport() const;
+	virtual bool CanReimport(UObject* EditingObject) const;
+
+    virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
 
 protected:
-    // FEditorUndoClient interface
-    virtual void PostUndo( bool iSuccess ) override;
-    virtual void PostRedo( bool iSuccess ) override;
-
-protected:
-    virtual const TSharedRef<FTabManager::FLayout>& GetLayout() const = 0;
-    virtual const TArray<TSharedPtr<FExtender>>& GetMenuExtenders() const = 0;
+	virtual void OpenAsset(UObject* iObject) = 0;
 
 private:
-	void InitializeExtenders();
-};
+	void InitMenu();
 
+private:
+    TSharedPtr<IOdysseyPainterEditor> mEditor;
+
+    FName mAppIdentifier;
+    UObject* mEditedObject;
+};

@@ -16,7 +16,7 @@ class FOdysseyImageLayer;
 /**
  * Implements an Editor Controller for textures.
  */
-class FOdysseyTextureEditorController :
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorController :
 	public FOdysseyPainterEditorController
 {
 public:

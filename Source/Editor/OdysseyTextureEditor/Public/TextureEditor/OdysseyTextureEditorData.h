@@ -18,7 +18,7 @@ struct FTexturePropertiesBackup
 /**
  * Implements an Editor toolkit for textures.
  */
-class FOdysseyTextureEditorData :
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorData :
 	public FOdysseyPainterEditorData
 {
 public:

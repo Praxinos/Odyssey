@@ -12,6 +12,7 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
+#include "OdysseyTextureEditor.h"
 #include "OdysseyTextureEditorSettings.h"
 #include "OdysseyTextureEditorToolkit.h"
 #include "OdysseyTexture_AssetTypeActions.h"
@@ -116,10 +117,12 @@ FOdysseyTextureEditorModule::UnregisterSettings()
 TSharedRef<FOdysseyTextureEditorToolkit>
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
-    TSharedRef<FOdysseyTextureEditorToolkit> newOdysseyTextureEditor( new FOdysseyTextureEditorToolkit() );
-    newOdysseyTextureEditor->Init( OdysseyTextureEditorAppIdentifier, iTexture );
-    
-    return newOdysseyTextureEditor;
+	TSharedPtr<FOdysseyTextureEditor> editor( new FOdysseyTextureEditor() );
+    TSharedRef<FOdysseyTextureEditorToolkit> toolkit( new FOdysseyTextureEditorToolkit() );
+
+    editor->EditObject(iTexture);
+    toolkit->Init(editor);
+    return toolkit;
 }
 
 TSharedPtr<FExtensibilityManager>

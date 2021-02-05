@@ -33,7 +33,7 @@ FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 	}
 }
 
-FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyFlipbookEditorToolkit> iToolkit)
+FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit)
     : mFlipbookWrapper( iFlipbookWrapper )
     , mTexture( NULL )
     , mLayerStack( NULL )
@@ -187,7 +187,7 @@ FOdysseyFlipbookEditorData::Texture()
 	return mTexture;
 }
 
-TWeakPtr<FOdysseyFlipbookEditorToolkit>&
+TWeakPtr<FOdysseyPainterEditorToolkit>&
 FOdysseyFlipbookEditorData::Toolkit()
 {
 	return mToolkit;

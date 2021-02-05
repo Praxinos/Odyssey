@@ -12,7 +12,7 @@ class UPaperFlipbook;
 class UTexture2D;
 class UOdysseyBrush;
 class UOdysseyTextureAssetUserData;
-class FOdysseyFlipbookEditorToolkit;
+class FOdysseyPainterEditorToolkit;
 class FOdysseyFlipbookWrapper;
 
 struct FTexturePropertiesBackup
@@ -23,13 +23,13 @@ struct FTexturePropertiesBackup
 /**
  * Implements an Editor toolkit for Flipbooks.
  */
-class FOdysseyFlipbookEditorData :
+class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorData :
 	public FOdysseyPainterEditorData
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorData();
-    FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyFlipbookEditorToolkit> iToolkit);
+    FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
 
 public:
     //Overrides
@@ -49,7 +49,7 @@ public:
     
 	FOdysseySurfaceReadOnly*			PreviewSurface();
 
-    TWeakPtr<FOdysseyFlipbookEditorToolkit>& Toolkit();
+    TWeakPtr<FOdysseyPainterEditorToolkit>& Toolkit();
 
     //Data Sanity Methods 
 
@@ -87,7 +87,7 @@ private:
     //Current Texture Properties backup
     FTexturePropertiesBackup    mPropertiesBackup;
 
-    TWeakPtr<FOdysseyFlipbookEditorToolkit> mToolkit;
+    TWeakPtr<FOdysseyPainterEditorToolkit> mToolkit;
 	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPackagePreSaveHandle;
     FDelegateHandle mOnPackageSavedHandle;

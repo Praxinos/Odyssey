@@ -12,12 +12,12 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
+#include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorSettings.h"
 #include "OdysseyFlipbookEditorToolkit.h"
 #include "OdysseyFlipbook_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
-const FName OdysseyFlipbookEditorAppIdentifier = FName( TEXT( "OdysseyFlipbookEditorApp" ) );
 
 /*-----------------------------------------------------------------------------
    FOdysseyFlipbookEditorModule
@@ -116,10 +116,13 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
 TSharedRef<FOdysseyFlipbookEditorToolkit>
 FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
 {
-    TSharedRef<FOdysseyFlipbookEditorToolkit> newOdysseyFlipbookEditor( new FOdysseyFlipbookEditorToolkit() );
-    newOdysseyFlipbookEditor->Init( OdysseyFlipbookEditorAppIdentifier, iFlipbook );
+	TSharedPtr<FOdysseyFlipbookEditor> editor(new FOdysseyFlipbookEditor());
+    TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit( new FOdysseyFlipbookEditorToolkit() );
+
+	editor->EditObject( iFlipbook );
+	toolkit->Init(editor);
     
-    return newOdysseyFlipbookEditor;
+    return toolkit;
 }
 
 TSharedPtr<FExtensibilityManager>

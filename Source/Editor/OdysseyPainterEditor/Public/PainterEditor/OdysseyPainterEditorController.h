@@ -31,9 +31,6 @@ public:
 public:
     // Getters
 	const TArray<TSharedPtr<FExtender>>& GetMenuExtenders() const;
-
-protected:
-	// Permissive Getters
 	TArray<TSharedPtr<FExtender>>& GetMenuExtenders();
 
 public:
