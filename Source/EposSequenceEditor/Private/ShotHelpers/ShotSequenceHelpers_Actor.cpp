@@ -3,7 +3,7 @@
 
 #include "ShotSequenceHelpers.h"
 
-#include "Actor.h"
+#include "GameFramework/Actor.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"

@@ -39,6 +39,7 @@ public class EposSequenceEditor : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
+                "InputCore",
                 "MovieScene",
                 "MovieSceneTracks",
                 "Projects",
