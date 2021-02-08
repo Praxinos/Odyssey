@@ -34,10 +34,13 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorT
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
-	mData(MakeShareable(new FOdysseyFlipbookEditorData(mFlipbookWrapper, GetToolkit()))),
-	mGUI(MakeShareable(new FOdysseyFlipbookEditorGUI())),
-	mController(MakeShareable(new FOdysseyFlipbookEditorController(mData, mGUI)))
+	mData(nullptr),
+	mGUI(nullptr),
+	mController(nullptr)
 {
+	mData = MakeShareable(new FOdysseyFlipbookEditorData(mFlipbookWrapper));
+	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI());
+	mController = MakeShareable(new FOdysseyFlipbookEditorController(this, mGUI));
 }
 
 void
@@ -45,95 +48,15 @@ FOdysseyFlipbookEditor::Init()
 {
 	FOdysseyPainterEditor::Init();
 
-	//----
-
-	mOnSpriteTextureChangedHandle = mFlipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditor::OnSpriteTextureChanged);
-
-	//----
-
-	mController->OnSpriteCreated().BindRaw(this, &FOdysseyFlipbookEditor::OnSpriteCreated);
-    mController->OnTextureCreated().BindRaw(this, &FOdysseyFlipbookEditor::OnTextureCreated);
-    mController->OnKeyframeRemoved().BindRaw(this, &FOdysseyFlipbookEditor::OnKeyframeRemoved);
-
 	mData->Init();
 	mGUI->Init(mData, mController);
-	mController->Init(GetToolkit()->GetToolkitCommands());
+	mController->Init();
 }
 
 void
 FOdysseyFlipbookEditor::OnToolkitInitialized()
 {
-	TSharedPtr<SDockTab> OwnerTab = GetToolkit()->GetTabManager()->GetOwnerTab();
-	TSharedPtr<SWindow> parentWindow = NULL;
-	if (OwnerTab.IsValid())
-	{
-		parentWindow = FSlateApplication::Get().FindWidgetWindow(OwnerTab.ToSharedRef());
-	}
-	else
-	{
-		parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
-	}
-
-	SetTimelineNavigationShortcuts(parentWindow);
-}
-
-void
-FOdysseyFlipbookEditor::SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget)
-{
-	TSharedPtr<FNavigationMetaData> navigationMetaData = MakeShareable(new FNavigationMetaData());
-	navigationMetaData->SetNavigationCustom(EUINavigation::Left, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	navigationMetaData->SetNavigationCustom(EUINavigation::Right, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	navigationMetaData->SetNavigationCustom(EUINavigation::Next, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	navigationMetaData->SetNavigationCustom(EUINavigation::Previous, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	iWidget->AddMetadata(navigationMetaData.ToSharedRef());
-}
-
-void
-FOdysseyFlipbookEditor::OnSpriteCreated(UPaperSprite* iSprite)
-{
-	GetToolkit()->AddEditingObject(iSprite);
-}
-
-
-void
-FOdysseyFlipbookEditor::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
-{
-	UTexture2D* texture = iSprite->GetSourceTexture();
-
-	UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
-	for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
-	{
-		UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(i);
-		if (sprite == iSprite)
-		{
-			if (iOldTexture)
-				GetToolkit()->RemoveEditingObject(iOldTexture);
-
-			if (texture)
-				GetToolkit()->AddEditingObject(texture);
-		}
-	}
-}
-
-void
-FOdysseyFlipbookEditor::OnTextureCreated(UTexture2D* iTexture)
-{
-	GetToolkit()->AddEditingObject(iTexture);
-}
-
-void
-FOdysseyFlipbookEditor::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe)
-{
-	if (!iKeyframe.Sprite)
-		return;
-
-	GetToolkit()->RemoveEditingObject(iKeyframe.Sprite);
-
-	UTexture2D* texture = iKeyframe.Sprite->GetSourceTexture();
-	if (!texture)
-		return;
-
-	GetToolkit()->RemoveEditingObject(texture);
+	mController->OnToolkitInitialized();
 }
 
 bool
@@ -177,4 +100,23 @@ FOdysseyFlipbookEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager
 {
 	mGUI->UnregisterTabSpawners(iTabManager);
 }
+
+/**
+ * TODO:
+ * 1) Make Controller have access to Editor instead of Data
+ * 2) Move Data directly in editor (allowing data methods override on Editor inheritance)
+ * 3) Make Tabs classes, containing the creation of GUI and a pointer to a controller specific for this GUI (This one is a BIG one)
+ * 3.1) while making 3), the old almighty controller can coexist with the new Tabs classes, so we can make each Tab class + controller one after the other
+ * 4) Make FlipbookEditor Inherite TextureEditor and cleanup
+ * 5) Test and Debug
+ * 6) Hooray !
+ */
+
+//TEMPORARY
+TSharedPtr<FOdysseyFlipbookEditorData>
+FOdysseyFlipbookEditor::GetData()
+{
+	return mData;
+}
+
 #undef LOCTEXT_NAMESPACE

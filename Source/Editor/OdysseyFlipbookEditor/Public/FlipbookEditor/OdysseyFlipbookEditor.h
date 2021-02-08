@@ -28,6 +28,10 @@ public:
     virtual void Init() override;
 
 public:
+    //TEMPORARY
+    TSharedPtr<FOdysseyFlipbookEditorData> GetData();
+
+public:
     virtual void OnToolkitInitialized() override;
     virtual bool OnCloseRequested();
     virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const override;
@@ -35,13 +39,6 @@ public:
     
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-
-private:
-    void SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget);
-    void OnSpriteCreated(UPaperSprite* iSprite);
-    void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
-    void OnTextureCreated(UTexture2D* iTexture);
-    void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 
 private:
     TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;

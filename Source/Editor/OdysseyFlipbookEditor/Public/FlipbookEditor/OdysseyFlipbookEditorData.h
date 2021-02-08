@@ -29,7 +29,7 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorData :
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorData();
-    FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
+    FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper);
 
 public:
     //Overrides
@@ -48,8 +48,6 @@ public:
     FOdysseyLayerStack*					LayerStack() const;
     
 	FOdysseySurfaceReadOnly*			PreviewSurface();
-
-    TWeakPtr<FOdysseyPainterEditorToolkit>& Toolkit();
 
     //Data Sanity Methods 
 
@@ -87,7 +85,6 @@ private:
     //Current Texture Properties backup
     FTexturePropertiesBackup    mPropertiesBackup;
 
-    TWeakPtr<FOdysseyPainterEditorToolkit> mToolkit;
 	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPackagePreSaveHandle;
     FDelegateHandle mOnPackageSavedHandle;

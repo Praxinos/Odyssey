@@ -24,17 +24,18 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorController :
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorController();
-    FOdysseyFlipbookEditorController(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorGUI>& iGUI);
+    FOdysseyFlipbookEditorController(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorGUI>& iGUI);
 
 public:
     //Init
-	void Init(const TSharedRef<FUICommandList>& iToolkitCommands);
+	void Init();
 	void InitLayerStack();
+	void OnToolkitInitialized();
 
 protected:
     // Commands building
     virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
-	TSharedPtr<FExtender> CreateMenuExtenders(const TSharedRef<FUICommandList>& iToolkitCommands);
+	TSharedPtr<FExtender> CreateMenuExtenders();
 
 public:
 	void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
@@ -50,10 +51,10 @@ public:
 
 	void OnFlipbookChanged();
 	//void OnTimelineStructureChanged();
-
-	FOnSpriteCreated& OnSpriteCreated();
-	FOnTextureCreated& OnTextureCreated();
-	FOnKeyframeRemoved& OnKeyframeRemoved();
+	
+    void OnSpriteCreated(UPaperSprite* iSprite);
+    void OnTextureCreated(UTexture2D* iTexture);
+    void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 	
 public:
 	virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
@@ -76,20 +77,20 @@ public:
 	virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
+	//TEMPORARY
+	TSharedPtr<FOdysseyFlipbookEditorData> GetFlipbookEditorData();
+
 	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
 
 private:
 	void SetTextureAtKeyframeIndex(int32 iKeyframe);
 	void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
+    void SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget);
 
 private:
-	TSharedPtr<FOdysseyFlipbookEditorData>		mData;
-	TSharedPtr<FOdysseyFlipbookEditorGUI>		mGUI;
-
-	FOnSpriteCreated mOnSpriteCreated;
-	FOnTextureCreated mOnTextureCreated;
-    FOnKeyframeRemoved mOnKeyframeRemoved;
+	FOdysseyFlipbookEditor*					mEditor;
+	TSharedPtr<FOdysseyFlipbookEditorGUI>	mGUI;
 	
 	FDelegateHandle mOnSpriteTextureChangedHandle;
 };

@@ -8,7 +8,6 @@
 #include "PaperSprite.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseyFlipbookWrapper.h"
-#include "OdysseyFlipbookEditorToolkit.h"
 
 
 
@@ -33,13 +32,12 @@ FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 	}
 }
 
-FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit)
+FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper)
     : mFlipbookWrapper( iFlipbookWrapper )
     , mTexture( NULL )
     , mLayerStack( NULL )
 	, mDisplaySurface(NULL)
 	, mPreviewSurface(new FOdysseySurfaceReadOnly(NULL))
-    , mToolkit( iToolkit )
 {
     mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged);
     /* FDelegateHandle */ mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this, &FOdysseyFlipbookEditorData::OnPackagePreSave);
@@ -185,12 +183,6 @@ UTexture2D*
 FOdysseyFlipbookEditorData::Texture()
 {
 	return mTexture;
-}
-
-TWeakPtr<FOdysseyPainterEditorToolkit>&
-FOdysseyFlipbookEditorData::Toolkit()
-{
-	return mToolkit;
 }
 
 FOdysseySurfaceEditable*

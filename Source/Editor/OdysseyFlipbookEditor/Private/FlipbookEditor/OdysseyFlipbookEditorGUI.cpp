@@ -10,7 +10,6 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseySurfaceViewport.h"
-#include "SSingleObjectDetailsPanel.h"
 #include "OdysseyFlipbookEditorToolkit.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
@@ -18,7 +17,6 @@
 /*static*/const FName FOdysseyFlipbookEditorGUI::smLayerStackTabId( TEXT( "OdysseyFlipbookEditor_LayerStack" ) );
 /*static*/const FName FOdysseyFlipbookEditorGUI::smTextureDetailsTabId( TEXT( "OdysseyFlipbookEditor_TextureDetails" ) );
 /*static*/const FName FOdysseyFlipbookEditorGUI::smTimelineTabId( TEXT( "OdysseyFlipbookEditor_Timeline" ) );
-/*static*/const FName FOdysseyFlipbookEditorGUI::smDetailsTabId( TEXT( "OdysseyFlipbookEditor_Details" ) );
 
 void
 FOdysseyFlipbookPerformanceOptions::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
@@ -26,52 +24,6 @@ FOdysseyFlipbookPerformanceOptions::NotifyPostChange(const FPropertyChangedEvent
 	// FString PropertyName = PropertyThatChanged->GetName();
 	FOdysseyPerformanceOptions::NotifyPostChange(PropertyChangedEvent, PropertyThatChanged);
 }
-
-
-
-/////////////////////////////////////////////////////
-// SOdysseyFlipbookPropertiesTabBody
-
-class SOdysseyFlipbookPropertiesTabBody : public SSingleObjectDetailsPanel
-{
-public:
-	SLATE_BEGIN_ARGS(SOdysseyFlipbookPropertiesTabBody) {}
-	SLATE_END_ARGS()
-
-private:
-	// Pointer back to owning sprite editor instance (the keeper of state)
-	TSharedPtr<FOdysseyFlipbookEditorData> mData;
-
-public:
-	void Construct(const FArguments& InArgs, TSharedPtr<FOdysseyFlipbookEditorData>& iData)
-	{
-		mData = iData;
-
-		SSingleObjectDetailsPanel::Construct(
-			SSingleObjectDetailsPanel::FArguments()
-			.HostCommandList(mData->Toolkit().Pin()->GetToolkitCommands())
-			.HostTabManager(mData->Toolkit().Pin()->GetTabManager())
-			, /*bAutomaticallyObserveViaGetObjectToObserve=*/ true,
-			/*bAllowSearch=*/ true);
-	}
-
-	// SSingleObjectDetailsPanel interface
-	virtual UObject* GetObjectToObserve() const override
-	{
-		return mData->FlipbookWrapper()->Flipbook();
-	}
-
-	virtual TSharedRef<SWidget> PopulateSlot(TSharedRef<SWidget> PropertyEditorWidget) override
-	{
-		return SNew(SVerticalBox)
-			+SVerticalBox::Slot()
-			.FillHeight(1)
-			[
-				PropertyEditorWidget
-			];
-	}
-	// End of SSingleObjectDetailsPanel interface
-};
 
 /////////////////////////////////////////////////////
 // FOdysseyFlipbookEditorGUI
@@ -98,7 +50,6 @@ FOdysseyFlipbookEditorGUI::Init(TSharedPtr<FOdysseyFlipbookEditorData>& iData, T
 	CreateLayerStackTab(iData, iController);
 	CreateTextureDetailsTab(iData, iController);
 	CreateTimelineTab(iData, iController);
-	CreateDetailsTab(iData, iController);
 
 	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iData, iController); //Creates also creates the Layout
 
@@ -184,11 +135,6 @@ FOdysseyFlipbookEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabMana
         .SetDisplayName( LOCTEXT( "TimelineTab", "Timeline" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
         .SetIcon( FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" ) ); //TODO: set timeline icon
-    // Details
-    /* iTabManager->RegisterTabSpawner( smDetailsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnDetails ) )
-        .SetDisplayName( LOCTEXT( "DetailsTab", "Details" ) )
-        .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon(FEditorStyle::GetStyleSetName(), "LevelEditor.Tabs.Details") ); */
 }
 
 void
@@ -197,7 +143,6 @@ FOdysseyFlipbookEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMa
     iTabManager->UnregisterTabSpawner( smLayerStackTabId );
     iTabManager->UnregisterTabSpawner( smTextureDetailsTabId );
     iTabManager->UnregisterTabSpawner( smTimelineTabId );
-    // iTabManager->UnregisterTabSpawner( smDetailsTabId );
 }
 
 //--------------------------------------------------------------------------------------
@@ -226,16 +171,10 @@ FOdysseyFlipbookEditorGUI::CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorDa
 		.OnScrubStopped(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineScrubStopped)
 		.OnCurrentKeyframeChanged(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineCurrentKeyframeChanged)
 		.OnFlipbookChanged(iController.Get(), &FOdysseyFlipbookEditorController::OnFlipbookChanged)
-		.OnSpriteCreated(iController->OnSpriteCreated())
-		.OnTextureCreated(iController->OnTextureCreated())
-		.OnKeyframeRemoved(iController->OnKeyframeRemoved());
+		.OnSpriteCreated(iController.Get(), &FOdysseyFlipbookEditorController::OnSpriteCreated)
+		.OnTextureCreated(iController.Get(), &FOdysseyFlipbookEditorController::OnTextureCreated)
+		.OnKeyframeRemoved(iController.Get(), &FOdysseyFlipbookEditorController::OnKeyframeRemoved);
 		//.OnStructureChanged(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineStructureChanged);
-}
-
-void
-FOdysseyFlipbookEditorGUI::CreateDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
-{
-	mDetailsTab = SNew(SOdysseyFlipbookPropertiesTabBody, iData);
 }
 
 //--------------------------------------------------------------------------------------
@@ -298,19 +237,6 @@ FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iA
         .Label( LOCTEXT( "FlipbookTimelineTitle", "Timeline" ) )
         [
             mTimelineTab.ToSharedRef()
-        ];
-
-}
-
-TSharedRef<SDockTab>
-FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnDetails(const FSpawnTabArgs& iArgs)
-{
-    check( iArgs.GetTabId() == smDetailsTabId );
-
-    return SNew( SDockTab )
-        .Label( LOCTEXT( "FlipbookDetailsTitle", "Details" ) )
-        [
-            mDetailsTab.ToSharedRef()
         ];
 
 }

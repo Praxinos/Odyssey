@@ -26,6 +26,10 @@ public:
     virtual void Init() override;
 
 public:
+    //TEMPORARY
+    TSharedPtr<FOdysseyTextureEditorData> GetData();
+
+public:
     virtual bool OnCloseRequested();
     virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const override;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;

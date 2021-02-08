@@ -22,11 +22,11 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorController :
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorController();
-    FOdysseyTextureEditorController(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorGUI>& iGUI);
+    FOdysseyTextureEditorController(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorGUI>& iGUI);
 
 public:
     //Init
-	void Init(const TSharedRef<FUICommandList>& iToolkitCommands);
+	void Init();
 
 protected:
     // Commands building
@@ -60,6 +60,9 @@ public:
     virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
+
+    TSharedPtr<FOdysseyTextureEditorData> GetTextureEditorData();
+
 	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
 
@@ -68,7 +71,7 @@ protected:
     virtual void OnBrushCompiled( UBlueprint* iBrush ) override;
 
 private:
-	TSharedPtr<FOdysseyTextureEditorData>		mData;
+	FOdysseyTextureEditor*		mEditor;
 	TSharedPtr<FOdysseyTextureEditorGUI>		mGUI;
 };
 

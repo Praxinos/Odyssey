@@ -29,10 +29,13 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToo
 
 FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
-	mData(MakeShareable(new FOdysseyTextureEditorData(iTexture))),
-	mGUI(MakeShareable(new FOdysseyTextureEditorGUI())),
-	mController(MakeShareable(new FOdysseyTextureEditorController(mData, mGUI)))
+	mData(nullptr),
+	mGUI(nullptr),
+	mController(nullptr)
 {
+	mData = MakeShareable(new FOdysseyTextureEditorData(iTexture));
+	mGUI = MakeShareable(new FOdysseyTextureEditorGUI());
+	mController = MakeShareable(new FOdysseyTextureEditorController(this, mGUI));
 }
 
 void
@@ -44,7 +47,7 @@ FOdysseyTextureEditor::Init()
 
 	mData->Init();
 	mGUI->Init(mData, mController);
-	mController->Init(GetToolkit()->GetToolkitCommands());
+	mController->Init();
 }
 
 bool
@@ -84,5 +87,12 @@ void
 FOdysseyTextureEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
 	mGUI->UnregisterTabSpawners(iTabManager);
+}
+
+//TEMPORARY
+TSharedPtr<FOdysseyTextureEditorData>
+FOdysseyTextureEditor::GetData()
+{
+	return mData;
 }
 #undef LOCTEXT_NAMESPACE

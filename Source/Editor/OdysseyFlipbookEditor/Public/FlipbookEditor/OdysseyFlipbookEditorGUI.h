@@ -80,7 +80,6 @@ private:
     void CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
     void CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 	void CreateTextureDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-    void CreateDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 private:
 	// Spawner callbacks
@@ -94,21 +93,16 @@ private:
 	// Callback for spawning the TextureDetails tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
 
-	// Callback for spawning the Details tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnDetails(const FSpawnTabArgs& iArgs);
-
 private:
     //Tabs
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
 	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
 	TSharedPtr<SOdysseyFlipbookTimelineView>    mTimelineTab;
-	TSharedPtr<SOdysseyFlipbookPropertiesTabBody>    mDetailsTab;
 
 private:
     /** Tabs IDs */
     static const FName smLayerStackTabId;
 	static const FName smTextureDetailsTabId;
 	static const FName smTimelineTabId;
-	static const FName smDetailsTabId;
 };
 
