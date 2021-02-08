@@ -32,7 +32,7 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    TSharedPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     FMovieScenePossessable mBinding;
 };
@@ -47,9 +47,29 @@ public:
         {}
     SLATE_END_ARGS()
 
+    virtual ~SCinematicBoardSectionPlanes();
+
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
 
+    // SWidget overrides
+    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+
+public:
+    /** Called when our sequencer has changed moviescene data */
+    void OnMovieSceneDataChanged( EMovieSceneDataChangeType iType );
+
+protected:
+    TSharedRef<ITableRow> MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+
 private:
-    TSharedPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<ISequencer> mSequencer;
+
+    TArray<TSharedRef<FMovieScenePossessable>> mPossessables;
+    TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetPlaneList;
+    bool mNeedRebuildPlaneList : 1;
+
+    /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
+    FDelegateHandle mOnMovieSceneDataChangedHandle;
 };

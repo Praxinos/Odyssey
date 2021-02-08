@@ -32,7 +32,7 @@ protected:
     FLinearColor    HandleTextColor() const;
 
 private:
-    TSharedPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     TSharedPtr<SInlineEditableTextBlock> mWidgetName;
 };

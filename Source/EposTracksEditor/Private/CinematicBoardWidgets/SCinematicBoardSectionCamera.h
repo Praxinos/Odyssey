@@ -30,5 +30,5 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    TSharedPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection> mBoardSection;
 };

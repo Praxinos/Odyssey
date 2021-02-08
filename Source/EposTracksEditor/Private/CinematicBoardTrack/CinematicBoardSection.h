@@ -67,12 +67,12 @@ public:
     virtual TArray<double> GetKeys() const override; //TODO: maybe move it to UMovieScene*Section ? but what to do with TimeSpace ?
 
 private:
+    TArray<double> mKeys;
+
+private:
 
     /** Add board takes menu */
     //void AddTakesMenu( FMenuBuilder& ioMenuBuilder );
-
-private:
-    TArray<double> mKeys;
 
 private:
     // Store data about a subsequence using the hierarchy to get camera/planes/...
@@ -116,6 +116,7 @@ public:
 private:
     // To be able to call GetSectionObjectAs()/GetSequencer() inside sub-widgets (because GetSectionObjectAs()/GetSequencer() are protected)
     // This is the easiest way to achieve this without having to readd publicly the same functions
+    friend class SCinematicBoardSectionCamera;
     friend class SCinematicBoardSectionTitle;
     friend class SCinematicBoardSectionThumbnails;
     friend class SCinematicBoardSectionPlanes;

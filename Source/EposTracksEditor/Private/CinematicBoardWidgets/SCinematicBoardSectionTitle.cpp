@@ -30,7 +30,7 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
             .Text_Lambda( [this] { return HandleText(); } )
             .ColorAndOpacity_Lambda( [this] { return HandleTextColor(); } )
             .ShadowOffset( FVector2D( 1, 1 ) )
-            .OnTextCommitted( mBoardSection.ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
+            .OnTextCommitted( mBoardSection.Pin().ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
         ]
     ];
 }
@@ -38,8 +38,11 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
 FText
 SCinematicBoardSectionTitle::HandleText() const
 {
-    UMovieSceneSubSection& subsection = mBoardSection->GetSubSectionObject();
-    FText section_text = mBoardSection->HandleThumbnailTextBlockText();
+    if( !mBoardSection.IsValid() )
+        return FText::GetEmpty();
+
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FText section_text = mBoardSection.Pin()->HandleThumbnailTextBlockText();
     FText sequence_text = subsection.GetSequence()->GetDisplayName();
 
     return !section_text.IsEmpty()
@@ -52,8 +55,11 @@ SCinematicBoardSectionTitle::HandleText() const
 FLinearColor
 SCinematicBoardSectionTitle::HandleTextColor() const
 {
-    UMovieSceneSubSection& subsection = mBoardSection->GetSubSectionObject();
-    FText section_text = mBoardSection->HandleThumbnailTextBlockText();
+    if( !mBoardSection.IsValid() )
+        return FLinearColor::White;
+
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FText section_text = mBoardSection.Pin()->HandleThumbnailTextBlockText();
     FText sequence_text = subsection.GetSequence()->GetDisplayName();
 
     return !section_text.IsEmpty()

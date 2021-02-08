@@ -97,21 +97,23 @@ FSequencerSectionPainterImpl::GetTimeConverter() const
 int32
 SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
-    if( !mBoardSection )
+    if( !mBoardSection.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
     //---
 
-    UMovieSceneSection* sectionObject = mBoardSection->GetSectionObject();
+    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+
+    UMovieSceneSection* sectionObject = section->GetSectionObject();
     UMovieSceneSubSection* subsectionObject = Cast<UMovieSceneSubSection>( sectionObject );
 
     FSequencerSectionPainterImpl painter( *sectionObject, OutDrawElements, AllottedGeometry );
     //painter.KeyAreaElements = ;
-    painter.SectionClippingRect = mBoardSection->GetRootPainter( Args )->SectionClippingRect.IntersectionWith( MyCullingRect );
+    painter.SectionClippingRect = section->GetRootPainter( Args )->SectionClippingRect.IntersectionWith( MyCullingRect );
     painter.LayerId = LayerId;
-    painter.bParentEnabled = mBoardSection->GetRootPainter( Args )->bParentEnabled;
-    painter.bIsHighlighted = mBoardSection->GetRootPainter( Args )->bIsHighlighted;
-    painter.bIsSelected = mBoardSection->GetRootPainter( Args )->bIsSelected;
+    painter.bParentEnabled = section->GetRootPainter( Args )->bParentEnabled;
+    painter.bIsHighlighted = section->GetRootPainter( Args )->bIsHighlighted;
+    painter.bIsSelected = section->GetRootPainter( Args )->bIsSelected;
 
     //---
 
@@ -136,16 +138,16 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     //---
 
-    painter.LayerId = mBoardSection->FKeyThumbnailSection::OnPaintSection( painter );
+    painter.LayerId = section->FKeyThumbnailSection::OnPaintSection( painter );
 
     //---
 
     // Paint the sub-sequence information/looping boundaries/etc.
 
-    FSubSectionPainterParams subSectionPainterParams( mBoardSection->GetContentPadding() );
+    FSubSectionPainterParams subSectionPainterParams( section->GetContentPadding() );
     subSectionPainterParams.bShowTrackNum = false;
 
-    FSubSectionPainterUtil::PaintSection( mBoardSection->GetSequencer(), *subsectionObject, painter, subSectionPainterParams );
+    FSubSectionPainterUtil::PaintSection( section->GetSequencer(), *subsectionObject, painter, subSectionPainterParams );
 
     //---
 

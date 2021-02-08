@@ -40,7 +40,7 @@ public:
 public:
 
 private:
-    TSharedPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     //FOnDrop mOnDrop;
     //FOnDragEnter mOnDragEnter;

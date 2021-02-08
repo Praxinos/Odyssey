@@ -61,40 +61,88 @@ SCinematicBoardSectionPlane::OnPaint( const FPaintArgs& Args, const FGeometry& A
 
 //---
 
+SCinematicBoardSectionPlanes::~SCinematicBoardSectionPlanes()
+{
+    if( mOnMovieSceneDataChangedHandle.IsValid() && mSequencer.IsValid() )
+        mSequencer.Pin()->OnMovieSceneDataChanged().Remove( mOnMovieSceneDataChangedHandle );
+}
+
+void
+SCinematicBoardSectionPlanes::OnMovieSceneDataChanged( EMovieSceneDataChangeType iType )
+{
+    mNeedRebuildPlaneList = true;
+}
+
 void
 SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
+    mSequencer = mBoardSection.Pin()->GetSequencer();
 
-    TArray<FMovieScenePossessable> possessables( mBoardSection->GetPlaneBindings() );
+    mOnMovieSceneDataChangedHandle = mSequencer.Pin()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlanes::OnMovieSceneDataChanged );
 
-    TSharedRef<SVerticalBox> planes = SNew( SVerticalBox );
-    for( int i = 0; i < mBoardSection->GetMaxPlaneBindings(); i++ )
-    {
-        planes->AddSlot()
-        .AutoHeight()
-        [
-            SNew( SCinematicBoardSectionPlane, mBoardSection.ToSharedRef() )
-            .Binding( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() )
+    //---
 
-            // This doesn't work because this vertical box won't have the same size for all sections
-            // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
-            // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
-            //!possessables.IsValidIndex( i )
-            //?
-            //SNullWidget::NullWidget
-            //:
-            //SNew( SCinematicBoardSectionPlane, mBoardSection.ToSharedRef() )
-            //.Binding( possessables[i] )
-        ];
-    }
+    check( !mPossessables.Num() );
 
     //---
 
     ChildSlot
     [
-        planes
+        SAssignNew( mWidgetPlaneList, SListView<TSharedRef<FMovieScenePossessable>> )
+        .ListItemsSource( &mPossessables )
+        .OnGenerateRow( this, &SCinematicBoardSectionPlanes::MakePlaneRow )
+        //.OnMouseButtonClick( this, &SOdysseyAboutScreen::OnListViewButtonClicked )
+        .SelectionMode( ESelectionMode::None )
     ];
+
+    OnMovieSceneDataChanged( EMovieSceneDataChangeType::Unknown );
+}
+
+TSharedRef<ITableRow>
+SCinematicBoardSectionPlanes::MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
+{
+    return
+        SNew( STableRow< TSharedPtr<FString> >, iOwnerTable )
+        [
+            mBoardSection.IsValid()
+            ?
+            SNew( SCinematicBoardSectionPlane, mBoardSection.Pin().ToSharedRef() )
+            .Binding( *iItem )
+            :
+            SNullWidget::NullWidget
+        ];
+}
+
+void
+SCinematicBoardSectionPlanes::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) //override
+{
+    SCompoundWidget::Tick( AllottedGeometry, InCurrentTime, InDeltaTime );
+
+    //---
+
+    if( mNeedRebuildPlaneList && mBoardSection.IsValid() )
+    {
+        TArray<FMovieScenePossessable> possessables( mBoardSection.Pin()->GetPlaneBindings() );
+
+        mPossessables.Empty();
+
+        // This doesn't work because this vertical box won't have the same size for all sections
+        // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
+        // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
+        //int max_planes = possessables.Num();
+
+        int max_planes = mBoardSection.Pin()->GetMaxPlaneBindings();
+        for( int i = 0; i < max_planes; i++ )
+        {
+            mPossessables.Add( MakeShared<FMovieScenePossessable>( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() ) );
+        }
+
+        if( mWidgetPlaneList )
+            mWidgetPlaneList->RebuildList();
+
+        mNeedRebuildPlaneList = false;
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

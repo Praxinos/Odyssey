@@ -61,9 +61,14 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
         background_brush.GetTint( InWidgetStyle )
     );
 
+    if( !mBoardSection.IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
     //---
 
-    TArray<double> keys = mBoardSection->GetKeys();
+    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+
+    TArray<double> keys = section->GetKeys();
 
     static const FName CircleKeyBrushName( "Sequencer.KeyCircle" );
     static const FName DiamondKeyBrushName( "Sequencer.KeyDiamond" );
@@ -81,7 +86,7 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
     {
         const FVector2D KeySize = SequencerSectionConstants::KeySize;
         //static const float BrushBorderWidth = 2.0f;
-        const float KeyPositionPx = ConstructTimeConverterForSection2( AllottedGeometry, *mBoardSection->GetSectionObject() ).SecondsToPixel( key );
+        const float KeyPositionPx = ConstructTimeConverterForSection2( AllottedGeometry, section->GetSubSectionObject() ).SecondsToPixel( key );
         const FVector2D KeyTranslation( KeyPositionPx - FMath::CeilToFloat( KeySize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( KeySize.Y / 2.0f ) ) );
 
         FSlateDrawElement::MakeBox(
