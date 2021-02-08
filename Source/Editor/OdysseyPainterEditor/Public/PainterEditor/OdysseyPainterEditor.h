@@ -13,14 +13,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
-    FOdysseyPainterEditor();
+    FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
 
-protected:
+public:
     virtual void Init();
 
 public:
     virtual TSharedPtr<FOdysseyPainterEditorToolkit> GetToolkit();
-    virtual void SetToolkit(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
     virtual void OnToolkitInitialized();
 
 public:

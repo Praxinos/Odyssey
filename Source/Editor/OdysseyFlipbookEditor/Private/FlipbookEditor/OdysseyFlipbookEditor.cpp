@@ -3,8 +3,6 @@
 
 #include "OdysseyFlipbookEditor.h"
 
-#include "OdysseyFlipbookWrapper.h"
-
 #include "OdysseyFlipbookEditorController.h"
 #include "OdysseyFlipbookEditorData.h"
 #include "OdysseyFlipbookEditorGUI.h"
@@ -21,29 +19,37 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 {
-	mData->FlipbookWrapper()->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
+	mFlipbookWrapper->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
 }
 
-FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
-	FOdysseyPainterEditor()
+FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
+	FOdysseyPainterEditor(iToolkit),
+	mFlipbookWrapper(nullptr),
+	mData(nullptr),
+	mGUI(nullptr),
+	mController(nullptr)
+{
+}
+
+FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
+	FOdysseyPainterEditor(iToolkit),
+	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
+	mData(MakeShareable(new FOdysseyFlipbookEditorData(mFlipbookWrapper, GetToolkit()))),
+	mGUI(MakeShareable(new FOdysseyFlipbookEditorGUI())),
+	mController(MakeShareable(new FOdysseyFlipbookEditorController(mData, mGUI)))
 {
 }
 
 void
-FOdysseyFlipbookEditor::InitWithFlipbook(UPaperFlipbook* iFlipbook)
+FOdysseyFlipbookEditor::Init()
 {
 	FOdysseyPainterEditor::Init();
 
 	//----
 
-	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook));
-	mOnSpriteTextureChangedHandle = flipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditor::OnSpriteTextureChanged);
+	mOnSpriteTextureChangedHandle = mFlipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditor::OnSpriteTextureChanged);
 
 	//----
-
-	mData = MakeShareable(new FOdysseyFlipbookEditorData(flipbookWrapper, GetToolkit()));
-	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI());
-	mController = MakeShareable(new FOdysseyFlipbookEditorController(mData, mGUI));
 
 	mController->OnSpriteCreated().BindRaw(this, &FOdysseyFlipbookEditor::OnSpriteCreated);
     mController->OnTextureCreated().BindRaw(this, &FOdysseyFlipbookEditor::OnTextureCreated);
@@ -94,10 +100,10 @@ FOdysseyFlipbookEditor::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D
 {
 	UTexture2D* texture = iSprite->GetSourceTexture();
 
-	UPaperFlipbook* flipbook = mData->FlipbookWrapper()->Flipbook();
+	UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
 	for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
 	{
-		UPaperSprite* sprite = mData->FlipbookWrapper()->GetKeyframeSprite(i);
+		UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(i);
 		if (sprite == iSprite)
 		{
 			if (iOldTexture)

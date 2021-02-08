@@ -8,9 +8,9 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor()
+FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
+    mToolkit(iToolkit)
 {
-
 }
 
 void
@@ -23,12 +23,6 @@ TSharedPtr<FOdysseyPainterEditorToolkit>
 FOdysseyPainterEditor::GetToolkit()
 {
     return mToolkit.Pin();
-}
-
-void
-FOdysseyPainterEditor::SetToolkit(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit)
-{
-    mToolkit = iToolkit;
 }
 
 void

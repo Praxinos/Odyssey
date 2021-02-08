@@ -6,6 +6,8 @@
 #include "OdysseyPainterEditor.h"
 #include "PaperFlipbook.h"
 
+#include "OdysseyFlipbookWrapper.h"
+
 class FOdysseyFlipbookEditorData;
 class FOdysseyFlipbookEditorGUI;
 class FOdysseyFlipbookEditorController;
@@ -19,10 +21,11 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditor();
-    FOdysseyFlipbookEditor();
+    FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit); //Non-Initialized Contructor
+    FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
 
 public:
-    void InitWithFlipbook(UPaperFlipbook* iFlipbook);
+    virtual void Init() override;
 
 public:
     virtual void OnToolkitInitialized() override;
@@ -41,6 +44,8 @@ private:
     void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 
 private:
+    TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
+
 	TSharedPtr<FOdysseyFlipbookEditorData> mData;
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 	TSharedPtr<FOdysseyFlipbookEditorController> mController;

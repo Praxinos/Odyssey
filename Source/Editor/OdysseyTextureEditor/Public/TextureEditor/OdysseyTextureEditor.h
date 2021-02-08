@@ -19,10 +19,11 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditor();
-    FOdysseyTextureEditor();
+    FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit); //Non Initialized constructor
+    FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
 
 public:
-    void InitWithTexture(UTexture2D* iTexture);
+    virtual void Init() override;
 
 public:
     virtual bool OnCloseRequested();
