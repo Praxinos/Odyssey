@@ -23,7 +23,7 @@ public:
     virtual void OnToolkitInitialized();
 
 public:
-    virtual bool OnCloseRequested() = 0;
+    virtual bool OnCloseRequested();
     virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const = 0;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const = 0;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;

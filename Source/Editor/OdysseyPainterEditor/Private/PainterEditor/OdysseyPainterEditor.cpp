@@ -30,3 +30,9 @@ FOdysseyPainterEditor::OnToolkitInitialized()
 {
 
 }
+
+bool
+FOdysseyPainterEditor::OnCloseRequested()
+{
+    return true;
+}

@@ -33,6 +33,10 @@ protected:
     virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
 
 public:
+    //Called when the texture pointer in the TextureWrapper changes
+    void OnPreTextureChange(UTexture2D* iNewTexture);
+    void OnPostTextureChange(UTexture2D* iOldTexture);
+
 	void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
 	void OnLayerStackStructureChanged();
 	void OnLayerStackImageResultChanged();

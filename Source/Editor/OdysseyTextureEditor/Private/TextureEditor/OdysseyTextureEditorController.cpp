@@ -12,6 +12,8 @@
 #include "OdysseyBrushAssetBase.h"
 #include "TextureEditor/OdysseyTextureEditorData.h"
 #include "TextureEditor/OdysseyTextureEditorState.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyPaintEngine.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
@@ -21,22 +23,8 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditorController::~FOdysseyTextureEditorController()
 {
-    GetTextureEditorData()->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-    GetTextureEditorData()->LayerStack()->OnStructureChanged().RemoveAll(this);
-    GetTextureEditorData()->LayerStack()->OnImageResultChanged().RemoveAll(this);
-	GetTextureEditorData()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
-    GetTextureEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
-
-	TSharedPtr<IOdysseyLayer> layer = GetTextureEditorData()->LayerStack()->GetCurrentLayer();
-	if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
-    {
-        TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetTextureEditorData()->LayerStack()->GetCurrentLayer());
-        if (imageLayer)
-        {
-            //Set AlphaLock Delegate
-            imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-        }
-    }
+    GetTextureEditorData()->TextureWrapper().OnPreTextureChangeDelegate().RemoveAll(this);
+    GetTextureEditorData()->TextureWrapper().OnPostTextureChangeDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditorController::FOdysseyTextureEditorController(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorGUI>& iGUI)
@@ -59,7 +47,55 @@ FOdysseyTextureEditorController::Init()
     // Bind each command to its function
     BindCommands(mEditor->GetToolkit()->GetToolkitCommands());
 
-	// Set LayerStack CB
+    if ( !(GetTextureEditorData()->TextureWrapper().OnPreTextureChangeDelegate().IsBoundToObject(this)) )
+        GetTextureEditorData()->TextureWrapper().OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnPreTextureChange);
+
+    if ( !(GetTextureEditorData()->TextureWrapper().OnPostTextureChangeDelegate().IsBoundToObject(this)) )
+        GetTextureEditorData()->TextureWrapper().OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnPostTextureChange);
+
+    //Make like if the texture changed, to set all callbacks correctly
+    OnPostTextureChange(nullptr);
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- Commands building
+
+void
+FOdysseyTextureEditorController::BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands)
+{
+    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
+}
+
+void
+FOdysseyTextureEditorController::OnPreTextureChange(UTexture2D* iNewTexture)
+{
+    if (!GetTextureEditorData()->LayerStack())
+        return;
+
+    GetTextureEditorData()->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+    GetTextureEditorData()->LayerStack()->OnStructureChanged().RemoveAll(this);
+    GetTextureEditorData()->LayerStack()->OnImageResultChanged().RemoveAll(this);
+    GetTextureEditorData()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+    GetTextureEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
+
+    TSharedPtr<IOdysseyLayer> layer = GetTextureEditorData()->LayerStack()->GetCurrentLayer();
+    if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
+    {
+        TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetTextureEditorData()->LayerStack()->GetCurrentLayer());
+        if (imageLayer)
+        {
+            //Set AlphaLock Delegate
+            imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
+        }
+    }
+}
+
+void
+FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
+{
+    if (!GetTextureEditorData()->LayerStack())
+        return;
+
     if( !(GetTextureEditorData()->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)) )
 	    GetTextureEditorData()->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged);
 
@@ -87,15 +123,6 @@ FOdysseyTextureEditorController::Init()
         GetTextureEditorData()->LayerStack()->SetCurrentLayer(layers[i]);
         break;
     }
-}
-
-//--------------------------------------------------------------------------------------
-//-------------------------------------------------------------------- Commands building
-
-void
-FOdysseyTextureEditorController::BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands)
-{
-    FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 }
 
 void

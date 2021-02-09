@@ -3,17 +3,8 @@
 
 #pragma once
 
-#include "OdysseyLayerStack.h"
-#include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorData.h"
-
-class UTexture;
-class UOdysseyBrush;
-
-struct FTexturePropertiesBackup
-{
-    uint8 mTextureCompressionNone;
-};
+#include "OdysseyTextureWrapper.h"
 
 /**
  * Implements an Editor toolkit for textures.
@@ -29,28 +20,19 @@ public:
 public:
 	virtual void Init() override;
 
-    // Paint engine driving methods
+    FOdysseyTextureWrapper&             TextureWrapper();
 	UTexture2D*							Texture();
     FOdysseyLayerStack*					LayerStack();
 	virtual FOdysseySurfaceEditable*    DisplaySurface() override;
 
 public:
-	void SyncTextureAndInvalidate();
-	void PrepareTextureProperties();
-	void ApplyPropertiesBackup();
-
-    void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
-    void OnPackagePreSave(UPackage* iPackage);
-    void OnPackageSaved(const FString& iPackageFilename, UObject* iOuter);
+    //TEMPORARY
+    void OnCloseRequested();
 
 private:
-    UTexture2D*                 mTexture;
-    FOdysseyLayerStack*         mLayerStack;        // Copied from mOdysseyTexture AssetUserData
-	FOdysseySurfaceEditable*    mDisplaySurface;
+    void OnTexturePreSave();
 
-    FTexturePropertiesBackup    mPropertiesBackup;
-	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
-    FDelegateHandle mOnPackagePreSaveHandle;
-    FDelegateHandle mOnPackageSavedHandle;
+private:
+    FOdysseyTextureWrapper     mTextureWrapper;
 };
 

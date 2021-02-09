@@ -17,6 +17,10 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditor::~FOdysseyTextureEditor()
 {
+	//Finalize in reverse order
+	mController = nullptr; //calls destructor
+	mGUI = nullptr; //calls destructor
+	mData = nullptr; //calls destructor
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
@@ -53,12 +57,7 @@ FOdysseyTextureEditor::Init()
 bool
 FOdysseyTextureEditor::OnCloseRequested()
 {
-	mData->PaintEngine()->Flush();
-	mData->SyncTextureAndInvalidate();
-	mData->ApplyPropertiesBackup();
-
-	//TODO: Move in the right place
-    mData->LayerStack()->mDrawingUndo->Clear();
+	mData->OnCloseRequested();
 	return true;
 }
 

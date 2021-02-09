@@ -68,9 +68,6 @@ FOdysseyFlipbookEditorController::Init()
 
 	//----
 
-	// Add Menu Extender
-    GetMenuExtenders().Add(CreateMenuExtenders());
-
 	// Register our commands. This will only register them if not previously registered
 	FOdysseyFlipbookEditorCommands::Register();
 
@@ -134,14 +131,6 @@ FOdysseyFlipbookEditorController::BindCommands(const TSharedRef<FUICommandList>&
 {
 	mGUI->GetTimelineTab()->BindCommands(iToolkitCommands);
 	FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
-}
-
-TSharedPtr<FExtender>
-FOdysseyFlipbookEditorController::CreateMenuExtenders()
-{
-    FExtender* extender = new FExtender();
-
-    return MakeShareable(extender);
 }
 
 void
