@@ -60,19 +60,19 @@ FOdysseyTextureWrapper::Texture(UTexture2D* iTexture)
 }
 
 UTexture2D*
-FOdysseyTextureWrapper::Texture()
+FOdysseyTextureWrapper::Texture() const
 {
     return mTexture;
 }
 
 FOdysseySurfaceEditable*
-FOdysseyTextureWrapper::Surface()
+FOdysseyTextureWrapper::Surface() const
 {
     return mSurface;
 }
 
 FOdysseyLayerStack*
-FOdysseyTextureWrapper::LayerStack()
+FOdysseyTextureWrapper::LayerStack() const
 {
     if (!mTexture)
         return nullptr;
@@ -117,7 +117,7 @@ FOdysseyTextureWrapper::OnPostTextureChangeDelegate()
 }
 
 UOdysseyTextureAssetUserData*
-FOdysseyTextureWrapper::CreateTextureUserData(UTexture2D* iTexture)
+FOdysseyTextureWrapper::CreateTextureUserData(UTexture2D* iTexture) const
 {
     //Init user data
     ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());

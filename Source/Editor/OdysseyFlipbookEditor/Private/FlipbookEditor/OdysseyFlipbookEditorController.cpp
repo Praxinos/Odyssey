@@ -31,26 +31,9 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditorController::~FOdysseyFlipbookEditorController()
 {
-	GetFlipbookEditorData()->FlipbookWrapper()->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
-	if (GetFlipbookEditorData()->LayerStack())
-	{
-		GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-        GetFlipbookEditorData()->LayerStack()->OnStructureChanged().RemoveAll(this);
-        GetFlipbookEditorData()->LayerStack()->OnImageResultChanged().RemoveAll(this);
-	    GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
-        GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
-
-        TSharedPtr<IOdysseyLayer> layer = GetFlipbookEditorData()->LayerStack()->GetCurrentLayer();
-        if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
-        {
-            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layer);
-            if (imageLayer)
-            {
-                //Set AlphaLock Delegate
-                imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-            }
-        }
-	}
+    GetFlipbookEditorData()->TextureWrapper().OnPreTextureChangeDelegate().RemoveAll(this);
+    GetFlipbookEditorData()->TextureWrapper().OnPostTextureChangeDelegate().RemoveAll(this);
+	GetFlipbookEditorData()->FlipbookWrapper()->OnSpriteTextureChanged().RemoveAll(this);
 }
 
 FOdysseyFlipbookEditorController::FOdysseyFlipbookEditorController(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorGUI>& iGUI)
@@ -77,38 +60,45 @@ FOdysseyFlipbookEditorController::Init()
     // Bind each command to its function
     BindCommands(mEditor->GetToolkit()->GetToolkitCommands());
 
-	InitLayerStack();
+    if ( !(GetFlipbookEditorData()->TextureWrapper().OnPreTextureChangeDelegate().IsBoundToObject(this)) )
+        GetFlipbookEditorData()->TextureWrapper().OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnPreTextureChange);
 
-
-	if (GetFlipbookEditorData()->LayerStack())
-	{
-		// Set Image Layer as the current Layer
-		TArray<TSharedPtr<IOdysseyLayer>> layers;
-		GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->DepthFirstSearchTree(&layers, false);
-
-		for (int i = 0; i < layers.Num(); i++)
-		{
-			if (layers[i]->GetType() != IOdysseyLayer::eType::kImage)
-				continue;
-
-			GetFlipbookEditorData()->LayerStack()->SetCurrentLayer(layers[i]);
-			break;
-		}
-	}
+    if ( !(GetFlipbookEditorData()->TextureWrapper().OnPostTextureChangeDelegate().IsBoundToObject(this)) )
+        GetFlipbookEditorData()->TextureWrapper().OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnPostTextureChange);
 }
 
 void
-FOdysseyFlipbookEditorController::InitLayerStack()
+FOdysseyFlipbookEditorController::OnPreTextureChange(UTexture2D* iNewTexture)
 {
-	//This function is also called when the layerstack changed, which is similar to changing a layer (and a bit more), so we call this
-	if (!GetFlipbookEditorData()->LayerStack())
-	{
-		GetFlipbookEditorData()->PaintEngine()->Block(NULL);
+    if (!GetFlipbookEditorData()->LayerStack())
 		return;
-	}
 
-	if (!(GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)))
-		GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged);
+    GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
+    GetFlipbookEditorData()->LayerStack()->OnStructureChanged().RemoveAll(this);
+    GetFlipbookEditorData()->LayerStack()->OnImageResultChanged().RemoveAll(this);
+    GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
+    GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
+
+    TSharedPtr<IOdysseyLayer> layer = GetFlipbookEditorData()->LayerStack()->GetCurrentLayer();
+    if ( layer && layer->GetType() == IOdysseyLayer::eType::kImage)
+    {
+        TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetFlipbookEditorData()->LayerStack()->GetCurrentLayer());
+        if (imageLayer)
+        {
+            //Set AlphaLock Delegate
+            imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
+        }
+    }
+}
+
+void
+FOdysseyFlipbookEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
+{
+    if (!GetFlipbookEditorData()->LayerStack())
+        return;
+
+    if( !(GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().IsBoundToObject(this)) )
+	    GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged);
 
     if( !(GetFlipbookEditorData()->LayerStack()->OnStructureChanged().IsBoundToObject(this)) )
 	    GetFlipbookEditorData()->LayerStack()->OnStructureChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackStructureChanged);
@@ -121,6 +111,35 @@ FOdysseyFlipbookEditorController::InitLayerStack()
         
     if( !(GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
 	    GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsVisibleChanged);
+    	
+    if (GetFlipbookEditorData()->LayerStack()->GetLayerRoot() == GetFlipbookEditorData()->LayerStack()->GetCurrentLayer())
+    {
+        // Set Image Layer as the current Layer
+        TArray<TSharedPtr<IOdysseyLayer>> layers;
+        GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
+
+        for (int i = 0; i < layers.Num(); i++)
+        {
+            if (layers[i]->GetType() != IOdysseyLayer::eType::kImage)
+                continue;
+            
+            GetFlipbookEditorData()->LayerStack()->SetCurrentLayer(layers[i]);
+            break;
+        }
+    }
+    else
+    {
+        OnLayerStackCurrentLayerChanged(nullptr);
+    }
+
+    //Refresh Layer stack
+    mGUI->GetLayerStackTab()->RefreshView();
+
+    //Set display Surface
+    mGUI->GetViewportTab()->SetSurface(GetFlipbookEditorData()->DisplaySurface());
+    
+    //Set the new texture in the texture details panel
+    mGUI->GetTextureDetailsTab()->SetTexture(GetFlipbookEditorData()->Texture());
 }
 
 //--------------------------------------------------------------------------------------
@@ -563,46 +582,7 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 		return;
 	}
 
-	//If we are not playing or scrubbing
-	//Check if keyFrame changed
-	if (texture != GetFlipbookEditorData()->Texture())
-	{
-		//disconnect the current layerstack
-		if (GetFlipbookEditorData()->LayerStack())
-		{
-			TSharedPtr<IOdysseyLayer> currentLayer = GetFlipbookEditorData()->LayerStack()->GetCurrentLayer();
-			if (currentLayer->GetType() == IOdysseyLayer::eType::kImage)
-			{
-				TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(currentLayer);
-				if (imageLayer)
-				{
-					imageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-				}
-			}
-			GetFlipbookEditorData()->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-            GetFlipbookEditorData()->LayerStack()->OnStructureChanged().RemoveAll(this);
-            GetFlipbookEditorData()->LayerStack()->OnImageResultChanged().RemoveAll(this);
-	        GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
-            GetFlipbookEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
-		}
-
-		//Set new keyframe
-		GetFlipbookEditorData()->Texture(texture);
-
-		//Init the new layerstack
-		InitLayerStack();
-
-        OnLayerStackCurrentLayerChanged(nullptr);
-
-		//Refresh Layer stack
-		mGUI->GetLayerStackTab()->RefreshView();
-
-		//Set display Surface
-		mGUI->GetViewportTab()->SetSurface(GetFlipbookEditorData()->DisplaySurface());
-        
-        //Set the new texture in the texture details panel
-        mGUI->GetTextureDetailsTab()->SetTexture(texture);
-	}
+    GetFlipbookEditorData()->Texture(texture);
 }
 
 void

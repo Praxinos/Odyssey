@@ -17,31 +17,18 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditorData::~FOdysseyFlipbookEditorData()
 {
-    FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
-    UPackage::PreSavePackageEvent.Remove(mOnPackagePreSaveHandle);
-    UPackage::PackageSavedEvent.Remove(mOnPackageSavedHandle);
-
-    if( mDisplaySurface ) {
-        delete mDisplaySurface;
-        mDisplaySurface = NULL;
-    }
-
 	if (mPreviewSurface) {
 		delete mPreviewSurface;
-		mPreviewSurface = NULL;
+		mPreviewSurface = nullptr;
 	}
 }
 
 FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbookWrapper>& iFlipbookWrapper)
     : mFlipbookWrapper( iFlipbookWrapper )
-    , mTexture( NULL )
-    , mLayerStack( NULL )
-	, mDisplaySurface(NULL)
-	, mPreviewSurface(new FOdysseySurfaceReadOnly(NULL))
+    , mTextureWrapper( nullptr )
+	, mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr))
 {
-    mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this, &FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged);
-    /* FDelegateHandle */ mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this, &FOdysseyFlipbookEditorData::OnPackagePreSave);
-	/* FDelegateHandle */ mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this, &FOdysseyFlipbookEditorData::OnPackageSaved);
+    mTextureWrapper.OnPreSaveDelegate().AddRaw(this, &FOdysseyFlipbookEditorData::OnTexturePreSave);
 }
 
 //--------------------------------------------------------------------------------------
@@ -49,6 +36,7 @@ FOdysseyFlipbookEditorData::FOdysseyFlipbookEditorData(TSharedPtr<FOdysseyFlipbo
 void
 FOdysseyFlipbookEditorData::Init()
 {
+    FOdysseyPainterEditorData::Init();
     // Get Flipbook keyFrames
     if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() <= 0)
     {
@@ -61,115 +49,16 @@ FOdysseyFlipbookEditorData::Init()
 void
 FOdysseyFlipbookEditorData::Texture(UTexture2D* iTexture)
 {
-	//Sync current texture with surface data
-	SyncTextureWithSurfaceBlock();
-
-    // Apply current Texture properties backup
-    ApplyPropertiesBackup();
-
-	//Remove Surface
-	if (mDisplaySurface)
-    {
-		mDisplaySurface->Block()->GetBlock()->SetOnInvalid(::ul3::FOnInvalid());
-		delete mDisplaySurface;
-	}
-    mDisplaySurface = NULL;
-    
-    //Remove Layerstack
-    mLayerStack = NULL;
-
-    // Replace current Texture with the given one
-    mTexture = iTexture;
-
-    //If no Texture provided, then nothing to do
-    if (!mTexture)
-        return;
-
-    //Prepare the texture to be edited and store its properties in a backup structure
-	PrepareTextureProperties();
-
-    // Get or Create Texture userData
-    UOdysseyTextureAssetUserData* userData = FindOrCreateTextureUserData(mTexture);
-
-	// Get Texture LayerStack
-    mLayerStack = userData->GetLayerStack();
-
-    // Setup Surface
-    mDisplaySurface = new FOdysseySurfaceEditable( mTexture);
-    mDisplaySurface->Invalidate();
-}
-
-UOdysseyTextureAssetUserData*
-FOdysseyFlipbookEditorData::FindOrCreateTextureUserData(UTexture2D* iTexture)
-{
-    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-    if( !userData )
-    {
-        //Init user data
-        ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-        userData = NewObject< UOdysseyTextureAssetUserData >(iTexture, NAME_None, RF_Public);
-        userData->GetLayerStack()->Init(iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY(), format);
-        iTexture->AddAssetUserData( userData );
-
-        //Create image layer
-        FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, userData->GetLayerStack()->Format() );
-		FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
-		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, textureData));
-
-        //Add Layer
-        userData->GetLayerStack()->AddLayer(imageLayer);
-
-        // Notify for changes
-        iTexture->PostEditChange();
-    }
-    return userData;
+    mTextureWrapper.Texture(iTexture);
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------- FAssetEditorToolkit override
 
-void
-FOdysseyFlipbookEditorData::SyncTextureWithSurfaceBlock()
-{
-    if (mTexture) {
-        CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture);
-        mTexture->UpdateResource();
-    }
-}
-
-void
-FOdysseyFlipbookEditorData::PrepareTextureProperties()
-{
-    FTextureFormatSettings textureFormatSettings;
-	mTexture->GetLayerFormatSettings(0, textureFormatSettings);
-
-	// Create new Texture Properties Backup
-	mPropertiesBackup = { textureFormatSettings.CompressionNone };
-    
-    textureFormatSettings.CompressionNone = 1;
-	mTexture->SetLayerFormatSettings(0, textureFormatSettings);
-	mTexture->UpdateResource();
-    mTexture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
-}
-
-void
-FOdysseyFlipbookEditorData::ApplyPropertiesBackup()
-{
-	if (mTexture) {
-        
-        FTextureFormatSettings textureFormatSettings;
-        mTexture->GetLayerFormatSettings(0,textureFormatSettings);
-        textureFormatSettings.CompressionNone = mPropertiesBackup.mTextureCompressionNone;
-        mTexture->SetLayerFormatSettings(0, textureFormatSettings);
-
-        mTexture->UpdateResource();
-	}
-}
-
 FOdysseyLayerStack*
 FOdysseyFlipbookEditorData::LayerStack() const
 {
-    return mLayerStack;
+    return mTextureWrapper.LayerStack();
 }
 
 
@@ -179,16 +68,22 @@ FOdysseyFlipbookEditorData::FlipbookWrapper()
 	return mFlipbookWrapper;
 }
 
+FOdysseyTextureWrapper&
+FOdysseyFlipbookEditorData::TextureWrapper()
+{
+	return mTextureWrapper;
+}
+
 UTexture2D*
 FOdysseyFlipbookEditorData::Texture()
 {
-	return mTexture;
+	return mTextureWrapper.Texture();
 }
 
 FOdysseySurfaceEditable*
 FOdysseyFlipbookEditorData::DisplaySurface()
 {
-	return mDisplaySurface;
+	return mTextureWrapper.Surface();
 }
 
 FOdysseySurfaceReadOnly*
@@ -198,38 +93,21 @@ FOdysseyFlipbookEditorData::PreviewSurface()
 }
 
 void
-FOdysseyFlipbookEditorData::OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain)
+FOdysseyFlipbookEditorData::OnTexturePreSave()
 {
-	if (mTexture == Cast<UTexture2D>(iObject))
-    {
-        //Texture properties will change, we need to SyncTextureWithBlock
-        CopyBlockDataIntoUTexture( mDisplaySurface->Block(), mTexture );
-    }
-}
-
-void
-FOdysseyFlipbookEditorData::OnPackagePreSave(UPackage* iPackage)
-{
-    if (!mTexture)
-        return;
-
-    UPackage* package = CastChecked<UPackage>(mTexture->GetOuter());
-    if (package != iPackage)
-        return;
-
     PaintEngine()->Flush();
-    SyncTextureWithSurfaceBlock();
-	ApplyPropertiesBackup();
 }
 
 void
-FOdysseyFlipbookEditorData::OnPackageSaved(const FString& iPackageFilename, UObject* iOuter)
+FOdysseyFlipbookEditorData::OnCloseRequested()
 {
-    if (!mTexture)
-        return;
+    PaintEngine()->Flush();
 
-    if (mTexture->GetOuter() != iOuter)
-        return;
+    //TODO: Move in the right place
+    if (LayerStack())
+    {
+        LayerStack()->mDrawingUndo->Clear();
+    }
 
-    PrepareTextureProperties();
+    mTextureWrapper.Texture(nullptr);
 }

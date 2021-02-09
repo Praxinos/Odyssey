@@ -131,7 +131,7 @@ void
 FOdysseyTextureEditorGUI::CreateLayerStackTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
-        .LayerStackData( iData->LayerStack() );
+        .LayerStackData_Raw( iData.Get(), &FOdysseyTextureEditorData::LayerStack );
 }
 
 void

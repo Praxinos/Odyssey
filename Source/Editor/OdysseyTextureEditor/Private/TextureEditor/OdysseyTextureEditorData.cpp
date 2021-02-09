@@ -37,7 +37,7 @@ FOdysseyTextureEditorData::Init()
 //--------------------------------------------------------- FAssetEditorToolkit override
 
 FOdysseyLayerStack*
-FOdysseyTextureEditorData::LayerStack()
+FOdysseyTextureEditorData::LayerStack() const
 {
     return mTextureWrapper.LayerStack();
 }
@@ -47,7 +47,6 @@ FOdysseyTextureEditorData::TextureWrapper()
 {
 	return mTextureWrapper;
 }
-
 UTexture2D*
 FOdysseyTextureEditorData::Texture()
 {
@@ -72,7 +71,10 @@ FOdysseyTextureEditorData::OnCloseRequested()
     PaintEngine()->Flush();
 
     //TODO: Move in the right place
-    LayerStack()->mDrawingUndo->Clear();
+    if (LayerStack())
+    {
+        LayerStack()->mDrawingUndo->Clear();
+    }
 
     mTextureWrapper.Texture(nullptr);
 }

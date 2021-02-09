@@ -7,6 +7,7 @@
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorData.h"
 #include "OdysseySurfaceReadOnly.h"
+#include "OdysseyTextureWrapper.h"
 
 class UPaperFlipbook;
 class UTexture2D;
@@ -34,59 +35,42 @@ public:
 public:
     //Overrides
 	virtual void Init() override;
-	virtual FOdysseySurfaceEditable*    DisplaySurface() override;
 
+public:
     //Getters
 
     //Currently Edited Flipbook
 	TSharedPtr<FOdysseyFlipbookWrapper>& FlipbookWrapper();
+    
+    FOdysseyTextureWrapper& TextureWrapper();
 
     //Currently Edited Texture
     UTexture2D*							Texture();
 
     //Currently Edited LayerStack
     FOdysseyLayerStack*					LayerStack() const;
-    
+
+	virtual FOdysseySurfaceEditable*    DisplaySurface() override;
 	FOdysseySurfaceReadOnly*			PreviewSurface();
 
-    //Data Sanity Methods 
+public:
+    // Setters
 
     // Sets the currently edited texture
-    void                        Texture(UTexture2D* iTexture);
+    void Texture(UTexture2D* iTexture);
     
-private:
-    UOdysseyTextureAssetUserData* FindOrCreateTextureUserData(UTexture2D* iTexture);
-
 public:
-    // Syncs the texture data with the surface block data
-    // This ensures the texture contains the right data (before saving for example)
-	void SyncTextureWithSurfaceBlock();
-
-	void ApplyPropertiesBackup();
-    
-    void PrepareTextureProperties();
-
-    void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
-    void OnPackagePreSave(UPackage* iPackage);
-    void OnPackageSaved(const FString& iPackageFilename, UObject* iOuter);
+    //TEMPORARY
+    void OnCloseRequested();
 
 private:
-    TSharedPtr<FOdysseyFlipbookWrapper>             mFlipbookWrapper;
-    UTexture2D*                 mTexture;
+    void OnTexturePreSave();
 
-    FOdysseyLayerStack*         mLayerStack;  // Copied from mOdysseyTexture AssetUserData
-    
-    //Recreated everytime the current Keyframe changes
-	FOdysseySurfaceEditable*            mDisplaySurface;
+private:
+    TSharedPtr<FOdysseyFlipbookWrapper>     mFlipbookWrapper;
+    FOdysseyTextureWrapper                  mTextureWrapper;
 
 	//Surface for previewing in viewport
-	FOdysseySurfaceReadOnly*            mPreviewSurface;
-
-    //Current Texture Properties backup
-    FTexturePropertiesBackup    mPropertiesBackup;
-
-	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
-    FDelegateHandle mOnPackagePreSaveHandle;
-    FDelegateHandle mOnPackageSavedHandle;
+	FOdysseySurfaceReadOnly*                mPreviewSurface;
 };
 

@@ -70,7 +70,7 @@ void
 FOdysseyTextureEditorController::OnPreTextureChange(UTexture2D* iNewTexture)
 {
     if (!GetTextureEditorData()->LayerStack())
-        return;
+		return;
 
     GetTextureEditorData()->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
     GetTextureEditorData()->LayerStack()->OnStructureChanged().RemoveAll(this);
@@ -111,17 +111,21 @@ FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     if( !(GetTextureEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
 	    GetTextureEditorData()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged);
     	
-    // Set Image Layer as the current Layer
-    TArray<TSharedPtr<IOdysseyLayer>> layers;
-    GetTextureEditorData()->LayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
-
-    for (int i = 0; i < layers.Num(); i++)
+    
+    if (GetTextureEditorData()->LayerStack()->GetLayerRoot() == GetTextureEditorData()->LayerStack()->GetCurrentLayer())
     {
-        if (layers[i]->GetType() != IOdysseyLayer::eType::kImage)
-            continue;
-        
-        GetTextureEditorData()->LayerStack()->SetCurrentLayer(layers[i]);
-        break;
+        // Set Image Layer as the current Layer
+        TArray<TSharedPtr<IOdysseyLayer>> layers;
+        GetTextureEditorData()->LayerStack()->GetLayerRoot()->DepthFirstSearchTree(&layers, false);
+
+        for (int i = 0; i < layers.Num(); i++)
+        {
+            if (layers[i]->GetType() != IOdysseyLayer::eType::kImage)
+                continue;
+
+            GetTextureEditorData()->LayerStack()->SetCurrentLayer(layers[i]);
+            break;
+        }
     }
 }
 

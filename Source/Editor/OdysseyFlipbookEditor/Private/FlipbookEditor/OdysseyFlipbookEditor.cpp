@@ -62,17 +62,7 @@ FOdysseyFlipbookEditor::OnToolkitInitialized()
 bool
 FOdysseyFlipbookEditor::OnCloseRequested()
 { 
-	//FOdysseyPainterEditor::OnCloseRequested();
-	GetData()->PaintEngine()->Flush();
-
-	mData->SyncTextureWithSurfaceBlock();
-	mData->ApplyPropertiesBackup();
-
-	//TODO: Move in the right place
-    if (mData->LayerStack())
-	{
-		mData->LayerStack()->mDrawingUndo->Clear();
-	}
+	mData->OnCloseRequested();
     return true;
 }
 

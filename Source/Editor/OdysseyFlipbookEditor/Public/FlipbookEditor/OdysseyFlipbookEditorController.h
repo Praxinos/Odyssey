@@ -57,6 +57,10 @@ public:
     void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 	
 public:
+	//Called when the texture pointer in the TextureWrapper changes
+    void OnPreTextureChange(UTexture2D* iNewTexture);
+    void OnPostTextureChange(UTexture2D* iOldTexture);
+
 	virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;

@@ -22,7 +22,7 @@ public:
 
     FOdysseyTextureWrapper&             TextureWrapper();
 	UTexture2D*							Texture();
-    FOdysseyLayerStack*					LayerStack();
+    FOdysseyLayerStack*					LayerStack() const;
 	virtual FOdysseySurfaceEditable*    DisplaySurface() override;
 
 public:

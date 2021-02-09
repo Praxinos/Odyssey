@@ -34,9 +34,9 @@ public:
     
 public:
     void Texture(UTexture2D*);
-    UTexture2D* Texture();
-    FOdysseySurfaceEditable* Surface();
-    FOdysseyLayerStack* LayerStack();
+    UTexture2D* Texture() const;
+    FOdysseySurfaceEditable* Surface() const;
+    FOdysseyLayerStack* LayerStack() const;
 
     FOnPrePropertyChanged& OnPrePropertyChangedDelegate();
     FOnPreSave& OnPreSaveDelegate();
@@ -46,7 +46,7 @@ public:
 
 private:
     //Creates Texture UserData holding the layerstack for example and returns it
-    UOdysseyTextureAssetUserData* CreateTextureUserData(UTexture2D* iTexture);
+    UOdysseyTextureAssetUserData* CreateTextureUserData(UTexture2D* iTexture) const;
 
     //Manage Texture Synchronization with Surface
     void UpdateTextureFromSurface();
