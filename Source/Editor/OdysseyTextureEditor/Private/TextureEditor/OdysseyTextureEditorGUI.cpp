@@ -40,7 +40,7 @@ FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI() :
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyTextureEditorGUI::Init(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
+FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
 	FOdysseyTexturePerformanceOptions* performanceOptions = new FOdysseyTexturePerformanceOptions();
 	PerformanceOptions(performanceOptions);

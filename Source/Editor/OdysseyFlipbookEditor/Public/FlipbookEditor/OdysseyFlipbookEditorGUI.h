@@ -55,7 +55,7 @@ public:
 
 public:
     //Init
-	void Init(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+	void InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 public:
     // Getters

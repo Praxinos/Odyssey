@@ -70,7 +70,8 @@ FOdysseyFlipbookEditor::Init()
 
 	//----
 
-	mGUI->Init(this, mController);
+	mGUI->Init(this);
+	mGUI->InitOdysseyFlipbookEditorGUI(this, mController);
 	mController->Init();
 }
 
@@ -126,8 +127,8 @@ FOdysseyFlipbookEditor::Texture(UTexture2D* iTexture)
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
-const TSharedRef<FTabManager::FLayout>&
-FOdysseyFlipbookEditor::CreateLayout() const
+TSharedRef<FTabManager::FLayout>
+FOdysseyFlipbookEditor::GetLayout()
 {
 	return mGUI->GetLayout();
 }
@@ -183,8 +184,7 @@ FOdysseyFlipbookEditor::OnTexturePreSave()
 
 /**
  * TODO:
- * 2) Move Data directly in editor (allowing data methods override on Editor inheritance)
- * 3) Make Tabs classes, containing the creation of GUI and a pointer to a controller specific for this GUI (This one is a BIG one)
+ * 3) Make GUI -> Tabs classes, containing the creation of GUI and a pointer to a controller specific for this GUI (This one is a BIG one)
  * 3.1) while making 3), the old almighty controller can coexist with the new Tabs classes, so we can make each Tab class + controller one after the other
  * 4) Make FlipbookEditor Inherite TextureEditor and cleanup
  * 5) Test and Debug

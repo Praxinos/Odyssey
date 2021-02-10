@@ -53,7 +53,8 @@ FOdysseyTextureEditor::Init()
 
 	//----
 
-	mGUI->Init(this, mController);
+	mGUI->Init(this);
+	mGUI->InitOdysseyTextureEditorGUI(this, mController);
 	mController->Init();
 }
 
@@ -87,8 +88,8 @@ FOdysseyTextureEditor::LayerStack() const
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
-const TSharedRef<FTabManager::FLayout>&
-FOdysseyTextureEditor::CreateLayout() const
+TSharedRef<FTabManager::FLayout>
+FOdysseyTextureEditor::GetLayout()
 {
 	return mGUI->GetLayout();
 }

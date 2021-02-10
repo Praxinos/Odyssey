@@ -24,6 +24,7 @@
 #include "OdysseyStyleSet.h"
 
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolkit"
 
@@ -50,7 +51,8 @@ FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(const FName iLayoutName)
-	: mLayout(FTabManager::NewLayout(iLayoutName))
+	: mLayoutName()
+	, mLayout(nullptr)
 	, mPerformanceOptions( NULL )
 {
 }
@@ -59,17 +61,68 @@ FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(const FName iLayoutName)
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController> iController)
+FOdysseyPainterEditorGUI::Init(FOdysseyPainterEditor* iEditor)
 {
-	CreateWidgets(iEditor, iController);
+	CreateTabs(iEditor); //Create Tabs Objects and sets their corresponding controllers
+	InitTabs(); //Init Tabs, creating their widgets
+
 	CreateLayout();
 }
 
-const TSharedRef<FTabManager::FLayout>&
-FOdysseyPainterEditorGUI::GetLayout() const
+void
+FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController> iController)
 {
-	return mLayout;
+	CreateWidgets(iEditor, iController);
+	// CreateLayout();
 }
+
+TSharedRef<FTabManager::FLayout>
+FOdysseyPainterEditorGUI::GetLayout()
+{
+	return mLayout.ToSharedRef();
+}
+
+void
+FOdysseyPainterEditorGUI::CreateTabs(FOdysseyPainterEditor* iEditor)
+{
+	/* CreateMeshSelectorTab(iEditor);
+	CreateViewportTab(iEditor);
+	CreateBrushSelectorTab(iEditor);
+	CreateBrushExposedParametersTab(iEditor);
+	CreateColorSelectorTab(iEditor);
+	CreateColorSlidersTab(iEditor);
+	CreateTopTab(iEditor);
+	CreateStrokeOptionsTab(iEditor);
+	CreatePerformanceOptionsTab(iEditor);
+	CreateUndoHistoryTab(iEditor);
+	CreateToolsTab(iEditor); */
+}
+
+void
+FOdysseyPainterEditorGUI::InitTabs()
+{
+	for( int i = 0; i < mTabs.Num(); i++)
+	{
+		mTabs[i]->Init(); //Creates internal Widget
+	}
+}
+
+void
+FOdysseyPainterEditorGUI::CreateLayout()
+{
+	mLayout = FTabManager::NewLayout(mLayoutName)
+		->AddArea
+		(
+			FTabManager::NewPrimaryArea()
+			->SetOrientation(Orient_Horizontal)
+			->Split
+			(
+				CreateMainSection()
+			)
+		);
+}
+
+
 
 void
 FOdysseyPainterEditorGUI::CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
@@ -86,22 +139,6 @@ FOdysseyPainterEditorGUI::CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedP
 	CreatePerformanceOptionsTab(iEditor, iController);
 	//CreateUndoHistoryTab(iEditor, iController);
 	CreateToolsTab(iEditor, iController);
-}
-
-void
-FOdysseyPainterEditorGUI::CreateLayout()
-{
-    // Build Layout
-	mLayout
-		->AddArea
-		(
-			FTabManager::NewPrimaryArea()
-			->SetOrientation(Orient_Horizontal)
-			->Split
-			(
-				CreateMainSection()
-			)
-		);
 }
 
 TSharedRef<FTabManager::FSplitter>

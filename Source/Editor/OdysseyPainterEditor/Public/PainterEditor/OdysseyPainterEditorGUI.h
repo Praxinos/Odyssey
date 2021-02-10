@@ -21,6 +21,7 @@ class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
+class FOdysseyPainterEditorTab;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -32,6 +33,13 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorGUI();
     FOdysseyPainterEditorGUI(const FName iLayoutName);
+
+public:
+    void Init(FOdysseyPainterEditor* iEditor);
+
+protected:
+    virtual void CreateTabs(FOdysseyPainterEditor* iEditor);
+    void InitTabs();
 
 private:
     void CreateViewportTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
@@ -91,7 +99,7 @@ protected:
 	virtual TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
 
 public:
-	const TSharedRef<FTabManager::FLayout>& GetLayout() const;
+	TSharedRef<FTabManager::FLayout> GetLayout();
 
     TSharedPtr<SOdysseySurfaceViewport>& GetViewportTab();
     TSharedPtr<SOdysseyBrushSelector>& GetBrushSelectorTab();
@@ -110,7 +118,10 @@ protected:
 
 private:
     /** List of open tool panels; used to ensure only one exists at any one time */
-	TSharedRef<FTabManager::FLayout>            mLayout;
+    FName                                           mLayoutName;
+	TSharedPtr<FTabManager::FLayout>                mLayout;
+    TArray<TSharedPtr<FOdysseyPainterEditorTab>>    mTabs;
+
 
     TSharedPtr<SOdysseySurfaceViewport>         mViewportTab;
     TSharedPtr<SOdysseyBrushSelector>           mBrushSelectorTab;

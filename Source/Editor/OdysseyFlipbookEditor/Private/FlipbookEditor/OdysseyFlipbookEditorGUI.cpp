@@ -43,7 +43,7 @@ FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI() :
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyFlipbookEditorGUI::Init(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
+FOdysseyFlipbookEditorGUI::InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
 	FOdysseyFlipbookPerformanceOptions* performanceOptions = new FOdysseyFlipbookPerformanceOptions();
 	PerformanceOptions(performanceOptions);

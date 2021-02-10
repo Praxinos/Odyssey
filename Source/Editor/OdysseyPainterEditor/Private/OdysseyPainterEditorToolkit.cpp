@@ -29,7 +29,7 @@ FOdysseyPainterEditorToolkit::Init(TSharedPtr<FOdysseyPainterEditor> iEditor, UO
     mEditedObject = iEditedObject;
     
     TArray<UObject*> editedObjects = GetAllEditedObjects();
-    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, false, editedObjects);
+    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->GetLayout(), true, false, editedObjects);
     InitMenu();
 
     mEditor->OnToolkitInitialized();

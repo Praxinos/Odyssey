@@ -53,7 +53,7 @@ public:
 
 public:
     //Init
-	void Init(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 public:
     // Getters

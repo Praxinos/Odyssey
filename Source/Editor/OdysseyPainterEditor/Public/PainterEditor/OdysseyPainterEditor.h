@@ -52,7 +52,7 @@ public:
 
 public:
     // Interface
-    virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const = 0;
+    virtual TSharedRef<FTabManager::FLayout> GetLayout() = 0;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const = 0;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;

@@ -35,7 +35,7 @@ public:
 
 public:
     // Overrides
-    virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const override;
+    virtual TSharedRef<FTabManager::FLayout> GetLayout() override;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;
     
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
