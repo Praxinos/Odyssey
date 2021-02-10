@@ -10,6 +10,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseySurfaceViewport.h"
+#include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorToolkit.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
@@ -42,18 +43,18 @@ FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI() :
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyFlipbookEditorGUI::Init(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
+FOdysseyFlipbookEditorGUI::Init(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
 	FOdysseyFlipbookPerformanceOptions* performanceOptions = new FOdysseyFlipbookPerformanceOptions();
 	PerformanceOptions(performanceOptions);
 
-	CreateLayerStackTab(iData, iController);
-	CreateTextureDetailsTab(iData, iController);
-	CreateTimelineTab(iData, iController);
+	CreateLayerStackTab(iEditor, iController);
+	CreateTextureDetailsTab(iEditor, iController);
+	CreateTimelineTab(iEditor, iController);
 
-	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iData, iController); //Creates also creates the Layout
+	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iEditor, iController); //Creates also creates the Layout
 
-	GetViewportTab()->SetSurface( iData->DisplaySurface() );
+	GetViewportTab()->SetSurface( iEditor->DisplaySurface() );
 }
  
 TSharedRef<FTabManager::FSplitter>
@@ -149,24 +150,24 @@ FOdysseyFlipbookEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMa
 //------------------------------------------------------------- Internal widget creation
 
 void
-FOdysseyFlipbookEditorGUI::CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
+FOdysseyFlipbookEditorGUI::CreateLayerStackTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
-        .LayerStackData_Raw( iData.Get(), &FOdysseyFlipbookEditorData::LayerStack );
+        .LayerStackData_Raw( iEditor, &FOdysseyFlipbookEditor::LayerStack );
 }
 
 void
-FOdysseyFlipbookEditorGUI::CreateTextureDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
+FOdysseyFlipbookEditorGUI::CreateTextureDetailsTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
     mTextureDetailsTab = SNew( SOdysseyTextureDetails )
-        .Texture( iData->Texture() );
+        .Texture( iEditor->Texture() );
 }
 
 void
-FOdysseyFlipbookEditorGUI::CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
+FOdysseyFlipbookEditorGUI::CreateTimelineTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
 	mTimelineTab = SNew(SOdysseyFlipbookTimelineView)
-		.FlipbookWrapper(iData->FlipbookWrapper())
+		.FlipbookWrapper(iEditor->FlipbookWrapper())
 		.OnScrubStarted(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineScrubStarted)
 		.OnScrubStopped(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineScrubStopped)
 		.OnCurrentKeyframeChanged(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineCurrentKeyframeChanged)

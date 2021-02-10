@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "OdysseyFlipbookEditorData.h"
-
 #include "Brush/SOdysseyBrushExposedParameters.h"
 #include "Brush/SOdysseyBrushSelector.h"
 #include "Color/SOdysseyColorSelector.h"
@@ -23,6 +21,7 @@
 class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
+class FOdysseyFlipbookEditor;
 class FOdysseyFlipbookEditorController;
 class SOdysseyFlipbookPropertiesTabBody;
 
@@ -56,7 +55,7 @@ public:
 
 public:
     //Init
-	void Init(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+	void Init(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 public:
     // Getters
@@ -77,9 +76,9 @@ protected:
 
 private:
     // Internal widget creation
-    void CreateLayerStackTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-    void CreateTimelineTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-	void CreateTextureDetailsTab(TSharedPtr<FOdysseyFlipbookEditorData>& iData, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+    void CreateLayerStackTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+    void CreateTimelineTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+	void CreateTextureDetailsTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 private:
 	// Spawner callbacks

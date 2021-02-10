@@ -9,6 +9,7 @@
 #include "Widgets/Layout/SExpandableArea.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyStyleSet.h"
+#include "OdysseyTextureEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
@@ -39,14 +40,14 @@ FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI() :
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyTextureEditorGUI::Init(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController)
+FOdysseyTextureEditorGUI::Init(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
 	FOdysseyTexturePerformanceOptions* performanceOptions = new FOdysseyTexturePerformanceOptions();
 	PerformanceOptions(performanceOptions);
 
-	CreateLayerStackTab(iData, iController);
-	CreateTextureDetailsTab(iData, iController);
-	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iData, iController); //Creates also creates the Layout
+	CreateLayerStackTab(iEditor, iController);
+	CreateTextureDetailsTab(iEditor, iController);
+	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iEditor, iController); //Creates also creates the Layout
 }
  
 TSharedRef<FTabManager::FSplitter>
@@ -128,17 +129,17 @@ FOdysseyTextureEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMan
 //------------------------------------------------------------- Internal widget creation
 
 void
-FOdysseyTextureEditorGUI::CreateLayerStackTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController)
+FOdysseyTextureEditorGUI::CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
-        .LayerStackData_Raw( iData.Get(), &FOdysseyTextureEditorData::LayerStack );
+        .LayerStackData_Raw( iEditor, &FOdysseyTextureEditor::LayerStack );
 }
 
 void
-FOdysseyTextureEditorGUI::CreateTextureDetailsTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController)
+FOdysseyTextureEditorGUI::CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
     mTextureDetailsTab = SNew( SOdysseyTextureDetails )
-        .Texture( iData->Texture() );
+        .Texture( iEditor->Texture() );
 }
 
 //--------------------------------------------------------------------------------------

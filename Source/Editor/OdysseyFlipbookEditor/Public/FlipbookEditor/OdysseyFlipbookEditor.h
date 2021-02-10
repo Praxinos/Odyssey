@@ -7,9 +7,15 @@
 #include "PaperFlipbook.h"
 
 #include "OdysseyFlipbookWrapper.h"
+#include "OdysseyTextureWrapper.h"
 
-class FOdysseyFlipbookEditorData;
+class UPaperFlipbook;
+class UTexture2D;
+class UOdysseyBrush;
+class UOdysseyTextureAssetUserData;
+class FOdysseyPainterEditorToolkit;
 class FOdysseyFlipbookEditorGUI;
+class FOdysseySurfaceReadOnly;
 class FOdysseyFlipbookEditorController;
 
 /**
@@ -25,28 +31,42 @@ public:
     FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
 
 public:
+    //Initialization
     virtual void Init() override;
 
 public:
-    //TEMPORARY
-    TSharedPtr<FOdysseyFlipbookEditorData> GetData();
+    // Getters
+	TSharedPtr<FOdysseyFlipbookWrapper>&    FlipbookWrapper();
+    FOdysseyTextureWrapper&                 TextureWrapper();
+    UTexture2D*							    Texture();
+    FOdysseyLayerStack*					    LayerStack() const;
+	virtual FOdysseySurfaceEditable*        DisplaySurface() override;
+	FOdysseySurfaceReadOnly*			    PreviewSurface();
 
 public:
-    virtual void OnToolkitInitialized() override;
-    virtual bool OnCloseRequested();
+    // Setters
+    void Texture(UTexture2D* iTexture);
+
+public:
+    //Overrides
     virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const override;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;
     
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
-private:
-    TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
+    virtual void OnToolkitInitialized() override;
+    virtual bool OnCloseRequested();
 
-	TSharedPtr<FOdysseyFlipbookEditorData> mData;
+protected:
+    virtual void OnTexturePreSave();
+
+private:
+    TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper; //TODO: No need for a SharedPtr here, and no need for a pointer here
+    FOdysseyTextureWrapper                  mTextureWrapper;
+	FOdysseySurfaceReadOnly*                mPreviewSurface; //TODO: No need for a pointer here I guess
+
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 	TSharedPtr<FOdysseyFlipbookEditorController> mController;
-
-    FDelegateHandle mOnSpriteTextureChangedHandle;
 };
 

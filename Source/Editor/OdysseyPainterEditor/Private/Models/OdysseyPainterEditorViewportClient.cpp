@@ -24,10 +24,9 @@
 
 #include "IOdysseyStylusInputModule.h"
 #include "OdysseyPaintEngine.h"
+#include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
-// #include "OdysseyPainterEditorToolkit.h"
-#include "OdysseyPainterEditorData.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "OdysseySurface.h"
 #include "SOdysseyCursorWidget.h"
@@ -43,13 +42,13 @@
 // FOdysseyPainterEditorViewportClient
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakPtr< FOdysseyPainterEditorData >     iOdysseyPainterEditorData,
+FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdysseyPainterEditor*                    iOdysseyPainterEditor,
                                                                           TWeakPtr< SOdysseySurfaceViewport >       iOdysseyPainterEditorViewport,
                                                                           FOdysseyMeshSelector*                     iMeshSelector)
     : InputSubsystem( nullptr )
     , mLastKey( EKeys::Invalid )
     , mLastEvent( EInputEvent::IE_MAX )
-    , mOdysseyPainterEditorDataPtr( iOdysseyPainterEditorData )
+    , mOdysseyPainterEditor(iOdysseyPainterEditor)
     , mOdysseyPainterEditorViewportPtr( iOdysseyPainterEditorViewport )
     , mMeshSelector( iMeshSelector )
     , mCheckerboardTexture( NULL )
@@ -58,7 +57,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( TWeakP
     , mCurrentToolState( eState::kIdle )
     , mIsCapturedByStylus(false)
 {
-    check( // mOdysseyPainterEditorDataPtr.IsValid() &&
+    check( // mOdysseyPainterEditor.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
 
     InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
@@ -92,11 +91,11 @@ FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInp
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    /* if( !mOdysseyPainterEditorDataPtr.IsValid() )
+    /* if( !mOdysseyPainterEditor.IsValid() )
         return; */
 
     // Draw on tick or catch up
-    // auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+    // auto paintengine = mOdysseyPainterEditor.Pin()->PaintEngine();
     // FVector2D oldpoint = FVector2D( RefEventStrokePoint.x, RefEventStrokePoint.y );
     // FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
     // FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
@@ -110,7 +109,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // }
 
     // Send Tick to PaintEngine
-	mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->Tick();
+	mOdysseyPainterEditor->PaintEngine()->Tick();
 
 	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
 	ioCanvas->Clear(settings.BackgroundColor);
@@ -202,9 +201,9 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     // Draw Cursor Preview
-    if( mOdysseyPainterEditorDataPtr.Pin()->DrawBrushPreview() )
+    if( mOdysseyPainterEditor->DrawBrushPreview() )
     {
-        auto paintEngine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+        auto paintEngine = mOdysseyPainterEditor->PaintEngine();
         paintEngine->UpdateBrushCursorPreview();
         if( paintEngine->mBrushCursorPreviewSurface )
         {
@@ -446,14 +445,14 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
             mCurrentToolState = eState::kDrawing;
-            //mOdysseyPainterEditorDataPtr.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
-            //mOdysseyPainterEditorDataPtr.Pin()->MarkTransactionAsDirty();
-			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->BeginStroke( mCurrentPointInTexture, lastPointInTexture );
+            //mOdysseyPainterEditor.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
+            //mOdysseyPainterEditor.Pin()->MarkTransactionAsDirty();
+			mOdysseyPainterEditor->PaintEngine()->BeginStroke( mCurrentPointInTexture, lastPointInTexture );
             return true;
         }
         else if( iKey == EKeys::Escape && iEvent == EInputEvent::IE_Pressed )
         {
-			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->AbortStroke();
+			mOdysseyPainterEditor->PaintEngine()->AbortStroke();
             return true;
         }
         else if( iKey == EKeys::P && iEvent == EInputEvent::IE_Pressed )
@@ -491,8 +490,8 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         {
             mCurrentToolState = eState::kIdle;
 
-			mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->EndStroke();
-            //mOdysseyPainterEditorDataPtr.Pin()->EndTransaction();
+			mOdysseyPainterEditor->PaintEngine()->EndStroke();
+            //mOdysseyPainterEditor->EndTransaction();
 
             return true;
         }
@@ -620,7 +619,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 
     if( mCurrentToolState == eState::kDrawing )
     {
-        auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+        auto paintengine = mOdysseyPainterEditor->PaintEngine();
         
         // if( paintengine->GetStokePaintOnTick() )
         //     return;
@@ -713,7 +712,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
 
     if (mCurrentToolState == eState::kIdle)
     {
-        auto paintengine = mOdysseyPainterEditorDataPtr.Pin()->PaintEngine();
+        auto paintengine = mOdysseyPainterEditor->PaintEngine();
 
         // if( paintengine->GetStokePaintOnTick() )
         //     return;
@@ -970,7 +969,7 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
         return 1.0;
     }
 
-    //mOdysseyPainterEditorDataPtr.Pin()->PaintEngine()->Invalidate();
+    //mOdysseyPainterEditor.Pin()->PaintEngine()->Invalidate();
 
     double zoom = 1.0;
     bool fitToViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetFitToViewport();

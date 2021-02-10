@@ -4,10 +4,13 @@
 #include "OdysseyFlipbookEditor.h"
 
 #include "OdysseyFlipbookEditorController.h"
-#include "OdysseyFlipbookEditorData.h"
 #include "OdysseyFlipbookEditorGUI.h"
 
 #include "OdysseyFlipbookEditorToolkit.h"
+
+#include "OdysseySurfaceReadOnly.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyPaintEngine.h"
 
 #include "Types/NavigationMetaData.h"
 
@@ -19,13 +22,17 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 {
-	mFlipbookWrapper->OnSpriteTextureChanged().Remove(mOnSpriteTextureChangedHandle);
+	if (mPreviewSurface) {
+		delete mPreviewSurface;
+		mPreviewSurface = nullptr;
+	}
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
 	mFlipbookWrapper(nullptr),
-	mData(nullptr),
+	mTextureWrapper( nullptr ),
+	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
 	mGUI(nullptr),
 	mController(nullptr)
 {
@@ -34,37 +41,90 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorT
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
-	mData(nullptr),
+	mTextureWrapper( nullptr ),
+	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
 	mGUI(nullptr),
 	mController(nullptr)
 {
-	mData = MakeShareable(new FOdysseyFlipbookEditorData(mFlipbookWrapper));
 	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI());
 	mController = MakeShareable(new FOdysseyFlipbookEditorController(this, mGUI));
 }
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Initialization
 
 void
 FOdysseyFlipbookEditor::Init()
 {
 	FOdysseyPainterEditor::Init();
 
-	mData->Init();
-	mGUI->Init(mData, mController);
+	//----
+
+	mTextureWrapper.OnPreSaveDelegate().AddRaw(this, &FOdysseyFlipbookEditor::OnTexturePreSave);
+    
+    //We don't need to initialize anything if there is no keyFrames
+    if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() <= 0)
+        return;
+
+    Texture(mFlipbookWrapper->GetKeyframeTexture(0));
+
+	//----
+
+	mGUI->Init(this, mController);
 	mController->Init();
 }
 
-void
-FOdysseyFlipbookEditor::OnToolkitInitialized()
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Getters
+
+
+TSharedPtr<FOdysseyFlipbookWrapper>&
+FOdysseyFlipbookEditor::FlipbookWrapper()
 {
-	mController->OnToolkitInitialized();
+	return mFlipbookWrapper;
 }
 
-bool
-FOdysseyFlipbookEditor::OnCloseRequested()
-{ 
-	mData->OnCloseRequested();
-    return true;
+FOdysseyTextureWrapper&
+FOdysseyFlipbookEditor::TextureWrapper()
+{
+	return mTextureWrapper;
 }
+
+UTexture2D*
+FOdysseyFlipbookEditor::Texture()
+{
+	return mTextureWrapper.Texture();
+}
+
+FOdysseySurfaceEditable*
+FOdysseyFlipbookEditor::DisplaySurface()
+{
+	return mTextureWrapper.Surface();
+}
+
+FOdysseyLayerStack*
+FOdysseyFlipbookEditor::LayerStack() const
+{
+    return mTextureWrapper.LayerStack();
+}
+
+FOdysseySurfaceReadOnly*
+FOdysseyFlipbookEditor::PreviewSurface()
+{
+	return mPreviewSurface;
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Setters
+
+void
+FOdysseyFlipbookEditor::Texture(UTexture2D* iTexture)
+{
+    mTextureWrapper.Texture(iTexture);
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- Overrides
 
 const TSharedRef<FTabManager::FLayout>&
 FOdysseyFlipbookEditor::CreateLayout() const
@@ -93,6 +153,34 @@ FOdysseyFlipbookEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager
 	mGUI->UnregisterTabSpawners(iTabManager);
 }
 
+void
+FOdysseyFlipbookEditor::OnToolkitInitialized()
+{
+	mController->OnToolkitInitialized();
+}
+
+bool
+FOdysseyFlipbookEditor::OnCloseRequested()
+{ 
+	FOdysseyPainterEditor::OnCloseRequested();
+
+    //TODO: Move in the right place
+    if (LayerStack())
+        LayerStack()->mDrawingUndo->Clear();
+
+    mTextureWrapper.Texture(nullptr);
+    return true;
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
+
+void
+FOdysseyFlipbookEditor::OnTexturePreSave()
+{
+    PaintEngine()->Flush();
+}
+
 /**
  * TODO:
  * 2) Move Data directly in editor (allowing data methods override on Editor inheritance)
@@ -102,12 +190,5 @@ FOdysseyFlipbookEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager
  * 5) Test and Debug
  * 6) Hooray !
  */
-
-//TEMPORARY
-TSharedPtr<FOdysseyFlipbookEditorData>
-FOdysseyFlipbookEditor::GetData()
-{
-	return mData;
-}
 
 #undef LOCTEXT_NAMESPACE

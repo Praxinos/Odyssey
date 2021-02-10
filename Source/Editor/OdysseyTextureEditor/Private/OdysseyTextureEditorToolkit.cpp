@@ -4,7 +4,6 @@
 #include "OdysseyTextureEditorToolkit.h"
 
 #include "OdysseyTextureEditorController.h"
-#include "OdysseyTextureEditorData.h"
 #include "OdysseyTextureEditorGUI.h"
 
 #include "IOdysseyTextureEditorModule.h"

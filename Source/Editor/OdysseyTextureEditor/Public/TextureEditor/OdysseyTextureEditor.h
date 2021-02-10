@@ -5,8 +5,8 @@
 
 #include "OdysseyPainterEditor.h"
 #include "Engine/Texture2D.h"
+#include "OdysseyTextureWrapper.h"
 
-class FOdysseyTextureEditorData;
 class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorController;
 
@@ -23,22 +23,33 @@ public:
     FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
 
 public:
+    // Initialization
     virtual void Init() override;
 
 public:
-    //TEMPORARY
-    TSharedPtr<FOdysseyTextureEditorData> GetData();
+    // Getters
+    virtual FOdysseyTextureWrapper&             TextureWrapper();
+	virtual UTexture2D*							Texture();
+	virtual FOdysseySurfaceEditable*            DisplaySurface() override;
+    virtual FOdysseyLayerStack*					LayerStack() const;
 
 public:
-    virtual bool OnCloseRequested();
+    // Overrides
     virtual const TSharedRef<FTabManager::FLayout>& CreateLayout() const override;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;
     
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
+    virtual bool OnCloseRequested();
+
+protected:
+    // Methods
+    virtual void OnTexturePreSave();
+    
 private:
-	TSharedPtr<FOdysseyTextureEditorData> mData;
+    FOdysseyTextureWrapper     mTextureWrapper;
+
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
 	TSharedPtr<FOdysseyTextureEditorController> mController;
 };

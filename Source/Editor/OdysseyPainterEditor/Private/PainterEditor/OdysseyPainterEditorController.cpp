@@ -8,7 +8,6 @@
 #include "IContentBrowserSingleton.h"
 
 #include "Models/OdysseyPainterEditorCommands.h"
-#include "PainterEditor/OdysseyPainterEditorData.h"
 #include "PainterEditor/OdysseyPainterEditorGUI.h"
 #include "SOdysseyAboutScreen.h"
 #include "OdysseyBrushBlueprint.h"
@@ -58,10 +57,10 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
     FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 
 	//Add PaintEngine Callbacks
-	GetData()->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged);
-	GetData()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
-	GetData()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
-	GetData()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
+	GetEditor()->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged);
+	GetEditor()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
+	GetEditor()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
+	GetEditor()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
 
 	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
     GetGUI()->GetBrushSelectorTab()->SelectBrush(settings.BrushDefaults.DefaultBrush);
@@ -419,24 +418,22 @@ FOdysseyPainterEditorController::OnVisitPraxinosForums()
 void
 FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
 {
-	GetData()->Brush(iBrush);
+	GetEditor()->Brush(iBrush);
 
-    if(GetData()->BrushInstance())
+    if(GetEditor()->BrushInstance())
     {
-		GetData()->BrushInstance()->RemoveFromRoot();
-		GetData()->BrushInstance(NULL);
-        GetData()->PaintEngine()->SetBrushInstance(NULL);
+		GetEditor()->BrushInstance(NULL);
+        GetEditor()->PaintEngine()->SetBrushInstance(NULL);
     }
 
-    if(GetData()->Brush())
+    if(GetEditor()->Brush())
     {
         //@todo: check
         //mBrush->OnChanged().AddSP( this, &FOdysseyPainterEditorController::OnBrushChanged );
 
-		GetData()->Brush()->OnCompiled().AddSP( this, &FOdysseyPainterEditorController::OnBrushCompiled );
+		GetEditor()->Brush()->OnCompiled().AddSP( this, &FOdysseyPainterEditorController::OnBrushCompiled );
 
-		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetData()->Brush()->GeneratedClass);
-		brushInstance->AddToRoot();
+		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetEditor()->Brush()->GeneratedClass);
 
         FOdysseyBrushPreferencesOverrides& overrides = brushInstance->Preferences;
         if( overrides.bOverride_Step )          GetGUI()->GetStrokeOptionsTab()->SetStrokeStep( overrides.Step );
@@ -454,14 +451,14 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
         if( overrides.bOverride_BlendingMode )  GetGUI()->GetTopTab()->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
         if( overrides.bOverride_AlphaMode )     GetGUI()->GetTopTab()->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
 
-        GetData()->BrushInstance(brushInstance);
-        GetData()->PaintEngine()->SetBrushInstance(brushInstance);
+        GetEditor()->BrushInstance(brushInstance);
+        GetEditor()->PaintEngine()->SetBrushInstance(brushInstance);
         GetGUI()->GetBrushExposedParametersTab()->Refresh(brushInstance);
 
         //---
 
         FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
-        GetData()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
+        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
 
@@ -479,26 +476,22 @@ FOdysseyPainterEditorController::OnBrushCompiled( UBlueprint* iBrush )
     // Reload instance
     if( check_brush )
     {
-        if( GetData()->BrushInstance() )
+        if( GetEditor()->BrushInstance() )
         {
-            if(GetData()->BrushInstance()->IsValidLowLevel() )
-				GetData()->BrushInstance()->RemoveFromRoot();
-
-			GetData()->BrushInstance(NULL);
+			GetEditor()->BrushInstance(NULL);
         }
 
         //brush->OnCompiled().AddSP( this, &FOdysseyPainterEditorController::OnBrushCompiled );
-		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetData()->Brush()->GeneratedClass);
-		brushInstance->AddToRoot();
-		GetData()->BrushInstance(brushInstance);
+		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetEditor()->Brush()->GeneratedClass);
+		GetEditor()->BrushInstance(brushInstance);
 
-		GetData()->PaintEngine()->SetBrushInstance(GetData()->BrushInstance());
-        GetGUI()->GetBrushExposedParametersTab()->Refresh(GetData()->BrushInstance());
+		GetEditor()->PaintEngine()->SetBrushInstance(GetEditor()->BrushInstance());
+        GetGUI()->GetBrushExposedParametersTab()->Refresh(GetEditor()->BrushInstance());
 
         //---
 
         FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
-        GetData()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
+        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
 
@@ -520,10 +513,10 @@ FOdysseyPainterEditorController::OnMeshChanged( UBlueprint* iMesh )
 void
 FOdysseyPainterEditorController::HandleViewportParameterChanged()
 {
-    if( GetData()->BrushInstance() )
+    if( GetEditor()->BrushInstance() )
     {
         FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
-        GetData()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
+        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
 
@@ -532,7 +525,7 @@ FOdysseyPainterEditorController::HandleViewportParameterChanged()
 void
 FOdysseyPainterEditorController::HandleBrushParameterChanged()
 {
-    GetData()->PaintEngine()->TriggerStateChanged();
+    GetEditor()->PaintEngine()->TriggerStateChanged();
 }
 
 //--------------------------------------------------------------------------------------
@@ -541,31 +534,31 @@ FOdysseyPainterEditorController::HandleBrushParameterChanged()
 void
 FOdysseyPainterEditorController::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
 {
-	if (!GetData()->DisplaySurface())
+	if (!GetEditor()->DisplaySurface())
 		return;
 
-    ::ul3::FBlock* block = GetData()->DisplaySurface()->Block()->GetBlock();
+    ::ul3::FBlock* block = GetEditor()->DisplaySurface()->Block()->GetBlock();
     if (iPositionInTexture.X >= 0 && iPositionInTexture.X < block->Width() &&
         iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
     {
         const ::ul3::FPixelValue& color = block->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
-        GetData()->PaintColor(color);
+        GetEditor()->PaintColor(color);
     }
         
     if (iEventState == eOdysseyEventState::kSet)
     {
-        GetData()->PaintEngine()->SetColor(GetData()->PaintColor());
+        GetEditor()->PaintEngine()->SetColor(GetEditor()->PaintColor());
     }
 }
 
 void
 FOdysseyPainterEditorController::HandlePaintColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
 {
-    GetData()->PaintColor(iColor);
+    GetEditor()->PaintColor(iColor);
 
     if (iEventState == eOdysseyEventState::kSet)
     {
-	    GetData()->PaintEngine()->SetColor( iColor );
+	    GetEditor()->PaintEngine()->SetColor( iColor );
     }
 }
 
@@ -574,31 +567,31 @@ FOdysseyPainterEditorController::HandlePaintColorChange( eOdysseyEventState::Typ
 void
 FOdysseyPainterEditorController::HandleSizeModifierChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetSizeModifier( iValue );
+	GetEditor()->PaintEngine()->SetSizeModifier( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleOpacityModifierChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetOpacityModifier( iValue );
+	GetEditor()->PaintEngine()->SetOpacityModifier( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleFlowModifierChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetFlowModifier( iValue );
+	GetEditor()->PaintEngine()->SetFlowModifier( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleBlendingModeModifierChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
+	GetEditor()->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
 }
 
 void
 FOdysseyPainterEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
+	GetEditor()->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
 }
 
 //--------------------------------------------------------------------------------------
@@ -606,55 +599,55 @@ FOdysseyPainterEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 void
 FOdysseyPainterEditorController::HandleStrokeStepChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetStrokeStep( iValue );
+	GetEditor()->PaintEngine()->SetStrokeStep( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleStrokeAdaptativeChanged( bool iValue )
 {
-	GetData()->PaintEngine()->SetStrokeAdaptative( iValue );
+	GetEditor()->PaintEngine()->SetStrokeAdaptative( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleStrokePaintOnTickChanged( bool iValue )
 {
-	GetData()->PaintEngine()->SetStrokePaintOnTick( iValue );
+	GetEditor()->PaintEngine()->SetStrokePaintOnTick( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleInterpolationTypeChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetInterpolationType( static_cast<EOdysseyInterpolationType>( iValue ) );
+	GetEditor()->PaintEngine()->SetInterpolationType( static_cast<EOdysseyInterpolationType>( iValue ) );
 }
 
 void
 FOdysseyPainterEditorController::HandleSmoothingMethodChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetSmoothingMethod( static_cast<EOdysseySmoothingMethod>( iValue ) );
+	GetEditor()->PaintEngine()->SetSmoothingMethod( static_cast<EOdysseySmoothingMethod>( iValue ) );
 }
 
 void
 FOdysseyPainterEditorController::HandleSmoothingStrengthChanged( int32 iValue )
 {
-	GetData()->PaintEngine()->SetSmoothingStrength( iValue );
+	GetEditor()->PaintEngine()->SetSmoothingStrength( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleSmoothingEnabledChanged( bool iValue )
 {
-	GetData()->PaintEngine()->SetSmoothingEnabled( iValue );
+	GetEditor()->PaintEngine()->SetSmoothingEnabled( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleSmoothingRealTimeChanged( bool iValue )
 {
-	GetData()->PaintEngine()->SetSmoothingRealTime( iValue );
+	GetEditor()->PaintEngine()->SetSmoothingRealTime( iValue );
 }
 
 void
 FOdysseyPainterEditorController::HandleSmoothingCatchUpChanged( bool iValue )
 {
-	GetData()->PaintEngine()->SetSmoothingCatchUp( iValue );
+	GetEditor()->PaintEngine()->SetSmoothingCatchUp( iValue );
 }
 
 //--------------------------------------------------------------------------------------
@@ -663,10 +656,10 @@ FOdysseyPainterEditorController::HandleSmoothingCatchUpChanged( bool iValue )
 void
 FOdysseyPainterEditorController::HandlePerformanceDrawBrushPreviewChanged( bool iValue )
 {
-    GetData()->DrawBrushPreview( iValue );
-    if (GetData()->DisplaySurface())
+    GetEditor()->DrawBrushPreview( iValue );
+    if (GetEditor()->DisplaySurface())
     {
-        GetData()->DisplaySurface()->Invalidate();
+        GetEditor()->DisplaySurface()->Invalidate();
     }
 }
 
@@ -676,21 +669,21 @@ FOdysseyPainterEditorController::HandlePerformanceDrawBrushPreviewChanged( bool 
 FReply
 FOdysseyPainterEditorController::OnClear()
 {
-	GetData()->PaintEngine()->AbortStroke();
+	GetEditor()->PaintEngine()->AbortStroke();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorController::OnFill()
 {
-	GetData()->PaintEngine()->AbortStroke();
+	GetEditor()->PaintEngine()->AbortStroke();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorController::OnUndoIliad()
 {
-	GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+	GetEditor()->PaintEngine()->InterruptStrokeAndStampInPlace();
     return FReply::Handled();
 }
 
@@ -698,7 +691,7 @@ FOdysseyPainterEditorController::OnUndoIliad()
 FReply
 FOdysseyPainterEditorController::OnRedoIliad()
 {
-	GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+	GetEditor()->PaintEngine()->InterruptStrokeAndStampInPlace();
     return FReply::Handled();
 }
 
@@ -775,8 +768,8 @@ FOdysseyPainterEditorController::OnZoomOut()
 void
 FOdysseyPainterEditorController::OnRefreshBrush()
 {
-    if( GetData()->Brush() )
-        OnBrushSelected( GetData()->Brush() );
+    if( GetEditor()->Brush() )
+        OnBrushSelected( GetEditor()->Brush() );
 }
 
 void

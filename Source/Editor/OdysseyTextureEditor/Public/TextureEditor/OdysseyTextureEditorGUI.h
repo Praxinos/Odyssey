@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "OdysseyTextureEditorData.h"
-
 #include "Brush/SOdysseyBrushExposedParameters.h"
 #include "Brush/SOdysseyBrushSelector.h"
 #include "Color/SOdysseyColorSelector.h"
@@ -22,6 +20,7 @@
 class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
+class FOdysseyTextureEditor;
 class FOdysseyTextureEditorController;
 
 /////////////////////////////////////////////////////
@@ -54,7 +53,7 @@ public:
 
 public:
     //Init
-	void Init(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void Init(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 public:
     // Getters
@@ -74,8 +73,8 @@ protected:
 
 private:
     // Internal widget creation
-    void CreateLayerStackTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
-	void CreateTextureDetailsTab(TSharedPtr<FOdysseyTextureEditorData>& iData, TSharedPtr<FOdysseyTextureEditorController>& iController);
+    void CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 private:
 	// Spawner callbacks

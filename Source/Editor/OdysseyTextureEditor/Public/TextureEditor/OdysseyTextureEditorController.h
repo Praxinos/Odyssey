@@ -64,10 +64,7 @@ public:
     virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
-
-    TSharedPtr<FOdysseyTextureEditorData> GetTextureEditorData();
-
-	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
+	virtual FOdysseyTextureEditor* GetEditor() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
 
     virtual void OnBrushSelected( UOdysseyBrush* iBrush ) override;

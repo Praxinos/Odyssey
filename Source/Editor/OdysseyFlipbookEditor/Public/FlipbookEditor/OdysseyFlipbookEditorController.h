@@ -81,10 +81,7 @@ public:
 	virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
-	//TEMPORARY
-	TSharedPtr<FOdysseyFlipbookEditorData> GetFlipbookEditorData();
-
-	virtual TSharedPtr<FOdysseyPainterEditorData> GetData() override;
+	virtual FOdysseyFlipbookEditor* GetEditor() override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
 
 private:

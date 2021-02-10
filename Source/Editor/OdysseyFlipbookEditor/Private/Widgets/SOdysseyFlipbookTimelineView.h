@@ -12,6 +12,8 @@ class SOdysseyTimeline;
 class SOdysseyFlipbookTimelineTrack;
 class UTexture2D;
 class UPaperSprite;
+class FOdysseyFlipbookWrapper;
+
 /**
  * Implements the Timeline widget
  */

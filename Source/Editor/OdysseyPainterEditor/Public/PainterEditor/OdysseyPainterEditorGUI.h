@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorData.h"
 #include "SOdysseyPerformanceOptions.h"
+
 class SOdysseyBrushExposedParameters;
 class SOdysseyBrushSelector;
 class SOdysseyColorSelector;
@@ -19,6 +19,7 @@ class SOdysseyUndoHistory;
 class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
+class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
 
 /**
@@ -33,17 +34,17 @@ public:
     FOdysseyPainterEditorGUI(const FName iLayoutName);
 
 private:
-    void CreateViewportTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateBrushSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateMeshSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateBrushExposedParametersTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateColorSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateColorSlidersTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateTopTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateStrokeOptionsTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreatePerformanceOptionsTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    //void CreateUndoHistoryTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateViewportTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateBrushSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateMeshSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateBrushExposedParametersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateColorSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    void CreatePerformanceOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    //void CreateUndoHistoryTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
 
 protected:
 	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
@@ -79,11 +80,11 @@ private:
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTools(const FSpawnTabArgs& iArgs);
 
 protected:
-	virtual void InitOdysseyPainterEditorGUI(TSharedPtr<FOdysseyPainterEditorData> iData, TSharedPtr<FOdysseyPainterEditorController> iController);
+	virtual void InitOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController> iController);
 
 	// Internal widget creation
 	virtual void CreateLayout();
-	virtual void CreateWidgets(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController);
+	virtual void CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
 	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection();

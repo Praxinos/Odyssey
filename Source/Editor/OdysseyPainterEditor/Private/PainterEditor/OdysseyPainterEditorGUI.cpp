@@ -23,6 +23,8 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyStyleSet.h"
 
+#include "OdysseyPainterEditor.h"
+
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolkit"
 
 /*static*/const FName FOdysseyPainterEditorGUI::smViewportTabId( TEXT( "OdysseyPainterEditor_Viewport" ) );
@@ -57,9 +59,9 @@ FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(const FName iLayoutName)
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(TSharedPtr<FOdysseyPainterEditorData> iData, TSharedPtr<FOdysseyPainterEditorController> iController)
+FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController> iController)
 {
-	CreateWidgets(iData, iController);
+	CreateWidgets(iEditor, iController);
 	CreateLayout();
 }
 
@@ -70,20 +72,20 @@ FOdysseyPainterEditorGUI::GetLayout() const
 }
 
 void
-FOdysseyPainterEditorGUI::CreateWidgets(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
 	// Create tabs contents
-	CreateMeshSelectorTab(iData, iController);
-	CreateViewportTab(iData, iController);
-	CreateBrushSelectorTab(iData, iController);
-	CreateBrushExposedParametersTab(iData, iController);
-	CreateColorSelectorTab(iData, iController);
-	CreateColorSlidersTab(iData, iController);
-	CreateTopTab(iData, iController);
-	CreateStrokeOptionsTab(iData, iController);
-	CreatePerformanceOptionsTab(iData, iController);
-	//CreateUndoHistoryTab(iData, iController);
-	CreateToolsTab(iData, iController);
+	CreateMeshSelectorTab(iEditor, iController);
+	CreateViewportTab(iEditor, iController);
+	CreateBrushSelectorTab(iEditor, iController);
+	CreateBrushExposedParametersTab(iEditor, iController);
+	CreateColorSelectorTab(iEditor, iController);
+	CreateColorSlidersTab(iEditor, iController);
+	CreateTopTab(iEditor, iController);
+	CreateStrokeOptionsTab(iEditor, iController);
+	CreatePerformanceOptionsTab(iEditor, iController);
+	//CreateUndoHistoryTab(iEditor, iController);
+	CreateToolsTab(iEditor, iController);
 }
 
 void
@@ -346,11 +348,11 @@ FOdysseyPainterEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMan
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------- Internal widget creation
 void
-FOdysseyPainterEditorGUI::CreateViewportTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateViewportTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mViewportTab = SNew( SOdysseySurfaceViewport );
-    mViewportTab->SetSurface( iData->DisplaySurface() );
-	FOdysseyPainterEditorViewportClient* viewportClient = new FOdysseyPainterEditorViewportClient(iData, mViewportTab, mMeshSelectorTab->GetMeshSelectorPtr());
+    mViewportTab->SetSurface( iEditor->DisplaySurface() );
+	FOdysseyPainterEditorViewportClient* viewportClient = new FOdysseyPainterEditorViewportClient(iEditor, mViewportTab, mMeshSelectorTab->GetMeshSelectorPtr());
 	viewportClient->OnPickColor().AddRaw(iController.Get(), &FOdysseyPainterEditorController::HandleViewportColorPicked);
 	mViewportTab->SetViewportClient(MakeShareable(viewportClient));
 
@@ -358,44 +360,44 @@ FOdysseyPainterEditorGUI::CreateViewportTab(TSharedPtr<FOdysseyPainterEditorData
 }
 
 void
-FOdysseyPainterEditorGUI::CreateBrushSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateBrushSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mBrushSelectorTab = SNew( SOdysseyBrushSelector )
         .OnBrushChanged_Raw( iController.Get(), &FOdysseyPainterEditorController::OnBrushSelected );
 }
 
 void
-FOdysseyPainterEditorGUI::CreateMeshSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateMeshSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mMeshSelectorTab = SNew( SOdysseyMeshSelector )
         .OnMeshChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::OnMeshSelected );
 }
 
 void
-FOdysseyPainterEditorGUI::CreateBrushExposedParametersTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateBrushExposedParametersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mBrushExposedParametersTab = SNew( SOdysseyBrushExposedParameters )
         .OnParameterChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleBrushParameterChanged );
 }
 
 void
-FOdysseyPainterEditorGUI::CreateColorSelectorTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateColorSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mColorSelectorTab = SNew( SOdysseyColorSelector )
-		.Color(iData.ToSharedRef(), &FOdysseyPainterEditorData::PaintColor)
+		.Color_Raw(iEditor, &FOdysseyPainterEditor::PaintColor)
         .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandlePaintColorChange);
 }
 
 void
-FOdysseyPainterEditorGUI::CreateColorSlidersTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mColorSlidersTab = SNew( SOdysseyColorSliders )
-		.Color(iData.ToSharedRef(), &FOdysseyPainterEditorData::PaintColor)
+		.Color_Raw(iEditor, &FOdysseyPainterEditor::PaintColor)
         .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandlePaintColorChange);
 }
 
 void
-FOdysseyPainterEditorGUI::CreateTopTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mTopTab = SNew( SOdysseyPaintModifiers )
         .OnSizeChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleSizeModifierChanged )
@@ -404,14 +406,14 @@ FOdysseyPainterEditorGUI::CreateTopTab(TSharedPtr<FOdysseyPainterEditorData>& iD
         .OnBlendingModeChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleBlendingModeModifierChanged )
         .OnAlphaModeChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleAlphaModeModifierChanged );
 
-	mTopTab->SetAlphaMode(iData->PaintEngine()->GetAlphaMode());
+	mTopTab->SetAlphaMode(iEditor->PaintEngine()->GetAlphaMode());
 	mTopTab->SetSize(20);
 	mTopTab->SetOpacity(100);
 	mTopTab->SetFlow(100);
 }
 
 void
-FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mStrokeOptionsTab = SNew( SOdysseyStrokeOptions )
         .OnStrokeStepChanged_Raw(iController.Get(), &FOdysseyPainterEditorController::HandleStrokeStepChanged )
@@ -436,7 +438,7 @@ FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(TSharedPtr<FOdysseyPainterEdito
 }
 
 void
-FOdysseyPainterEditorGUI::CreatePerformanceOptionsTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreatePerformanceOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
 	mPerformanceOptions->mOnDrawBrushPreviewChanged.BindRaw(iController.Get(), &FOdysseyPainterEditorController::HandlePerformanceDrawBrushPreviewChanged);
 	mPerformanceOptionsTab = SNew(SOdysseyPerformanceOptions)
@@ -444,7 +446,7 @@ FOdysseyPainterEditorGUI::CreatePerformanceOptionsTab(TSharedPtr<FOdysseyPainter
 }
 
 void
-FOdysseyPainterEditorGUI::CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mToolsTab = SNew( SScrollBox )
 		.Orientation( Orient_Vertical )
@@ -624,7 +626,7 @@ FOdysseyPainterEditorGUI::CreateToolsTab(TSharedPtr<FOdysseyPainterEditorData>& 
 
 /*
 void
-FOdysseyPainterEditorGUI::CreateUndoHistoryTab(TSharedPtr<FOdysseyPainterEditorData>& iData, TSharedPtr<FOdysseyPainterEditorController>& iController)
+FOdysseyPainterEditorGUI::CreateUndoHistoryTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mUndoHistoryTab = SNew( SOdysseyUndoHistory, &mUndoHistory );
 }*/

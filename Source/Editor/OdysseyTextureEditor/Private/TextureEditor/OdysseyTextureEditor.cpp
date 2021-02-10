@@ -4,8 +4,10 @@
 #include "OdysseyTextureEditor.h"
 
 #include "OdysseyTextureEditorController.h"
-#include "OdysseyTextureEditorData.h"
 #include "OdysseyTextureEditorGUI.h"
+
+#include "OdysseyLayerStack.h"
+#include "OdysseyPaintEngine.h"
 
 #include "OdysseyPainterEditorToolkit.h"
 
@@ -17,15 +19,11 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditor::~FOdysseyTextureEditor()
 {
-	//Finalize in reverse order
-	mController = nullptr; //calls destructor
-	mGUI = nullptr; //calls destructor
-	mData = nullptr; //calls destructor
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
-	mData(nullptr),
+	mTextureWrapper(nullptr),
 	mGUI(nullptr),
 	mController(nullptr)
 {
@@ -33,14 +31,16 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToo
 
 FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
-	mData(nullptr),
+    mTextureWrapper( iTexture ),
 	mGUI(nullptr),
 	mController(nullptr)
 {
-	mData = MakeShareable(new FOdysseyTextureEditorData(iTexture));
 	mGUI = MakeShareable(new FOdysseyTextureEditorGUI());
 	mController = MakeShareable(new FOdysseyTextureEditorController(this, mGUI));
 }
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Initialization
 
 void
 FOdysseyTextureEditor::Init()
@@ -48,18 +48,44 @@ FOdysseyTextureEditor::Init()
 	FOdysseyPainterEditor::Init();
 
 	//----
+	
+    mTextureWrapper.OnPreSaveDelegate().AddRaw(this, &FOdysseyTextureEditor::OnTexturePreSave);
 
-	mData->Init();
-	mGUI->Init(mData, mController);
+	//----
+
+	mGUI->Init(this, mController);
 	mController->Init();
 }
 
-bool
-FOdysseyTextureEditor::OnCloseRequested()
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Getters
+
+FOdysseyTextureWrapper&
+FOdysseyTextureEditor::TextureWrapper()
 {
-	mData->OnCloseRequested();
-	return true;
+	return mTextureWrapper;
 }
+
+UTexture2D*
+FOdysseyTextureEditor::Texture()
+{
+	return mTextureWrapper.Texture();
+}
+
+FOdysseySurfaceEditable*
+FOdysseyTextureEditor::DisplaySurface()
+{
+	return mTextureWrapper.Surface();
+}
+
+FOdysseyLayerStack*
+FOdysseyTextureEditor::LayerStack() const
+{
+    return mTextureWrapper.LayerStack();
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- Overrides
 
 const TSharedRef<FTabManager::FLayout>&
 FOdysseyTextureEditor::CreateLayout() const
@@ -88,10 +114,26 @@ FOdysseyTextureEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>
 	mGUI->UnregisterTabSpawners(iTabManager);
 }
 
-//TEMPORARY
-TSharedPtr<FOdysseyTextureEditorData>
-FOdysseyTextureEditor::GetData()
+bool
+FOdysseyTextureEditor::OnCloseRequested()
 {
-	return mData;
+	FOdysseyPainterEditor::OnCloseRequested();
+
+    //TODO: Move in the right place
+    if (LayerStack())
+        LayerStack()->mDrawingUndo->Clear();
+
+    mTextureWrapper.Texture(nullptr);
+	return true;
 }
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- Overrides
+
+void
+FOdysseyTextureEditor::OnTexturePreSave()
+{
+    PaintEngine()->Flush();
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -35,7 +35,7 @@ public:
 
 public:
     // Virtual Methods
-    virtual TSharedPtr<FOdysseyPainterEditorData> GetData() = 0;
+    virtual FOdysseyPainterEditor* GetEditor() = 0;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() = 0;
 
 public:
