@@ -8,7 +8,7 @@
 class SOdysseyBrushExposedParameters;
 class SOdysseyBrushSelector;
 class SOdysseyColorSelector;
-class SOdysseyColorSliders;
+class FOdysseyPainterEditorColorSlidersTab;
 class SOdysseyLayerStackView;
 class SOdysseyMeshSelector;
 class SOdysseyPaintModifiers;
@@ -47,7 +47,7 @@ private:
     void CreateMeshSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateBrushExposedParametersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateColorSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    // void CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
@@ -71,7 +71,7 @@ private:
 	// Callback for spawning the ColorSelector tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSelector(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the ColorSelector tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSliders(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSliders(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the LayerStack tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the TopBar tab.
@@ -106,7 +106,7 @@ public:
     TSharedPtr<SOdysseyMeshSelector>& GetMeshSelectorTab();
     TSharedPtr<SOdysseyBrushExposedParameters>& GetBrushExposedParametersTab();
     TSharedPtr<SOdysseyColorSelector>& GetColorSelectorTab();
-    TSharedPtr<SOdysseyColorSliders>& GetColorSlidersTab();
+    TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
     TSharedPtr<SOdysseyStrokeOptions>& GetStrokeOptionsTab();
     TSharedPtr<SOdysseyPerformanceOptions>& GetPerformanceOptionsTab();
     //TSharedPtr<SOdysseyUndoHistory>& GetUndoHistoryTab();
@@ -128,7 +128,7 @@ private:
     TSharedPtr<SOdysseyMeshSelector>            mMeshSelectorTab;
     TSharedPtr<SOdysseyBrushExposedParameters>  mBrushExposedParametersTab;
     TSharedPtr<SOdysseyColorSelector>           mColorSelectorTab;
-    TSharedPtr<SOdysseyColorSliders>            mColorSlidersTab;
+    TSharedPtr<FOdysseyPainterEditorColorSlidersTab> mColorSlidersTab;
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
     TSharedPtr<SOdysseyStrokeOptions>           mStrokeOptionsTab;
     TSharedPtr<SOdysseyPerformanceOptions>      mPerformanceOptionsTab;
@@ -145,7 +145,7 @@ private:
     static const FName smMeshSelectorTabId;
     static const FName smBrushExposedParametersTabId;
     static const FName smColorSelectorTabId;
-    static const FName smColorSlidersTabId;
+    // static const FName smColorSlidersTabId;
     static const FName smLayerStackTabId;
     static const FName smTopBarTabId;
     static const FName smStrokeOptionsTabId;

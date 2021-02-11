@@ -14,7 +14,7 @@ public:
 public:
     void Init();
 
-protected:
+public:
     virtual TSharedPtr<SWidget> CreateWidget() = 0;
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
 	virtual void RegisterTabSpawner(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
