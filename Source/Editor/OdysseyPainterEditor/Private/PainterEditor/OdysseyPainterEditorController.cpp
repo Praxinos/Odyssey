@@ -14,6 +14,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorViewportTab.h"
+#include "OdysseyPainterEditorTopTab.h"
 
 #include "Brush/SOdysseyBrushExposedParameters.h"
 #include "Brush/SOdysseyBrushSelector.h"
@@ -361,11 +362,11 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
         if( overrides.bOverride_Enabled )       GetGUI()->GetStrokeOptionsTab()->SetSmoothingEnabled( overrides.Enabled );
         if( overrides.bOverride_RealTime )      GetGUI()->GetStrokeOptionsTab()->SetSmoothingRealTime( overrides.RealTime );
         if( overrides.bOverride_CatchUp )       GetGUI()->GetStrokeOptionsTab()->SetSmoothingCatchUp( overrides.CatchUp );
-        if( overrides.bOverride_Size )          GetGUI()->GetTopTab()->SetSize( overrides.Size );
-        if( overrides.bOverride_Opacity )       GetGUI()->GetTopTab()->SetOpacity( overrides.Opacity );
-        if( overrides.bOverride_Flow )          GetGUI()->GetTopTab()->SetFlow( overrides.Flow );
-        if( overrides.bOverride_BlendingMode )  GetGUI()->GetTopTab()->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
-        if( overrides.bOverride_AlphaMode )     GetGUI()->GetTopTab()->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
+        if( overrides.bOverride_Size )          GetGUI()->GetTopTab()->PaintModifiers()->SetSize( overrides.Size );
+        if( overrides.bOverride_Opacity )       GetGUI()->GetTopTab()->PaintModifiers()->SetOpacity( overrides.Opacity );
+        if( overrides.bOverride_Flow )          GetGUI()->GetTopTab()->PaintModifiers()->SetFlow( overrides.Flow );
+        if( overrides.bOverride_BlendingMode )  GetGUI()->GetTopTab()->PaintModifiers()->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
+        if( overrides.bOverride_AlphaMode )     GetGUI()->GetTopTab()->PaintModifiers()->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
 
         GetEditor()->BrushInstance(brushInstance);
         GetEditor()->PaintEngine()->SetBrushInstance(brushInstance);
@@ -643,14 +644,14 @@ void
 FOdysseyPainterEditorController::OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode)
 {
     //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
-    GetGUI()->GetTopTab()->SetAlphaMode(iAlphaMode);
+    GetGUI()->GetTopTab()->PaintModifiers()->SetAlphaMode(iAlphaMode);
 }
 
 void
 FOdysseyPainterEditorController::OnAddBrushSize(int32 iValue)
 {
     //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
-    GetGUI()->GetTopTab()->SetSize(GetGUI()->GetTopTab()->GetSize() + iValue);
+    GetGUI()->GetTopTab()->PaintModifiers()->SetSize(GetGUI()->GetTopTab()->PaintModifiers()->GetSize() + iValue);
 }
 
 

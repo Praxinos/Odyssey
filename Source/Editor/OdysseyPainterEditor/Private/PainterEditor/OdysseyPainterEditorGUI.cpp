@@ -26,6 +26,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
+#include "OdysseyPainterEditorTopTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolkit"
 
@@ -35,7 +36,7 @@
 /*static*/const FName FOdysseyPainterEditorGUI::smBrushExposedParametersTabId( TEXT( "OdysseyPainterEditor_BrushExposedParameters" ) );
 ///*static*/const FName FOdysseyPainterEditorGUI::smColorSelectorTabId( TEXT( "OdysseyPainterEditor_ColorSelector" ) );
 ///*static*/const FName FOdysseyPainterEditorGUI::smColorSlidersTabId( TEXT( "OdysseyPainterEditor_ColorSliders" ) );
-/*static*/const FName FOdysseyPainterEditorGUI::smTopBarTabId( TEXT( "OdysseyPainterEditor_TopBar" ) );
+///*static*/const FName FOdysseyPainterEditorGUI::smTopBarTabId( TEXT( "OdysseyPainterEditor_TopBar" ) );
 /*static*/const FName FOdysseyPainterEditorGUI::smStrokeOptionsTabId( TEXT( "OdysseyPainterEditor_StrokeOptions" ) );
 /*static*/const FName FOdysseyPainterEditorGUI::smNotesTabId( TEXT( "OdysseyPainterEditor_Notes" ) );
 // /*static*/const FName FOdysseyPainterEditorGUI::smUndoHistoryTabId( TEXT( "OdysseyPainterEditor_UndoHistory" ) );
@@ -91,6 +92,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
 	mViewportTab = MakeShareable(new FOdysseyPainterEditorViewportTab(mEditor));
 	mColorWheelTab = MakeShareable(new FOdysseyPainterEditorColorWheelTab(mEditor));
 	mColorSlidersTab = MakeShareable(new FOdysseyPainterEditorColorSlidersTab(mEditor));
+	mTopTab = MakeShareable(new FOdysseyPainterEditorTopTab(mEditor));
 
 	/* CreateMeshSelectorTab(iEditor);
 	CreateViewportTab(iEditor);
@@ -112,6 +114,7 @@ FOdysseyPainterEditorGUI::InitTabs()
 	mViewportTab->Init();
 	mColorWheelTab->Init();
 	mColorSlidersTab->Init();
+	mTopTab->Init();
 }
 
 void
@@ -121,6 +124,7 @@ FOdysseyPainterEditorGUI::OnToolkitInitialized()
 	mViewportTab->OnToolkitInitialized();
 	mColorWheelTab->OnToolkitInitialized();
 	mColorSlidersTab->OnToolkitInitialized();
+	mTopTab->OnToolkitInitialized();
 }
 
 void
@@ -150,7 +154,7 @@ FOdysseyPainterEditorGUI::CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedP
 	CreateBrushExposedParametersTab(iEditor, iController);
 	// CreateColorSelectorTab(iEditor, iController);
 	// CreateColorSlidersTab(iEditor, iController);
-	CreateTopTab(iEditor, iController);
+	// CreateTopTab(iEditor, iController);
 	CreateStrokeOptionsTab(iEditor, iController);
 	CreatePerformanceOptionsTab(iEditor, iController);
 	//CreateUndoHistoryTab(iEditor, iController);
@@ -263,7 +267,8 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
 		->Split
 		(
 			FTabManager::NewStack()
-			->AddTab(smTopBarTabId, ETabState::OpenedTab)
+			//->AddTab(smTopBarTabId, ETabState::OpenedTab)
+			->AddTab(mTopTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(true)
 			->SetSizeCoefficient(0.1f)
 		)
@@ -355,10 +360,11 @@ FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ) ); */
 
     // TopBar
-    iTabManager->RegisterTabSpawner( smTopBarTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTopBar ) )
+	mTopTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
+    /* iTabManager->RegisterTabSpawner( smTopBarTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTopBar ) )
         .SetDisplayName( LOCTEXT( "TopBarTab", "TopBar" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ) );
+        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ) ); */
 
     // StrokeOptions
     iTabManager->RegisterTabSpawner( smStrokeOptionsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnStrokeOptions ) )
@@ -402,9 +408,10 @@ FOdysseyPainterEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMan
     iTabManager->UnregisterTabSpawner( smBrushExposedParametersTabId );
 	mColorWheelTab->UnregisterTabSpawner(iTabManager);
 	mColorSlidersTab->UnregisterTabSpawner(iTabManager);
+	mTopTab->UnregisterTabSpawner(iTabManager);
     //iTabManager->UnregisterTabSpawner( smColorSelectorTabId );
     // iTabManager->UnregisterTabSpawner( smColorSlidersTabId );
-    iTabManager->UnregisterTabSpawner( smTopBarTabId );
+    //iTabManager->UnregisterTabSpawner( smTopBarTabId );
     iTabManager->UnregisterTabSpawner( smStrokeOptionsTabId );
     iTabManager->UnregisterTabSpawner( smPerformanceOptionsTabId );
     iTabManager->UnregisterTabSpawner( smNotesTabId );
@@ -463,7 +470,7 @@ FOdysseyPainterEditorGUI::CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, 
         .OnColorChange_Raw(iController.Get(), &FOdysseyPainterEditorController::HandlePaintColorChange);
 } */
 
-void
+/* void
 FOdysseyPainterEditorGUI::CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mTopTab = SNew( SOdysseyPaintModifiers )
@@ -477,7 +484,7 @@ FOdysseyPainterEditorGUI::CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPt
 	mTopTab->SetSize(20);
 	mTopTab->SetOpacity(100);
 	mTopTab->SetFlow(100);
-}
+} */
 
 void
 FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
@@ -761,7 +768,7 @@ FOdysseyPainterEditorGUI::GetPerformanceOptionsTab()
 //	return mUndoHistoryTab;
 //}
 
-TSharedPtr<SOdysseyPaintModifiers>&
+TSharedPtr<FOdysseyPainterEditorTopTab>&
 FOdysseyPainterEditorGUI::GetTopTab()
 {
 	return mTopTab;
@@ -853,7 +860,7 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnColorSliders( const FSpawnTabArgs
         ];
 } */
 
-TSharedRef< SDockTab >
+/* TSharedRef< SDockTab >
 FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTopBar( const FSpawnTabArgs& iArgs )
 {
     check( iArgs.GetTabId() == smTopBarTabId );
@@ -864,7 +871,7 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTopBar( const FSpawnTabArgs& iArg
         [
             mTopTab.ToSharedRef()
         ];
-}
+} */
 
 TSharedRef< SDockTab >
 FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnStrokeOptions( const FSpawnTabArgs& iArgs )

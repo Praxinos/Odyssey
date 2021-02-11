@@ -17,6 +17,7 @@
 #include "SOdysseySurfaceViewport.h"
 #include "TextureEditor/OdysseyTextureEditorState.h"
 
+#include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyFlipbookEditorTimelineTab.h"
 #include "SOdysseyFlipbookTimelineView.h"
 
@@ -215,7 +216,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
         if (oldImageLayer)
         {
             oldImageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-            GetEditor()->PaintEngine()->SetAlphaModeModifier(mGUI->GetTopTab()->GetAlphaMode());
+            GetEditor()->PaintEngine()->SetAlphaModeModifier(mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
         }
 	}
 
@@ -237,7 +238,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
 		return;
 
 	GetEditor()->PaintEngine()->Block(imageLayer->GetBlock());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged);
@@ -248,7 +249,7 @@ void
 FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 {
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
 }
 
 void
@@ -264,7 +265,7 @@ FOdysseyFlipbookEditorController::HandleAlphaModeModifierChanged( int32 iValue )
         return;
 
 	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
 }
 
 void
