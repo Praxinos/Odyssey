@@ -20,10 +20,17 @@ public:
 	TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
 
 private:
+	// AssetTypeActions
     void RegisterAssetTypeActions();
 	void UnregisterAssetTypeActions();
+
+	// Settings
 	void RegisterSettings();
 	void UnregisterSettings();
+
+    // Commands
+	void RegisterCommands();
+	void UnregisterCommands();
 
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */

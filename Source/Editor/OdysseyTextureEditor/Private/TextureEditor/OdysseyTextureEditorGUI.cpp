@@ -31,8 +31,8 @@ FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
 }
 
-FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI() :
-	FOdysseyPainterEditorGUI("OdysseyTextureEditor_Layout")
+FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor) :
+	FOdysseyPainterEditorGUI(iEditor, "OdysseyTextureEditor_Layout")
 {
 }
 

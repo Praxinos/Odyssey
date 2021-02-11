@@ -12,12 +12,14 @@
 #include "SOdysseySurfaceViewport.h"
 #include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorToolkit.h"
+#include "OdysseyFlipbookEditorViewportTab.h"
+#include "OdysseyFlipbookEditorTimelineTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
 /*static*/const FName FOdysseyFlipbookEditorGUI::smLayerStackTabId( TEXT( "OdysseyFlipbookEditor_LayerStack" ) );
 /*static*/const FName FOdysseyFlipbookEditorGUI::smTextureDetailsTabId( TEXT( "OdysseyFlipbookEditor_TextureDetails" ) );
-/*static*/const FName FOdysseyFlipbookEditorGUI::smTimelineTabId( TEXT( "OdysseyFlipbookEditor_Timeline" ) );
+///*static*/const FName FOdysseyFlipbookEditorGUI::smTimelineTabId( TEXT( "OdysseyFlipbookEditor_Timeline" ) );
 
 void
 FOdysseyFlipbookPerformanceOptions::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
@@ -34,13 +36,34 @@ FOdysseyFlipbookEditorGUI::~FOdysseyFlipbookEditorGUI()
 {
 }
 
-FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI() :
-	FOdysseyPainterEditorGUI("OdysseyFlipbookEditor_Layout")
+FOdysseyFlipbookEditorGUI::FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor)
+	: FOdysseyPainterEditorGUI(iEditor, "OdysseyFlipbookEditor_Layout")
+	, mEditor(iEditor)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
+
+
+void
+FOdysseyFlipbookEditorGUI::CreateTabs()
+{
+	FOdysseyPainterEditorGUI::CreateTabs();
+
+	mViewportTab = MakeShareable(new FOdysseyFlipbookEditorViewportTab(mEditor));
+	mTimelineTab = MakeShareable(new FOdysseyFlipbookEditorTimelineTab(mEditor));
+}
+
+void
+FOdysseyFlipbookEditorGUI::InitTabs()
+{
+	mTimelineTab->Init();//TODO: Initialize Timeline after, FOdysseyPainterEditorGUI::InitTabs()
+
+	FOdysseyPainterEditorGUI::InitTabs();
+
+	//mViewportTab initialized by PainterEditorGUI
+}
 
 void
 FOdysseyFlipbookEditorGUI::InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
@@ -50,13 +73,13 @@ FOdysseyFlipbookEditorGUI::InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* 
 
 	CreateLayerStackTab(iEditor, iController);
 	CreateTextureDetailsTab(iEditor, iController);
-	CreateTimelineTab(iEditor, iController);
+	//CreateTimelineTab(iEditor, iController);
 
 	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iEditor, iController); //Creates also creates the Layout
 
-	GetViewportTab()->SetSurface( iEditor->DisplaySurface() );
+	// GetViewportTab()->SetSurface( iEditor->DisplaySurface() );
 }
- 
+
 TSharedRef<FTabManager::FSplitter>
 FOdysseyFlipbookEditorGUI::CreateMainSection()
 {
@@ -66,7 +89,8 @@ FOdysseyFlipbookEditorGUI::CreateMainSection()
 		(
 			FTabManager::NewStack()
 			// Timeline
-			->AddTab(smTimelineTabId, ETabState::OpenedTab)
+			//->AddTab(smTimelineTabId, ETabState::OpenedTab)
+			->AddTab(mTimelineTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.2f)
 		);
@@ -132,10 +156,11 @@ FOdysseyFlipbookEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabMana
         .SetGroup(iWorkspaceMenuCategoryRef)
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ) );
     // Timeline
-    iTabManager->RegisterTabSpawner( smTimelineTabId, FOnSpawnTab::CreateSP( this, &FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline ) )
+	mTimelineTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
+    /* iTabManager->RegisterTabSpawner( smTimelineTabId, FOnSpawnTab::CreateSP( this, &FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline ) )
         .SetDisplayName( LOCTEXT( "TimelineTab", "Timeline" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" ) ); //TODO: set timeline icon
+        .SetIcon( FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" ) ); //TODO: set timeline icon */
 }
 
 void
@@ -143,7 +168,8 @@ FOdysseyFlipbookEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMa
 {
     iTabManager->UnregisterTabSpawner( smLayerStackTabId );
     iTabManager->UnregisterTabSpawner( smTextureDetailsTabId );
-    iTabManager->UnregisterTabSpawner( smTimelineTabId );
+	mTimelineTab->UnregisterTabSpawner(iTabManager);
+    // iTabManager->UnregisterTabSpawner( smTimelineTabId );
 }
 
 //--------------------------------------------------------------------------------------
@@ -163,7 +189,7 @@ FOdysseyFlipbookEditorGUI::CreateTextureDetailsTab(FOdysseyFlipbookEditor* iEdit
         .Texture( iEditor->Texture() );
 }
 
-void
+/* void
 FOdysseyFlipbookEditorGUI::CreateTimelineTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
 	mTimelineTab = SNew(SOdysseyFlipbookTimelineView)
@@ -176,7 +202,7 @@ FOdysseyFlipbookEditorGUI::CreateTimelineTab(FOdysseyFlipbookEditor* iEditor, TS
 		.OnTextureCreated(iController.Get(), &FOdysseyFlipbookEditorController::OnTextureCreated)
 		.OnKeyframeRemoved(iController.Get(), &FOdysseyFlipbookEditorController::OnKeyframeRemoved);
 		//.OnStructureChanged(iController.Get(), &FOdysseyFlipbookEditorController::OnTimelineStructureChanged);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
@@ -194,7 +220,7 @@ FOdysseyFlipbookEditorGUI::GetTextureDetailsTab()
 	return mTextureDetailsTab;
 }
 
-TSharedPtr<SOdysseyFlipbookTimelineView>&
+TSharedPtr<FOdysseyFlipbookEditorTimelineTab>&
 FOdysseyFlipbookEditorGUI::GetTimelineTab()
 {
 	return mTimelineTab;
@@ -229,7 +255,7 @@ FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTextureDetails(const FSpawnTabAr
 
 }
 
-TSharedRef<SDockTab>
+/* TSharedRef<SDockTab>
 FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iArgs)
 {
     check( iArgs.GetTabId() == smTimelineTabId );
@@ -240,6 +266,6 @@ FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iA
             mTimelineTab.ToSharedRef()
         ];
 
-}
+} */
 
 #undef LOCTEXT_NAMESPACE

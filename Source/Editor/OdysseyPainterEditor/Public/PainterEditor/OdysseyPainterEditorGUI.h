@@ -10,7 +10,7 @@ class SOdysseyBrushSelector;
 class FOdysseyPainterEditorColorWheelTab;
 class FOdysseyPainterEditorColorSlidersTab;
 class SOdysseyLayerStackView;
-class SOdysseyMeshSelector;
+class FOdysseyPainterEditorMeshSelectorTab;
 class SOdysseyPaintModifiers;
 // class SOdysseyPerformanceOptions;
 class SOdysseyStrokeOptions;
@@ -18,7 +18,7 @@ class SOdysseyUndoHistory;
 
 class SDockableTab;
 class STextBlock;
-class SOdysseySurfaceViewport;
+class FOdysseyPainterEditorViewportTab;
 class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
 class FOdysseyPainterEditorTab;
@@ -32,19 +32,20 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGUI :
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorGUI();
-    FOdysseyPainterEditorGUI(const FName iLayoutName);
+    FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, const FName iLayoutName);
 
 public:
-    void Init(FOdysseyPainterEditor* iEditor);
+    void Init();
+    void OnToolkitInitialized();
 
 protected:
-    virtual void CreateTabs(FOdysseyPainterEditor* iEditor);
-    void InitTabs();
+    virtual void CreateTabs();
+    virtual void InitTabs();
 
 private:
-    void CreateViewportTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    // void CreateViewportTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateBrushSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateMeshSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    // void CreateMeshSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateBrushExposedParametersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     // void CreateColorSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     // void CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
@@ -63,11 +64,11 @@ private:
 	// Callback for spawning the Brush Selector tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushSelector(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Mesh Selector tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnMeshSelector(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnMeshSelector(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Brush Parameters tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnBrushExposedParameters(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Viewport tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnViewport(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnViewport(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the ColorSelector tab.
 	// TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSelector(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the ColorSelector tab.
@@ -101,9 +102,9 @@ protected:
 public:
 	TSharedRef<FTabManager::FLayout> GetLayout();
 
-    TSharedPtr<SOdysseySurfaceViewport>& GetViewportTab();
+    TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<SOdysseyBrushSelector>& GetBrushSelectorTab();
-    TSharedPtr<SOdysseyMeshSelector>& GetMeshSelectorTab();
+    TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
     TSharedPtr<SOdysseyBrushExposedParameters>& GetBrushExposedParametersTab();
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
@@ -117,32 +118,31 @@ protected:
 	void PerformanceOptions(FOdysseyPerformanceOptions* iPerformanceOptions);
 
 private:
-    /** List of open tool panels; used to ensure only one exists at any one time */
+    FOdysseyPainterEditor*                          mEditor;
     FName                                           mLayoutName;
 	TSharedPtr<FTabManager::FLayout>                mLayout;
-    TArray<TSharedPtr<FOdysseyPainterEditorTab>>    mTabs;
 
+protected:
+    TSharedPtr<FOdysseyPainterEditorViewportTab>        mViewportTab;
+    TSharedPtr<SOdysseyBrushSelector>                   mBrushSelectorTab;
+    TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>    mMeshSelectorTab;
+    TSharedPtr<SOdysseyBrushExposedParameters>          mBrushExposedParametersTab;
+    TSharedPtr<FOdysseyPainterEditorColorWheelTab>      mColorWheelTab;
+    TSharedPtr<FOdysseyPainterEditorColorSlidersTab>    mColorSlidersTab;
+    TSharedPtr<SOdysseyLayerStackView>                  mLayerStackTab;
+    TSharedPtr<SOdysseyStrokeOptions>                   mStrokeOptionsTab;
+    TSharedPtr<SOdysseyPerformanceOptions>              mPerformanceOptionsTab;
+    //TSharedPtr<SOdysseyUndoHistory>                   mUndoHistoryTab;
+    TSharedPtr<SOdysseyPaintModifiers>                  mTopTab;
+    TSharedPtr<SWidget>                                 mToolsTab;
 
-    TSharedPtr<SOdysseySurfaceViewport>         mViewportTab;
-    TSharedPtr<SOdysseyBrushSelector>           mBrushSelectorTab;
-    TSharedPtr<SOdysseyMeshSelector>            mMeshSelectorTab;
-    TSharedPtr<SOdysseyBrushExposedParameters>  mBrushExposedParametersTab;
-    TSharedPtr<FOdysseyPainterEditorColorWheelTab>   mColorWheelTab;
-    TSharedPtr<FOdysseyPainterEditorColorSlidersTab> mColorSlidersTab;
-    TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
-    TSharedPtr<SOdysseyStrokeOptions>           mStrokeOptionsTab;
-    TSharedPtr<SOdysseyPerformanceOptions>      mPerformanceOptionsTab;
-    //TSharedPtr<SOdysseyUndoHistory>             mUndoHistoryTab;
-    TSharedPtr<SOdysseyPaintModifiers>          mTopTab;
-    TSharedPtr<SWidget>                         mToolsTab;
-
-	FOdysseyPerformanceOptions*					mPerformanceOptions; //OWNED but created by a derived class
+	FOdysseyPerformanceOptions*					        mPerformanceOptions; //OWNED but created by a derived class
 
 private:
     /** Tabs IDs */
-    static const FName smViewportTabId;
+    // static const FName smViewportTabId;
     static const FName smBrushSelectorTabId;
-    static const FName smMeshSelectorTabId;
+    // static const FName smMeshSelectorTabId;
     static const FName smBrushExposedParametersTabId;
     // static const FName smColorSelectorTabId;
     // static const FName smColorSlidersTabId;

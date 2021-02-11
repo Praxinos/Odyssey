@@ -8,7 +8,6 @@
 #include "Color/SOdysseyColorSelector.h"
 #include "Color/SOdysseyColorSliders.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
-#include "SOdysseyFlipbookTimelineView.h"
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyPerformanceOptions.h"
@@ -23,7 +22,7 @@ class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyFlipbookEditor;
 class FOdysseyFlipbookEditorController;
-class SOdysseyFlipbookPropertiesTabBody;
+class FOdysseyFlipbookEditorTimelineTab;
 
 /////////////////////////////////////////////////////
 // FOdysseyPerformanceOptions
@@ -51,17 +50,21 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorGUI :
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorGUI();
-    FOdysseyFlipbookEditorGUI();
+    FOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor);
+
+protected:
+    //Init
+	virtual void CreateTabs() override;
+	virtual void InitTabs() override;
 
 public:
-    //Init
 	void InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 public:
     // Getters
     TSharedPtr<SOdysseyLayerStackView>& GetLayerStackTab();
 	TSharedPtr<SOdysseyTextureDetails>& GetTextureDetailsTab();
-	TSharedPtr<SOdysseyFlipbookTimelineView>& GetTimelineTab();
+	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>& GetTimelineTab();
 
 public:
 	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef) override;
@@ -77,7 +80,7 @@ protected:
 private:
     // Internal widget creation
     void CreateLayerStackTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
-    void CreateTimelineTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
+    // void CreateTimelineTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 	void CreateTextureDetailsTab(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);
 
 private:
@@ -87,21 +90,24 @@ private:
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 
 	// Callback for spawning the Timeline tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnTimeline(const FSpawnTabArgs& iArgs);
 
 	// Callback for spawning the TextureDetails tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
 
 private:
+	FOdysseyFlipbookEditor*						mEditor;
+
+protected:
     //Tabs
     TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
 	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
-	TSharedPtr<SOdysseyFlipbookTimelineView>    mTimelineTab;
+	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>    mTimelineTab;
 
 private:
     /** Tabs IDs */
     static const FName smLayerStackTabId;
 	static const FName smTextureDetailsTabId;
-	static const FName smTimelineTabId;
+	// static const FName smTimelineTabId;
 };
 

@@ -39,12 +39,14 @@ FOdysseyPainterEditorModule::StartupModule()
     f.RunTest();
 
     RegisterSettings();
+    RegisterCommands();
 }
 
 void
 FOdysseyPainterEditorModule::ShutdownModule()
 {
     UnregisterSettings();
+    UnregisterCommands();
 }
 
 void
@@ -70,6 +72,18 @@ FOdysseyPainterEditorModule::UnregisterSettings()
         return;
         
     settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyPainterEditor" );
+}
+
+void
+FOdysseyPainterEditorModule::RegisterCommands()
+{
+    FOdysseyPainterEditorCommands::Register();
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterCommands()
+{
+    FOdysseyPainterEditorCommands::Unregister();
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

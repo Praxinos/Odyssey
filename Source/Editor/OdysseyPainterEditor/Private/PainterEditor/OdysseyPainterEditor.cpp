@@ -116,7 +116,7 @@ FOdysseyPainterEditor::PaintColor(::ul3::FPixelValue iColor)
 void
 FOdysseyPainterEditor::OnToolkitInitialized()
 {
-
+    GetGUI()->OnToolkitInitialized();
 }
 
 bool

@@ -16,9 +16,12 @@ public:
 
 public:
     virtual TSharedPtr<SWidget> CreateWidget() = 0;
+    virtual void BindShortcuts();
+    virtual void OnToolkitInitialized();
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
 	virtual void RegisterTabSpawner(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
 	virtual void UnregisterTabSpawner(const TSharedRef< class FTabManager >& iTabManager);
+
 
 public:
     const FName&                        ID() const;

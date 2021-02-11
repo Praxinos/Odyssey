@@ -30,7 +30,6 @@ public:
     //Init
 	void Init();
 	void InitLayerStack();
-	void OnToolkitInitialized();
 
 protected:
     // Commands building
@@ -87,7 +86,6 @@ protected:
 private:
 	void SetTextureAtKeyframeIndex(int32 iKeyframe);
 	void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
-    void SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget);
 
 private:
 	FOdysseyFlipbookEditor*					mEditor;

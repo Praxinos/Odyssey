@@ -12,6 +12,11 @@ public:
     virtual void ShutdownModule() override;
 
 private:
+    //Settings
 	void RegisterSettings();
 	void UnregisterSettings();
+
+    //Commands
+	void RegisterCommands();
+	void UnregisterCommands();
 };

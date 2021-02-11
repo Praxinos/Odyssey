@@ -13,6 +13,7 @@
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPaintEngine.h"
+#include "OdysseyPainterEditorViewportTab.h"
 
 #include "Brush/SOdysseyBrushExposedParameters.h"
 #include "Brush/SOdysseyBrushSelector.h"
@@ -51,7 +52,7 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
     //GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
 
     // Register our commands. This will only register them if not previously registered
-    FOdysseyPainterEditorCommands::Register();
+    // FOdysseyPainterEditorCommands::Register();
 
     // Build commands
     FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
@@ -132,91 +133,6 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
 	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().DeleteCurrentLayer,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnDeleteCurrentLayer ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().ResetViewportPosition,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnResetViewportPosition ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().ResetViewportRotation,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnResetViewportRotation ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().RotateViewportLeft,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRotateViewportLeft ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().RotateViewportRight,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnRotateViewportRight ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom10Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.1 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom20Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.2 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom30Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.3 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom40Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.4 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom50Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.5 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom60Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.6 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom70Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.7 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom80Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.8 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom90Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 0.9 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoom100Percent,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoom, 1.0 ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().SetZoomFitScreen,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSetZoomFitScreen ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().ZoomIn,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnZoomIn ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().ZoomOut,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnZoomOut ),
         FCanExecuteAction() );
 
 	iToolkitCommands->MapAction(
@@ -457,7 +373,7 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
 
         //---
 
-        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
+        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetViewport()->GetPan() );
         GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
@@ -490,7 +406,7 @@ FOdysseyPainterEditorController::OnBrushCompiled( UBlueprint* iBrush )
 
         //---
 
-        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
+        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetViewport()->GetPan() );
         GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
@@ -515,7 +431,7 @@ FOdysseyPainterEditorController::HandleViewportParameterChanged()
 {
     if( GetEditor()->BrushInstance() )
     {
-        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetZoom(), GetGUI()->GetViewportTab()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetPan() );
+        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetViewport()->GetPan() );
         GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
@@ -714,55 +630,6 @@ FOdysseyPainterEditorController::OnDuplicateCurrentLayer()
 void
 FOdysseyPainterEditorController::OnDeleteCurrentLayer()
 {
-}
-
-void
-FOdysseyPainterEditorController::OnResetViewportPosition()
-{
-    GetGUI()->GetViewportTab()->SetRotationInDegrees( 0 );
-    GetGUI()->GetViewportTab()->SetPan(FVector2D(0, 0));
-}
-
-void
-FOdysseyPainterEditorController::OnResetViewportRotation()
-{
-    GetGUI()->GetViewportTab()->SetRotationInDegrees( 0 );
-}
-
-void
-FOdysseyPainterEditorController::OnRotateViewportLeft()
-{
-    GetGUI()->GetViewportTab()->RotateLeft();
-}
-
-void
-FOdysseyPainterEditorController::OnRotateViewportRight()
-{
-    GetGUI()->GetViewportTab()->RotateRight();
-}
-
-void
-FOdysseyPainterEditorController::OnSetZoom(double iZoomValue)
-{
-    GetGUI()->GetViewportTab()->SetZoom(iZoomValue);
-}
-
-void
-FOdysseyPainterEditorController::OnSetZoomFitScreen()
-{
-    GetGUI()->GetViewportTab()->ToggleFitToViewport();
-}
-
-void
-FOdysseyPainterEditorController::OnZoomIn()
-{
-    GetGUI()->GetViewportTab()->ZoomIn();
-}
-
-void
-FOdysseyPainterEditorController::OnZoomOut()
-{
-    GetGUI()->GetViewportTab()->ZoomOut();
 }
 
 void

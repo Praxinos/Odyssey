@@ -5,9 +5,9 @@
 
 #include "OdysseyPainterEditor.h"
 #include "Engine/Texture2D.h"
+#include "OdysseyTextureEditorGUI.h"
 #include "OdysseyTextureWrapper.h"
 
-class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorController;
 
 /**
@@ -35,6 +35,7 @@ public:
 
 public:
     // Overrides
+    virtual FOdysseyTextureEditorGUI* GetGUI() override;
     virtual TSharedRef<FTabManager::FLayout> GetLayout() override;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;
     

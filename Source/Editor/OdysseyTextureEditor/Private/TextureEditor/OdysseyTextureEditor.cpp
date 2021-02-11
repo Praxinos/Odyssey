@@ -35,7 +35,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FO
 	mGUI(nullptr),
 	mController(nullptr)
 {
-	mGUI = MakeShareable(new FOdysseyTextureEditorGUI());
+	mGUI = MakeShareable(new FOdysseyTextureEditorGUI(this));
 	mController = MakeShareable(new FOdysseyTextureEditorController(this, mGUI));
 }
 
@@ -53,7 +53,7 @@ FOdysseyTextureEditor::Init()
 
 	//----
 
-	mGUI->Init(this);
+	mGUI->Init();
 	mGUI->InitOdysseyTextureEditorGUI(this, mController);
 	mController->Init();
 }
@@ -87,6 +87,12 @@ FOdysseyTextureEditor::LayerStack() const
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
+
+FOdysseyTextureEditorGUI*
+FOdysseyTextureEditor::GetGUI()
+{
+	return mGUI.Get();
+}
 
 TSharedRef<FTabManager::FLayout>
 FOdysseyTextureEditor::GetLayout()

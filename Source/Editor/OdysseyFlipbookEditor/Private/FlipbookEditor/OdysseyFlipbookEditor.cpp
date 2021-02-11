@@ -46,7 +46,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TShare
 	mGUI(nullptr),
 	mController(nullptr)
 {
-	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI());
+	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI(this));
 	mController = MakeShareable(new FOdysseyFlipbookEditorController(this, mGUI));
 }
 
@@ -70,7 +70,7 @@ FOdysseyFlipbookEditor::Init()
 
 	//----
 
-	mGUI->Init(this);
+	mGUI->Init();
 	mGUI->InitOdysseyFlipbookEditorGUI(this, mController);
 	mController->Init();
 }
@@ -127,6 +127,12 @@ FOdysseyFlipbookEditor::Texture(UTexture2D* iTexture)
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
+FOdysseyFlipbookEditorGUI*
+FOdysseyFlipbookEditor::GetGUI()
+{
+	return mGUI.Get();
+}
+
 TSharedRef<FTabManager::FLayout>
 FOdysseyFlipbookEditor::GetLayout()
 {
@@ -152,12 +158,6 @@ void
 FOdysseyFlipbookEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
 	mGUI->UnregisterTabSpawners(iTabManager);
-}
-
-void
-FOdysseyFlipbookEditor::OnToolkitInitialized()
-{
-	mController->OnToolkitInitialized();
 }
 
 bool

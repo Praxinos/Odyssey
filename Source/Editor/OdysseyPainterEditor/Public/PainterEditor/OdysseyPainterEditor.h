@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "OdysseyPainterEditorGUI.h"
 #include <ULIS3>
 
 class FOdysseyPaintEngine;
@@ -52,6 +53,7 @@ public:
 
 public:
     // Interface
+    virtual FOdysseyPainterEditorGUI* GetGUI() = 0;
     virtual TSharedRef<FTabManager::FLayout> GetLayout() = 0;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const = 0;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;

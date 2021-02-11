@@ -26,6 +26,15 @@ void
 FOdysseyPainterEditorTab::Init()
 {
 	mWidget = CreateWidget();
+    BindShortcuts();
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
+
+void
+FOdysseyPainterEditorTab::BindShortcuts()
+{
 }
 
 void
@@ -44,8 +53,13 @@ FOdysseyPainterEditorTab::UnregisterTabSpawner( const TSharedRef< class FTabMana
     iTabManager->UnregisterTabSpawner( mID );
 }
 
+void
+FOdysseyPainterEditorTab::OnToolkitInitialized()
+{
+}
+
 //--------------------------------------------------------------------------------------
-//-------------------------------------------------------------------- Spawner callbacks
+//--------------------------------------------------------------------- Spawner callback
 
 TSharedRef< SDockTab >
 FOdysseyPainterEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
@@ -53,12 +67,14 @@ FOdysseyPainterEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
     check( iArgs.GetTabId() == mID );
 
     return SNew( SDockTab )
-        .ShouldAutosize( true )
         .Label( mDisplayName )
         [
             mWidget.ToSharedRef()
         ];
 }
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Getters
 
 const FName&
 FOdysseyPainterEditorTab::ID() const

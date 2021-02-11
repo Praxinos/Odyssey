@@ -49,7 +49,7 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI :
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorGUI();
-    FOdysseyTextureEditorGUI();
+    FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor);
 
 public:
     //Init

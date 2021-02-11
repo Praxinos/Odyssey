@@ -32,6 +32,9 @@ FOdysseyFlipbookEditorModule::StartupModule()
 	// Register Assets Types Actions
 	RegisterAssetTypeActions();
 
+	// Register Commands
+	RegisterCommands();
+
 	// Register Settings
     RegisterSettings();
 
@@ -50,6 +53,9 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
 
 	// Unregister Settings
     UnregisterSettings();
+
+	// Unregister Commands
+	UnregisterCommands();
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
@@ -127,6 +133,18 @@ TSharedPtr<FExtensibilityManager>
 FOdysseyFlipbookEditorModule::GetMenuExtensibilityManager()
 {
 	return mMenuExtensibilityManager;
+}
+
+void
+FOdysseyFlipbookEditorModule::RegisterCommands()
+{
+	FOdysseyFlipbookEditorCommands::Register();
+}
+
+void
+FOdysseyFlipbookEditorModule::UnregisterCommands()
+{
+	FOdysseyFlipbookEditorCommands::Unregister();
 }
 
 IMPLEMENT_MODULE( FOdysseyFlipbookEditorModule, OdysseyFlipbookEditor );

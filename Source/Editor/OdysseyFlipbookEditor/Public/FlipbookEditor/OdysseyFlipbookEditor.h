@@ -6,6 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "PaperFlipbook.h"
 
+#include "OdysseyFlipbookEditorGUI.h"
 #include "OdysseyFlipbookWrapper.h"
 #include "OdysseyTextureWrapper.h"
 
@@ -49,13 +50,13 @@ public:
 
 public:
     //Overrides
+    virtual FOdysseyFlipbookEditorGUI* GetGUI() override;
     virtual TSharedRef<FTabManager::FLayout> GetLayout() override;
     virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;
     
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
 
-    virtual void OnToolkitInitialized() override;
     virtual bool OnCloseRequested();
 
 protected:

@@ -21,12 +21,14 @@ class UTexture2D;
 class ODYSSEYWIDGETS_API SOdysseySurfaceViewport : public SCompoundWidget
 {
 public:
-    DECLARE_MULTICAST_DELEGATE( FOnParameterChanged );
+    DECLARE_DELEGATE( FOnParameterChanged );
 
 public:
 
     SLATE_BEGIN_ARGS(SOdysseySurfaceViewport)
         {}
+        SLATE_ATTRIBUTE(IOdysseySurface*, Surface)
+        SLATE_EVENT(FOnParameterChanged, OnParameterChanged)
     SLATE_END_ARGS()
 
 public:
@@ -35,7 +37,7 @@ public:
 
 public:
     // Public API
-    void                        SetSurface( IOdysseySurface* iValue );
+    // void                        SetSurface( IOdysseySurface* iValue );
     void                        SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
 
     TSharedPtr<FOdysseySceneViewport>   GetViewport()              const;
@@ -95,24 +97,22 @@ public:
     void            RotateLeft();
     void            RotateRight();
     void            CalculateTextureDisplayDimensions(uint32& Width, uint32& Height) const;
-    
-    FOnParameterChanged& OnParameterChanged() { return mOnParameterChanged; }
 
 private:
     // Private Member Data
-    IOdysseySurface*            Surface;
-    TSharedPtr<FViewportClient> ViewportClient;
-    TSharedPtr<FOdysseySceneViewport>  Viewport;
-    TSharedPtr<SViewport>       ViewportWidget;
-    TSharedPtr<SScrollBar>      TextureViewportVerticalScrollBar;
-    TSharedPtr<SScrollBar>      TextureViewportHorizontalScrollBar;
-    double                      Zoom;
-    double                      Rotation;
-    FVector2D                   Pan;
-    bool                        IsFitToViewport;
-    bool                        mIsAutoFilter;
-    uint32                      PreviewEffectiveTextureWidth;
-    uint32                      PreviewEffectiveTextureHeight;
+    TAttribute<IOdysseySurface*>        Surface;
+    TSharedPtr<FViewportClient>         ViewportClient;
+    TSharedPtr<FOdysseySceneViewport>   Viewport;
+    TSharedPtr<SViewport>               ViewportWidget;
+    TSharedPtr<SScrollBar>              TextureViewportVerticalScrollBar;
+    TSharedPtr<SScrollBar>              TextureViewportHorizontalScrollBar;
+    double                              Zoom;
+    double                              Rotation;
+    FVector2D                           Pan;
+    bool                                IsFitToViewport;
+    bool                                mIsAutoFilter;
+    uint32                              PreviewEffectiveTextureWidth;
+    uint32                              PreviewEffectiveTextureHeight;
 
-    FOnParameterChanged         mOnParameterChanged;
+    FOnParameterChanged                 mOnParameterChanged;
 };

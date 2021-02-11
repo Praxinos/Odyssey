@@ -17,6 +17,9 @@
 #include "SOdysseySurfaceViewport.h"
 #include "TextureEditor/OdysseyTextureEditorState.h"
 
+#include "OdysseyFlipbookEditorTimelineTab.h"
+#include "SOdysseyFlipbookTimelineView.h"
+
 #include "PaperFlipbook.h"
 #include "PaperSprite.h"
 
@@ -51,7 +54,7 @@ FOdysseyFlipbookEditorController::Init()
 	//----
 
 	// Register our commands. This will only register them if not previously registered
-	FOdysseyFlipbookEditorCommands::Register();
+	//FOdysseyFlipbookEditorCommands::Register();
 
     // Init Painter Editor
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(mEditor->Toolkit()->GetToolkitCommands());
@@ -138,7 +141,7 @@ FOdysseyFlipbookEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     mGUI->GetLayerStackTab()->RefreshView();
 
     //Set display Surface
-    mGUI->GetViewportTab()->SetSurface(GetEditor()->DisplaySurface());
+    //mGUI->GetViewportTab()->SetSurface(GetEditor()->DisplaySurface());
     
     //Set the new texture in the texture details panel
     mGUI->GetTextureDetailsTab()->SetTexture(GetEditor()->Texture());
@@ -150,7 +153,7 @@ FOdysseyFlipbookEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
 void
 FOdysseyFlipbookEditorController::BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
-	mGUI->GetTimelineTab()->BindCommands(iToolkitCommands);
+	// mGUI->GetTimelineTab()->BindCommands(iToolkitCommands);
 	FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 }
 
@@ -201,36 +204,6 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeAbort()
 	GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
     GetEditor()->DisplaySurface()->Invalidate();
 	//TODO: Check how to abort undo recording
-}
-
-void
-FOdysseyFlipbookEditorController::OnTimelineCurrentKeyframeChanged(int32 iKeyframe)
-{
-	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
-}
-
-void
-FOdysseyFlipbookEditorController::OnTimelineScrubStarted()
-{
-}
-
-void
-FOdysseyFlipbookEditorController::OnTimelineScrubStopped()
-{
-	//TODO: unlock paintengine
-	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
-
-	//Force display Surface
-	mGUI->GetViewportTab()->SetSurface(GetEditor()->DisplaySurface());
-
-	//Cleanup Preview Surface
-	GetEditor()->PreviewSurface()->Texture(NULL);
-}
-
-void
-FOdysseyFlipbookEditorController::OnFlipbookChanged()
-{
-	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
 }
 
 void
@@ -570,11 +543,11 @@ void
 FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
 	UTexture2D* texture = GetEditor()->FlipbookWrapper()->GetKeyframeTexture(iKeyframeIndex);
-	if (mGUI->GetTimelineTab()->IsScrubbing())
+	if (GetEditor()->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing())
 	{
 		GetEditor()->PreviewSurface()->Texture(texture);
-        mGUI->GetTextureDetailsTab()->SetTexture(texture);
-		mGUI->GetViewportTab()->SetSurface(GetEditor()->PreviewSurface());
+        GetEditor()->GetGUI()->GetTextureDetailsTab()->SetTexture(texture);
+		//mGUI->GetViewportTab()->SetSurface(GetEditor()->PreviewSurface());
 		return;
 	}
 
@@ -600,66 +573,11 @@ FOdysseyFlipbookEditorController::OnSpriteTextureChanged(UPaperSprite* iSprite, 
 	}
 
 
-	UPaperSprite* sprite = GetEditor()->FlipbookWrapper()->GetKeyframeSprite(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
+	UPaperSprite* sprite = GetEditor()->FlipbookWrapper()->GetKeyframeSprite(mGUI->GetTimelineTab()->Timeline()->GetCurrentKeyframeIndex());
 	if (sprite != iSprite)
 		return;
 
-	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->GetCurrentKeyframeIndex());
-}
-
-void
-FOdysseyFlipbookEditorController::OnSpriteCreated(UPaperSprite* iSprite)
-{
-	mEditor->Toolkit()->AddEditingObject(iSprite);
-}
-
-void
-FOdysseyFlipbookEditorController::OnTextureCreated(UTexture2D* iTexture)
-{
-	mEditor->Toolkit()->AddEditingObject(iTexture);
-}
-
-void
-FOdysseyFlipbookEditorController::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe)
-{
-	if (!iKeyframe.Sprite)
-		return;
-
-	mEditor->Toolkit()->RemoveEditingObject(iKeyframe.Sprite);
-
-	UTexture2D* texture = iKeyframe.Sprite->GetSourceTexture();
-	if (!texture)
-		return;
-
-	mEditor->Toolkit()->RemoveEditingObject(texture);
-}
-
-void
-FOdysseyFlipbookEditorController::OnToolkitInitialized()
-{
-	TSharedPtr<SDockTab> OwnerTab = mEditor->Toolkit()->GetTabManager()->GetOwnerTab();
-	TSharedPtr<SWindow> parentWindow = NULL;
-	if (OwnerTab.IsValid())
-	{
-		parentWindow = FSlateApplication::Get().FindWidgetWindow(OwnerTab.ToSharedRef());
-	}
-	else
-	{
-		parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
-	}
-
-	SetTimelineNavigationShortcuts(parentWindow);
-}
-
-void
-FOdysseyFlipbookEditorController::SetTimelineNavigationShortcuts(TSharedPtr<SWidget> iWidget)
-{
-	TSharedPtr<FNavigationMetaData> navigationMetaData = MakeShareable(new FNavigationMetaData());
-	navigationMetaData->SetNavigationCustom(EUINavigation::Left, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	navigationMetaData->SetNavigationCustom(EUINavigation::Right, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	navigationMetaData->SetNavigationCustom(EUINavigation::Next, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	navigationMetaData->SetNavigationCustom(EUINavigation::Previous, EUINavigationRule::Custom, FNavigationDelegate::CreateSP(mGUI->GetTimelineTab().ToSharedRef(), &SOdysseyFlipbookTimelineView::OnArrowNavigation));
-	iWidget->AddMetadata(navigationMetaData.ToSharedRef());
+	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->Timeline()->GetCurrentKeyframeIndex());
 }
 
 #undef LOCTEXT_NAMESPACE
