@@ -64,6 +64,9 @@ FOdysseyFlipbookEditorController::Init()
 
     if ( !(GetEditor()->TextureWrapper().OnPostTextureChangeDelegate().IsBoundToObject(this)) )
         GetEditor()->TextureWrapper().OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnPostTextureChange);
+
+    //Make like if the texture changed, to set all callbacks correctly
+    OnPostTextureChange(nullptr);
 }
 
 void

@@ -18,7 +18,7 @@ FOdysseyPainterEditorColorSlidersTab::~FOdysseyPainterEditorColorSlidersTab()
 
 FOdysseyPainterEditorColorSlidersTab::FOdysseyPainterEditorColorSlidersTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_ColorSliders"),
-                            LOCTEXT( "OdysseyPainterEditorColorSlidersTab", "ColorSliders" ),
+                            LOCTEXT( "OdysseyPainterEditorColorSlidersTab", "Color Sliders" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
     , mEditor(iEditor)
 {

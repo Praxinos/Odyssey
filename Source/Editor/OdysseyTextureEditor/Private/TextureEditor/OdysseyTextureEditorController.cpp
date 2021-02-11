@@ -126,6 +126,11 @@ FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
             break;
         }
     }
+    else
+    {
+        //Call this anyway because, as we changed of texture, we naturally also changed of layerstack
+        OnLayerStackCurrentLayerChanged(nullptr);
+    }
 }
 
 void
