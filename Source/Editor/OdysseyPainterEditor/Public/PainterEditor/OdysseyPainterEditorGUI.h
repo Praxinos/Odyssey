@@ -10,7 +10,7 @@ class SOdysseyBrushSelector;
 class SOdysseyLayerStackView;
 class SOdysseyPaintModifiers;
 // class SOdysseyPerformanceOptions;
-class SOdysseyStrokeOptions;
+// class SOdysseyStrokeOptions;
 class SOdysseyUndoHistory;
 
 class SDockableTab;
@@ -23,6 +23,7 @@ class FOdysseyPainterEditorBrushExposedParametersTab;
 class FOdysseyPainterEditorColorSlidersTab;
 class FOdysseyPainterEditorColorWheelTab;
 class FOdysseyPainterEditorMeshSelectorTab;
+class FOdysseyPainterEditorStrokeOptionsTab;
 class FOdysseyPainterEditorTopTab;
 class FOdysseyPainterEditorViewportTab;
 
@@ -54,7 +55,7 @@ private:
     // void CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     // void CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    // void CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     void CreatePerformanceOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     //void CreateUndoHistoryTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
 
@@ -81,7 +82,7 @@ private:
 	// Callback for spawning the TopBar tab.
 	// TSharedRef<SDockTab> HandleTabSpawnerSpawnTopBar(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Smoothing Options tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnStrokeOptions(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnStrokeOptions(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Smoothing Options tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnPerformanceOptions(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Notes tab.
@@ -111,7 +112,7 @@ public:
     TSharedPtr<FOdysseyPainterEditorBrushExposedParametersTab>& GetBrushExposedParametersTab();
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
-    TSharedPtr<SOdysseyStrokeOptions>& GetStrokeOptionsTab();
+    TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>& GetStrokeOptionsTab();
     TSharedPtr<SOdysseyPerformanceOptions>& GetPerformanceOptionsTab();
     //TSharedPtr<SOdysseyUndoHistory>& GetUndoHistoryTab();
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
@@ -133,7 +134,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
     TSharedPtr<SOdysseyLayerStackView>                          mLayerStackTab;
-    TSharedPtr<SOdysseyStrokeOptions>                           mStrokeOptionsTab;
+    TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>           mStrokeOptionsTab;
     TSharedPtr<SOdysseyPerformanceOptions>                      mPerformanceOptionsTab;
     //TSharedPtr<SOdysseyUndoHistory>                           mUndoHistoryTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
@@ -151,7 +152,7 @@ private:
     // static const FName smColorSlidersTabId;
     static const FName smLayerStackTabId;
     // static const FName smTopBarTabId;
-    static const FName smStrokeOptionsTabId;
+    // static const FName smStrokeOptionsTabId;
     static const FName smNotesTabId;
     static const FName smUndoHistoryTabId;
     static const FName smPerformanceOptionsTabId;

@@ -14,6 +14,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorViewportTab.h"
+#include "OdysseyPainterEditorStrokeOptionsTab.h"
 #include "OdysseyPainterEditorTopTab.h"
 
 #include "Brush/SOdysseyBrushExposedParameters.h"
@@ -353,15 +354,15 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
 		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetEditor()->Brush()->GeneratedClass);
 
         FOdysseyBrushPreferencesOverrides& overrides = brushInstance->Preferences;
-        if( overrides.bOverride_Step )          GetGUI()->GetStrokeOptionsTab()->SetStrokeStep( overrides.Step );
-        if( overrides.bOverride_Adaptative )    GetGUI()->GetStrokeOptionsTab()->SetStrokeAdaptative( overrides.SizeAdaptative );
-        if( overrides.bOverride_PaintOnTick )   GetGUI()->GetStrokeOptionsTab()->SetStrokePaintOnTick( overrides.PaintOnTick );
-        if( overrides.bOverride_Type )          GetGUI()->GetStrokeOptionsTab()->SetInterpolationType( (int32)overrides.Type );
-        if( overrides.bOverride_Method )        GetGUI()->GetStrokeOptionsTab()->SetSmoothingMethod( (int32)overrides.Method );
-        if( overrides.bOverride_Strength )      GetGUI()->GetStrokeOptionsTab()->SetSmoothingStrength( overrides.Strength );
-        if( overrides.bOverride_Enabled )       GetGUI()->GetStrokeOptionsTab()->SetSmoothingEnabled( overrides.Enabled );
-        if( overrides.bOverride_RealTime )      GetGUI()->GetStrokeOptionsTab()->SetSmoothingRealTime( overrides.RealTime );
-        if( overrides.bOverride_CatchUp )       GetGUI()->GetStrokeOptionsTab()->SetSmoothingCatchUp( overrides.CatchUp );
+        if( overrides.bOverride_Step )          GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetStrokeStep( overrides.Step );
+        if( overrides.bOverride_Adaptative )    GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetStrokeAdaptative( overrides.SizeAdaptative );
+        if( overrides.bOverride_PaintOnTick )   GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetStrokePaintOnTick( overrides.PaintOnTick );
+        if( overrides.bOverride_Type )          GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetInterpolationType( (int32)overrides.Type );
+        if( overrides.bOverride_Method )        GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingMethod( (int32)overrides.Method );
+        if( overrides.bOverride_Strength )      GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingStrength( overrides.Strength );
+        if( overrides.bOverride_Enabled )       GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingEnabled( overrides.Enabled );
+        if( overrides.bOverride_RealTime )      GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingRealTime( overrides.RealTime );
+        if( overrides.bOverride_CatchUp )       GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingCatchUp( overrides.CatchUp );
         if( overrides.bOverride_Size )          GetGUI()->GetTopTab()->PaintModifiers()->SetSize( overrides.Size );
         if( overrides.bOverride_Opacity )       GetGUI()->GetTopTab()->PaintModifiers()->SetOpacity( overrides.Opacity );
         if( overrides.bOverride_Flow )          GetGUI()->GetTopTab()->PaintModifiers()->SetFlow( overrides.Flow );
