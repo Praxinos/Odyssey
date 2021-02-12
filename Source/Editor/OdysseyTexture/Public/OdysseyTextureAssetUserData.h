@@ -23,6 +23,7 @@ public:
 
 public:
     FOdysseyLayerStack* GetLayerStack();
+    void SetLayerStack( FOdysseyLayerStack* iLayerStack );
 
 private:
     FOdysseyLayerStack* mLayerStack;

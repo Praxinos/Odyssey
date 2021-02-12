@@ -1,0 +1,131 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Serialization/BufferArchive.h"
+#include "OdysseyLayerStack.h"
+
+struct PsdLayerInfo
+{
+    uint32_t mLeft = 0, mTop = 0, mBottom = 0, mRight = 0;
+    int16_t mID[32];
+    uint16_t mNumChannels;
+    int32_t mChannelSize[32];
+    uint32_t mStartChannelPos[32];
+    char mBlendModeKey[5];
+    uint8_t mOpacity;
+    uint8_t mFlags;
+    uint32_t mExtraSize;
+    uint32_t mExtraPosition;
+    uint32_t mExtraRead;
+
+    uint32_t mLayerMaskSize;
+    uint32_t mYMask;
+    uint32_t mXMask;
+    uint32_t mWMask;
+    uint32_t mHMask;
+    uint8_t  mColorMask;
+    uint8_t  mFlagsMask;
+
+    uint32_t mLayerBlendingSize;
+
+    uint8_t mNameSize;
+    char mName[257];
+
+    uint32_t mSizeLayerImage = 0;
+    uint8_t* mLayerImageDst = nullptr;
+    uint16_t* mLayerImageDst16 = nullptr;
+
+
+    uint32_t mDividerType;
+
+};
+
+class ODYSSEYPSDOPERATIONS_API FOdysseyPsdOperations
+{
+public:
+    // Construction / Destruction
+    ~FOdysseyPsdOperations();
+    FOdysseyPsdOperations(const TCHAR* iFilename);
+
+private:
+    /** The header of the file, with basic info about the image and verification that it's indeed a psd file */
+    bool ReadFileHeader();
+
+    /** Used for indexed colored images (look up tables), mostly useless for our purposes for now */
+    bool ReadFileColorMode();
+
+    /** Image resources, stores paths of pen strokes and such, mostly useless for our purposes for now */
+    bool ReadImageResources();
+
+    bool ReadLayerAndMaskInfo();
+
+    bool ReadLayerInfo();
+
+    bool ReadMaskInfo();
+
+    bool ReadLayers();
+
+    bool ReadAdditionalLayerInfoSignature();
+
+    bool ReadAdditionalLayerInfo( uint32_t sectionEnd );
+
+    //bool ReadImageData();
+
+    bool ReadLayerStackData();
+    bool ReadLayerStackData16();
+
+    void GenerateLayerStackFromLayerStackData();
+
+    void CopyUncompressed(uint16_t* dst,uint32_t length);
+    void CopyUncompressed(uint8_t* dst,uint32_t length);
+
+    void DecodeAndCopyRLE(uint16_t* dst,uint32_t length);
+    void DecodeAndCopyRLE(uint8_t* dst,uint32_t length);
+
+    void UnpredictZip(uint8* dst,uint32_t length, uint32_t numColumns, uint32_t rowSize);
+
+    void PlanarByteConvert( uint8_t* src, uint8_t* dst, uint32_t length, uint8_t numChannels );
+    void PlanarByteConvert(uint16_t* src,uint16_t* dst,uint32_t length,uint8_t numChannels);
+
+    ::ul3::eBlendingMode GetBlendingModeFromPSD( char iBlendModeKey[5] );
+
+public:
+
+    //-- Getters / Setters
+    uint16_t GetChannelsNumber();
+    uint32_t GetImageHeight();
+    uint32_t GetImageWidth();
+    uint16_t GetBitDepth();
+    uint16_t GetColorMode();
+
+    uint8_t* GetImageDst();
+    uint16_t* GetImageDst16();
+
+    FOdysseyLayerStack* GetLayerStack();
+
+    //-- Import / Export
+    /** Tries to import the file passed in the constructor, return true if succeeded */
+    bool Import();
+
+private:
+    IFileHandle* mFileHandle;
+
+private:
+    uint16_t mChannelsNumber;
+    uint32_t mImageHeight;
+    uint32_t mImageWidth;
+    uint16_t mBitDepth;
+    uint16_t mColorMode;
+
+    uint32_t mImageStart;
+    uint8_t* mImageDst;
+    uint16_t* mImageDst16;
+
+    FOdysseyLayerStack* mLayerStack;
+
+    TArray<PsdLayerInfo> mLayersInfo;
+};
+

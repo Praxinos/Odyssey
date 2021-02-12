@@ -34,6 +34,7 @@ FOdysseyLayerStack::FOdysseyLayerStack()
 	, mOutputFormat(0)
     , mLayerRoot(MakeShareable(new  FOdysseyRootLayer()))
     , mCurrentLayer( mLayerRoot )
+    , mDrawingUndo( new  FOdysseyDrawingUndo(this) )
 {
 }
 
@@ -47,9 +48,6 @@ FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ul3::tFormat iFormat)
     mHeight = iHeight;
     mOutputFormat = iFormat;
 	mFormat = ComputationFormatForResultFormat(iFormat);
-
-    //TODO: Move outside one day
-    mDrawingUndo = new  FOdysseyDrawingUndo( this );
 
 	mLayerRoot->ImageResultChangedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
 	mLayerRoot->NodeAdded().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once

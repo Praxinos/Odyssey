@@ -240,3 +240,16 @@ FOdysseyMathUtils::QuadraticBezierGenerateLinearLUT_Imp( TArray< FOdysseyBezierL
 
     return ( lengthSegmentA + lengthSegmentB );
 }
+
+inline
+void 
+FOdysseyMathUtils::ByteSwap(void* V,int32 Length)
+{
+    uint8* Ptr = (uint8*)V;
+    int32 Top = Length - 1;
+    int32 Bottom = 0;
+    while(Bottom < Top)
+    {
+        Swap(Ptr[Top--],Ptr[Bottom++]);
+    }
+}

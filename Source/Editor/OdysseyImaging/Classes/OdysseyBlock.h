@@ -15,6 +15,7 @@ ODYSSEYIMAGING_API void ConvertULISFormatToUE4TextureSourceFormat(const uint8* i
 
 ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat );
 ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat );
+ODYSSEYIMAGING_API ETextureSourceFormat UE4TextureSourceFormatForULISFormat(::ul3::tFormat iFormat);
 ODYSSEYIMAGING_API EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFormat );
 
 /////////////////////////////////////////////////////

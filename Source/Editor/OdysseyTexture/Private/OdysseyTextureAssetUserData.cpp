@@ -28,3 +28,14 @@ FOdysseyLayerStack* UOdysseyTextureAssetUserData::GetLayerStack()
     return mLayerStack;
 }
 
+void UOdysseyTextureAssetUserData::SetLayerStack(FOdysseyLayerStack* iLayerStack)
+{
+    if( !iLayerStack )
+        return;
+
+    if( mLayerStack )
+        delete mLayerStack;
+
+    mLayerStack = iLayerStack;
+}
+
