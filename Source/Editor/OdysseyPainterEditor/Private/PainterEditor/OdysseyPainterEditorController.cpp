@@ -370,7 +370,6 @@ FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
 
         GetEditor()->BrushInstance(brushInstance);
         GetEditor()->PaintEngine()->SetBrushInstance(brushInstance);
-        GetGUI()->GetBrushExposedParametersTab()->Refresh(brushInstance);
 
         //---
 
@@ -403,7 +402,6 @@ FOdysseyPainterEditorController::OnBrushCompiled( UBlueprint* iBrush )
 		GetEditor()->BrushInstance(brushInstance);
 
 		GetEditor()->PaintEngine()->SetBrushInstance(GetEditor()->BrushInstance());
-        GetGUI()->GetBrushExposedParametersTab()->Refresh(GetEditor()->BrushInstance());
 
         //---
 

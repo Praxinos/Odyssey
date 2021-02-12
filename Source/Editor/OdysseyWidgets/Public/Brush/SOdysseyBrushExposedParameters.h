@@ -22,6 +22,7 @@ class ODYSSEYWIDGETS_API SOdysseyBrushExposedParameters
 {
     SLATE_BEGIN_ARGS( SOdysseyBrushExposedParameters )
         {}
+        SLATE_ATTRIBUTE(UOdysseyBrushAssetBase*, BrushInstance)
         SLATE_EVENT( FOnParameterChanged, OnParameterChanged )
     SLATE_END_ARGS()
 
@@ -30,8 +31,8 @@ public:
     void Construct( const FArguments& InArgs );
 
 public:
-    // Public API
-    void Refresh( UOdysseyBrushAssetBase* iValue );
+    // SWidget overrides
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime);
 
 public:
     // FNotifyHook Interface
@@ -40,6 +41,9 @@ public:
 
 private:
     // Private data members
+    TAttribute<UOdysseyBrushAssetBase*>     mBrushInstance;
+    UOdysseyBrushAssetBase*                 mCurrentBrushInstance;
+
     FOnParameterChanged         OnParameterChangedCallback;
     TSharedPtr< IDetailsView >  details_view;
 };

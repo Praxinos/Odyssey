@@ -129,7 +129,7 @@ FOdysseyViewportDrawingEditorData::Brush()
 }
 
 UOdysseyBrushAssetBase*             
-FOdysseyViewportDrawingEditorData::BrushInstance()
+FOdysseyViewportDrawingEditorData::BrushInstance() const
 {
     return mBrushInstance;
 }

@@ -31,8 +31,17 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorColorSlidersTab::CreateWidget()
 {
 	return SNew( SOdysseyColorSliders )
-		.Color_Raw(mEditor, &FOdysseyPainterEditor::PaintColor)
+		.Color_Raw(this, &FOdysseyPainterEditorColorSlidersTab::Color)
         .OnColorChange_Raw(this, &FOdysseyPainterEditorColorSlidersTab::OnColorChange);
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Getters
+
+::ul3::FPixelValue
+FOdysseyPainterEditorColorSlidersTab::Color() const
+{
+    return mEditor->PaintColor();
 }
 
 //--------------------------------------------------------------------------------------

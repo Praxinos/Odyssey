@@ -64,6 +64,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .VerticalAspect( true );
 
     mBrushExposedParameters = SNew(SOdysseyBrushExposedParameters)
+        .BrushInstance(iPainter->GetController()->GetData().ToSharedRef(), &FOdysseyViewportDrawingEditorData::BrushInstance )
         .OnParameterChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleBrushParameterChanged);
 
     mColorSelector = SNew(SOdysseyColorSelector)

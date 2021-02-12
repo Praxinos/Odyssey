@@ -303,7 +303,6 @@ FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
         mData->BrushInstance(brushInstance);
 
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
-        GetGUI()->GetBrushExposedParameters()->Refresh(mData->BrushInstance());
 
         FOdysseyBrushPreferencesOverrides& overrides = mData->BrushInstance()->Preferences;
         if(overrides.bOverride_Step)          GetGUI()->GetStrokeOptions()->SetStrokeStep(overrides.Step);
@@ -345,7 +344,6 @@ FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
         mData->BrushInstance(brushInstance);
 
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
-        GetGUI()->GetBrushExposedParameters()->Refresh(mData->BrushInstance());
     }
 }
 

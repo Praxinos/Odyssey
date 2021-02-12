@@ -19,6 +19,10 @@ protected:
     // FOdysseyPainterEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
+protected:
+    // Widget Getters
+    virtual ::ul3::FPixelValue Color() const;
+
 private:
     // Event Listeners
     void OnColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
