@@ -89,7 +89,7 @@ public:
     virtual void HandleOpacityModifierChanged( int32 iValue );
     virtual void HandleFlowModifierChanged( int32 iValue );
     virtual void HandleBlendingModeModifierChanged( int32 iValue );
-    virtual void HandleAlphaModeModifierChanged( int32 iValue );
+    // virtual void HandleAlphaModeModifierChanged( int32 iValue );
 
     // Stroke Options Handlers
     /* virtual void HandleStrokeStepChanged( int32 iValue );

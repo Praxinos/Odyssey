@@ -28,10 +28,6 @@ protected:
     virtual ::ul3::eBlendingMode BlendingMode() const;
     virtual ::ul3::eAlphaMode AlphaMode() const;
 
-public:
-    // Public Getters
-    TSharedPtr<SOdysseyPaintModifiers> PaintModifiers();
-
 protected:
     // Event Listeners
     virtual void OnSizeChanged( int32 iValue );
@@ -42,7 +38,5 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
-
-    TSharedPtr<SOdysseyPaintModifiers> mPaintModifiers;
 };
 

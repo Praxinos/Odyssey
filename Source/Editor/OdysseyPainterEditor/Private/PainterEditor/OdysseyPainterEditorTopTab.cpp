@@ -30,7 +30,7 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
-	return mPaintModifiers = SNew( SOdysseyPaintModifiers )
+	return SNew( SOdysseyPaintModifiers )
         .Size(this, &FOdysseyPainterEditorTopTab::Size)
         .Opacity(this, &FOdysseyPainterEditorTopTab::Opacity)
         .Flow(this, &FOdysseyPainterEditorTopTab::Flow)
@@ -87,15 +87,6 @@ FOdysseyPainterEditorTopTab::BlendingMode() const
 FOdysseyPainterEditorTopTab::AlphaMode() const
 {
     return mEditor->PaintEngine()->GetAlphaModeModifier();
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Public Getters
-
-TSharedPtr<SOdysseyPaintModifiers>
-FOdysseyPainterEditorTopTab::PaintModifiers()
-{
-    return mPaintModifiers;
 }
 
 //--------------------------------------------------------------------------------------

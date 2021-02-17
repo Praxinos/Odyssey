@@ -61,7 +61,7 @@ public:
     virtual void   OnDuplicateCurrentLayer() override;
     virtual void   OnDeleteCurrentLayer() override;
 
-    virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
+    // virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
 	virtual FOdysseyTextureEditor* GetEditor() override;

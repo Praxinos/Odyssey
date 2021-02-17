@@ -420,11 +420,11 @@ FOdysseyPainterEditorController::HandleBlendingModeModifierChanged( int32 iValue
 	GetEditor()->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
 }
 
-void
+/* void
 FOdysseyPainterEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 {
 	GetEditor()->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Stroke Options Handlers

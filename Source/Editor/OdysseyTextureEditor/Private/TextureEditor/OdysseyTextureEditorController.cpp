@@ -227,7 +227,7 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdy
         if (oldImageLayer)
         {
             oldImageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-            GetEditor()->PaintEngine()->SetAlphaModeModifier(mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
+            GetEditor()->PaintEngine()->SetAlphaModeModifier(mEditor->SelectedAlphaMode());
         }
 	}
     GetEditor()->PaintEngine()->Block(NULL);
@@ -245,7 +245,7 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdy
         return;
 
     GetEditor()->PaintEngine()->Block(imageLayer->GetBlock());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mEditor->SelectedAlphaMode());
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged);
@@ -256,10 +256,10 @@ void
 FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 {
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mEditor->SelectedAlphaMode());
 }
 
-void
+/* void
 FOdysseyTextureEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 {
     if (!GetEditor()->LayerStack())
@@ -272,8 +272,8 @@ FOdysseyTextureEditorController::HandleAlphaModeModifierChanged( int32 iValue )
         return;
 
 	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
-}
+    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mEditor->SelectedAlphaMode());
+} */
 
 void
 FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
