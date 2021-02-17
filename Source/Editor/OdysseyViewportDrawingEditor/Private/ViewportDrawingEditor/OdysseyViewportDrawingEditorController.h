@@ -62,7 +62,7 @@ public:
     void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     void OnBrushSelected(UOdysseyBrush* iBrush);
-    void OnBrushCompiled(UBlueprint* iBrush);
+    // void OnBrushCompiled(UBlueprint* iBrush);
     void OnEditedTextureChanged(UTexture2D* iTexture);
 
     // Tools Actions
@@ -86,7 +86,7 @@ public:
     void HandleAlphaModeModifierChanged(int32 iValue);
 
     // Stroke Options Handlers
-    void HandleStrokeStepChanged(int32 iValue);
+    /* void HandleStrokeStepChanged(int32 iValue);
     void HandleStrokeAdaptativeChanged(bool iValue);
     void HandleStrokePaintOnTickChanged(bool iValue);
     void HandleInterpolationTypeChanged(int32 iValue);
@@ -94,7 +94,7 @@ public:
     void HandleSmoothingStrengthChanged(int32 iValue);
     void HandleSmoothingEnabledChanged(bool iValue);
     void HandleSmoothingRealTimeChanged(bool iValue);
-    void HandleSmoothingCatchUpChanged(bool iValue);
+    void HandleSmoothingCatchUpChanged(bool iValue); */
 
 private:
     TSharedPtr<FOdysseyViewportDrawingEditorData>		mData;

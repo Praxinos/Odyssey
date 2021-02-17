@@ -11,6 +11,8 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyTextureEditor.h"
 
+#include "OdysseyTextureEditorTopTab.h"
+
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
 /*static*/const FName FOdysseyTextureEditorGUI::smLayerStackTabId( TEXT( "OdysseyTextureEditor_LayerStack" ) );
@@ -32,12 +34,30 @@ FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 }
 
 FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor) :
-	FOdysseyPainterEditorGUI(iEditor, "OdysseyTextureEditor_Layout")
+	FOdysseyPainterEditorGUI(iEditor, "OdysseyTextureEditor_Layout"),
+	mEditor( iEditor )
 {
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
+
+
+void
+FOdysseyTextureEditorGUI::CreateTabs()
+{
+	FOdysseyPainterEditorGUI::CreateTabs();
+
+	mTopTab = MakeShareable(new FOdysseyTextureEditorTopTab(mEditor));
+}
+
+void
+FOdysseyTextureEditorGUI::InitTabs()
+{
+	FOdysseyPainterEditorGUI::InitTabs();
+
+	//mTopTab initialized by PainterEditorGUI
+}
 
 void
 FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)

@@ -283,8 +283,9 @@ void
 FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
 {
     mData->Brush(iBrush);
+    mData->PaintEngine()->Brush(iBrush);
 
-    if(mData->BrushInstance())
+    /* if(mData->BrushInstance())
     {
         mData->BrushInstance()->RemoveFromRoot();
         mData->BrushInstance(NULL);
@@ -305,7 +306,7 @@ FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
 
         FOdysseyBrushPreferencesOverrides& overrides = mData->BrushInstance()->Preferences;
-        if(overrides.bOverride_Step)          GetGUI()->GetStrokeOptions()->SetStrokeStep(overrides.Step);
+        /* if(overrides.bOverride_Step)          GetGUI()->GetStrokeOptions()->SetStrokeStep(overrides.Step);
         if(overrides.bOverride_Adaptative)    GetGUI()->GetStrokeOptions()->SetStrokeAdaptative(overrides.SizeAdaptative);
         if(overrides.bOverride_PaintOnTick)   GetGUI()->GetStrokeOptions()->SetStrokePaintOnTick(overrides.PaintOnTick);
         if(overrides.bOverride_Type)          GetGUI()->GetStrokeOptions()->SetInterpolationType((int32)overrides.Type);
@@ -313,16 +314,16 @@ FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
         if(overrides.bOverride_Strength)      GetGUI()->GetStrokeOptions()->SetSmoothingStrength(overrides.Strength);
         if(overrides.bOverride_Enabled)       GetGUI()->GetStrokeOptions()->SetSmoothingEnabled(overrides.Enabled);
         if(overrides.bOverride_RealTime)      GetGUI()->GetStrokeOptions()->SetSmoothingRealTime(overrides.RealTime);
-        if(overrides.bOverride_CatchUp)       GetGUI()->GetStrokeOptions()->SetSmoothingCatchUp(overrides.CatchUp);
-        if(overrides.bOverride_Size)          GetGUI()->GetPaintModifiers()->SetSize(overrides.Size);
+        if(overrides.bOverride_CatchUp)       GetGUI()->GetStrokeOptions()->SetSmoothingCatchUp(overrides.CatchUp); */
+        /* if(overrides.bOverride_Size)          GetGUI()->GetPaintModifiers()->SetSize(overrides.Size);
         if(overrides.bOverride_Opacity)       GetGUI()->GetPaintModifiers()->SetOpacity(overrides.Opacity);
         if(overrides.bOverride_Flow)          GetGUI()->GetPaintModifiers()->SetFlow(overrides.Flow);
         if(overrides.bOverride_BlendingMode)  GetGUI()->GetPaintModifiers()->SetBlendingMode((::ul3::eBlendingMode)overrides.BlendingMode);
         if(overrides.bOverride_AlphaMode)     GetGUI()->GetPaintModifiers()->SetAlphaMode((::ul3::eAlphaMode)overrides.AlphaMode);
-    }
+    } */
 }
 
-void
+/* void
 FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
 {
     UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>(iBrush);
@@ -345,7 +346,7 @@ FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
 
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
     }
-}
+} */
 
 void
 FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTexture)
@@ -520,7 +521,7 @@ FOdysseyViewportDrawingEditorController::HandleAlphaModeModifierChanged(int32 iV
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Stroke Options Handlers
-void
+/* void
 FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged(int32 iValue)
 {
     mData->PaintEngine()->SetStrokeStep(iValue);
@@ -572,7 +573,7 @@ void
 FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged(bool iValue)
 {
     mData->PaintEngine()->SetSmoothingCatchUp(iValue);
-}
+} */
 
 FName
 FOdysseyViewportDrawingEditorController::GetEditorName() const

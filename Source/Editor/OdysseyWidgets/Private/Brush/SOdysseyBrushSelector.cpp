@@ -17,6 +17,7 @@ SOdysseyBrushSelector::~SOdysseyBrushSelector()
 
 void SOdysseyBrushSelector::Construct(const FArguments& InArgs)
 {
+    current_brush = InArgs._Brush;
     OnBrushChanged = InArgs._OnBrushChanged;
 
     asset_thumbnail_pool = MakeShareable( new FAssetThumbnailPool( 1024 ) );
@@ -50,26 +51,20 @@ void SOdysseyBrushSelector::Construct(const FArguments& InArgs)
 //----------------------------------------------------------- Private internal callbacks
 FString SOdysseyBrushSelector::ObjectPath() const
 {
-    if( !current_brush )
+    if( !current_brush.Get() )
         return FString();
 
-    return current_brush->GetPathName();
+    return current_brush.Get()->GetPathName();
 }
 
 
 void SOdysseyBrushSelector::OnObjectChanged( const FAssetData& AssetData )
 {
+    UOdysseyBrush* brush = nullptr;
     if( AssetData.IsValid() )
-        current_brush = CastChecked< UOdysseyBrush >( AssetData.GetAsset() );
+        brush = CastChecked< UOdysseyBrush >( AssetData.GetAsset() );
 
-    OnBrushChanged.ExecuteIfBound( current_brush );
-}
-
-void
-SOdysseyBrushSelector::SelectBrush(UOdysseyBrush* iBrush)
-{
-    current_brush = iBrush;
-    OnBrushChanged.ExecuteIfBound(current_brush);
+    OnBrushChanged.ExecuteIfBound( brush );
 }
 
 

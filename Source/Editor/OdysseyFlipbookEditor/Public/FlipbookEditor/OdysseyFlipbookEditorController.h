@@ -77,7 +77,7 @@ public:
     void           OnExportLayersAsTextures() override;
     void           OnImportTexturesAsLayers() override;
 
-	virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
+	// virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
 	virtual FOdysseyFlipbookEditor* GetEditor() override;

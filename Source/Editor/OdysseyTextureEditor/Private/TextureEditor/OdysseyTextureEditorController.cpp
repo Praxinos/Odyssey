@@ -135,15 +135,16 @@ FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     }
 }
 
+/*
 void
 FOdysseyTextureEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
 {
     FOdysseyPainterEditorController::OnBrushSelected( iBrush );
 
-    if( GetEditor()->BrushInstance() )
+    if( GetEditor()->PaintEngine()->BrushInstance() )
     {
         FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
-        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+        GetEditor()->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
     }
 }
 
@@ -166,12 +167,12 @@ FOdysseyTextureEditorController::OnBrushCompiled( UBlueprint* iBrush )
     if( !check_brush )
         return;
 
-    if( GetEditor()->BrushInstance() )
+    if( GetEditor()->PaintEngine()->BrushInstance() )
     {
         FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
-        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+        GetEditor()->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
     }
-}
+} */
 
 void
 FOdysseyTextureEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
@@ -297,10 +298,10 @@ FOdysseyTextureEditorController::OnLayerStackStructureChanged()
 {
     GetEditor()->Texture()->MarkPackageDirty();
 
-    if( GetEditor()->BrushInstance() )
+    if( GetEditor()->PaintEngine()->BrushInstance() )
     {
         FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
-        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+        GetEditor()->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
     }
 }
 

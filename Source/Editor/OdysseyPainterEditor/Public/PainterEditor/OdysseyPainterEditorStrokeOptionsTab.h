@@ -22,25 +22,12 @@ protected:
 
 protected:
     // Widget Getters
+    FOdysseyPaintEngine* PaintEngine() const;
 
-public:
-    // Public Getters
-    TSharedPtr<SOdysseyStrokeOptions> StrokeOptions();
-
-private:
+protected:
     // Event Listeners
-    virtual void OnStrokeStepChanged( int32 iValue );
-    virtual void OnStrokeAdaptativeChanged( bool iValue );
-    virtual void OnStrokePaintOnTickChanged( bool iValue );
-    virtual void OnInterpolationTypeChanged( int32 iValue );
-    virtual void OnSmoothingMethodChanged( int32 iValue );
-    virtual void OnSmoothingStrengthChanged( int32 iValue );
-    virtual void OnSmoothingEnabledChanged( bool iValue );
-    virtual void OnSmoothingRealTimeChanged( bool iValue );
-    virtual void OnSmoothingCatchUpChanged( bool iValue );
 
 private:
     FOdysseyPainterEditor* mEditor;
-    TSharedPtr<SOdysseyStrokeOptions> mStrokeOptions;
 };
 

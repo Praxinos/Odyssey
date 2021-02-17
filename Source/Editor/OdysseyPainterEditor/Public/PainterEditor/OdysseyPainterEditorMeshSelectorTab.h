@@ -23,9 +23,9 @@ public:
     // Public Getters
     TSharedPtr<SOdysseyMeshSelector> MeshSelector();
 
-private:
+protected:
     // Event Listeners
-    void OnMeshSelected( UStaticMesh* iMesh );
+    virtual void OnMeshSelected( UStaticMesh* iMesh );
 
 private:
     FOdysseyPainterEditor* mEditor;

@@ -20,17 +20,25 @@ protected:
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
 
+protected:
+    // Widget Getters
+    virtual float Size() const;
+    virtual float Opacity() const;
+    virtual float Flow() const;
+    virtual ::ul3::eBlendingMode BlendingMode() const;
+    virtual ::ul3::eAlphaMode AlphaMode() const;
+
 public:
     // Public Getters
     TSharedPtr<SOdysseyPaintModifiers> PaintModifiers();
 
-private:
+protected:
     // Event Listeners
-    void OnSizeModifierChanged( int32 iValue );
-    void OnOpacityModifierChanged( int32 iValue );
-    void OnFlowModifierChanged( int32 iValue );
-    void OnBlendingModeModifierChanged( int32 iValue );
-    void OnAlphaModeModifierChanged( int32 iValue );
+    virtual void OnSizeChanged( int32 iValue );
+    virtual void OnOpacityChanged( int32 iValue );
+    virtual void OnFlowChanged( int32 iValue );
+    virtual void OnBlendingModeChanged( int32 iValue );
+    virtual void OnAlphaModeChanged( int32 iValue );
 
 private:
     FOdysseyPainterEditor* mEditor;

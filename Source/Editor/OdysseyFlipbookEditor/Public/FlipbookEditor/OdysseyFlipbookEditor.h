@@ -43,10 +43,12 @@ public:
     FOdysseyLayerStack*					    LayerStack() const;
 	virtual FOdysseySurfaceEditable*        DisplaySurface() override;
 	FOdysseySurfaceReadOnly*			    PreviewSurface();
+    ::ul3::eAlphaMode	                    SelectedAlphaMode() const;
 
 public:
     // Setters
     void Texture(UTexture2D* iTexture);
+    void SelectedAlphaMode(::ul3::eAlphaMode iMode);
 
 public:
     //Overrides
@@ -66,6 +68,7 @@ private:
     TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper; //TODO: No need for a SharedPtr here, and no need for a pointer here
     FOdysseyTextureWrapper                  mTextureWrapper;
 	FOdysseySurfaceReadOnly*                mPreviewSurface; //TODO: No need for a pointer here I guess
+    ::ul3::eAlphaMode                       mSelectedAlphaMode;
 
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 	TSharedPtr<FOdysseyFlipbookEditorController> mController;

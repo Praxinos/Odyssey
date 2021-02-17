@@ -24,6 +24,7 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
 FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
 	mTextureWrapper(nullptr),
+	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr),
 	mController(nullptr)
 {
@@ -32,6 +33,7 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToo
 FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
 	FOdysseyPainterEditor(iToolkit),
     mTextureWrapper( iTexture ),
+	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr),
 	mController(nullptr)
 {
@@ -83,6 +85,47 @@ FOdysseyLayerStack*
 FOdysseyTextureEditor::LayerStack() const
 {
     return mTextureWrapper.LayerStack();
+}
+
+::ul3::eAlphaMode
+FOdysseyTextureEditor::SelectedAlphaMode() const
+{
+	return mSelectedAlphaMode;
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Setters
+
+void
+FOdysseyTextureEditor::Texture(UTexture2D* iTexture)
+{
+    mTextureWrapper.Texture(iTexture);
+}
+
+void
+FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
+{
+	mSelectedAlphaMode = iMode;
+
+	//Make sure we set the right value in the Paint Engine accoridng to the editor state
+    if (!LayerStack())
+        return;
+
+    if (!LayerStack()->GetCurrentLayer())
+        return;
+
+    if (LayerStack()->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(LayerStack()->GetCurrentLayer());
+    if (imageLayer && imageLayer->IsAlphaLocked())
+    {
+        PaintEngine()->SetAlphaModeModifier(::ul3::AM_BACK);
+    }
+    else
+    {
+		PaintEngine()->SetAlphaModeModifier(mSelectedAlphaMode);
+    }
 }
 
 //--------------------------------------------------------------------------------------

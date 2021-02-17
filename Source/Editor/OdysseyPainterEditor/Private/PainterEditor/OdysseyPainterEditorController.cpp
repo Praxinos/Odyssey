@@ -64,9 +64,6 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
 	GetEditor()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
 	GetEditor()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
 	GetEditor()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
-
-	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    GetGUI()->GetBrushSelectorTab()->SelectBrush(settings.BrushDefaults.DefaultBrush);
 }
 
 const TArray<TSharedPtr<FExtender>>&
@@ -328,87 +325,6 @@ FOdysseyPainterEditorController::OnVisitPraxinosForums()
 {
     FString URL = "https://praxinos.coop/forum";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
-}  
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------- Paint engine driving methods
-
-void
-FOdysseyPainterEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
-{
-	GetEditor()->Brush(iBrush);
-
-    if(GetEditor()->BrushInstance())
-    {
-		GetEditor()->BrushInstance(NULL);
-        GetEditor()->PaintEngine()->SetBrushInstance(NULL);
-    }
-
-    if(GetEditor()->Brush())
-    {
-        //@todo: check
-        //mBrush->OnChanged().AddSP( this, &FOdysseyPainterEditorController::OnBrushChanged );
-
-		GetEditor()->Brush()->OnCompiled().AddSP( this, &FOdysseyPainterEditorController::OnBrushCompiled );
-
-		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetEditor()->Brush()->GeneratedClass);
-
-        FOdysseyBrushPreferencesOverrides& overrides = brushInstance->Preferences;
-        if( overrides.bOverride_Step )          GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetStrokeStep( overrides.Step );
-        if( overrides.bOverride_Adaptative )    GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetStrokeAdaptative( overrides.SizeAdaptative );
-        if( overrides.bOverride_PaintOnTick )   GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetStrokePaintOnTick( overrides.PaintOnTick );
-        if( overrides.bOverride_Type )          GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetInterpolationType( (int32)overrides.Type );
-        if( overrides.bOverride_Method )        GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingMethod( (int32)overrides.Method );
-        if( overrides.bOverride_Strength )      GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingStrength( overrides.Strength );
-        if( overrides.bOverride_Enabled )       GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingEnabled( overrides.Enabled );
-        if( overrides.bOverride_RealTime )      GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingRealTime( overrides.RealTime );
-        if( overrides.bOverride_CatchUp )       GetGUI()->GetStrokeOptionsTab()->StrokeOptions()->SetSmoothingCatchUp( overrides.CatchUp );
-        if( overrides.bOverride_Size )          GetGUI()->GetTopTab()->PaintModifiers()->SetSize( overrides.Size );
-        if( overrides.bOverride_Opacity )       GetGUI()->GetTopTab()->PaintModifiers()->SetOpacity( overrides.Opacity );
-        if( overrides.bOverride_Flow )          GetGUI()->GetTopTab()->PaintModifiers()->SetFlow( overrides.Flow );
-        if( overrides.bOverride_BlendingMode )  GetGUI()->GetTopTab()->PaintModifiers()->SetBlendingMode( ( ::ul3::eBlendingMode )overrides.BlendingMode );
-        if( overrides.bOverride_AlphaMode )     GetGUI()->GetTopTab()->PaintModifiers()->SetAlphaMode( ( ::ul3::eAlphaMode )overrides.AlphaMode );
-
-        GetEditor()->BrushInstance(brushInstance);
-        GetEditor()->PaintEngine()->SetBrushInstance(brushInstance);
-
-        //---
-
-        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetViewport()->GetPan() );
-        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
-    }
-}
-
-void
-FOdysseyPainterEditorController::OnBrushChanged( UBlueprint* iBrush )
-{
-    UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>( iBrush );
-}
-
-void
-FOdysseyPainterEditorController::OnBrushCompiled( UBlueprint* iBrush )
-{
-    UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>( iBrush );
-
-    // Reload instance
-    if( check_brush )
-    {
-        if( GetEditor()->BrushInstance() )
-        {
-			GetEditor()->BrushInstance(NULL);
-        }
-
-        //brush->OnCompiled().AddSP( this, &FOdysseyPainterEditorController::OnBrushCompiled );
-		UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), GetEditor()->Brush()->GeneratedClass);
-		GetEditor()->BrushInstance(brushInstance);
-
-		GetEditor()->PaintEngine()->SetBrushInstance(GetEditor()->BrushInstance());
-
-        //---
-
-        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetViewport()->GetPan() );
-        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
-    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -426,7 +342,7 @@ FOdysseyPainterEditorController::OnMeshChanged( UBlueprint* iMesh )
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Viewport Handlers
-void
+/* void
 FOdysseyPainterEditorController::HandleViewportParameterChanged()
 {
     if( GetEditor()->BrushInstance() )
@@ -434,7 +350,7 @@ FOdysseyPainterEditorController::HandleViewportParameterChanged()
         FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), GetGUI()->GetViewportTab()->GetViewport()->GetPan() );
         GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Brush Handlers
@@ -512,7 +428,7 @@ FOdysseyPainterEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Stroke Options Handlers
-void
+/* void
 FOdysseyPainterEditorController::HandleStrokeStepChanged( int32 iValue )
 {
 	GetEditor()->PaintEngine()->SetStrokeStep( iValue );
@@ -564,7 +480,7 @@ void
 FOdysseyPainterEditorController::HandleSmoothingCatchUpChanged( bool iValue )
 {
 	GetEditor()->PaintEngine()->SetSmoothingCatchUp( iValue );
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------- Performance Handlers
@@ -635,22 +551,24 @@ FOdysseyPainterEditorController::OnDeleteCurrentLayer()
 void
 FOdysseyPainterEditorController::OnRefreshBrush()
 {
-    if( GetEditor()->Brush() )
-        OnBrushSelected( GetEditor()->Brush() );
+    UOdysseyBrush* brush = GetEditor()->PaintEngine()->Brush();
+    if (brush)
+    {
+        GetEditor()->PaintEngine()->Brush(nullptr);
+        GetEditor()->PaintEngine()->Brush(brush);
+    }
 }
 
 void
 FOdysseyPainterEditorController::OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode)
 {
-    //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
-    GetGUI()->GetTopTab()->PaintModifiers()->SetAlphaMode(iAlphaMode);
+    GetEditor()->PaintEngine()->SetAlphaModeModifier(iAlphaMode);
 }
 
 void
 FOdysseyPainterEditorController::OnAddBrushSize(int32 iValue)
 {
-    //PATCH: temporary solution, in the refactored version we should, as much as possible, change the data only, letting the GUI automatically refresh itself according to the Slate Attribute behaviour
-    GetGUI()->GetTopTab()->PaintModifiers()->SetSize(GetGUI()->GetTopTab()->PaintModifiers()->GetSize() + iValue);
+    GetEditor()->PaintEngine()->SetSizeModifier(GetEditor()->PaintEngine()->GetSizeModifier() + iValue);
 }
 
 

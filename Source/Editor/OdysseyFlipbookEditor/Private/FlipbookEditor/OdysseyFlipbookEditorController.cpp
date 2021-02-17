@@ -216,7 +216,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
         if (oldImageLayer)
         {
             oldImageLayer->IsAlphaLockedChangedDelegate().RemoveAll(this);
-            GetEditor()->PaintEngine()->SetAlphaModeModifier(mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
+            GetEditor()->PaintEngine()->SetAlphaModeModifier(GetEditor()->SelectedAlphaMode());
         }
 	}
 
@@ -238,7 +238,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
 		return;
 
 	GetEditor()->PaintEngine()->Block(imageLayer->GetBlock());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : GetEditor()->SelectedAlphaMode());
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged);
@@ -249,10 +249,10 @@ void
 FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 {
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
+    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : GetEditor()->SelectedAlphaMode());
 }
 
-void
+/* void
 FOdysseyFlipbookEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 {
     if (!GetEditor()->LayerStack())
@@ -266,7 +266,7 @@ FOdysseyFlipbookEditorController::HandleAlphaModeModifierChanged( int32 iValue )
 
 	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
     GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
-}
+} */
 
 void
 FOdysseyFlipbookEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
@@ -294,10 +294,10 @@ FOdysseyFlipbookEditorController::OnLayerStackStructureChanged()
         GetEditor()->Texture()->MarkPackageDirty();
     }
 
-    if( GetEditor()->BrushInstance() )
+    if( GetEditor()->PaintEngine()->BrushInstance() )
     {
         FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
-        GetEditor()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
+        GetEditor()->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
     }
 }
 

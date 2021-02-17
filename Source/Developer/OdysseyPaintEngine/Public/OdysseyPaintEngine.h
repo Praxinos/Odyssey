@@ -9,6 +9,7 @@
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
 #include "OdysseyTransactionnable.h"
+#include "OdysseyBrushBlueprint.h"
 #include <ULIS3>
 #include <queue>
 #include <functional>
@@ -16,6 +17,7 @@
 class UOdysseyBrushAssetBase;
 
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
+    : public FGCObject //Allows us to register External UObject in Garbage Collector
 {
 public:
     DECLARE_MULTICAST_DELEGATE(FOnStrokeBegin);
@@ -37,12 +39,15 @@ public:
 
 public:
     // Public API
+    void Brush(UOdysseyBrush* iBrush);
+    UOdysseyBrush* Brush() const;
+    UOdysseyBrushAssetBase* BrushInstance() const;
+
     void Flush();
     void SetLock(bool iValue);
 
     void InterruptDelay();
     virtual void Tick();
-    void SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance );
     void SetColor( const ::ul3::FPixelValue& iColor );
     void SetSizeModifier( float iValue );
     void SetOpacityModifier( float iValue );
@@ -50,15 +55,13 @@ public:
     void SetBlendingModeModifier( ::ul3::eBlendingMode iValue );
     void SetAlphaModeModifier( ::ul3::eAlphaMode iValue );
 
-    void SetStrokeStep( int32 iValue );
-    void SetStrokeAdaptative( bool iValue );
-    void SetStrokePaintOnTick( bool iValue );
-    void SetInterpolationType( EOdysseyInterpolationType iValue );
-    void SetSmoothingMethod( EOdysseySmoothingMethod iValue );
-    void SetSmoothingStrength( int32 iValue );
-    void SetSmoothingEnabled( bool iValue );
-    void SetSmoothingRealTime( bool iValue );
-    void SetSmoothingCatchUp( bool iValue );
+    float GetSizeModifier() const;
+    float GetOpacityModifier() const;
+    float GetFlowModifier() const;
+    ::ul3::eBlendingMode GetBlendingModeModifier() const;
+    ::ul3::eAlphaMode GetAlphaModeModifier() const;
+
+    void UpdateStrokeOptions();
 
     bool GetStokePaintOnTick() const;
     bool GetSmoothingCatchUp() const;
@@ -88,6 +91,8 @@ public:
 
     void UpdateBrushCursorPreview();
 
+    FOdysseyStrokeOptions* StrokeOptions();
+
 public: //DELEGATES
     FOnStrokeBegin& OnStrokeBegin() { return mOnStrokeBeginDelegate; }
 	FOnStrokeStep& OnStrokeStep() { return mOnStrokeStepDelegate; }
@@ -99,7 +104,15 @@ public: //DELEGATES
     FOnEditedBlockTilesChanged& OnEditedBlockTilesChanged() { return mOnEditedBlockTilesChangedDelegate; }
 
 protected:
+    // FGCObject interface
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
+
+protected:
     // Protected API
+    void BrushInstance(UOdysseyBrushAssetBase* iBrushInstance);
+    void OnBrushCompiled(UBlueprint* iBrush);
+
     void SmoothingCatchUpTick();
     void ExecuteDelayQueue();
     TArray<::ul3::FRect> GetTmpInvalidTiles();
@@ -126,9 +139,21 @@ protected:
     void ComputePointRelativeParameters(FOdysseyStrokePoint& ioPoint, const FOdysseyStrokePoint& iPreviousPoint);
     void AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoints);
 
+    void UpdateStrokeStep();
+    void UpdateStrokeAdaptative();
+    void UpdateStrokePaintOnTick();
+    void UpdateInterpolationType();
+    void UpdateSmoothingMethod();
+    void UpdateSmoothingStrength();
+    void UpdateSmoothingEnabled();
+    void UpdateSmoothingRealTime();
+    void UpdateSmoothingCatchUp();
+
 protected:
     // protected Data Members
+    UOdysseyBrush*                      mBrush;
     bool                                mIsLocked;
+    FOdysseyStrokeOptions               mStrokeOptions;
 
 	FOdysseyBlock*                      mEditedBlock; // Holds th original block to edit
 	FOdysseyBlock*                      mStrokeBlock; //Holds the stroke tiles

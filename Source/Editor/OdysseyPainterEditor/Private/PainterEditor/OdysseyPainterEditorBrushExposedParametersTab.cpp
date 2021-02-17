@@ -42,7 +42,7 @@ FOdysseyPainterEditorBrushExposedParametersTab::CreateWidget()
 UOdysseyBrushAssetBase*
 FOdysseyPainterEditorBrushExposedParametersTab::BrushInstance() const
 {
-    return mEditor->BrushInstance();
+    return mEditor->PaintEngine()->BrushInstance();
 }
 
 //--------------------------------------------------------------------------------------

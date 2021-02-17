@@ -14,6 +14,7 @@
 #include "OdysseyFlipbookEditorToolkit.h"
 #include "OdysseyFlipbookEditorViewportTab.h"
 #include "OdysseyFlipbookEditorTimelineTab.h"
+#include "OdysseyFlipbookEditorTopTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorToolkit"
 
@@ -53,6 +54,7 @@ FOdysseyFlipbookEditorGUI::CreateTabs()
 
 	mViewportTab = MakeShareable(new FOdysseyFlipbookEditorViewportTab(mEditor));
 	mTimelineTab = MakeShareable(new FOdysseyFlipbookEditorTimelineTab(mEditor));
+	mTopTab = MakeShareable(new FOdysseyFlipbookEditorTopTab(mEditor));
 }
 
 void
@@ -63,6 +65,7 @@ FOdysseyFlipbookEditorGUI::InitTabs()
 	FOdysseyPainterEditorGUI::InitTabs();
 
 	//mViewportTab initialized by PainterEditorGUI
+	//mTopTab initialized by PainterEditorGUI
 }
 
 void

@@ -24,9 +24,9 @@ protected:
     // Widget Getters
     virtual ::ul3::FPixelValue Color() const;
 
-private:
+protected:
     // Event Listeners
-    void OnColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
+    virtual void OnColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
 
 private:
     FOdysseyPainterEditor* mEditor;

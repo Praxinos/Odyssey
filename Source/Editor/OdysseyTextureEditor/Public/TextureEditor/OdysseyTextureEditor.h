@@ -32,6 +32,12 @@ public:
 	virtual UTexture2D*							Texture();
 	virtual FOdysseySurfaceEditable*            DisplaySurface() override;
     virtual FOdysseyLayerStack*					LayerStack() const;
+    ::ul3::eAlphaMode	                        SelectedAlphaMode() const;
+
+public:
+    // Setters
+    void Texture(UTexture2D* iTexture);
+    void SelectedAlphaMode(::ul3::eAlphaMode iMode);
 
 public:
     // Overrides
@@ -50,6 +56,7 @@ protected:
     
 private:
     FOdysseyTextureWrapper     mTextureWrapper;
+    ::ul3::eAlphaMode                       mSelectedAlphaMode;
 
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
 	TSharedPtr<FOdysseyTextureEditorController> mController;

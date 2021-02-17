@@ -117,7 +117,7 @@ FOdysseyViewportDrawingEditorData::DisplaySurface()
 }
 
 FOdysseyPaintEngine3D*		        
-FOdysseyViewportDrawingEditorData::PaintEngine()
+FOdysseyViewportDrawingEditorData::PaintEngine() const
 {
     return mPaintEngine;
 }

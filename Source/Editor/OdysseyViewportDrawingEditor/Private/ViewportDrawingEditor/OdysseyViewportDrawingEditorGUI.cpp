@@ -53,6 +53,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
     mPaintModeSettings = Cast<UOdysseyViewportDrawingEditorSettings>(iPainter->GetPainterSettings());
 
     mBrushSelector = SNew(SOdysseyBrushSelector)
+        .Brush_Lambda([&]() { return iPainter->GetController()->GetData()->Brush(); })
         .OnBrushChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnBrushSelected);
 
     mPaintModifiers = SNew(SOdysseyPaintModifiers)
@@ -76,7 +77,8 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnColorChange_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandlePaintColorChange);
 
     mStrokeOptions = SNew(SOdysseyStrokeOptions)
-        .OnStrokeStepChanged_Raw        (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged)
+        .PaintEngine_Lambda([&]() { return iPainter->GetController()->GetData()->PaintEngine(); });
+        /* .OnStrokeStepChanged_Raw        (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged)
         .OnStrokeAdaptativeChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeAdaptativeChanged)
         .OnStrokePaintOnTickChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokePaintOnTickChanged)
         .OnInterpolationTypeChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleInterpolationTypeChanged)
@@ -84,7 +86,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnSmoothingStrengthChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingStrengthChanged)
         .OnSmoothingEnabledChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingEnabledChanged)
         .OnSmoothingRealTimeChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingRealTimeChanged)
-        .OnSmoothingCatchUpChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged);
+        .OnSmoothingCatchUpChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged); */
 
     CreateMainWidget(iPainter);
 }

@@ -30,7 +30,7 @@ FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPaint
 TSharedPtr<SWidget>
 FOdysseyPainterEditorViewportTab::CreateWidget()
 {
-    mViewport = SNew( SOdysseySurfaceViewport )
+    SAssignNew(mViewport, SOdysseySurfaceViewport)
         .Surface_Raw(this, &FOdysseyPainterEditorViewportTab::Surface)
         .OnParameterChanged_Raw(this, &FOdysseyPainterEditorViewportTab::OnViewportParameterChanged);
 
@@ -95,10 +95,10 @@ FOdysseyPainterEditorViewportTab::Surface() const
 void
 FOdysseyPainterEditorViewportTab::OnViewportParameterChanged()
 {
-    if( mEditor->BrushInstance() )
+    if( mEditor->PaintEngine()->BrushInstance() )
     {
         FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( mViewport->GetZoom(), mViewport->GetRotationInDegrees(), mViewport->GetPan() );
-        mEditor->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
+        mEditor->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
     }
 }
 

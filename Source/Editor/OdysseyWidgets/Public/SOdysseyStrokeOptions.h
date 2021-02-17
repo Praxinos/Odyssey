@@ -11,6 +11,8 @@
 #include "IStructureDetailsView.h"
 #include "OdysseyStrokeOptions.h"
 
+class FOdysseyPaintEngine;
+
 /////////////////////////////////////////////////////
 // SOdysseyStrokeOptions
 class ODYSSEYWIDGETS_API SOdysseyStrokeOptions
@@ -24,7 +26,8 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyStrokeOptions )
         {}
-        SLATE_EVENT( FOnInt32ValueChanged   ,   OnStrokeStepChanged         )
+        SLATE_ATTRIBUTE( FOdysseyPaintEngine*,  PaintEngine )
+        /* SLATE_EVENT( FOnInt32ValueChanged   ,   OnStrokeStepChanged         )
         SLATE_EVENT( FOnBooleanValueChanged ,   OnStrokeAdaptativeChanged   )
         SLATE_EVENT( FOnBooleanValueChanged ,   OnStrokePaintOnTickChanged  )
         SLATE_EVENT( FOnInt32ValueChanged   ,   OnInterpolationTypeChanged  )
@@ -33,14 +36,14 @@ public:
         SLATE_EVENT( FOnBooleanValueChanged ,   OnSmoothingEnabledChanged   )
         SLATE_EVENT( FOnBooleanValueChanged ,   OnSmoothingRealTimeChanged  )
         SLATE_EVENT( FOnBooleanValueChanged ,   OnSmoothingCatchUpChanged   )
-        SLATE_EVENT( FOnBooleanValueChanged ,   OnAnyValueChanged           )
+        SLATE_EVENT( FOnBooleanValueChanged ,   OnAnyValueChanged           ) */
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
 public:
     // Public Callbacks
-    const  FOdysseyStrokeOptions&  GetStrokeOptions()  const;
+    /* const  FOdysseyStrokeOptions&  GetStrokeOptions()  const;
     void  SetStrokeOptions( const  FOdysseyStrokeOptions& iValue );
 
     void  SetStrokeStep         ( int32 iValue );
@@ -51,19 +54,25 @@ public:
     void  SetSmoothingStrength  ( int32 iValue );
     void  SetSmoothingEnabled   ( bool  iValue );
     void  SetSmoothingRealTime  ( bool  iValue );
-    void  SetSmoothingCatchUp   ( bool  iValue );
+    void  SetSmoothingCatchUp   ( bool  iValue ); */
 
 public:
     // FNotifyHook Interface
     virtual void NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged) override;
 
 private:
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
+private:
     // Private data members
+    TAttribute< FOdysseyPaintEngine* >                mPaintEngine;
+    FOdysseyPaintEngine*                              mCurrentPaintEngine;
+
     TSharedPtr< IStructureDetailsView > DetailsView;
-    FOdysseyStrokeOptions               StructData;
+    // FOdysseyStrokeOptions               StructData;
     TSharedPtr< FStructOnScope >        StructToDisplay;
 
-    FOnInt32ValueChanged    OnStrokeStepChangedCallback         ;
+    /* FOnInt32ValueChanged    OnStrokeStepChangedCallback         ;
     FOnBooleanValueChanged  OnStrokeAdaptativeChangedCallback   ;
     FOnBooleanValueChanged  OnStrokePaintOnTickChangedCallback  ;
     FOnInt32ValueChanged    OnInterpolationTypeChangedCallback  ;
@@ -72,6 +81,6 @@ private:
     FOnBooleanValueChanged  OnSmoothingEnabledChangedCallback   ;
     FOnBooleanValueChanged  OnSmoothingRealTimeChangedCallback  ;
     FOnBooleanValueChanged  OnSmoothingCatchUpChangedCallback   ;
-    FOnBooleanValueChanged  OnAnyValueChangedCallback           ;
+    FOnBooleanValueChanged  OnAnyValueChangedCallback           ; */
 };
 

@@ -22,9 +22,10 @@ protected:
 protected:
     // Widget Getters
     virtual UOdysseyBrushAssetBase* BrushInstance() const;
-private:
+
+protected:
     // Event Listeners
-    void OnParameterChanged();
+    virtual void OnParameterChanged();
 
 private:
     FOdysseyPainterEditor* mEditor;

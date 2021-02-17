@@ -51,6 +51,11 @@ public:
     virtual ~FOdysseyTextureEditorGUI();
     FOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor);
 
+protected:
+    //Init
+	virtual void CreateTabs() override;
+	virtual void InitTabs() override;
+
 public:
     //Init
 	void InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
@@ -83,6 +88,9 @@ private:
 
 	// Callback for spawning the TextureDetails tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
+
+private:
+	FOdysseyTextureEditor* mEditor;
 
 private:
     //Tabs

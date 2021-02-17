@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorTopTab.h"
 
 #include "OdysseyPainterEditor.h"
+#include "SOdysseyPaintModifiers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
@@ -30,20 +31,16 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
 	return mPaintModifiers = SNew( SOdysseyPaintModifiers )
-        /* .Size(this, &FOdysseyPainterEditorTopTab::Size)
+        .Size(this, &FOdysseyPainterEditorTopTab::Size)
         .Opacity(this, &FOdysseyPainterEditorTopTab::Opacity)
         .Flow(this, &FOdysseyPainterEditorTopTab::Flow)
-        .AlphaMode(this, &FOdysseyPainterEditorTopTab::AlphaMode)*/
-        .OnSizeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnSizeModifierChanged )
-        .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityModifierChanged )
-        .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowModifierChanged )
-        .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeModifierChanged )
-        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeModifierChanged );
-
-	mPaintModifiers->SetAlphaMode(mEditor->PaintEngine()->GetAlphaMode()); //TODO: Do an AlphaMode Getter (beware layer alphamode lock) 
-	mPaintModifiers->SetSize(20);
-	mPaintModifiers->SetOpacity(100);
-	mPaintModifiers->SetFlow(100);
+        .BlendingMode(this, &FOdysseyPainterEditorTopTab::BlendingMode)
+        .AlphaMode(this, &FOdysseyPainterEditorTopTab::AlphaMode)
+        .OnSizeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnSizeChanged )
+        .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
+        .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
+        .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
+        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged );
 }
 
 TSharedRef< SDockTab >
@@ -60,6 +57,39 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
 }
 
 //--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Getters
+
+float
+FOdysseyPainterEditorTopTab::Size() const
+{
+    return mEditor->PaintEngine()->GetSizeModifier();
+}
+
+float
+FOdysseyPainterEditorTopTab::Opacity() const
+{
+    return mEditor->PaintEngine()->GetOpacityModifier();
+}
+
+float
+FOdysseyPainterEditorTopTab::Flow() const
+{
+    return mEditor->PaintEngine()->GetFlowModifier();
+}
+
+::ul3::eBlendingMode
+FOdysseyPainterEditorTopTab::BlendingMode() const
+{
+    return mEditor->PaintEngine()->GetBlendingModeModifier();
+}
+
+::ul3::eAlphaMode
+FOdysseyPainterEditorTopTab::AlphaMode() const
+{
+    return mEditor->PaintEngine()->GetAlphaModeModifier();
+}
+
+//--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Public Getters
 
 TSharedPtr<SOdysseyPaintModifiers>
@@ -72,31 +102,31 @@ FOdysseyPainterEditorTopTab::PaintModifiers()
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorTopTab::OnSizeModifierChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnSizeChanged( int32 iValue )
 {
 	mEditor->PaintEngine()->SetSizeModifier( iValue );
 }
 
 void
-FOdysseyPainterEditorTopTab::OnOpacityModifierChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnOpacityChanged( int32 iValue )
 {
 	mEditor->PaintEngine()->SetOpacityModifier( iValue );
 }
 
 void
-FOdysseyPainterEditorTopTab::OnFlowModifierChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
 {
 	mEditor->PaintEngine()->SetFlowModifier( iValue );
 }
 
 void
-FOdysseyPainterEditorTopTab::OnBlendingModeModifierChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 {
 	mEditor->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
 }
 
 void
-FOdysseyPainterEditorTopTab::OnAlphaModeModifierChanged( int32 iValue )
+FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
 	mEditor->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
 }

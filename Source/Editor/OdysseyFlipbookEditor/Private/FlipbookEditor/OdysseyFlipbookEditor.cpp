@@ -14,6 +14,8 @@
 
 #include "Types/NavigationMetaData.h"
 
+#include <ULIS3>
+
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditor"
 
 /////////////////////////////////////////////////////
@@ -33,6 +35,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorT
 	mFlipbookWrapper(nullptr),
 	mTextureWrapper( nullptr ),
 	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
+	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr),
 	mController(nullptr)
 {
@@ -43,6 +46,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TShare
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
 	mTextureWrapper( nullptr ),
 	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
+	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr),
 	mController(nullptr)
 {
@@ -115,6 +119,12 @@ FOdysseyFlipbookEditor::PreviewSurface()
 	return mPreviewSurface;
 }
 
+::ul3::eAlphaMode
+FOdysseyFlipbookEditor::SelectedAlphaMode() const
+{
+	return mSelectedAlphaMode;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -122,6 +132,32 @@ void
 FOdysseyFlipbookEditor::Texture(UTexture2D* iTexture)
 {
     mTextureWrapper.Texture(iTexture);
+}
+
+void
+FOdysseyFlipbookEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
+{
+	mSelectedAlphaMode = iMode;
+
+	//Make sure we set the right value in the Paint Engine accoridng to the editor state
+    if (!LayerStack())
+        return;
+
+    if (!LayerStack()->GetCurrentLayer())
+        return;
+
+    if (LayerStack()->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(LayerStack()->GetCurrentLayer());
+    if (imageLayer && imageLayer->IsAlphaLocked())
+    {
+        PaintEngine()->SetAlphaModeModifier(::ul3::AM_BACK);
+    }
+    else
+    {
+		PaintEngine()->SetAlphaModeModifier(mSelectedAlphaMode);
+    }
 }
 
 //--------------------------------------------------------------------------------------

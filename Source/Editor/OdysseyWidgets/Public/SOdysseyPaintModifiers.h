@@ -29,6 +29,11 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPaintModifiers )
         {}
+        SLATE_ATTRIBUTE( float, Size )
+        SLATE_ATTRIBUTE( float, Opacity )
+        SLATE_ATTRIBUTE( float, Flow )
+        SLATE_ATTRIBUTE( ::ul3::eBlendingMode, BlendingMode )
+        SLATE_ATTRIBUTE( ::ul3::eAlphaMode, AlphaMode )
         SLATE_EVENT( FOnInt32ValueChanged, OnSizeChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnOpacityChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnFlowChanged )
@@ -39,32 +44,36 @@ public:
 
     void  Construct( const  FArguments&  InArgs );
 
+private:
+    // Widget overrides
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
 public:
     // Public Callbacks
-    void  SetSize( int32 iValue );
-    void  SetOpacity( int32 iValue );
-    void  SetFlow( int32 iValue );
+    void  SetSize( float iValue );
+    void  SetOpacity(float iValue );
+    void  SetFlow(float iValue );
     void  SetBlendingMode( ::ul3::eBlendingMode iValue );
     void  SetAlphaMode( ::ul3::eAlphaMode iValue );
 
 public:
     // Public Getters
-    int32  GetSize();
-    int32  GetOpacity();
-    int32  GetFlow();
+    float  GetSize();
+    float  GetOpacity();
+    float  GetFlow();
     ::ul3::eBlendingMode  GetBlendingMode();
     ::ul3::eAlphaMode  GetAlphaMode();
 
 private:
     // Private Callbacks
-    void HandleSizeSpinBoxChanged( int32 iValue, ETextCommit::Type iType );
-    void HandleOpacitySpinBoxChanged( int32 iValue, ETextCommit::Type iType );
-    void HandleFlowSpinBoxChanged( int32 iValue, ETextCommit::Type iType );
+    void HandleSizeSpinBoxChanged( float iValue, ETextCommit::Type iType );
+    void HandleOpacitySpinBoxChanged( float iValue, ETextCommit::Type iType );
+    void HandleFlowSpinBoxChanged( float iValue, ETextCommit::Type iType );
 
 private:
     // Blending mode Callbacks
     TSharedRef<SWidget> GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem );
-    TSharedRef<SWidget> CreateBlendingModeTextWidget( TSharedPtr<FText> InItem );
+    TSharedRef<SWidget> CreateBlendingModeTextWidget();
     void HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo );
     TArray< TSharedPtr< FText > > GetBlendingModesAsText();
     FText GetBlendingModeAsText() const;
@@ -72,24 +81,31 @@ private:
 private:
     // Alpha mode Callbacks
     TSharedRef<SWidget> GenerateAlphaComboBoxItem( TSharedPtr<FText> InItem );
-    TSharedRef<SWidget> CreateAlphaModeTextWidget( TSharedPtr<FText> InItem );
+    TSharedRef<SWidget> CreateAlphaModeTextWidget();
     void HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo );
     TArray< TSharedPtr< FText > > GetAlphaModesAsText();
     FText GetAlphaModeAsText() const;
 
 private:
     // Private Data Members
-    TSharedPtr< SSpinBox< int > >   mSizeSpinBox;
-    TSharedPtr< SSpinBox< int > >   mOpacitySpinBox;
-    TSharedPtr< SSpinBox< int > >   mFlowSpinBox;
+    TAttribute<float> mSize;
+    TAttribute<float> mOpacity;
+    TAttribute<float> mFlow;
+    TAttribute<::ul3::eBlendingMode> mBlendingMode;
+    TAttribute<::ul3::eAlphaMode> mAlphaMode;
+
+    ::ul3::eBlendingMode                       mCurrentBlendingMode; //cache value
+    ::ul3::eAlphaMode                          mCurrentAlphaMode; //cache value
+
+    TSharedPtr< SSpinBox< float > >   mSizeSpinBox;
+    TSharedPtr< SSpinBox< float > >   mOpacitySpinBox;
+    TSharedPtr< SSpinBox< float > >   mFlowSpinBox;
 
     TSharedPtr<SComboBox<TSharedPtr<FText>>>    mBlendingBox;
-    ::ul3::eBlendingMode                       mCurrentBlendingMode;
     TArray< TSharedPtr<FText> >                 mBlendingModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mBlendingModeComboBox;
 
     TSharedPtr<SComboBox<TSharedPtr<FText>>>    mAlphaBox;
-    ::ul3::eAlphaMode                          mCurrentAlphaMode;
     TArray< TSharedPtr<FText> >                 mAlphaModes;
     TSharedPtr<SComboBox<TSharedPtr<FText> > >  mAlphaModeComboBox;
 

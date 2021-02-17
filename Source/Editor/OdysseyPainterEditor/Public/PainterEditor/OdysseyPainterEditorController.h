@@ -48,11 +48,6 @@ public:
     virtual void OnVisitPraxinosWebsite();
     virtual void OnVisitPraxinosForums();
 
-    // Paint engine driving methods
-    virtual void OnBrushSelected( UOdysseyBrush* iBrush );
-    virtual void OnBrushChanged( UBlueprint* iBrush );
-    virtual void OnBrushCompiled( UBlueprint* iBrush );
-
     //Mesh Selector
     virtual void OnMeshSelected( UStaticMesh* iMesh );
     virtual void OnMeshChanged( UBlueprint* iMesh );
@@ -97,7 +92,7 @@ public:
     virtual void HandleAlphaModeModifierChanged( int32 iValue );
 
     // Stroke Options Handlers
-    virtual void HandleStrokeStepChanged( int32 iValue );
+    /* virtual void HandleStrokeStepChanged( int32 iValue );
     virtual void HandleStrokeAdaptativeChanged( bool iValue );
     virtual void HandleStrokePaintOnTickChanged( bool iValue );
     virtual void HandleInterpolationTypeChanged( int32 iValue );
@@ -105,13 +100,13 @@ public:
     virtual void HandleSmoothingStrengthChanged( int32 iValue );
     virtual void HandleSmoothingEnabledChanged( bool iValue );
     virtual void HandleSmoothingRealTimeChanged( bool iValue );
-    virtual void HandleSmoothingCatchUpChanged( bool iValue );
+    virtual void HandleSmoothingCatchUpChanged( bool iValue ); */
 
     // Performance Handlers
     virtual void HandlePerformanceDrawBrushPreviewChanged( bool iValue );
 
     // Viewport (zoom/rotation/pan) Handlers
-    virtual void HandleViewportParameterChanged();
+    // virtual void HandleViewportParameterChanged();
 
 protected:
     // Commands building

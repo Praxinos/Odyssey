@@ -28,7 +28,8 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
-    : mIsLocked(false)
+    : mBrush(nullptr)
+    , mIsLocked(false)
     , mEditedBlock( NULL )
     , mStrokeBlock(NULL)
 	, mPreviewBlock(NULL)
@@ -377,6 +378,12 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
     UpdateBrushInstance();
 }
 
+FOdysseyStrokeOptions*
+FOdysseyPaintEngine::StrokeOptions()
+{
+    return &mStrokeOptions;
+}
+
 FOdysseyBlock*
 FOdysseyPaintEngine::StrokeBlock()
 {
@@ -396,20 +403,51 @@ FOdysseyPaintEngine::SetLock(bool iValue)
 }
 
 void
-FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
+FOdysseyPaintEngine::Brush(UOdysseyBrush* iBrush)
 {
-    if (iBrushInstance == mBrushInstance)
-        return;
-
     Flush();
-
-	mBrushInstance = iBrushInstance;
 	mBrushCursorInvalid = true;
 
-    if (!mBrushInstance)
+    if (!iBrush)
+    {
+        mBrushInstance = nullptr;
+        mBrush = nullptr;
         return;
+    }
 
-	//we need to do this before iBrushInstance->ExecuteSelected();
+    mBrush = iBrush;
+    UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), mBrush->GeneratedClass);
+
+    //Set all the overrides
+    FOdysseyBrushPreferencesOverrides& overrides = brushInstance->Preferences;
+    if (overrides.bOverride_Step)          mStrokeOptions.Step = overrides.Step;
+    if (overrides.bOverride_Adaptative)    mStrokeOptions.SizeAdaptative = overrides.SizeAdaptative;
+    if (overrides.bOverride_PaintOnTick)   mStrokeOptions.PaintOnTick = overrides.PaintOnTick;
+    if (overrides.bOverride_Type)          mStrokeOptions.Type = overrides.Type;
+    if (overrides.bOverride_Method)        mStrokeOptions.Method = overrides.Method;
+    if (overrides.bOverride_Strength)      mStrokeOptions.Strength = overrides.Strength;
+    if (overrides.bOverride_Enabled)       mStrokeOptions.Enabled = overrides.Enabled;
+    if (overrides.bOverride_RealTime)      mStrokeOptions.RealTime = overrides.RealTime;
+    if (overrides.bOverride_CatchUp)       mStrokeOptions.CatchUp = overrides.CatchUp;
+    if (overrides.bOverride_Size)          mSizeModifier = overrides.Size;
+    if (overrides.bOverride_Opacity)       mOpacityModifier = overrides.Opacity;
+    if (overrides.bOverride_Flow)          mFlowModifier = overrides.Flow;
+    if (overrides.bOverride_BlendingMode)  mBlendingModeModifier = (::ul3::eBlendingMode)overrides.BlendingMode;
+    if (overrides.bOverride_AlphaMode)     mAlphaModeModifier = (::ul3::eAlphaMode)overrides.AlphaMode;
+
+    BrushInstance(brushInstance);
+    UpdateStrokeOptions();
+
+    if (mBrush)
+        mBrush->OnCompiled().AddRaw(this, &FOdysseyPaintEngine::OnBrushCompiled);
+}
+
+void
+FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance)
+{
+    mBrushInstance = iBrushInstance;
+
+    //we need to do this before iBrushInstance->ExecuteSelected();
 	//and we cannot use UpdateBrushInstance() as it sends a StateChanged, and we only want this after iBrushInstance->ExecuteSelected();
 	FOdysseyBrushState& state = mBrushInstance->GetState();
 	state.target_temp_buffer = mStrokeBlock;
@@ -425,8 +463,35 @@ FOdysseyPaintEngine::SetBrushInstance( UOdysseyBrushAssetBase* iBrushInstance )
 	state.currentPointIndex = 0;
 	state.currentStroke = &mResultStroke;
 
-    iBrushInstance->ExecuteSelected();
+    mBrushInstance->ExecuteSelected();
     UpdateBrushInstance();
+
+    //2)
+    //TODO: Make all state class access their editor, so that it is only created when setting the BrushInstance
+    /* FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState(mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetPan());
+    mEditor->BrushInstance()->AddOrReplaceState(FOdysseyPainterEditorState::GetId(), state); */
+}
+
+void
+FOdysseyPaintEngine::OnBrushCompiled( UBlueprint* iBrush )
+{
+    UOdysseyBrush* brush = dynamic_cast<UOdysseyBrush*>( iBrush );
+    if( !brush )
+        return;
+
+    BrushInstance(NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), mBrush->GeneratedClass));
+}
+
+UOdysseyBrush*
+FOdysseyPaintEngine::Brush() const
+{
+    return mBrush;
+}
+
+UOdysseyBrushAssetBase*
+FOdysseyPaintEngine::BrushInstance() const
+{
+    return mBrushInstance;
 }
 
 void
@@ -493,45 +558,80 @@ FOdysseyPaintEngine::SetAlphaModeModifier( ::ul3::eAlphaMode iValue )
     UpdateBrushInstance();
 }
 
+float
+FOdysseyPaintEngine::GetSizeModifier() const
+{
+    return mSizeModifier;
+}
+
+float
+FOdysseyPaintEngine::GetOpacityModifier() const
+{
+    return mOpacityModifier;
+}
+
+float
+FOdysseyPaintEngine::GetFlowModifier() const
+{
+    return mFlowModifier;
+}
+
+::ul3::eBlendingMode
+FOdysseyPaintEngine::GetBlendingModeModifier() const
+{
+    return mBlendingModeModifier;
+}
+
+::ul3::eAlphaMode
+FOdysseyPaintEngine::GetAlphaModeModifier() const
+{
+    return mAlphaModeModifier;
+}
 
 void
-FOdysseyPaintEngine::SetStrokeStep( int32 iValue )
+FOdysseyPaintEngine::UpdateStrokeOptions()
 {
     InterruptStrokeAndStampInPlace();
 
-    mStepValue = iValue;
-    float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
-    mInterpolator->SetStep( val );
+    UpdateStrokeStep();
+    UpdateStrokeAdaptative();
+    UpdateStrokePaintOnTick();
+    UpdateInterpolationType();
+    UpdateSmoothingMethod();
+    UpdateSmoothingStrength();
+    UpdateSmoothingEnabled();
+    UpdateSmoothingRealTime();
+    UpdateSmoothingCatchUp();
 
     UpdateBrushInstance();
 }
 
 void
-FOdysseyPaintEngine::SetStrokeAdaptative( bool iValue )
+FOdysseyPaintEngine::UpdateStrokeStep()
 {
-    InterruptStrokeAndStampInPlace();
-
-    mIsAdaptativeStep = iValue;
+    mStepValue = mStrokeOptions.Step;
     float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
     mInterpolator->SetStep( val );
-
-    UpdateBrushInstance();
 }
 
 void
-FOdysseyPaintEngine::SetStrokePaintOnTick( bool iValue )
+FOdysseyPaintEngine::UpdateStrokeAdaptative()
 {
-    InterruptStrokeAndStampInPlace();
-
-    mIsPaintOnTick = iValue;
+    mIsAdaptativeStep = mStrokeOptions.SizeAdaptative;
+    float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
+    mInterpolator->SetStep( val );
 }
 
 void
-FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
+FOdysseyPaintEngine::UpdateStrokePaintOnTick()
 {
-    InterruptStrokeAndStampInPlace();
+    mIsPaintOnTick = mStrokeOptions.PaintOnTick;
+}
 
-    switch( iValue )
+void
+FOdysseyPaintEngine::UpdateInterpolationType()
+{
+    switch( mStrokeOptions.Type )
     {
         case EOdysseyInterpolationType::kBezier:
         {
@@ -557,15 +657,12 @@ FOdysseyPaintEngine::SetInterpolationType( EOdysseyInterpolationType iValue )
 
     float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
     mInterpolator->SetStep( val );
-    UpdateBrushInstance();
 }
 
 void
-FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
+FOdysseyPaintEngine::UpdateSmoothingMethod()
 {
-    InterruptStrokeAndStampInPlace();
-
-    switch( iValue )
+    switch(mStrokeOptions.Method)
     {
         case EOdysseySmoothingMethod::kAverage:
         {
@@ -591,39 +688,27 @@ FOdysseyPaintEngine::SetSmoothingMethod( EOdysseySmoothingMethod iValue )
 }
 
 void
-FOdysseyPaintEngine::SetSmoothingStrength( int32 iValue )
+FOdysseyPaintEngine::UpdateSmoothingStrength()
 {
-    InterruptStrokeAndStampInPlace();
-
-    mSmoothingParameters->SetStrength( iValue );
-
-    UpdateBrushInstance();
+    mSmoothingParameters->SetStrength(mStrokeOptions.Strength);
 }
 
 void
-FOdysseyPaintEngine::SetSmoothingEnabled( bool iValue )
+FOdysseyPaintEngine::UpdateSmoothingEnabled()
 {
-    InterruptStrokeAndStampInPlace();
-
-    mIsSmoothingEnabled = iValue;
+    mIsSmoothingEnabled = mStrokeOptions.Enabled;
 }
 
 void
-FOdysseyPaintEngine::SetSmoothingRealTime( bool iValue )
+FOdysseyPaintEngine::UpdateSmoothingRealTime()
 {
-    InterruptStrokeAndStampInPlace();
-
-    mIsRealTime = iValue;
+    mIsRealTime = mStrokeOptions.RealTime;
 }
 
 void
-FOdysseyPaintEngine::SetSmoothingCatchUp( bool iValue )
+FOdysseyPaintEngine::UpdateSmoothingCatchUp()
 {
-    InterruptStrokeAndStampInPlace();
-
-    mSmoothingParameters->SetCatchUp( iValue );
-
-    //mIsCatchUp = iValue;
+    mSmoothingParameters->SetCatchUp(mStrokeOptions.CatchUp);
 }
 
 bool
@@ -1242,4 +1327,23 @@ FOdysseyPaintEngine::SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& i
             ioMap[k + iRect.y][l + iRect.x] = iValue;
         }
     }
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------ FGCObject interface
+
+void
+FOdysseyPaintEngine::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    if (mBrush)
+        Collector.AddReferencedObject(mBrush);
+
+    if (mBrushInstance)
+        Collector.AddReferencedObject(mBrushInstance);
+}
+
+FString
+FOdysseyPaintEngine::GetReferencerName() const
+{
+	return TEXT("FOdysseyPaintEngine");
 }

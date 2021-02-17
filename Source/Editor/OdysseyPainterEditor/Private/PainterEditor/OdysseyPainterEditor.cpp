@@ -3,6 +3,10 @@
 
 #include "OdysseyPainterEditor.h"
 
+#include "OdysseyBrushAssetBase.h"
+#include "OdysseyPainterEditorTopTab.h"
+#include "SOdysseyPaintModifiers.h"
+
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditor
 //--------------------------------------------------------------------------------------
@@ -18,8 +22,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToo
     : mToolkit(iToolkit)
     , mUndoHistory( new FOdysseyUndoHistory() )
     , mPaintEngine( new FOdysseyPaintEngine(mUndoHistory) )
-    , mBrush( NULL )
-    , mBrushInstance( NULL )
 	, mPaintColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) )
     , mDrawBrushPreview( true )
 {
@@ -33,9 +35,12 @@ FOdysseyPainterEditor::Init()
 {
     // Setup Paint Engine
 	mPaintEngine->Block( NULL );
-    mPaintEngine->SetBrushInstance( NULL );
     mPaintEngine->SetColor( mPaintColor );
     mPaintEngine->SetSizeModifier( 20.f );
+
+    //Set Default Brush
+    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    mPaintEngine->Brush(settings.BrushDefaults.DefaultBrush);
 }
 
 //--------------------------------------------------------------------------------------
@@ -51,18 +56,6 @@ FOdysseyUndoHistory*
 FOdysseyPainterEditor::UndoHistory()
 {
 	return mUndoHistory;
-}
-
-UOdysseyBrush*
-FOdysseyPainterEditor::Brush()
-{
-	return mBrush;
-}
-
-UOdysseyBrushAssetBase*
-FOdysseyPainterEditor::BrushInstance()
-{
-	return mBrushInstance;
 }
 
 bool
@@ -85,18 +78,6 @@ FOdysseyPainterEditor::Toolkit()
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
-
-void
-FOdysseyPainterEditor::Brush(UOdysseyBrush* iBrush)
-{
-	mBrush = iBrush;
-}
-
-void
-FOdysseyPainterEditor::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance)
-{
-	mBrushInstance = iBrushInstance;
-}
 
 void
 FOdysseyPainterEditor::DrawBrushPreview(bool iDrawBrushPreview)
@@ -124,21 +105,4 @@ FOdysseyPainterEditor::OnCloseRequested()
 {
 	PaintEngine()->Flush();
     return true;
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------ FGCObject interface
-
-void FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
-{
-    if (mBrushInstance)
-        Collector.AddReferencedObject(mBrushInstance);
-        
-    if (mBrush)
-        Collector.AddReferencedObject(mBrush);
-}
-
-FString FOdysseyPainterEditor::GetReferencerName() const
-{
-	return TEXT("FOdysseyPainterEditor");
 }

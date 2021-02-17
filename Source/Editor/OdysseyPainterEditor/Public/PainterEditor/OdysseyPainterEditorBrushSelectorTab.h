@@ -4,28 +4,30 @@
 #pragma once
 
 #include "OdysseyPainterEditorTab.h"
+#include <ULIS3>
 
 class FOdysseyPainterEditor;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorColorWheelTab :
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorBrushSelectorTab :
 	public FOdysseyPainterEditorTab
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyPainterEditorColorWheelTab();
-    FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor);
+    virtual ~FOdysseyPainterEditorBrushSelectorTab();
+    FOdysseyPainterEditorBrushSelectorTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyPainterEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
 
 protected:
     // Widget Getters
-    virtual ::ul3::FPixelValue Color() const;
+    virtual UOdysseyBrush* Brush() const;
 
 protected:
     // Event Listeners
-    virtual void OnColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
+    virtual void OnBrushSelected( UOdysseyBrush* iBrush );
 
 private:
     FOdysseyPainterEditor* mEditor;
