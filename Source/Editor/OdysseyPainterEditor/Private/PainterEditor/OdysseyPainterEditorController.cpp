@@ -23,7 +23,6 @@
 #include "Color/SOdysseyColorSliders.h"
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
-#include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
 #include "Dialogs/CustomDialog.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"

@@ -18,13 +18,6 @@
 /*static*/const FName FOdysseyTextureEditorGUI::smLayerStackTabId( TEXT( "OdysseyTextureEditor_LayerStack" ) );
 /*static*/const FName FOdysseyTextureEditorGUI::smTextureDetailsTabId( TEXT( "OdysseyTextureEditor_TextureDetails" ) );
 
-void
-FOdysseyTexturePerformanceOptions::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
-{
-	// FString PropertyName = PropertyThatChanged->GetName();
-	FOdysseyPerformanceOptions::NotifyPostChange(PropertyChangedEvent, PropertyThatChanged);
-}
-
 /////////////////////////////////////////////////////
 // FOdysseyTextureEditorGUI
 //--------------------------------------------------------------------------------------
@@ -62,9 +55,6 @@ FOdysseyTextureEditorGUI::InitTabs()
 void
 FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
-	FOdysseyTexturePerformanceOptions* performanceOptions = new FOdysseyTexturePerformanceOptions();
-	PerformanceOptions(performanceOptions);
-
 	CreateLayerStackTab(iEditor, iController);
 	CreateTextureDetailsTab(iEditor, iController);
 	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iEditor, iController); //Creates also creates the Layout

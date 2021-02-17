@@ -10,12 +10,10 @@
 #include "LayerStack/SOdysseyLayerStackView.h"
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
-#include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
 #include "SOdysseyTextureDetails.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
-#include "OdysseyFlipbookEditorGUI.generated.h"
 
 class SDockableTab;
 class STextBlock;
@@ -23,23 +21,6 @@ class SOdysseySurfaceViewport;
 class FOdysseyFlipbookEditor;
 class FOdysseyFlipbookEditorController;
 class FOdysseyFlipbookEditorTimelineTab;
-
-/////////////////////////////////////////////////////
-// FOdysseyPerformanceOptions
-USTRUCT()
-struct FOdysseyFlipbookPerformanceOptions : public FOdysseyPerformanceOptions
-{
-	GENERATED_BODY()
-
-		FOdysseyFlipbookPerformanceOptions()
-	{}
-
-	virtual void NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged) override;
-
-	virtual const UStruct* GetScriptStruct() override {
-		return FOdysseyFlipbookPerformanceOptions::StaticStruct();
-	}
-};
 
 /**
  * Implements an Editor toolkit for Flipbooks.

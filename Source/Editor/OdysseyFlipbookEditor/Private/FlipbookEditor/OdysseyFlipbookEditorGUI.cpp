@@ -22,13 +22,6 @@
 /*static*/const FName FOdysseyFlipbookEditorGUI::smTextureDetailsTabId( TEXT( "OdysseyFlipbookEditor_TextureDetails" ) );
 ///*static*/const FName FOdysseyFlipbookEditorGUI::smTimelineTabId( TEXT( "OdysseyFlipbookEditor_Timeline" ) );
 
-void
-FOdysseyFlipbookPerformanceOptions::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
-{
-	// FString PropertyName = PropertyThatChanged->GetName();
-	FOdysseyPerformanceOptions::NotifyPostChange(PropertyChangedEvent, PropertyThatChanged);
-}
-
 /////////////////////////////////////////////////////
 // FOdysseyFlipbookEditorGUI
 //--------------------------------------------------------------------------------------
@@ -71,9 +64,6 @@ FOdysseyFlipbookEditorGUI::InitTabs()
 void
 FOdysseyFlipbookEditorGUI::InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController)
 {
-	FOdysseyFlipbookPerformanceOptions* performanceOptions = new FOdysseyFlipbookPerformanceOptions();
-	PerformanceOptions(performanceOptions);
-
 	CreateLayerStackTab(iEditor, iController);
 	CreateTextureDetailsTab(iEditor, iController);
 	//CreateTimelineTab(iEditor, iController);

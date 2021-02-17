@@ -10,35 +10,16 @@
 #include "LayerStack/SOdysseyLayerStackView.h"
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
-#include "SOdysseyPerformanceOptions.h"
 #include "SOdysseyStrokeOptions.h"
 #include "SOdysseyTextureDetails.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
-#include "OdysseyTextureEditorGUI.generated.h"
 
 class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyTextureEditor;
 class FOdysseyTextureEditorController;
-
-/////////////////////////////////////////////////////
-// FOdysseyPerformanceOptions
-USTRUCT()
-struct FOdysseyTexturePerformanceOptions : public FOdysseyPerformanceOptions
-{
-	GENERATED_BODY()
-
-		FOdysseyTexturePerformanceOptions()
-	{}
-
-	virtual void NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged) override;
-
-	virtual const UStruct* GetScriptStruct() override {
-		return FOdysseyTexturePerformanceOptions::StaticStruct();
-	}
-};
 
 /**
  * Implements an Editor toolkit for textures.

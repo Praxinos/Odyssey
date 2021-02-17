@@ -11,7 +11,6 @@
 // #include "Color/SOdysseyColorSliders.h"
 // #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
-#include "SOdysseyPerformanceOptions.h"
 // #include "SOdysseyStrokeOptions.h"
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorController.h"
@@ -40,7 +39,6 @@
 ///*static*/const FName FOdysseyPainterEditorGUI::smStrokeOptionsTabId( TEXT( "OdysseyPainterEditor_StrokeOptions" ) );
 /*static*/const FName FOdysseyPainterEditorGUI::smNotesTabId( TEXT( "OdysseyPainterEditor_Notes" ) );
 ///*static*/const FName FOdysseyPainterEditorGUI::smUndoHistoryTabId( TEXT( "OdysseyPainterEditor_UndoHistory" ) );
-/*static*/const FName FOdysseyPainterEditorGUI::smPerformanceOptionsTabId( TEXT( "OdysseyPainterEditor_PerformanceOptions" ) );
 /*static*/const FName FOdysseyPainterEditorGUI::smToolsTabId( TEXT( "OdysseyPainterEditor_Tools" ) );
 
 /////////////////////////////////////////////////////
@@ -49,14 +47,12 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 {
-	delete mPerformanceOptions;
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, const FName iLayoutName)
 	: mEditor(iEditor)
 	, mLayoutName(iLayoutName)
 	, mLayout(nullptr)
-	, mPerformanceOptions( NULL )
 {
 }
 
@@ -105,7 +101,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
 	CreateColorSlidersTab(iEditor);
 	CreateTopTab(iEditor);
 	CreateStrokeOptionsTab(iEditor);
-	CreatePerformanceOptionsTab(iEditor);
 	CreateUndoHistoryTab(iEditor);
 	CreateToolsTab(iEditor); */
 }
@@ -165,7 +160,6 @@ FOdysseyPainterEditorGUI::CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedP
 	// CreateColorSlidersTab(iEditor, iController);
 	// CreateTopTab(iEditor, iController);
 	// CreateStrokeOptionsTab(iEditor, iController);
-	CreatePerformanceOptionsTab(iEditor, iController);
 	//CreateUndoHistoryTab(iEditor, iController);
 	CreateToolsTab(iEditor, iController);
 }
@@ -209,10 +203,6 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
 			->AddTab(mStrokeOptionsTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.3f)
-			// Performance Options
-			->AddTab( smPerformanceOptionsTabId, ETabState::ClosedTab )
-			->SetHideTabWell( false )
-			->SetSizeCoefficient( 0.3f )
 			// Mesh Selector
 			// ->AddTab(smMeshSelectorTabId, ETabState::OpenedTab)
 			->AddTab(mMeshSelectorTab->ID(), ETabState::OpenedTab)
@@ -387,12 +377,6 @@ FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
         .SetGroup(iWorkspaceMenuCategoryRef)
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.StrokeOptions16" ) ); */
 
-    // PerformanceOptions
-    iTabManager->RegisterTabSpawner( smPerformanceOptionsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnPerformanceOptions ) )
-        .SetDisplayName( LOCTEXT( "PerformanceOptionsTab", "Performance Options" ) )
-        .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.PerformanceTools16" ) );
-
     // Notes
     iTabManager->RegisterTabSpawner( smNotesTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnNotes ) )
         .SetDisplayName( LOCTEXT( "NotesTab", "Notes" ) )
@@ -431,7 +415,6 @@ FOdysseyPainterEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMan
     // iTabManager->UnregisterTabSpawner( smColorSlidersTabId );
     //iTabManager->UnregisterTabSpawner( smTopBarTabId );
     // iTabManager->UnregisterTabSpawner( smStrokeOptionsTabId );
-    iTabManager->UnregisterTabSpawner( smPerformanceOptionsTabId );
     iTabManager->UnregisterTabSpawner( smNotesTabId );
     //iTabManager->UnregisterTabSpawner( smUndoHistoryTabId );
     iTabManager->UnregisterTabSpawner( smToolsTabId );
@@ -529,14 +512,6 @@ FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor,
 	mStrokeOptionsTab->SetSmoothingRealTime(true);
 	mStrokeOptionsTab->SetSmoothingCatchUp(true);
 } */
-
-void
-FOdysseyPainterEditorGUI::CreatePerformanceOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
-{
-	mPerformanceOptions->mOnDrawBrushPreviewChanged.BindRaw(iController.Get(), &FOdysseyPainterEditorController::HandlePerformanceDrawBrushPreviewChanged);
-	mPerformanceOptionsTab = SNew(SOdysseyPerformanceOptions)
-		.PerformanceOptions(mPerformanceOptions);
-}
 
 void
 FOdysseyPainterEditorGUI::CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
@@ -727,12 +702,6 @@ FOdysseyPainterEditorGUI::CreateUndoHistoryTab(FOdysseyPainterEditor* iEditor, T
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-void
-FOdysseyPainterEditorGUI::PerformanceOptions(FOdysseyPerformanceOptions* iPerformanceOptions)
-{
-	mPerformanceOptions = iPerformanceOptions;
-}
-
 TSharedPtr<FOdysseyPainterEditorViewportTab>&
 FOdysseyPainterEditorGUI::GetViewportTab()
 {
@@ -773,12 +742,6 @@ TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>&
 FOdysseyPainterEditorGUI::GetStrokeOptionsTab()
 {
 	return mStrokeOptionsTab;
-}
-
-TSharedPtr<SOdysseyPerformanceOptions>&
-FOdysseyPainterEditorGUI::GetPerformanceOptionsTab()
-{
-	return mPerformanceOptionsTab;
 }
 
 //TSharedPtr<SOdysseyUndoHistory>&
@@ -903,18 +866,6 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnStrokeOptions( const FSpawnTabArg
             mStrokeOptionsTab.ToSharedRef()
         ];
 } */
-
-TSharedRef< SDockTab >
-FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnPerformanceOptions( const FSpawnTabArgs& iArgs )
-{
-    check( iArgs.GetTabId() == smPerformanceOptionsTabId );
-
-    return SNew( SDockTab )
-        .Label( LOCTEXT( "PerformanceOptionsTitle", "Performance Options" ) )
-        [
-            mPerformanceOptionsTab.ToSharedRef()
-        ];
-}
 
 TSharedRef< SDockTab >
 FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnNotes( const FSpawnTabArgs& iArgs )
