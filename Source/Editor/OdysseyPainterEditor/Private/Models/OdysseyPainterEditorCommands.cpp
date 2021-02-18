@@ -2,11 +2,12 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorCommands"
 
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
-    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
+    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
 }
 

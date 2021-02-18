@@ -151,6 +151,78 @@ FOdysseyPaintEngine::GetStrokeInvalidTiles()
 }
 
 void
+FOdysseyPaintEngine::Clear()
+{
+    InterruptStrokeAndStampInPlace();
+
+    if (!mPreviewBlock)
+        return;
+
+    //Clear Preview Block
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mPreviewBlock->GetBlock(), mPreviewBlock->GetBlock()->Rect() );
+
+    //SetTileMap
+    ::ul3::FRect rect = { 0, 0, mPreviewBlock->Width(), mPreviewBlock->Height() };
+
+    float xf = FMath::Max(0.f, float(rect.x) / TILE_SIZE);
+    float yf = FMath::Max(0.f, float(rect.y) / TILE_SIZE);
+    float wf = float(rect.w) / TILE_SIZE;
+    float hf = float(rect.h) / TILE_SIZE;
+    int x = xf;
+    int y = yf;
+    int w = FMath::Min(mCountTileX, int(ceil(xf + wf))) - x;
+    int h = FMath::Min(mCountTileY, int(ceil(yf + hf))) - y;
+    ::ul3::FRect tileRect = { x, y, w, h };
+
+    SetMapWithRect(mStrokeInvalidTileMap, tileRect, true);
+
+    //Call the delegate correctly
+    TArray<::ul3::FRect> changedTiles = GetStrokeInvalidTiles();
+    mOnPreviewBlockTilesChangedDelegate.Broadcast(changedTiles);
+    
+    //Flush To Edited Block
+    Flush();
+}
+
+void
+FOdysseyPaintEngine::Fill()
+{
+    InterruptStrokeAndStampInPlace();
+
+    if (!mPreviewBlock)
+        return;
+
+    //Clear Preview Block
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mPreviewBlock->GetBlock(), mColor, mPreviewBlock->GetBlock()->Rect() );
+
+    //SetTileMap
+    ::ul3::FRect rect = { 0, 0, mPreviewBlock->Width(), mPreviewBlock->Height() };
+
+    float xf = FMath::Max(0.f, float(rect.x) / TILE_SIZE);
+    float yf = FMath::Max(0.f, float(rect.y) / TILE_SIZE);
+    float wf = float(rect.w) / TILE_SIZE;
+    float hf = float(rect.h) / TILE_SIZE;
+    int x = xf;
+    int y = yf;
+    int w = FMath::Min(mCountTileX, int(ceil(xf + wf))) - x;
+    int h = FMath::Min(mCountTileY, int(ceil(yf + hf))) - y;
+    ::ul3::FRect tileRect = { x, y, w, h };
+
+    SetMapWithRect( mStrokeInvalidTileMap, tileRect, true );
+
+    //Call the delegate correctly
+    TArray<::ul3::FRect> changedTiles = GetStrokeInvalidTiles();
+    mOnPreviewBlockTilesChangedDelegate.Broadcast(changedTiles);
+
+    //Flush To Edited Block
+    Flush();
+}
+
+void
 FOdysseyPaintEngine::ClearStrokeBlock()
 {
     if (!mStrokeBlock)
@@ -327,7 +399,7 @@ FOdysseyPaintEngine::Tick()
     // mBrushInstance->ClearInvalidRects();
 
     //Refresh the tiles
-    UpdatePreviewBlockTiles();
+    UpdatePreviewBlockTiles(); 
     
     //End the stroke if we need to
     if( mIsPendingEndStroke && mDelayQueue.empty() )

@@ -12,6 +12,7 @@
 #include "OdysseyTextureEditor.h"
 
 #include "OdysseyTextureEditorTopTab.h"
+#include "OdysseyTextureEditorToolsTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
@@ -42,6 +43,7 @@ FOdysseyTextureEditorGUI::CreateTabs()
 	FOdysseyPainterEditorGUI::CreateTabs();
 
 	mTopTab = MakeShareable(new FOdysseyTextureEditorTopTab(mEditor));
+	mToolsTab = MakeShareable(new FOdysseyTextureEditorToolsTab(mEditor));
 }
 
 void
@@ -50,6 +52,7 @@ FOdysseyTextureEditorGUI::InitTabs()
 	FOdysseyPainterEditorGUI::InitTabs();
 
 	//mTopTab initialized by PainterEditorGUI
+	//mToolsTab initialized by PainterEditorGUI
 }
 
 void

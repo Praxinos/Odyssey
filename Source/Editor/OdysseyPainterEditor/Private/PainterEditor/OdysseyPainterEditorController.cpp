@@ -309,7 +309,18 @@ FOdysseyPainterEditorController::OnAboutIliad()
             SNew( SOdysseyAboutScreen )
         ];
 
-	FSlateApplication::Get().AddModalWindow(aboutWindow.ToSharedRef(), GetGUI()->GetToolsTab()); //TODO: CORRECTLY /* mToolkit->GetToolkitHost()->GetParentWidget()*/ );
+    TSharedPtr<SDockTab> OwnerTab = GetEditor()->Toolkit()->GetTabManager()->GetOwnerTab();
+    TSharedPtr<SWindow> parentWindow = NULL;
+    if (OwnerTab.IsValid())
+    {
+        parentWindow = FSlateApplication::Get().FindWidgetWindow(OwnerTab.ToSharedRef());
+    }
+    else
+    {
+        parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
+    }
+
+	FSlateApplication::Get().AddModalWindow(aboutWindow.ToSharedRef(), parentWindow);
 }
 
 void

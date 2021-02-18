@@ -103,7 +103,7 @@
     {
       "Name": "OdysseyStyle",
       "Type": "Editor",
-      "LoadingPhase": "Default"
+      "LoadingPhase": "PreDefault"
     },
     {
       "Name": "OdysseyStylusInput",

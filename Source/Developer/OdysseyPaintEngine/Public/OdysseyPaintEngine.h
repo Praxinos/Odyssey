@@ -76,6 +76,8 @@ public:
     void AbortStroke();
     void TriggerStateChanged();
     void InterruptStrokeAndStampInPlace();
+    void Clear();
+    void Fill();
 
     const ::ul3::FPixelValue& GetColor() const;
 	virtual void Block(FOdysseyBlock* iBlock);

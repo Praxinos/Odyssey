@@ -3,16 +3,6 @@
 
 #pragma once
 
-// class SOdysseyBrushExposedParameters;
-// class SOdysseyBrushSelector;
-class SOdysseyLayerStackView;
-class SOdysseyPaintModifiers;
-// class SOdysseyStrokeOptions;
-class SOdysseyUndoHistory;
-
-class SDockableTab;
-class STextBlock;
-
 class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
 class FOdysseyPainterEditorTab;
@@ -22,6 +12,7 @@ class FOdysseyPainterEditorColorSlidersTab;
 class FOdysseyPainterEditorColorWheelTab;
 class FOdysseyPainterEditorMeshSelectorTab;
 class FOdysseyPainterEditorStrokeOptionsTab;
+class FOdysseyPainterEditorToolsTab;
 class FOdysseyPainterEditorTopTab;
 class FOdysseyPainterEditorViewportTab;
 
@@ -52,7 +43,7 @@ private:
     // void CreateColorSelectorTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     // void CreateColorSlidersTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     // void CreateTopTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
-    void CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
+    // void CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     // void CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
     //void CreateUndoHistoryTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController);
 
@@ -75,18 +66,18 @@ private:
 	// Callback for spawning the ColorSelector tab.
 	// TSharedRef<SDockTab> HandleTabSpawnerSpawnColorSliders(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the LayerStack tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the TopBar tab.
 	// TSharedRef<SDockTab> HandleTabSpawnerSpawnTopBar(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Smoothing Options tab.
 	// TSharedRef<SDockTab> HandleTabSpawnerSpawnStrokeOptions(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Smoothing Options tab.
 	// Callback for spawning the Notes tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnNotes(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnNotes(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Undo History tab.
 	//TSharedRef<SDockTab> HandleTabSpawnerSpawnUndoHistory(const FSpawnTabArgs& iArgs);
 	// Callback for spawning the Tools tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnTools(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnTools(const FSpawnTabArgs& iArgs);
 
 protected:
 	virtual void InitOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController> iController);
@@ -109,9 +100,8 @@ public:
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>& GetStrokeOptionsTab();
-    //TSharedPtr<SOdysseyUndoHistory>& GetUndoHistoryTab();
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
-    TSharedPtr<SWidget>& GetToolsTab();
+    TSharedPtr<FOdysseyPainterEditorToolsTab>& GetToolsTab();
 
 private:
     FOdysseyPainterEditor*                          mEditor;
@@ -120,16 +110,15 @@ private:
 
 protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
-    TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>                           mBrushSelectorTab;
+    TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
     TSharedPtr<FOdysseyPainterEditorBrushExposedParametersTab>  mBrushExposedParametersTab;
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
-    TSharedPtr<SOdysseyLayerStackView>                          mLayerStackTab;
+    // TSharedPtr<SOdysseyLayerStackView>                          mLayerStackTab;
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>           mStrokeOptionsTab;
-    //TSharedPtr<SOdysseyUndoHistory>                           mUndoHistoryTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
-    TSharedPtr<SWidget>                                         mToolsTab;
+    TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
 
 private:
     /** Tabs IDs */
@@ -139,11 +128,11 @@ private:
     // static const FName smBrushExposedParametersTabId;
     // static const FName smColorSelectorTabId;
     // static const FName smColorSlidersTabId;
-    static const FName smLayerStackTabId;
+    // static const FName smLayerStackTabId;
     // static const FName smTopBarTabId;
     // static const FName smStrokeOptionsTabId;
-    static const FName smNotesTabId;
-    static const FName smUndoHistoryTabId;
-    static const FName smToolsTabId;
+    // static const FName smNotesTabId;
+    // static const FName smUndoHistoryTabId;
+    // static const FName smToolsTabId;
 };
 

@@ -223,8 +223,9 @@ FOdysseyFlipbookEditor::OnTexturePreSave()
  * 3) Make GUI -> Tabs classes, containing the creation of GUI and a pointer to a controller specific for this GUI (This one is a BIG one)
  * 3.1) while making 3), the old almighty controller can coexist with the new Tabs classes, so we can make each Tab class + controller one after the other
  * 4) Make FlipbookEditor Inherite TextureEditor and cleanup
- * 5) Test and Debug
- * 6) Hooray !
+ * 5) Apply refactor to ViewportDrawingEditor
+ * 6) Test and Debug
+ * 7) Hooray !
  */
 
 #undef LOCTEXT_NAMESPACE

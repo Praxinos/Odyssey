@@ -182,7 +182,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
     Set( "About.Iliad", new IMAGE_BRUSH( "About/iliad", FVector2D( 128, 128 ) ) );
 
-
+    //IliadPainterEditor Commands
+    // Example of how to define icons for Actions / Commands
+    /* Set( "IliadPainterEditor.ZoomIn", new IMAGE_BRUSH( "PainterEditor/arrow_down_64", mIcon64x64 ) );
+    Set( "IliadPainterEditor.ZoomOut", new IMAGE_BRUSH( "PainterEditor/arrow_up_64", mIcon64x64 ) ); */
 
     //PainterEditor
     Set( "PainterEditor.OpenPaintEditor64", new IMAGE_BRUSH( "PainterEditor/open_paint_editor_64", mIcon64x64 ) );

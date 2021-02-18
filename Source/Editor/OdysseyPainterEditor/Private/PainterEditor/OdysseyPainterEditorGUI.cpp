@@ -3,28 +3,16 @@
 
 #include "OdysseyPainterEditorGUI.h"
 
-#include "Widgets/Text/SMultiLineEditableText.h"
-
-// #include "Brush/SOdysseyBrushExposedParameters.h"
-// #include "Brush/SOdysseyBrushSelector.h"
-// #include "Color/SOdysseyColorSelector.h"
-// #include "Color/SOdysseyColorSliders.h"
-// #include "Mesh/SOdysseyMeshSelector.h"
-#include "SOdysseyPaintModifiers.h"
-// #include "SOdysseyStrokeOptions.h"
-#include "UndoHistory/SOdysseyUndoHistory.h"
-#include "OdysseyPainterEditorController.h"
-
-#include "Widgets/Input/SButton.h"
-#include "Widgets/Layout/SExpandableArea.h"
-#include "Widgets/Layout/SWrapBox.h"
-#include "OdysseyStyleSet.h"
-
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorTab.h"
+#include "OdysseyPainterEditorBrushSelectorTab.h"
+#include "OdysseyPainterEditorBrushExposedParametersTab.h"
+#include "OdysseyPainterEditorColorSlidersTab.h"
+#include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorStrokeOptionsTab.h"
 #include "OdysseyPainterEditorTopTab.h"
+#include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorToolkit"
@@ -37,9 +25,9 @@
 ///*static*/const FName FOdysseyPainterEditorGUI::smColorSlidersTabId( TEXT( "OdysseyPainterEditor_ColorSliders" ) );
 ///*static*/const FName FOdysseyPainterEditorGUI::smTopBarTabId( TEXT( "OdysseyPainterEditor_TopBar" ) );
 ///*static*/const FName FOdysseyPainterEditorGUI::smStrokeOptionsTabId( TEXT( "OdysseyPainterEditor_StrokeOptions" ) );
-/*static*/const FName FOdysseyPainterEditorGUI::smNotesTabId( TEXT( "OdysseyPainterEditor_Notes" ) );
+///*static*/const FName FOdysseyPainterEditorGUI::smNotesTabId( TEXT( "OdysseyPainterEditor_Notes" ) );
 ///*static*/const FName FOdysseyPainterEditorGUI::smUndoHistoryTabId( TEXT( "OdysseyPainterEditor_UndoHistory" ) );
-/*static*/const FName FOdysseyPainterEditorGUI::smToolsTabId( TEXT( "OdysseyPainterEditor_Tools" ) );
+// /*static*/const FName FOdysseyPainterEditorGUI::smToolsTabId( TEXT( "OdysseyPainterEditor_Tools" ) );
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorGUI
@@ -90,6 +78,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
 	mBrushExposedParametersTab = MakeShareable(new FOdysseyPainterEditorBrushExposedParametersTab(mEditor));
 	mColorWheelTab = MakeShareable(new FOdysseyPainterEditorColorWheelTab(mEditor));
 	mColorSlidersTab = MakeShareable(new FOdysseyPainterEditorColorSlidersTab(mEditor));
+	mToolsTab = MakeShareable(new FOdysseyPainterEditorToolsTab(mEditor));
 	mTopTab = MakeShareable(new FOdysseyPainterEditorTopTab(mEditor));
 	mStrokeOptionsTab = MakeShareable(new FOdysseyPainterEditorStrokeOptionsTab(mEditor));
 
@@ -114,6 +103,7 @@ FOdysseyPainterEditorGUI::InitTabs()
 	mBrushExposedParametersTab->Init();
 	mColorWheelTab->Init();
 	mColorSlidersTab->Init();
+	mToolsTab->Init();
 	mTopTab->Init();
 	mStrokeOptionsTab->Init();
 }
@@ -127,6 +117,7 @@ FOdysseyPainterEditorGUI::OnToolkitInitialized()
 	mBrushExposedParametersTab->OnToolkitInitialized();
 	mColorWheelTab->OnToolkitInitialized();
 	mColorSlidersTab->OnToolkitInitialized();
+	mToolsTab->OnToolkitInitialized();
 	mTopTab->OnToolkitInitialized();
 	mStrokeOptionsTab->OnToolkitInitialized();
 }
@@ -161,7 +152,7 @@ FOdysseyPainterEditorGUI::CreateWidgets(FOdysseyPainterEditor* iEditor, TSharedP
 	// CreateTopTab(iEditor, iController);
 	// CreateStrokeOptionsTab(iEditor, iController);
 	//CreateUndoHistoryTab(iEditor, iController);
-	CreateToolsTab(iEditor, iController);
+	// CreateToolsTab(iEditor, iController);
 }
 
 TSharedRef<FTabManager::FSplitter>
@@ -213,7 +204,8 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
 		->Split
 		(
 			FTabManager::NewStack()
-			->AddTab(smToolsTabId, ETabState::OpenedTab)
+			//->AddTab(smToolsTabId, ETabState::OpenedTab)
+			->AddTab(mToolsTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.2f)
 		);
@@ -378,10 +370,10 @@ FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.StrokeOptions16" ) ); */
 
     // Notes
-    iTabManager->RegisterTabSpawner( smNotesTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnNotes ) )
+    /* iTabManager->RegisterTabSpawner( smNotesTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnNotes ) )
         .SetDisplayName( LOCTEXT( "NotesTab", "Notes" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Notes16" ) );
+        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Notes16" ) ); */
 
     // Undo History
     /*iTabManager->RegisterTabSpawner( UndoHistoryTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnUndoHistory ) )
@@ -389,11 +381,12 @@ FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
         .SetGroup( iWorkspaceMenuCategoryRef )
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.UndoHistory16" ) );*/
 
+	mToolsTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
         // Tools
-    iTabManager->RegisterTabSpawner( smToolsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTools ) )
+    /*iTabManager->RegisterTabSpawner( smToolsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTools ) )
         .SetDisplayName( LOCTEXT( "ToolsTab", "Tools" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ) );
+        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ) );*/
 }
 
 void
@@ -411,13 +404,14 @@ FOdysseyPainterEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMan
 	mColorSlidersTab->UnregisterTabSpawner(iTabManager);
 	mTopTab->UnregisterTabSpawner(iTabManager);
 	mStrokeOptionsTab->UnregisterTabSpawner(iTabManager);
+	mToolsTab->UnregisterTabSpawner(iTabManager);
     //iTabManager->UnregisterTabSpawner( smColorSelectorTabId );
     // iTabManager->UnregisterTabSpawner( smColorSlidersTabId );
     //iTabManager->UnregisterTabSpawner( smTopBarTabId );
     // iTabManager->UnregisterTabSpawner( smStrokeOptionsTabId );
-    iTabManager->UnregisterTabSpawner( smNotesTabId );
+    //iTabManager->UnregisterTabSpawner( smNotesTabId );
     //iTabManager->UnregisterTabSpawner( smUndoHistoryTabId );
-    iTabManager->UnregisterTabSpawner( smToolsTabId );
+    //iTabManager->UnregisterTabSpawner( smToolsTabId );
 }
 
 //--------------------------------------------------------------------------------------
@@ -513,7 +507,7 @@ FOdysseyPainterEditorGUI::CreateStrokeOptionsTab(FOdysseyPainterEditor* iEditor,
 	mStrokeOptionsTab->SetSmoothingCatchUp(true);
 } */
 
-void
+/* void
 FOdysseyPainterEditorGUI::CreateToolsTab(FOdysseyPainterEditor* iEditor, TSharedPtr<FOdysseyPainterEditorController>& iController)
 {
     mToolsTab = SNew( SScrollBox )
@@ -553,94 +547,8 @@ FOdysseyPainterEditorGUI::CreateToolsTab(FOdysseyPainterEditor* iEditor, TShared
 						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket32" ) )
 					]
 				]
-				/*+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ColorPicker32" ) )
-					]
-				]*/
 			]
 		]
-		/*+SScrollBox::Slot()
-		[
-			SNew( SExpandableArea )
-			.HeaderContent()
-			[
-				SNew( STextBlock )
-				.Text( LOCTEXT( "Shapes", "Shapes" ) )
-				.Font( FEditorStyle::GetFontStyle( "DetailsView.CategoryFontStyle" ) )
-				.ShadowOffset( FVector2D( 1.0f, 1.0f ) )
-			]
-			.BodyContent()
-			[
-				SNew( SWrapBox )
-				.UseAllottedWidth( true )
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Line32" ) )
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Square32" ) )
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Circle32" ) )
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Ellipse32" ) )
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Curve32" ) )
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					//.OnClicked_Raw( iController.Get(), &FOdysseyPainterEditorController::OnFillCurrentLayer )
-					[
-						SNew( SImage )
-						.Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Bezier32" ) )
-					]
-				]
-			]
-		]*/
 		+SScrollBox::Slot()
 		[
 			SNew( SExpandableArea )
@@ -673,13 +581,6 @@ FOdysseyPainterEditorGUI::CreateToolsTab(FOdysseyPainterEditor* iEditor, TShared
 						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
 					]
 				]
-				//Debug Purposes
-				/*+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.Text( LOCTEXT( "Check", "Check" ) )
-					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnCheck)
-				]*/
 				+SWrapBox::Slot()
 				[
 					SNew( SButton )
@@ -688,9 +589,9 @@ FOdysseyPainterEditorGUI::CreateToolsTab(FOdysseyPainterEditor* iEditor, TShared
                     .VAlign(EVerticalAlignment::VAlign_Center)
 					.OnClicked_Raw(iController.Get(), &FOdysseyPainterEditorController::OnClearUndo)
 				]
-				]
+			]
 		];
-}
+}*/
 
 /*
 void
@@ -756,7 +657,7 @@ FOdysseyPainterEditorGUI::GetTopTab()
 	return mTopTab;
 }
 
-TSharedPtr<SWidget>&
+TSharedPtr<FOdysseyPainterEditorToolsTab>&
 FOdysseyPainterEditorGUI::GetToolsTab()
 {
 	return mToolsTab;
@@ -867,7 +768,7 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnStrokeOptions( const FSpawnTabArg
         ];
 } */
 
-TSharedRef< SDockTab >
+/*TSharedRef< SDockTab >
 FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnNotes( const FSpawnTabArgs& iArgs )
 {
     check( iArgs.GetTabId() == smNotesTabId );
@@ -877,7 +778,7 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnNotes( const FSpawnTabArgs& iArgs
         [
             SNew( SMultiLineEditableText )
         ];
-}
+} */
 
 /*
 TSharedRef< SDockTab >
@@ -892,7 +793,7 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnUndoHistory( const FSpawnTabArgs&
         ];
 }*/
 
-TSharedRef< SDockTab >
+/* TSharedRef< SDockTab >
 FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& iArgs )
 {
     check( iArgs.GetTabId() == smToolsTabId );
@@ -902,6 +803,6 @@ FOdysseyPainterEditorGUI::HandleTabSpawnerSpawnTools( const FSpawnTabArgs& iArgs
         [
 			mToolsTab.ToSharedRef()
         ];
-}
+} */
 
 #undef LOCTEXT_NAMESPACE
