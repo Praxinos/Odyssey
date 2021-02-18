@@ -69,10 +69,7 @@ FOdysseyFlipbookEditorGUI::InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* 
 {
 	CreateLayerStackTab(iEditor, iController);
 	CreateTextureDetailsTab(iEditor, iController);
-	//CreateTimelineTab(iEditor, iController);
-
-	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iEditor, iController); //Creates also creates the Layout
-
+	// CreateTimelineTab(iEditor, iController);
 	// GetViewportTab()->SetSurface( iEditor->DisplaySurface() );
 }
 

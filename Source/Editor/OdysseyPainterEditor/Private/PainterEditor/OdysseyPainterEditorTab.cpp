@@ -40,7 +40,6 @@ FOdysseyPainterEditorTab::BindShortcuts()
 void
 FOdysseyPainterEditorTab::RegisterTabSpawner( const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
 {
-    //The viewport: the central area where we can draw on images
     iTabManager->RegisterTabSpawner( mID, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorTab::SpawnTab ) )
         .SetDisplayName( mDisplayName )
         .SetGroup(iWorkspaceMenuCategoryRef)

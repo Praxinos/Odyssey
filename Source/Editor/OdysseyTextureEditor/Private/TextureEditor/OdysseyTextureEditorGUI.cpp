@@ -60,7 +60,6 @@ FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEd
 {
 	CreateLayerStackTab(iEditor, iController);
 	CreateTextureDetailsTab(iEditor, iController);
-	FOdysseyPainterEditorGUI::InitOdysseyPainterEditorGUI(iEditor, iController); //Creates also creates the Layout
 }
  
 TSharedRef<FTabManager::FSplitter>
