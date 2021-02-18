@@ -56,6 +56,29 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
         ];
 }
 
+void
+FOdysseyPainterEditorTopTab::BindShortcuts()
+{
+    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorTopTab::__VA_ARGS__ ), FCanExecuteAction() );
+
+    MAP_ACTION(painterEditorCommands.IncreaseBrushSize, AddSize, 1 )
+    MAP_ACTION(painterEditorCommands.DecreaseBrushSize, AddSize, -1 )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeNormal, SetAlphaMode, ::ul3::eAlphaMode::AM_NORMAL )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeErase, SetAlphaMode, ::ul3::eAlphaMode::AM_ERASE )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeTop, SetAlphaMode, ::ul3::eAlphaMode::AM_TOP )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeBack, SetAlphaMode, ::ul3::eAlphaMode::AM_BACK )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeSub, SetAlphaMode, ::ul3::eAlphaMode::AM_SUB )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeAdd, SetAlphaMode, ::ul3::eAlphaMode::AM_ADD )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeMul, SetAlphaMode, ::ul3::eAlphaMode::AM_MUL )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeMin, SetAlphaMode, ::ul3::eAlphaMode::AM_MIN )
+    MAP_ACTION(painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
+
+    #undef MAP_ACTION
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
@@ -120,6 +143,21 @@ void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
 	mEditor->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Event Listeners
+
+void
+FOdysseyPainterEditorTopTab::SetAlphaMode(::ul3::eAlphaMode iAlphaMode)
+{
+    mEditor->PaintEngine()->SetAlphaModeModifier( iAlphaMode );
+}
+
+void
+FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
+{
+    mEditor->PaintEngine()->SetSizeModifier( Size() + iValue );
 }
 
 #undef LOCTEXT_NAMESPACE

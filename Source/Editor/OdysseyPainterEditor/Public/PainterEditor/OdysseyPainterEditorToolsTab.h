@@ -19,6 +19,7 @@ public:
 protected:
     // FOdysseyPainterEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    virtual void BindShortcuts() override;
 
 protected:
     // Widget Getters
@@ -30,6 +31,14 @@ protected:
     virtual FReply OnUndo();
     virtual FReply OnRedo();
     virtual FReply OnClearUndo();
+
+protected:
+    // Methods
+    virtual void Clear();
+    virtual void Fill();
+    virtual void Undo();
+    virtual void Redo();
+    virtual void ClearUndo();
 
 private:
     FOdysseyPainterEditor* mEditor;

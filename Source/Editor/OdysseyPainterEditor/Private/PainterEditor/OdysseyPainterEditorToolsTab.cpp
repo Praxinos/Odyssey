@@ -115,6 +115,22 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 		];
 }
 
+void
+FOdysseyPainterEditorToolsTab::BindShortcuts()
+{
+    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolsTab::__VA_ARGS__ ), FCanExecuteAction() );
+
+	MAP_ACTION(painterEditorCommands.Undo, Undo )
+	MAP_ACTION(painterEditorCommands.Redo, Redo )
+    MAP_ACTION(painterEditorCommands.FillCurrentLayer, Fill )
+	MAP_ACTION(painterEditorCommands.ClearCurrentLayer, Clear )
+
+    #undef MAP_ACTION
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
@@ -124,40 +140,72 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 FReply
 FOdysseyPainterEditorToolsTab::OnClear()
 {
-    //TODO: PaintEngine->Clear() should generate its own undo 
-    mEditor->PaintEngine()->Clear();
+    Clear();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolsTab::OnFill()
 {
-    //TODO: PaintEngine->Fill() should generate its own undo 
-	mEditor->PaintEngine()->Fill();
+    Fill();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolsTab::OnUndo()
 {
-    //TODO: Should call PaintEngine->Undo();
-	mEditor->PaintEngine()->InterruptStrokeAndStampInPlace();
+    Undo();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolsTab::OnRedo()
 {
-    //TODO: Should call PaintEngine->Redo();
-	mEditor->PaintEngine()->InterruptStrokeAndStampInPlace();
+    Redo();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolsTab::OnClearUndo()
 {
-    //TODO: Should call PaintEngine->ClearUndo();
+    ClearUndo();
     return FReply::Handled();
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
+
+void
+FOdysseyPainterEditorToolsTab::Clear()
+{
+    //TODO: PaintEngine->Clear() should generate its own undo 
+    mEditor->PaintEngine()->Clear();
+}
+
+void
+FOdysseyPainterEditorToolsTab::Fill()
+{
+    //TODO: PaintEngine->Fill() should generate its own undo 
+	mEditor->PaintEngine()->Fill();
+}
+
+void
+FOdysseyPainterEditorToolsTab::Undo()
+{
+    //TODO: Should call PaintEngine->Undo();
+	mEditor->PaintEngine()->InterruptStrokeAndStampInPlace();
+}
+
+void
+FOdysseyPainterEditorToolsTab::Redo()
+{
+    //TODO: Should call PaintEngine->Redo();
+	mEditor->PaintEngine()->InterruptStrokeAndStampInPlace();
+}
+
+void
+FOdysseyPainterEditorToolsTab::ClearUndo()
+{
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -46,22 +46,13 @@ FOdysseyFlipbookEditorGUI::CreateTabs()
 {
 	FOdysseyPainterEditorGUI::CreateTabs();
 
-	mViewportTab = MakeShareable(new FOdysseyFlipbookEditorViewportTab(mEditor));
-	mTimelineTab = MakeShareable(new FOdysseyFlipbookEditorTimelineTab(mEditor));
-	mTopTab = MakeShareable(new FOdysseyFlipbookEditorTopTab(mEditor));
-	mToolsTab = MakeShareable(new FOdysseyFlipbookEditorToolsTab(mEditor));
-}
+	//REPLACE TABS
+	ODYSSEY_SET_TAB(mViewportTab, FOdysseyFlipbookEditorViewportTab, mEditor)
+	ODYSSEY_SET_TAB(mTopTab, FOdysseyFlipbookEditorTopTab, mEditor)
+	ODYSSEY_SET_TAB(mToolsTab, FOdysseyFlipbookEditorToolsTab, mEditor)
 
-void
-FOdysseyFlipbookEditorGUI::InitTabs()
-{
-	mTimelineTab->Init();//TODO: Initialize Timeline after, FOdysseyPainterEditorGUI::InitTabs()
-
-	FOdysseyPainterEditorGUI::InitTabs();
-
-	//mViewportTab initialized by PainterEditorGUI
-	//mTopTab initialized by PainterEditorGUI
-	//mToolsTab initialized by PainterEditorGUI
+	//ADD NEW TABS
+	ODYSSEY_ADD_TAB(mTimelineTab, FOdysseyFlipbookEditorTimelineTab, mEditor);
 }
 
 void
@@ -149,7 +140,6 @@ FOdysseyFlipbookEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabMana
         .SetGroup(iWorkspaceMenuCategoryRef)
         .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ) );
     // Timeline
-	mTimelineTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
     /* iTabManager->RegisterTabSpawner( smTimelineTabId, FOnSpawnTab::CreateSP( this, &FOdysseyFlipbookEditorGUI::HandleTabSpawnerSpawnTimeline ) )
         .SetDisplayName( LOCTEXT( "TimelineTab", "Timeline" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
@@ -161,7 +151,6 @@ FOdysseyFlipbookEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabMa
 {
     iTabManager->UnregisterTabSpawner( smLayerStackTabId );
     iTabManager->UnregisterTabSpawner( smTextureDetailsTabId );
-	mTimelineTab->UnregisterTabSpawner(iTabManager);
     // iTabManager->UnregisterTabSpawner( smTimelineTabId );
 }
 

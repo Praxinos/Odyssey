@@ -25,14 +25,14 @@ FOdysseyFlipbookEditorToolsTab::FOdysseyFlipbookEditorToolsTab(FOdysseyFlipbookE
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
-FReply
-FOdysseyFlipbookEditorToolsTab::OnClear()
+void
+FOdysseyFlipbookEditorToolsTab::Clear()
 {
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
 
 	if( mEditor->LayerStack()->GetCurrentLayer() == NULL )
-        return FReply::Handled();
+        return;
 
     //Record
     mEditor->LayerStack()->mDrawingUndo->StartRecord();
@@ -40,17 +40,17 @@ FOdysseyFlipbookEditorToolsTab::OnClear()
 	mEditor->LayerStack()->mDrawingUndo->EndRecord();
     //EndRecord
 
-    return FOdysseyPainterEditorToolsTab::OnClear();
+    FOdysseyPainterEditorToolsTab::Clear();
 }
 
-FReply
-FOdysseyFlipbookEditorToolsTab::OnFill()
+void
+FOdysseyFlipbookEditorToolsTab::Fill()
 {
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
 
 	if( mEditor->LayerStack()->GetCurrentLayer() == NULL )
-        return FReply::Handled();
+        return;
 
     //Record
     mEditor->LayerStack()->mDrawingUndo->StartRecord();
@@ -58,40 +58,39 @@ FOdysseyFlipbookEditorToolsTab::OnFill()
 	mEditor->LayerStack()->mDrawingUndo->EndRecord();
     //EndRecord
 
-    return FOdysseyPainterEditorToolsTab::OnFill();
+    FOdysseyPainterEditorToolsTab::Fill();
 }
 
-FReply
-FOdysseyFlipbookEditorToolsTab::OnUndo()
+void
+FOdysseyFlipbookEditorToolsTab::Undo()
 {
-    FOdysseyPainterEditorToolsTab::OnUndo();
+    FOdysseyPainterEditorToolsTab::Undo();
 
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->LoadData();
-    return FReply::Handled();
 }
 
-FReply
-FOdysseyFlipbookEditorToolsTab::OnRedo()
+void
+FOdysseyFlipbookEditorToolsTab::Redo()
 {
-    FOdysseyPainterEditorToolsTab::OnRedo();
+    FOdysseyPainterEditorToolsTab::Redo();
 
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->Redo();
-    return FReply::Handled();
 }
 
-FReply
-FOdysseyFlipbookEditorToolsTab::OnClearUndo()
+void
+FOdysseyFlipbookEditorToolsTab::ClearUndo()
 {
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->Clear();
-    return FOdysseyPainterEditorToolsTab::OnClearUndo();
+    FOdysseyPainterEditorToolsTab::ClearUndo();
 }
+
 #undef LOCTEXT_NAMESPACE

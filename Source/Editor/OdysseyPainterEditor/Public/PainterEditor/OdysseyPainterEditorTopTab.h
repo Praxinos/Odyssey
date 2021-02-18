@@ -19,6 +19,7 @@ protected:
     // FOdysseyPainterEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
+    virtual void BindShortcuts() override;
 
 protected:
     // Widget Getters
@@ -35,6 +36,11 @@ protected:
     virtual void OnFlowChanged( int32 iValue );
     virtual void OnBlendingModeChanged( int32 iValue );
     virtual void OnAlphaModeChanged( int32 iValue );
+
+protected:
+    // Methods
+    virtual void SetAlphaMode(::ul3::eAlphaMode iAlphaMode);
+    virtual void AddSize(int32 iValue);
 
 private:
     FOdysseyPainterEditor* mEditor;

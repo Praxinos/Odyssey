@@ -51,71 +51,51 @@ FOdysseyPainterEditorGUI::GetLayout()
 void
 FOdysseyPainterEditorGUI::CreateTabs()
 {
-	mMeshSelectorTab = MakeShareable(new FOdysseyPainterEditorMeshSelectorTab(mEditor));
-	mViewportTab = MakeShareable(new FOdysseyPainterEditorViewportTab(mEditor));
-	mBrushSelectorTab = MakeShareable(new FOdysseyPainterEditorBrushSelectorTab(mEditor));
-	mBrushExposedParametersTab = MakeShareable(new FOdysseyPainterEditorBrushExposedParametersTab(mEditor));
-	mColorWheelTab = MakeShareable(new FOdysseyPainterEditorColorWheelTab(mEditor));
-	mColorSlidersTab = MakeShareable(new FOdysseyPainterEditorColorSlidersTab(mEditor));
-	mToolsTab = MakeShareable(new FOdysseyPainterEditorToolsTab(mEditor));
-	mTopTab = MakeShareable(new FOdysseyPainterEditorTopTab(mEditor));
-	mStrokeOptionsTab = MakeShareable(new FOdysseyPainterEditorStrokeOptionsTab(mEditor));
+	ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
+	ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
+	ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
+	ODYSSEY_ADD_TAB(mBrushExposedParametersTab, FOdysseyPainterEditorBrushExposedParametersTab, mEditor);
+	ODYSSEY_ADD_TAB(mColorWheelTab, FOdysseyPainterEditorColorWheelTab, mEditor);
+	ODYSSEY_ADD_TAB(mColorSlidersTab, FOdysseyPainterEditorColorSlidersTab, mEditor);
+	ODYSSEY_ADD_TAB(mToolsTab, FOdysseyPainterEditorToolsTab, mEditor);
+	ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
+	ODYSSEY_ADD_TAB(mStrokeOptionsTab, FOdysseyPainterEditorStrokeOptionsTab, mEditor);
 }
 
 void
 FOdysseyPainterEditorGUI::InitTabs()
 {
-	mMeshSelectorTab->Init();
-	mViewportTab->Init();
-	mBrushSelectorTab->Init();
-	mBrushExposedParametersTab->Init();
-	mColorWheelTab->Init();
-	mColorSlidersTab->Init();
-	mToolsTab->Init();
-	mTopTab->Init();
-	mStrokeOptionsTab->Init();
+	for (int i = 0; i < mTabs.Num(); i++)
+	{
+		mTabs[i].Get()->Init();
+	}
 }
 
 void
 FOdysseyPainterEditorGUI::OnToolkitInitialized()
 {
-	mMeshSelectorTab->OnToolkitInitialized();
-	mViewportTab->OnToolkitInitialized();
-	mBrushSelectorTab->OnToolkitInitialized();
-	mBrushExposedParametersTab->OnToolkitInitialized();
-	mColorWheelTab->OnToolkitInitialized();
-	mColorSlidersTab->OnToolkitInitialized();
-	mToolsTab->OnToolkitInitialized();
-	mTopTab->OnToolkitInitialized();
-	mStrokeOptionsTab->OnToolkitInitialized();
+	for (int i = 0; i < mTabs.Num(); i++)
+	{
+		mTabs[i].Get()->OnToolkitInitialized();
+	}
 }
 
 void
 FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
 {
-	mViewportTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mBrushSelectorTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mMeshSelectorTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mBrushExposedParametersTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mColorWheelTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mColorSlidersTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mTopTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mStrokeOptionsTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
-	mToolsTab->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
+	for (int i = 0; i < mTabs.Num(); i++)
+	{
+		mTabs[i].Get()->RegisterTabSpawner(iTabManager, iWorkspaceMenuCategoryRef);
+	}
 }
 
 void
 FOdysseyPainterEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager )
 {
-	mViewportTab->UnregisterTabSpawner(iTabManager);
-	mBrushSelectorTab->UnregisterTabSpawner(iTabManager);
-	mMeshSelectorTab->UnregisterTabSpawner(iTabManager);
-	mBrushExposedParametersTab->UnregisterTabSpawner(iTabManager);
-	mColorWheelTab->UnregisterTabSpawner(iTabManager);
-	mColorSlidersTab->UnregisterTabSpawner(iTabManager);
-	mTopTab->UnregisterTabSpawner(iTabManager);
-	mStrokeOptionsTab->UnregisterTabSpawner(iTabManager);
-	mToolsTab->UnregisterTabSpawner(iTabManager);
+	for (int i = 0; i < mTabs.Num(); i++)
+	{
+		mTabs[i].Get()->UnregisterTabSpawner(iTabManager);
+	}
 }
 
 void

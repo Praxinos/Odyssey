@@ -52,12 +52,7 @@ public:
     virtual void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles) override;
     virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 
-	virtual FReply OnClear() override;
-	virtual FReply OnFill() override;
-    virtual FReply OnUndoIliad() override;
-    virtual FReply OnRedoIliad() override;
-	virtual FReply OnClearUndo() override;
-    virtual void   OnCreateNewLayer() override;
+	virtual void   OnCreateNewLayer() override;
     virtual void   OnDuplicateCurrentLayer() override;
     virtual void   OnDeleteCurrentLayer() override;
 

@@ -42,17 +42,11 @@ FOdysseyTextureEditorGUI::CreateTabs()
 {
 	FOdysseyPainterEditorGUI::CreateTabs();
 
-	mTopTab = MakeShareable(new FOdysseyTextureEditorTopTab(mEditor));
-	mToolsTab = MakeShareable(new FOdysseyTextureEditorToolsTab(mEditor));
-}
+	//REPLACE TABS
+	ODYSSEY_SET_TAB(mTopTab, FOdysseyTextureEditorTopTab, mEditor)
+	ODYSSEY_SET_TAB(mToolsTab, FOdysseyTextureEditorToolsTab, mEditor);
 
-void
-FOdysseyTextureEditorGUI::InitTabs()
-{
-	FOdysseyPainterEditorGUI::InitTabs();
-
-	//mTopTab initialized by PainterEditorGUI
-	//mToolsTab initialized by PainterEditorGUI
+	//ADD NEW TABS
 }
 
 void

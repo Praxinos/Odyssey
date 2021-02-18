@@ -16,6 +16,9 @@ class FOdysseyPainterEditorToolsTab;
 class FOdysseyPainterEditorTopTab;
 class FOdysseyPainterEditorViewportTab;
 
+#define ODYSSEY_ADD_TAB(var, class, ...) { var = MakeShareable(new class(__VA_ARGS__)); mTabs.Add(TAttribute<TSharedPtr<FOdysseyPainterEditorTab>>::Create([&](){ return var; })); }
+#define ODYSSEY_SET_TAB(var, class, ...) { var = MakeShareable(new class(__VA_ARGS__)); }
+
 /**
  * Implements an Editor toolkit for textures.
  */
@@ -64,6 +67,10 @@ private:
     FOdysseyPainterEditor*                          mEditor;
     FName                                           mLayoutName;
 	TSharedPtr<FTabManager::FLayout>                mLayout;
+
+protected:
+    //listing all tabs and managing the fact that a tab ptr can change through the Init process
+    TArray<TAttribute<TSharedPtr<FOdysseyPainterEditorTab>>> mTabs;
 
 protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;

@@ -8,7 +8,6 @@
 #include "OdysseyEventState.h"
 
 class FOdysseyPainterEditorToolkit;
-class FOdysseyPainterEditorData;
 class FOdysseyPainterEditorGUI;
 class UOdysseyBrush;
 class UBlueprint;
@@ -48,65 +47,13 @@ public:
     virtual void OnVisitPraxinosWebsite();
     virtual void OnVisitPraxinosForums();
 
-    //Mesh Selector
-    virtual void OnMeshSelected( UStaticMesh* iMesh );
-    virtual void OnMeshChanged( UBlueprint* iMesh );
-
     //Shortcut Actions
-    virtual FReply OnClear();
-    virtual FReply OnFill();
-    virtual FReply OnUndoIliad();
-    virtual FReply OnRedoIliad();
-    virtual FReply OnClearUndo();
     virtual void   OnCreateNewLayer();
     virtual void   OnDuplicateCurrentLayer();
     virtual void   OnDeleteCurrentLayer();
     virtual void   OnExportLayersAsTextures() = 0;
     virtual void   OnImportTexturesAsLayers() = 0;
-    void           OnResetViewportPosition();
-    void           OnResetViewportRotation();
-    void           OnRotateViewportLeft();
-    void           OnRotateViewportRight();
-    void           OnSetZoom(double iZoomValue);
-    void           OnSetZoomFitScreen();
-    void           OnZoomIn();
-    void           OnZoomOut();
-    void           OnRefreshBrush();
-    void           OnAddBrushSize(int32 iValue);
-    void           OnSetAlphaMode(::ul3::eAlphaMode iAlphaMode);
     void           OnSwitchTabletAPI();
-
-    // Brush Handlers
-    virtual void HandleBrushParameterChanged();
-
-    // Color Handlers
-	virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
-    // virtual void HandleSelectorColorChanged( const ::ul3::FPixelValue& iColor );
-    virtual void HandlePaintColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
-
-    // Modifiers Handlers
-    virtual void HandleSizeModifierChanged( int32 iValue );
-    virtual void HandleOpacityModifierChanged( int32 iValue );
-    virtual void HandleFlowModifierChanged( int32 iValue );
-    virtual void HandleBlendingModeModifierChanged( int32 iValue );
-    // virtual void HandleAlphaModeModifierChanged( int32 iValue );
-
-    // Stroke Options Handlers
-    /* virtual void HandleStrokeStepChanged( int32 iValue );
-    virtual void HandleStrokeAdaptativeChanged( bool iValue );
-    virtual void HandleStrokePaintOnTickChanged( bool iValue );
-    virtual void HandleInterpolationTypeChanged( int32 iValue );
-    virtual void HandleSmoothingMethodChanged( int32 iValue );
-    virtual void HandleSmoothingStrengthChanged( int32 iValue );
-    virtual void HandleSmoothingEnabledChanged( bool iValue );
-    virtual void HandleSmoothingRealTimeChanged( bool iValue );
-    virtual void HandleSmoothingCatchUpChanged( bool iValue ); */
-
-    // Performance Handlers
-    virtual void HandlePerformanceDrawBrushPreviewChanged( bool iValue );
-
-    // Viewport (zoom/rotation/pan) Handlers
-    // virtual void HandleViewportParameterChanged();
 
 protected:
     // Commands building

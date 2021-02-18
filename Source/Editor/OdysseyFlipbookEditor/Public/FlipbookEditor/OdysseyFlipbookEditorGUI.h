@@ -36,7 +36,6 @@ public:
 protected:
     //Init
 	virtual void CreateTabs() override;
-	virtual void InitTabs() override;
 
 public:
 	void InitOdysseyFlipbookEditorGUI(FOdysseyFlipbookEditor* iEditor, TSharedPtr<FOdysseyFlipbookEditorController>& iController);

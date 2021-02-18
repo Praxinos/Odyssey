@@ -56,6 +56,19 @@ FOdysseyPainterEditorBrushSelectorTab::SpawnTab( const FSpawnTabArgs& iArgs )
         ];
 }
 
+void
+FOdysseyPainterEditorBrushSelectorTab::BindShortcuts()
+{
+    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorBrushSelectorTab::__VA_ARGS__ ), FCanExecuteAction() );
+
+	MAP_ACTION(painterEditorCommands.RefreshBrush, RefreshBrush )
+
+    #undef MAP_ACTION
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
@@ -72,6 +85,20 @@ void
 FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected( UOdysseyBrush* iBrush )
 {
 	mEditor->PaintEngine()->Brush(iBrush);
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
+
+void
+FOdysseyPainterEditorBrushSelectorTab::RefreshBrush()
+{
+	UOdysseyBrush* brush = mEditor->PaintEngine()->Brush();
+    if (brush)
+    {
+        mEditor->PaintEngine()->Brush(nullptr);
+        mEditor->PaintEngine()->Brush(brush);
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

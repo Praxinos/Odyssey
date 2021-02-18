@@ -25,14 +25,14 @@ FOdysseyTextureEditorToolsTab::FOdysseyTextureEditorToolsTab(FOdysseyTextureEdit
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
-FReply
-FOdysseyTextureEditorToolsTab::OnClear()
+void
+FOdysseyTextureEditorToolsTab::Clear()
 {
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
 
 	if( mEditor->LayerStack()->GetCurrentLayer() == NULL )
-        return FReply::Handled();
+        return;
 
     //Record
     mEditor->LayerStack()->mDrawingUndo->StartRecord();
@@ -40,17 +40,17 @@ FOdysseyTextureEditorToolsTab::OnClear()
 	mEditor->LayerStack()->mDrawingUndo->EndRecord();
     //EndRecord
 
-    return FOdysseyPainterEditorToolsTab::OnClear();
+    FOdysseyPainterEditorToolsTab::Clear();
 }
 
-FReply
-FOdysseyTextureEditorToolsTab::OnFill()
+void
+FOdysseyTextureEditorToolsTab::Fill()
 {
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
 
 	if( mEditor->LayerStack()->GetCurrentLayer() == NULL )
-        return FReply::Handled();
+        return;
 
     //Record
     mEditor->LayerStack()->mDrawingUndo->StartRecord();
@@ -58,40 +58,39 @@ FOdysseyTextureEditorToolsTab::OnFill()
 	mEditor->LayerStack()->mDrawingUndo->EndRecord();
     //EndRecord
 
-    return FOdysseyPainterEditorToolsTab::OnFill();
+    FOdysseyPainterEditorToolsTab::Fill();
 }
 
-FReply
-FOdysseyTextureEditorToolsTab::OnUndo()
+void
+FOdysseyTextureEditorToolsTab::Undo()
 {
-    FOdysseyPainterEditorToolsTab::OnUndo();
+    FOdysseyPainterEditorToolsTab::Undo();
 
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->LoadData();
-    return FReply::Handled();
 }
 
-FReply
-FOdysseyTextureEditorToolsTab::OnRedo()
+void
+FOdysseyTextureEditorToolsTab::Redo()
 {
-    FOdysseyPainterEditorToolsTab::OnRedo();
+    FOdysseyPainterEditorToolsTab::Redo();
 
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->Redo();
-    return FReply::Handled();
 }
 
-FReply
-FOdysseyTextureEditorToolsTab::OnClearUndo()
+void
+FOdysseyTextureEditorToolsTab::ClearUndo()
 {
     if(!mEditor->LayerStack())
-        return FReply::Handled();
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->Clear();
-    return FOdysseyPainterEditorToolsTab::OnClearUndo();
+    FOdysseyPainterEditorToolsTab::ClearUndo();
 }
+
 #undef LOCTEXT_NAMESPACE

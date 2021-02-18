@@ -19,12 +19,12 @@ protected:
     // Widget Getters
 
 protected:
-    // Event Listeners
-    virtual FReply OnClear() override;
-    virtual FReply OnFill() override;
-    virtual FReply OnUndo() override;
-    virtual FReply OnRedo() override;
-    virtual FReply OnClearUndo() override;
+    // Methods
+    virtual void Clear() override;
+    virtual void Fill() override;
+    virtual void Undo() override;
+    virtual void Redo() override;
+    virtual void ClearUndo() override;
 
 private:
     FOdysseyTextureEditor* mEditor;

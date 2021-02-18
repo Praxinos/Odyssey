@@ -20,6 +20,7 @@ protected:
     // FOdysseyPainterEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
+    virtual void BindShortcuts() override;
 
 protected:
     // Widget Getters
@@ -28,6 +29,10 @@ protected:
 protected:
     // Event Listeners
     virtual void OnBrushSelected( UOdysseyBrush* iBrush );
+
+protected:
+    // Methods
+    virtual void RefreshBrush();
 
 private:
     FOdysseyPainterEditor* mEditor;

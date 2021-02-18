@@ -35,7 +35,6 @@ public:
 protected:
     //Init
 	virtual void CreateTabs() override;
-	virtual void InitTabs() override;
 
 public:
     //Init
