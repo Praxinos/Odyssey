@@ -300,14 +300,14 @@ bool FOdysseyPsdOperations::ReadLayers()
         mFileHandle->Seek( mFileHandle->Tell() + mLayersInfo[currLayer].mLayerBlendingSize );
 
         mFileHandle->Read( (uint8*) &mLayersInfo[currLayer].mNameSize, 1 );
-        mLayersInfo[currLayer].mName[257] = {0};
+        mLayersInfo[currLayer].mName[256] = {0};
         mFileHandle->Read( (uint8*) mLayersInfo[currLayer].mName, mLayersInfo[currLayer].mNameSize );
 
         mFileHandle->Seek( mFileHandle->Tell() + (3 - mLayersInfo[currLayer].mNameSize % 4) ); //4 bytes increments for the name
         mLayersInfo[currLayer].mExtraRead  += mLayersInfo[currLayer].mNameSize + 4 - mLayersInfo[currLayer].mNameSize%4;
 
         if(mLayersInfo[currLayer].mName[0] == 0)
-            strcpy_s(mLayersInfo[currLayer].mName,"background");
+            strcpy(mLayersInfo[currLayer].mName,"background");
 
         //UE_LOG(LogTemp, Display, TEXT("%s"), mLayersInfo[currLayer].mName);
 
@@ -812,7 +812,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             uint8_t* planar = new uint8_t[(mImageWidth * mImageHeight) / 8 + 1];
             CopyUncompressed(planar,size);
             PlanarByteConvertBitMapToBGRA8( planar, mImageDst, (mImageWidth * mImageHeight) / 8 + 1 );
-            delete planar;
+            delete[] planar;
         } 
         else if(compressionType == 1) //RLE
         {
@@ -821,7 +821,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             mFileHandle->Seek(mFileHandle->Tell() + mImageHeight * 2);
             DecodeAndCopyRLE(planar,sizeBitmap);
             PlanarByteConvertBitMapToBGRA8(planar,mImageDst,sizeBitmap);
-            delete planar;
+            delete[] planar;
         }
         ::ul3::FBlock* srcblock = new ::ul3::FBlock((::ul3::tByte*)mImageDst,mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);;
         FOdysseyBlock* layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);
@@ -841,7 +841,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                             ,srcblock->Rect()
                             ,::ul3::FVec2I(0,0));
 
-        TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(L"Layer 1",layerBlock));
+        TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(TEXT("Layer1"),layerBlock));
         mLayerStack->AddLayer( imageLayer );
 
         delete srcblock;
@@ -1329,19 +1329,19 @@ void FOdysseyPsdOperations::PlanarByteConvert(uint32_t* src,uint32_t* dst,uint32
 void FOdysseyPsdOperations::NegateImage(uint8_t* ioSrc,uint32_t length )
 {
     for( uint32_t i = 0; i < length; i++ )
-        ioSrc[i] = _UI8_MAX - ioSrc[i];
+        ioSrc[i] = MAX_uint8 - ioSrc[i];
 }
 
 void FOdysseyPsdOperations::NegateImage(uint16_t* ioSrc,uint32_t length )
 {
     for(uint32_t i = 0; i < length; i++)
-        ioSrc[i] = _UI16_MAX - ioSrc[i];
+        ioSrc[i] = MAX_uint16 - ioSrc[i];
 }
 
 void FOdysseyPsdOperations::NegateImage(uint32_t* ioSrc,uint32_t length)
 {
     for(uint32_t i = 0; i < length; i++)
-        ioSrc[i] = _UI32_MAX - ioSrc[i];
+        ioSrc[i] = MAX_uint32 - ioSrc[i];
 }
 
 void FOdysseyPsdOperations::lerp24BitsInto32Bits(uint32_t* ioSrc,uint32_t length)
