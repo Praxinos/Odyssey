@@ -21,6 +21,9 @@ FOdysseyPsdOperations::~FOdysseyPsdOperations()
     if( mImageDst16 )
         delete [] mImageDst16;
 
+    if(mImageDst32)
+        delete[] mImageDst32;
+
     for( int i = 0; i < mLayersInfo.Num(); i++)
     {
         if( mLayersInfo[i].mLayerImageDst )
@@ -28,6 +31,9 @@ FOdysseyPsdOperations::~FOdysseyPsdOperations()
 
         if( mLayersInfo[i].mLayerImageDst16 )
             delete [] mLayersInfo[i].mLayerImageDst16;
+
+        if(mLayersInfo[i].mLayerImageDst32)
+            delete[] mLayersInfo[i].mLayerImageDst32;
     }
 }
 
@@ -46,6 +52,7 @@ FOdysseyPsdOperations::FOdysseyPsdOperations(const TCHAR* iFilename)
     mImageStart = 0;
     mImageDst = nullptr;
     mImageDst16 = nullptr;
+    mImageDst32 = nullptr;
 
     mLayerStack = nullptr;
 
@@ -166,9 +173,9 @@ bool FOdysseyPsdOperations::ReadLayerInfo()
 
     //UE_LOG(LogTemp, Display, TEXT("layerInfoSize: %d"), layerInfoSize);
 
-    if( mBitDepth == 16 && layerInfoSize != 0) 
+    if( mBitDepth >= 16 && layerInfoSize != 0) 
     {
-        UE_LOG(LogTemp, Warning, TEXT("Shouldn't have any info for 16 bit depth, import failed"))
+        UE_LOG(LogTemp, Warning, TEXT("Shouldn't have any info for 16+ bit depth, import failed"))
         return false;
     }
 
@@ -383,11 +390,16 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
 
         position = mFileHandle->Tell();
 
-        if(strcmp(key,"Lr16") == 0)
+        if(strcmp(key,"Lr16") == 0 || strcmp(key,"Lr32") == 0)
         {
             ReadLayers();
             break;
         } 
+        else if( strcmp(key,"Mt32") == 0 )
+        {
+            mFileHandle->Seek(mFileHandle->Tell() + len);
+            ReadAdditionalLayerInfo(sectionEnd);
+        }
         else 
         {
             mFileHandle->Seek( mFileHandle->Tell() + len );
@@ -516,10 +528,13 @@ bool FOdysseyPsdOperations::ReadLayerStackData()
                 UE_LOG(LogTemp, Warning, TEXT ("Unknown or unsupported Compression, import failed" ))
                 return false;
             }
+
+            if(mColorMode == 4 && j != 0)//CMYK, we negate everything but the alpha
+                NegateImage(channelContents[j],channelSize);
         }
 
-        uint8_t* planarDst = new uint8[mLayersInfo[i].mSizeLayerImage];
-        mLayersInfo[i].mLayerImageDst = new uint8[ mLayersInfo[i].mSizeLayerImage ];
+        uint8_t* planarDst = new uint8_t[mLayersInfo[i].mSizeLayerImage];
+        mLayersInfo[i].mLayerImageDst = new uint8_t[ mLayersInfo[i].mSizeLayerImage ];
 
         uint32_t numBytesWritten = 0;
         for ( uint16_t currChannel = 0; currChannel < mLayersInfo[i].mNumChannels; currChannel++ )
@@ -531,7 +546,7 @@ bool FOdysseyPsdOperations::ReadLayerStackData()
             }
         }
 
-        PlanarByteConvert(planarDst,mLayersInfo[i].mLayerImageDst,mLayersInfo[i].mSizeLayerImage, mLayersInfo[i].mNumChannels);
+        PlanarByteConvert(planarDst,mLayersInfo[i].mLayerImageDst,mLayersInfo[i].mSizeLayerImage,mLayersInfo[i].mNumChannels);
 
         //UE_LOG(LogTemp, Display, TEXT("size: %d, written: %d"), mLayersInfo[i].mSizeLayerImage, numBytesWritten )
 
@@ -558,8 +573,6 @@ bool FOdysseyPsdOperations::ReadLayerStackData16()
         int lr = mLayersInfo[i].mRight;
         int lb = mLayersInfo[i].mBottom;
         uint32_t channelSize =  (lr - ll) * (lb - lt);
-
-        uint32_t shiftRow = 0;
 
         //UE_LOG(LogTemp, Display, TEXT("CHannelSize layer %d: %d"), i, channelSize );
 
@@ -588,7 +601,7 @@ bool FOdysseyPsdOperations::ReadLayerStackData16()
                 DecodeAndCopyRLE(channelContents[j],channelSize);
                 mLayersInfo[i].mSizeLayerImage += channelSize;
             } 
-            else if( (cp == 2 || cp == 3) && mBitDepth == 16) //zip (only viable in 16 bits)
+            else if( (cp == 2 || cp == 3) )
             {
                 uLongf dstSize = channelSize * sizeof( uint16_t );
                 uLongf srcSize = mLayersInfo[i].mChannelSize[j];
@@ -598,7 +611,7 @@ bool FOdysseyPsdOperations::ReadLayerStackData16()
                 int zResult = uncompress( (uint8*)channelContents[j], &dstSize, srcData, srcSize );
 
                 if( cp == 3 )
-                    UnpredictZip( (uint8*)channelContents[j], channelSize * sizeof( uint16_t ), lr - ll, (lr - ll) * sizeof( uint16_t) );
+                    UnpredictZip16( (uint8*)channelContents[j], channelSize * sizeof( uint16_t ), lr - ll, (lr - ll) * sizeof( uint16_t) );
 
                 for( uint32_t currShort = 0; currShort < channelSize; currShort++ )
                 {
@@ -615,10 +628,13 @@ bool FOdysseyPsdOperations::ReadLayerStackData16()
                 UE_LOG(LogTemp,Warning,TEXT ("Unknown or unsupported Compression, import failed"))
                     return false;
             }
+
+            if(mColorMode == 4 && j != 0)//CMYK, we negate everything but the alpha
+                NegateImage(channelContents[j],channelSize);
         }
 
-        uint16_t* planarDst = new uint16[mLayersInfo[i].mSizeLayerImage];
-        mLayersInfo[i].mLayerImageDst16 = new uint16[mLayersInfo[i].mSizeLayerImage];
+        uint16_t* planarDst = new uint16_t[mLayersInfo[i].mSizeLayerImage];
+        mLayersInfo[i].mLayerImageDst16 = new uint16_t[mLayersInfo[i].mSizeLayerImage];
 
         uint32_t numShortWritten = 0;
         for(uint16_t currChannel = 0; currChannel < mLayersInfo[i].mNumChannels; currChannel++)
@@ -645,6 +661,113 @@ bool FOdysseyPsdOperations::ReadLayerStackData16()
     return true;
 }
 
+bool FOdysseyPsdOperations::ReadLayerStackData32()
+{
+    for(uint8_t i = 0; i < mLayersInfo.Num(); i++)
+    {
+        //UE_LOG(LogTemp, Display, TEXT("Layer Number %d"), i)
+        uint32_t** channelContents = new uint32_t*[mLayersInfo[i].mNumChannels];
+
+        int ll = mLayersInfo[i].mLeft;
+        int lt = mLayersInfo[i].mTop;
+        int lr = mLayersInfo[i].mRight;
+        int lb = mLayersInfo[i].mBottom;
+        uint32_t channelSize =  (lr - ll) * (lb - lt);
+
+        //UE_LOG(LogTemp, Display, TEXT("CHannelSize layer %d: %d"), i, channelSize );
+
+        for(uint8_t j = 0; j < mLayersInfo[i].mNumChannels; j++)
+        {
+            //UE_LOG(LogTemp,Display,TEXT("ChannelStart layer %d channel %d: %d"),i, j, mLayersInfo[i].mStartChannelPos[j]);
+
+            //Future TODO: add masks gestion here when we'll have them
+
+            mFileHandle->Seek(mLayersInfo[i].mStartChannelPos[j]);
+            uint16_t cp;
+            mFileHandle->Read((uint8*)&cp,2);
+            FOdysseyMathUtils::ByteSwap(&cp,2);
+            //UE_LOG(LogTemp, Display, TEXT ("LayerCompression: %d" ), cp );
+
+            channelContents[j] = new uint32_t[channelSize];
+
+            if(cp == 0) //No compression
+            {
+                CopyUncompressed(channelContents[j],channelSize);
+                mLayersInfo[i].mSizeLayerImage += channelSize;
+            } 
+            else if(cp == 1) //RLE
+            {
+                mFileHandle->Seek(mFileHandle->Tell() + (lb - lt) * 2);
+                DecodeAndCopyRLE(channelContents[j],channelSize);
+                mLayersInfo[i].mSizeLayerImage += channelSize;
+            } 
+            else if((cp == 2 || cp == 3))
+            {
+                uLongf dstSize = channelSize * sizeof(uint32_t);
+                uLongf srcSize = mLayersInfo[i].mChannelSize[j];
+                uint8* srcData = new uint8[srcSize];
+                uint32_t* dstData = new uint32_t[channelSize];
+
+                mFileHandle->Read(srcData,srcSize);
+
+                int zResult = uncompress((uint8*)dstData,&dstSize,srcData,srcSize);
+
+                if(cp == 3)
+                    UnpredictZip32((uint8*)dstData, (uint8*)channelContents[j], channelSize * sizeof(uint32_t),lr - ll, lb - lt, (lr - ll) * sizeof(uint32_t));
+
+                for(uint32_t currLong = 0; currLong < channelSize; currLong++)
+                {
+                    //channelContents[j][currLong] = channelContents[j][currLong] >> 8;
+                    FOdysseyMathUtils::ByteSwap(&channelContents[j][currLong],4);
+                    //channelContents[j][currLong]*=255;
+                }
+
+                mLayersInfo[i].mSizeLayerImage += channelSize;
+
+                //UE_LOG(LogTemp, Display, TEXT("returnErrCode: %d"), zResult);
+                delete[] srcData;
+                delete[] dstData;
+            } 
+            else
+            {
+                UE_LOG(LogTemp,Warning,TEXT ("Unknown or unsupported Compression, import failed"))
+                    return false;
+            }
+
+            //lerp24BitsInto32Bits( channelContents[j], channelSize );
+
+            if(mColorMode == 4 && mLayersInfo[i].mID[j] != -1)//CMYK, we negate everything but the alpha
+                NegateImage(channelContents[j],channelSize);
+        }
+
+        uint32_t* planarDst = new uint32_t[mLayersInfo[i].mSizeLayerImage];
+        mLayersInfo[i].mLayerImageDst32 = new uint32_t[mLayersInfo[i].mSizeLayerImage];
+
+        uint32_t numLongWritten = 0;
+        for(uint16_t currChannel = 0; currChannel < mLayersInfo[i].mNumChannels; currChannel++)
+        {
+            for(uint32_t currWrite = 0; currWrite < channelSize; currWrite++)
+            {
+                planarDst[numLongWritten] = channelContents[currChannel][currWrite];
+                numLongWritten++;
+            }
+        }
+
+        PlanarByteConvert(planarDst,mLayersInfo[i].mLayerImageDst32,mLayersInfo[i].mSizeLayerImage,mLayersInfo[i].mNumChannels);
+
+        //UE_LOG(LogTemp, Display, TEXT("size: %d, written: %d"), mLayersInfo[i].mSizeLayerImage, numBytesWritten )
+
+        delete[] planarDst;
+
+        for(int chan = 0; chan < mLayersInfo[i].mNumChannels; chan++)
+            delete[] channelContents[chan];
+
+        delete[] channelContents;
+    }
+
+    return true;
+}
+
 void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 {
     ::ul3::tFormat format;
@@ -654,8 +777,78 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
     else
         format = ULISFormatForUE4TextureSourceFormat(ETextureSourceFormat::TSF_BGRA8);
 
-    mLayerStack = new FOdysseyLayerStack();
-    mLayerStack->Init(mImageWidth,mImageHeight,format);
+    if( mLayersInfo.Num() != 0 )
+    {
+        mLayerStack = new FOdysseyLayerStack();
+        mLayerStack->Init(mImageWidth,mImageHeight,format);
+    }
+
+    //Special case: bitmap --------------------------------------
+    if( mColorMode == 0  /*BitMap*/ ) //If we're dealing with bitmap, the data is at ImgDst, and not in the layers info
+    {
+        if( mImageStart == 0 )
+            return;
+
+        if(mImageDst != nullptr)
+        {
+            delete[] mImageDst;
+            mImageDst = nullptr;
+        }
+
+        mLayerStack = new FOdysseyLayerStack();
+        mLayerStack->Init(mImageWidth,mImageHeight,format);
+
+        mFileHandle->Seek(mImageStart);
+
+        uint16_t compressionType;
+        mFileHandle->Read((uint8*)&compressionType,2);
+        FOdysseyMathUtils::ByteSwap(&compressionType,2);
+
+        uint32_t size =  mImageWidth * mImageHeight * 4; //Converted to BGRA -> 4 channels;
+        mImageDst = new uint8_t[size];
+
+        if(compressionType == 0) // uncompressed
+        {
+            uint8_t* planar = new uint8_t[(mImageWidth * mImageHeight) / 8 + 1];
+            CopyUncompressed(planar,size);
+            PlanarByteConvertBitMapToBGRA8( planar, mImageDst, (mImageWidth * mImageHeight) / 8 + 1 );
+            delete planar;
+        } 
+        else if(compressionType == 1) //RLE
+        {
+            uint32_t sizeBitmap = (mImageWidth * mImageHeight) / 8 + 1;
+            uint8_t* planar = new uint8_t[sizeBitmap];
+            mFileHandle->Seek(mFileHandle->Tell() + mImageHeight * 2);
+            DecodeAndCopyRLE(planar,sizeBitmap);
+            PlanarByteConvertBitMapToBGRA8(planar,mImageDst,sizeBitmap);
+            delete planar;
+        }
+        ::ul3::FBlock* srcblock = new ::ul3::FBlock((::ul3::tByte*)mImageDst,mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);;
+        FOdysseyBlock* layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);
+
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        ::ul3::uint32 MT_bit = ULIS3_PERF_MT;
+        ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+
+
+        ::ul3::Copy(hULIS.ThreadPool()
+                            ,ULIS3_BLOCKING
+                            ,perfIntent
+                            ,hULIS.HostDeviceInfo()
+                            ,ULIS3_NOCB
+                            ,srcblock
+                            ,layerBlock->GetBlock()
+                            ,srcblock->Rect()
+                            ,::ul3::FVec2I(0,0));
+
+        TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(L"Layer 1",layerBlock));
+        mLayerStack->AddLayer( imageLayer );
+
+        delete srcblock;
+    }
+    //-----------------------------------------------------------
+
+
     for( int i = mLayersInfo.Num() - 1; i >= 0; i-- )
     {
         TSharedPtr<IOdysseyLayer> currentRoot = mLayerStack->GetCurrentLayer();
@@ -669,17 +862,68 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             FOdysseyBlock* convBlock;
             FOdysseyBlock* layerBlock;
 
-            if( mBitDepth > 8 )
+            if( mBitDepth == 32 )
+            {
+                switch(mColorMode)
+                {
+                    case 1: //GrayScale
+                    {
+                        if(mLayersInfo[i].mNumChannels == 2)
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_AGF);
+                        else
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_GF);
+                        break;
+                    }
+                    case 3: //RGB
+                    {
+                        if(mLayersInfo[i].mNumChannels == 4)
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_ARGBF);
+                        else
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_RGBF);
+                        break;
+                    }
+                    case 4: //CMYK
+                    {
+                        if(mLayersInfo[i].mNumChannels == 5)
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_ACMYKF);
+                        else
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_CMYKF);
+                        break;
+                    }
+                    case 9: //LAB
+                    {
+                        if(mLayersInfo[i].mNumChannels == 4)
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_ALabF);
+                        else
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_LabF);
+                        break;
+                    }
+                    default: //ERROR
+                        return;
+                }
+
+                //We don't handle drawing on 32 bits, so we convert to 16 bits
+                convBlock =  new FOdysseyBlock(w,h,ULIS3_FORMAT_RGBA16);
+                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_RGBA16);
+            }
+            else if( mBitDepth == 16 )
             {
                 switch (mColorMode)
                 {
+                    case 1: //GrayScale
+                    {
+                        if(mLayersInfo[i].mNumChannels == 2)
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_AG16);
+                        else
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_G16);
+                        break;
+                    }
                     case 3: //RGB
                     {
                         if( mLayersInfo[i].mNumChannels == 4 )
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_ARGB16);
                         else
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_RGB16);
-
                         break;
                     }
                     case 4: //CMYK
@@ -688,7 +932,6 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_ACMYK16);
                         else
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_CMYK16);
-
                         break;
                     }
                     case 9: //LAB
@@ -697,7 +940,6 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_ALab16);
                         else
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_Lab16);
-
                         break;
                     }
                     default: //ERROR
@@ -707,17 +949,24 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 convBlock =  new FOdysseyBlock(w,h,ULIS3_FORMAT_RGBA16);
                 layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_RGBA16);
             }
-            else
+            else if( mBitDepth == 8 )
             {
                 switch(mColorMode)
                 {
+                    case 1: //GrayScale
+                    {
+                        if(mLayersInfo[i].mNumChannels == 2)
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_AG8);
+                        else
+                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_G8);
+                        break;
+                    }
                     case 3: //RGB
                     {
                         if(mLayersInfo[i].mNumChannels == 4)
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_ARGB8);
                         else
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_RGB8);
-
                         break;
                     }
                     case 4: //CMYK
@@ -726,7 +975,6 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_ACMYK8);
                         else
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_CMYK8);
-
                         break;
                     }
                     case 9: //LAB
@@ -735,7 +983,6 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_ALab8);
                         else
                             srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_Lab8);
-
                         break;
                     }
                     default: //ERROR
@@ -745,11 +992,17 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 convBlock =  new FOdysseyBlock(w,h,ULIS3_FORMAT_BGRA8);
                 layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);
             }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Error: we don't handle this bit depth, import failed" ))
+                return;
+            }
 
             IULISLoaderModule& hULIS = IULISLoaderModule::Get();
             ::ul3::uint32 MT_bit = ULIS3_PERF_MT;
             ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-
+            
+            ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, layerBlock->GetBlock(), layerBlock->GetBlock()->Rect() );
             ::ul3::Conv(hULIS.ThreadPool(),ULIS3_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS3_NOCB,srcblock,convBlock->GetBlock());
             ::ul3::Copy(hULIS.ThreadPool()
                                 ,ULIS3_BLOCKING
@@ -807,6 +1060,15 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
     }
 }
 
+void FOdysseyPsdOperations::CopyUncompressed(uint32_t* dst,uint32_t length)
+{
+    for(uint32_t i = 0; i < length; i++)
+    {
+        mFileHandle->Read((uint8*) &(dst[i]),4);
+        FOdysseyMathUtils::ByteSwap(&(dst[i]),4);
+    }
+}
+
 void FOdysseyPsdOperations::CopyUncompressed(uint16_t* dst, uint32_t length)
 {
     for( uint32_t i = 0; i < length; i++ )
@@ -821,11 +1083,50 @@ void FOdysseyPsdOperations::CopyUncompressed(uint8_t* dst, uint32_t length)
     mFileHandle->Read((uint8*) dst, length);
 }
 
+void FOdysseyPsdOperations::DecodeAndCopyRLE(uint32_t* dst,uint32_t length)
+{
+    while(length > 0)
+    {
+        int32_t k;
+        mFileHandle->Read((uint8*)&k,4);
+        FOdysseyMathUtils::ByteSwap(&k,4);
+
+        if(k >= 0)
+        {
+            uint32_t n = k + 1;
+            if(n > length)
+                n = length;
+
+            for(uint32_t i = 0; i < n; i++)
+            {
+                mFileHandle->Read((uint8*)dst,n);
+                FOdysseyMathUtils::ByteSwap(&dst,4);
+                dst++;
+            }
+            length -= n;
+        } else
+        {
+            uint32_t n = -k + 1;
+            if(n > length)
+                n = length;
+
+            uint32_t fileLong;
+            mFileHandle->Read((uint8*)&fileLong,4);
+            FOdysseyMathUtils::ByteSwap(&fileLong,4);
+
+            for(uint32_t i = 0; i < n; i++)
+                *dst++ = fileLong;
+
+            length -= n;
+        }
+    }
+}
+
 void FOdysseyPsdOperations::DecodeAndCopyRLE(uint16_t* dst,uint32_t length)
 {
     while( length > 0 )
     {
-        uint16_t k;
+        int16_t k;
         mFileHandle->Read( (uint8*) &k, 2 );
         FOdysseyMathUtils::ByteSwap( &k, 2 );
 
@@ -900,10 +1201,8 @@ void FOdysseyPsdOperations::DecodeAndCopyRLE(uint8_t* dst, uint32_t length)
     //UE_LOG(LogTemp, Display, TEXT("%d"), numBytesRead)
 }
 
-void FOdysseyPsdOperations::UnpredictZip(uint8_t* dst,uint32_t length, uint32_t numColumns, uint32_t rowSize)
+void FOdysseyPsdOperations::UnpredictZip16(uint8_t* dst,uint32_t length, uint32_t numColumns, uint32_t rowSize)
 {
-    UE_LOG(LogTemp,Display,TEXT("begin"));
-
     while (length > 0)
     {
         uint32_t c = numColumns;
@@ -915,6 +1214,79 @@ void FOdysseyPsdOperations::UnpredictZip(uint8_t* dst,uint32_t length, uint32_t 
         }
         dst+=2;
         length-=rowSize;
+    }
+}
+
+void FOdysseyPsdOperations::UnpredictZip32(uint8* src, uint8* dst, uint32_t length,uint32_t numColumns, uint32_t numRows, uint32_t rowSize)
+{
+    uint32 remaining;
+    uint8* start;
+
+    for(uint32_t y = 0; y < numRows; y++)
+    {
+        start=src;
+        remaining=rowSize;
+        while(--remaining)
+        {
+            *(src+1)+=*src;
+            src++;
+        }
+
+        src=start;
+        remaining=numColumns;
+        while(remaining--)
+        {
+            *(dst++)=*src;
+            *(dst++)=*(src + numColumns);
+            *(dst++)=*(src + numColumns * 2);
+            *(dst++)=*(src + numColumns * 3);
+
+            src++;
+        }
+        src=start+rowSize;
+    }
+}
+
+void FOdysseyPsdOperations::PlanarByteConvertBitMapToBGRA8(uint8_t* src,uint8_t* dst,uint32_t length)
+{
+    unsigned int mask = 1U << 7;
+    for( uint32_t i = 0; i < length; i++ )
+    {
+        for(int j = 0; j < 8; j++)
+        {
+            dst[i*8*4 + j*4] = ((src[i] & mask) ? 0 : 1) * 255;
+            dst[i*8*4 + j*4 + 1] = dst[i*8*4 + j*4];
+            dst[i*8*4 + j*4 + 2] = dst[i*8*4 + j*4];
+            dst[i*8*4 + j*4 + 3] = 255;
+
+            src[i] <<= 1;
+        }
+    }
+}
+
+
+
+void FOdysseyPsdOperations::PlanarByteConvertOrdered(uint8_t* src,uint8_t* dst,uint32_t length,uint8_t numChannels,uint8_t channelsOrder[])
+{
+    uint32_t maxByChannel = length / numChannels;
+    for(uint32_t i = 0; i < maxByChannel; i++)
+    {
+        for(uint16_t j = 0; j < numChannels; j++)
+        {
+            dst[i * numChannels + channelsOrder[j]] = src[i + j * maxByChannel];
+        }
+    }
+}
+
+void FOdysseyPsdOperations::PlanarByteConvertOrdered(uint16_t* src,uint16_t* dst,uint32_t length,uint8_t numChannels,uint8_t channelsOrder[])
+{
+    uint32_t maxByChannel = length / numChannels;
+    for(uint32_t i = 0; i < maxByChannel; i++)
+    {
+        for(uint16_t j = 0; j < numChannels; j++)
+        {
+            dst[i * numChannels + channelsOrder[j]] = src[i + j * maxByChannel];
+        }
     }
 }
 
@@ -939,6 +1311,44 @@ void FOdysseyPsdOperations::PlanarByteConvert(uint16_t* src,uint16_t* dst,uint32
         {
             dst[i * numChannels + j] = src[i + j * maxByChannel];
         }
+    }
+}
+
+void FOdysseyPsdOperations::PlanarByteConvert(uint32_t* src,uint32_t* dst,uint32_t length,uint8_t numChannels)
+{
+    uint32_t maxByChannel = length / numChannels;
+    for(uint32_t i = 0; i < maxByChannel; i++)
+    {
+        for(uint16_t j = 0; j < numChannels; j++)
+        {
+            dst[i * numChannels + j] = src[i + j * maxByChannel];
+        }
+    }
+}
+
+void FOdysseyPsdOperations::NegateImage(uint8_t* ioSrc,uint32_t length )
+{
+    for( uint32_t i = 0; i < length; i++ )
+        ioSrc[i] = _UI8_MAX - ioSrc[i];
+}
+
+void FOdysseyPsdOperations::NegateImage(uint16_t* ioSrc,uint32_t length )
+{
+    for(uint32_t i = 0; i < length; i++)
+        ioSrc[i] = _UI16_MAX - ioSrc[i];
+}
+
+void FOdysseyPsdOperations::NegateImage(uint32_t* ioSrc,uint32_t length)
+{
+    for(uint32_t i = 0; i < length; i++)
+        ioSrc[i] = _UI32_MAX - ioSrc[i];
+}
+
+void FOdysseyPsdOperations::lerp24BitsInto32Bits(uint32_t* ioSrc,uint32_t length)
+{
+    for(uint32_t i = 0; i < length; i++)
+    {
+        ioSrc[i] = ioSrc[i] << 8;
     }
 }
 
@@ -1033,16 +1443,25 @@ bool FOdysseyPsdOperations::Import()
     //We can get it faster by blending the whole layer stack
     /*if( !ReadImageData() )
         return false;*/
-
-    if( mBitDepth > 8 )
+    if( mBitDepth == 32)
+    {
+        if(!ReadLayerStackData32())
+            return false;
+    }
+    else if( mBitDepth == 16 )
     {
         if( !ReadLayerStackData16() )
             return false;
     }
-    else
+    else if( mBitDepth == 8 )
     {
         if(!ReadLayerStackData())
             return false;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Unsupported bit depth, Import failed"));
+        return false;
     }
 
     GenerateLayerStackFromLayerStackData();

@@ -37,10 +37,9 @@ struct PsdLayerInfo
     uint32_t mSizeLayerImage = 0;
     uint8_t* mLayerImageDst = nullptr;
     uint16_t* mLayerImageDst16 = nullptr;
-
+    uint32_t* mLayerImageDst32 = nullptr;
 
     uint32_t mDividerType;
-
 };
 
 class ODYSSEYPSDOPERATIONS_API FOdysseyPsdOperations
@@ -76,19 +75,36 @@ private:
 
     bool ReadLayerStackData();
     bool ReadLayerStackData16();
+    bool ReadLayerStackData32();
 
     void GenerateLayerStackFromLayerStackData();
 
+    void CopyUncompressed(uint32_t* dst,uint32_t length);
     void CopyUncompressed(uint16_t* dst,uint32_t length);
     void CopyUncompressed(uint8_t* dst,uint32_t length);
 
+    void DecodeAndCopyRLE(uint32_t* dst,uint32_t length);
     void DecodeAndCopyRLE(uint16_t* dst,uint32_t length);
     void DecodeAndCopyRLE(uint8_t* dst,uint32_t length);
 
-    void UnpredictZip(uint8* dst,uint32_t length, uint32_t numColumns, uint32_t rowSize);
+    void UnpredictZip16(uint8* dst,uint32_t length, uint32_t numColumns, uint32_t rowSize);
+    void UnpredictZip32(uint8* src, uint8* dst, uint32_t length,uint32_t numColumns, uint32_t numRows, uint32_t rowSize);
+
+    //Size of dst should be 8(bits) * 3(channels) = 24 times size of src
+    void PlanarByteConvertBitMapToBGRA8(uint8_t* src,uint8_t* dst,uint32_t length);
+
+    void PlanarByteConvertOrdered(uint8_t* src,uint8_t* dst,uint32_t length, uint8_t numChannels, uint8_t channelsOrder[]);
+    void PlanarByteConvertOrdered(uint16_t* src,uint16_t* dst,uint32_t length,uint8_t numChannels,uint8_t channelsOrder[]);
 
     void PlanarByteConvert( uint8_t* src, uint8_t* dst, uint32_t length, uint8_t numChannels );
     void PlanarByteConvert(uint16_t* src,uint16_t* dst,uint32_t length,uint8_t numChannels);
+    void PlanarByteConvert(uint32_t* src,uint32_t* dst,uint32_t length,uint8_t numChannels);
+
+    void NegateImage( uint8_t* ioSrc, uint32_t length );
+    void NegateImage( uint16_t* ioSrc, uint32_t length );
+    void NegateImage( uint32_t* ioSrc,uint32_t length );
+
+    void lerp24BitsInto32Bits( uint32_t* ioSrc,uint32_t length );
 
     ::ul3::eBlendingMode GetBlendingModeFromPSD( char iBlendModeKey[5] );
 
@@ -113,7 +129,6 @@ public:
 private:
     IFileHandle* mFileHandle;
 
-private:
     uint16_t mChannelsNumber;
     uint32_t mImageHeight;
     uint32_t mImageWidth;
@@ -121,8 +136,10 @@ private:
     uint16_t mColorMode;
 
     uint32_t mImageStart;
+
     uint8_t* mImageDst;
     uint16_t* mImageDst16;
+    uint32_t* mImageDst32;
 
     FOdysseyLayerStack* mLayerStack;
 
