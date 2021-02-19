@@ -848,10 +848,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
     }
     //-----------------------------------------------------------
 
+    TSharedPtr<IOdysseyLayer> currentRoot = mLayerStack->GetCurrentLayer();
 
     for( int i = mLayersInfo.Num() - 1; i >= 0; i-- )
     {
-        TSharedPtr<IOdysseyLayer> currentRoot = mLayerStack->GetCurrentLayer();
         if( mLayersInfo[i].mDividerType == 0 ) //Rasterizable layer
         {
             FName layerName = FName(mLayersInfo[i].mName);
