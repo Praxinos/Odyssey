@@ -36,6 +36,8 @@ struct FOdysseyMathUtils
 
     static float QuadraticBezierGenerateLinearLUT( TArray< FOdysseyBezierLutElement >* ioArray, const FVector2D& iP0, const FVector2D& iP1, const FVector2D& iP2, int iAdaptativeLength = 3 );
     static float QuadraticBezierGenerateLinearLUT_Imp( TArray< FOdysseyBezierLutElement >* ioArray, const FVector2D& iP0, const FVector2D& iP1, const FVector2D& iP2, int iAdaptativeLength = 3, float iOffset = 0.f );
+
+    static void ByteSwap( void* iPtr, int32 iLength );
 };
 
 #include "OdysseyMathUtils.inl"

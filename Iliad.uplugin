@@ -41,6 +41,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseyPsdOperations",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyMeshPaintRendering",
       "Type": "UncookedOnly",
       "LoadingPhase": "PostConfigInit"

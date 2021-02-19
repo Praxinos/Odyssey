@@ -213,6 +213,22 @@ ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int i
     return ret;
 }
 
+ETextureSourceFormat UE4TextureSourceFormatForULISFormat( ::ul3::tFormat iFormat )
+{
+    ETextureSourceFormat ret = TSF_Invalid;
+    switch(iFormat) {
+        case ULIS3_FORMAT_G8:		ret = TSF_G8;           break;
+        case ULIS3_FORMAT_G16:		ret = TSF_G16;		    break;
+        case ULIS3_FORMAT_BGRA8:	ret = TSF_BGRA8;        break;
+        case ULIS3_FORMAT_RGBA8:	ret = TSF_RGBA8;        break;
+        case ULIS3_FORMAT_RGBA16:	ret = TSF_RGBA16;	    break;
+        case ULIS3_FORMAT_RGBAF:	ret = TSF_RGBA16F;	    break;
+        default:					ret = TSF_Invalid;      break;
+    }
+    checkf(ret,TEXT("Error, bad format !")); // Crash
+    return ret;
+}
+
 EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFormat )
 {
     EPixelFormat ret = PF_Unknown;
