@@ -28,11 +28,6 @@ public:
 	void InitOdysseyPainterEditorController(const TSharedRef<FUICommandList>& iToolkitCommands);
 
 public:
-    // Getters
-	const TArray<TSharedPtr<FExtender>>& GetMenuExtenders() const;
-	TArray<TSharedPtr<FExtender>>& GetMenuExtenders();
-
-public:
     // Virtual Methods
     virtual FOdysseyPainterEditor* GetEditor() = 0;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() = 0;
@@ -48,11 +43,6 @@ public:
     virtual void OnVisitPraxinosForums();
 
     //Shortcut Actions
-    virtual void   OnCreateNewLayer();
-    virtual void   OnDuplicateCurrentLayer();
-    virtual void   OnDeleteCurrentLayer();
-    virtual void   OnExportLayersAsTextures() = 0;
-    virtual void   OnImportTexturesAsLayers() = 0;
     void           OnSwitchTabletAPI();
 
 protected:
@@ -60,16 +50,11 @@ protected:
     virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);
 
 private:
-    TSharedPtr<FExtender> CreateMenuExtender(const TSharedRef<FUICommandList>& iToolkitCommands);
-    static void FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor );
-    static void FillAboutMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor );
-
     TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem );
     void ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo );
     FText GetComboBoxTabletAPISelectedAsText() const;
 
 private:
     TSharedPtr<EOdysseyStylusInputDriver>       mComboBoxTabletAPISelected;
-	TArray<TSharedPtr<FExtender>>               mMenuExtenders;
 };
 

@@ -30,8 +30,7 @@ FOdysseyPainterEditorToolkit::Init(TSharedPtr<FOdysseyPainterEditor> iEditor, UO
     
     TArray<UObject*> editedObjects = GetAllEditedObjects();
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->GetLayout(), true, false, editedObjects);
-    InitMenu();
-
+    InitExtender();
     mEditor->OnToolkitInitialized();
 }
 
@@ -77,13 +76,12 @@ FOdysseyPainterEditorToolkit::GetWorldCentricTabColorScale() const
 //-------------------------------------------------------------------- Commands building
 
 void
-FOdysseyPainterEditorToolkit::InitMenu()
+FOdysseyPainterEditorToolkit::InitExtender()
 {
-    TArray<TSharedPtr<FExtender>> extenders = mEditor->CreateMenuExtenders();
-    for( int i = 0; i < extenders.Num(); i++)
-    {
-        AddMenuExtender(extenders[i]);
-    }
+	TSharedPtr<FExtender> extender = MakeShareable(new FExtender());
+    mEditor->FillExtender(extender);
+    AddMenuExtender(extender);
+    AddToolbarExtender(extender);
     RegenerateMenusAndToolbars(); //TODO: check if really needed
 }
 

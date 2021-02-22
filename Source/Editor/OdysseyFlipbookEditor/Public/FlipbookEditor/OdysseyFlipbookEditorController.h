@@ -65,13 +65,6 @@ public:
 	virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineStrokeAbort() override;
 
-    virtual void   OnCreateNewLayer() override;
-    virtual void   OnDuplicateCurrentLayer() override;
-    virtual void   OnDeleteCurrentLayer() override;
-
-    void           OnExportLayersAsTextures() override;
-    void           OnImportTexturesAsLayers() override;
-
 	// virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:

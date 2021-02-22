@@ -47,8 +47,6 @@ FOdysseyPainterEditorController::FOdysseyPainterEditorController()
 void
 FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
-    mMenuExtenders.Add(CreateMenuExtender(iToolkitCommands));
-
     // Add Menu Extender
     //GetMenuExtenders().Add(CreateMenuExtenders(iToolkitCommands));
 
@@ -63,18 +61,6 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
 	GetEditor()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
 	GetEditor()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
 	GetEditor()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
-}
-
-const TArray<TSharedPtr<FExtender>>&
-FOdysseyPainterEditorController::GetMenuExtenders() const
-{
-	return mMenuExtenders;
-}
-
-TArray<TSharedPtr<FExtender>>&
-FOdysseyPainterEditorController::GetMenuExtenders()
-{
-	return mMenuExtenders;
 }
 
 //--------------------------------------------------------------------------------------
@@ -99,77 +85,9 @@ FOdysseyPainterEditorController::BindCommands(const TSharedRef<FUICommandList>& 
         FCanExecuteAction() );
 
 	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().CreateNewLayer,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnCreateNewLayer ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().DuplicateCurrentLayer,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnDuplicateCurrentLayer ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().DeleteCurrentLayer,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnDeleteCurrentLayer ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
         FOdysseyPainterEditorCommands::Get().SwitchTabletAPI,
         FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnSwitchTabletAPI ),
         FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().ImportTexturesAsLayers,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnImportTexturesAsLayers ),
-        FCanExecuteAction() );
-
-	iToolkitCommands->MapAction(
-        FOdysseyPainterEditorCommands::Get().ExportLayersAsTextures,
-        FExecuteAction::CreateSP( this, &FOdysseyPainterEditorController::OnExportLayersAsTextures ),
-        FCanExecuteAction() );
-}
-
-TSharedPtr<FExtender>
-FOdysseyPainterEditorController::CreateMenuExtender(const TSharedRef<FUICommandList>& iToolkitCommands)
-{
-    FExtender* extender = new FExtender();
-
-	extender->AddMenuExtension(
-        "HelpApplication",
-        EExtensionHook::After,
-		iToolkitCommands,
-        FMenuExtensionDelegate::CreateStatic< FOdysseyPainterEditorController& >( &FOdysseyPainterEditorController::FillAboutMenu, *this ) );
-
-	extender->AddMenuExtension(
-        "FileLoadAndSave",
-        EExtensionHook::After,
-		iToolkitCommands,
-        FMenuExtensionDelegate::CreateStatic< FOdysseyPainterEditorController& >( &FOdysseyPainterEditorController::FillImportExportMenu, *this) );
-
-    return MakeShareable(extender);
-}
-
-//static
-void
-FOdysseyPainterEditorController::FillImportExportMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyTextureEditor )
-{
-    ioMenuBuilder.BeginSection( "FileOdysseyTexture", LOCTEXT( "OdysseyTexture", "OdysseyTexture" ) );
-    {
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ImportTexturesAsLayers );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportLayersAsTextures );
-    }
-}
-
-//static
-void
-FOdysseyPainterEditorController::FillAboutMenu( FMenuBuilder& ioMenuBuilder, FOdysseyPainterEditorController& iOdysseyPainterEditor )
-{
-    ioMenuBuilder.BeginSection( "About", LOCTEXT( "OdysseyPainter", "OdysseyPainter" ) );
-    {
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().AboutIliad );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosForums );
-    }
 }
 
 TSharedRef<SWidget>
@@ -255,21 +173,6 @@ FOdysseyPainterEditorController::OnVisitPraxinosForums()
 {
     FString URL = "https://praxinos.coop/forum";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
-}
-
-void
-FOdysseyPainterEditorController::OnCreateNewLayer()
-{
-}
-
-void
-FOdysseyPainterEditorController::OnDuplicateCurrentLayer()
-{
-}
-
-void
-FOdysseyPainterEditorController::OnDeleteCurrentLayer()
-{
 }
 
 void

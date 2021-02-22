@@ -23,7 +23,7 @@ FOdysseyViewportDrawingEditorController::~FOdysseyViewportDrawingEditorControlle
         if(mData->LayerStack())
         {
             mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-            mData->LayerStack()->OnStructureChanged().RemoveAll(this);
+            mData->LayerStack()->OnStructureChanged().RemoveAll(this); //TODO: Remove OnStructureChanged
             mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
             mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
             mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);

@@ -45,14 +45,13 @@ public:
     // Methods
     virtual void OnToolkitInitialized();
     virtual bool OnCloseRequested();
-
+    virtual void FillExtender(TSharedPtr<FExtender>& ioExtender);
+    virtual TSharedRef<FTabManager::FLayout> GetLayout();
+    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager );
 public:
     // Interface
     virtual FOdysseyPainterEditorGUI* GetGUI() = 0;
-    virtual TSharedRef<FTabManager::FLayout> GetLayout() = 0;
-    virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const = 0;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;
-    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;
 
 private:
     TWeakPtr<FOdysseyPainterEditorToolkit> mToolkit;

@@ -11,12 +11,13 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyTextureEditor.h"
 
+#include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTopTab.h"
 #include "OdysseyTextureEditorToolsTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
-/*static*/const FName FOdysseyTextureEditorGUI::smLayerStackTabId( TEXT( "OdysseyTextureEditor_LayerStack" ) );
+///*static*/const FName FOdysseyTextureEditorGUI::smLayerStackTabId( TEXT( "OdysseyTextureEditor_LayerStack" ) );
 /*static*/const FName FOdysseyTextureEditorGUI::smTextureDetailsTabId( TEXT( "OdysseyTextureEditor_TextureDetails" ) );
 
 /////////////////////////////////////////////////////
@@ -47,12 +48,13 @@ FOdysseyTextureEditorGUI::CreateTabs()
 	ODYSSEY_SET_TAB(mToolsTab, FOdysseyTextureEditorToolsTab, mEditor);
 
 	//ADD NEW TABS
+	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyTextureEditorLayerStackTab, mEditor);
 }
 
 void
 FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
-	CreateLayerStackTab(iEditor, iController);
+	// CreateLayerStackTab(iEditor, iController);
 	CreateTextureDetailsTab(iEditor, iController);
 }
  
@@ -82,7 +84,8 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 			//->SetHideTabWell( false )
 			//->SetSizeCoefficient( 0.6f )
 			// Layer Stack
-			->AddTab(smLayerStackTabId, ETabState::OpenedTab)
+			//->AddTab(smLayerStackTabId, ETabState::OpenedTab)
+			->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
 			->SetSizeCoefficient(0.2f)
 		)
@@ -112,10 +115,10 @@ FOdysseyTextureEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
     FOdysseyPainterEditorGUI::RegisterTabSpawners(iTabManager, iWorkspaceMenuCategoryRef);
 
     // LayerStack
-    iTabManager->RegisterTabSpawner( smLayerStackTabId, FOnSpawnTab::CreateSP( this, &FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnLayerStack ) )
+    /* iTabManager->RegisterTabSpawner( smLayerStackTabId, FOnSpawnTab::CreateSP( this, &FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnLayerStack ) )
         .SetDisplayName( LOCTEXT( "LayerStackTab", "LayerStack" ) )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ) );
+        .SetIcon( FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ) ); */
 
 	// Texture Details
     iTabManager->RegisterTabSpawner( smTextureDetailsTabId, FOnSpawnTab::CreateSP( this, &FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnTextureDetails ) )
@@ -127,19 +130,21 @@ FOdysseyTextureEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManag
 void
 FOdysseyTextureEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager )
 {
+	FOdysseyPainterEditorGUI::UnregisterTabSpawners(iTabManager);
+
     iTabManager->UnregisterTabSpawner( smTextureDetailsTabId );
-	iTabManager->UnregisterTabSpawner( smLayerStackTabId );
+	// iTabManager->UnregisterTabSpawner( smLayerStackTabId );
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------- Internal widget creation
 
-void
+/* void
 FOdysseyTextureEditorGUI::CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
 {
     mLayerStackTab = SNew( SOdysseyLayerStackView )
         .LayerStackData_Raw( iEditor, &FOdysseyTextureEditor::LayerStack );
-}
+} */
 
 void
 FOdysseyTextureEditorGUI::CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
@@ -151,7 +156,7 @@ FOdysseyTextureEditorGUI::CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-TSharedPtr<SOdysseyLayerStackView>&
+TSharedPtr<FOdysseyTextureEditorLayerStackTab>&
 FOdysseyTextureEditorGUI::GetLayerStackTab()
 {
 	return mLayerStackTab;
@@ -167,7 +172,7 @@ FOdysseyTextureEditorGUI::GetTextureDetailsTab()
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Spawner callbacks
 
-TSharedRef<SDockTab>
+/* TSharedRef<SDockTab>
 FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs)
 {
     check( iArgs.GetTabId() == smLayerStackTabId );
@@ -178,7 +183,7 @@ FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& i
             mLayerStackTab.ToSharedRef()
         ];
 
-}
+}*/
 
 TSharedRef<SDockTab>
 FOdysseyTextureEditorGUI::HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs)

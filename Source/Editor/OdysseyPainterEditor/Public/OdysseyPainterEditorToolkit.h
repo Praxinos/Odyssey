@@ -44,8 +44,7 @@ protected:
     virtual TArray<UObject*> GetAllEditedObjects();
 
 private:
-	void InitMenu();
-
+	void InitExtender();
 
 private:
     TSharedPtr<FOdysseyPainterEditor> mEditor;

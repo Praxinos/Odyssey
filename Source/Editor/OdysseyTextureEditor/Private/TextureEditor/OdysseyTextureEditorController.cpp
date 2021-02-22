@@ -42,9 +42,6 @@ FOdysseyTextureEditorController::Init()
     // Init Painter Editor
     FOdysseyPainterEditorController::InitOdysseyPainterEditorController(mEditor->Toolkit()->GetToolkitCommands());
 
-    // Register our commands. This will only register them if not previously registered
-    FOdysseyTextureEditorCommands::Register();
-
     // Bind each command to its function
     BindCommands(mEditor->Toolkit()->GetToolkitCommands());
 
@@ -135,45 +132,6 @@ FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     }
 }
 
-/*
-void
-FOdysseyTextureEditorController::OnBrushSelected( UOdysseyBrush* iBrush )
-{
-    FOdysseyPainterEditorController::OnBrushSelected( iBrush );
-
-    if( GetEditor()->PaintEngine()->BrushInstance() )
-    {
-        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
-        GetEditor()->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
-    }
-}
-
-void
-FOdysseyTextureEditorController::OnBrushChanged( UBlueprint* iBrush )
-{
-    FOdysseyPainterEditorController::OnBrushChanged( iBrush );
-
-    UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>( iBrush );
-    if( !check_brush )
-        return;
-}
-
-void
-FOdysseyTextureEditorController::OnBrushCompiled( UBlueprint* iBrush )
-{
-    FOdysseyPainterEditorController::OnBrushCompiled( iBrush );
-
-    UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>( iBrush );
-    if( !check_brush )
-        return;
-
-    if( GetEditor()->PaintEngine()->BrushInstance() )
-    {
-        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
-        GetEditor()->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
-    }
-} */
-
 void
 FOdysseyTextureEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
@@ -192,6 +150,8 @@ void
 FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange(iChangedTiles);
+
+    //TODO: Manage Undo directly in PaintEngine
 	GetEditor()->LayerStack()->mDrawingUndo->StartRecord();
 	for (int i = 0; i < iChangedTiles.Num(); i++)
 	{
@@ -205,8 +165,8 @@ void
 FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(iChangedTiles);
-	// GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-	// GetEditor()->DisplaySurface()->Invalidate();
+
+    //TODO: Move To Editor
 	GetEditor()->Texture()->MarkPackageDirty();
 }
 
@@ -214,6 +174,8 @@ void
 FOdysseyTextureEditorController::OnPaintEngineStrokeAbort()
 {
     FOdysseyPainterEditorController::OnPaintEngineStrokeAbort();
+
+    //TODO: make StrokeAbort change PreviewBlock, so that OnPaintEnginePreviewBlockTilesChanged is called and remove these lines
 	GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
 	GetEditor()->DisplaySurface()->Invalidate();
 }
@@ -221,6 +183,8 @@ FOdysseyTextureEditorController::OnPaintEngineStrokeAbort()
 void
 FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
 {
+    //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
+
     //Remove all delegates for AlphaLock and set alpha lock to a default value
     if (iOldValue && iOldValue->GetType() == IOdysseyLayer::eType::kImage) {
         TSharedPtr<FOdysseyImageLayer> oldImageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(iOldValue);
@@ -255,29 +219,15 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdy
 void
 FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 {
+    //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
     GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mEditor->SelectedAlphaMode());
 }
 
-/* void
-FOdysseyTextureEditorController::HandleAlphaModeModifierChanged( int32 iValue )
-{
-    if (!GetEditor()->LayerStack())
-        return;
-
-    if (!GetEditor()->LayerStack()->GetCurrentLayer())
-        return;
-
-    if( !( GetEditor()->LayerStack()->GetCurrentLayer()->GetType() == IOdysseyLayer::eType::kImage ) )
-        return;
-
-	TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(GetEditor()->LayerStack()->GetCurrentLayer());
-    GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mEditor->SelectedAlphaMode());
-} */
-
 void
 FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
 {
+    //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
     if (iLayer == GetEditor()->LayerStack()->GetCurrentLayer() || GetEditor()->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
     {
         GetEditor()->PaintEngine()->SetLock(GetEditor()->LayerStack()->GetCurrentLayer()->IsLocked(true) || !GetEditor()->LayerStack()->GetCurrentLayer()->IsVisible(true));
@@ -287,6 +237,7 @@ FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer
 void
 FOdysseyTextureEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
 {
+    //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
     if (iLayer == GetEditor()->LayerStack()->GetCurrentLayer() || GetEditor()->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
     {
         GetEditor()->PaintEngine()->SetLock(GetEditor()->LayerStack()->GetCurrentLayer()->IsLocked(true) || !GetEditor()->LayerStack()->GetCurrentLayer()->IsVisible(true));
@@ -296,8 +247,10 @@ FOdysseyTextureEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLaye
 void
 FOdysseyTextureEditorController::OnLayerStackStructureChanged()
 {
+    //TODO: Move to TextureWrapper
     GetEditor()->Texture()->MarkPackageDirty();
 
+    //TODO: Remove when States use Editor
     if( GetEditor()->PaintEngine()->BrushInstance() )
     {
         FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( GetEditor()->LayerStack() );
@@ -308,133 +261,14 @@ FOdysseyTextureEditorController::OnLayerStackStructureChanged()
 void
 FOdysseyTextureEditorController::OnLayerStackImageResultChanged()
 {
+    //TODO: Move to TextureEditor ? Is this line really needed ?
     GetEditor()->PaintEngine()->Flush();
+
+
+    //TODO: Move to TextureWrapper
     GetEditor()->Texture()->MarkPackageDirty();
     GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
 	GetEditor()->DisplaySurface()->Invalidate();
-}
-
-void
-FOdysseyTextureEditorController::OnExportLayersAsTextures()
-{
-    FSaveAssetDialogConfig saveAssetDialogConfig;
-    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ExportLayerDialogTitle", "Export Layers As Texture" );
-    saveAssetDialogConfig.DefaultPath = FPaths::GetPath( GetEditor()->Texture()->GetPathName() );
-    saveAssetDialogConfig.DefaultAssetName = GetEditor()->Texture()->GetName();
-    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
-    saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
-    FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
-
-    if( saveObjectPath != "" )
-    {
-        TArray< TSharedPtr<IOdysseyLayer> > layers;
-		GetEditor()->LayerStack()->GetLayerRoot()->DepthFirstSearchTree( &layers, false );
-
-        for( int i = 0; i < layers.Num(); i++ )
-        {
-            if( !( layers[i]->GetType() == IOdysseyLayer::eType::kImage ) )
-                continue;
-
-            TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer> ( layers[i] );
-
-            FString assetPath = FPaths::GetPath( saveObjectPath ) + "/";
-            FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
-            UPackage* package = CreatePackage( *packagePath );
-
-            UTexture2D* object = NewObject<UTexture2D>( package, UTexture2D::StaticClass(), FName( *( FPaths::GetBaseFilename( saveObjectPath ) + TEXT( "_" ) + imageLayer->GetName().ToString() ) ), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone );
-            object->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-            object->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-            object->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-            InitTextureWithBlockData(imageLayer->GetBlock(), object, GetEditor()->Texture()->Source.GetFormat());
-
-            object->PostEditChange();
-            object->UpdateResource();
-
-            FAssetRegistryModule::AssetCreated( object );
-
-            UPackage::SavePackage( package, object, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *( imageLayer->GetName().ToString() ) );
-            
-            package->MarkAsFullyLoaded();
-            object->MarkPackageDirty();
-        }
-    }
-}
-
-void
-FOdysseyTextureEditorController::OnImportTexturesAsLayers()
-{
-    FOpenAssetDialogConfig openAssetDialogConfig;
-    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "ImportTextureDialogTitle", "Import Textures As Layers" );
-    openAssetDialogConfig.DefaultPath = FPaths::GetPath(GetEditor()->Texture()->GetPathName() );
-    openAssetDialogConfig.bAllowMultipleSelection = true;
-    openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetFName() );
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
-    TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
-
-    for( int i = 0; i < assetsData.Num(); i++ )
-    {
-        UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, GetEditor()->LayerStack()->Format() );
-		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(FName(*(openedTexture->GetName())), textureBlock));
-		GetEditor()->LayerStack()->AddLayer( imageLayer );
-    }
-
-    mGUI->GetLayerStackTab()->RefreshView();
-	
-	GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-	GetEditor()->DisplaySurface()->Invalidate();
-}
-
-void
-FOdysseyTextureEditorController::OnCreateNewLayer()
-{
-    FOdysseyPainterEditorController::OnCreateNewLayer();
-
-    FName name = GetEditor()->LayerStack()->GetLayerRoot()->GetNextLayerName();
-    int w = GetEditor()->LayerStack()->Width();
-    int h = GetEditor()->LayerStack()->Height();
-    ::ul3::tFormat format = GetEditor()->LayerStack()->Format();
-	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(name, FVector2D(w, h), format));
-    GetEditor()->LayerStack()->AddLayer(imageLayer, 0);
-	GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-	GetEditor()->DisplaySurface()->Invalidate();
-    mGUI->GetLayerStackTab()->RefreshView();
-}
-
-void
-FOdysseyTextureEditorController::OnDuplicateCurrentLayer()
-{
-    FOdysseyPainterEditorController::OnDuplicateCurrentLayer();
-
-    if( GetEditor()->LayerStack()->GetCurrentLayer() )
-    {
-        GetEditor()->LayerStack()->DuplicateLayer( GetEditor()->LayerStack()->GetCurrentLayer() );
-        GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-		GetEditor()->DisplaySurface()->Invalidate();
-        mGUI->GetLayerStackTab()->RefreshView();
-    }
-}
-
-void
-FOdysseyTextureEditorController::OnDeleteCurrentLayer()
-{
-    FOdysseyPainterEditorController::OnDeleteCurrentLayer();
-
-
-    if( GetEditor()->LayerStack()->GetCurrentLayer() )
-    {
-		FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Deleting current layer");
-        if( FMessageDialog::Open(EAppMsgType::OkCancel,  LOCTEXT("DeletingCurrentLayer", "Are you sure you want to delete this layer ?" ), &Title ) == EAppReturnType::Ok )
-        {
-            GetEditor()->LayerStack()->DeleteLayer( GetEditor()->LayerStack()->GetCurrentLayer() );
-            GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-			GetEditor()->DisplaySurface()->Invalidate();
-            mGUI->GetLayerStackTab()->RefreshView();
-        }
-    }
 }
 
 FOdysseyTextureEditor*

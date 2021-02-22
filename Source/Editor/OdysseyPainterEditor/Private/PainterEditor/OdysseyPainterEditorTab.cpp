@@ -38,22 +38,12 @@ FOdysseyPainterEditorTab::BindShortcuts()
 }
 
 void
-FOdysseyPainterEditorTab::RegisterTabSpawner( const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
-{
-    iTabManager->RegisterTabSpawner( mID, FOnSpawnTab::CreateSP( this, &FOdysseyPainterEditorTab::SpawnTab ) )
-        .SetDisplayName( mDisplayName )
-        .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( mIcon );
-}
-
-void
-FOdysseyPainterEditorTab::UnregisterTabSpawner( const TSharedRef< class FTabManager >& iTabManager )
-{
-    iTabManager->UnregisterTabSpawner( mID );
-}
-
-void
 FOdysseyPainterEditorTab::OnToolkitInitialized()
+{
+}
+
+void
+FOdysseyPainterEditorTab::FillExtender(TSharedPtr<FExtender>& ioExtender)
 {
 }
 

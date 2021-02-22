@@ -169,18 +169,6 @@ FOdysseyFlipbookEditor::GetGUI()
 	return mGUI.Get();
 }
 
-TSharedRef<FTabManager::FLayout>
-FOdysseyFlipbookEditor::GetLayout()
-{
-	return mGUI->GetLayout();
-}
-
-const TArray<TSharedPtr<FExtender>>&
-FOdysseyFlipbookEditor::CreateMenuExtenders() const
-{
-	return mController->GetMenuExtenders();
-}
-
 TSharedPtr<FWorkspaceItem>
 FOdysseyFlipbookEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
@@ -188,12 +176,6 @@ FOdysseyFlipbookEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>&
 	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
 	mGUI->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
 	return workspaceMenuCategory;
-}
-
-void
-FOdysseyFlipbookEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
-{
-	mGUI->UnregisterTabSpawners(iTabManager);
 }
 
 bool

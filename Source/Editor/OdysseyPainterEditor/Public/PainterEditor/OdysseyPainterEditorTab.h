@@ -19,9 +19,7 @@ public:
     virtual void BindShortcuts();
     virtual void OnToolkitInitialized();
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
-	virtual void RegisterTabSpawner(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
-	virtual void UnregisterTabSpawner(const TSharedRef< class FTabManager >& iTabManager);
-
+    virtual void FillExtender(TSharedPtr<FExtender>& ioExtender);
 
 public:
     const FName&                        ID() const;

@@ -7,7 +7,6 @@
 #include "Brush/SOdysseyBrushSelector.h"
 #include "Color/SOdysseyColorSelector.h"
 #include "Color/SOdysseyColorSliders.h"
-#include "LayerStack/SOdysseyLayerStackView.h"
 #include "Mesh/SOdysseyMeshSelector.h"
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyStrokeOptions.h"
@@ -20,6 +19,8 @@ class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyTextureEditor;
 class FOdysseyTextureEditorController;
+
+class FOdysseyTextureEditorLayerStackTab;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -42,7 +43,7 @@ public:
 
 public:
     // Getters
-    TSharedPtr<SOdysseyLayerStackView>& GetLayerStackTab();
+    TSharedPtr<FOdysseyTextureEditorLayerStackTab>& GetLayerStackTab();
 	TSharedPtr<SOdysseyTextureDetails>& GetTextureDetailsTab();
 
 public:
@@ -58,13 +59,13 @@ protected:
 
 private:
     // Internal widget creation
-    void CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
+    // void CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
 	void CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
 
 private:
 	// Spawner callbacks
 	// Callback for spawning the LayerStack tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 
 	// Callback for spawning the TextureDetails tab.
 	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
@@ -74,12 +75,12 @@ private:
 
 private:
     //Tabs
-    TSharedPtr<SOdysseyLayerStackView>          mLayerStackTab;
+    TSharedPtr<FOdysseyTextureEditorLayerStackTab>          mLayerStackTab;
 	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
 
 private:
     /** Tabs IDs */
-    static const FName smLayerStackTabId;
+    // static const FName smLayerStackTabId;
 	static const FName smTextureDetailsTabId;
 };
 

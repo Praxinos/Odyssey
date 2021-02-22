@@ -107,7 +107,7 @@ FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
 {
 	mSelectedAlphaMode = iMode;
 
-	//Make sure we set the right value in the Paint Engine accoridng to the editor state
+	//Make sure we set the right value in the Paint Engine according to the editor state
     if (!LayerStack())
         return;
 
@@ -137,18 +137,6 @@ FOdysseyTextureEditor::GetGUI()
 	return mGUI.Get();
 }
 
-TSharedRef<FTabManager::FLayout>
-FOdysseyTextureEditor::GetLayout()
-{
-	return mGUI->GetLayout();
-}
-
-const TArray<TSharedPtr<FExtender>>&
-FOdysseyTextureEditor::CreateMenuExtenders() const
-{
-	return mController->GetMenuExtenders();
-}
-
 TSharedPtr<FWorkspaceItem>
 FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
@@ -156,12 +144,6 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
 	mGUI->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
 	return workspaceMenuCategory;
-}
-
-void
-FOdysseyTextureEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
-{
-	mGUI->UnregisterTabSpawners(iTabManager);
 }
 
 bool

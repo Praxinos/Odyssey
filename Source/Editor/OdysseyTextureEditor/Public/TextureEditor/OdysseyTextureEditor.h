@@ -42,12 +42,7 @@ public:
 public:
     // Overrides
     virtual FOdysseyTextureEditorGUI* GetGUI() override;
-    virtual TSharedRef<FTabManager::FLayout> GetLayout() override;
-    virtual const TArray<TSharedPtr<FExtender>>& CreateMenuExtenders() const override;
-    
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-    virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-
     virtual bool OnCloseRequested();
 
 protected:

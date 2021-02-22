@@ -106,3 +106,21 @@ FOdysseyPainterEditor::OnCloseRequested()
 	PaintEngine()->Flush();
     return true;
 }
+
+void
+FOdysseyPainterEditor::FillExtender(TSharedPtr<FExtender>& ioExtender)
+{
+	return GetGUI()->FillExtender(ioExtender);
+}
+
+TSharedRef<FTabManager::FLayout>
+FOdysseyPainterEditor::GetLayout()
+{
+    return GetGUI()->GetLayout();
+}
+
+void
+FOdysseyPainterEditor::UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
+{
+    GetGUI()->UnregisterTabSpawners(iTabManager);
+}

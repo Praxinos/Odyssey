@@ -43,18 +43,11 @@ public:
     void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
     void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
 	void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
-
-    void OnExportLayersAsTextures() override;
-    void OnImportTexturesAsLayers() override;
 	
 	virtual void OnPaintEngineStrokeAbort() override;
     virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
     virtual void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles) override;
     virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
-
-	virtual void   OnCreateNewLayer() override;
-    virtual void   OnDuplicateCurrentLayer() override;
-    virtual void   OnDeleteCurrentLayer() override;
 
     // virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 

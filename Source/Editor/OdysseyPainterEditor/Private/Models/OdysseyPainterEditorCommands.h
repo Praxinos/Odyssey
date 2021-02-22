@@ -45,13 +45,7 @@ public:
     TSharedPtr<FUICommandInfo> Redo;
 
 
-    //Import Export
-
-    /** Action used to import Textures as Layers */
-    TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
-
-    /** Action used to export Layers as Textures */
-    TSharedPtr<FUICommandInfo> ExportLayersAsTextures;
+    
 
 
     //Tools Actions
@@ -61,18 +55,6 @@ public:
 
     /** Action for clearing the current layer */
     TSharedPtr<FUICommandInfo> ClearCurrentLayer;
-
-    
-    //Layers Actions
-
-    /** Action for creating a new layer */
-    TSharedPtr<FUICommandInfo> CreateNewLayer;
-
-    /** Action for duplicating the current layer */
-    TSharedPtr<FUICommandInfo> DuplicateCurrentLayer;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> DeleteCurrentLayer;
 
     
     //Viewport Actions

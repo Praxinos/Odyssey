@@ -32,14 +32,22 @@ public:
 
 public:
     void Init();
-    void OnToolkitInitialized();
 
-protected:
+public:
     // Tabs
     virtual void CreateTabs();
     virtual void InitTabs();
 	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
 	virtual void UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager);
+
+public:
+    // Menu And Toolbar
+    virtual void FillExtender(TSharedPtr<FExtender>& ioExtender);
+    virtual void ExtendMenuAbout(FMenuBuilder& ioMenuBuilder);
+
+public:
+    // Listeners
+    virtual void OnToolkitInitialized();
 
 protected:
 	// Layout

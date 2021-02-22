@@ -33,6 +33,9 @@ FOdysseyTextureEditorModule::StartupModule()
 	// Register Assets Types Actions
 	RegisterAssetTypeActions();
 
+	// Register Commands
+	RegisterCommands();
+
 	// Register Settings
     RegisterSettings();
 
@@ -51,6 +54,9 @@ FOdysseyTextureEditorModule::ShutdownModule()
 
 	// Unregister Settings
     UnregisterSettings();
+
+	// Unregister Commands
+	UnregisterCommands();
 
 	// Unregister Assets Type Actions
 	UnregisterAssetTypeActions();
@@ -112,6 +118,18 @@ FOdysseyTextureEditorModule::UnregisterSettings()
 		return;
     
 	settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyTextureEditor" );
+}
+
+void
+FOdysseyTextureEditorModule::RegisterCommands()
+{
+	FOdysseyTextureEditorCommands::Register();
+}
+
+void
+FOdysseyTextureEditorModule::UnregisterCommands()
+{
+	FOdysseyTextureEditorCommands::Unregister();
 }
 
 TSharedRef<FOdysseyTextureEditorToolkit>
