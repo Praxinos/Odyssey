@@ -322,6 +322,7 @@ void
 ShotSequenceHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
     if( !sequence )
         return;
     UMovieScene* movieScene = sequence->GetMovieScene();
@@ -344,12 +345,12 @@ ShotSequenceHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor
     movieScene->RemoveCameraCutTrack();
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, &camera_guid );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id, &camera_guid );
 
     //TODO: maybe get the size of the existing section
     // But as it should only be called in FSequencer::AddActors(), after an auto track creation, it should be ok to replace without taking care to of the existing section
 
-    ShotSequenceHelpers::CreateCameraCut( iSequencer, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
+    ShotSequenceHelpers::CreateCameraCut( *iSequencer, sequence, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
 }
 
 #undef LOCTEXT_NAMESPACE

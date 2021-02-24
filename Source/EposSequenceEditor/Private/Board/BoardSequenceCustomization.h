@@ -37,6 +37,18 @@ private:
     void SetArrangeSections( EArrangeSections iArrangeSections );
     void NewSectionWithBoardAtCurrentFrame();
     void NewSectionWithShotAtCurrentFrame();
+    void CreateCamera();
+    void SnapCameraToViewport();
+    void CreatePlane();
+    bool CheckNoCamera();
+    bool CheckCamera();
+
+    struct FInnerSequenceResult
+    {
+        UMovieSceneSequence* mInnerSequence;
+        FMovieSceneSequenceID mInnerSequenceId;
+    };
+    FInnerSequenceResult GetInnerSequence();
 
 private:
     //bool OnSequencerReceiveDragOver( const FGeometry& iGeometry, const FDragDropEvent& iEvent, FReply& oReply );

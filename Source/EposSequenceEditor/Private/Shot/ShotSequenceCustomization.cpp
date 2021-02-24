@@ -58,8 +58,8 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCamera,
-            FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreateCamera, mSequencer ),
-            FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::CreateCamera( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), nullptr ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
@@ -67,8 +67,10 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-            FExecuteAction::CreateStatic( &ShotSequenceHelpers::SnapCameraToViewport, mSequencer ),
-            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::SnapCameraToViewport( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ); } ),
+            // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
+            //FExecuteAction::CreateStatic( &ShotSequenceHelpers::SnapCameraToViewport, mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ),
+            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), nullptr ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
@@ -76,8 +78,8 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlane,
-            FExecuteAction::CreateStatic( &ShotSequenceHelpers::CreatePlane, mSequencer ),
-            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer, nullptr ); } )
+            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::CreatePlane( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), nullptr ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );

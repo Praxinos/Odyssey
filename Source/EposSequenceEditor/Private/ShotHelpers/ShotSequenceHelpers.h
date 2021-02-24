@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Misc/Guid.h"
 
+#include "MovieSceneSequenceID.h"
+
 class AActor;
 class ACineCameraActor;
 class UMovieScene;
@@ -20,36 +22,40 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oGuid );
+    static ACineCameraActor* GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oGuid );
 
     /**
     *  Add a Camera track
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCamera( ISequencer* iSequencer );
+    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
     /**
     *  Update the camera location from the viewport
     *
     * @param ISequencer iSequencer to update camera.
     */
-    static void SnapCameraToViewport( ISequencer* iSequencer );
+    static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
     /**
     *  Add a Camera track
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static void CreatePlane( ISequencer* iSequencer );
+    static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
 private:
-    static ACineCameraActor* CreateCamera( ISequencer* iSequencer, FGuid* oGuid );
-    static void CameraAdded( ISequencer* iSequencer, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber );
-    static void CreateCameraCut( ISequencer* iSequencer, FGuid iCameraGuid, FFrameNumber iFrameNumber );
-    static void CreatePlane( ISequencer* iSequencer, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
+    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, FGuid* oGuid );
+    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber );
+    static void CreateCameraCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
+
+private:
+    static FMovieSceneSequenceIDRef GoInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iSequenceID );
+    static void                     GoOuter( ISequencer& iSequencer, FMovieSceneSequenceIDRef iMovieSceneSequenceID );
 
 //---
 
