@@ -76,7 +76,7 @@ FOdysseyFolderLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 		layerBlendable->ImageResultChangedDelegate().AddRaw(this, &FOdysseyFolderLayer::OnChildImageResultChanged, iLayer);
         if (iLayer->IsVisible())
         {
-            mImageResultChangedDelegate.Broadcast();
+            mImageResultChangedDelegate.Broadcast(nullptr);
         }
     }
 }
@@ -96,17 +96,17 @@ FOdysseyFolderLayer::DeleteNode(int iIndex)
 
     if (isBlendable && layer->IsVisible())
     {
-        mImageResultChangedDelegate.Broadcast();
+        mImageResultChangedDelegate.Broadcast(nullptr);
     }
 }
 
 void
-FOdysseyFolderLayer::OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer)
+FOdysseyFolderLayer::OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer)
 {
     bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
     if (isBlendable)
     {
-        mImageResultChangedDelegate.Broadcast();
+        mImageResultChangedDelegate.Broadcast(iRect);
     }
 }
 
@@ -223,7 +223,7 @@ void
 FOdysseyFolderLayer::SetIsVisible(bool iIsVisible)
 {
     IOdysseyLayer::SetIsVisible(iIsVisible);
-    mImageResultChangedDelegate.Broadcast();
+    mImageResultChangedDelegate.Broadcast(nullptr);
 }
 
 #undef LOCTEXT_NAMESPACE

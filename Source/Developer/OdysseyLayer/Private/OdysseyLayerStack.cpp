@@ -353,7 +353,7 @@ void FOdysseyLayerStack::MergeDownLayer(TSharedPtr<IOdysseyLayer> iLayer)
     ::ul3::FVec2F pos( 0, 0 );
 
     srcLayerImage->Blend(dstLayerImage->GetBlock()->GetBlock(), canvasRect, pos);
-    dstLayerImage->ImageResultChangedDelegate().Broadcast();
+    dstLayerImage->ImageResultChangedDelegate().Broadcast(nullptr);
     DeleteLayer( iLayer );
 }
 
@@ -398,7 +398,7 @@ FOdysseyLayerStack::ClearCurrentLayer()
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), canvasRect );
-        imageLayer->ImageResultChangedDelegate().Broadcast();
+        imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
     }
 }
 
@@ -412,7 +412,7 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), iColor, canvasRect );
-        imageLayer->ImageResultChangedDelegate().Broadcast();
+        imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
     }
 }
 
@@ -420,9 +420,10 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
 //-------------------------------------------------------------------------- Private API
 
 void
-FOdysseyLayerStack::OnLayerRootImageResultChanged()
+FOdysseyLayerStack::OnLayerRootImageResultChanged(const ::ul3::FRect* iRect)
 {
-    mOnImageResultChanged.Broadcast();
+    ::ul3::FRect rect(0, 0, Width(), Height());
+    mOnImageResultChanged.Broadcast(iRect ? *iRect : rect);
 }
 
 void
@@ -816,7 +817,7 @@ FOdysseyDrawingUndo::LoadData()
     }
 
 	if (imageLayer)
-		imageLayer->ImageResultChangedDelegate().Broadcast();
+		imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
 
     if(bSaveForRedo)
     {
@@ -900,7 +901,7 @@ FOdysseyDrawingUndo::Redo()
     }
 
 	if (imageLayer)
-		imageLayer->ImageResultChangedDelegate().Broadcast();
+		imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
 
     if(mCurrentIndex < (mUndosPositions.Num() - 1))
         mCurrentIndex++;

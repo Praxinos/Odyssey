@@ -56,7 +56,7 @@ FOdysseyViewportDrawingEditorData::Init(UTexture2D* iTexture)
     //Data edited texture changed, so we reset unload the texture and reset its properties
     if( mTexture )
     {
-        mPaintEngine->Flush();
+        // mPaintEngine->Flush();
         SyncTextureAndInvalidate();
         ApplyPropertiesBackup();
 
@@ -227,7 +227,7 @@ FOdysseyViewportDrawingEditorData::OnPackagePreSave(UPackage* iPackage)
     if(package != iPackage)
         return;
 
-    PaintEngine()->Flush();
+    // PaintEngine()->Flush();
     SyncTextureAndInvalidate();
     ApplyPropertiesBackup();
 }

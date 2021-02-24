@@ -34,5 +34,5 @@ public:
 
 public:
     // Public API
-    void OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer);
+    void OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer);
 };

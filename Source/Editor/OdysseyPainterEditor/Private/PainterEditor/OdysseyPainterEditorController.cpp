@@ -57,10 +57,10 @@ FOdysseyPainterEditorController::InitOdysseyPainterEditorController(const TShare
     FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 
 	//Add PaintEngine Callbacks
-	GetEditor()->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged);
-	GetEditor()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
-	GetEditor()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
-	GetEditor()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
+	// GetEditor()->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged);
+    // GetEditor()->PaintEngine()->OnEditedBlockTilesWillChange().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange);
+    // GetEditor()->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged);
+    // GetEditor()->PaintEngine()->OnStrokeAbort().AddRaw(this, &FOdysseyPainterEditorController::OnPaintEngineStrokeAbort);
 }
 
 //--------------------------------------------------------------------------------------

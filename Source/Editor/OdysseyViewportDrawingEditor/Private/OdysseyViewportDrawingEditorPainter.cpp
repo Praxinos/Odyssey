@@ -1001,7 +1001,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mPaintingTexture2D = texture2D;
 
         mStrokeBufferTexture2D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->EditedBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
         mStrokeBufferTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         mStrokeBufferTexture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         mStrokeBufferTexture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
@@ -1009,7 +1009,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mStrokeBufferTexture2D->PostEditChange();
 
         mStrokeBufferTexture3D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->EditedBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
         mStrokeBufferTexture3D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         mStrokeBufferTexture3D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         mStrokeBufferTexture3D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;

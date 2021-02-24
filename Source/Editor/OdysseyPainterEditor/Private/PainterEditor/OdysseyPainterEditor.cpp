@@ -103,7 +103,7 @@ FOdysseyPainterEditor::OnToolkitInitialized()
 bool
 FOdysseyPainterEditor::OnCloseRequested()
 {
-	PaintEngine()->Flush();
+	// PaintEngine()->Flush();
     return true;
 }
 

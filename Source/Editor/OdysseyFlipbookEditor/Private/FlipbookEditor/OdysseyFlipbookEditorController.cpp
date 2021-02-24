@@ -69,6 +69,14 @@ FOdysseyFlipbookEditorController::Init()
     if ( !(GetEditor()->TextureWrapper().OnPostTextureChangeDelegate().IsBoundToObject(this)) )
         GetEditor()->TextureWrapper().OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnPostTextureChange);
 
+    if (!(GetEditor()->PaintEngine()->OnStrokeWillEnd().IsBoundToObject(this)))
+        GetEditor()->PaintEngine()->OnStrokeWillEnd().AddRaw(this, &FOdysseyFlipbookEditorController::OnPaintEngineStrokeWillEnd);
+
+    if (!(GetEditor()->PaintEngine()->OnStrokeEnd().IsBoundToObject(this)))
+        GetEditor()->PaintEngine()->OnStrokeEnd().AddRaw(this, &FOdysseyFlipbookEditorController::OnPaintEngineStrokeEnd);
+
+    GetEditor()->PaintEngine()->IsLocked(TAttribute<bool>(this, &FOdysseyFlipbookEditorController::PaintEngineIsLocked));
+
     //Make like if the texture changed, to set all callbacks correctly
     OnPostTextureChange(nullptr);
 }
@@ -112,11 +120,11 @@ FOdysseyFlipbookEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     if( !(GetEditor()->LayerStack()->OnImageResultChanged().IsBoundToObject(this)) )
 	    GetEditor()->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged);
 
-    if( !(GetEditor()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
+    /*if( !(GetEditor()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
 	    GetEditor()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsLockedChanged);
         
     if( !(GetEditor()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
-	    GetEditor()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsVisibleChanged);
+	    GetEditor()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnLayerIsVisibleChanged); */
     	
     if (GetEditor()->LayerStack()->GetLayerRoot() == GetEditor()->LayerStack()->GetCurrentLayer())
     {
@@ -158,6 +166,8 @@ FOdysseyFlipbookEditorController::BindCommands(const TSharedRef<FUICommandList>&
 	FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 }
 
+/*
+
 void
 FOdysseyFlipbookEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
@@ -195,9 +205,9 @@ FOdysseyFlipbookEditorController::OnPaintEngineEditedBlockTilesChanged(const TAr
 	// GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
     // GetEditor()->DisplaySurface()->Invalidate();
 	GetEditor()->Texture()->MarkPackageDirty(); 
-}
+} */
 
-void
+/* void
 FOdysseyFlipbookEditorController::OnPaintEngineStrokeAbort()
 {
     check(GetEditor()->LayerStack());
@@ -205,6 +215,32 @@ FOdysseyFlipbookEditorController::OnPaintEngineStrokeAbort()
 	GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
     GetEditor()->DisplaySurface()->Invalidate();
 	//TODO: Check how to abort undo recording
+} */
+
+void
+FOdysseyFlipbookEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
+{
+    if (!GetEditor()->LayerStack())
+        return;
+
+    //TODO: Manage Undo directly in PaintEngine
+    GetEditor()->LayerStack()->mDrawingUndo->StartRecord();
+    for (int i = 0; i < iChangedTiles.Num(); i++)
+    {
+        GetEditor()->LayerStack()->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
+        // GetEditor()->LayerStack()->BlendOnCurrentLayer(GetEditor()->PaintEngine()->TempBuffer(), iChangedTiles[i], GetEditor()->PaintEngine()->GetOpacity(), GetEditor()->PaintEngine()->GetBlendingMode(), GetEditor()->PaintEngine()->GetAlphaMode());
+    }
+    GetEditor()->LayerStack()->mDrawingUndo->EndRecord();
+}
+
+void
+FOdysseyFlipbookEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
+{
+    if (!GetEditor()->Texture())
+        return;
+
+    //TODO: Move To Editor
+    GetEditor()->Texture()->MarkPackageDirty();
 }
 
 void
@@ -242,7 +278,7 @@ FOdysseyFlipbookEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOd
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyFlipbookEditorController::OnCurrentLayerIsAlphaLockedChanged);
-    GetEditor()->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
+    // GetEditor()->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
 }
 
 void
@@ -268,7 +304,7 @@ FOdysseyFlipbookEditorController::HandleAlphaModeModifierChanged( int32 iValue )
     GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mGUI->GetTopTab()->PaintModifiers()->GetAlphaMode());
 } */
 
-void
+/* void
 FOdysseyFlipbookEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
 {
     if (iLayer == GetEditor()->LayerStack()->GetCurrentLayer() || GetEditor()->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
@@ -284,7 +320,7 @@ FOdysseyFlipbookEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLay
     {
         GetEditor()->PaintEngine()->SetLock(GetEditor()->LayerStack()->GetCurrentLayer()->IsLocked(true) || !GetEditor()->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
-}
+} */
 
 void
 FOdysseyFlipbookEditorController::OnLayerStackStructureChanged()
@@ -302,19 +338,19 @@ FOdysseyFlipbookEditorController::OnLayerStackStructureChanged()
 }
 
 void
-FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged()
+FOdysseyFlipbookEditorController::OnLayerStackImageResultChanged(const ::ul3::FRect& iRect)
 {
     if (GetEditor()->Texture())
     {
-        GetEditor()->PaintEngine()->Flush();
+        // GetEditor()->PaintEngine()->Flush();
         GetEditor()->Texture()->MarkPackageDirty();
-        GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-        GetEditor()->DisplaySurface()->Invalidate();
+        GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock(), iRect);
+        GetEditor()->DisplaySurface()->Invalidate(iRect);
     }
 }
 
 FOdysseyFlipbookEditor*
-FOdysseyFlipbookEditorController::GetEditor()
+FOdysseyFlipbookEditorController::GetEditor() const
 {
     return mEditor;
 }
@@ -364,6 +400,19 @@ FOdysseyFlipbookEditorController::OnSpriteTextureChanged(UPaperSprite* iSprite, 
 		return;
 
 	SetTextureAtKeyframeIndex(mGUI->GetTimelineTab()->Timeline()->GetCurrentKeyframeIndex());
+}
+
+bool
+FOdysseyFlipbookEditorController::PaintEngineIsLocked() const
+{
+    if (!GetEditor()->LayerStack())
+        return false;
+
+    TSharedPtr<IOdysseyLayer> layer = GetEditor()->LayerStack()->GetCurrentLayer();
+    if (!layer)
+        return false;
+
+    return layer->IsLocked(true) || !layer->IsVisible(true);
 }
 
 #undef LOCTEXT_NAMESPACE

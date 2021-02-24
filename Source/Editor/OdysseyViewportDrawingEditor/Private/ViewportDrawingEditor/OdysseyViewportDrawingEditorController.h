@@ -32,6 +32,8 @@ public:
     TSharedPtr<FOdysseyViewportDrawingEditorData> GetData();
     TSharedPtr<SOdysseyViewportDrawingEditorGUI> GetGUI();
 
+    bool PaintEngineIsLocked() const;
+
 public:
     //IAssetEditorInstance
 	virtual FName GetEditorName() const;
@@ -49,16 +51,19 @@ public:
     void EdModeExit();
 
 public:
-    void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
+    /* void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
-    void OnPaintEngineStrokeAbort();
+    void OnPaintEngineStrokeAbort(); */
+
+    virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles);
+    virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
     void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
     void OnLayerStackStructureChanged();
-    void OnLayerStackImageResultChanged();
-    void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer,bool iOldValue);
-    void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
+    void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
+    // void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer,bool iOldValue);
+    // void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
     void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     void OnBrushSelected(UOdysseyBrush* iBrush);

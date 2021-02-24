@@ -204,7 +204,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if( mOdysseyPainterEditor->DrawBrushPreview() )
     {
         auto paintEngine = mOdysseyPainterEditor->PaintEngine();
-        paintEngine->UpdateBrushCursorPreview();
+        // paintEngine->UpdateBrushCursorPreview();
         if( paintEngine->mBrushCursorPreviewSurface )
         {
             paintEngine->mBrushCursorPreviewSurface->Texture()->SetForceMipLevelsToBeResident( 30.0f );

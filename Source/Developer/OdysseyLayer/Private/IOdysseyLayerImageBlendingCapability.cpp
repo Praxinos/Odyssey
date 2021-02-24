@@ -40,7 +40,7 @@ IOdysseyLayerImageBlendingCapability::SetBlendingMode( ::ul3::eBlendingMode iBle
     ::ul3::eBlendingMode oldValue = mBlendingMode;
     mBlendingMode = iBlendingMode;
     mBlendingModeChangedDelegate.Broadcast(oldValue);
-	ImageResultChangedDelegate().Broadcast();
+	ImageResultChangedDelegate().Broadcast(nullptr);
 }
 
 void
@@ -79,7 +79,7 @@ IOdysseyLayerImageBlendingCapability::SetOpacity( float iOpacity )
     float oldValue = mOpacity;
     mOpacity = iOpacity;
     mOpacityChangedDelegate.Broadcast(oldValue);
-	ImageResultChangedDelegate().Broadcast();
+	ImageResultChangedDelegate().Broadcast(nullptr);
 }
 
 void

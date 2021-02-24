@@ -197,7 +197,7 @@ FOdysseyFlipbookEditor::OnCloseRequested()
 void
 FOdysseyFlipbookEditor::OnTexturePreSave()
 {
-    PaintEngine()->Flush();
+    // PaintEngine()->Flush();
 }
 
 /**

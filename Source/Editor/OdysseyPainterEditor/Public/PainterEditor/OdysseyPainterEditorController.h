@@ -29,7 +29,7 @@ public:
 
 public:
     // Virtual Methods
-    virtual FOdysseyPainterEditor* GetEditor() = 0;
+    virtual FOdysseyPainterEditor* GetEditor() const = 0;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() = 0;
 
 public:

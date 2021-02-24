@@ -51,6 +51,14 @@ FOdysseyTextureEditorController::Init()
     if ( !(GetEditor()->TextureWrapper().OnPostTextureChangeDelegate().IsBoundToObject(this)) )
         GetEditor()->TextureWrapper().OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnPostTextureChange);
 
+    if (!(GetEditor()->PaintEngine()->OnStrokeWillEnd().IsBoundToObject(this)))
+        GetEditor()->PaintEngine()->OnStrokeWillEnd().AddRaw(this, &FOdysseyTextureEditorController::OnPaintEngineStrokeWillEnd);
+
+    if (!(GetEditor()->PaintEngine()->OnStrokeEnd().IsBoundToObject(this)))
+        GetEditor()->PaintEngine()->OnStrokeEnd().AddRaw(this, &FOdysseyTextureEditorController::OnPaintEngineStrokeEnd);
+
+    GetEditor()->PaintEngine()->IsLocked(TAttribute<bool>(this, &FOdysseyTextureEditorController::PaintEngineIsLocked));
+
     //Make like if the texture changed, to set all callbacks correctly
     OnPostTextureChange(nullptr);
 }
@@ -103,11 +111,11 @@ FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     if( !(GetEditor()->LayerStack()->OnImageResultChanged().IsBoundToObject(this)) )
 	    GetEditor()->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyTextureEditorController::OnLayerStackImageResultChanged);
 
-    if( !(GetEditor()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
+    /* if( !(GetEditor()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBoundToObject(this)) )
 	    GetEditor()->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsLockedChanged);
         
     if( !(GetEditor()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
-	    GetEditor()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged);
+	    GetEditor()->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnLayerIsVisibleChanged); */
     	
     
     if (GetEditor()->LayerStack()->GetLayerRoot() == GetEditor()->LayerStack()->GetCurrentLayer())
@@ -132,7 +140,7 @@ FOdysseyTextureEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     }
 }
 
-void
+/* void
 FOdysseyTextureEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEnginePreviewBlockTilesChanged(iChangedTiles);
@@ -144,9 +152,34 @@ FOdysseyTextureEditorController::OnPaintEnginePreviewBlockTilesChanged(const TAr
 	{
 		GetEditor()->DisplaySurface()->Block()->GetBlock()->Invalidate(iChangedTiles[i]);
     }
+} */
+
+
+void
+FOdysseyTextureEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
+{
+    if (!GetEditor()->LayerStack())
+        return;
+    //TODO: Manage Undo directly in PaintEngine
+    GetEditor()->LayerStack()->mDrawingUndo->StartRecord();
+    for (int i = 0; i < iChangedTiles.Num(); i++)
+    {
+        GetEditor()->LayerStack()->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
+        // GetEditor()->LayerStack()->BlendOnCurrentLayer(GetEditor()->PaintEngine()->TempBuffer(), iChangedTiles[i], GetEditor()->PaintEngine()->GetOpacity(), GetEditor()->PaintEngine()->GetBlendingMode(), GetEditor()->PaintEngine()->GetAlphaMode());
+    }
+    GetEditor()->LayerStack()->mDrawingUndo->EndRecord();
 }
 
 void
+FOdysseyTextureEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
+{
+    if (!GetEditor()->Texture())
+        return;
+    //TODO: Move To Editor
+    GetEditor()->Texture()->MarkPackageDirty();
+}
+
+/* void
 FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesWillChange(iChangedTiles);
@@ -159,26 +192,26 @@ FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesWillChange(const T
         // GetEditor()->LayerStack()->BlendOnCurrentLayer(GetEditor()->PaintEngine()->TempBuffer(), iChangedTiles[i], GetEditor()->PaintEngine()->GetOpacity(), GetEditor()->PaintEngine()->GetBlendingMode(), GetEditor()->PaintEngine()->GetAlphaMode());
 	}
     GetEditor()->LayerStack()->mDrawingUndo->EndRecord();
-}
+} */
 
-void
+/* void
 FOdysseyTextureEditorController::OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
 {
     FOdysseyPainterEditorController::OnPaintEngineEditedBlockTilesChanged(iChangedTiles);
 
     //TODO: Move To Editor
 	GetEditor()->Texture()->MarkPackageDirty();
-}
+} */
 
-void
+/* void
 FOdysseyTextureEditorController::OnPaintEngineStrokeAbort()
 {
     FOdysseyPainterEditorController::OnPaintEngineStrokeAbort();
 
     //TODO: make StrokeAbort change PreviewBlock, so that OnPaintEnginePreviewBlockTilesChanged is called and remove these lines
-	GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-	GetEditor()->DisplaySurface()->Invalidate();
-}
+	// GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
+	// GetEditor()->DisplaySurface()->Invalidate();
+} */
 
 void
 FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue)
@@ -213,7 +246,7 @@ FOdysseyTextureEditorController::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdy
     
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged);
-    GetEditor()->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
+    // GetEditor()->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
 }
 
 void
@@ -224,7 +257,7 @@ FOdysseyTextureEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldVal
     GetEditor()->PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mEditor->SelectedAlphaMode());
 }
 
-void
+/* void
 FOdysseyTextureEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue)
 {
     //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
@@ -242,7 +275,7 @@ FOdysseyTextureEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLaye
     {
         GetEditor()->PaintEngine()->SetLock(GetEditor()->LayerStack()->GetCurrentLayer()->IsLocked(true) || !GetEditor()->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
-}
+} */
 
 void
 FOdysseyTextureEditorController::OnLayerStackStructureChanged()
@@ -259,20 +292,33 @@ FOdysseyTextureEditorController::OnLayerStackStructureChanged()
 }
 
 void
-FOdysseyTextureEditorController::OnLayerStackImageResultChanged()
+FOdysseyTextureEditorController::OnLayerStackImageResultChanged(const ::ul3::FRect& iRect)
 {
     //TODO: Move to TextureEditor ? Is this line really needed ?
-    GetEditor()->PaintEngine()->Flush();
+    // GetEditor()->PaintEngine()->Flush();
 
 
     //TODO: Move to TextureWrapper
     GetEditor()->Texture()->MarkPackageDirty();
-    GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock());
-	GetEditor()->DisplaySurface()->Invalidate();
+    GetEditor()->LayerStack()->ComputeResultInBlock(GetEditor()->DisplaySurface()->Block()->GetBlock(), iRect);
+	GetEditor()->DisplaySurface()->Invalidate(iRect);
+}
+
+bool
+FOdysseyTextureEditorController::PaintEngineIsLocked() const
+{
+    if (!GetEditor()->LayerStack())
+        return false;
+
+    TSharedPtr<IOdysseyLayer> layer = GetEditor()->LayerStack()->GetCurrentLayer();
+    if (!layer)
+        return false;
+
+    return layer->IsLocked(true) || !layer->IsVisible(true);
 }
 
 FOdysseyTextureEditor*
-FOdysseyTextureEditorController::GetEditor()
+FOdysseyTextureEditorController::GetEditor() const
 {
     return mEditor;
 }

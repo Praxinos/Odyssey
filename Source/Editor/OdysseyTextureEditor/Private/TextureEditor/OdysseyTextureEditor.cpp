@@ -165,7 +165,7 @@ FOdysseyTextureEditor::OnCloseRequested()
 void
 FOdysseyTextureEditor::OnTexturePreSave()
 {
-    PaintEngine()->Flush();
+    // PaintEngine()->Flush();
 }
 
 #undef LOCTEXT_NAMESPACE

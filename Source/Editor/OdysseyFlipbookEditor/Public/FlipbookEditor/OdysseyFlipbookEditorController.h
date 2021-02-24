@@ -39,9 +39,9 @@ protected:
 public:
 	void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
 	void OnLayerStackStructureChanged();
-	void OnLayerStackImageResultChanged();
-	void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
-    void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
+	void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
+	// void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
+    // void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
 	void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 	
 	void OnTimelineScrubStarted();
@@ -60,16 +60,21 @@ public:
     void OnPreTextureChange(UTexture2D* iNewTexture);
     void OnPostTextureChange(UTexture2D* iOldTexture);
 
-	virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
+	virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles);
+	virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles);
+
+	/* virtual void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles) override;
 	virtual void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles) override;
-	virtual void OnPaintEngineStrokeAbort() override;
+	virtual void OnPaintEngineStrokeAbort() override; */
 
 	// virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
-	virtual FOdysseyFlipbookEditor* GetEditor() override;
+	virtual FOdysseyFlipbookEditor* GetEditor() const override;
     virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
+
+	bool PaintEngineIsLocked() const;
 
 private:
 	void SetTextureAtKeyframeIndex(int32 iKeyframe);
