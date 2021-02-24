@@ -26,7 +26,6 @@ void
 FOdysseyPainterEditorTab::Init()
 {
 	mWidget = CreateWidget();
-    BindShortcuts();
 }
 
 //--------------------------------------------------------------------------------------

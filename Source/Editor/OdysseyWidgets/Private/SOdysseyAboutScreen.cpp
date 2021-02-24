@@ -69,6 +69,27 @@ public:
 
 //---
 
+void
+SOdysseyAboutScreen::Open(TSharedPtr<SWindow> iParentWindow)
+{
+	const FText aboutWindowTitle = LOCTEXT( "AboutIliad", "About Iliad" );
+
+    TSharedPtr<SWindow> aboutWindow =
+        SNew( SWindow )
+        .Title( aboutWindowTitle )
+        .ClientSize( FVector2D( 600.f, 460.f ) )
+        .SupportsMaximize( false )
+        .SupportsMinimize( false )
+        .SizingRule( ESizingRule::FixedSize )
+        [
+            SNew( SOdysseyAboutScreen )
+        ];
+
+	FSlateApplication::Get().AddModalWindow(aboutWindow.ToSharedRef(), iParentWindow);
+}
+
+//---
+
 SOdysseyAboutScreen::SOdysseyAboutScreen()
     : mAboutLines()
     , mIliadButton()

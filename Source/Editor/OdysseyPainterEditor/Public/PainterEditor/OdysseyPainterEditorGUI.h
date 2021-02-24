@@ -37,6 +37,7 @@ public:
     // Tabs
     virtual void CreateTabs();
     virtual void InitTabs();
+    virtual void BindShortcuts();
 	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
 	virtual void UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager);
 
@@ -70,6 +71,13 @@ public:
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>& GetStrokeOptionsTab();
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
     TSharedPtr<FOdysseyPainterEditorToolsTab>& GetToolsTab();
+
+protected:
+    // Shortcuts
+    virtual void VisitPraxinosWebsite();
+    virtual void VisitPraxinosForums();
+    virtual void AboutIliad();
+    virtual void SwitchTabletAPI();
 
 private:
     FOdysseyPainterEditor*                          mEditor;

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorController.h"
-
 #include "IOdysseyLayer.h"
 #include "OdysseyTreeShared.h"
 
@@ -17,7 +15,7 @@ class FOdysseyImageLayer;
  * Implements an Editor Controller for textures.
  */
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorController :
-	public FOdysseyPainterEditorController
+    public TSharedFromThis<FOdysseyTextureEditorController>
 {
 public:
     // Construction / Destruction
@@ -30,7 +28,7 @@ public:
 
 protected:
     // Commands building
-    virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
+    virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);
 
 public:
     //Called when the texture pointer in the TextureWrapper changes
@@ -54,8 +52,8 @@ public:
     // virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
-	virtual FOdysseyTextureEditor* GetEditor() const override;
-    virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
+	virtual FOdysseyTextureEditor* GetEditor() const;
+    virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI();
 
     bool PaintEngineIsLocked() const;
 

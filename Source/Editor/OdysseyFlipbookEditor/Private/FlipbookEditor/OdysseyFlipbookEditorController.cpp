@@ -54,12 +54,6 @@ FOdysseyFlipbookEditorController::Init()
 
 	//----
 
-	// Register our commands. This will only register them if not previously registered
-	//FOdysseyFlipbookEditorCommands::Register();
-
-    // Init Painter Editor
-    FOdysseyPainterEditorController::InitOdysseyPainterEditorController(mEditor->Toolkit()->GetToolkitCommands());
-
     // Bind each command to its function
     BindCommands(mEditor->Toolkit()->GetToolkitCommands());
 
@@ -162,8 +156,6 @@ FOdysseyFlipbookEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
 void
 FOdysseyFlipbookEditorController::BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands)
 {
-	// mGUI->GetTimelineTab()->BindCommands(iToolkitCommands);
-	FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
 }
 
 /*

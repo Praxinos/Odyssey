@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorController.h"
-
 #include "SOdysseyFlipbookTimelineViewEvents.h"
 
 #include "IOdysseyLayer.h"
@@ -19,7 +17,7 @@ class FOdysseyImageLayer;
  * Implements an Editor Controller for Flipbooks.
  */
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorController :
-	public FOdysseyPainterEditorController
+	public TSharedFromThis<FOdysseyFlipbookEditorController>
 {
 public:
     // Construction / Destruction
@@ -33,7 +31,7 @@ public:
 
 protected:
     // Commands building
-    virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands) override;
+    virtual void BindCommands(const TSharedRef<FUICommandList>& iToolkitCommands);
 	TSharedPtr<FExtender> CreateMenuExtenders();
 
 public:
@@ -71,8 +69,8 @@ public:
 	// virtual void HandleAlphaModeModifierChanged( int32 iValue ) override;
 
 protected:
-	virtual FOdysseyFlipbookEditor* GetEditor() const override;
-    virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI() override;
+	virtual FOdysseyFlipbookEditor* GetEditor() const;
+    virtual TSharedPtr<FOdysseyPainterEditorGUI> GetGUI();
 
 	bool PaintEngineIsLocked() const;
 

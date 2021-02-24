@@ -15,6 +15,9 @@
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
+#include "SOdysseyAboutScreen.h"
+#include "SOdysseyTabletAPISwitcher.h"
+
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
 
 /////////////////////////////////////////////////////
@@ -40,6 +43,8 @@ FOdysseyPainterEditorGUI::Init()
 {
 	CreateTabs(); //Create Tabs Objects and sets their corresponding controllers
 	InitTabs(); //Init Tabs, creating their widgets
+
+	BindShortcuts();
 
 	CreateLayout();
 }
@@ -67,6 +72,29 @@ FOdysseyPainterEditorGUI::InitTabs()
 	for (int i = 0; i < mTabs.Num(); i++)
 	{
 		mTabs[i].Get()->Init();
+	}
+}
+
+void
+FOdysseyPainterEditorGUI::BindShortcuts()
+{
+	const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorGUI::__VA_ARGS__ ), FCanExecuteAction() );
+
+	MAP_ACTION(painterEditorCommands.AboutIliad, AboutIliad )
+	MAP_ACTION(painterEditorCommands.VisitPraxinosWebsite, VisitPraxinosWebsite )
+	MAP_ACTION(painterEditorCommands.VisitPraxinosForums, VisitPraxinosForums )
+	MAP_ACTION(painterEditorCommands.SwitchTabletAPI, VisitPraxinosForums )
+
+	#undef MAP_ACTION
+
+	//---
+
+	for (int i = 0; i < mTabs.Num(); i++)
+	{
+		mTabs[i].Get()->BindShortcuts();
 	}
 }
 
@@ -342,6 +370,45 @@ TSharedPtr<FOdysseyPainterEditorToolsTab>&
 FOdysseyPainterEditorGUI::GetToolsTab()
 {
 	return mToolsTab;
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- Shortcuts
+
+void
+FOdysseyPainterEditorGUI::VisitPraxinosWebsite()
+{
+    FString URL = "https://praxinos.coop/";
+    FPlatformProcess::LaunchURL( *URL, NULL, NULL );
+}
+
+void
+FOdysseyPainterEditorGUI::VisitPraxinosForums()
+{
+    FString URL = "https://praxinos.coop/forum";
+    FPlatformProcess::LaunchURL( *URL, NULL, NULL );
+}
+
+void
+FOdysseyPainterEditorGUI::AboutIliad()
+{
+    TSharedPtr<SDockTab> OwnerTab = mEditor->Toolkit()->GetTabManager()->GetOwnerTab();
+    TSharedPtr<SWindow> parentWindow = NULL;
+    if (OwnerTab.IsValid())
+    {
+        parentWindow = FSlateApplication::Get().FindWidgetWindow(OwnerTab.ToSharedRef());
+    }
+    else
+    {
+        parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
+    }
+	SOdysseyAboutScreen::Open(parentWindow);
+}
+
+void
+FOdysseyPainterEditorGUI::SwitchTabletAPI()
+{
+    SOdysseyTabletAPISwitcher::Open();
 }
 
 #undef LOCTEXT_NAMESPACE
