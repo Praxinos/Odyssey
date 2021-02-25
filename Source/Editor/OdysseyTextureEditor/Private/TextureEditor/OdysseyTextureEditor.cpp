@@ -68,7 +68,6 @@ FOdysseyTextureEditor::Init()
 	//--- Init GUI
 
 	mGUI->Init();
-	mGUI->InitOdysseyTextureEditorGUI(this);
 }
 
 //--------------------------------------------------------------------------------------

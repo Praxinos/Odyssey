@@ -147,7 +147,7 @@ FOdysseyFlipbookEditorController::OnPostTextureChange(UTexture2D* iOldTexture)
     //mGUI->GetViewportTab()->SetSurface(GetEditor()->DisplaySurface());
     
     //Set the new texture in the texture details panel
-    mGUI->GetTextureDetailsTab()->SetTexture(GetEditor()->Texture());
+    // mGUI->GetTextureDetailsTab()->SetTexture(GetEditor()->Texture());
 }
 
 //--------------------------------------------------------------------------------------
@@ -360,7 +360,7 @@ FOdysseyFlipbookEditorController::SetTextureAtKeyframeIndex(int32 iKeyframeIndex
 	if (GetEditor()->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing())
 	{
 		GetEditor()->PreviewSurface()->Texture(texture);
-        GetEditor()->GetGUI()->GetTextureDetailsTab()->SetTexture(texture);
+        // GetEditor()->GetGUI()->GetTextureDetailsTab()->SetTexture(texture);
 		//mGUI->GetViewportTab()->SetSurface(GetEditor()->PreviewSurface());
 		return;
 	}

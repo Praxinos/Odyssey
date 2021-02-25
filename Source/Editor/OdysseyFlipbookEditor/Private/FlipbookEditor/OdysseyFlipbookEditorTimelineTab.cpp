@@ -151,7 +151,6 @@ FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeInde
 	if (mTimeline->IsScrubbing())
 	{
 		mEditor->PreviewSurface()->Texture(texture);
-        mEditor->GetGUI()->GetTextureDetailsTab()->SetTexture(texture);
 		return;
 	}
 

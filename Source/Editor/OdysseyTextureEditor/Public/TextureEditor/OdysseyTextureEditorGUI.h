@@ -21,6 +21,7 @@ class FOdysseyTextureEditor;
 class FOdysseyTextureEditorController;
 
 class FOdysseyTextureEditorLayerStackTab;
+class FOdysseyTextureEditorTextureDetailsTab;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -39,28 +40,28 @@ protected:
 
 public:
     //Init
-	void InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor);
+	// void InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor);
 
 public:
     // Getters
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>& GetLayerStackTab();
-	TSharedPtr<SOdysseyTextureDetails>& GetTextureDetailsTab();
+	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>& GetTextureDetailsTab();
 
 public:
-	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef) override;
-	virtual void UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager) override;
+	// virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef) override;
+	// virtual void UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager) override;
 
 protected:
 	// Internal widget creation
-	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
-	virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
+	// virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
+	// virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection();
-	virtual TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
+	// virtual TSharedRef<FTabManager::FSplitter>	CreateMiddleSection();
 
 private:
     // Internal widget creation
     // void CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
-	void CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor);
+	// void CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor);
 
 private:
 	// Spawner callbacks
@@ -68,7 +69,7 @@ private:
 	// TSharedRef<SDockTab> HandleTabSpawnerSpawnLayerStack(const FSpawnTabArgs& iArgs);
 
 	// Callback for spawning the TextureDetails tab.
-	TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
+	// TSharedRef<SDockTab> HandleTabSpawnerSpawnTextureDetails(const FSpawnTabArgs& iArgs);
 
 private:
 	FOdysseyTextureEditor* mEditor;
@@ -76,11 +77,11 @@ private:
 private:
     //Tabs
     TSharedPtr<FOdysseyTextureEditorLayerStackTab>          mLayerStackTab;
-	TSharedPtr<SOdysseyTextureDetails>          mTextureDetailsTab;
+	TSharedPtr<FOdysseyTextureEditorTextureDetailsTab>      mTextureDetailsTab;
 
 private:
     /** Tabs IDs */
     // static const FName smLayerStackTabId;
-	static const FName smTextureDetailsTabId;
+	// static const FName smTextureDetailsTabId;
 };
 
