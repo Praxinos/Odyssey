@@ -58,6 +58,41 @@ ShotSequenceHelpers::GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
 //---
 
+ShotSequenceHelpers::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID )
+    : mSequencer( iSequencer )
+    , mOriginalId()
+{
+    check( iInnerID != MovieSceneSequenceID::Root );
+
+    mOriginalId = mSequencer.GetFocusedTemplateID();
+    if( iInnerID == mOriginalId )
+        return;
+
+    UMovieSceneSubSection* subsection = mSequencer.FindSubSection( iInnerID );
+    check( subsection );
+    mSequencer.FocusSequenceInstance( *subsection );
+}
+
+ShotSequenceHelpers::cTemporarySwitchInner::~cTemporarySwitchInner()
+{
+    FMovieSceneSequenceID focused_id = mSequencer.GetFocusedTemplateID();
+    if( focused_id == mOriginalId )
+        return;
+
+    if( mOriginalId == MovieSceneSequenceID::Root )
+    {
+        mSequencer.ResetToNewRootSequence( *mSequencer.GetRootMovieSceneSequence() );
+    }
+    else
+    {
+        UMovieSceneSubSection* subsection = mSequencer.FindSubSection( mOriginalId );
+        check( subsection );
+        mSequencer.FocusSequenceInstance( *subsection );
+    }
+}
+
+//---
+
 //static
 void
 ShotSequenceHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
@@ -79,10 +114,9 @@ ShotSequenceHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* 
 
     //---
 
-    const FScopedTransaction Transaction( LOCTEXT( "CreateStoryCameraHere", "Create Storyboard Camera Here" ) );
+    const FScopedTransaction transaction( LOCTEXT( "CreateStoryCameraHere", "Create Storyboard Camera Here" ) );
 
-    FMovieSceneSequenceIDRef original_id = GoInner( iSequencer, iSequenceID );
-    // No return after here as it changes (until GoOuter()) the current sequence
+    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
     //---
 
@@ -94,10 +128,6 @@ ShotSequenceHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* 
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-
-    //---
-
-    GoOuter( iSequencer, original_id );
 }
 
 //static
@@ -437,10 +467,9 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
 
     //---
 
-    const FScopedTransaction Transaction( LOCTEXT( "SnapStoryCameraToViewport", "Snap Storyboard Camera To Viewport" ) );
+    const FScopedTransaction transaction( LOCTEXT( "SnapStoryCameraToViewport", "Snap Storyboard Camera To Viewport" ) );
 
-    FMovieSceneSequenceIDRef original_id = GoInner( iSequencer, iSequenceID );
-    // No return after here as it changes (until GoOuter()) the current sequence
+    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
     //---
 
@@ -526,10 +555,6 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
-
-    //---
-
-    GoOuter( iSequencer, original_id );
 }
 
 //---
@@ -546,10 +571,9 @@ ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* i
 
     //---
 
-    const FScopedTransaction Transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
+    const FScopedTransaction transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
 
-    FMovieSceneSequenceIDRef original_id = GoInner( iSequencer, iSequenceID );
-    // No return after here as it changes (until GoOuter()) the current sequence
+    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
     //---
 
@@ -558,49 +582,6 @@ ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* i
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-
-    //---
-
-    GoOuter( iSequencer, original_id );
-}
-
-//---
-
-//static
-FMovieSceneSequenceIDRef
-ShotSequenceHelpers::GoInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iSequenceID )
-{
-    check( iSequenceID != MovieSceneSequenceID::Root );
-
-    FMovieSceneSequenceIDRef previous_focused_id = iSequencer.GetFocusedTemplateID();
-    if( iSequenceID != previous_focused_id )
-    {
-        UMovieSceneSubSection* subsection = iSequencer.FindSubSection( iSequenceID );
-        check( subsection );
-        iSequencer.FocusSequenceInstance( *subsection );
-    }
-
-    return previous_focused_id;
-}
-
-//static
-void
-ShotSequenceHelpers::GoOuter( ISequencer& iSequencer, FMovieSceneSequenceIDRef iPreviousSequenceID )
-{
-    FMovieSceneSequenceIDRef focused_id = iSequencer.GetFocusedTemplateID();
-    if( focused_id != iPreviousSequenceID )
-    {
-        if( iPreviousSequenceID == MovieSceneSequenceID::Root )
-        {
-            iSequencer.ResetToNewRootSequence( *iSequencer.GetRootMovieSceneSequence() );
-        }
-        else
-        {
-            UMovieSceneSubSection* subsection = iSequencer.FindSubSection( iPreviousSequenceID );
-            check( subsection );
-            iSequencer.FocusSequenceInstance( *subsection );
-        }
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

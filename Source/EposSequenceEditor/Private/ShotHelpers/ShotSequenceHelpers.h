@@ -54,8 +54,15 @@ private:
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
 
 private:
-    static FMovieSceneSequenceIDRef GoInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iSequenceID );
-    static void                     GoOuter( ISequencer& iSequencer, FMovieSceneSequenceIDRef iMovieSceneSequenceID );
+    class cTemporarySwitchInner
+    {
+    public:
+        cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID );
+        ~cTemporarySwitchInner();
+    private:
+        ISequencer& mSequencer;
+        FMovieSceneSequenceID mOriginalId;
+    };
 
 //---
 
