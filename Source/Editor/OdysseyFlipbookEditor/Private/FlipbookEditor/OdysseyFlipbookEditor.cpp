@@ -64,19 +64,17 @@ FOdysseyFlipbookEditor::Init()
 
 	//----
 
-	mTextureWrapper.OnPreSaveDelegate().AddRaw(this, &FOdysseyFlipbookEditor::OnTexturePreSave);
-    
-    //We don't need to initialize anything if there is no keyFrames
-    if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() <= 0)
-        return;
-
-    Texture(mFlipbookWrapper->GetKeyframeTexture(0));
-
-	//----
-
 	mGUI->Init();
 	mGUI->InitOdysseyFlipbookEditorGUI(this, mController);
 	mController->Init();
+	
+	//----
+
+    //We don't need to initialize Texture if there is no keyFrames
+    if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() > 0)
+	{
+    	Texture(mFlipbookWrapper->GetKeyframeTexture(0));
+	}
 }
 
 //--------------------------------------------------------------------------------------
@@ -189,15 +187,6 @@ FOdysseyFlipbookEditor::OnCloseRequested()
 
     mTextureWrapper.Texture(nullptr);
     return true;
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Methods
-
-void
-FOdysseyFlipbookEditor::OnTexturePreSave()
-{
-    // PaintEngine()->Flush();
 }
 
 /**

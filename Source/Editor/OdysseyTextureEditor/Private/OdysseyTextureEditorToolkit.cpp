@@ -3,7 +3,6 @@
 
 #include "OdysseyTextureEditorToolkit.h"
 
-#include "OdysseyTextureEditorController.h"
 #include "OdysseyTextureEditorGUI.h"
 
 #include "IOdysseyTextureEditorModule.h"

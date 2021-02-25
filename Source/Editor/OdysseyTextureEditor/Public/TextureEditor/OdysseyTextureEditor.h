@@ -9,6 +9,7 @@
 #include "OdysseyTextureWrapper.h"
 
 class FOdysseyTextureEditorController;
+class IOdysseyLayer;
 
 /**
  * Implements an Editor for textures.
@@ -44,16 +45,28 @@ public:
     virtual FOdysseyTextureEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual bool OnCloseRequested();
+    
+protected:
+    // Attributes
+    virtual bool PaintEngineIsLocked() const;
 
 protected:
-    // Methods
-    virtual void OnTexturePreSave();
-    
+    // Listeners
+    virtual void OnPreTextureChange(UTexture2D* iNewTexture);
+    virtual void OnPostTextureChange(UTexture2D* iOldTexture);
+
+	virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
+	virtual void OnLayerStackStructureChanged();
+	virtual void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
+	virtual void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
+
+    virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles);
+    virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles);
+
 private:
     FOdysseyTextureWrapper     mTextureWrapper;
     ::ul3::eAlphaMode                       mSelectedAlphaMode;
 
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
-	TSharedPtr<FOdysseyTextureEditorController> mController;
 };
 

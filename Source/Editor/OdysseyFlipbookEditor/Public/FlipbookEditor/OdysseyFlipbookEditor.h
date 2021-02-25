@@ -56,9 +56,6 @@ public:
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual bool OnCloseRequested();
 
-protected:
-    virtual void OnTexturePreSave();
-
 private:
     TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper; //TODO: No need for a SharedPtr here, and no need for a pointer here
     FOdysseyTextureWrapper                  mTextureWrapper;

@@ -3,6 +3,7 @@
 
 #include "OdysseyTextureEditorLayerStackTab.h"
 
+#include "AssetRegistryModule.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
 #include "OdysseyTextureEditor.h"
 

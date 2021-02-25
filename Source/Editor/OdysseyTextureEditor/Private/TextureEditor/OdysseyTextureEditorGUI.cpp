@@ -52,10 +52,10 @@ FOdysseyTextureEditorGUI::CreateTabs()
 }
 
 void
-FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
+FOdysseyTextureEditorGUI::InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor)
 {
-	// CreateLayerStackTab(iEditor, iController);
-	CreateTextureDetailsTab(iEditor, iController);
+	// CreateLayerStackTab(iEditor);
+	CreateTextureDetailsTab(iEditor);
 }
  
 TSharedRef<FTabManager::FSplitter>
@@ -147,7 +147,7 @@ FOdysseyTextureEditorGUI::CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TS
 } */
 
 void
-FOdysseyTextureEditorGUI::CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController)
+FOdysseyTextureEditorGUI::CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor)
 {
     mTextureDetailsTab = SNew( SOdysseyTextureDetails )
         .Texture( iEditor->Texture() );

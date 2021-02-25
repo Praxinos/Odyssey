@@ -39,7 +39,7 @@ protected:
 
 public:
     //Init
-	void InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void InitOdysseyTextureEditorGUI(FOdysseyTextureEditor* iEditor);
 
 public:
     // Getters
@@ -60,7 +60,7 @@ protected:
 private:
     // Internal widget creation
     // void CreateLayerStackTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
-	void CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor, TSharedPtr<FOdysseyTextureEditorController>& iController);
+	void CreateTextureDetailsTab(FOdysseyTextureEditor* iEditor);
 
 private:
 	// Spawner callbacks
