@@ -3,16 +3,11 @@
 
 #include "OdysseyFlipbookEditor.h"
 
-#include "OdysseyFlipbookEditorController.h"
+#include "OdysseyPainterEditorToolkit.h"
 #include "OdysseyFlipbookEditorGUI.h"
-
-#include "OdysseyFlipbookEditorToolkit.h"
-
+#include "OdysseyFlipbookEditorTimelineTab.h"
 #include "OdysseySurfaceReadOnly.h"
-#include "OdysseyLayerStack.h"
-#include "OdysseyPaintEngine.h"
-
-#include "Types/NavigationMetaData.h"
+#include "SOdysseyFlipbookTimelineView.h"
 
 #include <ULIS3>
 
@@ -24,6 +19,8 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 {
+	mFlipbookWrapper->OnSpriteTextureChanged().RemoveAll(this);
+
 	if (mPreviewSurface) {
 		delete mPreviewSurface;
 		mPreviewSurface = nullptr;
@@ -31,42 +28,32 @@ FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyPainterEditor(iToolkit),
+	FOdysseyTextureEditor(iToolkit),
 	mFlipbookWrapper(nullptr),
-	mTextureWrapper( nullptr ),
 	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
-	mSelectedAlphaMode(::ul3::AM_NORMAL),
-	mGUI(nullptr),
-	mController(nullptr)
+	mGUI(nullptr)
 {
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyPainterEditor(iToolkit),
+	FOdysseyTextureEditor(iToolkit),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
-	mTextureWrapper( nullptr ),
 	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
-	mSelectedAlphaMode(::ul3::AM_NORMAL),
-	mGUI(nullptr),
-	mController(nullptr)
+	mGUI(nullptr)
 {
-	mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI(this));
-	mController = MakeShareable(new FOdysseyFlipbookEditorController(this, mGUI));
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyFlipbookEditor::Init()
+FOdysseyFlipbookEditor::InitData()
 {
-	FOdysseyPainterEditor::Init();
+	FOdysseyTextureEditor::InitData();
 
 	//----
 
-	mGUI->Init();
-	mGUI->InitOdysseyFlipbookEditorGUI(this, mController);
-	mController->Init();
+	mFlipbookWrapper->OnSpriteTextureChanged().AddRaw(this, &FOdysseyFlipbookEditor::OnSpriteTextureChanged);
 	
 	//----
 
@@ -87,76 +74,15 @@ FOdysseyFlipbookEditor::FlipbookWrapper()
 	return mFlipbookWrapper;
 }
 
-FOdysseyTextureWrapper&
-FOdysseyFlipbookEditor::TextureWrapper()
-{
-	return mTextureWrapper;
-}
-
-UTexture2D*
-FOdysseyFlipbookEditor::Texture()
-{
-	return mTextureWrapper.Texture();
-}
-
-FOdysseySurfaceEditable*
-FOdysseyFlipbookEditor::DisplaySurface()
-{
-	return mTextureWrapper.Surface();
-}
-
-FOdysseyLayerStack*
-FOdysseyFlipbookEditor::LayerStack() const
-{
-    return mTextureWrapper.LayerStack();
-}
-
 FOdysseySurfaceReadOnly*
 FOdysseyFlipbookEditor::PreviewSurface()
 {
 	return mPreviewSurface;
 }
 
-::ul3::eAlphaMode
-FOdysseyFlipbookEditor::SelectedAlphaMode() const
-{
-	return mSelectedAlphaMode;
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
-void
-FOdysseyFlipbookEditor::Texture(UTexture2D* iTexture)
-{
-    mTextureWrapper.Texture(iTexture);
-}
-
-void
-FOdysseyFlipbookEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
-{
-	mSelectedAlphaMode = iMode;
-
-	//Make sure we set the right value in the Paint Engine accoridng to the editor state
-    if (!LayerStack())
-        return;
-
-    if (!LayerStack()->GetCurrentLayer())
-        return;
-
-    if (LayerStack()->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
-        return;
-
-    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(LayerStack()->GetCurrentLayer());
-    if (imageLayer && imageLayer->IsAlphaLocked())
-    {
-        PaintEngine()->SetAlphaModeModifier(::ul3::AM_BACK);
-    }
-    else
-    {
-		PaintEngine()->SetAlphaModeModifier(mSelectedAlphaMode);
-    }
-}
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
@@ -164,6 +90,8 @@ FOdysseyFlipbookEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
 FOdysseyFlipbookEditorGUI*
 FOdysseyFlipbookEditor::GetGUI()
 {
+	if (!mGUI)
+		mGUI = MakeShareable(new FOdysseyFlipbookEditorGUI(this));
 	return mGUI.Get();
 }
 
@@ -172,31 +100,51 @@ FOdysseyFlipbookEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>&
 {
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyFlipbookEditor", "Odyssey Flipbook Editor"));
 	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	mGUI->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
+	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
 	return workspaceMenuCategory;
 }
 
-bool
-FOdysseyFlipbookEditor::OnCloseRequested()
-{ 
-	FOdysseyPainterEditor::OnCloseRequested();
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Methods
 
-    //TODO: Move in the right place
-    if (LayerStack())
-        LayerStack()->mDrawingUndo->Clear();
+void
+FOdysseyFlipbookEditor::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
+{
+	UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(iKeyframeIndex);
+	if (GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing())
+	{
+		PreviewSurface()->Texture(texture);
+		return;
+	}
 
-    mTextureWrapper.Texture(nullptr);
-    return true;
+    Texture(texture);
 }
 
-/**
- * TODO:
- * 3) Make GUI -> Tabs classes, containing the creation of GUI and a pointer to a controller specific for this GUI (This one is a BIG one)
- * 3.1) while making 3), the old almighty controller can coexist with the new Tabs classes, so we can make each Tab class + controller one after the other
- * 4) Make FlipbookEditor Inherite TextureEditor and cleanup
- * 5) Apply refactor to ViewportDrawingEditor
- * 6) Test and Debug
- * 7) Hooray !
- */
+void
+FOdysseyFlipbookEditor::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
+{
+    UTexture2D* texture = iSprite->GetSourceTexture();
+	UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
+	for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
+	{
+		UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(i);
+		if (sprite == iSprite)
+		{
+			if (iOldTexture)
+				Toolkit()->RemoveEditingObject(iOldTexture);
+
+			if (texture)
+				Toolkit()->AddEditingObject(texture);
+		}
+	}
+
+	int32 index = GetGUI()->GetTimelineTab()->Timeline()->GetCurrentKeyframeIndex();
+
+	UPaperSprite* sprite = mFlipbookWrapper->GetKeyframeSprite(index);
+	if (sprite != iSprite)
+		return;
+
+	SetTextureAtKeyframeIndex(index);
+}
 
 #undef LOCTEXT_NAMESPACE

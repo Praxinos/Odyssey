@@ -3,27 +3,19 @@
 
 #pragma once
 
-#include "OdysseyPainterEditor.h"
-#include "PaperFlipbook.h"
+#include "OdysseyTextureEditor.h"
 
 #include "OdysseyFlipbookEditorGUI.h"
 #include "OdysseyFlipbookWrapper.h"
-#include "OdysseyTextureWrapper.h"
 
-class UPaperFlipbook;
-class UTexture2D;
-class UOdysseyBrush;
-class UOdysseyTextureAssetUserData;
-class FOdysseyPainterEditorToolkit;
 class FOdysseyFlipbookEditorGUI;
 class FOdysseySurfaceReadOnly;
-class FOdysseyFlipbookEditorController;
 
 /**
  * Implements an Editor for flipbooks.
  */
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
-    : public FOdysseyPainterEditor
+    : public FOdysseyTextureEditor
 {
 public:
     // Construction / Destruction
@@ -33,36 +25,29 @@ public:
 
 public:
     //Initialization
-    virtual void Init() override;
+    virtual void InitData() override;
 
 public:
     // Getters
 	TSharedPtr<FOdysseyFlipbookWrapper>&    FlipbookWrapper();
-    FOdysseyTextureWrapper&                 TextureWrapper();
-    UTexture2D*							    Texture();
-    FOdysseyLayerStack*					    LayerStack() const;
-	virtual FOdysseySurfaceEditable*        DisplaySurface() override;
-	FOdysseySurfaceReadOnly*			    PreviewSurface();
-    ::ul3::eAlphaMode	                    SelectedAlphaMode() const;
+    FOdysseySurfaceReadOnly*			    PreviewSurface();
 
 public:
     // Setters
-    void Texture(UTexture2D* iTexture);
-    void SelectedAlphaMode(::ul3::eAlphaMode iMode);
 
 public:
     //Overrides
     virtual FOdysseyFlipbookEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-    virtual bool OnCloseRequested();
+
+protected:
+    virtual void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
+    virtual void SetTextureAtKeyframeIndex(int32 iKeyframeIndex);
 
 private:
     TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper; //TODO: No need for a SharedPtr here, and no need for a pointer here
-    FOdysseyTextureWrapper                  mTextureWrapper;
 	FOdysseySurfaceReadOnly*                mPreviewSurface; //TODO: No need for a pointer here I guess
-    ::ul3::eAlphaMode                       mSelectedAlphaMode;
 
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
-	TSharedPtr<FOdysseyFlipbookEditorController> mController;
 };
 

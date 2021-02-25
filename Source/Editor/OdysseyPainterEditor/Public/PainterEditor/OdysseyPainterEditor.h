@@ -27,6 +27,13 @@ public:
     // Initialization
     virtual void Init();
 
+protected:
+    // Protected Initialization
+
+    // Seperating Init from InitGUI allows us to seperate Data and GUI initialization also in derived classes
+    virtual void InitData();
+    virtual void InitGUI();
+
 public:
     // Getters
     virtual FOdysseyPaintEngine*		                PaintEngine();

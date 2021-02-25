@@ -28,9 +28,8 @@ FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 {
 }
 
-FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, const FName iLayoutName)
+FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor)
 	: mEditor(iEditor)
-	, mLayoutName(iLayoutName)
 	, mLayout(nullptr)
 {
 }
@@ -168,7 +167,7 @@ FOdysseyPainterEditorGUI::OnToolkitInitialized()
 void
 FOdysseyPainterEditorGUI::CreateLayout()
 {
-	mLayout = FTabManager::NewLayout(mLayoutName)
+	mLayout = FTabManager::NewLayout(GetLayoutName())
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()
@@ -316,6 +315,12 @@ TSharedRef<FTabManager::FLayout>
 FOdysseyPainterEditorGUI::GetLayout()
 {
 	return mLayout.ToSharedRef();
+}
+
+FName
+FOdysseyPainterEditorGUI::GetLayoutName()
+{
+	return "OdysseyFlipbookEditor_Layout";
 }
 
 TSharedPtr<FOdysseyPainterEditorViewportTab>&

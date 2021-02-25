@@ -192,15 +192,11 @@ FOdysseyPainterEditorToolsTab::Fill()
 void
 FOdysseyPainterEditorToolsTab::Undo()
 {
-    //TODO: Should call PaintEngine->Undo();
-	// mEditor->PaintEngine()->InterruptStrokeAndStampInPlace();
 }
 
 void
 FOdysseyPainterEditorToolsTab::Redo()
 {
-    //TODO: Should call PaintEngine->Redo();
-	// mEditor->PaintEngine()->InterruptStrokeAndStampInPlace();
 }
 
 void

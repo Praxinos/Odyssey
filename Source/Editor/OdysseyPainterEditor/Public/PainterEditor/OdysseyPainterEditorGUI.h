@@ -28,7 +28,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGUI :
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorGUI();
-    FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor, const FName iLayoutName);
+    FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor);
 
 public:
     void Init();
@@ -61,6 +61,7 @@ protected:
 public:
     // Getters
 	TSharedRef<FTabManager::FLayout> GetLayout();
+    virtual FName GetLayoutName();
 
     TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
@@ -81,7 +82,6 @@ protected:
 
 private:
     FOdysseyPainterEditor*                          mEditor;
-    FName                                           mLayoutName;
 	TSharedPtr<FTabManager::FLayout>                mLayout;
 
 protected:

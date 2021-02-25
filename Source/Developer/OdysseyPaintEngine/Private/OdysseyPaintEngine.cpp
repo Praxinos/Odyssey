@@ -56,7 +56,6 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
 
     , mIsSmoothingEnabled( true )
     , mIsRealTime( true )
-    // , mIsCatchUp( true )
     , mIsAdaptativeStep( true )
     , mIsPaintOnTick( false )
     , mIsPendingEndStroke( false )
@@ -83,11 +82,6 @@ FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdys
         mIsPendingEndStroke ||
         mIsLocked.Get() )
         return;
-
-	//TODO: Maybe find another way to keep the preview block uptodate, because this is potentially heavy
-    // But for now it's only in the begin stroke, so it should be ok
-    /* Flush();
-    CopyEditedBlockInPreviewBlock(); */
 
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
 
@@ -157,12 +151,6 @@ FOdysseyPaintEngine::EndStroke()
     if( !mBrushInstance ||
         !mEditedBlock )
         return;
-
-    /*if (!iImmediate)
-    {
-        mIsPendingEndStroke = true;
-        return;
-    }*/
     
     ExecuteDrawingQueue(0);
     SmoothingEndStroke();
@@ -170,9 +158,10 @@ FOdysseyPaintEngine::EndStroke()
     mBrushInstance->ExecuteStrokeEnd();
 
     auto rects = GetStrokeInvalidTiles();
-    mOnStrokeWillEndDelegate.Broadcast(rects);
-
     UpdateEditedBlock();
+
+    mOnStrokeWillEndDelegate.Broadcast(rects);
+    
     UpdateOriginalBlock();
     ResetStroke();
 
@@ -272,19 +261,6 @@ FOdysseyPaintEngine::TriggerStateChanged()
     UpdateBrushInstance();
 }
 
-
-/*void
-FOdysseyPaintEngine::InterruptStrokeAndStampInPlace()
-{
-    if( mDrawingQueue.empty() )
-        return;
-
-    Flush();
-    EndStroke();
-    ClearDrawingQueue();
-    Tick();
-}*/
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -355,17 +331,13 @@ void
 FOdysseyPaintEngine::SetColor( const ::ul3::FPixelValue& iColor )
 {
     // TODO: Convert to TAttribute
-    // InterruptStrokeAndStampInPlace();
     mColor = iColor; //No need for any conversion here
-    //::ul3::Conv( iColor, mColor );
     UpdateBrushInstance();
 }
 
 void
 FOdysseyPaintEngine::SetSizeModifier( float iValue )
 {
-    // InterruptStrokeAndStampInPlace();
-
     if( iValue == 0 )
         iValue = 1;
     mSizeModifier = iValue;
@@ -381,8 +353,6 @@ FOdysseyPaintEngine::SetSizeModifier( float iValue )
 void
 FOdysseyPaintEngine::SetOpacityModifier( float iValue )
 {
-    // InterruptStrokeAndStampInPlace();
-
     mOpacityModifier = iValue / 100.f;
 
     UpdateBrushInstance();
@@ -391,8 +361,6 @@ FOdysseyPaintEngine::SetOpacityModifier( float iValue )
 void
 FOdysseyPaintEngine::SetFlowModifier( float iValue )
 {
-    // InterruptStrokeAndStampInPlace();
-
     mFlowModifier = iValue / 100.f;
 
     UpdateBrushInstance();
@@ -401,8 +369,6 @@ FOdysseyPaintEngine::SetFlowModifier( float iValue )
 void
 FOdysseyPaintEngine::SetBlendingModeModifier( ::ul3::eBlendingMode iValue )
 {
-    // InterruptStrokeAndStampInPlace();
-
     mBlendingModeModifier = iValue;
 
     UpdateBrushInstance();
@@ -411,8 +377,6 @@ FOdysseyPaintEngine::SetBlendingModeModifier( ::ul3::eBlendingMode iValue )
 void
 FOdysseyPaintEngine::SetAlphaModeModifier( ::ul3::eAlphaMode iValue )
 {
-    // InterruptStrokeAndStampInPlace();
-
     mAlphaModeModifier = iValue;
 
     UpdateBrushInstance();
@@ -523,13 +487,6 @@ FOdysseyPaintEngine::Tick()
 
     //Execute Tick and Update invalid maps in case of drawing in the tick event
     mBrushInstance->ExecuteTick();
-    
-    //End the stroke if we need to
-    /* if( mIsPendingEndStroke && mDrawingQueue.empty() )
-    {
-        EndStroke(true);
-        return;
-    } */
 
     //Refresh the tiles
     UpdateEditedBlock();
@@ -936,18 +893,6 @@ FOdysseyPaintEngine::SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& i
     }
 }
 
-/* FOdysseyBlock*
-FOdysseyPaintEngine::StrokeBlock()
-{
-    return mStrokeBlock;
-}
-
-FOdysseyBlock*
-FOdysseyPaintEngine::PreviewBlock()
-{
-    return mPreviewBlock;
-} */
-
 void
 FOdysseyPaintEngine::DeallocInvalidMap( InvalidTileMap& ioMap )
 {
@@ -1055,9 +1000,6 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
 
             mBrushInstance->ExecuteStep();
             mOnStrokeStepDelegate.Broadcast();
-
-            // UpdateInvalidMaps();
-            // mBrushInstance->ClearInvalidRects();
         } );
     }
 
@@ -1069,8 +1011,6 @@ FOdysseyPaintEngine::AddResultPoints(const TArray< FOdysseyStrokePoint >& iPoint
             state.point = point;
             state.currentPointIndex = i;
             mBrushInstance->ExecuteSubStrokeEnd();
-            // UpdateInvalidMaps();
-            // mBrushInstance->ClearInvalidRects();
         } );
     }
 }

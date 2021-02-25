@@ -33,14 +33,22 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToo
 void
 FOdysseyPainterEditor::Init()
 {
-    // Setup Paint Engine
-	mPaintEngine->Block( NULL );
-    mPaintEngine->SetColor( mPaintColor );
-    mPaintEngine->SetSizeModifier( 20.f );
+    InitData();
+    InitGUI();
+}
 
+void
+FOdysseyPainterEditor::InitData()
+{
     //Set Default Brush
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
     mPaintEngine->Brush(settings.BrushDefaults.DefaultBrush);
+}
+
+void
+FOdysseyPainterEditor::InitGUI()
+{
+    GetGUI()->Init();
 }
 
 //--------------------------------------------------------------------------------------
@@ -103,7 +111,6 @@ FOdysseyPainterEditor::OnToolkitInitialized()
 bool
 FOdysseyPainterEditor::OnCloseRequested()
 {
-	// PaintEngine()->Flush();
     return true;
 }
 

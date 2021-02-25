@@ -4,7 +4,9 @@
 #include "OdysseyFlipbookEditorTimelineTab.h"
 
 #include "OdysseyFlipbookEditor.h"
+#include "OdysseyFlipbookEditorCommands.h"
 #include "SOdysseyFlipbookTimelineView.h"
+#include "Types/NavigationMetaData.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorTimelineTab"
 
@@ -53,9 +55,11 @@ FOdysseyFlipbookEditorTimelineTab::BindShortcuts()
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorViewportTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    mTimeline->BindCommands(toolkitCommands);
+	// Insert Shortcuts Here
 
     #undef MAP_ACTION
+
+	mTimeline->BindCommands(toolkitCommands);
 }
 
 void

@@ -38,16 +38,15 @@ FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FO
 	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr)
 {
-	mGUI = MakeShareable(new FOdysseyTextureEditorGUI(this));
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyTextureEditor::Init()
+FOdysseyTextureEditor::InitData()
 {
-	FOdysseyPainterEditor::Init();
+	FOdysseyPainterEditor::InitData();
 
 	//--- Init Data
 	
@@ -64,10 +63,6 @@ FOdysseyTextureEditor::Init()
     mTextureWrapper.OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPostTextureChange);
     PaintEngine()->OnStrokeWillEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEngineStrokeWillEnd);
     PaintEngine()->OnStrokeEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEngineStrokeEnd);
-
-	//--- Init GUI
-
-	mGUI->Init();
 }
 
 //--------------------------------------------------------------------------------------
@@ -144,6 +139,8 @@ FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
 FOdysseyTextureEditorGUI*
 FOdysseyTextureEditor::GetGUI()
 {
+	if (!mGUI)
+		mGUI = MakeShareable(new FOdysseyTextureEditorGUI(this));
 	return mGUI.Get();
 }
 
@@ -152,7 +149,7 @@ FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& 
 {
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyTextureEditor", "Odyssey Texture Editor"));
 	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	mGUI->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
+	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
 	return workspaceMenuCategory;
 }
 

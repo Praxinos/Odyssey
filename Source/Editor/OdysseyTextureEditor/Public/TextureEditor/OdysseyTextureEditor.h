@@ -25,7 +25,7 @@ public:
 
 public:
     // Initialization
-    virtual void Init() override;
+    virtual void InitData() override;
 
 public:
     // Getters
