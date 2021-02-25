@@ -22,7 +22,6 @@ class FKeyThumbnailSection
     : public FViewportThumbnailSection
 {
 public:
-
     /** Create and initialize a new instance. */
     FKeyThumbnailSection( TSharedPtr<ISequencer> InSequencer, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool, UMovieSceneSection& InSection );
 
@@ -30,19 +29,24 @@ public:
     virtual ~FKeyThumbnailSection();
 
 protected:
-
     /** Called to force a redraw of this section's thumbnails */
     void RedrawThumbnails();
 
 public:
-
     // ISequencerSection interface
     virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
     virtual void BuildSectionContextMenu( FMenuBuilder& MenuBuilder, const FGuid& ObjectBinding ) override;
     virtual int32 OnPaintSection( FSequencerSectionPainter& InPainter ) const override;
 
-    virtual void BuildKeys() = 0;
-    virtual TArray<double> GetKeys() const = 0;
+    virtual void BuildKeys();
+    virtual void BuildThumbnailKeys() = 0;
+    virtual TArray<double> GetThumbnailKeys() const = 0;
+
+private:
+    virtual void RebuildKeys( EMovieSceneDataChangeType iType );
+
+    FDelegateHandle mRebuildKeysDelegateHandle;
+    bool mNeedRebuildKeys;
 
 protected:
 
@@ -50,7 +54,4 @@ protected:
         This list replace the original one inside FThumbnailSection
     */
     FTrackEditorKeyThumbnailCache KeyThumbnailCache;
-
-private:
-    double mLastCurrentTime;
 };

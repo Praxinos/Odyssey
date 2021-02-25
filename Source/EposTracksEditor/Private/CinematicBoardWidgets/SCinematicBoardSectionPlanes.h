@@ -47,6 +47,7 @@ public:
         {}
     SLATE_END_ARGS()
 
+    SCinematicBoardSectionPlanes();
     virtual ~SCinematicBoardSectionPlanes();
 
     // Construct the widget
@@ -57,7 +58,7 @@ public:
 
 public:
     /** Called when our sequencer has changed moviescene data */
-    void OnMovieSceneDataChanged( EMovieSceneDataChangeType iType );
+    void RebuildPlaneList( EMovieSceneDataChangeType iType );
 
 protected:
     TSharedRef<ITableRow> MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
@@ -68,8 +69,8 @@ private:
 
     TArray<TSharedRef<FMovieScenePossessable>> mPossessables;
     TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetPlaneList;
-    bool mNeedRebuildPlaneList : 1;
+    bool mNeedRebuildPlaneList;
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
-    FDelegateHandle mOnMovieSceneDataChangedHandle;
+    FDelegateHandle mRebuildPlaneListHandle;
 };

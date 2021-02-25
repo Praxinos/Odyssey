@@ -300,7 +300,30 @@ FCinematicBoardSection::GetViewCamera()
 
 static
 TArray<FFrameTime>
-FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
+FindCameraKeys( UMovieSceneCinematicBoardSection* iBoardSection )
+{
+    TArray<FFrameTime> keys;
+
+    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
+    if( !innerMovieSceneSequence )
+        return keys;
+
+    // if we are on a shot subsequence
+    if( innerMovieSceneSequence->IsA<UShotSequence>() )
+    {
+        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
+
+        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
+
+        return keys;
+    }
+
+    return keys;
+}
+
+static
+TArray<FFrameTime>
+FindCameraKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
 {
     TArray<FFrameTime> keys;
 
@@ -334,7 +357,7 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
         {
             UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
             TArray<FFrameTime> section_keys;
-            section_keys = FindKeysRecursive( board_section );
+            section_keys = FindCameraKeysRecursive( board_section );
 
             subkeys.Append( section_keys );
         }
@@ -348,22 +371,48 @@ FindKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
 }
 
 void
-FCinematicBoardSection::BuildKeys() //override
+FCinematicBoardSection::BuildThumbnailKeys() //override
 {
     UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mKeys.Empty( mKeys.Num() );
+    mThumbnailKeys.Empty( mThumbnailKeys.Num() );
 
-    TArray<FFrameTime> keys_as_frame = FindKeysRecursive( BoardSection );
-    mKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+    TArray<FFrameTime> keys_as_frame = FindCameraKeysRecursive( BoardSection );
+    mThumbnailKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
 TArray<double>
-FCinematicBoardSection::GetKeys() const //override
+FCinematicBoardSection::GetThumbnailKeys() const //override
 {
-    return mKeys;
+    return mThumbnailKeys;
+}
+
+void
+FCinematicBoardSection::BuildCameraKeys()
+{
+    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
+
+    check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
+
+    mCameraKeys.Empty( mCameraKeys.Num() );
+
+    TArray<FFrameTime> keys_as_frame = FindCameraKeys( BoardSection );
+    mCameraKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+}
+
+TArray<double>
+FCinematicBoardSection::GetCameraKeys() const
+{
+    return mCameraKeys;
+}
+
+void
+FCinematicBoardSection::BuildKeys() //override
+{
+    FKeyThumbnailSection::BuildKeys();
+    BuildCameraKeys();
 }
 
 //---
@@ -481,7 +530,7 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
     FCinematicSectionCache newCacheData( &sectionObject );
     if( newCacheData != mThumbnailCacheData )
     {
-        ThumbnailCache.ForceRedraw();
+        KeyThumbnailCache.ForceRedraw();
     }
     mThumbnailCacheData = newCacheData;
 
@@ -489,11 +538,11 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
     if( GetDefault<UMovieSceneUserThumbnailSettings>()->bDrawSingleThumbnails && sectionObject.HasStartFrame() )
     {
         double referenceTime = sectionObject.GetInclusiveStartFrame() / sectionObject.GetTypedOuter<UMovieScene>()->GetTickResolution() + sectionObject.GetThumbnailReferenceOffset();
-        ThumbnailCache.SetSingleReferenceFrame( referenceTime );
+        KeyThumbnailCache.SetSingleReferenceFrame( referenceTime );
     }
     else
     {
-        ThumbnailCache.SetSingleReferenceFrame( TOptional<double>() );
+        KeyThumbnailCache.SetSingleReferenceFrame( TOptional<double>() );
     }
 
     FKeyThumbnailSection::Tick( iAllottedGeometry, iClippedGeometry, iCurrentTime, iDeltaTime );

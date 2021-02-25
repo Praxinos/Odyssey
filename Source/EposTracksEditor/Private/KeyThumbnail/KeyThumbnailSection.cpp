@@ -30,15 +30,18 @@
 FKeyThumbnailSection::FKeyThumbnailSection( TSharedPtr<ISequencer> InSequencer, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool, UMovieSceneSection& InSection )
     : FViewportThumbnailSection( InSequencer, InThumbnailPool, InSection )
     , KeyThumbnailCache( InThumbnailPool, this )
-    , mLastCurrentTime( 0.0 )
+    , mNeedRebuildKeys( true )
 {
     GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().Remove( RedrawThumbnailDelegateHandle );
-    RedrawThumbnailDelegateHandle = GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().AddRaw( this, &FKeyThumbnailSection::RedrawThumbnails );
+    RedrawThumbnailDelegateHandle = GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().AddRaw( this, &FKeyThumbnailSection::RedrawThumbnails ); // Removed inside parent destructor
+
+    mRebuildKeysDelegateHandle = SequencerPtr.Pin()->OnMovieSceneDataChanged().AddRaw( this, &FKeyThumbnailSection::RebuildKeys );
 }
 
 
 FKeyThumbnailSection::~FKeyThumbnailSection()
 {
+    SequencerPtr.Pin()->OnMovieSceneDataChanged().Remove( mRebuildKeysDelegateHandle );
 }
 
 
@@ -47,6 +50,15 @@ void FKeyThumbnailSection::RedrawThumbnails()
     KeyThumbnailCache.ForceRedraw();
 }
 
+void FKeyThumbnailSection::RebuildKeys( EMovieSceneDataChangeType iType )
+{
+    mNeedRebuildKeys = true;
+}
+
+void FKeyThumbnailSection::BuildKeys()
+{
+    BuildThumbnailKeys();
+}
 
 /* ISequencerSection interface
  *****************************************************************************/
@@ -229,13 +241,13 @@ void FKeyThumbnailSection::Tick( const FGeometry& AllottedGeometry, const FGeome
         FIntPoint AllocatedSize = AllottedGeometry.GetLocalSize().IntPoint();
         AllocatedSize.X = FMath::Max( AllocatedSize.X, 1 );
 
-        if( InCurrentTime - mLastCurrentTime > 0.5 )
+        if( mNeedRebuildKeys )
         {
-            mLastCurrentTime = InCurrentTime;
             BuildKeys();
+            mNeedRebuildKeys = false;
         }
 
-        KeyThumbnailCache.Update( GetTotalRange(), GetVisibleRange(), GetKeys(), AllocatedSize, Settings->ThumbnailSize, Settings->Quality, InCurrentTime );
+        KeyThumbnailCache.Update( GetTotalRange(), GetVisibleRange(), GetThumbnailKeys(), AllocatedSize, Settings->ThumbnailSize, Settings->Quality, InCurrentTime );
     }
 }
 

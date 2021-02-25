@@ -61,14 +61,19 @@ SCinematicBoardSectionPlane::OnPaint( const FPaintArgs& Args, const FGeometry& A
 
 //---
 
+SCinematicBoardSectionPlanes::SCinematicBoardSectionPlanes()
+    : mNeedRebuildPlaneList( true )
+{
+}
+
 SCinematicBoardSectionPlanes::~SCinematicBoardSectionPlanes()
 {
-    if( mOnMovieSceneDataChangedHandle.IsValid() && mSequencer.IsValid() )
-        mSequencer.Pin()->OnMovieSceneDataChanged().Remove( mOnMovieSceneDataChangedHandle );
+    if( mSequencer.IsValid() )
+        mSequencer.Pin()->OnMovieSceneDataChanged().Remove( mRebuildPlaneListHandle );
 }
 
 void
-SCinematicBoardSectionPlanes::OnMovieSceneDataChanged( EMovieSceneDataChangeType iType )
+SCinematicBoardSectionPlanes::RebuildPlaneList( EMovieSceneDataChangeType iType )
 {
     mNeedRebuildPlaneList = true;
 }
@@ -79,7 +84,7 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     mBoardSection = iBoardSection;
     mSequencer = mBoardSection.Pin()->GetSequencer();
 
-    mOnMovieSceneDataChangedHandle = mSequencer.Pin()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlanes::OnMovieSceneDataChanged );
+    mRebuildPlaneListHandle = mSequencer.Pin()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlanes::RebuildPlaneList );
 
     //---
 
@@ -96,7 +101,7 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         .SelectionMode( ESelectionMode::None )
     ];
 
-    OnMovieSceneDataChanged( EMovieSceneDataChangeType::Unknown );
+    mNeedRebuildPlaneList = true;
 }
 
 TSharedRef<ITableRow>

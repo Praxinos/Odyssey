@@ -64,10 +64,17 @@ public:
 
     // FKeyThumbnailSection interface
     virtual void BuildKeys() override;
-    virtual TArray<double> GetKeys() const override; //TODO: maybe move it to UMovieScene*Section ? but what to do with TimeSpace ?
+    virtual void BuildThumbnailKeys() override;
+    virtual TArray<double> GetThumbnailKeys() const override;
+
+    //---
+
+    virtual void BuildCameraKeys();
+    virtual TArray<double> GetCameraKeys() const;
 
 private:
-    TArray<double> mKeys;
+    TArray<double> mThumbnailKeys;
+    TArray<double> mCameraKeys;
 
 private:
 
@@ -96,6 +103,7 @@ private:
 
     FInnerSequenceResult GetInnerSequenceID( const UMovieSceneSubSection* iSubSection = nullptr ) const;
     void FillInnerSequenceResult( FInnerSequenceResult& iInnerSequenceResult ) const;
+
     UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceResult iInnerSequenceResult );
 
 private:

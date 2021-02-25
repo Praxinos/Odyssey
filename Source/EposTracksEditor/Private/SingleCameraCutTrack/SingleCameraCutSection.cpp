@@ -54,7 +54,7 @@ void FSingleCameraCutSection::SetSingleTime(double GlobalTime)
     }
 }
 
-void FSingleCameraCutSection::BuildKeys() //override
+void FSingleCameraCutSection::BuildThumbnailKeys() //override
 {
     UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
     TSharedPtr<ISequencer> Sequencer = SequencerPtr.Pin();
@@ -71,7 +71,7 @@ void FSingleCameraCutSection::BuildKeys() //override
     mKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
-TArray<double> FSingleCameraCutSection::GetKeys() const //override
+TArray<double> FSingleCameraCutSection::GetThumbnailKeys() const //override
 {
     return mKeys;
 }

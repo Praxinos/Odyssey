@@ -51,8 +51,8 @@ public:
     virtual FText HandleThumbnailTextBlockText() const override;
 
     // FKeyThumbnailSection interface
-    virtual void BuildKeys() override;
-    virtual TArray<double> GetKeys() const override;
+    virtual void BuildThumbnailKeys() override;
+    virtual TArray<double> GetThumbnailKeys() const override;
 
     // IViewportThumbnailClient interface
     virtual UCameraComponent* GetViewCamera() override;
