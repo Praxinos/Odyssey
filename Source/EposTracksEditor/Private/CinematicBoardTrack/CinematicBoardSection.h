@@ -69,12 +69,20 @@ public:
 
     //---
 
-    virtual void BuildCameraKeys();
-    virtual TArray<double> GetCameraKeys() const;
+    virtual void BuildCameraTransformKeys();
+    virtual TArray<double> GetCameraTransformKeys() const;
+
+    virtual void BuildPlaneTransformsKeys();
+    virtual TArray<double> GetPlaneTransformKeys( FMovieScenePossessable iPossessable ) const;
+
+    virtual void BuildPlaneMaterialsKeys();
+    virtual TArray<double> GetPlaneMaterialKeys( FMovieScenePossessable iPossessable ) const;
 
 private:
     TArray<double> mThumbnailKeys;
-    TArray<double> mCameraKeys;
+    TArray<double> mCameraTransformKeys;
+    TMap<FGuid, TArray<double>> mPlaneTransformsKeys;
+    TMap<FGuid, TArray<double>> mPlaneMaterialsKeys;
 
 private:
 
@@ -123,10 +131,13 @@ public:
 
 private:
     // To be able to call GetSectionObjectAs()/GetSequencer() inside sub-widgets (because GetSectionObjectAs()/GetSequencer() are protected)
-    // This is the easiest way to achieve this without having to readd publicly the same functions
+    // This is the easiest way to achieve this without having to read publicly the same functions
     friend class SCinematicBoardSectionCamera;
     friend class SCinematicBoardSectionTitle;
     friend class SCinematicBoardSectionThumbnails;
+    friend class SCinematicBoardSectionPlaneKeys;
+    friend class SCinematicBoardSectionPlaneMaterialKeys;
+    friend class SCinematicBoardSectionPlane;
     friend class SCinematicBoardSectionPlanes;
 
     TSharedPtr<SCinematicBoardSectionLayout> mWidgetLayout;

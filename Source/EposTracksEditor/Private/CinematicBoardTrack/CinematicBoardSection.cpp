@@ -300,7 +300,7 @@ FCinematicBoardSection::GetViewCamera()
 
 static
 TArray<FFrameTime>
-FindCameraKeys( UMovieSceneCinematicBoardSection* iBoardSection )
+FindCameraTransformKeys( UMovieSceneCinematicBoardSection* iBoardSection )
 {
     TArray<FFrameTime> keys;
 
@@ -311,7 +311,7 @@ FindCameraKeys( UMovieSceneCinematicBoardSection* iBoardSection )
     // if we are on a shot subsequence
     if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
+        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
 
         keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
 
@@ -323,7 +323,7 @@ FindCameraKeys( UMovieSceneCinematicBoardSection* iBoardSection )
 
 static
 TArray<FFrameTime>
-FindCameraKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
+FindCameraTransformKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
 {
     TArray<FFrameTime> keys;
 
@@ -334,7 +334,7 @@ FindCameraKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
     // if we are on a shot subsequence
     if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetKeys( innerMovieSceneSequence );
+        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
 
         keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
 
@@ -357,7 +357,7 @@ FindCameraKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
         {
             UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
             TArray<FFrameTime> section_keys;
-            section_keys = FindCameraKeysRecursive( board_section );
+            section_keys = FindCameraTransformKeysRecursive( board_section );
 
             subkeys.Append( section_keys );
         }
@@ -379,7 +379,7 @@ FCinematicBoardSection::BuildThumbnailKeys() //override
 
     mThumbnailKeys.Empty( mThumbnailKeys.Num() );
 
-    TArray<FFrameTime> keys_as_frame = FindCameraKeysRecursive( BoardSection );
+    TArray<FFrameTime> keys_as_frame = FindCameraTransformKeysRecursive( BoardSection );
     mThumbnailKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
@@ -390,29 +390,119 @@ FCinematicBoardSection::GetThumbnailKeys() const //override
 }
 
 void
-FCinematicBoardSection::BuildCameraKeys()
+FCinematicBoardSection::BuildCameraTransformKeys()
 {
     UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mCameraKeys.Empty( mCameraKeys.Num() );
+    mCameraTransformKeys.Empty( mCameraTransformKeys.Num() );
 
-    TArray<FFrameTime> keys_as_frame = FindCameraKeys( BoardSection );
-    mCameraKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+    TArray<FFrameTime> keys_as_frame = FindCameraTransformKeys( BoardSection );
+    mCameraTransformKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
 TArray<double>
-FCinematicBoardSection::GetCameraKeys() const
+FCinematicBoardSection::GetCameraTransformKeys() const
 {
-    return mCameraKeys;
+    return mCameraTransformKeys;
+}
+
+static
+TArray<FFrameTime>
+FindPlaneTransformKeys( UMovieSceneCinematicBoardSection* iBoardSection, FMovieScenePossessable iPossessable )
+{
+    TArray<FFrameTime> keys;
+
+    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
+    if( !innerMovieSceneSequence )
+        return keys;
+
+    // if we are on a shot subsequence
+    if( innerMovieSceneSequence->IsA<UShotSequence>() )
+    {
+        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetPlaneTransformKeys( innerMovieSceneSequence, iPossessable );
+
+        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
+
+        return keys;
+    }
+
+    return keys;
+}
+
+void
+FCinematicBoardSection::BuildPlaneTransformsKeys()
+{
+    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
+
+    mPlaneTransformsKeys.Empty( mPlaneTransformsKeys.Num() );
+
+    TArray<FMovieScenePossessable> possessables = GetPlaneBindings();
+    for( auto possessable : possessables )
+    {
+        TArray<FFrameTime> keys_as_frame = FindPlaneTransformKeys( BoardSection, possessable );
+        mPlaneTransformsKeys.Add( possessable.GetGuid() ) = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+    }
+}
+
+TArray<double>
+FCinematicBoardSection::GetPlaneTransformKeys( FMovieScenePossessable iPossessable ) const
+{
+    return mPlaneTransformsKeys[iPossessable.GetGuid()];
+}
+
+static
+TArray<FFrameTime>
+FindPlaneMaterialKeys( UMovieSceneCinematicBoardSection* iBoardSection, FMovieScenePossessable iPossessable )
+{
+    TArray<FFrameTime> keys;
+
+    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
+    if( !innerMovieSceneSequence )
+        return keys;
+
+    // if we are on a shot subsequence
+    if( innerMovieSceneSequence->IsA<UShotSequence>() )
+    {
+        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetPlaneMaterialKeys( innerMovieSceneSequence, iPossessable );
+
+        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
+
+        return keys;
+    }
+
+    return keys;
+}
+
+void
+FCinematicBoardSection::BuildPlaneMaterialsKeys()
+{
+    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
+
+    mPlaneMaterialsKeys.Empty( mPlaneMaterialsKeys.Num() );
+
+    TArray<FMovieScenePossessable> possessables = GetPlaneBindings();
+    for( auto possessable : possessables )
+    {
+        TArray<FFrameTime> keys_as_frame = FindPlaneMaterialKeys( BoardSection, possessable );
+        mPlaneMaterialsKeys.Add( possessable.GetGuid() ) = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+    }
+}
+
+TArray<double>
+FCinematicBoardSection::GetPlaneMaterialKeys( FMovieScenePossessable iPossessable ) const
+{
+    return mPlaneMaterialsKeys[iPossessable.GetGuid()];
 }
 
 void
 FCinematicBoardSection::BuildKeys() //override
 {
     FKeyThumbnailSection::BuildKeys();
-    BuildCameraKeys();
+    BuildCameraTransformKeys();
+    BuildPlaneTransformsKeys();
+    BuildPlaneMaterialsKeys();
 }
 
 //---

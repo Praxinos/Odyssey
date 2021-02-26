@@ -29,8 +29,8 @@
 
 FKeyThumbnailSection::FKeyThumbnailSection( TSharedPtr<ISequencer> InSequencer, TSharedPtr<FTrackEditorThumbnailPool> InThumbnailPool, UMovieSceneSection& InSection )
     : FViewportThumbnailSection( InSequencer, InThumbnailPool, InSection )
-    , KeyThumbnailCache( InThumbnailPool, this )
     , mNeedRebuildKeys( true )
+    , KeyThumbnailCache( InThumbnailPool, this )
 {
     GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().Remove( RedrawThumbnailDelegateHandle );
     RedrawThumbnailDelegateHandle = GetMutableDefault<UMovieSceneUserThumbnailSettings>()->OnForceRedraw().AddRaw( this, &FKeyThumbnailSection::RedrawThumbnails ); // Removed inside parent destructor

@@ -68,7 +68,7 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
 
     TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
 
-    TArray<double> keys = section->GetCameraKeys();
+    TArray<double> keys = section->GetCameraTransformKeys();
 
     static const FName CircleKeyBrushName( "Sequencer.KeyCircle" );
     static const FName DiamondKeyBrushName( "Sequencer.KeyDiamond" );

@@ -67,7 +67,7 @@ void FSingleCameraCutSection::BuildThumbnailKeys() //override
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameTime> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetKeys( moviescene_sequence );
+    TArray<FFrameTime> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( moviescene_sequence );
     mKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 
