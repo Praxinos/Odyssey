@@ -10,6 +10,10 @@
 class ODYSSEYBRUSH_API FOdysseyDrawingState //TODO: rename to I* (?)
 {
 public:
+    virtual ~FOdysseyDrawingState() {};
     FOdysseyDrawingState();
+
+public:
+    virtual const FName& Id() = 0;
 };
 

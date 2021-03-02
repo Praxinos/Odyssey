@@ -15,7 +15,7 @@ class UOdysseyBrushAssetBase;
 //---
 
 UCLASS(meta=(ScriptName="OdysseyTextureEditorLibrary"))
-class ODYSSEYDRAWINGSTATE_API UOdysseyTextureEditorFunctionLibrary 
+class UOdysseyTextureEditorFunctionLibrary 
     : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()

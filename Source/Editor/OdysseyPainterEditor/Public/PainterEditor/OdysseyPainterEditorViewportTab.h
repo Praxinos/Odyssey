@@ -4,8 +4,11 @@
 #pragma once
 
 #include "OdysseyPainterEditorTab.h"
+#include "OdysseyEventState.h"
 
 class FOdysseyPainterEditor;
+class SOdysseySurfaceViewport;
+class IOdysseySurface;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorViewportTab :
 	public FOdysseyPainterEditorTab
@@ -30,7 +33,6 @@ protected:
 
 protected:
     // Event Listeners
-    virtual void OnViewportParameterChanged();
     virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
 
 protected:

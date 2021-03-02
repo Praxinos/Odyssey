@@ -20,8 +20,6 @@ protected:
 
 protected:
     // Methods
-    virtual void Clear() override;
-    virtual void Fill() override;
     virtual void Undo() override;
     virtual void Redo() override;
     virtual void ClearUndo() override;

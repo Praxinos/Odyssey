@@ -9,7 +9,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
-#include "TextureEditor/OdysseyTextureEditorState.h"
+#include "OdysseyTextureEditorDrawingState.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
@@ -49,10 +49,13 @@ FOdysseyTextureEditor::InitData()
 	FOdysseyPainterEditor::InitData();
 
 	//--- Init Data
+
+    FOdysseyTextureEditorDrawingState* drawingState = new FOdysseyTextureEditorDrawingState(this);
 	
     TAttribute<bool> paintEngineIsLockedAttr;
     paintEngineIsLockedAttr.BindRaw(this, &FOdysseyTextureEditor::PaintEngineIsLocked);
     PaintEngine()->IsLocked(paintEngineIsLockedAttr);
+    PaintEngine()->AddDrawingState(drawingState);
 
     //Make like if the texture changed, to set all callbacks correctly
     OnPostTextureChange(nullptr);
@@ -299,18 +302,6 @@ FOdysseyTextureEditor::OnLayerStackStructureChanged()
 {
     //TODO: Move to TextureWrapper
     Texture()->MarkPackageDirty();
-
-
-	FOdysseyLayerStack* layerstack = LayerStack();
-    if (!layerstack)
-		return;
-
-    //TODO: Remove when States use Editor
-    if(PaintEngine()->BrushInstance() )
-    {
-        FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState( layerstack );
-        PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyTextureEditorState::GetId(), layer_state );
-    }
 }
 
 void

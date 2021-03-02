@@ -42,6 +42,9 @@ FOdysseyPainterEditor::InitData()
 {
     //Set Default Brush
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    FOdysseyPainterEditorDrawingState* drawingState = new FOdysseyPainterEditorDrawingState(this);
+
+    mPaintEngine->AddDrawingState(drawingState);
     mPaintEngine->Brush(settings.BrushDefaults.DefaultBrush);
 }
 

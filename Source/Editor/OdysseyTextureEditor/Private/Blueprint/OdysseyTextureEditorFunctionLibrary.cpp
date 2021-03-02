@@ -1,11 +1,11 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "TextureEditor/OdysseyTextureEditorFunctionLibrary.h"
+#include "OdysseyTextureEditorFunctionLibrary.h"
 
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
-#include "TextureEditor/OdysseyTextureEditorState.h"
+#include "OdysseyTextureEditorDrawingState.h"
 #include <ULIS3>
 #include "ULISLoaderModule.h"
 
@@ -20,11 +20,11 @@ GetStack( UOdysseyBrushAssetBase* BrushContext )
     if( !BrushContext )
         return nullptr;
 
-    FOdysseyDrawingState* istate = BrushContext->FindState( FOdysseyTextureEditorState::GetId() );
+    FOdysseyDrawingState* istate = BrushContext->FindState( FOdysseyTextureEditorDrawingState::GetId() );
     if( !istate )
         return nullptr;
 
-    FOdysseyTextureEditorState* state = static_cast<FOdysseyTextureEditorState*>( istate );
+    FOdysseyTextureEditorDrawingState* state = static_cast<FOdysseyTextureEditorDrawingState*>( istate );
     check( state );
     if( !state )
         return nullptr;
@@ -226,12 +226,12 @@ UOdysseyTextureEditorFunctionLibrary::GetResultBlock( UOdysseyBrushAssetBase* Br
     if( !BrushContext )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    FOdysseyDrawingState* istate = BrushContext->FindState( FOdysseyTextureEditorState::GetId() );
-    //FOdysseyDrawingState* istate = *BrushContext->GetStates().Find( FOdysseyTextureEditorState::GetId() );
+    FOdysseyDrawingState* istate = BrushContext->FindState(FOdysseyTextureEditorDrawingState::GetId() );
+    //FOdysseyDrawingState* istate = *BrushContext->GetStates().Find( FOdysseyTextureEditorDrawingState::GetId() );
     if( !istate )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    FOdysseyTextureEditorState* state = static_cast<FOdysseyTextureEditorState*>( istate );
+    FOdysseyTextureEditorDrawingState* state = static_cast<FOdysseyTextureEditorDrawingState*>( istate );
     check( state );
 
     FOdysseyLayerStack* stack = state->LayerStack();

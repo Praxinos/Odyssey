@@ -44,12 +44,12 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyTransaction",
                 "OdysseyStylusInput",
                 // "OdysseyTexture",
-                "OdysseyDrawingState",
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
+                Path.Combine(ModuleDirectory, "Private", "Blueprint"),
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),

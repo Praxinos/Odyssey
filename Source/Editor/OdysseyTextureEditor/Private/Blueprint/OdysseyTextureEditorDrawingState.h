@@ -7,25 +7,25 @@
 
 #include "OdysseyDrawingState.h"
 
+class FOdysseyLayerStack;
+class FOdysseyTextureEditor;
+
 //---
 
-class ODYSSEYDRAWINGSTATE_API FOdysseyPainterEditorState
+class FOdysseyTextureEditorDrawingState
     : public FOdysseyDrawingState
 {
 public:
     static const FName& GetId();
+    virtual const FName& Id() override;
 
 public:
-    FOdysseyPainterEditorState( float iZoom, float iRotationInDegrees, const FVector2D& iPan );
+    FOdysseyTextureEditorDrawingState( FOdysseyTextureEditor* iEditor );
 
 public:
-    float               Zoom();
-    float               RotationInDegrees();
-    const FVector2D&    Pan();
+    FOdysseyLayerStack* LayerStack();
 
 private:
-    float       mZoom;
-    float       mRotation;
-    FVector2D   mPan;
+    FOdysseyTextureEditor*           mEditor;
 };
 

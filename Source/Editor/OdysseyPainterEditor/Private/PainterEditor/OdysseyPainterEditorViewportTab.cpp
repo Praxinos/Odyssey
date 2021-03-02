@@ -31,8 +31,7 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorViewportTab::CreateWidget()
 {
     SAssignNew(mViewport, SOdysseySurfaceViewport)
-        .Surface_Raw(this, &FOdysseyPainterEditorViewportTab::Surface)
-        .OnParameterChanged_Raw(this, &FOdysseyPainterEditorViewportTab::OnViewportParameterChanged);
+        .Surface_Raw(this, &FOdysseyPainterEditorViewportTab::Surface);
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
 	TSharedPtr<FOdysseyPainterEditorViewportClient> viewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
@@ -91,16 +90,6 @@ FOdysseyPainterEditorViewportTab::Surface() const
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
-
-void
-FOdysseyPainterEditorViewportTab::OnViewportParameterChanged()
-{
-    if( mEditor->PaintEngine()->BrushInstance() )
-    {
-        FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState( mViewport->GetZoom(), mViewport->GetRotationInDegrees(), mViewport->GetPan() );
-        mEditor->PaintEngine()->BrushInstance()->AddOrReplaceState( FOdysseyPainterEditorState::GetId(), state );
-    }
-}
 
 void
 FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)

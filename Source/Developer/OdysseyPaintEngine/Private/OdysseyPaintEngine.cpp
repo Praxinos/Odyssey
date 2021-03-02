@@ -15,6 +15,11 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPaintEngine::~FOdysseyPaintEngine()
 {
+    for (int i = 0; i < mDrawingStates.Num(); i++)
+    {
+        delete mDrawingStates[i];
+    }
+
     delete mSmoother;
     delete mSmoothingParameters;
     delete mInterpolator;
@@ -282,8 +287,7 @@ FOdysseyPaintEngine::Fill()
     ::ul3::FRect rect = mPaintBlock->GetBlock()->Rect();
     ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mPaintBlock->GetBlock(), mColor, mPaintBlock->GetBlock()->Rect() );
 
-    SetMapWithRect( mPaintBlockInvalidMap, rect, true );
-    SetMapWithRect( mEditedBlockInvalidMap, rect, true );
+    UpdateInvalidMaps(rect);
 
     PaintStep();
     PaintFinalize();
@@ -866,10 +870,10 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
         UpdateBrushInstance();
     }
 
-    //2)
-    //TODO: Make all state class access their editor, so that it is only created when setting the BrushInstance
-    /* FOdysseyPainterEditorState* state = new FOdysseyPainterEditorState(mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetZoom(), mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees(), mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetPan());
-    mEditor->BrushInstance()->AddOrReplaceState(FOdysseyPainterEditorState::GetId(), state); */
+    for (int i = 0; i < mDrawingStates.Num(); i++)
+    {
+        mBrushInstance->AddOrReplaceState(mDrawingStates[i]->Id(), mDrawingStates[i]);
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -894,20 +898,25 @@ FOdysseyPaintEngine::UpdateInvalidMaps()
     auto invalid_rects = mBrushInstance->GetInvalidRects();
     for( int j = 0; j < invalid_rects.Num(); ++j )
     {
-        const ::ul3::FRect& rect = invalid_rects[j];
-        float xf = FMath::Max( 0.f, float( rect.x ) / TILE_SIZE );
-        float yf = FMath::Max( 0.f, float( rect.y ) / TILE_SIZE );
-        float wf = float( rect.w ) / TILE_SIZE;
-        float hf = float( rect.h ) / TILE_SIZE;
-        int x = xf;
-        int y = yf;
-        int w = FMath::Min( mCountTileX, int( ceil( xf + wf ) ) ) - x;
-        int h = FMath::Min( mCountTileY, int( ceil( yf + hf ) ) ) - y;
-        ::ul3::FRect tileRect = { x, y, w, h };
-        SetMapWithRect(mPaintBlockInvalidMap, tileRect, true );
-        SetMapWithRect( mEditedBlockInvalidMap, tileRect, true );
+        UpdateInvalidMaps(invalid_rects[j]);
     }
     mBrushInstance->ClearInvalidRects();
+}
+
+void
+FOdysseyPaintEngine::UpdateInvalidMaps(::ul3::FRect iRect)
+{
+    float xf = FMath::Max(0.f, float(iRect.x) / TILE_SIZE);
+    float yf = FMath::Max(0.f, float(iRect.y) / TILE_SIZE);
+    float wf = float(iRect.w) / TILE_SIZE;
+    float hf = float(iRect.h) / TILE_SIZE;
+    int x = xf;
+    int y = yf;
+    int w = FMath::Min(mCountTileX, int(ceil(xf + wf))) - x;
+    int h = FMath::Min(mCountTileY, int(ceil(yf + hf))) - y;
+    ::ul3::FRect tileRect = { x, y, w, h };
+    SetMapWithRect(mPaintBlockInvalidMap, tileRect, true);
+    SetMapWithRect(mEditedBlockInvalidMap, tileRect, true);
 }
 
 TArray<::ul3::FRect>
@@ -1345,6 +1354,13 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     mBrushCursorInvalid = false;
     */
 //}
+
+void
+FOdysseyPaintEngine::AddDrawingState(FOdysseyDrawingState* iDrawingState)
+{
+    mDrawingStates.Add(iDrawingState);
+    UpdateBrushInstance();
+}
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ FGCObject interface

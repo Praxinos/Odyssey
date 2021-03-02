@@ -26,42 +26,6 @@ FOdysseyTextureEditorToolsTab::FOdysseyTextureEditorToolsTab(FOdysseyTextureEdit
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyTextureEditorToolsTab::Clear()
-{
-    if(!mEditor->LayerStack())
-        return;
-
-	if( mEditor->LayerStack()->GetCurrentLayer() == NULL )
-        return;
-
-    //Record
-    mEditor->LayerStack()->mDrawingUndo->StartRecord();
-	mEditor->LayerStack()->mDrawingUndo->SaveData( 0, 0, mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height() );
-	mEditor->LayerStack()->mDrawingUndo->EndRecord();
-    //EndRecord
-
-    FOdysseyPainterEditorToolsTab::Clear();
-}
-
-void
-FOdysseyTextureEditorToolsTab::Fill()
-{
-    if(!mEditor->LayerStack())
-        return;
-
-	if( mEditor->LayerStack()->GetCurrentLayer() == NULL )
-        return;
-
-    //Record
-    mEditor->LayerStack()->mDrawingUndo->StartRecord();
-	mEditor->LayerStack()->mDrawingUndo->SaveData( 0, 0, mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height() );
-	mEditor->LayerStack()->mDrawingUndo->EndRecord();
-    //EndRecord
-
-    FOdysseyPainterEditorToolsTab::Fill();
-}
-
-void
 FOdysseyTextureEditorToolsTab::Undo()
 {
     FOdysseyPainterEditorToolsTab::Undo();

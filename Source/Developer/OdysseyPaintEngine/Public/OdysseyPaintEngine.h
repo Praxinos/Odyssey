@@ -15,6 +15,7 @@
 #include <functional>
 
 class UOdysseyBrushAssetBase;
+class FOdysseyDrawingState;
 
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
     : public FGCObject //Allows us to register External UObject in Garbage Collector
@@ -169,6 +170,9 @@ protected:
     // Updates the invalid tiles structure from the brush instance invalid rects
     void UpdateInvalidMaps();
 
+    // Updates the invalid tiles structure from the given Rect
+    void UpdateInvalidMaps(::ul3::FRect iRect);
+
     // Returns the Sub Stroke Invalid Tiles structure 
     TArray<::ul3::FRect> GetPaintBlockInvalidTiles();
 
@@ -234,6 +238,10 @@ public:
     FOnEditedBlockTilesWillChange& OnEditedBlockTilesWillChange() { return mOnEditedBlockTilesWillChangeDelegate; }
     FOnEditedBlockTilesChanged& OnEditedBlockTilesChanged() { return mOnEditedBlockTilesChangedDelegate; } */
 
+public:
+    // Drawing States
+    void AddDrawingState(FOdysseyDrawingState* iDrawingState);
+
 protected:
     // FGCObject interface
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -296,6 +304,8 @@ protected:
 	FOnPaintAbort                       mOnPaintAbortDelegate;
 
     std::chrono::steady_clock::time_point mLastStrokeTimePoint;
+
+    TArray<FOdysseyDrawingState*>       mDrawingStates;
 
 public:
     FOdysseySurfaceEditable*            mBrushCursorPreviewSurface;

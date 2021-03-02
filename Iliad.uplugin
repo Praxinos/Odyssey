@@ -26,11 +26,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyDrawingState",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyLayer",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"

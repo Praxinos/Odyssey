@@ -1,27 +1,27 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "PainterEditor/OdysseyPainterEditorFunctionLibrary.h"
+#include "OdysseyPainterEditorFunctionLibrary.h"
 
 #include "OdysseyBrushAssetBase.h"
-#include "PainterEditor/OdysseyPainterEditorState.h"
+#include "OdysseyPainterEditorDrawingState.h"
 
 //---
 
 namespace
 {
 static
-FOdysseyPainterEditorState*
+FOdysseyPainterEditorDrawingState*
 GetState( UOdysseyBrushAssetBase* BrushContext )
 {
     if( !BrushContext )
         return nullptr;
 
-    FOdysseyDrawingState* istate = BrushContext->FindState( FOdysseyPainterEditorState::GetId() );
+    FOdysseyDrawingState* istate = BrushContext->FindState(FOdysseyPainterEditorDrawingState::GetId() );
     if( !istate )
         return nullptr;
 
-    FOdysseyPainterEditorState* state = static_cast<FOdysseyPainterEditorState*>( istate );
+    FOdysseyPainterEditorDrawingState* state = static_cast<FOdysseyPainterEditorDrawingState*>( istate );
     check( state );
     if( !state )
         return nullptr;
@@ -41,7 +41,7 @@ UOdysseyPainterEditorFunctionLibrary::GetViewportZoom( UOdysseyBrushAssetBase* i
 
     //---
 
-    FOdysseyPainterEditorState* state = GetState( iBrushContext );
+    FOdysseyPainterEditorDrawingState* state = GetState( iBrushContext );
     if( !state )
         return 100.f;
 
@@ -59,7 +59,7 @@ UOdysseyPainterEditorFunctionLibrary::GetViewportRotation( UOdysseyBrushAssetBas
 
     //---
 
-    FOdysseyPainterEditorState* state = GetState( iBrushContext );
+    FOdysseyPainterEditorDrawingState* state = GetState( iBrushContext );
     if( !state )
         return 0.f;
 
@@ -77,7 +77,7 @@ UOdysseyPainterEditorFunctionLibrary::GetViewportPan( UOdysseyBrushAssetBase* iB
 
     //---
 
-    FOdysseyPainterEditorState* state = GetState( iBrushContext );
+    FOdysseyPainterEditorDrawingState* state = GetState( iBrushContext );
     if( !state )
         return FVector2D::ZeroVector;
 

@@ -12,7 +12,6 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyStrokeOptions.h"
-#include "PainterEditor/OdysseyPainterEditorState.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushSelectorTab"
 
