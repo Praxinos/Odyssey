@@ -154,6 +154,6 @@ FOdysseyPaintEngine3D::UpdateTmpTileMapFromTriangles(TArray<FTexturePaintTriangl
         xMax = FMath::Min( xMax, mCountTileX - 1 ); xMax = FMath::Max( xMax, 0 );
         yMax = FMath::Min( yMax, mCountTileY - 1 ); yMax = FMath::Max( yMax, 0 );
 
-        SetMapWithRect( mSubStrokeInvalidMap, ::ul3::FRect( xMin, yMin, xMax - xMin + 1, yMax - yMin + 1 ), true );
+        SetMapWithRect( mPaintBlockInvalidMap, ::ul3::FRect( xMin, yMin, xMax - xMin + 1, yMax - yMin + 1 ), true );
     }
 }

@@ -60,8 +60,7 @@ protected:
 	virtual void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
 	virtual void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
-    virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles);
-    virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles);
+    virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
 private:
     FOdysseyTextureWrapper     mTextureWrapper;

@@ -56,8 +56,7 @@ public:
     void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineStrokeAbort(); */
 
-    virtual void OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles);
-    virtual void OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles);
+    virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
     void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
     void OnLayerStackStructureChanged();

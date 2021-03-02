@@ -68,6 +68,9 @@ FOdysseyTextureEditorToolsTab::Undo()
 
     if(!mEditor->LayerStack())
         return;
+
+    if (!mEditor->LayerStack()->mDrawingUndo->HasUndo())
+        return;
     
 	mEditor->LayerStack()->mDrawingUndo->LoadData();
 }
@@ -78,6 +81,9 @@ FOdysseyTextureEditorToolsTab::Redo()
     FOdysseyPainterEditorToolsTab::Redo();
 
     if(!mEditor->LayerStack())
+        return;
+
+    if (!mEditor->LayerStack()->mDrawingUndo->HasRedo())
         return;
     
 	mEditor->LayerStack()->mDrawingUndo->Redo();

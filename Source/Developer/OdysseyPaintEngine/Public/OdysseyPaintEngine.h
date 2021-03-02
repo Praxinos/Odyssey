@@ -19,13 +19,30 @@ class UOdysseyBrushAssetBase;
 class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine 
     : public FGCObject //Allows us to register External UObject in Garbage Collector
 {
+private:
+    enum ePaintState
+    {
+        kIDLE = 0,
+        kDrawingAction,
+        kDrawingStroke,
+        kDrawingTick
+    };
+
 public:
     // Events Declaration
+
+    // User Stroke delegates
     DECLARE_MULTICAST_DELEGATE(FOnStrokeBegin);
 	DECLARE_MULTICAST_DELEGATE(FOnStrokeStep);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeWillEnd, const TArray<::ul3::FRect>& iChangedTiles);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStrokeEnd, const TArray<::ul3::FRect>& iChangedTiles);
+	DECLARE_MULTICAST_DELEGATE(FOnStrokeEnd);
 	DECLARE_MULTICAST_DELEGATE(FOnStrokeAbort);
+
+    
+    // Any Paint delegates (even Ticks)
+    DECLARE_MULTICAST_DELEGATE(FOnPaintBegin);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintStep, const TArray<::ul3::FRect>& iChangedTiles);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintEnd, const TArray<::ul3::FRect>& iChangedTiles);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintAbort, const TArray<::ul3::FRect>& iChangedTiles);
 
     /* 
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreviewBlockTilesChanged, const TArray<::ul3::FRect>&);
@@ -49,6 +66,15 @@ public:
     void PushStroke( const FOdysseyStrokePoint& iPoint );
     void EndStroke();
     void AbortStroke();
+    
+    bool PaintInitialize(ePaintState iPaintState);
+    bool PaintCheck();
+    void PaintStep();
+    void PaintFinalize();
+    void PaintAbort();
+
+    // Will end safely what the PaintEngine is doing (like drawing in ticks for example)
+    void Flush();
 
     // Paint Operations
     void Clear();
@@ -58,7 +84,6 @@ public:
     void SetCurrentStrokePoint(const FOdysseyStrokePoint& iPoint); //TODO: Rename,  it allows us to set what is the current cursor position when hovering the canvas
     void UpdateStrokeOptions(); //TODO: Replace by a TAttribute<FStrokeOptions>
     void TriggerStateChanged(); //TODO: Rename, it allows us to rebuild the BrushInstance when the brush parameters changes
-    // void InterruptStrokeAndStampInPlace(); //TODO: Remove, allows to end the stroke and flush everything
 
 public:
     // Setters
@@ -77,9 +102,10 @@ public:
 
 public:
     // Getters
-	// FOdysseyBlock* PreviewBlock(); //TODO: Replace with new system OriginalBlock/EditedBlock/StrokeBlock
-	FOdysseyBlock* StrokeBlock();
+	// FOdysseyBlock* PreviewBlock(); //TODO: Replace with new system OriginalBlock/EditedBlock/PaintBlock
+	FOdysseyBlock* PaintBlock();
     FOdysseyBlock* EditedBlock();
+    FOdysseyBlock* OriginalBlock();
 
     UOdysseyBrush* Brush() const;
     UOdysseyBrushAssetBase* BrushInstance() const;
@@ -120,12 +146,12 @@ private:
     // Blocks Management
 
     // Internal Methods
-    void ClearStrokeBlock();
+    void ClearPaintBlock();
 
     // Copies EditedBlock Rects to Original Block
     void UpdateOriginalBlock(bool iForceRefresh = false);
 
-    // Blends StrokeBlock on OriginalBlock and stores the result in EditedBlock
+    // Blends PaintBlock on OriginalBlock and stores the result in EditedBlock
     void UpdateEditedBlock();
 
 private:
@@ -144,16 +170,10 @@ protected:
     void UpdateInvalidMaps();
 
     // Returns the Sub Stroke Invalid Tiles structure 
-    TArray<::ul3::FRect> GetSubStrokeInvalidTiles();
+    TArray<::ul3::FRect> GetPaintBlockInvalidTiles();
 
     // Returns the Stroke Invalid Tiles structure 
-    TArray<::ul3::FRect> GetStrokeInvalidTiles();
-
-    // Clear the Sub Stroke Invalid Tiles structure
-    // void ClearSubStrokeInvalidMap();
-
-    // Clear the Stroke Invalid Tiles structure
-    // void ClearStrokeInvalidMap();
+    TArray<::ul3::FRect> GetEditedBlockInvalidTiles();
 
     // Reallocates the Invalid Maps to match EditedBlock
     void ReallocInvalidMaps();
@@ -175,19 +195,6 @@ protected:
 
     // MISC - Set the InvalidMap tiles value from the given rect
     void SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue );
-
-    //--- OLD ---
-    // void InterruptDrawing();
-
-    // virtual void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
-	// void CopyPreviewBlockInEditedBlock(TArray<::ul3::FRect>& iRects);
-    // void CopyEditedBlockInPreviewBlock(TArray<::ul3::FRect>& iRects);
-	// void CopyEditedBlockInPreviewBlock();
-    // void UpdatePreviewBlockTiles();
-    // void UpdateEditedBlockTiles();
-    // void UpdateBrushCursorPreview();
-
-    // void OnBrushCompiled(UBlueprint* iBrush);
 
 private:
     // Stroke Helpers
@@ -214,9 +221,14 @@ public:
     // Delegates
     FOnStrokeBegin& OnStrokeBegin() { return mOnStrokeBeginDelegate; }
 	FOnStrokeStep& OnStrokeStep() { return mOnStrokeStepDelegate; }
-    FOnStrokeWillEnd& OnStrokeWillEnd() { return mOnStrokeWillEndDelegate; }
 	FOnStrokeEnd& OnStrokeEnd() { return mOnStrokeEndDelegate; }
 	FOnStrokeAbort& OnStrokeAbort() { return mOnStrokeAbortDelegate; }
+
+    
+	FOnPaintBegin& OnPaintBegin() { return mOnPaintBeginDelegate; }
+	FOnPaintStep& OnPaintStep() { return mOnPaintStepDelegate; }
+    FOnPaintEnd& OnPaintEnd() { return mOnPaintEndDelegate; }
+	FOnPaintAbort& OnPaintAbort() { return mOnPaintAbortDelegate; }
 
     /* FOnPreviewBlockTilesChanged& OnPreviewBlockTilesChanged() { return mOnPreviewBlockTilesChangedDelegate; }
     FOnEditedBlockTilesWillChange& OnEditedBlockTilesWillChange() { return mOnEditedBlockTilesWillChangeDelegate; }
@@ -229,12 +241,14 @@ protected:
 
 protected:
     // protected Data Members
+    ePaintState                         mPaintState;
+
     UOdysseyBrush*                      mBrush;
     TAttribute<bool>                    mIsLocked;
     FOdysseyStrokeOptions               mStrokeOptions;
 
 	FOdysseyBlock*                      mEditedBlock; // Holds th original block to edit
-	FOdysseyBlock*                      mStrokeBlock; //Holds the stroke tiles
+	FOdysseyBlock*                      mPaintBlock; //Holds the stroke tiles
     FOdysseyBlock*                      mOriginalBlock; //Holds the stroke tiles
 
     UOdysseyBrushAssetBase*             mBrushInstance;
@@ -247,8 +261,8 @@ protected:
     TArray< FOdysseyStrokePoint >       mRawStroke;
     TArray< FOdysseyStrokePoint >       mResultStroke;
 
-    InvalidTileMap                      mSubStrokeInvalidMap;
-    InvalidTileMap                      mStrokeInvalidMap;
+    InvalidTileMap                      mPaintBlockInvalidMap;
+    InvalidTileMap                      mEditedBlockInvalidMap;
 
     ::ul3::FPixelValue                  mColor;
 
@@ -269,19 +283,17 @@ protected:
     bool                                mIsAdaptativeStep;
     bool                                mIsPaintOnTick;
 
-    bool                                mIsPendingEndStroke;
-
     std::queue<std::function<void()>>   mDrawingQueue;
 
     FOnStrokeBegin                      mOnStrokeBeginDelegate;
 	FOnStrokeStep                       mOnStrokeStepDelegate;
-    FOnStrokeWillEnd                        mOnStrokeWillEndDelegate;
 	FOnStrokeEnd                        mOnStrokeEndDelegate;
 	FOnStrokeAbort                      mOnStrokeAbortDelegate;
 
-    // FOnPreviewBlockTilesChanged         mOnPreviewBlockTilesChangedDelegate;
-    // FOnEditedBlockTilesWillChange       mOnEditedBlockTilesWillChangeDelegate; //TODO: Remove once the undo will be moved from Layerstack to PaintEngine
-    // FOnEditedBlockTilesChanged          mOnEditedBlockTilesChangedDelegate;
+    FOnPaintBegin                       mOnPaintBeginDelegate;
+	FOnPaintStep                        mOnPaintStepDelegate;
+    FOnPaintEnd                         mOnPaintEndDelegate;
+	FOnPaintAbort                       mOnPaintAbortDelegate;
 
     std::chrono::steady_clock::time_point mLastStrokeTimePoint;
 

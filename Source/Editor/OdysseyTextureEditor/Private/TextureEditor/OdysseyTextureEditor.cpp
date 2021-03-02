@@ -61,8 +61,7 @@ FOdysseyTextureEditor::InitData()
 
     mTextureWrapper.OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPreTextureChange);
     mTextureWrapper.OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPostTextureChange);
-    PaintEngine()->OnStrokeWillEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEngineStrokeWillEnd);
-    PaintEngine()->OnStrokeEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEngineStrokeEnd);
+    PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEnginePaintEnd);
 }
 
 //--------------------------------------------------------------------------------------
@@ -328,26 +327,41 @@ FOdysseyTextureEditor::OnLayerStackImageResultChanged(const ::ul3::FRect& iRect)
 }
 
 void
-FOdysseyTextureEditor::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyTextureEditor::OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles)
 {
-	FOdysseyLayerStack* layerstack = LayerStack();
+    if (iChangedTiles.Num() <= 0)
+        return;
+
+    if (!Texture())
+        return;
+
+    FOdysseyLayerStack* layerstack = LayerStack();
     if (!layerstack)
-		return;
+        return;
 
     //TODO: Manage Undo directly in PaintEngine
+
+    //PATCH: To make the Undo work
+    //TODO: Remove this when another Undo system will be made
+    //As the PaintEngine edits directly the layer block, we need to replace it with the original block to store the changed tiles
+    //Then we come back to the layer block
+    if (!layerstack->GetCurrentLayer())
+        return;
+
+    if (layerstack->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
+    imageLayer->SetBlock(PaintEngine()->OriginalBlock(), false, false);
+
     layerstack->mDrawingUndo->StartRecord();
     for (int i = 0; i < iChangedTiles.Num(); i++)
     {
         layerstack->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
     }
     layerstack->mDrawingUndo->EndRecord();
-}
 
-void
-FOdysseyTextureEditor::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
-{
-    if (!Texture())
-        return;
+    imageLayer->SetBlock(PaintEngine()->EditedBlock(), false, false);
     //TODO: Move To Editor
     Texture()->MarkPackageDirty();
 }

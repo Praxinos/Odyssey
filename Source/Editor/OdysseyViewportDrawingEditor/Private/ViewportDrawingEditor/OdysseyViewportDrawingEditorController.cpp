@@ -72,11 +72,8 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
         if(!(mData->PaintEngine()->OnStrokeAbort().IsBoundToObject(this)))
             mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort); */
 
-        if (!(mData->PaintEngine()->OnStrokeWillEnd().IsBoundToObject(this)))
-            mData->PaintEngine()->OnStrokeWillEnd().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeWillEnd);
-
-        if (!(mData->PaintEngine()->OnStrokeEnd().IsBoundToObject(this)))
-            mData->PaintEngine()->OnStrokeEnd().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeEnd);
+        if (!(mData->PaintEngine()->OnPaintEnd().IsBoundToObject(this)))
+            mData->PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnPaintEnginePaintEnd);
 
         mData->PaintEngine()->IsLocked(TAttribute<bool>(this, &FOdysseyViewportDrawingEditorController::PaintEngineIsLocked));
 
@@ -140,27 +137,38 @@ FOdysseyViewportDrawingEditorController::GetGUI()
 }
 
 void
-FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeWillEnd(const TArray<::ul3::FRect>& iChangedTiles)
-{
-    //TODO: Manage Undo directly in PaintEngine
-    if (!mData->LayerStack())
-        return;
-
-    mData->LayerStack()->mDrawingUndo->StartRecord();
-    for (int i = 0; i < iChangedTiles.Num(); i++)
-    {
-        mData->LayerStack()->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
-        // GetEditor()->LayerStack()->BlendOnCurrentLayer(GetEditor()->PaintEngine()->TempBuffer(), iChangedTiles[i], GetEditor()->PaintEngine()->GetOpacity(), GetEditor()->PaintEngine()->GetBlendingMode(), GetEditor()->PaintEngine()->GetAlphaMode());
-    }
-    mData->LayerStack()->mDrawingUndo->EndRecord();
-}
-
-void
-FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyViewportDrawingEditorController::OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles)
 {
     if (!mData->Texture())
         return;
 
+    FOdysseyLayerStack* layerstack = mData->LayerStack();
+    if (!layerstack)
+        return;
+
+    //TODO: Manage Undo directly in PaintEngine
+
+    //PATCH: To make the Undo work
+    //TODO: Remove this when another Undo system will be made
+    //As the PaintEngine edits directly the layer block, we need to replace it with the original block to store the changed tiles
+    //Then we come back to the layer block
+    if (!layerstack->GetCurrentLayer())
+        return;
+
+    if (layerstack->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
+    imageLayer->SetBlock(mData->PaintEngine()->OriginalBlock(), false, false);
+
+    layerstack->mDrawingUndo->StartRecord();
+    for (int i = 0; i < iChangedTiles.Num(); i++)
+    {
+        layerstack->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
+    }
+    layerstack->mDrawingUndo->EndRecord();
+
+    imageLayer->SetBlock(mData->PaintEngine()->EditedBlock(), false, false);
     //TODO: Move To Editor
     mData->Texture()->MarkPackageDirty();
 }

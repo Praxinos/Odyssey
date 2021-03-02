@@ -192,16 +192,22 @@ FOdysseyPainterEditorToolsTab::Fill()
 void
 FOdysseyPainterEditorToolsTab::Undo()
 {
+	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
+	mEditor->PaintEngine()->Flush();
 }
 
 void
 FOdysseyPainterEditorToolsTab::Redo()
 {
+	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
+	mEditor->PaintEngine()->Flush();
 }
 
 void
 FOdysseyPainterEditorToolsTab::ClearUndo()
 {
+	//End stroke before undoing, just to be perfectly clean
+	mEditor->PaintEngine()->Flush();
 }
 
 #undef LOCTEXT_NAMESPACE

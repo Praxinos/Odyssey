@@ -184,6 +184,10 @@ public:
     bool Redo();
     void Check();
 
+public:
+    bool HasUndo();
+    bool HasRedo();
+
 private:
     FOdysseyLayerStack* mLayerStackPtr;
     int                 mCurrentIndex;

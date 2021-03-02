@@ -1073,7 +1073,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHit
     // Create a canvas for the brush render target.
     FCanvas brushPaintCanvas(brushRenderTargetResource,nullptr,0,0,0,featureLevel);
 
-    InvalidateTextureFromData(mController->GetData()->PaintEngine()->StrokeBlock(), mStrokeBufferTexture2D);
+    InvalidateTextureFromData(mController->GetData()->PaintEngine()->PaintBlock(), mStrokeBufferTexture2D);
 
     // Parameters for brush paint
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());

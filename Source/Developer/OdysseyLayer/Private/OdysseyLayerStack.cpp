@@ -786,13 +786,14 @@ FOdysseyDrawingUndo::LoadData()
         //Useless, I just want mTileData at the right size for the next undo, to change
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::FRect tileRect(tileX, tileY, sizeX, sizeY);
 		mTileData = ::ul3::XCopy(hULIS.ThreadPool()
 			, ULIS3_BLOCKING
 			, perfIntent
 			, hULIS.HostDeviceInfo()
 			, ULIS3_NOCB
 			, imageLayer->GetBlock()->GetBlock()
-			, ::ul3::FRect(tileX, tileY, sizeX, sizeY));
+			, tileRect);
 
         if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
@@ -811,13 +812,12 @@ FOdysseyDrawingUndo::LoadData()
                        , ::ul3::FRect( 0, 0, sizeX, sizeY )
                        , ::ul3::FVec2I( tileX, tileY ) );
             // mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX,tileY,sizeX,sizeY));
+
+            imageLayer->GetBlock()->GetBlock()->Invalidate(tileRect);
         }
 
 		delete mTileData;
     }
-
-	if (imageLayer)
-		imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
 
     if(bSaveForRedo)
     {
@@ -871,6 +871,7 @@ FOdysseyDrawingUndo::Redo()
         //Useless, I just want mTileData at the right size for the next undo, to change
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        ::ul3::FRect tileRect( tileX, tileY, sizeX, sizeY );
         if( i == 0 ) {
             mTileData = ::ul3::XCopy( hULIS.ThreadPool()
                                     , ULIS3_BLOCKING
@@ -878,7 +879,7 @@ FOdysseyDrawingUndo::Redo()
                                     , hULIS.HostDeviceInfo()
                                     , ULIS3_NOCB
                                     , imageLayer->GetBlock()->GetBlock()
-                                    , ::ul3::FRect( tileX, tileY, sizeX, sizeY ) );
+                                    , tileRect );
         }
 
         if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
@@ -897,11 +898,13 @@ FOdysseyDrawingUndo::Redo()
                        , imageLayer->GetBlock()->GetBlock()
                        , ::ul3::FRect( 0, 0, sizeX, sizeY )
                        , ::ul3::FVec2I( tileX, tileY ) );
+
+            imageLayer->GetBlock()->GetBlock()->Invalidate(tileRect);
         }
     }
 
-	if (imageLayer)
-		imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
+	// if (imageLayer)
+		// imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
 
     if(mCurrentIndex < (mUndosPositions.Num() - 1))
         mCurrentIndex++;
@@ -910,6 +913,18 @@ FOdysseyDrawingUndo::Redo()
         delete mTileData;
 
     return true;
+}
+
+bool
+FOdysseyDrawingUndo::HasUndo()
+{
+    return mCurrentIndex > 0;
+}
+
+bool
+FOdysseyDrawingUndo::HasRedo()
+{
+    return mCurrentIndex < mUndosPositions.Num() - 1;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -19,27 +19,28 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
     delete mSmoothingParameters;
     delete mInterpolator;
     delete mOriginalBlock;
-    delete mStrokeBlock;
-    DeallocInvalidMap( mSubStrokeInvalidMap );
-    DeallocInvalidMap( mStrokeInvalidMap );
+    delete mPaintBlock;
+    DeallocInvalidMap( mPaintBlockInvalidMap );
+    DeallocInvalidMap( mEditedBlockInvalidMap );
 
     if( mBrushCursorPreviewSurface )
         delete  mBrushCursorPreviewSurface;
 }
 
 FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
-    : mBrush(nullptr)
+    : mPaintState(kIDLE)
+    , mBrush(nullptr)
     , mIsLocked(false)
     , mEditedBlock( NULL )
-    , mStrokeBlock(NULL)
+    , mPaintBlock(NULL)
 	, mOriginalBlock(NULL)
     , mBrushInstance( NULL )
     
     , mCountTileX( 0 )
     , mCountTileY( 0 )
 
-    , mSubStrokeInvalidMap( NULL )
-    , mStrokeInvalidMap( NULL )
+    , mPaintBlockInvalidMap( NULL )
+    , mEditedBlockInvalidMap( NULL )
 
     , mColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0, 255 ) )
 
@@ -58,7 +59,6 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mIsRealTime( true )
     , mIsAdaptativeStep( true )
     , mIsPaintOnTick( false )
-    , mIsPendingEndStroke( false )
     , mDrawingQueue()
 
     , mBrushCursorPreviewSurface( nullptr )
@@ -74,13 +74,95 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Paint Engine API
 
+bool
+FOdysseyPaintEngine::PaintInitialize(ePaintState iPaintState)
+{
+    if (mPaintState != iPaintState)
+        Flush();
+
+    if (iPaintState == kIDLE || !mBrushInstance || !mEditedBlock || mIsLocked.Get())
+        return false;
+
+    mPaintState = iPaintState;
+    UpdateOriginalBlock(true);
+
+    ClearPaintBlock();
+    ClearInvalidMap(mPaintBlockInvalidMap);
+    ClearInvalidMap(mEditedBlockInvalidMap);
+
+    mOnPaintBeginDelegate.Broadcast();
+
+    return true;
+}
+
+bool
+FOdysseyPaintEngine::PaintCheck()
+{
+    if (mPaintState == kIDLE || !mBrushInstance || !mEditedBlock || mIsLocked.Get())
+    {
+        Flush();
+        return false;
+    }
+        
+    return true;
+}
+
+void
+FOdysseyPaintEngine::PaintStep()
+{
+    //Call paint step broadcast
+    UpdateInvalidMaps();
+    UpdateEditedBlock();
+
+    TArray<::ul3::FRect> rects = GetPaintBlockInvalidTiles();
+    ClearInvalidMap(mPaintBlockInvalidMap);
+    mOnPaintStepDelegate.Broadcast(rects);
+}
+
+void
+FOdysseyPaintEngine::PaintFinalize()
+{
+    if (mPaintState == kIDLE)
+        return;
+
+    PaintStep();
+    TArray<::ul3::FRect> rects = GetEditedBlockInvalidTiles();
+    mPaintState = kIDLE;
+    mOnPaintEndDelegate.Broadcast(rects);
+}
+
+void
+FOdysseyPaintEngine::PaintAbort()
+{
+    //Abort
+    ClearPaintBlock();
+    CopyInvalidMap(mEditedBlockInvalidMap, mPaintBlockInvalidMap); //Invalidate every tiles that changed
+    UpdateEditedBlock();
+    ClearInvalidMap(mPaintBlockInvalidMap);
+
+    //End
+    TArray<::ul3::FRect> rects = GetEditedBlockInvalidTiles();
+    mPaintState = kIDLE;
+    mOnPaintAbortDelegate.Broadcast(rects);
+}
+
+void
+FOdysseyPaintEngine::Flush()
+{
+    if (mPaintState == kIDLE)
+        return;
+        
+    if (mPaintState == kDrawingStroke)
+        EndStroke();
+
+    if (mPaintState == kDrawingTick || mPaintState == kDrawingAction)
+        PaintFinalize();
+}
+
 void
 FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdysseyStrokePoint& iPreviousPoint )
 {
-    if( !mBrushInstance ||
-        !mEditedBlock ||
-        mIsPendingEndStroke ||
-        mIsLocked.Get() )
+    if (!PaintInitialize(kDrawingStroke))
         return;
 
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
@@ -109,17 +191,8 @@ FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdys
 void
 FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint )
 {
-    if( !mBrushInstance ||
-        !mEditedBlock )
+    if (!PaintCheck())
         return;
-
-    if (mIsLocked.Get())
-    {
-        EndStroke();
-        return;
-    }
-
-    //TODO: If mIsLocked.Get() then EndStroke();
 
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
     mRawStroke.Add( iPoint );
@@ -148,38 +221,27 @@ FOdysseyPaintEngine::PushStroke( const FOdysseyStrokePoint& iPoint )
 void
 FOdysseyPaintEngine::EndStroke()
 {
-    if( !mBrushInstance ||
-        !mEditedBlock )
-        return;
-    
+    //Ending the stroke first
     ExecuteDrawingQueue(0);
     SmoothingEndStroke();
-
     mBrushInstance->ExecuteStrokeEnd();
 
-    auto rects = GetStrokeInvalidTiles();
-    UpdateEditedBlock();
-
-    mOnStrokeWillEndDelegate.Broadcast(rects);
-    
-    UpdateOriginalBlock();
+    //Ending the painting
+    PaintFinalize();
     ResetStroke();
-
-    mOnStrokeEndDelegate.Broadcast(rects);
+    mOnStrokeEndDelegate.Broadcast();
 }
 
 void
 FOdysseyPaintEngine::AbortStroke()
 {
-    if( !mStrokeBlock || !mEditedBlock || mIsLocked.Get() )
-        return;
+    //Abort the stroke first
+    // ClearStrokeBlock();
+    // UpdateEditedBlock();
 
-    CopyInvalidMap(mStrokeInvalidMap, mSubStrokeInvalidMap); //Invalidate every tiles that changed
-    ClearStrokeBlock();
-    UpdateEditedBlock();
-
+    //Abort the painting
+    PaintAbort();
     ResetStroke();
-
     mOnStrokeAbortDelegate.Broadcast();
 }
 
@@ -188,22 +250,19 @@ FOdysseyPaintEngine::AbortStroke()
 void
 FOdysseyPaintEngine::Clear()
 {
-    // InterruptStrokeAndStampInPlace();
+    ::ul3::eBlendingMode blend = mBlendingModeModifier;
+    ::ul3::eAlphaMode alpha = mAlphaModeModifier;
+    ::ul3::FPixelValue color = mColor;
 
-    if (!mEditedBlock)
-        return;
+    mBlendingModeModifier = ::ul3::BM_TOP;
+    mAlphaModeModifier = ::ul3::AM_TOP;
+    mColor = ::ul3::FPixelValue::FromRGBA8(0, 0, 0, 0);
 
-    ClearStrokeBlock();
+    Fill();
 
-    //Clear Edited Block
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mEditedBlock->GetBlock(), mEditedBlock->GetBlock()->Rect() );
-
-    UpdateOriginalBlock(true);
-
-    ::ul3::FRect rect = { 0, 0, mEditedBlock->Width(), mEditedBlock->Height() };
-    mEditedBlock->GetBlock()->Invalidate(rect);
+    mBlendingModeModifier = blend;
+    mAlphaModeModifier = alpha;
+    mColor = color;
 }
 
 void
@@ -214,23 +273,26 @@ FOdysseyPaintEngine::Fill()
     if (!mEditedBlock)
         return;
 
-    ClearStrokeBlock();
+    PaintInitialize(kDrawingAction);
 
     //Clear Edited Block
+    
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mEditedBlock->GetBlock(), mColor, mEditedBlock->GetBlock()->Rect() );
+    ::ul3::FRect rect = mPaintBlock->GetBlock()->Rect();
+    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mPaintBlock->GetBlock(), mColor, mPaintBlock->GetBlock()->Rect() );
 
-    UpdateOriginalBlock(true);
+    SetMapWithRect( mPaintBlockInvalidMap, rect, true );
+    SetMapWithRect( mEditedBlockInvalidMap, rect, true );
 
-    ::ul3::FRect rect = { 0, 0, mEditedBlock->Width(), mEditedBlock->Height() };
-    mEditedBlock->GetBlock()->Invalidate(rect);
+    PaintStep();
+    PaintFinalize();
 }
 
 void
 FOdysseyPaintEngine::UpdateStrokeOptions()
 {
-    EndStroke(); //Maybe useless one day
+    Flush(); //Maybe useless one day
 
     UpdateStrokeStep();
     UpdateStrokeAdaptative();
@@ -257,7 +319,7 @@ FOdysseyPaintEngine::SetCurrentStrokePoint(const FOdysseyStrokePoint& iPoint)
 void
 FOdysseyPaintEngine::TriggerStateChanged()
 {
-    EndStroke(); //useless one day, like the whole methode itself ?
+    Flush(); //useless one day, like the whole methode itself ?
     UpdateBrushInstance();
 }
 
@@ -270,31 +332,28 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
     if (mEditedBlock == iBlock)
         return;
 
-    //TODO: If we are drawing, EndStroke()
+    Flush();
 
     mEditedBlock = iBlock;
     if (!mEditedBlock) {
-		delete mStrokeBlock;
+		delete mPaintBlock;
         delete mOriginalBlock;
-        mStrokeBlock = nullptr;
+        mPaintBlock = nullptr;
         mOriginalBlock = nullptr;
 		UpdateBrushInstance();
         return;
     }
 
-    if (    !mStrokeBlock   || mStrokeBlock->Size()   != mEditedBlock->Size() || mStrokeBlock->Format()   != mEditedBlock->Format()
+    if (    !mPaintBlock   || mPaintBlock->Size()   != mEditedBlock->Size() || mPaintBlock->Format()   != mEditedBlock->Format()
          || !mOriginalBlock || mOriginalBlock->Size() != mEditedBlock->Size() || mOriginalBlock->Format() != mEditedBlock->Format() )
     {
-        delete mStrokeBlock;
+        delete mPaintBlock;
         delete mOriginalBlock;
 
-        mStrokeBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
+        mPaintBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
         mOriginalBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
 
         ReallocInvalidMaps();
-        
-        ClearStrokeBlock();
-        UpdateOriginalBlock(true);
     }
     UpdateBrushInstance();
 }
@@ -302,7 +361,8 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
 void
 FOdysseyPaintEngine::Brush(UOdysseyBrush* iBrush)
 {
-    //TODO: If we are drawing, EndStroke()
+    Flush();
+    
 	mBrushCursorInvalid = true;
 
     if (!iBrush)
@@ -386,15 +446,21 @@ FOdysseyPaintEngine::SetAlphaModeModifier( ::ul3::eAlphaMode iValue )
 //------------------------------------------------------------------------------ Getters
 
 FOdysseyBlock*
-FOdysseyPaintEngine::StrokeBlock()
+FOdysseyPaintEngine::PaintBlock()
 {
-    return mStrokeBlock;
+    return mPaintBlock;
 }
 
 FOdysseyBlock*
 FOdysseyPaintEngine::EditedBlock()
 {
     return mEditedBlock;
+}
+
+FOdysseyBlock*
+FOdysseyPaintEngine::OriginalBlock()
+{
+    return mOriginalBlock;
 }
 
 UOdysseyBrush*
@@ -476,7 +542,7 @@ FOdysseyPaintEngine::ClearDrawingQueue()
 void
 FOdysseyPaintEngine::Tick()
 {
-    if( !mBrushInstance || !mStrokeBlock || mIsLocked.Get() )
+    if( !mBrushInstance || !mPaintBlock || mIsLocked.Get() )
         return;
 
     //Execute Drawing Queue
@@ -486,10 +552,14 @@ FOdysseyPaintEngine::Tick()
     SmoothingCatchUpTick();
 
     //Execute Tick and Update invalid maps in case of drawing in the tick event
+    if (mPaintState == kIDLE)
+    {
+        PaintInitialize(kDrawingTick);
+    }
     mBrushInstance->ExecuteTick();
 
     //Refresh the tiles
-    UpdateEditedBlock();
+    PaintStep();
 }
 
 void
@@ -518,11 +588,11 @@ FOdysseyPaintEngine::SmoothingEndStroke()
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect());
+        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mPaintBlock->GetBlock(), mPaintBlock->GetBlock()->Rect());
 
-        ClearInvalidMap(mSubStrokeInvalidMap );
-        CopyInvalidMap(mStrokeInvalidMap, mSubStrokeInvalidMap); //Invalidate every tiles that changed before applying smoothing
-        ClearInvalidMap( mStrokeInvalidMap );
+        ClearInvalidMap(mPaintBlockInvalidMap );
+        CopyInvalidMap(mEditedBlockInvalidMap, mPaintBlockInvalidMap); //Invalidate every tiles that changed before applying smoothing
+        ClearInvalidMap( mEditedBlockInvalidMap );
 
         mInterpolator->Reset();
         mSmoother->Reset();
@@ -570,18 +640,15 @@ FOdysseyPaintEngine::ResetStroke()
 {
     //Prepare blocks for the next stroke
     ClearDrawingQueue();
-    ClearStrokeBlock();
-    
-    //Clear Tile maps
-    ClearInvalidMap( mSubStrokeInvalidMap );
-    ClearInvalidMap( mStrokeInvalidMap );
+    // ClearStrokeBlock();
+    // ClearInvalidMap( mEditedBlockInvalidMap );
+    // ClearInvalidMap( mPaintBlockInvalidMap );
     
     //Reset everything else
     mInterpolator->Reset();
     mSmoother->Reset();
     mRawStroke.Empty();
     mResultStroke.Empty();
-    mIsPendingEndStroke = false;
 }
 
 //--------------------------------------------------------------------------------------
@@ -607,14 +674,14 @@ FOdysseyPaintEngine::ExecuteDrawingQueue(long long iMaxTimeMs)
 //--------------------------------------------------------------------- Block Management
 
 void
-FOdysseyPaintEngine::ClearStrokeBlock()
+FOdysseyPaintEngine::ClearPaintBlock()
 {
-    if (!mStrokeBlock)
+    if (!mPaintBlock)
         return;
 
     IULISLoaderModule& hULIS = IULISLoaderModule::Get();
     uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mStrokeBlock->GetBlock(), mStrokeBlock->GetBlock()->Rect() );
+    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, mPaintBlock->GetBlock(), mPaintBlock->GetBlock()->Rect() );
 }
 
 void
@@ -628,7 +695,7 @@ FOdysseyPaintEngine::UpdateOriginalBlock(bool iForceRefresh)
 
     if (iForceRefresh)
     {
-        ClearInvalidMap(mStrokeInvalidMap);
+        ClearInvalidMap(mEditedBlockInvalidMap);
         ::ul3::FVec2F pos( 0, 0 );
 
         ::ul3::Copy( hULIS.ThreadPool()
@@ -643,8 +710,8 @@ FOdysseyPaintEngine::UpdateOriginalBlock(bool iForceRefresh)
         return;
     }
 
-    TArray<::ul3::FRect> changedTiles = GetStrokeInvalidTiles();
-    ClearInvalidMap(mStrokeInvalidMap);
+    TArray<::ul3::FRect> changedTiles = GetEditedBlockInvalidTiles();
+    ClearInvalidMap(mEditedBlockInvalidMap);
     if (changedTiles.Num() <= 0)
         return;
 
@@ -666,13 +733,10 @@ FOdysseyPaintEngine::UpdateOriginalBlock(bool iForceRefresh)
 void
 FOdysseyPaintEngine::UpdateEditedBlock()
 {
-    if (!mStrokeBlock || !mEditedBlock || !mOriginalBlock)
+    if (!mPaintBlock || !mEditedBlock || !mOriginalBlock)
         return;
 
-    UpdateInvalidMaps();
-    mBrushInstance->ClearInvalidRects();
-
-    TArray<::ul3::FRect> changedTiles = GetSubStrokeInvalidTiles();
+    TArray<::ul3::FRect> changedTiles = GetPaintBlockInvalidTiles();
     if (changedTiles.Num() <= 0)
         return;
     
@@ -697,7 +761,7 @@ FOdysseyPaintEngine::UpdateEditedBlock()
                     , perfIntent
                     , hULIS.HostDeviceInfo()
                     , ULIS3_NOCB
-                    , mStrokeBlock->GetBlock()
+                    , mPaintBlock->GetBlock()
                     , mEditedBlock->GetBlock()
                     , changedTiles[i]
                     , pos
@@ -709,8 +773,6 @@ FOdysseyPaintEngine::UpdateEditedBlock()
     
         mEditedBlock->GetBlock()->Invalidate(changedTiles[i]); //can be optimized if we can invalidate an array of rect
     }
-
-    ClearInvalidMap(mSubStrokeInvalidMap);
 }
 
 //--------------------------------------------------------------------------------------
@@ -735,7 +797,7 @@ FOdysseyPaintEngine::UpdateBrushInstance()
     mBrushCursorInvalid = true;
 
     FOdysseyBrushState& state = mBrushInstance->GetState();
-    state.target_temp_buffer = mStrokeBlock;
+    state.target_temp_buffer = mPaintBlock;
     state.point = FOdysseyStrokePoint();
     state.color = mColor;
     state.size_modifier = mSizeModifier;
@@ -780,7 +842,7 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
     //we need to do this before iBrushInstance->ExecuteSelected();
 	//and we cannot use UpdateBrushInstance() as it sends a StateChanged, and we only want this after iBrushInstance->ExecuteSelected();
 	FOdysseyBrushState& state = mBrushInstance->GetState();
-	state.target_temp_buffer = mStrokeBlock;
+	state.target_temp_buffer = mPaintBlock;
 	state.point = FOdysseyStrokePoint();
 	state.color = mColor;
 	state.size_modifier = mSizeModifier;
@@ -816,14 +878,14 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
 void
 FOdysseyPaintEngine::ReallocInvalidMaps()
 {
-    DeallocInvalidMap(mSubStrokeInvalidMap );
-    DeallocInvalidMap( mStrokeInvalidMap );
+    DeallocInvalidMap(mPaintBlockInvalidMap );
+    DeallocInvalidMap( mEditedBlockInvalidMap );
 
     mCountTileX = mEditedBlock ? ceil( (float)mEditedBlock->Width() / TILE_SIZE ) : 0;
     mCountTileY = mEditedBlock ? ceil( (float)mEditedBlock->Height() / TILE_SIZE ) : 0;
 
-    AllocInvalidMap(mSubStrokeInvalidMap );
-    AllocInvalidMap( mStrokeInvalidMap );
+    AllocInvalidMap(mPaintBlockInvalidMap );
+    AllocInvalidMap( mEditedBlockInvalidMap );
 }
 
 void
@@ -842,20 +904,21 @@ FOdysseyPaintEngine::UpdateInvalidMaps()
         int w = FMath::Min( mCountTileX, int( ceil( xf + wf ) ) ) - x;
         int h = FMath::Min( mCountTileY, int( ceil( yf + hf ) ) ) - y;
         ::ul3::FRect tileRect = { x, y, w, h };
-        SetMapWithRect(mSubStrokeInvalidMap, tileRect, true );
-        SetMapWithRect( mStrokeInvalidMap, tileRect, true );
+        SetMapWithRect(mPaintBlockInvalidMap, tileRect, true );
+        SetMapWithRect( mEditedBlockInvalidMap, tileRect, true );
     }
+    mBrushInstance->ClearInvalidRects();
 }
 
 TArray<::ul3::FRect>
-FOdysseyPaintEngine::GetSubStrokeInvalidTiles()
+FOdysseyPaintEngine::GetPaintBlockInvalidTiles()
 {
     TArray<::ul3::FRect> tiles;
     for( int k = 0; k < mCountTileY; ++k )
     {
         for( int l = 0; l < mCountTileX; ++l )
         {
-            if(mSubStrokeInvalidMap[k][l] )
+            if(mPaintBlockInvalidMap[k][l] )
             {
                 ::ul3::FRect rect = MakeTileRect(l, k);
                 tiles.Add(rect);
@@ -866,14 +929,14 @@ FOdysseyPaintEngine::GetSubStrokeInvalidTiles()
 }
 
 TArray<::ul3::FRect>
-FOdysseyPaintEngine::GetStrokeInvalidTiles()
+FOdysseyPaintEngine::GetEditedBlockInvalidTiles()
 {
     TArray<::ul3::FRect> tiles;
     for( int k = 0; k < mCountTileY; ++k )
     {
         for( int l = 0; l < mCountTileX; ++l )
         {
-            if (!mStrokeInvalidMap[k][l])
+            if (!mEditedBlockInvalidMap[k][l])
                 continue;
 			tiles.Add(MakeTileRect(l, k));
         }
@@ -1238,8 +1301,8 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     // Clear invalid rects in brush instance
     mBrushInstance->ClearInvalidRects();
 
-    // Reset brush state target to mStrokeBlock
-    state.target_temp_buffer = mStrokeBlock;
+    // Reset brush state target to mPaintBlock
+    state.target_temp_buffer = mPaintBlock;
 
     // Compute Brush Shift
     int shiftx = xmin;
