@@ -69,6 +69,12 @@ public:
     // SWidget overrides
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
 
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual void OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual void OnMouseLeave( const FPointerEvent& MouseEvent ) override;
+
 protected:
     // SWidget overrides.
     virtual FVector2D ComputeDesiredSize( float ) const override;
@@ -99,6 +105,42 @@ SCinematicBoardSectionPlaneKeys::ComputeDesiredSize( float ) const //override
     size.Y = SequencerSectionConstants::DefaultSectionHeight + 5.f;
 
     return size;
+}
+
+FReply
+SCinematicBoardSectionPlaneKeys::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonDown" ) );
+    //return FReply::Handled();
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonUp" ) );
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneKeys::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove" ) );
+    return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
+}
+
+void
+SCinematicBoardSectionPlaneKeys::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseEnter" ) );
+    return SCompoundWidget::OnMouseEnter( MyGeometry, MouseEvent );
+}
+
+void
+SCinematicBoardSectionPlaneKeys::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseLeave" ) );
+    return SCompoundWidget::OnMouseLeave( MouseEvent );
 }
 
 static
@@ -353,11 +395,21 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     mNeedRebuildPlaneList = true;
 }
 
+
+template<typename ItemType>
+class SNoDoubleClickTableRow : public STableRow<ItemType>
+{
+    virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override
+    {
+        return FReply::Unhandled();
+    }
+};
+
 TSharedRef<ITableRow>
 SCinematicBoardSectionPlanes::MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
     return
-        SNew( STableRow< TSharedPtr<FString> >, iOwnerTable )
+        SNew( SNoDoubleClickTableRow< TSharedPtr<FString> >, iOwnerTable )
         [
             mBoardSection.IsValid()
             ?

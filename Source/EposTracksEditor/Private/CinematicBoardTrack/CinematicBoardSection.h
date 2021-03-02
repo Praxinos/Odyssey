@@ -130,16 +130,6 @@ public:
     int GetMaxPlaneBindings() const;
 
 private:
-    // To be able to call GetSectionObjectAs()/GetSequencer() inside sub-widgets (because GetSectionObjectAs()/GetSequencer() are protected)
-    // This is the easiest way to achieve this without having to read publicly the same functions
-    friend class SCinematicBoardSectionCamera;
-    friend class SCinematicBoardSectionTitle;
-    friend class SCinematicBoardSectionThumbnails;
-    friend class SCinematicBoardSectionPlaneKeys;
-    friend class SCinematicBoardSectionPlaneMaterialKeys;
-    friend class SCinematicBoardSectionPlane;
-    friend class SCinematicBoardSectionPlanes;
-
     TSharedPtr<SCinematicBoardSectionLayout> mWidgetLayout;
     TSharedPtr<SCinematicBoardSectionTitle> mWidgetTitle;
 
@@ -148,6 +138,11 @@ public:
         FPaintArgs parameter must be given to try to force the call of this function only inside SWidget::OnPaint() functions
     */
     const FSequencerSectionPainter* GetRootPainter( const FPaintArgs& ) const;
+
+    // To be able to call GetSectionObjectAs()/GetSequencer() inside sub-widgets (because GetSectionObjectAs()/GetSequencer() are protected in the parent)
+    TSharedPtr<ISequencer> GetSequencer() const { return TSubSectionMixin::GetSequencer(); }
+    UMovieSceneSubSection& GetSubSectionObject() { return TSubSectionMixin::GetSubSectionObject(); }
+    const UMovieSceneSubSection& GetSubSectionObject() const { return TSubSectionMixin::GetSubSectionObject(); }
 
 private:
     /** This is used to be able to get all parameters of the ioPainter object given by OnPaintSection()
