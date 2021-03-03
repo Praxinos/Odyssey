@@ -67,7 +67,6 @@ public:
     virtual const UTexture2D*     Texture() const;
 
     bool IsBorrowedTexture() const;
-    void CommitBlockChangesIntoTextureBulk();
 
 public:
     // Public Tampon Methods

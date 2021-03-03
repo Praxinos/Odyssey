@@ -18,7 +18,7 @@ class ODYSSEYLAYER_API IOdysseyLayerImageRenderingCapability
 public:
     // Layer Blending Mode Changed Event
     // ::ul3::eBlendingMode is for the previous value
-    DECLARE_MULTICAST_DELEGATE(FOdysseyLayerImageResultChanged);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerImageResultChanged, const ::ul3::FRect*);
 
 public:
     // Construction / Destruction
@@ -51,6 +51,6 @@ public:
 public:
     FOdysseyLayerImageResultChanged& ImageResultChangedDelegate();
 
-protected:
+public:
     FOdysseyLayerImageResultChanged mImageResultChangedDelegate;
 };

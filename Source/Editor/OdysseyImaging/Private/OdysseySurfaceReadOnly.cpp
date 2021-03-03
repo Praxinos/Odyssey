@@ -9,7 +9,7 @@
 FOdysseySurfaceReadOnly::~FOdysseySurfaceReadOnly()
 {
     if (mTexture) {
-        mTexture->RemoveFromRoot();
+        mTexture->RemoveFromRoot(); //TODO: Replace this by adding the Texture to the Referenced Objects of the Editor
     }
 }
 
@@ -18,7 +18,7 @@ FOdysseySurfaceReadOnly::FOdysseySurfaceReadOnly(UTexture2D* iTexture)
 {
 	if (mTexture)
 	{
-		mTexture->AddToRoot();
+		mTexture->AddToRoot(); //TODO: Replace this by adding the Texture to the Referenced Objects of the Editor
 	}
 }
 

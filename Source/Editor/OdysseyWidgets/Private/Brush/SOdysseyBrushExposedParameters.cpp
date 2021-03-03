@@ -20,6 +20,8 @@
 void
 SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
 {
+    mBrushInstance = InArgs._BrushInstance;
+    mCurrentBrushInstance = nullptr;
     OnParameterChangedCallback = InArgs._OnParameterChanged;
 
     // Create a details view
@@ -45,11 +47,17 @@ SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
     ];
 }
 
-
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- SWidget overrides
 void
-SOdysseyBrushExposedParameters::Refresh( UOdysseyBrushAssetBase* iValue )
+SOdysseyBrushExposedParameters::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-    details_view->SetObject( iValue );
+    UOdysseyBrushAssetBase* brushInstance = mBrushInstance.Get();
+    if (brushInstance != mCurrentBrushInstance)
+    {
+        mCurrentBrushInstance = brushInstance;
+        details_view->SetObject(brushInstance);
+    }
 }
 
 

@@ -7,25 +7,34 @@ class FOdysseyFlipbookEditorModule
 	: public IOdysseyFlipbookEditorModule
 {
 public:
-    virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UPaperFlipbook* iFlipbook ) override;
-    
-	TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
+	// IOdysseyFlipbookEditorModule interface
+    virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook ) override;
 
-public:
     // IModuleInterface interface
     virtual void StartupModule() override;
 
     virtual void ShutdownModule() override;
-    
+
+public:
+	// Getters
+	TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
+
 private:
-	void RegisterAssetTypeAction(IAssetTools& ioAssetTools, TSharedRef<IAssetTypeActions> iAction);
-    
+	// AssetTypeActions
+    void RegisterAssetTypeActions();
+	void UnregisterAssetTypeActions();
+
+	// Settings
+	void RegisterSettings();
+	void UnregisterSettings();
+
+    // Commands
+	void RegisterCommands();
+	void UnregisterCommands();
 
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TArray< TSharedPtr<IAssetTypeActions> > mCreatedAssetTypeActions;
-
-	EAssetTypeCategories::Type mOdysseyPainterCategory;
+	TArray< TSharedPtr<IAssetTypeActions> > mTypeActions;
 
 	// Holds the menu extensibility manager.
 	TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;

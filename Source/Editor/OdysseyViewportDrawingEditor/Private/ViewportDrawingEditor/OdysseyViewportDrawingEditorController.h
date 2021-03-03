@@ -32,6 +32,8 @@ public:
     TSharedPtr<FOdysseyViewportDrawingEditorData> GetData();
     TSharedPtr<SOdysseyViewportDrawingEditorGUI> GetGUI();
 
+    bool PaintEngineIsLocked() const;
+
 public:
     //IAssetEditorInstance
 	virtual FName GetEditorName() const;
@@ -49,20 +51,22 @@ public:
     void EdModeExit();
 
 public:
-    void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
+    /* void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
-    void OnPaintEngineStrokeAbort();
+    void OnPaintEngineStrokeAbort(); */
+
+    virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
     void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
     void OnLayerStackStructureChanged();
-    void OnLayerStackImageResultChanged();
-    void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer,bool iOldValue);
-    void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
+    void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
+    // void OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer,bool iOldValue);
+    // void OnLayerIsVisibleChanged(TSharedPtr<IOdysseyLayer> iLayer, bool iOldValue);
     void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     void OnBrushSelected(UOdysseyBrush* iBrush);
-    void OnBrushCompiled(UBlueprint* iBrush);
+    // void OnBrushCompiled(UBlueprint* iBrush);
     void OnEditedTextureChanged(UTexture2D* iTexture);
 
     // Tools Actions
@@ -86,7 +90,7 @@ public:
     void HandleAlphaModeModifierChanged(int32 iValue);
 
     // Stroke Options Handlers
-    void HandleStrokeStepChanged(int32 iValue);
+    /* void HandleStrokeStepChanged(int32 iValue);
     void HandleStrokeAdaptativeChanged(bool iValue);
     void HandleStrokePaintOnTickChanged(bool iValue);
     void HandleInterpolationTypeChanged(int32 iValue);
@@ -94,7 +98,7 @@ public:
     void HandleSmoothingStrengthChanged(int32 iValue);
     void HandleSmoothingEnabledChanged(bool iValue);
     void HandleSmoothingRealTimeChanged(bool iValue);
-    void HandleSmoothingCatchUpChanged(bool iValue);
+    void HandleSmoothingCatchUpChanged(bool iValue); */
 
 private:
     TSharedPtr<FOdysseyViewportDrawingEditorData>		mData;

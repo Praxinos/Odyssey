@@ -53,9 +53,15 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
     mPaintModeSettings = Cast<UOdysseyViewportDrawingEditorSettings>(iPainter->GetPainterSettings());
 
     mBrushSelector = SNew(SOdysseyBrushSelector)
+        .Brush_Lambda([=]() { return iPainter->GetController()->GetData()->Brush(); })
         .OnBrushChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::OnBrushSelected);
 
     mPaintModifiers = SNew(SOdysseyPaintModifiers)
+        .Size_Lambda([=]() { return iPainter->GetController()->GetData()->PaintEngine()->GetSizeModifier(); })
+        .Opacity_Lambda([=]() { return iPainter->GetController()->GetData()->PaintEngine()->GetOpacityModifier(); })
+        .Flow_Lambda([=]() { return iPainter->GetController()->GetData()->PaintEngine()->GetFlowModifier(); })
+        .BlendingMode_Lambda([=]() { return iPainter->GetController()->GetData()->PaintEngine()->GetBlendingModeModifier(); })
+        .AlphaMode_Lambda([=]() { return iPainter->GetController()->GetData()->PaintEngine()->GetAlphaModeModifier(); })
         .OnSizeChanged_Raw          (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSizeModifierChanged)
         .OnOpacityChanged_Raw       (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleOpacityModifierChanged)
         .OnFlowChanged_Raw          (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleFlowModifierChanged)
@@ -64,6 +70,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .VerticalAspect( true );
 
     mBrushExposedParameters = SNew(SOdysseyBrushExposedParameters)
+        .BrushInstance(iPainter->GetController()->GetData().ToSharedRef(), &FOdysseyViewportDrawingEditorData::BrushInstance )
         .OnParameterChanged_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleBrushParameterChanged);
 
     mColorSelector = SNew(SOdysseyColorSelector)
@@ -75,7 +82,8 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnColorChange_Raw(iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandlePaintColorChange);
 
     mStrokeOptions = SNew(SOdysseyStrokeOptions)
-        .OnStrokeStepChanged_Raw        (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged)
+        .PaintEngine_Lambda([=]() { return iPainter->GetController()->GetData()->PaintEngine(); });
+        /* .OnStrokeStepChanged_Raw        (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged)
         .OnStrokeAdaptativeChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokeAdaptativeChanged)
         .OnStrokePaintOnTickChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleStrokePaintOnTickChanged)
         .OnInterpolationTypeChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleInterpolationTypeChanged)
@@ -83,7 +91,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnSmoothingStrengthChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingStrengthChanged)
         .OnSmoothingEnabledChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingEnabledChanged)
         .OnSmoothingRealTimeChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingRealTimeChanged)
-        .OnSmoothingCatchUpChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged);
+        .OnSmoothingCatchUpChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged); */
 
     CreateMainWidget(iPainter);
 }

@@ -51,8 +51,12 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
     int32   Strength;
 
     /** Should smoothing be enabled. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing" )
+    UPROPERTY(EditAnywhere, Category = "Smoothing")
     bool    Enabled;
+
+    /*UFUNCTION(BlueprintPure
+        , Category = "Odyssey|Transform"
+        , meta = (KeyWords = "Matrix"))*/
 
     /** Should smoothing be real-time, meaning the first input draws directly, even though the strength is not reached yet. */
     UPROPERTY( EditAnywhere, Category = "Smoothing" )

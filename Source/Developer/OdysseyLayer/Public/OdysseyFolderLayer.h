@@ -42,7 +42,7 @@ public:
     bool IsOpen() const;
     void SetIsOpen( bool iIsOpen );
 
-    void OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer);
+    void OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer);
 
     virtual void SetIsVisible(bool iIsVisible) override;
 

@@ -5,6 +5,7 @@
 
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
+#include "OdysseyPaintEngine.h"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyStrokeOptions"
@@ -16,7 +17,9 @@
 void
 SOdysseyStrokeOptions::Construct( const FArguments& InArgs )
 {
-    OnStrokeStepChangedCallback         = InArgs._OnStrokeStepChanged           ;
+    mPaintEngine = InArgs._PaintEngine;
+
+    /* OnStrokeStepChangedCallback         = InArgs._OnStrokeStepChanged           ;
     OnStrokeAdaptativeChangedCallback   = InArgs._OnStrokeAdaptativeChanged     ;
     OnStrokePaintOnTickChangedCallback  = InArgs._OnStrokePaintOnTickChanged    ;
     OnInterpolationTypeChangedCallback  = InArgs._OnInterpolationTypeChanged    ;
@@ -25,13 +28,13 @@ SOdysseyStrokeOptions::Construct( const FArguments& InArgs )
     OnSmoothingEnabledChangedCallback   = InArgs._OnSmoothingEnabledChanged     ;
     OnSmoothingRealTimeChangedCallback  = InArgs._OnSmoothingRealTimeChanged    ;
     OnSmoothingCatchUpChangedCallback   = InArgs._OnSmoothingCatchUpChanged     ;
-    OnAnyValueChangedCallback           = InArgs._OnAnyValueChanged;
+    OnAnyValueChangedCallback           = InArgs._OnAnyValueChanged; */
 
     // Create a details view
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FNotifyHook* NotifyHook = this;
-    StructData      = FOdysseyStrokeOptions();
-    StructToDisplay = MakeShared< FStructOnScope >( FOdysseyStrokeOptions::StaticStruct(), (uint8*)&StructData );
+    // StructData      = mPaintEngine->StrokeOptions();
+    StructToDisplay = MakeShared< FStructOnScope >( FOdysseyStrokeOptions::StaticStruct(), (uint8*)mPaintEngine.Get()->StrokeOptions());
 
     // create struct to display
     FStructureDetailsViewArgs StructureViewArgs;
@@ -64,9 +67,25 @@ SOdysseyStrokeOptions::Construct( const FArguments& InArgs )
     ];
 }
 
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- SWidget overrides
+void
+SOdysseyStrokeOptions::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+    FOdysseyPaintEngine* paintEngine = mPaintEngine.Get();
+    if (paintEngine != mCurrentPaintEngine)
+    {
+        mCurrentPaintEngine = paintEngine;
+        StructToDisplay = MakeShared< FStructOnScope >( FOdysseyStrokeOptions::StaticStruct(), (uint8*)mPaintEngine.Get()->StrokeOptions());
+        DetailsView->SetStructureData(StructToDisplay);
+    }
+}
+
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks
+
+/* 
 const  FOdysseyStrokeOptions&
 SOdysseyStrokeOptions::GetStrokeOptions()  const
 {
@@ -170,36 +189,14 @@ SOdysseyStrokeOptions::SetSmoothingCatchUp(  bool iValue )
     StructData.CatchUp = iValue;
     OnSmoothingCatchUpChangedCallback.ExecuteIfBound( StructData.CatchUp );
     OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
+}*/
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- FNotifyHook Interface
 void
 SOdysseyStrokeOptions::NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged )
 {
-    FString PropertyName = PropertyThatChanged->GetName();
-    if( PropertyName == FString( TEXT("Step") ) ) {
-        OnStrokeStepChangedCallback.ExecuteIfBound( StructData.Step );
-    } else if( PropertyName == FString( TEXT("SizeAdaptative") ) ) {
-        OnStrokeAdaptativeChangedCallback.ExecuteIfBound( StructData.SizeAdaptative );
-    } else if( PropertyName == FString( TEXT("PaintOnTick" ) ) ) {
-        OnStrokePaintOnTickChangedCallback.ExecuteIfBound( StructData.PaintOnTick );
-    } else if( PropertyName == FString( TEXT("Type" ) ) ) {
-        OnInterpolationTypeChangedCallback.ExecuteIfBound( static_cast< int32 >( StructData.Type ) );
-    } else if( PropertyName == FString( TEXT("Method" ) ) ) {
-        OnSmoothingMethodChangedCallback.ExecuteIfBound( static_cast< int32 >( StructData.Method ) );
-    } else if( PropertyName == FString( TEXT("Strength" ) ) ) {
-        OnSmoothingStrengthChangedCallback.ExecuteIfBound( StructData.Strength );
-    } else if( PropertyName == FString( TEXT("Enabled" ) ) ) {
-        OnSmoothingEnabledChangedCallback.ExecuteIfBound( StructData.Enabled );
-    } else if( PropertyName == FString( TEXT("RealTime" ) ) ) {
-        OnSmoothingRealTimeChangedCallback.ExecuteIfBound( StructData.RealTime );
-    } else if( PropertyName == FString( TEXT("CatchUp" ) ) ) {
-        OnSmoothingCatchUpChangedCallback.ExecuteIfBound( StructData.CatchUp );
-    }
-
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
+    mPaintEngine.Get()->UpdateStrokeOptions();
 }
 
 

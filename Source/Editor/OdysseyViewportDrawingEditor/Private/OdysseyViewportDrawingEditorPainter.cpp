@@ -109,7 +109,7 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
     mController->Init();
 
     //Select default brush
-    mController->GetGUI()->GetBrushSelector()->SelectBrush(LoadObject<UOdysseyBrush>(nullptr,TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")));
+    //mController->GetGUI()->GetBrushSelector()->SelectBrush(LoadObject<UOdysseyBrush>(nullptr,TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")));
 }
 
 void
@@ -1001,7 +1001,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mPaintingTexture2D = texture2D;
 
         mStrokeBufferTexture2D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->EditedBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
         mStrokeBufferTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         mStrokeBufferTexture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         mStrokeBufferTexture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
@@ -1009,7 +1009,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mStrokeBufferTexture2D->PostEditChange();
 
         mStrokeBufferTexture3D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->PreviewBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
+        InitTextureWithBlockData(mController->GetData()->PaintEngine()->EditedBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
         mStrokeBufferTexture3D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         mStrokeBufferTexture3D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         mStrokeBufferTexture3D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
@@ -1073,7 +1073,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHit
     // Create a canvas for the brush render target.
     FCanvas brushPaintCanvas(brushRenderTargetResource,nullptr,0,0,0,featureLevel);
 
-    InvalidateTextureFromData(mController->GetData()->PaintEngine()->StrokeBlock(), mStrokeBufferTexture2D);
+    InvalidateTextureFromData(mController->GetData()->PaintEngine()->PaintBlock(), mStrokeBufferTexture2D);
 
     // Parameters for brush paint
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());

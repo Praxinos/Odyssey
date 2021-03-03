@@ -23,6 +23,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyBrushSelector)
         {}
         /** Called when the object value changes */
+        SLATE_ATTRIBUTE(UOdysseyBrush*, Brush)
         SLATE_EVENT( FOnBrushChanged, OnBrushChanged )
     SLATE_END_ARGS()
 
@@ -30,7 +31,6 @@ public:
     // Construction / Destruction
     ~SOdysseyBrushSelector();
     void Construct(const FArguments& InArgs);
-    void SelectBrush(UOdysseyBrush* iBrush);
 
 private:
     // Private internal callbacks
@@ -40,6 +40,6 @@ private:
 private:
     // Private data
     FOnBrushChanged OnBrushChanged;
-    UOdysseyBrush* current_brush;
+    TAttribute<UOdysseyBrush*> current_brush;
     TSharedPtr< FAssetThumbnailPool > asset_thumbnail_pool;
 };

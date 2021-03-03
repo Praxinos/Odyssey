@@ -18,10 +18,12 @@ public:
 
 public:
     // Public API
-    void Tick() override;
-    void Block(FOdysseyBlock* iBlock) override;
+    // void Tick() override;
+    // void Block(FOdysseyBlock* iBlock) override;
 
-    void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects) override;
+    // void BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects) override;
+
+    // virtual void UpdateEditedBlock(TArray<::ul3::FRect>& iRects) override;
 
 
 public: 

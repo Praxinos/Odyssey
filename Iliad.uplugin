@@ -26,11 +26,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyDrawingState",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyLayer",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
@@ -103,7 +98,7 @@
     {
       "Name": "OdysseyStyle",
       "Type": "Editor",
-      "LoadingPhase": "Default"
+      "LoadingPhase": "PreDefault"
     },
     {
       "Name": "OdysseyStylusInput",

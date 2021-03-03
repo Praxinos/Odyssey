@@ -85,7 +85,7 @@ FOdysseyRootLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 		layerBlendable->ImageResultChangedDelegate().AddRaw(this, &FOdysseyRootLayer::OnChildImageResultChanged, iLayer);
         if (iLayer->IsVisible())
         {
-            mImageResultChangedDelegate.Broadcast();
+            mImageResultChangedDelegate.Broadcast(nullptr);
         }
     }
 }
@@ -105,17 +105,17 @@ FOdysseyRootLayer::DeleteNode(int iIndex)
 
     if (isBlendable && layer->IsVisible())
     {
-        mImageResultChangedDelegate.Broadcast();
+        mImageResultChangedDelegate.Broadcast(nullptr);
     }
 }
 
 void
-FOdysseyRootLayer::OnChildImageResultChanged(TSharedPtr<IOdysseyLayer> iLayer)
+FOdysseyRootLayer::OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer)
 {
     bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
     if (isBlendable)
     {
-        mImageResultChangedDelegate.Broadcast();
+        mImageResultChangedDelegate.Broadcast(iRect);
     }
 }
 

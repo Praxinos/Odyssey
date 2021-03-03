@@ -23,7 +23,7 @@ FOdysseyViewportDrawingEditorController::~FOdysseyViewportDrawingEditorControlle
         if(mData->LayerStack())
         {
             mData->LayerStack()->OnCurrentLayerChanged().RemoveAll(this);
-            mData->LayerStack()->OnStructureChanged().RemoveAll(this);
+            mData->LayerStack()->OnStructureChanged().RemoveAll(this); //TODO: Remove OnStructureChanged
             mData->LayerStack()->OnImageResultChanged().RemoveAll(this);
             mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().RemoveAll(this);
             mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().RemoveAll(this);
@@ -60,7 +60,7 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
     //Add PaintEngine Callbacks
     if( mData->Texture() )
     {
-        if(!(mData->PaintEngine()->OnPreviewBlockTilesChanged().IsBoundToObject(this)))
+        /* if(!(mData->PaintEngine()->OnPreviewBlockTilesChanged().IsBoundToObject(this)))
             mData->PaintEngine()->OnPreviewBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEnginePreviewBlockTilesChanged);
 
         if(!(mData->PaintEngine()->OnEditedBlockTilesWillChange().IsBoundToObject(this)))
@@ -70,7 +70,12 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
             mData->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesChanged);
 
         if(!(mData->PaintEngine()->OnStrokeAbort().IsBoundToObject(this)))
-            mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort);
+            mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort); */
+
+        if (!(mData->PaintEngine()->OnPaintEnd().IsBoundToObject(this)))
+            mData->PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnPaintEnginePaintEnd);
+
+        mData->PaintEngine()->IsLocked(TAttribute<bool>(this, &FOdysseyViewportDrawingEditorController::PaintEngineIsLocked));
 
         // Set LayerStack CB
         if (mData->LayerStack())
@@ -84,11 +89,11 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
             if (!(mData->LayerStack()->OnImageResultChanged().IsBoundToObject(this)))
                 mData->LayerStack()->OnImageResultChanged().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerStackImageResultChanged);
 
-            if (!(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()))
+            /* if (!(mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().IsBound()))
                 mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsLockedChanged);
         
             if( !(mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
-                mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged);
+                mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged); */
 
             // Set Image Layer as the current Layer
             TArray<TSharedPtr<IOdysseyLayer>> layers;
@@ -130,6 +135,45 @@ FOdysseyViewportDrawingEditorController::GetGUI()
 {
     return mGUI;
 }
+
+void
+FOdysseyViewportDrawingEditorController::OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles)
+{
+    if (!mData->Texture())
+        return;
+
+    FOdysseyLayerStack* layerstack = mData->LayerStack();
+    if (!layerstack)
+        return;
+
+    //TODO: Manage Undo directly in PaintEngine
+
+    //PATCH: To make the Undo work
+    //TODO: Remove this when another Undo system will be made
+    //As the PaintEngine edits directly the layer block, we need to replace it with the original block to store the changed tiles
+    //Then we come back to the layer block
+    if (!layerstack->GetCurrentLayer())
+        return;
+
+    if (layerstack->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+        return;
+
+    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
+    imageLayer->SetBlock(mData->PaintEngine()->OriginalBlock(), false, false);
+
+    layerstack->mDrawingUndo->StartRecord();
+    for (int i = 0; i < iChangedTiles.Num(); i++)
+    {
+        layerstack->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
+    }
+    layerstack->mDrawingUndo->EndRecord();
+
+    imageLayer->SetBlock(mData->PaintEngine()->EditedBlock(), false, false);
+    //TODO: Move To Editor
+    mData->Texture()->MarkPackageDirty();
+}
+
+/*
 
 void
 FOdysseyViewportDrawingEditorController::OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles)
@@ -189,7 +233,7 @@ FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort()
     {
         mData->DisplaySurface()->Invalidate();
     }
-}
+} */
 
 
 //Delegates
@@ -224,7 +268,7 @@ void FOdysseyViewportDrawingEditorController::OnLayerStackCurrentLayerChanged(TS
 
     //Set AlphaLock Delegate
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnCurrentLayerIsAlphaLockedChanged);
-    mData->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
+    // mData->PaintEngine()->SetLock( imageLayer->IsLocked(true) || !imageLayer->IsVisible(true) );
 }
 
 void FOdysseyViewportDrawingEditorController::OnLayerStackStructureChanged()
@@ -238,7 +282,7 @@ void FOdysseyViewportDrawingEditorController::OnLayerStackStructureChanged()
     }*/
 }
 
-void FOdysseyViewportDrawingEditorController::OnLayerStackImageResultChanged()
+void FOdysseyViewportDrawingEditorController::OnLayerStackImageResultChanged(const ::ul3::FRect& iRect)
 {
     if (mData->Texture())
     {
@@ -247,16 +291,16 @@ void FOdysseyViewportDrawingEditorController::OnLayerStackImageResultChanged()
 
     if (mData->LayerStack())
     {
-        mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock());
+        mData->LayerStack()->ComputeResultInBlock(mData->DisplaySurface()->Block()->GetBlock(), iRect);
     }
 
     if (mData->DisplaySurface())
     {
-        mData->DisplaySurface()->Invalidate();
+        mData->DisplaySurface()->Invalidate(iRect);
     }
 }
 
-void FOdysseyViewportDrawingEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer,bool iOldValue)
+/* void FOdysseyViewportDrawingEditorController::OnLayerIsLockedChanged(TSharedPtr<IOdysseyLayer> iLayer,bool iOldValue)
 {
     if(mData->LayerStack() && iLayer == mData->LayerStack()->GetCurrentLayer() || mData->LayerStack()->GetCurrentLayer()->HasForParent(iLayer))
     {
@@ -271,7 +315,7 @@ FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdy
     {
         mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
-}
+} */
 
 void FOdysseyViewportDrawingEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 {
@@ -283,8 +327,9 @@ void
 FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
 {
     mData->Brush(iBrush);
+    mData->PaintEngine()->Brush(iBrush);
 
-    if(mData->BrushInstance())
+    /* if(mData->BrushInstance())
     {
         mData->BrushInstance()->RemoveFromRoot();
         mData->BrushInstance(NULL);
@@ -303,10 +348,9 @@ FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
         mData->BrushInstance(brushInstance);
 
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
-        GetGUI()->GetBrushExposedParameters()->Refresh(mData->BrushInstance());
 
         FOdysseyBrushPreferencesOverrides& overrides = mData->BrushInstance()->Preferences;
-        if(overrides.bOverride_Step)          GetGUI()->GetStrokeOptions()->SetStrokeStep(overrides.Step);
+        /* if(overrides.bOverride_Step)          GetGUI()->GetStrokeOptions()->SetStrokeStep(overrides.Step);
         if(overrides.bOverride_Adaptative)    GetGUI()->GetStrokeOptions()->SetStrokeAdaptative(overrides.SizeAdaptative);
         if(overrides.bOverride_PaintOnTick)   GetGUI()->GetStrokeOptions()->SetStrokePaintOnTick(overrides.PaintOnTick);
         if(overrides.bOverride_Type)          GetGUI()->GetStrokeOptions()->SetInterpolationType((int32)overrides.Type);
@@ -314,16 +358,16 @@ FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
         if(overrides.bOverride_Strength)      GetGUI()->GetStrokeOptions()->SetSmoothingStrength(overrides.Strength);
         if(overrides.bOverride_Enabled)       GetGUI()->GetStrokeOptions()->SetSmoothingEnabled(overrides.Enabled);
         if(overrides.bOverride_RealTime)      GetGUI()->GetStrokeOptions()->SetSmoothingRealTime(overrides.RealTime);
-        if(overrides.bOverride_CatchUp)       GetGUI()->GetStrokeOptions()->SetSmoothingCatchUp(overrides.CatchUp);
-        if(overrides.bOverride_Size)          GetGUI()->GetPaintModifiers()->SetSize(overrides.Size);
+        if(overrides.bOverride_CatchUp)       GetGUI()->GetStrokeOptions()->SetSmoothingCatchUp(overrides.CatchUp); */
+        /* if(overrides.bOverride_Size)          GetGUI()->GetPaintModifiers()->SetSize(overrides.Size);
         if(overrides.bOverride_Opacity)       GetGUI()->GetPaintModifiers()->SetOpacity(overrides.Opacity);
         if(overrides.bOverride_Flow)          GetGUI()->GetPaintModifiers()->SetFlow(overrides.Flow);
         if(overrides.bOverride_BlendingMode)  GetGUI()->GetPaintModifiers()->SetBlendingMode((::ul3::eBlendingMode)overrides.BlendingMode);
         if(overrides.bOverride_AlphaMode)     GetGUI()->GetPaintModifiers()->SetAlphaMode((::ul3::eAlphaMode)overrides.AlphaMode);
-    }
+    } */
 }
 
-void
+/* void
 FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
 {
     UOdysseyBrush* check_brush = dynamic_cast<UOdysseyBrush*>(iBrush);
@@ -345,16 +389,15 @@ FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
         mData->BrushInstance(brushInstance);
 
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
-        GetGUI()->GetBrushExposedParameters()->Refresh(mData->BrushInstance());
     }
-}
+} */
 
 void
 FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTexture)
 {
     //PATCH: this ensures that when we change the selected actor but we still edit the samle texture, the texture is synched
     // it avoids the texture to refresh itself to a previous state
-    mData->PaintEngine()->Flush();
+    // mData->PaintEngine()->Flush();
     mData->SyncTextureAndInvalidate();
 
     if (mData->Texture() == iTexture)
@@ -430,7 +473,7 @@ FOdysseyViewportDrawingEditorController::OnFill()
 FReply
 FOdysseyViewportDrawingEditorController::OnUndoIliad()
 {
-    GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    // GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
     if (mData->LayerStack())
     {
         mData->LayerStack()->mDrawingUndo->LoadData();
@@ -445,7 +488,7 @@ FOdysseyViewportDrawingEditorController::OnUndoIliad()
 FReply
 FOdysseyViewportDrawingEditorController::OnRedoIliad()
 {
-    GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
+    // GetData()->PaintEngine()->InterruptStrokeAndStampInPlace();
     if (mData->LayerStack())
     {
         mData->LayerStack()->mDrawingUndo->Redo();
@@ -522,7 +565,7 @@ FOdysseyViewportDrawingEditorController::HandleAlphaModeModifierChanged(int32 iV
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Stroke Options Handlers
-void
+/* void
 FOdysseyViewportDrawingEditorController::HandleStrokeStepChanged(int32 iValue)
 {
     mData->PaintEngine()->SetStrokeStep(iValue);
@@ -574,7 +617,7 @@ void
 FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged(bool iValue)
 {
     mData->PaintEngine()->SetSmoothingCatchUp(iValue);
-}
+} */
 
 FName
 FOdysseyViewportDrawingEditorController::GetEditorName() const
@@ -594,7 +637,7 @@ FOdysseyViewportDrawingEditorController::CloseWindow()
     //---
     if( mData->Texture() )
     {
-        mData->PaintEngine()->Flush();
+        // mData->PaintEngine()->Flush();
         mData->SyncTextureAndInvalidate();
         mData->ApplyPropertiesBackup();
 
@@ -668,7 +711,7 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
     if (texture)
     {
         ClearLayerStackDelegates();
-        mData->PaintEngine()->Flush();
+        // mData->PaintEngine()->Flush();
         mData->SyncTextureAndInvalidate();
         mData->ApplyPropertiesBackup();
 
@@ -681,6 +724,19 @@ FOdysseyViewportDrawingEditorController::EdModeExit()
 
         GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed(texture, this);
     }
+}
+
+bool
+FOdysseyViewportDrawingEditorController::PaintEngineIsLocked() const
+{
+    if (!mData->LayerStack())
+        return false;
+
+    TSharedPtr<IOdysseyLayer> layer = mData->LayerStack()->GetCurrentLayer();
+    if (!layer)
+        return false;
+
+    return layer->IsLocked(true) || !layer->IsVisible(true);
 }
 
 #undef LOCTEXT_NAMESPACE

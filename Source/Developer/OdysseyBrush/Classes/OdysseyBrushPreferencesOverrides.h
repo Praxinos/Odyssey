@@ -10,7 +10,7 @@
 #include "OdysseyBrushPreferencesOverrides.generated.h"
 
 /////////////////////////////////////////////////////
-// FOdysseyPerformanceOptions
+// FOdysseyBrushPreferencesOverrides
 USTRUCT()
 struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
 {

@@ -489,6 +489,8 @@ private:
     // Callbacks
     void SendColorChangeEvent( eOdysseyEventState::Type iState, const ::ul3::FPixelValue& iValue )
     {
+        bool isStateSendable = false;
+
         if (mEventState == iState && mEventState == eOdysseyEventState::kAdjust)
         {
             mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kAdjust, iValue);
@@ -530,6 +532,12 @@ private:
                 }
                 break;
             }
+        }
+
+        if (mEventState == eOdysseyEventState::kSet || mEventState == eOdysseyEventState::kAbort)
+        {
+            //Once Set or Abort is done we go back to a None state to ensure that if the next call is a Set or a Abort we go through all the process again
+            mEventState = eOdysseyEventState::kNone;
         }
     }
 

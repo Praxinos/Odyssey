@@ -33,6 +33,8 @@ public:
 
     SOdysseyAboutScreen();
 
+    static void Open(TSharedPtr<SWindow> iParentWindow);
+
 private:
     struct FLineDefinition;
 

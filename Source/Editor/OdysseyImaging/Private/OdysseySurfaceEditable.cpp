@@ -971,12 +971,6 @@ FOdysseySurfaceEditable::IsBorrowedTexture() const
     return mIsBorrowedTexture;
 }
 
-void
-FOdysseySurfaceEditable::CommitBlockChangesIntoTextureBulk()
-{
-    CopyBlockDataIntoUTexture(mBlock,mTexture);
-}
-
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- Public Tampon Methods
 int

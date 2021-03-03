@@ -10,14 +10,11 @@ class ODYSSEYTEXTURE_API SOdysseyTextureDetails : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS(SOdysseyTextureDetails)
 	{}
-		SLATE_ARGUMENT(UTexture*, Texture)
+		SLATE_ATTRIBUTE(UTexture*, Texture)
 	SLATE_END_ARGS()
     
 
 	void Construct(const FArguments& InArgs);
-
-public:
-    void SetTexture(UTexture* iTexture);
 
 private:
     void PopulateQuickInfo();
@@ -35,6 +32,10 @@ private:
     EVisibility GetHasAlphaChannelVisibility() const;
 
 private:
-    UTexture* mTexture;
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
+private:
+    TAttribute<UTexture*> mTexture;
+	UTexture* mCurrentTexture;
     TSharedPtr<class IDetailsView> mTexturePropertiesWidget;
 };

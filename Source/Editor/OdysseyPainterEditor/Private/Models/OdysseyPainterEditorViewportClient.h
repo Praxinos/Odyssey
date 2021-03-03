@@ -24,6 +24,7 @@ class FOdysseyMeshSelector;
 class FOdysseyPainterEditorData;
 class IStylusInputInterfaceInternal;
 class SOdysseySurfaceViewport;
+class FOdysseyPainterEditor;
 
 //
 //                                                                                                         MouseWheelUp/Down
@@ -77,7 +78,7 @@ public:
 
 public:
     // Construction / Destruction
-    FOdysseyPainterEditorViewportClient(TWeakPtr<FOdysseyPainterEditorData>iData, TWeakPtr< SOdysseySurfaceViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector);
+    FOdysseyPainterEditorViewportClient(FOdysseyPainterEditor* iEditor, TWeakPtr< SOdysseySurfaceViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector);
     ~FOdysseyPainterEditorViewportClient();
 
 public:
@@ -129,7 +130,7 @@ private:
     UOdysseyStylusInputSubsystem*           InputSubsystem;
     FKey                                    mLastKey;
     EInputEvent                             mLastEvent;
-    TWeakPtr<FOdysseyPainterEditorData>		mOdysseyPainterEditorDataPtr;
+    FOdysseyPainterEditor*		            mOdysseyPainterEditor;
     TWeakPtr<SOdysseySurfaceViewport>       mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
     UTexture2D*                             mCheckerboardTexture;

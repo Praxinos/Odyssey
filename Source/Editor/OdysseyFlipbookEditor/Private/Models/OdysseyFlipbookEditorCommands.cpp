@@ -2,11 +2,12 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Models/OdysseyFlipbookEditorCommands.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorCommands"
 
 FOdysseyFlipbookEditorCommands::FOdysseyFlipbookEditorCommands()
-    : TCommands<FOdysseyFlipbookEditorCommands>( "IliadFlipbookEditor", NSLOCTEXT( "Contexts", "IliadFlipbookEditor", "Iliad Flipbook Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
+    : TCommands<FOdysseyFlipbookEditorCommands>( "IliadFlipbookEditor", NSLOCTEXT( "Contexts", "IliadFlipbookEditor", "Iliad Flipbook Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
 }
 

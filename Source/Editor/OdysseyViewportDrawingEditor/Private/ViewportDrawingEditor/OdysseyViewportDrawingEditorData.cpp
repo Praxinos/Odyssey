@@ -56,7 +56,7 @@ FOdysseyViewportDrawingEditorData::Init(UTexture2D* iTexture)
     //Data edited texture changed, so we reset unload the texture and reset its properties
     if( mTexture )
     {
-        mPaintEngine->Flush();
+        // mPaintEngine->Flush();
         SyncTextureAndInvalidate();
         ApplyPropertiesBackup();
 
@@ -117,7 +117,7 @@ FOdysseyViewportDrawingEditorData::DisplaySurface()
 }
 
 FOdysseyPaintEngine3D*		        
-FOdysseyViewportDrawingEditorData::PaintEngine()
+FOdysseyViewportDrawingEditorData::PaintEngine() const
 {
     return mPaintEngine;
 }
@@ -129,7 +129,7 @@ FOdysseyViewportDrawingEditorData::Brush()
 }
 
 UOdysseyBrushAssetBase*             
-FOdysseyViewportDrawingEditorData::BrushInstance()
+FOdysseyViewportDrawingEditorData::BrushInstance() const
 {
     return mBrushInstance;
 }
@@ -227,7 +227,7 @@ FOdysseyViewportDrawingEditorData::OnPackagePreSave(UPackage* iPackage)
     if(package != iPackage)
         return;
 
-    PaintEngine()->Flush();
+    // PaintEngine()->Flush();
     SyncTextureAndInvalidate();
     ApplyPropertiesBackup();
 }

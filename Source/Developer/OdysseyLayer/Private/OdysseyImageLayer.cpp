@@ -7,6 +7,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
 
+void
+OnBlockInvalidated(const ::ul3::FBlock* iData, void* iInfo, const ::ul3::FRect& iRect)
+{
+    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>(iInfo);
+    layer->mImageResultChangedDelegate.Broadcast(&iRect);
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyImageLayer::~FOdysseyImageLayer()
@@ -33,6 +40,8 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyImageLayer& iLayer)
                 , mBlock->GetBlock()
                 , mBlock->GetBlock()->Rect()
                 , pos );
+
+    mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ::ul3::tFormat iFormat)
@@ -53,6 +62,8 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ::u
                 , ULIS3_NOCB
                 , mBlock->GetBlock()
                 , mBlock->GetBlock()->Rect() );
+
+    mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
@@ -61,6 +72,8 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     , mBlock( iBlock )
     , mIsAlphaLocked( false )
 {
+    if (mBlock)
+        mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
 }
 
 FOdysseyImageLayer*
@@ -82,11 +95,12 @@ void
 FOdysseyImageLayer::SetBlock(FOdysseyBlock* iBlock, bool iSendEvents, bool iDestroyPreviousBlock)
 {
     FOdysseyBlock* block = mBlock;
-    mBlock = iBlock;   
+    mBlock = iBlock;
+    mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
 
     if (iSendEvents)
     {
-        mImageResultChangedDelegate.Broadcast();
+        mImageResultChangedDelegate.Broadcast(nullptr);
     }
 
     if (iDestroyPreviousBlock)
@@ -113,7 +127,7 @@ void
 FOdysseyImageLayer::SetIsVisible(bool iIsVisible)
 {
     IOdysseyLayer::SetIsVisible(iIsVisible);
-    mImageResultChangedDelegate.Broadcast();
+    mImageResultChangedDelegate.Broadcast(nullptr);
 }
 
 bool
@@ -348,6 +362,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
 
         check(!mBlock);
         mBlock = new FOdysseyBlock(width,height,format);
+        mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;

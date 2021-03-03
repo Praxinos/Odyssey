@@ -33,9 +33,9 @@ public:
     UTexture2D*                         Texture();
     FOdysseyLayerStack*					LayerStack();
     FOdysseySurfaceEditable*            DisplaySurface();
-    FOdysseyPaintEngine3D*		        PaintEngine();
+    FOdysseyPaintEngine3D*		        PaintEngine() const;
     UOdysseyBrush*                      Brush();
-    UOdysseyBrushAssetBase*             BrushInstance();
+    UOdysseyBrushAssetBase*             BrushInstance() const;
     ::ul3::FPixelValue                  PaintColor() const;
 
     void						        Brush(UOdysseyBrush* iBrush);

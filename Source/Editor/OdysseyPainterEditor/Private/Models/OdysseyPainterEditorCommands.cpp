@@ -2,11 +2,12 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorCommands"
 
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
-    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FEditorStyle::GetStyleSetName() )
+    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
 }
 
@@ -16,9 +17,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::F1 ) );
     UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...",                EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( VisitPraxinosForums, "Praxinos Forums...", "Praxinos Forums...",                   EUserInterfaceActionType::Button, FInputChord() );
-
-    UI_COMMAND( ImportTexturesAsLayers, "Import Textures As Layers", "Import Textures As Layers",  EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::P ) );
-    UI_COMMAND( ExportLayersAsTextures, "Export Layer As Textures", "Export Layer As Textures",    EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::E ) );    
 
     UI_COMMAND( ResetViewportRotation, "Reset Viewport Rotation", "Reset viewport rotation",       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::R ) );
     UI_COMMAND( ResetViewportPosition, "Reset Viewport Position", "Reset viewport position",       EUserInterfaceActionType::Button, FInputChord( EKeys::Escape ) );
@@ -54,11 +52,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
     UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EKeys::F12 ) );
    
-    UI_COMMAND( CreateNewLayer, "Create New Layer", "Create new image layer",                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::N ) );
-    UI_COMMAND( DuplicateCurrentLayer, "Duplicate Current Layer", "Duplicate current layer",       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::D ) );
     UI_COMMAND( FillCurrentLayer, "Fill Current Layer", "Fill current layer",                      EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
     UI_COMMAND( ClearCurrentLayer, "Clear Current Layer", "Clear current layer",                   EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
-    UI_COMMAND( DeleteCurrentLayer, "Delete Current Layer", "Delete current layer",                EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::Delete ) );
 
 #if PLATFORM_MAC
     UI_COMMAND( Undo, "Undo Iliad", "Undo stroke in Iliad",                                        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Command, EKeys::Z ) );

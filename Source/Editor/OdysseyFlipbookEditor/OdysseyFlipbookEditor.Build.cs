@@ -47,7 +47,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyStylusInput",
                 "OdysseyFlipbook",
                 "OdysseyTexture",
-                "OdysseyDrawingState",
+                "OdysseyTextureEditor",
                 "Paper2D",
                 "Paper2DEditor",
             }
@@ -67,6 +67,7 @@ public class OdysseyFlipbookEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Public"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
+                Path.Combine(ModuleDirectory, "Public", "FlipbookEditor"),
             }
         );
 

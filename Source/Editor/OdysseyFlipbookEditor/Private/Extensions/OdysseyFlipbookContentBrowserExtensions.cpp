@@ -146,7 +146,7 @@ FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
 
 
         IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );
-        odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( EToolkitMode::Standalone, NULL, Flipbook );
+        odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( Flipbook );
     }
 }
 

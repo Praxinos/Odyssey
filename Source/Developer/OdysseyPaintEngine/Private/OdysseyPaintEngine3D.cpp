@@ -23,7 +23,7 @@ FOdysseyPaintEngine3D::FOdysseyPaintEngine3D( FOdysseyUndoHistory* iUndoHistoryP
 }
 
 
-void
+/* void
 FOdysseyPaintEngine3D::Tick()
 {
     if(!mBrushInstance || !mStrokeBlock || !mPreviewBlock || mIsLocked)
@@ -40,13 +40,13 @@ FOdysseyPaintEngine3D::Tick()
     UpdatePreviewBlockTiles();
 
     //End the stroke if we need to
-    if(mIsPendingEndStroke && mDelayQueue.empty())
+    if(mIsPendingEndStroke && mDrawingQueue.empty())
     {
         EndStrokeTick();
     }
-}
+} */
 
-void
+/* void
 FOdysseyPaintEngine3D::Block(FOdysseyBlock* iBlock)
 {
     if(mEditedBlock == iBlock)
@@ -92,8 +92,9 @@ FOdysseyPaintEngine3D::Block(FOdysseyBlock* iBlock)
         ReallocInvalidMaps();
     }
     UpdateBrushInstance();
-}
+} */
 
+/*
 void
 FOdysseyPaintEngine3D::BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRects)
 {
@@ -124,7 +125,7 @@ FOdysseyPaintEngine3D::BlendStrokeBlockInPreviewBlock(TArray<::ul3::FRect>& iRec
                     ,mOpacityModifier
         );
     }
-}
+} */
 
 FOdysseyBlock* 
 FOdysseyPaintEngine3D::StrokeBlock3D()
@@ -153,6 +154,6 @@ FOdysseyPaintEngine3D::UpdateTmpTileMapFromTriangles(TArray<FTexturePaintTriangl
         xMax = FMath::Min( xMax, mCountTileX - 1 ); xMax = FMath::Max( xMax, 0 );
         yMax = FMath::Min( yMax, mCountTileY - 1 ); yMax = FMath::Max( yMax, 0 );
 
-        SetMapWithRect( mTmpInvalidTileMap, ::ul3::FRect( xMin, yMin, xMax - xMin + 1, yMax - yMin + 1 ), true );
+        SetMapWithRect( mPaintBlockInvalidMap, ::ul3::FRect( xMin, yMin, xMax - xMin + 1, yMax - yMin + 1 ), true );
     }
 }

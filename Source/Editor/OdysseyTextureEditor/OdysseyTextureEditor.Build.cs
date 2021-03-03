@@ -45,12 +45,12 @@ public class OdysseyTextureEditor : ModuleRules
                 "OdysseyTransaction",
                 "OdysseyStylusInput",
                 "OdysseyTexture",
-                "OdysseyDrawingState",
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
+                Path.Combine(ModuleDirectory, "Private", "Blueprint"),
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
@@ -61,6 +61,7 @@ public class OdysseyTextureEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Public"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
+                Path.Combine(ModuleDirectory, "Public", "TextureEditor"),
             }
         );
 

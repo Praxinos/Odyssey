@@ -31,7 +31,7 @@ public:
 
     // Image Result Changed Event
     // Params: None
-	DECLARE_MULTICAST_DELEGATE(FOnLayerStackImageResultChanged);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackImageResultChanged, const ::ul3::FRect&);
 
     // Sent when children are changed (added, removed, moved)
     // Params: None
@@ -137,7 +137,7 @@ public:
 
 private:
     // Private API
-    void                                OnLayerRootImageResultChanged();
+    void                                OnLayerRootImageResultChanged(const ::ul3::FRect* iRect);
     void                                OnLayerAdded(TSharedPtr<IOdysseyLayer> iNode);
     void                                OnLayerRemoved(TSharedPtr<IOdysseyLayer> iNode, TSharedPtr<IOdysseyLayer> iOldParent, int iOldIndex);
 
@@ -183,6 +183,10 @@ public:
     bool LoadData();
     bool Redo();
     void Check();
+
+public:
+    bool HasUndo();
+    bool HasRedo();
 
 private:
     FOdysseyLayerStack* mLayerStackPtr;

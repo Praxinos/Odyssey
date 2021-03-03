@@ -12,61 +12,33 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
+#include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorSettings.h"
 #include "OdysseyFlipbookEditorToolkit.h"
 #include "OdysseyFlipbook_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
-const FName OdysseyFlipbookEditorAppIdentifier = FName( TEXT( "OdysseyFlipbookEditorApp" ) );
 
 /*-----------------------------------------------------------------------------
    FOdysseyFlipbookEditorModule
 -----------------------------------------------------------------------------*/
 
-TSharedRef<FOdysseyFlipbookEditorToolkit>
-FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor(const EToolkitMode::Type iMode, const TSharedPtr< IToolkitHost >& iInitToolkitHost, UPaperFlipbook* iFlipbook )
-{
-    TSharedRef<FOdysseyFlipbookEditorToolkit> newOdysseyFlipbookEditor( new FOdysseyFlipbookEditorToolkit() );
-    newOdysseyFlipbookEditor->Init( iMode, iInitToolkitHost, OdysseyFlipbookEditorAppIdentifier, iFlipbook );
-    
-    return newOdysseyFlipbookEditor;
-}
-
-TSharedPtr<FExtensibilityManager>
-FOdysseyFlipbookEditorModule::GetMenuExtensibilityManager()
-{
-	return mMenuExtensibilityManager;
-}
-
-void
-FOdysseyFlipbookEditorModule::RegisterAssetTypeAction(IAssetTools& ioAssetTools, TSharedRef<IAssetTypeActions> iAction)
-{
-	ioAssetTools.RegisterAssetTypeActions(iAction);
-	mCreatedAssetTypeActions.Add(iAction);
-}
-
 void
 FOdysseyFlipbookEditorModule::StartupModule()
 {
-	// Register asset types
-	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	mOdysseyPainterCategory = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
-	RegisterAssetTypeAction(assetTools, MakeShareable(new FOdysseyFlipbookAssetTypeActions(mOdysseyPainterCategory)));
-        
-	// register menu extensions
+	// Register menu extensions
 	mMenuExtensibilityManager = MakeShareable(new FExtensibilityManager);
-    
-    // register settings
-    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
-    
-    if( settingsModule )
-    {
-        settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADFlipbookEditor"
-                                            , LOCTEXT( "OdysseyFlipbookEditorSettingsName", "ILIAD Flipbook Editor" )
-                                            , LOCTEXT( "OdysseyFlipbookEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
-                                            , GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
-    }
-    
+
+	// Register Assets Types Actions
+	RegisterAssetTypeActions();
+
+	// Register Commands
+	RegisterCommands();
+
+	// Register Settings
+    RegisterSettings();
+
+	// Install Content Browser Extionsion Hooks
 	if (!IsRunningCommandlet())
 	{
 		FOdysseyFlipbookContentBrowserExtensions::InstallHooks();
@@ -76,28 +48,103 @@ FOdysseyFlipbookEditorModule::StartupModule()
 void
 FOdysseyFlipbookEditorModule::ShutdownModule()
 {
-    // unregister settings
+	// Uninstall Content Browser Extionsion Hooks
+	FOdysseyFlipbookContentBrowserExtensions::RemoveHooks();
+
+	// Unregister Settings
+    UnregisterSettings();
+
+	// Unregister Commands
+	UnregisterCommands();
+
+	// Unregister Assets Type Actions
+	UnregisterAssetTypeActions();
+    
+	// Unregister menu extensions
+	mMenuExtensibilityManager.Reset();
+}
+
+void
+FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
+{
+	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+
+	// Create Asset Categories
+	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+
+	//Create Asset Types Actions
+	mTypeActions.Add(MakeShareable(new FOdysseyFlipbookAssetTypeActions(category)));
+
+	//Register created Asset Type Actions
+	for (int32 index = 0; index < mTypeActions.Num(); ++index)
+	{
+		assetTools.RegisterAssetTypeActions(mTypeActions[index].ToSharedRef());
+	}
+}
+
+void
+FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
+{
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+		return;
+	
+	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	for (int32 index = 0; index < mTypeActions.Num(); ++index)
+	{
+		assetTools.UnregisterAssetTypeActions(mTypeActions[index].ToSharedRef());
+	}
+}
+
+void
+FOdysseyFlipbookEditorModule::RegisterSettings()
+{
+    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+    if( !settingsModule )
+		return;
+
+	settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADFlipbookEditor"
+										, LOCTEXT( "OdysseyFlipbookEditorSettingsName", "ILIAD Flipbook Editor" )
+										, LOCTEXT( "OdysseyFlipbookEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+										, GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
+}
+
+void
+FOdysseyFlipbookEditorModule::UnregisterSettings()
+{
     ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
-    if( settingsModule )
-    {
-        settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyFlipbookEditor" );
-    }
+    if( !settingsModule )
+		return;
     
-	// unregister menu extensions
-	mMenuExtensibilityManager.Reset();
-    
-	// Unregister all the asset types that we registered
-	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-		for (int32 index = 0; index < mCreatedAssetTypeActions.Num(); ++index)
-		{
-			assetTools.UnregisterAssetTypeActions(mCreatedAssetTypeActions[index].ToSharedRef());
-		}
-	}
+	settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyFlipbookEditor" );
+}
 
-	FOdysseyFlipbookContentBrowserExtensions::RemoveHooks();
+TSharedRef<FOdysseyFlipbookEditorToolkit>
+FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
+{
+    TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable( new FOdysseyFlipbookEditorToolkit() );
+	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook, toolkit));
+	editor->Init();
+	toolkit->Init(editor, iFlipbook);
+    return toolkit;
+}
+
+TSharedPtr<FExtensibilityManager>
+FOdysseyFlipbookEditorModule::GetMenuExtensibilityManager()
+{
+	return mMenuExtensibilityManager;
+}
+
+void
+FOdysseyFlipbookEditorModule::RegisterCommands()
+{
+	FOdysseyFlipbookEditorCommands::Register();
+}
+
+void
+FOdysseyFlipbookEditorModule::UnregisterCommands()
+{
+	FOdysseyFlipbookEditorCommands::Unregister();
 }
 
 IMPLEMENT_MODULE( FOdysseyFlipbookEditorModule, OdysseyFlipbookEditor );

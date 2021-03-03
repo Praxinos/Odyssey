@@ -36,6 +36,9 @@
 void
 SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
 {
+    Surface = InArgs._Surface;
+    mOnParameterChanged = InArgs._OnParameterChanged;
+
     // create zoom menu
     FMenuBuilder ZoomMenuBuilder(true, NULL);
     {
@@ -268,11 +271,11 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
-void
+/* void
 SOdysseySurfaceViewport::SetSurface( IOdysseySurface* iValue )
 {
     Surface = iValue;
-}
+} */
 
 
 TSharedPtr< FOdysseySceneViewport >
@@ -306,7 +309,7 @@ SOdysseySurfaceViewport::GetHorizontalScrollBar( ) const
 IOdysseySurface*
 SOdysseySurfaceViewport::GetSurface() const
 {
-    return  Surface;
+    return  Surface.Get();
 }
 
 
@@ -491,7 +494,7 @@ SOdysseySurfaceViewport::HandleRotationValue( ) const
 FText
 SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
 {
-    if (!Surface || !Surface->Texture() /* || !Surface->Block() */)
+    if (!GetSurface() || !GetSurface()->Texture() /* || !Surface->Block() */)
         return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
 
     /* ::ul3::FFormatMetrics format(Surface->Block()->Format());
@@ -518,7 +521,7 @@ SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
     } */
 
     //return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px | {2} {3} bits"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ), formatName, FText::AsNumber(format.BPC) );
-    return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ));
+    return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px"), FText::AsNumber(GetSurface()->Width() ), FText::AsNumber(GetSurface()->Height() ));
 }
 
 
@@ -569,7 +572,7 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
         }
     }
 
-    mOnParameterChanged.Broadcast();
+    mOnParameterChanged.ExecuteIfBound();
 }
 
 
@@ -624,7 +627,7 @@ void SOdysseySurfaceViewport::SetRotationInDegrees(double RotationValue)
 {
     Rotation = RotationValue;
 
-    mOnParameterChanged.Broadcast();
+    mOnParameterChanged.ExecuteIfBound();
 }
 
 FVector2D SOdysseySurfaceViewport::GetPan() const
@@ -636,14 +639,14 @@ void SOdysseySurfaceViewport::SetPan( FVector2D PanValue )
 {
     Pan = PanValue;
 
-    mOnParameterChanged.Broadcast();
+    mOnParameterChanged.ExecuteIfBound();
 }
 
 void SOdysseySurfaceViewport::AddPan( FVector2D PanValue )
 {
     Pan+=PanValue;
 
-    mOnParameterChanged.Broadcast();
+    mOnParameterChanged.ExecuteIfBound();
 }
 
 
@@ -651,27 +654,27 @@ void SOdysseySurfaceViewport::RotateLeft()
 {
     Rotation -= RotationStep;
 
-    mOnParameterChanged.Broadcast();
+    mOnParameterChanged.ExecuteIfBound();
 }
 
 void SOdysseySurfaceViewport::RotateRight()
 {
     Rotation += RotationStep;
 
-    mOnParameterChanged.Broadcast();
+    mOnParameterChanged.ExecuteIfBound();
 }
 
 void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, uint32& Height ) const
 {
-    if (!Surface || !Surface->Texture())
+    if (!GetSurface() || !GetSurface()->Texture())
     {
         Width = 0;
         Height = 0;
         return;
     }
 
-    uint32 ImportedWidth = Surface->Texture()->GetSizeX(); //Get the displayed size of the texture instead of its Source size
-    uint32 ImportedHeight = Surface->Texture()->GetSizeY();
+    uint32 ImportedWidth = GetSurface()->Texture()->GetSizeX(); //Get the displayed size of the texture instead of its Source size
+    uint32 ImportedHeight = GetSurface()->Texture()->GetSizeY();
 
     Width = ImportedWidth;
     Height = ImportedHeight;
@@ -728,8 +731,8 @@ void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, 
     }
     else
     {
-        Width = Surface->Texture()->GetSizeX() * GetZoom();
-        Height = Surface->Texture()->GetSizeY() * GetZoom();
+        Width = GetSurface()->Texture()->GetSizeX() * GetZoom();
+        Height = GetSurface()->Texture()->GetSizeY() * GetZoom();
     }
 }
 

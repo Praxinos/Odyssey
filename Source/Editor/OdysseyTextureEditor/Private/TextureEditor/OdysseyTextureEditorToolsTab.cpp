@@ -1,0 +1,66 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#include "OdysseyTextureEditorToolsTab.h"
+
+#include "OdysseyTextureEditor.h"
+
+/////////////////////////////////////////////////////
+// FOdysseyTextureEditorToolsTab
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+FOdysseyTextureEditorToolsTab::~FOdysseyTextureEditorToolsTab()
+{
+}
+
+FOdysseyTextureEditorToolsTab::FOdysseyTextureEditorToolsTab(FOdysseyTextureEditor* iEditor)
+	: FOdysseyPainterEditorToolsTab(iEditor)
+    , mEditor(iEditor)
+{
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Getters
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Event Listeners
+
+void
+FOdysseyTextureEditorToolsTab::Undo()
+{
+    FOdysseyPainterEditorToolsTab::Undo();
+
+    if(!mEditor->LayerStack())
+        return;
+
+    if (!mEditor->LayerStack()->mDrawingUndo->HasUndo())
+        return;
+    
+	mEditor->LayerStack()->mDrawingUndo->LoadData();
+}
+
+void
+FOdysseyTextureEditorToolsTab::Redo()
+{
+    FOdysseyPainterEditorToolsTab::Redo();
+
+    if(!mEditor->LayerStack())
+        return;
+
+    if (!mEditor->LayerStack()->mDrawingUndo->HasRedo())
+        return;
+    
+	mEditor->LayerStack()->mDrawingUndo->Redo();
+}
+
+void
+FOdysseyTextureEditorToolsTab::ClearUndo()
+{
+    if(!mEditor->LayerStack())
+        return;
+    
+	mEditor->LayerStack()->mDrawingUndo->Clear();
+    FOdysseyPainterEditorToolsTab::ClearUndo();
+}
+
+#undef LOCTEXT_NAMESPACE

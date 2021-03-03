@@ -1,0 +1,53 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#pragma once
+
+#include "OdysseyTextureEditor.h"
+
+#include "OdysseyFlipbookEditorGUI.h"
+#include "OdysseyFlipbookWrapper.h"
+
+class FOdysseyFlipbookEditorGUI;
+class FOdysseySurfaceReadOnly;
+
+/**
+ * Implements an Editor for flipbooks.
+ */
+class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
+    : public FOdysseyTextureEditor
+{
+public:
+    // Construction / Destruction
+    virtual ~FOdysseyFlipbookEditor();
+    FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit); //Non-Initialized Contructor
+    FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
+
+public:
+    //Initialization
+    virtual void InitData() override;
+
+public:
+    // Getters
+	TSharedPtr<FOdysseyFlipbookWrapper>&    FlipbookWrapper();
+    FOdysseySurfaceReadOnly*			    PreviewSurface();
+
+public:
+    // Setters
+
+public:
+    //Overrides
+    virtual FOdysseyFlipbookEditorGUI* GetGUI() override;
+    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
+
+protected:
+    virtual void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
+    virtual void SetTextureAtKeyframeIndex(int32 iKeyframeIndex);
+
+private:
+    TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper; //TODO: No need for a SharedPtr here, and no need for a pointer here
+	FOdysseySurfaceReadOnly*                mPreviewSurface; //TODO: No need for a pointer here I guess
+
+	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
+};
+

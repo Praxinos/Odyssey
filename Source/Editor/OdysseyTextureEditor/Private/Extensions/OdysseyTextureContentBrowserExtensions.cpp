@@ -109,7 +109,7 @@ FEditTextureExtension::EditTextures( TArray<UTexture2D*>& iTextures )
 			continue;
 		}
         IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>( "OdysseyTextureEditor" );
-        odysseyTextureEditorModule->CreateOdysseyTextureEditor( EToolkitMode::Standalone, NULL, texture );
+        odysseyTextureEditorModule->CreateOdysseyTextureEditor( texture );
     }
 }
 
