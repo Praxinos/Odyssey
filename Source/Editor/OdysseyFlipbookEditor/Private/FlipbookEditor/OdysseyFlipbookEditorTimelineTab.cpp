@@ -98,6 +98,8 @@ FOdysseyFlipbookEditorTimelineTab::OnTimelineCurrentKeyframeChanged(int32 iKeyfr
 void
 FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStarted()
 {
+	//TODO: lock paintengine
+	SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 }
 
 void

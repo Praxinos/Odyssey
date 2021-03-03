@@ -114,15 +114,16 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
 	ioCanvas->Clear(settings.BackgroundColor);
 
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return;
-    }
+
+    UTexture2D* texture       = surface->Texture();
+    if (!texture)
+        return;
 
     double rotation         = mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees();
     FVector2D pan           = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
-
-    UTexture* texture       = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture();
     FVector2D ratio         = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(),
                                          mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
     FVector2D viewportSize  = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X,
@@ -134,13 +135,12 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     int32 xPos              = xOffset - scrollBarPos.X;
 
     UpdateScrollBars();
-    UTexture2D* texture2D = Cast< UTexture2D >( texture );
 
     // Fully stream in the texture before drawing it.
-    if( texture2D )
+    if(texture)
     {
-        texture2D->SetForceMipLevelsToBeResident( 30.0f );
-        texture2D->WaitForStreaming();
+        texture->SetForceMipLevelsToBeResident( 30.0f );
+        texture->WaitForStreaming();
     }
 
     // Figure out the size we need
@@ -153,10 +153,10 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5 )
     {
         //ODYSSEY: PATCH
-        bool isNormalMap = texture2D->IsNormalMap();
-        bool isSingleChannel = texture2D->CompressionSettings == TC_Grayscale || texture2D->CompressionSettings == TC_Alpha;
-        bool isVirtual = texture2D->IsCurrentlyVirtualTextured();
-        bool isVTSPS = texture2D->IsVirtualTexturedWithSinglePhysicalSpace();
+        bool isNormalMap = texture->IsNormalMap();
+        bool isSingleChannel = texture->CompressionSettings == TC_Grayscale || texture->CompressionSettings == TC_Alpha;
+        bool isVirtual = texture->IsCurrentlyVirtualTextured();
+        bool isVTSPS = texture->IsVirtualTexturedWithSinglePhysicalSpace();
         bool isTextureArray = false;
         float layerIndex = 0.f;
         batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray );
@@ -164,7 +164,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );
     FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
-    mPivotPointRatio = FVector2D( position_in_texture.X / mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->GetSizeX(), position_in_texture.Y / mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->GetSizeY());
+    mPivotPointRatio = FVector2D( position_in_texture.X / texture->GetSizeX(), position_in_texture.Y / texture->GetSizeY());
 
     // Draw background Checker
     {
@@ -289,7 +289,12 @@ void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
     //If we don't have a surface, then we don't interact with anything
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
+        return;
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
         return;
 
     //---
@@ -431,10 +436,13 @@ bool
 FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
 {
     //If we don't have a surface, then we don't interact with anything
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return false;
-    }
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
+        return false;
 
     FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
     mCurrentPointInTexture = GetLocalMousePosition( iPointInViewport );
@@ -607,10 +615,13 @@ void
 FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOdysseyStrokePoint& iPointInViewport )
 {
     //If we don't have a surface, then we don't interact with anything
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return;
-    }
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
+        return;
 
     
     FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
@@ -661,8 +672,8 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         FOdysseyStrokePoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
         FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
 
-        if( position_in_texture.X >= 0 && position_in_texture.X < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->Source.GetSizeX() &&
-            position_in_texture.Y >= 0 && position_in_texture.Y < mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->Source.GetSizeY())
+        if( position_in_texture.X >= 0 && position_in_texture.X < texture->Source.GetSizeX() &&
+            position_in_texture.Y >= 0 && position_in_texture.Y < texture->Source.GetSizeY())
         {
 			mOnPickColor.Broadcast(eOdysseyEventState::kAdjust, position_in_texture);
         }
@@ -698,10 +709,13 @@ void
 FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     //If we don't have a surface, then we don't interact with anything
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return;
-    }
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
+        return;
 
 
     FOdysseyStrokePoint lastPointInTexture = mCurrentPointInTexture;
@@ -810,6 +824,10 @@ FOdysseyPainterEditorViewportClient::UpdateScrollBars()
             viewport->GetVerticalScrollBar()->SetState( 0.0f, vRatio );
         }
     }
+    else
+    {
+        viewport->GetVerticalScrollBar()->SetState(0.0f, 1.0f);
+    }
 
     if( hRatio < 1.0f )
     {
@@ -821,6 +839,10 @@ FOdysseyPainterEditorViewportClient::UpdateScrollBars()
         {
             viewport->GetHorizontalScrollBar()->SetState( 0.0f, hRatio );
         }
+    }
+    else
+    {
+        viewport->GetHorizontalScrollBar()->SetState(0.0f, 1.0f);
     }
 }
 
@@ -878,10 +900,13 @@ void
 FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositionInViewport )
 {
     //If we don't have a surface, then we don't interact with anything
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return;
-    }
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
+        return;
 
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
@@ -921,10 +946,13 @@ void
 FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositionInViewport )
 {
     //If we don't have a surface, then we don't interact with anything
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return;
-    }
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
+        return;
 
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
@@ -964,10 +992,13 @@ double
 FOdysseyPainterEditorViewportClient::GetZoom() const
 {
     //If we don't have a surface, then we return a default 100% zoom
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return 1.0;
-    }
+
+    UTexture2D* texture       = surface->Texture();
+    if (!texture)
+        return 1.0;
 
     //mOdysseyPainterEditor.Pin()->PaintEngine()->Invalidate();
 
@@ -979,7 +1010,7 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
         //The member zoom is overriden by the fit to viewport. The drawing function uses another way to calculate the effective zoom, and we do the same here
         uint32 width, height;
         mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
-        zoom = static_cast<double>( width ) / static_cast<double>( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->GetSizeX() );
+        zoom = static_cast<double>( width ) / static_cast<double>( texture->GetSizeX() );
     }
     else
     {
@@ -994,10 +1025,13 @@ FVector2D
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation ) const
 {
     //If we don't have a surface, then we don't have a local mouse position
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return FVector2D(0,0);
-    }
+
+    UTexture2D* texture       = surface->Texture();
+    if (!texture)
+        return FVector2D(0,0);
 
     double zoom = GetZoom();
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
@@ -1007,8 +1041,8 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     int32 yOffset = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) : 0;
     int32 xOffset = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) : 0;
 
-    int textureWidth = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->GetSizeX();
-    int textureHeight = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture()->GetSizeY();
+    int textureWidth = texture->GetSizeX();
+    int textureHeight = texture->GetSizeY();
 
     FVector2D texturePanPivot = FVector2D( mPivotPointRatio.X * textureWidth, mPivotPointRatio.Y * textureHeight ) - 0.5 * FVector2D( textureWidth, textureHeight );
 
@@ -1040,6 +1074,14 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
 FOdysseyStrokePoint
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport ) const
 {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
+        return FOdysseyStrokePoint();
+
+    UTexture2D* texture       = surface->Texture();
+    if (!texture)
+        return FOdysseyStrokePoint();
+
     FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
     FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
 
@@ -1048,8 +1090,6 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStroke
     point_in_texture.y = position_in_texture.Y;
 
     //Convert the position from the displayed texture size to the the position in the texture source size
-    UTexture2D* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture();
-
     uint32 textureFullWidth = texture->Source.GetSizeX();
     uint32 textureFullHeight = texture->Source.GetSizeY();
     switch (texture->PowerOfTwoMode)
@@ -1081,10 +1121,13 @@ void
 FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices )
 {
     //If we don't have a surface, we can't draw UVs
-    if (!mOdysseyPainterEditorViewportPtr.Pin()->GetSurface() || !mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Texture())
-    {
+    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    if (!surface)
         return;
-    }
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
+        return;
 
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
 
@@ -1181,7 +1224,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
 
                 if( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
                 {
-                    FVector2D center = FVector2D( uvBoxOrigin.X + ( ( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Width() * zoom ) / 2 ), uvBoxOrigin.Y + ( ( mOdysseyPainterEditorViewportPtr.Pin()->GetSurface()->Height() * zoom ) / 2 ) );
+                    FVector2D center = FVector2D( uvBoxOrigin.X + ( ( surface->Width() * zoom ) / 2 ), uvBoxOrigin.Y + ( ( surface->Height() * zoom ) / 2 ) );
 
                     FVector2D positionP1( UVs[corner1] * FVector2D( width, height ) + uvBoxOrigin );
                     FVector2D positionP2( UVs[corner2] * FVector2D( width, height ) + uvBoxOrigin );

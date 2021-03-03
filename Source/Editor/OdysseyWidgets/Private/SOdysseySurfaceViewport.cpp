@@ -113,7 +113,9 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     [
                         // vertical scroll bar
                         SAssignNew(TextureViewportVerticalScrollBar, SScrollBar)
-                            .Visibility(this, &SOdysseySurfaceViewport::HandleVerticalScrollBarVisibility)
+                            .AlwaysShowScrollbar(true)
+                            // .Visibility(EVisibility::Visible)
+                            // .Visibility(this, &SOdysseySurfaceViewport::HandleVerticalScrollBarVisibility)
                             .OnUserScrolled(this, &SOdysseySurfaceViewport::HandleVerticalScrollBarScrolled)
                     ]
             ]
@@ -124,7 +126,9 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                 // horizontal scrollbar
                 SAssignNew(TextureViewportHorizontalScrollBar, SScrollBar)
                     .Orientation( Orient_Horizontal )
-                    .Visibility(this, &SOdysseySurfaceViewport::HandleHorizontalScrollBarVisibility)
+                    .AlwaysShowScrollbar(true)
+                    // .Visibility(EVisibility::Visible)
+                    // .Visibility(this, &SOdysseySurfaceViewport::HandleHorizontalScrollBarVisibility)
                     .OnUserScrolled(this, &SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled)
             ]
 
@@ -494,7 +498,12 @@ SOdysseySurfaceViewport::HandleRotationValue( ) const
 FText
 SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
 {
-    if (!GetSurface() || !GetSurface()->Texture() /* || !Surface->Block() */)
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
+        return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
+
+    UTexture* texture       = surface->Texture();
+    if (!texture)
         return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
 
     /* ::ul3::FFormatMetrics format(Surface->Block()->Format());
@@ -521,7 +530,7 @@ SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
     } */
 
     //return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px | {2} {3} bits"), FText::AsNumber( Surface->Width() ), FText::AsNumber( Surface->Height() ), formatName, FText::AsNumber(format.BPC) );
-    return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px"), FText::AsNumber(GetSurface()->Width() ), FText::AsNumber(GetSurface()->Height() ));
+    return FText::Format( NSLOCTEXT("Texture Infos","Texture Infos","{0}x{1} px"), FText::AsNumber(surface->Width() ), FText::AsNumber(surface->Height() ));
 }
 
 
@@ -554,21 +563,26 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
     Zoom = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
     SetFitToViewport( false );
 
-    if( GetSurface() )
+    IOdysseySurface* surface = GetSurface();
+    if (surface)
     {
-        if( Zoom >= 1.0 && GetSurface()->Texture()->Filter != TextureFilter::TF_Nearest )
+        UTexture* texture       = surface->Texture();
+        if (texture)
         {
-            GetSurface()->Texture()->Filter = TextureFilter::TF_Nearest;
-            GetSurface()->Texture()->PostEditChange();
-            FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>( GetSurface() );
-            surfaceEditable->Invalidate();
-        }
-        else if( Zoom < 1.0 && GetSurface()->Texture()->Filter != TextureFilter::TF_Bilinear )
-        {
-            GetSurface()->Texture()->Filter = TextureFilter::TF_Bilinear;
-            GetSurface()->Texture()->PostEditChange();
-            FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>(GetSurface());
-            surfaceEditable->Invalidate();
+            if( Zoom >= 1.0 && texture->Filter != TextureFilter::TF_Nearest )
+            {
+                texture->Filter = TextureFilter::TF_Nearest;
+                texture->PostEditChange();
+                FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>( surface );
+                surfaceEditable->Invalidate();
+            }
+            else if( Zoom < 1.0 && texture->Filter != TextureFilter::TF_Bilinear )
+            {
+                texture->Filter = TextureFilter::TF_Bilinear;
+                texture->PostEditChange();
+                FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>(surface);
+                surfaceEditable->Invalidate();
+            }
         }
     }
 
@@ -666,15 +680,24 @@ void SOdysseySurfaceViewport::RotateRight()
 
 void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, uint32& Height ) const
 {
-    if (!GetSurface() || !GetSurface()->Texture())
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
     {
         Width = 0;
         Height = 0;
         return;
     }
 
-    uint32 ImportedWidth = GetSurface()->Texture()->GetSizeX(); //Get the displayed size of the texture instead of its Source size
-    uint32 ImportedHeight = GetSurface()->Texture()->GetSizeY();
+    UTexture2D* texture = surface->Texture();
+    if (!texture)
+    {
+        Width = 0;
+        Height = 0;
+        return;
+    }
+
+    uint32 ImportedWidth = texture->GetSizeX(); //Get the displayed size of the texture instead of its Source size
+    uint32 ImportedHeight = texture->GetSizeY();
 
     Width = ImportedWidth;
     Height = ImportedHeight;
@@ -731,8 +754,8 @@ void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, 
     }
     else
     {
-        Width = GetSurface()->Texture()->GetSizeX() * GetZoom();
-        Height = GetSurface()->Texture()->GetSizeY() * GetZoom();
+        Width = texture->GetSizeX() * GetZoom();
+        Height = texture->GetSizeY() * GetZoom();
     }
 }
 

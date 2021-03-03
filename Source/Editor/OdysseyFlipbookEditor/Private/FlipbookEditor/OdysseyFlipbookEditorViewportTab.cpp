@@ -32,6 +32,7 @@ FOdysseyFlipbookEditorViewportTab::Surface() const
         return nullptr;
 
     return mEditor->GetGUI()->GetTimelineTab()->Timeline()->IsScrubbing() ? (IOdysseySurface*)mEditor->PreviewSurface() : (IOdysseySurface*)mEditor->DisplaySurface();
+    // return (IOdysseySurface*)mEditor->DisplaySurface();
 }
 
 //--------------------------------------------------------------------------------------
