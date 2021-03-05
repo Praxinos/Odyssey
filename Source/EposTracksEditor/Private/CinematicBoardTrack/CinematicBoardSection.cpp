@@ -26,6 +26,7 @@
 #include "CineCameraActor.h"
 
 #include "Board/BoardSequence.h"
+#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -131,108 +132,15 @@ FCinematicBoardSection::IsReadOnly() const
 
 //---
 
-FCinematicBoardSection::FInnerSequenceResult::FInnerSequenceResult()
-    : mInnerSequenceID()
-    , mHierarchy( nullptr )
-    , mPlayer( nullptr )
-    , mNode( nullptr )
-    , mSubData( nullptr )
-    , mInnerMovieSceneSequence( nullptr )
-    , mInnerMovieScene( nullptr )
-{
-}
-
-FCinematicBoardSection::FInnerSequenceResult::FInnerSequenceResult( const FMovieSceneSequenceID& iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer )
-    : mInnerSequenceID( iID )
-    , mHierarchy( iHierarchy )
-    , mPlayer( ioPlayer )
-    , mNode( nullptr )
-    , mSubData( nullptr )
-    , mInnerMovieSceneSequence( nullptr )
-    , mInnerMovieScene( nullptr )
-{
-}
-
-bool
-FCinematicBoardSection::FInnerSequenceResult::IsValid() const
-{
-    return mInnerSequenceID.IsValid();
-}
-
-bool
-FCinematicBoardSection::FInnerSequenceResult::IsFilled() const
-{
-    return !!mInnerMovieScene;
-}
-
-//-
-
-FCinematicBoardSection::FInnerSequenceResult
-FCinematicBoardSection::GetInnerSequenceID( const UMovieSceneSubSection* iSubSection ) const
-{
-    TSharedPtr<ISequencer> sequencer = GetSequencer();
-    if( !sequencer.IsValid() )
-        return FInnerSequenceResult();
-
-    const UMovieSceneSubSection&            sectionObject = iSubSection ? *iSubSection : GetSectionObjectAs<UMovieSceneSubSection>();
-    const FMovieSceneSequenceID             thisSequenceID = sequencer->GetFocusedTemplateID();
-    const FMovieSceneSequenceID             targetSequenceID = sectionObject.GetSequenceID();
-    const FMovieSceneSequenceHierarchy*     hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
-
-    if( !hierarchy )
-        return FInnerSequenceResult();
-
-    const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
-
-    check( thisSequenceNode );
-
-    // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-    const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
-        [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
-        {
-            const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
-            return subData && subData->DeterministicSequenceID == targetSequenceID;
-        }
-    );
-
-    if( !innerSequenceID )
-        return FInnerSequenceResult();
-
-    FInnerSequenceResult result( *innerSequenceID, hierarchy, sequencer.Get() );
-    return result;
-}
-
-void
-FCinematicBoardSection::FillInnerSequenceResult( FInnerSequenceResult& ioInnerSequenceResult ) const
-{
-    if( !ioInnerSequenceResult.IsValid() )
-        return;
-
-    const FMovieSceneSequenceHierarchyNode* Node = ioInnerSequenceResult.mHierarchy->FindNode( ioInnerSequenceResult.mInnerSequenceID );
-    const FMovieSceneSubSequenceData*       SubData = ioInnerSequenceResult.mHierarchy->FindSubData( ioInnerSequenceResult.mInnerSequenceID );
-    if( !ensure( SubData && Node ) )
-        return;
-
-    UMovieSceneSequence* InnerSequence = SubData->GetSequence();
-    UMovieScene*         InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
-    if( !InnerMovieScene )
-        return;
-
-    ioInnerSequenceResult.mNode = Node;
-    ioInnerSequenceResult.mSubData = SubData;
-    ioInnerSequenceResult.mInnerMovieSceneSequence = InnerSequence;
-    ioInnerSequenceResult.mInnerMovieScene = InnerMovieScene;
-}
-
 UCameraComponent*
-FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceResult iInnerSequenceResult )
+FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceData& iInnerSequenceData )
 {
-    FillInnerSequenceResult( iInnerSequenceResult );
-    if( !iInnerSequenceResult.IsFilled() )
+    iInnerSequenceData.Fill();
+    if( !iInnerSequenceData.IsFilled() )
         return nullptr;
 
-    FFrameNumber InnerTime = ( iGlobalTime * iInnerSequenceResult.mSubData->RootToSequenceTransform ).FloorToFrame();
-    if( !iInnerSequenceResult.mSubData->PlayRange.Value.Contains( InnerTime ) )
+    FFrameNumber InnerTime = ( iGlobalTime * iInnerSequenceData.mSubData->RootToSequenceTransform ).FloorToFrame();
+    if( !iInnerSequenceData.mSubData->PlayRange.Value.Contains( InnerTime ) )
     {
         return nullptr;
     }
@@ -242,7 +150,7 @@ FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTim
 
     UMovieSceneSingleCameraCutSection* ActiveSection = nullptr;
 
-    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( iInnerSequenceResult.mInnerMovieScene->GetCameraCutTrack() ) )
+    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( iInnerSequenceData.mInnerMovieScene->GetCameraCutTrack() ) )
     {
         for( UMovieSceneSection* ItSection : CutTrack->GetAllSections() )
         {
@@ -265,12 +173,12 @@ FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTim
 
     if( ActiveSection )
     {
-        return ActiveSection->GetFirstCamera( *iInnerSequenceResult.mPlayer, iInnerSequenceResult.mInnerSequenceID );
+        return ActiveSection->GetFirstCamera( *iInnerSequenceData.mPlayer, iInnerSequenceData.mInnerSequenceID );
     }
 
-    for( FMovieSceneSequenceID Child : iInnerSequenceResult.mNode->Children )
+    for( FMovieSceneSequenceID Child : iInnerSequenceData.mNode->Children )
     {
-        FInnerSequenceResult result( Child, iInnerSequenceResult.mHierarchy, iInnerSequenceResult.mPlayer );
+        FInnerSequenceData result( Child, iInnerSequenceData.mHierarchy, iInnerSequenceData.mPlayer );
 
         UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, result );
         if( CameraComponent )
@@ -285,8 +193,9 @@ FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTim
 UCameraComponent*
 FCinematicBoardSection::GetViewCamera()
 {
-    FInnerSequenceResult result = GetInnerSequenceID();
-    if( !result.IsValid() )
+    FInnerSequenceData result;
+    result.InitializeFromSubSection( GetSequencer().Get(), GetSequencer()->GetFocusedTemplateID(), GetSubSectionObject() );
+    if( !result.IsInitialized() )
         return nullptr;
 
     UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( GetSequencer()->GetGlobalTime().Time.FrameNumber, result );
@@ -298,89 +207,21 @@ FCinematicBoardSection::GetViewCamera()
 
 //---
 
-static
-TArray<FFrameTime>
-FindCameraTransformKeys( UMovieSceneCinematicBoardSection* iBoardSection )
+void
+FCinematicBoardSection::BuildKeys() //override
 {
-    TArray<FFrameTime> keys;
-
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
-
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
-    {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
-
-        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    return keys;
-}
-
-static
-TArray<FFrameTime>
-FindCameraTransformKeysRecursive( UMovieSceneCinematicBoardSection* iBoardSection )
-{
-    TArray<FFrameTime> keys;
-
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
-
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
-    {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
-
-        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    // if we are on a board subsequence
-    if( innerMovieSceneSequence->IsA<UBoardSequence>() )
-    {
-        UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
-        if( !innerMovieScene )
-            return keys;
-
-        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-        if( !board_track )
-            return keys;
-
-        TArray<FFrameTime> subkeys;
-        for( auto section : board_track->GetAllSections() )
-        {
-            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-            TArray<FFrameTime> section_keys;
-            section_keys = FindCameraTransformKeysRecursive( board_section );
-
-            subkeys.Append( section_keys );
-        }
-
-        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    return keys;
+    FKeyThumbnailSection::BuildKeys();
+    BuildCameraTransformKeys();
+    BuildPlaneTransformsKeys();
+    BuildPlaneMaterialsKeys();
 }
 
 void
 FCinematicBoardSection::BuildThumbnailKeys() //override
 {
-    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
-
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mThumbnailKeys.Empty( mThumbnailKeys.Num() );
-
-    TArray<FFrameTime> keys_as_frame = FindCameraTransformKeysRecursive( BoardSection );
-    mThumbnailKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+    mThumbnailKeys = CinematicBoardSectionKeysHelpers::BuildThumbnailKeys( GetSubSectionObject() );
 }
 
 TArray<double>
@@ -392,14 +233,9 @@ FCinematicBoardSection::GetThumbnailKeys() const //override
 void
 FCinematicBoardSection::BuildCameraTransformKeys()
 {
-    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
-
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mCameraTransformKeys.Empty( mCameraTransformKeys.Num() );
-
-    TArray<FFrameTime> keys_as_frame = FindCameraTransformKeys( BoardSection );
-    mCameraTransformKeys = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
+    mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformKeys( GetSubSectionObject() );
 }
 
 TArray<double>
@@ -408,185 +244,37 @@ FCinematicBoardSection::GetCameraTransformKeys() const
     return mCameraTransformKeys;
 }
 
-static
-TArray<FFrameTime>
-FindPlaneTransformKeys( UMovieSceneCinematicBoardSection* iBoardSection, FMovieScenePossessable iPossessable )
-{
-    TArray<FFrameTime> keys;
-
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
-
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
-    {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetPlaneTransformKeys( innerMovieSceneSequence, iPossessable );
-
-        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    return keys;
-}
-
 void
 FCinematicBoardSection::BuildPlaneTransformsKeys()
 {
-    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
-
-    mPlaneTransformsKeys.Empty( mPlaneTransformsKeys.Num() );
-
-    TArray<FMovieScenePossessable> possessables = GetPlaneBindings();
-    for( auto possessable : possessables )
-    {
-        TArray<FFrameTime> keys_as_frame = FindPlaneTransformKeys( BoardSection, possessable );
-        mPlaneTransformsKeys.Add( possessable.GetGuid() ) = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
-    }
+    mPlaneTransformsKeys = CinematicBoardSectionKeysHelpers::BuildPlaneTransformsKeys( GetSubSectionObject(), *GetSequencer() );
 }
 
 TArray<double>
 FCinematicBoardSection::GetPlaneTransformKeys( FMovieScenePossessable iPossessable ) const
 {
+    if( !mPlaneTransformsKeys.Contains( iPossessable.GetGuid() ) )
+        return TArray<double>();
+
     return mPlaneTransformsKeys[iPossessable.GetGuid()];
-}
-
-static
-TArray<FFrameTime>
-FindPlaneMaterialKeys( UMovieSceneCinematicBoardSection* iBoardSection, FMovieScenePossessable iPossessable )
-{
-    TArray<FFrameTime> keys;
-
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection->GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
-
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
-    {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetPlaneMaterialKeys( innerMovieSceneSequence, iPossessable );
-
-        keys = SectionsHelpersConvert::InnerToOuter( iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    return keys;
 }
 
 void
 FCinematicBoardSection::BuildPlaneMaterialsKeys()
 {
-    UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section );
-
-    mPlaneMaterialsKeys.Empty( mPlaneMaterialsKeys.Num() );
-
-    TArray<FMovieScenePossessable> possessables = GetPlaneBindings();
-    for( auto possessable : possessables )
-    {
-        TArray<FFrameTime> keys_as_frame = FindPlaneMaterialKeys( BoardSection, possessable );
-        mPlaneMaterialsKeys.Add( possessable.GetGuid() ) = SectionsHelpersConvert::FrameToSecond( Section, keys_as_frame );
-    }
+    mPlaneMaterialsKeys = CinematicBoardSectionKeysHelpers::BuildPlaneMaterialsKeys( GetSubSectionObject(), *GetSequencer() );
 }
 
 TArray<double>
 FCinematicBoardSection::GetPlaneMaterialKeys( FMovieScenePossessable iPossessable ) const
 {
+    if( !mPlaneMaterialsKeys.Contains( iPossessable.GetGuid() ) )
+        return TArray<double>();
+
     return mPlaneMaterialsKeys[iPossessable.GetGuid()];
 }
 
-void
-FCinematicBoardSection::BuildKeys() //override
-{
-    FKeyThumbnailSection::BuildKeys();
-    BuildCameraTransformKeys();
-    BuildPlaneTransformsKeys();
-    BuildPlaneMaterialsKeys();
-}
-
 //---
-
-int
-FCinematicBoardSection::GetMaxPlaneBindings() const
-{
-    UMovieSceneTrack* track = GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>();
-
-    int count = 0;
-    for( auto section : track->GetAllSections() )
-    {
-        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-        TArray<FMovieScenePossessable> bindings = GetPlaneBindings( *subsection );
-
-        count = FMath::Max( count, bindings.Num() );
-    }
-
-    return count;
-}
-
-TArray<FMovieScenePossessable>
-FCinematicBoardSection::GetPlaneBindings() const
-{
-    return GetPlaneBindings( GetSubSectionObject() );
-}
-
-TArray<FMovieScenePossessable>
-FCinematicBoardSection::GetPlaneBindings( const UMovieSceneSubSection& iSection ) const
-{
-    TArray<FMovieScenePossessable> bindings;
-
-    FInnerSequenceResult result = GetInnerSequenceID( &iSection );
-    if( !result.IsValid() )
-        return bindings;
-
-    FillInnerSequenceResult( result );
-    if( !result.IsFilled() )
-        return bindings;
-
-    AStaticMeshActor* plane = nullptr;
-    for( int i = 0; i < result.mInnerMovieScene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable possessable = result.mInnerMovieScene->GetPossessable( i );
-
-        for( auto Object : GetSequencer()->FindBoundObjects( possessable.GetGuid(), result.mInnerSequenceID ) )
-        {
-            plane = Cast<AStaticMeshActor>( Object.Get() );
-            if( plane )
-                bindings.Add( possessable );
-        }
-    }
-
-    return bindings;
-}
-
-FMovieScenePossessable
-FCinematicBoardSection::GetCameraBinding() const
-{
-    FMovieScenePossessable binding;
-
-    FInnerSequenceResult result = GetInnerSequenceID();
-    if( !result.IsValid() )
-        return binding;
-
-    FillInnerSequenceResult( result );
-    if( !result.IsFilled() )
-        return binding;
-
-    ACineCameraActor* camera = nullptr;
-    for( int i = 0; i < result.mInnerMovieScene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable possessable = result.mInnerMovieScene->GetPossessable( i );
-
-        for( auto Object : GetSequencer()->FindBoundObjects( possessable.GetGuid(), result.mInnerSequenceID ) )
-        {
-            camera = Cast<ACineCameraActor>( Object.Get() );
-            if( camera )
-                return possessable;
-        }
-    }
-
-    return binding;
-}
 
 TSharedRef<SWidget>
 FCinematicBoardSection::GenerateSectionWidget()

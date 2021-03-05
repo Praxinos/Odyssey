@@ -10,7 +10,7 @@
 
 //static
 TArray<FFrameTime>
-SectionsHelpersConvert::InnerToOuter( UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
+SectionsHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
 {
     TArray<FFrameTime> converted_keys;
 
@@ -26,7 +26,7 @@ SectionsHelpersConvert::InnerToOuter( UMovieSceneSubSection* iOuterSection, TArr
 
 //static
 TArray<double>
-SectionsHelpersConvert::FrameToSecond( UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys )
+SectionsHelpersConvert::FrameToSecond( const UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys )
 {
     TArray<double> second_keys;
 

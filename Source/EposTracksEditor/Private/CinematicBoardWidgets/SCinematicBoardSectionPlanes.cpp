@@ -6,6 +6,7 @@
 #include "Brushes/SlateColorBrush.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionPlanes"
 
@@ -388,7 +389,6 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         SAssignNew( mWidgetPlaneList, SListView<TSharedRef<FMovieScenePossessable>> )
         .ListItemsSource( &mPossessables )
         .OnGenerateRow( this, &SCinematicBoardSectionPlanes::MakePlaneRow )
-        //.OnMouseButtonClick( this, &SOdysseyAboutScreen::OnListViewButtonClicked )
         .SelectionMode( ESelectionMode::None )
     ];
 
@@ -429,7 +429,7 @@ SCinematicBoardSectionPlanes::Tick( const FGeometry& AllottedGeometry, const dou
 
     if( mNeedRebuildPlaneList && mBoardSection.IsValid() )
     {
-        TArray<FMovieScenePossessable> possessables( mBoardSection.Pin()->GetPlaneBindings() );
+        TArray<FMovieScenePossessable> possessables( CinematicBoardSectionBindingHelpers::GetPlaneBindings( mBoardSection.Pin()->GetSubSectionObject(), *mBoardSection.Pin()->GetSequencer() ) );
 
         mPossessables.Empty();
 
@@ -438,14 +438,15 @@ SCinematicBoardSectionPlanes::Tick( const FGeometry& AllottedGeometry, const dou
         // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
         //int max_planes = possessables.Num();
 
-        int max_planes = mBoardSection.Pin()->GetMaxPlaneBindings();
+        int max_planes = CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( *mBoardSection.Pin()->GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>(), *mBoardSection.Pin()->GetSequencer() );
         for( int i = 0; i < max_planes; i++ )
         {
             mPossessables.Add( MakeShared<FMovieScenePossessable>( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() ) );
         }
 
         if( mWidgetPlaneList )
-            mWidgetPlaneList->RebuildList();
+            mWidgetPlaneList->RequestListRefresh();
+            //mWidgetPlaneList->RebuildList();
 
         mNeedRebuildPlaneList = false;
     }

@@ -18,6 +18,7 @@ class FTrackEditorThumbnailPool;
 class SCinematicBoardSectionLayout;
 class SCinematicBoardSectionTitle;
 class UMovieSceneCinematicBoardSection;
+struct FInnerSequenceData;
 
 /**
  * Board section, which paints and ticks the appropriate section.
@@ -90,44 +91,7 @@ private:
     //void AddTakesMenu( FMenuBuilder& ioMenuBuilder );
 
 private:
-    // Store data about a subsequence using the hierarchy to get camera/planes/...
-    struct FInnerSequenceResult
-    {
-        FInnerSequenceResult();
-        FInnerSequenceResult( const FMovieSceneSequenceID& iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer );
-
-        bool IsValid() const;
-        bool IsFilled() const;
-
-        const FMovieSceneSequenceID             mInnerSequenceID;
-        const FMovieSceneSequenceHierarchy*     mHierarchy;
-        IMovieScenePlayer*                      mPlayer;
-
-        const FMovieSceneSequenceHierarchyNode* mNode;
-        const FMovieSceneSubSequenceData*       mSubData;
-        UMovieSceneSequence*                    mInnerMovieSceneSequence;
-        UMovieScene*                            mInnerMovieScene;
-    };
-
-    FInnerSequenceResult GetInnerSequenceID( const UMovieSceneSubSection* iSubSection = nullptr ) const;
-    void FillInnerSequenceResult( FInnerSequenceResult& iInnerSequenceResult ) const;
-
-    UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceResult iInnerSequenceResult );
-
-private:
-    /** Get all (static mesh) possessables inside the given section
-        This is used by GetMaxPlaneBindings() which loops over all sections in the track
-        to get section with the max number of planes
-    */
-    TArray<FMovieScenePossessable> GetPlaneBindings( const UMovieSceneSubSection& iSection ) const;
-
-public:
-    /** Get all (static mesh) possessables inside the current subsection */
-    TArray<FMovieScenePossessable> GetPlaneBindings() const;
-    /** Get the camera possessable inside the current subsection */
-    FMovieScenePossessable GetCameraBinding() const;
-    /** Get the maximum number of planes inside all subsections of the current track */
-    int GetMaxPlaneBindings() const;
+    UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceData& iInnerSequenceData );
 
 private:
     TSharedPtr<SCinematicBoardSectionLayout> mWidgetLayout;
