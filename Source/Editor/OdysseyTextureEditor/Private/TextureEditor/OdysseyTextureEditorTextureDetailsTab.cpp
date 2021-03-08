@@ -16,7 +16,7 @@ FOdysseyTextureEditorTextureDetailsTab::~FOdysseyTextureEditorTextureDetailsTab(
 }
 
 FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyTextureEditor_TextureDetails"),
+	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_TextureDetails"),
                             LOCTEXT( "OdysseyTextureEditorTextureDetailsTab", "Texture Details" ),
                             FSlateIcon( "OdysseyStyle", "TextureEditor.Layers16" ))
     , mEditor(iEditor)

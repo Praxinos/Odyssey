@@ -12,7 +12,6 @@
 #include "Toolkits/AssetEditorToolkit.h"
 
 #include "OdysseyPainterEditorSettings.h"
-#include "OdysseyPainterEditorToolkit.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
 

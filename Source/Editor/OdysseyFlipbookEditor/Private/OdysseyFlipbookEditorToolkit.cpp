@@ -15,8 +15,8 @@ FOdysseyFlipbookEditorToolkit::~FOdysseyFlipbookEditorToolkit()
 {
 }
 
-FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit() :
-	FOdysseyPainterEditorToolkit( TEXT("OdysseyFlipbookEditorApp") )
+FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit(TSharedPtr<FOdysseyFlipbookEditor> iEditor) :
+	FOdysseyAssetEditorToolkit( TEXT("OdysseyFlipbookEditorApp"), iEditor )
 {
 }
 
@@ -44,34 +44,6 @@ FString
 FOdysseyFlipbookEditorToolkit::GetWorldCentricTabPrefix() const
 {
     return LOCTEXT( "WorldCentricTabPrefix", "Flipbook" ).ToString();
-}
-
-TArray<UObject*>
-FOdysseyFlipbookEditorToolkit::GetAllEditedObjects()
-{
-	TArray<UObject*> objects;
-	objects.Add(mEditedObject);
-
-
-	UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(mEditedObject);
-	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(flipbook));
-
-	for (int32 index = 0; index < flipbook->GetNumKeyFrames(); ++index)
-	{
-		UPaperSprite* sprite = flipbookWrapper->GetKeyframeSprite(index);
-        if (!sprite)
-            continue;
-
-		objects.Add(sprite);
-
-		UTexture2D* texture = flipbookWrapper->GetKeyframeTexture(index);
-        if (!texture)
-            continue;
-            
-        objects.Add(texture);
-	}
-
-	return objects;
 }
 
 #undef LOCTEXT_NAMESPACE

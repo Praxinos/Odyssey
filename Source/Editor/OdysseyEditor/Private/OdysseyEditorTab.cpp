@@ -1,17 +1,17 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 
 /////////////////////////////////////////////////////
-// FOdysseyPainterEditorTab
+// FOdysseyEditorTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorTab::~FOdysseyPainterEditorTab()
+FOdysseyEditorTab::~FOdysseyEditorTab()
 {
 }
 
-FOdysseyPainterEditorTab::FOdysseyPainterEditorTab(FName iID, FText iDisplayName, FSlateIcon iIcon)
+FOdysseyEditorTab::FOdysseyEditorTab(FName iID, FText iDisplayName, FSlateIcon iIcon)
 	: mID(iID)
 	, mDisplayName(iDisplayName)
 	, mIcon(iIcon)
@@ -23,7 +23,7 @@ FOdysseyPainterEditorTab::FOdysseyPainterEditorTab(FName iID, FText iDisplayName
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditorTab::Init()
+FOdysseyEditorTab::Init()
 {
 	mWidget = CreateWidget();
 }
@@ -32,17 +32,17 @@ FOdysseyPainterEditorTab::Init()
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyPainterEditorTab::BindShortcuts()
+FOdysseyEditorTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
 }
 
 void
-FOdysseyPainterEditorTab::OnToolkitInitialized()
+FOdysseyEditorTab::OnToolkitInitialized(FBaseToolkit* iToolkit)
 {
 }
 
 void
-FOdysseyPainterEditorTab::FillExtender(TSharedPtr<FExtender>& ioExtender)
+FOdysseyEditorTab::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
 {
 }
 
@@ -50,7 +50,7 @@ FOdysseyPainterEditorTab::FillExtender(TSharedPtr<FExtender>& ioExtender)
 //--------------------------------------------------------------------- Spawner callback
 
 TSharedRef< SDockTab >
-FOdysseyPainterEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
+FOdysseyEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 {
     check( iArgs.GetTabId() == mID );
 
@@ -65,25 +65,25 @@ FOdysseyPainterEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 //------------------------------------------------------------------------------ Getters
 
 const FName&
-FOdysseyPainterEditorTab::ID() const
+FOdysseyEditorTab::ID() const
 {
 	return mID;
 }
 
 const FText&
-FOdysseyPainterEditorTab::DisplayName() const
+FOdysseyEditorTab::DisplayName() const
 {
 	return mDisplayName;
 }
 
 const FSlateIcon&
-FOdysseyPainterEditorTab::Icon() const
+FOdysseyEditorTab::Icon() const
 {
 	return mIcon;
 }
 
 const TSharedPtr<SWidget>&
-FOdysseyPainterEditorTab::Widget() const
+FOdysseyEditorTab::Widget() const
 {
 	return mWidget;
 }

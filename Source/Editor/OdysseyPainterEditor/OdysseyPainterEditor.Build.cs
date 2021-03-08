@@ -36,6 +36,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "Projects",
                 "OdysseyStyle",
                 "OdysseyBrush",
+                "OdysseyEditor",
                 "OdysseyWidgets",
                 "OdysseyImaging",
                 "OdysseyPaintEngine",

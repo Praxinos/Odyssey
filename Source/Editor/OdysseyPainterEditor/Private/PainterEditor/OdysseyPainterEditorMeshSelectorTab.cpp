@@ -17,7 +17,7 @@ FOdysseyPainterEditorMeshSelectorTab::~FOdysseyPainterEditorMeshSelectorTab()
 }
 
 FOdysseyPainterEditorMeshSelectorTab::FOdysseyPainterEditorMeshSelectorTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_MeshSelector"),
+	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_MeshSelector"),
                             LOCTEXT( "OdysseyPainterEditorMeshSelectorTab", "Mesh Selector" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh16" ))
     , mEditor(iEditor)
@@ -26,7 +26,7 @@ FOdysseyPainterEditorMeshSelectorTab::FOdysseyPainterEditorMeshSelectorTab(FOdys
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyPainterEditorTab interface
+//--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorMeshSelectorTab::CreateWidget()

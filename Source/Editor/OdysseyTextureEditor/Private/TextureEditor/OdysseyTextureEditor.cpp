@@ -5,7 +5,6 @@
 
 #include "OdysseyTextureEditorGUI.h"
 
-#include "OdysseyPainterEditorToolkit.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
@@ -24,16 +23,16 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
     mTextureWrapper.OnPostTextureChangeDelegate().RemoveAll(this);
 }
 
-FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyPainterEditor(iToolkit),
+FOdysseyTextureEditor::FOdysseyTextureEditor() :
+	FOdysseyPainterEditor(),
 	mTextureWrapper(nullptr),
 	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr)
 {
 }
 
-FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyPainterEditor(iToolkit),
+FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture) :
+	FOdysseyPainterEditor(),
     mTextureWrapper( iTexture ),
 	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr)
@@ -166,6 +165,12 @@ FOdysseyTextureEditor::OnCloseRequested()
 
     mTextureWrapper.Texture(nullptr);
 	return true;
+}
+
+UObject*
+FOdysseyTextureEditor::GetPrimaryEditedObject()
+{
+    return Texture();
 }
 
 //--------------------------------------------------------------------------------------

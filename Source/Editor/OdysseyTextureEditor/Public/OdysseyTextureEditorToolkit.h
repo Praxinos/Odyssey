@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorToolkit.h"
+#include "OdysseyAssetEditorToolkit.h"
 
 #include <ULIS3>
 
@@ -17,12 +17,12 @@ class UTexture;
  * Implements an Editor toolkit for textures.
  */
 class FOdysseyTextureEditorToolkit
-    : public FOdysseyPainterEditorToolkit
+    : public FOdysseyAssetEditorToolkit
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorToolkit();
-    FOdysseyTextureEditorToolkit();
+    FOdysseyTextureEditorToolkit(TSharedPtr<FOdysseyTextureEditor> iEditor);
 
 protected:
 	virtual void OpenAsset(UObject* iObject) override;

@@ -17,7 +17,7 @@ FOdysseyPainterEditorStrokeOptionsTab::~FOdysseyPainterEditorStrokeOptionsTab()
 }
 
 FOdysseyPainterEditorStrokeOptionsTab::FOdysseyPainterEditorStrokeOptionsTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_StrokeOptions"),
+	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_StrokeOptions"),
                             LOCTEXT( "OdysseyPainterEditorStrokeOptionsTab", "Stroke Options" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.StrokeOptions16" ))
     , mEditor(iEditor)
@@ -25,7 +25,7 @@ FOdysseyPainterEditorStrokeOptionsTab::FOdysseyPainterEditorStrokeOptionsTab(FOd
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyPainterEditorTab interface
+//--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorStrokeOptionsTab::CreateWidget()

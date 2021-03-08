@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
 
 class FOdysseyPainterEditor;
@@ -11,7 +11,7 @@ class SOdysseySurfaceViewport;
 class IOdysseySurface;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorViewportTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -19,9 +19,9 @@ public:
     FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyPainterEditorTab interface
+    // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
     // Public Getters

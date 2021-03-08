@@ -18,9 +18,8 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
     delete mUndoHistory;
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit)
-    : mToolkit(iToolkit)
-    , mUndoHistory( new FOdysseyUndoHistory() )
+FOdysseyPainterEditor::FOdysseyPainterEditor()
+    : mUndoHistory( new FOdysseyUndoHistory() )
     , mPaintEngine( new FOdysseyPaintEngine(mUndoHistory) )
 	, mPaintColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) )
     , mDrawBrushPreview( true )
@@ -31,13 +30,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToo
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyPainterEditor::Init()
-{
-    InitData();
-    InitGUI();
-}
-
-void
 FOdysseyPainterEditor::InitData()
 {
     //Set Default Brush
@@ -46,12 +38,6 @@ FOdysseyPainterEditor::InitData()
 
     mPaintEngine->AddDrawingState(drawingState);
     mPaintEngine->Brush(settings.BrushDefaults.DefaultBrush);
-}
-
-void
-FOdysseyPainterEditor::InitGUI()
-{
-    GetGUI()->Init();
 }
 
 //--------------------------------------------------------------------------------------
@@ -81,12 +67,6 @@ FOdysseyPainterEditor::PaintColor() const
 	return mPaintColor;
 }
 
-TSharedPtr<FOdysseyPainterEditorToolkit>
-FOdysseyPainterEditor::Toolkit()
-{
-    return mToolkit.Pin();
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -100,37 +80,4 @@ void
 FOdysseyPainterEditor::PaintColor(::ul3::FPixelValue iColor)
 {
 	mPaintColor = iColor;
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Methods
-
-void
-FOdysseyPainterEditor::OnToolkitInitialized()
-{
-    GetGUI()->OnToolkitInitialized();
-}
-
-bool
-FOdysseyPainterEditor::OnCloseRequested()
-{
-    return true;
-}
-
-void
-FOdysseyPainterEditor::FillExtender(TSharedPtr<FExtender>& ioExtender)
-{
-	return GetGUI()->FillExtender(ioExtender);
-}
-
-TSharedRef<FTabManager::FLayout>
-FOdysseyPainterEditor::GetLayout()
-{
-    return GetGUI()->GetLayout();
-}
-
-void
-FOdysseyPainterEditor::UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
-{
-    GetGUI()->UnregisterTabSpawners(iTabManager);
 }

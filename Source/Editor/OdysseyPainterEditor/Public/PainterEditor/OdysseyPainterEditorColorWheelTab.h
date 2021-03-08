@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 
 class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorColorWheelTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -16,7 +16,7 @@ public:
     FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyPainterEditorTab interface
+    // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 protected:

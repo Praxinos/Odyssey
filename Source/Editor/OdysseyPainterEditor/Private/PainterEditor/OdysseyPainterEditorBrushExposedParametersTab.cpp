@@ -17,7 +17,7 @@ FOdysseyPainterEditorBrushExposedParametersTab::~FOdysseyPainterEditorBrushExpos
 }
 
 FOdysseyPainterEditorBrushExposedParametersTab::FOdysseyPainterEditorBrushExposedParametersTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_BrushExposedParameters"),
+	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_BrushExposedParameters"),
                             LOCTEXT( "OdysseyPainterEditorBrushExposedParametersTab", "Brush Parameters" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
     , mEditor(iEditor)
@@ -25,7 +25,7 @@ FOdysseyPainterEditorBrushExposedParametersTab::FOdysseyPainterEditorBrushExpose
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyPainterEditorTab interface
+//--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorBrushExposedParametersTab::CreateWidget()

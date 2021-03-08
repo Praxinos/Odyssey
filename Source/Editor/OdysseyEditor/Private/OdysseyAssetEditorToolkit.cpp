@@ -1,0 +1,108 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#include "OdysseyAssetEditorToolkit.h"
+
+#include "OdysseyEditor.h"
+
+#define LOCTEXT_NAMESPACE "OdysseyAssetEditorToolkit"
+
+/////////////////////////////////////////////////////
+// FOdysseyAssetEditorToolkit
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+FOdysseyAssetEditorToolkit::~FOdysseyAssetEditorToolkit()
+{
+}
+
+FOdysseyAssetEditorToolkit::FOdysseyAssetEditorToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor) :
+    TOdysseyToolkit<FAssetEditorToolkit>(iAppIdentifier, iEditor)
+{
+}
+
+void
+FOdysseyAssetEditorToolkit::Init()
+{
+    mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnAddEditedObject);
+    mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnRemoveEditedObject);
+
+    TArray<UObject*> editedObjects = mEditor->GetEditedObjects();
+    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->GetLayout(), true, false, editedObjects);
+    InitExtender();
+
+    //Finish Initialization
+    TOdysseyToolkit<FAssetEditorToolkit>::Init();
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------- FAssetEditorToolkit interface
+
+void
+FOdysseyAssetEditorToolkit::SaveAssetAs_Execute()
+{
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+    FDelegateHandle openAssetHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddRaw(this, &FOdysseyAssetEditorToolkit::OpenAsset );
+
+	FAssetEditorToolkit::SaveAssetAs_Execute();
+
+	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
+}
+
+bool
+FOdysseyAssetEditorToolkit::OnRequestClose()
+{
+    return mEditor->OnCloseRequested();
+}
+
+void
+FOdysseyAssetEditorToolkit::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
+{
+    FAssetEditorToolkit::RegisterTabSpawners(iTabManager);
+    WorkspaceMenuCategory = mEditor->RegisterTabSpawners(iTabManager);
+}
+
+void
+FOdysseyAssetEditorToolkit::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
+{
+    FAssetEditorToolkit::UnregisterTabSpawners(iTabManager);
+	mEditor->UnregisterTabSpawners(iTabManager);
+}
+
+bool
+FOdysseyAssetEditorToolkit::CanReimport() const
+{
+	return false;
+}
+
+bool
+FOdysseyAssetEditorToolkit::CanReimport(UObject* EditingObject) const
+{
+	return false;
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- Commands building
+
+void
+FOdysseyAssetEditorToolkit::InitExtender()
+{
+	TSharedPtr<FExtender> extender = MakeShareable(new FExtender());
+    mEditor->FillExtender(this, extender);
+    AddMenuExtender(extender);
+    AddToolbarExtender(extender);
+    RegenerateMenusAndToolbars(); //TODO: check if really needed
+}
+
+void
+FOdysseyAssetEditorToolkit::OnAddEditedObject(UObject* iObject)
+{
+    AddEditingObject(iObject);
+}
+
+void
+FOdysseyAssetEditorToolkit::OnRemoveEditedObject(UObject* iObject)
+{
+    AddEditingObject(iObject);
+}
+
+#undef LOCTEXT_NAMESPACE

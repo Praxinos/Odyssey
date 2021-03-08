@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorTextureDetailsTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction

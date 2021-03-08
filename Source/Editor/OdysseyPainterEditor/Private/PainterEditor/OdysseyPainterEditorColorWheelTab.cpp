@@ -17,7 +17,7 @@ FOdysseyPainterEditorColorWheelTab::~FOdysseyPainterEditorColorWheelTab()
 }
 
 FOdysseyPainterEditorColorWheelTab::FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_ColorSelector"), //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_ColorSelector"), //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
                             LOCTEXT( "OdysseyPainterEditorColorWheelTab", "Color Wheel" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel_16" ))
     , mEditor(iEditor)
@@ -25,7 +25,7 @@ FOdysseyPainterEditorColorWheelTab::FOdysseyPainterEditorColorWheelTab(FOdysseyP
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyPainterEditorTab interface
+//--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorColorWheelTab::CreateWidget()

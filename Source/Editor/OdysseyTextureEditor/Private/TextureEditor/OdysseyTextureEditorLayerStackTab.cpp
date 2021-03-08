@@ -18,7 +18,7 @@ FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
 }
 
 FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyTextureEditor_LayerStack"),
+	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_LayerStack"),
                             LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" ),
                             FSlateIcon( "OdysseyStyle", "TextureEditor.Layers16" ))
     , mEditor(iEditor)
@@ -37,9 +37,9 @@ FOdysseyTextureEditorLayerStackTab::CreateWidget()
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::BindShortcuts()
+FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
@@ -54,12 +54,12 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts()
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::FillExtender(TSharedPtr<FExtender>& ioExtender)
+FOdysseyTextureEditorLayerStackTab::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
 {
     ioExtender->AddMenuExtension(
         "FileLoadAndSave",
         EExtensionHook::After,
-		mEditor->Toolkit()->GetToolkitCommands(),
+		iToolkit->GetToolkitCommands(),
         FMenuExtensionDelegate::CreateRaw( this, &FOdysseyTextureEditorLayerStackTab::ExtendMenuFile ) );
 }
 

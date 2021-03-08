@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 
 class FOdysseyPainterEditor;
 class SOdysseyStrokeOptions;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorStrokeOptionsTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -17,7 +17,7 @@ public:
     FOdysseyPainterEditorStrokeOptionsTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyPainterEditorTab interface
+    // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 protected:

@@ -19,7 +19,7 @@ FOdysseyPainterEditorToolsTab::~FOdysseyPainterEditorToolsTab()
 }
 
 FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_Tools"),
+	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_Tools"),
                             LOCTEXT( "OdysseyPainterEditorToolsTab", "Tools" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
     , mEditor(iEditor)
@@ -27,7 +27,7 @@ FOdysseyPainterEditorToolsTab::FOdysseyPainterEditorToolsTab(FOdysseyPainterEdit
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyPainterEditorTab interface
+//--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolsTab::CreateWidget()
@@ -116,9 +116,9 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 }
 
 void
-FOdysseyPainterEditorToolsTab::BindShortcuts()
+FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolsTab::__VA_ARGS__ ), FCanExecuteAction() );
