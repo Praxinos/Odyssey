@@ -56,6 +56,8 @@ public:
 public:
     /** Get the camera possessable inside the current subsection */
     static FMovieScenePossessable GetCameraBinding( const UMovieSceneSubSection& iSection, ISequencer& iSequencer );
+
+    static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( UMovieSceneSequence* iInnerSequence, ISequencer& iSequencer );
 };
 
 //---
@@ -65,14 +67,13 @@ class CinematicBoardSectionKeysHelpers
 public:
     static TArray<double> BuildThumbnailKeys( const UMovieSceneSubSection& iSubSection );
 
-    static TArray<double> BuildCameraTransformKeys( const UMovieSceneSubSection& iSubSection );
+    static TSharedPtr<FMovieSceneChannelProxy> BuildCameraTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
 
     static TMap<FGuid, TArray<double>> BuildPlaneTransformsKeys( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
 
     static TMap<FGuid, TArray<double>> BuildPlaneMaterialsKeys( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
 
 private:
-    static TArray<FFrameTime> FindCameraTransformKeys( const UMovieSceneSubSection& iSubSection );
     static TArray<FFrameTime> FindCameraTransformKeysRecursive( const UMovieSceneSubSection& iSubSection );
     static TArray<FFrameTime> FindPlaneTransformKeys( const UMovieSceneSubSection& iSubSection, FMovieScenePossessable iPossessable );
     static TArray<FFrameTime> FindPlaneMaterialKeys( const UMovieSceneSubSection& iSubSection, FMovieScenePossessable iPossessable );

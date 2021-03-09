@@ -235,11 +235,11 @@ FCinematicBoardSection::BuildCameraTransformKeys()
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformKeys( GetSubSectionObject() );
+    mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( GetSubSectionObject(), *GetSequencer() );
 }
 
-TArray<double>
-FCinematicBoardSection::GetCameraTransformKeys() const
+TSharedPtr<FMovieSceneChannelProxy>
+FCinematicBoardSection::GetCameraTransformChannelProxy() const
 {
     return mCameraTransformKeys;
 }

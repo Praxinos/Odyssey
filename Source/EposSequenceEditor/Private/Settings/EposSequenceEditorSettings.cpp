@@ -8,13 +8,13 @@ UEposSequenceEditorSettings::UEposSequenceEditorSettings()
 }
 
 FBoardSettings::FBoardSettings()
-    : DefaultTickFrameRate( 24000, 1000 )
+    : DefaultTickFrameRate( 24000, 1 )
     , DefaultDisplayFrameRate( 24, 1 )
 {
 }
 
 FShotSettings::FShotSettings()
-    : DefaultTickFrameRate( 24000, 1000 )
+    : DefaultTickFrameRate( 24000, 1 )
     , DefaultDisplayFrameRate( 24, 1 )
 {
 }

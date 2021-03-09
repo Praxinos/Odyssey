@@ -150,6 +150,8 @@ FInnerSequenceData::Fill()
 }
 
 //---
+//---
+//---
 
 //static
 int
@@ -235,6 +237,47 @@ CinematicBoardSectionBindingHelpers::GetCameraBinding( const UMovieSceneSubSecti
     return binding;
 }
 
+//static
+TArray<UMovieScene3DTransformSection*>
+CinematicBoardSectionBindingHelpers::GetCameraTransformSections( UMovieSceneSequence* iInnerSequence, ISequencer& iSequencer )
+{
+    TArray<UMovieScene3DTransformSection*> sections;
+
+    UMovieScene* inner_moviescene = iInnerSequence ? iInnerSequence->GetMovieScene() : nullptr;
+    if( !inner_moviescene )
+        return sections;
+
+    FMovieScenePossessable possessable_camera;
+    for( int i = 0; i < inner_moviescene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = inner_moviescene->GetPossessable( i );
+
+        for( auto Object : iInnerSequence->LocateBoundObjects( possessable.GetGuid(), iSequencer.GetPlaybackContext() ) ) //TODO: is it correct or use iSequencer.FindBoundObjects(...) instead ?
+        {
+            ACineCameraActor* camera = Cast<ACineCameraActor>( Object );
+            if( camera )
+                possessable_camera = possessable;
+        }
+
+        if( possessable_camera.GetGuid().IsValid() )
+            break;
+    }
+
+    if( !possessable_camera.GetGuid().IsValid() )
+        return sections;
+
+    UMovieSceneTrack* track = inner_moviescene->FindTrack<UMovieScene3DTransformTrack>( possessable_camera.GetGuid() );
+    if( !track )
+        return sections;
+
+    for( auto section : track->GetAllSections() )
+        sections.Add( Cast<UMovieScene3DTransformSection>( section ) );
+
+    return sections;
+}
+
+//---
+//---
 //---
 
 //static
@@ -295,34 +338,56 @@ CinematicBoardSectionKeysHelpers::BuildThumbnailKeys( const UMovieSceneSubSectio
 }
 
 //static
-TArray<FFrameTime>
-CinematicBoardSectionKeysHelpers::FindCameraTransformKeys( const UMovieSceneSubSection& iBoardSection )
+TSharedPtr<FMovieSceneChannelProxy>
+CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer )
 {
-    TArray<FFrameTime> keys;
+    FMovieSceneChannelProxyData ChannelIndirection;
 
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection.GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
+    UMovieSceneSequence* inner_sequence = iSubSection.GetSequence();
 
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
+    //---
+
+    int sort = 0;
+
+    TArray<UMovieScene3DTransformSection*> camera_transform_sections = CinematicBoardSectionBindingHelpers::GetCameraTransformSections( inner_sequence, iSequencer );
+    int section_index = -1;
+    for( auto camera_transform_section : camera_transform_sections )
     {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
+        section_index++;
 
-        keys = SectionsHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
+        const FMovieSceneChannelEntry* FloatChannelEntry = camera_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
+        if( FloatChannelEntry )
+        {
+            TArrayView<FMovieSceneChannel* const>        FloatChannels = FloatChannelEntry->GetChannels();
+            TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
+            TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
 
-        return keys;
+            for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+            {
+                FMovieSceneChannelMetaData MetaDataEntry = MetaData[Index];
+                MetaDataEntry.bCanCollapseToTrack = false;
+                MetaDataEntry.SortOrder = sort++;
+                MetaDataEntry.DisplayText = FText::Format( FText::FromString( "{0} - {1}" ), MetaDataEntry.Group, MetaDataEntry.DisplayText, sort );
+                MetaDataEntry.Group = FText::Format( FText::FromString( "Camera.Section{0}" ), section_index ); // Must be after MetaDataEntry.DisplayText because it used the old MetaDataEntry.Group
+                //MetaDataEntry.Color = FLinearColor( 0, 0, 1, 0.8 );
+
+                //UMovieScene3DTransformTrack* track = camera_transform_section->GetTypedOuter<UMovieScene3DTransformTrack>();
+                //FGuid id = track->FindObjectBindingGuid();
+                //FMovieSceneBinding* binding = inner_sequence->GetMovieScene()->FindBinding( id );
+                //UE_LOG( LogTemp, Warning, TEXT( "%s: group: %s - label: %s - index: %d - sort: %d" ), *binding->GetName(), *MetaDataEntry.Group.ToString(), *MetaDataEntry.Name.ToString(), Index, sort );
+
+                ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaDataEntry, MetaDataExt[Index] );
+            }
+        }
+
+        // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+        // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+        //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+        //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
     }
 
-    return keys;
-}
-
-//static
-TArray<double>
-CinematicBoardSectionKeysHelpers::BuildCameraTransformKeys( const UMovieSceneSubSection& iSubSection )
-{
-    TArray<FFrameTime> keys_as_frame = FindCameraTransformKeys( iSubSection );
-    return SectionsHelpersConvert::FrameToSecond( &iSubSection, keys_as_frame );
+    TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+    return ChannelProxy;
 }
 
 //static
