@@ -31,6 +31,12 @@ protected:
     virtual void InitGUI();
 
 public:
+    // Undo
+    virtual void Undo();
+    virtual void Redo();
+    virtual void ClearUndo();
+
+public:
     // Getters
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
@@ -45,6 +51,7 @@ public:
 
 public:
     // Interface
+    virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender);
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager );

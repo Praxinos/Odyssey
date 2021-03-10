@@ -56,6 +56,7 @@ void
 TOdysseyToolkit<T>::Initialize()
 {
     mEditor->OnToolkitInitialized(this);
+    mEditor->BindShortcuts(this);
 }
 
 //--------------------------------------------------------------------------------------

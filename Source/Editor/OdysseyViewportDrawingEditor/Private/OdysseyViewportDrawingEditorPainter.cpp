@@ -84,9 +84,9 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter(TShar
 void FOdysseyViewportDrawingEditorPainter::Initialize()
 {
 	//Create Data / View / Controller
-	TSharedPtr<FOdysseyViewportDrawingEditorData> data = MakeShareable(new FOdysseyViewportDrawingEditorData());
-	mWidget = MakeShareable(new SOdysseyViewportDrawingEditorGUI());
-	mController = MakeShareable(new FOdysseyViewportDrawingEditorController(data, mWidget));
+	// TSharedPtr<FOdysseyViewportDrawingEditorData> data = MakeShareable(new FOdysseyViewportDrawingEditorData());
+	// mWidget = MakeShareable(new SOdysseyViewportDrawingEditorGUI());
+	// mController = MakeShareable(new FOdysseyViewportDrawingEditorController(data, mWidget));
 
 	//Register commands
 	// RegisterTexturePaintCommands();
@@ -106,8 +106,8 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
 
 	//Initialize Data / View / Controller
     // mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
-    mWidget->Init(this);
-    mController->Init();
+    // mWidget->Init(this);
+    // mController->Init();
 
     //Select default brush
     //mController->GetGUI()->GetBrushSelector()->SelectBrush(LoadObject<UOdysseyBrush>(nullptr,TEXT("/Iliad/Brushes/Drawing_Tools/Penbrush1.Penbrush1")));
@@ -120,8 +120,8 @@ FOdysseyViewportDrawingEditorPainter::OnStylusInputChanged(TSharedPtr<IStylusInp
 
 void FOdysseyViewportDrawingEditorPainter::Finalize()
 {
-    mWidget.Reset(); mWidget = 0;
-    mController.Reset(); mController = 0; //Resetting the controller also reset the data inside it. Should work differently
+    // mWidget.Reset(); mWidget = 0;
+    // mController.Reset(); mController = 0; //Resetting the controller also reset the data inside it. Should work differently
 
     // UnregisterTexturePaintCommands();
 
@@ -176,7 +176,7 @@ UMeshPaintSettings* FOdysseyViewportDrawingEditorPainter::GetPainterSettings()
 
 TSharedPtr<class SWidget> FOdysseyViewportDrawingEditorPainter::GetWidget()
 {
-    return mWidget->GetMainWidget();
+    return mEditor->GetGUI()->GetWidget();
 }
 
 TSharedPtr<FUICommandList> FOdysseyViewportDrawingEditorPainter::GetUICommandList()
@@ -184,10 +184,10 @@ TSharedPtr<FUICommandList> FOdysseyViewportDrawingEditorPainter::GetUICommandLis
 	return mUICommandList;
 }
 
-TSharedPtr<FOdysseyViewportDrawingEditorController> FOdysseyViewportDrawingEditorPainter::GetController() const
+/* TSharedPtr<FOdysseyViewportDrawingEditorController> FOdysseyViewportDrawingEditorPainter::GetController() const
 {
     return mController;
-}
+} */
 
 const FHitResult FOdysseyViewportDrawingEditorPainter::GetHitResult(const FVector& iOrigin, const FVector& iDirection)
 {
@@ -294,7 +294,8 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 {
     mBeginPosition = FVector2D(0,0);
     mFocusedViewport = nullptr;
-    mController->GetData()->PaintEngine()->EndStroke();
+    mEditor->PaintEngine()->EndStroke();
+    //mController->GetData()->PaintEngine()->EndStroke();
     mIsGoingToDraw = false;
     
     //mPaintSettings->mTexturePaintSettings.mPaintTexture->MarkPackageDirty();
@@ -407,11 +408,13 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
 
 				    if (IsPainting())
 				    {
-					    mController->GetData()->PaintEngine()->PushStroke(mLastEvent);
+                        mEditor->PaintEngine()->PushStroke(mLastEvent);
+					    //mController->GetData()->PaintEngine()->PushStroke(mLastEvent);
 				    }
 				    else
 				    {
-					    mController->GetData()->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
+                        mEditor->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
+					    //mController->GetData()->PaintEngine()->BeginStroke(mLastEvent, mPreviousEvent);
 				    }
                 }
             }
@@ -910,7 +913,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mPaintingTexture2D = texture2D;
 
         mStrokeBufferTexture2D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->EditedBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
+        InitTextureWithBlockData(mEditor->PaintEngine()->EditedBlock(),mStrokeBufferTexture2D,TSF_BGRA8);
         mStrokeBufferTexture2D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         mStrokeBufferTexture2D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         mStrokeBufferTexture2D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
@@ -918,7 +921,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
         mStrokeBufferTexture2D->PostEditChange();
 
         mStrokeBufferTexture3D = NewObject<UTexture2D>(GetTransientPackage(),FName(),RF_Transient);
-        InitTextureWithBlockData(mController->GetData()->PaintEngine()->EditedBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
+        InitTextureWithBlockData(mEditor->PaintEngine()->EditedBlock(),mStrokeBufferTexture3D,TSF_BGRA8);
         mStrokeBufferTexture3D->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         mStrokeBufferTexture3D->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         mStrokeBufferTexture3D->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
@@ -982,7 +985,7 @@ void FOdysseyViewportDrawingEditorPainter::PaintMeshBased(const FHitResult& iHit
     // Create a canvas for the brush render target.
     FCanvas brushPaintCanvas(brushRenderTargetResource,nullptr,0,0,0,featureLevel);
 
-    InvalidateTextureFromData(mController->GetData()->PaintEngine()->PaintBlock(), mStrokeBufferTexture2D);
+    InvalidateTextureFromData(mEditor->PaintEngine()->PaintBlock(), mStrokeBufferTexture2D);
 
     // Parameters for brush paint
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
@@ -1517,12 +1520,12 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 		mPaintTargetData.Empty();
 	}
 
-    if( mController->GetData()->Texture() )
+    if( mEditor->Texture() )
     {
-        mController->GetData()->PaintEngine()->Tick();
-        FPaintTexture2DData* textureData = GetPaintTargetData(mController->GetData()->Texture());
+        mEditor->PaintEngine()->Tick();
+        FPaintTexture2DData* textureData = GetPaintTargetData(mEditor->Texture());
         if( textureData )
-            TexturePaintHelpers::CopyTextureToRenderTargetTexture(mController->GetData()->Texture(),textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+            TexturePaintHelpers::CopyTextureToRenderTargetTexture(mEditor->Texture(),textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
     }
 }
 
@@ -1633,12 +1636,12 @@ bool FOdysseyViewportDrawingEditorPainter::InputKey(FEditorViewportClient* InVie
                 //We can't change those shortcuts, but for accessibility, we have ctrl Z and ctrl Y working for Undo/redo for Iliad strokes
                 if(!IsPainting() && (InKey == EKeys::Z && (InEvent == IE_Pressed)) )
                 {
-                    mController->OnUndoIliad();
+                    mEditor->Undo();
                 }
 
                 if(!IsPainting() && (InKey == EKeys::Y && (InEvent == IE_Pressed)) )
                 {
-                    mController->OnRedoIliad();
+                    mEditor->Redo();
                 }
             }
         }
@@ -1695,7 +1698,7 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 			{
 				UTexture2D* texture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
 				UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-				if (texture != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+				if (texture != mEditor->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
 				{
 					if (i == 0)
 					{
@@ -1710,10 +1713,10 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 			}
 		}
 	}
-	else if (mController->GetData()->Texture() != mEditor->Texture())
+	else if (mEditor->Texture() != mEditor->Texture())
 	{
 		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-		if (mEditor->Texture() != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(mEditor->Texture(), true) != nullptr)
+		if (mEditor->Texture() != mEditor->Texture() && AssetEditorSubsystem->FindEditorForAsset(mEditor->Texture(), true) != nullptr)
 		{
 			mEditor->Texture(nullptr);
 			FText Title = LOCTEXT("TitleSelectedtextureAlreadyOpened", "Selected Texture Already Opened");
@@ -1724,7 +1727,7 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 				for (int i = 0; i < mPaintableTextures.Num(); i++)
 				{
 					UTexture2D* texture = Cast<UTexture2D>(mPaintableTextures[0].Texture);
-					if (texture != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+					if (texture != mEditor->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
 						continue;
 
 					mEditor->Texture(texture);
@@ -1733,7 +1736,7 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 			}
 		}
 	}
-	mController->OnEditedTextureChanged(mEditor->Texture());
+	//mController->OnEditedTextureChanged(mEditor->Texture());
 }
 
 void FOdysseyViewportDrawingEditorPainter::ResetPaintingState()

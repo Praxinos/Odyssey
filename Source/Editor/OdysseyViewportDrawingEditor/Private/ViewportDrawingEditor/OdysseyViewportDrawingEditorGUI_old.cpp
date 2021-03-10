@@ -3,7 +3,7 @@
 
 #include "OdysseyViewportDrawingEditorGUI_old.h"
 
-#include "PropertyEditorModule.h"
+/* #include "PropertyEditorModule.h"
 #include "IDetailsView.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/SBoxPanel.h"
@@ -91,7 +91,7 @@ void SOdysseyViewportDrawingEditorGUI::Init(FOdysseyViewportDrawingEditorPainter
         .OnSmoothingStrengthChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingStrengthChanged)
         .OnSmoothingEnabledChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingEnabledChanged)
         .OnSmoothingRealTimeChanged_Raw (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingRealTimeChanged)
-        .OnSmoothingCatchUpChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged); */
+        .OnSmoothingCatchUpChanged_Raw  (iPainter->GetController().Get(),&FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged);
 
     CreateMainWidget(iPainter);
 }
@@ -571,3 +571,5 @@ SOdysseyViewportDrawingEditorGUI::RefreshLayerStackView(FOdysseyLayerStack* iLay
 
 
 #undef LOCTEXT_NAMESPACE // "PaintModePainter"
+
+*/

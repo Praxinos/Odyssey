@@ -26,7 +26,7 @@ FOdysseyEditor::Initialize(UObject* iEditedObject)
 {
     if (iEditedObject)
         mEditedObjects.Add(iEditedObject);
-        
+
     InitData();
     InitGUI();
 }
@@ -40,6 +40,26 @@ void
 FOdysseyEditor::InitGUI()
 {
     GetGUI()->Init();
+}
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Getters
+
+void
+FOdysseyEditor::Undo()
+{
+
+}
+
+void
+FOdysseyEditor::Redo()
+{
+
+}
+
+void
+FOdysseyEditor::ClearUndo()
+{
+    
 }
 
 //--------------------------------------------------------------------------------------
@@ -76,6 +96,12 @@ void
 FOdysseyEditor::OnToolkitInitialized(FBaseToolkit* iToolkit)
 {
     GetGUI()->OnToolkitInitialized(iToolkit);
+}
+
+void
+FOdysseyEditor::BindShortcuts(FBaseToolkit* iToolkit)
+{
+	GetGUI()->BindShortcuts(iToolkit);
 }
 
 bool

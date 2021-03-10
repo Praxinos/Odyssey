@@ -40,6 +40,49 @@ FOdysseyPainterEditor::InitData()
     mPaintEngine->Brush(settings.BrushDefaults.DefaultBrush);
 }
 
+void
+FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
+{
+	FOdysseyEditor::BindShortcuts(iToolkit);
+
+	//---
+
+	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
+
+	MAP_ACTION(painterEditorCommands.Undo, Undo )
+	MAP_ACTION(painterEditorCommands.Redo, Redo )
+    MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo )
+
+	#undef MAP_ACTION
+}
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------- Undo
+
+void
+FOdysseyPainterEditor::Undo()
+{
+	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
+	PaintEngine()->Flush();
+}
+
+void
+FOdysseyPainterEditor::Redo()
+{
+	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
+	PaintEngine()->Flush();
+}
+
+void
+FOdysseyPainterEditor::ClearUndo()
+{
+	//End stroke before undoing, just to be perfectly clean
+	PaintEngine()->Flush();
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 

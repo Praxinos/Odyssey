@@ -28,7 +28,7 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
 void
 FOdysseyViewportDrawingEditor::InitData()
 {
-	FOdysseyPainterEditor::InitData();
+	FOdysseyTextureEditor::InitData();
 
 	//--- Init Data
 }
@@ -55,5 +55,31 @@ FOdysseyViewportDrawingEditor::GetGUI()
 		mGUI = MakeShareable(new FOdysseyViewportDrawingEditorGUI(this));
 	return mGUI.Get();
 }
+
+void
+FOdysseyViewportDrawingEditor::OnPreTextureChange(UTexture2D* iNewTexture)
+{
+	UTexture2D* texture = Texture();
+    if (texture)
+	{
+		RemoveEditedObject(texture);
+	}
+
+	FOdysseyTextureEditor::OnPreTextureChange(iNewTexture);
+}
+
+void
+FOdysseyViewportDrawingEditor::OnPostTextureChange(UTexture2D* iOldTexture)
+{
+	UTexture2D* texture = Texture();
+    if (texture)
+	{
+		AddEditedObject(texture);
+	}
+
+    FOdysseyTextureEditor::OnPostTextureChange(iOldTexture);
+}
+
+    
 
 #undef LOCTEXT_NAMESPACE

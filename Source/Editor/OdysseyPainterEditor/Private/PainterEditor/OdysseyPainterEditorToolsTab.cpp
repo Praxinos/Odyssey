@@ -123,8 +123,6 @@ FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolsTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-	MAP_ACTION(painterEditorCommands.Undo, Undo )
-	MAP_ACTION(painterEditorCommands.Redo, Redo )
     MAP_ACTION(painterEditorCommands.FillCurrentLayer, Fill )
 	MAP_ACTION(painterEditorCommands.ClearCurrentLayer, Clear )
 
@@ -154,21 +152,21 @@ FOdysseyPainterEditorToolsTab::OnFill()
 FReply
 FOdysseyPainterEditorToolsTab::OnUndo()
 {
-    Undo();
+    mEditor->Undo();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolsTab::OnRedo()
 {
-    Redo();
+    mEditor->Redo();
     return FReply::Handled();
 }
 
 FReply
 FOdysseyPainterEditorToolsTab::OnClearUndo()
 {
-    ClearUndo();
+    mEditor->ClearUndo();
     return FReply::Handled();
 }
 
@@ -187,27 +185,6 @@ FOdysseyPainterEditorToolsTab::Fill()
 {
     //TODO: PaintEngine->Fill() should generate its own undo 
 	mEditor->PaintEngine()->Fill();
-}
-
-void
-FOdysseyPainterEditorToolsTab::Undo()
-{
-	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
-	mEditor->PaintEngine()->Flush();
-}
-
-void
-FOdysseyPainterEditorToolsTab::Redo()
-{
-	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
-	mEditor->PaintEngine()->Flush();
-}
-
-void
-FOdysseyPainterEditorToolsTab::ClearUndo()
-{
-	//End stroke before undoing, just to be perfectly clean
-	mEditor->PaintEngine()->Flush();
 }
 
 #undef LOCTEXT_NAMESPACE

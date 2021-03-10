@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <ULIS3>
+/* #include <ULIS3>
 
 class FOdysseyPaintEngine3D;
 class FOdysseyUndoHistory;
@@ -18,7 +18,7 @@ struct FTexturePropertiesBackup
 
 /**
  * Implements an Editor toolkit for textures.
- */
+ 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorData :
 	public TSharedFromThis<FOdysseyViewportDrawingEditorData>
 {
@@ -64,4 +64,4 @@ private:
     FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPackagePreSaveHandle;
     FDelegateHandle mOnPackageSavedHandle;
-};
+};*/

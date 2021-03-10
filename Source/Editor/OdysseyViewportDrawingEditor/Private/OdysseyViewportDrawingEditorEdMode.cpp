@@ -4,10 +4,13 @@
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EdMode.h"
 #include "EditorModeManager.h"
+#include "PhysicsEngine/PhysicsSettings.h"
 
 #include "OdysseyViewportDrawingEditor.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "OdysseyViewportDrawingEditorPainter.h"
+
+#define LOCTEXT_NAMESPACE "FOdysseyViewportDrawingEditorEdMode"
 
 const FEditorModeID FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId = TEXT("EM_OdysseyViewportDrawingEditorEdMode");
 
@@ -88,14 +91,22 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 
 void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
+    if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
+    {
+        FText Title = LOCTEXT("TitleCollisionUVNoSupport","CollisionUVNoSupport");
+        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("Enable FindCollisionUV","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
+    }
+
     mViewportDrawingEditorPainter->Initialize();
-    mViewportDrawingEditorPainter->GetController()->EdModeEnter();
+    //mViewportDrawingEditorPainter->GetController()->EdModeEnter();
 	IMeshPaintEdMode::Enter();
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()
 {
-    mViewportDrawingEditorPainter->GetController()->EdModeExit();
+    // mViewportDrawingEditorPainter->GetController()->EdModeExit();
     mViewportDrawingEditorPainter->Finalize();
 	IMeshPaintEdMode::Exit();
 }
+
+#undef LOCTEXT_NAMESPACE

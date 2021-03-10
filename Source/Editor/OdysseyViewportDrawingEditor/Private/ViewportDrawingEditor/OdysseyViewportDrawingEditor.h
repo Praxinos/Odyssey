@@ -30,6 +30,8 @@ public:
 public:
     // Overrides
     virtual FOdysseyViewportDrawingEditorGUI* GetGUI() override;
+    virtual void OnPreTextureChange(UTexture2D* iNewTexture) override;
+    virtual void OnPostTextureChange(UTexture2D* iOldTexture) override;
     
 private:
 	TSharedPtr<FOdysseyViewportDrawingEditorGUI> mGUI;

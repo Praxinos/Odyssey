@@ -11,11 +11,6 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyTextureEditor.h"
 
-#include "OdysseyTextureEditorLayerStackTab.h"
-#include "OdysseyTextureEditorTextureDetailsTab.h"
-#include "OdysseyTextureEditorTopTab.h"
-#include "OdysseyTextureEditorToolsTab.h"
-
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
 
 /////////////////////////////////////////////////////
@@ -42,7 +37,6 @@ FOdysseyTextureEditorGUI::CreateTabs()
 
 	//REPLACE TABS
 	ODYSSEY_SET_TAB(mTopTab, FOdysseyTextureEditorTopTab, mEditor)
-	ODYSSEY_SET_TAB(mToolsTab, FOdysseyTextureEditorToolsTab, mEditor);
 
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mLayerStackTab, FOdysseyTextureEditorLayerStackTab, mEditor);

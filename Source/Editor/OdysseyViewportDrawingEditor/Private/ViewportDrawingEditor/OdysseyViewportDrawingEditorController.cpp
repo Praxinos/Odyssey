@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyViewportDrawingEditorController.h"
-#include "Subsystems/AssetEditorSubsystem.h"
+/* #include "Subsystems/AssetEditorSubsystem.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorController"
@@ -43,7 +43,7 @@ FOdysseyViewportDrawingEditorController::FOdysseyViewportDrawingEditorController
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
 void
-FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>& iToolkitCommands*/)
+FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>& iToolkitCommands)
 {
     /*
     mMenuExtenders.Add(CreateMenuExtender(iToolkitCommands));
@@ -56,7 +56,7 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
 
     // Build commands
     FOdysseyPainterEditorController::BindCommands(iToolkitCommands);
-    */
+    
     //Add PaintEngine Callbacks
     if( mData->Texture() )
     {
@@ -70,7 +70,7 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
             mData->PaintEngine()->OnEditedBlockTilesChanged().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineEditedBlockTilesChanged);
 
         if(!(mData->PaintEngine()->OnStrokeAbort().IsBoundToObject(this)))
-            mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort); */
+            mData->PaintEngine()->OnStrokeAbort().AddRaw(this,&FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort); 
 
         if (!(mData->PaintEngine()->OnPaintEnd().IsBoundToObject(this)))
             mData->PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnPaintEnginePaintEnd);
@@ -93,7 +93,7 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
                 mData->LayerStack()->GetLayerRoot()->ChildIsLockedChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsLockedChanged);
         
             if( !(mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().IsBoundToObject(this)) )
-                mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged); */
+                mData->LayerStack()->GetLayerRoot()->ChildIsVisibleChangedDelegate().AddRaw(this, &FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged); 
 
             // Set Image Layer as the current Layer
             TArray<TSharedPtr<IOdysseyLayer>> layers;
@@ -112,7 +112,7 @@ FOdysseyViewportDrawingEditorController::Init(/*const TSharedRef<FUICommandList>
 }
 
 void
-FOdysseyViewportDrawingEditorController::ClearLayerStackDelegates(/*const TSharedRef<FUICommandList>& iToolkitCommands*/)
+FOdysseyViewportDrawingEditorController::ClearLayerStackDelegates(/*const TSharedRef<FUICommandList>& iToolkitCommands)
 {
     if(mData->LayerStack())
     {
@@ -233,7 +233,7 @@ FOdysseyViewportDrawingEditorController::OnPaintEngineStrokeAbort()
     {
         mData->DisplaySurface()->Invalidate();
     }
-} */
+}
 
 
 //Delegates
@@ -279,7 +279,7 @@ void FOdysseyViewportDrawingEditorController::OnLayerStackStructureChanged()
     {
         FOdysseyTextureEditorState* layer_state = new FOdysseyTextureEditorState(mData->LayerStack());
         mData->BrushInstance()->AddOrReplaceState(FOdysseyTextureEditorState::GetId(),layer_state);
-    }*/
+    }
 }
 
 void FOdysseyViewportDrawingEditorController::OnLayerStackImageResultChanged(const ::ul3::FRect& iRect)
@@ -315,7 +315,7 @@ FOdysseyViewportDrawingEditorController::OnLayerIsVisibleChanged(TSharedPtr<IOdy
     {
         mData->PaintEngine()->SetLock(mData->LayerStack()->GetCurrentLayer()->IsLocked(true) || !mData->LayerStack()->GetCurrentLayer()->IsVisible(true));
     }
-} */
+}
 
 void FOdysseyViewportDrawingEditorController::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 {
@@ -364,7 +364,7 @@ FOdysseyViewportDrawingEditorController::OnBrushSelected(UOdysseyBrush* iBrush)
         if(overrides.bOverride_Flow)          GetGUI()->GetPaintModifiers()->SetFlow(overrides.Flow);
         if(overrides.bOverride_BlendingMode)  GetGUI()->GetPaintModifiers()->SetBlendingMode((::ul3::eBlendingMode)overrides.BlendingMode);
         if(overrides.bOverride_AlphaMode)     GetGUI()->GetPaintModifiers()->SetAlphaMode((::ul3::eAlphaMode)overrides.AlphaMode);
-    } */
+    }
 }
 
 /* void
@@ -390,7 +390,7 @@ FOdysseyViewportDrawingEditorController::OnBrushCompiled(UBlueprint* iBrush)
 
         mData->PaintEngine()->SetBrushInstance(mData->BrushInstance());
     }
-} */
+}
 
 void
 FOdysseyViewportDrawingEditorController::OnEditedTextureChanged(UTexture2D* iTexture)
@@ -617,7 +617,7 @@ void
 FOdysseyViewportDrawingEditorController::HandleSmoothingCatchUpChanged(bool iValue)
 {
     mData->PaintEngine()->SetSmoothingCatchUp(iValue);
-} */
+}
 
 FName
 FOdysseyViewportDrawingEditorController::GetEditorName() const
@@ -689,22 +689,6 @@ FOdysseyViewportDrawingEditorController::RemoveEditingAsset(UObject* Asset)
 }
 
 void
-FOdysseyViewportDrawingEditorController::EdModeEnter()
-{
-    if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
-    {
-        FText Title = LOCTEXT("TitleCollisionUVNoSupport","CollisionUVNoSupport");
-        FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("Enable FindCollisionUV","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
-    }
-
-    UObject* texture = mData->Texture();
-    if (texture)
-    {
-        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( texture, this);
-    }
-}
-
-void
 FOdysseyViewportDrawingEditorController::EdModeExit()
 {
     UObject* texture = mData->Texture();
@@ -740,3 +724,4 @@ FOdysseyViewportDrawingEditorController::PaintEngineIsLocked() const
 }
 
 #undef LOCTEXT_NAMESPACE
+*/

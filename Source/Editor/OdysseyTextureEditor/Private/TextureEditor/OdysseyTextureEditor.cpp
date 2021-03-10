@@ -67,6 +67,47 @@ FOdysseyTextureEditor::InitData()
 }
 
 //--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Undo
+
+void
+FOdysseyTextureEditor::Undo()
+{
+    FOdysseyPainterEditor::Undo();
+
+    if(!LayerStack())
+        return;
+
+    if (!LayerStack()->mDrawingUndo->HasUndo())
+        return;
+    
+	LayerStack()->mDrawingUndo->LoadData();
+}
+
+void
+FOdysseyTextureEditor::Redo()
+{
+    FOdysseyPainterEditor::Redo();
+
+    if(!LayerStack())
+        return;
+
+    if (!LayerStack()->mDrawingUndo->HasRedo())
+        return;
+    
+	LayerStack()->mDrawingUndo->Redo();
+}
+
+void
+FOdysseyTextureEditor::ClearUndo()
+{
+    if(!LayerStack())
+        return;
+    
+	LayerStack()->mDrawingUndo->Clear();
+    FOdysseyPainterEditor::ClearUndo();
+}
+
+//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
 FOdysseyTextureWrapper&

@@ -28,6 +28,12 @@ public:
     virtual void InitData() override;
 
 public:
+    // Undo
+    virtual void Undo() override;
+    virtual void Redo() override;
+    virtual void ClearUndo() override;
+
+public:
     // Getters
     virtual FOdysseyTextureWrapper&             TextureWrapper();
 	virtual UTexture2D*							Texture();

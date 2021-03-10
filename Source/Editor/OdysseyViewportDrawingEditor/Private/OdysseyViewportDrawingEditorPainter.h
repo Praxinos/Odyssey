@@ -5,7 +5,7 @@
 
 #include "IMeshPainter.h"
 #include "OdysseyViewportDrawingEditorGUI.h"
-#include "OdysseyViewportDrawingEditorController.h"
+// #include "OdysseyViewportDrawingEditorController.h"
 #include "IStylusState.h"
 #include "OdysseyStrokePoint.h"
 #include "MeshPaintTypes.h"
@@ -96,7 +96,7 @@ public:
 	TSharedPtr<FUICommandList> GetUICommandList();
 
 	/** Gets the Editor Controller associated with this painter */ //TODO: Is this mandatory ?
-	TSharedPtr<FOdysseyViewportDrawingEditorController> GetController() const;
+	// TSharedPtr<FOdysseyViewportDrawingEditorController> GetController() const;
 
 	/** Returns the maximum LOD index for the mesh we paint */
 	int32 GetMaxLODIndexToPaint() const;
@@ -248,10 +248,10 @@ protected:
 	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
 
     /** Widget representing the state and settings for the painter */
-	TSharedPtr<SOdysseyViewportDrawingEditorGUI> mWidget;
+	// TSharedPtr<SOdysseyViewportDrawingEditorGUI> mWidget;
 
     /** Widget representing the state and settings for the painter */
-    TSharedPtr<FOdysseyViewportDrawingEditorController> mController;
+    // TSharedPtr<FOdysseyViewportDrawingEditorController> mController;
 
 	/** Painting settings */
 	UOdysseyViewportDrawingEditorSettings* mPaintSettings;

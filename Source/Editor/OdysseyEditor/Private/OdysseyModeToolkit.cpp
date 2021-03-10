@@ -14,6 +14,13 @@ FOdysseyModeToolkit::FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr
 void
 FOdysseyModeToolkit::Initialize()
 {
+    TArray<UObject*> objects = mEditor->GetEditedObjects();
+    for(int i = 0; i < objects.Num(); i++)
+    {
+        if (objects[i])
+            OnAddEditedObject(objects[i]);
+    }
+
 	mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
 

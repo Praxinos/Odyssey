@@ -17,7 +17,6 @@
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 #include "OdysseyTextureEditorTopTab.h"
-#include "OdysseyTextureEditorToolsTab.h"
 
 class SDockableTab;
 class STextBlock;

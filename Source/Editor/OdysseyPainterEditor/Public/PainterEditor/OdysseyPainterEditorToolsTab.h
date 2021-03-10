@@ -36,9 +36,6 @@ protected:
     // Methods
     virtual void Clear();
     virtual void Fill();
-    virtual void Undo();
-    virtual void Redo();
-    virtual void ClearUndo();
 
 private:
     FOdysseyPainterEditor* mEditor;

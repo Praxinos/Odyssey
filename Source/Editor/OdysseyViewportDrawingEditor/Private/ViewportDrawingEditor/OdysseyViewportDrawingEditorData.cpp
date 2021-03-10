@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyViewportDrawingEditorData.h"
-
+/*
 #include "ULISLoaderModule.h"
 #include "OdysseyTextureAssetUserData.h"
 
@@ -41,8 +41,8 @@ FOdysseyViewportDrawingEditorData::FOdysseyViewportDrawingEditorData()
 {
     mOnPrePropertyChangedDelegateHandle = FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPreGlobalObjectPropertyChanged);
 
-    /* FDelegateHandle */ mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPackagePreSave);
-    /* FDelegateHandle */ mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPackageSaved);
+    mOnPackagePreSaveHandle = UPackage::PreSavePackageEvent.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPackagePreSave);
+    mOnPackageSavedHandle = UPackage::PackageSavedEvent.AddRaw(this,&FOdysseyViewportDrawingEditorData::OnPackageSaved);
 }
 
 //--------------------------------------------------------------------------------------
@@ -242,4 +242,4 @@ FOdysseyViewportDrawingEditorData::OnPackageSaved(const FString& iPackageFilenam
         return;
 
     PrepareTextureProperties();
-}
+} */

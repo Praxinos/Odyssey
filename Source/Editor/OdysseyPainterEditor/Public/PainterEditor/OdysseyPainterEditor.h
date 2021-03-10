@@ -29,6 +29,12 @@ protected:
     virtual void InitData();
 
 public:
+    // Undo
+    virtual void Undo() override;
+    virtual void Redo() override;
+    virtual void ClearUndo() override;
+
+public:
     // Getters
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
@@ -42,6 +48,10 @@ public:
     // Setters
 	void                         DrawBrushPreview(bool iDrawBrushPreview);
 	void                         PaintColor(::ul3::FPixelValue iColor);
+
+public:
+    // Interface
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 private:
 	FOdysseyUndoHistory*		mUndoHistory;

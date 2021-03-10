@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
-
+/*
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Misc/NotifyHook.h"
@@ -34,7 +34,7 @@ enum class EOdysseyViewportView: uint8
     kTools
 };
 
-/** Widget representing the state / functionality and settings for PaintModePainter*/
+/** Widget representing the state / functionality and settings for PaintModePainter
 class SOdysseyViewportDrawingEditorGUI : 
     public TSharedFromThis<SOdysseyViewportDrawingEditorGUI>
 {
@@ -45,12 +45,12 @@ public:
     void Init(FOdysseyViewportDrawingEditorPainter* iPainter);
 
 private:
-	/** Creates a widget to select the different UI tabs of the paint in Viewport (Brush Settings, Stroke Options, Layer Stack...)*/
+	/** Creates a widget to select the different UI tabs of the paint in Viewport (Brush Settings, Stroke Options, Layer Stack...)
 	TSharedPtr<SWidget> CreateTabSelectorWidget(FOdysseyViewportDrawingEditorPainter* iPainter);	
     void CreateMainWidget(FOdysseyViewportDrawingEditorPainter* iPainter);
 
 private:	
-	/** Paint settings instance */
+	/** Paint settings instance
 	UOdysseyViewportDrawingEditorSettings* mPaintModeSettings;
 	
     FString PaintTexturePath() const;
@@ -96,3 +96,4 @@ private:
 
     EOdysseyViewportView                        mSelectedView;
 };
+*/

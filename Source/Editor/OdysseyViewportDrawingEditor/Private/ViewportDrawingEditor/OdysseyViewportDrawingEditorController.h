@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
-
+/*
 #include <ULIS3>
 #include "OdysseyStylusInputSettings.h"
 
@@ -11,7 +11,7 @@
 
 /**
  * Implements an Editor Controller for the paint in viewport.
- */
+ 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorController :
 	public TSharedFromThis<FOdysseyViewportDrawingEditorController>,
     public IAssetEditorInstance
@@ -23,7 +23,7 @@ public:
 
 public:
     // Init
-    void Init(/*const TSharedRef<FUICommandList>& iToolkitCommands*/);
+    void Init(/*const TSharedRef<FUICommandList>& iToolkitCommands);
 
     //Clean the layer stack delegates created in the controller
     void ClearLayerStackDelegates();
@@ -54,7 +54,7 @@ public:
     /* void OnPaintEnginePreviewBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineEditedBlockTilesWillChange(const TArray<::ul3::FRect>& iChangedTiles);
     void OnPaintEngineEditedBlockTilesChanged(const TArray<::ul3::FRect>& iChangedTiles);
-    void OnPaintEngineStrokeAbort(); */
+    void OnPaintEngineStrokeAbort();
 
     virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
@@ -98,9 +98,9 @@ public:
     void HandleSmoothingStrengthChanged(int32 iValue);
     void HandleSmoothingEnabledChanged(bool iValue);
     void HandleSmoothingRealTimeChanged(bool iValue);
-    void HandleSmoothingCatchUpChanged(bool iValue); */
+    void HandleSmoothingCatchUpChanged(bool iValue);
 
 private:
     TSharedPtr<FOdysseyViewportDrawingEditorData>		mData;
     TSharedPtr<SOdysseyViewportDrawingEditorGUI>		mGUI;
-};
+};*/

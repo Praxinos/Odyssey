@@ -102,8 +102,6 @@ FOdysseyEditorGUI::OnToolkitInitialized(FBaseToolkit* iToolkit)
 	{
 		mTabs[i].Get()->OnToolkitInitialized(iToolkit);
 	}
-
-	BindShortcuts(iToolkit);
 }
 
 
