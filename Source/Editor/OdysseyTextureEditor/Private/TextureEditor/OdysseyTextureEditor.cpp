@@ -167,12 +167,6 @@ FOdysseyTextureEditor::OnCloseRequested()
 	return true;
 }
 
-UObject*
-FOdysseyTextureEditor::GetPrimaryEditedObject()
-{
-    return Texture();
-}
-
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Attributes
 

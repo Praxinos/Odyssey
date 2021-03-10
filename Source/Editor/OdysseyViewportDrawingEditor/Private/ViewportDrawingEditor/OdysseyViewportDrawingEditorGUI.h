@@ -3,28 +3,10 @@
 
 #pragma once
 
-#include "Widgets/SCompoundWidget.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
-#include "Misc/NotifyHook.h"
-#include "Widgets/Notifications/SErrorText.h"
+#include "OdysseyTextureEditorGUI.h"
 
-#include "Brush/SOdysseyBrushExposedParameters.h"
-#include "Brush/SOdysseyBrushSelector.h"
-#include "Color/SOdysseyColorSelector.h"
-#include "Color/SOdysseyColorSliders.h"
-#include "SOdysseyPaintModifiers.h"
-#include "SOdysseyStrokeOptions.h"
-#include "OdysseyLayerStack.h"
-
-#include "OdysseyPaintEngine3D.h"
-#include "OdysseyBrushAssetBase.h"
-
-class FOdysseyViewportDrawingEditorPainter;
-class UOdysseyViewportDrawingEditorSettings;
-class IDetailsView;
-class SErrorText;
-class UOdysseyBrush;
-class SOdysseyBrushSelector;
+class FOdysseyViewportDrawingEditor;
+class FOdysseyViewportDrawingEditorTextureSelectorTab;
 
 enum class EOdysseyViewportSelectedView: uint8
 {
@@ -34,65 +16,42 @@ enum class EOdysseyViewportSelectedView: uint8
     kTools
 };
 
-/** Widget representing the state / functionality and settings for PaintModePainter*/
-class SOdysseyViewportDrawingEditorGUI : 
-    public TSharedFromThis<SOdysseyViewportDrawingEditorGUI>
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorGUI :
+	public FOdysseyTextureEditorGUI
 {
 public:
     // Construction / Destruction
-    virtual ~SOdysseyViewportDrawingEditorGUI();
-    SOdysseyViewportDrawingEditorGUI();
-    void Init(FOdysseyViewportDrawingEditorPainter* iPainter);
-
-private:
-	/** Creates a widget to select the different UI tabs of the paint in Viewport (Brush Settings, Stroke Options, Layer Stack...)*/
-	TSharedPtr<SWidget> CreateTabSelectorWidget(FOdysseyViewportDrawingEditorPainter* iPainter);	
-    void CreateMainWidget(FOdysseyViewportDrawingEditorPainter* iPainter);
-
-private:	
-	/** Paint settings instance */
-	UOdysseyViewportDrawingEditorSettings* mPaintModeSettings;
-	
-    FString PaintTexturePath() const;
-
-private:
-    EVisibility GetBrushSettingsWidgetVisibility() const;
-    EVisibility GetLayerStackWidgetVisibility() const;
-    EVisibility GetStrokeOptionsWidgetVisibility() const;
-    EVisibility GetToolsWidgetVisibility() const;
+    virtual ~FOdysseyViewportDrawingEditorGUI();
+    FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditor* iEditor);
 
 public:
-    void OnSetOdysseyBrushSettingsView();
-    void OnSetOdysseyStrokeOptionsView();
-    void OnSetOdysseyLayerStackView();
-    void OnSetOdysseyToolsView();
+    // Initialization
+    virtual void CreateTabs() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
-    TSharedPtr<SWidget>&                         GetMainWidget();
-    TSharedPtr<SOdysseyBrushSelector>&           GetBrushSelector();
-    TSharedPtr<SOdysseyColorSelector>&           GetColorSelector();
-    TSharedPtr<SOdysseyColorSliders>&            GetColorSliders();
-    TSharedPtr<SOdysseyStrokeOptions>&           GetStrokeOptions();
-    TSharedPtr<SOdysseyPaintModifiers>&          GetPaintModifiers();
-    TSharedPtr<SOdysseyBrushExposedParameters>&  GetBrushExposedParameters();
-
-    EOdysseyViewportSelectedView                 GetSelectedView();
+    // GettersFName
+	virtual FName GetLayoutName() override;
+    TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab>& GetTextureSelectorTab();
+    EOdysseyViewportSelectedView GetSelectedView();
 
 public:
-    void RefreshLayerStackView(FOdysseyLayerStack* iLayerStackData);
+    // Layout
+	virtual TSharedPtr<SWidget> CreateWidget() override;
+    TSharedPtr<SWidget> CreateTabSelectorWidget();
+    SVerticalBox::FSlot& CreateSection(TSharedPtr<SWidget> iWidget, FText iName);
+
+public:
+    void SetSelectedView(EOdysseyViewportSelectedView iView);
 
 private:
-    TSharedPtr<SWidget>                         mMainWidget;
-    TSharedPtr<SWidget>                         mTabSelectorWidget;
+    EVisibility GetViewVisibility(EOdysseyViewportSelectedView iView) const;
 
-    TSharedPtr<SOdysseyBrushSelector>           mBrushSelector;
-    TSharedPtr<SOdysseyColorSelector>           mColorSelector;
-    TSharedPtr<SOdysseyColorSliders>            mColorSliders;
-    TSharedPtr<SOdysseyStrokeOptions>           mStrokeOptions;
-    TSharedPtr<SOdysseyPaintModifiers>          mPaintModifiers;
-    TSharedPtr<SOdysseyBrushExposedParameters>  mBrushExposedParameters;
+private:
+	FOdysseyViewportDrawingEditor* mEditor;
+    TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab>          mTextureSelectorTab;
 
-    SVerticalBox::FSlot*                        mLayerStackView;
-
-    EOdysseyViewportSelectedView                mSelectedView;
+private:
+    EOdysseyViewportSelectedView mSelectedView;
+    TSharedPtr<FUICommandList>  mCommandList;
 };

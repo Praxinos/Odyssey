@@ -6,6 +6,9 @@
 #include "IMeshPaintMode.h"
 
 class FModeToolkit;
+class FOdysseyViewportDrawingEditor;
+class FOdysseyViewportDrawingEditorToolkit;
+class FOdysseyViewportDrawingEditorPainter;
 
 /**
  * Odyssey paint on viewport editor mode
@@ -32,4 +35,9 @@ public:
     virtual bool ProcessCapturedMouseMoves(FEditorViewportClient* InViewportClient,FViewport* InViewport,const TArrayView<FIntPoint>& CapturedMouseMoves) override;
 
 	bool IsEditingEnabled() const;
+
+private:
+	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
+	TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mToolkit;
+	FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
 };

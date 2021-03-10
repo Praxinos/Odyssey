@@ -48,12 +48,13 @@
 
 FOdysseyViewportDrawingEditorPainter::~FOdysseyViewportDrawingEditorPainter()
 {
-	Finalize();
+	Finalize(); //Force finalization on destruction
     delete mTemporaryViewportClient;
 }
 
-FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
-    : mPaintSettings(UOdysseyViewportDrawingEditorSettings::Get()), 
+FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor)
+    : mEditor(iEditor),
+    mPaintSettings(UOdysseyViewportDrawingEditorSettings::Get()), 
     mTexturePaintingCurrentMeshComponent(nullptr),
 	mPaintingTexture2D(nullptr),
     mStrokeBufferTexture2D(nullptr),
@@ -69,7 +70,7 @@ FOdysseyViewportDrawingEditorPainter::FOdysseyViewportDrawingEditorPainter()
 {
 }
 
-FOdysseyViewportDrawingEditorPainter* FOdysseyViewportDrawingEditorPainter::Get()
+/* FOdysseyViewportDrawingEditorPainter* FOdysseyViewportDrawingEditorPainter::Get()
 {
 	static FOdysseyViewportDrawingEditorPainter* painter = nullptr;
 	if (!painter)
@@ -78,7 +79,7 @@ FOdysseyViewportDrawingEditorPainter* FOdysseyViewportDrawingEditorPainter::Get(
 		painter->Initialize();
 	}
 	return painter;
-}
+} */
 
 void FOdysseyViewportDrawingEditorPainter::Initialize()
 {
@@ -88,7 +89,7 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
 	mController = MakeShareable(new FOdysseyViewportDrawingEditorController(data, mWidget));
 
 	//Register commands
-	RegisterTexturePaintCommands();
+	// RegisterTexturePaintCommands();
 
 	// Handle Stylus SubSystem
 	UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
@@ -104,7 +105,7 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorPainter::UpdatePaintTargets);
 
 	//Initialize Data / View / Controller
-    mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
+    // mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
     mWidget->Init(this);
     mController->Init();
 
@@ -122,7 +123,7 @@ void FOdysseyViewportDrawingEditorPainter::Finalize()
     mWidget.Reset(); mWidget = 0;
     mController.Reset(); mController = 0; //Resetting the controller also reset the data inside it. Should work differently
 
-    UnregisterTexturePaintCommands();
+    // UnregisterTexturePaintCommands();
 
 	UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->OnStylusInputChanged().Unbind();
@@ -134,45 +135,6 @@ void FOdysseyViewportDrawingEditorPainter::Finalize()
 
 	Cleanup(); //Why ?
 	mComponentToTexturePaintSettingsMap.Empty(); //Why ?
-}
-
-void FOdysseyViewportDrawingEditorPainter::RegisterTexturePaintCommands()
-{
-	mUICommandList->MapAction(
-		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyBrushSettingsView,
-		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyBrushSettingsView),
-		FCanExecuteAction(),
-    	FIsActionChecked::CreateLambda([=]
-	    {
-		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kBrushSettings;
-        }));
-
-	mUICommandList->MapAction(
-		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyStrokeOptionsView,
-		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyStrokeOptionsView),
-		FCanExecuteAction(),
-    	FIsActionChecked::CreateLambda([=]
-	    {
-		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kStrokeOptions;
-        }));
-
-	mUICommandList->MapAction(
-		FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyLayerStackView,
-		FExecuteAction::CreateRaw(mController->GetGUI().Get(), &SOdysseyViewportDrawingEditorGUI::OnSetOdysseyLayerStackView),
-		FCanExecuteAction(),
-    	FIsActionChecked::CreateLambda([=]
-	    {
-		    return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kLayerStack;
-        }));
-
-    mUICommandList->MapAction(
-        FOdysseyViewportDrawingEditorCommands::Get().SetOdysseyToolsView,
-        FExecuteAction::CreateRaw(mController->GetGUI().Get(),&SOdysseyViewportDrawingEditorGUI::OnSetOdysseyToolsView),
-        FCanExecuteAction(),
-        FIsActionChecked::CreateLambda([=]
-        {
-            return mController->GetGUI()->GetSelectedView() == EOdysseyViewportSelectedView::kTools;
-        }));
 }
 
 void FOdysseyViewportDrawingEditorPainter::Render(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
@@ -227,56 +189,6 @@ TSharedPtr<FOdysseyViewportDrawingEditorController> FOdysseyViewportDrawingEdito
     return mController;
 }
 
-
-bool FOdysseyViewportDrawingEditorPainter::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
-{	
-	return !(mPaintableTextures.ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
-}
-
-void FOdysseyViewportDrawingEditorPainter::PaintTextureChanged(const FAssetData& iAssetData)
-{
-	UTexture2D* texture = Cast<UTexture2D>(iAssetData.GetAsset());
-
-	if (texture)
-	{
-		//check
-		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-		if (texture != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-		{
-			FText Title = LOCTEXT("TitleSelectedTextureAlreadyOpenedTitle", "Selected Texture Already Opened");
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedTextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
-			return;
-		}
-
-        mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
-        texture->TemporarilyDisableStreaming();
-
-        mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
-		// Loop through our list of textures and see which one the user wants to select
-		for (int32 targetIndex = 0; targetIndex < mTexturePaintTargetList.Num(); targetIndex++)
-		{
-			FTextureTargetListInfo& textureTarget = mTexturePaintTargetList[targetIndex];
-			if (textureTarget.TextureData == texture)
-			{
-				textureTarget.bIsSelected = true;
-			}
-			else
-			{
-				textureTarget.bIsSelected = false;
-			}
-		}
-	}
-}
-
-void FOdysseyViewportDrawingEditorPainter::UnregisterTexturePaintCommands()
-{
-	const FOdysseyViewportDrawingEditorCommands& commands = FOdysseyViewportDrawingEditorCommands::Get();
-	for (const TSharedPtr<const FUICommandInfo> Action : commands.Commands)
-	{
-		mUICommandList->UnmapAction(Action);
-	}
-}
-
 const FHitResult FOdysseyViewportDrawingEditorPainter::GetHitResult(const FVector& iOrigin, const FVector& iDirection)
 {
 	TArray<UMeshComponent*> hoveredComponents;
@@ -315,7 +227,7 @@ const FHitResult FOdysseyViewportDrawingEditorPainter::GetHitResult(const FVecto
 
 void FOdysseyViewportDrawingEditorPainter::ActorSelected(AActor* iActor)
 {
-    if( mPaintSettings->mTexturePaintSettings.mPaintTexture )
+    if( mEditor->Texture() )
         CommitAllPaintedTextures();
 
 	TInlineComponentArray<UMeshComponent*> meshComponents;
@@ -325,7 +237,7 @@ void FOdysseyViewportDrawingEditorPainter::ActorSelected(AActor* iActor)
 	for (UMeshComponent* meshComponent : meshComponents)
 	{
 		FInstanceTexturePaintSettings& Settings = AddOrRetrieveInstanceTexturePaintSettings(meshComponent);
-		mPaintSettings->mTexturePaintSettings.mPaintTexture = Settings.mSelectedTexture;
+		mEditor->Texture( Settings.mSelectedTexture );
 	}
 
 
@@ -349,7 +261,7 @@ void FOdysseyViewportDrawingEditorPainter::ActorDeselected(AActor* iActor)
 		{	
 			MeshPaintHelpers::ClearMeshTextureOverrides(*adapter, meshComponent);
 			FInstanceTexturePaintSettings& settings = AddOrRetrieveInstanceTexturePaintSettings(meshComponent);
-			settings.mSelectedTexture = mPaintSettings->mTexturePaintSettings.mPaintTexture;
+			settings.mSelectedTexture = mEditor->Texture();
 		}
 	}
 
@@ -412,7 +324,7 @@ void FOdysseyViewportDrawingEditorPainter::FinishPainting()
 
 bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraOrigin, const TArrayView<TPair<FVector, FVector>>& iRays, EMeshPaintAction iPaintAction, float iPaintStrength)
 {
-    if( !mPaintSettings->mTexturePaintSettings.mPaintTexture )
+    if( !mEditor->Texture() )
         return false;
 
 	TArray<FHitResult> paintRayResults;
@@ -489,8 +401,8 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
 
 				    //WARNING: Be aware that we change the meaning of mLastEvent x and y here, as they were the stylus event x and y, now they are the x and y position in the texture
 				    // this new meaning is then propagated to mPreviousEvent in OnStylusStateChanged()
-				    mLastEvent.x = coord.X * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceWidth();
-				    mLastEvent.y = coord.Y * mPaintSettings->mTexturePaintSettings.mPaintTexture->GetSurfaceHeight();
+				    mLastEvent.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
+				    mLastEvent.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
                     mLastEvent.keysDown = mKeysPressed;
 
 				    if (IsPainting())
@@ -535,7 +447,7 @@ bool FOdysseyViewportDrawingEditorPainter::PaintInternal(const FVector& iCameraO
 			if ( meshAdapter->SupportsTexturePaint() )
 			{
 				TArray<const UTexture*> textures;
-				const UTexture2D* targetTexture2D = mPaintSettings->mTexturePaintSettings.mPaintTexture;
+				const UTexture2D* targetTexture2D = mEditor->Texture();
 				if (targetTexture2D)
 				{
 					textures.Add(targetTexture2D);
@@ -632,9 +544,6 @@ void FOdysseyViewportDrawingEditorPainter::Reset()
 	}
 
 	mPaintTargetData.Empty();
-
-	// Remove any existing texture targets
-	mTexturePaintTargetList.Empty();
 	
 	mPaintableComponents.Empty();
 
@@ -725,7 +634,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingTextureBased(UMeshCompon
 
     const auto featureLevel = iMeshComponent->GetWorld()->FeatureLevel;
 
-    UTexture2D* texture2D = mPaintSettings->mTexturePaintSettings.mPaintTexture;
+    UTexture2D* texture2D = mEditor->Texture();
     if(texture2D == nullptr)
     {
         return;
@@ -891,7 +800,7 @@ void FOdysseyViewportDrawingEditorPainter::StartPaintingMeshBased(UMeshComponent
 
     const auto featureLevel = iMeshComponent->GetWorld()->FeatureLevel;
 
-    UTexture2D* texture2D = mPaintSettings->mTexturePaintSettings.mPaintTexture;
+    UTexture2D* texture2D = mEditor->Texture();
     if(texture2D == nullptr)
     {
         return;
@@ -1500,7 +1409,7 @@ void FOdysseyViewportDrawingEditorPainter::UpdatePaintTargets(UObject* iObject, 
 
 void FOdysseyViewportDrawingEditorPainter::SaveModifiedTextures()
 {
-	UTexture2D* selectedTexture = mPaintSettings->mTexturePaintSettings.mPaintTexture;
+	UTexture2D* selectedTexture = mEditor->Texture();
 
 	if (nullptr != selectedTexture)
 	{
@@ -1543,14 +1452,14 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
 	}
 
 	// Will set the texture override up for the selected texture, important for the drop down combo-list and selecting between material instances.
-	if (mPaintableComponents.Num() == 1 && mPaintableComponents[0] && mPaintSettings->mTexturePaintSettings.mPaintTexture)
+	if (mPaintableComponents.Num() == 1 && mPaintableComponents[0] && mEditor->Texture())
 	{
 		for (UMeshComponent* meshComponent : mPaintableComponents)
 		{
 			TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapter = mComponentToAdapterMap.Find(meshComponent);
 			if (meshAdapter)
 			{
-				SetSpecificTextureOverrideForMesh(*meshAdapter->Get(), mPaintSettings->mTexturePaintSettings.mPaintTexture);
+				SetSpecificTextureOverrideForMesh(*meshAdapter->Get(), mEditor->Texture());
 			}
 		}
 	}
@@ -1777,9 +1686,9 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 	}
 
 	// Ensure that the selection remains valid or is invalidated
-	if (!mPaintableTextures.Contains(mPaintSettings->mTexturePaintSettings.mPaintTexture))
+	if (!mPaintableTextures.Contains(mEditor->Texture()))
 	{
-		mPaintSettings->mTexturePaintSettings.mPaintTexture = nullptr;
+		mEditor->Texture(nullptr);
 		if (mPaintableTextures.Num() > 0)
 		{
 			for (int i = 0; i < mPaintableTextures.Num(); i++)
@@ -1796,17 +1705,17 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 					continue;
 				}
 
-				mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
+				mEditor->Texture(texture);
 				break;
 			}
 		}
 	}
-	else if (mController->GetData()->Texture() != mPaintSettings->mTexturePaintSettings.mPaintTexture)
+	else if (mController->GetData()->Texture() != mEditor->Texture())
 	{
 		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-		if (mPaintSettings->mTexturePaintSettings.mPaintTexture != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(mPaintSettings->mTexturePaintSettings.mPaintTexture, true) != nullptr)
+		if (mEditor->Texture() != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(mEditor->Texture(), true) != nullptr)
 		{
-			mPaintSettings->mTexturePaintSettings.mPaintTexture = nullptr;
+			mEditor->Texture(nullptr);
 			FText Title = LOCTEXT("TitleSelectedtextureAlreadyOpened", "Selected Texture Already Opened");
 			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedtextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
 
@@ -1818,13 +1727,13 @@ void FOdysseyViewportDrawingEditorPainter::CacheTexturePaintData()
 					if (texture != mController->GetData()->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
 						continue;
 
-					mPaintSettings->mTexturePaintSettings.mPaintTexture = texture;
+					mEditor->Texture(texture);
 					break;
 				}
 			}
 		}
 	}
-	mController->OnEditedTextureChanged(mPaintSettings->mTexturePaintSettings.mPaintTexture);
+	mController->OnEditedTextureChanged(mEditor->Texture());
 }
 
 void FOdysseyViewportDrawingEditorPainter::ResetPaintingState()

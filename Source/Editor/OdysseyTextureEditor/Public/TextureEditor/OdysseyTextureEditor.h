@@ -45,7 +45,6 @@ public:
     virtual FOdysseyTextureEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual bool OnCloseRequested() override;
-    virtual UObject* GetPrimaryEditedObject() override;
     
 protected:
     // Attributes

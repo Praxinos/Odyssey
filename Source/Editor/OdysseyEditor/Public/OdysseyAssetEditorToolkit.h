@@ -20,7 +20,7 @@ public:
     FOdysseyAssetEditorToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor);
 
 public:
-    void Init();
+    virtual void Initialize() override;
 
 protected:
     // FAssetEditorToolkit interface
@@ -28,6 +28,8 @@ protected:
     virtual bool OnRequestClose() override;
     virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
     virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    virtual FText GetToolkitName() const override;
+    virtual FText GetToolkitToolTipText() const override;
 
 	/** Called to check to see if there's an asset capable of being reimported */
 	virtual bool CanReimport() const;

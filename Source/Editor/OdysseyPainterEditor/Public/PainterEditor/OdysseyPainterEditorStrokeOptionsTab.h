@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "OdysseyPaintEngine.h"
 
 class FOdysseyPainterEditor;
 class SOdysseyStrokeOptions;

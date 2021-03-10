@@ -30,6 +30,7 @@ FOdysseyEditorGUI::Init()
 	InitTabs(); //Init Tabs, creating their widgets
 
 	mLayout = CreateLayout();
+	mWidget = CreateWidget();
 }
 
 //--------------------------------------------------------------------------------------
@@ -115,6 +116,12 @@ FOdysseyEditorGUI::CreateLayout()
 	return FTabManager::NewLayout(GetLayoutName());
 }
 
+TSharedPtr<SWidget>
+FOdysseyEditorGUI::CreateWidget()
+{
+	return nullptr;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
@@ -122,4 +129,10 @@ TSharedRef<FTabManager::FLayout>
 FOdysseyEditorGUI::GetLayout()
 {
 	return mLayout.ToSharedRef();
+}
+
+TSharedRef<SWidget>
+FOdysseyEditorGUI::GetWidget()
+{
+	return mWidget.ToSharedRef();
 }

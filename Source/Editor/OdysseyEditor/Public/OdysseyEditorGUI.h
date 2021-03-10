@@ -41,16 +41,24 @@ public:
 
 protected:
 	// Layout
+
+    //There is 2 ways to create the layout
+    // - As a FTabManager::FLayout which has proper tabs layed out in a window, used by standalone editors like the Texture Editor
+    // - As a Widget, which is a very customized layout used for specific purposes like ViewportDrawingEditor layout
+    // each of these methods can return nullptr
 	virtual TSharedPtr<FTabManager::FLayout> CreateLayout();
+    virtual TSharedPtr<SWidget> CreateWidget();
 
 public:
     // Getters
 	TSharedRef<FTabManager::FLayout> GetLayout();
+    TSharedRef<SWidget> GetWidget();
     virtual FName GetLayoutName() = 0;
 
 private:
-    FOdysseyEditor*                          mEditor;
-	TSharedPtr<FTabManager::FLayout>         mLayout;
+    FOdysseyEditor*                         mEditor;
+	TSharedPtr<FTabManager::FLayout>        mLayout;
+    TSharedPtr<SWidget>                     mWidget;
 
 protected:
     //listing all tabs and managing the fact that a tab ptr can change through the Init process

@@ -124,8 +124,8 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlip
 {
 	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
 	TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable(new FOdysseyFlipbookEditorToolkit(editor));
-	editor->Init();
-	toolkit->Init();
+	editor->Initialize(iFlipbook);
+	toolkit->Initialize();
     return toolkit;
 }
 

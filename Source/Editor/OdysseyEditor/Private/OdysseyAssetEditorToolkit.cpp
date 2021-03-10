@@ -21,17 +21,17 @@ FOdysseyAssetEditorToolkit::FOdysseyAssetEditorToolkit(const FName& iAppIdentifi
 }
 
 void
-FOdysseyAssetEditorToolkit::Init()
+FOdysseyAssetEditorToolkit::Initialize()
 {
     mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnRemoveEditedObject);
-
+    
     TArray<UObject*> editedObjects = mEditor->GetEditedObjects();
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->GetLayout(), true, false, editedObjects);
     InitExtender();
 
     //Finish Initialization
-    TOdysseyToolkit<FAssetEditorToolkit>::Init();
+    TOdysseyToolkit<FAssetEditorToolkit>::Initialize();
 }
 
 //--------------------------------------------------------------------------------------
@@ -78,6 +78,18 @@ bool
 FOdysseyAssetEditorToolkit::CanReimport(UObject* EditingObject) const
 {
 	return false;
+}
+
+FText
+FOdysseyAssetEditorToolkit::GetToolkitName() const
+{
+	return GetLabelForObject(GetEditingObjects()[0]);
+}
+
+FText
+FOdysseyAssetEditorToolkit::GetToolkitToolTipText() const
+{
+	return GetToolTipTextForObject(GetEditingObjects()[0]);
 }
 
 //--------------------------------------------------------------------------------------

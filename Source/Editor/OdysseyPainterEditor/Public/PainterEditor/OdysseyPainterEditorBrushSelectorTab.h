@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "OdysseyBrushBlueprint.h"
 #include <ULIS3>
 
 class FOdysseyPainterEditor;

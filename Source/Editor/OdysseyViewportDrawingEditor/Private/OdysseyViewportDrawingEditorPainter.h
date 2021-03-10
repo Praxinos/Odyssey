@@ -73,12 +73,12 @@ class FOdysseyViewportDrawingEditorPainter : public IMeshPainter
 	//TODO: why ?
 	friend class SOdysseyViewportDrawingEditorGUI;
 
-protected:
+public:
 	/** destructor */
 	~FOdysseyViewportDrawingEditorPainter();
 
 	/** constructor */
-	FOdysseyViewportDrawingEditorPainter();
+	FOdysseyViewportDrawingEditorPainter(TSharedPtr<FOdysseyViewportDrawingEditor> iEditor);
 
 public:
 	/** Initialization method (called by Get() static method) */
@@ -89,7 +89,7 @@ public:
 
 public:
 	/** The singleton Getter */
-	static FOdysseyViewportDrawingEditorPainter* Get();
+	// static FOdysseyViewportDrawingEditorPainter* Get();
 
 public:
 	/** Gets the UICommandList */
@@ -140,12 +140,6 @@ protected:
 	/** End IMeshPainter overrides */
 
 private:
-	/** Registers the paint commands (UICommandList) */
-	void RegisterTexturePaintCommands();
-
-	/** Unregisters the paint commands (UICommandList) */
-	void UnregisterTexturePaintCommands();
-
 	/** Per triangle action function used for retrieving triangle eligible for texture painting */
 	void GatherTextureTriangles(IMeshPaintGeometryAdapter* iAdapter, int32 iTriangleIndex, const int32 iVertexIndices[3], TArray<FTexturePaintTriangleInfo>* iTriangleInfo, TArray<FTexturePaintMeshSectionInfo>* iSectionInfos, int32 iUVChannelIndex);
 
@@ -163,14 +157,6 @@ private:
 	/** Returns the instance of ComponentClass found in the current Editor selection */
 	template<typename ComponentClass>
 	TArray<ComponentClass*> GetSelectedComponents() const;
-
-private:
-	/** Callbacks */
-	/** Checks whether or not the given asset should not be shown in the list of textures to paint on */
-	bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
-	
-	/** Callback for when the user changes the texture to paint on */
-	void PaintTextureChanged(const FAssetData& iAssetData);
 
 protected:  
 	/** Texture Based Painting Methods */
@@ -258,6 +244,9 @@ private:
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
 
 protected:	
+	/** Texture To Draw on*/
+	TSharedPtr<FOdysseyViewportDrawingEditor> mEditor;
+
     /** Widget representing the state and settings for the painter */
 	TSharedPtr<SOdysseyViewportDrawingEditorGUI> mWidget;
 
@@ -294,9 +283,6 @@ protected:
 
 	/** Stores data associated with our paint target textures */
 	TMap< UTexture2D*, FPaintTexture2DData > mPaintTargetData;
-
-	/** Texture paint: Will hold a list of texture items that we can paint on */
-	TArray<FTextureTargetListInfo> mTexturePaintTargetList;
 
 	/** True if we need to generate a texture seam mask used for texture dilation */
 	bool mDoGenerateSeamMask;

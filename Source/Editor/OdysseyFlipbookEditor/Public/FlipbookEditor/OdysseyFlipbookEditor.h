@@ -39,7 +39,6 @@ public:
     //Overrides
     virtual FOdysseyFlipbookEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-    virtual UObject* GetPrimaryEditedObject() override;
 
 protected:
     virtual void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);

@@ -3,21 +3,28 @@
 
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EdMode.h"
-#include "OdysseyViewportDrawingEditorEdModeToolkit.h"
 #include "EditorModeManager.h"
 
+#include "OdysseyViewportDrawingEditor.h"
+#include "OdysseyViewportDrawingEditorToolkit.h"
 #include "OdysseyViewportDrawingEditorPainter.h"
 
 const FEditorModeID FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId = TEXT("EM_OdysseyViewportDrawingEditorEdMode");
 
 void FOdysseyViewportDrawingEditorEdMode::Initialize()
 {
-	MeshPainter = FOdysseyViewportDrawingEditorPainter::Get();
+    mEditor = MakeShareable(new FOdysseyViewportDrawingEditor());
+	mToolkit = MakeShareable(new FOdysseyViewportDrawingEditorToolkit(mEditor, this));
+	mEditor->Initialize(nullptr);
+	mToolkit->Initialize();
+
+    mViewportDrawingEditorPainter = new FOdysseyViewportDrawingEditorPainter(mEditor);
+	MeshPainter = mViewportDrawingEditorPainter;
 }
 
 TSharedPtr<class FModeToolkit> FOdysseyViewportDrawingEditorEdMode::GetToolkit()
 {
-	return MakeShareable(new FOdysseyViewportDrawingEditorEdModeToolkit(this));
+    return mToolkit;
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
@@ -81,14 +88,14 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 
 void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
-    FOdysseyViewportDrawingEditorPainter::Get()->Initialize();
-	FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeEnter();
+    mViewportDrawingEditorPainter->Initialize();
+    mViewportDrawingEditorPainter->GetController()->EdModeEnter();
 	IMeshPaintEdMode::Enter();
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()
 {
-    FOdysseyViewportDrawingEditorPainter::Get()->GetController()->EdModeExit();
-    FOdysseyViewportDrawingEditorPainter::Get()->Finalize();
+    mViewportDrawingEditorPainter->GetController()->EdModeExit();
+    mViewportDrawingEditorPainter->Finalize();
 	IMeshPaintEdMode::Exit();
 }

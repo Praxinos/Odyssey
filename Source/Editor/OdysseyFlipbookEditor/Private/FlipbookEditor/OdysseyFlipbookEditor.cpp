@@ -123,12 +123,6 @@ FOdysseyFlipbookEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>&
 	return workspaceMenuCategory;
 }
 
-UObject*
-FOdysseyFlipbookEditor::GetPrimaryEditedObject()
-{
-    return mFlipbookWrapper->Flipbook();
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Methods
 

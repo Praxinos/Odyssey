@@ -5,17 +5,18 @@
 
 #include "OdysseyEditorGUI.h"
 
+#include "OdysseyPainterEditorBrushSelectorTab.h"
+#include "OdysseyPainterEditorBrushExposedParametersTab.h"
+#include "OdysseyPainterEditorColorSlidersTab.h"
+#include "OdysseyPainterEditorColorWheelTab.h"
+#include "OdysseyPainterEditorMeshSelectorTab.h"
+#include "OdysseyPainterEditorStrokeOptionsTab.h"
+#include "OdysseyPainterEditorTopTab.h"
+#include "OdysseyPainterEditorToolsTab.h"
+#include "OdysseyPainterEditorViewportTab.h"
+
 class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
-class FOdysseyPainterEditorBrushExposedParametersTab;
-class FOdysseyPainterEditorBrushSelectorTab;
-class FOdysseyPainterEditorColorSlidersTab;
-class FOdysseyPainterEditorColorWheelTab;
-class FOdysseyPainterEditorMeshSelectorTab;
-class FOdysseyPainterEditorStrokeOptionsTab;
-class FOdysseyPainterEditorToolsTab;
-class FOdysseyPainterEditorTopTab;
-class FOdysseyPainterEditorViewportTab;
 
 /**
  * Implements an Editor toolkit for textures.

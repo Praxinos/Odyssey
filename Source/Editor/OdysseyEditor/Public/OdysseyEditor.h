@@ -21,7 +21,7 @@ public:
 
 public:
     // Initialization
-    void Init();
+    void Initialize(UObject* iEditedObject);
 
 protected:
     // Protected Initialization
@@ -35,7 +35,6 @@ public:
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
     virtual TSharedRef<FTabManager::FLayout> GetLayout();
-    virtual UObject* GetPrimaryEditedObject() = 0;
     virtual TArray<UObject*> GetEditedObjects();
     virtual FOdysseyEditorGUI* GetGUI() = 0;
 

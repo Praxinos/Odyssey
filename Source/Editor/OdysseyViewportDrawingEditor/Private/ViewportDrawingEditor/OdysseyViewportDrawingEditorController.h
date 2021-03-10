@@ -7,7 +7,7 @@
 #include "OdysseyStylusInputSettings.h"
 
 #include "OdysseyViewportDrawingEditorData.h"
-#include "OdysseyViewportDrawingEditorGUI.h"
+#include "OdysseyViewportDrawingEditorGUI_old.h"
 
 /**
  * Implements an Editor Controller for the paint in viewport.

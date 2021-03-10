@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "OdysseyBrushAssetBase.h"
 
 class FOdysseyPainterEditor;
 

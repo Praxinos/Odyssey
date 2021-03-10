@@ -137,8 +137,8 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
 {
 	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor(iTexture));
     TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
-	editor->Init();
-    toolkit->Init();
+	editor->Initialize(iTexture);
+    toolkit->Initialize();
     return toolkit.ToSharedRef();
 }
 

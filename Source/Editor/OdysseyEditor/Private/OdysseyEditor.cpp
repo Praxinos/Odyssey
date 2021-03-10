@@ -22,10 +22,11 @@ FOdysseyEditor::FOdysseyEditor()
 //----------------------------------------------------------------------- Initialization
 
 void
-FOdysseyEditor::Init()
+FOdysseyEditor::Initialize(UObject* iEditedObject)
 {
-    mEditedObjects.Add(GetPrimaryEditedObject());
-
+    if (iEditedObject)
+        mEditedObjects.Add(iEditedObject);
+        
     InitData();
     InitGUI();
 }

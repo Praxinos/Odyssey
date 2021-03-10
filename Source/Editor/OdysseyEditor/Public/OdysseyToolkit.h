@@ -19,12 +19,10 @@ public:
     TOdysseyToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor);
 
 public:
-    void Init();
+    virtual void Initialize();
 
 protected:
     // FAssetEditorToolkit interface
-    virtual FText GetToolkitName() const override;
-    virtual FText GetToolkitToolTipText() const override;
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
     virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
     virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
@@ -55,27 +53,13 @@ TOdysseyToolkit<T>::TOdysseyToolkit(const FName& iAppIdentifier, TSharedPtr<FOdy
 
 template<typename T>
 void
-TOdysseyToolkit<T>::Init()
+TOdysseyToolkit<T>::Initialize()
 {
     mEditor->OnToolkitInitialized(this);
 }
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------- FAssetEditorToolkit interface
-
-template<typename T>
-FText
-TOdysseyToolkit<T>::GetToolkitName() const
-{
-	return GetLabelForObject(mEditor->GetEditedObjects()[0]);
-}
-
-template<typename T>
-FText
-TOdysseyToolkit<T>::GetToolkitToolTipText() const
-{
-	return GetToolTipTextForObject(mEditor->GetEditedObjects()[0]);
-}
 
 template<typename T>
 FLinearColor
@@ -91,7 +75,7 @@ template<typename T>
 void
 TOdysseyToolkit<T>::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
-    FAssetEditorToolkit::RegisterTabSpawners(iTabManager);
+    T::RegisterTabSpawners(iTabManager);
     WorkspaceMenuCategory = mEditor->RegisterTabSpawners(iTabManager);
 }
 
