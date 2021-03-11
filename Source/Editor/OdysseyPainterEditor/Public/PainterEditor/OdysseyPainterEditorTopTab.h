@@ -21,6 +21,10 @@ protected:
     virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
+public:
+    // Setters
+    void IsVertical(bool iIsVertical);
+
 protected:
     // Widget Getters
     virtual float Size() const;
@@ -44,5 +48,6 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
+    bool mIsVertical;
 };
 

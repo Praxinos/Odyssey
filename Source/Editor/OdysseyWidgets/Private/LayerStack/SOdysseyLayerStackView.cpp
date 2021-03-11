@@ -19,6 +19,8 @@
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 
 
+//TODO: Make it a SListView, it will be much much easier
+
 SOdysseyLayerStackView::~SOdysseyLayerStackView()
 {
     //delete LayerStackModelPtr;
@@ -27,6 +29,7 @@ SOdysseyLayerStackView::~SOdysseyLayerStackView()
 
 void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 {
+    mCurrentLayerStack = nullptr;
     mLayerStackModelPtr = new FOdysseyLayerStackModel( MakeShareable( this ), InArgs._LayerStackData );
 
     //SAssignNew(mTreeView, SOdysseyLayerStackTreeView, mLayerStackModelPtr->GetNodeTree());
@@ -92,6 +95,20 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 
     if( mTreeView->GetNodeTree()->Update() != -1 ) //Empty stack
         mTreeView->Refresh();
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- SWidget overrides
+
+void
+SOdysseyLayerStackView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+    FOdysseyLayerStack* layerstack = mLayerStackModelPtr->GetLayerStackData();
+    if (layerstack != mCurrentLayerStack)
+    {
+        mCurrentLayerStack = layerstack;
+        mTreeView->Refresh();
+    }
 }
 
 

@@ -54,7 +54,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath() const
 bool
 FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
 {	
-	return !(mEditor->PaintableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
+	return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
 
 //--------------------------------------------------------------------------------------

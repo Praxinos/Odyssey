@@ -23,6 +23,9 @@ bool FOdysseyViewportDrawingEditorViewportClient::IgnoreInput()
         mTrueViewport->SetViewportClient(mViewportClient);
         mViewportClient = nullptr;
     }
+
+    //BIG BIG PATCH: let's make that bad guy destroy itself MOUAHAHAHAHA
+    delete this;
     return false;
 }
 

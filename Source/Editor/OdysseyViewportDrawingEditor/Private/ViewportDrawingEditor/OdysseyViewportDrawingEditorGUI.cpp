@@ -34,6 +34,9 @@ FOdysseyViewportDrawingEditorGUI::CreateTabs()
 
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mTextureSelectorTab, FOdysseyViewportDrawingEditorTextureSelectorTab, mEditor);
+
+    //Adjustments
+    mTopTab->IsVertical(true);
 }
 
 void

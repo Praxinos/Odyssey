@@ -25,29 +25,6 @@ struct FPaintTexture2DData;
 struct FTexturePaintMeshSectionInfo;
 
 
-/** Struct representing the selected settings for a mesh
- *	It allow us to remember which settings were selected when we come back to a previously selected actor
- */
-struct FInstanceTexturePaintSettings
-{
-
-	FInstanceTexturePaintSettings()
-		: mSelectedTexture(nullptr)
-	{}
-
-	FInstanceTexturePaintSettings(UTexture2D* iSelectedTexture)
-		: mSelectedTexture(iSelectedTexture)
-	{}
-
-	void operator=(const FInstanceTexturePaintSettings& iSrcSettings)
-	{
-		mSelectedTexture = iSrcSettings.mSelectedTexture;
-	}
-
-	UTexture2D* mSelectedTexture;
-};
-
-
 /** Mesh Based Painting
  * Batched element parameters for texture paint shaders used for paint blending and paint mask generation
  */
@@ -92,9 +69,6 @@ public:
 	// static FOdysseyViewportDrawingEditorPainter* Get();
 
 public:
-	/** Gets the UICommandList */
-	TSharedPtr<FUICommandList> GetUICommandList();
-
 	/** Gets the Editor Controller associated with this painter */ //TODO: Is this mandatory ?
 	// TSharedPtr<FOdysseyViewportDrawingEditorController> GetController() const;
 
@@ -144,19 +118,19 @@ private:
 	void GatherTextureTriangles(IMeshPaintGeometryAdapter* iAdapter, int32 iTriangleIndex, const int32 iVertexIndices[3], TArray<FTexturePaintTriangleInfo>* iTriangleInfo, TArray<FTexturePaintMeshSectionInfo>* iSectionInfos, int32 iUVChannelIndex);
 
 	/** Retrieves per-instnace texture paint settings instance for the given component */
-	FInstanceTexturePaintSettings& AddOrRetrieveInstanceTexturePaintSettings(UMeshComponent* iComponent);
+	// FInstanceTexturePaintSettings& AddOrRetrieveInstanceTexturePaintSettings(UMeshComponent* iComponent);
 
 	/** Functions for retrieving and resetting cached paint data */
-	void CacheSelectionData(); //TODO: Check how these 3 functions work together and if they're needed or needs to be replaced by something better
-	void CacheTexturePaintData();
-	void ResetPaintingState();
+	// void CacheSelectionData(); //TODO: Check how these 3 functions work together and if they're needed or needs to be replaced by something better
+	// void CacheTexturePaintData();
+	// void ResetPaintingState();
 
 	/** Checks whether or not the current selection contains components which reference the same (static/skeletal)-mesh */
 	bool ContainsDuplicateMeshes(TArray<UMeshComponent*>& iComponents) const;
 
 	/** Returns the instance of ComponentClass found in the current Editor selection */
-	template<typename ComponentClass>
-	TArray<ComponentClass*> GetSelectedComponents() const;
+	/* template<typename ComponentClass>
+	TArray<ComponentClass*> GetSelectedComponents() const;*/ 
 
 protected:  
 	/** Texture Based Painting Methods */
@@ -235,10 +209,10 @@ private:
 	void ApplyForcedLODIndex(int32 iForcedLODIndex);
 
 	/** Updates the paint targets based on property changes on actors in the scene */
-	void UpdatePaintTargets(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
+	void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
 
 	void SaveModifiedTextures();
-	void Cleanup();
+	// void Cleanup();
 
 private:
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
@@ -261,7 +235,7 @@ protected:
 
 	/** Texture paint state */
 	/** Textures eligible for painting retrieved from the current selection */
-	TArray<FPaintableTexture> mPaintableTextures;
+	// TArray<FPaintableTexture> mPaintableTextures;
 
     /** Texture paint: The mesh components that we're currently painting */
 	UMeshComponent* mTexturePaintingCurrentMeshComponent;
@@ -279,40 +253,36 @@ protected:
     UTextureRenderTarget2D* mBrushRenderTargetTexture;
 
 	/** Cached / stored instance texture paint settings for selected components */
-	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
+	// TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
 
 	/** Stores data associated with our paint target textures */
 	TMap< UTexture2D*, FPaintTexture2DData > mPaintTargetData;
 
 	/** True if we need to generate a texture seam mask used for texture dilation */
-	bool mDoGenerateSeamMask;
+	// bool mDoGenerateSeamMask;
 	
 	/** Used to store a flag that will tell the tick function to restore data to our rendertargets after they have been invalidated by a viewport resize. */
 	bool mDoRestoreRenTargets;
 
 	/** A map of the currently selected actors against info required for painting (selected material index etc)*/
-	TMap<TWeakObjectPtr<AActor>, FMeshSelectedMaterialInfo> mCurrentlySelectedActorsMaterialInfo;
+	// TMap<TWeakObjectPtr<AActor>, FMeshSelectedMaterialInfo> mCurrentlySelectedActorsMaterialInfo;
 
 	/** The currently selected actor, used to refer into the Map of Selected actor info */
-	TWeakObjectPtr<AActor> mActorBeingEdited;
+	// TWeakObjectPtr<AActor> mActorBeingEdited;
 	// End texture paint state
 
 	// Painter state
 	/** Flag for updating cached data */
-	bool mDoRefreshCachedData;
+	// bool mDoRefreshCachedData;
 	/** Map of geometry adapters for each selected mesh component */
-	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
+	// TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
 	// End painter state
 
 	/** Mesh components within the current selection which are eligible for painting */
-	TArray<UMeshComponent*> mPaintableComponents;
-
-	/** UI command list object */
-	TSharedPtr<FUICommandList> mUICommandList;
+	// TArray<UMeshComponent*> mPaintableComponents;
 
     FViewport* mFocusedViewport;
-    //PATCH: Temporary viewportClient created for overriding highPrecision mouse events (useful for mac)
-    FOdysseyViewportDrawingEditorViewportClient* mTemporaryViewportClient;
+    // FOdysseyViewportDrawingEditorViewportClient* mTemporaryViewportClient;
 
     FOdysseyStrokePoint mLastEvent;
 	FOdysseyStrokePoint mPreviousEvent;

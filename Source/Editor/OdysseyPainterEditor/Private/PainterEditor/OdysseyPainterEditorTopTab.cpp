@@ -21,6 +21,7 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ))
     , mEditor(iEditor)
+    , mIsVertical(false)
 {
 }
 
@@ -40,7 +41,8 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
         .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
         .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
-        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged );
+        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged )
+        .VerticalAspect(mIsVertical);
 }
 
 TSharedRef< SDockTab >
@@ -77,6 +79,15 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
 
     #undef MAP_ACTION
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Setters
+
+void
+FOdysseyPainterEditorTopTab::IsVertical(bool iIsVertical)
+{
+    mIsVertical = iIsVertical;
 }
 
 //--------------------------------------------------------------------------------------
