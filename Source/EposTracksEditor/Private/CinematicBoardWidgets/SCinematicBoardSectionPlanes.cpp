@@ -392,12 +392,12 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         .SelectionMode( ESelectionMode::None )
     ];
 
-    mNeedRebuildPlaneList = true;
+    RebuildPlaneList();
 }
 
 
-template<typename ItemType>
-class SNoDoubleClickTableRow : public STableRow<ItemType>
+class STableRowPlane
+    : public STableRow<TSharedPtr<FString>>
 {
     virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override
     {
@@ -408,16 +408,67 @@ class SNoDoubleClickTableRow : public STableRow<ItemType>
 TSharedRef<ITableRow>
 SCinematicBoardSectionPlanes::MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
+    if( !mBoardSection.IsValid() )
+        return SNew( STableRowPlane, iOwnerTable );
+
     return
-        SNew( SNoDoubleClickTableRow< TSharedPtr<FString> >, iOwnerTable )
+        SNew( STableRowPlane, iOwnerTable )
         [
-            mBoardSection.IsValid()
-            ?
             SNew( SCinematicBoardSectionPlane, mBoardSection.Pin().ToSharedRef() )
             .Binding( *iItem )
-            :
-            SNullWidget::NullWidget
         ];
+}
+
+void
+SCinematicBoardSectionPlanes::RebuildPlaneList()
+{
+    if( !mBoardSection.IsValid() )
+        return;
+
+    //---
+
+    if( !mNeedRebuildPlaneList )
+        return;
+
+    mNeedRebuildPlaneList = false;
+
+    //---
+
+    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( mBoardSection.Pin()->GetSubSectionObject(), *mBoardSection.Pin()->GetSequencer() );
+
+    auto need_rebuild = [&]()
+    {
+        if( possessables.Num() != mPossessables.Num() )
+            return true;
+
+        if( !possessables.Num() ) // Rebuild when no possessables, otherwise list view will be empty and not containing max_planes rows (with invalid guid)
+            return true;
+
+        for( int i = 0; i < possessables.Num(); i++ )
+            if( possessables[i].GetGuid() != mPossessables[i]->GetGuid() )
+                return true;
+
+        return false;
+    };
+    if( !need_rebuild() ) //TOCHECK: check if it's really ok
+        return;
+
+    mPossessables.Empty();
+
+    // This doesn't work because this vertical box won't have the same size for all sections
+    // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
+    // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
+    //int max_planes = possessables.Num();
+
+    int max_planes = CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( *mBoardSection.Pin()->GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>(), *mBoardSection.Pin()->GetSequencer() );
+    for( int i = 0; i < max_planes; i++ )
+    {
+        mPossessables.Add( MakeShared<FMovieScenePossessable>( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() ) );
+    }
+
+    if( mWidgetPlaneList )
+        mWidgetPlaneList->RequestListRefresh();
+        //mWidgetPlaneList->RebuildList();
 }
 
 void
@@ -425,31 +476,7 @@ SCinematicBoardSectionPlanes::Tick( const FGeometry& AllottedGeometry, const dou
 {
     SCompoundWidget::Tick( AllottedGeometry, InCurrentTime, InDeltaTime );
 
-    //---
-
-    if( mNeedRebuildPlaneList && mBoardSection.IsValid() )
-    {
-        TArray<FMovieScenePossessable> possessables( CinematicBoardSectionBindingHelpers::GetPlaneBindings( mBoardSection.Pin()->GetSubSectionObject(), *mBoardSection.Pin()->GetSequencer() ) );
-
-        mPossessables.Empty();
-
-        // This doesn't work because this vertical box won't have the same size for all sections
-        // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
-        // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
-        //int max_planes = possessables.Num();
-
-        int max_planes = CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( *mBoardSection.Pin()->GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>(), *mBoardSection.Pin()->GetSequencer() );
-        for( int i = 0; i < max_planes; i++ )
-        {
-            mPossessables.Add( MakeShared<FMovieScenePossessable>( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() ) );
-        }
-
-        if( mWidgetPlaneList )
-            mWidgetPlaneList->RequestListRefresh();
-            //mWidgetPlaneList->RebuildList();
-
-        mNeedRebuildPlaneList = false;
-    }
+    RebuildPlaneList();
 }
 
 #undef LOCTEXT_NAMESPACE

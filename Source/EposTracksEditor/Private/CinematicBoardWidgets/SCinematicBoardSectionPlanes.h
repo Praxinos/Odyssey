@@ -56,6 +56,8 @@ public:
 protected:
     TSharedRef<ITableRow> MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
+    void RebuildPlaneList();
+
 private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
     TWeakPtr<ISequencer> mSequencer;
