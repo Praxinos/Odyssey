@@ -17,15 +17,16 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyPainterEditor_TopBar"),
+	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TopBar"),
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ))
     , mEditor(iEditor)
+    , mIsVertical(false)
 {
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyPainterEditorTab interface
+//--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
@@ -40,7 +41,8 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
         .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
         .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
-        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged );
+        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged )
+        .VerticalAspect(mIsVertical);
 }
 
 TSharedRef< SDockTab >
@@ -57,9 +59,9 @@ FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
 }
 
 void
-FOdysseyPainterEditorTopTab::BindShortcuts()
+FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorTopTab::__VA_ARGS__ ), FCanExecuteAction() );
@@ -77,6 +79,15 @@ FOdysseyPainterEditorTopTab::BindShortcuts()
     MAP_ACTION(painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
 
     #undef MAP_ACTION
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Setters
+
+void
+FOdysseyPainterEditorTopTab::IsVertical(bool iIsVertical)
+{
+    mIsVertical = iIsVertical;
 }
 
 //--------------------------------------------------------------------------------------

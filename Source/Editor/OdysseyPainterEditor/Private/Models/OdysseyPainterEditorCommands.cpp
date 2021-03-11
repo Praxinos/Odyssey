@@ -62,6 +62,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( Undo, "Undo Iliad", "Undo stroke in Iliad",                                        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Z ) );
     UI_COMMAND( Redo, "Redo Iliad", "Redo stroke in Iliad",                                        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Y ) );
 #endif
+    UI_COMMAND( ClearUndo, "Clear Undo Iliad", "Clears the Undo Stack in Iliad",                        EUserInterfaceActionType::Button, FInputChord() );
     
 }
 

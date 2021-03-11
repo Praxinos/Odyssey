@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 #include <ULIS3>
 
 class FOdysseyTextureEditor;
@@ -11,7 +11,7 @@ class FOdysseyLayerStack;
 class SOdysseyLayerStackView;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorLayerStackTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -21,8 +21,8 @@ public:
 protected:
     // FOdysseyTextureEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts() override;
-    virtual void FillExtender(TSharedPtr<FExtender>& ioExtender) override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender) override;
 
 protected:
     // Widget Getters

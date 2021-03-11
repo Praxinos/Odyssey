@@ -37,6 +37,7 @@ public class OdysseyTextureEditor : ModuleRules
                 "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyWidgets",
+                "OdysseyEditor",
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
                 "OdysseyPainterEditor",

@@ -38,6 +38,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyWidgets",
+                "OdysseyEditor",
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
                 "OdysseyPainterEditor",

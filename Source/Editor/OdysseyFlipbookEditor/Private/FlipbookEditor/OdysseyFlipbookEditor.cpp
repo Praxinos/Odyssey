@@ -3,7 +3,6 @@
 
 #include "OdysseyFlipbookEditor.h"
 
-#include "OdysseyPainterEditorToolkit.h"
 #include "OdysseyFlipbookEditorGUI.h"
 #include "OdysseyFlipbookEditorTimelineTab.h"
 #include "OdysseySurfaceReadOnly.h"
@@ -27,16 +26,16 @@ FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 	}
 }
 
-FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyTextureEditor(iToolkit),
+FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
+	FOdysseyTextureEditor(),
 	mFlipbookWrapper(nullptr),
 	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
 	mGUI(nullptr)
 {
 }
 
-FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyTextureEditor(iToolkit),
+FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
+	FOdysseyTextureEditor(),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
 	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
 	mGUI(nullptr)
@@ -50,6 +49,26 @@ void
 FOdysseyFlipbookEditor::InitData()
 {
 	FOdysseyTextureEditor::InitData();
+
+	//--- Add Edited Objects
+
+	UPaperFlipbook* flipbook = mFlipbookWrapper->Flipbook();
+	TSharedPtr<FOdysseyFlipbookWrapper> flipbookWrapper = MakeShareable(new FOdysseyFlipbookWrapper(flipbook));
+
+	for (int32 index = 0; index < flipbook->GetNumKeyFrames(); ++index)
+	{
+		UPaperSprite* sprite = flipbookWrapper->GetKeyframeSprite(index);
+        if (!sprite)
+            continue;
+
+		AddEditedObject(sprite);
+
+		UTexture2D* texture = flipbookWrapper->GetKeyframeTexture(index);
+        if (!texture)
+            continue;
+            
+        AddEditedObject(texture);
+	}
 
 	//----
 
@@ -131,10 +150,10 @@ FOdysseyFlipbookEditor::OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D
 		if (sprite == iSprite)
 		{
 			if (iOldTexture)
-				Toolkit()->RemoveEditingObject(iOldTexture);
+				RemoveEditedObject(iOldTexture);
 
 			if (texture)
-				Toolkit()->AddEditingObject(texture);
+				AddEditedObject(texture);
 		}
 	}
 

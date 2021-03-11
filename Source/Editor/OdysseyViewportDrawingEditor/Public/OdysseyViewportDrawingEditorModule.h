@@ -12,7 +12,25 @@
 class FOdysseyViewportDrawingEditorModule : public IModuleInterface
 {
 public:
+	// IModuleInterface interface
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+	//Editor Mode
+	void RegisterEditorMode();
+	void UnregisterEditorMode();
+
+    //Commands
+	void RegisterCommands();
+	void UnregisterCommands();
+
+    //Shaders
+	void RegisterShaders();
+	void UnregisterShaders();
+
+    //Property Module Customizations
+	void RegisterPropertyModuleCustomizations();
+	void UnregisterPropertyModuleCustomizations();
 };
 

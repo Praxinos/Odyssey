@@ -20,12 +20,18 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditor();
-    FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit); //Non Initialized constructor
-    FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
+    FOdysseyTextureEditor(); //Non Initialized constructor
+    FOdysseyTextureEditor(UTexture2D* iTexture);
 
 public:
     // Initialization
     virtual void InitData() override;
+
+public:
+    // Undo
+    virtual void Undo() override;
+    virtual void Redo() override;
+    virtual void ClearUndo() override;
 
 public:
     // Getters
@@ -44,7 +50,7 @@ public:
     // Overrides
     virtual FOdysseyTextureEditorGUI* GetGUI() override;
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
-    virtual bool OnCloseRequested();
+    virtual bool OnCloseRequested() override;
     
 protected:
     // Attributes

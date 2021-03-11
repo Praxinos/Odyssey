@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 
 class FOdysseyFlipbookEditor;
 class SOdysseyFlipbookTimelineView;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorTimelineTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -17,10 +17,9 @@ public:
     FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditor* iEditor);
 
 protected:
-    // FOdysseyPainterEditorTab interface
+    // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts() override;
-    virtual void OnToolkitInitialized() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
     // Public Getters
@@ -43,7 +42,7 @@ protected:
 private:
     // Methods
     void SetTextureAtKeyframeIndex(int32 iKeyframeIndex);
-    void BindNavigationShortcuts();
+    void BindNavigationShortcuts(FBaseToolkit* iToolkit);
 
 private:
     FOdysseyFlipbookEditor* mEditor;

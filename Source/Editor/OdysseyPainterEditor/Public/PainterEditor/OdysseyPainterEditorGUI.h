@@ -3,27 +3,26 @@
 
 #pragma once
 
+#include "OdysseyEditorGUI.h"
+
+#include "OdysseyPainterEditorBrushSelectorTab.h"
+#include "OdysseyPainterEditorBrushExposedParametersTab.h"
+#include "OdysseyPainterEditorColorSlidersTab.h"
+#include "OdysseyPainterEditorColorWheelTab.h"
+#include "OdysseyPainterEditorMeshSelectorTab.h"
+#include "OdysseyPainterEditorStrokeOptionsTab.h"
+#include "OdysseyPainterEditorTopTab.h"
+#include "OdysseyPainterEditorToolsTab.h"
+#include "OdysseyPainterEditorViewportTab.h"
+
 class FOdysseyPainterEditor;
 class FOdysseyPainterEditorController;
-class FOdysseyPainterEditorTab;
-class FOdysseyPainterEditorBrushExposedParametersTab;
-class FOdysseyPainterEditorBrushSelectorTab;
-class FOdysseyPainterEditorColorSlidersTab;
-class FOdysseyPainterEditorColorWheelTab;
-class FOdysseyPainterEditorMeshSelectorTab;
-class FOdysseyPainterEditorStrokeOptionsTab;
-class FOdysseyPainterEditorToolsTab;
-class FOdysseyPainterEditorTopTab;
-class FOdysseyPainterEditorViewportTab;
-
-#define ODYSSEY_ADD_TAB(var, class, ...) { var = MakeShareable(new class(__VA_ARGS__)); mTabs.Add(TAttribute<TSharedPtr<FOdysseyPainterEditorTab>>::Create([&](){ return var; })); }
-#define ODYSSEY_SET_TAB(var, class, ...) { var = MakeShareable(new class(__VA_ARGS__)); }
 
 /**
  * Implements an Editor toolkit for textures.
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGUI :
-	public TSharedFromThis<FOdysseyPainterEditorGUI>
+	public FOdysseyEditorGUI
 {
 public:
     // Construction / Destruction
@@ -36,23 +35,16 @@ public:
 public:
     // Tabs
     virtual void CreateTabs();
-    virtual void InitTabs();
-    virtual void BindShortcuts();
-	virtual void RegisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
-	virtual void UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager);
+    virtual void BindShortcuts(FBaseToolkit* iToolkit);
 
 public:
     // Menu And Toolbar
-    virtual void FillExtender(TSharedPtr<FExtender>& ioExtender);
+    virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender);
     virtual void ExtendMenuAbout(FMenuBuilder& ioMenuBuilder);
-
-public:
-    // Listeners
-    virtual void OnToolkitInitialized();
 
 protected:
 	// Layout
-	virtual void CreateLayout();
+	virtual TSharedPtr<FTabManager::FLayout> CreateLayout() override;
 	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateLeftSection();
 	virtual TSharedRef<FTabManager::FSplitter>	CreateRightSection();
@@ -60,9 +52,6 @@ protected:
 
 public:
     // Getters
-	TSharedRef<FTabManager::FLayout> GetLayout();
-    virtual FName GetLayoutName();
-
     TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
@@ -82,11 +71,6 @@ protected:
 
 private:
     FOdysseyPainterEditor*                          mEditor;
-	TSharedPtr<FTabManager::FLayout>                mLayout;
-
-protected:
-    //listing all tabs and managing the fact that a tab ptr can change through the Init process
-    TArray<TAttribute<TSharedPtr<FOdysseyPainterEditorTab>>> mTabs;
 
 protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;

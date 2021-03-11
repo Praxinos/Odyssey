@@ -76,6 +76,11 @@
       "LoadingPhase": "PostEngineInit"
     },
     {
+      "Name": "OdysseyEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyFlipbook",
       "Type": "Editor",
       "LoadingPhase": "PostDefault"

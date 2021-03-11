@@ -3,13 +3,14 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
+#include "OdysseyEventState.h"
 #include <ULIS3>
 
 class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorColorSlidersTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -17,7 +18,7 @@ public:
     FOdysseyPainterEditorColorSlidersTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyPainterEditorTab interface
+    // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
 protected:

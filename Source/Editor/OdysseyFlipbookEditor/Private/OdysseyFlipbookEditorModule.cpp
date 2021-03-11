@@ -122,10 +122,10 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
 TSharedRef<FOdysseyFlipbookEditorToolkit>
 FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
 {
-    TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable( new FOdysseyFlipbookEditorToolkit() );
-	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook, toolkit));
-	editor->Init();
-	toolkit->Init(editor, iFlipbook);
+	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
+	TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable(new FOdysseyFlipbookEditorToolkit(editor));
+	editor->Initialize(iFlipbook);
+	toolkit->Initialize();
     return toolkit;
 }
 

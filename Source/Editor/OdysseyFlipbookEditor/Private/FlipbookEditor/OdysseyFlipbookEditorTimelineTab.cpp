@@ -19,7 +19,7 @@ FOdysseyFlipbookEditorTimelineTab::~FOdysseyFlipbookEditorTimelineTab()
 }
 
 FOdysseyFlipbookEditorTimelineTab::FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditor* iEditor)
-	: FOdysseyPainterEditorTab(TEXT("OdysseyFlipbookEditor_Timeline"),
+	: FOdysseyEditorTab(TEXT("OdysseyFlipbookEditor_Timeline"),
                             LOCTEXT( "OdysseyFlipbookEditorTimelineTab", "Timeline" ),
                             FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" )) //TODO: Timeline Icon
     , mEditor(iEditor)
@@ -48,9 +48,9 @@ FOdysseyFlipbookEditorTimelineTab::CreateWidget()
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::BindShortcuts()
+FOdysseyFlipbookEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyFlipbookEditorCommands& flipbookEditorCommands = FOdysseyFlipbookEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorViewportTab::__VA_ARGS__ ), FCanExecuteAction() );
@@ -59,13 +59,8 @@ FOdysseyFlipbookEditorTimelineTab::BindShortcuts()
 
     #undef MAP_ACTION
 
+	BindNavigationShortcuts(iToolkit);
 	mTimeline->BindCommands(toolkitCommands);
-}
-
-void
-FOdysseyFlipbookEditorTimelineTab::OnToolkitInitialized()
-{
-	BindNavigationShortcuts();
 }
 
 //--------------------------------------------------------------------------------------
@@ -121,13 +116,13 @@ FOdysseyFlipbookEditorTimelineTab::OnFlipbookChanged()
 void
 FOdysseyFlipbookEditorTimelineTab::OnSpriteCreated(UPaperSprite* iSprite)
 {
-	mEditor->Toolkit()->AddEditingObject(iSprite);
+	mEditor->AddEditedObject(iSprite);
 }
 
 void
 FOdysseyFlipbookEditorTimelineTab::OnTextureCreated(UTexture2D* iTexture)
 {
-	mEditor->Toolkit()->AddEditingObject(iTexture);
+	mEditor->AddEditedObject(iTexture);
 }
 
 void
@@ -136,13 +131,13 @@ FOdysseyFlipbookEditorTimelineTab::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKe
 	if (!iKeyframe.Sprite)
 		return;
 
-	mEditor->Toolkit()->RemoveEditingObject(iKeyframe.Sprite);
+	mEditor->RemoveEditedObject(iKeyframe.Sprite);
 
 	UTexture2D* texture = iKeyframe.Sprite->GetSourceTexture();
 	if (!texture)
 		return;
 
-	mEditor->Toolkit()->RemoveEditingObject(texture);
+	mEditor->RemoveEditedObject(texture);
 }
 
 //--------------------------------------------------------------------------------------
@@ -164,9 +159,13 @@ FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeInde
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::BindNavigationShortcuts()
+FOdysseyFlipbookEditorTimelineTab::BindNavigationShortcuts(FBaseToolkit* iToolkit)
 {
-	TSharedPtr<SDockTab> OwnerTab = mEditor->Toolkit()->GetTabManager()->GetOwnerTab();
+	if (!iToolkit->IsAssetEditor())
+		return;
+
+	FAssetEditorToolkit* toolkit = static_cast<FAssetEditorToolkit*>(iToolkit);
+	TSharedPtr<SDockTab> OwnerTab = toolkit->GetTabManager()->GetOwnerTab();
 	TSharedPtr<SWindow> parentWindow = NULL;
 	if (OwnerTab.IsValid())
 	{

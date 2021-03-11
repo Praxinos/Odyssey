@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorTab.h"
+#include "OdysseyEditorTab.h"
 
 class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTopTab :
-	public FOdysseyPainterEditorTab
+	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
@@ -16,10 +16,14 @@ public:
     FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyPainterEditorTab interface
+    // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
-    virtual void BindShortcuts() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+
+public:
+    // Setters
+    void IsVertical(bool iIsVertical);
 
 protected:
     // Widget Getters
@@ -44,5 +48,6 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
+    bool mIsVertical;
 };
 

@@ -18,9 +18,8 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
     delete mUndoHistory;
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit)
-    : mToolkit(iToolkit)
-    , mUndoHistory( new FOdysseyUndoHistory() )
+FOdysseyPainterEditor::FOdysseyPainterEditor()
+    : mUndoHistory( new FOdysseyUndoHistory() )
     , mPaintEngine( new FOdysseyPaintEngine(mUndoHistory) )
 	, mPaintColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) )
     , mDrawBrushPreview( true )
@@ -29,13 +28,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedPtr<FOdysseyPainterEditorToo
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Initialization
-
-void
-FOdysseyPainterEditor::Init()
-{
-    InitData();
-    InitGUI();
-}
 
 void
 FOdysseyPainterEditor::InitData()
@@ -49,9 +41,46 @@ FOdysseyPainterEditor::InitData()
 }
 
 void
-FOdysseyPainterEditor::InitGUI()
+FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    GetGUI()->Init();
+	FOdysseyEditor::BindShortcuts(iToolkit);
+
+	//---
+
+	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
+
+	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
+
+	MAP_ACTION(painterEditorCommands.Undo, Undo )
+	MAP_ACTION(painterEditorCommands.Redo, Redo )
+    MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo )
+
+	#undef MAP_ACTION
+}
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------- Undo
+
+void
+FOdysseyPainterEditor::Undo()
+{
+	//End stroke before undoing, allows to manage PaintEngine->OnTick Undo
+	PaintEngine()->Flush();
+}
+
+void
+FOdysseyPainterEditor::Redo()
+{
+	//End stroke before redoing, allows to manage PaintEngine->OnTick Redo
+	PaintEngine()->Flush();
+}
+
+void
+FOdysseyPainterEditor::ClearUndo()
+{
+	//End stroke before undoing, just to be perfectly clean
+	PaintEngine()->Flush();
 }
 
 //--------------------------------------------------------------------------------------
@@ -81,12 +110,6 @@ FOdysseyPainterEditor::PaintColor() const
 	return mPaintColor;
 }
 
-TSharedPtr<FOdysseyPainterEditorToolkit>
-FOdysseyPainterEditor::Toolkit()
-{
-    return mToolkit.Pin();
-}
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -100,37 +123,4 @@ void
 FOdysseyPainterEditor::PaintColor(::ul3::FPixelValue iColor)
 {
 	mPaintColor = iColor;
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Methods
-
-void
-FOdysseyPainterEditor::OnToolkitInitialized()
-{
-    GetGUI()->OnToolkitInitialized();
-}
-
-bool
-FOdysseyPainterEditor::OnCloseRequested()
-{
-    return true;
-}
-
-void
-FOdysseyPainterEditor::FillExtender(TSharedPtr<FExtender>& ioExtender)
-{
-	return GetGUI()->FillExtender(ioExtender);
-}
-
-TSharedRef<FTabManager::FLayout>
-FOdysseyPainterEditor::GetLayout()
-{
-    return GetGUI()->GetLayout();
-}
-
-void
-FOdysseyPainterEditor::UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
-{
-    GetGUI()->UnregisterTabSpawners(iTabManager);
 }

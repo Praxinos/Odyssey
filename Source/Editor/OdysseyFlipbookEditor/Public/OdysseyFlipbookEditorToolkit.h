@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyPainterEditorToolkit.h"
+#include "OdysseyAssetEditorToolkit.h"
 
 #include <ULIS3>
 
@@ -17,16 +17,15 @@ class UPaperFlipbook;
  * Implements an Editor toolkit for Flipbooks.
  */
 class FOdysseyFlipbookEditorToolkit
-    : public FOdysseyPainterEditorToolkit
+    : public FOdysseyAssetEditorToolkit
 {
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorToolkit();
-    FOdysseyFlipbookEditorToolkit();
+    FOdysseyFlipbookEditorToolkit(TSharedPtr<FOdysseyFlipbookEditor> iEditor);
 
 protected:
 	virtual void OpenAsset(UObject* iObject) override;
-    virtual TArray<UObject*> GetAllEditedObjects() override;
 
 public:
     // IToolkit interface

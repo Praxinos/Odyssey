@@ -20,8 +20,8 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditor();
-    FOdysseyFlipbookEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit); //Non-Initialized Contructor
-    FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit);
+    FOdysseyFlipbookEditor(); //Non-Initialized Contructor
+    FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook);
 
 public:
     //Initialization

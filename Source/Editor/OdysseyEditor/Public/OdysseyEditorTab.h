@@ -3,23 +3,23 @@
 
 #pragma once
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTab :
-	public TSharedFromThis<FOdysseyPainterEditorTab>
+class ODYSSEYEDITOR_API FOdysseyEditorTab :
+	public TSharedFromThis<FOdysseyEditorTab>
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyPainterEditorTab();
-    FOdysseyPainterEditorTab(FName iID, FText iDisplayName, FSlateIcon iIcon);
+    virtual ~FOdysseyEditorTab();
+    FOdysseyEditorTab(FName iID, FText iDisplayName, FSlateIcon iIcon);
 
 public:
     void Init();
 
 public:
     virtual TSharedPtr<SWidget> CreateWidget() = 0;
-    virtual void BindShortcuts();
-    virtual void OnToolkitInitialized();
+    virtual void BindShortcuts(FBaseToolkit* iToolkit);
+    virtual void OnToolkitInitialized(FBaseToolkit* iToolkit);
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
-    virtual void FillExtender(TSharedPtr<FExtender>& ioExtender);
+    virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender);
 
 public:
     const FName&                        ID() const;

@@ -5,7 +5,6 @@
 
 #include "OdysseyTextureEditorGUI.h"
 
-#include "OdysseyPainterEditorToolkit.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
@@ -24,16 +23,16 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
     mTextureWrapper.OnPostTextureChangeDelegate().RemoveAll(this);
 }
 
-FOdysseyTextureEditor::FOdysseyTextureEditor(TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyPainterEditor(iToolkit),
+FOdysseyTextureEditor::FOdysseyTextureEditor() :
+	FOdysseyPainterEditor(),
 	mTextureWrapper(nullptr),
 	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr)
 {
 }
 
-FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture, TSharedPtr<FOdysseyPainterEditorToolkit> iToolkit) :
-	FOdysseyPainterEditor(iToolkit),
+FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture) :
+	FOdysseyPainterEditor(),
     mTextureWrapper( iTexture ),
 	mSelectedAlphaMode(::ul3::AM_NORMAL),
 	mGUI(nullptr)
@@ -65,6 +64,47 @@ FOdysseyTextureEditor::InitData()
     mTextureWrapper.OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPreTextureChange);
     mTextureWrapper.OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPostTextureChange);
     PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEnginePaintEnd);
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Undo
+
+void
+FOdysseyTextureEditor::Undo()
+{
+    FOdysseyPainterEditor::Undo();
+
+    if(!LayerStack())
+        return;
+
+    if (!LayerStack()->mDrawingUndo->HasUndo())
+        return;
+    
+	LayerStack()->mDrawingUndo->LoadData();
+}
+
+void
+FOdysseyTextureEditor::Redo()
+{
+    FOdysseyPainterEditor::Redo();
+
+    if(!LayerStack())
+        return;
+
+    if (!LayerStack()->mDrawingUndo->HasRedo())
+        return;
+    
+	LayerStack()->mDrawingUndo->Redo();
+}
+
+void
+FOdysseyTextureEditor::ClearUndo()
+{
+    if(!LayerStack())
+        return;
+    
+	LayerStack()->mDrawingUndo->Clear();
+    FOdysseyPainterEditor::ClearUndo();
 }
 
 //--------------------------------------------------------------------------------------

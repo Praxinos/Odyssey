@@ -43,9 +43,9 @@ public:
     
     /** Action for redoing a stroke in ILIAD*/
     TSharedPtr<FUICommandInfo> Redo;
-
-
     
+    /** Action for redoing a stroke in ILIAD*/
+    TSharedPtr<FUICommandInfo> ClearUndo;
 
 
     //Tools Actions

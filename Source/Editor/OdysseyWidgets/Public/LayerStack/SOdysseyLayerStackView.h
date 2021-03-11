@@ -35,6 +35,9 @@ public:
     ~SOdysseyLayerStackView();
     void Construct(const FArguments& InArgs);
 
+private:
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
 public:
     //PUBLIC API
     /** Access the tree view */
@@ -61,6 +64,7 @@ private:
 	EVisibility LayerStackVisibility() const;
 
 private:
+    FOdysseyLayerStack* mCurrentLayerStack;
 
     /** The main LayerStack model */
     FOdysseyLayerStackModel* mLayerStackModelPtr;

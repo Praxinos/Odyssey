@@ -3,8 +3,8 @@
 
 #include "OdysseyPainterEditorGUI.h"
 
+#include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorTab.h"
 #include "OdysseyPainterEditorBrushSelectorTab.h"
 #include "OdysseyPainterEditorBrushExposedParametersTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
@@ -29,23 +29,9 @@ FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor)
-	: mEditor(iEditor)
-	, mLayout(nullptr)
+	: FOdysseyEditorGUI(iEditor)
+	, mEditor(iEditor)
 {
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Initialization
-
-void
-FOdysseyPainterEditorGUI::Init()
-{
-	CreateTabs(); //Create Tabs Objects and sets their corresponding controllers
-	InitTabs(); //Init Tabs, creating their widgets
-
-	BindShortcuts();
-
-	CreateLayout();
 }
 
 //--------------------------------------------------------------------------------------
@@ -54,6 +40,8 @@ FOdysseyPainterEditorGUI::Init()
 void
 FOdysseyPainterEditorGUI::CreateTabs()
 {
+	FOdysseyEditorGUI::CreateTabs();
+
 	ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
 	ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
 	ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
@@ -66,18 +54,13 @@ FOdysseyPainterEditorGUI::CreateTabs()
 }
 
 void
-FOdysseyPainterEditorGUI::InitTabs()
+FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->Init();
-	}
-}
+	FOdysseyEditorGUI::BindShortcuts(iToolkit);
 
-void
-FOdysseyPainterEditorGUI::BindShortcuts()
-{
-	const TSharedRef<FUICommandList>& toolkitCommands = mEditor->Toolkit()->GetToolkitCommands();
+	//---
+
+	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
 	#define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorGUI::__VA_ARGS__ ), FCanExecuteAction() );
@@ -88,52 +71,23 @@ FOdysseyPainterEditorGUI::BindShortcuts()
 	MAP_ACTION(painterEditorCommands.SwitchTabletAPI, VisitPraxinosForums )
 
 	#undef MAP_ACTION
-
-	//---
-
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->BindShortcuts();
-	}
-}
-
-void
-FOdysseyPainterEditorGUI::RegisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager, TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		iTabManager->RegisterTabSpawner(mTabs[i].Get()->ID(), FOnSpawnTab::CreateSP( mTabs[i].Get().ToSharedRef(), &FOdysseyPainterEditorTab::SpawnTab ) )
-			.SetDisplayName( mTabs[i].Get()->DisplayName() )
-			.SetGroup(iWorkspaceMenuCategoryRef)
-			.SetIcon( mTabs[i].Get()->Icon() );
-	}
-}
-
-void
-FOdysseyPainterEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabManager >& iTabManager )
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		iTabManager->UnregisterTabSpawner( mTabs[i].Get()->ID() );
-	}
 }
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Menu and Toolbar
 
 void
-FOdysseyPainterEditorGUI::FillExtender(TSharedPtr<FExtender>& ioExtender)
+FOdysseyPainterEditorGUI::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
 {
+	FOdysseyEditorGUI::FillExtender(iToolkit, ioExtender);
+
+	//---
+
 	ioExtender->AddMenuExtension(
         "HelpApplication",
         EExtensionHook::After,
-		mEditor->Toolkit()->GetToolkitCommands(),
+		iToolkit->GetToolkitCommands(),
         FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorGUI::ExtendMenuAbout ) );
-
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->FillExtender(ioExtender);
-	}
 }
 
 //static
@@ -148,26 +102,14 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FMenuBuilder& ioMenuBuilder )
     }
 }
 
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------- Listeners
-
-void
-FOdysseyPainterEditorGUI::OnToolkitInitialized()
-{
-	for (int i = 0; i < mTabs.Num(); i++)
-	{
-		mTabs[i].Get()->OnToolkitInitialized();
-	}
-}
-
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Layout
 
-void
+TSharedPtr<FTabManager::FLayout>
 FOdysseyPainterEditorGUI::CreateLayout()
 {
-	mLayout = FTabManager::NewLayout(GetLayoutName())
+	return FOdysseyEditorGUI::CreateLayout()
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()
@@ -311,18 +253,6 @@ FOdysseyPainterEditorGUI::CreateMainSection()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-TSharedRef<FTabManager::FLayout>
-FOdysseyPainterEditorGUI::GetLayout()
-{
-	return mLayout.ToSharedRef();
-}
-
-FName
-FOdysseyPainterEditorGUI::GetLayoutName()
-{
-	return "OdysseyFlipbookEditor_Layout";
-}
-
 TSharedPtr<FOdysseyPainterEditorViewportTab>&
 FOdysseyPainterEditorGUI::GetViewportTab()
 {
@@ -397,16 +327,7 @@ FOdysseyPainterEditorGUI::VisitPraxinosForums()
 void
 FOdysseyPainterEditorGUI::AboutIliad()
 {
-    TSharedPtr<SDockTab> OwnerTab = mEditor->Toolkit()->GetTabManager()->GetOwnerTab();
-    TSharedPtr<SWindow> parentWindow = NULL;
-    if (OwnerTab.IsValid())
-    {
-        parentWindow = FSlateApplication::Get().FindWidgetWindow(OwnerTab.ToSharedRef());
-    }
-    else
-    {
-        parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
-    }
+	TSharedPtr<SWindow> parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
 	SOdysseyAboutScreen::Open(parentWindow);
 }
 

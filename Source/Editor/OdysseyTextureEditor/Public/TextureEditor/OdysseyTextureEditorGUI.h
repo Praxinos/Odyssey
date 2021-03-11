@@ -14,14 +14,15 @@
 #include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
 
+#include "OdysseyTextureEditorLayerStackTab.h"
+#include "OdysseyTextureEditorTextureDetailsTab.h"
+#include "OdysseyTextureEditorTopTab.h"
+
 class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyTextureEditor;
 class FOdysseyTextureEditorController;
-
-class FOdysseyTextureEditorLayerStackTab;
-class FOdysseyTextureEditorTextureDetailsTab;
 
 /**
  * Implements an Editor toolkit for textures.

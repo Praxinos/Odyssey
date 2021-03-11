@@ -19,29 +19,82 @@
 
 IMPLEMENT_MODULE(FOdysseyViewportDrawingEditorModule, OdysseyViewportDrawingEditor );
 
-void FOdysseyViewportDrawingEditorModule::StartupModule()
+void
+FOdysseyViewportDrawingEditorModule::StartupModule()
+{
+	RegisterEditorMode();
+
+	RegisterCommands();
+
+    RegisterShaders();
+
+	RegisterPropertyModuleCustomizations();
+}
+
+void
+FOdysseyViewportDrawingEditorModule::ShutdownModule()
+{
+	UnregisterEditorMode();
+
+	UnregisterCommands();
+
+    UnregisterShaders();
+
+	UnregisterPropertyModuleCustomizations();
+}
+
+void
+FOdysseyViewportDrawingEditorModule::RegisterEditorMode()
 {
 	FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
 		FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
 		NSLOCTEXT("OdysseyPaintInViewportMode", "OdysseyViewportPaint_ModeName", "Iliad"),
 		FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
 		true, 200 );
-
-    FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("Iliad"))->GetBaseDir(),TEXT("Shaders"));
-    AddShaderSourceDirectoryMapping(TEXT("/Plugin/Iliad"),PluginShaderDir);
-
-	/** Register detail/property customization */
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-	FModuleManager::Get().LoadModule("MeshPaint");
-
-	FOdysseyViewportDrawingEditorCommands::Register();
 }
 
-void FOdysseyViewportDrawingEditorModule::ShutdownModule()
+void
+FOdysseyViewportDrawingEditorModule::UnregisterEditorMode()
 {
 	FEditorModeRegistry::Get().UnregisterMode(FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId);
+}
 
+void
+FOdysseyViewportDrawingEditorModule::RegisterCommands()
+{
+    FOdysseyViewportDrawingEditorCommands::Register();
+}
+
+void
+FOdysseyViewportDrawingEditorModule::UnregisterCommands()
+{
+    FOdysseyViewportDrawingEditorCommands::Unregister();
+}
+
+void
+FOdysseyViewportDrawingEditorModule::RegisterShaders()
+{
+    FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("Iliad"))->GetBaseDir(),TEXT("Shaders"));
+    AddShaderSourceDirectoryMapping(TEXT("/Plugin/Iliad"),PluginShaderDir);
+}
+
+void
+FOdysseyViewportDrawingEditorModule::UnregisterShaders()
+{
+	//No method available to unregister Shaders directories
+}
+
+void
+FOdysseyViewportDrawingEditorModule::RegisterPropertyModuleCustomizations()
+{
+	/** Register detail/property customization */
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FModuleManager::Get().LoadModule("MeshPaint");
+}
+
+void
+FOdysseyViewportDrawingEditorModule::UnregisterPropertyModuleCustomizations()
+{
 	/** De-register detail/property customization */
 	FPropertyEditorModule* PropertyModule = FModuleManager::GetModulePtr<FPropertyEditorModule>("PropertyEditor");
 	if (PropertyModule)

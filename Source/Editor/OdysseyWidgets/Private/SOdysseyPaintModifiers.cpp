@@ -31,7 +31,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mOnAlphaModeChangedCallback = InArgs._OnAlphaModeChanged;
     mAlphaModes = GetAlphaModesAsText();
 
-    if( InArgs._VerticalAspect.Get())
+    if( InArgs._VerticalAspect)
     {
         ChildSlot
         [
