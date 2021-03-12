@@ -37,17 +37,23 @@ FOdysseyPainterEditorDrawingState::Id()
 float
 FOdysseyPainterEditorDrawingState::Zoom()
 {
+    if (!mEditor->GetGUI()->GetViewportTab())
+        return 1.0f;
     return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetZoom();
 }
 
 float
 FOdysseyPainterEditorDrawingState::RotationInDegrees()
 {
+    if (!mEditor->GetGUI()->GetViewportTab())
+        return 0.0f;
     return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees();
 }
 
 FVector2D
 FOdysseyPainterEditorDrawingState::Pan()
 {
+    if (!mEditor->GetGUI()->GetViewportTab())
+        return FVector2D(0.0f, 0.0f);
     return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetPan();
 }

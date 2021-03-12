@@ -1199,7 +1199,7 @@ void FOdysseyViewportDrawingEditorPainter::FinishPaintingMeshBased()
                 textureData->PaintingTexture2D->Source.UnlockMip(0);
 
                 // If render target gamma used was 1.0 then disable SRGB for the static texture
-                textureData->PaintingTexture2D->SRGB = FMath::Abs(renderTargetResource->GetDisplayGamma() - 1.0f) >= KINDA_SMALL_NUMBER;
+                //textureData->PaintingTexture2D->SRGB = FMath::Abs(renderTargetResource->GetDisplayGamma() - 1.0f) >= KINDA_SMALL_NUMBER;
 
                 textureData->PaintingTexture2D->bHasBeenPaintedInEditor = true;
             }
@@ -1314,7 +1314,7 @@ void FOdysseyViewportDrawingEditorPainter::CommitAllPaintedTextures()
 
 					// If render target gamma used was 1.0 then disable SRGB for the static texture
 					// @todo MeshPaint: We are not allowed to dereference the RenderTargetResource pointer, figure out why we need this when the GetDisplayGamma() function is hard coded to return 2.2.
-					textureData->PaintingTexture2D->SRGB = FMath::Abs(renderTargetResource->GetDisplayGamma() - 1.0f) >= KINDA_SMALL_NUMBER;
+					//textureData->PaintingTexture2D->SRGB = FMath::Abs(renderTargetResource->GetDisplayGamma() - 1.0f) >= KINDA_SMALL_NUMBER;
 
 					textureData->PaintingTexture2D->bHasBeenPaintedInEditor = true;
 
