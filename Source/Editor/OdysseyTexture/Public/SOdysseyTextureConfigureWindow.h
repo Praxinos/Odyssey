@@ -20,11 +20,26 @@ public:
     };
 
 public:
-    void Construct( const FArguments& iArgs );
+    struct ODYSSEYTEXTURE_API FProperties
+    {
+        FProperties();
+        int                     mWidth;
+        int                     mHeight;
+        ETextureSourceFormat    mFormat;
+        FText                   mName;
+        EBackgroundColor        mBackgroundColor;
+    };
+
+public:
+    void Construct(const FArguments& iArgs);
+    void Construct( const FArguments& iArgs, const FProperties& iProperties);
 
     bool GetWindowAnswer();
 
 public:
+    void SetProperties(const FProperties& iProperties);
+
+    const FProperties& GetProperties() const;
     int32 GetWidth() const;
     int32 GetHeight() const;
     ETextureSourceFormat GetFormat() const;
@@ -54,13 +69,14 @@ public:
     FReply OnCancel();
 
 private:
-    int                     mWidth;
+    FProperties             mProperties;
+    /* int                     mWidth;
     int                     mHeight;
     ETextureSourceFormat    mFormat;
     FText                   mName;
-    EBackgroundColor        mBackgroundColor;
-    bool                    mWindowAnswer;
+    EBackgroundColor        mBackgroundColor; */
 
+    bool                    mWindowAnswer;
     TArray< TSharedPtr<ETextureSourceFormat> >                  mAllFormats;
     TSharedPtr<SComboBox<TSharedPtr<ETextureSourceFormat> > >   mFormatComboBox;
 };

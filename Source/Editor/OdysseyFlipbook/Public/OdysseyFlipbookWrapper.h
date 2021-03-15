@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SOdysseyTextureConfigureWindow.h"
 
 class UTexture2D;
 class UPaperSprite;
@@ -95,6 +96,8 @@ private:
 	UPaperFlipbook* mFlipbook;
 
     UTexture2D* mSpritePreviousTexture; //
+
+    SOdysseyTextureConfigureWindow::FProperties mTextureWindowProperties;
 
     //FOnKeyFrameAdded mOnKeyFrameAdded;
     //FOnKeyFrameChanged mOnKeyFrameChanged;

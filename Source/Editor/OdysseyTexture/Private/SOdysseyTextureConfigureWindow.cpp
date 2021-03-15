@@ -15,18 +15,28 @@
 
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
-#define DEFAULT_CANVAS_SIZE 1024
+
+SOdysseyTextureConfigureWindow::FProperties::FProperties()
+{
+    mWidth = 1024;
+    mHeight = 1024;
+    mFormat = TSF_BGRA8;
+    mName = LOCTEXT("default-name", "T_Drawing");
+    mBackgroundColor = kTransparent;
+}
 
 //---
 
 void
-SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
+SOdysseyTextureConfigureWindow::Construct(const FArguments& iArgs, const FProperties& iProperties)
 {
-    mWidth = DEFAULT_CANVAS_SIZE;
-    mHeight = DEFAULT_CANVAS_SIZE;
-    mName = LOCTEXT( "default-name", "T_Drawing" );
+    mProperties = iProperties;
+    Construct(iArgs);
+}
 
-    mFormat = TSF_BGRA8;
+void
+SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
+{
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_G8 ) );
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRA8 ) );
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_BGRE8 ) );
@@ -34,8 +44,6 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
     mAllFormats.Add( MakeShared< ETextureSourceFormat >( TSF_RGBA16F ) );
     //mAllFormats.Add( MakeShared< TPair<ETextureSourceFormat, FText> >( TSF_G16, FText::FromString( "Grey 16 (unsued?)" ) ) );
 
-    mBackgroundColor = kTransparent;
-        
     mWindowAnswer = false;
 
     //---
@@ -256,7 +264,7 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs )
 
     mFormatComboBox->SetSelectedItem( *mAllFormats.FindByPredicate( [this]( const TSharedPtr<ETextureSourceFormat> iFormat )
     {
-        return mFormat == *iFormat;
+        return mProperties.mFormat == *iFormat;
     } ) );
 }
 
@@ -268,34 +276,46 @@ SOdysseyTextureConfigureWindow::GetWindowAnswer()
     return mWindowAnswer;
 }
 
+void
+SOdysseyTextureConfigureWindow::SetProperties(const FProperties& iProperties)
+{
+    mProperties = iProperties;
+}
+
+const SOdysseyTextureConfigureWindow::FProperties&
+SOdysseyTextureConfigureWindow::GetProperties() const
+{
+    return mProperties;
+}
+
 int32
 SOdysseyTextureConfigureWindow::GetWidth() const
 {
-    return mWidth;
+    return mProperties.mWidth;
 }
 
 int32
 SOdysseyTextureConfigureWindow::GetHeight() const
 {
-    return mHeight;
+    return mProperties.mHeight;
 }
 
 ETextureSourceFormat
 SOdysseyTextureConfigureWindow::GetFormat() const
 {
-    return mFormat;
+    return mProperties.mFormat;
 }
 
 FText
 SOdysseyTextureConfigureWindow::GetDefaultName() const
 {
-    return mName;
+    return mProperties.mName;
 }
 
 FLinearColor
 SOdysseyTextureConfigureWindow::GetBackgroundColor() const
 {
-    switch( mBackgroundColor )
+    switch(mProperties.mBackgroundColor )
     {
         default:
         case kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
@@ -309,54 +329,54 @@ SOdysseyTextureConfigureWindow::GetBackgroundColor() const
 void
 SOdysseyTextureConfigureWindow::OnSetWidth( int32 iNewWidthValue, ETextCommit::Type iCommitInfo )
 {
-    mWidth = iNewWidthValue;
+    mProperties.mWidth = iNewWidthValue;
 
-    if( mWidth > MAX_CANVAS_SIZE )
-        mWidth = MAX_CANVAS_SIZE;
-    if( mWidth < MIN_CANVAS_SIZE )
-        mWidth = MIN_CANVAS_SIZE;
+    if(mProperties.mWidth > MAX_CANVAS_SIZE )
+        mProperties.mWidth = MAX_CANVAS_SIZE;
+    if(mProperties.mWidth < MIN_CANVAS_SIZE )
+        mProperties.mWidth = MIN_CANVAS_SIZE;
 }
 void
 SOdysseyTextureConfigureWindow::OnChangeWidth( int32 iNewWidthValue )
 {
-    mWidth = iNewWidthValue;
+    mProperties.mWidth = iNewWidthValue;
 
-    if( mWidth > MAX_CANVAS_SIZE )
-        mWidth = MAX_CANVAS_SIZE;
-    if( mWidth < MIN_CANVAS_SIZE )
-        mWidth = MIN_CANVAS_SIZE;
+    if(mProperties.mWidth > MAX_CANVAS_SIZE )
+        mProperties.mWidth = MAX_CANVAS_SIZE;
+    if(mProperties.mWidth < MIN_CANVAS_SIZE )
+        mProperties.mWidth = MIN_CANVAS_SIZE;
 }
 
 void
 SOdysseyTextureConfigureWindow::OnSetHeight( int32 iNewHeightValue, ETextCommit::Type iCommitInfo)
 {
-    mHeight = iNewHeightValue;
+    mProperties.mHeight = iNewHeightValue;
 
-    if( mHeight > MAX_CANVAS_SIZE )
-        mHeight = MAX_CANVAS_SIZE;
-    if( mHeight < MIN_CANVAS_SIZE )
-        mHeight = MIN_CANVAS_SIZE;
+    if(mProperties.mHeight > MAX_CANVAS_SIZE )
+        mProperties.mHeight = MAX_CANVAS_SIZE;
+    if(mProperties.mHeight < MIN_CANVAS_SIZE )
+        mProperties.mHeight = MIN_CANVAS_SIZE;
 }
 void
 SOdysseyTextureConfigureWindow::OnChangeHeight( int32 iNewHeightValue )
 {
-    mHeight = iNewHeightValue;
+    mProperties.mHeight = iNewHeightValue;
 
-    if( mHeight > MAX_CANVAS_SIZE )
-        mHeight = MAX_CANVAS_SIZE;
-    if( mHeight < MIN_CANVAS_SIZE )
-        mHeight = MIN_CANVAS_SIZE;
+    if(mProperties.mHeight > MAX_CANVAS_SIZE )
+        mProperties.mHeight = MAX_CANVAS_SIZE;
+    if(mProperties.mHeight < MIN_CANVAS_SIZE )
+        mProperties.mHeight = MIN_CANVAS_SIZE;
 }
 
 void
 SOdysseyTextureConfigureWindow::OnSetName( const FText& iNewNameValue, ETextCommit::Type iCommitInfo )
 {
-    mName = iNewNameValue;
+    mProperties.mName = iNewNameValue;
 }
 void
 SOdysseyTextureConfigureWindow::OnChangeName( const FText& iNewNameValue )
 {
-    mName = iNewNameValue;
+    mProperties.mName = iNewNameValue;
 }
 
 //---
@@ -391,7 +411,7 @@ SOdysseyTextureConfigureWindow::GenerateFormatComboBoxItem( TSharedPtr<ETextureS
 void
 SOdysseyTextureConfigureWindow::HandleOnFormatChanged( TSharedPtr<ETextureSourceFormat> NewSelection, ESelectInfo::Type SelectInfo )
 {
-    mFormat = *NewSelection;
+    mProperties.mFormat = *NewSelection;
 }
 
 //---
@@ -423,13 +443,13 @@ SOdysseyTextureConfigureWindow::GetBackgroundColorText( EBackgroundColor iBackgr
 ECheckBoxState
 SOdysseyTextureConfigureWindow::IsBackgroundColorRadioChecked( EBackgroundColor iBackgroundColor ) const
 {
-    return ( mBackgroundColor == iBackgroundColor ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return (mProperties.mBackgroundColor == iBackgroundColor ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
 SOdysseyTextureConfigureWindow::OnBackgroundColorRadioChanged( ECheckBoxState iCheckType, EBackgroundColor iBackgroundColor )
 {
-    mBackgroundColor = iBackgroundColor;
+    mProperties.mBackgroundColor = iBackgroundColor;
 }
 
 //---

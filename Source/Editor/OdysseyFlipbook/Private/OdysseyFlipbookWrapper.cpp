@@ -13,7 +13,6 @@
 
 #include "Subsystems/AssetEditorSubsystem.h"
 
-#include "SOdysseyTextureConfigureWindow.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseySurfaceEditable.h"
 #include "ULISLoaderModule.h"
@@ -49,12 +48,14 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
 {
     // Displays a modal window asking for Width and Height of the new texture to draw in
 	// If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
-    TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow );
+    TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow, mTextureWindowProperties);
     GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
 
     //If cancel is clicked, we do nothing
     if(!textureConfigurationWindow->GetWindowAnswer())
         return false;
+
+    mTextureWindowProperties = textureConfigurationWindow->GetProperties();
 
     int32 width = textureConfigurationWindow->GetWidth();
     int32 height = textureConfigurationWindow->GetHeight();
