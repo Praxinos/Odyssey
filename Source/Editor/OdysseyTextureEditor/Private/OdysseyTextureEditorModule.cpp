@@ -103,7 +103,7 @@ FOdysseyTextureEditorModule::RegisterSettings()
     if( !settingsModule )
 		return;
 
-	settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADTextureEditor"
+	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADTextureEditor"
 										, LOCTEXT( "OdysseyTextureEditorSettingsName", "ILIAD Texture Editor" )
 										, LOCTEXT( "OdysseyTextureEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
 										, GetMutableDefault<UOdysseyTextureEditorSettings>() );
@@ -117,7 +117,7 @@ FOdysseyTextureEditorModule::UnregisterSettings()
     if( !settingsModule )
 		return;
     
-	settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyTextureEditor" );
+	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyTextureEditor" );
 }
 
 void

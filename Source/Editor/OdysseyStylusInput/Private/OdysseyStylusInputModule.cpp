@@ -33,7 +33,7 @@ public:
 
 		if (settingsModule)
 		{
-			settingsModule->RegisterSettings("Editor", "ContentEditors", "ILIADStylusInput"
+			settingsModule->RegisterSettings("Editor", "Plugins", "ILIADStylusInput"
 				, LOCTEXT("OdysseyPainterEditorSettingsName", "ILIAD Stylus Input")
 				, LOCTEXT("OdysseyPainterEditorSettingsDescription", "Configure the behaviour of stylus inputs in ILIAD.")
 				, GetMutableDefault<UOdysseyStylusInputSettings>());
@@ -47,7 +47,7 @@ public:
 
 		if (settingsModule)
 		{
-			settingsModule->UnregisterSettings("Editor", "ContentEditors", "ILIADStylusInput");
+			settingsModule->UnregisterSettings("Editor", "Plugins", "ILIADStylusInput");
 		}
 	}
 };

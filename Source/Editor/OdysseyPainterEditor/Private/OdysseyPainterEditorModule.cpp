@@ -56,7 +56,7 @@ FOdysseyPainterEditorModule::RegisterSettings()
     if( !settingsModule )
         return;
 
-    settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADPainterEditor"
+    settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADPainterEditor"
                                         , LOCTEXT( "OdysseyPainterEditorSettingsName", "ILIAD Painter Editor" )
                                         , LOCTEXT( "OdysseyPainterEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
                                         , GetMutableDefault<UOdysseyPainterEditorSettings>() );
@@ -70,7 +70,7 @@ FOdysseyPainterEditorModule::UnregisterSettings()
     if( !settingsModule )
         return;
         
-    settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyPainterEditor" );
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditor" );
 }
 
 void

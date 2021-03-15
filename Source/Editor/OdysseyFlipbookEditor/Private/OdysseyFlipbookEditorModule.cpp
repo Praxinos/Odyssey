@@ -102,7 +102,7 @@ FOdysseyFlipbookEditorModule::RegisterSettings()
     if( !settingsModule )
 		return;
 
-	settingsModule->RegisterSettings( "Editor", "ContentEditors", "ILIADFlipbookEditor"
+	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADFlipbookEditor"
 										, LOCTEXT( "OdysseyFlipbookEditorSettingsName", "ILIAD Flipbook Editor" )
 										, LOCTEXT( "OdysseyFlipbookEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
 										, GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
@@ -116,7 +116,7 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
     if( !settingsModule )
 		return;
     
-	settingsModule->UnregisterSettings( "Editor", "ContentEditors", "OdysseyFlipbookEditor" );
+	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor" );
 }
 
 TSharedRef<FOdysseyFlipbookEditorToolkit>
