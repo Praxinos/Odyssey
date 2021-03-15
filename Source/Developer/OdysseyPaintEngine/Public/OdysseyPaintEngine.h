@@ -213,7 +213,6 @@ private:
     // TODO: Have a TAttribute system for StrokeOptions like TAttribute<FStrokeOptions>
     void UpdateStrokeStep();
     void UpdateStrokeAdaptative();
-    void UpdateStrokePaintOnTick();
     void UpdateInterpolationType();
     void UpdateSmoothingMethod();
     void UpdateSmoothingStrength();
@@ -289,7 +288,6 @@ protected:
     bool                                mIsRealTime;
     //bool                                mIsCatchUp;
     bool                                mIsAdaptativeStep;
-    bool                                mIsPaintOnTick;
 
     std::queue<std::function<void()>>   mDrawingQueue;
 

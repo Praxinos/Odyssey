@@ -63,7 +63,6 @@ FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
     , mIsSmoothingEnabled( true )
     , mIsRealTime( true )
     , mIsAdaptativeStep( true )
-    , mIsPaintOnTick( false )
     , mDrawingQueue()
 
     , mBrushCursorPreviewSurface( nullptr )
@@ -300,7 +299,6 @@ FOdysseyPaintEngine::UpdateStrokeOptions()
 
     UpdateStrokeStep();
     UpdateStrokeAdaptative();
-    UpdateStrokePaintOnTick();
     UpdateInterpolationType();
     UpdateSmoothingMethod();
     UpdateSmoothingStrength();
@@ -829,7 +827,6 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
         FOdysseyBrushPreferencesOverrides& overrides = mBrushInstance->Preferences;
         if (overrides.bOverride_Step)          mStrokeOptions.Step = overrides.Step;
         if (overrides.bOverride_Adaptative)    mStrokeOptions.SizeAdaptative = overrides.SizeAdaptative;
-        if (overrides.bOverride_PaintOnTick)   mStrokeOptions.PaintOnTick = overrides.PaintOnTick;
         if (overrides.bOverride_Type)          mStrokeOptions.Type = overrides.Type;
         if (overrides.bOverride_Method)        mStrokeOptions.Method = overrides.Method;
         if (overrides.bOverride_Strength)      mStrokeOptions.Strength = overrides.Strength;
@@ -1128,12 +1125,6 @@ FOdysseyPaintEngine::UpdateStrokeAdaptative()
     mIsAdaptativeStep = mStrokeOptions.SizeAdaptative;
     float val = FMath::Max( 1.f, mIsAdaptativeStep ? ( mStepValue / 100.f ) * mSizeModifier : (float)mStepValue );
     mInterpolator->SetStep( val );
-}
-
-void
-FOdysseyPaintEngine::UpdateStrokePaintOnTick()
-{
-    mIsPaintOnTick = mStrokeOptions.PaintOnTick;
 }
 
 void

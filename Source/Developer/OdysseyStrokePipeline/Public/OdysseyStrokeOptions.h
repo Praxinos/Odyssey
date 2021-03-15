@@ -17,7 +17,6 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
     FOdysseyStrokeOptions()
         : Step          ( 20 )
         , SizeAdaptative( true )
-        , PaintOnTick   ( false )
         , Type          ( EOdysseyInterpolationType::kCatmullRom )
         , Method        ( EOdysseySmoothingMethod::kAverage )
         , Strength      ( 10 )
@@ -33,10 +32,6 @@ struct ODYSSEYSTROKEPIPELINE_API FOdysseyStrokeOptions
     /** Should Step be expressed as a relative fraction of the result Stamp size, or in pixels. */
     UPROPERTY( EditAnywhere, Category = "Stroke" )
     bool    SizeAdaptative;
-
-    /** Should Steps events be triggered for each tick, even if the mouse doesn't move when drawing. */
-    UPROPERTY( EditAnywhere, Category = "Stroke" )
-    bool    PaintOnTick;
 
     /** The type of interpolation. */
     UPROPERTY( EditAnywhere, Category = "Interpolation" )

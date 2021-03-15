@@ -24,7 +24,6 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
         , bOverride_AlphaMode   ( false                                     )
         , bOverride_Step        ( false                                     )
         , bOverride_Adaptative  ( false                                     )
-        , bOverride_PaintOnTick ( false                                     )
         , bOverride_Type        ( false                                     )
         , bOverride_Method      ( false                                     )
         , bOverride_Strength    ( false                                     )
@@ -38,7 +37,6 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
         , AlphaMode             ( EOdysseyAlphaMode::kNormal                )
         , Step                  ( 20                                        )
         , SizeAdaptative        ( true                                      )
-        , PaintOnTick           ( false                                     )
         , Type                  ( EOdysseyInterpolationType::kCatmullRom    )
         , Method                ( EOdysseySmoothingMethod::kAverage         )
         , Strength              ( 10                                        )
@@ -76,10 +74,6 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     /** Enable Stroke Adaptative Override. */
     UPROPERTY( EditAnywhere, Category = "Stroke", meta=(InlineEditConditionToggle) )
     bool    bOverride_Adaptative;
-
-    /** Enable Stroke PaintOnTick Override. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta=(InlineEditConditionToggle) )
-    bool    bOverride_PaintOnTick;
 
     /** Enable Interpolation Type Override. */
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
@@ -135,10 +129,6 @@ struct ODYSSEYBRUSH_API FOdysseyBrushPreferencesOverrides
     /** Stroke Size Adaptative Override Value. */
     UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( editcondition = "bOverride_Adaptative" ) )
     bool    SizeAdaptative;
-
-    /** Stroke PaintOnTick Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Stroke", meta = ( editcondition = "bOverride_PaintOnTick" ) )
-    bool    PaintOnTick;
 
     /** Interpolation Type Override Value. */
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_Type" ) )

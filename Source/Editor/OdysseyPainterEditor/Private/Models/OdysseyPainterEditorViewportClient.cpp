@@ -91,23 +91,6 @@ FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInp
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    /* if( !mOdysseyPainterEditor.IsValid() )
-        return; */
-
-    // Draw on tick or catch up
-    // auto paintengine = mOdysseyPainterEditor.Pin()->PaintEngine();
-    // FVector2D oldpoint = FVector2D( RefEventStrokePoint.x, RefEventStrokePoint.y );
-    // FVector2D position_in_viewport( Viewport->GetMouseX(), Viewport->GetMouseY() );
-    // FVector2D position_in_texture = GetLocalMousePosition( position_in_viewport );
-    // if( mCurrentToolState == eState::kDrawing
-    // && ( paintengine->GetStokePaintOnTick() || ( paintengine->GetSmoothingCatchUp() && oldpoint != position_in_texture ) ) )
-    // {
-    //     FOdysseyStrokePoint point = RefEventStrokePoint;
-    //     point.x = position_in_texture.X;
-    //     point.y = position_in_texture.Y;
-    //     paintengine->PushStroke( point );
-    // }
-
     // Send Tick to PaintEngine
 	mOdysseyPainterEditor->PaintEngine()->Tick();
 
@@ -631,9 +614,6 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     if( mCurrentToolState == eState::kDrawing )
     {
         auto paintengine = mOdysseyPainterEditor->PaintEngine();
-        
-        // if( paintengine->GetStokePaintOnTick() )
-        //     return;
 
 		if (long(mCurrentPointInTexture.x) == long(lastPointInTexture.x) && long(mCurrentPointInTexture.y) == long(lastPointInTexture.y))
 			return;
@@ -727,9 +707,6 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
     if (mCurrentToolState == eState::kIdle)
     {
         auto paintengine = mOdysseyPainterEditor->PaintEngine();
-
-        // if( paintengine->GetStokePaintOnTick() )
-        //     return;
 
         if (long(mCurrentPointInTexture.x) == long(lastPointInTexture.x) && long(mCurrentPointInTexture.y) == long(lastPointInTexture.y))
             return;

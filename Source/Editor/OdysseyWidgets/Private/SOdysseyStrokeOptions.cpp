@@ -19,21 +19,9 @@ SOdysseyStrokeOptions::Construct( const FArguments& InArgs )
 {
     mPaintEngine = InArgs._PaintEngine;
 
-    /* OnStrokeStepChangedCallback         = InArgs._OnStrokeStepChanged           ;
-    OnStrokeAdaptativeChangedCallback   = InArgs._OnStrokeAdaptativeChanged     ;
-    OnStrokePaintOnTickChangedCallback  = InArgs._OnStrokePaintOnTickChanged    ;
-    OnInterpolationTypeChangedCallback  = InArgs._OnInterpolationTypeChanged    ;
-    OnSmoothingMethodChangedCallback    = InArgs._OnSmoothingMethodChanged      ;
-    OnSmoothingStrengthChangedCallback  = InArgs._OnSmoothingStrengthChanged    ;
-    OnSmoothingEnabledChangedCallback   = InArgs._OnSmoothingEnabledChanged     ;
-    OnSmoothingRealTimeChangedCallback  = InArgs._OnSmoothingRealTimeChanged    ;
-    OnSmoothingCatchUpChangedCallback   = InArgs._OnSmoothingCatchUpChanged     ;
-    OnAnyValueChangedCallback           = InArgs._OnAnyValueChanged; */
-
     // Create a details view
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FNotifyHook* NotifyHook = this;
-    // StructData      = mPaintEngine->StrokeOptions();
     StructToDisplay = MakeShared< FStructOnScope >( FOdysseyStrokeOptions::StaticStruct(), (uint8*)mPaintEngine.Get()->StrokeOptions());
 
     // create struct to display
@@ -80,116 +68,6 @@ SOdysseyStrokeOptions::Tick(const FGeometry& AllottedGeometry, const double InCu
         DetailsView->SetStructureData(StructToDisplay);
     }
 }
-
-
-//--------------------------------------------------------------------------------------
-//-------------------------------------------------------------------- Private Callbacks
-
-/* 
-const  FOdysseyStrokeOptions&
-SOdysseyStrokeOptions::GetStrokeOptions()  const
-{
-    return  StructData;
-}
-
-
-void
-SOdysseyStrokeOptions::SetStrokeOptions( const  FOdysseyStrokeOptions& iValue )
-{
-    StructData = iValue;
-    OnStrokeStepChangedCallback         .ExecuteIfBound( StructData.Step        );
-    OnStrokeAdaptativeChangedCallback   .ExecuteIfBound( StructData.SizeAdaptative  );
-    OnStrokePaintOnTickChangedCallback  .ExecuteIfBound( StructData.PaintOnTick );
-    OnInterpolationTypeChangedCallback  .ExecuteIfBound( static_cast< int32 >( StructData.Type ) );
-    OnSmoothingMethodChangedCallback    .ExecuteIfBound( static_cast< int32 >( StructData.Method ) );
-    OnSmoothingStrengthChangedCallback  .ExecuteIfBound( StructData.Strength    );
-    OnSmoothingEnabledChangedCallback   .ExecuteIfBound( StructData.Enabled     );
-    OnSmoothingRealTimeChangedCallback  .ExecuteIfBound( StructData.RealTime    );
-    OnSmoothingCatchUpChangedCallback   .ExecuteIfBound( StructData.CatchUp     );
-
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetStrokeStep(        int32 iValue )
-{
-    StructData.Step = iValue;
-    OnStrokeStepChangedCallback.ExecuteIfBound( StructData.Step );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetStrokeAdaptative(  bool iValue )
-{
-    StructData.SizeAdaptative = iValue;
-    OnStrokeAdaptativeChangedCallback.ExecuteIfBound( StructData.SizeAdaptative );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetStrokePaintOnTick( bool iValue )
-{
-    StructData.PaintOnTick = iValue;
-    OnStrokePaintOnTickChangedCallback.ExecuteIfBound( StructData.PaintOnTick );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetInterpolationType( int32 iValue )
-{
-    StructData.Type = static_cast< EOdysseyInterpolationType >( iValue );
-    OnInterpolationTypeChangedCallback.ExecuteIfBound( static_cast< int32 >( StructData.Type ) );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetSmoothingMethod(   int32 iValue )
-{
-    StructData.Method = static_cast< EOdysseySmoothingMethod >( iValue );
-    OnSmoothingMethodChangedCallback.ExecuteIfBound( static_cast< int32 >( StructData.Method ) );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetSmoothingStrength( int32 iValue )
-{
-    StructData.Strength = iValue;
-    OnSmoothingStrengthChangedCallback.ExecuteIfBound( StructData.Strength );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetSmoothingEnabled(  bool iValue )
-{
-    StructData.Enabled = iValue;
-    OnSmoothingEnabledChangedCallback.ExecuteIfBound( StructData.Enabled );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetSmoothingRealTime( bool iValue )
-{
-    StructData.RealTime = iValue;
-    OnSmoothingRealTimeChangedCallback.ExecuteIfBound( StructData.RealTime );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}
-
-
-void
-SOdysseyStrokeOptions::SetSmoothingCatchUp(  bool iValue )
-{
-    StructData.CatchUp = iValue;
-    OnSmoothingCatchUpChangedCallback.ExecuteIfBound( StructData.CatchUp );
-    OnAnyValueChangedCallback.ExecuteIfBound( true );
-}*/
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- FNotifyHook Interface
