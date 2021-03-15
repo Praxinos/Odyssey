@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "SOdysseySurfaceViewport.h"
+#include "ObjectEditorUtils.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SButton.h"
@@ -571,17 +572,11 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
         {
             if( Zoom >= 1.0 && texture->Filter != TextureFilter::TF_Nearest )
             {
-                texture->Filter = TextureFilter::TF_Nearest;
-                texture->PostEditChange();
-                FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>( surface );
-                surfaceEditable->Invalidate();
+                FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Nearest);
             }
             else if( Zoom < 1.0 && texture->Filter != TextureFilter::TF_Bilinear )
             {
-                texture->Filter = TextureFilter::TF_Bilinear;
-                texture->PostEditChange();
-                FOdysseySurfaceEditable* surfaceEditable = static_cast<FOdysseySurfaceEditable*>(surface);
-                surfaceEditable->Invalidate();
+                FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Bilinear);
             }
         }
     }
