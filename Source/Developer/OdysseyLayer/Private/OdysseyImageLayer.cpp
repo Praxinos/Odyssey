@@ -281,6 +281,7 @@ struct FOdysseyImageLayerObjectVersion
 		// Before any version changes were made
 		SavePixelFormat,
         SaveBlendable,
+        SaveBlockArray64,
 		
 		VersionPlusOne,
 		LatestVersion = VersionPlusOne - 1
@@ -305,81 +306,52 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
 	Ar.UsingCustomVersion(FOdysseyImageLayerObjectVersion::GUID);
 
     //Manage old saving order
-    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) < FOdysseyImageLayerObjectVersion::SaveBlendable)
-    {   
-        Ar << mIsAlphaLocked;
+    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SaveBlendable)
+    {
         SerializeImageBlendingCapability(Ar);
+        Ar << mIsAlphaLocked;
     }
     else
     {
-        SerializeImageBlendingCapability(Ar);
+        //Manage old saving order
         Ar << mIsAlphaLocked;
+        SerializeImageBlendingCapability(Ar);
     }
 
-    if( Ar.IsSaving() )
+    //Load/Save Size
+    int width = mBlock ? mBlock->Width() : 0;
+    int height = mBlock ? mBlock->Height() : 0;
+
+    Ar << width;
+    Ar << height;
+
+    //Load/Save Format (compatibility with version version which don't save format)
+    ::ul3::tFormat format = ULIS3_FORMAT_BGRA8;
+    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat)
     {
-        int width = mBlock->Width();
-        int height = mBlock->Height();
-		::ul3::tFormat format = mBlock->Format();
-
-        Ar << width;
-        Ar << height;
-		if( Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat )
-		{
-			Ar << format;
-		}
-
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::FBlock* blockLayerData = ::ul3::XCopy( hULIS.ThreadPool()
-                                                    , ULIS3_BLOCKING
-                                                    , perfIntent
-                                                    , hULIS.HostDeviceInfo()
-                                                    , ULIS3_NOCB
-                                                    , mBlock->GetBlock()
-                                                    , ::ul3::FRect( 0, 0, mBlock->Width(), mBlock->Height() ) );
-
-        TArray<uint8> layerData = TArray<uint8>();
-        layerData.AddUninitialized(blockLayerData->BytesTotal());
-        FMemory::Memcpy(layerData.GetData(),blockLayerData->DataPtr(),blockLayerData->BytesTotal());
-        delete blockLayerData;
-
-        Ar << layerData;
+        Ar << format;
     }
-    else if(Ar.IsLoading())
+
+    //Create mBlock if we are loading
+    if (Ar.IsLoading())
     {
-        int width;
-        int height;
-
-        Ar << width;
-        Ar << height;
-
-		::ul3::tFormat format = ULIS3_FORMAT_BGRA8;
-		if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat)
-		{
-			Ar << format;
-		}
-
         check(!mBlock);
-        mBlock = new FOdysseyBlock(width,height,format);
+        mBlock = new FOdysseyBlock(width, height, format);
         mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
+    }
 
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( hULIS.ThreadPool()
-                    , ULIS3_BLOCKING
-                    , perfIntent
-                    , hULIS.HostDeviceInfo()
-                    , ULIS3_NOCB
-                    , mBlock->GetBlock()
-                    , mBlock->GetBlock()->Rect() );
-
+    //Load/Save mBlock content (compatibility with version which were saving/loading a TArray, but now we use TArray64)
+    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SaveBlockArray64)
+    {
+        Ar << mBlock->GetArray();
+    }
+    else
+    {
         TArray< uint8 > layerData = TArray< uint8 >();
         layerData.AddUninitialized(mBlock->GetBlock()->BytesTotal());
-
         Ar << layerData;
 
-        for(int j = 0; j < layerData.Num(); j++) {
+        for (int j = 0; j < layerData.Num(); j++) {
             *(mBlock->GetBlock()->DataPtr() + j) = layerData[j];
         }
     }
