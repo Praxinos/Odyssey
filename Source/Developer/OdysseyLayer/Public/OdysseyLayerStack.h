@@ -195,10 +195,10 @@ private:
     TArray<int>         mNumberBlocksUndo;
     TArray<int>         mNumberBlocksRedo;
     FBufferArchive      mToBinary;
-    ::ul3::FBlock* mTileData;
+    // ::ul3::FBlock*      mTileData;
     FString mUndoPath;
     FString mRedoPath;
-    TArray< uint8 > mData;
+    // TArray64< uint8 > mData;
 
 	//FOdysseyBlock* mData;
 };

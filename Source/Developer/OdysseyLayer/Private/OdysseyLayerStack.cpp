@@ -512,14 +512,14 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
 {
     mLayerStackPtr = iLayerStack;
 
-    mData = TArray<uint8>();
-	FOdysseyBlock* tmp = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
+    // mData = TArray<uint8>();
+	// FOdysseyBlock* tmp = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
     mCurrentIndex = 0;
 
     //We reserve the maximum memory needed for a undo
 
-    mData.Reserve(tmp->GetBlock()->BytesTotal());
-	delete tmp;
+    //mData.Reserve(tmp->GetBlock()->BytesTotal());
+	//delete tmp;
 
     static int numberUndoStack = 1;
 
@@ -658,33 +658,35 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
     if(imageLayer == nullptr)
         return false;
 
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    mTileData = ::ul3::XCopy( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , imageLayer->GetBlock()->GetBlock()
-                            , ::ul3::FRect( iXTile, iYTile, iSizeX, iSizeY ) );
-
-    TArray<uint8> array = TArray<uint8>();
-    array.AddUninitialized(mTileData->BytesTotal());
-
-    FMemory::Memcpy(array.GetData(),mTileData->DataPtr(),mTileData->BytesTotal());
-
     UPTRINT address = (UPTRINT)imageLayer.Get();
     mToBinary << address;
     mToBinary << iXTile;
     mToBinary << iYTile;
     mToBinary << iSizeX;
     mToBinary << iSizeY;
-    mToBinary << array;
+
+    if(iXTile >= 0 && iYTile >= 0 && iSizeX > 0 && iSizeY > 0)
+    {
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        FOdysseyBlock* tileBlock = new FOdysseyBlock(iSizeX, iSizeY, imageLayer->GetBlock()->Format());
+
+        ::ul3::Copy(hULIS.ThreadPool()
+            , ULIS3_BLOCKING
+            , perfIntent
+            , hULIS.HostDeviceInfo()
+            , ULIS3_NOCB
+            , imageLayer->GetBlock()->GetBlock()
+            , tileBlock->GetBlock()
+            , ::ul3::FRect(iXTile, iYTile, iSizeX, iSizeY)
+            , ::ul3::FVec2I(0, 0));
+
+        mToBinary << tileBlock->GetArray();
+
+        delete tileBlock;
+    }
 
     mNumberBlocksRedo[mCurrentIndex]++;
-
-    // Why is mTileData not deleted here ??
-    delete  mTileData;
 
     return true;
 }
@@ -696,32 +698,35 @@ FOdysseyDrawingUndo::SaveData(unsigned int iXTile, unsigned int iYTile,unsigned 
         return false;
 
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mLayerStackPtr->GetCurrentLayer());
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    mTileData = ::ul3::XCopy( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , imageLayer->GetBlock()->GetBlock()
-                            , ::ul3::FRect( iXTile, iYTile, iSizeX, iSizeY ) );
-
-    TArray<uint8> array = TArray<uint8>();
-    array.AddUninitialized(mTileData->BytesTotal());
-
-    FMemory::Memcpy(array.GetData(),mTileData->DataPtr(),mTileData->BytesTotal());
-
     UPTRINT address = (UPTRINT)imageLayer.Get();
     mToBinary << address;
     mToBinary << iXTile;
     mToBinary << iYTile;
     mToBinary << iSizeX;
     mToBinary << iSizeY;
-    mToBinary << array;
+
+    if(iXTile >= 0 && iYTile >= 0 && iSizeX > 0 && iSizeY > 0)
+    {
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+        FOdysseyBlock* tileBlock = new FOdysseyBlock(iSizeX, iSizeY, imageLayer->GetBlock()->Format());
+
+        ::ul3::Copy(hULIS.ThreadPool()
+            , ULIS3_BLOCKING
+            , perfIntent
+            , hULIS.HostDeviceInfo()
+            , ULIS3_NOCB
+            , imageLayer->GetBlock()->GetBlock()
+            , tileBlock->GetBlock()
+            , ::ul3::FRect(iXTile, iYTile, iSizeX, iSizeY)
+            , ::ul3::FVec2I(0, 0));
+
+        mToBinary << tileBlock->GetArray();
+
+        delete tileBlock;
+    }
 
     mNumberBlocksUndo[mCurrentIndex]++;
-
-    delete mTileData;
 
     return true;
 }
@@ -764,59 +769,44 @@ FOdysseyDrawingUndo::LoadData()
         {
             SaveDataRedo(address,tileX,tileY,sizeX,sizeY);
         }
-
-        Ar << mData;
-
-		TArray< TSharedPtr<IOdysseyLayer> > layers;
-        mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers,false);
-
-        for(int j = 0; j < layers.Num(); j++)
+        
+        if (tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
-            if(address == (UPTRINT)(layers[j].Get()))
+            TArray< TSharedPtr<IOdysseyLayer> > layers;
+            mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers, false);
+
+            for (int j = 0; j < layers.Num(); j++)
             {
-                imageLayer = StaticCastSharedPtr<FOdysseyImageLayer> (layers[j]);
-                break;
-            }
-        }
-
-        if(imageLayer == nullptr)
-            return false;
-        //---
-
-        //Useless, I just want mTileData at the right size for the next undo, to change
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::FRect tileRect(tileX, tileY, sizeX, sizeY);
-		mTileData = ::ul3::XCopy(hULIS.ThreadPool()
-			, ULIS3_BLOCKING
-			, perfIntent
-			, hULIS.HostDeviceInfo()
-			, ULIS3_NOCB
-			, imageLayer->GetBlock()->GetBlock()
-			, tileRect);
-
-        if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
-        {
-            for(int j = 0; j < mData.Num(); j++)
-            {
-                *(mTileData->DataPtr() + j) = mData[j];
+                if (address == (UPTRINT)(layers[j].Get()))
+                {
+                    imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layers[j]);
+                    break;
+                }
             }
 
-            ::ul3::Copy( hULIS.ThreadPool()
-                       , ULIS3_BLOCKING
-                       , perfIntent
-                       , hULIS.HostDeviceInfo()
-                       , ULIS3_NOCB
-                       , mTileData
-                       , imageLayer->GetBlock()->GetBlock()
-                       , ::ul3::FRect( 0, 0, sizeX, sizeY )
-                       , ::ul3::FVec2I( tileX, tileY ) );
-            // mLayerStackPtr->ComputeResultBlock(::ul3::FRect(tileX,tileY,sizeX,sizeY));
+            if (imageLayer == nullptr)
+                return false;
+
+            FOdysseyBlock* tileBlock = new FOdysseyBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
+            Ar << tileBlock->GetArray();
+
+            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+            uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+            ::ul3::FRect tileRect(tileX, tileY, sizeX, sizeY);
+
+            ::ul3::Copy(hULIS.ThreadPool()
+                , ULIS3_BLOCKING
+                , perfIntent
+                , hULIS.HostDeviceInfo()
+                , ULIS3_NOCB
+                , tileBlock->GetBlock()
+                , imageLayer->GetBlock()->GetBlock()
+                , ::ul3::FRect(0, 0, sizeX, sizeY)
+                , ::ul3::FVec2I(tileX, tileY));
 
             imageLayer->GetBlock()->GetBlock()->Invalidate(tileRect);
+            delete tileBlock;
         }
-
-		delete mTileData;
     }
 
     if(bSaveForRedo)
@@ -850,67 +840,48 @@ FOdysseyDrawingUndo::Redo()
         Ar << tileY;
         Ar << sizeX;
         Ar << sizeY;
-        Ar << mData;
 
-		TArray< TSharedPtr<IOdysseyLayer> > layers;
-        mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers,false);
-
-        for(int j = 0; j < layers.Num(); j++)
+        if(tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
         {
-            if(address == (UPTRINT)(layers[j].Get()))
+            TArray< TSharedPtr<IOdysseyLayer> > layers;
+            mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers,false);
+
+            for(int j = 0; j < layers.Num(); j++)
             {
-                imageLayer = StaticCastSharedPtr<FOdysseyImageLayer> (layers[j]);
-                break;
+                if(address == (UPTRINT)(layers[j].Get()))
+                {
+                    imageLayer = StaticCastSharedPtr<FOdysseyImageLayer> (layers[j]);
+                    break;
+                }
             }
-        }
 
-        if(imageLayer == nullptr)
-            return false;
-        //---
+            if(imageLayer == nullptr)
+                return false;
 
-        //Useless, I just want mTileData at the right size for the next undo, to change
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::FRect tileRect( tileX, tileY, sizeX, sizeY );
-        if( i == 0 ) {
-            mTileData = ::ul3::XCopy( hULIS.ThreadPool()
-                                    , ULIS3_BLOCKING
-                                    , perfIntent
-                                    , hULIS.HostDeviceInfo()
-                                    , ULIS3_NOCB
-                                    , imageLayer->GetBlock()->GetBlock()
-                                    , tileRect );
-        }
+            FOdysseyBlock* tileBlock = new FOdysseyBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
+            Ar << tileBlock->GetArray();
 
-        if(mData.Num() > 0 && tileX >= 0 && tileY >= 0 && sizeX > 0 && sizeY > 0)
-        {
-            for(int j = 0; j < mData.Num(); j++)
-            {
-                *(mTileData->DataPtr() + j) = mData[j];
-            }
+            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+            uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+            ::ul3::FRect tileRect(tileX, tileY, sizeX, sizeY);
 
             ::ul3::Copy( hULIS.ThreadPool()
                        , ULIS3_BLOCKING
                        , perfIntent
                        , hULIS.HostDeviceInfo()
                        , ULIS3_NOCB
-                       , mTileData
+                       , tileBlock->GetBlock()
                        , imageLayer->GetBlock()->GetBlock()
                        , ::ul3::FRect( 0, 0, sizeX, sizeY )
                        , ::ul3::FVec2I( tileX, tileY ) );
 
             imageLayer->GetBlock()->GetBlock()->Invalidate(tileRect);
+            delete tileBlock;
         }
     }
 
-	// if (imageLayer)
-		// imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
-
     if(mCurrentIndex < (mUndosPositions.Num() - 1))
         mCurrentIndex++;
-
-    if( mNumberBlocksRedo[mCurrentIndex] != 0 )
-        delete mTileData;
 
     return true;
 }
