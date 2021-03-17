@@ -9,6 +9,7 @@
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 
+#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "KeyThumbnail/KeyThumbnailSection.h"
 
 class FCinematicBoardTrackEditor;
@@ -66,12 +67,14 @@ public:
     // FKeyThumbnailSection interface
     virtual void BuildKeys() override;
     virtual void BuildThumbnailKeys() override;
-    virtual TArray<double> GetThumbnailKeys() const override;
+    virtual TArray<double> GetThumbnailKeys() const override; //TODO: use const& for return type ???????????????????????? check where it is called !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     //---
 
     virtual void BuildCameraTransformKeys();
     virtual TSharedPtr<FMovieSceneChannelProxy> GetCameraTransformChannelProxy() const;
+    virtual void ReBuildCameraTransformMetaKeys();
+    virtual TSharedPtr<FMetaChannelProxy> GetCameraTransformMetaChannelProxy() const;
 
     virtual void BuildPlaneTransformsKeys();
     virtual TArray<double> GetPlaneTransformKeys( FMovieScenePossessable iPossessable ) const;
@@ -82,8 +85,9 @@ public:
 private:
     TArray<double> mThumbnailKeys;
     TSharedPtr<FMovieSceneChannelProxy> mCameraTransformKeys;
-    TMap<FGuid, TArray<double>> mPlaneTransformsKeys;
-    TMap<FGuid, TArray<double>> mPlaneMaterialsKeys;
+    TSharedPtr<FMetaChannelProxy>       mCameraTransformMetaKeys;
+    TMap<FGuid, TArray<double>>         mPlaneTransformsKeys;
+    TMap<FGuid, TArray<double>>         mPlaneMaterialsKeys;
 
 private:
 

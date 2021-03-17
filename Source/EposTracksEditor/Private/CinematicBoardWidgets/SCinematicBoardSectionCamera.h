@@ -41,30 +41,10 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    typedef TMovieSceneChannelHandle<FMovieSceneFloatChannel> FFloatChannelHandle;
-
-    template <typename ValueType>
-    struct THandleMapKeyFuncs : BaseKeyFuncs< TPair<FFloatChannelHandle, ValueType>, const FFloatChannelHandle* > //https://docs.unrealengine.com/en-US/ProgrammingAndScripting/ProgrammingWithCPP/UnrealArchitecture/TMap/index.html#keyfuncs
-    {
-    private:
-        typedef BaseKeyFuncs< TPair<FFloatChannelHandle, ValueType>, const FFloatChannelHandle* > Super;
-
-    public:
-        typedef typename Super::ElementInitType ElementInitType;
-        typedef typename Super::KeyInitType     KeyInitType;
-
-        static KeyInitType  GetSetKey( ElementInitType Element )    { return &Element.Key; }
-        static bool         Matches( KeyInitType A, KeyInitType B ) { return A == B; }
-        static uint32       GetKeyHash( KeyInitType Key )           { return GetTypeHash( Key ); }
-    };
-
-    typedef TMap<FFloatChannelHandle, int32, FDefaultSetAllocator, THandleMapKeyFuncs<int>> FMapFloatChannelHandleToKeyIndex;
+    TSharedPtr<FMetaChannelProxy> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
 private:
-    FMapFloatChannelHandleToKeyIndex GetKeysUnderCursor( const FPointerEvent& MouseEvent ) const;
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
-
-    FMapFloatChannelHandleToKeyIndex mKeyIndexForChannel;
+    TSharedPtr<FMetaChannelProxy>       mKeysUnderMouse;
 };

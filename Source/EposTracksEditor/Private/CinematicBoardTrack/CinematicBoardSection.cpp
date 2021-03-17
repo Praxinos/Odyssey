@@ -236,6 +236,7 @@ FCinematicBoardSection::BuildCameraTransformKeys()
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
     mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( GetSubSectionObject(), *GetSequencer() );
+    mCameraTransformMetaKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannelProxy( mCameraTransformKeys, TRange<FFrameNumber>::All() );
 }
 
 TSharedPtr<FMovieSceneChannelProxy>
@@ -243,6 +244,20 @@ FCinematicBoardSection::GetCameraTransformChannelProxy() const
 {
     return mCameraTransformKeys;
 }
+
+void
+FCinematicBoardSection::ReBuildCameraTransformMetaKeys()
+{
+    mCameraTransformMetaKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannelProxy( mCameraTransformKeys, TRange<FFrameNumber>::All() );
+}
+
+TSharedPtr<FMetaChannelProxy>
+FCinematicBoardSection::GetCameraTransformMetaChannelProxy() const
+{
+    return mCameraTransformMetaKeys;
+}
+
+//-
 
 void
 FCinematicBoardSection::BuildPlaneTransformsKeys()
@@ -258,6 +273,8 @@ FCinematicBoardSection::GetPlaneTransformKeys( FMovieScenePossessable iPossessab
 
     return mPlaneTransformsKeys[iPossessable.GetGuid()];
 }
+
+//-
 
 void
 FCinematicBoardSection::BuildPlaneMaterialsKeys()
