@@ -3,7 +3,7 @@
 
 #pragma once
 
-class FOdysseyEditor;
+#include "OdysseyEditor.h"
 
 /**
  * Base class of any Odyssey Toolkit.
@@ -77,7 +77,7 @@ void
 TOdysseyToolkit<T>::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
     T::RegisterTabSpawners(iTabManager);
-    WorkspaceMenuCategory = mEditor->RegisterTabSpawners(iTabManager);
+    T::WorkspaceMenuCategory = mEditor->RegisterTabSpawners(iTabManager);
 }
 
 template<typename T>
