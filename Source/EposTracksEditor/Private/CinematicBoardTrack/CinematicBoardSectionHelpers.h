@@ -64,7 +64,7 @@ public:
 
 //---
 
-struct FMetaChannelProxy;
+struct FMetaFloatChannel;
 
 class CinematicBoardSectionKeysHelpers
 {
@@ -72,7 +72,7 @@ public:
     static TArray<double> BuildThumbnailKeys( const UMovieSceneSubSection& iSubSection );
 
     static TSharedPtr<FMovieSceneChannelProxy> BuildCameraTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
-    static TSharedPtr<FMetaChannelProxy> BuildCameraTransformMetaChannelProxy( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy, const TRange<FFrameNumber>& iRange );
+    static TSharedPtr<FMetaFloatChannel> BuildCameraTransformMetaChannel( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy, const FFrameNumber& iMergeTolerance );
 
     static TMap<FGuid, TArray<double>> BuildPlaneTransformsKeys( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
 

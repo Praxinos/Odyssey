@@ -43,7 +43,7 @@ SCinematicBoardSectionCamera::ComputeDesiredSize( float ) const //override
 
 //---
 
-TSharedPtr<FMetaChannelProxy>
+TSharedPtr<FMetaFloatChannel>
 SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
     TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
@@ -55,7 +55,8 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
     FFrameTime clicked_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
-    TRange<FFrameNumber> range( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
     //---
 
@@ -63,23 +64,10 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
 
     //---
 
-    TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetCameraTransformChannelProxy();
-    TSharedPtr<FMetaChannelProxy> meta_channel_proxy = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannelProxy( channel_proxy, range );
+    TSharedPtr<FMetaFloatChannel> meta_channel = section->GetCameraTransformMetaChannel();
+    TSharedPtr<FMetaFloatChannel> new_meta_channel = meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
 
-    for( auto& pair : meta_channel_proxy->mMetaKeys )
-    {
-        FFrameNumber time = pair.Key;
-        FMetaKey& meta_key = pair.Value;
-
-        for( auto& sub_key : meta_key.mSubKeys )
-        {
-            FFrameNumber key_time;
-            sub_key.mChannelHandle.Get()->GetKeyTime( sub_key.mKeyHandle, key_time );
-            sub_key.mOffset = inner_clicked_frame - key_time;
-        }
-    }
-
-    return meta_channel_proxy;
+    return new_meta_channel;
 }
 
 //---
@@ -87,9 +75,9 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
 FCursorReply
 SCinematicBoardSectionCamera::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
-    TSharedPtr<FMetaChannelProxy> proxy = GetKeysUnderMouse( CursorEvent );
+    TSharedPtr<FMetaFloatChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
 
-    if( proxy->mMetaKeys.Num() )
+    if( meta_channel->NumMetaKeys() )
         return FCursorReply::Cursor( EMouseCursor::CardinalCross );
 
     return FCursorReply::Cursor( EMouseCursor::Default );
@@ -139,44 +127,13 @@ SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FP
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
     // For the moment should always be the case
-    check( mKeysUnderMouse->mMetaKeys.Num() == 1 );
+    check( mKeysUnderMouse->NumMetaKeys() == 1 );
 
-    for( auto& pair : mKeysUnderMouse->mMetaKeys )
-    {
-        for( auto& sub_key : pair.Value.mSubKeys )
-        {
-            TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = sub_key.mChannelHandle.Cast<FMovieSceneFloatChannel>();
-            FKeyHandle& key_handle = sub_key.mKeyHandle;
-            FFrameTime offset = sub_key.mOffset;
+    const bool snap = section->GetSequencer()->GetSequencerSettings()->GetIsSnapEnabled() && section->GetSequencer()->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+    const FFrameRate inner_tick_resolution = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetTickResolution();
+    const FFrameRate inner_display_rate = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetDisplayRate();
 
-            FMovieSceneFloatChannel* channel = channel_handle.Get();
-            if( !channel )
-                continue;
-
-            TMovieSceneChannelData<FMovieSceneFloatValue> channel_data = channel->GetData();
-            int32 key_index = channel_data.GetIndex( key_handle );
-
-            FFrameNumber inner_key_frame = channel_data.GetTimes()[key_index];
-            FFrameTime inner_moved_key_frame = inner_moved_frame - offset;
-
-            // From ...\Source\Editor\Sequencer\Private\Tools\EditToolDragOperations.cpp -> OnDrag() -> SnapToInterval()
-            if( section->GetSequencer()->GetSequencerSettings()->GetIsSnapEnabled() && section->GetSequencer()->GetSequencerSettings()->GetSnapKeyTimesToInterval() )
-            {
-                FFrameRate inner_tick_resolution = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetTickResolution();
-                FFrameRate inner_display_rate = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetDisplayRate();
-
-                // Convert from resolution to DisplayRate, round to frame, then back again. We floor to frames when using the frame block scrubber, and round using the vanilla scrubber
-                FFrameTime   DisplayTime = FFrameRate::TransformTime( inner_moved_key_frame, inner_tick_resolution, inner_display_rate );
-                //FFrameNumber PlayIntervalTime = ScrubStyle == ESequencerScrubberStyle::FrameBlock ? DisplayTime.FloorToFrame() : DisplayTime.RoundToFrame();
-                FFrameNumber PlayIntervalTime = DisplayTime.FloorToFrame();
-                inner_moved_key_frame = FFrameRate::TransformTime( PlayIntervalTime, inner_display_rate, inner_tick_resolution ).FloorToFrame();
-            }
-
-
-            int32 new_key_index = channel_data.MoveKey( key_index, inner_moved_key_frame.GetFrame() );
-            key_handle = channel_data.GetHandle( new_key_index );
-        }
-    }
+    mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
 
     section->ReBuildCameraTransformMetaKeys();
 
@@ -229,13 +186,13 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
     TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetCameraTransformChannelProxy();
-    TSharedPtr<FMetaChannelProxy> meta_channel_proxy = section->GetCameraTransformMetaChannelProxy();
+    TSharedPtr<FMetaFloatChannel> meta_channel = section->GetCameraTransformMetaChannel();
 
     //---
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
 
-    for( const auto& pair : meta_channel_proxy->mMetaKeys )
+    for( const auto& pair : meta_channel->GetMetaKeys() )
     {
         FFrameNumber time = pair.Key;
         FMetaKey meta_key = pair.Value;

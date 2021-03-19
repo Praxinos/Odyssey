@@ -41,10 +41,10 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    TSharedPtr<FMetaChannelProxy> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+    TSharedPtr<FMetaFloatChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-    TSharedPtr<FMetaChannelProxy>       mKeysUnderMouse;
+    TSharedPtr<FMetaFloatChannel>       mKeysUnderMouse;
 };

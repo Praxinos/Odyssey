@@ -236,7 +236,10 @@ FCinematicBoardSection::BuildCameraTransformKeys()
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
     mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( GetSubSectionObject(), *GetSequencer() );
-    mCameraTransformMetaKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannelProxy( mCameraTransformKeys, TRange<FFrameNumber>::All() );
+
+    //---
+
+    ReBuildCameraTransformMetaKeys();
 }
 
 TSharedPtr<FMovieSceneChannelProxy>
@@ -248,11 +251,20 @@ FCinematicBoardSection::GetCameraTransformChannelProxy() const
 void
 FCinematicBoardSection::ReBuildCameraTransformMetaKeys()
 {
-    mCameraTransformMetaKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannelProxy( mCameraTransformKeys, TRange<FFrameNumber>::All() );
+    FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
+    FTimeToPixel converter( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
+
+    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
+    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
+    FFrameTime clicked_frame = 0; // As if we are on frame 0
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
+
+    mCameraTransformMetaKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannel( mCameraTransformKeys, inner_tolerance );
 }
 
-TSharedPtr<FMetaChannelProxy>
-FCinematicBoardSection::GetCameraTransformMetaChannelProxy() const
+TSharedPtr<FMetaFloatChannel>
+FCinematicBoardSection::GetCameraTransformMetaChannel() const
 {
     return mCameraTransformMetaKeys;
 }

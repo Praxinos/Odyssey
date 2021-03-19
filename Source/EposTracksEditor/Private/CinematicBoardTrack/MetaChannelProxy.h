@@ -13,14 +13,6 @@
 
 //---
 
-struct FMetaSubKey
-{
-    FMovieSceneChannelHandle    mChannelHandle;
-    FKeyHandle                  mKeyHandle;
-    FKeyDrawParams              mKeyDrawParam;
-    FFrameTime                  mOffset;
-};
-
 struct FMetaKey
 {
     enum class EFlags
@@ -29,12 +21,286 @@ struct FMetaKey
         kPartial    = 1 << 0,
     };
 
-    TArray<FMetaSubKey>     mSubKeys;
+    struct FSubKey
+    {
+        FMovieSceneChannelHandle    mChannelHandle;
+        FKeyHandle                  mKeyHandle;
+        FKeyDrawParams              mKeyDrawParam;  // The 'real' draw params of the sub key
+        FFrameTime                  mOffset;        // The offset of each sub key to a reference frame (when a click is done in the meta channel for example, and used when moving sub keys, because all sub keys of the same meta key don't may have the same time)
+    };
+
+    TArray<FSubKey>         mSubKeys;
     EFlags                  mFlags;
-    FKeyDrawParams          mMetaKeyDrawParam;
+    FKeyDrawParams          mMetaKeyDrawParam; // The draw param which will be used to drw inside the meta channel
 };
 
-struct FMetaChannelProxy
+//---
+
+template<typename ChannelType, typename ValueType>
+struct TMetaChannel
 {
-    TMap<FFrameNumber, FMetaKey> mMetaKeys;
+public:
+    TMetaChannel( const FFrameNumber& iMergeTolerance );
+
+    /** Build the meta channel from a channel proxy depending of the ChannelType */
+    virtual void Build( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
+
+    /** Move all sub keys to the new time */
+    virtual void Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate );
+
+public:
+    /** Get the number of meta key */
+    int32 NumMetaKeys() const;
+
+    /** Get all meta keys (as const) */
+    const TMap<FFrameNumber, FMetaKey>& GetMetaKeys() const;
+
+protected:
+    /** Build all the sub keys */
+    virtual void BuildSubKeys( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
+    /** Build all the FKeyDrawParams of all sub keys */
+    virtual void BuildDrawKeys() = 0;
+    /** Set flags of all meta keys */
+    virtual void BuildFlags();
+
+    /** Get all meta keys at the given time of the current meta channel and copy them inside the new (empty) meta channel
+        This function must be used inside CreateFromTime(...) which returns the 'real' meta channel type
+    */
+    virtual void FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<TMetaChannel<ChannelType, ValueType>> ioMetaChannel );
+
+protected:
+    FFrameNumber                    mMergeTolerance;
+    TMap<FFrameNumber, FMetaKey>    mMetaKeys;
 };
+
+//---
+
+struct FMetaFloatChannel
+    : TMetaChannel<FMovieSceneFloatChannel, FMovieSceneFloatValue>
+{
+public:
+    FMetaFloatChannel( const FFrameNumber& iMergeTolerance );
+
+public:
+    /** Create a new meta channel with all meta keys at the given time of the current meta channel */
+    virtual TSharedPtr<FMetaFloatChannel> CreateFromTime( const FFrameTime& iTime, const FFrameNumber& iTolerance );
+
+protected:
+    /** Build all the FKeyDrawParams of all sub keys */
+    virtual void BuildDrawKeys();
+};
+
+//---
+//---
+//---
+
+template<typename ChannelType, typename ValueType>
+TMetaChannel<ChannelType, ValueType>::TMetaChannel( const FFrameNumber& iMergeTolerance )
+    : mMergeTolerance( iMergeTolerance )
+{
+}
+
+template<typename ChannelType, typename ValueType>
+int32
+TMetaChannel<ChannelType, ValueType>::NumMetaKeys() const
+{
+    return mMetaKeys.Num();
+}
+
+template<typename ChannelType, typename ValueType>
+const TMap<FFrameNumber, FMetaKey>&
+TMetaChannel<ChannelType, ValueType>::GetMetaKeys() const
+{
+    return mMetaKeys;
+}
+
+//---
+
+template<typename ChannelType, typename ValueType>
+void
+TMetaChannel<ChannelType, ValueType>::Build( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy )
+{
+    BuildSubKeys( iChannelProxy );
+    BuildDrawKeys();
+    BuildFlags();
+}
+
+template<typename ChannelType, typename ValueType>
+void
+TMetaChannel<ChannelType, ValueType>::BuildSubKeys( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy )
+{
+    TArrayView<ChannelType*> channels = iChannelProxy->GetChannels<ChannelType>();
+
+    for( int32 channel_index = 0; channel_index < channels.Num(); ++channel_index )
+    {
+        TMovieSceneChannelHandle<ChannelType> channel_handle = iChannelProxy->MakeHandle<ChannelType>( channel_index );
+
+        ChannelType* channel = channel_handle.Get();
+        if( !channel || !channel->GetNumKeys() )
+            continue;
+
+        TMovieSceneChannelData<FMovieSceneFloatValue> channel_data = channel->GetData();
+
+        for( int32 key_index = 0; key_index < channel->GetNumKeys(); ++key_index )
+        {
+            FKeyHandle key_handle = channel_data.GetHandle( key_index );
+
+            // Create the new sub key corresponding to the current key
+            FMetaKey::FSubKey sub_key;
+            sub_key.mChannelHandle = channel_handle;
+            sub_key.mKeyHandle = key_handle;
+
+            FFrameNumber time = channel_data.GetTimes()[key_index];
+
+            // Check if the current sub key time is already near an existing meta key
+            bool found_key = false;
+            FFrameNumber key_to_add;
+            for( const auto& pair : mMetaKeys )
+            {
+                TRange<FFrameNumber> range_tolerance( pair.Key - mMergeTolerance, pair.Key + 1 + mMergeTolerance );
+
+                if( range_tolerance.Contains( time ) )
+                {
+                    found_key = true;
+                    key_to_add = pair.Key;
+                }
+            }
+
+            // If the current sub key time is near an existing meta key
+            if( found_key )
+            {
+                // If both time are equal, just add the new sub key inside sub keys list
+                if( time == key_to_add )
+                {
+                    FMetaKey* meta_key = mMetaKeys.Find( time );
+                    check( meta_key );
+
+                    meta_key->mSubKeys.Add( sub_key );
+                }
+                // If both time differ:
+                // - find the near corresponding meta key
+                // - add the new sub key inside sub keys list
+                // - change the time of the meta key to represent an average of all sub key times
+                else
+                {
+                    const FMetaKey& meta_key = mMetaKeys.FindChecked( key_to_add );
+                    FMetaKey new_meta_key = meta_key;
+                    new_meta_key.mSubKeys.Add( sub_key );
+
+                    mMetaKeys.Remove( key_to_add );
+                    FFrameNumber new_time = ( key_to_add + time ) / 2;
+                    mMetaKeys.Add( new_time, new_meta_key );
+                }
+            }
+            // Otherwise, just add a new meta key with the new sub key
+            else
+            {
+                FMetaKey& meta_key = mMetaKeys.FindOrAdd( time );
+
+                meta_key.mSubKeys.Add( sub_key );
+                meta_key.mFlags = FMetaKey::EFlags::kNone;
+            }
+        }
+    }
+}
+
+template<typename ChannelType, typename ValueType>
+void
+TMetaChannel<ChannelType, ValueType>::BuildFlags()
+{
+    for( auto& pair : mMetaKeys )
+    {
+        FFrameNumber time = pair.Key;
+        FMetaKey& meta_key = pair.Value;
+
+        const TArray<FMetaKey::FSubKey>& sub_keys = meta_key.mSubKeys;
+
+        check( sub_keys.Num() );
+        meta_key.mMetaKeyDrawParam = sub_keys[0].mKeyDrawParam; // Init
+
+        for( int i = 1; i < sub_keys.Num(); i++ )
+        {
+            if( sub_keys[i - 1].mKeyDrawParam != sub_keys[i].mKeyDrawParam )
+            {
+                meta_key.mFlags = FMetaKey::EFlags::kPartial;
+
+                static const FSlateBrush* PartialKeyBrush = FEditorStyle::GetBrush( "Sequencer.PartialKey" );
+                meta_key.mMetaKeyDrawParam.BorderBrush = PartialKeyBrush;
+                meta_key.mMetaKeyDrawParam.FillBrush = PartialKeyBrush;
+                meta_key.mMetaKeyDrawParam.FillOffset = FVector2D( 0.f, 0.f );
+                meta_key.mMetaKeyDrawParam.FillTint = FLinearColor::White;
+                meta_key.mMetaKeyDrawParam.BorderTint = FLinearColor::White;
+
+                break;
+            }
+        }
+    }
+}
+
+//---
+
+template<typename ChannelType, typename ValueType>
+void
+TMetaChannel<ChannelType, ValueType>::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<TMetaChannel<ChannelType, ValueType>> ioMetaChannel )
+{
+    TRange<FFrameNumber> range( ( iTime - iTolerance ).GetFrame(), ( iTime + iTolerance ).GetFrame() + 1 );
+
+    for( auto& pair : mMetaKeys )
+    {
+        if( range.Contains( pair.Key ) )
+            ioMetaChannel->mMetaKeys.Add( pair.Key, pair.Value );
+    }
+
+    for( auto& pair : ioMetaChannel->mMetaKeys )
+    {
+        FFrameNumber time = pair.Key;
+        FMetaKey& meta_key = pair.Value;
+
+        for( auto& sub_key : meta_key.mSubKeys )
+        {
+            FFrameNumber key_time;
+            sub_key.mChannelHandle.Get()->GetKeyTime( sub_key.mKeyHandle, key_time );
+            sub_key.mOffset = iTime - key_time;
+        }
+    }
+}
+
+//---
+
+template<typename ChannelType, typename ValueType>
+void
+TMetaChannel<ChannelType, ValueType>::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate )
+{
+    for( auto& pair : mMetaKeys )
+    {
+        for( auto& sub_key : pair.Value.mSubKeys )
+        {
+            TMovieSceneChannelHandle<ChannelType> channel_handle = sub_key.mChannelHandle.Cast<ChannelType>();
+            FKeyHandle& key_handle = sub_key.mKeyHandle;
+            FFrameTime offset = sub_key.mOffset;
+
+            ChannelType* channel = channel_handle.Get();
+            if( !channel )
+                continue;
+
+            TMovieSceneChannelData<ValueType> channel_data = channel->GetData();
+            int32 key_index = channel_data.GetIndex( key_handle );
+
+            FFrameNumber inner_key_frame = channel_data.GetTimes()[key_index];
+            FFrameTime inner_moved_key_frame = iTime - offset;
+
+            // From ...\Source\Editor\Sequencer\Private\Tools\EditToolDragOperations.cpp -> OnDrag() -> SnapToInterval()
+            if( iSnap )
+            {
+                // Convert from resolution to DisplayRate, round to frame, then back again. We floor to frames when using the frame block scrubber, and round using the vanilla scrubber
+                FFrameTime   DisplayTime = FFrameRate::TransformTime( inner_moved_key_frame, iTickResolution, iDisplayRate );
+                //FFrameNumber PlayIntervalTime = ScrubStyle == ESequencerScrubberStyle::FrameBlock ? DisplayTime.FloorToFrame() : DisplayTime.RoundToFrame();
+                FFrameNumber PlayIntervalTime = DisplayTime.FloorToFrame();
+                inner_moved_key_frame = FFrameRate::TransformTime( PlayIntervalTime, iDisplayRate, iTickResolution ).FloorToFrame();
+            }
+
+            int32 new_key_index = channel_data.MoveKey( key_index, inner_moved_key_frame.GetFrame() );
+            key_handle = channel_data.GetHandle( new_key_index );
+        }
+    }
+}
