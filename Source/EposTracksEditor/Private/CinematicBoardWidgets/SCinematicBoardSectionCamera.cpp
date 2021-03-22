@@ -65,9 +65,10 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
     //---
 
     TSharedPtr<FMetaFloatChannel> meta_channel = section->GetCameraTransformMetaChannel();
-    TSharedPtr<FMetaFloatChannel> new_meta_channel = meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
+    if( !meta_channel )
+        return nullptr;
 
-    return new_meta_channel;
+    return meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
 }
 
 //---
@@ -77,7 +78,7 @@ SCinematicBoardSectionCamera::OnCursorQuery( const FGeometry& MyGeometry, const 
 {
     TSharedPtr<FMetaFloatChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
 
-    if( meta_channel->NumMetaKeys() )
+    if( meta_channel.IsValid() && meta_channel->NumMetaKeys() )
         return FCursorReply::Cursor( EMouseCursor::CardinalCross );
 
     return FCursorReply::Cursor( EMouseCursor::Default );
@@ -108,7 +109,7 @@ SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, cons
 FReply
 SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( !HasMouseCapture() )
+    if( !HasMouseCapture() || !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
     {
         //return FReply::Handled();
         return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
@@ -123,7 +124,6 @@ SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FP
     //---
 
     const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
-    const FMovieSceneSequenceTransform InnerToOuterTransform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
     // For the moment should always be the case
@@ -135,7 +135,7 @@ SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FP
 
     mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
 
-    section->ReBuildCameraTransformMetaKeys();
+    section->ReBuildCameraTransformMetaChannel();
 
     //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove" ) );
     return FReply::Handled();
@@ -187,6 +187,9 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetCameraTransformChannelProxy();
     TSharedPtr<FMetaFloatChannel> meta_channel = section->GetCameraTransformMetaChannel();
+
+    if( !meta_channel.IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
     //---
 

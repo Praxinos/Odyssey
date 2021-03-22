@@ -41,6 +41,7 @@ struct TMetaChannel
 {
 public:
     TMetaChannel( const FFrameNumber& iMergeTolerance );
+    virtual ~TMetaChannel();
 
     /** Build the meta channel from a channel proxy depending of the ChannelType */
     virtual void Build( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
@@ -97,6 +98,11 @@ protected:
 template<typename ChannelType, typename ValueType>
 TMetaChannel<ChannelType, ValueType>::TMetaChannel( const FFrameNumber& iMergeTolerance )
     : mMergeTolerance( iMergeTolerance )
+{
+}
+
+template<typename ChannelType, typename ValueType>
+TMetaChannel<ChannelType, ValueType>::~TMetaChannel()
 {
 }
 

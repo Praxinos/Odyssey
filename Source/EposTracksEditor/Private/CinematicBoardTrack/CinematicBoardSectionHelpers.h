@@ -60,6 +60,7 @@ public:
     static FMovieScenePossessable GetCameraBinding( const UMovieSceneSubSection& iSection, ISequencer& iSequencer );
 
     static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( UMovieSceneSequence* iInnerSequence, ISequencer& iSequencer );
+    static TArray<UMovieScene3DTransformSection*> GetPlaneTransformSections( UMovieSceneSequence* iInnerSequence, const FMovieScenePossessable& iPossessable, ISequencer& iSequencer );
 };
 
 //---
@@ -74,12 +75,12 @@ public:
     static TSharedPtr<FMovieSceneChannelProxy> BuildCameraTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
     static TSharedPtr<FMetaFloatChannel> BuildCameraTransformMetaChannel( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy, const FFrameNumber& iMergeTolerance );
 
-    static TMap<FGuid, TArray<double>> BuildPlaneTransformsKeys( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
+    static TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> BuildPlanesTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
+    static TMap<FGuid, TSharedPtr<FMetaFloatChannel>> BuildPlanesTransformMetaChannel( const TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> iChannelProxies, const FFrameNumber& iMergeTolerance );
 
     static TMap<FGuid, TArray<double>> BuildPlaneMaterialsKeys( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer );
 
 private:
     static TArray<FFrameTime> FindCameraTransformKeysRecursive( const UMovieSceneSubSection& iSubSection );
-    static TArray<FFrameTime> FindPlaneTransformKeys( const UMovieSceneSubSection& iSubSection, FMovieScenePossessable iPossessable );
     static TArray<FFrameTime> FindPlaneMaterialKeys( const UMovieSceneSubSection& iSubSection, FMovieScenePossessable iPossessable );
 };

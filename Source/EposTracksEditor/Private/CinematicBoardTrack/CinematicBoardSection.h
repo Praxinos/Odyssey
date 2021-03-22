@@ -71,13 +71,15 @@ public:
 
     //---
 
-    virtual void BuildCameraTransformKeys();
+    virtual void BuildCameraTransformChannelProxy();
     virtual TSharedPtr<FMovieSceneChannelProxy> GetCameraTransformChannelProxy() const;
-    virtual void ReBuildCameraTransformMetaKeys();
+    virtual void ReBuildCameraTransformMetaChannel();
     virtual TSharedPtr<FMetaFloatChannel> GetCameraTransformMetaChannel() const;
 
-    virtual void BuildPlaneTransformsKeys();
-    virtual TArray<double> GetPlaneTransformKeys( FMovieScenePossessable iPossessable ) const;
+    virtual void BuildPlanesTransformChannelProxy();
+    virtual TSharedPtr<FMovieSceneChannelProxy> GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildPlanesTransformMetaChannel();
+    virtual TSharedPtr<FMetaFloatChannel> GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
 
     virtual void BuildPlaneMaterialsKeys();
     virtual TArray<double> GetPlaneMaterialKeys( FMovieScenePossessable iPossessable ) const;
@@ -86,7 +88,8 @@ private:
     TArray<double> mThumbnailKeys;
     TSharedPtr<FMovieSceneChannelProxy> mCameraTransformKeys;
     TSharedPtr<FMetaFloatChannel>       mCameraTransformMetaKeys;
-    TMap<FGuid, TArray<double>>         mPlaneTransformsKeys;
+    TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>    mPlanesTransformsKeys;
+    TMap<FGuid, TSharedPtr<FMetaFloatChannel>>          mPlanesTransformsMetaKeys;
     TMap<FGuid, TArray<double>>         mPlaneMaterialsKeys;
 
 private:
