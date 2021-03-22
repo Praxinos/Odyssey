@@ -49,7 +49,7 @@
 /* FCinematicBoardSection structors
  *****************************************************************************/
 
-FCinematicBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSceneCinematicBoardSection* iSection )
+FCinematicBoardSection::FCinematicSectionCacheForThumbnail::FCinematicSectionCacheForThumbnail( UMovieSceneCinematicBoardSection* iSection )
     : mInnerFrameRate( 1, 1 )
     , mInnerFrameOffset( 0 )
     , mSectionStartFrame( 0 )
@@ -70,7 +70,7 @@ FCinematicBoardSection::FCinematicSectionCache::FCinematicSectionCache( UMovieSc
 }
 
 bool
-FCinematicBoardSection::FCinematicSectionCache::operator!=( const FCinematicSectionCache& iRHS ) const
+FCinematicBoardSection::FCinematicSectionCacheForThumbnail::operator!=( const FCinematicSectionCacheForThumbnail& iRHS ) const
 {
     return mInnerFrameRate != iRHS.mInnerFrameRate
         || mInnerFrameOffset != iRHS.mInnerFrameOffset
@@ -80,10 +80,80 @@ FCinematicBoardSection::FCinematicSectionCache::operator!=( const FCinematicSect
 
 //---
 
+FCinematicBoardSection::FViewCachedState::FViewCachedState( const UMovieSceneCinematicBoardSection& iSection, TSharedPtr<ISequencer> iSequencer )
+{
+    check( iSequencer );
+
+    //if( iSequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry().GetLocalSize().IsNearlyZero() ) // In the first tick(s), geometry is empty, but it's not the better way to manage this
+    //    return;
+
+    //FTimeToPixel TimeToPixelConverter = ...; // Get as parameter
+
+    //const UMovieScene* MovieScene = iSection.GetTypedOuter<UMovieScene>();
+
+    // Gather keys for a region larger than the view range to ensure we draw keys that are only just offscreen.
+    // Compute visible range taking into account a half-frame offset for keys, plus half a key width for keys that are partially offscreen
+    //TRange<FFrameNumber> SectionRange = iSection.GetRange();
+    //const double         HalfKeyWidth = 0.5f * ( TimeToPixelConverter.PixelToSeconds( SequencerSectionConstants::KeySize.X ) - TimeToPixelConverter.PixelToSeconds( 0 ) );
+    //TRange<double>       VisibleRange = UE::MovieScene::DilateRange( iSequencer->GetViewRange(), -HalfKeyWidth, HalfKeyWidth );
+    //TRange<FFrameNumber> ValidKeyRange = iSequencer->GetSubSequenceRange().Get( MovieScene->GetPlaybackRange() ); // ?
+
+    //ValidPlayRangeMin = UE::MovieScene::DiscreteInclusiveLower( ValidKeyRange );
+    //ValidPlayRangeMax = UE::MovieScene::DiscreteExclusiveUpper( ValidKeyRange );
+    //PaddedViewRange = TRange<double>::Intersection( SectionRange / MovieScene->GetTickResolution(), VisibleRange );
+    //SelectionSerial = Sequencer->GetSelection().GetSerialNumber();
+    //SelectionPreviewHash = Sequencer->GetSelectionPreview().GetSelectionHash();
+
+    mPaddedViewRange = iSequencer->GetViewRange();
+}
+
+bool
+FCinematicBoardSection::FViewCachedState::operator!=( const FViewCachedState& iRHS ) const
+{
+    const double RangeSize = mPaddedViewRange.Size<double>();
+    const double OtherRangeSize = iRHS.mPaddedViewRange.Size<double>();
+
+    return !FMath::IsNearlyEqual( RangeSize, OtherRangeSize, RangeSize * 0.001 );
+
+    //ECacheFlags Flags = ECacheFlags::None;
+
+    //if( ValidPlayRangeMin != Other.ValidPlayRangeMin || ValidPlayRangeMax != Other.ValidPlayRangeMax )
+    //{
+    //    // The valid key ranges for the data has changed
+    //    Flags |= ECacheFlags::KeyStateChanged;
+    //}
+
+    //if( SelectionSerial != Other.SelectionSerial || SelectionPreviewHash != Other.SelectionPreviewHash )
+    //{
+    //    // Selection states have changed
+    //    Flags |= ECacheFlags::KeyStateChanged;
+    //}
+
+    //if( PaddedViewRange != Other.PaddedViewRange )
+    //{
+    //    Flags |= ECacheFlags::ViewChanged;
+
+    //    const double RangeSize = PaddedViewRange.Size<double>();
+    //    const double OtherRangeSize = Other.PaddedViewRange.Size<double>();
+
+    //    if( !FMath::IsNearlyEqual( RangeSize, OtherRangeSize, RangeSize * 0.001 ) )
+    //    {
+    //        Flags |= ECacheFlags::ViewZoomed;
+    //    }
+    //}
+
+    //return Flags;
+}
+
+//---
+//---
+//---
+
 FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequencer, UMovieSceneCinematicBoardSection& iSection, TSharedPtr<FCinematicBoardTrackEditor> iCinematicBoardTrackEditor, TSharedPtr<FTrackEditorThumbnailPool> iThumbnailPool )
     : TSubSectionMixin( iSequencer, iSection, iSequencer, iThumbnailPool, iSection )
     , mCinematicBoardTrackEditor( iCinematicBoardTrackEditor )
     , mThumbnailCacheData( &iSection )
+    , mViewCacheState( iSection, iSequencer )
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 }
@@ -215,6 +285,7 @@ FCinematicBoardSection::ConstructConverterForViewRange( FGeometry* oGeometry ) c
     FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
     if( oGeometry )
         *oGeometry = geometry;
+
     return FTimeToPixel( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
 }
 
@@ -386,12 +457,19 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
 {
     // Set cached data
     UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
-    FCinematicSectionCache newCacheData( &sectionObject );
+    FCinematicSectionCacheForThumbnail newCacheData( &sectionObject );
     if( newCacheData != mThumbnailCacheData )
     {
         KeyThumbnailCache.ForceRedraw();
     }
     mThumbnailCacheData = newCacheData;
+
+    FViewCachedState newCacheState( sectionObject, GetSequencer() );
+    if( newCacheState != mViewCacheState )
+    {
+        BuildKeys();
+    }
+    mViewCacheState = newCacheState;
 
     // Update single reference frame settings
     if( GetDefault<UMovieSceneUserThumbnailSettings>()->bDrawSingleThumbnails && sectionObject.HasStartFrame() )

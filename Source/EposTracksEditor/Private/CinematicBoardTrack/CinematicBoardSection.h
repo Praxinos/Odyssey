@@ -140,11 +140,11 @@ private:
     /** The board track editor that contains this section */
     TWeakPtr<FCinematicBoardTrackEditor> mCinematicBoardTrackEditor;
 
-    struct FCinematicSectionCache
+    struct FCinematicSectionCacheForThumbnail
     {
-        FCinematicSectionCache( UMovieSceneCinematicBoardSection* iSection = nullptr );
+        FCinematicSectionCacheForThumbnail( UMovieSceneCinematicBoardSection* iSection = nullptr );
 
-        bool operator!=( const FCinematicSectionCache& iRHS ) const;
+        bool operator!=( const FCinematicSectionCacheForThumbnail& iRHS ) const;
 
         FFrameRate   mInnerFrameRate;
         FFrameNumber mInnerFrameOffset;
@@ -153,5 +153,32 @@ private:
     };
 
     /** Cached section thumbnail data */
-    FCinematicSectionCache mThumbnailCacheData;
+    FCinematicSectionCacheForThumbnail mThumbnailCacheData;
+
+    //---
+
+    // From (inspired by) ...\UE_4.26\Engine\Source\Editor\Sequencer\Private\SequencerKeyRenderer.cpp
+
+    /** Structure that caches the various bits of information upon which our view is dependent */
+    struct FViewCachedState
+    {
+        /** Construction from a section painter and sequencer object - populates the cached values */
+        FViewCachedState( const UMovieSceneCinematicBoardSection& iSection, TSharedPtr<ISequencer> iSequencer );
+
+        /** Compare this cache state to another */
+        bool operator!=( const FViewCachedState& iRHS ) const;
+        //ECacheFlags CompareTo( const FCachedState& Other ) const;
+
+        /** The min/max tick value relating to the FMovieSceneSubSequenceData::ValidPlayRange bounds, or the current playback range */
+        //FFrameNumber mValidPlayRangeMin, mValidPlayRangeMax;
+        /** The current view range +/- the width of a key */
+        TRange<double> mPaddedViewRange;
+        /** The value of FSequencerSelection::GetSerialNumber when this cache was created */
+        //uint32 mSelectionSerial = 0;
+        /** The value of FSequencerSelectionPreview::GetSelectionHash when this cache was created */
+        //uint32 mSelectionPreviewHash = 0;
+    };
+
+    /** Cached section data */
+    FViewCachedState mViewCacheState;
 };

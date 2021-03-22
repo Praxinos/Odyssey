@@ -58,7 +58,7 @@ public:
 
 protected:
     /** Build all the sub keys */
-    virtual void BuildSubKeys( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
+    virtual void BuildSubKeys( TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
     /** Build all the FKeyDrawParams of all sub keys */
     virtual void BuildDrawKeys() = 0;
     /** Set flags of all meta keys */
@@ -133,8 +133,11 @@ TMetaChannel<ChannelType, ValueType>::Build( const TSharedPtr<FMovieSceneChannel
 
 template<typename ChannelType, typename ValueType>
 void
-TMetaChannel<ChannelType, ValueType>::BuildSubKeys( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy )
+TMetaChannel<ChannelType, ValueType>::BuildSubKeys( TSharedPtr<FMovieSceneChannelProxy> iChannelProxy )
 {
+    if( !iChannelProxy.IsValid() )
+        return;
+
     TArrayView<ChannelType*> channels = iChannelProxy->GetChannels<ChannelType>();
 
     for( int32 channel_index = 0; channel_index < channels.Num(); ++channel_index )
