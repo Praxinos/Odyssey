@@ -207,6 +207,30 @@ FCinematicBoardSection::GetViewCamera()
 
 //---
 
+FTimeToPixel
+FCinematicBoardSection::ConstructConverterForViewRange( FGeometry* oGeometry ) const
+{
+    check( GetSequencer() );
+
+    FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
+    if( oGeometry )
+        *oGeometry = geometry;
+    return FTimeToPixel( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
+}
+
+FTimeToPixel
+FCinematicBoardSection::ConstructConverterForSection( const FGeometry& iGeometry ) const
+{
+    const UMovieSceneCinematicBoardSection& section_object = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+    FFrameRate     TickResolution = section_object.GetTypedOuter<UMovieScene>()->GetTickResolution();
+    double         LowerTime = section_object.GetInclusiveStartFrame() / TickResolution;
+    double         UpperTime = section_object.GetExclusiveEndFrame() / TickResolution;
+
+    return FTimeToPixel( iGeometry, TRange<double>( LowerTime, UpperTime ), TickResolution );
+}
+
+//---
+
 void
 FCinematicBoardSection::BuildKeys() //override
 {

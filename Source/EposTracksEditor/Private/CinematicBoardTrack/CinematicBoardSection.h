@@ -71,6 +71,11 @@ public:
 
     //---
 
+    FTimeToPixel ConstructConverterForViewRange( FGeometry* oGeometry = nullptr ) const;
+    FTimeToPixel ConstructConverterForSection( const FGeometry& iGeometry ) const;
+
+    //---
+
     virtual void BuildCameraTransformChannelProxy();
     virtual TSharedPtr<FMovieSceneChannelProxy> GetCameraTransformChannelProxy() const;
     virtual void ReBuildCameraTransformMetaChannel();

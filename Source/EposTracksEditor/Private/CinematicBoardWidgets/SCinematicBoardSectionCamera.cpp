@@ -50,8 +50,8 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
 
     const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
 
-    FGeometry geometry( section->GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
-    FTimeToPixel converter( geometry, section->GetSequencer()->GetViewRange(), section->GetSequencer()->GetFocusedTickResolution() );
+    FGeometry geometry;
+    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
     FFrameTime clicked_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
@@ -117,8 +117,8 @@ SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FP
 
     TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
 
-    FGeometry geometry( section->GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
-    FTimeToPixel converter( geometry, section->GetSequencer()->GetViewRange(), section->GetSequencer()->GetFocusedTickResolution() );
+    FGeometry geometry;
+    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
     FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     //---
@@ -153,17 +153,6 @@ SCinematicBoardSectionCamera::OnMouseLeave( const FPointerEvent& MouseEvent ) //
     //UE_LOG( LogTemp, Warning, TEXT( "OnMouseLeave" ) );
 }
 
-static
-FTimeToPixel
-ConstructTimeConverterForSection2( const FGeometry& InSectionGeometry, const UMovieSceneSection& InSection )
-{
-    FFrameRate     TickResolution = InSection.GetTypedOuter<UMovieScene>()->GetTickResolution();
-    double         LowerTime = InSection.GetInclusiveStartFrame() / TickResolution;
-    double         UpperTime = InSection.GetExclusiveEndFrame() / TickResolution;
-
-    return FTimeToPixel( InSectionGeometry, TRange<double>( LowerTime, UpperTime ), TickResolution );
-}
-
 int32
 SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
@@ -194,6 +183,7 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
     //---
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
+    FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
 
     for( const auto& pair : meta_channel->GetMetaKeys() )
     {
@@ -207,7 +197,7 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
         const FVector2D KeySize = SequencerSectionConstants::KeySize;
 
         static const float BrushBorderWidth = 2.0f;
-        const float KeyPositionPx = ConstructTimeConverterForSection2( AllottedGeometry, section->GetSubSectionObject() ).SecondsToPixel( outer_second );
+        const float KeyPositionPx = converter.SecondsToPixel( outer_second );
         const FVector2D KeyTranslation( KeyPositionPx - FMath::CeilToFloat( KeySize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( KeySize.Y / 2.0f ) ) );
         const FVector2D KeyTranslationBorder( KeyPositionPx - FMath::CeilToFloat( KeySize.X / 2.0f - BrushBorderWidth ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( KeySize.Y / 2.0f - BrushBorderWidth ) ) );
 
