@@ -16,7 +16,7 @@ struct FInnerSequenceData
 {
 public:
     FInnerSequenceData();
-    FInnerSequenceData( const FMovieSceneSequenceIDRef iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer );
+    FInnerSequenceData( FMovieSceneSequenceIDRef iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer );
 
     void InitializeFromSubSection( IMovieScenePlayer* iPlayer, FMovieSceneSequenceIDRef iSequenceID, const UMovieSceneSubSection& iSubSection );
     void Fill();

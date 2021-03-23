@@ -302,7 +302,7 @@ TMetaChannel<ChannelType, ValueType>::Move( const FFrameTime& iTime, bool iSnap,
     {
         for( auto& sub_key : pair.Value.mSubKeys )
         {
-            TMovieSceneChannelHandle<ChannelType> channel_handle = sub_key.mChannelHandle.Cast<ChannelType>();
+            TMovieSceneChannelHandle<ChannelType> channel_handle = sub_key.mChannelHandle.template Cast<ChannelType>(); // https://stackoverflow.com/questions/3786360/confusing-template-error#answer-3786481
             FKeyHandle& key_handle = sub_key.mKeyHandle;
             FFrameTime offset = sub_key.mOffset;
 

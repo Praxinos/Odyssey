@@ -46,7 +46,7 @@ FInnerSequenceData::FInnerSequenceData()
 {
 }
 
-FInnerSequenceData::FInnerSequenceData( const FMovieSceneSequenceIDRef iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer )
+FInnerSequenceData::FInnerSequenceData( FMovieSceneSequenceIDRef iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer )
     : mInnerSequenceID( iID )
     , mHierarchy( iHierarchy )
     , mPlayer( ioPlayer )
