@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Channels/MovieSceneChannelHandle.h"
+#include "Channels/MovieSceneObjectPathChannel.h"
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 #include "KeyDrawParams.h"
@@ -92,6 +93,23 @@ protected:
 };
 
 //---
+
+struct FMetaMaterialChannel
+    : TMetaChannel<FMovieSceneObjectPathChannel, FMovieSceneObjectPathChannelKeyValue>
+{
+public:
+    FMetaMaterialChannel( const FFrameNumber& iMergeTolerance );
+
+public:
+    /** Create a new meta channel with all meta keys at the given time of the current meta channel */
+    virtual TSharedPtr<FMetaMaterialChannel> CreateFromTime( const FFrameTime& iTime, const FFrameNumber& iTolerance );
+
+protected:
+    /** Build all the FKeyDrawParams of all sub keys */
+    virtual void BuildDrawKeys();
+};
+
+//---
 //---
 //---
 
@@ -148,7 +166,7 @@ TMetaChannel<ChannelType, ValueType>::BuildSubKeys( TSharedPtr<FMovieSceneChanne
         if( !channel || !channel->GetNumKeys() )
             continue;
 
-        TMovieSceneChannelData<FMovieSceneFloatValue> channel_data = channel->GetData();
+        TMovieSceneChannelData<ValueType> channel_data = channel->GetData();
 
         for( int32 key_index = 0; key_index < channel->GetNumKeys(); ++key_index )
         {

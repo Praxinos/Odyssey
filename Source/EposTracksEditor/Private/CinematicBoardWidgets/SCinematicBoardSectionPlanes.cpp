@@ -259,6 +259,9 @@ SCinematicBoardSectionPlaneKeys::OnPaint( const FPaintArgs& Args, const FGeometr
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = section->GetSubSectionObject().GetTypedOuter<UMovieScene>();
+    check( movie_scene );
 
     for( const auto& pair : meta_channel->GetMetaKeys() )
     {
@@ -266,8 +269,8 @@ SCinematicBoardSectionPlaneKeys::OnPaint( const FPaintArgs& Args, const FGeometr
         FMetaKey meta_key = pair.Value;
         FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
 
-        FFrameTime outer_time = SectionsHelpersConvert::InnerToOuter( &section->GetSubSectionObject(), time );
-        double outer_second = SectionsHelpersConvert::FrameToSecond( &section->GetSubSectionObject(), outer_time );
+        FFrameTime outer_time = time * inner_to_outer_transform;
+        double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
 
         const FVector2D KeySize = SequencerSectionConstants::KeySize;
 
@@ -320,14 +323,27 @@ public:
     // SWidget overrides
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
 
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual void OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual void OnMouseLeave( const FPointerEvent& MouseEvent ) override;
+
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
 protected:
     // SWidget overrides.
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
+    TSharedPtr<FMetaMaterialChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+
+private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     FMovieScenePossessable mBinding;
+
+    TSharedPtr<FMetaMaterialChannel>       mKeysUnderMouse;
 };
 
 void
@@ -350,6 +366,114 @@ SCinematicBoardSectionPlaneMaterialKeys::ComputeDesiredSize( float ) const //ove
     size.Y = SequencerSectionConstants::DefaultSectionHeight + 5.f;
 
     return size;
+}
+
+TSharedPtr<FMetaMaterialChannel>
+SCinematicBoardSectionPlaneMaterialKeys::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
+{
+    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+
+    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+
+    FGeometry geometry;
+    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FFrameTime clicked_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
+
+    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
+
+    //---
+
+    FFrameTime inner_clicked_frame = clicked_frame * OuterToInnerTransform;
+
+    //---
+
+    TSharedPtr<FMetaMaterialChannel> meta_channel = section->GetPlaneMaterialMetaChannel( mBinding );
+    if( !meta_channel )
+        return nullptr;
+
+    return meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
+}
+
+FCursorReply
+SCinematicBoardSectionPlaneMaterialKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+{
+    TSharedPtr<FMetaMaterialChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
+
+    if( meta_channel.IsValid() && meta_channel->NumMetaKeys() )
+        return FCursorReply::Cursor( EMouseCursor::CardinalCross );
+
+    return FCursorReply::Cursor( EMouseCursor::Default );
+}
+
+FReply
+SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    check( !mKeysUnderMouse.IsValid() );
+
+    mKeysUnderMouse = GetKeysUnderMouse( MouseEvent );
+
+    //---
+
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonDown" ) );
+    return FReply::Handled().CaptureMouse( SharedThis( this ) );
+}
+
+FReply
+SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    mKeysUnderMouse = nullptr;
+
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonUp" ) );
+    return FReply::Handled().ReleaseMouseCapture();
+}
+
+FReply
+SCinematicBoardSectionPlaneMaterialKeys::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    if( !HasMouseCapture() || !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+    {
+        //return FReply::Handled();
+        return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
+    }
+
+    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+
+    FGeometry geometry;
+    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
+
+    //---
+
+    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
+
+    // For the moment should always be the case
+    check( mKeysUnderMouse->NumMetaKeys() == 1 );
+
+    const bool snap = section->GetSequencer()->GetSequencerSettings()->GetIsSnapEnabled() && section->GetSequencer()->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+    const FFrameRate inner_tick_resolution = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetTickResolution();
+    const FFrameRate inner_display_rate = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetDisplayRate();
+
+    mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+
+    section->ReBuildPlanesMaterialMetaChannel();
+
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove" ) );
+    return FReply::Handled();
+}
+
+void
+SCinematicBoardSectionPlaneMaterialKeys::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseEnter" ) );
+}
+
+void
+SCinematicBoardSectionPlaneMaterialKeys::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
+{
+    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseLeave" ) );
 }
 
 int32
@@ -376,35 +500,58 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
 
     TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
 
-    TArray<double> keys = section->GetPlaneMaterialKeys( mBinding );
+    //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetPlaneMaterialChannelProxy();
+    TSharedPtr<FMetaMaterialChannel> meta_channel = section->GetPlaneMaterialMetaChannel( mBinding );
 
-    static const FName CircleKeyBrushName( "Sequencer.KeyCircle" );
-    static const FName DiamondKeyBrushName( "Sequencer.KeyDiamond" );
-    static const FName SquareKeyBrushName( "Sequencer.KeySquare" );
-    static const FName TriangleKeyBrushName( "Sequencer.KeyTriangle" );
+    if( !meta_channel.IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
-    const FSlateBrush* CircleKeyBrush = FEditorStyle::GetBrush( CircleKeyBrushName );
-    const FSlateBrush* DiamondKeyBrush = FEditorStyle::GetBrush( DiamondKeyBrushName );
-    const FSlateBrush* SquareKeyBrush = FEditorStyle::GetBrush( SquareKeyBrushName );
-    const FSlateBrush* TriangleKeyBrush = FEditorStyle::GetBrush( TriangleKeyBrushName );
+    //---
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = section->GetSubSectionObject().GetTypedOuter<UMovieScene>();
+    check( movie_scene );
 
-    for( auto key : keys )
+    for( const auto& pair : meta_channel->GetMetaKeys() )
     {
+        FFrameNumber time = pair.Key;
+        FMetaKey meta_key = pair.Value;
+        FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+
+        FFrameTime outer_time = time * inner_to_outer_transform;
+        double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
+
         const FVector2D KeySize = SequencerSectionConstants::KeySize;
-        //static const float BrushBorderWidth = 2.0f;
-        const float KeyPositionPx = converter.SecondsToPixel( key );
+
+        static const float BrushBorderWidth = 2.0f;
+        const float KeyPositionPx = converter.SecondsToPixel( outer_second );
         const FVector2D KeyTranslation( KeyPositionPx - FMath::CeilToFloat( KeySize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( KeySize.Y / 2.0f ) ) );
+        const FVector2D KeyTranslationBorder( KeyPositionPx - FMath::CeilToFloat( KeySize.X / 2.0f - BrushBorderWidth ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( KeySize.Y / 2.0f - BrushBorderWidth ) ) );
+
+        key_draw_param.BorderTint = FLinearColor( 0.05f, 0.05f, 0.05f, 1.0f );
 
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId,
             AllottedGeometry.ToPaintGeometry( KeySize, FSlateLayoutTransform( KeyTranslation ) ),
-            DiamondKeyBrush
+            key_draw_param.BorderBrush,
+            ESlateDrawEffect::None,
+            key_draw_param.BorderTint
+        );
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry( KeySize - 2.0f * BrushBorderWidth, FSlateLayoutTransform( key_draw_param.FillOffset + KeyTranslationBorder ) ),
+            key_draw_param.FillBrush,
+            ESlateDrawEffect::None,
+            key_draw_param.FillTint
         );
     }
+
+    LayerId++;
 
     return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }

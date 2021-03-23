@@ -184,6 +184,9 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = section->GetSubSectionObject().GetTypedOuter<UMovieScene>();
+    check( movie_scene );
 
     for( const auto& pair : meta_channel->GetMetaKeys() )
     {
@@ -191,8 +194,8 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
         FMetaKey meta_key = pair.Value;
         FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
 
-        FFrameTime outer_time = SectionsHelpersConvert::InnerToOuter( &section->GetSubSectionObject(), time );
-        double outer_second = SectionsHelpersConvert::FrameToSecond( &section->GetSubSectionObject(), outer_time );
+        FFrameTime outer_time = time * inner_to_outer_transform;
+        double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
 
         const FVector2D KeySize = SequencerSectionConstants::KeySize;
 

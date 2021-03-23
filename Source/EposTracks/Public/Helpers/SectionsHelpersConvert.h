@@ -11,13 +11,9 @@ class UMovieSceneSubSection;
 class EPOSTRACKS_API SectionsHelpersConvert
 {
 public:
-    /** Convert a key inside a subsequence reference to its (a) parent reference */
-    static FFrameTime InnerToOuter( const UMovieSceneSubSection* iOuterSection, FFrameTime iInnerKeys );
     /** Convert all keys inside a subsequence reference to its (a) parent reference */
     static TArray<FFrameTime> InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys );
 
-    /** Convert a key from frame to second */
-    static double FrameToSecond( const UMovieSceneSection* iSection, FFrameTime iFrameKeys );
     /** Convert all keys from frame to second */
     static TArray<double> FrameToSecond( const UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys );
 };

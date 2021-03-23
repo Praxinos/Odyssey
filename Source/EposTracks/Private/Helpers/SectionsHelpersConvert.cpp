@@ -9,14 +9,6 @@
 //---
 
 //static
-FFrameTime
-SectionsHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection, FFrameTime iInnerKey )
-{
-    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseLinearOnly();
-    return iInnerKey * InnerToOuterTransform;
-}
-
-//static
 TArray<FFrameTime>
 SectionsHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
 {
@@ -30,15 +22,6 @@ SectionsHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection
     }
 
     return converted_keys;
-}
-
-//static
-double
-SectionsHelpersConvert::FrameToSecond( const UMovieSceneSection* iSection, FFrameTime iFrameKey )
-{
-    FQualifiedFrameTime time( iFrameKey, iSection->GetTypedOuter<UMovieScene>()->GetTickResolution() );
-
-    return time.AsSeconds();
 }
 
 //static
