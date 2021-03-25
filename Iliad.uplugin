@@ -121,6 +121,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseyTextureEditorBlueprint",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyViewportDrawingEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"

@@ -12,7 +12,7 @@ class FOdysseyTextureEditor;
 
 //---
 
-class FOdysseyTextureEditorDrawingState
+class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorDrawingState
     : public FOdysseyDrawingState
 {
 public:
