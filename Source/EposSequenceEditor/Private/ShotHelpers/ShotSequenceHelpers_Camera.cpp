@@ -62,8 +62,6 @@ ShotSequenceHelpers::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& i
     : mSequencer( iSequencer )
     , mOriginalId()
 {
-    check( iInnerID != MovieSceneSequenceID::Root );
-
     mOriginalId = mSequencer.GetFocusedTemplateID();
     if( iInnerID == mOriginalId )
         return;
@@ -175,7 +173,7 @@ ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, FGuid* oGuid ) 
 
 //static
 void
-ShotSequenceHelpers::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, const ACineCameraActor* iCamera, FFrameNumber FrameNumber)
+ShotSequenceHelpers::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber)
 {
     CreateCameraCut( iSequencer, iSequence, CameraGuid, FrameNumber );
 
@@ -351,7 +349,7 @@ CreateTexture2DAsset( UMovieSceneSequence* iSequence, UMaterialInterface* iMater
 
 //static
 void
-ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, const ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
     FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
 
@@ -417,6 +415,7 @@ ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSeque
 
     plane->GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
     plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
+    plane->SetMobility( EComponentMobility::Movable );
 
     //---
 
@@ -424,6 +423,9 @@ ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSeque
     plane->SetActorLocation( plane_location );
     plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
     plane->AddActorWorldRotation( CamRot );
+
+    //plane->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform );
+    GEditor->ParentActors( iCamera, plane, NAME_None );
 
     //---
 

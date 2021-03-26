@@ -60,6 +60,7 @@ ShotSequenceHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const 
         else
         {
             NewSection = NewTrack->CreateNewSection();
+            check( NewTrack->IsEmpty() );
             NewTrack->AddSection( *NewSection );
         }
 
@@ -108,7 +109,7 @@ ShotSequenceHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const 
             //FloatChannels[8]->SetDefault( Scale.Z );
         }
 
-        if( NewTrack->IsA<UMovieScenePrimitiveMaterialTrack>() )
+        if( NewTrack->IsA<UMovieScenePrimitiveMaterialTrack>() && iSequencer->GetAutoSetTrackDefaults() )
         {
             UMovieScenePrimitiveMaterialTrack* material_track = Cast< UMovieScenePrimitiveMaterialTrack >( NewTrack );
 
@@ -262,7 +263,7 @@ ShotSequenceHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor
     // - '3DTransform' track
     // - 'StaticMeshComponent' binding
     //     - 'Material Switcher' track
-    CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+    //CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
 
     FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ?
 

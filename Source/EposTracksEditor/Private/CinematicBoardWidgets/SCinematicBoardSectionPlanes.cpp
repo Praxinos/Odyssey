@@ -675,21 +675,21 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( mBoardSection.Pin()->GetSubSectionObject(), *mBoardSection.Pin()->GetSequencer() );
 
-    auto need_rebuild = [&]()
+    auto need_rebuild = [this]( const TArray<FMovieScenePossessable>& iPossessables )
     {
-        if( possessables.Num() != mPossessables.Num() )
+        if( iPossessables.Num() != mPossessables.Num() )
             return true;
 
-        if( !possessables.Num() ) // Rebuild when no possessables, otherwise list view will be empty and not containing max_planes rows (with invalid guid)
+        if( !iPossessables.Num() ) // Rebuild when no possessables, otherwise list view will be empty and not containing max_planes rows (with invalid guid)
             return true;
 
-        for( int i = 0; i < possessables.Num(); i++ )
-            if( possessables[i].GetGuid() != mPossessables[i]->GetGuid() )
+        for( int i = 0; i < iPossessables.Num(); i++ )
+            if( iPossessables[i].GetGuid() != mPossessables[i]->GetGuid() )
                 return true;
 
         return false;
     };
-    if( !need_rebuild() ) //TOCHECK: check if it's really ok
+    if( !need_rebuild( possessables ) ) //TOCHECK: check if it's really ok
         return;
 
     mPossessables.Empty();
