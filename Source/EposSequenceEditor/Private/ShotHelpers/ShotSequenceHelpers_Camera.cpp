@@ -61,10 +61,15 @@ ShotSequenceHelpers::GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSe
 ShotSequenceHelpers::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID )
     : mSequencer( iSequencer )
     , mOriginalId()
+    , mOriginalGlobalTime()
 {
     mOriginalId = mSequencer.GetFocusedTemplateID();
     if( iInnerID == mOriginalId )
         return;
+
+    FFrameRate display_rate = mSequencer.GetFocusedDisplayRate();
+    FFrameRate tick_resolution = mSequencer.GetFocusedTickResolution();
+    mOriginalGlobalTime = ConvertFrameTime( mSequencer.GetGlobalTime().Time, tick_resolution, display_rate );
 
     UMovieSceneSubSection* subsection = mSequencer.FindSubSection( iInnerID );
     check( subsection );
@@ -87,6 +92,10 @@ ShotSequenceHelpers::cTemporarySwitchInner::~cTemporarySwitchInner()
         check( subsection );
         mSequencer.FocusSequenceInstance( *subsection );
     }
+
+    FFrameRate display_rate = mSequencer.GetFocusedDisplayRate();
+    FFrameRate tick_resolution = mSequencer.GetFocusedTickResolution();
+    mSequencer.SetGlobalTime( ConvertFrameTime( mOriginalGlobalTime, display_rate, tick_resolution ) );
 }
 
 //---
@@ -153,17 +162,17 @@ ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, FGuid* oGuid ) 
     //---
     // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
 
-    //iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
+    // an option ?
+
+    iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
 
     // Lock the viewport to this camera
     if( NewCamera && NewCamera->GetLevel() )
     {
-        // an option ?
-
-        //GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-        //GCurrentLevelEditingViewportClient->SetActorLock( NewCamera );
-        //GCurrentLevelEditingViewportClient->bLockedCameraView = true;
-        //GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
+        GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
+        GCurrentLevelEditingViewportClient->SetActorLock( NewCamera );
+        GCurrentLevelEditingViewportClient->bLockedCameraView = true;
+        GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
         GCurrentLevelEditingViewportClient->Invalidate();
     }
 

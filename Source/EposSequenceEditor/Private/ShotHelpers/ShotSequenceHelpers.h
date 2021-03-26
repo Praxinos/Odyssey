@@ -62,6 +62,7 @@ private:
     private:
         ISequencer& mSequencer;
         FMovieSceneSequenceID mOriginalId;
+        FFrameTime mOriginalGlobalTime;
     };
 
 //---
