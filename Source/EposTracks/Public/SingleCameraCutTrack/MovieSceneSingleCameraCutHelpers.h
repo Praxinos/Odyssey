@@ -11,8 +11,4 @@ class EPOSTRACKS_API MovieSceneSingleCameraCutHelpers
 {
 public:
     static TArray<FFrameTime> GetCameraTransformKeys( UMovieSceneSequence* iShotSequence );
-
-    static TArray<FFrameTime> GetPlaneTransformKeys( UMovieSceneSequence* iShotSequence, FMovieScenePossessable iPossessable );
-
-    static TArray<FFrameTime> GetPlaneMaterialKeys( UMovieSceneSequence* iShotSequence, FMovieScenePossessable iPossessable );
 };
