@@ -210,7 +210,7 @@ def Build( iUPluginPathFile, iOutputPath ):
             module['WhitelistPlatforms'] = [ 'Mac' ]
 
     with iUPluginPathFile.open( 'w' ) as outfile:
-        json.dump( uplugin_data, outfile )
+        json.dump( uplugin_data, outfile, indent=2 )
 
     #---
 
@@ -237,7 +237,7 @@ def Build( iUPluginPathFile, iOutputPath ):
 
 #---
 
-# Add platform specification (all platforms) for marketplace
+# Add platform specifications (all platforms) for marketplace
 def PostBuildFixPlatforms( iArgs, iOutputPath ):
     if not iArgs.marketplace:
         return
@@ -255,9 +255,11 @@ def PostBuildFixPlatforms( iArgs, iOutputPath ):
         
     for module in uplugin_data['Modules']:
         module['WhitelistPlatforms'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+    
+    del uplugin_data['PreBuildSteps'] # Remove pre-build-steps as they are (at least for now) for development stuff: https://udn.unrealengine.com/s/question/0D54z00006tMlfbCAC/plugin-cconfig-how-to-use-config-ini-file-for-a-custom-plugin-
 
     with uplugin_pathfile.open( 'w' ) as outfile:
-        json.dump( uplugin_data, outfile )
+        json.dump( uplugin_data, outfile, indent=2 )
 
 #---
 
@@ -313,7 +315,7 @@ Build( uplugin_pathfile, output_path )
 
 #---
 
-PostBuildFixPlatforms( args, output_path )                              # For marketplace package, the uplugin file must know all the os supported
+PostBuildFixPlatforms( args, output_path )      # For marketplace package, the uplugin file must know all the os supported
 
 #---
 

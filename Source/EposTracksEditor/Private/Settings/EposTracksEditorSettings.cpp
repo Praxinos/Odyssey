@@ -3,8 +3,7 @@
 
 #include "Settings/EposTracksEditorSettings.h"
 
-UEposTracksEditorSettings::UEposTracksEditorSettings( const FObjectInitializer& ObjectInitializer )
-    : Super( ObjectInitializer )
+UEposTracksEditorSettings::UEposTracksEditorSettings()
 {
     BoardTrackSettings.ArrangeShots = EArrangeSections::OnTwoRowsShifted;
 }

@@ -40,5 +40,13 @@
       "Type": "Editor",
       "LoadingPhase": "Default"
     }
-  ]
+  ],
+  "PreBuildSteps": {
+    "Win64": [
+      "copy /Y \"$(PluginDir)\\Config\\BaseEpos.ini\" \"$(PluginDir)\\Config\\DefaultEpos.ini\""
+    ],
+    "Mac": [
+      "cp \"$(PluginDir)/Config/BaseEpos.ini\" \"$(PluginDir)/Config/DefaultEpos.ini\""
+    ]
+  }
 }

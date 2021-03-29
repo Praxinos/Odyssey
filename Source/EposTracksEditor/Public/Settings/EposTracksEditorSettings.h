@@ -17,8 +17,9 @@ struct FBoardTrackSettings
 {
     GENERATED_BODY()
 
+public:
     /** Select the way to arrange board sections. */
-    UPROPERTY(config, EditAnywhere, Category=BoardTrackSettings)
+    UPROPERTY(config, EditAnywhere, Category=BoardTrack)
     EArrangeSections ArrangeShots;
 };
 
@@ -35,21 +36,20 @@ struct FShotTrackSettings
 /**
  * Epos Editor settings.
  */
-UCLASS(config=EposTracks)
+UCLASS(config=Epos)
 class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-
-    UEposTracksEditorSettings(const FObjectInitializer& ObjectInitializer);
+    UEposTracksEditorSettings();
 
     /** Specifies Board track stuff. */
-    UPROPERTY(config, EditAnywhere, Category=BoardTrack)
+    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FBoardTrackSettings BoardTrackSettings;
 
     /** Specifies Shot track stuff. */
-    UPROPERTY(config, EditAnywhere, Category=ShotTrack)
+    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FShotTrackSettings ShotTrackSettings;
 };
