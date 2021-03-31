@@ -8,6 +8,7 @@
 #include "Styling/ISlateStyle.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
+#include "IEposSequenceEditorToolkit.h"
 #include "Settings/EposSequenceEditorSettings.h"
 
 class FToolBarBuilder;
@@ -22,7 +23,7 @@ class UEposMovieSceneSequence;
  * Implements an Editor toolkit for template sequences.
  */
 class FEposSequenceEditorToolkit
-    : public FAssetEditorToolkit
+    : public IEposSequenceEditorToolkit
     , public FGCObject
 {
 public:
@@ -36,6 +37,19 @@ public:
 
     /** Virtual destructor */
     virtual ~FEposSequenceEditorToolkit();
+
+public:
+
+    /** Iterate all open level sequence editor toolkits */
+    static void IterateOpenToolkits(TFunctionRef<bool(FEposSequenceEditorToolkit&)> Iter);
+
+    /** Called when the tab manager is changed */
+    DECLARE_EVENT_OneParam(FEposSequenceEditorToolkit, FEposSequenceEditorToolkitOpened, FEposSequenceEditorToolkit&);
+    static FEposSequenceEditorToolkitOpened& OnOpened();
+
+    /** Called when the tab manager is changed */
+    DECLARE_EVENT(FEposSequenceEditorToolkit, FEposSequenceEditorToolkitClosed);
+    FEposSequenceEditorToolkitClosed& OnClosed();
 
 public:
 
@@ -68,6 +82,9 @@ public:
     virtual void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager ) override;
     virtual void UnregisterTabSpawners( const TSharedRef<FTabManager>& iTabManager ) override;
 
+    //~ IEposSequenceEditorToolkit interface
+    virtual TSharedPtr<ISequencer> GetSequencer() const override;
+
 private:
 
     /** Callback for the menu extensibility manager. */
@@ -95,6 +112,9 @@ private:
 
     /** The sequencer used by this editor. */
     TSharedPtr<ISequencer> mSequencer;
+
+    /** Event that is cast when this toolkit is closed */
+    FEposSequenceEditorToolkitClosed mOnClosedEvent;
 
     /** Pointer to the style set to use for toolkits. */
     TSharedRef<ISlateStyle> mStyle;

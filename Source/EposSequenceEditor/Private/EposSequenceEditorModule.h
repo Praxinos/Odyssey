@@ -36,6 +36,9 @@ private:
     void RegisterMenuExtensions();
     void UnregisterMenuExtensions();
 
+    void RegisterLevelEditorExtensions();
+    void UnregisterLevelEditorExtensions();
+
     static void OnCreateNewAssetWithSettings( UClass* iClass );
 
     void RegisterSettings();

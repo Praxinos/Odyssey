@@ -14,11 +14,13 @@
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "Board/BoardSequenceEditorCommands.h"
+#include "EposSequenceEditorCommands.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceActions.h"
 #include "Shot/ShotSequenceCustomization.h"
 #include "Shot/ShotSequenceEditorCommands.h"
+#include "StoryboardViewport/StoryboardViewportLayoutEntity.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FEposEditorModule"
@@ -40,6 +42,7 @@ FEposSequenceEditorModule::StartupModule()
     RegisterCommands();
     RegisterAssetTools();
     RegisterMenuExtensions();
+    RegisterLevelEditorExtensions();
     RegisterSettings();
     RegisterSequenceCustomizations();
 }
@@ -50,6 +53,7 @@ FEposSequenceEditorModule::ShutdownModule()
     UnregisterSequenceCustomizations();
     UnregisterSettings();
     UnregisterMenuExtensions();
+    UnregisterLevelEditorExtensions();
     UnregisterAssetTools();
     UnregisterCommands();
 }
@@ -68,6 +72,7 @@ FEposSequenceEditorModule::AddReferencedObjects( FReferenceCollector& Collector 
 void
 FEposSequenceEditorModule::RegisterCommands()
 {
+    FEposSequenceEditorCommands::Register();
     FBoardSequenceEditorCommands::Register();
     FShotSequenceEditorCommands::Register();
 }
@@ -77,6 +82,7 @@ FEposSequenceEditorModule::UnregisterCommands()
 {
     FShotSequenceEditorCommands::Unregister();
     FBoardSequenceEditorCommands::Unregister();
+    FEposSequenceEditorCommands::Unregister();
 }
 
 //---
@@ -172,6 +178,27 @@ FEposSequenceEditorModule::UnregisterMenuExtensions()
     LevelEditorModule->GetAllLevelEditorToolbarCinematicsMenuExtenders().Remove( mCinematicsMenuExtender );
     mCinematicsMenuExtender = nullptr;
     mCommandList = nullptr;
+}
+
+//---
+
+void
+FEposSequenceEditorModule::RegisterLevelEditorExtensions()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+
+    FViewportTypeDefinition StoryboardViewportType = FViewportTypeDefinition::FromType<FStoryboardViewportLayoutEntity>( FEposSequenceEditorCommands::Get().ToggleStoryboardViewportCommand );
+    LevelEditorModule.RegisterViewportType( "Storyboard", StoryboardViewportType );
+}
+
+void
+FEposSequenceEditorModule::UnregisterLevelEditorExtensions()
+{
+    FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>( "LevelEditor" );
+    if( !LevelEditorModule )
+        return;
+
+    LevelEditorModule->UnregisterViewportType( "Storyboard" );
 }
 
 //---

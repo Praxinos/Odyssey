@@ -37,12 +37,45 @@
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorToolkit"
 
+//---
+
 const FName FEposSequenceEditorToolkit::smSequencerMainTabId( TEXT( "Sequencer_SequencerMain" ) );
 
 namespace SequencerDefs
 {
     static const FName sgEposSequencerAppIdentifier( TEXT( "EposSequencerApp" ) );
 }
+
+//---
+
+static TArray<FEposSequenceEditorToolkit*> sgOpenToolkits;
+
+void
+FEposSequenceEditorToolkit::IterateOpenToolkits(TFunctionRef<bool(FEposSequenceEditorToolkit&)> Iter)
+{
+    for( FEposSequenceEditorToolkit* Toolkit : sgOpenToolkits )
+    {
+        if (!Iter(*Toolkit))
+        {
+            return;
+        }
+    }
+}
+
+FEposSequenceEditorToolkit::FEposSequenceEditorToolkitOpened&
+FEposSequenceEditorToolkit::OnOpened()
+{
+    static FEposSequenceEditorToolkitOpened sOnOpenedEvent;
+    return sOnOpenedEvent;
+}
+
+FEposSequenceEditorToolkit::FEposSequenceEditorToolkitClosed&
+FEposSequenceEditorToolkit::OnClosed()
+{
+    return mOnClosedEvent;
+}
+
+//---
 
 FEposSequenceEditorToolkit::FEposSequenceEditorToolkit( const TSharedRef<ISlateStyle>& iStyle )
     : mSequence( nullptr )
@@ -53,6 +86,8 @@ FEposSequenceEditorToolkit::FEposSequenceEditorToolkit( const TSharedRef<ISlateS
     int32 NewIndex = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates().Add(
         FAssetEditorExtender::CreateRaw( this, &FEposSequenceEditorToolkit::HandleMenuExtensibilityGetExtender ) );
     mSequencerExtenderHandle = SequencerModule.GetAddTrackMenuExtensibilityManager()->GetExtenderDelegates()[NewIndex].GetHandle();
+
+    sgOpenToolkits.Add( this );
 }
 
 FEposSequenceEditorToolkit::~FEposSequenceEditorToolkit()
@@ -155,6 +190,14 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
     levelEditorModule.OnMapChanged().AddRaw( this, &FEposSequenceEditorToolkit::HandleMapChanged );
+
+    OnOpened().Broadcast( *this );
+}
+
+TSharedPtr<ISequencer>
+FEposSequenceEditorToolkit::GetSequencer() const //override
+{
+    return mSequencer;
 }
 
 void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSequence* > iSequences )
@@ -206,6 +249,10 @@ FEposSequenceEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollecto
 
 bool FEposSequenceEditorToolkit::OnRequestClose()
 {
+    sgOpenToolkits.Remove( this );
+
+    mOnClosedEvent.Broadcast();
+
     return true;
 }
 

@@ -13,6 +13,7 @@
 #include "Styling/SlateStyleRegistry.h"
 
 #define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
+#define BORDER_BRUSH(RelativePath, ...) FSlateBorderBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 
 //---
 
@@ -63,6 +64,24 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon24x24 ) );
 
+    //---
+
+    SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );
+
+    Set( "EposSequenceEditor.CinematicViewportPlayMarker", new IMAGE_BRUSH( "CinematicViewportPlayMarker", FVector2D( 11, 6 ) ) );
+    Set( "EposSequenceEditor.CinematicViewportRangeStart", new BORDER_BRUSH( "CinematicViewportRangeStart", FMargin( 1.f, .3f, 0.f, .6f ) ) );
+    Set( "EposSequenceEditor.CinematicViewportRangeEnd", new BORDER_BRUSH( "CinematicViewportRangeEnd", FMargin( 0.f, .3f, 1.f, .6f ) ) );
+
+    Set( "EposSequenceEditor.CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
+
+    Set( "FilmOverlay.DefaultThumbnail", new IMAGE_BRUSH( "DefaultFilmOverlayThumbnail", FVector2D( 36, 24 ) ) );
+
+    Set( "FilmOverlay.Disabled", new IMAGE_BRUSH( "FilmOverlay.Disabled", FVector2D( 36, 24 ) ) );
+    Set( "FilmOverlay.2x2Grid", new IMAGE_BRUSH( "FilmOverlay.2x2Grid", FVector2D( 36, 24 ) ) );
+    Set( "FilmOverlay.3x3Grid", new IMAGE_BRUSH( "FilmOverlay.3x3Grid", FVector2D( 36, 24 ) ) );
+    Set( "FilmOverlay.Crosshair", new IMAGE_BRUSH( "FilmOverlay.Crosshair", FVector2D( 36, 24 ) ) );
+    Set( "FilmOverlay.Rabatment", new IMAGE_BRUSH( "FilmOverlay.Rabatment", FVector2D( 36, 24 ) ) );
+
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }
 
@@ -82,7 +101,5 @@ FEposSequenceEditorStyle::Get()
 
     return smSingleton.ToSharedRef();
 }
-
-//---
 
 #undef IMAGE_BRUSH
