@@ -156,11 +156,18 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
     , mViewCacheState( iSection, iSequencer )
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
+
+    iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetLayout.IsValid() ? mWidgetLayout->GetDesiredSize().Y : 100.f; } ) );
 }
 
 
 FCinematicBoardSection::~FCinematicBoardSection()
 {
+    // Doesn't work, because when the gui is rebuild:
+    // - first, create the new FCinematicBoardSections
+    // - then, delete the old ones
+    // In this order, the next line will reset the attribute of the UMovieSceneCinematicBoardSection after it has been set in the constructor for the new ones
+    //Cast<UMovieSceneCinematicBoardSection>( Section )->SetWidgetHeight( 0 );
 }
 
 FText
@@ -173,10 +180,19 @@ FCinematicBoardSection::GetSectionTitle() const
 float
 FCinematicBoardSection::GetSectionHeight() const
 {
-    if( !mWidgetLayout.IsValid() )
-        return 50.f; // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+    float height = 100.f; // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
 
-    return mWidgetLayout->GetDesiredSize().Y;
+    UMovieSceneCinematicBoardTrack* track = Section->GetTypedOuter<UMovieSceneCinematicBoardTrack>();
+    if( track )
+    {
+        for( auto section : track->GetAllSections() )
+        {
+            UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+            height = FMath::Max( height, board_section->GetWidgetHeight() );
+        }
+    }
+
+    return height;
 }
 
 FMargin

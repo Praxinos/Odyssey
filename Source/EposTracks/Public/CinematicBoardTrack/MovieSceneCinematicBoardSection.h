@@ -52,6 +52,17 @@ private:
     /** The board's reference frame offset for single thumbnail rendering */
     UPROPERTY()
     float mThumbnailReferenceOffset;
+
+public:
+    /** Get the height of this track's rows */
+    float GetWidgetHeight() const;
+
+    /** Set the height of this track's rows */
+    void SetWidgetHeight( TAttribute<float> iWidgetHeight );
+
+private:
+    /** The height for each row of this track */
+    TAttribute<float> mWidgetHeight;
 #endif
 
 //---

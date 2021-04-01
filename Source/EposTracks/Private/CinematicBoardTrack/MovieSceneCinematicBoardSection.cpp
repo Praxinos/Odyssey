@@ -343,4 +343,17 @@ UMovieSceneCinematicBoardSection::SetThumbnailReferenceOffset( float iNewOffset 
     mThumbnailReferenceOffset = iNewOffset;
 }
 
+float
+UMovieSceneCinematicBoardSection::GetWidgetHeight() const
+{
+    return mWidgetHeight.Get();
+}
+
+/** Set the height of this track's rows */
+void
+UMovieSceneCinematicBoardSection::SetWidgetHeight( TAttribute<float> iWidgetHeight )
+{
+    mWidgetHeight = iWidgetHeight;
+}
+
 #endif
