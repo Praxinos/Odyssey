@@ -1,19 +1,19 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
-#include "OdysseySurfaceReadOnly.h"
+#include "OdysseySurfaceTexture2D.h"
 
 /////////////////////////////////////////////////////
-// FOdysseySurfaceReadOnly
+// FOdysseySurfaceTexture2D
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseySurfaceReadOnly::~FOdysseySurfaceReadOnly()
+FOdysseySurfaceTexture2D::~FOdysseySurfaceTexture2D()
 {
     if (mTexture) {
         mTexture->RemoveFromRoot(); //TODO: Replace this by adding the Texture to the Referenced Objects of the Editor
     }
 }
 
-FOdysseySurfaceReadOnly::FOdysseySurfaceReadOnly(UTexture2D* iTexture)
+FOdysseySurfaceTexture2D::FOdysseySurfaceTexture2D(UTexture2D* iTexture)
 	: mTexture(iTexture)
 {
 	if (mTexture)
@@ -26,19 +26,19 @@ FOdysseySurfaceReadOnly::FOdysseySurfaceReadOnly(UTexture2D* iTexture)
 //--------------------------------------------------------------------------- Public API
 
 UTexture2D*
-FOdysseySurfaceReadOnly::Texture()
+FOdysseySurfaceTexture2D::Texture()
 {
     return mTexture;
 }
 
 const UTexture2D*
-FOdysseySurfaceReadOnly::Texture() const
+FOdysseySurfaceTexture2D::Texture() const
 {
     return mTexture;
 }
 
 void
-FOdysseySurfaceReadOnly::Texture(UTexture2D* iTexture)
+FOdysseySurfaceTexture2D::Texture(UTexture2D* iTexture)
 {
     if (mTexture)
     {
@@ -56,7 +56,7 @@ FOdysseySurfaceReadOnly::Texture(UTexture2D* iTexture)
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- Public Tampon Methods
 int
-FOdysseySurfaceReadOnly::Width()
+FOdysseySurfaceTexture2D::Width()
 {
 	if (!mTexture)
 		return 0;
@@ -64,7 +64,7 @@ FOdysseySurfaceReadOnly::Width()
 }
 
 int
-FOdysseySurfaceReadOnly::Height()
+FOdysseySurfaceTexture2D::Height()
 {
 	if (!mTexture)
 		return 0;

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyBlock.h"
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
 #include "OdysseyTransactionnable.h"
@@ -306,7 +306,7 @@ protected:
     TArray<FOdysseyDrawingState*>       mDrawingStates;
 
 public:
-    FOdysseySurfaceEditable*            mBrushCursorPreviewSurface;
+    FOdysseySurfaceTexture2DEditable*            mBrushCursorPreviewSurface;
     FVector2D                           mBrushCursorPreviewShift;
     long long                           mLastBrushCursorComputationTime;
     bool                                mBrushCursorInvalid;

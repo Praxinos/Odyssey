@@ -101,7 +101,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if (!surface)
         return;
 
-    UTexture2D* texture       = surface->Texture();
+    UTexture* texture       = surface->Texture();
     if (!texture)
         return;
 
@@ -135,11 +135,13 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     if( GMaxRHIFeatureLevel >= ERHIFeatureLevel::SM5 )
     {
+        UTexture2D* texture2D = Cast<UTexture2D>(texture);
+
         //ODYSSEY: PATCH
         bool isNormalMap = texture->IsNormalMap();
         bool isSingleChannel = texture->CompressionSettings == TC_Grayscale || texture->CompressionSettings == TC_Alpha;
         bool isVirtual = texture->IsCurrentlyVirtualTextured();
-        bool isVTSPS = texture->IsVirtualTexturedWithSinglePhysicalSpace();
+        bool isVTSPS = texture2D ? texture2D->IsVirtualTexturedWithSinglePhysicalSpace() : false;
         bool isTextureArray = false;
         float layerIndex = 0.f;
         batchedElementParameters = new FBatchedElementTexture2DPreviewParameters( mipLevel, layerIndex, isNormalMap, isSingleChannel, isVTSPS, isVirtual, isTextureArray );
@@ -147,7 +149,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );
     FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
-    mPivotPointRatio = FVector2D( position_in_texture.X / texture->GetSizeX(), position_in_texture.Y / texture->GetSizeY());
+    mPivotPointRatio = FVector2D( position_in_texture.X / texture->GetSurfaceWidth(), position_in_texture.Y / texture->GetSurfaceHeight());
 
     // Draw background Checker
     {
@@ -973,7 +975,7 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
     if (!surface)
         return 1.0;
 
-    UTexture2D* texture       = surface->Texture();
+    UTexture* texture       = surface->Texture();
     if (!texture)
         return 1.0;
 
@@ -987,7 +989,7 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
         //The member zoom is overriden by the fit to viewport. The drawing function uses another way to calculate the effective zoom, and we do the same here
         uint32 width, height;
         mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
-        zoom = static_cast<double>( width ) / static_cast<double>( texture->GetSizeX() );
+        zoom = static_cast<double>( width ) / static_cast<double>( texture->GetSurfaceWidth() );
     }
     else
     {
@@ -1006,7 +1008,7 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     if (!surface)
         return FVector2D(0,0);
 
-    UTexture2D* texture       = surface->Texture();
+    UTexture* texture       = surface->Texture();
     if (!texture)
         return FVector2D(0,0);
 
@@ -1018,8 +1020,8 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     int32 yOffset = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) : 0;
     int32 xOffset = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) : 0;
 
-    int textureWidth = texture->GetSizeX();
-    int textureHeight = texture->GetSizeY();
+    int textureWidth = texture->GetSurfaceWidth();
+    int textureHeight = texture->GetSurfaceHeight();
 
     FVector2D texturePanPivot = FVector2D( mPivotPointRatio.X * textureWidth, mPivotPointRatio.Y * textureHeight ) - 0.5 * FVector2D( textureWidth, textureHeight );
 
@@ -1055,7 +1057,7 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStroke
     if (!surface)
         return FOdysseyStrokePoint();
 
-    UTexture2D* texture       = surface->Texture();
+    UTexture* texture       = surface->Texture();
     if (!texture)
         return FOdysseyStrokePoint();
 
@@ -1088,8 +1090,8 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStroke
         break;
     }
 
-    point_in_texture.x = point_in_texture.x * textureFullWidth / texture->GetSizeX();
-    point_in_texture.y = point_in_texture.y * textureFullHeight / texture->GetSizeY();
+    point_in_texture.x = point_in_texture.x * textureFullWidth / texture->GetSurfaceWidth();
+    point_in_texture.y = point_in_texture.y * textureFullHeight / texture->GetSurfaceHeight();
 
     return point_in_texture;
 }

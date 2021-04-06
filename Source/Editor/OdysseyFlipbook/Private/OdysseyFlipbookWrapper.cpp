@@ -14,7 +14,7 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 
 #include "OdysseyTextureAssetUserData.h"
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "ULISLoaderModule.h"
 
 FOdysseyFlipbookWrapper::~FOdysseyFlipbookWrapper()

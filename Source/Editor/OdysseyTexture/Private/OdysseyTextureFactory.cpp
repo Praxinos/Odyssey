@@ -9,7 +9,7 @@
 
 #include "ULISLoaderModule.h"
 #include "OdysseyBlock.h"
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTexture.h"
 #include "SOdysseyTextureConfigureWindow.h"
 

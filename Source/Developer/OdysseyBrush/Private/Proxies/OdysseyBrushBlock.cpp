@@ -6,7 +6,7 @@
 #include "Engine/Font.h"
 #include "UObject/StrongObjectPtr.h"
 
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBlock.h"
 #include <ULIS3>

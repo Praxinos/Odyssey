@@ -5,7 +5,7 @@
 
 #include "OdysseyFlipbookEditorGUI.h"
 #include "OdysseyFlipbookEditorTimelineTab.h"
-#include "OdysseySurfaceReadOnly.h"
+#include "OdysseySurfaceTexture2D.h"
 #include "SOdysseyFlipbookTimelineView.h"
 
 #include <ULIS3>
@@ -29,7 +29,7 @@ FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
 	FOdysseyTextureEditor(),
 	mFlipbookWrapper(nullptr),
-	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
+	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
 	mGUI(nullptr)
 {
 }
@@ -37,7 +37,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
 	FOdysseyTextureEditor(),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
-	mPreviewSurface(new FOdysseySurfaceReadOnly(nullptr)),
+	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
 	mGUI(nullptr)
 {
 }
@@ -93,7 +93,7 @@ FOdysseyFlipbookEditor::FlipbookWrapper()
 	return mFlipbookWrapper;
 }
 
-FOdysseySurfaceReadOnly*
+FOdysseySurfaceTexture2D*
 FOdysseyFlipbookEditor::PreviewSurface()
 {
 	return mPreviewSurface;

@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "Engine/Texture2D.h"
 #include "OdysseyTextureEditorGUI.h"
-#include "OdysseyTextureWrapper.h"
+#include "OdysseyTexture2DWrapper.h"
 
 class FOdysseyTextureEditorController;
 class IOdysseyLayer;
@@ -35,9 +35,9 @@ public:
 
 public:
     // Getters
-    virtual FOdysseyTextureWrapper&             TextureWrapper();
+    virtual FOdysseyTexture2DWrapper&           TextureWrapper();
 	virtual UTexture2D*							Texture();
-	virtual FOdysseySurfaceEditable*            DisplaySurface() override;
+	virtual IOdysseySurfaceEditable*            DisplaySurface() override;
     virtual FOdysseyLayerStack*					LayerStack() const;
     ::ul3::eAlphaMode	                        SelectedAlphaMode() const;
 
@@ -69,7 +69,7 @@ protected:
     virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
 private:
-    FOdysseyTextureWrapper     mTextureWrapper;
+    FOdysseyTexture2DWrapper     mTextureWrapper;
     ::ul3::eAlphaMode                       mSelectedAlphaMode;
 
 	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;

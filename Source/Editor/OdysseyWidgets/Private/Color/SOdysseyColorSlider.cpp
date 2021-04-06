@@ -76,7 +76,7 @@ IOdysseyChannelSlider::InitInternalBuffers() const
     cursor_size = FVector2D( 8, InternalSize.Y );
     if (!cursor_surface || cursor_size.X != cursor_surface->Width() || cursor_size.Y != cursor_surface->Height())
     {
-        cursor_surface = MakeUnique< FOdysseySurfaceEditable >(cursor_size.X, cursor_size.Y);
+        cursor_surface = MakeUnique< FOdysseySurfaceTexture2DEditable >(cursor_size.X, cursor_size.Y);
         cursor_brush->SetResourceObject(cursor_surface->Texture());
         cursor_brush->ImageSize.X = cursor_surface->Width();
         cursor_brush->ImageSize.Y = cursor_surface->Height();

@@ -11,7 +11,7 @@
 #include "SOdysseyTimeline.h"
 #include "SOdysseyFlipbookTimelineTrack.h"
 #include "OdysseyBlock.h"
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTexture.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbook"

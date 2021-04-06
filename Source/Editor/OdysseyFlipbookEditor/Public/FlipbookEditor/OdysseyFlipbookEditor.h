@@ -9,7 +9,7 @@
 #include "OdysseyFlipbookWrapper.h"
 
 class FOdysseyFlipbookEditorGUI;
-class FOdysseySurfaceReadOnly;
+class FOdysseySurfaceTexture2D;
 
 /**
  * Implements an Editor for flipbooks.
@@ -30,7 +30,7 @@ public:
 public:
     // Getters
 	TSharedPtr<FOdysseyFlipbookWrapper>&    FlipbookWrapper();
-    FOdysseySurfaceReadOnly*			    PreviewSurface();
+    FOdysseySurfaceTexture2D*			    PreviewSurface();
 
 public:
     // Setters
@@ -46,7 +46,7 @@ protected:
 
 private:
     TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper; //TODO: No need for a SharedPtr here, and no need for a pointer here
-	FOdysseySurfaceReadOnly*                mPreviewSurface; //TODO: No need for a pointer here I guess
+	FOdysseySurfaceTexture2D*                mPreviewSurface; //TODO: No need for a pointer here I guess
 
 	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 };

@@ -15,7 +15,7 @@
 #include "Layout/Children.h"
 #include "Widgets/SPanel.h"
 
-class FOdysseySurfaceEditable;
+class FOdysseySurfaceTexture2DEditable;
 
 #define ODYSSEY_LEAF_WIDGET_CONSTRUCT_ARGS              \
     : _DesiredWidth(FOptionalSize())                    \
@@ -102,7 +102,7 @@ protected:
     // to reallocate the internal buffer or paint on it
     mutable FVector2D InternalSize;
     mutable FVector2D ExternalSize;
-    mutable TUniquePtr< FOdysseySurfaceEditable > surface;
+    mutable TUniquePtr< FOdysseySurfaceTexture2DEditable > surface;
     mutable TUniquePtr< FSlateBrush > ItemBrush;
 
     ODYSSEY_LEAF_WIDGET_MEMBERS

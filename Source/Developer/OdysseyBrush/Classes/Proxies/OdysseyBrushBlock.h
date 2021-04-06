@@ -93,6 +93,7 @@ public:
              , Category="Odyssey|Block"
              , meta = ( DisplayName = "To Odyssey Block Reference (Texture2D)", BlueprintAutocast ) )
     static FOdysseyBlockProxy Conv_TextureToOdysseyBlockProxy( UTexture2D* Texture, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8);
+    //TODO: other versions of Conv_TextureToOdysseyBlockProxy to manage our other Texture types
 
     //Convert the Odyssey Block Reference to the specified Color Model and Channel Depth
     UFUNCTION(BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Convert Block to Format" ))

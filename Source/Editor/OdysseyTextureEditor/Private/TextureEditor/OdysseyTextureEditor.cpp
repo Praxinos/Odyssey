@@ -110,7 +110,7 @@ FOdysseyTextureEditor::ClearUndo()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyTextureWrapper&
+FOdysseyTexture2DWrapper&
 FOdysseyTextureEditor::TextureWrapper()
 {
 	return mTextureWrapper;
@@ -122,7 +122,7 @@ FOdysseyTextureEditor::Texture()
 	return mTextureWrapper.Texture();
 }
 
-FOdysseySurfaceEditable*
+IOdysseySurfaceEditable*
 FOdysseyTextureEditor::DisplaySurface()
 {
 	return mTextureWrapper.Surface();

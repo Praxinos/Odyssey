@@ -4,7 +4,6 @@
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 
-class FOdysseySurface;
 class FOdysseyBlock;
 
 /////////////////////////////////////////////////////
@@ -13,9 +12,12 @@ class FOdysseyBlock;
 class ODYSSEYIMAGING_API IOdysseySurface
 {
 public:
+    virtual ~IOdysseySurface() {};
+
+public:
     // Public API
-    virtual UTexture2D*             Texture() = 0;
-    virtual const UTexture2D*       Texture() const = 0;
+    virtual UTexture*             Texture() = 0; //TODO: Change to UTexture*
+    virtual const UTexture*       Texture() const = 0; //TODO: Change to UTexture*
 
 public:
     // Public Tampon Methods

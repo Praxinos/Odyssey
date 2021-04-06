@@ -16,7 +16,7 @@
 #include "Widgets/SPanel.h"
 #include "SOdysseyLeafWidget.h"
 #include "Widgets/Input/SSpinBox.h"
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyEventState.h"
 #include <ULIS3>
 
@@ -90,7 +90,7 @@ protected:
 
 private:
     // Private data members
-    mutable TUniquePtr< FOdysseySurfaceEditable > cursor_surface;
+    mutable TUniquePtr< FOdysseySurfaceTexture2DEditable > cursor_surface;
     mutable TUniquePtr< FSlateBrush > cursor_brush;
     mutable FVector2D cursor_size;
     float cursor_t;

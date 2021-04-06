@@ -11,7 +11,7 @@ class FOdysseyPaintEngine;
 class FOdysseyUndoHistory;
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;
-class FOdysseySurfaceEditable;
+class IOdysseySurfaceEditable;
 
 /**
  * Base class for a Painting Editor
@@ -39,7 +39,7 @@ public:
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyPaintEngine*		                PaintEngine();
-	virtual FOdysseySurfaceEditable*                    DisplaySurface() = 0;
+	virtual IOdysseySurfaceEditable*                    DisplaySurface() = 0;
 	virtual FOdysseyUndoHistory*		                UndoHistory();
 	virtual bool                                        DrawBrushPreview();
 	virtual ::ul3::FPixelValue                          PaintColor() const;

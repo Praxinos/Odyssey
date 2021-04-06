@@ -6,15 +6,15 @@
 #include "CoreMinimal.h"
 #include <ULIS3>
 
-class UTexture2D;
-class FOdysseySurfaceEditable;
+class UTexture;
 class FOdysseyLayerStack;
-class UOdysseyTextureAssetUserData;
+class IOdysseySurfaceEditable;
 
 /** 
  * High level wrapper class to modify or read a UTexture2D
 */
-class ODYSSEYTEXTURE_API FOdysseyTextureWrapper : public TSharedFromThis<FOdysseyTextureWrapper>
+template<class T>
+class FOdysseyTextureWrapper : public TSharedFromThis<FOdysseyTextureWrapper<T>>
 {
 public:
     //Delegates
@@ -22,40 +22,55 @@ public:
     DECLARE_MULTICAST_DELEGATE(FOnPreSave);
     DECLARE_MULTICAST_DELEGATE(FOnPostSave);
 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreTextureChange, UTexture2D*);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostTextureChange, UTexture2D*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreTextureChange, T*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostTextureChange, T*);
 
 public:
     /** The destructor */
-	~FOdysseyTextureWrapper();
+	virtual ~FOdysseyTextureWrapper();
 
     /** The constructor */
-	FOdysseyTextureWrapper(UTexture2D* iTexture);
+	FOdysseyTextureWrapper();
     
 public:
-    void Texture(UTexture2D*);
-    UTexture2D* Texture() const;
-    FOdysseySurfaceEditable* Surface() const;
-    FOdysseyLayerStack* LayerStack() const;
+    //Generic Setters/Getters
+    //Set Texture
+    void Texture(T*);
 
+    //Get Texture
+    T* Texture() const;
+
+    //Get Surface
+    IOdysseySurfaceEditable* Surface() const;
+
+    //Delegates
     FOnPrePropertyChanged& OnPrePropertyChangedDelegate();
     FOnPreSave& OnPreSaveDelegate();
     FOnPostSave& OnPostSaveDelegate();
     FOnPreTextureChange& OnPreTextureChangeDelegate();
     FOnPostTextureChange& OnPostTextureChangeDelegate();
 
-private:
-    //Creates Texture UserData holding the layerstack for example and returns it
-    UOdysseyTextureAssetUserData* CreateTextureUserData(UTexture2D* iTexture) const;
+public:
+    //Public Wrapper Interface
+    //Get LayerStack
+    virtual FOdysseyLayerStack* LayerStack() const = 0;
 
+protected:
+    //Private Wrapper Interface
     //Manage Texture Synchronization with Surface
-    void UpdateTextureFromSurface();
+    virtual void UpdateTextureFromSurface() = 0;
 
     //Prepares Texture for use in an OdysseyEditor
-	void SetTextureProperties();
+	virtual void SetTextureProperties() = 0;
 
     //Restores Original Texture properties
-	void RestoreTextureProperties();
+	virtual void RestoreTextureProperties() = 0;
+
+    //Destroys properly the surface
+    virtual void DestroySurface() = 0;
+
+    //Creates the appropriate surface
+    virtual IOdysseySurfaceEditable* CreateSurface() = 0;
 
 private:
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
@@ -63,8 +78,8 @@ private:
     void OnPackageSaved(const FString& iPackageFilename, UObject* iOuter);
 
 private:
-	UTexture2D* mTexture;
-    FOdysseySurfaceEditable* mSurface;
+	T* mTexture;
+    IOdysseySurfaceEditable* mSurface;
     
 	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPackagePreSaveHandle;
@@ -77,7 +92,6 @@ private:
 
     FOnPreTextureChange mOnPreTextureChange;
     FOnPostTextureChange mOnPostTextureChange;
-
-    //tmp
-    int mPropertyCompressionNone;
 };
+
+#include "OdysseyTextureWrapper.inl"

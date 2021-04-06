@@ -1,6 +1,6 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
-#include "OdysseySurfaceEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyBlock.h"
 #include "ULISLoaderModule.h"
 #include "ImageCore.h"
@@ -156,13 +156,13 @@ FillOdysseyBlockFromUTextureData(FOdysseyBlock* ioBlock, UTexture2D* iTexture, :
 }
 
 void
-InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceEditable* iSurface)
+InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceTexture2DEditable* iSurface)
 {
     InvalidateTextureFromData(iData,iSurface->Texture());
 }
 
 void
-InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceEditable* iSurface,int x1,int y1,int x2,int y2)
+InvalidateSurfaceFromData(const FOdysseyBlock* iData,FOdysseySurfaceTexture2DEditable* iSurface,int x1,int y1,int x2,int y2)
 {
     InvalidateTextureFromData(iData,iSurface->Texture(),x1,y1,x2,y2);
 }
@@ -803,7 +803,7 @@ InvalidateTextureFromData(const ::ul3::FBlock* iData,UTexture2D* iTexture,const 
 }
 
 void
-InvalidateSurfaceFromData(const ::ul3::FBlock* iData,FOdysseySurfaceEditable* iSurface,const ::ul3::FRect& iRect)
+InvalidateSurfaceFromData(const ::ul3::FBlock* iData,FOdysseySurfaceTexture2DEditable* iSurface,const ::ul3::FRect& iRect)
 {
     InvalidateTextureFromData(iData,iSurface->Texture(),iRect);
 }
@@ -811,22 +811,22 @@ InvalidateSurfaceFromData(const ::ul3::FBlock* iData,FOdysseySurfaceEditable* iS
 void
 InvalidateSurfaceCallback(const FOdysseyBlock* iData,void* iInfo,int iX1,int iY1,int iX2,int iY2)
 {
-    FOdysseySurfaceEditable* surface = static_cast<FOdysseySurfaceEditable*>(iInfo);
+    FOdysseySurfaceTexture2DEditable* surface = static_cast<FOdysseySurfaceTexture2DEditable*>(iInfo);
     InvalidateSurfaceFromData(iData,surface,iX1,iY1,iX2,iY2);
 }
 
 void
 InvalidateSurfaceCallback(const ::ul3::FBlock* iData,void* iInfo,const ::ul3::FRect& iRect)
 {
-    FOdysseySurfaceEditable* surface = static_cast<FOdysseySurfaceEditable*>(iInfo);
+    FOdysseySurfaceTexture2DEditable* surface = static_cast<FOdysseySurfaceTexture2DEditable*>(iInfo);
     InvalidateSurfaceFromData(iData,surface,iRect);
 }
 
 /////////////////////////////////////////////////////
-// FOdysseySurfaceEditable
+// FOdysseySurfaceTexture2DEditable
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseySurfaceEditable::~FOdysseySurfaceEditable()
+FOdysseySurfaceTexture2DEditable::~FOdysseySurfaceTexture2DEditable()
 {
     mTexture->RemoveFromRoot();
     if(!mIsBorrowedTexture) // If not borrowed, that means transient hence we are responsible for dealloc
@@ -849,7 +849,7 @@ FOdysseySurfaceEditable::~FOdysseySurfaceEditable()
     }
 }
 
-FOdysseySurfaceEditable::FOdysseySurfaceEditable(int iWidth,int iHeight, ::ul3::tFormat iFormat)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ul3::tFormat iFormat)
     : mIsBorrowedTexture(false)
     ,mIsBorrowedBlock(false)
 {
@@ -871,7 +871,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(int iWidth,int iHeight, ::ul3::
     //CopyBlockDataIntoUTexture(mBlock,mTexture);
 }
 
-FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture, FOdysseyBlock* iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, FOdysseyBlock* iBlock)
     : mIsBorrowedTexture(true)
     , mIsBorrowedBlock(true)
 {
@@ -892,7 +892,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture, FOdysseyB
 	mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&InvalidateSurfaceCallback, static_cast<void*>(this)));
 }
 
-FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture)
     : mIsBorrowedTexture(true)
     ,mIsBorrowedBlock(false)
 {
@@ -914,7 +914,7 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(UTexture2D* iTexture)
 	}
 }
 
-FOdysseySurfaceEditable::FOdysseySurfaceEditable(FOdysseyBlock* iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(FOdysseyBlock* iBlock)
     : mIsBorrowedTexture(false)
     ,mIsBorrowedBlock(true)
 {
@@ -942,31 +942,31 @@ FOdysseySurfaceEditable::FOdysseySurfaceEditable(FOdysseyBlock* iBlock)
 //--------------------------------------------------------------------------- Public API
 
 FOdysseyBlock*
-FOdysseySurfaceEditable::Block()
+FOdysseySurfaceTexture2DEditable::Block()
 {
     return mBlock;
 }
 
 const FOdysseyBlock*
-FOdysseySurfaceEditable::Block() const
+FOdysseySurfaceTexture2DEditable::Block() const
 {
     return mBlock;
 }
 
 UTexture2D*
-FOdysseySurfaceEditable::Texture()
+FOdysseySurfaceTexture2DEditable::Texture()
 {
     return mTexture;
 }
 
 const UTexture2D*
-FOdysseySurfaceEditable::Texture() const
+FOdysseySurfaceTexture2DEditable::Texture() const
 {
     return mTexture;
 }
 
 bool
-FOdysseySurfaceEditable::IsBorrowedTexture() const
+FOdysseySurfaceTexture2DEditable::IsBorrowedTexture() const
 {
     return mIsBorrowedTexture;
 }
@@ -974,31 +974,31 @@ FOdysseySurfaceEditable::IsBorrowedTexture() const
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- Public Tampon Methods
 int
-FOdysseySurfaceEditable::Width()
+FOdysseySurfaceTexture2DEditable::Width()
 {
     return mBlock->Width();
 }
 
 int
-FOdysseySurfaceEditable::Height()
+FOdysseySurfaceTexture2DEditable::Height()
 {
     return mBlock->Height();
 }
 
 void
-FOdysseySurfaceEditable::Invalidate()
+FOdysseySurfaceTexture2DEditable::Invalidate()
 {
     mBlock->GetBlock()->Invalidate();
 }
 
 void
-FOdysseySurfaceEditable::Invalidate(int iX1,int iY1,int iX2,int iY2)
+FOdysseySurfaceTexture2DEditable::Invalidate(int iX1,int iY1,int iX2,int iY2)
 {
     mBlock->GetBlock()->Invalidate(::ul3::FRect::FromMinMax(iX1,iY1,iX2,iY2));
 }
 
 void
-FOdysseySurfaceEditable::Invalidate(const ::ul3::FRect& iRect)
+FOdysseySurfaceTexture2DEditable::Invalidate(const ::ul3::FRect& iRect)
 {
     mBlock->GetBlock()->Invalidate(iRect);
 }

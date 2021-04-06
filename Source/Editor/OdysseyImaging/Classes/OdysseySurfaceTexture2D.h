@@ -6,23 +6,23 @@
 /////////////////////////////////////////////////////
 // FOdysseySurface
 // Allows pixel wise manipulation and easy interfacing with UTexture
-class ODYSSEYIMAGING_API FOdysseySurfaceReadOnly :
+class ODYSSEYIMAGING_API FOdysseySurfaceTexture2D :
     public IOdysseySurface
 {
 public:
     // Construction / Destruction
 
     // Destruction will delete texture if Transient ( not borrowed )
-    virtual ~FOdysseySurfaceReadOnly();
+    virtual ~FOdysseySurfaceTexture2D();
 
     // Responsible for its underlyin FOdysseyBlock TArray allocation
     // With borrowed UTexture, not responsible for its Allocation / Deallocation
-    FOdysseySurfaceReadOnly(UTexture2D* iTexture);
+    FOdysseySurfaceTexture2D(UTexture2D* iTexture);
 
 private:
     // Forbid Copy Constructor and Copy Assignement Operator
-    FOdysseySurfaceReadOnly(const FOdysseyBlock&)            = delete;
-    FOdysseySurfaceReadOnly& operator=(const FOdysseyBlock&) = delete;
+    FOdysseySurfaceTexture2D(const FOdysseyBlock&)            = delete;
+    FOdysseySurfaceTexture2D& operator=(const FOdysseyBlock&) = delete;
 
 public:
     // Public API
