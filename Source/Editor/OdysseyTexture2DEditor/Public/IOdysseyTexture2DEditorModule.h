@@ -7,12 +7,11 @@
 #include "Modules/ModuleManager.h"
 #include "Toolkits/IToolkitHost.h"
 
-class FOdysseyTextureEditorToolkit;
+class FOdysseyTexture2DEditorToolkit;
 
-class IOdysseyTextureEditorModule
+class IOdysseyTexture2DEditorModule
 	: public IModuleInterface
-	, public IHasMenuExtensibility
 {
 public:
-    virtual TSharedRef<FOdysseyTextureEditorToolkit> CreateOdysseyTextureEditor( UTexture2D* iTexture ) = 0;
+    virtual TSharedRef<FOdysseyTexture2DEditorToolkit> CreateOdysseyTexture2DEditor( UTexture2D* iTexture ) = 0;
 };

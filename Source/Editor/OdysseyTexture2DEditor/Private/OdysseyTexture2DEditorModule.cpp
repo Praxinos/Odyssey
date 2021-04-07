@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyFlipbookEditorModule.h"
+#include "OdysseyTexture2DEditorModule.h"
 
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -12,19 +12,29 @@
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-#include "OdysseyFlipbookEditor.h"
-#include "OdysseyFlipbookEditorSettings.h"
-#include "OdysseyFlipbookEditorToolkit.h"
-#include "OdysseyFlipbook_AssetTypeActions.h"
+#include "OdysseyTexture2DEditor.h"
+#include "OdysseyTexture2DEditorSettings.h"
+#include "OdysseyTexture2DEditorToolkit.h"
+#include "OdysseyTexture_AssetTypeActions.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
+#define LOCTEXT_NAMESPACE "OdysseyTexture2DEditorModule"
 
 /*-----------------------------------------------------------------------------
-   FOdysseyFlipbookEditorModule
+   FOdysseyTexture2DEditorModule
 -----------------------------------------------------------------------------*/
 
+TSharedRef<FOdysseyTexture2DEditorToolkit>
+FOdysseyTexture2DEditorModule::CreateOdysseyTexture2DEditor( UTexture2D* iTexture )
+{
+	TSharedPtr<FOdysseyTexture2DEditor> editor = MakeShareable(new FOdysseyTexture2DEditor(iTexture));
+    TSharedPtr<FOdysseyTexture2DEditorToolkit> toolkit = MakeShareable( new FOdysseyTexture2DEditorToolkit(editor) );
+	editor->Initialize(iTexture);
+    toolkit->Initialize();
+    return toolkit.ToSharedRef();
+}
+
 void
-FOdysseyFlipbookEditorModule::StartupModule()
+FOdysseyTexture2DEditorModule::StartupModule()
 {
 	// Register Assets Types Actions
 	RegisterAssetTypeActions();
@@ -38,15 +48,15 @@ FOdysseyFlipbookEditorModule::StartupModule()
 	// Install Content Browser Extionsion Hooks
 	if (!IsRunningCommandlet())
 	{
-		FOdysseyFlipbookContentBrowserExtensions::InstallHooks();
+		FOdysseyTexture2DContentBrowserExtensions::InstallHooks();
 	}
 }
 
 void
-FOdysseyFlipbookEditorModule::ShutdownModule()
+FOdysseyTexture2DEditorModule::ShutdownModule()
 {
 	// Uninstall Content Browser Extionsion Hooks
-	FOdysseyFlipbookContentBrowserExtensions::RemoveHooks();
+	FOdysseyTexture2DContentBrowserExtensions::RemoveHooks();
 
 	// Unregister Settings
     UnregisterSettings();
@@ -59,7 +69,7 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
 }
 
 void
-FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
+FOdysseyTexture2DEditorModule::RegisterAssetTypeActions()
 {
 	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
@@ -67,7 +77,7 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
 
 	//Create Asset Types Actions
-	mTypeActions.Add(MakeShareable(new FOdysseyFlipbookAssetTypeActions(category)));
+	mTypeActions.Add(MakeShareable(new FOdysseyTextureAssetTypeActions(category)));
 
 	//Register created Asset Type Actions
 	for (int32 index = 0; index < mTypeActions.Num(); ++index)
@@ -77,7 +87,7 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 }
 
 void
-FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
+FOdysseyTexture2DEditorModule::UnregisterAssetTypeActions()
 {
 	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
 		return;
@@ -90,51 +100,41 @@ FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
 }
 
 void
-FOdysseyFlipbookEditorModule::RegisterSettings()
+FOdysseyTexture2DEditorModule::RegisterSettings()
 {
     ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
     if( !settingsModule )
 		return;
 
-	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADFlipbookEditor"
-										, LOCTEXT( "OdysseyFlipbookEditorSettingsName", "ILIAD Flipbook Editor" )
-										, LOCTEXT( "OdysseyFlipbookEditorSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
-										, GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
+	settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor"
+										, LOCTEXT( "OdysseyTextureEditor2DSettingsName", "ILIAD Texture2D Editor" )
+										, LOCTEXT( "OdysseyTextureEditor2DSettingsDescription", "Configure the look and feel of the ILIAD Editor." )
+										, GetMutableDefault<UOdysseyTexture2DEditorSettings>() );
 }
 
 void
-FOdysseyFlipbookEditorModule::UnregisterSettings()
+FOdysseyTexture2DEditorModule::UnregisterSettings()
 {
     ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
     if( !settingsModule )
 		return;
     
-	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor" );
-}
-
-TSharedRef<FOdysseyFlipbookEditorToolkit>
-FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook )
-{
-	TSharedPtr<FOdysseyFlipbookEditor> editor = MakeShareable(new FOdysseyFlipbookEditor(iFlipbook));
-	TSharedRef<FOdysseyFlipbookEditorToolkit> toolkit = MakeShareable(new FOdysseyFlipbookEditorToolkit(editor));
-	editor->Initialize(iFlipbook);
-	toolkit->Initialize();
-    return toolkit;
+	settingsModule->UnregisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor" );
 }
 
 void
-FOdysseyFlipbookEditorModule::RegisterCommands()
+FOdysseyTexture2DEditorModule::RegisterCommands()
 {
-	FOdysseyFlipbookEditorCommands::Register();
+	FOdysseyTexture2DEditorCommands::Register();
 }
 
 void
-FOdysseyFlipbookEditorModule::UnregisterCommands()
+FOdysseyTexture2DEditorModule::UnregisterCommands()
 {
-	FOdysseyFlipbookEditorCommands::Unregister();
+	FOdysseyTexture2DEditorCommands::Unregister();
 }
 
-IMPLEMENT_MODULE( FOdysseyFlipbookEditorModule, OdysseyFlipbookEditor );
+IMPLEMENT_MODULE( FOdysseyTexture2DEditorModule, OdysseyTexture2DEditor );
 
 #undef LOCTEXT_NAMESPACE

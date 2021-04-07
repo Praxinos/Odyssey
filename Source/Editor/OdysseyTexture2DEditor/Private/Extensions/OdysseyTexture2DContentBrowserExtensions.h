@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyTextureContentBrowserExtensions
+class FOdysseyTexture2DContentBrowserExtensions
 {
 public:
     static void InstallHooks();

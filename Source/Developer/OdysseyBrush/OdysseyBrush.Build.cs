@@ -15,6 +15,8 @@ public class OdysseyBrush : ModuleRules
                 "CoreUObject",
                 "InputCore",
                 "Engine",
+                "OdysseyStrokePipeline",
+                "OdysseyImaging",
             }
         );
 

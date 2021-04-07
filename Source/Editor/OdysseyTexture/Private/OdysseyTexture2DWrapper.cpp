@@ -6,103 +6,148 @@
 
 FOdysseyTexture2DWrapper::~FOdysseyTexture2DWrapper()
 {
-    Texture(nullptr);
+    SetTexture(nullptr);
 }
 
 FOdysseyTexture2DWrapper::FOdysseyTexture2DWrapper(UTexture2D* iTexture) :
-    FOdysseyTextureWrapper<UTexture2D>()
+    FOdysseyTextureWrapper(),
+    mTexture(nullptr),
+    mSurface(nullptr),
+    mLayerStack(nullptr)
 {
-    Texture(iTexture);
+    SetTexture(iTexture);
+}
+
+UTexture2D*
+FOdysseyTexture2DWrapper::Texture() const
+{
+    return mTexture;
+}
+
+FOdysseySurfaceTexture2DEditable*
+FOdysseyTexture2DWrapper::Surface() const
+{
+    return mSurface;
 }
 
 FOdysseyLayerStack*
 FOdysseyTexture2DWrapper::LayerStack() const
 {
-    if (!Texture())
-        return nullptr;
+    return mLayerStack;
+}
 
-    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(Texture()->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-    if( !userData )
-    {
-        userData = CreateTextureUserData(Texture());
-    }
+void
+FOdysseyTexture2DWrapper::SetTexture(UTexture2D* iTexture)
+{
+    if (iTexture == mTexture)
+        return;
 
-    return userData->GetLayerStack();
+    PreTextureChange();
+    mTexture = iTexture;
+    PostTextureChange();
 }
 
 void
 FOdysseyTexture2DWrapper::UpdateTextureFromSurface()
 {
-    if(!Texture())
+    if(!mTexture)
         return;
 
-    CopyBlockDataIntoUTexture( Surface()->Block(), Texture());
-    Texture()->UpdateResource();
+    CopyBlockDataIntoUTexture( Surface()->Block(), mTexture);
+    mTexture->UpdateResource();
 }
 
 void
 FOdysseyTexture2DWrapper::SetTextureProperties()
 {
-    if(!Texture())
+    if(!mTexture)
         return;
 
     FTextureFormatSettings textureFormatSettings;
-    Texture()->GetLayerFormatSettings(0, textureFormatSettings);
+    mTexture->GetLayerFormatSettings(0, textureFormatSettings);
 
 	// Create new Texture Properties Backup
 	mPropertyCompressionNone = textureFormatSettings.CompressionNone;
 
 	// Overwrite Texture properties
     textureFormatSettings.CompressionNone = 1;
-    Texture()->SetLayerFormatSettings(0, textureFormatSettings);
+    mTexture->SetLayerFormatSettings(0, textureFormatSettings);
 
-    Texture()->UpdateResource();
-    Texture()->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
+    mTexture->UpdateResource();
+    mTexture->TemporarilyDisableStreaming(); //needed to be able to draw on previously streamed textures, avoids using NoMipMaps
 }
 
 void
 FOdysseyTexture2DWrapper::RestoreTextureProperties()
 {
-    if(!Texture())
+    if(!mTexture)
         return;
 
     FTextureFormatSettings textureFormatSettings;
-    Texture()->GetLayerFormatSettings(0,textureFormatSettings);
+    mTexture->GetLayerFormatSettings(0,textureFormatSettings);
     textureFormatSettings.CompressionNone = mPropertyCompressionNone;
-    Texture()->SetLayerFormatSettings(0, textureFormatSettings);
+    mTexture->SetLayerFormatSettings(0, textureFormatSettings);
 
-    Texture()->UpdateResource();
+    mTexture->UpdateResource();
 }
 
 void
-FOdysseyTexture2DWrapper::DestroySurface()
+FOdysseyTexture2DWrapper::Finalize()
 {
-    if (Surface())
+    SetTexture(nullptr);
+}
+
+void
+FOdysseyTexture2DWrapper::FinalizeSurface()
+{
+    if (mSurface)
     {
-        Surface()->Block()->GetBlock()->SetOnInvalid(::ul3::FOnInvalid());
-        delete Surface();
+        mSurface->Block()->GetBlock()->SetOnInvalid(::ul3::FOnInvalid());
+        delete mSurface;
+        mSurface = nullptr;
 	}
 }
 
-IOdysseySurfaceEditable*
-FOdysseyTexture2DWrapper::CreateSurface()
+void
+FOdysseyTexture2DWrapper::InitializeSurface()
 {
-    FOdysseySurfaceTexture2DEditable* surface = new FOdysseySurfaceTexture2DEditable(Texture());
-    surface->Invalidate();
-    return surface;
+    if (!mTexture)
+        return;
+
+    mSurface = new FOdysseySurfaceTexture2DEditable(mTexture);
+    mSurface->Invalidate();
+}
+
+void
+FOdysseyTexture2DWrapper::FinalizeLayerStack()
+{
+    mLayerStack = nullptr;
+}
+
+void
+FOdysseyTexture2DWrapper::InitializeLayerStack()
+{
+    if (!mTexture)
+        return;
+
+    mLayerStack = FindOrCreateTextureUserData()->GetLayerStack();
 }
 
 UOdysseyTextureAssetUserData*
-FOdysseyTexture2DWrapper::CreateTextureUserData(UTexture2D* iTexture) const
+FOdysseyTexture2DWrapper::FindOrCreateTextureUserData() const
 {
+    UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
+    if (userData)
+        return userData;
+
     //Init user data
-    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-    UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(iTexture, NAME_None, RF_Public);
-    userData->GetLayerStack()->Init(iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY(), format);
-    iTexture->AddAssetUserData( userData );
+    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
+    userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
+    userData->GetLayerStack()->Init(mTexture->Source.GetSizeX(), mTexture->Source.GetSizeY(), format);
+    mTexture->AddAssetUserData( userData );
 
     //Create image layer
-    FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( iTexture, userData->GetLayerStack()->Format() );
+    FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, userData->GetLayerStack()->Format() );
     FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
     TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, textureData));
 
@@ -110,6 +155,6 @@ FOdysseyTexture2DWrapper::CreateTextureUserData(UTexture2D* iTexture) const
     userData->GetLayerStack()->AddLayer(imageLayer);
 
     // Notify for changes
-    iTexture->PostEditChange();
+    mTexture->PostEditChange();
     return userData;
 }

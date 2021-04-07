@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyTextureContentBrowserExtensions.h"
+#include "OdysseyTexture2DContentBrowserExtensions.h"
 
 #include "AssetData.h"
 #include "AssetToolsModule.h"
@@ -16,10 +16,9 @@
 #include "Misc/PackageName.h"
 #include "Modules/ModuleManager.h"
 #include "Textures/SlateIcon.h"
+#include "IOdysseyTexture2DEditorModule.h"
 
-#include "IOdysseyTextureEditorModule.h"
-
-#define LOCTEXT_NAMESPACE "OdysseyTextureContentBrowserExtensions"
+#define LOCTEXT_NAMESPACE "OdysseyTexture2DContentBrowserExtensions"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -108,14 +107,14 @@ FEditTextureExtension::EditTextures( TArray<UTexture2D*>& iTextures )
             }
 			continue;
 		}
-        IOdysseyTextureEditorModule* odysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>( "OdysseyTextureEditor" );
-        odysseyTextureEditorModule->CreateOdysseyTextureEditor( texture );
+        IOdysseyTexture2DEditorModule* odysseyTexture2DEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTexture2DEditorModule>( "OdysseyTexture2DEditor" );
+        odysseyTexture2DEditorModule->CreateOdysseyTexture2DEditor( texture );
     }
 }
 
 //////////////////////////////////////////////////////////////////////////
-// FOdysseyTextureContentBrowserExtensions_Impl
-class FOdysseyTextureContentBrowserExtensions_Impl
+// FOdysseyTexture2DContentBrowserExtensions_Impl
+class FOdysseyTexture2DContentBrowserExtensions_Impl
 {
 public:
     static void ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor );
@@ -131,20 +130,20 @@ public:
 
 //static
 void
-FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor )
+FOdysseyTexture2DContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor )
 {
     iSelectedAssetFunctor->Execute();
 }
 
 //static
 void
-FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
 {
     TSharedPtr<FEditTextureExtension> editTextureFunctor = MakeShareable( new FEditTextureExtension() );
     editTextureFunctor->mSelectedAssets = iSelectedAssets;
 
     FUIAction action_EditTexture(
-        FExecuteAction::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editTextureFunctor ) ) );
+        FExecuteAction::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editTextureFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
           LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit Texture with ILIAD" )
@@ -157,7 +156,7 @@ FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuB
 
 //static
 TSharedRef<FExtender>
-FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
+FOdysseyTexture2DContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
 {
     TSharedRef<FExtender> extender( new FExtender() );
 
@@ -175,7 +174,7 @@ FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelecti
               "GetAssetActions"
             , EExtensionHook::After
             , nullptr
-            , FMenuExtensionDelegate::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu, iSelectedAssets ) );
+            , FMenuExtensionDelegate::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsMenu, iSelectedAssets ) );
     }
 
     return extender;
@@ -183,7 +182,7 @@ FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelecti
 
 //static
 TArray<FContentBrowserMenuExtender_SelectedAssets>&
-FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates()
+FOdysseyTexture2DContentBrowserExtensions_Impl::GetExtenderDelegates()
 {
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
 
@@ -191,23 +190,23 @@ FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// FOdysseyTextureContentBrowserExtensions
+// FOdysseyTexture2DContentBrowserExtensions
 //static
 void
-FOdysseyTextureContentBrowserExtensions::InstallHooks()
+FOdysseyTexture2DContentBrowserExtensions::InstallHooks()
 {
-    sgContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu );
+    sgContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu );
 
-    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates();
+    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyTexture2DContentBrowserExtensions_Impl::GetExtenderDelegates();
     cbMenuExtenderDelegates.Add( sgContentBrowserExtenderDelegate );
     sgContentBrowserExtenderDelegateHandle = cbMenuExtenderDelegates.Last().GetHandle();
 }
 
 //static
 void
-FOdysseyTextureContentBrowserExtensions::RemoveHooks()
+FOdysseyTexture2DContentBrowserExtensions::RemoveHooks()
 {
-    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates();
+    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyTexture2DContentBrowserExtensions_Impl::GetExtenderDelegates();
     cbMenuExtenderDelegates.RemoveAll( []( const FContentBrowserMenuExtender_SelectedAssets& Delegate ) { return Delegate.GetHandle() == sgContentBrowserExtenderDelegateHandle; } );
 }
 

@@ -155,7 +155,7 @@ FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeInde
 		return;
 	}
 
-    mEditor->Texture(texture);
+    mEditor->SetTexture(texture);
 }
 
 void

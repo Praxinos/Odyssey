@@ -38,10 +38,10 @@ public:
     // Getters
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
-    virtual FOdysseyPaintEngine*		                PaintEngine();
-	virtual IOdysseySurfaceEditable*                    DisplaySurface() = 0;
-	virtual FOdysseyUndoHistory*		                UndoHistory();
-	virtual bool                                        DrawBrushPreview();
+    virtual FOdysseyPaintEngine*		                PaintEngine() const;
+	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
+	virtual FOdysseyUndoHistory*		                UndoHistory() const;
+	virtual bool                                        DrawBrushPreview() const;
 	virtual ::ul3::FPixelValue                          PaintColor() const;
 
 public:

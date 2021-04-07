@@ -6,6 +6,8 @@
 #include "AssetRegistryModule.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
 #include "OdysseyTextureEditor.h"
+#include "ContentBrowserModule.h"
+#include "IContentBrowserSingleton.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
 

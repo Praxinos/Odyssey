@@ -34,7 +34,6 @@ public class OdysseyTextureEditor : ModuleRules
                 "EditorStyle",
                 "PropertyEditor",
                 "Projects",
-                "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyWidgets",
                 "OdysseyEditor",
@@ -43,9 +42,10 @@ public class OdysseyTextureEditor : ModuleRules
                 "OdysseyPainterEditor",
                 "OdysseyStrokePipeline",
                 "OdysseyLayer",
-                "OdysseyTransaction",
+                "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyTexture",
+                "OdysseyTransaction",
             }
         );
 
@@ -69,6 +69,9 @@ public class OdysseyTextureEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
+                "OdysseyPainterEditor",
+                "OdysseyStyle",
+                "OdysseyTexture",
                 "ULIS",
                 "ULISLoader"
              }

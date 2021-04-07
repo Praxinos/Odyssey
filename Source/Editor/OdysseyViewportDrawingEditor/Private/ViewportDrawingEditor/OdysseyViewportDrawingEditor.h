@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyTextureEditor.h"
+#include "OdysseyTexture2DEditor.h"
 #include "OdysseyViewportDrawingEditorGUI.h"
 
 struct FPaintableTexture;
@@ -36,7 +36,7 @@ struct FInstanceTexturePaintSettings
  * Implements an Editor for textures.
  */
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditor
-    : public FOdysseyTextureEditor
+    : public FOdysseyTexture2DEditor
 {
 public:
     // Construction / Destruction
@@ -57,14 +57,15 @@ public:
 
 public:
     // Setters
-    void Actor(AActor* iActor);
-    void Component(UMeshComponent* iComponent);
+    void SetActor(AActor* iActor);
+    void SetComponent(UMeshComponent* iComponent);
+    void SetTexture(UTexture2D* iTexture);
 
 public:
     // Overrides
     virtual FOdysseyViewportDrawingEditorGUI* GetGUI() override;
-    virtual void OnPreTextureChange(UTexture2D* iNewTexture) override;
-    virtual void OnPostTextureChange(UTexture2D* iOldTexture) override;
+    virtual void OnPreTextureChange() override;
+    virtual void OnPostTextureChange() override;
     
 private:
     // Listeners

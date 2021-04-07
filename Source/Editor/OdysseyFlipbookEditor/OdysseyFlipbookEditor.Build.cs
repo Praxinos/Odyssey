@@ -49,6 +49,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyFlipbook",
                 "OdysseyTexture",
                 "OdysseyTextureEditor",
+                "OdysseyTexture2DEditor",
                 "Paper2D",
                 "Paper2DEditor",
             }

@@ -1,33 +1,36 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "IOdysseyFlipbookEditorModule.h"
+#include "IOdysseyTexture2DEditorModule.h"
 
-class FOdysseyFlipbookEditorModule
-	: public IOdysseyFlipbookEditorModule
+#include "IAssetTypeActions.h"
+
+class FOdysseyTexture2DEditorModule
+	: public IOdysseyTexture2DEditorModule
 {
 public:
-	// IOdysseyFlipbookEditorModule interface
-    virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook ) override;
+	// IOdysseyTexture2DEditorModule interface
+	virtual TSharedRef<FOdysseyTexture2DEditorToolkit> CreateOdysseyTexture2DEditor( UTexture2D* iTexture ) override;
 
+public:
     // IModuleInterface interface
     virtual void StartupModule() override;
 
     virtual void ShutdownModule() override;
 
 private:
-	// AssetTypeActions
+	//Asset Type Action
     void RegisterAssetTypeActions();
 	void UnregisterAssetTypeActions();
 
-	// Settings
+	//Settings
 	void RegisterSettings();
 	void UnregisterSettings();
 
-    // Commands
+	//Commands
 	void RegisterCommands();
 	void UnregisterCommands();
-
+    
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
 	TArray< TSharedPtr<IAssetTypeActions> > mTypeActions;

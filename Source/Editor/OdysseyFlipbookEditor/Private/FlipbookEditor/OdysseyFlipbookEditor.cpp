@@ -27,7 +27,7 @@ FOdysseyFlipbookEditor::~FOdysseyFlipbookEditor()
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
-	FOdysseyTextureEditor(),
+	FOdysseyTexture2DEditor(),
 	mFlipbookWrapper(nullptr),
 	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
 	mGUI(nullptr)
@@ -35,7 +35,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor() :
 }
 
 FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
-	FOdysseyTextureEditor(),
+	FOdysseyTexture2DEditor(),
 	mFlipbookWrapper(MakeShareable(new FOdysseyFlipbookWrapper(iFlipbook))),
 	mPreviewSurface(new FOdysseySurfaceTexture2D(nullptr)),
 	mGUI(nullptr)
@@ -48,7 +48,7 @@ FOdysseyFlipbookEditor::FOdysseyFlipbookEditor(UPaperFlipbook* iFlipbook) :
 void
 FOdysseyFlipbookEditor::InitData()
 {
-	FOdysseyTextureEditor::InitData();
+	FOdysseyTexture2DEditor::InitData();
 
 	//--- Add Edited Objects
 
@@ -79,7 +79,7 @@ FOdysseyFlipbookEditor::InitData()
     //We don't need to initialize Texture if there is no keyFrames
     if (mFlipbookWrapper->Flipbook()->GetNumKeyFrames() > 0)
 	{
-    	Texture(mFlipbookWrapper->GetKeyframeTexture(0));
+    	SetTexture(mFlipbookWrapper->GetKeyframeTexture(0));
 	}
 }
 
@@ -102,6 +102,11 @@ FOdysseyFlipbookEditor::PreviewSurface()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
+void
+FOdysseyFlipbookEditor::SetTexture(UTexture2D* iTexture)
+{
+	TextureWrapper()->SetTexture(iTexture);
+}
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
@@ -136,7 +141,7 @@ FOdysseyFlipbookEditor::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 		return;
 	}
 
-    Texture(texture);
+    SetTexture(texture);
 }
 
 void

@@ -34,17 +34,15 @@ public class OdysseyPainterEditor : ModuleRules
                 "EditorStyle",
                 "PropertyEditor",
                 "Projects",
-                "OdysseyStyle",
                 "OdysseyBrush",
                 "OdysseyEditor",
-                "OdysseyWidgets",
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
                 "OdysseyStrokePipeline",
-                // "OdysseyLayer",
                 "OdysseyTransaction",
+                "OdysseyStyle",
                 "OdysseyStylusInput",
-                // "OdysseyTexture",
+                "OdysseyWidgets"
             }
         );
 

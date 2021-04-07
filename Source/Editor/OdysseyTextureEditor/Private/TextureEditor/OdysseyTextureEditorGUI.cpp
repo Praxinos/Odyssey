@@ -11,7 +11,7 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyTextureEditor.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyTextureEditorToolkit"
+#define LOCTEXT_NAMESPACE "OdysseyTextureEditorGUI"
 
 /////////////////////////////////////////////////////
 // FOdysseyTextureEditorGUI

@@ -106,7 +106,7 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
         AActor* selectedActor = Cast<AActor>(actorSelection->GetSelectedObject(selectionIndex));
         if (selectedActor)
         {
-            mEditor->Actor(selectedActor);
+            mEditor->SetActor(selectedActor);
         }
     }
 
@@ -137,7 +137,7 @@ void FOdysseyViewportDrawingEditorPainter::Finalize()
 
 	mBrushSettings->RemoveFromRoot();
 
-    mEditor->Actor(nullptr); //Unselect the actor to cleanup the editor
+    mEditor->SetActor(nullptr); //Unselect the actor to cleanup the editor
 	// Cleanup(); //Why ?
 	// mComponentToTexturePaintSettingsMap.Empty(); //Why ?
 }
@@ -227,7 +227,7 @@ const FHitResult FOdysseyViewportDrawingEditorPainter::GetHitResult(const FVecto
 
 void FOdysseyViewportDrawingEditorPainter::ActorSelected(AActor* iActor)
 {
-    mEditor->Actor(iActor);
+    mEditor->SetActor(iActor);
     /* mActorBeingEdited = iActor;
 
 	TInlineComponentArray<UMeshComponent*> meshComponents;
@@ -251,7 +251,7 @@ void FOdysseyViewportDrawingEditorPainter::ActorSelected(AActor* iActor)
 void FOdysseyViewportDrawingEditorPainter::ActorDeselected(AActor* iActor)
 {
     CommitAllPaintedTextures();
-    mEditor->Actor(nullptr);
+    mEditor->SetActor(nullptr);
     /* if (mPaintableComponents.Num() == 1 && mPaintableComponents[0])
     {
         UMeshComponent* meshComponent = mPaintableComponents[0];

@@ -4,11 +4,10 @@
 #pragma once
 
 #include "OdysseyPainterEditor.h"
-#include "Engine/Texture2D.h"
+#include "Engine/Texture.h"
 #include "OdysseyTextureEditorGUI.h"
-#include "OdysseyTexture2DWrapper.h"
+#include "OdysseyTextureWrapper.h"
 
-class FOdysseyTextureEditorController;
 class IOdysseyLayer;
 
 /**
@@ -21,7 +20,6 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditor();
     FOdysseyTextureEditor(); //Non Initialized constructor
-    FOdysseyTextureEditor(UTexture2D* iTexture);
 
 public:
     // Initialization
@@ -35,21 +33,19 @@ public:
 
 public:
     // Getters
-    virtual FOdysseyTexture2DWrapper&           TextureWrapper();
-	virtual UTexture2D*							Texture();
-	virtual IOdysseySurfaceEditable*            DisplaySurface() override;
+	virtual UTexture*							Texture() const = 0;
+    virtual FOdysseyTextureWrapper*             TextureWrapper() const = 0;
+    
+	virtual IOdysseySurfaceEditable*            DisplaySurface() const override;
     virtual FOdysseyLayerStack*					LayerStack() const;
     ::ul3::eAlphaMode	                        SelectedAlphaMode() const;
 
 public:
     // Setters
-    void Texture(UTexture2D* iTexture);
     void SelectedAlphaMode(::ul3::eAlphaMode iMode);
 
 public:
     // Overrides
-    virtual FOdysseyTextureEditorGUI* GetGUI() override;
-    virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) override;
     virtual bool OnCloseRequested() override;
     
 protected:
@@ -58,20 +54,20 @@ protected:
 
 protected:
     // Listeners
-    virtual void OnPreTextureChange(UTexture2D* iNewTexture);
-    virtual void OnPostTextureChange(UTexture2D* iOldTexture);
 
+    //Texture
+    virtual void OnPreTextureChange();
+    virtual void OnPostTextureChange();
+
+    //LayerStack
 	virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
 	virtual void OnLayerStackStructureChanged();
 	virtual void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
 	virtual void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
+    //Paint Engine
     virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
 
 private:
-    FOdysseyTexture2DWrapper     mTextureWrapper;
     ::ul3::eAlphaMode                       mSelectedAlphaMode;
-
-	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
 };
-

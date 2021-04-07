@@ -17,7 +17,7 @@ FOdysseyViewportDrawingEditorGUI::~FOdysseyViewportDrawingEditorGUI()
 }
 
 FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditor* iEditor) :
-	FOdysseyTextureEditorGUI(iEditor),
+	FOdysseyTexture2DEditorGUI(iEditor),
 	mEditor( iEditor ),
     mSelectedView( EOdysseyViewportSelectedView::kBrushSettings ),
     mCommandList(MakeShareable(new FUICommandList()))
@@ -30,7 +30,7 @@ FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewp
 void
 FOdysseyViewportDrawingEditorGUI::CreateTabs()
 {
-	FOdysseyTextureEditorGUI::CreateTabs();
+	FOdysseyTexture2DEditorGUI::CreateTabs();
 
 	//ADD NEW TABS
 	ODYSSEY_ADD_TAB(mTextureSelectorTab, FOdysseyViewportDrawingEditorTextureSelectorTab, mEditor);
@@ -42,7 +42,7 @@ FOdysseyViewportDrawingEditorGUI::CreateTabs()
 void
 FOdysseyViewportDrawingEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {
-	FOdysseyTextureEditorGUI::BindShortcuts(iToolkit);
+	FOdysseyTexture2DEditorGUI::BindShortcuts(iToolkit);
 
 	//---
 

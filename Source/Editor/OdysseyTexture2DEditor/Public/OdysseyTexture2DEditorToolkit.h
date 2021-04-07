@@ -7,22 +7,22 @@
 
 #include <ULIS3>
 
-class FOdysseyTextureEditorData;
-class FOdysseyTextureEditorGUI;
-class FOdysseyTextureEditorController;
+class FOdysseyTexture2DEditorData;
+class FOdysseyTexture2DEditorGUI;
+class FOdysseyTexture2DEditorController;
 
 class UTexture;
 
 /**
  * Implements an Editor toolkit for textures.
  */
-class FOdysseyTextureEditorToolkit
+class FOdysseyTexture2DEditorToolkit
     : public FOdysseyAssetEditorToolkit
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyTextureEditorToolkit();
-    FOdysseyTextureEditorToolkit(TSharedPtr<FOdysseyTextureEditor> iEditor);
+    virtual ~FOdysseyTexture2DEditorToolkit();
+    FOdysseyTexture2DEditorToolkit(TSharedPtr<FOdysseyTexture2DEditor> iEditor);
 
 protected:
 	virtual void OpenAsset(UObject* iObject) override;

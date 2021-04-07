@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyTextureEditor.h"
+#include "OdysseyTexture2DEditor.h"
 
 #include "OdysseyFlipbookEditorGUI.h"
 #include "OdysseyFlipbookWrapper.h"
@@ -15,7 +15,7 @@ class FOdysseySurfaceTexture2D;
  * Implements an Editor for flipbooks.
  */
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditor
-    : public FOdysseyTextureEditor
+    : public FOdysseyTexture2DEditor
 {
 public:
     // Construction / Destruction
@@ -34,6 +34,7 @@ public:
 
 public:
     // Setters
+    void SetTexture(UTexture2D* iTexture);
 
 public:
     //Overrides

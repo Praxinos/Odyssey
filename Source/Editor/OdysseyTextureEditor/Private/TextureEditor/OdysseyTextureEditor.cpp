@@ -3,8 +3,6 @@
 
 #include "OdysseyTextureEditor.h"
 
-#include "OdysseyTextureEditorGUI.h"
-
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
@@ -19,23 +17,11 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditor::~FOdysseyTextureEditor()
 {
-    mTextureWrapper.OnPreTextureChangeDelegate().RemoveAll(this);
-    mTextureWrapper.OnPostTextureChangeDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	FOdysseyPainterEditor(),
-	mTextureWrapper(nullptr),
-	mSelectedAlphaMode(::ul3::AM_NORMAL),
-	mGUI(nullptr)
-{
-}
-
-FOdysseyTextureEditor::FOdysseyTextureEditor(UTexture2D* iTexture) :
-	FOdysseyPainterEditor(),
-    mTextureWrapper( iTexture ),
-	mSelectedAlphaMode(::ul3::AM_NORMAL),
-	mGUI(nullptr)
+	mSelectedAlphaMode(::ul3::AM_NORMAL)
 {
 }
 
@@ -57,12 +43,12 @@ FOdysseyTextureEditor::InitData()
     PaintEngine()->AddDrawingState(drawingState);
 
     //Make like if the texture changed, to set all callbacks correctly
-    OnPostTextureChange(nullptr);
+    OnPostTextureChange();
 
 	//--- Init Listeners
 
-    mTextureWrapper.OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPreTextureChange);
-    mTextureWrapper.OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPostTextureChange);
+    TextureWrapper()->OnPreTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPreTextureChange);
+    TextureWrapper()->OnPostTextureChangeDelegate().AddRaw(this, &FOdysseyTextureEditor::OnPostTextureChange);
     PaintEngine()->OnPaintEnd().AddRaw(this, &FOdysseyTextureEditor::OnPaintEnginePaintEnd);
 }
 
@@ -110,28 +96,28 @@ FOdysseyTextureEditor::ClearUndo()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyTexture2DWrapper&
-FOdysseyTextureEditor::TextureWrapper()
+UTexture*
+FOdysseyTextureEditor::Texture() const
 {
-	return mTextureWrapper;
+    return nullptr;
 }
 
-UTexture2D*
-FOdysseyTextureEditor::Texture()
+FOdysseyTextureWrapper*
+FOdysseyTextureEditor::TextureWrapper() const
 {
-	return mTextureWrapper.Texture();
+    return nullptr;
 }
 
 IOdysseySurfaceEditable*
-FOdysseyTextureEditor::DisplaySurface()
+FOdysseyTextureEditor::DisplaySurface() const
 {
-	return mTextureWrapper.Surface();
+	return TextureWrapper()->Surface();
 }
 
 FOdysseyLayerStack*
 FOdysseyTextureEditor::LayerStack() const
 {
-    return mTextureWrapper.LayerStack();
+    return TextureWrapper()->LayerStack();
 }
 
 ::ul3::eAlphaMode
@@ -142,12 +128,6 @@ FOdysseyTextureEditor::SelectedAlphaMode() const
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
-
-void
-FOdysseyTextureEditor::Texture(UTexture2D* iTexture)
-{
-    mTextureWrapper.Texture(iTexture);
-}
 
 void
 FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
@@ -178,23 +158,6 @@ FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
-FOdysseyTextureEditorGUI*
-FOdysseyTextureEditor::GetGUI()
-{
-	if (!mGUI)
-		mGUI = MakeShareable(new FOdysseyTextureEditorGUI(this));
-	return mGUI.Get();
-}
-
-TSharedPtr<FWorkspaceItem>
-FOdysseyTextureEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
-{
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyTextureEditor", "Odyssey Texture Editor"));
-	TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	GetGUI()->RegisterTabSpawners(iTabManager, workspaceMenuCategoryRef);
-	return workspaceMenuCategory;
-}
-
 bool
 FOdysseyTextureEditor::OnCloseRequested()
 {
@@ -204,7 +167,7 @@ FOdysseyTextureEditor::OnCloseRequested()
     if (LayerStack())
         LayerStack()->mDrawingUndo->Clear();
 
-    mTextureWrapper.Texture(nullptr);
+    TextureWrapper()->Finalize();
 	return true;
 }
 
@@ -229,7 +192,7 @@ FOdysseyTextureEditor::PaintEngineIsLocked() const
 //---------------------------------------------------------------------------- Listeners
 
 void
-FOdysseyTextureEditor::OnPreTextureChange(UTexture2D* iNewTexture)
+FOdysseyTextureEditor::OnPreTextureChange()
 {
 	FOdysseyLayerStack* layerstack = LayerStack();
     if (!layerstack)
@@ -253,7 +216,7 @@ FOdysseyTextureEditor::OnPreTextureChange(UTexture2D* iNewTexture)
 }
 
 void
-FOdysseyTextureEditor::OnPostTextureChange(UTexture2D* iOldTexture)
+FOdysseyTextureEditor::OnPostTextureChange()
 {
     FOdysseyLayerStack* layerstack = LayerStack();
     if (!layerstack)

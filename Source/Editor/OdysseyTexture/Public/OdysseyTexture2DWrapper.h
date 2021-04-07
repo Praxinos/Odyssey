@@ -5,17 +5,19 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
+
 #include "OdysseyTextureWrapper.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+
 #include <ULIS3>
 
-class FOdysseySurfaceTexture2DEditable;
 class FOdysseyLayerStack;
 class UOdysseyTextureAssetUserData;
 
 /** 
  * High level wrapper class to modify or read a UTexture2D
 */
-class ODYSSEYTEXTURE_API FOdysseyTexture2DWrapper : public FOdysseyTextureWrapper<UTexture2D>
+class ODYSSEYTEXTURE_API FOdysseyTexture2DWrapper : public FOdysseyTextureWrapper
 {
 public:
     /** The destructor */
@@ -23,10 +25,20 @@ public:
 
     /** The constructor */
 	FOdysseyTexture2DWrapper(UTexture2D* iTexture);
-    
+
 public:
     //Public FOdysseyTextureWrapper interface
+    virtual UTexture2D* Texture() const override;
+    virtual FOdysseySurfaceTexture2DEditable* Surface() const override;
     virtual FOdysseyLayerStack* LayerStack() const override;
+
+public:
+    //Setters
+    void SetTexture(UTexture2D* iTexture);
+
+public:
+    //Public FOdysseyTextureWrapper interface
+    virtual void Finalize() override;
 
 private:
     //Private FOdysseyTextureWrapper interface
@@ -40,17 +52,27 @@ private:
     //Restores Original Texture properties
 	virtual void RestoreTextureProperties() override;
 
-    //Destroys properly the surface
-    virtual void DestroySurface() override;
+    //Surface Initialization
+    virtual void InitializeSurface()  override;
 
-    //Creates the appropriate surface
-    virtual IOdysseySurfaceEditable* CreateSurface() override;
+    //Surface Finalization
+    virtual void FinalizeSurface() override;
+
+    //LayerStack Initialization
+    virtual void InitializeLayerStack() override;
+
+    //LayerStack Finalization
+    virtual void FinalizeLayerStack() override;
 
 private:
     //Creates Texture UserData holding the layerstack for example and returns it
-    UOdysseyTextureAssetUserData* CreateTextureUserData(UTexture2D* iTexture) const;
+    UOdysseyTextureAssetUserData* FindOrCreateTextureUserData() const;
 
 private:
+    UTexture2D* mTexture;
+    FOdysseySurfaceTexture2DEditable* mSurface;
+    FOdysseyLayerStack* mLayerStack;
+
     //tmp
     int mPropertyCompressionNone;
 };

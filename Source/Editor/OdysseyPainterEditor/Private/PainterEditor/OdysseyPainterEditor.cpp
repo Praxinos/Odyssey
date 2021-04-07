@@ -87,19 +87,19 @@ FOdysseyPainterEditor::ClearUndo()
 //------------------------------------------------------------------------------ Getters
 
 FOdysseyPaintEngine*
-FOdysseyPainterEditor::PaintEngine()
+FOdysseyPainterEditor::PaintEngine() const
 {
     return mPaintEngine;
 }
 
 FOdysseyUndoHistory*
-FOdysseyPainterEditor::UndoHistory()
+FOdysseyPainterEditor::UndoHistory() const
 {
 	return mUndoHistory;
 }
 
 bool
-FOdysseyPainterEditor::DrawBrushPreview()
+FOdysseyPainterEditor::DrawBrushPreview() const
 {
 	return mDrawBrushPreview;
 }

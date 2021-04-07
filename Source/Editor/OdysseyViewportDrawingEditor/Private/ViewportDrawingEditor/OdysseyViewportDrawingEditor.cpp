@@ -18,7 +18,7 @@ FOdysseyViewportDrawingEditor::~FOdysseyViewportDrawingEditor()
 }
 
 FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
-	FOdysseyTextureEditor(),
+	FOdysseyTexture2DEditor(),
 	mGUI(nullptr)
 {
 }
@@ -29,7 +29,7 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
 void
 FOdysseyViewportDrawingEditor::InitData()
 {
-	FOdysseyTextureEditor::InitData();
+	FOdysseyTexture2DEditor::InitData();
 
 	//Handle Object Property Changed Callback to refresh when actors's visibility changes for example
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditor::OnObjectPropertyChanged);
@@ -74,7 +74,7 @@ FOdysseyViewportDrawingEditor::ComponentToAdapterMap() const
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyViewportDrawingEditor::Actor(AActor* iActor)
+FOdysseyViewportDrawingEditor::SetActor(AActor* iActor)
 {
 	if (mActor == iActor)
 		return;
@@ -94,7 +94,7 @@ FOdysseyViewportDrawingEditor::Actor(AActor* iActor)
 }
 
 void
-FOdysseyViewportDrawingEditor::Component(UMeshComponent* iComponent)
+FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 {
 	if (mComponent == iComponent)
 		return;
@@ -119,6 +119,12 @@ FOdysseyViewportDrawingEditor::Component(UMeshComponent* iComponent)
 	}
 }
 
+void
+FOdysseyViewportDrawingEditor::SetTexture(UTexture2D* iTexture)
+{
+	TextureWrapper()->SetTexture(iTexture);
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Overrides
 
@@ -131,7 +137,7 @@ FOdysseyViewportDrawingEditor::GetGUI()
 }
 
 void
-FOdysseyViewportDrawingEditor::OnPreTextureChange(UTexture2D* iNewTexture)
+FOdysseyViewportDrawingEditor::OnPreTextureChange()
 {
 	UTexture2D* texture = Texture();
     if (texture)
@@ -139,11 +145,11 @@ FOdysseyViewportDrawingEditor::OnPreTextureChange(UTexture2D* iNewTexture)
 		RemoveEditedObject(texture);
 	}
 
-	FOdysseyTextureEditor::OnPreTextureChange(iNewTexture);
+	FOdysseyTexture2DEditor::OnPreTextureChange();
 }
 
 void
-FOdysseyViewportDrawingEditor::OnPostTextureChange(UTexture2D* iOldTexture)
+FOdysseyViewportDrawingEditor::OnPostTextureChange()
 {
 	UTexture2D* texture = Texture();
 
@@ -152,7 +158,7 @@ FOdysseyViewportDrawingEditor::OnPostTextureChange(UTexture2D* iOldTexture)
 		AddEditedObject(texture);
 	}
 
-    FOdysseyTextureEditor::OnPostTextureChange(iOldTexture);
+    FOdysseyTexture2DEditor::OnPostTextureChange();
 }
 
 //--------------------------------------------------------------------------------------
@@ -184,7 +190,7 @@ FOdysseyViewportDrawingEditor::OnObjectPropertyChanged(UObject* iObject, struct 
 void
 FOdysseyViewportDrawingEditor::ClearSelectableComponents()
 {
-	Component(nullptr);
+	SetComponent(nullptr);
 	mSelectableComponents.Empty();
 	for (auto meshAdapterPair : mComponentToAdapterMap)
 	{
@@ -240,13 +246,13 @@ FOdysseyViewportDrawingEditor::SelectDefaultComponent()
 	if (mSelectableComponents.Num() <= 0)
 		return;
 
-	Component(mSelectableComponents[0]);
+	SetComponent(mSelectableComponents[0]);
 }
 
 void
 FOdysseyViewportDrawingEditor::ClearSelectableTextures()
 {
-	Texture(nullptr);
+	SetTexture(nullptr);
 	mSelectableTextures.Empty();
 }
 
@@ -284,7 +290,7 @@ FOdysseyViewportDrawingEditor::SelectDefaultTexture()
 
 		if (AssetEditorSubsystem->FindEditorForAsset(texturePaintSettings.mSelectedTexture, true) == nullptr)
 		{
-			Texture(texturePaintSettings.mSelectedTexture);
+			SetTexture(texturePaintSettings.mSelectedTexture);
 			return;
 		}
 		
@@ -318,7 +324,7 @@ FOdysseyViewportDrawingEditor::SelectDefaultTexture()
 			continue;
 		}
 
-		Texture(texture);
+		SetTexture(texture);
 		break;
 	}	
 }

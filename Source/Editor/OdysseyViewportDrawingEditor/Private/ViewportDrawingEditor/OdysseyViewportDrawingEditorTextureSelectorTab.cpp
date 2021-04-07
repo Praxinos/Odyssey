@@ -76,7 +76,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnObjectChanged(const FAssetDat
 			return;
 		}
 
-        mEditor->Texture(texture);
+        mEditor->SetTexture(texture);
 	}
 }
 

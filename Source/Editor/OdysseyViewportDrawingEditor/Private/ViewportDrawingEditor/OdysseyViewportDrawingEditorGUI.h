@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyTextureEditorGUI.h"
+#include "OdysseyTexture2DEditorGUI.h"
 
 class FOdysseyViewportDrawingEditor;
 class FOdysseyViewportDrawingEditorTextureSelectorTab;
@@ -17,7 +17,7 @@ enum class EOdysseyViewportSelectedView: uint8
 };
 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorGUI :
-	public FOdysseyTextureEditorGUI
+	public FOdysseyTexture2DEditorGUI
 {
 public:
     // Construction / Destruction

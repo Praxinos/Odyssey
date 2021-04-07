@@ -10,15 +10,12 @@
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Settings/ContentBrowserSettings.h"
-#include "Toolkits/AssetEditorToolkit.h"
 
 #include "OdysseyTextureEditor.h"
 #include "OdysseyTextureEditorSettings.h"
-#include "OdysseyTextureEditorToolkit.h"
 #include "OdysseyTexture_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
-const FName OdysseyTextureEditorAppIdentifier = FName( TEXT( "OdysseyTextureEditorApp" ) );
 
 /*-----------------------------------------------------------------------------
    FOdysseyTextureEditorModule
@@ -27,73 +24,21 @@ const FName OdysseyTextureEditorAppIdentifier = FName( TEXT( "OdysseyTextureEdit
 void
 FOdysseyTextureEditorModule::StartupModule()
 {
-	// Register menu extensions
-	mMenuExtensibilityManager = MakeShareable(new FExtensibilityManager);
-
-	// Register Assets Types Actions
-	RegisterAssetTypeActions();
-
 	// Register Commands
 	RegisterCommands();
 
 	// Register Settings
     RegisterSettings();
-
-	// Install Content Browser Extionsion Hooks
-	if (!IsRunningCommandlet())
-	{
-		FOdysseyTextureContentBrowserExtensions::InstallHooks();
-	}
 }
 
 void
 FOdysseyTextureEditorModule::ShutdownModule()
 {
-	// Uninstall Content Browser Extionsion Hooks
-	FOdysseyTextureContentBrowserExtensions::RemoveHooks();
-
 	// Unregister Settings
     UnregisterSettings();
 
 	// Unregister Commands
 	UnregisterCommands();
-
-	// Unregister Assets Type Actions
-	UnregisterAssetTypeActions();
-    
-	// Unregister menu extensions
-	mMenuExtensibilityManager.Reset();
-}
-
-void
-FOdysseyTextureEditorModule::RegisterAssetTypeActions()
-{
-	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-
-	// Create Asset Categories
-	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
-
-	//Create Asset Types Actions
-	mTypeActions.Add(MakeShareable(new FOdysseyTextureAssetTypeActions(category)));
-
-	//Register created Asset Type Actions
-	for (int32 index = 0; index < mTypeActions.Num(); ++index)
-	{
-		assetTools.RegisterAssetTypeActions(mTypeActions[index].ToSharedRef());
-	}
-}
-
-void
-FOdysseyTextureEditorModule::UnregisterAssetTypeActions()
-{
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
-		return;
-	
-	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	for (int32 index = 0; index < mTypeActions.Num(); ++index)
-	{
-		assetTools.UnregisterAssetTypeActions(mTypeActions[index].ToSharedRef());
-	}
 }
 
 void
@@ -130,22 +75,6 @@ void
 FOdysseyTextureEditorModule::UnregisterCommands()
 {
 	FOdysseyTextureEditorCommands::Unregister();
-}
-
-TSharedRef<FOdysseyTextureEditorToolkit>
-FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( UTexture2D* iTexture )
-{
-	TSharedPtr<FOdysseyTextureEditor> editor = MakeShareable(new FOdysseyTextureEditor(iTexture));
-    TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShareable( new FOdysseyTextureEditorToolkit(editor) );
-	editor->Initialize(iTexture);
-    toolkit->Initialize();
-    return toolkit.ToSharedRef();
-}
-
-TSharedPtr<FExtensibilityManager>
-FOdysseyTextureEditorModule::GetMenuExtensibilityManager()
-{
-	return mMenuExtensibilityManager;
 }
 
 IMPLEMENT_MODULE( FOdysseyTextureEditorModule, OdysseyTextureEditor );

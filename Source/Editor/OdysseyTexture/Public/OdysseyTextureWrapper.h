@@ -13,8 +13,7 @@ class IOdysseySurfaceEditable;
 /** 
  * High level wrapper class to modify or read a UTexture2D
 */
-template<class T>
-class FOdysseyTextureWrapper : public TSharedFromThis<FOdysseyTextureWrapper<T>>
+class ODYSSEYTEXTURE_API FOdysseyTextureWrapper : public TSharedFromThis<FOdysseyTextureWrapper>
 {
 public:
     //Delegates
@@ -22,8 +21,12 @@ public:
     DECLARE_MULTICAST_DELEGATE(FOnPreSave);
     DECLARE_MULTICAST_DELEGATE(FOnPostSave);
 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreTextureChange, T*);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostTextureChange, T*);
+    DECLARE_MULTICAST_DELEGATE(FOnPreTextureChange);
+    DECLARE_MULTICAST_DELEGATE(FOnPostTextureChange);
+    DECLARE_MULTICAST_DELEGATE(FOnLayerStackInitialize);
+    DECLARE_MULTICAST_DELEGATE(FOnLayerStackFinalize);
+    DECLARE_MULTICAST_DELEGATE(FOnSurfaceInitialize);
+    DECLARE_MULTICAST_DELEGATE(FOnSurfaceFinalize);
 
 public:
     /** The destructor */
@@ -31,29 +34,28 @@ public:
 
     /** The constructor */
 	FOdysseyTextureWrapper();
-    
+
 public:
-    //Generic Setters/Getters
-    //Set Texture
-    void Texture(T*);
+    //Getters
+    virtual UTexture* Texture() const = 0;
+    virtual IOdysseySurfaceEditable* Surface() const = 0;
+    virtual FOdysseyLayerStack* LayerStack() const = 0;
 
-    //Get Texture
-    T* Texture() const;
+public:
+    //Public FOdysseyTextureWrapper interface
+    virtual void Finalize() = 0;
 
-    //Get Surface
-    IOdysseySurfaceEditable* Surface() const;
-
+public:
     //Delegates
     FOnPrePropertyChanged& OnPrePropertyChangedDelegate();
     FOnPreSave& OnPreSaveDelegate();
     FOnPostSave& OnPostSaveDelegate();
     FOnPreTextureChange& OnPreTextureChangeDelegate();
     FOnPostTextureChange& OnPostTextureChangeDelegate();
-
-public:
-    //Public Wrapper Interface
-    //Get LayerStack
-    virtual FOdysseyLayerStack* LayerStack() const = 0;
+    FOnLayerStackInitialize& OnLayerStackInitializeDelegate();
+    FOnLayerStackFinalize& OnLayerStackFinalizeDelegate();
+    FOnSurfaceInitialize& OnSurfaceInitializeDelegate();
+    FOnSurfaceFinalize& OnSurfaceFinalizeDelegate();
 
 protected:
     //Private Wrapper Interface
@@ -66,11 +68,21 @@ protected:
     //Restores Original Texture properties
 	virtual void RestoreTextureProperties() = 0;
 
-    //Destroys properly the surface
-    virtual void DestroySurface() = 0;
+    //Surface Initialization
+    virtual void InitializeSurface() = 0;
 
-    //Creates the appropriate surface
-    virtual IOdysseySurfaceEditable* CreateSurface() = 0;
+    //Surface Finalization
+    virtual void FinalizeSurface() = 0;
+
+    //LayerStack Initialization
+    virtual void InitializeLayerStack() = 0;
+
+    //LayerStack Finalization
+    virtual void FinalizeLayerStack() = 0;
+
+protected:
+    void PreTextureChange();
+    void PostTextureChange();
 
 private:
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
@@ -78,8 +90,8 @@ private:
     void OnPackageSaved(const FString& iPackageFilename, UObject* iOuter);
 
 private:
-	T* mTexture;
-    IOdysseySurfaceEditable* mSurface;
+	// UTexture* mTexture;
+    // IOdysseySurfaceEditable* mSurface;
     
 	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPackagePreSaveHandle;
@@ -92,6 +104,8 @@ private:
 
     FOnPreTextureChange mOnPreTextureChange;
     FOnPostTextureChange mOnPostTextureChange;
+    FOnLayerStackInitialize mOnLayerStackInitialize;
+    FOnLayerStackFinalize mOnLayerStackFinalize;
+    FOnSurfaceInitialize mOnSurfaceInitialize;
+    FOnSurfaceFinalize mOnSurfaceFinalize;
 };
-
-#include "OdysseyTextureWrapper.inl"

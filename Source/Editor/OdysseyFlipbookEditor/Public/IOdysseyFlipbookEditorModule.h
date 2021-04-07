@@ -11,7 +11,6 @@ class FOdysseyFlipbookEditorToolkit;
 
 class IOdysseyFlipbookEditorModule
 	: public IModuleInterface
-	, public IHasMenuExtensibility
 {
 public:
     virtual TSharedRef<FOdysseyFlipbookEditorToolkit> CreateOdysseyFlipbookEditor( UPaperFlipbook* iFlipbook ) = 0;
