@@ -19,10 +19,12 @@
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
+
+#include "Settings/EposSequenceEditorSettings.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Camera"
 
@@ -152,6 +154,11 @@ ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, FGuid* oGuid ) 
     NewCamera->SetActorLocation( GCurrentLevelEditingViewportClient->GetViewLocation(), false );
     NewCamera->SetActorRotation( GCurrentLevelEditingViewportClient->GetViewRotation() );
     //pNewCamera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
+    const UEposSequenceEditorSettings* settings = GetDefault<UEposSequenceEditorSettings>();
+    NewCamera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
+    NewCamera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
+    NewCamera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
+    NewCamera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData()
 
     FGuid CameraGuid = iSequencer.CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
     if( !CameraGuid.IsValid() )
