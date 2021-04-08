@@ -1458,7 +1458,7 @@ bool FOdysseyPsdOperations::Import()
         if(!ReadLayerStackData())
             return false;
     }
-    else
+    else if ( !mBitDepth == 1 )
     {
         UE_LOG(LogTemp, Warning, TEXT("Unsupported bit depth, Import failed"));
         return false;
