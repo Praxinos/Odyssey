@@ -821,6 +821,11 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
 {
     mBrushInstance = iBrushInstance;
 
+    for (int i = 0; i < mDrawingStates.Num(); i++)
+    {
+        mBrushInstance->AddOrReplaceState(mDrawingStates[i]->Id(), mDrawingStates[i]);
+    }
+
     //Set all the overrides
     if (iApplyOverrides)
     {
@@ -867,10 +872,6 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
         UpdateBrushInstance();
     }
 
-    for (int i = 0; i < mDrawingStates.Num(); i++)
-    {
-        mBrushInstance->AddOrReplaceState(mDrawingStates[i]->Id(), mDrawingStates[i]);
-    }
 }
 
 //--------------------------------------------------------------------------------------
