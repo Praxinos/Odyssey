@@ -7,7 +7,7 @@
 #include "Serialization/BufferArchive.h"
 #include "OdysseyLayerStack.h"
 
-struct PsdLayerInfo
+struct FPsdLayerInfo
 {
     uint32_t mLeft = 0, mTop = 0, mBottom = 0, mRight = 0;
     int16_t mID[32];
@@ -143,6 +143,6 @@ private:
 
     FOdysseyLayerStack* mLayerStack;
 
-    TArray<PsdLayerInfo> mLayersInfo;
+    TArray<FPsdLayerInfo> mLayersInfo;
 };
 

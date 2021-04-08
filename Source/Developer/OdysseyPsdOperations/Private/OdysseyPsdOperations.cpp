@@ -56,7 +56,7 @@ FOdysseyPsdOperations::FOdysseyPsdOperations(const TCHAR* iFilename)
 
     mLayerStack = nullptr;
 
-    mLayersInfo = TArray<PsdLayerInfo>();
+    mLayersInfo = TArray<FPsdLayerInfo>();
 }
 
 bool FOdysseyPsdOperations::ReadFileHeader()
@@ -210,7 +210,7 @@ bool FOdysseyPsdOperations::ReadLayers()
     //UE_LOG(LogTemp,Display,TEXT("numLayers: %d"),numLayers);
     for (int currLayer = 0; currLayer < numLayers; currLayer++) 
     {
-        mLayersInfo.Add( PsdLayerInfo() );
+        mLayersInfo.Add( FPsdLayerInfo() );
 
         mFileHandle->Read((uint8*)&mLayersInfo[currLayer].mTop,4);
         FOdysseyMathUtils::ByteSwap(&mLayersInfo[currLayer].mTop,4);
