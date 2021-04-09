@@ -3,6 +3,7 @@
 
 #include "Shot/ShotSequenceCustomization.h"
 
+#include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotHelpers/ShotSequenceHelpers.h"
 #include "ShotSequenceEditorCommands.h"
@@ -93,6 +94,13 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCamera );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeCameraMenu ),
+        LOCTEXT( "CameraOptions", "Options" ),
+        LOCTEXT( "CameraOptionsToolTip", "Camera Options" ),
+        TAttribute<FSlateIcon>(),
+        true );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
 
     ToolbarBuilder.AddSeparator();
@@ -121,6 +129,37 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         //];
 
     //ToolbarBuilder.AddWidget(Widget);
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeCameraMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "CameraSettingsTitle", "Default Camera Settings" ) );
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+        // Create a detail view
+        FDetailsViewArgs Args( false, false, false, FDetailsViewArgs::HideNameArea );
+        Args.ColumnWidth = .5f;
+        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
+
+        // Filter properties to only get CameraSettings ones
+        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
+        {
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposSequenceEditorSettings, CameraSettings );
+        };
+        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
+        // Set the object to view
+        DetailView->SetObject( GetMutableDefault<UEposSequenceEditorSettings>() );
+
+        MenuBuilder.AddWidget( DetailView, FText(), true );
+    }
+    MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
 }
 
 //---
