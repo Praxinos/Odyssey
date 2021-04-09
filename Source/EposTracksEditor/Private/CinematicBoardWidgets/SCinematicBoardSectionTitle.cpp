@@ -43,7 +43,7 @@ SCinematicBoardSectionTitle::HandleText() const
 
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
     FText section_text = mBoardSection.Pin()->HandleThumbnailTextBlockText();
-    FText sequence_text = subsection.GetSequence()->GetDisplayName();
+    FText sequence_text = subsection.GetSequence() ? subsection.GetSequence()->GetDisplayName() : FText::GetEmpty();
 
     return !section_text.IsEmpty()
         ?
@@ -60,7 +60,7 @@ SCinematicBoardSectionTitle::HandleTextColor() const
 
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
     FText section_text = mBoardSection.Pin()->HandleThumbnailTextBlockText();
-    FText sequence_text = subsection.GetSequence()->GetDisplayName();
+    //FText sequence_text = subsection.GetSequence() ? subsection.GetSequence()->GetDisplayName() : FText::GetEmpty();
 
     return !section_text.IsEmpty()
         ?
