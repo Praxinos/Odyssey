@@ -14,10 +14,12 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "Sections/MovieScene3DTransformSection.h"
+#include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
+#include "Tracks/MovieSceneVisibilityTrack.h"
 
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -167,7 +169,7 @@ ShotSequenceHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActo
 
 //static
 void
-ShotSequenceHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentPath, const FString& iPropertyPath )
+ShotSequenceHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath )
 {
     TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
     UObject* PropertyOwner = iActor;
@@ -224,6 +226,42 @@ ShotSequenceHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor
     FKeyPropertyParams KeyPropertyParams( TArrayBuilder<UObject*>().Add( PropertyOwner ), *PropertyPath, ESequencerKeyMode::ManualKey );
 
     iSequencer->KeyProperty( KeyPropertyParams );
+
+    //---
+
+    if( !iClass )
+        return;
+
+    if( !iBinding.IsValid() )
+        return;
+
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( sequence == nullptr )
+        return;
+
+    UMovieScene* movieScene = sequence->GetMovieScene();
+    if( movieScene == nullptr )
+        return;
+
+    UMovieSceneTrack* NewTrack = movieScene->FindTrack( iClass, iBinding );
+    if( !NewTrack )
+        return;
+
+    if( NewTrack->IsA<UMovieSceneVisibilityTrack>() )
+    {
+        UMovieSceneVisibilityTrack* track = Cast<UMovieSceneVisibilityTrack>( NewTrack );
+        check( track );
+
+        auto sections = track->GetAllSections();
+        if( !sections.Num() )
+            return;
+
+        UMovieSceneBoolSection* section = Cast<UMovieSceneBoolSection>( sections[0] );
+        section->SetRange( movieScene->GetPlaybackRange() );
+
+        FMovieSceneBoolChannel& channel = section->GetChannel();
+        channel.SetDefault( true );
+    }
 }
 
 //static
@@ -261,9 +299,13 @@ ShotSequenceHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor
 
     // For all other actors (except cinecamera actor)
     // - '3DTransform' track
+    // - 'Visibility' track
     // - 'StaticMeshComponent' binding
     //     - 'Material Switcher' track
+
     //CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+
+    CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
 
     FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ?
 

@@ -469,6 +469,7 @@ ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSeque
     plane->GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
     plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
     plane->SetMobility( EComponentMobility::Movable );
+    plane->SetActorHiddenInGame( true );
 
     //---
 
