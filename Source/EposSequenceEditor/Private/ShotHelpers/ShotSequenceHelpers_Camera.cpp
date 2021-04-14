@@ -20,6 +20,7 @@
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
+#include "ObjectEditorUtils.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 
@@ -131,7 +132,7 @@ ShotSequenceHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* 
     //---
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::SpawnAndBindCamera( iSequencer, &camera_guid );
+    ACineCameraActor* camera = ShotSequenceHelpers::SpawnAndBindCamera( iSequencer, iSequence, &camera_guid );
 
     ShotSequenceHelpers::CameraAdded( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame() );
 
@@ -142,7 +143,7 @@ ShotSequenceHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* 
 
 //static
 ACineCameraActor*
-ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, FGuid* oGuid ) // From FSequencer::CreateCamera()
+ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
 {
     UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
 
@@ -152,14 +153,90 @@ ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, FGuid* oGuid ) 
     if( !NewCamera )
         return nullptr;
 
+    NewCamera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
+    FActorLabelUtilities::SetActorLabelUnique( NewCamera, TEXT( "Camera_1" ) ); // The shot name is displayed in another column in the world outliner
+
     NewCamera->SetActorLocation( GCurrentLevelEditingViewportClient->GetViewLocation(), false );
     NewCamera->SetActorRotation( GCurrentLevelEditingViewportClient->GetViewRotation() );
     //pNewCamera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
     const UEposSequenceEditorSettings* settings = GetDefault<UEposSequenceEditorSettings>();
-    NewCamera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
-    NewCamera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
-    NewCamera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
-    NewCamera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData()
+
+    UCineCameraComponent* CameraComponent = NewCamera->GetCineCameraComponent();
+    if( CameraComponent != NULL )
+    {
+        {
+            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "LensSettings" );
+            CameraComponent->PreEditChange( ChangedProperty );
+
+            CameraComponent->LensSettings = settings->CameraSettings.LensSettings;
+
+            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead( ChangedProperty );
+            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
+        }
+        {
+            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "Filmback" );
+            CameraComponent->PreEditChange( ChangedProperty );
+
+            CameraComponent->Filmback = settings->CameraSettings.Filmback;
+
+            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead( ChangedProperty );
+            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
+        }
+        {
+            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "CurrentAperture" );
+            CameraComponent->PreEditChange( ChangedProperty );
+
+            CameraComponent->CurrentAperture = settings->CameraSettings.CurrentAperture;
+
+            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead( ChangedProperty );
+            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
+        }
+        {
+            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "CurrentFocalLength" );
+            CameraComponent->PreEditChange( ChangedProperty );
+
+            CameraComponent->CurrentFocalLength = settings->CameraSettings.CurrentFocalLength;
+
+            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead( ChangedProperty );
+            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
+        }
+    }
+
+    //NewCamera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
+    //NewCamera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
+    //NewCamera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
+    //NewCamera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData()
+
+    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "LensSettings", settings->CameraSettings.LensSettings );
+    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "Filmback", settings->CameraSettings.Filmback );
+    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "CurrentAperture", settings->CameraSettings.CurrentAperture );
+    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "CurrentFocalLength", settings->CameraSettings.CurrentFocalLength );
+
+    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.LensSettings", settings->CameraSettings.LensSettings );
+    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.Filmback", settings->CameraSettings.Filmback );
+    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.CurrentAperture", settings->CameraSettings.CurrentAperture );
+    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.CurrentFocalLength", settings->CameraSettings.CurrentFocalLength );
+
+    //SetPropertyValue( NewCamera, "CineCameraComponent.LensSettings", settings->CameraSettings.LensSettings );
+    //SetPropertyValue( NewCamera, "CineCameraComponent.Filmback", settings->CameraSettings.Filmback );
+    //SetPropertyValue( NewCamera, "CineCameraComponent.CurrentAperture", settings->CameraSettings.CurrentAperture );
+    //SetPropertyValue( NewCamera, "CineCameraComponent.CurrentFocalLength", settings->CameraSettings.CurrentFocalLength );
 
     FGuid CameraGuid = iSequencer.CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
     if( !CameraGuid.IsValid() )
@@ -418,6 +495,76 @@ CreateTexture2DAsset( UMovieSceneSequence* iSequence, UMaterialInterface* iMater
     return Cast<UTexture2D>( new_object );
 }
 
+/*
+static
+int
+SplitActorLabel( const FString iPrefix, FString& ioLabel, int32& oIndex )
+{
+    ioLabel.RemoveFromStart( iPrefix );
+
+    // Look at the label and see if it begins in a number and separate them
+    FString index;
+    const TArray<TCHAR>& LabelCharArray = ioLabel.GetCharArray();
+    for( int32 CharIdx = 0; CharIdx < LabelCharArray.Num(); CharIdx++ )
+    {
+        if( !FChar::IsDigit( LabelCharArray[CharIdx] ) )
+            break;
+
+        index += LabelCharArray[CharIdx];
+    }
+
+    if( !index.Len() )
+        return 0;
+
+    ioLabel.RemoveFromStart( index );
+    oIndex = FCString::Atoi( *index );
+
+    return index.Len();
+}
+
+static
+void
+SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
+{
+    check( Actor );
+
+    FString suffix = NewActorLabel;
+    FString ModifiedActorLabel = NewActorLabel;
+    int32   index = 0;
+
+    FCachedActorLabels ActorLabels;
+    TSet<AActor*> IgnoreActors;
+    IgnoreActors.Add( Actor );
+    ActorLabels.Populate( Actor->GetWorld(), IgnoreActors );
+
+    if( ActorLabels.Contains( ModifiedActorLabel ) )
+    {
+        // See if the current label begins in a number, and try to create a new label based on that
+        int index_length = SplitActorLabel( TEXT( "Plane_" ), suffix, index );
+        if( index_length == 0 )
+        {
+            // If there wasn't a number on there, append a number, starting from 2 (1 before incrementing below)
+            index = 1;
+        }
+
+        // Update the actor label until we find one that doesn't already exist
+        while( ActorLabels.Contains( ModifiedActorLabel ) )
+        {
+            ++index;
+
+            FString format = FString::Format( TEXT( "%0{0}d" ), { index_length } );
+            TCHAR format2[10] = { 0 };
+            for( int i = 0; i < FMath::Min( format.Len(), 10 ); i++ )
+                format2[i] = format[i];
+            FString index_string = FString::Printf( format2, index );
+            ModifiedActorLabel = TEXT( "Plane_" ) + index_string + suffix;
+        }
+    }
+
+    Actor->SetActorLabel( ModifiedActorLabel );
+}
+*/
+
 //static
 void
 ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
@@ -470,6 +617,10 @@ ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSeque
     plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
     plane->SetMobility( EComponentMobility::Movable );
     plane->SetActorHiddenInGame( true );
+
+    plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
+    FActorLabelUtilities::SetActorLabelUnique( plane, TEXT("Plane_1") ); // The shot name is displayed in another column in the world outliner
+    //SetPlaneLabelUnique( plane, TEXT("Plane_01_") + iSequence->GetDisplayName().ToString() );
 
     //---
 
