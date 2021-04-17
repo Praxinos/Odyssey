@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Helpers/SectionsHelpersArrange.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrackHelpers.h"
 
 #include "MovieSceneTrack.h"
 #include "Settings/EposTracksSettings.h"
@@ -10,7 +10,7 @@
 
 //static
 void
-SectionsHelpersArrange::Arrange( TArray< UMovieSceneSection* > ioSections, EArrangeSections iArrangeShots )
+MovieSceneCinematicBoardTrackHelpers::Arrange( TArray< UMovieSceneSection* > ioSections, EArrangeSections iArrangeShots )
 {
     if( !ioSections.Num() )
         return;
@@ -41,8 +41,40 @@ SectionsHelpersArrange::Arrange( TArray< UMovieSceneSection* > ioSections, EArra
 
 //static
 void
-SectionsHelpersArrange::Arrange( TArray< UMovieSceneSection* > ioSections )
+MovieSceneCinematicBoardTrackHelpers::Arrange( TArray< UMovieSceneSection* > ioSections )
 {
     const UEposTracksSettings* settings = GetDefault<UEposTracksSettings>();
     Arrange( ioSections, settings->BoardTrackSettings.ArrangeShots );
+}
+
+//---
+
+//static
+void
+MovieSceneCinematicBoardTrackHelpers::OrganizeSections( TArray< UMovieSceneSection* > iSections )
+{
+    UMovieSceneSection* first_section = nullptr;
+    if( iSections.Num() )
+    {
+        first_section = iSections[0];
+        first_section->MoveSection( -first_section->GetInclusiveStartFrame() );
+    }
+
+    UMovieSceneSection* previous_section = nullptr;
+    for( auto section : iSections )
+    {
+        if( section == first_section )
+        {
+            previous_section = section;
+            continue;
+        }
+
+        FFrameNumber offset = section->GetInclusiveStartFrame() - previous_section->GetExclusiveEndFrame();
+
+        section->MoveSection( -offset );
+
+        //---
+
+        previous_section = section;
+    }
 }

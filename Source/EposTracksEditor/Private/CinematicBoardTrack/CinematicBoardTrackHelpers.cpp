@@ -13,7 +13,7 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "Helpers/SectionsHelpersArrange.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrackHelpers.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 
@@ -508,7 +508,7 @@ CinematicBoardTrackHelpers::ArrangeSections( ISequencer* iSequencer )
     if( !track )
         return;
 
-    SectionsHelpersArrange::Arrange( track->GetAllSections() );
+    MovieSceneCinematicBoardTrackHelpers::Arrange( track->GetAllSections() );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 }

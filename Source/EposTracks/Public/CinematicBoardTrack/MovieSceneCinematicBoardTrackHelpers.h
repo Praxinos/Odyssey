@@ -9,10 +9,14 @@
 
 class UMovieSceneSection;
 
-class EPOSTRACKS_API SectionsHelpersArrange
+class EPOSTRACKS_API MovieSceneCinematicBoardTrackHelpers
 {
 public:
     static void Arrange( TArray< UMovieSceneSection* > ioSections, EArrangeSections iArrangeShots );
 
     static void Arrange( TArray< UMovieSceneSection* > ioSections );
+
+public:
+    /** Move all sections to make consecutives each other (previous end bound == next start bound) by the order inside the array */
+    static void OrganizeSections( TArray< UMovieSceneSection* > iSections );
 };

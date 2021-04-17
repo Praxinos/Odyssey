@@ -10,9 +10,9 @@
 #include "Compilation/MovieSceneCompilerRules.h"
 
 #include "ArrangeSectionsType.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrackHelpers.h"
 #include "EposMovieSceneSequence.h"
 #include "EposTracksModule.h"
-#include "Helpers/SectionsHelpersArrange.h"
 #include "Helpers/SectionsHelpersMove.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "Helpers/SectionsHelpersShift.h"
@@ -67,7 +67,7 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
     // Should be done again as after the first one, at least 2 sections (new one and the one at this place) have the same start
     MovieSceneHelpers::SortConsecutiveSections( Sections );
     // Force arranging sections
-    SectionsHelpersArrange::Arrange( Sections );
+    MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -107,8 +107,8 @@ UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
     Sections.Remove( &ioSection );
 
     MovieSceneHelpers::SortConsecutiveSections( Sections );
-    SectionsHelpersShift::OrganizeSections( Sections );
-    SectionsHelpersArrange::Arrange( Sections );
+    MovieSceneCinematicBoardTrackHelpers::OrganizeSections( Sections );
+    MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -125,8 +125,8 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
     Sections.RemoveAt( iSectionIndex );
 
     MovieSceneHelpers::SortConsecutiveSections( Sections );
-    SectionsHelpersShift::OrganizeSections( Sections );
-    SectionsHelpersArrange::Arrange( Sections );
+    MovieSceneCinematicBoardTrackHelpers::OrganizeSections( Sections );
+    MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -230,7 +230,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
             check( outer_sequence );
             outer_sequence->SectionResized( board_section->IsResizingLeading() ? previous_section : board_section );
-            SectionsHelpersArrange::Arrange( Sections );
+            MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
 
             board_section->StopResizing();
 
@@ -269,7 +269,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
                 move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
                 SectionsHelpersMove::FixPostMoveSections( Sections, last_gap, &ioSection, move_result );
-                SectionsHelpersArrange::Arrange( Sections );
+                MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
 
                 board_section->SetOverlapPriority( cache_priority );
 

@@ -11,8 +11,8 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrackHelpers.h"
 #include "EposMovieSceneSequence.h"
-#include "Helpers/SectionsHelpersShift.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 //---
@@ -169,7 +169,7 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
         UMovieSceneTrack* parent_track = parent_section->GetTypedOuter<UMovieSceneTrack>();
         check( parent_track );
 
-        SectionsHelpersShift::OrganizeSections( parent_track->GetAllSections() );
+        MovieSceneCinematicBoardTrackHelpers::OrganizeSections( parent_track->GetAllSections() );
 
         auto new_full_range = TRange<FFrameNumber>( parent_track->GetAllSections()[0]->GetInclusiveStartFrame(), parent_track->GetAllSections().Last()->GetExclusiveEndFrame() );
         parent_sequence->Resize( UE::MovieScene::DiscreteSize( new_full_range ) );
