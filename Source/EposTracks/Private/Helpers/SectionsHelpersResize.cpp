@@ -3,7 +3,6 @@
 
 #include "Helpers/SectionsHelpersResize.h"
 
-#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
 
