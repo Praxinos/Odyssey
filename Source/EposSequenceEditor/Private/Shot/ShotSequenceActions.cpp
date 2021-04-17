@@ -7,7 +7,7 @@
 #include "Engine/Engine.h"
 #include "Toolkits/ToolkitManager.h"
 
-#include "BoardHelpers.h"
+#include "Board/BoardHelpers.h"
 #include "Shot/ShotSequence.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceEditorModule.h"

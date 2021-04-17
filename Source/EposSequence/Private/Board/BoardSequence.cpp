@@ -14,7 +14,7 @@
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 
-#include "BoardHelpers.h"
+#include "Board/BoardHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h" //TMP
 
