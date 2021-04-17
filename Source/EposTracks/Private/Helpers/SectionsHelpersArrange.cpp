@@ -10,7 +10,7 @@
 
 //static
 void
-SectionsHelpersArrange::Arrange( const TArray< UMovieSceneSection* >& ioSections, EArrangeSections iArrangeShots )
+SectionsHelpersArrange::Arrange( TArray< UMovieSceneSection* > ioSections, EArrangeSections iArrangeShots )
 {
     if( !ioSections.Num() )
         return;
@@ -41,7 +41,7 @@ SectionsHelpersArrange::Arrange( const TArray< UMovieSceneSection* >& ioSections
 
 //static
 void
-SectionsHelpersArrange::Arrange( const TArray< UMovieSceneSection* >& ioSections )
+SectionsHelpersArrange::Arrange( TArray< UMovieSceneSection* > ioSections )
 {
     const UEposTracksSettings* settings = GetDefault<UEposTracksSettings>();
     Arrange( ioSections, settings->BoardTrackSettings.ArrangeShots );

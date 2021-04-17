@@ -12,7 +12,7 @@ class UMovieSceneSection;
 class EPOSTRACKS_API SectionsHelpersArrange
 {
 public:
-    static void Arrange( const TArray< UMovieSceneSection* >& ioSections, EArrangeSections iArrangeShots );
+    static void Arrange( TArray< UMovieSceneSection* > ioSections, EArrangeSections iArrangeShots );
 
-    static void Arrange( const TArray< UMovieSceneSection* >& ioSections );
+    static void Arrange( TArray< UMovieSceneSection* > ioSections );
 };
