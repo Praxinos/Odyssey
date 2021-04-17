@@ -26,7 +26,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
-#include "Helpers/SectionsHelpersConvert.h"
+#include "Helpers/SectionHelpersConvert.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -354,7 +354,7 @@ CinematicBoardSectionKeysHelpers::FindCameraTransformKeysRecursive( const UMovie
     {
         TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
 
-        keys = SectionsHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
+        keys = SectionHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
 
         return keys;
     }
@@ -380,7 +380,7 @@ CinematicBoardSectionKeysHelpers::FindCameraTransformKeysRecursive( const UMovie
             subkeys.Append( section_keys );
         }
 
-        keys = SectionsHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
+        keys = SectionHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
 
         return keys;
     }
@@ -393,7 +393,7 @@ TArray<double>
 CinematicBoardSectionKeysHelpers::BuildThumbnailKeys( const UMovieSceneSubSection& iSubSection )
 {
     TArray<FFrameTime> keys_as_frame = FindCameraTransformKeysRecursive( iSubSection );
-    return SectionsHelpersConvert::FrameToSecond( &iSubSection, keys_as_frame );
+    return SectionHelpersConvert::FrameToSecond( &iSubSection, keys_as_frame );
 }
 
 //---

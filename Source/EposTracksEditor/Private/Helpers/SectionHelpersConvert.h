@@ -6,9 +6,10 @@
 #include "CoreMinimal.h"
 #include "Misc/FrameTime.h"
 
+class UMovieSceneSection;
 class UMovieSceneSubSection;
 
-class EPOSTRACKS_API SectionsHelpersConvert
+class SectionHelpersConvert
 {
 public:
     /** Convert all keys inside a subsequence reference to its (a) parent reference */

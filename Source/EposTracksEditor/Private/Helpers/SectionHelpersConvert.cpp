@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Helpers/SectionsHelpersConvert.h"
+#include "Helpers/SectionHelpersConvert.h"
 
 #include "MovieScene.h"
 #include "Sections/MovieSceneSubSection.h"
@@ -10,7 +10,7 @@
 
 //static
 TArray<FFrameTime>
-SectionsHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
+SectionHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
 {
     TArray<FFrameTime> converted_keys;
 
@@ -26,7 +26,7 @@ SectionsHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection
 
 //static
 TArray<double>
-SectionsHelpersConvert::FrameToSecond( const UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys )
+SectionHelpersConvert::FrameToSecond( const UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys )
 {
     TArray<double> second_keys;
 
