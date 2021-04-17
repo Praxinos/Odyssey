@@ -33,9 +33,9 @@
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "EposTracksEditorHelpers.h"
 #include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardTrackEditor"
@@ -117,7 +117,7 @@ FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryCanExecute() co
 void
 FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryExecute()
 {
-    UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
     if( boardTrack )
     {
         if( GetSequencer().IsValid() )
@@ -300,7 +300,7 @@ FCinematicBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSc
 {
     FKeyPropertyResult keyPropertyResult;
 
-    auto boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+    auto boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
 
     const FFrameRate tickResolution = iSequence->GetMovieScene()->GetTickResolution();
     const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
@@ -484,19 +484,19 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovie
 void
 FCinematicBoardTrackEditor::InsertBoard()
 {
-    EposTracksEditorHelpers::InsertBoard( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
+    CinematicBoardTrackHelpers::InsertBoard( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
 }
 
 void
 FCinematicBoardTrackEditor::InsertFiller()
 {
-    EposTracksEditorHelpers::InsertFiller( GetSequencer().Get() );
+    CinematicBoardTrackHelpers::InsertFiller( GetSequencer().Get() );
 }
 
 void
 FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iSection )
 {
-    EposTracksEditorHelpers::DuplicateSection( GetSequencer().Get(), iSection );
+    CinematicBoardTrackHelpers::DuplicateSection( GetSequencer().Get(), iSection );
 }
 
 void
@@ -551,7 +551,7 @@ FCinematicBoardTrackEditor::RenameBoard( UMovieSceneCinematicBoardSection* iSect
 //
 //        if( NewShot )
 //        {
-//            UMovieSceneCinematicShotTrack* CinematicShotTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack(GetSequencer().Get());
+//            UMovieSceneCinematicShotTrack* CinematicShotTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack(GetSequencer().Get());
 //            CinematicShotTrack->RemoveSection( *Section );
 //
 //            NewShot->SetRange( NewShotRange );
@@ -649,7 +649,7 @@ FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSe
 
     if( CanAddSubSequence( *iMovieSceneSequence ) )
     {
-        UMovieSceneCinematicBoardTrack* boardTrack = EposTracksEditorHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+        UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
 
         const FFrameRate tickResolution = iMovieSceneSequence->GetMovieScene()->GetTickResolution();
         const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(

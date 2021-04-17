@@ -6,9 +6,9 @@
 #include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
+#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
-#include "EposTracksEditorHelpers.h"
 #include "EposTracksModule.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposTracksSettings.h"
@@ -150,24 +150,24 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 void
 FBoardSequenceCustomization::ArrangeSections()
 {
-    EposTracksEditorHelpers::ArrangeSections( mSequencer );
+    CinematicBoardTrackHelpers::ArrangeSections( mSequencer );
 }
 
 void
 FBoardSequenceCustomization::SetArrangeSections( EArrangeSections iArrangeSections )
 {
-    EposTracksEditorHelpers::SetArrangeSections( mSequencer, iArrangeSections );
+    CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, iArrangeSections );
 }
 
 void
 FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame()
 {
-    EposTracksEditorHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
+    CinematicBoardTrackHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
 }
 void
 FBoardSequenceCustomization::NewSectionWithShotAtCurrentFrame()
 {
-    EposTracksEditorHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
+    CinematicBoardTrackHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
 }
 
 //---

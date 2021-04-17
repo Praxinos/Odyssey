@@ -13,7 +13,7 @@ class UMovieSceneSubSection;
 class UMovieSceneCinematicBoardSection;
 class UMovieSceneCinematicBoardTrack;
 
-class EPOSTRACKSEDITOR_API EposTracksEditorHelpers
+class EPOSTRACKSEDITOR_API CinematicBoardTrackHelpers
 {
 public:
 
