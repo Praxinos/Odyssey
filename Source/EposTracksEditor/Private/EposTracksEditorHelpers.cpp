@@ -14,7 +14,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Helpers/SectionsHelpersArrange.h"
-#include "Settings/EposTracksEditorSettings.h"
+#include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "EposTracksEditorHelpers"
@@ -508,9 +508,7 @@ EposTracksEditorHelpers::ArrangeSections( ISequencer* iSequencer )
     if( !track )
         return;
 
-    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-
-    SectionsHelpersArrange::Arrange( track, settings->BoardTrackSettings.ArrangeShots );
+    SectionsHelpersArrange::Arrange( track->GetAllSections() );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 }
@@ -519,7 +517,7 @@ EposTracksEditorHelpers::ArrangeSections( ISequencer* iSequencer )
 void
 EposTracksEditorHelpers::SetArrangeSections( ISequencer* iSequencer, EArrangeSections iArrangeSections )
 {
-    UEposTracksEditorSettings* settings = GetMutableDefault<UEposTracksEditorSettings>();
+    UEposTracksSettings* settings = GetMutableDefault<UEposTracksSettings>();
     settings->BoardTrackSettings.ArrangeShots = iArrangeSections;
     settings->SaveConfig();
 

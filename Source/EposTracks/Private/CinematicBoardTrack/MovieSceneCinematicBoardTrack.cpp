@@ -12,6 +12,7 @@
 #include "ArrangeSectionsType.h"
 #include "EposMovieSceneSequence.h"
 #include "EposTracksModule.h"
+#include "Helpers/SectionsHelpersArrange.h"
 #include "Helpers/SectionsHelpersMove.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "Helpers/SectionsHelpersShift.h"
@@ -48,7 +49,7 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( shift_result.mNewRange ), iRowIndex );
 
-    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
+//    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
 
 //#if WITH_EDITOR
 //
@@ -65,8 +66,8 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
     SectionsHelpersShift::ShiftFollowingSections( Sections, newSection, shift_result );
     // Should be done again as after the first one, at least 2 sections (new one and the one at this place) have the same start
     MovieSceneHelpers::SortConsecutiveSections( Sections );
-
-    FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+    // Force arranging sections
+    SectionsHelpersArrange::Arrange( Sections );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -107,8 +108,7 @@ UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 
     MovieSceneHelpers::SortConsecutiveSections( Sections );
     SectionsHelpersShift::OrganizeSections( Sections );
-
-    FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+    SectionsHelpersArrange::Arrange( Sections );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -126,8 +126,7 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
 
     MovieSceneHelpers::SortConsecutiveSections( Sections );
     SectionsHelpersShift::OrganizeSections( Sections );
-
-    FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+    SectionsHelpersArrange::Arrange( Sections );
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -231,10 +230,13 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
             check( outer_sequence );
             outer_sequence->SectionResized( board_section->IsResizingLeading() ? previous_section : board_section );
+            SectionsHelpersArrange::Arrange( Sections );
 
             board_section->StopResizing();
 
-            FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+            //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
+            // as Arrange() may move the current section and FMoveKeysAndSections::OnEndDrag() won't call it (=Notify())
+            FEposTracksModule::GetTracksCustomizationManager().PatchNotifySequencer();
         }
     }
     else
@@ -267,6 +269,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
                 move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
                 SectionsHelpersMove::FixPostMoveSections( Sections, last_gap, &ioSection, move_result );
+                SectionsHelpersArrange::Arrange( Sections );
 
                 board_section->SetOverlapPriority( cache_priority );
 
@@ -277,10 +280,10 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 mCacheOverlapPriority.Remove( board_section );
 
                 UpdateEasing();
-                //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
-                // as FixPostMoveSections() may move the current section and OnEndDrag() won't call it (=Notify())
 
-                FEposTracksModule::GetTracksCustomizationManager().ExecuteArrangeSections();
+                //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
+                // as FixPostMoveSections()/Arrange() may move the current section and FMoveKeysAndSections::OnEndDrag() won't call it (=Notify())
+                FEposTracksModule::GetTracksCustomizationManager().PatchNotifySequencer();
             }
             else
             {

@@ -8,7 +8,7 @@
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
-#include "Settings/EposTracksEditorSettings.h"
+#include "Settings/EposTracksSettings.h"
 
 #define LOCTEXT_NAMESPACE "FEposTracksEditorModule"
 
@@ -61,7 +61,7 @@ FEposTracksEditorModule::RegisterSettings()
     SettingsModule->RegisterSettings( "Project", "Plugins", "EposTracks",
                                       LOCTEXT( "EposTracksSettingsName", "Epos Tracks" ),
                                       LOCTEXT( "EposTracksSettingsDescription", "Configure the Epos Tracks Editor." ),
-                                      GetMutableDefault<UEposTracksEditorSettings>() );
+                                      GetMutableDefault<UEposTracksSettings>() );
 }
 void
 FEposTracksEditorModule::UnregisterSettings()

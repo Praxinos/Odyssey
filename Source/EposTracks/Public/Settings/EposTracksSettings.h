@@ -8,7 +8,7 @@
 
 #include "ArrangeSectionsType.h"
 
-#include "EposTracksEditorSettings.generated.h"
+#include "EposTracksSettings.generated.h"
 
 //---
 
@@ -34,16 +34,16 @@ struct FShotTrackSettings
 //---
 
 /**
- * Epos Editor settings.
+ * Epos Tracks settings.
  */
 UCLASS(config=Epos)
-class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
+class EPOSTRACKS_API UEposTracksSettings
     : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UEposTracksEditorSettings();
+    UEposTracksSettings();
 
     /** Specifies Board track stuff. */
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))

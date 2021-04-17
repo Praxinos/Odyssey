@@ -6,22 +6,22 @@
 //---
 
 FDelegateHandle
-FTracksCustomizationManager::Register( FOnArrangeSections iOnArrangeSections )
+FTracksCustomizationManager::Register( FOnNotifySequencer iOnNotifySequencer )
 {
-    mArrangeSections = iOnArrangeSections;
+    mPatchNotifySequencer = iOnNotifySequencer;
 
-    return mArrangeSections.GetHandle();
+    return mPatchNotifySequencer.GetHandle();
 }
 
 void
 FTracksCustomizationManager::Unregister( FDelegateHandle iHandle )
 {
-    if( iHandle == mArrangeSections.GetHandle() )
-        mArrangeSections.Unbind();
+    if( iHandle == mPatchNotifySequencer.GetHandle() )
+        mPatchNotifySequencer.Unbind();
 }
 
 void
-FTracksCustomizationManager::ExecuteArrangeSections()
+FTracksCustomizationManager::PatchNotifySequencer()
 {
-    mArrangeSections.ExecuteIfBound();
+    mPatchNotifySequencer.ExecuteIfBound();
 }

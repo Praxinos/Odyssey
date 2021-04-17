@@ -7,10 +7,12 @@
 
 #include "ArrangeSectionsType.h"
 
-class UMovieSceneTrack;
+class UMovieSceneSection;
 
 class EPOSTRACKS_API SectionsHelpersArrange
 {
 public:
-    static void Arrange( UMovieSceneTrack* iTrack, EArrangeSections iArrangeShots );
+    static void Arrange( const TArray< UMovieSceneSection* >& ioSections, EArrangeSections iArrangeShots );
+
+    static void Arrange( const TArray< UMovieSceneSection* >& ioSections );
 };

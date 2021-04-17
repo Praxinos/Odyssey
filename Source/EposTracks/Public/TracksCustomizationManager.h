@@ -7,16 +7,16 @@
 
 //---
 
-DECLARE_DELEGATE( FOnArrangeSections );
+DECLARE_DELEGATE( FOnNotifySequencer );
 
 class EPOSTRACKS_API FTracksCustomizationManager
 {
 public:
-    FDelegateHandle Register( FOnArrangeSections iOnArrangeSections );
+    FDelegateHandle Register( FOnNotifySequencer iOnNotifySequencer );
     void Unregister( FDelegateHandle iHandle );
 
-    void ExecuteArrangeSections();
+    void PatchNotifySequencer();
 
 private:
-    FOnArrangeSections mArrangeSections;
+    FOnNotifySequencer mPatchNotifySequencer;
 };
