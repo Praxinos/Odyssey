@@ -161,82 +161,31 @@ ShotSequenceHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequ
     //pNewCamera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
     const UEposSequenceEditorSettings* settings = GetDefault<UEposSequenceEditorSettings>();
 
-    UCineCameraComponent* CameraComponent = NewCamera->GetCineCameraComponent();
-    if( CameraComponent != NULL )
-    {
-        {
-            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "LensSettings" );
-            CameraComponent->PreEditChange( ChangedProperty );
+    // https://udn.unrealengine.com/s/question/0D54z00006uhl34CAA/plugin-cuproperty-how-to-change-uproperty-and-trigger-prepostedit-
 
-            CameraComponent->LensSettings = settings->CameraSettings.LensSettings;
+    //UCineCameraComponent* CameraComponent = NewCamera->GetCineCameraComponent();
+    //if( CameraComponent != NULL )
+    //{
+    //    {
+    //        FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "LensSettings" );
+    //        CameraComponent->PreEditChange( ChangedProperty );
 
-            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
-            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
-            FEditPropertyChain PropertyChain;
-            PropertyChain.AddHead( ChangedProperty );
-            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
-            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
-        }
-        {
-            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "Filmback" );
-            CameraComponent->PreEditChange( ChangedProperty );
+    //        CameraComponent->LensSettings = settings->CameraSettings.LensSettings;
 
-            CameraComponent->Filmback = settings->CameraSettings.Filmback;
+    //        FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+    //        //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
+    //        FEditPropertyChain PropertyChain;
+    //        PropertyChain.AddHead( ChangedProperty );
+    //        FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+    //        CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
+    //    }
+    //    ... do it for all properties to change
+    //}
 
-            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
-            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
-            FEditPropertyChain PropertyChain;
-            PropertyChain.AddHead( ChangedProperty );
-            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
-            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
-        }
-        {
-            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "CurrentAperture" );
-            CameraComponent->PreEditChange( ChangedProperty );
-
-            CameraComponent->CurrentAperture = settings->CameraSettings.CurrentAperture;
-
-            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
-            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
-            FEditPropertyChain PropertyChain;
-            PropertyChain.AddHead( ChangedProperty );
-            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
-            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
-        }
-        {
-            FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "CurrentFocalLength" );
-            CameraComponent->PreEditChange( ChangedProperty );
-
-            CameraComponent->CurrentFocalLength = settings->CameraSettings.CurrentFocalLength;
-
-            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
-            //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
-            FEditPropertyChain PropertyChain;
-            PropertyChain.AddHead( ChangedProperty );
-            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
-            CameraComponent->PostEditChangeChainProperty( PropertyChainEvent );
-        }
-    }
-
-    //NewCamera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
-    //NewCamera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
-    //NewCamera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
-    //NewCamera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData()
-
-    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "LensSettings", settings->CameraSettings.LensSettings );
-    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "Filmback", settings->CameraSettings.Filmback );
-    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "CurrentAperture", settings->CameraSettings.CurrentAperture );
-    //FObjectEditorUtils::SetPropertyValue( NewCamera->GetCineCameraComponent(), "CurrentFocalLength", settings->CameraSettings.CurrentFocalLength );
-
-    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.LensSettings", settings->CameraSettings.LensSettings );
-    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.Filmback", settings->CameraSettings.Filmback );
-    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.CurrentAperture", settings->CameraSettings.CurrentAperture );
-    //FObjectEditorUtils::SetPropertyValue( NewCamera, "CineCameraComponent.CurrentFocalLength", settings->CameraSettings.CurrentFocalLength );
-
-    //SetPropertyValue( NewCamera, "CineCameraComponent.LensSettings", settings->CameraSettings.LensSettings );
-    //SetPropertyValue( NewCamera, "CineCameraComponent.Filmback", settings->CameraSettings.Filmback );
-    //SetPropertyValue( NewCamera, "CineCameraComponent.CurrentAperture", settings->CameraSettings.CurrentAperture );
-    //SetPropertyValue( NewCamera, "CineCameraComponent.CurrentFocalLength", settings->CameraSettings.CurrentFocalLength );
+    NewCamera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
+    NewCamera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
+    NewCamera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
+    NewCamera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData(), so no need to call Pre/PostChange() and its huge syntax
 
     FGuid CameraGuid = iSequencer.CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
     if( !CameraGuid.IsValid() )
