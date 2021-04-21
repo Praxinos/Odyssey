@@ -3,6 +3,8 @@
 
 #include "Shot/ShotSequenceCustomization.h"
 
+#include "CineCameraActor.h"
+
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotHelpers/ShotSequenceHelpers.h"
@@ -19,6 +21,10 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     mShotSequence = Cast<UShotSequence>( &ioBuilder.GetFocusedSequence() );
 
     //---
+
+    // Listen for actor/component movement
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPrePropertyChanged );
+    FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPostPropertyChanged );
 
     ProcessCommands( mSequencer->GetCommandBindings(), kMap );
 
@@ -45,6 +51,9 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 void
 FShotSequenceCustomization::UnregisterSequencerCustomization()
 {
+    FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll( this );
+    FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
+
     ProcessCommands( mSequencer->GetCommandBindings(), kUnmap );
 
     mSequencer = nullptr;
@@ -160,6 +169,95 @@ FShotSequenceCustomization::MakeCameraMenu()
     MenuBuilder.EndSection();
 
     return MenuBuilder.MakeWidget();
+}
+
+//---
+
+void
+FShotSequenceCustomization::OnPreTransformChanged( UObject& InObject )
+{
+    if( !mSequencer->IsAllowedToChange() )
+        return;
+
+    ACineCameraActor* Actor = Cast<ACineCameraActor>( &InObject );
+    // If Sequencer is allowed to autokey and we are clicking on an Actor that can't be autokeyed
+    if( !Actor || Actor->IsEditorOnly() )
+        return;
+
+    USceneComponent* SceneComponentThatChanged = Actor->GetRootComponent();
+    check( SceneComponentThatChanged );
+
+    // Cache off the existing transform so we can detect which components have changed
+    // and keys only when something has changed
+    FTransformData Transform( SceneComponentThatChanged );
+
+    mObjectToExistingTransform.Add( &InObject, Transform );
+
+    // Do not manage track creation as it should already exist, and otherwise, do nothing (for the moment)
+}
+
+void
+FShotSequenceCustomization::OnTransformChanged( UObject& InObject )
+{
+    if( !mSequencer->IsAllowedToChange() )
+        return;
+
+    ACineCameraActor* Actor = Cast<ACineCameraActor>( &InObject );
+    // If the Actor that just finished transforming doesn't have autokey disabled
+    if( !Actor || Actor->IsEditorOnly() )
+        return;
+
+    USceneComponent* SceneComponentThatChanged = Actor->GetRootComponent();
+    check( SceneComponentThatChanged );
+
+    // Find an existing transform if possible.  If one exists we will compare against the new one to decide what components of the transform need keys
+    TOptional<FTransformData> ExistingTransform;
+    if( const FTransformData* Found = mObjectToExistingTransform.Find( &InObject ) )
+    {
+        ExistingTransform = *Found;
+    }
+
+    // Remove it from the list of cached transforms.
+    // @todo sequencer livecapture: This can be made much for efficient by not removing cached state during live capture situation
+    mObjectToExistingTransform.Remove( &InObject );
+
+    // Build new transform data
+    FTransformData NewTransformData( SceneComponentThatChanged );
+
+    //---
+
+    ShotSequenceHelpers::StopPilotingCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
+}
+
+void
+FShotSequenceCustomization::OnPrePropertyChanged( UObject* InObject, const FEditPropertyChain& InPropertyChain )
+{
+    FProperty* PropertyAboutToChange = InPropertyChain.GetActiveMemberNode()->GetValue();
+    const FName MemberPropertyName = PropertyAboutToChange != nullptr ? PropertyAboutToChange->GetFName() : NAME_None;
+    const bool bTransformationToChange =
+        ( MemberPropertyName == USceneComponent::GetRelativeLocationPropertyName() ||
+          MemberPropertyName == USceneComponent::GetRelativeRotationPropertyName() ||
+          MemberPropertyName == USceneComponent::GetRelativeScale3DPropertyName() );
+
+    if( InObject && bTransformationToChange )
+    {
+        OnPreTransformChanged( *InObject );
+    }
+}
+
+void
+FShotSequenceCustomization::OnPostPropertyChanged( UObject* InObject, FPropertyChangedEvent& InPropertyChangedEvent )
+{
+    const FName MemberPropertyName = InPropertyChangedEvent.MemberProperty != nullptr ? InPropertyChangedEvent.MemberProperty->GetFName() : NAME_None;
+    const bool bTransformationChanged =
+        ( MemberPropertyName == USceneComponent::GetRelativeLocationPropertyName() ||
+          MemberPropertyName == USceneComponent::GetRelativeRotationPropertyName() ||
+          MemberPropertyName == USceneComponent::GetRelativeScale3DPropertyName() );
+
+    if( InObject && bTransformationChanged )
+    {
+        OnTransformChanged( *InObject );
+    }
 }
 
 //---

@@ -47,6 +47,13 @@ public:
     */
     static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    /**
+    *  Stop piloting camera
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
+
 private:
     struct FInnerSequenceResult
     {
@@ -75,6 +82,13 @@ public:
     static void CreateCamera( ISequencer* iSequencer );
 
     /**
+    *  Stop piloting camera
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
+
+    /**
     *  Add a Camera track
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
@@ -94,6 +108,7 @@ private:
     static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
     static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid );
     static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber );

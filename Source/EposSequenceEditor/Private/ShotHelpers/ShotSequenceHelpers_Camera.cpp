@@ -15,6 +15,7 @@
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "ISequencer.h"
+#include "KeyframeTrackEditor.h"
 #include "LevelEditorActions.h"
 #include "LevelEditorViewport.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -107,8 +108,6 @@ BoardSequenceHelpers::GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumb
 }
 
 //---
-//---
-//---
 
 //static
 ACineCameraActor*
@@ -147,6 +146,8 @@ ShotSequenceHelpers::GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSe
     return nullptr;
 }
 
+//---
+//---
 //---
 
 ShotSequenceHelpers::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID )
@@ -189,6 +190,8 @@ ShotSequenceHelpers::cTemporarySwitchInner::~cTemporarySwitchInner()
     mSequencer.SetGlobalTime( ConvertFrameTime( mOriginalGlobalTime, display_rate, tick_resolution ) );
 }
 
+//---
+//---
 //---
 
 //static
@@ -385,6 +388,10 @@ ShotSequenceHelpers::CreateCameraCut( ISequencer& iSequencer, UMovieSceneSequenc
         }
     }
 }
+
+//---
+//---
+//---
 
 //static
 FVector
@@ -806,9 +813,7 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
     ioCamera->SetActorLocation( new_location, false );
     ioCamera->SetActorRotation( new_rotation );
 
-
 //TODO: set all (?) planes ?
-
 
     //---
 
@@ -817,51 +822,39 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
     FMovieSceneChannelProxy& proxy = section->GetChannelProxy();
     TArrayView<FMovieSceneFloatChannel*> FloatChannels = proxy.GetChannels<FMovieSceneFloatChannel>();
 
-    //if( FloatChannels[0]->GetNumKeys() == 1 &&
-    //    FloatChannels[1]->GetNumKeys() == 1 &&
-    //    FloatChannels[2]->GetNumKeys() == 1 &&
-    //    FloatChannels[3]->GetNumKeys() == 1 &&
-    //    FloatChannels[4]->GetNumKeys() == 1 &&
-    //    FloatChannels[5]->GetNumKeys() == 1 )
-    //{
-    //    AddKeyToChannel( FloatChannels[0], FloatChannels[0]->GetTimes()[0], ExistingCamera->GetActorLocation().X, iSequencer->GetKeyInterpolation() );
-    //    AddKeyToChannel( FloatChannels[1], FloatChannels[1]->GetTimes()[0], ExistingCamera->GetActorLocation().Y, iSequencer->GetKeyInterpolation() );
-    //    AddKeyToChannel( FloatChannels[2], FloatChannels[2]->GetTimes()[0], ExistingCamera->GetActorLocation().Z, iSequencer->GetKeyInterpolation() );
+//TODO: maybe use the same object as StopPilotingCamera() ???
 
-    //    AddKeyToChannel( FloatChannels[3], FloatChannels[3]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().X, iSequencer->GetKeyInterpolation() );
-    //    AddKeyToChannel( FloatChannels[4], FloatChannels[4]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Y, iSequencer->GetKeyInterpolation() );
-    //    AddKeyToChannel( FloatChannels[5], FloatChannels[5]->GetTimes()[0], ExistingCamera->GetActorRotation().Euler().Z, iSequencer->GetKeyInterpolation() );
-    //}
-    //else
-    {
-        AddKeyToChannel( FloatChannels[0], iFrameNumber, ioCamera->GetActorLocation().X, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[1], iFrameNumber, ioCamera->GetActorLocation().Y, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[2], iFrameNumber, ioCamera->GetActorLocation().Z, iSequencer.GetKeyInterpolation() );
+    AddKeyToChannel( FloatChannels[0], iFrameNumber, ioCamera->GetActorLocation().X, iSequencer.GetKeyInterpolation() );
+    AddKeyToChannel( FloatChannels[1], iFrameNumber, ioCamera->GetActorLocation().Y, iSequencer.GetKeyInterpolation() );
+    AddKeyToChannel( FloatChannels[2], iFrameNumber, ioCamera->GetActorLocation().Z, iSequencer.GetKeyInterpolation() );
 
-        AddKeyToChannel( FloatChannels[3], iFrameNumber, ioCamera->GetActorRotation().Euler().X, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[4], iFrameNumber, ioCamera->GetActorRotation().Euler().Y, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[5], iFrameNumber, ioCamera->GetActorRotation().Euler().Z, iSequencer.GetKeyInterpolation() );
-    }
+    AddKeyToChannel( FloatChannels[3], iFrameNumber, ioCamera->GetActorRotation().Euler().X, iSequencer.GetKeyInterpolation() );
+    AddKeyToChannel( FloatChannels[4], iFrameNumber, ioCamera->GetActorRotation().Euler().Y, iSequencer.GetKeyInterpolation() );
+    AddKeyToChannel( FloatChannels[5], iFrameNumber, ioCamera->GetActorRotation().Euler().Z, iSequencer.GetKeyInterpolation() );
 
     //AddKeyToChannel( FloatChannels[6], 0, Scale.X, iSequencer->GetKeyInterpolation() );
     //AddKeyToChannel( FloatChannels[7], 0, Scale.Y, iSequencer->GetKeyInterpolation() );
     //AddKeyToChannel( FloatChannels[8], 0, Scale.Z, iSequencer->GetKeyInterpolation() );
 
-    //FloatChannels[0]->SetDefault( new_location.X );
-    //FloatChannels[1]->SetDefault( new_location.Y );
-    //FloatChannels[2]->SetDefault( new_location.Z );
+    if( FloatChannels[0]->GetNumKeys() <= 1 )
+        FloatChannels[0]->SetDefault( new_location.X );
+    if( FloatChannels[1]->GetNumKeys() <= 1 )
+        FloatChannels[1]->SetDefault( new_location.Y );
+    if( FloatChannels[2]->GetNumKeys() <= 1 )
+        FloatChannels[2]->SetDefault( new_location.Z );
 
-    //FloatChannels[3]->SetDefault( new_rotation.Euler().X );
-    //FloatChannels[4]->SetDefault( new_rotation.Euler().Y );
-    //FloatChannels[5]->SetDefault( new_rotation.Euler().Z );
+    if( FloatChannels[3]->GetNumKeys() <= 1 )
+        FloatChannels[3]->SetDefault( new_rotation.Euler().X );
+    if( FloatChannels[4]->GetNumKeys() <= 1 )
+        FloatChannels[4]->SetDefault( new_rotation.Euler().Y );
+    if( FloatChannels[5]->GetNumKeys() <= 1 )
+        FloatChannels[5]->SetDefault( new_rotation.Euler().Z );
 
-    ////FloatChannels[6]->SetDefault( Scale.X );
-    ////FloatChannels[7]->SetDefault( Scale.Y );
-    ////FloatChannels[8]->SetDefault( Scale.Z );
-
+    //FloatChannels[6]->SetDefault( Scale.X );
+    //FloatChannels[7]->SetDefault( Scale.Y );
+    //FloatChannels[8]->SetDefault( Scale.Z );
 
 //TODO: set all (?) key planes ?
-
 
     //---
     // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
@@ -881,5 +874,226 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
+
+//---
+//---
+//---
+
+static
+float
+UnwindChannel( const float& OldValue, float NewValue )
+{
+    while( NewValue - OldValue > 180.0f )
+    {
+        NewValue -= 360.0f;
+    }
+    while( NewValue - OldValue < -180.0f )
+    {
+        NewValue += 360.0f;
+    }
+    return NewValue;
+}
+static
+FRotator
+UnwindRotator( const FRotator& InOld, const FRotator& InNew )
+{
+    FRotator Result;
+    Result.Pitch = UnwindChannel( InOld.Pitch, InNew.Pitch );
+    Result.Yaw = UnwindChannel( InOld.Yaw, InNew.Yaw );
+    Result.Roll = UnwindChannel( InOld.Roll, InNew.Roll );
+    return Result;
+}
+
+// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\TransformTrackEditor.cpp
+static
+void
+GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastTransform, const FTransformData& CurrentTransform, EMovieSceneTransformChannel ChannelsToKey, UObject* Object, UMovieSceneSection* Section, FGeneratedTrackKeys& OutGeneratedKeys )
+{
+    using namespace UE::MovieScene;
+
+    bool bLastVectorIsValid = LastTransform.IsSet();
+
+    // If key all is enabled, for a key on all the channels
+    if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll )
+    {
+        bLastVectorIsValid = false;
+        ChannelsToKey = EMovieSceneTransformChannel::All;
+    }
+
+    //FBuiltInComponentTypes* BuiltInComponents = FBuiltInComponentTypes::Get();
+
+    //FTransformData RecomposedTransform = RecomposeTransform( CurrentTransform, Object, Section );
+
+    // Set translation keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationZ );
+
+        if( bLastVectorIsValid )
+        {
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Translation.X, CurrentTransform.Translation.X );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Translation.Y, CurrentTransform.Translation.Y );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Translation.Z, CurrentTransform.Translation.Z );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        FVector KeyVector = CurrentTransform.Translation;
+        //FVector KeyVector = RecomposedTransform.Translation;
+
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 0, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 1, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 2, KeyVector.Z, bKeyZ ) );
+    }
+
+    // Set rotation keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationZ );
+
+        FRotator KeyRotator = CurrentTransform.Rotation;
+        if( bLastVectorIsValid )
+        {
+            KeyRotator = UnwindRotator( LastTransform->Rotation, CurrentTransform.Rotation );
+
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Rotation.Roll, KeyRotator.Roll );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Rotation.Pitch, KeyRotator.Pitch );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Rotation.Yaw, KeyRotator.Yaw );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        // Do we need to unwind re-composed rotations?
+        //KeyRotator = UnwindRotator( CurrentTransform.Rotation, RecomposedTransform.Rotation );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 3, KeyRotator.Roll, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 4, KeyRotator.Pitch, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
+
+    }
+
+    // Set scale keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleZ );
+
+        if( bLastVectorIsValid )
+        {
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Scale.X, CurrentTransform.Scale.X );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Scale.Y, CurrentTransform.Scale.Y );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Scale.Z, CurrentTransform.Scale.Z );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        FVector KeyVector = CurrentTransform.Scale;
+        //FVector KeyVector = RecomposedTransform.Scale;
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 6, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 7, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 8, KeyVector.Z, bKeyZ ) );
+    }
+}
+
+// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Public\KeyframeTrackEditor.h
+static
+void
+AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode )
+{
+    EAutoChangeMode AutoChangeMode = iSequencer.GetAutoChangeMode();
+
+    FMovieSceneChannelProxy& Proxy = Section->GetChannelProxy();
+
+    const bool bSetDefaults = iSequencer.GetAutoSetTrackDefaults();
+
+    if( KeyMode != ESequencerKeyMode::AutoKey || AutoChangeMode == EAutoChangeMode::AutoKey || AutoChangeMode == EAutoChangeMode::All )
+    {
+        EMovieSceneKeyInterpolation InterpolationMode = iSequencer.GetKeyInterpolation();
+
+        const bool bKeyEvenIfUnchanged =
+            KeyMode == ESequencerKeyMode::ManualKeyForced ||
+            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll ||
+            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup;
+
+        const bool bKeyEvenIfEmpty =
+            ( KeyMode == ESequencerKeyMode::AutoKey && AutoChangeMode == EAutoChangeMode::All ) ||
+            KeyMode == ESequencerKeyMode::ManualKeyForced;
+
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
+        }
+    }
+
+    if( bSetDefaults )
+    {
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            GeneratedKey->ApplyDefault( Section, Proxy );
+        }
+    }
+}
+
+//static
+void
+BoardSequenceHelpers::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceHelpers::StopPilotingCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iCamera, iPreviousTransform, iNewTransform );
+}
+
+//static
+void
+ShotSequenceHelpers::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
+{
+    StopPilotingCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iCamera, iPreviousTransform, iNewTransform );
+}
+
+//static
+void
+ShotSequenceHelpers::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
+{
+    const FScopedTransaction transaction( LOCTEXT( "StopPilotingCamera", "Stop Piloting Storyboard Camera" ) );
+
+    FGuid Binding = iSequencer.FindObjectId( *iCamera, iSequenceID );
+    if( !Binding.IsValid() )
+        return;
+
+    UMovieScene3DTransformTrack* transform_track = iSequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( Binding );
+
+    //---
+
+    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( transform_track->GetAllSections(), iFrameNumber );
+    FGeneratedTrackKeys generated_keys;
+    GetTransformKeys( iSequencer, iPreviousTransform, iNewTransform, EMovieSceneTransformChannel::All, iCamera, section, generated_keys );
+
+    //---
+
+//TODO: set all (?) planes ?
+
+    //---
+
+    AddKeysToSection( iSequencer, section, iFrameNumber, generated_keys, ESequencerKeyMode::AutoKey );
+
+//TODO: set all (?) key planes ?
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
 
 #undef LOCTEXT_NAMESPACE
