@@ -70,6 +70,19 @@ UOdysseyTransformProxyLibrary::MakeShearMatrix( float ShearX, float ShearY )
     return  FOdysseyMatrix( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
 }
 
+//static
+FOdysseyMatrix
+UOdysseyTransformProxyLibrary::MakePerspectiveMatrix( 
+      FVector2D SrcA, FVector2D SrcB, FVector2D SrcC, FVector2D SrcD
+    , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD 
+)
+{
+    ::ul3::FVec2F src[4] = { ::ul3::FVec2F( SrcA.X, SrcA.Y ), ::ul3::FVec2F( SrcB.X, SrcB.Y ), ::ul3::FVec2F( SrcC.X, SrcC.Y ), ::ul3::FVec2F( SrcD.X, SrcD.Y ) };
+    ::ul3::FVec2F dst[4] = { ::ul3::FVec2F( DstA.X, DstA.Y ), ::ul3::FVec2F( DstB.X, DstB.Y ), ::ul3::FVec2F( DstC.X, DstC.Y ), ::ul3::FVec2F( DstD.X, DstD.Y ) };
+
+    return FOdysseyMatrix( ::ul3::FTransform2D::GetPerspectiveTransform( src, dst ) );
+}
+
 
 //static
 FOdysseyMatrix
@@ -87,26 +100,30 @@ UOdysseyTransformProxyLibrary::GetMatrixResultRect( const FOdysseyMatrix& Matrix
     return FOdysseyBrushRect(box);
 }
 
+//static
+FOdysseyBrushRect
+UOdysseyTransformProxyLibrary::GetPerspectiveMatrixResultRect( const FOdysseyMatrix& PerspectiveMatrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod )
+{
+    ::ul3::FRect box = ::ul3::TransformPerspectiveMetrics( Rectangle.GetValue(), PerspectiveMatrix.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    return FOdysseyBrushRect(box);
+}
 
 //static
 FOdysseyBlockProxy
-UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, int Width, int Height, EResamplingMethod ResamplingMethod )
+UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod )
 {
     if( !Sample.m )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    if( Width <= 0 || Height <= 0 )
+    if( OutputWidth <= 0 || OutputHeight <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     TSharedPtr<FOdysseyBlock> src = Sample.m;
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( Width, Height, src->Format() ));
+	TSharedPtr<FOdysseyBlock> dst = MakeShared< FOdysseyBlock >( OutputWidth, OutputHeight, src->Format() );
     ::ul3::ClearRaw(dst->GetBlock());
 
     ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), Transform.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
     if( box.Area() <= 0 )
-        return FOdysseyBlockProxy(dst);
-
-    if( box.x + box.w <= 0 || box.y + box.h <= 0 )
         return FOdysseyBlockProxy(dst);
 
     //::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
@@ -420,3 +437,38 @@ UOdysseyTransformProxyLibrary::FlipXY( FOdysseyBlockProxy Sample, EResamplingMet
     return  ScaleXY( Sample, -1, -1, ResamplingMethod );
 }
 
+//static
+FOdysseyBlockProxy
+UOdysseyTransformProxyLibrary::Perspective( FOdysseyBlockProxy Sample, FOdysseyMatrix PerspectiveMatrix, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod )
+{
+    if( !Sample.m )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    if( OutputWidth <= 0 || OutputHeight <= 0 )
+        return FOdysseyBlockProxy::MakeNullProxy();
+
+    TSharedPtr<FOdysseyBlock> src = Sample.m;
+	TSharedPtr<FOdysseyBlock> dst = MakeShared< FOdysseyBlock >( OutputWidth, OutputHeight, src->Format() );
+    ::ul3::ClearRaw(dst->GetBlock());
+
+    ::ul3::FRect box = ::ul3::TransformPerspectiveMetrics( src->GetBlock()->Rect(), PerspectiveMatrix.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    if( box.Area() <= 0 )
+        return FOdysseyBlockProxy(dst);
+
+    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
+    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+
+    ::ul3::TransformPerspective( hULIS.ThreadPool()
+                            , ULIS3_BLOCKING
+                            , perfIntent
+                            , hULIS.HostDeviceInfo()
+                            , ULIS3_NOCB
+                            , src->GetBlock()
+                            , dst->GetBlock()
+                            , src->GetBlock()->Rect()
+                            , PerspectiveMatrix.GetValue()
+                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+
+    return FOdysseyBlockProxy(dst);
+}

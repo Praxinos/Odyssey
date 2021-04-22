@@ -68,13 +68,25 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix MakeShearMatrix( float ShearX, float ShearY );
     
+    //Require the 4 source and destination points to be a non-concave quadrilateral
+    UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
+    static FOdysseyMatrix MakePerspectiveMatrix( 
+          FVector2D SrcA, FVector2D SrcB, FVector2D SrcC, FVector2D SrcD
+        , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD 
+    );
+
     //Composes a Matrix with several Matrices.
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
     
-    //Returns the resulting recatngle of a matrix as if it were applied on the given Rectangle with the given ResamplingMethod
+    //Returns the resulting rectangle of a matrix as if it were applied on the given Rectangle with the given ResamplingMethod
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyBrushRect GetMatrixResultRect( const FOdysseyMatrix& Matrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod );
+
+    //Returns the resulting rectangle of a perspective matrix as if it were applied on the given Rectangle with the given ResamplingMethod
+    UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
+    static FOdysseyBrushRect GetPerspectiveMatrixResultRect( const FOdysseyMatrix& PerspectiveMatrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod );
+
 
     //TOTEST with multiple matrix to check associativity
     //Waiting for Epic debug.
@@ -138,4 +150,11 @@ public:
              , Category="Odyssey|Transform"
              , meta = ( KeyWords = "Matrix") )
     static FOdysseyBlockProxy FlipXY( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
+
+    //Flips an Odyssey Block Reference on horizontal and vertical axis.
+    UFUNCTION(BlueprintPure
+             , Category="Odyssey|Transform"
+             , meta = ( KeyWords = "Matrix") )
+    static FOdysseyBlockProxy Perspective( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, FOdysseyMatrix PerspectiveMatrix, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
+
 };
