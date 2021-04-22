@@ -389,6 +389,8 @@ CinematicBoardTrackHelpers::CreateSequenceInternal( ISequencer* iSequencer, FStr
     // Set the playback length of the subsequence to match its section length
     newSequence->GetMovieScene()->SetPlaybackRange( 0, UE::MovieScene::DiscreteSize( newSection->GetTrueRange() ) );
 
+    iSequencer->SetLocalTime( newSection->GetInclusiveStartFrame() );
+
     return newSection;
 }
 
