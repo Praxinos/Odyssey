@@ -5,6 +5,7 @@
 
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
@@ -18,17 +19,103 @@
 #include "LevelEditorViewport.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieScene.h"
+#include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "ObjectEditorUtils.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 
+#include "Board/BoardSequence.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Camera"
+
+BoardSequenceHelpers::FInnerSequenceResult
+BoardSequenceHelpers::GetInnerSequence( ISequencer& iSequencer, const FFrameNumber& iFrameNumber )
+{
+    FInnerSequenceResult result = { nullptr, MovieSceneSequenceID::Invalid, 0 };
+
+    UMovieSceneSequence* sequence = iSequencer.GetFocusedMovieSceneSequence();
+    UMovieScene* moviescene = sequence ? sequence->GetMovieScene() : nullptr;
+    UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+    UMovieSceneSection* section = moviescene ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), iFrameNumber ) : nullptr;
+    UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+
+    result.mInnerSequence = subsection ? subsection->GetSequence() : nullptr;
+    //result.mInnerSequenceId = subsection ? subsection->GetSequenceID() : FMovieSceneSequenceID();
+
+    //---
+
+    if( subsection )
+    {
+        const FMovieSceneSequenceID             thisSequenceID = iSequencer.GetFocusedTemplateID();
+        const FMovieSceneSequenceID             targetSequenceID = subsection->GetSequenceID();
+        const FMovieSceneSequenceHierarchy*     hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+
+        if( !hierarchy )
+            return result;
+
+        const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
+
+        check( thisSequenceNode );
+
+        // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
+        const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
+                                                                              [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
+        {
+            const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
+            return subData && subData->DeterministicSequenceID == targetSequenceID;
+        }
+        );
+
+        result.mInnerSequenceId = innerSequenceID ? *innerSequenceID : FMovieSceneSequenceID();
+
+        const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( result.mInnerSequenceId );
+        result.mInnerTime = iFrameNumber * subsection->OuterToInnerTransform();
+    }
+
+    return result;
+}
+
+//static
+bool
+BoardSequenceHelpers::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    return !ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oGuid )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return nullptr;
+
+    return ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oGuid );
+}
+
+//---
+//---
+//---
+
+//static
+ACineCameraActor*
+ShotSequenceHelpers::GetCamera( ISequencer* iSequencer, FGuid* oGuid )
+{
+    return GetCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oGuid );
+}
 
 //static
 ACineCameraActor*
@@ -103,6 +190,24 @@ ShotSequenceHelpers::cTemporarySwitchInner::~cTemporarySwitchInner()
 }
 
 //---
+
+//static
+void
+BoardSequenceHelpers::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    return ShotSequenceHelpers::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+void
+ShotSequenceHelpers::CreateCamera( ISequencer* iSequencer )
+{
+    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+}
 
 //static
 void
@@ -592,30 +697,97 @@ ShotSequenceHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSeque
 
 //static
 void
-ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+BoardSequenceHelpers::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !movieScene )
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
         return;
 
-    if( movieScene->IsReadOnly() )
+    ShotSequenceHelpers::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iFrameNumber );
+}
+
+//static
+void
+ShotSequenceHelpers::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    CreatePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+void
+ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
+
+    if( !camera )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
+
+    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
+
+    //---
+
+    ShotSequenceHelpers::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iFrameNumber );
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+}
+
+//---
+//---
+//---
+
+//static
+void
+BoardSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
+    if( !camera )
+        return;
+
+    ShotSequenceHelpers::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, result.mInnerTime.GetFrame() );
+}
+
+//static
+void
+ShotSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
+    if( !sequence )
+        return;
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id, &camera_guid );
+    if( !camera )
+        return;
+
+    ShotSequenceHelpers::SnapCameraToViewport( *iSequencer, sequence, camera, camera_guid, iFrameNumber );
+}
+
+//static
+void
+ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber )
+{
+    UMovieScene* movieScene = iSequence->GetMovieScene();
+    if( !movieScene || movieScene->IsReadOnly() )
     {
         //ShowReadOnlyError();
         return;
     }
 
-    FGuid CameraGuid;
-    ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &CameraGuid );
-    if( !ExistingCamera )
-        return;
-
-    UMovieSceneTrack* track = movieScene->FindTrack( UMovieScene3DTransformTrack::StaticClass(), CameraGuid );
-    UMovieScene3DTransformTrack* transform_track = Cast<UMovieScene3DTransformTrack>( track );
-
-    if( !transform_track || !transform_track->GetAllSections().Num() )
-        return;
-
-    UMovieSceneSection* section = transform_track->GetAllSections()[0];
+    UMovieSceneTrack* track = movieScene->FindTrack<UMovieScene3DTransformTrack>( iCameraGuid );
+    UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) : nullptr;
     UMovieScene3DTransformSection* transform_section = Cast<UMovieScene3DTransformSection>( section );
 
     if( !transform_section )
@@ -625,16 +797,14 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
 
     const FScopedTransaction transaction( LOCTEXT( "SnapStoryCameraToViewport", "Snap Storyboard Camera To Viewport" ) );
 
-    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
-
     //---
 
     FVector new_location = GCurrentLevelEditingViewportClient->GetViewLocation();
     FRotator new_rotation = GCurrentLevelEditingViewportClient->GetViewRotation();
     //FVector Scale = iActor->GetActorScale();
 
-    ExistingCamera->SetActorLocation( new_location, false );
-    ExistingCamera->SetActorRotation( new_rotation );
+    ioCamera->SetActorLocation( new_location, false );
+    ioCamera->SetActorRotation( new_rotation );
 
 
 //TODO: set all (?) planes ?
@@ -642,11 +812,10 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
 
     //---
 
-    FFrameNumber sequence_frame = iSequencer.GetLocalTime().Time.GetFrame();
-
     transform_section->Modify();
 
-    TArrayView<FMovieSceneFloatChannel*> FloatChannels = transform_section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+    FMovieSceneChannelProxy& proxy = section->GetChannelProxy();
+    TArrayView<FMovieSceneFloatChannel*> FloatChannels = proxy.GetChannels<FMovieSceneFloatChannel>();
 
     //if( FloatChannels[0]->GetNumKeys() == 1 &&
     //    FloatChannels[1]->GetNumKeys() == 1 &&
@@ -665,13 +834,13 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
     //}
     //else
     {
-        AddKeyToChannel( FloatChannels[0], sequence_frame, ExistingCamera->GetActorLocation().X, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[1], sequence_frame, ExistingCamera->GetActorLocation().Y, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[2], sequence_frame, ExistingCamera->GetActorLocation().Z, iSequencer.GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[0], iFrameNumber, ioCamera->GetActorLocation().X, iSequencer.GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[1], iFrameNumber, ioCamera->GetActorLocation().Y, iSequencer.GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[2], iFrameNumber, ioCamera->GetActorLocation().Z, iSequencer.GetKeyInterpolation() );
 
-        AddKeyToChannel( FloatChannels[3], sequence_frame, ExistingCamera->GetActorRotation().Euler().X, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[4], sequence_frame, ExistingCamera->GetActorRotation().Euler().Y, iSequencer.GetKeyInterpolation() );
-        AddKeyToChannel( FloatChannels[5], sequence_frame, ExistingCamera->GetActorRotation().Euler().Z, iSequencer.GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[3], iFrameNumber, ioCamera->GetActorRotation().Euler().X, iSequencer.GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[4], iFrameNumber, ioCamera->GetActorRotation().Euler().Y, iSequencer.GetKeyInterpolation() );
+        AddKeyToChannel( FloatChannels[5], iFrameNumber, ioCamera->GetActorRotation().Euler().Z, iSequencer.GetKeyInterpolation() );
     }
 
     //AddKeyToChannel( FloatChannels[6], 0, Scale.X, iSequencer->GetKeyInterpolation() );
@@ -700,7 +869,7 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
     //iSequencer->SetPerspectiveViewportCameraCutEnabled( false );
 
     // Lock the viewport to this camera
-    if( ExistingCamera && ExistingCamera->GetLevel() )
+    if( ioCamera && ioCamera->GetLevel() )
     {
         //GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
         //GCurrentLevelEditingViewportClient->SetActorLock( ExistingCamera );
@@ -711,33 +880,6 @@ ShotSequenceHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSe
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
-}
-
-//---
-
-//static
-void
-ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
-{
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
-
-    if( !camera )
-        return;
-
-    //---
-
-    const FScopedTransaction transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
-
-    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
-
-    //---
-
-    ShotSequenceHelpers::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.GetFrame() );
-
-    //---
-
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
 }
 
 #undef LOCTEXT_NAMESPACE

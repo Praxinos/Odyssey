@@ -72,7 +72,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsManually,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SetArrangeSections, EArrangeSections::Manually ),
+            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::Manually ); } ),
             FCanExecuteAction::CreateLambda([] { return true; }),
             FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
         );
@@ -82,7 +82,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SetArrangeSections, EArrangeSections::OnOneRow ),
+            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnOneRow ); } ),
             FCanExecuteAction::CreateLambda([] { return true; }),
             FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
         );
@@ -92,7 +92,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SetArrangeSections, EArrangeSections::OnTwoRowsShifted ),
+            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnTwoRowsShifted ); } ),
             FCanExecuteAction::CreateLambda([] { return true; }),
             FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
         );
@@ -104,7 +104,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame )
+            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
@@ -112,7 +112,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::NewSectionWithShotAtCurrentFrame )
+            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
@@ -122,150 +122,29 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCamera,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::CreateCamera ),
-            FCanExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::CheckNoCamera )
+            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return BoardSequenceHelpers::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::SnapCameraToViewport ),
-            FCanExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::CheckCamera )
-        );
-    else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlane,
-            FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::CreatePlane ),
-            FCanExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::CheckCamera )
+            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return !!BoardSequenceHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
-}
 
-void
-FBoardSequenceCustomization::ArrangeSections()
-{
-    CinematicBoardTrackHelpers::ArrangeSections( mSequencer );
-}
-
-void
-FBoardSequenceCustomization::SetArrangeSections( EArrangeSections iArrangeSections )
-{
-    CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, iArrangeSections );
-}
-
-void
-FBoardSequenceCustomization::NewSectionWithBoardAtCurrentFrame()
-{
-    CinematicBoardTrackHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
-}
-void
-FBoardSequenceCustomization::NewSectionWithShotAtCurrentFrame()
-{
-    CinematicBoardTrackHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
-}
-
-//---
-
-void
-FBoardSequenceCustomization::CreateCamera()
-{
-    FInnerSequenceResult inner_sequence = GetInnerSequence();
-    check( inner_sequence.mInnerSequence );
-
-    ShotSequenceHelpers::CreateCamera( *mSequencer, inner_sequence.mInnerSequence, inner_sequence.mInnerSequenceId );
-}
-
-void
-FBoardSequenceCustomization::SnapCameraToViewport()
-{
-    FInnerSequenceResult inner_sequence = GetInnerSequence();
-    check( inner_sequence.mInnerSequence );
-
-    ShotSequenceHelpers::SnapCameraToViewport( *mSequencer, inner_sequence.mInnerSequence, inner_sequence.mInnerSequenceId );
-}
-
-void
-FBoardSequenceCustomization::CreatePlane()
-{
-    FInnerSequenceResult inner_sequence = GetInnerSequence();
-    check( inner_sequence.mInnerSequence );
-
-    ShotSequenceHelpers::CreatePlane( *mSequencer, inner_sequence.mInnerSequence, inner_sequence.mInnerSequenceId );
-}
-
-FBoardSequenceCustomization::FInnerSequenceResult
-FBoardSequenceCustomization::GetInnerSequence()
-{
-    FInnerSequenceResult result = { nullptr, MovieSceneSequenceID::Invalid };
-
-    UMovieSceneSequence* sequence = mSequencer->GetFocusedMovieSceneSequence();
-    UMovieScene* moviescene = sequence ? sequence->GetMovieScene() : nullptr;
-    UMovieSceneSection* section = moviescene ? MovieSceneHelpers::FindSectionAtTime( moviescene->GetAllSections(), mSequencer->GetLocalTime().Time.GetFrame() ) : nullptr;
-    UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-
-    result.mInnerSequence = subsection ? subsection->GetSequence() : nullptr;
-    //result.mInnerSequenceId = subsection ? subsection->GetSequenceID() : FMovieSceneSequenceID();
-
-    //---
-
-    if( subsection )
-    {
-        const FMovieSceneSequenceID             thisSequenceID = mSequencer->GetFocusedTemplateID();
-        const FMovieSceneSequenceID             targetSequenceID = subsection->GetSequenceID();
-        const FMovieSceneSequenceHierarchy*     hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
-
-        if( !hierarchy )
-            return result;
-
-        const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
-
-        check( thisSequenceNode );
-
-        // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-        const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
-            [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
-            {
-                const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
-                return subData && subData->DeterministicSequenceID == targetSequenceID;
-            }
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return !!BoardSequenceHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
-
-        result.mInnerSequenceId = innerSequenceID ? *innerSequenceID : FMovieSceneSequenceID();
-    }
-
-    return result;
-}
-
-bool
-FBoardSequenceCustomization::CheckNoCamera()
-{
-    FInnerSequenceResult inner_sequence = GetInnerSequence();
-    if( !inner_sequence.mInnerSequence )
-        return false;
-
-    if( !inner_sequence.mInnerSequence->IsA<UShotSequence>() )
-        return false;
-
-    return !ShotSequenceHelpers::GetCamera( *mSequencer, inner_sequence.mInnerSequence, inner_sequence.mInnerSequenceId, nullptr );
-}
-
-bool
-FBoardSequenceCustomization::CheckCamera()
-{
-    FInnerSequenceResult inner_sequence = GetInnerSequence();
-    if( !inner_sequence.mInnerSequence )
-        return false;
-
-    if( !inner_sequence.mInnerSequence->IsA<UShotSequence>() )
-        return false;
-
-    return ShotSequenceHelpers::GetCamera( *mSequencer, inner_sequence.mInnerSequence, inner_sequence.mInnerSequenceId, nullptr );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
 }
 
 //---

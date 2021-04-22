@@ -14,6 +14,49 @@ class UMovieScene;
 class UMovieSceneTrack;
 class ISequencer;
 
+class EPOSSEQUENCEEDITOR_API BoardSequenceHelpers
+{
+public:
+    /**
+    *  Find a Camera from the camera track
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oGuid = nullptr );
+
+    static bool CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Add a Camera track
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Add a Camera track
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Update the camera location from the viewport
+    *
+    * @param ISequencer iSequencer to update camera.
+    */
+    static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+private:
+    struct FInnerSequenceResult
+    {
+        UMovieSceneSequence* mInnerSequence;
+        FMovieSceneSequenceID mInnerSequenceId;
+        FFrameTime mInnerTime;
+    };
+    static FInnerSequenceResult GetInnerSequence( ISequencer& iSequencer, const FFrameNumber& iFrameNumber );
+};
+
 class EPOSSEQUENCEEDITOR_API ShotSequenceHelpers
 {
 public:
@@ -22,30 +65,36 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static ACineCameraActor* GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oGuid );
+    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oGuid = nullptr );
 
     /**
     *  Add a Camera track
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static void CreateCamera( ISequencer* iSequencer );
+
+    /**
+    *  Add a Camera track
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
     *  Update the camera location from the viewport
     *
     * @param ISequencer iSequencer to update camera.
     */
-    static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
-
-    /**
-    *  Add a Camera track
-    *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
-    */
-    static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
 private:
+    friend BoardSequenceHelpers;
+    static ACineCameraActor* GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oGuid = nullptr );
+    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+
     static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid );
     static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber );
     static void CreateCameraCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber iFrameNumber );
