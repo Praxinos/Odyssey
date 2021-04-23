@@ -24,8 +24,10 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "ObjectEditorUtils.h"
+#include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
+#include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -743,6 +745,174 @@ ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* i
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+}
+
+//---
+//---
+//---
+
+static
+AStaticMeshActor*
+GetPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oPlaneBinding )
+{
+    UMovieScene* movieScene = iSequence->GetMovieScene();
+    if( !movieScene )
+        return nullptr;
+
+    AStaticMeshActor* plane = nullptr;
+    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+
+        for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        {
+            plane = Cast<AStaticMeshActor>( WeakObject.Get() );
+
+            if( plane )
+            {
+                if( oPlaneBinding )
+                    *oPlaneBinding = possessable.GetGuid();
+
+                return plane;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+//---
+
+//static
+bool
+BoardSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    return ShotSequenceHelpers::CanCreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    return CanCreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceHelpers::CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    UMovieScene* moviescene = iSequence->GetMovieScene();
+    if( !moviescene )
+        return false;
+
+    FGuid plane_binding;
+    AStaticMeshActor* plane = GetPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    if( !plane )
+        return false;
+
+    FGuid plane_component = iSequencer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+
+    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+    if( !track )
+        return false;
+
+    UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
+    if( !section )
+        return false;
+
+    TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+    check( channels.Num() == 1 );
+    int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
+    return key_index == INDEX_NONE;
+}
+
+//---
+
+//static
+void
+BoardSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceHelpers::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iFrameNumber );
+}
+
+//static
+void
+ShotSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    CreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+void
+ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    UMovieScene* moviescene = iSequence->GetMovieScene();
+    if( !moviescene )
+        return;
+
+    FGuid plane_binding;
+    AStaticMeshActor* plane = GetPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    if( !plane )
+        return;
+
+    FGuid plane_component = iSequencer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+
+    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+    if( !track )
+        return;
+
+    UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
+    if( !section )
+        return;
+
+    TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+    check( channels.Num() == 1 );
+    int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
+    if( key_index != INDEX_NONE )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "CreateDrawing", "Create a new drawing" ) );
+
+    section->Modify();
+
+    //---
+
+    FString new_material_package_name;
+    FString new_material_asset_name;
+    UMaterialInstanceConstant* new_material = CreateMaterialInstanceConstantAsset( iSequence, iSequencer.GetRootMovieSceneSequence(), new_material_package_name, new_material_asset_name );
+    if( !new_material )
+        return;
+
+    FString new_texture_package_name;
+    FString new_texture_asset_name;
+    UTexture2D* new_texture = CreateTexture2DAsset( iSequence, new_material, new_texture_package_name, new_texture_asset_name );
+    if( !new_texture )
+        return;
+
+    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
+
+    //---
+
+    FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
+
+    UE::MovieScene::AddKeyToChannel( channels[0], iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //---

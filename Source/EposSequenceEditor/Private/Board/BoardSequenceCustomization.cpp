@@ -151,6 +151,15 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().CreateDrawing,
+            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return BoardSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
 }
 
 //---
@@ -220,7 +229,11 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         true );
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+
+    ToolbarBuilder.AddSeparator();
+
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateDrawing );
 
     ToolbarBuilder.AddSeparator();
 }

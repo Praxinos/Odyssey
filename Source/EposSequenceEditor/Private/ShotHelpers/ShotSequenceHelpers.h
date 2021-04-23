@@ -42,6 +42,15 @@ public:
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
+    *  Add a drawing (material/texture)
+    *
+    * @param ISequencer iSequencer to add a drawing.
+    */
+    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
     *  Update the camera location from the viewport
     *
     * @param ISequencer iSequencer to update camera.
@@ -83,18 +92,20 @@ public:
     static void CreateCamera( ISequencer* iSequencer );
 
     /**
-    *  Stop piloting camera
-    *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
-    */
-    static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
-
-    /**
     *  Add a Camera track
     *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer iSequencer to add a plane.
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Add a drawing (material/texture)
+    *
+    * @param ISequencer iSequencer to add a drawing.
+    */
+    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
     *  Update the camera location from the viewport
@@ -103,11 +114,20 @@ public:
     */
     static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    /**
+    *  Stop piloting camera
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
+
 private:
     friend BoardSequenceHelpers;
     static ACineCameraActor* GetCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oGuid = nullptr );
     static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static bool CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
     static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 

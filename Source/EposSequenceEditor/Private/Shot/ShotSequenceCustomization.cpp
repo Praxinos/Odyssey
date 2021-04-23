@@ -93,6 +93,15 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().CreateDrawing,
+            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return ShotSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
 }
 
 //---
@@ -115,6 +124,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateDrawing );
 
     //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
     //  +SHorizontalBox::Slot()
