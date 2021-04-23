@@ -4,6 +4,7 @@
 #include "ShotSequenceHelpers.h"
 
 #include "GameFramework/Actor.h"
+#include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"

@@ -11,6 +11,7 @@
 class AActor;
 class ACineCameraActor;
 class UMovieScene;
+class UMovieSceneSequence;
 class UMovieSceneTrack;
 class ISequencer;
 
