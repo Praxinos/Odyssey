@@ -146,7 +146,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
             FString packagePath = ( assetPath + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) );
             UPackage* package = CreatePackage( *packagePath );
 
-            UTexture2D* object = NewObject<UTexture2D>( package, UTexture2D::StaticClass(), FName( *( FPaths::GetBaseFilename( saveObjectPath ) + TEXT( "_" ) + imageLayer->GetName().ToString() ) ), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone );
+            UTexture2D* object = NewObject<UTexture2D>( package, UTexture2D::StaticClass(), FName( *( FPaths::GetBaseFilename( saveObjectPath ) + TEXT( "_" ) + imageLayer->GetName().ToString().Replace( TEXT( " " ), TEXT( "_" ) ) ) ), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone );
             object->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
             object->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
             object->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
