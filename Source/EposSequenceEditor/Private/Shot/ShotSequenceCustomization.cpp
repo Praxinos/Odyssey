@@ -102,6 +102,24 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().GotoPreviousDrawing,
+            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return ShotSequenceHelpers::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().GotoNextDrawing,
+            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this]{ return ShotSequenceHelpers::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 }
 
 //---
@@ -124,7 +142,12 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateDrawing );
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
     //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
     //  +SHorizontalBox::Slot()

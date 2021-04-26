@@ -919,6 +919,169 @@ ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence*
 //---
 //---
 
+static
+TArray<FFrameNumber>
+GetAllMaterialTimes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    UMovieScene* moviescene = iSequence->GetMovieScene();
+    if( !moviescene )
+        return TArray<FFrameNumber>();
+
+    FGuid plane_binding;
+    AStaticMeshActor* plane = GetPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    if( !plane )
+        return TArray<FFrameNumber>();
+
+    FGuid plane_component = iSequencer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+
+    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+    if( !track )
+        return TArray<FFrameNumber>();
+
+    TArray<FFrameNumber> times;
+    for( auto section : track->GetAllSections() )
+    {
+        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
+        if( !section_material )
+            continue;
+
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        check( channels.Num() == 1 );
+        for( auto time : channels[0]->GetData().GetTimes() )
+            times.Add( time );
+    }
+
+    times.Sort();
+
+    return times;
+}
+
+//---
+
+//static
+void
+BoardSequenceHelpers::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceHelpers::GotoPreviousDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+}
+
+//static
+bool
+BoardSequenceHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
+
+    return index != INDEX_NONE;
+}
+
+//static
+void
+ShotSequenceHelpers::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    ShotSequenceHelpers::GotoPreviousDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
+
+    return index != INDEX_NONE;
+}
+
+//static
+void
+ShotSequenceHelpers::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    TArray<FFrameNumber> times = GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
+
+    int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
+    if( index == INDEX_NONE )
+        return;
+
+    FFrameNumber previous_time = times[index];
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
+
+    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+}
+
+//---
+
+//static
+void
+BoardSequenceHelpers::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceHelpers::GotoNextDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+}
+
+//static
+bool
+BoardSequenceHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
+
+    return !!next_time;
+}
+
+//static
+void
+ShotSequenceHelpers::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    ShotSequenceHelpers::GotoNextDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
+
+    return !!next_time;
+}
+
+//static
+void
+ShotSequenceHelpers::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    TArray<FFrameNumber> times = GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
+
+    FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
+    if( !next_time )
+        return;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
+
+    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+}
+
+//---
+//---
+//---
+
 //static
 void
 BoardSequenceHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )

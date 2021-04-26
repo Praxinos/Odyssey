@@ -51,6 +51,24 @@ public:
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
+    *  Go to the previous drawing
+    *
+    * @param ISequencer iSequencer to add a drawing.
+    */
+    static void GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Go to the next drawing
+    *
+    * @param ISequencer iSequencer to add a drawing.
+    */
+    static void GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
     *  Update the camera location from the viewport
     *
     * @param ISequencer iSequencer to update camera.
@@ -108,6 +126,24 @@ public:
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
+    *  Go to the previous drawing
+    *
+    * @param ISequencer iSequencer to add a drawing.
+    */
+    static void GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Go to the next drawing
+    *
+    * @param ISequencer iSequencer to add a drawing.
+    */
+    static void GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
     *  Update the camera location from the viewport
     *
     * @param ISequencer iSequencer to update camera.
@@ -128,6 +164,8 @@ private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static bool CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
     static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 

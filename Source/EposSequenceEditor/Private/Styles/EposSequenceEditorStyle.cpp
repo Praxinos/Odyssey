@@ -51,6 +51,10 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.CreateDrawing", new IMAGE_BRUSH( "IconCreateDrawing_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreateDrawing.Small", new IMAGE_BRUSH( "IconCreateDrawing_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.GotoPreviousDrawing", new IMAGE_BRUSH( "IconDrawingPrevious_24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "IconDrawingPrevious_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.GotoNextDrawing", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
 
