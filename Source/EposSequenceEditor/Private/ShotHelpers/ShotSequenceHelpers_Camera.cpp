@@ -45,7 +45,7 @@ BoardSequenceHelpers::GetInnerSequence( ISequencer& iSequencer, const FFrameNumb
     UMovieSceneSequence* sequence = iSequencer.GetFocusedMovieSceneSequence();
     UMovieScene* moviescene = sequence ? sequence->GetMovieScene() : nullptr;
     UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-    UMovieSceneSection* section = moviescene ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), iFrameNumber ) : nullptr;
+    UMovieSceneSection* section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), iFrameNumber ) : nullptr;
     UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
 
     result.mInnerSequence = subsection ? subsection->GetSequence() : nullptr;
@@ -77,7 +77,7 @@ BoardSequenceHelpers::GetInnerSequence( ISequencer& iSequencer, const FFrameNumb
 
         result.mInnerSequenceId = innerSequenceID ? *innerSequenceID : FMovieSceneSequenceID();
 
-        const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( result.mInnerSequenceId );
+        //const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( result.mInnerSequenceId );
         result.mInnerTime = iFrameNumber * subsection->OuterToInnerTransform();
     }
 
@@ -712,7 +712,7 @@ BoardSequenceHelpers::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNu
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceHelpers::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iFrameNumber );
+    ShotSequenceHelpers::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
 
 //static
@@ -794,7 +794,7 @@ BoardSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFr
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    return ShotSequenceHelpers::CanCreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iFrameNumber );
+    return ShotSequenceHelpers::CanCreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
 
 //static
@@ -843,7 +843,7 @@ BoardSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrame
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceHelpers::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iFrameNumber );
+    ShotSequenceHelpers::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
 
 //static
