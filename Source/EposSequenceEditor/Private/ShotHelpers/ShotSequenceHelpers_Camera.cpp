@@ -753,7 +753,7 @@ ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* i
 
 static
 AStaticMeshActor*
-GetPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oPlaneBinding )
+GetFirstPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oPlaneBinding ) //TODO: remove it
 {
     UMovieScene* movieScene = iSequence->GetMovieScene();
     if( !movieScene )
@@ -779,6 +779,53 @@ GetPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSeq
     }
 
     return nullptr;
+}
+
+static
+int32
+GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
+{
+    check( !oPlanes.Num() );
+    check( !oPlaneBindings.Num() );
+
+    UMovieScene* movieScene = iSequence->GetMovieScene();
+    if( !movieScene )
+        return 0;
+
+    TArray<AStaticMeshActor*> planes_not_selected;
+    TArray<FGuid> plane_bindings_not_selected;
+
+    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+
+        for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        {
+            AStaticMeshActor* plane = Cast<AStaticMeshActor>( WeakObject.Get() );
+
+            if( plane )
+            {
+                if( plane->IsSelected() )
+                {
+                    oPlanes.Add( plane );
+                    oPlaneBindings.Add( possessable.GetGuid() );
+                }
+                else
+                {
+                    planes_not_selected.Add( plane );
+                    plane_bindings_not_selected.Add( possessable.GetGuid() );
+                }
+            }
+        }
+    }
+
+    if( !oPlanes.Num() )
+    {
+        oPlanes.Append( planes_not_selected );
+        oPlaneBindings.Append( plane_bindings_not_selected );
+    }
+
+    return oPlanes.Num();
 }
 
 //---
@@ -813,7 +860,7 @@ ShotSequenceHelpers::CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequen
         return false;
 
     FGuid plane_binding;
-    AStaticMeshActor* plane = GetPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    AStaticMeshActor* plane = GetFirstPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
     if( !plane )
         return false;
 
@@ -862,7 +909,7 @@ ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence*
         return;
 
     FGuid plane_binding;
-    AStaticMeshActor* plane = GetPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    AStaticMeshActor* plane = GetFirstPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
     if( !plane )
         return;
 
@@ -923,32 +970,40 @@ static
 TArray<FFrameNumber>
 GetAllMaterialTimes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
+    TArray<FFrameNumber> times;
+
     UMovieScene* moviescene = iSequence->GetMovieScene();
     if( !moviescene )
-        return TArray<FFrameNumber>();
+        return times;
 
-    FGuid plane_binding;
-    AStaticMeshActor* plane = GetPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
-    if( !plane )
-        return TArray<FFrameNumber>();
+    TArray<AStaticMeshActor*> planes;
+    TArray<FGuid> guids;
+    int32 nb_plane = GetPlanes( iSequencer, iSequence, iSequenceID, planes, guids );
+    if( !nb_plane )
+        return times;
 
-    FGuid plane_component = iSequencer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-
-    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
-    if( !track )
-        return TArray<FFrameNumber>();
-
-    TArray<FFrameNumber> times;
-    for( auto section : track->GetAllSections() )
+    for( int i = 0; i < planes.Num(); i++ )
     {
-        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
-        if( !section_material )
+        AStaticMeshActor* plane = planes[i];
+        FGuid guid = guids[i];
+
+        FGuid plane_component = iSequencer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+
+        UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+        if( !track )
             continue;
 
-        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
-        check( channels.Num() == 1 );
-        for( auto time : channels[0]->GetData().GetTimes() )
-            times.Add( time );
+        for( auto section : track->GetAllSections() )
+        {
+            UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
+            if( !section_material )
+                continue;
+
+            TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+            check( channels.Num() == 1 );
+            for( auto time : channels[0]->GetData().GetTimes() )
+                times.Add( time );
+        }
     }
 
     times.Sort();
