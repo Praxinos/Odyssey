@@ -19,7 +19,7 @@ FOdysseyTexture2DEditor::~FOdysseyTexture2DEditor()
 
 FOdysseyTexture2DEditor::FOdysseyTexture2DEditor() :
 	FOdysseyTextureEditor(),
-	mTextureWrapper(nullptr),
+	mTextureWrapper(new FOdysseyTexture2DWrapper(nullptr)),
 	mGUI(nullptr)
 {
 }
