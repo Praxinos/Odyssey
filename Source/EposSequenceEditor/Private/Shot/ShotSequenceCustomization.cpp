@@ -4,6 +4,7 @@
 #include "Shot/ShotSequenceCustomization.h"
 
 #include "CineCameraActor.h"
+#include "Engine/StaticMeshActor.h"
 
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
@@ -68,8 +69,8 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCamera,
-            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::CreateCamera( mSequencer ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return !ShotSequenceHelpers::GetCamera( mSequencer ); } )
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceHelpers::CreateCamera( mSequencer ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !ShotSequenceHelpers::GetCamera( mSequencer ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
@@ -77,8 +78,8 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlane,
-            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer ); } )
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceHelpers::GetCamera( mSequencer ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
@@ -86,10 +87,10 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
             //FExecuteAction::CreateStatic( &ShotSequenceHelpers::SnapCameraToViewport, mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ),
-            FCanExecuteAction::CreateLambda( [this]{ return !!ShotSequenceHelpers::GetCamera( mSequencer ); } )
+            FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceHelpers::GetCamera( mSequencer ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
@@ -97,8 +98,31 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateDrawing,
-            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return ShotSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    int32 plane_count = ShotSequenceHelpers::GetPlanes( mSequencer, planes, plane_bindings );
+                    if( !plane_count )
+                        return;
+                    ShotSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                } ),
+            FCanExecuteAction::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    int32 plane_count = ShotSequenceHelpers::GetPlanes( mSequencer, planes, plane_bindings );
+                    if( !plane_count )
+                        return false;
+                    return ShotSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                } ),
+            FIsActionChecked(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    return ShotSequenceHelpers::GetPlanes( mSequencer, planes, plane_bindings ) <= 1;
+                } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
@@ -106,8 +130,8 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().GotoPreviousDrawing,
-            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return ShotSequenceHelpers::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceHelpers::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceHelpers::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
@@ -115,8 +139,8 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().GotoNextDrawing,
-            FExecuteAction::CreateLambda( [this]{ ShotSequenceHelpers::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return ShotSequenceHelpers::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceHelpers::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceHelpers::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
@@ -146,7 +170,26 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 plane (or 0) available
+    // - the second button is displayed when there are more than 2 planes available
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateDrawing );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    return ShotSequenceHelpers::GetPlanes( mSequencer, planes, plane_bindings ) > 1;
+                } )
+        ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeDrawingMenu ),
+        FShotSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
+        FShotSequenceEditorCommands::Get().CreateDrawing->GetDescription(),
+        FShotSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
     //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
@@ -200,6 +243,40 @@ FShotSequenceCustomization::MakeCameraMenu()
         MenuBuilder.AddWidget( DetailView, FText(), true );
     }
     MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeDrawingMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    TArray<AStaticMeshActor*> planes;
+    TArray<FGuid> plane_bindings;
+    int32 plane_count = ShotSequenceHelpers::GetPlanes( mSequencer, planes, plane_bindings );
+    if( !plane_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < plane_count; i++ )
+    {
+        AStaticMeshActor* plane = planes[i];
+        FGuid plane_binding = plane_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( plane->GetActorLabel() ),
+            //LOCTEXT( "LockPlayback", "Lock to Display Rate at Runtime" ),
+            FText::GetEmpty(),
+            //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, plane_binding](){ ShotSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
+                FCanExecuteAction::CreateLambda( [this, plane_binding](){ return ShotSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } )
+            )/*,
+            NAME_None,
+            EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
+        );
+    }
 
     return MenuBuilder.MakeWidget();
 }

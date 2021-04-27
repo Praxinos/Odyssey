@@ -4,6 +4,7 @@
 #include "Board/BoardSequenceCustomization.h"
 
 #include "CineCameraActor.h"
+#include "Engine/StaticMeshActor.h"
 
 #include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
@@ -78,9 +79,9 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsManually,
-            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::Manually ); } ),
-            FCanExecuteAction::CreateLambda([] { return true; }),
-            FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
+            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::Manually ); } ),
+            FCanExecuteAction::CreateLambda( [](){ return true; } ),
+            FIsActionChecked::CreateLambda( [](){ return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsManually );
@@ -88,9 +89,9 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnOneRow ); } ),
-            FCanExecuteAction::CreateLambda([] { return true; }),
-            FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
+            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnOneRow ); } ),
+            FCanExecuteAction::CreateLambda( [](){ return true; } ),
+            FIsActionChecked::CreateLambda( [](){ return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow );
@@ -98,9 +99,9 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnTwoRowsShifted ); } ),
-            FCanExecuteAction::CreateLambda([] { return true; }),
-            FIsActionChecked::CreateLambda([] { return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
+            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnTwoRowsShifted ); } ),
+            FCanExecuteAction::CreateLambda( [](){ return true; } ),
+            FIsActionChecked::CreateLambda( [](){ return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows );
@@ -110,7 +111,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
-            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
@@ -118,7 +119,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
-            FExecuteAction::CreateLambda( [this]{ CinematicBoardTrackHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
@@ -128,8 +129,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCamera,
-            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return BoardSequenceHelpers::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceHelpers::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceHelpers::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
@@ -137,8 +138,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlane,
-            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return !!BoardSequenceHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
@@ -146,8 +147,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return !!BoardSequenceHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
@@ -155,8 +156,31 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateDrawing,
-            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return BoardSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings );
+                    if( !plane_count )
+                        return;
+                    BoardSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                } ),
+            FCanExecuteAction::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings );
+                    if( !plane_count )
+                        return false;
+                    return BoardSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                } ),
+            FIsActionChecked(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    return BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings ) <= 1;
+                } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
@@ -164,8 +188,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().GotoPreviousDrawing,
-            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return BoardSequenceHelpers::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceHelpers::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceHelpers::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
@@ -173,8 +197,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().GotoNextDrawing,
-            FExecuteAction::CreateLambda( [this]{ BoardSequenceHelpers::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this]{ return BoardSequenceHelpers::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceHelpers::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceHelpers::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
@@ -255,7 +279,26 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 plane (or 0) available
+    // - the second button is displayed when there are more than 2 planes available
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateDrawing );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                {
+                    TArray<AStaticMeshActor*> planes;
+                    TArray<FGuid> plane_bindings;
+                    return BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings ) > 1;
+                } )
+        ),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingMenu ),
+        FShotSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
+        FShotSequenceEditorCommands::Get().CreateDrawing->GetDescription(),
+        FShotSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
     ToolbarBuilder.AddSeparator();
@@ -304,6 +347,40 @@ FBoardSequenceCustomization::MakeCameraMenu()
         MenuBuilder.AddWidget( DetailView, FText(), true );
     }
     MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeDrawingMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    TArray<AStaticMeshActor*> planes;
+    TArray<FGuid> plane_bindings;
+    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings );
+    if( !plane_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < plane_count; i++ )
+    {
+        AStaticMeshActor* plane = planes[i];
+        FGuid plane_binding = plane_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( plane->GetActorLabel() ),
+            //LOCTEXT( "LockPlayback", "Lock to Display Rate at Runtime" ),
+            FText::GetEmpty(),
+            //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, plane_binding](){ BoardSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
+                FCanExecuteAction::CreateLambda( [this, plane_binding](){ return BoardSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } )
+            )/*,
+            NAME_None,
+            EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
+        );
+    }
 
     return MenuBuilder.MakeWidget();
 }

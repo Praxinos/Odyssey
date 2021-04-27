@@ -751,39 +751,30 @@ ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* i
 //---
 //---
 
-static
-AStaticMeshActor*
-GetFirstPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oPlaneBinding ) //TODO: remove it
+//static
+int32
+BoardSequenceHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
 {
-    UMovieScene* movieScene = iSequence->GetMovieScene();
-    if( !movieScene )
-        return nullptr;
+    FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
+    if( !result.mInnerSequence )
+        return 0;
 
-    AStaticMeshActor* plane = nullptr;
-    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return 0;
 
-        for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
-        {
-            plane = Cast<AStaticMeshActor>( WeakObject.Get() );
-
-            if( plane )
-            {
-                if( oPlaneBinding )
-                    *oPlaneBinding = possessable.GetGuid();
-
-                return plane;
-            }
-        }
-    }
-
-    return nullptr;
+    return ShotSequenceHelpers::GetPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oPlanes, oPlaneBindings );
 }
 
-static
+//static
 int32
-GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
+ShotSequenceHelpers::GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
+{
+    return ShotSequenceHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oPlanes, oPlaneBindings );
+}
+
+//static
+int32
+ShotSequenceHelpers::GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
 {
     check( !oPlanes.Num() );
     check( !oPlaneBindings.Num() );
@@ -832,7 +823,7 @@ GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSe
 
 //static
 bool
-BoardSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
     if( !result.mInnerSequence )
@@ -841,26 +832,28 @@ BoardSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFr
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    return ShotSequenceHelpers::CanCreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+    return ShotSequenceHelpers::CanCreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
 }
 
 //static
 bool
-ShotSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    return CanCreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    return CanCreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
 }
 
 //static
 bool
-ShotSequenceHelpers::CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     UMovieScene* moviescene = iSequence->GetMovieScene();
     if( !moviescene )
         return false;
 
-    FGuid plane_binding;
-    AStaticMeshActor* plane = GetFirstPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return false;
+    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
     if( !plane )
         return false;
 
@@ -874,9 +867,13 @@ ShotSequenceHelpers::CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequen
     if( !section )
         return false;
 
+    if( !moviescene->GetPlaybackRange().Contains( iFrameNumber ) )
+        return false;
+
     TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
     check( channels.Num() == 1 );
     int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
+
     return key_index == INDEX_NONE;
 }
 
@@ -884,32 +881,34 @@ ShotSequenceHelpers::CanCreateDrawing( ISequencer& iSequencer, UMovieSceneSequen
 
 //static
 void
-BoardSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceHelpers::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+    ShotSequenceHelpers::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
 }
 
 //static
 void
-ShotSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    CreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    CreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
 }
 
 //static
 void
-ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     UMovieScene* moviescene = iSequence->GetMovieScene();
     if( !moviescene )
         return;
 
-    FGuid plane_binding;
-    AStaticMeshActor* plane = GetFirstPlane( iSequencer, iSequence, iSequenceID, &plane_binding );
+    TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return;
+    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
     if( !plane )
         return;
 
@@ -921,6 +920,9 @@ ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence*
 
     UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
     if( !section )
+        return;
+
+    if( !moviescene->GetPlaybackRange().Contains( iFrameNumber ) )
         return;
 
     TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
@@ -966,9 +968,9 @@ ShotSequenceHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence*
 //---
 //---
 
-static
+//static
 TArray<FFrameNumber>
-GetAllMaterialTimes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+ShotSequenceHelpers::GetAllMaterialTimes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
     TArray<FFrameNumber> times;
 
@@ -1032,7 +1034,7 @@ BoardSequenceHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber i
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
     int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
 
     return index != INDEX_NONE;
@@ -1094,7 +1096,7 @@ BoardSequenceHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFram
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
     FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
 
     return !!next_time;
