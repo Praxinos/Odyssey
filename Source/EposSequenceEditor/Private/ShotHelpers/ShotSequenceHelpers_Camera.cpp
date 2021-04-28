@@ -753,7 +753,7 @@ ShotSequenceHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* i
 
 //static
 int32
-BoardSequenceHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
+BoardSequenceHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     FInnerSequenceResult result = GetInnerSequence( *iSequencer, iFrameNumber );
     if( !result.mInnerSequence )
@@ -767,21 +767,26 @@ BoardSequenceHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumb
 
 //static
 int32
-ShotSequenceHelpers::GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
+ShotSequenceHelpers::GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     return ShotSequenceHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oPlanes, oPlaneBindings );
 }
 
 //static
 int32
-ShotSequenceHelpers::GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>& oPlanes, TArray<FGuid>& oPlaneBindings )
+ShotSequenceHelpers::GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
-    check( !oPlanes.Num() );
-    check( !oPlaneBindings.Num() );
+    if( oPlanes )
+        oPlanes->Empty();
+    if( oPlaneBindings )
+        oPlaneBindings->Empty();
 
     UMovieScene* movieScene = iSequence->GetMovieScene();
     if( !movieScene )
         return 0;
+
+    TArray<AStaticMeshActor*> planes_selected;
+    TArray<FGuid> plane_bindings_selected;
 
     TArray<AStaticMeshActor*> planes_not_selected;
     TArray<FGuid> plane_bindings_not_selected;
@@ -798,8 +803,8 @@ ShotSequenceHelpers::GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSe
             {
                 if( plane->IsSelected() )
                 {
-                    oPlanes.Add( plane );
-                    oPlaneBindings.Add( possessable.GetGuid() );
+                    planes_selected.Add( plane );
+                    plane_bindings_selected.Add( possessable.GetGuid() );
                 }
                 else
                 {
@@ -810,13 +815,24 @@ ShotSequenceHelpers::GetPlanes( ISequencer& iSequencer, UMovieSceneSequence* iSe
         }
     }
 
-    if( !oPlanes.Num() )
+    if( planes_selected.Num() )
     {
-        oPlanes.Append( planes_not_selected );
-        oPlaneBindings.Append( plane_bindings_not_selected );
-    }
+        if( oPlanes )
+            oPlanes->Append( planes_selected );
+        if( oPlaneBindings )
+            oPlaneBindings->Append( plane_bindings_selected );
 
-    return oPlanes.Num();
+        return planes_selected.Num();
+    }
+    else
+    {
+        if( oPlanes )
+            oPlanes->Append( planes_not_selected );
+        if( oPlaneBindings )
+            oPlaneBindings->Append( plane_bindings_not_selected );
+
+        return planes_not_selected.Num();
+    }
 }
 
 //---
@@ -980,7 +996,7 @@ ShotSequenceHelpers::GetAllMaterialTimes( ISequencer& iSequencer, UMovieSceneSeq
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> guids;
-    int32 nb_plane = GetPlanes( iSequencer, iSequence, iSequenceID, planes, guids );
+    int32 nb_plane = GetPlanes( iSequencer, iSequence, iSequenceID, &planes, &guids );
     if( !nb_plane )
         return times;
 

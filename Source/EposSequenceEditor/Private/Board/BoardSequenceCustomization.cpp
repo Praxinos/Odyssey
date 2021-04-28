@@ -169,29 +169,22 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
             FShotSequenceEditorCommands::Get().CreateDrawing,
             FExecuteAction::CreateLambda( [this]()
                 {
-                    TArray<AStaticMeshActor*> planes;
                     TArray<FGuid> plane_bindings;
-                    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings );
+                    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                     if( !plane_count )
                         return;
                     BoardSequenceHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                 } ),
             FCanExecuteAction::CreateLambda( [this]()
                 {
-                    TArray<AStaticMeshActor*> planes;
                     TArray<FGuid> plane_bindings;
-                    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings );
+                    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                     if( !plane_count )
                         return false;
                     return BoardSequenceHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                 } ),
             FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this]()
-                {
-                    TArray<AStaticMeshActor*> planes;
-                    TArray<FGuid> plane_bindings;
-                    return BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings ) <= 1;
-                } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1; } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
@@ -299,12 +292,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this]()
-                {
-                    TArray<AStaticMeshActor*> planes;
-                    TArray<FGuid> plane_bindings;
-                    return BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings ) > 1;
-                } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1; } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingMenu ),
         FShotSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
@@ -369,7 +357,7 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes, plane_bindings );
+    int32 plane_count = BoardSequenceHelpers::GetPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
