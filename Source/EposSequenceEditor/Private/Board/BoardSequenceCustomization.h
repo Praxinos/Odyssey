@@ -20,6 +20,9 @@ class FBoardSequenceCustomization
     : public ISequencerCustomization
 {
 public:
+    virtual ~FBoardSequenceCustomization();
+
+public:
     virtual void RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) override;
     virtual void UnregisterSequencerCustomization() override;
 

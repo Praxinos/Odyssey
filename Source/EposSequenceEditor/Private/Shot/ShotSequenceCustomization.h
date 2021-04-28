@@ -18,6 +18,9 @@ class FShotSequenceCustomization
     : public ISequencerCustomization
 {
 public:
+    ~FShotSequenceCustomization();
+
+public:
     virtual void RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) override;
     virtual void UnregisterSequencerCustomization() override;
 

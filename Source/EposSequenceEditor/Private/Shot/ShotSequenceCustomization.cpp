@@ -15,6 +15,17 @@
 
 //---
 
+FShotSequenceCustomization::~FShotSequenceCustomization()
+{
+    //PATCH: unregister is not called if
+    // - a board sequence is opened
+    // - open a level sequence which replace the board sequence
+    // - UnregisterSequencerCustomization() of the board sequence is not called
+    // So, call it inside the destructor and check is wasn't called before
+    if( mSequencer )
+        UnregisterSequencerCustomization();
+}
+
 void
 FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder )
 {

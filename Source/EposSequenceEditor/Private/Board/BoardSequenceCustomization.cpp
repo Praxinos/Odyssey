@@ -22,6 +22,17 @@
 
 //---
 
+FBoardSequenceCustomization::~FBoardSequenceCustomization()
+{
+    //PATCH: unregister is not called if
+    // - a board sequence is opened
+    // - open a level sequence which replace the board sequence
+    // - UnregisterSequencerCustomization() of the board sequence is not called
+    // So, call it inside the destructor and check is wasn't called before
+    if( mSequencer )
+        UnregisterSequencerCustomization();
+}
+
 void
 FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizationBuilder& ioBuilder ) // This is called each time the focused sequence changed (ie. when double-clicking on a section to go inside its subsequence)
 {
