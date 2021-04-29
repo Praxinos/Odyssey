@@ -217,14 +217,24 @@ FCinematicBoardSection::IsReadOnly() const
 //---
 
 UCameraComponent*
-FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceData& iInnerSequenceData )
+FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID InnerSequenceID, const FMovieSceneSequenceHierarchy& Hierarchy, IMovieScenePlayer& Player )
 {
-    iInnerSequenceData.Fill();
-    if( !iInnerSequenceData.IsFilled() )
+    const FMovieSceneSequenceHierarchyNode* Node = Hierarchy.FindNode( InnerSequenceID );
+    const FMovieSceneSubSequenceData*       SubData = Hierarchy.FindSubData( InnerSequenceID );
+    if( !ensure( SubData && Node ) )
+    {
         return nullptr;
+    }
 
-    FFrameNumber InnerTime = ( iGlobalTime * iInnerSequenceData.mSubData->RootToSequenceTransform ).FloorToFrame();
-    if( !iInnerSequenceData.mSubData->PlayRange.Value.Contains( InnerTime ) )
+    UMovieSceneSequence* InnerSequence = SubData->GetSequence();
+    UMovieScene*         InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
+    if( !InnerMovieScene )
+    {
+        return nullptr;
+    }
+
+    FFrameNumber InnerTime = ( iGlobalTime * SubData->RootToSequenceTransform ).FloorToFrame();
+    if( !SubData->PlayRange.Value.Contains( InnerTime ) )
     {
         return nullptr;
     }
@@ -234,7 +244,7 @@ FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTim
 
     UMovieSceneSingleCameraCutSection* ActiveSection = nullptr;
 
-    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( iInnerSequenceData.mInnerMovieScene->GetCameraCutTrack() ) )
+    if( UMovieSceneSingleCameraCutTrack* CutTrack = Cast<UMovieSceneSingleCameraCutTrack>( InnerMovieScene->GetCameraCutTrack() ) )
     {
         for( UMovieSceneSection* ItSection : CutTrack->GetAllSections() )
         {
@@ -257,14 +267,12 @@ FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTim
 
     if( ActiveSection )
     {
-        return ActiveSection->GetFirstCamera( *iInnerSequenceData.mPlayer, iInnerSequenceData.mInnerSequenceID );
+        return ActiveSection->GetFirstCamera( Player, InnerSequenceID );
     }
 
-    for( FMovieSceneSequenceID Child : iInnerSequenceData.mNode->Children )
+    for( FMovieSceneSequenceID Child : Node->Children )
     {
-        FInnerSequenceData result( Child, iInnerSequenceData.mHierarchy, iInnerSequenceData.mPlayer );
-
-        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, result );
+        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( iGlobalTime, Child, Hierarchy, Player );
         if( CameraComponent )
         {
             return CameraComponent;
@@ -277,14 +285,40 @@ FCinematicBoardSection::FindCameraCutComponentRecursive( FFrameNumber iGlobalTim
 UCameraComponent*
 FCinematicBoardSection::GetViewCamera()
 {
-    FInnerSequenceData result;
-    result.InitializeFromSubSection( GetSequencer().Get(), GetSequencer()->GetFocusedTemplateID(), GetSubSectionObject() );
-    if( !result.IsInitialized() )
+    TSharedPtr<ISequencer> sequencer = GetSequencer();
+    if( !sequencer.IsValid() )
         return nullptr;
 
-    UCameraComponent* cameraComponent = FindCameraCutComponentRecursive( GetSequencer()->GetGlobalTime().Time.FrameNumber, result );
-    if( cameraComponent )
-        return cameraComponent;
+
+    const UMovieSceneCinematicBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+    const FMovieSceneSequenceID             ThisSequenceID = sequencer->GetFocusedTemplateID();
+    const FMovieSceneSequenceID             TargetSequenceID = SectionObject.GetSequenceID();
+    const FMovieSceneSequenceHierarchy*     Hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
+
+    if( !Hierarchy )
+        return nullptr;
+
+    const FMovieSceneSequenceHierarchyNode* ThisSequenceNode = Hierarchy->FindNode( ThisSequenceID );
+
+    check( ThisSequenceNode );
+
+    // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
+    const FMovieSceneSequenceID* InnerSequenceID = Algo::FindByPredicate( ThisSequenceNode->Children,
+                                                                          [Hierarchy, TargetSequenceID]( FMovieSceneSequenceID InSequenceID )
+                                                                          {
+                                                                              const FMovieSceneSubSequenceData* SubData = Hierarchy->FindSubData( InSequenceID );
+                                                                              return SubData && SubData->DeterministicSequenceID == TargetSequenceID;
+                                                                          }
+                                                                          );
+
+    if( InnerSequenceID )
+    {
+        UCameraComponent* CameraComponent = FindCameraCutComponentRecursive( sequencer->GetGlobalTime().Time.FrameNumber, *InnerSequenceID, *Hierarchy, *sequencer );
+        if( CameraComponent )
+        {
+            return CameraComponent;
+        }
+    }
 
     return nullptr;
 }
@@ -344,7 +378,7 @@ FCinematicBoardSection::BuildCameraTransformChannelProxy()
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( GetSubSectionObject(), *GetSequencer() );
+    mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildCameraTransformMetaChannel();
 }
@@ -380,7 +414,7 @@ FCinematicBoardSection::GetCameraTransformMetaChannel() const
 void
 FCinematicBoardSection::BuildPlanesTransformChannelProxy()
 {
-    mPlanesTransformsKeys = CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( GetSubSectionObject(), *GetSequencer() );
+    mPlanesTransformsKeys = CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildPlanesTransformMetaChannel();
 }
@@ -422,7 +456,7 @@ FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPo
 void
 FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
 {
-    mPlanesMaterialsKeys = CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( GetSubSectionObject(), *GetSequencer() );
+    mPlanesMaterialsKeys = CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildPlanesMaterialMetaChannel();
 }

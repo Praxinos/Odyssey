@@ -21,6 +21,7 @@
 #include "CineCameraActor.h"
 
 #include "Board/BoardSequence.h"
+#include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -32,138 +33,15 @@
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
-//---
-
-FInnerSequenceData::FInnerSequenceData()
-    : mInnerSequenceID()
-    , mHierarchy( nullptr )
-    , mPlayer( nullptr )
-    , mNode( nullptr )
-    , mSubData( nullptr )
-    , mInnerMovieSceneSequence( nullptr )
-    , mInnerMovieScene( nullptr )
-{
-}
-
-FInnerSequenceData::FInnerSequenceData( FMovieSceneSequenceIDRef iID, const FMovieSceneSequenceHierarchy* iHierarchy, IMovieScenePlayer* ioPlayer )
-    : mInnerSequenceID( iID )
-    , mHierarchy( iHierarchy )
-    , mPlayer( ioPlayer )
-    , mNode( nullptr )
-    , mSubData( nullptr )
-    , mInnerMovieSceneSequence( nullptr )
-    , mInnerMovieScene( nullptr )
-{
-}
-
-bool
-FInnerSequenceData::IsInitialized() const
-{
-    return mInnerSequenceID.IsValid();
-}
-
-bool
-FInnerSequenceData::IsFilled() const
-{
-    return !!mInnerMovieScene;
-}
-
-FMovieSceneSequenceID
-FInnerSequenceData::GetInnerSequenceID() const
-{
-    return mInnerSequenceID;
-}
-
-UMovieSceneSequence*
-FInnerSequenceData::GetInnerSequence() const
-{
-    return mInnerMovieSceneSequence;
-}
-
-UMovieScene*
-FInnerSequenceData::GetInnerMovieScene() const
-{
-    return mInnerMovieScene;
-}
-
-void
-FInnerSequenceData::InitializeFromSubSection( IMovieScenePlayer* iPlayer, FMovieSceneSequenceIDRef iSequenceID, const UMovieSceneSubSection& iSubSection )
-{
-    mInnerSequenceID = FMovieSceneSequenceID();
-    mHierarchy = nullptr;
-    mPlayer = nullptr;
-    mNode = nullptr;
-    mSubData = nullptr;
-    mInnerMovieSceneSequence = nullptr;
-    mInnerMovieScene = nullptr;
-
-    if( !iPlayer )
-        return;
-
-    const UMovieSceneSubSection&            sectionObject = iSubSection;
-    const FMovieSceneSequenceID             thisSequenceID = iSequenceID;
-    const FMovieSceneSequenceID             targetSequenceID = sectionObject.GetSequenceID();
-    const FMovieSceneSequenceHierarchy*     hierarchy = iPlayer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iPlayer->GetEvaluationTemplate().GetCompiledDataID() );
-
-    if( !hierarchy )
-        return;
-
-    const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
-
-    check( thisSequenceNode );
-
-    // Find the TargetSequenceID by comparing deterministic sequence IDs for all children of the current node
-    const FMovieSceneSequenceID* innerSequenceID = Algo::FindByPredicate( thisSequenceNode->Children,
-        [hierarchy, targetSequenceID]( FMovieSceneSequenceID iSequenceID )
-        {
-            const FMovieSceneSubSequenceData* subData = hierarchy->FindSubData( iSequenceID );
-            return subData && subData->DeterministicSequenceID == targetSequenceID;
-        }
-    );
-
-    if( !innerSequenceID )
-        return;
-
-    mInnerSequenceID = *innerSequenceID;
-    mHierarchy = hierarchy;
-    mPlayer = iPlayer;
-}
-
-void
-FInnerSequenceData::Fill()
-{
-    if( !IsInitialized() )
-        return;
-
-    const FMovieSceneSequenceHierarchyNode* Node = mHierarchy->FindNode( mInnerSequenceID );
-    const FMovieSceneSubSequenceData*       SubData = mHierarchy->FindSubData( mInnerSequenceID );
-    if( !ensure( SubData && Node ) )
-        return;
-
-    UMovieSceneSequence* InnerSequence = SubData->GetSequence();
-    UMovieScene*         InnerMovieScene = InnerSequence ? InnerSequence->GetMovieScene() : nullptr;
-    if( !InnerMovieScene )
-        return;
-
-    mNode = Node;
-    mSubData = SubData;
-    mInnerMovieSceneSequence = InnerSequence;
-    mInnerMovieScene = InnerMovieScene;
-}
-
-//---
-//---
-//---
-
 //static
 int
-CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( const UMovieSceneTrack& iTrack, ISequencer& iSequencer )
+CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( IMovieScenePlayer& iPlayer, const UMovieSceneTrack& iTrack, FMovieSceneSequenceIDRef iSequenceID )
 {
     int count = 0;
     for( auto section : iTrack.GetAllSections() )
     {
         UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-        TArray<FMovieScenePossessable> bindings = GetPlaneBindings( *subsection, iSequencer );
+        TArray<FMovieScenePossessable> bindings = GetPlaneBindings( iPlayer, *subsection, iSequenceID );
 
         count = FMath::Max( count, bindings.Num() );
     }
@@ -173,28 +51,25 @@ CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( const UMovieSceneTrack
 
 //static
 TArray<FMovieScenePossessable>
-CinematicBoardSectionBindingHelpers::GetPlaneBindings( const UMovieSceneSubSection& iSection, ISequencer& iSequencer )
+CinematicBoardSectionBindingHelpers::GetPlaneBindings( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     TArray<FMovieScenePossessable> bindings;
 
-    FInnerSequenceData result;
-    result.InitializeFromSubSection( &iSequencer, iSequencer.GetFocusedTemplateID(), iSection );
-    if( !result.IsInitialized() )
-        return bindings;
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, iSection, iSequenceID );
 
-    result.Fill();
-    if( !result.IsFilled() )
-        return bindings;
+    FMovieSceneSequenceID inner_sequence_id = result.mInnerSequenceId;
+    UMovieSceneSequence* inner_sequence = result.mInnerSequence;
+    UMovieScene* inner_movie_scene = result.mInnerMovieScene;
 
-    FMovieSceneSequenceID inner_sequence_id = result.GetInnerSequenceID();
-    UMovieScene* inner_movie_scene = result.GetInnerMovieScene();
+    if( !inner_movie_scene )
+        return bindings;
 
     AStaticMeshActor* plane = nullptr;
     for( int i = 0; i < inner_movie_scene->GetPossessableCount(); i++ )
     {
         FMovieScenePossessable possessable = inner_movie_scene->GetPossessable( i );
 
-        for( auto Object : iSequencer.FindBoundObjects( possessable.GetGuid(), inner_sequence_id ) )
+        for( auto Object : iPlayer.FindBoundObjects( possessable.GetGuid(), inner_sequence_id ) )
         {
             plane = Cast<AStaticMeshActor>( Object.Get() );
             if( plane )
@@ -205,30 +80,30 @@ CinematicBoardSectionBindingHelpers::GetPlaneBindings( const UMovieSceneSubSecti
     return bindings;
 }
 
+//---
+//---
+//---
+
 //static
 FMovieScenePossessable
-CinematicBoardSectionBindingHelpers::GetCameraBinding( const UMovieSceneSubSection& iSection, ISequencer& iSequencer )
+CinematicBoardSectionBindingHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     FMovieScenePossessable binding;
 
-    FInnerSequenceData result;
-    result.InitializeFromSubSection( &iSequencer, iSequencer.GetFocusedTemplateID(), iSection );
-    if( !result.IsInitialized() )
-        return binding;
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, iSection, iSequenceID );
 
-    result.Fill();
-    if( !result.IsFilled() )
-        return binding;
+    FMovieSceneSequenceID inner_sequence_id = result.mInnerSequenceId;
+    UMovieScene* inner_movie_scene = result.mInnerMovieScene;
 
-    FMovieSceneSequenceID inner_sequence_id = result.GetInnerSequenceID();
-    UMovieScene* inner_movie_scene = result.GetInnerMovieScene();
+    if( !inner_movie_scene )
+        return binding;
 
     ACineCameraActor* camera = nullptr;
     for( int i = 0; i < inner_movie_scene->GetPossessableCount(); i++ )
     {
         FMovieScenePossessable possessable = inner_movie_scene->GetPossessable( i );
 
-        for( auto Object : iSequencer.FindBoundObjects( possessable.GetGuid(), inner_sequence_id ) )
+        for( auto Object : iPlayer.FindBoundObjects( possessable.GetGuid(), inner_sequence_id ) )
         {
             camera = Cast<ACineCameraActor>( Object.Get() );
             if( camera )
@@ -241,34 +116,20 @@ CinematicBoardSectionBindingHelpers::GetCameraBinding( const UMovieSceneSubSecti
 
 //static
 TArray<UMovieScene3DTransformSection*>
-CinematicBoardSectionBindingHelpers::GetCameraTransformSections( UMovieSceneSequence* iInnerSequence, ISequencer& iSequencer )
+CinematicBoardSectionKeysHelpers::GetCameraTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID, const FMovieScenePossessable& iPossessable )
 {
     TArray<UMovieScene3DTransformSection*> sections;
 
-    UMovieScene* inner_moviescene = iInnerSequence ? iInnerSequence->GetMovieScene() : nullptr;
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, iSection, iSequenceID );
+
+    UMovieScene* inner_moviescene = result.mInnerMovieScene;
     if( !inner_moviescene )
         return sections;
 
-    FMovieScenePossessable possessable_camera;
-    for( int i = 0; i < inner_moviescene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable possessable = inner_moviescene->GetPossessable( i );
-
-        for( auto Object : iInnerSequence->LocateBoundObjects( possessable.GetGuid(), iSequencer.GetPlaybackContext() ) ) //TODO: is it correct or use iSequencer.FindBoundObjects(...) instead ?
-        {
-            ACineCameraActor* camera = Cast<ACineCameraActor>( Object );
-            if( camera )
-                possessable_camera = possessable;
-        }
-
-        if( possessable_camera.GetGuid().IsValid() )
-            break;
-    }
-
-    if( !possessable_camera.GetGuid().IsValid() )
+    if( !iPossessable.GetGuid().IsValid() )
         return sections;
 
-    UMovieSceneTrack* track = inner_moviescene->FindTrack<UMovieScene3DTransformTrack>( possessable_camera.GetGuid() );
+    UMovieSceneTrack* track = inner_moviescene->FindTrack<UMovieScene3DTransformTrack>( iPossessable.GetGuid() );
     if( !track )
         return sections;
 
@@ -280,11 +141,13 @@ CinematicBoardSectionBindingHelpers::GetCameraTransformSections( UMovieSceneSequ
 
 //static
 TArray<UMovieScene3DTransformSection*>
-CinematicBoardSectionBindingHelpers::GetPlaneTransformSections( UMovieSceneSequence* iInnerSequence, const FMovieScenePossessable& iPossessable, ISequencer& iSequencer )
+CinematicBoardSectionKeysHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID, const FMovieScenePossessable& iPossessable )
 {
     TArray<UMovieScene3DTransformSection*> sections;
 
-    UMovieScene* inner_moviescene = iInnerSequence ? iInnerSequence->GetMovieScene() : nullptr;
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, iSection, iSequenceID );
+
+    UMovieScene* inner_moviescene = result.mInnerMovieScene;
     if( !inner_moviescene )
         return sections;
 
@@ -303,29 +166,29 @@ CinematicBoardSectionBindingHelpers::GetPlaneTransformSections( UMovieSceneSeque
 
 //static
 TArray<UMovieScenePrimitiveMaterialSection*>
-CinematicBoardSectionBindingHelpers::GetPlaneMaterialSections( UMovieSceneSequence* iInnerSequence, const FMovieScenePossessable& iPossessable, ISequencer& iSequencer )
+CinematicBoardSectionKeysHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID, const FMovieScenePossessable& iPossessable )
 {
     TArray<UMovieScenePrimitiveMaterialSection*> sections;
 
-    UMovieScene* inner_moviescene = iInnerSequence ? iInnerSequence->GetMovieScene() : nullptr;
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, iSection, iSequenceID );
+
+    UMovieScene* inner_moviescene = result.mInnerMovieScene;
     if( !inner_moviescene )
         return sections;
 
     if( !iPossessable.GetGuid().IsValid() )
         return sections;
 
-    FMovieScenePossessable possessable;
-    for( int i = 0; i < inner_moviescene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable p = inner_moviescene->GetPossessable( i );
-        if( p.GetParent() == iPossessable.GetGuid() )
-        {
-            possessable = p;
-            break;
-        }
-    }
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPossessable.GetGuid(), result.mInnerSequenceId );
+    if( objects.Num() != 1 )
+        return sections;
+    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
+    if( !plane )
+        return sections;
 
-    UMovieSceneTrack* track = inner_moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( possessable.GetGuid() );
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), result.mInnerSequenceId );
+
+    UMovieSceneTrack* track = inner_moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
     if( !track )
         return sections;
 
@@ -335,8 +198,6 @@ CinematicBoardSectionBindingHelpers::GetPlaneMaterialSections( UMovieSceneSequen
     return sections;
 }
 
-//---
-//---
 //---
 
 //static
@@ -400,17 +261,17 @@ CinematicBoardSectionKeysHelpers::BuildThumbnailKeys( const UMovieSceneSubSectio
 
 //static
 TSharedPtr<FMovieSceneChannelProxy>
-CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer )
+CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     FMovieSceneChannelProxyData ChannelIndirection;
 
-    UMovieSceneSequence* inner_sequence = iSubSection.GetSequence();
+    FMovieScenePossessable possessable = CinematicBoardSectionBindingHelpers::GetCameraBinding( iPlayer, iSubSection, iSequenceID );
 
     //---
 
     int sort = 0;
 
-    TArray<UMovieScene3DTransformSection*> camera_transform_sections = CinematicBoardSectionBindingHelpers::GetCameraTransformSections( inner_sequence, iSequencer );
+    TArray<UMovieScene3DTransformSection*> camera_transform_sections = CinematicBoardSectionKeysHelpers::GetCameraTransformSections( iPlayer, iSubSection, iSequenceID, possessable );
     int section_index = -1;
     for( auto camera_transform_section : camera_transform_sections )
     {
@@ -466,22 +327,20 @@ CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannel( const TShared
 
 //static
 TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>
-CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer )
+CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> proxies;
 
-    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( iSubSection, iSequencer );
+    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( iPlayer, iSubSection, iSequenceID );
     for( auto possessable : possessables )
     {
         FMovieSceneChannelProxyData ChannelIndirection;
-
-        UMovieSceneSequence* inner_sequence = iSubSection.GetSequence();
 
         //---
 
         int sort = 0;
 
-        TArray<UMovieScene3DTransformSection*> plane_transform_sections = CinematicBoardSectionBindingHelpers::GetPlaneTransformSections( inner_sequence, possessable, iSequencer );
+        TArray<UMovieScene3DTransformSection*> plane_transform_sections = CinematicBoardSectionKeysHelpers::GetPlaneTransformSections( iPlayer, iSubSection, iSequenceID, possessable );
         int section_index = -1;
         for( auto plane_transform_section : plane_transform_sections )
         {
@@ -550,22 +409,20 @@ CinematicBoardSectionKeysHelpers::BuildPlanesTransformMetaChannel( const TMap<FG
 
 //static
 TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>
-CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( const UMovieSceneSubSection& iSubSection, ISequencer& iSequencer )
+CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> proxies;
 
-    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( iSubSection, iSequencer );
+    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( iPlayer, iSubSection, iSequenceID );
     for( auto possessable : possessables )
     {
         FMovieSceneChannelProxyData ChannelIndirection;
-
-        UMovieSceneSequence* inner_sequence = iSubSection.GetSequence();
 
         //---
 
         int sort = 0;
 
-        TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = CinematicBoardSectionBindingHelpers::GetPlaneMaterialSections( inner_sequence, possessable, iSequencer );
+        TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = CinematicBoardSectionKeysHelpers::GetPlaneMaterialSections( iPlayer, iSubSection, iSequenceID, possessable );
         int section_index = -1;
         for( auto plane_material_section : plane_material_sections )
         {

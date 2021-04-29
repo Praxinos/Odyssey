@@ -672,7 +672,7 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     //---
 
-    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( mBoardSection.Pin()->GetSubSectionObject(), *mBoardSection.Pin()->GetSequencer() );
+    TArray<FMovieScenePossessable> possessables = CinematicBoardSectionBindingHelpers::GetPlaneBindings( *mBoardSection.Pin()->GetSequencer(), mBoardSection.Pin()->GetSubSectionObject(), mBoardSection.Pin()->GetSequencer()->GetFocusedTemplateID() );
 
     auto need_rebuild = [this]( const TArray<FMovieScenePossessable>& iPossessables )
     {
@@ -698,7 +698,7 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
     // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
     //int max_planes = possessables.Num();
 
-    int max_planes = CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( *mBoardSection.Pin()->GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>(), *mBoardSection.Pin()->GetSequencer() );
+    int max_planes = CinematicBoardSectionBindingHelpers::GetMaxPlaneBindings( *mBoardSection.Pin()->GetSequencer(), *mBoardSection.Pin()->GetSubSectionObject().GetTypedOuter<UMovieSceneTrack>(), mBoardSection.Pin()->GetSequencer()->GetFocusedTemplateID() );
     for( int i = 0; i < max_planes; i++ )
     {
         mPossessables.Add( MakeShared<FMovieScenePossessable>( possessables.IsValidIndex( i ) ? possessables[i] : FMovieScenePossessable() ) );

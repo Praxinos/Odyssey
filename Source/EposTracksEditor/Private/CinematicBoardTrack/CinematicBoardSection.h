@@ -106,7 +106,7 @@ private:
     //void AddTakesMenu( FMenuBuilder& ioMenuBuilder );
 
 private:
-    UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FInnerSequenceData& iInnerSequenceData );
+    UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID InnerSequenceID, const FMovieSceneSequenceHierarchy& Hierarchy, IMovieScenePlayer& Player );
 
 private:
     TSharedPtr<SCinematicBoardSectionLayout> mWidgetLayout;
