@@ -12,7 +12,7 @@
 #include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposTracksModule.h"
-#include "Helpers/ShotSequenceToolHelpers.h"
+#include "Helpers/EposSequenceToolHelpers.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"

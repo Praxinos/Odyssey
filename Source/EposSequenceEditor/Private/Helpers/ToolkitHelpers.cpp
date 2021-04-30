@@ -22,7 +22,7 @@
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
-#include "Helpers/ShotSequenceToolHelpers.h"
+#include "Helpers/EposSequenceToolHelpers.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"

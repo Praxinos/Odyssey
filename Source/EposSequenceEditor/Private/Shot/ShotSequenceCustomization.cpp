@@ -6,7 +6,7 @@
 #include "CineCameraActor.h"
 #include "Engine/StaticMeshActor.h"
 
-#include "Helpers/ShotSequenceToolHelpers.h"
+#include "Helpers/EposSequenceToolHelpers.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
