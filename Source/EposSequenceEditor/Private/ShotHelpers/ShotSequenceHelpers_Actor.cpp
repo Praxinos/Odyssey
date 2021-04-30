@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "ShotSequenceHelpers.h"
+#include "ShotHelpers/ShotSequenceHelpers.h"
 
 #include "GameFramework/Actor.h"
 #include "Channels/MovieSceneChannelProxy.h"
@@ -22,14 +22,15 @@
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
+#include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
-#define LOCTEXT_NAMESPACE "ShotSequenceHelpers_Actors"
+#define LOCTEXT_NAMESPACE "ShotSequenceToolHelpers_Actors"
 
 //static
 UMovieSceneTrack*
-ShotSequenceHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
+ShotSequenceToolHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
 {
     if( !iBinding.IsValid() )
         return nullptr;
@@ -148,7 +149,7 @@ ShotSequenceHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const 
 
 //static
 FGuid
-ShotSequenceHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
+ShotSequenceToolHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
 {
     for( UActorComponent* Component : iActor->GetComponents() )
     {
@@ -170,7 +171,7 @@ ShotSequenceHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActo
 
 //static
 void
-ShotSequenceHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath )
+ShotSequenceToolHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath )
 {
     TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
     UObject* PropertyOwner = iActor;
@@ -267,7 +268,7 @@ ShotSequenceHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor
 
 //static
 void
-ShotSequenceHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceToolHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     // For binding which has been removed when dropped actor is not supported
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
@@ -331,7 +332,7 @@ ShotSequenceHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor
 }
 
 void
-ShotSequenceHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceToolHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -363,7 +364,7 @@ ShotSequenceHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor
 }
 
 void
-ShotSequenceHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
+ShotSequenceToolHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
@@ -394,7 +395,7 @@ ShotSequenceHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor
     //TODO: maybe get the size of the existing section
     // But as it should only be called in FSequencer::AddActors(), after an auto track creation, it should be ok to replace without taking care to of the existing section
 
-    ShotSequenceHelpers::CreateCameraCut( *iSequencer, sequence, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
+    ShotSequenceToolHelpers::CreateCameraCut( *iSequencer, sequence, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
 }
 
 #undef LOCTEXT_NAMESPACE

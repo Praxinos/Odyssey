@@ -393,12 +393,12 @@ FEposSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
 
 void FEposSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
-    ShotSequenceHelpers::CreateDefaultTracksForActor( mSequencer.Get(), iActor, iBinding );
+    ShotSequenceToolHelpers::CreateDefaultTracksForActor( mSequencer.Get(), iActor, iBinding );
 
-    ShotSequenceHelpers::FixCameraBindingOnCameraCut( mSequencer.Get(), iActor, iBinding );
+    ShotSequenceToolHelpers::FixCameraBindingOnCameraCut( mSequencer.Get(), iActor, iBinding );
 
     //PATCH: replace standard cameracut track (if exists) by our single cameracut track
-    ShotSequenceHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
+    ShotSequenceToolHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
 }
 
 void FEposSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

@@ -26,7 +26,7 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oGuid = nullptr );
+    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding = nullptr );
 
     static bool CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
@@ -88,7 +88,7 @@ public:
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 };
 
-class EPOSSEQUENCEEDITOR_API ShotSequenceHelpers
+class EPOSSEQUENCEEDITOR_API ShotSequenceToolHelpers
 {
 public:
     /**
@@ -96,7 +96,7 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oGuid = nullptr );
+    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding = nullptr );
 
     /**
     *  Add a Camera track
@@ -157,7 +157,6 @@ public:
 
 private:
     friend BoardSequenceToolHelpers;
-    static ACineCameraActor* GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oGuid = nullptr );
     static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
