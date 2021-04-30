@@ -31,9 +31,9 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
+#include "Helpers/ToolkitHelpers.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Shot/ShotSequenceEditorCommands.h"
-#include "ShotHelpers/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorToolkit"
 
@@ -393,12 +393,12 @@ FEposSequenceEditorToolkit::HandleAddComponentActionExecute( UActorComponent* Co
 
 void FEposSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, const FGuid iBinding )
 {
-    ShotSequenceToolHelpers::CreateDefaultTracksForActor( mSequencer.Get(), iActor, iBinding );
+    ToolkitHelpers::CreateDefaultTracksForActor( mSequencer.Get(), iActor, iBinding );
 
-    ShotSequenceToolHelpers::FixCameraBindingOnCameraCut( mSequencer.Get(), iActor, iBinding );
+    ToolkitHelpers::FixCameraBindingOnCameraCut( mSequencer.Get(), iActor, iBinding );
 
     //PATCH: replace standard cameracut track (if exists) by our single cameracut track
-    ShotSequenceToolHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
+    ToolkitHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
 }
 
 void FEposSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )

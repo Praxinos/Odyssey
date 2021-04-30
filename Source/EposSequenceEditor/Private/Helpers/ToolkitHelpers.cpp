@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "ShotHelpers/ShotSequenceHelpers.h"
+#include "Helpers/ToolkitHelpers.h"
 
 #include "GameFramework/Actor.h"
 #include "Channels/MovieSceneChannelProxy.h"
@@ -22,15 +22,16 @@
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
+#include "Helpers/ShotSequenceToolHelpers.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
-#define LOCTEXT_NAMESPACE "ShotSequenceToolHelpers_Actors"
+#define LOCTEXT_NAMESPACE "ToolkitHelpers"
 
 //static
 UMovieSceneTrack*
-ShotSequenceToolHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
+ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex )
 {
     if( !iBinding.IsValid() )
         return nullptr;
@@ -149,7 +150,7 @@ ShotSequenceToolHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, co
 
 //static
 FGuid
-ShotSequenceToolHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
+ToolkitHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
 {
     for( UActorComponent* Component : iActor->GetComponents() )
     {
@@ -171,7 +172,7 @@ ShotSequenceToolHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* i
 
 //static
 void
-ShotSequenceToolHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath )
+ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath )
 {
     TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
     UObject* PropertyOwner = iActor;
@@ -268,7 +269,7 @@ ShotSequenceToolHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iA
 
 //static
 void
-ShotSequenceToolHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
+ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     // For binding which has been removed when dropped actor is not supported
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
@@ -332,7 +333,7 @@ ShotSequenceToolHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AA
 }
 
 void
-ShotSequenceToolHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
+ToolkitHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     if( !sequence )
@@ -364,7 +365,7 @@ ShotSequenceToolHelpers::FixCameraBindingOnCameraCut( ISequencer* iSequencer, AA
 }
 
 void
-ShotSequenceToolHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
+ToolkitHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();

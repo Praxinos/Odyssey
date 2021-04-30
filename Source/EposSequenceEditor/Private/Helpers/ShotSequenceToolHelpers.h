@@ -7,8 +7,11 @@
 #include "Misc/Guid.h"
 
 #include "KeyParams.h"
+#include "Misc/FrameNumber.h"
 #include "MovieSceneSequenceID.h"
 #include "TransformData.h"
+
+#include "Helpers/ToolkitHelpers.h"
 
 class AActor;
 class ACineCameraActor;
@@ -19,7 +22,7 @@ class UMovieSceneTrack;
 class IMovieScenePlayer;
 class ISequencer;
 
-class EPOSSEQUENCEEDITOR_API BoardSequenceToolHelpers
+class BoardSequenceToolHelpers
 {
 public:
     /**
@@ -94,8 +97,12 @@ public:
 
 //---
 
-class EPOSSEQUENCEEDITOR_API ShotSequenceToolHelpers
+class ShotSequenceToolHelpers
 {
+private:
+    friend BoardSequenceToolHelpers;
+    friend ToolkitHelpers;
+
 public:
     /**
     *  Find a Camera from the camera track
@@ -126,7 +133,6 @@ public:
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
 private:
-    friend BoardSequenceToolHelpers;
     static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
     static ACineCameraActor* SpawnCamera( UWorld* iWorld, const FTransform& iTransform );
@@ -204,33 +210,4 @@ private:
         FMovieSceneSequenceID mOriginalId;
         FFrameTime mOriginalGlobalTime;
     };
-
-//---
-
-public:
-    /**
-    *  Create all default inner sub tracks of added actor
-    *
-    * @param ISequencer iSequencer to add inner track.
-    * @param AActor iActor corresponding to the binding.
-    * @param FGuid iBinding  Guid of the track containing the actor.
-    */
-    static void CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
-
-    /**
-    *  Fix the binding of the cameracut track when a new camera is dropped
-    *
-    * @param ISequencer iSequencer to add inner track.
-    * @param AActor iActor corresponding to the binding.
-    * @param FGuid iBinding  Guid of the track containing the actor.
-    */
-    static void FixCameraBindingOnCameraCut( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
-
-    // PATCH
-    static void PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iActor, const FGuid iBinding );
-
-private:
-    static UMovieSceneTrack* CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, int iMaterialTrackIndex = INDEX_NONE );
-    static FGuid CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName );
-    static void CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, const FGuid& iBinding, UClass* iClass, const FString& iComponentPath, const FString& iPropertyPath );
 };

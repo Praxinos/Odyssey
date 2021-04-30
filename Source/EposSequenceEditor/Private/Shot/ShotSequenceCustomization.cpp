@@ -6,9 +6,9 @@
 #include "CineCameraActor.h"
 #include "Engine/StaticMeshActor.h"
 
+#include "Helpers/ShotSequenceToolHelpers.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
-#include "ShotHelpers/ShotSequenceHelpers.h"
 #include "ShotSequenceEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceCustomization"

@@ -12,11 +12,11 @@
 #include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposTracksModule.h"
+#include "Helpers/ShotSequenceToolHelpers.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceEditorCommands.h"
-#include "ShotHelpers/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
 
