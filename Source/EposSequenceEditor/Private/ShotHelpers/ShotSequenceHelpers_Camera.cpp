@@ -176,29 +176,24 @@ ShotSequenceToolHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequen
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
 }
 
+
 //static
 ACineCameraActor*
-ShotSequenceToolHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
+ShotSequenceToolHelpers::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 {
-    UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
-
     // Set new camera to match viewport
     FActorSpawnParameters SpawnParams;
-    ACineCameraActor* NewCamera = World->SpawnActor<ACineCameraActor>( SpawnParams );
-    if( !NewCamera )
+    ACineCameraActor* camera = iWorld->SpawnActor<ACineCameraActor>( SpawnParams );
+    if( !camera )
         return nullptr;
 
-    NewCamera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::SetActorLabelUnique( NewCamera, TEXT( "Camera_1" ) ); // The shot name is displayed in another column in the world outliner
+    camera->SetActorTransform( iTransform );
+    //camera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
 
-    NewCamera->SetActorLocation( GCurrentLevelEditingViewportClient->GetViewLocation(), false );
-    NewCamera->SetActorRotation( GCurrentLevelEditingViewportClient->GetViewRotation() );
-    //pNewCamera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
     const UEposSequenceEditorSettings* settings = GetDefault<UEposSequenceEditorSettings>();
 
     // https://udn.unrealengine.com/s/question/0D54z00006uhl34CAA/plugin-cuproperty-how-to-change-uproperty-and-trigger-prepostedit-
-
-    //UCineCameraComponent* CameraComponent = NewCamera->GetCineCameraComponent();
+    //UCineCameraComponent* CameraComponent = camera->GetCineCameraComponent();
     //if( CameraComponent != NULL )
     //{
     //    {
@@ -217,36 +212,53 @@ ShotSequenceToolHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieScene
     //    ... do it for all properties to change
     //}
 
-    NewCamera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
-    NewCamera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
-    NewCamera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
-    NewCamera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData(), so no need to call Pre/PostChange() and its huge syntax
+    camera->GetCineCameraComponent()->LensSettings = settings->CameraSettings.LensSettings;
+    camera->GetCineCameraComponent()->Filmback = settings->CameraSettings.Filmback;
+    camera->GetCineCameraComponent()->CurrentAperture = settings->CameraSettings.CurrentAperture;
+    camera->GetCineCameraComponent()->SetCurrentFocalLength( settings->CameraSettings.CurrentFocalLength ); // Use setter to trigger RecalcDerivedData(), so no need to call Pre/PostChange() and its huge syntax
 
-    FGuid CameraGuid = iSequencer.CreateBinding( *NewCamera, NewCamera->GetActorLabel() );
+    return camera;
+}
+
+//static
+ACineCameraActor*
+ShotSequenceToolHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
+{
+    UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
+    FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
+
+    ACineCameraActor* camera = SpawnCamera( world, transform );
+
+    //---
+
+    camera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
+    FActorLabelUtilities::SetActorLabelUnique( camera, TEXT( "Camera_1" ) ); // The shot name is displayed in another column in the world outliner
+
+    FGuid CameraGuid = iSequencer.CreateBinding( *camera, camera->GetActorLabel() );
     if( !CameraGuid.IsValid() )
         return nullptr;
 
-    iSequencer.OnActorAddedToSequencer().Broadcast( NewCamera, CameraGuid );
+    iSequencer.OnActorAddedToSequencer().Broadcast( camera, CameraGuid );
 
     //---
-    // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
+    // From FSequencer::NewCameraAdded( CameraGuid, camera )
 
     // an option ?
 
     iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
 
     // Lock the viewport to this camera
-    if( NewCamera && NewCamera->GetLevel() )
+    if( camera && camera->GetLevel() )
     {
         GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-        GCurrentLevelEditingViewportClient->SetActorLock( NewCamera );
+        GCurrentLevelEditingViewportClient->SetActorLock( camera );
         GCurrentLevelEditingViewportClient->bLockedCameraView = true;
         GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
         GCurrentLevelEditingViewportClient->Invalidate();
     }
 
     *oGuid = CameraGuid;
-    return NewCamera;
+    return camera;
 }
 
 //static
@@ -384,6 +396,51 @@ ShotSequenceToolHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, flo
 
     return FVector( norm_x, norm_y, 1.f );
     //return FVector( 1.5f, 1.f, 1.f );
+}
+
+//static
+AStaticMeshActor*
+ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial )
+{
+    FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
+
+    FVector const CamLocation = camera_transform.GetLocation();
+    FVector const CamDir = camera_transform.GetRotation().Vector();
+    FRotator const CamRot = camera_transform.Rotator();
+
+    //-
+
+    // Make a function ComputePlaneLocation(...)
+    float FocusDistance = 200;
+    FVector plane_location = CamLocation + CamDir * FocusDistance;
+
+    FVector plane_scale = ShotSequenceToolHelpers::ComputePlaneScale( iCamera, FocusDistance );
+
+    FRotator plane_rotator = CamRot;
+
+    //---
+
+    FActorSpawnParameters SpawnParams;
+    AStaticMeshActor* plane = iWorld->SpawnActor<AStaticMeshActor>( SpawnParams );
+    if( !plane )
+        return nullptr;
+
+    UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Epos/S_1_Unit_Plane.S_1_Unit_Plane" ) );
+    check( plane_mesh );
+
+    plane->GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
+    plane->GetStaticMeshComponent()->SetMaterial( 0, iMaterial );
+    plane->SetMobility( EComponentMobility::Movable );
+    plane->SetActorHiddenInGame( true );
+
+    plane->SetActorScale3D( plane_scale );
+    plane->SetActorLocation( plane_location );
+    plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
+    plane->AddActorWorldRotation( plane_rotator );
+
+    //plane->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform ); // Done in the editor with GEditor->ParentActors();
+
+    return plane;
 }
 
 static
@@ -557,29 +614,6 @@ SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
 void
 ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
-    FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
-
-    //---
-
-    FVector const CamLocation = camera_transform.GetLocation();
-    FVector const CamDir = camera_transform.GetRotation().Vector();
-    FRotator const CamRot = camera_transform.Rotator();
-
-    //---
-
-    // Make a function ComputePlaneLocation(...)
-    float FocusDistance = 200;
-    FVector plane_location = CamLocation + CamDir * FocusDistance;
-
-    FVector plane_scale = ShotSequenceToolHelpers::ComputePlaneScale( iCamera, FocusDistance );
-
-    //---
-
-    UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Epos/S_1_Unit_Plane.S_1_Unit_Plane" ) );
-    check( plane_mesh );
-
-    //---
-
     FString new_material_package_name;
     FString new_material_asset_name;
     UMaterialInstanceConstant* new_material = CreateMaterialInstanceConstantAsset( iSequence, iSequencer.GetRootMovieSceneSequence(), new_material_package_name, new_material_asset_name );
@@ -596,31 +630,17 @@ ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneS
 
     //---
 
-    UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
+    UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
 
-    FActorSpawnParameters SpawnParams;
-    AStaticMeshActor* plane = World->SpawnActor<AStaticMeshActor>( SpawnParams );
-
-    plane->GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
-    plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
-    plane->SetMobility( EComponentMobility::Movable );
-    plane->SetActorHiddenInGame( true );
-
-    plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::SetActorLabelUnique( plane, TEXT("Plane_1") ); // The shot name is displayed in another column in the world outliner
-    //SetPlaneLabelUnique( plane, TEXT("Plane_01_") + iSequence->GetDisplayName().ToString() );
+    AStaticMeshActor* plane = ShotSequenceToolHelpers::SpawnPlane( world, iCamera, new_material );
 
     //---
 
-    plane->SetActorScale3D( plane_scale );
-    plane->SetActorLocation( plane_location );
-    plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
-    plane->AddActorWorldRotation( CamRot );
-
-    //plane->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform );
     GEditor->ParentActors( iCamera, plane, NAME_None );
 
-    //---
+    plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
+    FActorLabelUtilities::SetActorLabelUnique( plane, TEXT( "Plane_1" ) ); // The shot name is displayed in another column in the world outliner
+    //SetPlaneLabelUnique( plane, TEXT("Plane_01_") + iSequence->GetDisplayName().ToString() );
 
     FGuid planeGuid = iSequencer.CreateBinding( *plane, plane->GetActorLabel() );
 
@@ -687,77 +707,14 @@ BoardSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrame
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return 0;
 
-    return ShotSequenceToolHelpers::GetPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oPlanes, oPlaneBindings );
+    return ShotSequenceHelpers::GetPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oPlanes, oPlaneBindings );
 }
 
 //static
 int32
 ShotSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
-    return ShotSequenceToolHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oPlanes, oPlaneBindings );
-}
-
-//static
-int32
-ShotSequenceToolHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
-{
-    if( oPlanes )
-        oPlanes->Empty();
-    if( oPlaneBindings )
-        oPlaneBindings->Empty();
-
-    UMovieScene* movieScene = iSequence->GetMovieScene();
-    if( !movieScene )
-        return 0;
-
-    TArray<AStaticMeshActor*> planes_selected;
-    TArray<FGuid> plane_bindings_selected;
-
-    TArray<AStaticMeshActor*> planes_not_selected;
-    TArray<FGuid> plane_bindings_not_selected;
-
-    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
-
-        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
-        {
-            AStaticMeshActor* plane = Cast<AStaticMeshActor>( WeakObject.Get() );
-
-            if( plane )
-            {
-                if( plane->IsSelected() )
-                {
-                    planes_selected.Add( plane );
-                    plane_bindings_selected.Add( possessable.GetGuid() );
-                }
-                else
-                {
-                    planes_not_selected.Add( plane );
-                    plane_bindings_not_selected.Add( possessable.GetGuid() );
-                }
-            }
-        }
-    }
-
-    if( planes_selected.Num() )
-    {
-        if( oPlanes )
-            oPlanes->Append( planes_selected );
-        if( oPlaneBindings )
-            oPlaneBindings->Append( plane_bindings_selected );
-
-        return planes_selected.Num();
-    }
-    else
-    {
-        if( oPlanes )
-            oPlanes->Append( planes_not_selected );
-        if( oPlaneBindings )
-            oPlaneBindings->Append( plane_bindings_not_selected );
-
-        return planes_not_selected.Num();
-    }
+    return ShotSequenceHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oPlanes, oPlaneBindings );
 }
 
 //---
@@ -773,49 +730,14 @@ BoardSequenceToolHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    return ShotSequenceToolHelpers::CanCreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
+    return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding ) == INDEX_NONE;
 }
 
 //static
 bool
 ShotSequenceToolHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    return CanCreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
-}
-
-//static
-bool
-ShotSequenceToolHelpers::CanCreateDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
-{
-    UMovieScene* moviescene = iSequence->GetMovieScene();
-    if( !moviescene )
-        return false;
-
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return false;
-    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
-    if( !plane )
-        return false;
-
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-
-    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
-    if( !track )
-        return false;
-
-    UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
-    if( !section )
-        return false;
-
-    if( !moviescene->GetPlaybackRange().Contains( iFrameNumber ) )
-        return false;
-
-    TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
-    check( channels.Num() == 1 );
-    int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
-
-    return key_index == INDEX_NONE;
+    return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding ) == INDEX_NONE;
 }
 
 //---
@@ -842,33 +764,8 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFr
 void
 ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    UMovieScene* moviescene = iSequence->GetMovieScene();
-    if( !moviescene )
-        return;
-
-    TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return;
-    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
-    if( !plane )
-        return;
-
-    FGuid plane_component = iSequencer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-
-    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
-    if( !track )
-        return;
-
-    UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
-    if( !section )
-        return;
-
-    if( !moviescene->GetPlaybackRange().Contains( iFrameNumber ) )
-        return;
-
-    TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
-    check( channels.Num() == 1 );
-    int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
+    ShotSequenceHelpers::FDrawingData drawing_data;
+    int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
     if( key_index != INDEX_NONE )
         return;
 
@@ -876,7 +773,7 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
     const FScopedTransaction transaction( LOCTEXT( "CreateDrawing", "Create a new drawing" ) );
 
-    section->Modify();
+    drawing_data.mSection->Modify();
 
     //---
 
@@ -898,7 +795,7 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
-    UE::MovieScene::AddKeyToChannel( channels[0], iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+    UE::MovieScene::AddKeyToChannel( drawing_data.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
 
     //---
 
@@ -907,53 +804,6 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
 //---
 //---
-//---
-
-//static
-TArray<FFrameNumber>
-ShotSequenceToolHelpers::GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
-{
-    TArray<FFrameNumber> times;
-
-    UMovieScene* moviescene = iSequence->GetMovieScene();
-    if( !moviescene )
-        return times;
-
-    TArray<AStaticMeshActor*> planes;
-    TArray<FGuid> guids;
-    int32 nb_plane = GetPlanes( iPlayer, iSequence, iSequenceID, &planes, &guids );
-    if( !nb_plane )
-        return times;
-
-    for( int i = 0; i < planes.Num(); i++ )
-    {
-        AStaticMeshActor* plane = planes[i];
-        FGuid guid = guids[i];
-
-        FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-
-        UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
-        if( !track )
-            continue;
-
-        for( auto section : track->GetAllSections() )
-        {
-            UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
-            if( !section_material )
-                continue;
-
-            TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
-            check( channels.Num() == 1 );
-            for( auto time : channels[0]->GetData().GetTimes() )
-                times.Add( time );
-        }
-    }
-
-    times.Sort();
-
-    return times;
-}
-
 //---
 
 //static
@@ -975,7 +825,7 @@ BoardSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumb
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceToolHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
     int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
 
     return index != INDEX_NONE;
@@ -992,7 +842,7 @@ ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumb
 bool
 ShotSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
 
     return index != INDEX_NONE;
@@ -1002,7 +852,7 @@ ShotSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumbe
 void
 ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
 
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
     if( index == INDEX_NONE )
@@ -1037,7 +887,7 @@ BoardSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber i
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceToolHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
     FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
 
     return !!next_time;
@@ -1054,7 +904,7 @@ ShotSequenceToolHelpers::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber i
 bool
 ShotSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
 
     return !!next_time;
@@ -1064,7 +914,7 @@ ShotSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iF
 void
 ShotSequenceToolHelpers::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
 
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
     if( !next_time )

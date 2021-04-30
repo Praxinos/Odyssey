@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "Misc/Guid.h"
-
 #include "MovieSceneSequenceID.h"
 
 class UMovieScene;
