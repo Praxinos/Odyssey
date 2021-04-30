@@ -308,7 +308,7 @@ ShotSequenceHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor
 
     CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
 
-    FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ?
+    FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ? ... maybe give ->RootComponent() instead of name ?
 
     //---
 

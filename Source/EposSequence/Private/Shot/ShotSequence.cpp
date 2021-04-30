@@ -331,7 +331,7 @@ UShotSequence::SectionAddedOrRemoved( UMovieSceneSection* iSection ) //override
     BoardHelpers::ResizeParentSequenceRecursively( this );
 }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
 
 FLinearColor
 UShotSequence::GetColorTint() const //override

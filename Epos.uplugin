@@ -17,17 +17,17 @@
   "Modules": [
     {
       "Name": "EposMovieScene",
-      "Type": "UncookedOnly",
+      "Type": "Runtime",
       "LoadingPhase": "Default"
     },
     {
       "Name": "EposSequence",
-      "Type": "UncookedOnly",
+      "Type": "Runtime",
       "LoadingPhase": "Default"
     },
     {
       "Name": "EposTracks",
-      "Type": "UncookedOnly",
+      "Type": "Runtime",
       "LoadingPhase": "Default"
     },
     {
