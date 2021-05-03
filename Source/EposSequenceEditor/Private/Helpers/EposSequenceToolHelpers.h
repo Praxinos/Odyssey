@@ -16,14 +16,17 @@
 class AActor;
 class ACineCameraActor;
 class UMaterialInstanceConstant;
+class UMaterialInterface;
 class UMovieScene;
 class UMovieSceneSequence;
 class UMovieSceneTrack;
+class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
 
 class BoardSequenceToolHelpers
 {
+// Inside EspoSequenceToolHelpers_Camera
 public:
     /**
     *  Find a Camera from the camera track
@@ -55,6 +58,7 @@ public:
     */
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
+// Inside EspoSequenceToolHelpers_Plane
 public:
     /**
     *  Add a Camera track
@@ -63,6 +67,9 @@ public:
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    static int32 GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+
+// Inside EspoSequenceToolHelpers_Drawing
 public:
     /**
     *  Add a drawing (material/texture)
@@ -72,8 +79,6 @@ public:
     static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-
-    static int32 GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 public:
     /**
@@ -103,6 +108,7 @@ private:
     friend BoardSequenceToolHelpers;
     friend ToolkitHelpers;
 
+// Inside EspoSequenceToolHelpers_Camera
 public:
     /**
     *  Find a Camera from the camera track
@@ -144,6 +150,7 @@ private:
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
     static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
+// Inside EspoSequenceToolHelpers_Plane
 public:
     /**
     *  Add a Camera track
@@ -161,6 +168,10 @@ private:
     static AStaticMeshActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
     static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
+    static UMaterialInstanceConstant* CreateMaterialInstanceConstantAsset( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
+    static UTexture2D* CreateTexture2DAsset( UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName );
+
+// Inside EspoSequenceToolHelpers_Drawing
 public:
     /**
     *  Add a drawing (material/texture)
@@ -197,7 +208,7 @@ private:
     static void GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
-    //---
+//---
 
 private:
     class cTemporarySwitchInner
