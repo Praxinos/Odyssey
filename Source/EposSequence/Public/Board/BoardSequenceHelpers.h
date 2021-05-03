@@ -25,4 +25,7 @@ public:
     };
     static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iSequencer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceId );
     static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber );
+
+public:
+    static TArray<FFrameTime> GetCameraTransformKeysRecursive( const UMovieSceneSubSection& iSubSection );
 };

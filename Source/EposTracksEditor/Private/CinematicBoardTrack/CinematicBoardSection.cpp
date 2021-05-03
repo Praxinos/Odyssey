@@ -26,6 +26,7 @@
 #include "CineCameraActor.h"
 
 #include "Board/BoardSequence.h"
+#include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -365,7 +366,7 @@ FCinematicBoardSection::BuildThumbnailKeys() //override
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameTime> keys_as_frame = ShotSequenceHelpers::GetCameraTransformKeysRecursive( GetSubSectionObject() );
+    TArray<FFrameTime> keys_as_frame = BoardSequenceHelpers::GetCameraTransformKeysRecursive( GetSubSectionObject() );
     mThumbnailKeys = SectionHelpersConvert::FrameToSecond( &GetSubSectionObject(), keys_as_frame );
 }
 

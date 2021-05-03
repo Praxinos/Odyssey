@@ -21,25 +21,25 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "Sections/MovieSceneSubSection.h"
+#include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 //#include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 
-#include "Board/BoardSequence.h"
+//#include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "Shot/ShotSequence.h"
+//#include "Shot/ShotSequence.h"
 //#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers"
 
-
 //static
 ACineCameraActor*
 ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding )
 {
-    UMovieScene* movieScene = iSequence->GetMovieScene();
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
         return nullptr;
 
@@ -67,16 +67,19 @@ ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
 
 //static
 int32
-ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     if( oPlanes )
         oPlanes->Empty();
     if( oPlaneBindings )
         oPlaneBindings->Empty();
 
-    UMovieScene* movieScene = iSequence->GetMovieScene();
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
         return 0;
+
+    TArray<AStaticMeshActor*> planes;
+    TArray<FGuid> plane_bindings;
 
     TArray<AStaticMeshActor*> planes_selected;
     TArray<FGuid> plane_bindings_selected;
@@ -94,21 +97,47 @@ ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
 
             if( plane )
             {
-                if( plane->IsSelected() )
+                switch( iSelection )
                 {
-                    planes_selected.Add( plane );
-                    plane_bindings_selected.Add( possessable.GetGuid() );
-                }
-                else
-                {
-                    planes_not_selected.Add( plane );
-                    plane_bindings_not_selected.Add( possessable.GetGuid() );
+                    case EGetPlane::kAlwaysAll:
+                        planes.Add( plane );
+                        plane_bindings.Add( possessable.GetGuid() );
+                        break;
+                    case EGetPlane::kSelectedOnly:
+                        if( plane->IsSelected() )
+                        {
+                            planes.Add( plane );
+                            plane_bindings.Add( possessable.GetGuid() );
+                        }
+                        break;
+                    default:
+                    case EGetPlane::kSelectedOrAll:
+                        if( plane->IsSelected() )
+                        {
+                            planes_selected.Add( plane );
+                            plane_bindings_selected.Add( possessable.GetGuid() );
+                        }
+                        else
+                        {
+                            planes_not_selected.Add( plane );
+                            plane_bindings_not_selected.Add( possessable.GetGuid() );
+                        }
+                        break;
                 }
             }
         }
     }
 
-    if( planes_selected.Num() )
+    if( planes.Num() )
+    {
+        if( oPlanes )
+            oPlanes->Append( planes );
+        if( oPlaneBindings )
+            oPlaneBindings->Append( plane_bindings );
+
+        return planes.Num();
+    }
+    else if( planes_selected.Num() )
     {
         if( oPlanes )
             oPlanes->Append( planes_selected );
@@ -139,7 +168,7 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
         oData->mSection = nullptr;
     }
 
-    UMovieScene* moviescene = iSequence->GetMovieScene();
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !moviescene )
         return INDEX_NONE;
 
@@ -183,13 +212,13 @@ ShotSequenceHelpers::GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieScen
 {
     TArray<FFrameNumber> times;
 
-    UMovieScene* moviescene = iSequence->GetMovieScene();
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !moviescene )
         return times;
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> guids;
-    int32 nb_plane = GetPlanes( iPlayer, iSequence, iSequenceID, &planes, &guids );
+    int32 nb_plane = GetPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll, &planes, &guids );
     if( !nb_plane )
         return times;
 
@@ -223,8 +252,6 @@ ShotSequenceHelpers::GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieScen
 }
 
 //---
-//---
-//---
 
 //static
 TArray<FFrameTime>
@@ -232,11 +259,11 @@ ShotSequenceHelpers::GetCameraTransformKeys( UMovieSceneSequence* iSequence )
 {
     TArray<FFrameTime> keys;
 
-    UMovieScene* movie_scene = iSequence->GetMovieScene();
-    if( !movie_scene )
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
         return keys;
 
-    UMovieSceneTrack* cameracut_track = movie_scene->GetCameraCutTrack();
+    UMovieSceneTrack* cameracut_track = moviescene->GetCameraCutTrack();
     if( !cameracut_track )
         return keys;
 
@@ -248,7 +275,7 @@ ShotSequenceHelpers::GetCameraTransformKeys( UMovieSceneSequence* iSequence )
     if( !cameracut_section )
         return keys;
 
-    UMovieSceneTrack* track = movie_scene->FindTrack<UMovieScene3DTransformTrack>( cameracut_section->GetCameraBindingID().GetGuid() );
+    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScene3DTransformTrack>( cameracut_section->GetCameraBindingID().GetGuid() );
     if( !track )
         return keys;
 
@@ -271,69 +298,84 @@ ShotSequenceHelpers::GetCameraTransformKeys( UMovieSceneSequence* iSequence )
     return keys;
 }
 
-static
-TArray<FFrameTime>
-InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
+//---
+
+//static
+TArray<UMovieScene3DTransformSection*>
+ShotSequenceHelpers::GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding )
 {
-    TArray<FFrameTime> converted_keys;
+    TArray<UMovieScene3DTransformSection*> sections;
 
-    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseLinearOnly();
-    for( auto key : iInnerKeys )
-    {
-        const FFrameTime converted_key = key * InnerToOuterTransform;
-        converted_keys.Add( converted_key );
-    }
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return sections;
 
-    return converted_keys;
+    if( !iCameraBinding.IsValid() )
+        return sections;
+
+    UMovieScene3DTransformTrack* track = moviescene->FindTrack<UMovieScene3DTransformTrack>( iCameraBinding );
+    if( !track )
+        return sections;
+
+    for( auto section : track->GetAllSections() )
+        sections.Add( Cast<UMovieScene3DTransformSection>( section ) );
+
+    return sections;
 }
 
 //static
-TArray<FFrameTime>
-ShotSequenceHelpers::GetCameraTransformKeysRecursive( const UMovieSceneSubSection& iBoardSection )
+TArray<UMovieScene3DTransformSection*>
+ShotSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
 {
-    TArray<FFrameTime> keys;
+    TArray<UMovieScene3DTransformSection*> sections;
 
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection.GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return sections;
 
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
-    {
-        TArray<FFrameTime> subkeys = GetCameraTransformKeys( innerMovieSceneSequence );
+    if( !iPlaneBinding.IsValid() )
+        return sections;
 
-        keys = InnerToOuter( &iBoardSection, subkeys );
+    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScene3DTransformTrack>( iPlaneBinding );
+    if( !track )
+        return sections;
 
-        return keys;
-    }
+    for( auto section : track->GetAllSections() )
+        sections.Add( Cast<UMovieScene3DTransformSection>( section ) );
 
-    // if we are on a board subsequence
-    if( innerMovieSceneSequence->IsA<UBoardSequence>() )
-    {
-        UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
-        if( !innerMovieScene )
-            return keys;
+    return sections;
+}
 
-        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-        if( !board_track )
-            return keys;
+//static
+TArray<UMovieScenePrimitiveMaterialSection*>
+ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
+{
+    TArray<UMovieScenePrimitiveMaterialSection*> sections;
 
-        TArray<FFrameTime> subkeys;
-        for( auto section : board_track->GetAllSections() )
-        {
-            UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-            TArray<FFrameTime> section_keys;
-            section_keys = GetCameraTransformKeysRecursive( *subsection );
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return sections;
 
-            subkeys.Append( section_keys );
-        }
+    if( !iPlaneBinding.IsValid() )
+        return sections;
 
-        keys = InnerToOuter( &iBoardSection, subkeys );
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return sections;
+    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
+    if( !plane )
+        return sections;
 
-        return keys;
-    }
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
 
-    return keys;
+    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+    if( !track )
+        return sections;
+
+    for( auto section : track->GetAllSections() )
+        sections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
+
+    return sections;
 }
 
 #undef LOCTEXT_NAMESPACE

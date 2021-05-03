@@ -402,14 +402,14 @@ BoardSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrame
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return 0;
 
-    return ShotSequenceHelpers::GetPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oPlanes, oPlaneBindings );
+    return ShotSequenceHelpers::GetPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
 
 //static
 int32
 ShotSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
-    return ShotSequenceHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oPlanes, oPlaneBindings );
+    return ShotSequenceHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
 
 
