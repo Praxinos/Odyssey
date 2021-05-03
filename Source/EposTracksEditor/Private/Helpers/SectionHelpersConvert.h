@@ -12,9 +12,6 @@ class UMovieSceneSubSection;
 class SectionHelpersConvert
 {
 public:
-    /** Convert all keys inside a subsequence reference to its (a) parent reference */
-    static TArray<FFrameTime> InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys );
-
     /** Convert all keys from frame to second */
     static TArray<double> FrameToSecond( const UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys );
 };

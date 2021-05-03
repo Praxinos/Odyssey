@@ -9,22 +9,6 @@
 //---
 
 //static
-TArray<FFrameTime>
-SectionHelpersConvert::InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
-{
-    TArray<FFrameTime> converted_keys;
-
-    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseLinearOnly();
-    for( auto key : iInnerKeys )
-    {
-        const FFrameTime converted_key = key * InnerToOuterTransform;
-        converted_keys.Add( converted_key );
-    }
-
-    return converted_keys;
-}
-
-//static
 TArray<double>
 SectionHelpersConvert::FrameToSecond( const UMovieSceneSection* iSection, TArray<FFrameTime> iFrameKeys )
 {

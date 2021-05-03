@@ -35,4 +35,5 @@ public:
     static TArray<FFrameNumber> GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
     static TArray<FFrameTime> GetCameraTransformKeys( UMovieSceneSequence* iSequence );
+    static TArray<FFrameTime> GetCameraTransformKeysRecursive( const UMovieSceneSubSection& iSubSection );
 };

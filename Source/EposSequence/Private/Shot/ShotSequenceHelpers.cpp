@@ -26,8 +26,9 @@
 //#include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 
-//#include "Board/BoardSequence.h"
+#include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "Shot/ShotSequence.h"
 //#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
@@ -265,6 +266,71 @@ ShotSequenceHelpers::GetCameraTransformKeys( UMovieSceneSequence* iSequence )
                     keys.AddUnique( time );
             }
         }
+    }
+
+    return keys;
+}
+
+static
+TArray<FFrameTime>
+InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
+{
+    TArray<FFrameTime> converted_keys;
+
+    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseLinearOnly();
+    for( auto key : iInnerKeys )
+    {
+        const FFrameTime converted_key = key * InnerToOuterTransform;
+        converted_keys.Add( converted_key );
+    }
+
+    return converted_keys;
+}
+
+//static
+TArray<FFrameTime>
+ShotSequenceHelpers::GetCameraTransformKeysRecursive( const UMovieSceneSubSection& iBoardSection )
+{
+    TArray<FFrameTime> keys;
+
+    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection.GetSequence();
+    if( !innerMovieSceneSequence )
+        return keys;
+
+    // if we are on a shot subsequence
+    if( innerMovieSceneSequence->IsA<UShotSequence>() )
+    {
+        TArray<FFrameTime> subkeys = GetCameraTransformKeys( innerMovieSceneSequence );
+
+        keys = InnerToOuter( &iBoardSection, subkeys );
+
+        return keys;
+    }
+
+    // if we are on a board subsequence
+    if( innerMovieSceneSequence->IsA<UBoardSequence>() )
+    {
+        UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
+        if( !innerMovieScene )
+            return keys;
+
+        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+        if( !board_track )
+            return keys;
+
+        TArray<FFrameTime> subkeys;
+        for( auto section : board_track->GetAllSections() )
+        {
+            UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+            TArray<FFrameTime> section_keys;
+            section_keys = GetCameraTransformKeysRecursive( *subsection );
+
+            subkeys.Append( section_keys );
+        }
+
+        keys = InnerToOuter( &iBoardSection, subkeys );
+
+        return keys;
     }
 
     return keys;

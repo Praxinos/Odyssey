@@ -38,8 +38,6 @@ struct FMetaMaterialChannel;
 class CinematicBoardSectionKeysHelpers
 {
 public:
-    static TArray<double> BuildThumbnailKeys( const UMovieSceneSubSection& iSubSection );
-
     static TSharedPtr<FMovieSceneChannelProxy> BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
     static TSharedPtr<FMetaFloatChannel> BuildCameraTransformMetaChannel( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy, const FFrameNumber& iMergeTolerance );
 
@@ -50,8 +48,6 @@ public:
     static TMap<FGuid, TSharedPtr<FMetaMaterialChannel>> BuildPlanesMaterialMetaChannel( const TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> iChannelProxies, const FFrameNumber& iMergeTolerance );
 
 private:
-    static TArray<FFrameTime> FindCameraTransformKeysRecursive( const UMovieSceneSubSection& iSubSection );
-
     static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID, const FMovieScenePossessable& iPossessable );
     static TArray<UMovieScene3DTransformSection*> GetPlaneTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID, const FMovieScenePossessable& iPossessable );
     static TArray<UMovieScenePrimitiveMaterialSection*> GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSection, FMovieSceneSequenceIDRef iSequenceID, const FMovieScenePossessable& iPossessable );

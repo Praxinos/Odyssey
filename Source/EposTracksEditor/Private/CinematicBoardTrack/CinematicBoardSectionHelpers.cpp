@@ -201,65 +201,6 @@ CinematicBoardSectionKeysHelpers::GetPlaneMaterialSections( IMovieScenePlayer& i
 //---
 
 //static
-TArray<FFrameTime>
-CinematicBoardSectionKeysHelpers::FindCameraTransformKeysRecursive( const UMovieSceneSubSection& iBoardSection )
-{
-    TArray<FFrameTime> keys;
-
-    UMovieSceneSequence* innerMovieSceneSequence = iBoardSection.GetSequence();
-    if( !innerMovieSceneSequence )
-        return keys;
-
-    // if we are on a shot subsequence
-    if( innerMovieSceneSequence->IsA<UShotSequence>() )
-    {
-        TArray<FFrameTime> subkeys = ShotSequenceHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
-
-        keys = SectionHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    // if we are on a board subsequence
-    if( innerMovieSceneSequence->IsA<UBoardSequence>() )
-    {
-        UMovieScene* innerMovieScene = innerMovieSceneSequence->GetMovieScene();
-        if( !innerMovieScene )
-            return keys;
-
-        UMovieSceneCinematicBoardTrack* board_track = innerMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-        if( !board_track )
-            return keys;
-
-        TArray<FFrameTime> subkeys;
-        for( auto section : board_track->GetAllSections() )
-        {
-            UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-            TArray<FFrameTime> section_keys;
-            section_keys = FindCameraTransformKeysRecursive( *subsection );
-
-            subkeys.Append( section_keys );
-        }
-
-        keys = SectionHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
-
-        return keys;
-    }
-
-    return keys;
-}
-
-//static
-TArray<double>
-CinematicBoardSectionKeysHelpers::BuildThumbnailKeys( const UMovieSceneSubSection& iSubSection )
-{
-    TArray<FFrameTime> keys_as_frame = FindCameraTransformKeysRecursive( iSubSection );
-    return SectionHelpersConvert::FrameToSecond( &iSubSection, keys_as_frame );
-}
-
-//---
-
-//static
 TSharedPtr<FMovieSceneChannelProxy>
 CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
 {
