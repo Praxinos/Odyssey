@@ -32,7 +32,6 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
 #include "Shot/ShotSequence.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionCamera.h"

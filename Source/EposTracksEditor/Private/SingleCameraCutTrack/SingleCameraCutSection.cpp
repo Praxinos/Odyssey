@@ -21,7 +21,7 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 
 #include "Helpers/SectionHelpersConvert.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
+#include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "FSingleCameraCutSection"
@@ -67,7 +67,7 @@ void FSingleCameraCutSection::BuildThumbnailKeys() //override
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameTime> keys_as_frame = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( moviescene_sequence );
+    TArray<FFrameTime> keys_as_frame = ShotSequenceHelpers::GetCameraTransformKeys( moviescene_sequence );
     mKeys = SectionHelpersConvert::FrameToSecond( Section, keys_as_frame );
 }
 

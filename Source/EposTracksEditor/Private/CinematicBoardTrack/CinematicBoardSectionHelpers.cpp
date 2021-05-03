@@ -29,7 +29,7 @@
 #include "EposMovieSceneSequence.h"
 #include "Helpers/SectionHelpersConvert.h"
 #include "Shot/ShotSequence.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutHelpers.h"
+#include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
@@ -213,7 +213,7 @@ CinematicBoardSectionKeysHelpers::FindCameraTransformKeysRecursive( const UMovie
     // if we are on a shot subsequence
     if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
-        TArray<FFrameTime> subkeys = MovieSceneSingleCameraCutHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
+        TArray<FFrameTime> subkeys = ShotSequenceHelpers::GetCameraTransformKeys( innerMovieSceneSequence );
 
         keys = SectionHelpersConvert::InnerToOuter( &iBoardSection, subkeys );
 

@@ -625,5 +625,4 @@ ShotSequenceToolHelpers::StopPilotingCamera( ISequencer& iSequencer, UMovieScene
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
-
 #undef LOCTEXT_NAMESPACE
