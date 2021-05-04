@@ -578,12 +578,12 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
         ]
         + SVerticalBox::Slot()
         [
-            SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
+            SNew( SCinematicBoardSectionPlaneMaterialKeys, iBoardSection )
             .Binding( mBinding )
         ]
         + SVerticalBox::Slot()
         [
-            SNew( SCinematicBoardSectionPlaneMaterialKeys, iBoardSection )
+            SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
             .Binding( mBinding )
         ]
     ];
