@@ -251,13 +251,11 @@ ShotSequenceHelpers::GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieScen
     return times;
 }
 
-//---
-
 //static
-TArray<FFrameTime>
-ShotSequenceHelpers::GetCameraTransformKeys( UMovieSceneSequence* iSequence )
+TArray<FFrameNumber>
+ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence )
 {
-    TArray<FFrameTime> keys;
+    TArray<FFrameNumber> keys;
 
     UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !moviescene )

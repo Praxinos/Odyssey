@@ -18,14 +18,14 @@ class EPOSSEQUENCE_API BoardSequenceHelpers
 public:
     struct FInnerSequenceResult
     {
-        UMovieSceneSequence*    mInnerSequence;
-        FMovieSceneSequenceID   mInnerSequenceId;
-        UMovieScene*            mInnerMovieScene;
-        FFrameTime              mInnerTime;
+        UMovieSceneSequence*    mInnerSequence = nullptr;
+        FMovieSceneSequenceID   mInnerSequenceId = MovieSceneSequenceID::Invalid;
+        UMovieScene*            mInnerMovieScene = nullptr;
+        FFrameTime              mInnerTime = 0;
     };
     static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iSequencer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceId );
     static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber );
 
 public:
-    static TArray<FFrameTime> GetCameraTransformKeysRecursive( const UMovieSceneSubSection& iSubSection );
+    static TArray<FFrameTime> GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection );
 };

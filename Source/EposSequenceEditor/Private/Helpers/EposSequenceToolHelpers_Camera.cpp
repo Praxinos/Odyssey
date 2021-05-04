@@ -86,7 +86,7 @@ ShotSequenceToolHelpers::CreateCamera( ISequencer* iSequencer )
 void
 ShotSequenceToolHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    UMovieScene* movieScene = iSequence->GetMovieScene();
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
         return;
 
@@ -342,7 +342,7 @@ ShotSequenceToolHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSce
 bool
 ShotSequenceToolHelpers::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation )
 {
-    UMovieScene* movieScene = iSequence->GetMovieScene();
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene || movieScene->IsReadOnly() )
     {
         //ShowReadOnlyError();
@@ -596,13 +596,22 @@ ShotSequenceToolHelpers::StopPilotingCamera( ISequencer* iSequencer, FFrameNumbe
 void
 ShotSequenceToolHelpers::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
 {
-    const FScopedTransaction transaction( LOCTEXT( "StopPilotingCamera", "Stop Piloting Storyboard Camera" ) );
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !movieScene || movieScene->IsReadOnly() )
+    {
+        //ShowReadOnlyError();
+        return;
+    }
 
     FGuid Binding = iSequencer.FindObjectId( *iCamera, iSequenceID );
     if( !Binding.IsValid() )
         return;
 
-    UMovieScene3DTransformTrack* transform_track = iSequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( Binding );
+    UMovieScene3DTransformTrack* transform_track = movieScene->FindTrack<UMovieScene3DTransformTrack>( Binding );
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "StopPilotingCamera", "Stop Piloting Storyboard Camera" ) );
 
     //---
 

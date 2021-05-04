@@ -44,7 +44,7 @@ CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( IMovieSceneP
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
     FGuid camera_binding;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iPlayer, result.mInnerSequence, result.mInnerSequenceId, &camera_binding );
+    /*ACineCameraActor* camera =*/ ShotSequenceHelpers::GetCamera( iPlayer, result.mInnerSequence, result.mInnerSequenceId, &camera_binding );
 
     //---
 
@@ -116,7 +116,7 @@ CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( IMovieSceneP
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
+    /*int plane_count =*/ ShotSequenceHelpers::GetPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
 
     for( auto binding : bindings )
     {
@@ -205,7 +205,7 @@ CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePl
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
+    /*int plane_count =*/ ShotSequenceHelpers::GetPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
 
     for( auto binding : bindings )
     {

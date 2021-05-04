@@ -366,7 +366,7 @@ FCinematicBoardSection::BuildThumbnailKeys() //override
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameTime> keys_as_frame = BoardSequenceHelpers::GetCameraTransformKeysRecursive( GetSubSectionObject() );
+    TArray<FFrameTime> keys_as_frame = BoardSequenceHelpers::GetCameraTransformTimesRecursive( GetSubSectionObject() );
     mThumbnailKeys = SectionHelpersConvert::FrameToSecond( &GetSubSectionObject(), keys_as_frame );
 }
 

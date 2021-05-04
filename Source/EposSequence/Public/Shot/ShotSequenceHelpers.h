@@ -43,7 +43,7 @@ public:
     static int32 GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding, FDrawingData* oData = nullptr );
     static TArray<FFrameNumber> GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
-    static TArray<FFrameTime> GetCameraTransformKeys( UMovieSceneSequence* iSequence );
+    static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );
 
 public:
     static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding );
