@@ -156,6 +156,8 @@ TMetaChannel<ChannelType, ValueType>::BuildSubKeys( TSharedPtr<FMovieSceneChanne
     if( !iChannelProxy.IsValid() )
         return;
 
+    TMap<FFrameNumber, FMetaKey> meta_keys;
+
     TArrayView<ChannelType*> channels = iChannelProxy->GetChannels<ChannelType>();
 
     for( int32 channel_index = 0; channel_index < channels.Num(); ++channel_index )
@@ -182,7 +184,7 @@ TMetaChannel<ChannelType, ValueType>::BuildSubKeys( TSharedPtr<FMovieSceneChanne
             // Check if the current sub key time is already near an existing meta key
             bool found_key = false;
             FFrameNumber key_to_add;
-            for( const auto& pair : mMetaKeys )
+            for( const auto& pair : meta_keys )
             {
                 TRange<FFrameNumber> range_tolerance( pair.Key - mMergeTolerance, pair.Key + 1 + mMergeTolerance );
 
@@ -190,44 +192,44 @@ TMetaChannel<ChannelType, ValueType>::BuildSubKeys( TSharedPtr<FMovieSceneChanne
                 {
                     found_key = true;
                     key_to_add = pair.Key;
+                    break;
                 }
             }
 
             // If the current sub key time is near an existing meta key
             if( found_key )
             {
-                // If both time are equal, just add the new sub key inside sub keys list
-                if( time == key_to_add )
-                {
-                    FMetaKey* meta_key = mMetaKeys.Find( time );
-                    check( meta_key );
+                FMetaKey* meta_key = meta_keys.Find( key_to_add );
+                check( meta_key );
 
-                    meta_key->mSubKeys.Add( sub_key );
-                }
-                // If both time differ:
-                // - find the near corresponding meta key
-                // - add the new sub key inside sub keys list
-                // - change the time of the meta key to represent an average of all sub key times
-                else
-                {
-                    const FMetaKey& meta_key = mMetaKeys.FindChecked( key_to_add );
-                    FMetaKey new_meta_key = meta_key;
-                    new_meta_key.mSubKeys.Add( sub_key );
-
-                    mMetaKeys.Remove( key_to_add );
-                    FFrameNumber new_time = ( key_to_add + time ) / 2;
-                    mMetaKeys.Add( new_time, new_meta_key );
-                }
+                meta_key->mSubKeys.Add( sub_key );
             }
             // Otherwise, just add a new meta key with the new sub key
             else
             {
-                FMetaKey& meta_key = mMetaKeys.FindOrAdd( time );
+                FMetaKey& meta_key = meta_keys.FindOrAdd( time );
 
                 meta_key.mSubKeys.Add( sub_key );
                 meta_key.mFlags = FMetaKey::EFlags::kNone;
             }
         }
+    }
+
+    check( !mMetaKeys.Num() );
+
+    for( const auto& pair : meta_keys )
+    {
+        FMetaKey meta_key = pair.Value;
+        FFrameNumber sum = 0;
+        for( auto sub_key : meta_key.mSubKeys )
+        {
+            FFrameNumber time;
+            sub_key.mChannelHandle.Get()->GetKeyTime( sub_key.mKeyHandle, time );
+            sum += time;
+        }
+        FFrameNumber average_time = sum / meta_key.mSubKeys.Num();
+
+        mMetaKeys.Add( average_time, meta_key );
     }
 }
 
@@ -272,8 +274,16 @@ TMetaChannel<ChannelType, ValueType>::FillWithTime( const FFrameTime& iTime, con
 {
     TRange<FFrameNumber> range( ( iTime - iTolerance ).GetFrame(), ( iTime + iTolerance ).GetFrame() + 1 );
 
+    UE_LOG( LogTemp, Warning, TEXT( "---" ) );
+    UE_LOG( LogTemp, Warning, TEXT( "time: %d" ), iTime.FrameNumber.Value );
+    UE_LOG( LogTemp, Warning, TEXT( "tolerance: %d" ), iTolerance.Value );
+    UE_LOG( LogTemp, Warning, TEXT( "range: %d %d" ), range.GetLowerBoundValue().Value, range.GetUpperBoundValue().Value );
+    UE_LOG( LogTemp, Warning, TEXT( "mMetaKeys num: %d" ), mMetaKeys.Num() );
+
     for( auto& pair : mMetaKeys )
     {
+        UE_LOG( LogTemp, Warning, TEXT( "metakeys time: %d" ), pair.Key.Value );
+        UE_LOG( LogTemp, Warning, TEXT( "subkeys num: %d" ), pair.Value.mSubKeys.Num() );
         if( range.Contains( pair.Key ) )
             ioMetaChannel->mMetaKeys.Add( pair.Key, pair.Value );
     }
