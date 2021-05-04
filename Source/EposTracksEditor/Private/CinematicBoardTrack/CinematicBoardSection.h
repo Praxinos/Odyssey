@@ -9,7 +9,6 @@
 #include "Sections/ThumbnailSection.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 
-#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "KeyThumbnail/KeyThumbnailSection.h"
 
 class FCinematicBoardTrackEditor;
@@ -20,6 +19,8 @@ class SCinematicBoardSectionLayout;
 class SCinematicBoardSectionTitle;
 class UMovieSceneCinematicBoardSection;
 struct FInnerSequenceData;
+struct FMetaFloatChannel;
+struct FMetaMaterialChannel;
 
 /**
  * Board section, which paints and ticks the appropriate section.

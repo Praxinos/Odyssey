@@ -7,7 +7,6 @@
 
 #include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
-#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "Shot/ShotSequenceHelpers.h"
 

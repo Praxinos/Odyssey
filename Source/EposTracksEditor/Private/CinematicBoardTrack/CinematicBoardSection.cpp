@@ -27,8 +27,8 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
-#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
+#include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
@@ -403,7 +403,8 @@ FCinematicBoardSection::ReBuildCameraTransformMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mCameraTransformMetaKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformMetaChannel( mCameraTransformKeys, inner_tolerance );
+    mCameraTransformMetaKeys = MakeShared<FMetaFloatChannel>( inner_tolerance );
+    mCameraTransformMetaKeys->Build( mCameraTransformKeys );
 }
 
 TSharedPtr<FMetaFloatChannel>
@@ -442,7 +443,17 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesTransformsMetaKeys = CinematicBoardSectionKeysHelpers::BuildPlanesTransformMetaChannel( mPlanesTransformsKeys, inner_tolerance );
+    mPlanesTransformsMetaKeys.Empty();
+    for( const auto& pair : mPlanesTransformsKeys )
+    {
+        FGuid guid = pair.Key;
+        TSharedPtr<FMovieSceneChannelProxy> proxy = pair.Value;
+
+        TSharedPtr<FMetaFloatChannel> meta_channel = MakeShared<FMetaFloatChannel>( inner_tolerance );
+        meta_channel->Build( proxy );
+
+        mPlanesTransformsMetaKeys.Add( guid, meta_channel );
+    }
 }
 
 TSharedPtr<FMetaFloatChannel>
@@ -484,7 +495,17 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesMaterialsMetaKeys = CinematicBoardSectionKeysHelpers::BuildPlanesMaterialMetaChannel( mPlanesMaterialsKeys, inner_tolerance );
+    mPlanesMaterialsMetaKeys.Empty();
+    for( const auto& pair : mPlanesMaterialsKeys )
+    {
+        FGuid guid = pair.Key;
+        TSharedPtr<FMovieSceneChannelProxy> proxy = pair.Value;
+
+        TSharedPtr<FMetaMaterialChannel> meta_channel = MakeShared<FMetaMaterialChannel>( inner_tolerance );
+        meta_channel->Build( proxy );
+
+        mPlanesMaterialsMetaKeys.Add( guid, meta_channel );
+    }
 }
 
 TSharedPtr<FMetaMaterialChannel>

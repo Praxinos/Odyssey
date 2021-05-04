@@ -9,7 +9,6 @@
 #include "SequencerSettings.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
-#include "CinematicBoardTrack/CinematicBoardSectionHelpers.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionCamera"
