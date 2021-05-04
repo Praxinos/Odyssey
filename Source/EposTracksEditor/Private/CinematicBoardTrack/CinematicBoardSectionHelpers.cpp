@@ -48,38 +48,19 @@ CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( IMovieSceneP
 
     //---
 
-    int sort = 0;
-
     TArray<UMovieScene3DTransformSection*> camera_transform_sections = ShotSequenceHelpers::GetCameraTransformSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, camera_binding );
-    int section_index = -1;
     for( auto camera_transform_section : camera_transform_sections )
     {
-        section_index++;
-
         const FMovieSceneChannelEntry* FloatChannelEntry = camera_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
         if( FloatChannelEntry )
         {
-            TArrayView<FMovieSceneChannel* const>        FloatChannels = FloatChannelEntry->GetChannels();
+            TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
             TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
             TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
 
             for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
             {
-                FMovieSceneChannelMetaData MetaDataEntry = MetaData[Index];
-                MetaDataEntry.bCanCollapseToTrack = false;
-                MetaDataEntry.SortOrder = sort++;
-                MetaDataEntry.DisplayText = FText::Format( FText::FromString( "{0} - {1}" ), MetaDataEntry.Group, MetaDataEntry.DisplayText, sort );
-                MetaDataEntry.Group = FText::Format( FText::FromString( "Camera.Section{0}" ), section_index ); // Must be after MetaDataEntry.DisplayText because it used the old MetaDataEntry.Group
-                //MetaDataEntry.Color = FLinearColor( 0, 0, 1, 0.8 );
-
-                //UMovieScene3DTransformTrack* track = camera_transform_section->GetTypedOuter<UMovieScene3DTransformTrack>();
-                //FGuid id = track->FindObjectBindingGuid();
-                //FMovieSceneBinding* binding = inner_sequence->GetMovieScene()->FindBinding( id );
-                //UE_LOG( LogTemp, Warning, TEXT( "%s: group: %s - label: %s - index: %d - sort: %d" ), *binding->GetName(), *MetaDataEntry.Group.ToString(), *MetaDataEntry.Name.ToString(), Index, sort );
-
-                ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaDataEntry, MetaDataExt[Index] );
-
-                //ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
             }
         }
 
@@ -124,38 +105,19 @@ CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( IMovieSceneP
 
         //---
 
-        int sort = 0;
-
         TArray<UMovieScene3DTransformSection*> plane_transform_sections = ShotSequenceHelpers::GetPlaneTransformSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, binding );
-        int section_index = -1;
         for( auto plane_transform_section : plane_transform_sections )
         {
-            section_index++;
-
             const FMovieSceneChannelEntry* FloatChannelEntry = plane_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
             if( FloatChannelEntry )
             {
-                TArrayView<FMovieSceneChannel* const>        FloatChannels = FloatChannelEntry->GetChannels();
+                TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
                 TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
                 TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
 
                 for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
                 {
-                    FMovieSceneChannelMetaData MetaDataEntry = MetaData[Index];
-                    MetaDataEntry.bCanCollapseToTrack = false;
-                    MetaDataEntry.SortOrder = sort++;
-                    MetaDataEntry.DisplayText = FText::Format( FText::FromString( "{0} - {1}" ), MetaDataEntry.Group, MetaDataEntry.DisplayText, sort );
-                    MetaDataEntry.Group = FText::Format( FText::FromString( "Camera.Section{0}" ), section_index ); // Must be after MetaDataEntry.DisplayText because it used the old MetaDataEntry.Group
-                    //MetaDataEntry.Color = FLinearColor( 0, 0, 1, 0.8 );
-
-                    //UMovieScene3DTransformTrack* track = camera_transform_section->GetTypedOuter<UMovieScene3DTransformTrack>();
-                    //FGuid id = track->FindObjectBindingGuid();
-                    //FMovieSceneBinding* binding = inner_sequence->GetMovieScene()->FindBinding( id );
-                    //UE_LOG( LogTemp, Warning, TEXT( "%s: group: %s - label: %s - index: %d - sort: %d" ), *binding->GetName(), *MetaDataEntry.Group.ToString(), *MetaDataEntry.Name.ToString(), Index, sort );
-
-                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaDataEntry, MetaDataExt[Index] );
-
-                    //ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
                 }
             }
 
@@ -213,14 +175,9 @@ CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePl
 
         //---
 
-        int sort = 0;
-
         TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, binding );
-        int section_index = -1;
         for( auto plane_material_section : plane_material_sections )
         {
-            section_index++;
-
             const FMovieSceneChannelEntry* ObjectPathChannelEntry = plane_material_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
             if( ObjectPathChannelEntry )
             {
@@ -230,21 +187,7 @@ CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePl
 
                 for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
                 {
-                    FMovieSceneChannelMetaData MetaDataEntry = MetaData[Index];
-                    MetaDataEntry.bCanCollapseToTrack = false;
-                    MetaDataEntry.SortOrder = sort++;
-                    MetaDataEntry.DisplayText = FText::Format( FText::FromString( "{0} - {1}" ), MetaDataEntry.Group, MetaDataEntry.DisplayText, sort );
-                    MetaDataEntry.Group = FText::Format( FText::FromString( "Camera.Section{0}" ), section_index ); // Must be after MetaDataEntry.DisplayText because it used the old MetaDataEntry.Group
-                    //MetaDataEntry.Color = FLinearColor( 0, 0, 1, 0.8 );
-
-                    //UMovieScene3DTransformTrack* track = camera_transform_section->GetTypedOuter<UMovieScene3DTransformTrack>();
-                    //FGuid id = track->FindObjectBindingGuid();
-                    //FMovieSceneBinding* binding = inner_sequence->GetMovieScene()->FindBinding( id );
-                    //UE_LOG( LogTemp, Warning, TEXT( "%s: group: %s - label: %s - index: %d - sort: %d" ), *binding->GetName(), *MetaDataEntry.Group.ToString(), *MetaDataEntry.Name.ToString(), Index, sort );
-
-                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ), MetaDataEntry, MetaDataExt[Index] );
-
-                    //ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
                 }
             }
 
