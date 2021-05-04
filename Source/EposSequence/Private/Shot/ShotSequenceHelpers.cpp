@@ -376,4 +376,135 @@ ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovi
     return sections;
 }
 
+//---
+
+//static
+TSharedPtr<FMovieSceneChannelProxy>
+ShotSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FMovieSceneChannelProxyData ChannelIndirection;
+
+    FGuid camera_binding;
+    /*ACineCameraActor* camera =*/ ShotSequenceHelpers::GetCamera( iPlayer, iSequence, iSequenceID, &camera_binding );
+
+    //---
+
+    TArray<UMovieScene3DTransformSection*> camera_transform_sections = ShotSequenceHelpers::GetCameraTransformSections( iPlayer, iSequence, iSequenceID, camera_binding );
+    for( auto camera_transform_section : camera_transform_sections )
+    {
+        const FMovieSceneChannelEntry* FloatChannelEntry = camera_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
+        if( FloatChannelEntry )
+        {
+            TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
+            TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
+            TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
+
+            for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+            {
+                ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+            }
+        }
+
+        // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+        // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+        //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+        //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+    }
+
+    TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+    return ChannelProxy;
+}
+
+//static
+TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>
+ShotSequenceHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> proxies;
+
+    TArray<AStaticMeshActor*> planes;
+    TArray<FGuid> bindings;
+    /*int plane_count =*/ ShotSequenceHelpers::GetPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
+
+    for( auto binding : bindings )
+    {
+        FMovieSceneChannelProxyData ChannelIndirection;
+
+        //---
+
+        TArray<UMovieScene3DTransformSection*> plane_transform_sections = ShotSequenceHelpers::GetPlaneTransformSections( iPlayer, iSequence, iSequenceID, binding );
+        for( auto plane_transform_section : plane_transform_sections )
+        {
+            const FMovieSceneChannelEntry* FloatChannelEntry = plane_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
+            if( FloatChannelEntry )
+            {
+                TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
+
+                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                }
+            }
+
+            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+        }
+
+        TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+        proxies.Add( binding, ChannelProxy );
+    }
+
+    return proxies;
+}
+
+//static
+TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>
+ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> proxies;
+
+    TArray<AStaticMeshActor*> planes;
+    TArray<FGuid> bindings;
+    /*int plane_count =*/ ShotSequenceHelpers::GetPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
+
+    for( auto binding : bindings )
+    {
+        FMovieSceneChannelProxyData ChannelIndirection;
+
+        //---
+
+        TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, iSequence, iSequenceID, binding );
+        for( auto plane_material_section : plane_material_sections )
+        {
+            const FMovieSceneChannelEntry* ObjectPathChannelEntry = plane_material_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
+            if( ObjectPathChannelEntry )
+            {
+                TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>            MetaData = ObjectPathChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<UObject*>>    MetaDataExt = ObjectPathChannelEntry->GetAllExtendedEditorData<FMovieSceneObjectPathChannel>();
+
+                for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                }
+            }
+
+            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+        }
+
+        TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+        proxies.Add( binding, ChannelProxy );
+    }
+
+    return proxies;
+}
+
 #undef LOCTEXT_NAMESPACE

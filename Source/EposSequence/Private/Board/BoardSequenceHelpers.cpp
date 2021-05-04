@@ -140,4 +140,33 @@ BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSect
     return keys;
 }
 
+//---
+
+//static
+TSharedPtr<FMovieSceneChannelProxy>
+BoardSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildCameraTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>
+BoardSequenceHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildPlanesTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>
+BoardSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
 #undef LOCTEXT_NAMESPACE

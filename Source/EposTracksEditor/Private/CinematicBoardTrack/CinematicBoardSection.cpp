@@ -381,7 +381,7 @@ FCinematicBoardSection::BuildCameraTransformChannelProxy()
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mCameraTransformKeys = CinematicBoardSectionKeysHelpers::BuildCameraTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mCameraTransformKeys = BoardSequenceHelpers::BuildCameraTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildCameraTransformMetaChannel();
 }
@@ -417,7 +417,7 @@ FCinematicBoardSection::GetCameraTransformMetaChannel() const
 void
 FCinematicBoardSection::BuildPlanesTransformChannelProxy()
 {
-    mPlanesTransformsKeys = CinematicBoardSectionKeysHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mPlanesTransformsKeys = BoardSequenceHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildPlanesTransformMetaChannel();
 }
@@ -459,7 +459,7 @@ FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPo
 void
 FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
 {
-    mPlanesMaterialsKeys = CinematicBoardSectionKeysHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mPlanesMaterialsKeys = BoardSequenceHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildPlanesMaterialMetaChannel();
 }
