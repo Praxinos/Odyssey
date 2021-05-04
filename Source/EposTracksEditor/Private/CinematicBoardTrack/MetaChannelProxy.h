@@ -32,7 +32,7 @@ struct FMetaKey
 
     TArray<FSubKey>         mSubKeys;
     EFlags                  mFlags;
-    FKeyDrawParams          mMetaKeyDrawParam; // The draw param which will be used to drw inside the meta channel
+    FKeyDrawParams          mMetaKeyDrawParam; // The draw param which will be used to draw inside the meta channel
 };
 
 //---
@@ -274,16 +274,8 @@ TMetaChannel<ChannelType, ValueType>::FillWithTime( const FFrameTime& iTime, con
 {
     TRange<FFrameNumber> range( ( iTime - iTolerance ).GetFrame(), ( iTime + iTolerance ).GetFrame() + 1 );
 
-    UE_LOG( LogTemp, Warning, TEXT( "---" ) );
-    UE_LOG( LogTemp, Warning, TEXT( "time: %d" ), iTime.FrameNumber.Value );
-    UE_LOG( LogTemp, Warning, TEXT( "tolerance: %d" ), iTolerance.Value );
-    UE_LOG( LogTemp, Warning, TEXT( "range: %d %d" ), range.GetLowerBoundValue().Value, range.GetUpperBoundValue().Value );
-    UE_LOG( LogTemp, Warning, TEXT( "mMetaKeys num: %d" ), mMetaKeys.Num() );
-
     for( auto& pair : mMetaKeys )
     {
-        UE_LOG( LogTemp, Warning, TEXT( "metakeys time: %d" ), pair.Key.Value );
-        UE_LOG( LogTemp, Warning, TEXT( "subkeys num: %d" ), pair.Value.mSubKeys.Num() );
         if( range.Contains( pair.Key ) )
             ioMetaChannel->mMetaKeys.Add( pair.Key, pair.Value );
     }
