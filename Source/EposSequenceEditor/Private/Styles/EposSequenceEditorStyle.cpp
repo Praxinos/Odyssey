@@ -70,6 +70,31 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon24x24 ) );
 
+    Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "IconHelp_24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "IconHelp_24x", Icon24x24 ) );
+    Set( "EposSequenceEditor.OpenAboutWindow", new IMAGE_BRUSH( "IconAbout_24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.OpenAboutWindow.Small", new IMAGE_BRUSH( "IconAbout_24x", Icon24x24 ) );
+
+    Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", FVector2D( 30, 30 ) ) );
+    Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", FVector2D( 30, 30 ) ) );
+    Set( "About.Youtube", new IMAGE_BRUSH( "About/youtube", FVector2D( 30, 30 ) ) );
+    Set( "About.Twitter", new IMAGE_BRUSH( "About/twitter", FVector2D( 30, 30 ) ) );
+    Set( "About.Instagram", new IMAGE_BRUSH( "About/instagram", FVector2D( 30, 30 ) ) );
+    Set( "About.Discord", new IMAGE_BRUSH( "About/discord", FVector2D( 30, 30 ) ) );
+    Set( "About.UserDoc", new IMAGE_BRUSH( "About/user-doc", FVector2D( 30, 30 ) ) );
+    Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
+    Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
+    Set( "About.Epos", new IMAGE_BRUSH( "About/epos", FVector2D( 128, 128 ) ) );
+
+    Set( "About.UnderlineText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
+                                .SetFontSize( 10 )
+                                .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
+    Set( "About.SmallText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
+                            .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
+    Set( "About.BigText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+                          .SetFontSize( 15 )
+                          .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
+
     //---
 
     SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );

@@ -6,10 +6,12 @@
 #include "CineCameraActor.h"
 #include "Engine/StaticMeshActor.h"
 
+#include "EposSequenceEditorCommands.h"
 #include "Helpers/EposSequenceToolHelpers.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
+#include "Styles/EposSequenceEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceCustomization"
 
@@ -148,6 +150,14 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().OpenAboutWindow,
+            FExecuteAction::CreateLambda( [this](){ TSharedPtr<SWindow> root = FGlobalTabmanager::Get()->GetRootWindow(); SAboutWindow::Open( root ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
 }
 
 //---
@@ -190,6 +200,15 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FShotSequenceEditorCommands::Get().CreateDrawing->GetDescription(),
         FShotSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
+
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeHelpMenu ),
+        LOCTEXT( "Help", "Help" ),
+        LOCTEXT( "HelpToolTip", "Help" ),
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" ) );
 
     //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
     //  +SHorizontalBox::Slot()
@@ -276,6 +295,16 @@ FShotSequenceCustomization::MakeDrawingMenu()
             EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
         );
     }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeHelpMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
 
     return MenuBuilder.MakeWidget();
 }

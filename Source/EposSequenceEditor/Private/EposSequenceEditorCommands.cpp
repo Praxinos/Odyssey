@@ -16,6 +16,8 @@ void
 FEposSequenceEditorCommands::RegisterCommands()
 {
     UI_COMMAND( ToggleStoryboardViewportCommand, "Storyboard Viewport", "A viewport layout tailored to storyboard preview", EUserInterfaceActionType::RadioButton, FInputChord() );
+
+    UI_COMMAND( OpenAboutWindow, "About Epos...", "Open the About window", EUserInterfaceActionType::Button, FInputChord() );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -5,18 +5,22 @@
 
 #include "CineCameraActor.h"
 #include "Engine/StaticMeshActor.h"
+#include "Framework/Docking/TabManager.h"
 
 #include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposSequenceEditorCommands.h"
 #include "EposTracksModule.h"
 #include "Helpers/EposSequenceToolHelpers.h"
+#include "Misc/SAboutWindow.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceEditorCommands.h"
+#include "Styles/EposSequenceEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
 
@@ -206,6 +210,14 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().OpenAboutWindow,
+            FExecuteAction::CreateLambda( [this](){ TSharedPtr<SWindow> root = FGlobalTabmanager::Get()->GetRootWindow(); SAboutWindow::Open( root ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
 }
 
 //---
@@ -301,6 +313,13 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
     ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeHelpMenu ),
+        LOCTEXT( "Help", "Help" ),
+        LOCTEXT( "HelpToolTip", "Help" ),
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" )  );
 }
 
 TSharedRef<SWidget>
@@ -368,9 +387,7 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 
         MenuBuilder.AddMenuEntry(
             FText::FromString( plane->GetActorLabel() ),
-            //LOCTEXT( "LockPlayback", "Lock to Display Rate at Runtime" ),
             FText::GetEmpty(),
-            //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
             FSlateIcon(),
             FUIAction(
                 FExecuteAction::CreateLambda( [this, plane_binding](){ BoardSequenceToolHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
@@ -380,6 +397,16 @@ FBoardSequenceCustomization::MakeDrawingMenu()
             EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
         );
     }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeHelpMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
 
     return MenuBuilder.MakeWidget();
 }

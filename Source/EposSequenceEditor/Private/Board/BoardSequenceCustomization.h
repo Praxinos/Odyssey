@@ -31,6 +31,7 @@ private:
     TSharedRef<SWidget> MakeArrangeShotsMenu();
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakeDrawingMenu();
+    TSharedRef<SWidget> MakeHelpMenu();
 
     enum EMapping
     {

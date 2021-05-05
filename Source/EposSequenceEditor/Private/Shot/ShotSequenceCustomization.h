@@ -28,6 +28,7 @@ private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakeDrawingMenu();
+    TSharedRef<SWidget> MakeHelpMenu();
 
     enum EMapping
     {

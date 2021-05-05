@@ -18,4 +18,6 @@ public:
 
 public:
     TSharedPtr<FUICommandInfo> ToggleStoryboardViewportCommand;
+
+    TSharedPtr<FUICommandInfo> OpenAboutWindow;
 };
