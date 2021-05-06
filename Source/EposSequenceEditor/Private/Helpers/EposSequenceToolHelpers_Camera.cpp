@@ -137,7 +137,7 @@ ShotSequenceToolHelpers::SpawnCamera( UWorld* iWorld, const FTransform& iTransfo
 
     // https://udn.unrealengine.com/s/question/0D54z00006uhl34CAA/plugin-cuproperty-how-to-change-uproperty-and-trigger-prepostedit-
     //UCineCameraComponent* CameraComponent = camera->GetCineCameraComponent();
-    //if( CameraComponent != NULL )
+    //if( CameraComponent != nullptr )
     //{
     //    {
     //        FProperty* ChangedProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), "LensSettings" );

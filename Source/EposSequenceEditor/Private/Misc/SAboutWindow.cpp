@@ -274,7 +274,7 @@ SAboutWindow::NewButtonImage( ELogo iLogo )
         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
         .Cursor( EMouseCursor::Hand )
         .ToolTipText( tooltip_with_url )
-        .OnClicked_Lambda( [&]() { FPlatformProcess::LaunchURL( *logo.mUrl.ToString(), NULL, NULL ); return FReply::Handled(); } )
+        .OnClicked_Lambda( [&]() { FPlatformProcess::LaunchURL( *logo.mUrl.ToString(), nullptr, nullptr ); return FReply::Handled(); } )
         [
             SNew( SImage )
             .Image( FEposSequenceEditorStyle::Get()->GetBrush( logo.mBrushName ) )

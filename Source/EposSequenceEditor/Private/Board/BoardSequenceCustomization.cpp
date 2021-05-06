@@ -220,7 +220,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().GotoPraxinos,
-            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop"), NULL, NULL ); } )
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop"), nullptr, nullptr ); } )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
@@ -228,7 +228,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().GotoForum,
-            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/forum/"), NULL, NULL ); } )
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/forum/"), nullptr, nullptr ); } )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
@@ -236,7 +236,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/Documentation/Epos/User/html/"), NULL, NULL ); } ),
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/Documentation/Epos/User/html/"), nullptr, nullptr ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
         );
     else
