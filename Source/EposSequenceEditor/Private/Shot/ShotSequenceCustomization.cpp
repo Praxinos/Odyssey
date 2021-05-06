@@ -8,6 +8,7 @@
 
 #include "EposSequenceEditorCommands.h"
 #include "Helpers/EposSequenceToolHelpers.h"
+#include "Misc/SAboutWindow.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
@@ -90,15 +91,6 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().CreatePlane,
-            FExecuteAction::CreateLambda( [this](){ ShotSequenceToolHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceToolHelpers::GetCamera( mSequencer ); } )
-        );
-    else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
             FShotSequenceEditorCommands::Get().SnapCameraToViewport,
             FExecuteAction::CreateLambda( [this](){ ShotSequenceToolHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
@@ -107,6 +99,19 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+
+    //---
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().CreatePlane,
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceToolHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceToolHelpers::GetCamera( mSequencer ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
+
+    //---
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -150,6 +155,33 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
+
+    //---
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoPraxinos,
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop"), NULL, NULL ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoForum,
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/forum/"), NULL, NULL ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoUserDocumentation,
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/Documentation/Epos/User/html/"), NULL, NULL ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -303,6 +335,15 @@ TSharedRef<SWidget>
 FShotSequenceCustomization::MakeHelpMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoPraxinos );
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoForum );
+
+    MenuBuilder.AddSeparator();
+
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
+
+    MenuBuilder.AddSeparator();
 
     MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
 

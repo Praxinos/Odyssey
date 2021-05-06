@@ -19,5 +19,8 @@ public:
 public:
     TSharedPtr<FUICommandInfo> ToggleStoryboardViewportCommand;
 
+    TSharedPtr<FUICommandInfo> GotoPraxinos;
+    TSharedPtr<FUICommandInfo> GotoForum;
+    TSharedPtr<FUICommandInfo> GotoUserDocumentation;
     TSharedPtr<FUICommandInfo> OpenAboutWindow;
 };

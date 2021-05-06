@@ -152,6 +152,17 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 
     if( iMap == kMap )
         CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceToolHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+
+    //---
+
+    if( iMap == kMap )
+        CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlane,
             FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceToolHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
@@ -159,14 +170,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
 
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceToolHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+    //---
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -210,6 +214,33 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
+
+    //---
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoPraxinos,
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop"), NULL, NULL ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoForum,
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/forum/"), NULL, NULL ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoUserDocumentation,
+            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/Documentation/Epos/User/html/"), NULL, NULL ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -405,6 +436,15 @@ TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeHelpMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoPraxinos );
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoForum );
+
+    MenuBuilder.AddSeparator();
+
+    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
+
+    MenuBuilder.AddSeparator();
 
     MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
 
