@@ -40,6 +40,7 @@ namespace UnrealBuildTool.Rules
 					"AssetTools",
 					"Core",
                 	"CoreUObject",
+                    "DesktopPlatform",
                 	"EditorStyle",
 					"Engine",
 					"OdysseyBrush",

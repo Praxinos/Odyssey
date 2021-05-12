@@ -10,6 +10,8 @@
 #include "Engine/Texture2D.h"
 #include "IAssetTools.h"
 #include "IContentBrowserSingleton.h"
+#include "IDesktopPlatform.h"
+#include "DesktopPlatformModule.h"
 #include "Framework/Commands/UIAction.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
@@ -27,90 +29,111 @@ static FDelegateHandle sgContentBrowserExtenderDelegateHandle;
 
 //////////////////////////////////////////////////////////////////////////
 // FContentBrowserSelectedAssetExtensionBase
-struct FContentBrowserSelectedAssetExtensionBase
+class FContentBrowserSelectedAssetExtensionBase
 {
 public:
-    virtual ~FContentBrowserSelectedAssetExtensionBase();
+    virtual ~FContentBrowserSelectedAssetExtensionBase()
+    {}
 
-    virtual void Execute();
+    FContentBrowserSelectedAssetExtensionBase( const TArray< FAssetData >& iSelectedAssets )
+        : mSelectedAssets( iSelectedAssets )
+    {}
 
-public:
-    TArray<struct FAssetData> mSelectedAssets;
+    void Execute()
+    {
+        TArray<UTexture2D*> textures;
+        for( auto assetIt = mSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
+        {
+            const FAssetData& assetData = *assetIt;
+            if( UTexture2D* texture = Cast<UTexture2D>( assetData.GetAsset() ) )
+            {
+                textures.Add( texture );
+            }
+        }
+
+        ActionTextures( textures );
+    }
+
+    virtual void ActionTextures( TArray< UTexture2D* >& iTextures ) = 0
+    {}
+
+protected:
+    TArray< FAssetData > mSelectedAssets;
 };
-
-//---
-
-FContentBrowserSelectedAssetExtensionBase::~FContentBrowserSelectedAssetExtensionBase()
-{
-}
-
-void 
-FContentBrowserSelectedAssetExtensionBase::Execute()
-{
-}
 
 //////////////////////////////////////////////////////////////////////////
 // FEditTextureExtension
-struct FEditTextureExtension 
+class FEditTextureExtension 
     : public FContentBrowserSelectedAssetExtensionBase
 {
 public:
-    FEditTextureExtension();
+    ~FEditTextureExtension() override
+    {}
 
-public:
-    virtual void Execute() override;
+    FEditTextureExtension( const TArray< FAssetData >& iSelectedAssets )
+        : FContentBrowserSelectedAssetExtensionBase( iSelectedAssets )
+    {}
 
-    void EditTextures( TArray<UTexture2D*>& Textures );
+    void ActionTextures( TArray< UTexture2D* >& iTextures ) override
+    {
+	    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem< UAssetEditorSubsystem >();
+        bool warningDisplayed = false;
+        for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
+        {
+            UTexture2D* texture = *textureIt;
+
+		    //PATCH: To avoid opening ILIAD when another editor for this asset is opened
+		    // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+            if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
+            {
+                if (!warningDisplayed)
+                {
+                    FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Texture Already Opened");
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
+                    warningDisplayed = true;
+                }
+			    continue;
+		    }
+            IOdysseyTexture2DEditorModule* odysseyTexture2DEditorModule = &FModuleManager::GetModuleChecked< IOdysseyTexture2DEditorModule >( "OdysseyTexture2DEditor" );
+            odysseyTexture2DEditorModule->CreateOdysseyTexture2DEditor( texture );
+        }
+    }
 };
 
-//---
+//////////////////////////////////////////////////////////////////////////
+// FExportTextureExtension
 
-FEditTextureExtension::FEditTextureExtension()
-    : FContentBrowserSelectedAssetExtensionBase()
+class FExportTextureExtension 
+    : public FContentBrowserSelectedAssetExtensionBase
 {
-}
+public:
+    ~FExportTextureExtension() override
+    {}
 
-void
-FEditTextureExtension::Execute()
-{
-    TArray<UTexture2D*> textures;
-    for( auto assetIt = mSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
+    FExportTextureExtension( const TArray< FAssetData >& iSelectedAssets )
+        : FContentBrowserSelectedAssetExtensionBase( iSelectedAssets )
+    {}
+
+    void ActionTextures( TArray<UTexture2D*>& iTextures ) override
     {
-        const FAssetData& assetData = *assetIt;
-        if( UTexture2D* texture = Cast<UTexture2D>( assetData.GetAsset() ) )
+        IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+        for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
         {
-            textures.Add( texture );
+            TArray< FString > filenames;
+            UTexture2D* texture = *textureIt;
+            desktopPlatformHandle->SaveFileDialog(
+                  FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
+                , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
+                , FPaths::ProjectDir()
+                , TEXT("")
+                , TEXT("PNG Image (.png)|*.png")
+                , EFileDialogFlags::None
+                , filenames
+            );
         }
     }
 
-    EditTextures( textures );
-}
-
-void
-FEditTextureExtension::EditTextures( TArray<UTexture2D*>& iTextures )
-{
-	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-    bool warningDisplayed = false;
-    for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
-    {
-        UTexture2D* texture = *textureIt;
-
-		//PATCH: To avoid opening ILIAD when another editor for this asset is opened
-		// To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
-        if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-        {
-            if (!warningDisplayed)
-            {
-                FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Texture Already Opened");
-                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
-                warningDisplayed = true;
-            }
-			continue;
-		}
-        IOdysseyTexture2DEditorModule* odysseyTexture2DEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTexture2DEditorModule>( "OdysseyTexture2DEditor" );
-        odysseyTexture2DEditorModule->CreateOdysseyTexture2DEditor( texture );
-    }
-}
+};
 
 //////////////////////////////////////////////////////////////////////////
 // FOdysseyTexture2DContentBrowserExtensions_Impl
@@ -119,7 +142,9 @@ class FOdysseyTexture2DContentBrowserExtensions_Impl
 public:
     static void ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor );
 
+    // we keep the iSelectedAssets type without ref and const, because CreateStatic discards qualifiers
     static void PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets );
+    static void PopulateTextureActionsSubMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets );
 
     static TSharedRef<FExtender> OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets );
 
@@ -139,17 +164,40 @@ FOdysseyTexture2DContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor( T
 void
 FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
 {
-    TSharedPtr<FEditTextureExtension> editTextureFunctor = MakeShareable( new FEditTextureExtension() );
-    editTextureFunctor->mSelectedAssets = iSelectedAssets;
+    ioMenuBuilder.AddSubMenu(
+          LOCTEXT( "CB_Extension_Texture_IliadActions", "ILIAD Actions" )
+        , LOCTEXT( "CB_Extension_Texture_IliadActions_ToolTip", "All actions related to ILIAD" )
+        , FNewMenuDelegate::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu, iSelectedAssets )
+        , false
+        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
+    );
+}
+
+//static
+void
+FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+{
+    TSharedPtr<FEditTextureExtension> editTextureFunctor = MakeShared< FEditTextureExtension >( iSelectedAssets );
+    TSharedPtr<FExportTextureExtension> exportTextureFunctor = MakeShared< FExportTextureExtension >( iSelectedAssets );
 
     FUIAction action_EditTexture(
         FExecuteAction::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editTextureFunctor ) ) );
+    FUIAction action_ExportTexture(
+        FExecuteAction::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( exportTextureFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
           LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit Texture with ILIAD" )
         , LOCTEXT( "CB_Extension_Texture_OpenPaintEditor_Tooltip", "Open ILIAD paint editor for the selected Texture" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditTexture
+        , NAME_None
+        , EUserInterfaceActionType::Button );
+
+    ioMenuBuilder.AddMenuEntry(
+          LOCTEXT( "CB_Extension_Texture_Export", "Export Texture with ILIAD" )
+        , LOCTEXT( "CB_Extension_Texture_Export_Tooltip", "Export Texture with ILIAD" )
+        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
+        , action_ExportTexture
         , NAME_None
         , EUserInterfaceActionType::Button );
 }
