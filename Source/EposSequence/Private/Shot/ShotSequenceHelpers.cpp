@@ -67,7 +67,7 @@ ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
 
 //static
 int32
-ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     if( oPlanes )
         oPlanes->Empty();
@@ -216,7 +216,7 @@ ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieScene
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> guids;
-    int32 nb_plane = GetPlanes( iPlayer, iSequence, iSequenceID, iPlaneSelection, &planes, &guids );
+    int32 nb_plane = GetAllPlanes( iPlayer, iSequence, iSequenceID, iPlaneSelection, &planes, &guids );
     if( !nb_plane )
         return times;
 
@@ -430,7 +430,7 @@ ShotSequenceHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlaye
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> bindings;
-    /*int plane_count =*/ ShotSequenceHelpers::GetPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
+    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
 
     for( auto binding : bindings )
     {
@@ -485,7 +485,7 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> bindings;
-    /*int plane_count =*/ ShotSequenceHelpers::GetPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
+    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
 
     for( auto binding : bindings )
     {

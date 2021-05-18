@@ -93,7 +93,7 @@ public:
     * @param TArray<AStaticMeshActor*>* oPlanes to get all plane actors.
     * @param TArray<FGuid>*             oPlaneBindings to get all plane bindings.
     */
-    static int32 GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 // Inside EspoSequenceToolHelpers_Drawing
 public:
@@ -209,7 +209,7 @@ public:
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-    static int32 GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAllPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );

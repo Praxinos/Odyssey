@@ -394,7 +394,7 @@ ShotSequenceToolHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequenc
 
 //static
 int32
-BoardSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+BoardSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -403,14 +403,14 @@ BoardSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, FFrameNumber iFrame
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return 0;
 
-    return ShotSequenceHelpers::GetPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
+    return ShotSequenceHelpers::GetAllPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
 
 //static
 int32
-ShotSequenceToolHelpers::GetPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
-    return ShotSequenceHelpers::GetPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
+    return ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
 
 

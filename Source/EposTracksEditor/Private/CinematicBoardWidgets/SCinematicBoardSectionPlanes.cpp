@@ -670,7 +670,7 @@ GetMaxPlaneCount( IMovieScenePlayer& iPlayer, const UMovieSceneTrack* iTrack, FM
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
         TArray<AStaticMeshActor*> planes;
         TArray<FGuid> guids;
-        int plane_count = ShotSequenceHelpers::GetPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &guids );
+        int plane_count = ShotSequenceHelpers::GetAllPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &guids );
 
         count = FMath::Max( count, plane_count );
     }
@@ -700,7 +700,7 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
+    int plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
 
     auto need_rebuild = [this]( const TArray<FGuid>& iBindings )
     {

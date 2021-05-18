@@ -34,7 +34,7 @@ class EPOSSEQUENCE_API ShotSequenceHelpers
 public:
     static ACineCameraActor* GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
-    static int32 GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
+    static int32 GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
     struct FDrawingData
     {
         FMovieSceneObjectPathChannel* mChannel;

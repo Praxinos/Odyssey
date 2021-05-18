@@ -119,7 +119,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
             FExecuteAction::CreateLambda( [this]()
                 {
                     TArray<FGuid> plane_bindings;
-                    int32 plane_count = ShotSequenceToolHelpers::GetPlanes( mSequencer, nullptr, &plane_bindings );
+                    int32 plane_count = ShotSequenceToolHelpers::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
                     if( !plane_count )
                         return;
                     ShotSequenceToolHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
@@ -127,13 +127,13 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
             FCanExecuteAction::CreateLambda( [this]()
                 {
                     TArray<FGuid> plane_bindings;
-                    int32 plane_count = ShotSequenceToolHelpers::GetPlanes( mSequencer, nullptr, &plane_bindings );
+                    int32 plane_count = ShotSequenceToolHelpers::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
                     if( !plane_count )
                         return false;
                     return ShotSequenceToolHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                 } ),
             FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetPlanes( mSequencer ) <= 1; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetAllPlanes( mSequencer ) <= 1; } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
@@ -225,7 +225,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetPlanes( mSequencer ) > 1; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetAllPlanes( mSequencer ) > 1; } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeDrawingMenu ),
         FShotSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
@@ -304,7 +304,7 @@ FShotSequenceCustomization::MakeDrawingMenu()
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceToolHelpers::GetPlanes( mSequencer, &planes, &plane_bindings );
+    int32 plane_count = ShotSequenceToolHelpers::GetAllPlanes( mSequencer, &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
