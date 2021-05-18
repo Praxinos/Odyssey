@@ -70,6 +70,9 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
     if( key_index != INDEX_NONE )
         return;
 
+    if( !drawing_data.mSection )
+        return;
+
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "CreateDrawing", "Create a new drawing" ) );
@@ -126,7 +129,7 @@ BoardSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumb
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll );
     int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
 
     return index != INDEX_NONE;
@@ -143,7 +146,7 @@ ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumb
 bool
 ShotSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
 
     return index != INDEX_NONE;
@@ -153,7 +156,7 @@ ShotSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumbe
 void
 ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
 
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
     if( index == INDEX_NONE )
@@ -188,7 +191,7 @@ BoardSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber i
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll );
     FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
 
     return !!next_time;
@@ -205,7 +208,7 @@ ShotSequenceToolHelpers::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber i
 bool
 ShotSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
 
     return !!next_time;
@@ -215,7 +218,7 @@ ShotSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iF
 void
 ShotSequenceToolHelpers::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllMaterialTimes( iSequencer, iSequence, iSequenceID );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
 
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
     if( !next_time )

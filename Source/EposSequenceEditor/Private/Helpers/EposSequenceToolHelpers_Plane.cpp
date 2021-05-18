@@ -173,23 +173,24 @@ ShotSequenceToolHelpers::CreateMaterialInstanceConstantAsset( UMovieSceneSequenc
 
         //---
 
-        FStaticParameterSet static_params;
-        material_master->GetStaticParameterValues( static_params );
-        for( auto& parameter : static_params.StaticSwitchParameters )
-            parameter.bOverride = true;
-        material_master->UpdateStaticPermutation( static_params );
+        // For information, as they were replaced by a float parameter to switch between grid or not
+        //FStaticParameterSet static_params;
+        //material_master->GetStaticParameterValues( static_params );
+        //for( auto& parameter : static_params.StaticSwitchParameters )
+        //    parameter.bOverride = true;
+        //material_master->UpdateStaticPermutation( static_params );
 
-        // Needed to compute all cases during creation, to have all shaders computed
-        for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
-        {
-            //UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
-            for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
-            {
-                static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
-                //UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
-                material_master->UpdateStaticPermutation( static_params );
-            }
-        }
+        //// Needed to compute all cases during creation, to have all shaders computed
+        //for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
+        //{
+        //    //UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
+        //    for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
+        //    {
+        //        static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
+        //        //UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
+        //        material_master->UpdateStaticPermutation( static_params );
+        //    }
+        //}
     }
     else
     {

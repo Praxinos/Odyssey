@@ -29,74 +29,124 @@ class BoardSequenceToolHelpers
 // Inside EspoSequenceToolHelpers_Camera
 public:
     /**
-    *  Find a Camera from the camera track
+    *  Find the camera of the board section
     *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer         iSequencer to get the camera.
+    * @param FFrameNumber       iFrameNumber to get the board section.
+    * @param FGuid*             oCameraBinding to get the camera binding.
+    * @return ACineCameraActor* the camera actor.
     */
     static ACineCameraActor* GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding = nullptr );
 
+    /**
+    *  Can a camera be created in the board section ?
+    *
+    * @param ISequencer         iSequencer to get the camera.
+    * @param FFrameNumber       iFrameNumber to get the board section.
+    * @return bool
+    */
     static bool CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Add a Camera track
+    *  Create a new camera (actor & track & cameracut track) in the board section
     *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer     iSequencer to add a new camera.
+    * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
     *  Update the camera location from the viewport
     *
-    * @param ISequencer iSequencer to update camera.
+    * @param ISequencer     iSequencer to update camera.
+    * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
     *  Stop piloting camera
     *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer                 iSequencer to stop piloting camera.
+    * @param FFrameNumber               iFrameNumber to get the board section.
+    * @param ACineCameraActor*          iCamera which was piloted.
+    * @param TOptional<FTransformData>  iPreviousTransform to know where the camera was before piloting.
+    * @param FTransformData             iNewTransform to know its new location.
     */
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
 // Inside EspoSequenceToolHelpers_Plane
 public:
     /**
-    *  Add a Camera track
+    *  Create a new plane (actor & track) in the board section
     *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    * @param ISequencer     iSequencer to add a new plane.
+    * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    /**
+    *  Get all planes (actor & track bindings) in the board section
+    *
+    * @param ISequencer     iSequencer to get planes.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param TArray<AStaticMeshActor*>* oPlanes to get all plane actors.
+    * @param TArray<FGuid>*             oPlaneBindings to get all plane bindings.
+    */
     static int32 GetPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 // Inside EspoSequenceToolHelpers_Drawing
 public:
     /**
-    *  Add a drawing (material/texture)
+    *  Create a new drawing (material & texture) in a plane in the board section
     *
-    * @param ISequencer iSequencer to add a drawing.
+    * @param ISequencer     iSequencer to add a new drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iPlaneBinding to get the plane track.
     */
     static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
+    /**
+    *  Can a drawing be created in the board section ?
+    *
+    * @param ISequencer     iSequencer to get the camera.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iPlaneBinding to get the plane track.
+    * @return bool
+    */
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
 public:
     /**
-    *  Go to the previous drawing
+    *  Go to the previous drawing in the board section
     *
-    * @param ISequencer iSequencer to add a drawing.
+    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    /**
+    *  Is there a previous drawing in the board section ?
+    *
+    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
     static bool HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Go to the next drawing
+    *  Go to the next drawing in the board section
     *
-    * @param ISequencer iSequencer to add a drawing.
+    * @param ISequencer     iSequencer to find the next drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    /**
+    *  Is there a next drawing in the board section ?
+    *
+    * @param ISequencer     iSequencer to find the next drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
     static bool HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 };
 

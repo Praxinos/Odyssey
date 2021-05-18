@@ -67,7 +67,7 @@ ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
 
 //static
 int32
-ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     if( oPlanes )
         oPlanes->Empty();
@@ -97,7 +97,7 @@ ShotSequenceHelpers::GetPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
 
             if( plane )
             {
-                switch( iSelection )
+                switch( iPlaneSelection )
                 {
                     case EGetPlane::kAlwaysAll:
                         planes.Add( plane );
@@ -164,7 +164,6 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
     if( oData )
     {
         oData->mChannel = nullptr;
-        oData->mTrack = nullptr;
         oData->mSection = nullptr;
     }
 
@@ -199,7 +198,6 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
     if( oData )
     {
         oData->mChannel = channels[0];
-        oData->mTrack = track;
         oData->mSection = section;
     }
 
@@ -208,7 +206,7 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
 
 //static
 TArray<FFrameNumber>
-ShotSequenceHelpers::GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection )
 {
     TArray<FFrameNumber> times;
 
@@ -218,7 +216,7 @@ ShotSequenceHelpers::GetAllMaterialTimes( IMovieScenePlayer& iPlayer, UMovieScen
 
     TArray<AStaticMeshActor*> planes;
     TArray<FGuid> guids;
-    int32 nb_plane = GetPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll, &planes, &guids );
+    int32 nb_plane = GetPlanes( iPlayer, iSequence, iSequenceID, iPlaneSelection, &planes, &guids );
     if( !nb_plane )
         return times;
 
