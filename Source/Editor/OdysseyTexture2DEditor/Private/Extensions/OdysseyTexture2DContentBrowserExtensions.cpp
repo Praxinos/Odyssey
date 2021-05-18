@@ -6,19 +6,23 @@
 #include "AssetData.h"
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
+#include "DesktopPlatformModule.h"
 #include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
-#include "IAssetTools.h"
-#include "IContentBrowserSingleton.h"
-#include "IDesktopPlatform.h"
-#include "DesktopPlatformModule.h"
 #include "Framework/Commands/UIAction.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
+#include "IAssetTools.h"
+#include "IContentBrowserSingleton.h"
+#include "IDesktopPlatform.h"
+#include "IOdysseyTexture2DEditorModule.h"
 #include "Misc/PackageName.h"
 #include "Modules/ModuleManager.h"
+#include "OdysseyBlock.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "Textures/SlateIcon.h"
-#include "IOdysseyTexture2DEditorModule.h"
+#include "ULISLoaderModule.h"
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DContentBrowserExtensions"
 
@@ -121,15 +125,62 @@ public:
         {
             TArray< FString > filenames;
             UTexture2D* texture = *textureIt;
-            desktopPlatformHandle->SaveFileDialog(
+            bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
                   FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
                 , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
                 , FPaths::ProjectDir()
-                , TEXT("")
-                , TEXT("PNG Image (.png)|*.png")
+                , texture->GetName()
+                , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|HDR Image (.HDR)|*.hdr")
                 , EFileDialogFlags::None
                 , filenames
             );
+
+            if( !saveSuccess )
+            {
+                // TODO: error message
+                continue;
+            }
+
+            if( filenames.Num() > 0 )
+            {
+                FOdysseyBlock* odysseyBlockToSave = NewOdysseyBlockFromUTextureData( texture, ULISFormatForUE4TextureSourceFormat( texture->Source.GetFormat() ) );
+                ::ul3::FBlock* ulisBlockToSave = odysseyBlockToSave->GetBlock();
+                IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+                FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
+                std::string str = std::string( TCHAR_TO_UTF8( *path ) );
+                std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
+                ::ul3::eImageFormat exportImageFormat = ::ul3::eImageFormat::IM_PNG;
+                bool extensionFound = false;
+                for( int i = 0; i <= ::ul3::eImageFormat::IM_HDR; ++i )
+                {
+                    if( extension == ::ul3::kwImageFormat[i] )
+                    {
+                        exportImageFormat = static_cast< ::ul3::eImageFormat >( i );
+                        extensionFound = true;
+                        break;
+                    }
+                }
+
+                if( !extensionFound )
+                {
+                    // TODO: error message
+                    continue;
+                }
+
+                ::ul3::SaveToFile(
+                      hULIS.ThreadPool()
+                    , true
+                    , 0
+                    , hULIS.HostDeviceInfo()
+                    , false
+                    , ulisBlockToSave
+                    , str
+                    , exportImageFormat
+                    , 100
+                );
+
+                delete odysseyBlockToSave;
+            }
         }
     }
 
@@ -186,7 +237,7 @@ FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( F
         FExecuteAction::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( exportTextureFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit Texture with ILIAD" )
+          LOCTEXT( "CB_Extension_Texture_OpenPaintEditor", "Edit Texture" )
         , LOCTEXT( "CB_Extension_Texture_OpenPaintEditor_Tooltip", "Open ILIAD paint editor for the selected Texture" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditTexture
@@ -194,7 +245,7 @@ FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( F
         , EUserInterfaceActionType::Button );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "CB_Extension_Texture_Export", "Export Texture with ILIAD" )
+          LOCTEXT( "CB_Extension_Texture_Export", "Export Texture" )
         , LOCTEXT( "CB_Extension_Texture_Export_Tooltip", "Export Texture with ILIAD" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_ExportTexture
