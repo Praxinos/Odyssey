@@ -32,7 +32,14 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     check( epos_plugin.IsValid() );
     SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
 
+    //---
+
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "IconCinematicBoardTrack_16x", Icon16x16 ) );
+
+    Set( "EposTracksEditor.LighttableOn", new IMAGE_BRUSH( "LighttableOn_16x", Icon16x16 ) );
+    Set( "EposTracksEditor.LighttableOff", new IMAGE_BRUSH( "LighttableOff_16x", Icon16x16 ) );
+
+    //---
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }

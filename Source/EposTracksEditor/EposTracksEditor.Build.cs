@@ -57,6 +57,7 @@ public class EposTracksEditor : ModuleRules
                 "UnrealEd",
                 "EditorStyle",
                 "EditorWidgets",
+                "MaterialEditor",
                 // [EDITOR] custom plugin dependencies
             }
             );

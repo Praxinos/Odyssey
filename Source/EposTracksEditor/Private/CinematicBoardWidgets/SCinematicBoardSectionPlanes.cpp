@@ -4,13 +4,187 @@
 #include "CinematicBoardWidgets/SCinematicBoardSectionPlanes.h"
 
 #include "Brushes/SlateColorBrush.h"
+#include "Channels/MovieSceneChannelProxy.h"
+#include "Channels/MovieSceneObjectPathChannel.h"
+#include "MaterialEditingLibrary.h"
+#include "Materials/MaterialInstanceConstant.h"
+#include "Sections/MovieScenePrimitiveMaterialSection.h"
 
 #include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "Shot/ShotSequenceHelpers.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionPlanes"
+
+//---
+
+class FLighttable
+{
+public:
+    FLighttable();
+
+public:
+    bool IsEnabled() const;
+    bool IsDisabled() const;
+
+    void Init( IMovieScenePlayer* iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+
+    void Activate();
+    void Deactivate();
+
+private:
+    void Activate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+    void Deactivate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+
+private:
+    IMovieScenePlayer*      mPlayer;
+    UMovieSceneSequence*    mSequence;
+    FMovieSceneSequenceID   mSequenceID;
+    FGuid                   mPlaneBinding;
+
+    bool mState;
+};
+
+FLighttable::FLighttable()
+    : mPlayer( nullptr )
+    , mSequence( nullptr )
+    //, mSequenceID()
+    //, mPlaneBinding()
+    , mState( false )
+{
+}
+
+void
+FLighttable::Init( IMovieScenePlayer* iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    mPlayer = iPlayer;
+    mSequence = iSequence;
+    mSequenceID = iSequenceID;
+    mPlaneBinding = iPlaneBinding;
+
+    //mState = ...
+}
+
+void
+FLighttable::Activate()
+{
+    if( IsEnabled() )
+        return;
+
+    mState = true;
+
+    Activate( *mPlayer, mSequence, mSequenceID, mPlaneBinding );
+}
+
+void
+FLighttable::Deactivate()
+{
+    if( IsDisabled() )
+        return;
+
+    mState = false;
+
+    Deactivate( *mPlayer, mSequence, mSequenceID, mPlaneBinding );
+}
+
+bool
+FLighttable::IsEnabled() const
+{
+    return mState == true;
+}
+
+bool
+FLighttable::IsDisabled() const
+{
+    return mState == false;
+}
+
+//static
+void
+FLighttable::Activate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, iSequence, iSequenceID, iPlaneBinding );
+
+    for( auto section : plane_material_sections )
+    {
+        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
+        if( !section_material )
+            continue;
+
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        check( channels.Num() == 1 );
+        FMovieSceneObjectPathChannel* channel = channels[0];
+
+        TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
+        for( int i = 0; i < values.Num(); i++ )
+        {
+            UMaterialInstanceConstant* previous_material = nullptr;
+            UTexture* previous_texture = nullptr;
+            if( i > 0 )
+            {
+                previous_material = Cast<UMaterialInstanceConstant>( values[i - 1].Get() );
+                previous_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), previous_texture );
+            }
+
+            UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+
+            UMaterialInstanceConstant* next_material = nullptr;
+            UTexture* next_texture = nullptr;
+            if( i < values.Num() - 1 )
+            {
+                next_material = Cast<UMaterialInstanceConstant>( values[i + 1].Get() );
+                next_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), next_texture );
+            }
+
+            if( previous_texture )
+            {
+                current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), previous_texture );
+            }
+            if( next_texture )
+            {
+                current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), next_texture );
+            }
+
+            UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
+        }
+    }
+}
+
+//static
+void
+FLighttable::Deactivate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, iSequence, iSequenceID, iPlaneBinding );
+
+    for( auto section : plane_material_sections )
+    {
+        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
+        if( !section_material )
+            continue;
+
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        check( channels.Num() == 1 );
+        FMovieSceneObjectPathChannel* channel = channels[0];
+
+        TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
+        if( values.Num() <= 1 )
+            continue;
+
+        for( int i = 0; i < values.Num(); i++ )
+        {
+            UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
+
+            UTexture2D* texture_transparent = LoadObject<UTexture2D>( nullptr, TEXT( "/Epos/T_Transparent" ) );
+
+            current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), texture_transparent );
+            current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), texture_transparent );
+
+            UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
+        }
+    }
+}
 
 //---
 
@@ -31,6 +205,8 @@ private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     FMovieScenePossessable mBinding;
+
+    FLighttable mLighttable;
 };
 
 void
@@ -39,17 +215,46 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     mBoardSection = iBoardSection;
 
     mBinding = InArgs._Binding;
+    check( mBinding.GetGuid().IsValid() );
+
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    mLighttable.Init( sequencer.Get(), result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
 
     static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
+    static const FSlateBrush* lighttable_on_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOn" );
+    static const FSlateBrush* lighttable_off_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOff" );
+
+    //---
 
     ChildSlot
     [
         SNew( SBorder )
-        .BorderImage( mBinding.GetGuid().IsValid() ? background_brush : nullptr )
-        .HAlign( EHorizontalAlignment::HAlign_Center )
+        .BorderImage( background_brush )
         [
-            SNew( STextBlock )
-            .Text( mBinding.GetGuid().IsValid() ? FText::FromString( mBinding.GetName() ) : FText::GetEmpty() )
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew( SButton )
+                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                .Cursor( EMouseCursor::Default )
+                .OnClicked_Lambda( [&]() { mLighttable.IsEnabled() ? mLighttable.Deactivate() : mLighttable.Activate(); return FReply::Handled(); } )
+                .ToolTipText_Lambda( [&]() { return mLighttable.IsEnabled() ? LOCTEXT( "lighttable.on", "Lighttable On" ) : LOCTEXT( "lighttable.off", "Lighttable Off" ); } )
+                [
+                    SNew( SImage )
+                    .Image_Lambda( [&]() { return mLighttable.IsEnabled() ? lighttable_on_brush : lighttable_off_brush; } )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
+            .VAlign( VAlign_Center )
+            [
+                SNew( STextBlock )
+                .Text( FText::FromString( mBinding.GetName() ) )
+            ]
         ]
     ];
 }
@@ -571,16 +776,19 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
     [
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneTitle, iBoardSection )
             .Binding( mBinding )
         ]
         + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneMaterialKeys, iBoardSection )
             .Binding( mBinding )
         ]
         + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
             .Binding( mBinding )
@@ -721,22 +929,31 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     mPossessables.Empty();
 
-    // This doesn't work because this vertical box won't have the same size for all sections
-    // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
-    // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
-    //int max_planes = possessables.Num();
-
     UMovieSceneSequence* inner_sequence = subsection.GetSequence();
     UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     if( !inner_moviescene )
         return;
 
-    int max_planes = GetMaxPlaneCount( *sequencer, subsection.GetTypedOuter<UMovieSceneTrack>(), sequencer->GetFocusedTemplateID() );
-    for( int i = 0; i < max_planes; i++ )
+    // This doesn't work because this vertical box won't have the same size for all sections
+    // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
+    // if the first section has no (or less) planes than others, all planes in the vertical box won't be displayed
+    //int max_planes = possessables.Num();
+
+    // Now it seems possible with the new way to compute each section height from the track
+
+    //int max_planes = GetMaxPlaneCount( *sequencer, subsection.GetTypedOuter<UMovieSceneTrack>(), sequencer->GetFocusedTemplateID() );
+    //for( int i = 0; i < max_planes; i++ )
+    //{
+    //    FMovieScenePossessable possessable;
+    //    if( bindings.IsValidIndex( i ) )
+    //        possessable = *inner_moviescene->FindPossessable( bindings[i] );
+
+    //    mPossessables.Add( MakeShared<FMovieScenePossessable>( possessable ) );
+    //}
+
+    for( int i = 0; i < plane_count; i++ )
     {
-        FMovieScenePossessable possessable;
-        if( bindings.IsValidIndex( i ) )
-            possessable = *inner_moviescene->FindPossessable( bindings[i] );
+        FMovieScenePossessable possessable = *inner_moviescene->FindPossessable( bindings[i] );
 
         mPossessables.Add( MakeShared<FMovieScenePossessable>( possessable ) );
     }

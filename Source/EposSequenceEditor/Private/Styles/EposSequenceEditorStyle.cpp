@@ -33,6 +33,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     check( epos_plugin.IsValid() );
     SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
 
+    //---
+
     // tab icons
     Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH( "SequencerTab_16x", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
 
@@ -112,6 +114,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "FilmOverlay.3x3Grid", new IMAGE_BRUSH( "FilmOverlay.3x3Grid", FVector2D( 36, 24 ) ) );
     Set( "FilmOverlay.Crosshair", new IMAGE_BRUSH( "FilmOverlay.Crosshair", FVector2D( 36, 24 ) ) );
     Set( "FilmOverlay.Rabatment", new IMAGE_BRUSH( "FilmOverlay.Rabatment", FVector2D( 36, 24 ) ) );
+
+    //---
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }

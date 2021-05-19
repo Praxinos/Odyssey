@@ -81,19 +81,18 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
     //---
 
-    FString new_material_package_name;
-    FString new_material_asset_name;
-    UMaterialInstanceConstant* new_material = CreateMaterialInstanceConstantAsset( iSequence, iSequencer.GetRootMovieSceneSequence(), new_material_package_name, new_material_asset_name );
+    FString package_name;
+    FString asset_name;
+    UMaterialInstanceConstant* new_material = CreateCurrentMaterialPlaneAsset( iSequence, iSequencer.GetRootMovieSceneSequence(), package_name, asset_name );
     if( !new_material )
         return;
 
-    FString new_texture_package_name;
-    FString new_texture_asset_name;
-    UTexture2D* new_texture = CreateTexture2DAsset( iSequence, new_material, new_texture_package_name, new_texture_asset_name );
+    UTexture2D* new_texture = CreateCurrentTexture2DAsset( iSequence, new_material, package_name, asset_name );
     if( !new_texture )
         return;
 
     new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
+//TODO: manage lighttable or in the delegate inside section row ?
 
     //---
 
