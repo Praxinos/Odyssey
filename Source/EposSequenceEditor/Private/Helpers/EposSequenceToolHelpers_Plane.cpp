@@ -3,8 +3,6 @@
 
 #include "Helpers/EposSequenceToolHelpers.h"
 
-#include "AssetRegistryModule.h"
-#include "AssetToolsModule.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
@@ -24,6 +22,7 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
+#include "MaterialPlaneAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceToolHelpers_Plane"
@@ -139,161 +138,6 @@ ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, 
     return plane;
 }
 
-//static
-UTexture2D*
-ShotSequenceToolHelpers::CreateTexture2DTransparentMasterAsset( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
-{
-    UTexture2D* texture_root = LoadObject<UTexture2D>( nullptr, TEXT( "/Epos/T_Transparent" ) );
-    if( !texture_root )
-        return nullptr;
-
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-
-    UTexture2D* texture_master = nullptr;
-
-    UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
-    UPackage* root_package = root_asset->GetPackage();
-    FString root_package_name = root_package->GetName() / "T_Transparent_Master"; // ie. /Game/MyStoryboard2
-
-    TArray<FAssetData> asset_datas;
-    assetRegistryModule.Get().GetAssetsByPackageName( *root_package_name, asset_datas );
-    if( !asset_datas.Num() )
-    {
-        assetToolsModule.Get().CreateUniqueAssetName( root_package_name, "", oPackageName, oAssetName );
-
-        FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-        UObject* new_object = assetToolsModule.Get().DuplicateAsset( oAssetName, package_path, texture_root );
-
-        texture_master = Cast<UTexture2D>( new_object );
-    }
-    else
-    {
-        oPackageName = asset_datas[0].PackageName.ToString();
-        oAssetName = asset_datas[0].AssetName.ToString();
-        texture_master = Cast<UTexture2D>( asset_datas[0].GetAsset() );
-    }
-
-    return texture_master;
-}
-
-//static
-UMaterialInstanceConstant*
-ShotSequenceToolHelpers::CreateMaterialPlaneMasterAsset( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
-{
-    UMaterial* material_root = LoadObject<UMaterial>( nullptr, TEXT( "/Epos/M_Plane_Root.M_Plane_Root" ) );
-    if( !material_root )
-        return nullptr;
-
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-
-    UMaterialInstanceConstant* material_master = nullptr;
-
-    UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
-    UPackage* root_package = root_asset->GetPackage();
-    FString root_package_name = root_package->GetName() / "MI_Plane_Master"; // ie. /Game/MyStoryboard2
-
-    TArray<FAssetData> asset_datas;
-    assetRegistryModule.Get().GetAssetsByPackageName( *root_package_name, asset_datas );
-    if( !asset_datas.Num() )
-    {
-        assetToolsModule.Get().CreateUniqueAssetName( root_package_name, "", oPackageName, oAssetName );
-
-        UMaterialInstanceConstantFactoryNew* factory = NewObject<UMaterialInstanceConstantFactoryNew>();
-        factory->InitialParent = material_root;
-
-        FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-        UObject* new_object = assetToolsModule.Get().CreateAsset( oAssetName, package_path, UMaterialInstanceConstant::StaticClass(), factory );
-
-        material_master = Cast<UMaterialInstanceConstant>( new_object );
-
-        //---
-
-        material_master->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), iDefaultTexture );
-        material_master->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), iDefaultTexture );
-        material_master->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), iDefaultTexture );
-
-        // For information, as they were replaced by a float parameter to switch between grid or not
-        //FStaticParameterSet static_params;
-        //material_master->GetStaticParameterValues( static_params );
-        //for( auto& parameter : static_params.StaticSwitchParameters )
-        //    parameter.bOverride = true;
-        //material_master->UpdateStaticPermutation( static_params );
-
-        //// Needed to compute all cases during creation, to have all shaders computed
-        //for( int combination = 0; combination < FMath::Pow( 2, static_params.StaticSwitchParameters.Num() ); combination++ )
-        //{
-        //    //UE_LOG( LogTemp, Warning, TEXT( "combination: %d" ), combination );
-        //    for( int i = 0; i < static_params.StaticSwitchParameters.Num(); i++ )
-        //    {
-        //        static_params.StaticSwitchParameters[i].Value = combination & ( 1 << i );
-        //        //UE_LOG( LogTemp, Warning, TEXT( "i: %d - value: %d" ), i, static_params.StaticSwitchParameters[i].Value );
-        //        material_master->UpdateStaticPermutation( static_params );
-        //    }
-        //}
-    }
-    else
-    {
-        oPackageName = asset_datas[0].PackageName.ToString();
-        oAssetName = asset_datas[0].AssetName.ToString();
-        material_master = Cast<UMaterialInstanceConstant>( asset_datas[0].GetAsset() );
-    }
-
-    return material_master;
-}
-
-
-//static
-UMaterialInstanceConstant*
-ShotSequenceToolHelpers::CreateCurrentMaterialPlaneAsset( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
-{
-    FString package_name;
-    FString asset_name;
-    UTexture2D* master_texture = CreateTexture2DTransparentMasterAsset( iRootSequence, package_name, asset_name );
-    if( !master_texture )
-        return nullptr;
-
-    UMaterialInstanceConstant* master_material = CreateMaterialPlaneMasterAsset( iRootSequence, master_texture, package_name, asset_name );
-    if( !master_material )
-        return nullptr;
-
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-
-    UPackage* package = iSequence->GetPackage();
-    package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
-
-    assetToolsModule.Get().CreateUniqueAssetName( package_name, "_MI_01", oPackageName, oAssetName );
-
-    UMaterialInstanceConstantFactoryNew* factory = NewObject<UMaterialInstanceConstantFactoryNew>();
-    factory->InitialParent = master_material;
-
-    FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( oAssetName, package_path, UMaterialInstanceConstant::StaticClass(), factory );
-
-    return Cast<UMaterialInstanceConstant>( new_object );
-}
-
-//static
-UTexture2D*
-ShotSequenceToolHelpers::CreateCurrentTexture2DAsset( UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName )
-{
-    UTexture2D* texture_transparent = LoadObject<UTexture2D>( nullptr, TEXT( "/Epos/T_Transparent" ) ); // It should be from "master transparent texture", but as there is no dependencies between texture (unlike material), it should be ok. Or maybe make a function GetMaster*()
-    if( !texture_transparent )
-        return nullptr;
-
-    UPackage* package = iMaterial->GetPackage();
-    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/M_Plane_Basic_Inst
-
-    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    Module.Get().CreateUniqueAssetName( package_name, "_T_01", oPackageName, oAssetName );
-
-    FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-    UObject* new_object = Module.Get().DuplicateAsset( oAssetName, package_path, texture_transparent );
-
-    return Cast<UTexture2D>( new_object );
-}
-
 /*
 static
 int
@@ -368,17 +212,9 @@ SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
 void
 ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
-    FString package_name;
-    FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateCurrentMaterialPlaneAsset( iSequence, iSequencer.GetRootMovieSceneSequence(), package_name, asset_name );
+    UMaterialInstanceConstant* new_material = MaterialPlaneAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
         return;
-
-    UTexture2D* new_texture = CreateCurrentTexture2DAsset( iSequence, new_material, package_name, asset_name );
-    if( !new_texture )
-        return;
-
-    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
 
     //---
 

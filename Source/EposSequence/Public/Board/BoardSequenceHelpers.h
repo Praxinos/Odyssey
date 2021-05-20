@@ -24,8 +24,8 @@ public:
         UMovieScene*            mInnerMovieScene = nullptr;
         FFrameTime              mInnerTime = 0;
     };
-    static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iSequencer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceId );
-    static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber );
+    static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceId );
+    static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber );
 
 public:
     static TArray<FFrameTime> GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection );

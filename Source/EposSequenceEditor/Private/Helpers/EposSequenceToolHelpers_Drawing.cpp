@@ -16,6 +16,7 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
+#include "MaterialPlaneAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceToolHelpers_Drawing"
@@ -81,17 +82,10 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
     //---
 
-    FString package_name;
-    FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateCurrentMaterialPlaneAsset( iSequence, iSequencer.GetRootMovieSceneSequence(), package_name, asset_name );
+    UMaterialInstanceConstant* new_material = MaterialPlaneAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
         return;
 
-    UTexture2D* new_texture = CreateCurrentTexture2DAsset( iSequence, new_material, package_name, asset_name );
-    if( !new_texture )
-        return;
-
-    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
 //TODO: manage lighttable or in the delegate inside section row ?
 
     //---

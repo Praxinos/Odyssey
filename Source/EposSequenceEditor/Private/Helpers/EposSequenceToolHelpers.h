@@ -218,12 +218,6 @@ private:
     static AStaticMeshActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
     static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
-    static UTexture2D* CreateTexture2DTransparentMasterAsset( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UMaterialInstanceConstant* CreateMaterialPlaneMasterAsset( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName );
-
-    static UMaterialInstanceConstant* CreateCurrentMaterialPlaneAsset( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UTexture2D* CreateCurrentTexture2DAsset( UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName );
-
 // Inside EspoSequenceToolHelpers_Drawing
 public:
     /**
