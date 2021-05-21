@@ -92,8 +92,8 @@ public:
             {
                 if (!warningDisplayed)
                 {
-                    FText Title = LOCTEXT("TitleDeletingCurrentLayer", "Texture Already Opened");
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("DeletingCurrentLayer", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
+                    FText Title = LOCTEXT("TitleTextureAlreadyOpened", "Texture Already Opened");
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MessageTextureAlreadyOpened", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), &Title);
                     warningDisplayed = true;
                 }
 			    continue;
@@ -135,10 +135,19 @@ public:
                 , filenames
             );
 
-            if( !saveSuccess )
+
+            if( ( textureIt.GetIndex() != ( iTextures.Num() - 1 ) ) && ( !saveSuccess ) )
             {
-                // TODO: error message
-                continue;
+                FText Title = LOCTEXT("TitleSaveCancel", "Save cancelled");
+                EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("MessageSaveCancel", "Continue the remaing files export ?"), &Title);
+                if( answer == EAppReturnType::Yes )
+                { 
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
             }
 
             if( filenames.Num() > 0 )
@@ -163,7 +172,8 @@ public:
 
                 if( !extensionFound )
                 {
-                    // TODO: error message
+                    FText Title = LOCTEXT("TitleExtensionNotFound", "Invalid extension");
+                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MessageExtensionNotFound", "The file extension or the file format is not supported"), &Title);
                     continue;
                 }
 
