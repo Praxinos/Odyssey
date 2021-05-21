@@ -30,16 +30,95 @@ public:
         SLATE_ARGUMENT( FMovieScenePossessable, Binding )
     SLATE_END_ARGS()
 
+    ~SCinematicBoardSectionPlaneTitle();
+
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
+
+private:
+    void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
+
+    FReply              OnLighttableClicked() const;
+    FText               GetLighttableTooltip() const;
+    const FSlateBrush*  GetLighttableIcon() const;
 
 private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     FMovieScenePossessable mBinding;
 
-    bool mLighttableState;
+    /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
+    FDelegateHandle mMovieSceneDataChangedHandle;
 };
+
+SCinematicBoardSectionPlaneTitle::~SCinematicBoardSectionPlaneTitle()
+{
+    if( mBoardSection.IsValid() && mBoardSection.Pin()->GetSequencer().IsValid() )
+        mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
+}
+
+void
+SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged( EMovieSceneDataChangeType iType )
+{
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    //---
+
+    LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+}
+
+//---
+
+FReply
+SCinematicBoardSectionPlaneTitle::OnLighttableClicked() const
+{
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    if( lighttable_on )
+        LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    else
+        LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    return FReply::Handled();
+}
+
+FText
+SCinematicBoardSectionPlaneTitle::GetLighttableTooltip() const
+{
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    return lighttable_on ? LOCTEXT( "lighttable.on", "Lighttable On" ) : LOCTEXT( "lighttable.off", "Lighttable Off" );
+}
+
+const FSlateBrush*
+SCinematicBoardSectionPlaneTitle::GetLighttableIcon() const
+{
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    //---
+
+    static const FSlateBrush* lighttable_on_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOn" );
+    static const FSlateBrush* lighttable_off_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOff" );
+
+    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() ); //TODO: improve to don't call it every ticks ?
+    return lighttable_on ? lighttable_on_brush : lighttable_off_brush;
+}
+
+//---
 
 void
 SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
@@ -49,11 +128,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     mBinding = InArgs._Binding;
     check( mBinding.GetGuid().IsValid() );
 
-    mLighttableState = false; //PATCH
+    mMovieSceneDataChangedHandle = mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged ); //TODO: or do it elsewhere ? in the USection/UTrack/... ?
 
     static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
-    static const FSlateBrush* lighttable_on_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOn" );
-    static const FSlateBrush* lighttable_off_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOff" );
 
     //---
 
@@ -69,25 +146,11 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
                 SNew( SButton )
                 .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
                 .Cursor( EMouseCursor::Default )
-                .OnClicked_Lambda( [&]()
-                    {
-                        TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-                        UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
-
-                        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
-                        if( mLighttableState )
-                            LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-                        else
-                            LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-
-                        mLighttableState = !mLighttableState;
-
-                        return FReply::Handled();
-                    } )
-                .ToolTipText_Lambda( [&]() { return mLighttableState ? LOCTEXT( "lighttable.on", "Lighttable On" ) : LOCTEXT( "lighttable.off", "Lighttable Off" ); } )
+                .OnClicked( this, &SCinematicBoardSectionPlaneTitle::OnLighttableClicked )
+                .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
                 [
                     SNew( SImage )
-                    .Image_Lambda( [&]() { return mLighttableState ? lighttable_on_brush : lighttable_off_brush; } )
+                    .Image( this, &SCinematicBoardSectionPlaneTitle::GetLighttableIcon )
                 ]
             ]
             + SHorizontalBox::Slot()
@@ -708,25 +771,25 @@ SCinematicBoardSectionPlanes::MakePlaneRow( TSharedRef<FMovieScenePossessable> i
         ];
 }
 
-static
-int
-GetMaxPlaneCount( IMovieScenePlayer& iPlayer, const UMovieSceneTrack* iTrack, FMovieSceneSequenceIDRef iSequenceID )
-{
-    int count = 0;
-    for( auto section : iTrack->GetAllSections() )
-    {
-        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
-        TArray<AStaticMeshActor*> planes;
-        TArray<FGuid> guids;
-        int plane_count = ShotSequenceHelpers::GetAllPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &guids );
-
-        count = FMath::Max( count, plane_count );
-    }
-
-    return count;
-}
+//static
+//int
+//GetMaxPlaneCount( IMovieScenePlayer& iPlayer, const UMovieSceneTrack* iTrack, FMovieSceneSequenceIDRef iSequenceID )
+//{
+//    int count = 0;
+//    for( auto section : iTrack->GetAllSections() )
+//    {
+//        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+//
+//        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
+//        TArray<AStaticMeshActor*> planes;
+//        TArray<FGuid> guids;
+//        int plane_count = ShotSequenceHelpers::GetAllPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &guids );
+//
+//        count = FMath::Max( count, plane_count );
+//    }
+//
+//    return count;
+//}
 
 void
 SCinematicBoardSectionPlanes::RebuildPlaneList()
