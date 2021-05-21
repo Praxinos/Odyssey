@@ -230,7 +230,7 @@ FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMen
         , LOCTEXT( "CB_Extension_Texture_IliadActions_ToolTip", "All actions related to ILIAD" )
         , FNewMenuDelegate::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu, iSelectedAssets )
         , false
-        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
+        , FSlateIcon( "OdysseyStyle", "OdysseyTexture.Iliad16" )
     );
 }
 
@@ -257,7 +257,7 @@ FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( F
     ioMenuBuilder.AddMenuEntry(
           LOCTEXT( "CB_Extension_Texture_Export", "Export Texture" )
         , LOCTEXT( "CB_Extension_Texture_Export_Tooltip", "Export Texture with ILIAD" )
-        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
+        , FSlateIcon( "OdysseyStyle", "OdysseyTexture.ExportTexture_16" )
         , action_ExportTexture
         , NAME_None
         , EUserInterfaceActionType::Button );
