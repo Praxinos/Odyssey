@@ -26,6 +26,9 @@ public:
 public:
     //Import Export
 
+    /** Test ExportTextureToOperatingSystem */
+    TSharedPtr<FUICommandInfo> ExportTextureToOperatingSystem;
+
     /** Action used to import Textures as Layers */
     TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
 

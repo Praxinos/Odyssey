@@ -35,6 +35,7 @@ private:
     //Methods
     virtual void ExtendMenuFile(FMenuBuilder& ioMenuBuilder);
     virtual void ImportTexturesAsLayers();
+    virtual void ExportTextureToOperatingSystem();
     virtual void ExportLayersAsTextures();
     virtual void CreateNewLayer();
     virtual void DuplicateCurrentLayer();

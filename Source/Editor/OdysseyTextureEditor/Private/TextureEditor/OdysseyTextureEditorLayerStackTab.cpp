@@ -4,10 +4,14 @@
 #include "OdysseyTextureEditorLayerStackTab.h"
 
 #include "AssetRegistryModule.h"
+#include "ContentBrowserModule.h"
+#include "DesktopPlatformModule.h"
+#include "IContentBrowserSingleton.h"
+#include "IDesktopPlatform.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
 #include "OdysseyTextureEditor.h"
-#include "ContentBrowserModule.h"
-#include "IContentBrowserSingleton.h"
+#include "ULISLoaderModule.h"
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
 
@@ -20,9 +24,9 @@ FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
 }
 
 FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditor* iEditor)
-	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_LayerStack"),
-                            LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" ),
-                            FSlateIcon( "OdysseyStyle", "TextureEditor.Layers16" ))
+	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_LayerStack")
+    , LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" )
+    , FSlateIcon( "OdysseyStyle", "TextureEditor.Layers16" ))
     , mEditor(iEditor)
 {
 }
@@ -46,8 +50,9 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-	MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
-	MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
+    MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
+    MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
+    MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
     MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
     MAP_ACTION(textureEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
     MAP_ACTION(textureEditorCommands.DeleteCurrentLayer, DeleteCurrentLayer )
@@ -87,8 +92,66 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile(FMenuBuilder& ioMenuBuilder)
     {
         ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
         ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
+        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
     }
 }
+
+void
+FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
+{
+    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+    TArray< FString > filenames;
+    bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
+        FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
+        , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
+        , FPaths::ProjectDir()
+        , mEditor->Texture()->GetName() // UTexture2D::StaticClass()->GetFName().ToString()
+        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|HDR Image (.HDR)|*.hdr")
+        , EFileDialogFlags::None
+        , filenames
+    );
+
+    if( filenames.Num() > 0 )
+    {
+        ::ul3::FBlock* ulisBlockToSave = mEditor->DisplaySurface()->Block()->GetBlock();
+        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+        FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
+        std::string str = std::string( TCHAR_TO_UTF8( *path ) );
+        std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
+        ::ul3::eImageFormat exportImageFormat = ::ul3::eImageFormat::IM_PNG;
+        bool extensionFound = false;
+        for( int i = 0; i <= ::ul3::eImageFormat::IM_HDR; ++i )
+        {
+            if( extension == ::ul3::kwImageFormat[i] )
+            {
+                exportImageFormat = static_cast< ::ul3::eImageFormat >( i );
+                extensionFound = true;
+                break;
+            }
+        }
+
+        if( !extensionFound )
+        {
+            FText Title = LOCTEXT("TitleExtensionNotFound", "Invalid extension");
+            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("MessageExtensionNotFound", "The file extension or the file format is not supported"), &Title);
+        }
+        else
+        {
+            ::ul3::SaveToFile(
+                    hULIS.ThreadPool()
+                , true
+                , 0
+                , hULIS.HostDeviceInfo()
+                , false
+                , ulisBlockToSave
+                , str
+                , exportImageFormat
+                , 100
+            );
+        }
+    }
+}
+
 
 void           
 FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()

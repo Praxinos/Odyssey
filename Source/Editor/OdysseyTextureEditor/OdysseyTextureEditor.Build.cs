@@ -23,6 +23,7 @@ public class OdysseyTextureEditor : ModuleRules
                 "AppFramework",
                 "Core",
                 "CoreUObject",
+                "DesktopPlatform",
                 "Slate",
                 "SlateCore",
                 "UnrealEd",
