@@ -4,6 +4,7 @@
 #include "Board/BoardSequence.h"
 
 #include "Components/ActorComponent.h"
+#include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
@@ -40,16 +41,38 @@ void UBoardSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
 
 void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& PossessedObject, UObject* Context)
 {
-    MovieScene->RemovePossessable( ObjectId );
+    if( !CanPossessObject( PossessedObject, Context ) )
+    {
+        MovieScene->RemovePossessable( ObjectId );
+        //UnbindPossessableObjects( ObjectId ); // Not necessary (?) as it can't have been added previously (?)
+
+        return;
+    }
+
+    ActorsBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
 }
 
 bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContext) const
 {
-    return false;
+    return Object.IsA<AStaticMeshActor>() || Object.IsA<UActorComponent>();
+}
+
+bool UBoardSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const
+{
+    return !InPossessable.GetParent().IsValid();
 }
 
 void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects) const
 {
+    const FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( ResolvedObject && ResolvedObject->GetWorld() )
+        {
+            OutObjects.Add( ResolvedObject );
+        }
+    }
 }
 
 UMovieScene* UBoardSequence::GetMovieScene() const
@@ -59,19 +82,47 @@ UMovieScene* UBoardSequence::GetMovieScene() const
 
 UObject* UBoardSequence::GetParentObject(UObject* Object) const
 {
+    if( UActorComponent* Component = Cast<UActorComponent>( Object ) )
+    {
+        return Component->GetOwner();
+    }
+
     return nullptr;
 }
 
 void UBoardSequence::UnbindPossessableObjects(const FGuid& ObjectId)
 {
+    ActorsBindingIdToReferences.Remove( ObjectId );
 }
 
 void UBoardSequence::UnbindObjects(const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context)
 {
+    FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( InObjects.Contains( ResolvedObject ) )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
+
+        return;
+    }
 }
 
 void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Context)
 {
+    FLevelSequenceBindingReference* Reference = ActorsBindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
+
+        return;
+    }
 }
 
 #if WITH_EDITOR

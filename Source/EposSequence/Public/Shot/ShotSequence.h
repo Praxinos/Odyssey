@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include "LevelSequenceBindingReference.h"
 #include "EposMovieSceneSequence.h"
+#include "LevelSequenceBindingReference.h"
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
+
 #include "ShotSequence.generated.h"
 
 /*
@@ -54,7 +55,6 @@ public:
 #endif
 
 public:
-
     UPROPERTY()
     UMovieScene* MovieScene;
 

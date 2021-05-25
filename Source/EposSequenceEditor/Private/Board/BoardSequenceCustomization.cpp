@@ -561,13 +561,6 @@ FBoardSequenceCustomization::OnPostPropertyChanged( UObject* InObject, FProperty
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerAssetsDrop( const TArray<UObject*>& iAssets, const FAssetDragDropOp& iDragDropOp )
 {
-    // Maybe we can store data, and then get them inside tracks through (like in sequencer.cpp ?)
-    //   ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    //   TSharedPtr<FSequencerCustomizationManager> Manager = SequencerModule.GetSequencerCustomizationManager();
-    //   ...
-    // because once an asset is dropped on a NOT supported track, it goes through here, where we can store iDragDropOp.X/Y,
-    // and get them again when we go inside CinematicBoardTrackEditor:HandleAssetAdded() where the information is not given
-
     return ESequencerDropResult::Unhandled; // Process the default behavior for assets
 }
 
@@ -580,7 +573,7 @@ FBoardSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropGraphEdOp& iDragDropOp )
 {
-    return ESequencerDropResult::DropDenied;    // Don't accept actors
+    return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }
 
 #undef LOCTEXT_NAMESPACE
