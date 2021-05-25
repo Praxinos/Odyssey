@@ -124,12 +124,12 @@ public:
         for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
         {
             TArray< FString > filenames;
-            UTexture2D* texture = *textureIt;
+            UTexture2D* currentTexture = *textureIt;
             bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
                   FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
                 , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
                 , FPaths::ProjectDir()
-                , texture->GetName()
+                , currentTexture->GetName()
                 , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|HDR Image (.HDR)|*.hdr")
                 , EFileDialogFlags::None
                 , filenames
@@ -152,9 +152,6 @@ public:
 
             if( filenames.Num() > 0 )
             {
-                FOdysseyBlock* odysseyBlockToSave = NewOdysseyBlockFromUTextureData( texture, ULISFormatForUE4TextureSourceFormat( texture->Source.GetFormat() ) );
-                ::ul3::FBlock* ulisBlockToSave = odysseyBlockToSave->GetBlock();
-                IULISLoaderModule& hULIS = IULISLoaderModule::Get();
                 FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
                 std::string str = std::string( TCHAR_TO_UTF8( *path ) );
                 std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
@@ -177,13 +174,17 @@ public:
                     continue;
                 }
 
+                FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
+                FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
+                CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
+                IULISLoaderModule& hULIS = IULISLoaderModule::Get();
                 ::ul3::SaveToFile(
                       hULIS.ThreadPool()
                     , true
                     , 0
                     , hULIS.HostDeviceInfo()
                     , false
-                    , ulisBlockToSave
+                    , odysseyBlockToSave->GetBlock()
                     , str
                     , exportImageFormat
                     , 100

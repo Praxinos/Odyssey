@@ -140,7 +140,6 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
         {
             FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
             FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
-            currentTexture->UpdateResource();
             CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
             IULISLoaderModule& hULIS = IULISLoaderModule::Get();
             ::ul3::SaveToFile(

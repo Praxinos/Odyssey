@@ -49,14 +49,15 @@ CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
            iBlock->Height() == PlatformData->SizeY
            ,TEXT("Sizes do not match"));
 
-    ENQUEUE_RENDER_COMMAND(UpdateTextureRegionsData)(
+    ENQUEUE_RENDER_COMMAND(GetTextureData)(
         [ iTexture, iBlock ]( FRHICommandListImmediate& RHICmdList ) {
             uint32 stride;
             void* data = RHILockTexture2D( iTexture->Resource->GetTexture2DRHI(), 0, EResourceLockMode::RLM_ReadOnly, stride, true, true );
             if( data )
-                FMemory::Memcpy(iBlock->GetArray().GetData(), data, iBlock->GetArray().Num() );
+                FMemory::Memcpy( iBlock->GetArray().GetData(), data, iBlock->GetArray().Num() );
             // TODO: Check if necessary
-            RHICmdList.EnqueueLambda( [ data ]( FRHICommandList& ) { delete data; } );
+            // RHICmdList.EnqueueLambda( [ data ]( FRHICommandList& ) { delete data; } );
+            RHIUnlockTexture2D( iTexture->Resource->GetTexture2DRHI(), 0, true, true );
         }
     );
 
