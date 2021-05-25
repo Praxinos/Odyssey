@@ -9,6 +9,7 @@
 #include "IContentBrowserSingleton.h"
 #include "IDesktopPlatform.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
+#include "OdysseyBlock.h"
 #include "OdysseyTextureEditor.h"
 #include "ULISLoaderModule.h"
 #include <ULIS3>
@@ -99,13 +100,14 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile(FMenuBuilder& ioMenuBuilder)
 void
 FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 {
+    UTexture* currentTexture = mEditor->Texture();
     IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
         FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
         , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
         , FPaths::ProjectDir()
-        , mEditor->Texture()->GetName() // UTexture2D::StaticClass()->GetFName().ToString()
+        , currentTexture->GetName()
         , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|HDR Image (.HDR)|*.hdr")
         , EFileDialogFlags::None
         , filenames
@@ -113,8 +115,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 
     if( filenames.Num() > 0 )
     {
-        ::ul3::FBlock* ulisBlockToSave = mEditor->DisplaySurface()->Block()->GetBlock();
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
+
         FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
         std::string str = std::string( TCHAR_TO_UTF8( *path ) );
         std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
@@ -137,17 +138,24 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
         }
         else
         {
+            FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
+            FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
+            currentTexture->UpdateResource();
+            CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
+            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
             ::ul3::SaveToFile(
                     hULIS.ThreadPool()
                 , true
                 , 0
                 , hULIS.HostDeviceInfo()
                 , false
-                , ulisBlockToSave
+                , odysseyBlockToSave->GetBlock()
                 , str
                 , exportImageFormat
                 , 100
             );
+
+            delete odysseyBlockToSave;
         }
     }
 }
