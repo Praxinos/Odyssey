@@ -21,7 +21,7 @@
 /////////////////////////////////////////////////////
 // Utlity
 void
-CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
+CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
 {
     checkf(iBlock->Width() == iTexture->Source.GetSizeX() &&
            iBlock->Height() == iTexture->Source.GetSizeY()
@@ -42,13 +42,14 @@ CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
 }
 
 void
-CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture2D* iTexture)
+CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
 {
-    checkf(iBlock->Width() == iTexture->GetSizeX() &&
-           iBlock->Height() == iTexture->GetSizeY()
+    FTexturePlatformData* PlatformData = *iTexture->GetRunningPlatformData();
+    checkf(iBlock->Width() == PlatformData->SizeX &&
+           iBlock->Height() == PlatformData->SizeY
            ,TEXT("Sizes do not match"));
 
-	const FTexture2DMipMap& Mip = iTexture->GetPlatformMips()[0];
+	const FTexture2DMipMap& Mip = PlatformData->Mips[0];
 	const void* Data = Mip.BulkData.LockReadOnly();
     if( Data )
     {
