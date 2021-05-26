@@ -152,25 +152,32 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
 
 //static
 FGuid
-ToolkitHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
+ToolkitHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, UActorComponent* iComponent )
 {
-    for( UActorComponent* Component : iActor->GetComponents() )
-    {
-        if( !Component )
-            continue;
-
-        if( !Component->GetName().Contains( iComponentName ) )
-            continue;
-
-        FGuid binding = iSequencer->GetHandleToObject( Component );
-        if( binding.IsValid() )
-        {
-            return binding; // Get only the first component matching the name
-        }
-    }
-
-    return FGuid();
+    return iSequencer->GetHandleToObject( iComponent );
 }
+
+////static
+//FGuid
+//ToolkitHelpers::CreateComponentTrack( ISequencer* iSequencer, AActor* iActor, const FString& iComponentName )
+//{
+//    for( UActorComponent* Component : iActor->GetComponents() )
+//    {
+//        if( !Component )
+//            continue;
+//
+//        if( !Component->GetName().Contains( iComponentName ) )
+//            continue;
+//
+//        FGuid binding = iSequencer->GetHandleToObject( Component );
+//        if( binding.IsValid() )
+//        {
+//            return binding; // Get only the first component matching the name
+//        }
+//    }
+//
+//    return FGuid();
+//}
 
 //static
 void
@@ -312,13 +319,13 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
 
         CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
 
-        FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ? ... maybe give ->RootComponent() instead of name ?
+        FGuid component_binding = CreateComponentTrack( iSequencer, iActor, iActor->GetRootComponent() );
 
         //---
 
         // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
         int32 minNumMaterials = TNumericLimits<int32>::Max();
-        for( TWeakObjectPtr<> weakObject : iSequencer->FindObjectsInCurrentSequence( binding ) )
+        for( TWeakObjectPtr<> weakObject : iSequencer->FindObjectsInCurrentSequence( component_binding ) )
         {
             UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( weakObject.Get() );
             if( !primitiveComponent )
@@ -331,7 +338,7 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
             minNumMaterials = 0;
 
         for( int material_index = 0; material_index < minNumMaterials; material_index++ )
-            CreateTrack( iSequencer, iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
+            CreateTrack( iSequencer, iActor, component_binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
     }
     // For skeletal mesh actor
     // - '3DTransform' track
