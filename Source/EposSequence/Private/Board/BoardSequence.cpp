@@ -3,6 +3,7 @@
 
 #include "Board/BoardSequence.h"
 
+#include "Animation/SkeletalMeshActor.h"
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
@@ -25,7 +26,7 @@ UBoardSequence::UBoardSequence(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , MovieScene(nullptr)
 {
-    //bParentContextsAreSignificant = true;
+    bParentContextsAreSignificant = true;
 }
 
 void UBoardSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
@@ -54,7 +55,9 @@ void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& Posse
 
 bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContext) const
 {
-    return Object.IsA<AStaticMeshActor>() || Object.IsA<UActorComponent>();
+    return Object.IsA<AStaticMeshActor>()
+        || Object.IsA<ASkeletalMeshActor>()
+        || Object.IsA<UActorComponent>();
 }
 
 bool UBoardSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const

@@ -3,6 +3,7 @@
 
 #include "Shot/ShotSequence.h"
 
+#include "Animation/SkeletalMeshActor.h"
 #include "CineCameraActor.h"
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMeshActor.h"
@@ -77,7 +78,10 @@ void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& Posse
 
 bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContext ) const
 {
-    return Object.IsA<AStaticMeshActor>() || Object.IsA<ACineCameraActor>() || Object.IsA<UActorComponent>();
+    return Object.IsA<AStaticMeshActor>()
+        || Object.IsA<ASkeletalMeshActor>()
+        || Object.IsA<ACineCameraActor>()
+        || Object.IsA<UActorComponent>();
 }
 
 bool UShotSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const

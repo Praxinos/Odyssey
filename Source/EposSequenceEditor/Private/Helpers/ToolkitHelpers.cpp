@@ -3,13 +3,14 @@
 
 #include "Helpers/ToolkitHelpers.h"
 
-#include "GameFramework/Actor.h"
+#include "Animation/SkeletalMeshActor.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "Containers/ArrayBuilder.h"
 #include "Engine/StaticMeshActor.h"
+#include "GameFramework/Actor.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
@@ -20,6 +21,7 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
+#include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
 #include "Helpers/EposSequenceToolHelpers.h"
@@ -283,7 +285,7 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
 
     // TODO-lchabant: add default tracks (re-use level sequence toolkit code).
 
-    // Only for cinecamera actor
+    // For cinecamera actor
     // - '3DTransform' track
     // - 'CameraComponent' binding (automatically when adding property)
     //     - 'CurrentFocalLength' property
@@ -299,37 +301,46 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
 
         return;
     }
-
-    // For all other actors (except cinecamera actor)
-    // - '3DTransform' track
+    // For planes (static mesh actor)
+    // - ('3DTransform' track)
     // - 'Visibility' track
     // - 'StaticMeshComponent' binding
     //     - 'Material Switcher' track
-
-    //CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
-
-    CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
-
-    FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ? ... maybe give ->RootComponent() instead of name ?
-
-    //---
-
-    // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
-    int32 minNumMaterials = TNumericLimits<int32>::Max();
-    for( TWeakObjectPtr<> weakObject : iSequencer->FindObjectsInCurrentSequence( binding ) )
+    else if( iActor->IsA<AStaticMeshActor>() )
     {
-        UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( weakObject.Get() );
-        if( !primitiveComponent )
-            continue;
+        //CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
 
-        minNumMaterials = FMath::Min( minNumMaterials, primitiveComponent->GetNumMaterials() );
+        CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
+
+        FGuid binding = CreateComponentTrack( iSequencer, iActor, "StaticMeshComponent" ); //TODO: improve how to find it ? ... maybe give ->RootComponent() instead of name ?
+
+        //---
+
+        // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
+        int32 minNumMaterials = TNumericLimits<int32>::Max();
+        for( TWeakObjectPtr<> weakObject : iSequencer->FindObjectsInCurrentSequence( binding ) )
+        {
+            UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( weakObject.Get() );
+            if( !primitiveComponent )
+                continue;
+
+            minNumMaterials = FMath::Min( minNumMaterials, primitiveComponent->GetNumMaterials() );
+        }
+
+        if( minNumMaterials == TNumericLimits<int32>::Max() )
+            minNumMaterials = 0;
+
+        for( int material_index = 0; material_index < minNumMaterials; material_index++ )
+            CreateTrack( iSequencer, iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
     }
-
-    if( minNumMaterials == TNumericLimits<int32>::Max() )
-        minNumMaterials = 0;
-
-    for( int material_index = 0; material_index < minNumMaterials; material_index++ )
-        CreateTrack( iSequencer, iActor, binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), material_index );
+    // For skeletal mesh actor
+    // - '3DTransform' track
+    // - 'SkeletalAnimation' track
+    else if( iActor->IsA<ASkeletalMeshActor>() )
+    {
+        CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
+        CreateTrack( iSequencer, iActor, iBinding, UMovieSceneSkeletalAnimationTrack::StaticClass() );
+    }
 }
 
 void
