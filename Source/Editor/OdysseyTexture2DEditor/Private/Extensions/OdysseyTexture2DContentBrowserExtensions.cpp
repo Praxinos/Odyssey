@@ -18,6 +18,7 @@
 #include "IOdysseyTexture2DEditorModule.h"
 #include "Misc/PackageName.h"
 #include "Modules/ModuleManager.h"
+#include "OdysseyScopedTextureSettings.h"
 #include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Textures/SlateIcon.h"
@@ -176,6 +177,7 @@ public:
 
                 FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
                 FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
+                FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressed( currentTexture );
                 CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
                 IULISLoaderModule& hULIS = IULISLoaderModule::Get();
                 ::ul3::SaveToFile(
