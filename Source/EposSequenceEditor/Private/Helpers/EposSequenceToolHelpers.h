@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "Misc/Guid.h"
-
 #include "KeyParams.h"
 #include "Misc/FrameNumber.h"
 #include "MovieSceneSequenceID.h"
@@ -15,6 +14,7 @@
 
 class AActor;
 class ACineCameraActor;
+class APlaneActor;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieScene;
@@ -90,10 +90,10 @@ public:
     * @param ISequencer     iSequencer to get planes.
     * @param FFrameNumber   iFrameNumber to get the board section.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param TArray<AStaticMeshActor*>* oPlanes to get all plane actors.
-    * @param TArray<FGuid>*             oPlaneBindings to get all plane bindings.
+    * @param TArray<APlaneActor*>* oPlanes to get all plane actors.
+    * @param TArray<FGuid>*        oPlaneBindings to get all plane bindings.
     */
-    static int32 GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 // Inside EspoSequenceToolHelpers_Drawing
 public:
@@ -209,13 +209,13 @@ public:
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-    static int32 GetAllPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
-    static AStaticMeshActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
+    static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
     static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
 // Inside EspoSequenceToolHelpers_Drawing

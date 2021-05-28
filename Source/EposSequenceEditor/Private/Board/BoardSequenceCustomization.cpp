@@ -4,7 +4,6 @@
 #include "Board/BoardSequenceCustomization.h"
 
 #include "CineCameraActor.h"
-#include "Engine/StaticMeshActor.h"
 #include "Framework/Docking/TabManager.h"
 
 #include "ArrangeSectionsType.h"
@@ -16,6 +15,7 @@
 #include "EposTracksModule.h"
 #include "Helpers/EposSequenceToolHelpers.h"
 #include "Misc/SAboutWindow.h"
+#include "PlaneActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
@@ -405,7 +405,7 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    TArray<AStaticMeshActor*> planes;
+    TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
     int32 plane_count = BoardSequenceToolHelpers::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
     if( !plane_count )
@@ -413,7 +413,7 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 
     for( int i = 0; i < plane_count; i++ )
     {
-        AStaticMeshActor* plane = planes[i];
+        APlaneActor* plane = planes[i];
         FGuid plane_binding = plane_bindings[i];
 
         MenuBuilder.AddMenuEntry(

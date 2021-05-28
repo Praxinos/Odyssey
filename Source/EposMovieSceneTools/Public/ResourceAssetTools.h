@@ -12,9 +12,9 @@ class UMovieSceneSequence;
 class UTexture2D;
 
 /*
- * The management of plane material, texture assets
+ * The management of master assets (copied from the plugins content directory to the project)
  */
-class EPOSMOVIESCENETOOLS_API MaterialPlaneAssetTools
+class EPOSMOVIESCENETOOLS_API MasterAssetTools
 {
 public:
     static UTexture2D* GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
@@ -23,14 +23,22 @@ public:
     static UMaterialInstanceConstant* GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
     static UMaterialInstanceConstant* GetMasterMaterial( UMovieSceneSequence* iRootSequence );
 
+private:
+    static UTexture2D* CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
+    static UMaterialInstanceConstant* CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName );
+
+    friend class ProjectAssetTools;
+};
+
+/*
+ * The management of project assets
+ */
+class EPOSMOVIESCENETOOLS_API ProjectAssetTools
+{
 public:
     static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence );
 
 private:
     static UMaterialInstanceConstant* CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
     static UTexture2D* CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName );
-
-private:
-    static UTexture2D* CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UMaterialInstanceConstant* CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName );
 };

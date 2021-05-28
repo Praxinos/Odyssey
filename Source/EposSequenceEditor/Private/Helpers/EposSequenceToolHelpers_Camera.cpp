@@ -19,6 +19,7 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -222,7 +223,7 @@ ShotSequenceToolHelpers::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieScen
     //---
 
     // If there's a cinematic shot track, no need to set this camera to a shot
-    UMovieSceneTrack* CinematicShotTrack = movieScene->FindMasterTrack( UMovieSceneCinematicShotTrack::StaticClass() );
+    UMovieSceneTrack* CinematicShotTrack = movieScene->FindMasterTrack( UMovieSceneCinematicBoardTrack::StaticClass() );
     if( CinematicShotTrack )
         return;
 

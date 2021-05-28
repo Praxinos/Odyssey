@@ -63,7 +63,11 @@ public:
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences;
 
-    // The map will contain multiple staticmesh actor (planes) and all their multiple components
+    // The map will contain multiple plane actors and all their multiple components
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > PlanesBindingIdToReferences;
+
+    // The map will contain multiple actors and all their multiple components
+    UPROPERTY()
+    TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
 };

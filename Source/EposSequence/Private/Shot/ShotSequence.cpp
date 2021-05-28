@@ -18,6 +18,7 @@
 #include "Tracks/MovieSceneAudioTrack.h"
 
 #include "Board/BoardHelpers.h"
+#include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 //---
@@ -66,19 +67,25 @@ void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& Posse
 
         CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
     }
-    else if( PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter< ACineCameraActor >() )
+    else if( PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter<ACineCameraActor>() )
     {
         CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
     }
-    else
+    else if( PossessedObject.IsA<APlaneActor>()
+             || PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter<APlaneActor>() )
     {
         PlanesBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
+    }
+    else
+    {
+        ActorsBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
     }
 }
 
 bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContext ) const
 {
-    return Object.IsA<AStaticMeshActor>()
+    return Object.IsA<APlaneActor>()
+        || Object.IsA<AStaticMeshActor>()
         || Object.IsA<ASkeletalMeshActor>()
         || Object.IsA<ACineCameraActor>()
         || Object.IsA<UActorComponent>();
@@ -111,6 +118,16 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
             OutObjects.Add( ResolvedObject );
         }
     }
+
+    Reference = ActorsBindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( ResolvedObject && ResolvedObject->GetWorld() )
+        {
+            OutObjects.Add( ResolvedObject );
+        }
+    }
 }
 
 UMovieScene* UShotSequence::GetMovieScene() const
@@ -132,6 +149,7 @@ void UShotSequence::UnbindPossessableObjects( const FGuid& ObjectId )
 {
     CameraBindingIdToReferences.Remove( ObjectId );
     PlanesBindingIdToReferences.Remove( ObjectId );
+    ActorsBindingIdToReferences.Remove( ObjectId );
 }
 
 void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context )
@@ -159,6 +177,18 @@ void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>
 
         return;
     }
+
+    Reference = ActorsBindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( InObjects.Contains( ResolvedObject ) )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
+
+        return;
+    }
 }
 
 void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context )
@@ -176,6 +206,18 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     }
 
     Reference = PlanesBindingIdToReferences.Find( ObjectId );
+    if( Reference )
+    {
+        UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
+        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        {
+            *Reference = FLevelSequenceBindingReference();
+        }
+
+        return;
+    }
+
+    Reference = ActorsBindingIdToReferences.Find( ObjectId );
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
@@ -263,6 +305,30 @@ void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) c
     {
         OutTags.Emplace( "Planes", "(0)", FAssetRegistryTag::TT_Alphabetical );
     }
+
+    if( ActorsBindingIdToReferences.Num() )
+    {
+        int actor_count = 0;
+        for( const TPair< FGuid, FLevelSequenceBindingReference >& pair : ActorsBindingIdToReferences )
+        {
+            FGuid binding = pair.Key;
+            //FLevelSequenceBindingReference reference = pair.Value;
+
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( binding );
+            if( possessable && !possessable->GetParent().IsValid() /* to get only root actors */ )
+            {
+                actor_count++;
+            }
+        }
+
+        FAssetRegistryTag Tag( "Actors", FString::FromInt( actor_count ), FAssetRegistryTag::TT_Alphabetical );
+        //FAssetRegistryTag Tag( "Actors", FString::FromInt( ActorsBindingIdToReferences.Num() ), FAssetRegistryTag::TT_Alphabetical );
+        OutTags.Add( Tag );
+    }
+    else
+    {
+        OutTags.Emplace( "Actors", "(0)", FAssetRegistryTag::TT_Alphabetical );
+    }
 }
 
 void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const
@@ -281,6 +347,13 @@ void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMe
         FAssetRegistryTagMetadata()
         .SetDisplayName( NSLOCTEXT( "ShotSequence", "Planes_Label", "Planes in shot" ) )
         .SetTooltip( NSLOCTEXT( "ShotSequence", "Planes_Tooltip", "The planes bound to this shot sequence" ) )
+    );
+
+    OutMetadata.Add(
+        "Actors",
+        FAssetRegistryTagMetadata()
+        .SetDisplayName( NSLOCTEXT( "ShotSequence", "Actors_Label", "Actors in shot" ) )
+        .SetTooltip( NSLOCTEXT( "ShotSequence", "Actors_Tooltip", "The actors bound to this shot sequence" ) )
     );
 }
 

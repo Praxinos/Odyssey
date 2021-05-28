@@ -781,9 +781,8 @@ SCinematicBoardSectionPlanes::MakePlaneRow( TSharedRef<FMovieScenePossessable> i
 //        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
 //
 //        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
-//        TArray<AStaticMeshActor*> planes;
 //        TArray<FGuid> guids;
-//        int plane_count = ShotSequenceHelpers::GetAllPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &guids );
+//        int plane_count = ShotSequenceHelpers::GetAllPlanes( iPlayer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, nullptr, &guids );
 //
 //        count = FMath::Max( count, plane_count );
 //    }
@@ -811,9 +810,8 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
-    TArray<AStaticMeshActor*> planes;
     TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, &planes, &bindings );
+    int plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, nullptr, &bindings );
 
     auto need_rebuild = [this]( const TArray<FGuid>& iBindings )
     {

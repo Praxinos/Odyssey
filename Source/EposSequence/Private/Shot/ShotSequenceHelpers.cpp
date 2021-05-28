@@ -3,16 +3,13 @@
 
 #include "Shot/ShotSequenceHelpers.h"
 
-//#include "AssetRegistryModule.h"
 #include "Channels/MovieSceneChannelProxy.h"
-//#include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Evaluation/MovieSceneSequenceHierarchy.h"
-//#include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "IMovieScenePlayer.h"
@@ -24,13 +21,10 @@
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
-//#include "Tracks/MovieSceneCinematicShotTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 
-//#include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-//#include "Shot/ShotSequence.h"
-//#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceHelpers"
@@ -67,7 +61,7 @@ ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
 
 //static
 int32
-ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     if( oPlanes )
         oPlanes->Empty();
@@ -78,13 +72,13 @@ ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequen
     if( !movieScene )
         return 0;
 
-    TArray<AStaticMeshActor*> planes;
+    TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
 
-    TArray<AStaticMeshActor*> planes_selected;
+    TArray<APlaneActor*> planes_selected;
     TArray<FGuid> plane_bindings_selected;
 
-    TArray<AStaticMeshActor*> planes_not_selected;
+    TArray<APlaneActor*> planes_not_selected;
     TArray<FGuid> plane_bindings_not_selected;
 
     for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
@@ -93,37 +87,37 @@ ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequen
 
         for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
         {
-            AStaticMeshActor* plane = Cast<AStaticMeshActor>( WeakObject.Get() );
+            APlaneActor* plane = Cast<APlaneActor>( WeakObject.Get() );
 
-            if( plane )
+            if( !plane )
+                continue;
+
+            switch( iPlaneSelection )
             {
-                switch( iPlaneSelection )
-                {
-                    case EGetPlane::kAlwaysAll:
+                case EGetPlane::kAlwaysAll:
+                    planes.Add( plane );
+                    plane_bindings.Add( possessable.GetGuid() );
+                    break;
+                case EGetPlane::kSelectedOnly:
+                    if( plane->IsSelected() )
+                    {
                         planes.Add( plane );
                         plane_bindings.Add( possessable.GetGuid() );
-                        break;
-                    case EGetPlane::kSelectedOnly:
-                        if( plane->IsSelected() )
-                        {
-                            planes.Add( plane );
-                            plane_bindings.Add( possessable.GetGuid() );
-                        }
-                        break;
-                    default:
-                    case EGetPlane::kSelectedOrAll:
-                        if( plane->IsSelected() )
-                        {
-                            planes_selected.Add( plane );
-                            plane_bindings_selected.Add( possessable.GetGuid() );
-                        }
-                        else
-                        {
-                            planes_not_selected.Add( plane );
-                            plane_bindings_not_selected.Add( possessable.GetGuid() );
-                        }
-                        break;
-                }
+                    }
+                    break;
+                default:
+                case EGetPlane::kSelectedOrAll:
+                    if( plane->IsSelected() )
+                    {
+                        planes_selected.Add( plane );
+                        plane_bindings_selected.Add( possessable.GetGuid() );
+                    }
+                    else
+                    {
+                        planes_not_selected.Add( plane );
+                        plane_bindings_not_selected.Add( possessable.GetGuid() );
+                    }
+                    break;
             }
         }
     }
@@ -174,7 +168,7 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
     TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
     if( objects.Num() != 1 )
         return INDEX_NONE;
-    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
     if( !plane )
         return INDEX_NONE;
 
@@ -214,7 +208,7 @@ ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieScene
     if( !moviescene )
         return times;
 
-    TArray<AStaticMeshActor*> planes;
+    TArray<APlaneActor*> planes;
     TArray<FGuid> guids;
     int32 nb_plane = GetAllPlanes( iPlayer, iSequence, iSequenceID, iPlaneSelection, &planes, &guids );
     if( !nb_plane )
@@ -222,7 +216,7 @@ ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieScene
 
     for( int i = 0; i < planes.Num(); i++ )
     {
-        AStaticMeshActor* plane = planes[i];
+        APlaneActor* plane = planes[i];
         FGuid guid = guids[i];
 
         FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
@@ -358,7 +352,7 @@ ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovi
     TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
     if( objects.Num() != 1 )
         return sections;
-    AStaticMeshActor* plane = Cast<AStaticMeshActor>( objects[0] );
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
     if( !plane )
         return sections;
 
@@ -428,7 +422,7 @@ ShotSequenceHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlaye
 {
     TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> proxies;
 
-    TArray<AStaticMeshActor*> planes;
+    TArray<APlaneActor*> planes;
     TArray<FGuid> bindings;
     /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
 
@@ -483,7 +477,7 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
 {
     TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>> proxies;
 
-    TArray<AStaticMeshActor*> planes;
+    TArray<APlaneActor*> planes;
     TArray<FGuid> bindings;
     /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
 

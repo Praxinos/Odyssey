@@ -9,7 +9,6 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "Containers/ArrayBuilder.h"
-#include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
@@ -127,7 +126,7 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
 
             //---
 
-            AStaticMeshActor* actor = Cast< AStaticMeshActor >( iActor );
+            APlaneActor* actor = Cast< APlaneActor >( iActor );
             FMovieSceneObjectPathChannelKeyValue material_objectpath;
             if( actor )
             {
@@ -313,7 +312,7 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
     // - 'Visibility' track
     // - 'StaticMeshComponent' binding
     //     - 'Material Switcher' track
-    else if( iActor->IsA<AStaticMeshActor>() )
+    else if( iActor->IsA<APlaneActor>() )
     {
         //CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
 

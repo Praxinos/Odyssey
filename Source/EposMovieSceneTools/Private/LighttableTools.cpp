@@ -11,7 +11,7 @@
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 
 #include "Board/BoardSequenceHelpers.h"
-#include "MaterialPlaneAssetTools.h"
+#include "ResourceAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "LighttableTools"
@@ -99,7 +99,7 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 
             current_material->SetScalarParameterValueEditorOnly( TEXT( "UseLighttable" ), 0.f );
 
-            UTexture2D* texture_transparent = MaterialPlaneAssetTools::GetMasterTexture2D( iSequencer.GetRootMovieSceneSequence() );
+            UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer.GetRootMovieSceneSequence() );
             current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), texture_transparent );
             current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), texture_transparent );
 

@@ -4,11 +4,11 @@
 #include "Shot/ShotSequenceCustomization.h"
 
 #include "CineCameraActor.h"
-#include "Engine/StaticMeshActor.h"
 
 #include "EposSequenceEditorCommands.h"
 #include "Helpers/EposSequenceToolHelpers.h"
 #include "Misc/SAboutWindow.h"
+#include "PlaneActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
@@ -302,7 +302,7 @@ FShotSequenceCustomization::MakeDrawingMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    TArray<AStaticMeshActor*> planes;
+    TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
     int32 plane_count = ShotSequenceToolHelpers::GetAllPlanes( mSequencer, &planes, &plane_bindings );
     if( !plane_count )
@@ -310,7 +310,7 @@ FShotSequenceCustomization::MakeDrawingMenu()
 
     for( int i = 0; i < plane_count; i++ )
     {
-        AStaticMeshActor* plane = planes[i];
+        APlaneActor* plane = planes[i];
         FGuid plane_binding = plane_bindings[i];
 
         MenuBuilder.AddMenuEntry(

@@ -14,6 +14,7 @@
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "ISequencer.h"
+#include "Kismet/GameplayStatics.h"
 #include "LevelEditorViewport.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieScene.h"
@@ -22,7 +23,8 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
-#include "MaterialPlaneAssetTools.h"
+#include "PlaneActor.h"
+#include "ResourceAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceToolHelpers_Plane"
@@ -94,7 +96,7 @@ ShotSequenceToolHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, flo
 }
 
 //static
-AStaticMeshActor*
+APlaneActor*
 ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial )
 {
     FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
@@ -116,17 +118,11 @@ ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, 
     //---
 
     FActorSpawnParameters SpawnParams;
-    AStaticMeshActor* plane = iWorld->SpawnActor<AStaticMeshActor>( SpawnParams );
+    APlaneActor* plane = iWorld->SpawnActor<APlaneActor>( SpawnParams );
     if( !plane )
         return nullptr;
 
-    UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Epos/S_1_Unit_Plane.S_1_Unit_Plane" ) );
-    check( plane_mesh );
-
-    plane->GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
     plane->GetStaticMeshComponent()->SetMaterial( 0, iMaterial );
-    plane->SetMobility( EComponentMobility::Movable );
-    plane->SetActorHiddenInGame( true );
 
     plane->SetActorScale3D( plane_scale );
     plane->SetActorLocation( plane_location );
@@ -212,7 +208,7 @@ SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
 void
 ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
-    UMaterialInstanceConstant* new_material = MaterialPlaneAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
         return;
 
@@ -220,7 +216,7 @@ ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneS
 
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
 
-    AStaticMeshActor* plane = ShotSequenceToolHelpers::SpawnPlane( world, iCamera, new_material );
+    APlaneActor* plane = ShotSequenceToolHelpers::SpawnPlane( world, iCamera, new_material );
 
     //---
 
@@ -286,7 +282,7 @@ ShotSequenceToolHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequenc
 
 //static
 int32
-BoardSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+BoardSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -300,7 +296,7 @@ BoardSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFr
 
 //static
 int32
-ShotSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, TArray<AStaticMeshActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     return ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }

@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "MaterialPlaneAssetTools.h"
+#include "ResourceAssetTools.h"
 
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
@@ -10,20 +10,69 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
 
-#define LOCTEXT_NAMESPACE "MaterialPlaneMasterTools"
+#define LOCTEXT_NAMESPACE "ResourceAssetTools"
+
+//---
+
+////static
+//void
+//MasterAssetTools::CopyPluginToMasterAssets( UMovieSceneSequence* iRootSequence )
+//{
+//    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+//    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+//
+//    UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
+//    UPackage* root_package = root_asset->GetPackage();
+//    FString master_folder = root_package->GetName() / "Master"; // ie. /Game/MyStoryboard2/Master
+//
+//    TArray<FAssetData> asset_datas;
+//    assetRegistryModule.Get().GetAssetsByPackageName( *( master_folder / "BP_Plane" ), asset_datas );
+//    if( asset_datas.Num() )
+//        return;
+//
+//    TArray<FName> sources;
+//    sources.Add( "/Epos/BP_Plane" );
+//    //for( auto source : sources )
+//    //{
+//    //    FString SrcFilename;
+//    //    UObject* ExistingObject = nullptr;
+//    //    if( FPackageName::DoesPackageExist( *source.ToString(), nullptr, &SrcFilename ) )
+//    //    {
+//    //        UPackage* Pkg = LoadPackage( nullptr, *source.ToString(), LOAD_None ); // To find all the dependencies
+//    //        if( Pkg )
+//    //        {
+//    //            FString Name = ObjectTools::SanitizeObjectName( FPaths::GetBaseFilename( SrcFilename ) );
+//    //            ExistingObject = StaticFindObject( UObject::StaticClass(), Pkg, *Name );
+//    //        }
+//    //    }
+//    //}
+//
+//    //FAdvancedCopyParams copy_params = FAdvancedCopyParams( sources, master_folder );
+//    //copy_params.bShouldSuppressUI = true;
+//    //copy_params.AddCustomization( UAdvancedCopyCustomization::StaticClass()->GetDefaultObject<UAdvancedCopyCustomization>() );
+//
+//    //assetToolsModule.Get().InitAdvancedCopyFromCopyParams( copy_params );
+//
+//    //const bool bPromptUserToSave = true;
+//    //const bool bSaveMapPackages = true;
+//    //const bool bSaveContentPackages = true;
+//    //FEditorFileUtils::SaveDirtyPackages( bPromptUserToSave, bSaveMapPackages, bSaveContentPackages );
+//
+//    assetToolsModule.Get().BeginAdvancedCopyPackages( sources, master_folder );
+//}
 
 //---
 
 //static
 UTexture2D*
-MaterialPlaneAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
     UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
     UPackage* root_package = root_asset->GetPackage();
-    FString root_package_name = root_package->GetName() / "T_Transparent_Master"; // ie. /Game/MyStoryboard2
+    FString root_package_name = root_package->GetName() / "Master" / "T_Transparent"; // ie. /Game/MyStoryboard2
 
     TArray<FAssetData> asset_datas;
     assetRegistryModule.Get().GetAssetsByPackageName( *root_package_name, asset_datas );
@@ -41,7 +90,7 @@ MaterialPlaneAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence,
 
 //static
 UTexture2D*
-MaterialPlaneAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence )
 {
     FString package_name;
     FString asset_name;
@@ -50,7 +99,7 @@ MaterialPlaneAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence 
 
 //static
 UTexture2D*
-MaterialPlaneAssetTools::CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
     UTexture2D* texture_master = GetMasterTexture2D( iRootSequence, oPackageName, oAssetName );
     if( texture_master )
@@ -71,14 +120,14 @@ MaterialPlaneAssetTools::CreateMasterTexture2D( UMovieSceneSequence* iRootSequen
 
 //static
 UMaterialInstanceConstant*
-MaterialPlaneAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
     UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
     UPackage* root_package = root_asset->GetPackage();
-    FString root_package_name = root_package->GetName() / "MI_Plane_Master"; // ie. /Game/MyStoryboard2
+    FString root_package_name = root_package->GetName() / "Master" / "MI_Plane"; // ie. /Game/MyStoryboard2
 
     TArray<FAssetData> asset_datas;
     assetRegistryModule.Get().GetAssetsByPackageName( *root_package_name, asset_datas );
@@ -96,7 +145,7 @@ MaterialPlaneAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence, 
 
 //static
 UMaterialInstanceConstant*
-MaterialPlaneAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence )
 {
     FString package_name;
     FString asset_name;
@@ -105,13 +154,13 @@ MaterialPlaneAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence )
 
 //static
 UMaterialInstanceConstant*
-MaterialPlaneAssetTools::CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
 {
     UMaterialInstanceConstant* material_master = GetMasterMaterial( iRootSequence, oPackageName, oAssetName );
     if( material_master )
         return material_master;
 
-    UMaterial* material_root = LoadObject<UMaterial>( nullptr, TEXT( "/Epos/M_Plane_Root.M_Plane_Root" ) );
+    UMaterial* material_root = LoadObject<UMaterial>( nullptr, TEXT( "/Epos/M_Plane.M_Plane" ) );
     if( !material_root )
         return nullptr;
 
@@ -153,25 +202,29 @@ MaterialPlaneAssetTools::CreateMasterMaterial( UMovieSceneSequence* iRootSequenc
 }
 
 //---
+//---
+//---
 
 //static
 UMaterialInstanceConstant*
-MaterialPlaneAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
-    FString package_name;
-    FString asset_name;
-    UTexture2D* master_texture = CreateMasterTexture2D( iRootSequence, package_name, asset_name );
+    FString package_name_tmp;
+    FString asset_name_tmp;
+    UTexture2D* master_texture = MasterAssetTools::CreateMasterTexture2D( iRootSequence, package_name_tmp, asset_name_tmp );
     if( !master_texture )
         return nullptr;
 
-    UMaterialInstanceConstant* master_material = CreateMasterMaterial( iRootSequence, master_texture, package_name, asset_name );
+    UMaterialInstanceConstant* master_material = MasterAssetTools::CreateMasterMaterial( iRootSequence, master_texture, package_name_tmp, asset_name_tmp );
     if( !master_material )
         return nullptr;
+
+    //---
 
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
 
     UPackage* package = iSequence->GetPackage();
-    package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
+    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
 
     assetToolsModule.Get().CreateUniqueAssetName( package_name, "_MI_01", oPackageName, oAssetName );
 
@@ -186,9 +239,9 @@ MaterialPlaneAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieS
 
 //static
 UTexture2D*
-MaterialPlaneAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName )
 {
-    UTexture2D* texture_master = GetMasterTexture2D( iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
+    UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
     if( !texture_master )
         return nullptr;
 
@@ -208,15 +261,15 @@ MaterialPlaneAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovie
 
 //static
 UMaterialInstanceConstant*
-MaterialPlaneAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = MaterialPlaneAssetTools::CreateMaterial( iSequence, iRootSequence, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CreateMaterial( iSequence, iRootSequence, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
-    UTexture2D* new_texture = MaterialPlaneAssetTools::CreateTexture2D( iSequence, iRootSequence, new_material, package_name, asset_name );
+    UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, package_name, asset_name );
     if( !new_texture )
     {
         new_material->MarkPendingKill();

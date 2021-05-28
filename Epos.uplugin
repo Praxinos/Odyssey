@@ -21,6 +21,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "EposActors",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "EposSequence",
       "Type": "Runtime",
       "LoadingPhase": "Default"
