@@ -42,25 +42,51 @@ CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
 }
 
 void
-CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
+CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iOdysseyBlock, UTexture* iTexture)
 {
     FTexturePlatformData* PlatformData = *iTexture->GetRunningPlatformData();
-    checkf(iBlock->Width() == PlatformData->SizeX &&
-           iBlock->Height() == PlatformData->SizeY
+    checkf(iOdysseyBlock->Width() == PlatformData->SizeX &&
+           iOdysseyBlock->Height() == PlatformData->SizeY
            ,TEXT("Sizes do not match"));
 
     ENQUEUE_RENDER_COMMAND( GetTextureData )(
-        [ iTexture, iBlock ]( FRHICommandListImmediate& RHICmdList ) {
+        [ iTexture, iOdysseyBlock ]( FRHICommandListImmediate& RHICmdList )
+        {
             FTexture2DRHIRef texture2DRHI = iTexture->Resource->GetTexture2DRHI();
             EPixelFormat format = texture2DRHI->GetFormat();
             uint32 blockBytes = GPixelFormats[ format ].BlockBytes;
             uint32 blockSizeX = GPixelFormats[ format ].BlockSizeX;
             uint32 blockSizeY = GPixelFormats[ format ].BlockSizeY;
+            uint32 numColumns = texture2DRHI->GetSizeX() / blockSizeX;
+            uint32 numRows = texture2DRHI->GetSizeY() / blockSizeY;
+            uint32 imageWidthInBytes = numColumns * blockBytes;
+            
+            uint32 stride = 0;
+            const uint8* srcDataPtr = reinterpret_cast< const uint8* >(
+                RHILockTexture2D( texture2DRHI, 0, EResourceLockMode::RLM_ReadOnly, stride, true, true )
+                );
+            // stride value is changed by RHILockTexture2D
 
-            uint32 stride;
-            void* data = RHILockTexture2D( texture2DRHI, 0, EResourceLockMode::RLM_ReadOnly, stride, true, true );
-            if( data )
-                FMemory::Memcpy( iBlock->GetArray().GetData(), data, iBlock->GetArray().Num() );
+            if( srcDataPtr )
+            {
+                if ( stride == imageWidthInBytes )
+                // means that all the data is valid. we can copy all immedialtely
+                {
+                    FMemory::Memcpy( iOdysseyBlock->GetArray().GetData(), srcDataPtr, iOdysseyBlock->GetArray().Num() );
+                }
+                else
+                // means that : stride > imageWidthInBytes
+                // only the useful data is copied row after row
+                {
+                    uint8* destDataPtr( iOdysseyBlock->GetArray().GetData() );
+                    for ( uint32 currentRow = 0; currentRow < numRows; ++currentRow )
+                    {
+                        FMemory::Memcpy( destDataPtr, srcDataPtr, imageWidthInBytes );
+                        srcDataPtr += stride;
+                        destDataPtr += imageWidthInBytes;
+                    }
+                }
+            }
             RHIUnlockTexture2D( texture2DRHI, 0, true, true );
         }
     );
@@ -68,7 +94,7 @@ CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
     FRenderCommandFence fence;
     fence.BeginFence();
     fence.Wait();
-    iBlock->ResyncData();
+    iOdysseyBlock->ResyncData();
 }
 
 void

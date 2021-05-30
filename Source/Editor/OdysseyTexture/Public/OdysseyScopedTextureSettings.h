@@ -12,17 +12,19 @@ public:
           UTexture* iTexture
         , const FTextureFormatSettings& iTextureFormatSettings
         , TextureCompressionSettings iTextureCompressionSettings
+        , TextureMipGenSettings iBackupTextureMipGenSettings
     );
 
     FOdysseyScopedTextureSettings& operator=( const FOdysseyScopedTextureSettings& ) = delete; // Copy Assignement 
 
     static
     FOdysseyScopedTextureSettings
-    MakeUncompressed( UTexture* iTexture );
+    MakeUncompressedNoMipMaps( UTexture* iTexture );
 
 private:
     UTexture* mTexture;
     FTextureFormatSettings mBackupTextureFormatSettings;
     TextureCompressionSettings mBackupTextureCompressionSettings;
+    TextureMipGenSettings mBackupTextureMipGenSettings;
 };
 

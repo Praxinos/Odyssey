@@ -7,6 +7,7 @@ FOdysseyScopedTextureSettings::~FOdysseyScopedTextureSettings()
     // restoring the initial values
     mTexture->SetLayerFormatSettings( 0, mBackupTextureFormatSettings );
     mTexture->CompressionSettings = mBackupTextureCompressionSettings;
+    mTexture->MipGenSettings = mBackupTextureMipGenSettings;
     mTexture->UpdateResource();
 }
 
@@ -14,6 +15,7 @@ FOdysseyScopedTextureSettings::FOdysseyScopedTextureSettings(
       UTexture* iTexture
     , const FTextureFormatSettings& iTextureFormatSettings
     , TextureCompressionSettings iTextureCompressionSettings
+    , TextureMipGenSettings iTextureMipGenSettings
 )
     : mTexture( iTexture )
 {
@@ -21,19 +23,21 @@ FOdysseyScopedTextureSettings::FOdysseyScopedTextureSettings(
     // backuping the existing settings
     mTexture->GetLayerFormatSettings( 0, mBackupTextureFormatSettings );
     mBackupTextureCompressionSettings = mTexture->CompressionSettings;
+    mBackupTextureMipGenSettings = mTexture->MipGenSettings;
     // changing the values
     mTexture->SetLayerFormatSettings( 0, iTextureFormatSettings );
     mTexture->CompressionSettings = iTextureCompressionSettings;
+    mTexture->MipGenSettings = iTextureMipGenSettings;
     mTexture->UpdateResource();
 }
 
 //static
 FOdysseyScopedTextureSettings
-FOdysseyScopedTextureSettings::MakeUncompressed( UTexture* iTexture )
+FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( UTexture* iTexture )
 {
     FTextureFormatSettings textureFormatSettings;
     iTexture->GetLayerFormatSettings( 0, textureFormatSettings );
     textureFormatSettings.CompressionNone = 1;
-    return FOdysseyScopedTextureSettings( iTexture, textureFormatSettings, TC_VectorDisplacementmap );
+    return FOdysseyScopedTextureSettings( iTexture, textureFormatSettings, TC_VectorDisplacementmap, TMGS_NoMipmaps );
 }
 
