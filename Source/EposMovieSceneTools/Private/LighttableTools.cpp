@@ -82,7 +82,6 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
 
             if( modified )
             {
-                current_material->PostEditChange();
                 UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
             }
         }
@@ -143,7 +142,6 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 
             if( modified )
             {
-                current_material->PostEditChange();
                 UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
             }
         }

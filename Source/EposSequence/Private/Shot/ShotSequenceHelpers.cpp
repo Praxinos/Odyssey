@@ -173,6 +173,8 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
         return INDEX_NONE;
 
     FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return INDEX_NONE;
 
     UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
     if( !track )
@@ -220,6 +222,8 @@ ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieScene
         FGuid guid = guids[i];
 
         FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+        if( !plane_component.IsValid() )
+            continue;
 
         UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
         if( !track )
@@ -357,6 +361,8 @@ ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovi
         return sections;
 
     FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return sections;
 
     UMovieSceneTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
     if( !track )
