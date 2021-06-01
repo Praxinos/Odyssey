@@ -45,45 +45,40 @@ void
 CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iOdysseyBlock, UTexture* iTexture)
 {
     FTexturePlatformData* PlatformData = *iTexture->GetRunningPlatformData();
-    checkf(iOdysseyBlock->Width() == PlatformData->SizeX &&
-           iOdysseyBlock->Height() == PlatformData->SizeY
-           ,TEXT("Sizes do not match"));
+    checkf(
+           iOdysseyBlock->Width() == PlatformData->SizeX
+        && iOdysseyBlock->Height() == PlatformData->SizeY
+        , TEXT( "Sizes do not match" )
+    );
 
     ENQUEUE_RENDER_COMMAND( GetTextureData )(
         [ iTexture, iOdysseyBlock ]( FRHICommandListImmediate& RHICmdList )
         {
             FTexture2DRHIRef texture2DRHI = iTexture->Resource->GetTexture2DRHI();
-            EPixelFormat format = texture2DRHI->GetFormat();
-            uint32 blockBytes = GPixelFormats[ format ].BlockBytes;
-            uint32 blockSizeX = GPixelFormats[ format ].BlockSizeX;
-            uint32 blockSizeY = GPixelFormats[ format ].BlockSizeY;
-            uint32 numColumns = texture2DRHI->GetSizeX() / blockSizeX;
-            uint32 numRows = texture2DRHI->GetSizeY() / blockSizeY;
-            uint32 imageWidthInBytes = numColumns * blockBytes;
-            
-            uint32 stride = 0;
-            const uint8* srcDataPtr = reinterpret_cast< const uint8* >(
-                RHILockTexture2D( texture2DRHI, 0, EResourceLockMode::RLM_ReadOnly, stride, true, true )
-                );
-            // stride value is changed by RHILockTexture2D
+            uint32 bps = iOdysseyBlock->GetBlock()->BytesPerScanLine();
 
-            if( srcDataPtr )
+            uint32 stride;
+            // stride value is changed by RHILockTexture2D
+            const uint8* src = reinterpret_cast< const uint8* >(
+                RHILockTexture2D( texture2DRHI, 0, EResourceLockMode::RLM_ReadOnly, stride, true, true )
+            );
+
+            if( src )
             {
-                if ( stride == imageWidthInBytes )
-                // means that all the data is valid. we can copy all immedialtely
+                if ( stride == bps )
                 {
-                    FMemory::Memcpy( iOdysseyBlock->GetArray().GetData(), srcDataPtr, iOdysseyBlock->GetArray().Num() );
+                    // Copy all raw
+                    FMemory::Memcpy( iOdysseyBlock->GetArray().GetData(), src, iOdysseyBlock->GetArray().Num() );
                 }
                 else
-                // means that : stride > imageWidthInBytes
-                // only the useful data is copied row after row
                 {
-                    uint8* destDataPtr( iOdysseyBlock->GetArray().GetData() );
-                    for ( uint32 currentRow = 0; currentRow < numRows; ++currentRow )
+                    // Copy line by line
+                    uint8* dest( iOdysseyBlock->GetArray().GetData() );
+                    for ( uint32 i = 0; i < texture2DRHI->GetSizeY(); ++i )
                     {
-                        FMemory::Memcpy( destDataPtr, srcDataPtr, imageWidthInBytes );
-                        srcDataPtr += stride;
-                        destDataPtr += imageWidthInBytes;
+                        FMemory::Memcpy( dest, src, bps );
+                        src += stride;
+                        dest += bps;
                     }
                 }
             }
