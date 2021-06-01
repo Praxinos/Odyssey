@@ -36,8 +36,16 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "IconCinematicBoardTrack_16x", Icon16x16 ) );
 
-    Set( "EposTracksEditor.LighttableOn", new IMAGE_BRUSH( "LighttableOn_16x", Icon16x16 ) );
-    Set( "EposTracksEditor.LighttableOff", new IMAGE_BRUSH( "LighttableOff_16x", Icon16x16 ) );
+    FCheckBoxStyle lighttable_style = FCheckBoxStyle()
+        //.SetCheckBoxType( ESlateCheckBoxType::ToggleButton )
+        .SetUncheckedImage( IMAGE_BRUSH( "LighttableOff_16x", Icon16x16 ) )
+        .SetUncheckedHoveredImage( IMAGE_BRUSH( "LighttableOff_16x", Icon16x16 ) )
+        .SetUncheckedPressedImage( IMAGE_BRUSH( "LighttableOff_16x", Icon16x16 ) )
+        .SetCheckedImage( IMAGE_BRUSH( "LighttableOn_16x", Icon16x16 ) )
+        .SetCheckedHoveredImage( IMAGE_BRUSH( "LighttableOn_16x", Icon16x16 ) )
+        .SetCheckedPressedImage( IMAGE_BRUSH( "LighttableOn_16x", Icon16x16 ) );
+
+    Set( "EposTracksEditor.Lighttable", lighttable_style );
 
     //---
 

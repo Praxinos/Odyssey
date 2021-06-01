@@ -38,9 +38,9 @@ public:
 private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
-    FReply              OnLighttableClicked() const;
+    void                OnToggleLighttable( ECheckBoxState iNewState );
     FText               GetLighttableTooltip() const;
-    const FSlateBrush*  GetLighttableIcon() const;
+    ECheckBoxState      IsLighttableOn() const;
 
 private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
@@ -72,21 +72,18 @@ SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged( EMovieSceneDataChangeTy
 
 //---
 
-FReply
-SCinematicBoardSectionPlaneTitle::OnLighttableClicked() const
+void
+SCinematicBoardSectionPlaneTitle::OnToggleLighttable( ECheckBoxState iNewState )
 {
     TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
-    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-    if( lighttable_on )
-        LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-    else
+    if( iNewState == ECheckBoxState::Checked )
         LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-
-    return FReply::Handled();
+    else
+        LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
 }
 
 FText
@@ -101,8 +98,8 @@ SCinematicBoardSectionPlaneTitle::GetLighttableTooltip() const
     return lighttable_on ? LOCTEXT( "lighttable.on", "Lighttable On" ) : LOCTEXT( "lighttable.off", "Lighttable Off" );
 }
 
-const FSlateBrush*
-SCinematicBoardSectionPlaneTitle::GetLighttableIcon() const
+ECheckBoxState
+SCinematicBoardSectionPlaneTitle::IsLighttableOn() const
 {
     TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
@@ -111,11 +108,8 @@ SCinematicBoardSectionPlaneTitle::GetLighttableIcon() const
 
     //---
 
-    static const FSlateBrush* lighttable_on_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOn" );
-    static const FSlateBrush* lighttable_off_brush = FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.LighttableOff" );
-
     bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() ); //TODO: improve to don't call it every ticks ?
-    return lighttable_on ? lighttable_on_brush : lighttable_off_brush;
+    return lighttable_on ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 //---
@@ -143,15 +137,13 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             + SHorizontalBox::Slot()
             .AutoWidth()
             [
-                SNew( SButton )
-                .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+                SNew( SCheckBox )
+                .Style( FEposTracksEditorStyle::Get(), "EposTracksEditor.Lighttable" )
                 .Cursor( EMouseCursor::Default )
-                .OnClicked( this, &SCinematicBoardSectionPlaneTitle::OnLighttableClicked )
+                .IsChecked( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn )
+                .OnCheckStateChanged( this, &SCinematicBoardSectionPlaneTitle::OnToggleLighttable )
                 .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
-                [
-                    SNew( SImage )
-                    .Image( this, &SCinematicBoardSectionPlaneTitle::GetLighttableIcon )
-                ]
+                // No content (text)
             ]
             + SHorizontalBox::Slot()
             .HAlign( HAlign_Center )
