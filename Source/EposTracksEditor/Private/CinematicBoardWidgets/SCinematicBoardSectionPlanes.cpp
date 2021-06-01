@@ -60,14 +60,14 @@ SCinematicBoardSectionPlaneTitle::~SCinematicBoardSectionPlaneTitle()
 void
 SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged( EMovieSceneDataChangeType iType )
 {
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    //TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    //UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    //BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
-    //---
+    ////---
 
-    LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    //LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
 }
 
 //---
@@ -134,17 +134,17 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         .BorderImage( background_brush )
         [
             SNew( SHorizontalBox )
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew( SCheckBox )
-                .Style( FEposTracksEditorStyle::Get(), "EposTracksEditor.Lighttable" )
-                .Cursor( EMouseCursor::Default )
-                .IsChecked( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn )
-                .OnCheckStateChanged( this, &SCinematicBoardSectionPlaneTitle::OnToggleLighttable )
-                .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
-                // No content (text)
-            ]
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            //[
+            //    SNew( SCheckBox )
+            //    .Style( FEposTracksEditorStyle::Get(), "EposTracksEditor.Lighttable" )
+            //    .Cursor( EMouseCursor::Default )
+            //    .IsChecked( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn )
+            //    .OnCheckStateChanged( this, &SCinematicBoardSectionPlaneTitle::OnToggleLighttable )
+            //    .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
+            //    // No content (text)
+            //]
             + SHorizontalBox::Slot()
             .HAlign( HAlign_Center )
             .VAlign( VAlign_Center )
