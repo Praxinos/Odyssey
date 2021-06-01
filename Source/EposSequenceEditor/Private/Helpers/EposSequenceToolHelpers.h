@@ -89,11 +89,29 @@ public:
     *
     * @param ISequencer     iSequencer to get planes.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FFrameNumber   iFrameNumber to get the board section.
     * @param TArray<APlaneActor*>* oPlanes to get all plane actors.
     * @param TArray<FGuid>*        oPlaneBindings to get all plane bindings.
     */
     static int32 GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+
+    /**
+    *  Detach a plane of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a plane.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param APlaneActor*   iPlane to detach.
+    */
+    static void DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, APlaneActor* iPlane );
+
+    /**
+    *  Get all planes (actor & track bindings) attached to the camera in the board section
+    *
+    * @param ISequencer     iSequencer to get planes.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param TArray<APlaneActor*>* oPlanes to get all plane actors.
+    * @param TArray<FGuid>*        oPlaneBindings to get all plane bindings.
+    */
+    static int32 GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
 // Inside EspoSequenceToolHelpers_Drawing
 public:
@@ -211,8 +229,13 @@ public:
 
     static int32 GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
+    static void DetachPlane( ISequencer* iSequencer, APlaneActor* iPlane );
+
+    static int32 GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+
 private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane );
 
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
     static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );

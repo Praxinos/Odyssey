@@ -47,18 +47,26 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "BoardSequenceEditor.NewStoryboardWithSettings", new IMAGE_BRUSH( "NewStoryboardWithSettings", Icon16x16 ) );
     Set( "BoardSequenceEditor.NewStoryboardWithSettings.Small", new IMAGE_BRUSH( "NewStoryboardWithSettings", Icon16x16 ) );
 
+    //---
+
     Set( "ShotSequenceEditor.CreateCamera", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreateCamera.Small", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
+
     Set( "ShotSequenceEditor.CreatePlane", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.DetachPlane", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.DetachPlane.Small", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon24x24 ) );
+
     Set( "ShotSequenceEditor.CreateDrawing", new IMAGE_BRUSH( "IconCreateDrawing_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreateDrawing.Small", new IMAGE_BRUSH( "IconCreateDrawing_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.GotoPreviousDrawing", new IMAGE_BRUSH( "IconDrawingPrevious_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "IconDrawingPrevious_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.GotoNextDrawing", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
+
+    //---
 
     Set( "BoardSequenceEditor.ArrangeShotsManually", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.ArrangeShotsManually.Small", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon24x24 ) );
@@ -71,6 +79,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon24x24 ) );
     Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon24x24 ) );
+
+    //---
 
     Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "IconHelp_24x", Icon48x48 ) );
     Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "IconHelp_24x", Icon24x24 ) );

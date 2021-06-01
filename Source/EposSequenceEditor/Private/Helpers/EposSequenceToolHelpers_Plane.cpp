@@ -107,7 +107,7 @@ ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, 
 
     //-
 
-    // Make a function ComputePlaneLocation(...)
+    // Make a function GuessPlaneLocation(...)
     float FocusDistance = 200;
     FVector plane_location = CamLocation + CamDir * FocusDistance;
 
@@ -277,8 +277,6 @@ ShotSequenceToolHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequenc
 }
 
 //---
-//---
-//---
 
 //static
 int32
@@ -299,6 +297,78 @@ int32
 ShotSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     return ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
+}
+
+//---
+//---
+//---
+
+//static
+void
+BoardSequenceToolHelpers::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, APlaneActor* iPlane )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceToolHelpers::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlane );
+}
+
+//static
+void
+ShotSequenceToolHelpers::DetachPlane( ISequencer* iSequencer, APlaneActor* iPlane )
+{
+    DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlane );
+}
+
+//static
+void
+ShotSequenceToolHelpers::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane )
+{
+    //FGuid camera_guid;
+    //ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
+
+    //if( !camera )
+    //    return;
+
+    //---
+
+    //const FScopedTransaction transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
+
+    //cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
+
+    //---
+
+    GEditor->SelectActor( iPlane, true, true );
+
+    GEditor->DetachSelectedActors();
+
+    //---
+
+    //iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+}
+
+//---
+
+//static
+int32
+BoardSequenceToolHelpers::GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return 0;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return 0;
+
+    return ShotSequenceHelpers::GetAttachedPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
+}
+
+//static
+int32
+ShotSequenceToolHelpers::GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+{
+    return ShotSequenceHelpers::GetAttachedPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
 
 

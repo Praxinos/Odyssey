@@ -20,9 +20,12 @@ public:
 public:
 
     TSharedPtr<FUICommandInfo> CreateCamera;
+    TSharedPtr<FUICommandInfo> SnapCameraToViewport;
+
     TSharedPtr<FUICommandInfo> CreatePlane;
+    TSharedPtr<FUICommandInfo> DetachPlane;
+
     TSharedPtr<FUICommandInfo> CreateDrawing;
     TSharedPtr<FUICommandInfo> GotoPreviousDrawing;
     TSharedPtr<FUICommandInfo> GotoNextDrawing;
-    TSharedPtr<FUICommandInfo> SnapCameraToViewport;
 };

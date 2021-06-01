@@ -111,6 +111,24 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
 
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FShotSequenceEditorCommands::Get().DetachPlane,
+            FExecuteAction::CreateLambda( [this]()
+                {
+                    TArray<APlaneActor*> planes;
+                    int32 plane_count = ShotSequenceToolHelpers::GetAttachedPlanes( mSequencer, &planes, nullptr );
+                    if( !plane_count )
+                        return;
+                    ShotSequenceToolHelpers::DetachPlane( mSequencer, planes[0] );
+                } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetAttachedPlanes( mSequencer ) == 1; } ),
+            FIsActionChecked(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetAttachedPlanes( mSequencer ) <= 1; } )
+        );
+    else
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().DetachPlane );
+
     //---
 
     if( iMap == kMap )
@@ -212,6 +230,22 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 plane (or 0) available
+    // - the second button is displayed when there are more than 2 planes available
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().DetachPlane );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceToolHelpers::GetAttachedPlanes( mSequencer ) > 1; } )
+        ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakePlaneMenu ),
+        FShotSequenceEditorCommands::Get().DetachPlane->GetLabel(),
+        FShotSequenceEditorCommands::Get().DetachPlane->GetDescription(),
+        FShotSequenceEditorCommands::Get().DetachPlane->GetIcon() );
+
 
     ToolbarBuilder.AddSeparator();
 
@@ -293,6 +327,35 @@ FShotSequenceCustomization::MakeCameraMenu()
         MenuBuilder.AddWidget( DetailView, FText(), true );
     }
     MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakePlaneMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> plane_bindings;
+    int32 plane_count = ShotSequenceToolHelpers::GetAttachedPlanes( mSequencer, &planes, &plane_bindings );
+    if( !plane_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < plane_count; i++ )
+    {
+        APlaneActor* plane = planes[i];
+        FGuid plane_binding = plane_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( plane->GetActorLabel() ),
+            FText::GetEmpty(),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, plane](){ ShotSequenceToolHelpers::DetachPlane( mSequencer, plane ); } )
+            )
+        );
+    }
 
     return MenuBuilder.MakeWidget();
 }

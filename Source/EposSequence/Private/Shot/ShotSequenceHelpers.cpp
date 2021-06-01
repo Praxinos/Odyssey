@@ -153,6 +153,106 @@ ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequen
 
 //static
 int32
+ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+{
+    if( oPlanes )
+        oPlanes->Empty();
+    if( oPlaneBindings )
+        oPlaneBindings->Empty();
+
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !movieScene )
+        return 0;
+
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> plane_bindings;
+
+    TArray<APlaneActor*> planes_selected;
+    TArray<FGuid> plane_bindings_selected;
+
+    TArray<APlaneActor*> planes_not_selected;
+    TArray<FGuid> plane_bindings_not_selected;
+
+    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+
+        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        {
+            APlaneActor* plane = Cast<APlaneActor>( WeakObject.Get() );
+
+            if( !plane )
+                continue;
+
+            USceneComponent* RootComp = plane->GetRootComponent();
+            if( !RootComp || !RootComp->GetAttachParent() )
+                continue;
+
+            AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+            if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the planes are in the movie scene ?
+                continue;
+
+            switch( iPlaneSelection )
+            {
+                case EGetPlane::kAlwaysAll:
+                    planes.Add( plane );
+                    plane_bindings.Add( possessable.GetGuid() );
+                    break;
+                case EGetPlane::kSelectedOnly:
+                    if( plane->IsSelected() )
+                    {
+                        planes.Add( plane );
+                        plane_bindings.Add( possessable.GetGuid() );
+                    }
+                    break;
+                default:
+                case EGetPlane::kSelectedOrAll:
+                    if( plane->IsSelected() )
+                    {
+                        planes_selected.Add( plane );
+                        plane_bindings_selected.Add( possessable.GetGuid() );
+                    }
+                    else
+                    {
+                        planes_not_selected.Add( plane );
+                        plane_bindings_not_selected.Add( possessable.GetGuid() );
+                    }
+                    break;
+            }
+        }
+    }
+
+    if( planes.Num() )
+    {
+        if( oPlanes )
+            oPlanes->Append( planes );
+        if( oPlaneBindings )
+            oPlaneBindings->Append( plane_bindings );
+
+        return planes.Num();
+    }
+    else if( planes_selected.Num() )
+    {
+        if( oPlanes )
+            oPlanes->Append( planes_selected );
+        if( oPlaneBindings )
+            oPlaneBindings->Append( plane_bindings_selected );
+
+        return planes_selected.Num();
+    }
+    else
+    {
+        if( oPlanes )
+            oPlanes->Append( planes_not_selected );
+        if( oPlaneBindings )
+            oPlaneBindings->Append( plane_bindings_not_selected );
+
+        return planes_not_selected.Num();
+    }
+}
+
+//static
+int32
 ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding, FDrawingData* oData )
 {
     if( oData )
