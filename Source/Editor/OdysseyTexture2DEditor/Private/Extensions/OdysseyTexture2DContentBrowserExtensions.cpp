@@ -59,8 +59,7 @@ public:
         ActionTextures( textures );
     }
 
-    virtual void ActionTextures( TArray< UTexture2D* >& iTextures ) = 0
-    {}
+    virtual void ActionTextures( TArray< UTexture2D* >& iTextures ) = 0;
 
 protected:
     TArray< FAssetData > mSelectedAssets;
