@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Helpers/EposSequenceToolHelpers.h"
+#include "EposSequenceTools.h"
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
@@ -19,11 +19,11 @@
 #include "ResourceAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
-#define LOCTEXT_NAMESPACE "EposSequenceToolHelpers_Drawing"
+#define LOCTEXT_NAMESPACE "EposSequenceTools_Drawing"
 
 //static
 bool
-BoardSequenceToolHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -37,7 +37,7 @@ BoardSequenceToolHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber
 
 //static
 bool
-ShotSequenceToolHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding ) == INDEX_NONE;
 }
@@ -46,25 +46,25 @@ ShotSequenceToolHelpers::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber 
 
 //static
 void
-BoardSequenceToolHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceToolHelpers::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
+    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
 }
 
 //static
 void
-ShotSequenceToolHelpers::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     CreateDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
 }
 
 //static
 void
-ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     ShotSequenceHelpers::FDrawingData drawing_data;
     int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
@@ -103,18 +103,18 @@ ShotSequenceToolHelpers::CreateDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
 //static
 void
-BoardSequenceToolHelpers::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceToolHelpers::GotoPreviousDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+    ShotSequenceTools::GotoPreviousDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
 
 //static
 bool
-BoardSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -128,14 +128,14 @@ BoardSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumb
 
 //static
 void
-ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    ShotSequenceToolHelpers::GotoPreviousDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    GotoPreviousDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
 }
 
 //static
 bool
-ShotSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
@@ -145,7 +145,7 @@ ShotSequenceToolHelpers::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumbe
 
 //static
 void
-ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+ShotSequenceTools::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
     TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
 
@@ -165,18 +165,18 @@ ShotSequenceToolHelpers::GotoPreviousDrawing( ISequencer& iSequencer, UMovieScen
 
 //static
 void
-BoardSequenceToolHelpers::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceToolHelpers::GotoNextDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+    ShotSequenceTools::GotoNextDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
 
 //static
 bool
-BoardSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -190,14 +190,14 @@ BoardSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber i
 
 //static
 void
-ShotSequenceToolHelpers::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    ShotSequenceToolHelpers::GotoNextDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    GotoNextDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
 }
 
 //static
 bool
-ShotSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
@@ -207,7 +207,7 @@ ShotSequenceToolHelpers::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iF
 
 //static
 void
-ShotSequenceToolHelpers::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+ShotSequenceTools::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
     TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
 

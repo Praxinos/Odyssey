@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Helpers/EposSequenceToolHelpers.h"
+#include "EposSequenceTools.h"
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
@@ -20,16 +20,16 @@
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "Settings/EposSequenceEditorSettings.h"
+#include "Settings/EposSequenceToolsSettings.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
-#define LOCTEXT_NAMESPACE "EposSequenceToolHelpers_Camera"
+#define LOCTEXT_NAMESPACE "EposSequenceTools_Camera"
 
 //static
 bool
-BoardSequenceToolHelpers::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -43,7 +43,7 @@ BoardSequenceToolHelpers::CanCreateCamera( ISequencer* iSequencer, FFrameNumber 
 
 //static
 ACineCameraActor*
-BoardSequenceToolHelpers::GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding )
+BoardSequenceTools::GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -56,7 +56,7 @@ BoardSequenceToolHelpers::GetCamera( ISequencer* iSequencer, FFrameNumber iFrame
 
 //static
 ACineCameraActor*
-ShotSequenceToolHelpers::GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding )
+ShotSequenceTools::GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding )
 {
     return ShotSequenceHelpers::GetCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oCameraBinding );
 }
@@ -67,25 +67,25 @@ ShotSequenceToolHelpers::GetCamera( ISequencer* iSequencer, FGuid* oCameraBindin
 
 //static
 void
-BoardSequenceToolHelpers::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    return ShotSequenceToolHelpers::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
 //static
 void
-ShotSequenceToolHelpers::CreateCamera( ISequencer* iSequencer )
+ShotSequenceTools::CreateCamera( ISequencer* iSequencer )
 {
     CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
 }
 
 //static
 void
-ShotSequenceToolHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
@@ -111,9 +111,9 @@ ShotSequenceToolHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequen
     //---
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceToolHelpers::SpawnAndBindCamera( iSequencer, iSequence, &camera_guid );
+    ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, &camera_guid );
 
-    ShotSequenceToolHelpers::CameraAdded( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame() );
+    ShotSequenceTools::CameraAdded( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame() );
 
     //---
 
@@ -123,7 +123,7 @@ ShotSequenceToolHelpers::CreateCamera( ISequencer& iSequencer, UMovieSceneSequen
 
 //static
 ACineCameraActor*
-ShotSequenceToolHelpers::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
+ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 {
     // Set new camera to match viewport
     FActorSpawnParameters SpawnParams;
@@ -134,7 +134,7 @@ ShotSequenceToolHelpers::SpawnCamera( UWorld* iWorld, const FTransform& iTransfo
     camera->SetActorTransform( iTransform );
     //camera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
 
-    const UEposSequenceEditorSettings* settings = GetDefault<UEposSequenceEditorSettings>();
+    const UEposSequenceToolsSettings* settings = GetDefault<UEposSequenceToolsSettings>();
 
     // https://udn.unrealengine.com/s/question/0D54z00006uhl34CAA/plugin-cuproperty-how-to-change-uproperty-and-trigger-prepostedit-
     //UCineCameraComponent* CameraComponent = camera->GetCineCameraComponent();
@@ -166,7 +166,7 @@ ShotSequenceToolHelpers::SpawnCamera( UWorld* iWorld, const FTransform& iTransfo
 
 //static
 ACineCameraActor*
-ShotSequenceToolHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
+ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
 {
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
     FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
@@ -207,7 +207,7 @@ ShotSequenceToolHelpers::SpawnAndBindCamera( ISequencer& iSequencer, UMovieScene
 
 //static
 void
-ShotSequenceToolHelpers::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber)
+ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber)
 {
     CreateCameraCut( iSequencer, iSequence, CameraGuid, FrameNumber );
 
@@ -216,7 +216,7 @@ ShotSequenceToolHelpers::CameraAdded( ISequencer& iSequencer, UMovieSceneSequenc
 
 //static
 void
-ShotSequenceToolHelpers::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber /*iFrameNumber*/ ) // From MovieSceneToolHelpers::CameraAdded()
+ShotSequenceTools::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber /*iFrameNumber*/ ) // From MovieSceneToolHelpers::CameraAdded()
 {
     UMovieScene* movieScene = iSequence->GetMovieScene();
 
@@ -278,7 +278,7 @@ ShotSequenceToolHelpers::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieScen
 
 //static
 void
-BoardSequenceToolHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -289,12 +289,12 @@ BoardSequenceToolHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNu
     if( !camera )
         return;
 
-    ShotSequenceToolHelpers::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, result.mInnerTime.GetFrame() );
+    ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, result.mInnerTime.GetFrame() );
 }
 
 //static
 void
-ShotSequenceToolHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
@@ -306,12 +306,12 @@ ShotSequenceToolHelpers::SnapCameraToViewport( ISequencer* iSequencer, FFrameNum
     if( !camera )
         return;
 
-    ShotSequenceToolHelpers::SnapCameraToViewport( *iSequencer, sequence, camera, camera_guid, iFrameNumber );
+    SnapCameraToViewport( *iSequencer, sequence, camera, camera_guid, iFrameNumber );
 }
 
 //static
 void
-ShotSequenceToolHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber )
+ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber )
 {
     const FScopedTransaction transaction( LOCTEXT( "SnapStoryCameraToViewport", "Snap Storyboard Camera To Viewport" ) );
 
@@ -341,7 +341,7 @@ ShotSequenceToolHelpers::SnapCameraToViewport( ISequencer& iSequencer, UMovieSce
 
 //static
 bool
-ShotSequenceToolHelpers::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation )
+ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene || movieScene->IsReadOnly() )
@@ -577,25 +577,25 @@ AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNum
 
 //static
 void
-BoardSequenceToolHelpers::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
+BoardSequenceTools::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceToolHelpers::StopPilotingCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iCamera, iPreviousTransform, iNewTransform );
+    ShotSequenceTools::StopPilotingCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iCamera, iPreviousTransform, iNewTransform );
 }
 
 //static
 void
-ShotSequenceToolHelpers::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
+ShotSequenceTools::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
 {
     StopPilotingCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iCamera, iPreviousTransform, iNewTransform );
 }
 
 //static
 void
-ShotSequenceToolHelpers::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
+ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene || movieScene->IsReadOnly() )

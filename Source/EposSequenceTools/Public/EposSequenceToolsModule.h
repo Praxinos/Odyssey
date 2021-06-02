@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FEposMovieSceneToolsModule : public IModuleInterface
+class FEposSequenceToolsModule : public IModuleInterface
 {
 public:
 

@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Helpers/EposSequenceToolHelpers.h"
+#include "EposSequenceTools.h"
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
@@ -27,11 +27,11 @@
 #include "ResourceAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
-#define LOCTEXT_NAMESPACE "EposSequenceToolHelpers_Plane"
+#define LOCTEXT_NAMESPACE "EposSequenceTools_Plane"
 
 //static
 FVector
-ShotSequenceToolHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance ) // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
+ShotSequenceTools::ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance ) // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
 {
     float FrustumAngle = iCamera->GetCineCameraComponent()->GetHorizontalFieldOfView();
     float FrustumAspectRatio = iCamera->GetCineCameraComponent()->AspectRatio;
@@ -97,7 +97,7 @@ ShotSequenceToolHelpers::ComputePlaneScale( const ACineCameraActor* iCamera, flo
 
 //static
 APlaneActor*
-ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial )
+ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial )
 {
     FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
 
@@ -111,7 +111,7 @@ ShotSequenceToolHelpers::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, 
     float FocusDistance = 200;
     FVector plane_location = CamLocation + CamDir * FocusDistance;
 
-    FVector plane_scale = ShotSequenceToolHelpers::ComputePlaneScale( iCamera, FocusDistance );
+    FVector plane_scale = ShotSequenceTools::ComputePlaneScale( iCamera, FocusDistance );
 
     FRotator plane_rotator = CamRot;
 
@@ -206,7 +206,7 @@ SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
 
 //static
 void
-ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
+ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
     UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
@@ -216,7 +216,7 @@ ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneS
 
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
 
-    APlaneActor* plane = ShotSequenceToolHelpers::SpawnPlane( world, iCamera, new_material );
+    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera, new_material );
 
     //---
 
@@ -235,25 +235,25 @@ ShotSequenceToolHelpers::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneS
 
 //static
 void
-BoardSequenceToolHelpers::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceToolHelpers::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+    ShotSequenceTools::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
 
 //static
 void
-ShotSequenceToolHelpers::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     CreatePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
 }
 
 //static
 void
-ShotSequenceToolHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+ShotSequenceTools::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
     FGuid camera_guid;
     ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
@@ -269,7 +269,7 @@ ShotSequenceToolHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     //---
 
-    ShotSequenceToolHelpers::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iFrameNumber );
+    ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iFrameNumber );
 
     //---
 
@@ -280,7 +280,7 @@ ShotSequenceToolHelpers::CreatePlane( ISequencer& iSequencer, UMovieSceneSequenc
 
 //static
 int32
-BoardSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+BoardSequenceTools::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -294,7 +294,7 @@ BoardSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFr
 
 //static
 int32
-ShotSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceTools::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     return ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
@@ -305,25 +305,25 @@ ShotSequenceToolHelpers::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActo
 
 //static
 void
-BoardSequenceToolHelpers::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, APlaneActor* iPlane )
+BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, APlaneActor* iPlane )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceToolHelpers::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlane );
+    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlane );
 }
 
 //static
 void
-ShotSequenceToolHelpers::DetachPlane( ISequencer* iSequencer, APlaneActor* iPlane )
+ShotSequenceTools::DetachPlane( ISequencer* iSequencer, APlaneActor* iPlane )
 {
     DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlane );
 }
 
 //static
 void
-ShotSequenceToolHelpers::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane )
+ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane )
 {
     //FGuid camera_guid;
     //ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
@@ -352,7 +352,7 @@ ShotSequenceToolHelpers::DetachPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
 //static
 int32
-BoardSequenceToolHelpers::GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+BoardSequenceTools::GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
@@ -366,7 +366,7 @@ BoardSequenceToolHelpers::GetAttachedPlanes( ISequencer* iSequencer, FFrameNumbe
 
 //static
 int32
-ShotSequenceToolHelpers::GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
+ShotSequenceTools::GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
 {
     return ShotSequenceHelpers::GetAttachedPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }

@@ -11,7 +11,7 @@ class UMovieSceneSequence;
 /*
  * The lighttable management
  */
-class EPOSMOVIESCENETOOLS_API LighttableTools
+class EPOSSEQUENCETOOLS_API LighttableTools
 {
 public:
     static void Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );

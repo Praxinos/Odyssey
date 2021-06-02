@@ -10,8 +10,6 @@
 #include "MovieSceneSequenceID.h"
 #include "TransformData.h"
 
-#include "Helpers/ToolkitHelpers.h"
-
 class AActor;
 class ACineCameraActor;
 class APlaneActor;
@@ -24,9 +22,9 @@ class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
 
-class BoardSequenceToolHelpers
+class EPOSSEQUENCETOOLS_API BoardSequenceTools
 {
-// Inside EspoSequenceToolHelpers_Camera
+// Inside EspoSequenceTools_Camera
 public:
     /**
     *  Find the camera of the board section
@@ -74,7 +72,7 @@ public:
     */
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
-// Inside EspoSequenceToolHelpers_Plane
+// Inside EspoSequenceTools_Plane
 public:
     /**
     *  Create a new plane (actor & track) in the board section
@@ -113,7 +111,7 @@ public:
     */
     static int32 GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
-// Inside EspoSequenceToolHelpers_Drawing
+// Inside EspoSequenceTools_Drawing
 public:
     /**
     *  Create a new drawing (material & texture) in a plane in the board section
@@ -170,13 +168,13 @@ public:
 
 //---
 
-class ShotSequenceToolHelpers
+class EPOSSEQUENCETOOLS_API ShotSequenceTools
 {
 private:
-    friend BoardSequenceToolHelpers;
-    friend ToolkitHelpers;
+    friend class BoardSequenceTools;
+    friend class ToolkitHelpers;
 
-// Inside EspoSequenceToolHelpers_Camera
+// Inside EspoSequenceTools_Camera
 public:
     /**
     *  Find a Camera from the camera track
@@ -218,7 +216,7 @@ private:
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
     static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
-// Inside EspoSequenceToolHelpers_Plane
+// Inside EspoSequenceTools_Plane
 public:
     /**
     *  Add a Camera track
@@ -241,7 +239,7 @@ private:
     static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
     static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
-// Inside EspoSequenceToolHelpers_Drawing
+// Inside EspoSequenceTools_Drawing
 public:
     /**
     *  Add a drawing (material/texture)

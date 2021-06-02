@@ -23,7 +23,7 @@
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 
-#include "Helpers/EposSequenceToolHelpers.h"
+#include "EposSequenceTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -413,7 +413,7 @@ ToolkitHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iAc
     //TODO: maybe get the size of the existing section
     // But as it should only be called in FSequencer::AddActors(), after an auto track creation, it should be ok to replace without taking care to of the existing section
 
-    ShotSequenceToolHelpers::CreateCameraCut( *iSequencer, sequence, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
+    ShotSequenceTools::CreateCameraCut( *iSequencer, sequence, camera_guid, iSequencer->GetLocalTime().Time.FloorToFrame() );
 }
 
 #undef LOCTEXT_NAMESPACE

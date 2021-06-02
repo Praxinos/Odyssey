@@ -13,10 +13,10 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceEditorCommands.h"
 #include "EposTracksModule.h"
-#include "Helpers/EposSequenceToolHelpers.h"
+#include "EposSequenceTools.h"
 #include "Misc/SAboutWindow.h"
 #include "PlaneActor.h"
-#include "Settings/EposSequenceEditorSettings.h"
+#include "Settings/EposSequenceToolsSettings.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceEditorCommands.h"
@@ -144,8 +144,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCamera,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceToolHelpers::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
@@ -153,8 +153,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().SnapCameraToViewport,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceToolHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceTools::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
@@ -164,8 +164,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlane,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceToolHelpers::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceTools::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
@@ -176,14 +176,14 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
             FExecuteAction::CreateLambda( [this]()
                 {
                     TArray<APlaneActor*> planes;
-                    int32 plane_count = BoardSequenceToolHelpers::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, nullptr );
+                    int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, nullptr );
                     if( !plane_count )
                         return;
-                    BoardSequenceToolHelpers::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes[0] );
+                    BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes[0] );
                 } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceToolHelpers::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) == 1; } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) == 1; } ),
             FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceToolHelpers::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1; } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().DetachPlane );
@@ -196,21 +196,21 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
             FExecuteAction::CreateLambda( [this]()
                 {
                     TArray<FGuid> plane_bindings;
-                    int32 plane_count = BoardSequenceToolHelpers::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                     if( !plane_count )
                         return;
-                    BoardSequenceToolHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                    BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                 } ),
             FCanExecuteAction::CreateLambda( [this]()
                 {
                     TArray<FGuid> plane_bindings;
-                    int32 plane_count = BoardSequenceToolHelpers::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                     if( !plane_count )
                         return false;
-                    return BoardSequenceToolHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                    return BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                 } ),
             FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceToolHelpers::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1; } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateDrawing );
@@ -218,8 +218,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().GotoPreviousDrawing,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceToolHelpers::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
@@ -227,8 +227,8 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     if( iMap == kMap )
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().GotoNextDrawing,
-            FExecuteAction::CreateLambda( [this](){ BoardSequenceToolHelpers::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceToolHelpers::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
@@ -349,7 +349,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceToolHelpers::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1; } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakePlaneMenu ),
         FShotSequenceEditorCommands::Get().DetachPlane->GetLabel(),
@@ -368,7 +368,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceToolHelpers::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1; } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingMenu ),
         FShotSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
@@ -420,11 +420,11 @@ FBoardSequenceCustomization::MakeCameraMenu()
         auto visible_property = []( const FPropertyAndParent& iPropertyChain )
         {
             FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposSequenceEditorSettings, CameraSettings );
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposSequenceToolsSettings, CameraSettings );
         };
         DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
         // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposSequenceEditorSettings>() );
+        DetailView->SetObject( GetMutableDefault<UEposSequenceToolsSettings>() );
 
         MenuBuilder.AddWidget( DetailView, FText(), true );
     }
@@ -440,7 +440,7 @@ FBoardSequenceCustomization::MakePlaneMenu()
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceToolHelpers::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
+    int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -454,7 +454,7 @@ FBoardSequenceCustomization::MakePlaneMenu()
             FText::GetEmpty(),
             FSlateIcon(),
             FUIAction(
-                FExecuteAction::CreateLambda( [this, plane](){ BoardSequenceToolHelpers::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane ); } )
+                FExecuteAction::CreateLambda( [this, plane](){ BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane ); } )
             )
         );
     }
@@ -469,7 +469,7 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceToolHelpers::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
+    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -483,8 +483,8 @@ FBoardSequenceCustomization::MakeDrawingMenu()
             FText::GetEmpty(),
             FSlateIcon(),
             FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding](){ BoardSequenceToolHelpers::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
-                FCanExecuteAction::CreateLambda( [this, plane_binding](){ return BoardSequenceToolHelpers::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } )
+                FExecuteAction::CreateLambda( [this, plane_binding](){ BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
+                FCanExecuteAction::CreateLambda( [this, plane_binding](){ return BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } )
             )/*,
             NAME_None,
             EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
@@ -568,7 +568,7 @@ FBoardSequenceCustomization::OnTransformChanged( UObject& InObject )
 
     //---
 
-    BoardSequenceToolHelpers::StopPilotingCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
+    BoardSequenceTools::StopPilotingCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
 }
 
 void

@@ -36,7 +36,7 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "EposMovieSceneTools",
+      "Name": "EposSequenceTools",
       "Type": "Editor",
       "LoadingPhase": "Default"
     },

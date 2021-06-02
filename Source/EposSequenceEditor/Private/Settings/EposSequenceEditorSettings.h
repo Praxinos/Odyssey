@@ -45,37 +45,6 @@ public:
 
 //---
 
-USTRUCT()
-struct FCameraSettings
-{
-    GENERATED_BODY()
-
-public:
-    /** Controls the filmback of the camera. */
-    UPROPERTY( config, EditAnywhere, Category = Camera )
-    FCameraFilmbackSettings Filmback;
-
-    /** Controls the camera's lens. */
-    UPROPERTY( config, EditAnywhere, Category = Camera )
-    FCameraLensSettings LensSettings;
-
-    /** Current focal length of the camera (i.e. controls FoV, zoom) */
-    UPROPERTY( config, EditAnywhere, Category = Camera )
-    float CurrentFocalLength;
-
-    /** Current aperture, in terms of f-stop (e.g. 2.8 for f/2.8) */
-    UPROPERTY( config, EditAnywhere, Category = Camera )
-    float CurrentAperture;
-
-#if WITH_EDITORONLY_DATA
-    /** Read-only. Control this value with CurrentFocalLength (and filmback settings). */
-    UPROPERTY( config, VisibleAnywhere, Category = Camera )
-    float CurrentHorizontalFOV;
-#endif
-};
-
-//---
-
 /**
  * Epos Sequence Editor settings.
  */
@@ -84,16 +53,6 @@ class UEposSequenceEditorSettings
     : public UObject
 {
     GENERATED_BODY()
-
-protected:
-    virtual void PostInitProperties() override;
-
-#if WITH_EDITOR
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-#endif
-
-private:
-    void UpdateValues();
 
 public:
     //TODO: add everything inside UMovieSceneToolsProjectSettings here ? or inherit from it ?
@@ -109,7 +68,4 @@ public:
     /** Specifies Shot stuff. */
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FShotSettings ShotSettings;
-
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
-    FCameraSettings CameraSettings;
 };

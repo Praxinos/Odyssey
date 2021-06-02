@@ -1,16 +1,16 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Helpers/EposSequenceToolHelpers.h"
+#include "EposSequenceTools.h"
 
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 
-#define LOCTEXT_NAMESPACE "EposSequenceToolHelpers"
+#define LOCTEXT_NAMESPACE "EposSequenceTools"
 
-ShotSequenceToolHelpers::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID )
+ShotSequenceTools::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID )
     : mSequencer( iSequencer )
     , mOriginalId()
     , mOriginalGlobalTime()
@@ -28,7 +28,7 @@ ShotSequenceToolHelpers::cTemporarySwitchInner::cTemporarySwitchInner( ISequence
     mSequencer.FocusSequenceInstance( *subsection );
 }
 
-ShotSequenceToolHelpers::cTemporarySwitchInner::~cTemporarySwitchInner()
+ShotSequenceTools::cTemporarySwitchInner::~cTemporarySwitchInner()
 {
     FMovieSceneSequenceID focused_id = mSequencer.GetFocusedTemplateID();
     if( focused_id == mOriginalId )

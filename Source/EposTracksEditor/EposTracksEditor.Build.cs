@@ -58,7 +58,7 @@ public class EposTracksEditor : ModuleRules
                 "EditorStyle",
                 "EditorWidgets",
                 // [EDITOR] custom plugin dependencies
-                "EposMovieSceneTools"
+                "EposSequenceTools"
             }
             );
 
