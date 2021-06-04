@@ -277,6 +277,11 @@ def Clean( iArgs, iOutputPath ):
         print( Fore.GREEN + f'Removing: {binaries}' )
         shutil.rmtree( binaries, ignore_errors=True )
 
+    if iArgs.target is eTarget.kBeta:
+        source = iOutputPath / 'Source'
+        print( Fore.GREEN + f'Removing: {source}' )
+        shutil.rmtree( source, ignore_errors=True )
+
     intermediate = iOutputPath / 'Intermediate'
     print( Fore.GREEN + f'Removing: {intermediate}' )
     shutil.rmtree( intermediate, ignore_errors=True )
