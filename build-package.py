@@ -3,6 +3,7 @@
 
 import argparse
 from datetime import datetime
+from enum import Enum
 import itertools
 import json
 from pathlib import Path
@@ -23,6 +24,14 @@ gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
     print( Fore.RED + f'This platform is not supported: {gOperatingSystem}' )
     sys.exit( 5 )
+
+class eTarget(Enum):
+    kDev = 'dev'
+    kBeta = 'beta'
+    kMarketplace = 'marketplace'
+
+    def __str__(self):
+        return self.value
 
 #---
 
@@ -45,13 +54,13 @@ def GetArguments():
                     if action.option_strings or action.nargs in defaulting_nargs:
                         help += '\n' + Fore.BLACK + Style.BRIGHT + '(default: %(default)s)' + Style.RESET_ALL
             return help
-            
+
     default_input_path = Path.cwd().resolve()
     default_output_path = ( default_input_path / '..' / 'package' ).resolve()
     default_upload_path = Path( 'P:\\' ) / 'Praxinos' / 'Developpement' / 'Package'
     if gOperatingSystem == 'darwin':
         default_upload_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
-    
+
     # Example with full parameters used
     # $(WORK)> 4.26\Epos\build-package.py --input-dir "C:\Users\Mike\work\4.26\Epos" --output-dir "C:\Users\Mike\work\4.26\package2" -u --upload-dir "C:\Users\Mike\work\4.26\upload2" -s test-script-parameters
 
@@ -61,9 +70,9 @@ def GetArguments():
     parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
     parser.add_argument( '-p', '--upload-dir', default=f'{default_upload_path}', help=f'the upload path\nsuffix folders will be append to it' )
     parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
-    parser.add_argument( '-m', '--marketplace', action="store_true", help=f'package for the marketplace (without binaries)' )
+    parser.add_argument( '-t', '--target', type=eTarget, choices=eTarget, default=eTarget.kDev, help=f'package for the specific target' )
     args = parser.parse_args()
-    
+
     return args
 
 #---
@@ -76,7 +85,7 @@ def ProcessArgumentForInputPath( iArgs ):
     if not uplugin_pathfiles:
         print( Fore.RED + f'no uplugin file in: {input_path}' )
         sys.exit( 10 )
-        
+
     uplugin_pathfile = uplugin_pathfiles[0]
     print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
 
@@ -95,20 +104,20 @@ def ProcessArgumentForInputPath( iArgs ):
     if invalid_subpathfiles:
         for invalid_subpathfile in invalid_subpathfiles:
             print( f'Invalid characters: {content_path} {Fore.RED}{invalid_subpathfile}' )
-            
+
         sys.exit( 12 )
-    
+
     return uplugin_pathfile, plugin_name
 
 # Get intermediate folders (with date/version/...)
 def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
     global gVersionUE
     global gOperatingSystem
-    
+
     uplugin_data = {}
     with iUPluginPathFile.open() as infile:
         uplugin_data = json.load( infile )
-        
+
     now = datetime.now()
 
     date_folder = []
@@ -116,7 +125,7 @@ def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
     date_folder.append( gVersionUE )
     date_folder.append( uplugin_data["VersionName"] )
     date_folder.append( 'beta' if uplugin_data['IsBetaVersion'] else '' )
-    if not iArgs.marketplace:
+    if iArgs.target in [eTarget.kDev, eTarget.kBeta]:
         date_folder.append( gOperatingSystem )
     date_folder.append( iArgs.suffix )
     date_folder = list( filter( None, date_folder ) )
@@ -125,7 +134,7 @@ def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
     main_folder = []
     main_folder.append( iPluginName )
     main_folder.append( gVersionUE )
-    main_folder.append( 'marketplace' if iArgs.marketplace else '' )
+    main_folder.append( iArgs.target.value )
     main_folder = list( filter( None, main_folder ) )
     main_folder = '-'.join( main_folder )
 
@@ -134,16 +143,16 @@ def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
 # Get the name of the zip (with version/...)
 def GetZipName( iArgs, iUPluginPathFile, iPluginName ):
     global gOperatingSystem
-    
+
     uplugin_data = {}
     with iUPluginPathFile.open() as infile:
         uplugin_data = json.load( infile )
-        
+
     zip_name = []
     zip_name.append( iPluginName )
     zip_name.append( uplugin_data["VersionName"] )
     zip_name.append( 'beta' if uplugin_data['IsBetaVersion'] else '' )
-    if not iArgs.marketplace:
+    if iArgs.target in [eTarget.kDev, eTarget.kBeta]:
         zip_name.append( gOperatingSystem )
     zip_name = list( filter( None, zip_name ) )
     zip_name = '-'.join( zip_name )
@@ -158,7 +167,7 @@ def ProcessArgumentForOutputPath( iArgs, iIntermediateFolders ):
     output_path.mkdir( parents=True, exist_ok=True )
 
     print( Fore.GREEN + f'Output path: {output_path}' )
-    
+
     return output_path
 
 # Get upload package directory
@@ -166,9 +175,9 @@ def ProcessArgumentForUploadPath( iArgs, iIntermediateFolders ):
     if not iArgs.upload:
         print( Fore.GREEN + f'NO upload' )
         return None
-        
+
     upload_path = Path( iArgs.upload_dir ).resolve()
-        
+
     upload_path.mkdir( parents=True, exist_ok=True )
     upload_path = upload_path / iIntermediateFolders
 
@@ -176,12 +185,9 @@ def ProcessArgumentForUploadPath( iArgs, iIntermediateFolders ):
 
     return upload_path
 
-# Print info for marketplace
-def ProcessArgumentForMarketplace( iArgs ):
-    if not iArgs.marketplace:
-        return
-        
-    print( Fore.GREEN + f'Build for marketplace' )
+# Print info for target
+def ProcessArgumentForTarget( iArgs ):
+    print( Fore.GREEN + f'Build for {iArgs.target.value}' )
 
 #---
 
@@ -198,7 +204,7 @@ def Build( iUPluginPathFile, iOutputPath ):
     uplugin_data = {}
     with iUPluginPathFile.open() as infile:
         uplugin_data = json.load( infile )
-        
+
     if not uplugin_data:
         print( Fore.RED + f'Empty uplugin_data: {iUPluginPathFile}' )
         sys.exit( 20 )
@@ -222,7 +228,7 @@ def Build( iUPluginPathFile, iOutputPath ):
     elif gOperatingSystem == 'darwin':
         uat = [ str( Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{gVersionUE}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh' ) ]
     uat_args = [ 'BuildPlugin', '-Plugin=' + str( iUPluginPathFile ) + '', '-Package=' + str( iOutputPath ) + '', '-CreateSubFolder', '-Rocket' ]
-        
+
     # Run packaging script
     process = subprocess.run( uat + uat_args )
 
@@ -239,7 +245,7 @@ def Build( iUPluginPathFile, iOutputPath ):
 
 # Add platform specifications (all platforms) for marketplace
 def PostBuildFixPlatforms( iArgs, iOutputPath ):
-    if not iArgs.marketplace:
+    if iArgs.target in [eTarget.kDev, eTarget.kBeta]:
         return
 
     uplugin_pathfiles = [ entry for entry in iOutputPath.glob( '*.uplugin' ) if entry.is_file() ]
@@ -248,14 +254,14 @@ def PostBuildFixPlatforms( iArgs, iOutputPath ):
         sys.exit( 40 )
 
     uplugin_pathfile = uplugin_pathfiles[0]
-        
+
     uplugin_data = {}
     with uplugin_pathfile.open() as infile:
         uplugin_data = json.load( infile )
-        
+
     for module in uplugin_data['Modules']:
         module['WhitelistPlatforms'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
-    
+
     del uplugin_data['PreBuildSteps'] # Remove pre-build-steps as they are (at least for now) for development stuff: https://udn.unrealengine.com/s/question/0D54z00006tMlfbCAC/plugin-cconfig-how-to-use-config-ini-file-for-a-custom-plugin-
 
     with uplugin_pathfile.open( 'w' ) as outfile:
@@ -266,7 +272,7 @@ def PostBuildFixPlatforms( iArgs, iOutputPath ):
 # Cleaning
 def Clean( iArgs, iOutputPath ):
     # Remove binaries only for marketplace, otherwise it's for internal testing and binaries are needed to not have to compile the plugin again
-    if iArgs.marketplace:
+    if iArgs.target is eTarget.kMarketplace:
         binaries = iOutputPath / 'Binaries'
         print( Fore.GREEN + f'Removing: {binaries}' )
         shutil.rmtree( binaries, ignore_errors=True )
@@ -295,7 +301,7 @@ def Upload( iArgs, iOutputPath, iUploadPath ):
     dst_path = iUploadPath.parents[0]
     print( Fore.GREEN + f'Copying/Uploading: {src_path} -> {dst_path}' )
     shutil.copytree( src_path, dst_path )
-    
+
 #---
 #---
 #---
@@ -307,7 +313,7 @@ intermediate_folders            = GetIntermediateFolders( args, uplugin_pathfile
 zip_name                        = GetZipName( args, uplugin_pathfile, plugin_name )
 output_path                     = ProcessArgumentForOutputPath( args, intermediate_folders )
 upload_path                     = ProcessArgumentForUploadPath( args, intermediate_folders )
-ProcessArgumentForMarketplace( args )
+ProcessArgumentForTarget( args )
 
 #---
 
