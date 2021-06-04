@@ -221,7 +221,7 @@ UBoardSequence::SectionAddedOrRemoved( UMovieSceneSection* iSection ) //override
 FLinearColor
 UBoardSequence::GetColorTint() const //override
 {
-    return FLinearColor( 0.5, 0, 0, 0.5 );
+    return FColor( 240, 100, 153, 64 );
 }
 
 #endif

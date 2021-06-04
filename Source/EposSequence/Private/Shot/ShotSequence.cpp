@@ -413,7 +413,7 @@ UShotSequence::SectionAddedOrRemoved( UMovieSceneSection* iSection ) //override
 FLinearColor
 UShotSequence::GetColorTint() const //override
 {
-    return FLinearColor( 0, 0, 0.5, 0.5 );
+    return FColor( 153, 100, 240, 64 );
 }
 
 #endif

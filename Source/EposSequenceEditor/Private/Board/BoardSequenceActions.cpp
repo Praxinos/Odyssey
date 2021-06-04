@@ -47,7 +47,7 @@ FBoardSequenceActions::GetSupportedClass() const
 FColor
 FBoardSequenceActions::GetTypeColor() const
 {
-    return FColor( 200, 80, 128 );
+    return FColor( 240, 100, 153 );
 }
 
 void

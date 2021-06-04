@@ -26,7 +26,8 @@ FShotSequenceActions::FShotSequenceActions( const TSharedRef<ISlateStyle>& iStyl
 /* IAssetTypeActions interface
  *****************************************************************************/
 
-uint32 FShotSequenceActions::GetCategories()
+uint32
+FShotSequenceActions::GetCategories()
 {
     return EAssetTypeCategories::Animation | FEposSequenceEditorModule::GetAssetCategory();
 }
@@ -46,7 +47,7 @@ FShotSequenceActions::GetSupportedClass() const
 FColor
 FShotSequenceActions::GetTypeColor() const
 {
-    return FColor( 200, 80, 128 );
+    return FColor( 240, 100, 153 );
 }
 
 void
