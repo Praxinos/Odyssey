@@ -22,6 +22,7 @@
 #include "MovieSceneSequence.h"
 #include "ScopedTransaction.h"
 #include "SequencerSettings.h"
+#include "SLevelViewport.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
@@ -192,6 +193,13 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     levelEditorModule.OnMapChanged().AddRaw( this, &FEposSequenceEditorToolkit::HandleMapChanged );
 
     OnOpened().Broadcast( *this );
+
+    TSharedPtr<SLevelViewport> viewport = levelEditorModule.GetFirstActiveLevelViewport();
+    if( viewport.IsValid() )
+    {
+        viewport->GetLevelViewportClient().SetViewportType(ELevelViewportType::LVT_Perspective); // Need to be called first
+        viewport->SetViewportTypeWithinLayout("Storyboard"); // Same name as in EposSequenceEditorModule::RegisterLevelEditorExtensions()
+    }
 }
 
 TSharedPtr<ISequencer>
