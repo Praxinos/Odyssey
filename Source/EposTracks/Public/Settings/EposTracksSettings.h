@@ -20,7 +20,7 @@ struct FBoardTrackSettings
 public:
     /** Select the way to arrange board sections. */
     UPROPERTY(config, EditAnywhere, Category=BoardTrack)
-    EArrangeSections ArrangeShots;
+    EArrangeSections ArrangeSections;
 };
 
 //---

@@ -5,5 +5,5 @@
 
 UEposTracksSettings::UEposTracksSettings()
 {
-    BoardTrackSettings.ArrangeShots = EArrangeSections::OnTwoRowsShifted;
+    BoardTrackSettings.ArrangeSections = EArrangeSections::OnTwoRowsShifted;
 }

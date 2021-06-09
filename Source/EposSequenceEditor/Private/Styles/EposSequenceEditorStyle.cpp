@@ -51,8 +51,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     Set( "ShotSequenceEditor.CreateCamera", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreateCamera.Small", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
 
     Set( "ShotSequenceEditor.CreatePlane", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
@@ -67,13 +67,6 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon24x24 ) );
 
     //---
-
-    Set( "BoardSequenceEditor.ArrangeShotsManually", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon48x48 ) );
-    Set( "BoardSequenceEditor.ArrangeShotsManually.Small", new IMAGE_BRUSH( "IconArrangeShotsManually_24x", Icon24x24 ) );
-    Set( "BoardSequenceEditor.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon48x48 ) );
-    Set( "BoardSequenceEditor.ArrangeShotsOnOneRow.Small", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_24x", Icon24x24 ) );
-    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon48x48 ) );          // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "BoardSequenceEditor.ArrangeShotsOnTwoRows.Small", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_24x", Icon24x24 ) );    // in the toolbar, stretch to the size Icon..x..
 
     Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon48x48 ) );
     Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon24x24 ) );

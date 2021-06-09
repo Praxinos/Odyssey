@@ -136,7 +136,6 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
     // Create a container edit box
     return SNew( SHorizontalBox )
 
-        // Add the camera combo box
         + SHorizontalBox::Slot()
         .AutoWidth()
         .VAlign( VAlign_Center )
@@ -144,7 +143,31 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
             FSequencerUtilities::MakeAddButton( LOCTEXT( "BoardText", "Board" ), FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), iParams.NodeIsHovered, GetSequencer() )
         ]
 
-    + SHorizontalBox::Slot()
+        + SHorizontalBox::Slot()
+        .VAlign( VAlign_Center )
+        .HAlign( HAlign_Right )
+        .AutoWidth()
+        .Padding( 4, 0, 0, 0 )
+        [
+            SNew( SComboButton )
+            .HasDownArrow( false )
+            .ButtonStyle( FEditorStyle::Get(), "HoverHintOnly" )
+            .ForegroundColor( FSlateColor::UseForeground() )
+            .IsEnabled_Lambda( [this]() { return GetSequencer().IsValid() ? !GetSequencer()->IsReadOnly() : false; } )
+            .OnGetMenuContent( this, &FCinematicBoardTrackEditor::HandleArrangeSectionsComboButtonGetMenuContent, iTrack )
+            //.ContentPadding( FMargin( 5, 2 ) )
+            //.HAlign( HAlign_Center )
+            //.VAlign( VAlign_Center )
+            .ButtonContent()
+            [
+                SNew( SImage )
+                .ColorAndOpacity( FSlateColor::UseForeground() )
+                .Image( this, &FCinematicBoardTrackEditor::GetArrangeSectionsIcon, iTrack )
+            ]
+        ]
+
+        // Add the camera check box
+        + SHorizontalBox::Slot()
         .VAlign( VAlign_Center )
         .HAlign( HAlign_Right )
         .AutoWidth()
@@ -152,17 +175,96 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
         [
             SNew( SCheckBox )
             .IsFocusable( false )
-        .IsChecked( this, &FCinematicBoardTrackEditor::AreBoardsLocked )
-        .OnCheckStateChanged( this, &FCinematicBoardTrackEditor::OnLockBoardsClicked )
-        .ToolTipText( this, &FCinematicBoardTrackEditor::GetLockBoardsToolTip )
-        .ForegroundColor( FLinearColor::White )
-        .CheckedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-        .CheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-        .CheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-        .UncheckedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-        .UncheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-        .UncheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+            .IsChecked( this, &FCinematicBoardTrackEditor::AreBoardsLocked )
+            .OnCheckStateChanged( this, &FCinematicBoardTrackEditor::OnLockBoardsClicked )
+            .ToolTipText( this, &FCinematicBoardTrackEditor::GetLockBoardsToolTip )
+            .ForegroundColor( FLinearColor::White )
+            .CheckedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
+            .CheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
+            .CheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
+            .UncheckedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+            .UncheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+            .UncheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
         ];
+}
+
+const FSlateBrush*
+FCinematicBoardTrackEditor::GetArrangeSectionsIcon( UMovieSceneTrack* iTrack ) const
+{
+    UMovieSceneCinematicBoardTrack* boardTrack = Cast<UMovieSceneCinematicBoardTrack>( iTrack );
+    check( boardTrack );
+
+    switch( boardTrack->GetArrangeSections() )
+    {
+        case EArrangeSections::OnOneRow:            return FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.ArrangeShotsOnOneRow" );
+        case EArrangeSections::OnTwoRowsShifted:    return FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.ArrangeShotsOnTwoRows" );
+        default:
+        case EArrangeSections::Manually:            return FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.ArrangeShotsManually" );
+    }
+}
+
+TSharedRef<SWidget>
+FCinematicBoardTrackEditor::HandleArrangeSectionsComboButtonGetMenuContent( UMovieSceneTrack* iTrack )
+{
+    FMenuBuilder MenuBuilder( true, nullptr );
+
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT( "ArrangeSectionsManually", "Arrange Sections Manually" ),
+        LOCTEXT( "ArrangeSectionsManuallyTooltip", "Arrange sections manually" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.ArrangeShotsManually" ),
+        FUIAction(
+            FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::SetArrangeSections, iTrack, EArrangeSections::Manually ),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateSP( this, &FCinematicBoardTrackEditor::IsArrangeSections, iTrack, EArrangeSections::Manually ) ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT( "ArrangeSectionsOneRow", "Arrange Sections On One Row" ),
+        LOCTEXT( "ArrangeSectionsOneRowTooltip", "Arrange sections on a single row" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.ArrangeShotsOnOneRow" ),
+        FUIAction(
+            FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::SetArrangeSections, iTrack, EArrangeSections::OnOneRow ),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateSP( this, &FCinematicBoardTrackEditor::IsArrangeSections, iTrack, EArrangeSections::OnOneRow ) ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT( "ArrangeSectionsTwoRows", "Arrange Sections On Two Rows" ),
+        LOCTEXT( "ArrangeSectionsTwoRowsTooltip", "Arrange sections on 2 rows and shifted each other" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.ArrangeShotsOnTwoRows" ),
+        FUIAction(
+            FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::SetArrangeSections, iTrack, EArrangeSections::OnTwoRowsShifted ),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateSP( this, &FCinematicBoardTrackEditor::IsArrangeSections, iTrack, EArrangeSections::OnTwoRowsShifted ) ),
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+
+    return MenuBuilder.MakeWidget();
+}
+
+void
+FCinematicBoardTrackEditor::SetArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections )
+{
+    UMovieSceneCinematicBoardTrack* boardTrack = Cast<UMovieSceneCinematicBoardTrack>( iTrack );
+    check( boardTrack );
+
+    boardTrack->SetArrangeSections( iArrangeSections );
+
+    GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
+
+bool
+FCinematicBoardTrackEditor::IsArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections )
+{
+    UMovieSceneCinematicBoardTrack* boardTrack = Cast<UMovieSceneCinematicBoardTrack>( iTrack );
+    check( boardTrack );
+
+    return boardTrack->GetArrangeSections() == iArrangeSections;
 }
 
 TSharedRef<SWidget>
@@ -370,41 +472,44 @@ FCinematicBoardTrackEditor::Tick( float iDeltaTime ) //override
 }
 
 
-//void
-//FCinematicBoardTrackEditor::BuildTrackContextMenu( FMenuBuilder& MenuBuilder, UMovieSceneTrack* Track ) //override
-//{
-//    MenuBuilder.BeginSection( "Import/Export", NSLOCTEXT( "Sequencer", "ImportExportMenuSectionName", "Import/Export" ) );
-//
-//    MenuBuilder.AddMenuEntry(
-//        NSLOCTEXT( "Sequencer", "ImportEDL", "Import EDL..." ),
-//        NSLOCTEXT( "Sequencer", "ImportEDLTooltip", "Import Edit Decision List (EDL) for non-linear editors." ),
-//        FSlateIcon(),
-//        FUIAction(
-//            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ImportEDL ) ) );
-//
-//    MenuBuilder.AddMenuEntry(
-//        NSLOCTEXT( "Sequencer", "ExportEDL", "Export EDL..." ),
-//        NSLOCTEXT( "Sequencer", "ExportEDLTooltip", "Export Edit Decision List (EDL) for non-linear editors." ),
-//        FSlateIcon(),
-//        FUIAction(
-//            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ExportEDL ) ) );
-//
-//    MenuBuilder.AddMenuEntry(
-//        NSLOCTEXT( "Sequencer", "ImportFCPXML", "Import Final Cut Pro 7 XML..." ),
-//        NSLOCTEXT( "Sequencer", "ImportFCPXMLTooltip", "Import Final Cut Pro 7 XML file for non-linear editors." ),
-//        FSlateIcon(),
-//        FUIAction(
-//            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ImportFCPXML ) ) );
-//
-//    MenuBuilder.AddMenuEntry(
-//        NSLOCTEXT( "Sequencer", "ExportFCPXML", "Export Final Cut Pro 7 XML..." ),
-//        NSLOCTEXT( "Sequencer", "ExportFCPXMLTooltip", "Export Final Cut Pro 7 XML file for non-linear editors." ),
-//        FSlateIcon(),
-//        FUIAction(
-//            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ExportFCPXML ) ) );
-//
-//    MenuBuilder.EndSection();
-//}
+void
+FCinematicBoardTrackEditor::BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) //override
+{
+    // May be the same as in HandleArrangeSectionsComboButtonGetMenuContent()
+    //ioMenuBuilder.AddSeparator();
+
+    //ioMenuBuilder.BeginSection( "Import/Export", NSLOCTEXT( "Sequencer", "ImportExportMenuSectionName", "Import/Export" ) );
+
+    //ioMenuBuilder.AddMenuEntry(
+    //    NSLOCTEXT( "Sequencer", "ImportEDL", "Import EDL..." ),
+    //    NSLOCTEXT( "Sequencer", "ImportEDLTooltip", "Import Edit Decision List (EDL) for non-linear editors." ),
+    //    FSlateIcon(),
+    //    FUIAction(
+    //        FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ImportEDL ) ) );
+
+    //ioMenuBuilder.AddMenuEntry(
+    //    NSLOCTEXT( "Sequencer", "ExportEDL", "Export EDL..." ),
+    //    NSLOCTEXT( "Sequencer", "ExportEDLTooltip", "Export Edit Decision List (EDL) for non-linear editors." ),
+    //    FSlateIcon(),
+    //    FUIAction(
+    //        FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ExportEDL ) ) );
+
+    //ioMenuBuilder.AddMenuEntry(
+    //    NSLOCTEXT( "Sequencer", "ImportFCPXML", "Import Final Cut Pro 7 XML..." ),
+    //    NSLOCTEXT( "Sequencer", "ImportFCPXMLTooltip", "Import Final Cut Pro 7 XML file for non-linear editors." ),
+    //    FSlateIcon(),
+    //    FUIAction(
+    //        FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ImportFCPXML ) ) );
+
+    //ioMenuBuilder.AddMenuEntry(
+    //    NSLOCTEXT( "Sequencer", "ExportFCPXML", "Export Final Cut Pro 7 XML..." ),
+    //    NSLOCTEXT( "Sequencer", "ExportFCPXMLTooltip", "Export Final Cut Pro 7 XML file for non-linear editors." ),
+    //    FSlateIcon(),
+    //    FUIAction(
+    //        FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ExportFCPXML ) ) );
+
+    //ioMenuBuilder.EndSection();
+}
 
 //---
 

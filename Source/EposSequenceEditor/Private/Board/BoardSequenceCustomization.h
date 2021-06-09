@@ -28,7 +28,6 @@ public:
 
 private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
-    TSharedRef<SWidget> MakeArrangeShotsMenu();
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakePlaneMenu();
     TSharedRef<SWidget> MakeDrawingMenu();

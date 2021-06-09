@@ -13,6 +13,8 @@
 #include "ISequencerTrackEditor.h"
 #include "MovieSceneTrackEditor.h"
 
+#include "ArrangeSectionsType.h"
+
 class AActor;
 struct FAssetData;
 class FMenuBuilder;
@@ -63,7 +65,7 @@ public:
     virtual bool SupportsSequence( UMovieSceneSequence* iSequence ) const override;
     virtual bool SupportsType( TSubclassOf<UMovieSceneTrack> iType ) const override;
     virtual void Tick( float iDeltaTime ) override;
-    //virtual void BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) override;
+    virtual void BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) override;
     virtual const FSlateBrush* GetIconBrush() const override;
     virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
     virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
@@ -126,6 +128,13 @@ private:
 
     /** Callback for executing a menu entry in the "Add Board" combo button when enter pressed. */
     void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData );
+
+    /** Callback for generating the menu of the "Arrange Sections" combo button. */
+    TSharedRef<SWidget> HandleArrangeSectionsComboButtonGetMenuContent( UMovieSceneTrack* iTrack );
+
+    void SetArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections );
+    bool IsArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections );
+    const FSlateBrush* GetArrangeSectionsIcon( UMovieSceneTrack* iTrack ) const;
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
     FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame );

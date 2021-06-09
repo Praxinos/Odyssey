@@ -9,6 +9,8 @@
 #include "Tracks/MovieSceneSubTrack.h"
 #include "Compilation/MovieSceneSegmentCompiler.h"
 
+#include "ArrangeSectionsType.h"
+
 #include "MovieSceneCinematicBoardTrack.generated.h"
 
 class UMovieSceneSequence;
@@ -28,14 +30,19 @@ public:
     UMovieSceneCinematicBoardTrack( const FObjectInitializer& iObjectInitializer );
 
     EPOSTRACKS_API void SortSections();
+    /** Move all sections to make consecutives each other (previous end bound == next start bound) by the order inside the array */
+    EPOSTRACKS_API void OrganizeSections();
+    /** Move all sections to the right row */
+    EPOSTRACKS_API void ArrangeSections();
+
+    EPOSTRACKS_API void             SetArrangeSections( EArrangeSections iArrangeSections );
+    EPOSTRACKS_API EArrangeSections GetArrangeSections();
 
     // UMovieSceneSubTrack interface
-
     EPOSTRACKS_API virtual UMovieSceneSubSection* AddSequence( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration ) override;
     EPOSTRACKS_API virtual UMovieSceneSubSection* AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex ) override;
 
     // UMovieSceneTrack interface
-
     virtual void AddSection( UMovieSceneSection& ioSection ) override;
     virtual bool SupportsType( TSubclassOf<UMovieSceneSection> iSectionClass ) const override;
     virtual UMovieSceneSection* CreateNewSection() override;
@@ -57,4 +64,7 @@ private:
     TMap<UMovieSceneSection*, TRange<FFrameNumber>> mPreviousMove;
     TMap<UMovieSceneSection*, TRange<FFrameNumber>> mLastGapMove;
     TMap<UMovieSceneSection*, int32>                mCacheOverlapPriority;
+
+    UPROPERTY()
+    EArrangeSections mArrangeSections;
 };

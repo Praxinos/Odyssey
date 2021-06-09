@@ -10,12 +10,12 @@
 #include "Compilation/MovieSceneCompilerRules.h"
 
 #include "ArrangeSectionsType.h"
-#include "CinematicBoardTrack/MovieSceneCinematicBoardTrackHelpers.h"
 #include "EposMovieSceneSequence.h"
 #include "EposTracksModule.h"
 #include "Helpers/SectionsHelpersMove.h"
 #include "Helpers/SectionsHelpersResize.h"
 #include "Helpers/SectionsHelpersShift.h"
+#include "Settings/EposTracksSettings.h"
 
 
 #define LOCTEXT_NAMESPACE "MovieSceneCinematicBoardTrack"
@@ -27,8 +27,12 @@ UMovieSceneCinematicBoardTrack::UMovieSceneCinematicBoardTrack( const FObjectIni
     : Super( iObjectInitializer )
 {
 #if WITH_EDITORONLY_DATA
-    TrackTint = FColor( 0, 0, 0, 127 );
+    TrackTint = FColor( 240, 100, 153, 64 );
 #endif
+
+    const UEposTracksSettings* settings = GetDefault<UEposTracksSettings>();
+    mArrangeSections = settings->BoardTrackSettings.ArrangeSections;
+    //mArrangeSections = EArrangeSections::OnTwoRowsShifted;
 
     //TODO: maybe set this only moving ?
     SupportedBlendTypes.Add( EMovieSceneBlendType::Absolute ); // Only to be able to move section through other ones
@@ -49,25 +53,14 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( shift_result.mNewRange ), iRowIndex );
 
-//    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
-
-//#if WITH_EDITOR
-//
-//    if( iSequence != nullptr )
-//    {
-//        newBoardSection->SetBoardDisplayName( iSequence->GetDisplayName().ToString() );
-//    }
-//
-//#endif
-
     // When a new sequence is added, sort all sequences to ensure they are in the correct order
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
+    SortSections();
     // Once sequences are sorted fixup the surrounding sequences to fix any gaps
     SectionsHelpersShift::ShiftFollowingSections( Sections, newSection, shift_result );
     // Should be done again as after the first one, at least 2 sections (new one and the one at this place) have the same start
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
+    SortSections();
     // Force arranging sections
-    MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
+    ArrangeSections();
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -106,9 +99,9 @@ UMovieSceneCinematicBoardTrack::RemoveSection( UMovieSceneSection& ioSection )
 {
     Sections.Remove( &ioSection );
 
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
-    MovieSceneCinematicBoardTrackHelpers::OrganizeSections( Sections );
-    MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
+    SortSections();
+    OrganizeSections();
+    ArrangeSections();
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -124,9 +117,9 @@ UMovieSceneCinematicBoardTrack::RemoveSectionAt( int32 iSectionIndex )
 
     Sections.RemoveAt( iSectionIndex );
 
-    MovieSceneHelpers::SortConsecutiveSections( Sections );
-    MovieSceneCinematicBoardTrackHelpers::OrganizeSections( Sections );
-    MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
+    SortSections();
+    OrganizeSections();
+    ArrangeSections();
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -230,7 +223,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
             check( outer_sequence );
             outer_sequence->SectionResized( board_section->IsResizingLeading() ? previous_section : board_section );
-            MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
+            ArrangeSections();
 
             board_section->StopResizing();
 
@@ -269,7 +262,7 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
                 move_result = SectionsHelpersMove::GetMoveInfo( Sections, previous_range, last_gap, board_section );
                 SectionsHelpersMove::FixPostMoveSections( Sections, last_gap, &ioSection, move_result );
-                MovieSceneCinematicBoardTrackHelpers::Arrange( Sections );
+                ArrangeSections();
 
                 board_section->SetOverlapPriority( cache_priority );
 
@@ -308,6 +301,79 @@ void
 UMovieSceneCinematicBoardTrack::SortSections()
 {
     MovieSceneHelpers::SortConsecutiveSections( Sections );
+}
+
+void
+UMovieSceneCinematicBoardTrack::OrganizeSections()
+{
+    UMovieSceneSection* first_section = nullptr;
+    if (Sections.Num())
+    {
+        first_section = Sections[0];
+        first_section->MoveSection(-first_section->GetInclusiveStartFrame());
+    }
+
+    UMovieSceneSection* previous_section = nullptr;
+    for (auto section : Sections)
+    {
+        if (section == first_section)
+        {
+            previous_section = section;
+            continue;
+        }
+
+        FFrameNumber offset = section->GetInclusiveStartFrame() - previous_section->GetExclusiveEndFrame();
+
+        section->MoveSection(-offset);
+
+        //---
+
+        previous_section = section;
+    }
+}
+
+void
+UMovieSceneCinematicBoardTrack::ArrangeSections()
+{
+    if( !Sections.Num() )
+        return;
+
+    if( mArrangeSections == EArrangeSections::Manually )
+    {
+    }
+    else if( mArrangeSections == EArrangeSections::OnOneRow )
+    {
+        for( auto section : Sections )
+        {
+            section->Modify();
+            section->SetRowIndex( 0 );
+        }
+    }
+    else if( mArrangeSections == EArrangeSections::OnTwoRowsShifted )
+    {
+        int start = Sections[0]->GetRowIndex();
+        for( int i = 0; i < Sections.Num(); i++ )
+        {
+            auto section = Sections[i];
+            section->Modify();
+
+            section->SetRowIndex( ( start + i ) % 2 );
+        }
+    }
+}
+
+void
+UMovieSceneCinematicBoardTrack::SetArrangeSections( EArrangeSections iArrangeSections )
+{
+    mArrangeSections = iArrangeSections;
+
+    ArrangeSections();
+}
+
+EArrangeSections
+UMovieSceneCinematicBoardTrack::GetArrangeSections()
+{
+    return mArrangeSections;
 }
 
 #undef LOCTEXT_NAMESPACE

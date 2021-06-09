@@ -13,7 +13,6 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "CinematicBoardTrack/MovieSceneCinematicBoardTrackHelpers.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 
@@ -499,33 +498,6 @@ CinematicBoardTrackHelpers::DuplicateSection( ISequencer* iSequencer, UMovieScen
         iSequencer->ThrobSectionSelection();
     }
 }
-
-//---
-
-//static
-void
-CinematicBoardTrackHelpers::ArrangeSections( ISequencer* iSequencer )
-{
-    auto track = iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-    if( !track )
-        return;
-
-    MovieSceneCinematicBoardTrackHelpers::Arrange( track->GetAllSections() );
-
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
-}
-
-//static
-void
-CinematicBoardTrackHelpers::SetArrangeSections( ISequencer* iSequencer, EArrangeSections iArrangeSections )
-{
-    UEposTracksSettings* settings = GetMutableDefault<UEposTracksSettings>();
-    settings->BoardTrackSettings.ArrangeShots = iArrangeSections;
-    settings->SaveConfig();
-
-    CinematicBoardTrackHelpers::ArrangeSections( iSequencer );
-}
-
 
 
 #undef LOCTEXT_NAMESPACE

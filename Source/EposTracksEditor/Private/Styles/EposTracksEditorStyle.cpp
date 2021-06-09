@@ -47,6 +47,10 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 
     Set( "EposTracksEditor.Lighttable", lighttable_style );
 
+    Set( "EposTracksEditor.ArrangeShotsManually", new IMAGE_BRUSH( "IconArrangeShotsManually_16x", Icon16x16 ) );
+    Set( "EposTracksEditor.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "IconArrangeShotsOnOneRow_16x", Icon16x16 ) );
+    Set( "EposTracksEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "IconArrangeShotsOnTwoRows_16x", Icon16x16 ) );
+
     //---
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );

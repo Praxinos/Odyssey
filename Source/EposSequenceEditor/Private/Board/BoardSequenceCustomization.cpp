@@ -6,7 +6,6 @@
 #include "CineCameraActor.h"
 #include "Framework/Docking/TabManager.h"
 
-#include "ArrangeSectionsType.h"
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
@@ -91,38 +90,6 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 void
 FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap )
 {
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FBoardSequenceEditorCommands::Get().ArrangeShotsManually,
-            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::Manually ); } ),
-            FCanExecuteAction::CreateLambda( [](){ return true; } ),
-            FIsActionChecked::CreateLambda( [](){ return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::Manually; } )
-        );
-    else
-        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsManually );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow,
-            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnOneRow ); } ),
-            FCanExecuteAction::CreateLambda( [](){ return true; } ),
-            FIsActionChecked::CreateLambda( [](){ return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnOneRow; } )
-        );
-    else
-        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows,
-            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::SetArrangeSections( mSequencer, EArrangeSections::OnTwoRowsShifted ); } ),
-            FCanExecuteAction::CreateLambda( [](){ return true; } ),
-            FIsActionChecked::CreateLambda( [](){ return GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots == EArrangeSections::OnTwoRowsShifted; } )
-        );
-    else
-        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows );
-
-    //---
-
     if( iMap == kMap )
         CommandList->MapAction(
             FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
@@ -276,51 +243,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 {
     ToolbarBuilder.AddSeparator();
 
-    TAttribute<FText> ArrangeShotsName;
-    ArrangeShotsName.Bind( TAttribute<FText>::FGetter::CreateLambda( []
-    {
-        switch( GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots )
-        {
-            case EArrangeSections::OnOneRow:            return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetLabel();
-            case EArrangeSections::OnTwoRowsShifted:    return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetLabel();
-            default:
-            case EArrangeSections::Manually:            return FBoardSequenceEditorCommands::Get().ArrangeShotsManually->GetLabel();
-        }
-    } ) );
-
-    TAttribute<FSlateIcon> ArrangeShotsIcon;
-    ArrangeShotsIcon.Bind( TAttribute<FSlateIcon>::FGetter::CreateLambda( []
-    {
-        switch( GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots )
-        {
-            case EArrangeSections::OnOneRow:            return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetIcon();
-            case EArrangeSections::OnTwoRowsShifted:    return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetIcon();
-            default:
-            case EArrangeSections::Manually:            return FBoardSequenceEditorCommands::Get().ArrangeShotsManually->GetIcon();
-        }
-    } ) );
-
-    TAttribute<FText> ArrangeShotsToolTip;
-    ArrangeShotsToolTip.Bind( TAttribute<FText>::FGetter::CreateLambda( []
-    {
-        switch( GetDefault<UEposTracksSettings>()->BoardTrackSettings.ArrangeShots )
-        {
-            case EArrangeSections::OnOneRow:            return FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow->GetDescription();
-            case EArrangeSections::OnTwoRowsShifted:    return FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows->GetDescription();
-            default:
-            case EArrangeSections::Manually:            return FBoardSequenceEditorCommands::Get().ArrangeShotsManually->GetDescription();
-        }
-    } ) );
-
-    ToolbarBuilder.AddComboButton(
-        FUIAction(),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeArrangeShotsMenu ),
-        ArrangeShotsName,
-        ArrangeShotsToolTip,
-        ArrangeShotsIcon );
-
-    ToolbarBuilder.AddSeparator();
-
     ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
     ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
 
@@ -384,22 +306,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
         FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" )  );
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeArrangeShotsMenu()
-{
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
-
-    //MenuBuilder.BeginSection( NAME_None, LOCTEXT( "ArrangeShotsHeader", "Arrange Shots" ) );
-    {
-        MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().ArrangeShotsManually );
-        MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().ArrangeShotsOnOneRow );
-        MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().ArrangeShotsOnTwoRows );
-    }
-    //MenuBuilder.EndSection();
-
-    return MenuBuilder.MakeWidget();
 }
 
 TSharedRef<SWidget>
