@@ -33,6 +33,7 @@
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardTrack/CinematicBoardTrackEditorCommands.h"
 #include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -68,6 +69,40 @@ void
 FCinematicBoardTrackEditor::OnInitialize() //override
 {
     mOnCameraCutHandle = GetSequencer()->OnCameraCut().AddSP( this, &FCinematicBoardTrackEditor::OnUpdateCameraCut );
+
+    //---
+
+    TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
+    if( command_list )
+    {
+        command_list->MapAction(
+            FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
+            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::InsertBoard )
+            );
+        command_list->MapAction(
+            FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
+            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::InsertShot )
+            );
+
+        command_list->MapAction(
+            FCinematicBoardTrackEditorCommands::Get().ArrangeShotsManually,
+            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::SetArrangeSections, EArrangeSections::Manually ),
+            FCanExecuteAction::CreateLambda( []() { return true; } ),
+            FIsActionChecked::CreateRaw( this, &FCinematicBoardTrackEditor::IsArrangeSections, EArrangeSections::Manually )
+        );
+        command_list->MapAction(
+            FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnOneRow,
+            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::SetArrangeSections, EArrangeSections::OnOneRow ),
+            FCanExecuteAction::CreateLambda( []() { return true; } ),
+            FIsActionChecked::CreateRaw( this, &FCinematicBoardTrackEditor::IsArrangeSections, EArrangeSections::OnOneRow )
+        );
+        command_list->MapAction(
+            FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnTwoRows,
+            FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::SetArrangeSections, EArrangeSections::OnTwoRowsShifted ),
+            FCanExecuteAction::CreateLambda( []() { return true; } ),
+            FIsActionChecked::CreateRaw( this, &FCinematicBoardTrackEditor::IsArrangeSections, EArrangeSections::OnTwoRowsShifted )
+        );
+    }
 }
 
 void
@@ -84,6 +119,17 @@ FCinematicBoardTrackEditor::OnRelease() //override
     if( mOnCameraCutHandle.IsValid() && GetSequencer().IsValid() )
     {
         GetSequencer()->OnCameraCut().Remove( mOnCameraCutHandle );
+    }
+
+    TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
+    if( command_list )
+    {
+        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
+
+        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsManually );
+        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnOneRow );
+        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnTwoRows );
     }
 }
 
@@ -140,30 +186,7 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
         .AutoWidth()
         .VAlign( VAlign_Center )
         [
-            FSequencerUtilities::MakeAddButton( LOCTEXT( "BoardText", "Board" ), FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), iParams.NodeIsHovered, GetSequencer() )
-        ]
-
-        + SHorizontalBox::Slot()
-        .VAlign( VAlign_Center )
-        .HAlign( HAlign_Right )
-        .AutoWidth()
-        .Padding( 4, 0, 0, 0 )
-        [
-            SNew( SComboButton )
-            .HasDownArrow( false )
-            .ButtonStyle( FEditorStyle::Get(), "HoverHintOnly" )
-            .ForegroundColor( FSlateColor::UseForeground() )
-            .IsEnabled_Lambda( [this]() { return GetSequencer().IsValid() ? !GetSequencer()->IsReadOnly() : false; } )
-            .OnGetMenuContent( this, &FCinematicBoardTrackEditor::HandleArrangeSectionsComboButtonGetMenuContent, iTrack )
-            //.ContentPadding( FMargin( 5, 2 ) )
-            //.HAlign( HAlign_Center )
-            //.VAlign( VAlign_Center )
-            .ButtonContent()
-            [
-                SNew( SImage )
-                .ColorAndOpacity( FSlateColor::UseForeground() )
-                .Image( this, &FCinematicBoardTrackEditor::GetArrangeSectionsIcon, iTrack )
-            ]
+            FSequencerUtilities::MakeAddButton( LOCTEXT( "CreateBoardShotText", "Board/Shot" ), FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), iParams.NodeIsHovered, GetSequencer() )
         ]
 
         // Add the camera check box
@@ -188,152 +211,15 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
         ];
 }
 
-const FSlateBrush*
-FCinematicBoardTrackEditor::GetArrangeSectionsIcon( UMovieSceneTrack* iTrack ) const
-{
-    UMovieSceneCinematicBoardTrack* boardTrack = Cast<UMovieSceneCinematicBoardTrack>( iTrack );
-    check( boardTrack );
-
-    switch( boardTrack->GetArrangeSections() )
-    {
-        case EArrangeSections::OnOneRow:            return FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.ArrangeShotsOnOneRow" );
-        case EArrangeSections::OnTwoRowsShifted:    return FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.ArrangeShotsOnTwoRows" );
-        default:
-        case EArrangeSections::Manually:            return FEposTracksEditorStyle::Get()->GetBrush( "EposTracksEditor.ArrangeShotsManually" );
-    }
-}
-
-TSharedRef<SWidget>
-FCinematicBoardTrackEditor::HandleArrangeSectionsComboButtonGetMenuContent( UMovieSceneTrack* iTrack )
-{
-    FMenuBuilder MenuBuilder( true, nullptr );
-
-    MenuBuilder.AddMenuEntry(
-        LOCTEXT( "ArrangeSectionsManually", "Arrange Sections Manually" ),
-        LOCTEXT( "ArrangeSectionsManuallyTooltip", "Arrange sections manually" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.ArrangeShotsManually" ),
-        FUIAction(
-            FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::SetArrangeSections, iTrack, EArrangeSections::Manually ),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateSP( this, &FCinematicBoardTrackEditor::IsArrangeSections, iTrack, EArrangeSections::Manually ) ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-
-    MenuBuilder.AddMenuEntry(
-        LOCTEXT( "ArrangeSectionsOneRow", "Arrange Sections On One Row" ),
-        LOCTEXT( "ArrangeSectionsOneRowTooltip", "Arrange sections on a single row" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.ArrangeShotsOnOneRow" ),
-        FUIAction(
-            FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::SetArrangeSections, iTrack, EArrangeSections::OnOneRow ),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateSP( this, &FCinematicBoardTrackEditor::IsArrangeSections, iTrack, EArrangeSections::OnOneRow ) ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-
-    MenuBuilder.AddMenuEntry(
-        LOCTEXT( "ArrangeSectionsTwoRows", "Arrange Sections On Two Rows" ),
-        LOCTEXT( "ArrangeSectionsTwoRowsTooltip", "Arrange sections on 2 rows and shifted each other" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.ArrangeShotsOnTwoRows" ),
-        FUIAction(
-            FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::SetArrangeSections, iTrack, EArrangeSections::OnTwoRowsShifted ),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateSP( this, &FCinematicBoardTrackEditor::IsArrangeSections, iTrack, EArrangeSections::OnTwoRowsShifted ) ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-
-    return MenuBuilder.MakeWidget();
-}
-
-void
-FCinematicBoardTrackEditor::SetArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections )
-{
-    UMovieSceneCinematicBoardTrack* boardTrack = Cast<UMovieSceneCinematicBoardTrack>( iTrack );
-    check( boardTrack );
-
-    boardTrack->SetArrangeSections( iArrangeSections );
-
-    GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
-}
-
-bool
-FCinematicBoardTrackEditor::IsArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections )
-{
-    UMovieSceneCinematicBoardTrack* boardTrack = Cast<UMovieSceneCinematicBoardTrack>( iTrack );
-    check( boardTrack );
-
-    return boardTrack->GetArrangeSections() == iArrangeSections;
-}
-
 TSharedRef<SWidget>
 FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent()
 {
-    FMenuBuilder menuBuilder( true, nullptr );
+    FMenuBuilder menuBuilder( true, GetSequencer()->GetCommandBindings() );
 
-    menuBuilder.AddMenuEntry(
-        LOCTEXT( "InsertBoard", "Insert Board" ),
-        LOCTEXT( "InsertBoardTooltip", "Insert new board at current time" ),
-        FSlateIcon(),
-        FUIAction( FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::InsertBoard ) )
-    );
-
-    menuBuilder.AddMenuEntry(
-        LOCTEXT( "InsertFiller", "Insert Filler" ),
-        LOCTEXT( "InsertFillerTooltip", "Insert filler at current time" ),
-        FSlateIcon(),
-        FUIAction( FExecuteAction::CreateSP( this, &FCinematicBoardTrackEditor::InsertFiller ) )
-    );
-
-    FAssetPickerConfig assetPickerConfig;
-    {
-        assetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute );
-        assetPickerConfig.OnAssetEnterPressed = FOnAssetEnterPressed::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed );
-        assetPickerConfig.bAllowNullSelection = false;
-        assetPickerConfig.InitialAssetViewType = EAssetViewType::Tile;
-        assetPickerConfig.Filter.ClassNames.Add( TEXT( "BoardSequence" ) );
-        assetPickerConfig.Filter.ClassNames.Add( TEXT( "ShotSequence" ) );
-    }
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
-
-    TSharedPtr<SBox> menuEntry = SNew( SBox )
-        .WidthOverride( 300.0f )
-        .HeightOverride( 300.f )
-        [
-            contentBrowserModule.Get().CreateAssetPicker( assetPickerConfig )
-        ];
-
-    menuBuilder.AddWidget( menuEntry.ToSharedRef(), FText::GetEmpty(), true );
+    menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+    menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
 
     return menuBuilder.MakeWidget();
-}
-
-void
-FCinematicBoardTrackEditor::HandleAddBoardComboButtonMenuEntryExecute( const FAssetData& iAssetData )
-{
-    FSlateApplication::Get().DismissAllMenus();
-
-    UObject* selectedObject = iAssetData.GetAsset();
-
-    if( selectedObject && selectedObject->IsA( UMovieSceneSequence::StaticClass() ) )
-    {
-        UMovieSceneSequence* movieSceneSequence = CastChecked<UMovieSceneSequence>( iAssetData.GetAsset() );
-
-        int32 rowIndex = INDEX_NONE;
-        TOptional<FFrameNumber> dropped_frame;
-        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, movieSceneSequence, rowIndex, dropped_frame ) );
-    }
-}
-
-void
-FCinematicBoardTrackEditor::HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData )
-{
-    if( iAssetData.Num() > 0 )
-    {
-        HandleAddBoardComboButtonMenuEntryExecute( iAssetData[0].GetAsset() );
-    }
 }
 
 //---
@@ -475,8 +361,18 @@ FCinematicBoardTrackEditor::Tick( float iDeltaTime ) //override
 void
 FCinematicBoardTrackEditor::BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) //override
 {
-    // May be the same as in HandleArrangeSectionsComboButtonGetMenuContent()
-    //ioMenuBuilder.AddSeparator();
+    ioMenuBuilder.AddSubMenu(
+        LOCTEXT( "ArrangeSections", "Arrange Sections" ),
+        LOCTEXT( "ArrangeSectionsTooltip", "Arrange sections." ),
+        FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioSubMenuBuilder )
+                                        {
+                                            ioSubMenuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsManually );
+                                            ioSubMenuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnOneRow );
+                                            ioSubMenuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnTwoRows );
+                                        } )
+    );
+
+    ioMenuBuilder.AddSeparator();
 
     //ioMenuBuilder.BeginSection( "Import/Export", NSLOCTEXT( "Sequencer", "ImportExportMenuSectionName", "Import/Export" ) );
 
@@ -509,6 +405,28 @@ FCinematicBoardTrackEditor::BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, 
     //        FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::ExportFCPXML ) ) );
 
     //ioMenuBuilder.EndSection();
+}
+
+void
+FCinematicBoardTrackEditor::SetArrangeSections( EArrangeSections iArrangeSections )
+{
+    auto board_track = CinematicBoardTrackHelpers::FindCinematicBoardTrack( GetSequencer().Get() );
+    if( !board_track )
+        return;
+
+    board_track->SetArrangeSections( iArrangeSections );
+
+    GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
+
+bool
+FCinematicBoardTrackEditor::IsArrangeSections( EArrangeSections iArrangeSections )
+{
+    auto board_track = CinematicBoardTrackHelpers::FindCinematicBoardTrack( GetSequencer().Get() );
+    if( !board_track )
+        return false;
+
+    return board_track->GetArrangeSections() == iArrangeSections;
 }
 
 //---
@@ -593,9 +511,9 @@ FCinematicBoardTrackEditor::InsertBoard()
 }
 
 void
-FCinematicBoardTrackEditor::InsertFiller()
+FCinematicBoardTrackEditor::InsertShot()
 {
-    CinematicBoardTrackHelpers::InsertFiller( GetSequencer().Get() );
+    CinematicBoardTrackHelpers::InsertShot( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
 }
 
 void

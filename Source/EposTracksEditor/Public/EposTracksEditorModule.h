@@ -15,6 +15,9 @@ public:
     virtual void ShutdownModule() override;
 
 private:
+    void RegisterCommands();
+    void UnregisterCommands();
+
     void RegisterTrackEditors();
     void UnregisterTrackEditors();
 

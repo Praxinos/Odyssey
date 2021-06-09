@@ -92,24 +92,6 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 {
     if( iMap == kMap )
         CommandList->MapAction(
-            FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
-            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::InsertBoard( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
-            FExecuteAction::CreateLambda( [this](){ CinematicBoardTrackHelpers::InsertShot( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
-        );
-    else
-        CommandList->UnmapAction( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
-
-    //---
-
-    if( iMap == kMap )
-        CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCamera,
             FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
@@ -241,11 +223,6 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
-    ToolbarBuilder.AddSeparator();
-
-    ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
-    ToolbarBuilder.AddToolBarButton( FBoardSequenceEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
-
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCamera );

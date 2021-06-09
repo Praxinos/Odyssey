@@ -20,11 +20,4 @@ public:
 public:
 
     TSharedPtr<FUICommandInfo> NewStoryboardWithSettings;
-
-    TSharedPtr<FUICommandInfo> ArrangeShotsManually;
-    TSharedPtr<FUICommandInfo> ArrangeShotsOnOneRow;
-    TSharedPtr<FUICommandInfo> ArrangeShotsOnTwoRows;
-
-    TSharedPtr<FUICommandInfo> NewSectionWithBoardAtCurrentFrame;
-    TSharedPtr<FUICommandInfo> NewSectionWithShotAtCurrentFrame;
 };

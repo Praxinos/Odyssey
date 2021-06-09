@@ -73,8 +73,8 @@ public:
     /** Insert board. */
     void InsertBoard();
 
-    /** Insert filler. */
-    void InsertFiller();
+    /** Insert shot. */
+    void InsertShot();
 
     /*
      * Duplicate board.
@@ -123,18 +123,8 @@ private:
     /** Callback for generating the menu of the "Add Board" combo button. */
     TSharedRef<SWidget> HandleAddBoardComboButtonGetMenuContent();
 
-    /** Callback for executing a menu entry in the "Add Board" combo button. */
-    void HandleAddBoardComboButtonMenuEntryExecute( const FAssetData& iAssetData );
-
-    /** Callback for executing a menu entry in the "Add Board" combo button when enter pressed. */
-    void HandleAddBoardComboButtonMenuEntryEnterPressed( const TArray<FAssetData>& iAssetData );
-
-    /** Callback for generating the menu of the "Arrange Sections" combo button. */
-    TSharedRef<SWidget> HandleArrangeSectionsComboButtonGetMenuContent( UMovieSceneTrack* iTrack );
-
-    void SetArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections );
-    bool IsArrangeSections( UMovieSceneTrack* iTrack, EArrangeSections iArrangeSections );
-    const FSlateBrush* GetArrangeSectionsIcon( UMovieSceneTrack* iTrack ) const;
+    void SetArrangeSections( EArrangeSections iArrangeSections );
+    bool IsArrangeSections( EArrangeSections iArrangeSections );
 
     /** Delegate for AnimatablePropertyChanged in AddKey */
     FKeyPropertyResult AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSequence* iMovieSceneSequence, int32 iRowIndex, TOptional<FFrameNumber> iDroppedFrame );

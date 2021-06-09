@@ -68,13 +68,6 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     //---
 
-    Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon48x48 ) );
-    Set( "BoardSequenceEditor.NewSectionWithBoardAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_24x", Icon24x24 ) );
-    Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon48x48 ) );
-    Set( "BoardSequenceEditor.NewSectionWithShotAtCurrentFrame.Small", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_24x", Icon24x24 ) );
-
-    //---
-
     Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "IconHelp_24x", Icon48x48 ) );
     Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "IconHelp_24x", Icon24x24 ) );
     Set( "EposSequenceEditor.OpenAboutWindow", new IMAGE_BRUSH( "IconAbout_24x", Icon48x48 ) );

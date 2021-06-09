@@ -17,6 +17,9 @@ class EPOSTRACKSEDITOR_API CinematicBoardTrackHelpers
 {
 public:
 
+    /** Find a cinematic board track in the currently focused movie scene. */
+    static UMovieSceneCinematicBoardTrack* FindCinematicBoardTrack( ISequencer* iSequencer );
+
     /** Find or create a cinematic board track in the currently focused movie scene. */
     static UMovieSceneCinematicBoardTrack* FindOrCreateCinematicBoardTrack( ISequencer* iSequencer );
 
@@ -41,7 +44,7 @@ public:
      *
      * @param iSequencer The sequencer
      */
-    static void InsertFiller( ISequencer* iSequencer );
+    //static void InsertFiller( ISequencer* iSequencer );
 
     /*
      * Duplicate board.

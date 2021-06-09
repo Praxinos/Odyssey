@@ -287,6 +287,28 @@ CinematicBoardTrackHelpers::GenerateNewSectionName( const TArray<UMovieSceneSect
 
 //static
 UMovieSceneCinematicBoardTrack*
+CinematicBoardTrackHelpers::FindCinematicBoardTrack( ISequencer* iSequencer )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return nullptr;
+
+    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
+    if( !focusedMovieScene )
+        return nullptr;
+
+    if( focusedMovieScene->IsReadOnly() )
+        return nullptr;
+
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !boardTrack )
+        return nullptr;
+
+    return boardTrack;
+}
+
+//static
+UMovieSceneCinematicBoardTrack*
 CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
@@ -430,33 +452,33 @@ CinematicBoardTrackHelpers::InsertShot( ISequencer* iSequencer, FFrameNumber iFr
     CinematicBoardTrackHelpers::InsertSequence<UShotSequence>( iSequencer, iFrameNumber );
 }
 
-//static
-void
-CinematicBoardTrackHelpers::InsertFiller( ISequencer* iSequencer )
-{
-    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
-
-    const FScopedTransaction transaction( LOCTEXT( "InsertFiller_Transaction", "Insert Filler" ) );
-
-    FQualifiedFrameTime currentTime = iSequencer->GetLocalTime();
-
-    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
-
-    int32 duration = ( projectSettings->DefaultDuration * currentTime.Rate ).FrameNumber.Value;
-
-    UMovieSceneSequence* nullSequence = nullptr;
-
-    UMovieSceneSubSection* newSection = boardTrack->AddSequence( nullSequence, currentTime.Time.FrameNumber, duration );
-
-    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
-
-    newBoardSection->SetBoardDisplayName( FText( LOCTEXT( "Filler", "Filler" ) ).ToString() );
-
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-    iSequencer->EmptySelection();
-    iSequencer->SelectSection( newSection );
-    iSequencer->ThrobSectionSelection();
-}
+////static
+//void
+//CinematicBoardTrackHelpers::InsertFiller( ISequencer* iSequencer )
+//{
+//    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
+//
+//    const FScopedTransaction transaction( LOCTEXT( "InsertFiller_Transaction", "Insert Filler" ) );
+//
+//    FQualifiedFrameTime currentTime = iSequencer->GetLocalTime();
+//
+//    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+//
+//    int32 duration = ( projectSettings->DefaultDuration * currentTime.Rate ).FrameNumber.Value;
+//
+//    UMovieSceneSequence* nullSequence = nullptr;
+//
+//    UMovieSceneSubSection* newSection = boardTrack->AddSequence( nullSequence, currentTime.Time.FrameNumber, duration );
+//
+//    UMovieSceneCinematicBoardSection* newBoardSection = Cast<UMovieSceneCinematicBoardSection>( newSection );
+//
+//    newBoardSection->SetBoardDisplayName( FText( LOCTEXT( "Filler", "Filler" ) ).ToString() );
+//
+//    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+//    iSequencer->EmptySelection();
+//    iSequencer->SelectSection( newSection );
+//    iSequencer->ThrobSectionSelection();
+//}
 
 //static
 void
