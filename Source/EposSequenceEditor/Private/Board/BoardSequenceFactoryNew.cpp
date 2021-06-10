@@ -7,6 +7,7 @@
 #include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposSequenceEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceFactory"
@@ -33,6 +34,8 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
 
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();
     NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0 /* ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame() */, ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
+
+    auto newTrack = NewBoardSequence->GetMovieScene()->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
 
     return NewBoardSequence;
 }
