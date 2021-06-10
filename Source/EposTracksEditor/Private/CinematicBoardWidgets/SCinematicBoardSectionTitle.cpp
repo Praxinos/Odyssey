@@ -18,13 +18,12 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
     mBoardSection = iBoardSection;
 
     ChildSlot
-    .HAlign( EHorizontalAlignment::HAlign_Center )
+    .HAlign( HAlign_Fill )
+    .Padding( 0.f, 4.f )
     [
-        SNew( SVerticalBox )
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        .HAlign( EHorizontalAlignment::HAlign_Center )
-        .Padding( 0.f, 4.f )
+        SNew( SHorizontalBox ) // For future buttons
+        + SHorizontalBox::Slot()
+        .HAlign( HAlign_Center )
         [
             SAssignNew( mWidgetName, SInlineEditableTextBlock )
             .Text_Lambda( [this] { return HandleText(); } )

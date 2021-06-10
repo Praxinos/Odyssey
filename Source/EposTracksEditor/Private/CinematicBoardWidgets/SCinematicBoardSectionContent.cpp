@@ -1,18 +1,22 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "CinematicBoardWidgets/SCinematicBoardSectionLayout.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionContent.h"
 
 #include "Brushes/SlateColorBrush.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionCamera.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionPlanes.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionThumbnails.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionTitle.h"
 
-#define LOCTEXT_NAMESPACE "SCinematicBoardSectionLayout"
+#define LOCTEXT_NAMESPACE "SCinematicBoardSectionContent"
 
 //---
 
 void
-SCinematicBoardSectionLayout::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
 
@@ -25,30 +29,55 @@ SCinematicBoardSectionLayout::Construct( const FArguments& InArgs, TSharedRef<FC
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            InArgs._Title.Widget
+            SAssignNew( mWidgetTitle, SCinematicBoardSectionTitle, iBoardSection )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            InArgs._Camera.Widget
+            SNew( SCinematicBoardSectionCamera, iBoardSection )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            InArgs._Thumbnails.Widget
+            SNew( SCinematicBoardSectionThumbnails, iBoardSection )
+            .OptionalWidgetsVisibility( this, &SCinematicBoardSectionContent::OptionalWidgetsVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            InArgs._Planes.Widget
+            SNew( SCinematicBoardSectionPlanes, iBoardSection )
         ]
     ];
 }
 
 int32
-SCinematicBoardSectionLayout::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+SCinematicBoardSectionContent::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
     return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+}
+
+void
+SCinematicBoardSectionContent::EnterRename()
+{
+    mWidgetTitle->EnterRename();
+}
+
+EVisibility
+SCinematicBoardSectionContent::OptionalWidgetsVisibility() const
+{
+    return mOptionalWidgetsVisibility;
+}
+
+void
+SCinematicBoardSectionContent::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    mOptionalWidgetsVisibility = EVisibility::Visible;
+}
+
+void
+SCinematicBoardSectionContent::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
+{
+    mOptionalWidgetsVisibility = EVisibility::Collapsed;
 }
 
 //FReply

@@ -6,8 +6,10 @@
 #include "Brushes/SlateColorBrush.h"
 #include "MovieSceneToolsUserSettings.h"
 #include "SequencerSectionPainter.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionThumbnails"
 
@@ -20,8 +22,114 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     ChildSlot
     [
-        SNew( SBox )
+        SNew( SOverlay )
+        + SOverlay::Slot()
+        [
+            SNew( SBox )
+        ]
+        + SOverlay::Slot()
+        .HAlign( HAlign_Fill )
+        .VAlign( VAlign_Center )
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            [
+                SNew( SComboButton )
+                .HasDownArrow( false )
+                .ButtonStyle( FEditorStyle::Get(), "SimpleRoundButton" )
+                .ButtonColorAndOpacity( FLinearColor( FColor( 72, 72, 72, 255 ) ) ) // like in ...\UE_4.26\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp
+                .Cursor( EMouseCursor::Default )
+                .Visibility( InArgs._OptionalWidgetsVisibility )
+                .OnGetMenuContent( FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent ) )
+                .ButtonContent()
+                [
+                    SNew( SImage )
+                    .ColorAndOpacity( FLinearColor::White )
+                    .Image( FEditorStyle::GetBrush( "Plus" ) )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            [
+                SNew( SSpacer )
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            [
+                SNew( SComboButton )
+                .HasDownArrow( false )
+                .ButtonStyle( FEditorStyle::Get(), "SimpleRoundButton" )
+                .ButtonColorAndOpacity( FLinearColor( FColor( 72, 72, 72, 255 ) ) ) // like in ...\UE_4.26\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp
+                .Cursor( EMouseCursor::Default )
+                .Visibility( InArgs._OptionalWidgetsVisibility )
+                .OnGetMenuContent( FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent ) )
+                .ButtonContent()
+                [
+                    SNew( SImage )
+                    .ColorAndOpacity( FLinearColor::White )
+                    .Image( FEditorStyle::GetBrush( "Plus" ) )
+                ]
+            ]
+        ]
     ];
+}
+
+TSharedRef<SWidget>
+SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent()
+{
+    FMenuBuilder menuBuilder( true, nullptr );
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "create-board-before.label", "New Previous Board" ),
+                              LOCTEXT( "create-board-before.description", "Create a new board inside a new section before this section" ),
+                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardBeforeSection" ),
+                              FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
+                                                                           CinematicBoardTrackHelpers::InsertBoard( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
+                                                                       } ) ) );
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-before.label", "New Previous Shot" ),
+                              LOCTEXT( "create-shot-before.description", "Create a new shot inside a new section before this section" ),
+                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithShotBeforeSection" ),
+                              FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
+                                                                           CinematicBoardTrackHelpers::InsertShot( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
+                                                                       } ) ) );
+
+    return menuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
+{
+    FMenuBuilder menuBuilder( true, nullptr );
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "create-board-after.label", "New Next Board" ),
+                              LOCTEXT( "create-board-after.description", "Create a new board inside a new section after this section" ),
+                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardAfterSection" ),
+                              FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
+                                                                           CinematicBoardTrackHelpers::InsertBoard( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
+                                                                       } ) ) );
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-after.label", "New Next Shot" ),
+                              LOCTEXT( "create-shot-after.description", "Create a new shot inside a new section after this section" ),
+                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithShotAfterSection" ),
+                              FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
+                                                                           CinematicBoardTrackHelpers::InsertShot( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
+                                                                       } ) ) );
+
+    return menuBuilder.MakeWidget();
 }
 
 FVector2D

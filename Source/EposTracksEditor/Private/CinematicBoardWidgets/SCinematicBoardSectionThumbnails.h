@@ -15,6 +15,7 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionThumbnails
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionThumbnails )
         {}
+        SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
     // Construct the widget
@@ -23,7 +24,9 @@ public:
     // SWidget overrides
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
 
-public:
+private:
+    TSharedRef<SWidget> HandleAddBoardBeforeComboButtonGetMenuContent();
+    TSharedRef<SWidget> HandleAddBoardAfterComboButtonGetMenuContent();
 
 protected:
     // SWidget overrides.

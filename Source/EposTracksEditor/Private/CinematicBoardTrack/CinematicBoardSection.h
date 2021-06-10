@@ -15,8 +15,7 @@ class FCinematicBoardTrackEditor;
 class FMenuBuilder;
 class FSequencerSectionPainter;
 class FTrackEditorThumbnailPool;
-class SCinematicBoardSectionLayout;
-class SCinematicBoardSectionTitle;
+class SCinematicBoardSectionContent;
 class UMovieSceneCinematicBoardSection;
 struct FInnerSequenceData;
 struct FMetaFloatChannel;
@@ -110,8 +109,7 @@ private:
     UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID InnerSequenceID, const FMovieSceneSequenceHierarchy& Hierarchy, IMovieScenePlayer& Player );
 
 private:
-    TSharedPtr<SCinematicBoardSectionLayout> mWidgetLayout;
-    TSharedPtr<SCinematicBoardSectionTitle> mWidgetTitle;
+    TSharedPtr<SCinematicBoardSectionContent> mWidgetSectionContent;
 
 public:
     /** Get the painter (named root) provided by OnPaintSection()

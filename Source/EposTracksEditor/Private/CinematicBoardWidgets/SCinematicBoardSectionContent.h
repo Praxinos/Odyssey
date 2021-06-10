@@ -8,17 +8,14 @@
 //---
 
 class FCinematicBoardSection;
+class SCinematicBoardSectionTitle;
 
-class EPOSTRACKSEDITOR_API SCinematicBoardSectionLayout
+class EPOSTRACKSEDITOR_API SCinematicBoardSectionContent
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS( SCinematicBoardSectionLayout )
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionContent )
         {}
-        SLATE_NAMED_SLOT( FArguments, Title )
-        SLATE_NAMED_SLOT( FArguments, Camera )
-        SLATE_NAMED_SLOT( FArguments, Thumbnails )
-        SLATE_NAMED_SLOT( FArguments, Planes )
         //SLATE_EVENT(FOnDrop, OnDrop)
         //SLATE_EVENT(FOnDragEnter, OnDragEnter)
         //SLATE_EVENT(FOnDrop, OnDragOver)
@@ -28,6 +25,9 @@ public:
 
     // Construct the widget
     void Construct(const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection);
+
+    virtual void OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent );
+    virtual void OnMouseLeave( const FPointerEvent& MouseEvent );
     //virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent);
     //virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent);
     //virtual void OnDragEnter(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent);
@@ -38,9 +38,17 @@ public:
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
 
 public:
+    EVisibility OptionalWidgetsVisibility() const;
+
+public:
+    virtual void EnterRename();
 
 private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
+
+    TSharedPtr<SCinematicBoardSectionTitle> mWidgetTitle;
+
+    EVisibility mOptionalWidgetsVisibility = EVisibility::Collapsed;
 
     //FOnDrop mOnDrop;
     //FOnDragEnter mOnDragEnter;

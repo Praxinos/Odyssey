@@ -37,11 +37,7 @@
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
-#include "CinematicBoardWidgets/SCinematicBoardSectionCamera.h"
-#include "CinematicBoardWidgets/SCinematicBoardSectionLayout.h"
-#include "CinematicBoardWidgets/SCinematicBoardSectionPlanes.h"
-#include "CinematicBoardWidgets/SCinematicBoardSectionThumbnails.h"
-#include "CinematicBoardWidgets/SCinematicBoardSectionTitle.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionContent.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
@@ -157,7 +153,7 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
-    iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetLayout.IsValid() ? mWidgetLayout->GetDesiredSize().Y : 100.f; } ) );
+    iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
 }
 
 
@@ -522,25 +518,7 @@ FCinematicBoardSection::GetPlaneMaterialMetaChannel( FMovieScenePossessable iPos
 TSharedRef<SWidget>
 FCinematicBoardSection::GenerateSectionWidget()
 {
-    TSharedRef<FCinematicBoardSection> me = SharedThis( this );
-
-    return SAssignNew( mWidgetLayout, SCinematicBoardSectionLayout, me )
-        .Title()
-        [
-            SAssignNew( mWidgetTitle, SCinematicBoardSectionTitle, me )
-        ]
-        .Camera()
-        [
-            SNew( SCinematicBoardSectionCamera, me )
-        ]
-        .Thumbnails()
-        [
-            SNew( SCinematicBoardSectionThumbnails, me )
-        ]
-        .Planes()
-        [
-            SNew( SCinematicBoardSectionPlanes, me )
-        ];
+    return SAssignNew( mWidgetSectionContent, SCinematicBoardSectionContent, SharedThis( this ) );
 }
 
 void
@@ -649,7 +627,8 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
             LOCTEXT( "RenameBoard", "Rename Board" ),
             FText::Format( LOCTEXT( "RenameBoardTooltip", "Rename {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
             FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mWidgetTitle.ToSharedRef(), &SCinematicBoardSectionTitle::EnterRename ) )
+            FUIAction( FExecuteAction::CreateSP( mWidgetSectionContent.ToSharedRef(), &SCinematicBoardSectionContent::EnterRename ) )
+            //FUIAction( FExecuteAction::CreateSP( mWidgetTitle.ToSharedRef(), &SCinematicBoardSectionTitle::EnterRename ) )
         );
     }
     ioMenuBuilder.EndSection();

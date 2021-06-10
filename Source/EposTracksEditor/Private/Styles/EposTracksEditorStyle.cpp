@@ -39,6 +39,12 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     Set( "EposTracksEditor.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_16x", Icon16x16 ) );
     Set( "EposTracksEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_16x", Icon16x16 ) );
 
+    Set( "EposTracksEditor.NewSectionWithBoardBeforeSection", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_16x", Icon16x16 ) );
+    Set( "EposTracksEditor.NewSectionWithShotBeforeSection", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_16x", Icon16x16 ) );
+
+    Set( "EposTracksEditor.NewSectionWithBoardAfterSection", new IMAGE_BRUSH( "IconNewSectionWithBoardAtCurrentFrame_16x", Icon16x16 ) );
+    Set( "EposTracksEditor.NewSectionWithShotAfterSection", new IMAGE_BRUSH( "IconNewSectionWithShotAtCurrentFrame_16x", Icon16x16 ) );
+
     //---
 
     Set( "EposTracksEditor.ArrangeShotsManually", new IMAGE_BRUSH( "IconArrangeShotsManually_16x", Icon16x16 ) );
