@@ -242,31 +242,29 @@ def Build( iUPluginPathFile, iOutputPath ):
         print( Fore.RED + f'An error occurs during processing...' )
         sys.exit( 30 )
 
-#---
-
-# Add platform specifications (all platforms) for marketplace
-def PostBuildFixPlatforms( iArgs, iOutputPath ):
-    if iArgs.target in [eTarget.kDev, eTarget.kBeta]:
-        return
-
+# Make some fix depending on target (whitelist platform, config, ...)
+def PostBuildFix( iArgs, iOutputPath ):
     uplugin_pathfiles = [ entry for entry in iOutputPath.glob( '*.uplugin' ) if entry.is_file() ]
     if not uplugin_pathfiles:
         print( Fore.RED + f'no uplugin file in: {iOutputPath}' )
         sys.exit( 40 )
 
-    uplugin_pathfile = uplugin_pathfiles[0]
+    if iArgs.target is eTarget.kMarketplace:
+        uplugin_pathfile = uplugin_pathfiles[0]
 
-    uplugin_data = {}
-    with uplugin_pathfile.open() as infile:
-        uplugin_data = json.load( infile )
+        uplugin_data = {}
+        with uplugin_pathfile.open() as infile:
+            uplugin_data = json.load( infile )
 
-    for module in uplugin_data['Modules']:
-        module['WhitelistPlatforms'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
+        for module in uplugin_data['Modules']:
+            module['WhitelistPlatforms'] = [ 'Win64', 'Mac' ] # https://www.unrealengine.com/en-US/marketplace-guidelines#261b
 
-    del uplugin_data['PreBuildSteps'] # Remove pre-build-steps as they are (at least for now) for development stuff: https://udn.unrealengine.com/s/question/0D54z00006tMlfbCAC/plugin-cconfig-how-to-use-config-ini-file-for-a-custom-plugin-
+        del uplugin_data['PreBuildSteps'] # Remove pre-build-steps as they are (at least for now) for development stuff: https://udn.unrealengine.com/s/question/0D54z00006tMlfbCAC/plugin-cconfig-how-to-use-config-ini-file-for-a-custom-plugin-
 
-    with uplugin_pathfile.open( 'w' ) as outfile:
-        json.dump( uplugin_data, outfile, indent=2 )
+        with uplugin_pathfile.open( 'w' ) as outfile:
+            json.dump( uplugin_data, outfile, indent=2 )
+    elif iArgs.target is eTarget.kBeta:
+        shutil.copyfile( iOutputPath / 'Config' / 'BaseEpos.ini', iOutputPath / 'Config' / 'DefaultEpos.ini' ) # So, people installing plugin inside project, settings will be read from DefaultEpos.ini
 
 #---
 
@@ -325,9 +323,7 @@ ProcessArgumentForTarget( args )
 
 Build( uplugin_pathfile, output_path )
 
-#---
-
-PostBuildFixPlatforms( args, output_path )      # For marketplace package, the uplugin file must know all the os supported
+PostBuildFix( args, output_path )
 
 #---
 
