@@ -239,6 +239,13 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeTextureMenu ),
+        LOCTEXT( "TextureOptions", "Options" ),
+        LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
+        TAttribute<FSlateIcon>(),
+        true );
     // The 2 following buttons should be exclusive visible:
     // - the first button is displayed when there is only 1 plane (or 0) available
     // - the second button is displayed when there are more than 2 planes available
@@ -373,6 +380,37 @@ FBoardSequenceCustomization::MakeDrawingMenu()
             EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
         );
     }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeTextureMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "TextureSettingsTitle", "Default Texture Settings" ) );
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+        // Create a detail view
+        FDetailsViewArgs Args( false, false, false, FDetailsViewArgs::HideNameArea );
+        Args.ColumnWidth = .5f;
+        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
+
+        // Filter properties to only get CameraSettings ones
+        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
+        {
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposSequenceToolsSettings, TextureSettings );
+        };
+        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
+        // Set the object to view
+        DetailView->SetObject( GetMutableDefault<UEposSequenceToolsSettings>() );
+
+        MenuBuilder.AddWidget( DetailView, FText(), true );
+    }
+    MenuBuilder.EndSection();
 
     return MenuBuilder.MakeWidget();
 }

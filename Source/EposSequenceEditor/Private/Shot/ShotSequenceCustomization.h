@@ -29,6 +29,7 @@ private:
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakePlaneMenu();
     TSharedRef<SWidget> MakeDrawingMenu();
+    TSharedRef<SWidget> MakeTextureMenu();
     TSharedRef<SWidget> MakeHelpMenu();
 
     enum EMapping

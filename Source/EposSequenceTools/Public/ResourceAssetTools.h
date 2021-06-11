@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+class ACineCameraActor;
 class FString;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
@@ -36,9 +37,11 @@ private:
 class EPOSSEQUENCETOOLS_API ProjectAssetTools
 {
 public:
-    static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence );
+    static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence );
 
 private:
     static UMaterialInstanceConstant* CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UTexture2D* CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName );
+    static UTexture2D* CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName );
+
+    static FIntPoint ComputeTextureSize( ACineCameraActor* iCamera );
 };

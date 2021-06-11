@@ -208,7 +208,7 @@ SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
 void
 ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
 {
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, iCamera, iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
         return;
 

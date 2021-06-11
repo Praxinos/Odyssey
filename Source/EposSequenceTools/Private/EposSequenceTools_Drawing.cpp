@@ -82,7 +82,7 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
     //---
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID ), iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
         return;
 

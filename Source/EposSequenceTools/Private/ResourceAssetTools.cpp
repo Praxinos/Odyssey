@@ -5,10 +5,14 @@
 
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "CineCameraActor.h"
+#include "CineCameraComponent.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
+
+#include "Settings/EposSequenceToolsSettings.h"
 
 #define LOCTEXT_NAMESPACE "ResourceAssetTools"
 
@@ -239,7 +243,7 @@ ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSe
 
 //static
 UTexture2D*
-ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
 {
     UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
     if( !texture_master )
@@ -251,17 +255,53 @@ ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneS
     FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     Module.Get().CreateUniqueAssetName( package_name, "_T_01", oPackageName, oAssetName );
 
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-    UObject* new_object = Module.Get().DuplicateAsset( oAssetName, package_path, texture_master );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( oAssetName, package_path, UTexture2D::StaticClass(), nullptr );
+    UTexture2D* new_texture = Cast<UTexture2D>( new_object );
 
-    return Cast<UTexture2D>( new_object );
+    // Init texture like in UTexture2DFactoryNew
+    new_texture->Source.Init2DWithMipChain( iTextureSize.X, iTextureSize.Y, TSF_BGRA8 );
+
+    if( new_texture->Source.IsValid() )
+    {
+        TArray64<uint8> TexturePixels;
+        new_texture->Source.GetMipData( TexturePixels, 0 );
+
+        uint8* DestData = new_texture->Source.LockMip( 0 );
+        FMemory::Memset( DestData, 0, TexturePixels.Num() * sizeof( uint8 ) );
+        new_texture->Source.UnlockMip( 0 );
+
+        new_texture->PostEditChange();
+    }
+
+    return new_texture;
+}
+
+//---
+
+FIntPoint
+ProjectAssetTools::ComputeTextureSize( ACineCameraActor* iCamera )
+{
+    float camera_ratio = iCamera->GetCineCameraComponent()->AspectRatio;
+
+    const UEposSequenceToolsSettings* settings = GetDefault<UEposSequenceToolsSettings>();
+    int32 height = settings->TextureSettings.Height;
+
+    int32 width = int32( height * camera_ratio );
+    if( width % 4 )
+        width += ( 4 - width % 4 ); // To always have a multiple of 4 (like the height)
+
+    width = FMath::Clamp( width, 16, 8192 );
+
+    return FIntPoint( width, height );
 }
 
 //---
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence )
 {
     FString package_name;
     FString asset_name;
@@ -269,7 +309,9 @@ ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMo
     if( !new_material )
         return nullptr;
 
-    UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, package_name, asset_name );
+    FIntPoint texture_size = ComputeTextureSize( iCamera );
+
+    UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, texture_size, package_name, asset_name );
     if( !new_texture )
     {
         new_material->MarkPendingKill();

@@ -42,6 +42,18 @@ public:
 
 //---
 
+USTRUCT()
+struct FTextureSettings
+{
+    GENERATED_BODY()
+
+    /** Controls the height (a multiple of 4) of the texture (drawing). (Its width is computed from the camera ratio) */
+    UPROPERTY(config, EditAnywhere, Category="Texture", meta=(ClampMin="16", ClampMax="4096", Multiple="4"))
+    int32 Height = 1080;
+};
+
+//---
+
 /**
  * Epos Sequence Editor settings.
  */
@@ -64,4 +76,8 @@ private:
 public:
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
+
+    /** Select the way to arrange board sections. */
+    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    FTextureSettings TextureSettings;
 };
