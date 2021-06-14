@@ -44,6 +44,13 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                         SNew(STextBlock)
                         .Text(FText::FromString("Select Mesh"))
                     ]
+                    + SVerticalBox::Slot()
+                    .Padding( 2 )
+                    .AutoHeight()
+                    .Expose( mMeshComponentSelectionMenu )
+                    [
+                        SNullWidget::NullWidget
+                    ]
                     +SVerticalBox::Slot()
                     .Padding(2)
                     .AutoHeight()
@@ -93,28 +100,43 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                                 .ThumbnailSizeOverride(FIntPoint(30, 30))
                         ]
             ];
-
-    /*return SNew(SObjectPropertyEntryBox)
-        .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath)
-        .AllowedClass(UTexture2D::StaticClass())
-        .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset))
-        .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnObjectChanged))
-        .DisplayUseSelected(false);
-        //.ThumbnailPool(iCustomizationUtils.GetThumbnailPool());*/
-
-    /*return SNew(SObjectPropertyEntryBox)
-        .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMeshComponentPath)
-        .AllowedClass(UMeshComponent::StaticClass())
-//        .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset))
-        .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnObjectChanged))
-        .DisplayUseSelected(false);
-    //.ThumbnailPool(iCustomizationUtils.GetThumbnailPool())*/
 }
+
+/* TArray<FAssetData> FAssetDataArray ;
+
+TArray<UMaterialInterface*> materialsArray;
+mEditor->SelectableMaterials( materialsArray );
+
+for(int i = 0; i < materialsArray.Num(); i++)
+{
+    FAssetDataArray.Add( FAssetData( materialsArray[i] ) );
+}
+*/
 
 TSharedRef<SWidget>
 FOdysseyViewportDrawingEditorTextureSelectorTab::CreateMeshComponentMenuWidget()
 {
-    return SNullWidget::NullWidget;
+    TArray<FAssetData> meshAssetArray;
+    TArray<UMeshComponent*> selectableComponent = mEditor->SelectableComponents();
+    for(int i = 0; i < selectableComponent.Num(); i++)
+    {
+        meshAssetArray.Add( FAssetData( selectableComponent[i] ) );
+    }
+
+return                       
+    SNew(SObjectPropertyEntryBox)
+    .AllowedClass(UMeshComponent::StaticClass())
+    .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath)
+    .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged))
+    .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset))
+    .AllowClear(true)
+    .DisplayUseSelected(true)
+    .DisplayBrowse(true)
+    .EnableContentPicker(true)
+    .DisplayCompactSize(true)
+    .DisplayThumbnail(true)
+    .ThumbnailSizeOverride(FIntPoint(30, 30))
+    .OwnerAssetDataArray(meshAssetArray);
 }
 
 //--------------------------------------------------------------------------------------
@@ -139,8 +161,11 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath() const
 }
 
 bool
-FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
+FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData)
 {    
+    mMeshComponentSelectionMenu->DetachWidget();
+    mMeshComponentSelectionMenu->AttachWidget( CreateMeshComponentMenuWidget() );
+
     return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
 
@@ -158,6 +183,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset(const
 void
 FOdysseyViewportDrawingEditorTextureSelectorTab::OnTextureChanged(const FAssetData& iAssetData)
 {
+
     UTexture2D* texture = Cast<UTexture2D>(iAssetData.GetAsset());
 
     if ( texture )

@@ -26,7 +26,7 @@ protected:
     // Widget Getters
     FString PaintTexturePath() const;
     FString PaintMaterialPath() const;
-    bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
+    bool ShouldFilterTextureAsset(const FAssetData& iAssetData);
     bool ShouldFilterMaterialAsset(const FAssetData& iAssetData) const;
 
 protected:
