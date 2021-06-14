@@ -51,14 +51,19 @@ public:
     // Getters
     AActor* Actor() const;
     UMeshComponent* Component() const;
+    UMaterialInterface* Material() const;
     const TArray<UMeshComponent*>& SelectableComponents() const;
+    void  SelectableMaterials( TArray<UMaterialInterface*>& ioSelectedMaterials ) const;
     const TArray<FPaintableTexture>& SelectableTextures() const;
     const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
+    
+
 
 public:
     // Setters
     void SetActor(AActor* iActor);
     void SetComponent(UMeshComponent* iComponent);
+    void SetMaterial(UMaterialInterface* iMaterial);
     void SetTexture(UTexture2D* iTexture);
 
 public:
@@ -85,6 +90,7 @@ private:
 	TSharedPtr<FOdysseyViewportDrawingEditorGUI> mGUI;
     AActor* mActor;
     UMeshComponent* mComponent;
+    UMaterialInterface* mMaterial; //Storage purposes only for the GUI -> Get path for it
     TArray<UMeshComponent*> mSelectableComponents;
     TArray<FPaintableTexture> mSelectableTextures;
 

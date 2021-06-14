@@ -105,6 +105,8 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 void FOdysseyViewportDrawingEditorEdMode::Exit()
 {
     // mViewportDrawingEditorPainter->GetController()->EdModeExit();
+    // virer les tabs restantes.
+    // UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager)
     mViewportDrawingEditorPainter->Finalize();
 	IMeshPaintEdMode::Exit();
 }

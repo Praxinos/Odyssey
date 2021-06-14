@@ -27,6 +27,7 @@ public:
 	virtual void Enter() override;
 	virtual void Exit() override;
 	virtual TSharedPtr< FModeToolkit> GetToolkit() override;
+    virtual bool UsesToolkits() const override { return true; }
 
 	// IMeshPaintEdMode interface.
 	virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent) override;

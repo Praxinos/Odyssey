@@ -19,7 +19,8 @@ FOdysseyViewportDrawingEditor::~FOdysseyViewportDrawingEditor()
 
 FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
 	FOdysseyTexture2DEditor(),
-	mGUI(nullptr)
+	mGUI(nullptr),
+    mMaterial(nullptr)
 {
 }
 
@@ -52,10 +53,25 @@ FOdysseyViewportDrawingEditor::Component() const
     return mComponent;
 }
 
+UMaterialInterface*
+FOdysseyViewportDrawingEditor::Material() const
+{
+    return mMaterial;
+}
+
 const TArray<UMeshComponent*>&
 FOdysseyViewportDrawingEditor::SelectableComponents() const
 {
     return mSelectableComponents;
+}
+
+void
+FOdysseyViewportDrawingEditor::SelectableMaterials( TArray<UMaterialInterface*>& ioSelectableMaterials ) const
+{
+    if ( mComponent )
+    {
+        mComponent->GetUsedMaterials( ioSelectableMaterials );
+    }
 }
 
 const TArray<FPaintableTexture>&
@@ -117,6 +133,12 @@ FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 		UpdateSelectableTextures();
 		SelectDefaultTexture();
 	}
+}
+
+void
+FOdysseyViewportDrawingEditor::SetMaterial(UMaterialInterface* iMaterial)
+{
+    mMaterial = iMaterial;
 }
 
 void

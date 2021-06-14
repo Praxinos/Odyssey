@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "Widgets/SBoxPanel.h"
 #include <ULIS3>
 
 class FOdysseyViewportDrawingEditor;
@@ -19,17 +20,23 @@ public:
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    TSharedRef<SWidget> CreateMeshComponentMenuWidget();
 
 protected:
     // Widget Getters
     FString PaintTexturePath() const;
+    FString PaintMaterialPath() const;
     bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
+    bool ShouldFilterMaterialAsset(const FAssetData& iAssetData) const;
 
 protected:
     // Event Listeners
-    void OnObjectChanged(const FAssetData& iAssetData);
+    void OnTextureChanged(const FAssetData& iAssetData);
+    void OnMaterialChanged(const FAssetData& iAssetData);
+    void OnMeshComponentChanged(const UMeshComponent& iNewMeshComponent);
 
 private:
     FOdysseyViewportDrawingEditor* mEditor;
+    SVerticalBox::FSlot* mMeshComponentSelectionMenu;
 };
 
