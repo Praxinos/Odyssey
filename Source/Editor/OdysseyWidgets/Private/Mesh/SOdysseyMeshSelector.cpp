@@ -253,14 +253,16 @@ FString SOdysseyMeshSelector::ObjectPath() const
 
 void SOdysseyMeshSelector::OnObjectChanged( const FAssetData& AssetData )
 {
+    MeshSelector->SetCurrentMesh(nullptr);
+    MeshSelector->SetCurrentUVChannel(-1);
+    MeshSelector->SetCurrentLOD(-1);
+    LODSelectionMenu->DetachWidget();
+    UVSelectionMenu->DetachWidget();
+
     if( AssetData.IsValid() )
     {
         MeshSelector->SetCurrentMesh( CastChecked< UStaticMesh >( AssetData.GetAsset() ) );
-        MeshSelector->SetCurrentUVChannel(-1);
-        MeshSelector->SetCurrentLOD(-1);
-        LODSelectionMenu->DetachWidget();
         LODSelectionMenu->AttachWidget( CreateLODMenuWidget() );
-        UVSelectionMenu->DetachWidget();
         UVSelectionMenu->AttachWidget( CreateUVMenuWidget() );
     }
 

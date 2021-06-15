@@ -60,6 +60,9 @@ int FOdysseyMeshSelector::GetMaxLOD() const
 
 int FOdysseyMeshSelector::GetMaxUVChannelForCurrentLOD()
 {
+    if( !CurrentMesh )
+        return -1;
+
     int NumLODLevels = CurrentMesh->RenderData->LODResources.Num();
 
     if( CurrentLOD < 0 || CurrentLOD > NumLODLevels )
