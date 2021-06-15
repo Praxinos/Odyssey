@@ -33,7 +33,8 @@ protected:
     // Event Listeners
     void OnTextureChanged(const FAssetData& iAssetData);
     void OnMaterialChanged(const FAssetData& iAssetData);
-    void OnMeshComponentChanged(const UMeshComponent& iNewMeshComponent);
+    void OnMeshComponentChanged(const FString iName);
+    ECheckBoxState GetMeshComponentCheckState(const FString iName);
 
 private:
     FOdysseyViewportDrawingEditor* mEditor;

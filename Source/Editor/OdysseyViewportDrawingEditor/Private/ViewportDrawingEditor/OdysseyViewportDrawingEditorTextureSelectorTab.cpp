@@ -102,41 +102,67 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
             ];
 }
 
-/* TArray<FAssetData> FAssetDataArray ;
-
-TArray<UMaterialInterface*> materialsArray;
-mEditor->SelectableMaterials( materialsArray );
-
-for(int i = 0; i < materialsArray.Num(); i++)
-{
-    FAssetDataArray.Add( FAssetData( materialsArray[i] ) );
-}
-*/
-
 TSharedRef<SWidget>
 FOdysseyViewportDrawingEditorTextureSelectorTab::CreateMeshComponentMenuWidget()
 {
-    TArray<FAssetData> meshAssetArray;
-    TArray<UMeshComponent*> selectableComponent = mEditor->SelectableComponents();
-    for(int i = 0; i < selectableComponent.Num(); i++)
+    FMenuBuilder menuBuilder(false, NULL);
+
+    menuBuilder.BeginSection("Select Mesh Component");
+
+    FUIAction changeMeshAction;
+    changeMeshAction.ExecuteAction.BindSP( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged, FString() );
+    changeMeshAction.GetActionCheckState.BindSP( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::GetMeshComponentCheckState, FString() );
+    
+    menuBuilder.AddMenuEntry(
+        LOCTEXT("SelecMeshComponentToggle", "None"),
+        LOCTEXT("SelecMeshComponentToggle_Tooltip", "Toggles selection of the mesh components."),
+        FSlateIcon(),
+        changeMeshAction,
+        NAME_None,
+        EUserInterfaceActionType::RadioButton
+    );
+
+    int32 maxMeshComponent = mEditor->SelectableComponents().Num();
+    if( maxMeshComponent > 0)
+        menuBuilder.AddMenuSeparator();
+
+    for(int i = 0; i < maxMeshComponent; ++i)
     {
-        meshAssetArray.Add( FAssetData( selectableComponent[i] ) );
+        FUIAction menuAction;
+        menuAction.ExecuteAction.BindSP( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged, mEditor->SelectableComponents()[i]->GetFName().ToString() );
+        menuAction.GetActionCheckState.BindSP( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::GetMeshComponentCheckState, mEditor->SelectableComponents()[i]->GetFName().ToString() );
+
+        menuBuilder.AddMenuEntry(
+            FText::Format(LOCTEXT("SelectedMeshComponent", "{0}"), FText::FromName( mEditor->SelectableComponents()[i]->GetFName() ) ),
+            FText::Format(LOCTEXT("SelectedMeshComponent_ToolTip", "Set {0} as Mesh Component"), FText::FromName( mEditor->SelectableComponents()[i]->GetFName() ) ),
+            FSlateIcon(),
+            menuAction,
+            NAME_None,
+            EUserInterfaceActionType::RadioButton
+        );
     }
 
-return                       
-    SNew(SObjectPropertyEntryBox)
-    .AllowedClass(UMeshComponent::StaticClass())
-    .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath)
-    .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged))
-    .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset))
-    .AllowClear(true)
-    .DisplayUseSelected(true)
-    .DisplayBrowse(true)
-    .EnableContentPicker(true)
-    .DisplayCompactSize(true)
-    .DisplayThumbnail(true)
-    .ThumbnailSizeOverride(FIntPoint(30, 30))
-    .OwnerAssetDataArray(meshAssetArray);
+    menuBuilder.EndSection();
+
+
+    TSharedRef< SWidget > widget =
+
+    SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .Padding( 2 )
+        .AutoHeight()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("Select Mesh", "Select Mesh"))
+        ]
+        + SVerticalBox::Slot()
+        .Padding( 2 )
+        .AutoHeight()
+        [
+            menuBuilder.MakeWidget()
+        ];
+        
+    return widget;
 }
 
 //--------------------------------------------------------------------------------------
@@ -162,10 +188,9 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath() const
 
 bool
 FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData)
-{    
+{
     mMeshComponentSelectionMenu->DetachWidget();
     mMeshComponentSelectionMenu->AttachWidget( CreateMeshComponentMenuWidget() );
-
     return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
 
@@ -212,10 +237,18 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged(const FAssetD
     }
 }
 
-void 
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged(const UMeshComponent& iNewMeshComponent)
+void
+FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged(const FString iName)
 {
     UE_LOG(LogTemp, Display, TEXT("MeshChanged"));
 }
 
+ECheckBoxState
+FOdysseyViewportDrawingEditorTextureSelectorTab::GetMeshComponentCheckState(const FString iName)
+{
+    FString string = mEditor->Component() ? mEditor->Component()->GetName() : FString();
+    return ( string == iName ? ECheckBoxState::Checked : ECheckBoxState::Unchecked );
+}
+
 #undef LOCTEXT_NAMESPACE
+
