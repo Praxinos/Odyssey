@@ -40,13 +40,6 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                     +SVerticalBox::Slot()
                     .Padding(2)
                     .AutoHeight()
-                    [
-                        SNew(STextBlock)
-                        .Text(FText::FromString("Select Mesh"))
-                    ]
-                    + SVerticalBox::Slot()
-                    .Padding( 2 )
-                    .AutoHeight()
                     .Expose( mMeshComponentSelectionMenu )
                     [
                         SNullWidget::NullWidget
@@ -103,10 +96,58 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
 }
 
 TSharedRef<SWidget>
+FOdysseyViewportDrawingEditorTextureSelectorTab::GenerateMeshSelectorComboBoxItem( TSharedPtr<FString> iItem )
+{
+    return SNew( STextBlock )
+                .Text( FText::FromString( *( iItem.Get() ) ) );
+}
+
+TSharedRef<SWidget>
+FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidgetContentMeshSelectorComboBox()
+{
+    if( mEditor->Component() )
+    {
+        return SNew( STextBlock )
+                .Text( FText::FromName( mEditor->Component()->GetFName() ) );
+    }
+    return SNew( STextBlock )
+                .Text( FText::FromString( "None" ) );
+}
+
+void
+FOdysseyViewportDrawingEditorTextureSelectorTab::HandleOnSelectionChanged( TSharedPtr<FString> iSelection, ESelectInfo::Type iSelectInfo )
+{
+    if( mEditor->Component()->GetName() == *( iSelection.Get() ) ) return;
+
+    for( int i = 0; i < mEditor->SelectableComponents().Num(); i++ )
+    {
+        if( mEditor->SelectableComponents()[i]->GetName() == *( iSelection.Get() ) )
+        {
+            mEditor->SetComponent( mEditor->SelectableComponents()[i] );
+        }
+    }
+}
+
+TSharedRef<SWidget>
 FOdysseyViewportDrawingEditorTextureSelectorTab::CreateMeshComponentMenuWidget()
 {
+
+    TSharedPtr<SWidget> comboBox = 
+        SNew( SComboBox<TSharedPtr<FString>> )
+        .OptionsSource( &mSComboBoxOptions )
+        .OnGenerateWidget( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::GenerateMeshSelectorComboBoxItem )
+        //.OnSelectionChanged()
+        //.ComboBoxStyle()
+        .Content()
+        [
+            CreateWidgetContentMeshSelectorComboBox()
+        ];
+
+
     FMenuBuilder menuBuilder(false, NULL);
 
+    menuBuilder.AddWidget( comboBox->AsShared(), FText::FromString( "" ) );
+    /*
     menuBuilder.BeginSection("Select Mesh Component");
 
     FUIAction changeMeshAction;
@@ -144,7 +185,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateMeshComponentMenuWidget()
 
     menuBuilder.EndSection();
 
-
+    */
     TSharedRef< SWidget > widget =
 
     SNew( SVerticalBox )

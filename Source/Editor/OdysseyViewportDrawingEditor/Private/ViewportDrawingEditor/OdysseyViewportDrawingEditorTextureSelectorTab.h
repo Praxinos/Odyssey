@@ -20,6 +20,9 @@ public:
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    TSharedRef<SWidget> GenerateMeshSelectorComboBoxItem( TSharedPtr<FString> iItem );
+    void HandleOnSelectionChanged( TSharedPtr<FString> iSelection, ESelectInfo::Type iSelectInfo );
+    TSharedRef<SWidget> CreateWidgetContentMeshSelectorComboBox();
     TSharedRef<SWidget> CreateMeshComponentMenuWidget();
 
 protected:
@@ -39,5 +42,6 @@ protected:
 private:
     FOdysseyViewportDrawingEditor* mEditor;
     SVerticalBox::FSlot* mMeshComponentSelectionMenu;
+    TArray<TSharedPtr<FString>> mSComboBoxOptions;
 };
 
