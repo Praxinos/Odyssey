@@ -317,7 +317,9 @@ FShotSequenceCustomization::MakeCameraMenu()
         FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
         // Create a detail view
-        FDetailsViewArgs Args( false, false, false, FDetailsViewArgs::HideNameArea );
+        FDetailsViewArgs Args;
+        Args.bAllowSearch = false;
+        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
         Args.ColumnWidth = .5f;
         TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
 
@@ -411,7 +413,9 @@ FShotSequenceCustomization::MakeTextureMenu()
         FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
         // Create a detail view
-        FDetailsViewArgs Args( false, false, false, FDetailsViewArgs::HideNameArea );
+        FDetailsViewArgs Args;
+        Args.bAllowSearch = false;
+        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
         Args.ColumnWidth = .5f;
         TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
 

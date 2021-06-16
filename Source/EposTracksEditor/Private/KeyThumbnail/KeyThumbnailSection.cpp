@@ -115,7 +115,10 @@ void FKeyThumbnailSection::BuildSectionContextMenu( FMenuBuilder& MenuBuilder, c
 
                     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
-                    FDetailsViewArgs Args( false, false, false, FDetailsViewArgs::HideNameArea );
+                    FDetailsViewArgs Args;
+                    Args.bAllowSearch = false;
+                    Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+
                     TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
                     DetailView->SetObject( GetMutableDefault<UMovieSceneUserThumbnailSettings>() );
                     InMenuBuilder.AddWidget( DetailView, FText(), true );
