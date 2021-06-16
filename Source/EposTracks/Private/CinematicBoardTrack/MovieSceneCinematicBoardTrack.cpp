@@ -30,12 +30,19 @@ UMovieSceneCinematicBoardTrack::UMovieSceneCinematicBoardTrack( const FObjectIni
     TrackTint = FColor( 240, 100, 153, 64 );
 #endif
 
-    const UEposTracksSettings* settings = GetDefault<UEposTracksSettings>();
-    mArrangeSections = settings->BoardTrackSettings.ArrangeSections;
-    //mArrangeSections = EArrangeSections::OnTwoRowsShifted;
+    mArrangeSections = EArrangeSections::OnTwoRowsShifted;
 
     //TODO: maybe set this only moving ?
     SupportedBlendTypes.Add( EMovieSceneBlendType::Absolute ); // Only to be able to move section through other ones
+}
+
+void
+UMovieSceneCinematicBoardTrack::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    const UEposTracksSettings* settings = GetDefault<UEposTracksSettings>();
+    mArrangeSections = settings->BoardTrackSettings.ArrangeSections;
 }
 
 UMovieSceneSubSection*

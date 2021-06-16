@@ -15,10 +15,6 @@
 
 UMovieSceneCinematicBoardSection::UMovieSceneCinematicBoardSection()
     : UMovieSceneSubSection()
-    , mResizing( -1 )
-    , mLeadingResizing( false )
-    , mTrailingResizing( false )
-    , mMoving( -1 )
 {
     SetBlendType( EMovieSceneBlendType::Absolute );
 
@@ -90,8 +86,6 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
         }
     }
 }
-
-#endif
 
 //---
 
@@ -308,6 +302,8 @@ UMovieSceneCinematicBoardSection::IsMoving() const
 {
     return mMoving > 0;
 }
+
+#endif
 
 //---
 

@@ -67,6 +67,8 @@ private:
 
 //---
 
+#if WITH_EDITOR
+
 private:
     TRange<FFrameNumber> mSectionRangeBackup;
 
@@ -92,9 +94,9 @@ public:
     bool IsResizingTrailing() const;
 
 private:
-    int mResizing;
-    bool mLeadingResizing;
-    bool mTrailingResizing;
+    int mResizing { -1 };
+    bool mLeadingResizing { false };
+    bool mTrailingResizing { false };
 
 //---
 
@@ -108,5 +110,7 @@ public:
     bool IsMoving() const;
 
 private:
-    int mMoving;
+    int mMoving { -1 };
+
+#endif
 };
