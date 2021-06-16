@@ -215,13 +215,3 @@ UBoardSequence::SectionAddedOrRemoved( UMovieSceneSection* iSection ) //override
 {
     BoardHelpers::ResizeParentSequenceRecursively( this );
 }
-
-#if WITH_EDITOR
-
-FLinearColor
-UBoardSequence::GetColorTint() const //override
-{
-    return FColor( 240, 100, 153, 64 );
-}
-
-#endif

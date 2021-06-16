@@ -28,9 +28,4 @@ public:
 
     virtual void SectionResized( UMovieSceneSection* iSection ) PURE_VIRTUAL( UEposMovieSceneSequence::SectionResized, );
     virtual void SectionAddedOrRemoved( UMovieSceneSection* iSection ) PURE_VIRTUAL( UEposMovieSceneSequence::SectionAddedOrRemoved, );
-
-//#if WITH_EDITORONLY_DATA // Like for UMovieSceneTrack, but as it as not data, WITH_EDITOR should be enough (?)
-#if WITH_EDITOR
-    virtual FLinearColor GetColorTint() const PURE_VIRTUAL( UEposMovieSceneSequence::GetColorTint, return FLinearColor(); );
-#endif
 };

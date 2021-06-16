@@ -50,10 +50,6 @@ public:
     virtual void SectionResized( UMovieSceneSection* iSection ) override;
     virtual void SectionAddedOrRemoved( UMovieSceneSection* iSection ) override;
 
-#if WITH_EDITOR
-    virtual FLinearColor GetColorTint() const override;
-#endif
-
 public:
     UPROPERTY()
     UMovieScene* MovieScene;

@@ -33,6 +33,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
 #include "Helpers/SectionHelpersConvert.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -564,10 +565,12 @@ int32
 FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) const
 {
     const UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
 
-    const UEposMovieSceneSequence* subsequence = Cast< UEposMovieSceneSequence>( sectionObject.GetSequence() );
-    if( subsequence )
-        ioPainter.LayerId = ioPainter.PaintSectionBackground( subsequence->GetColorTint() );
+    if( Cast<UBoardSequence>( sectionObject.GetSequence() ) )
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( settings->BoardTrackSettings.BoardSectionColor );
+    else if( Cast<UShotSequence>( sectionObject.GetSequence() ) )
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( settings->BoardTrackSettings.ShotSectionColor );
     else
         ioPainter.LayerId = ioPainter.PaintSectionBackground();
 

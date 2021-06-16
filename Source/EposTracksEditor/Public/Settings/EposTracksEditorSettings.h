@@ -55,6 +55,23 @@ struct FTextureSettings
 
 //---
 
+USTRUCT()
+struct FBoardSectionSettings
+{
+    GENERATED_BODY()
+
+public:
+    /** Select the background color of board sections. */
+    UPROPERTY(config, EditAnywhere, Category=BoardTrack)
+    FLinearColor BoardSectionColor { .94f, .39f, .6f, .25f };
+
+    /** Select the background color of shot sections. */
+    UPROPERTY(config, EditAnywhere, Category=BoardTrack)
+    FLinearColor ShotSectionColor { .6f, .39f, .94f, .25f };
+};
+
+//---
+
 /**
  * Epos Tracks Editor settings.
  */
@@ -85,4 +102,8 @@ public:
 
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FTextureSettings TextureSettings;
+
+    /** Specifies Board track stuff. */
+    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    FBoardSectionSettings BoardTrackSettings;
 };
