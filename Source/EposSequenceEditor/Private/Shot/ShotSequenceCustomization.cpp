@@ -6,13 +6,13 @@
 #include "CineCameraActor.h"
 
 #include "EposSequenceEditorCommands.h"
-#include "EposSequenceTools.h"
 #include "Misc/SAboutWindow.h"
 #include "PlaneActor.h"
-#include "Settings/EposSequenceToolsSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
 #include "Styles/EposSequenceEditorStyle.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceCustomization"
 
@@ -325,11 +325,11 @@ FShotSequenceCustomization::MakeCameraMenu()
         auto visible_property = []( const FPropertyAndParent& iPropertyChain )
         {
             FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposSequenceToolsSettings, CameraSettings );
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, CameraSettings );
         };
         DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
         // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposSequenceToolsSettings>() );
+        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
 
         MenuBuilder.AddWidget( DetailView, FText(), true );
     }
@@ -419,11 +419,11 @@ FShotSequenceCustomization::MakeTextureMenu()
         auto visible_property = []( const FPropertyAndParent& iPropertyChain )
         {
             FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposSequenceToolsSettings, TextureSettings );
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, TextureSettings );
         };
         DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
         // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposSequenceToolsSettings>() );
+        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
 
         MenuBuilder.AddWidget( DetailView, FText(), true );
     }

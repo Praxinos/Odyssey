@@ -45,10 +45,12 @@ public class EposTracksEditor : ModuleRules
                 "MovieSceneTracks",
                 "Projects",
                 "CinematicCamera",
+                "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
                 "EposTracks",
+                "EposActors",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
@@ -57,8 +59,8 @@ public class EposTracksEditor : ModuleRules
                 "UnrealEd",
                 "EditorStyle",
                 "EditorWidgets",
+                "MaterialEditor",
                 // [EDITOR] custom plugin dependencies
-                "EposSequenceTools"
             }
             );
 

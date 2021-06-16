@@ -22,7 +22,7 @@ class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
 
-class EPOSSEQUENCETOOLS_API BoardSequenceTools
+class EPOSTRACKSEDITOR_API BoardSequenceTools
 {
 // Inside EspoSequenceTools_Camera
 public:
@@ -168,7 +168,7 @@ public:
 
 //---
 
-class EPOSSEQUENCETOOLS_API ShotSequenceTools
+class EPOSTRACKSEDITOR_API ShotSequenceTools
 {
 private:
     friend class BoardSequenceTools;

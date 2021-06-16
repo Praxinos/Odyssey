@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "EposSequenceTools.h"
+#include "Tools/EposSequenceTools.h"
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
@@ -16,7 +16,7 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
-#include "ResourceAssetTools.h"
+#include "Tools/ResourceAssetTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Drawing"

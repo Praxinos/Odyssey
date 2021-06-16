@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "EposSequenceTools.h"
+#include "Tools/EposSequenceTools.h"
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
@@ -20,7 +20,7 @@
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "Settings/EposSequenceToolsSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -134,7 +134,7 @@ ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
     camera->SetActorTransform( iTransform );
     //camera->CameraComponent->FieldOfView = ViewportClient->ViewFOV; //@todo set the focal length from this field of view
 
-    const UEposSequenceToolsSettings* settings = GetDefault<UEposSequenceToolsSettings>();
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
 
     // https://udn.unrealengine.com/s/question/0D54z00006uhl34CAA/plugin-cuproperty-how-to-change-uproperty-and-trigger-prepostedit-
     //UCineCameraComponent* CameraComponent = camera->GetCineCameraComponent();

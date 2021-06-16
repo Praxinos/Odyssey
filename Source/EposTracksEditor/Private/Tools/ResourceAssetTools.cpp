@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "ResourceAssetTools.h"
+#include "Tools/ResourceAssetTools.h"
 
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
@@ -12,7 +12,7 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
 
-#include "Settings/EposSequenceToolsSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "ResourceAssetTools"
 
@@ -285,7 +285,7 @@ ProjectAssetTools::ComputeTextureSize( ACineCameraActor* iCamera )
 {
     float camera_ratio = iCamera->GetCineCameraComponent()->AspectRatio;
 
-    const UEposSequenceToolsSettings* settings = GetDefault<UEposSequenceToolsSettings>();
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
     int32 height = settings->TextureSettings.Height;
 
     int32 width = int32( height * camera_ratio );

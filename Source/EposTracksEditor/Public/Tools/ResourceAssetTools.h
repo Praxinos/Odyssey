@@ -15,7 +15,7 @@ class UTexture2D;
 /*
  * The management of master assets (copied from the plugins content directory to the project)
  */
-class EPOSSEQUENCETOOLS_API MasterAssetTools
+class EPOSTRACKSEDITOR_API MasterAssetTools
 {
 public:
     static UTexture2D* GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
@@ -34,7 +34,7 @@ private:
 /*
  * The management of project assets
  */
-class EPOSSEQUENCETOOLS_API ProjectAssetTools
+class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
     static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence );

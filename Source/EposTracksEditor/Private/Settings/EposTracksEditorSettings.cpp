@@ -1,10 +1,10 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Settings/EposSequenceToolsSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 
 void
-UEposSequenceToolsSettings::PostInitProperties()
+UEposTracksEditorSettings::PostInitProperties()
 {
     Super::PostInitProperties();
 
@@ -12,7 +12,7 @@ UEposSequenceToolsSettings::PostInitProperties()
 }
 
 FName
-UEposSequenceToolsSettings::GetCategoryName() const
+UEposTracksEditorSettings::GetCategoryName() const
 {
     return TEXT( "Plugins" );
 }
@@ -20,7 +20,7 @@ UEposSequenceToolsSettings::GetCategoryName() const
 #if WITH_EDITOR
 
 void
-UEposSequenceToolsSettings::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+UEposTracksEditorSettings::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
     Super::PostEditChangeProperty( PropertyChangedEvent );
 
@@ -42,7 +42,7 @@ UEposSequenceToolsSettings::PostEditChangeProperty( FPropertyChangedEvent& Prope
 #endif
 
 void
-UEposSequenceToolsSettings::UpdateValues()
+UEposTracksEditorSettings::UpdateValues()
 {
     // validate incorrect values
     CameraSettings.LensSettings.MaxFocalLength = FMath::Max( CameraSettings.LensSettings.MinFocalLength, CameraSettings.LensSettings.MaxFocalLength );

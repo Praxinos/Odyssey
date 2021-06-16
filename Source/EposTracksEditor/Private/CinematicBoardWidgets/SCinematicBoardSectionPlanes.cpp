@@ -12,7 +12,7 @@
 #include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
-#include "LighttableTools.h"
+#include "Tools/LighttableTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "Styles/EposTracksEditorStyle.h"
 

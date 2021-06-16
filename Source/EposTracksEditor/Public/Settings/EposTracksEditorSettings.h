@@ -8,7 +8,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
-#include "EposSequenceToolsSettings.generated.h"
+#include "EposTracksEditorSettings.generated.h"
 
 //---
 
@@ -56,10 +56,10 @@ struct FTextureSettings
 //---
 
 /**
- * Epos Tools settings.
+ * Epos Tracks Editor settings.
  */
-UCLASS(config=Epos, meta=(DisplayName="Epos Tools"))
-class EPOSSEQUENCETOOLS_API UEposSequenceToolsSettings
+UCLASS(config=Epos, meta=(DisplayName="Epos Tracks Editor"))
+class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
     : public UDeveloperSettings
 {
     GENERATED_BODY()
