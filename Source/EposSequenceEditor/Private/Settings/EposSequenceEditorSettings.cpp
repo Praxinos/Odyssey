@@ -3,14 +3,8 @@
 
 #include "Settings/EposSequenceEditorSettings.h"
 
-FBoardSettings::FBoardSettings()
-    : DefaultTickFrameRate( 24000, 1 )
-    , DefaultDisplayFrameRate( 24, 1 )
+FName
+UEposSequenceEditorSettings::GetCategoryName() const
 {
-}
-
-FShotSettings::FShotSettings()
-    : DefaultTickFrameRate( 24000, 1 )
-    , DefaultDisplayFrameRate( 24, 1 )
-{
+    return TEXT( "Plugins" );
 }

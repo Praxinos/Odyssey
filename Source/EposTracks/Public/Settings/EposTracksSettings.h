@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
 #include "ArrangeSectionsType.h"
@@ -20,15 +21,7 @@ struct FBoardTrackSettings
 public:
     /** Select the way to arrange board sections. */
     UPROPERTY(config, EditAnywhere, Category=BoardTrack)
-    EArrangeSections ArrangeSections;
-};
-
-//---
-
-USTRUCT()
-struct FShotTrackSettings
-{
-    GENERATED_BODY()
+    EArrangeSections ArrangeSections { EArrangeSections::OnTwoRowsShifted };
 };
 
 //---
@@ -36,20 +29,18 @@ struct FShotTrackSettings
 /**
  * Epos Tracks settings.
  */
-UCLASS(config=Epos)
+UCLASS(config=Epos, meta=(DisplayName="Epos Tracks"))
 class EPOSTRACKS_API UEposTracksSettings
-    : public UObject
+    : public UDeveloperSettings
 {
     GENERATED_BODY()
 
-public:
-    UEposTracksSettings();
+    //~ UDeveloperSettings Interface
+    virtual FName GetCategoryName() const override;
+    //~
 
+public:
     /** Specifies Board track stuff. */
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FBoardTrackSettings BoardTrackSettings;
-
-    /** Specifies Shot track stuff. */
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
-    FShotTrackSettings ShotTrackSettings;
 };

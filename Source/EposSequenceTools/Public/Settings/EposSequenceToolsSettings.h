@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "CineCameraComponent.h"
+#include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
 #include "EposSequenceToolsSettings.generated.h"
@@ -49,26 +50,31 @@ struct FTextureSettings
 
     /** Controls the height (a multiple of 4) of the texture (drawing). (Its width is computed from the camera ratio) */
     UPROPERTY(config, EditAnywhere, Category="Texture", meta=(ClampMin="16", ClampMax="4096", Multiple="4"))
-    int32 Height = 1080;
+    int32 Height { 1080 };
 };
 
 //---
 
 /**
- * Epos Sequence Editor settings.
+ * Epos Tools settings.
  */
-UCLASS(config=Epos)
+UCLASS(config=Epos, meta=(DisplayName="Epos Tools"))
 class EPOSSEQUENCETOOLS_API UEposSequenceToolsSettings
-    : public UObject
+    : public UDeveloperSettings
 {
     GENERATED_BODY()
 
-protected:
-    virtual void PostInitProperties() override;
-
+    //~ UDeveloperSettings Interface
+    virtual FName GetCategoryName() const override;
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 #endif
+    //~
+
+protected:
+    //~ UObject Interface
+    virtual void PostInitProperties() override;
+    //~
 
 private:
     void UpdateValues();
@@ -77,7 +83,6 @@ public:
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
 
-    /** Select the way to arrange board sections. */
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FTextureSettings TextureSettings;
 };

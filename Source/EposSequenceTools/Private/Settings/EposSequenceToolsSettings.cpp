@@ -11,6 +11,12 @@ UEposSequenceToolsSettings::PostInitProperties()
     UpdateValues();
 }
 
+FName
+UEposSequenceToolsSettings::GetCategoryName() const
+{
+    return TEXT( "Plugins" );
+}
+
 #if WITH_EDITOR
 
 void

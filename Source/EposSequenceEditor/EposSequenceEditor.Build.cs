@@ -45,6 +45,7 @@ public class EposSequenceEditor : ModuleRules
                 "Projects",
                 "CinematicCamera",
                 "AppFrameWork",
+                "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",

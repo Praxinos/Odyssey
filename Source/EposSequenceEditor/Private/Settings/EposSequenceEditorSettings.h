@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "CineCameraComponent.h"
+#include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
 #include "EposSequenceEditorSettings.generated.h"
@@ -17,13 +18,11 @@ struct FBoardSettings
     GENERATED_BODY()
 
 public:
-    FBoardSettings();
+    UPROPERTY(config, EditAnywhere, Category=Board)
+    FFrameRate DefaultTickFrameRate { 24000, 1 };
 
     UPROPERTY(config, EditAnywhere, Category=Board)
-    FFrameRate DefaultTickFrameRate;
-
-    UPROPERTY(config, EditAnywhere, Category=Board)
-    FFrameRate DefaultDisplayFrameRate;
+    FFrameRate DefaultDisplayFrameRate { 24, 1 };
 };
 
 //---
@@ -34,13 +33,11 @@ struct FShotSettings
     GENERATED_BODY()
 
 public:
-    FShotSettings();
+    UPROPERTY(config, EditAnywhere, Category=Shot)
+    FFrameRate DefaultTickFrameRate { 24000, 1 };
 
     UPROPERTY(config, EditAnywhere, Category=Shot)
-    FFrameRate DefaultTickFrameRate;
-
-    UPROPERTY(config, EditAnywhere, Category=Shot)
-    FFrameRate DefaultDisplayFrameRate;
+    FFrameRate DefaultDisplayFrameRate { 24, 1 };
 };
 
 //---
@@ -48,11 +45,15 @@ public:
 /**
  * Epos Sequence Editor settings.
  */
-UCLASS(config=Epos)
+UCLASS(config=Epos, meta=(DisplayName="Epos Sequence"))
 class UEposSequenceEditorSettings
-    : public UObject
+    : public UDeveloperSettings
 {
     GENERATED_BODY()
+
+    //~ UDeveloperSettings Interface
+    virtual FName GetCategoryName() const override;
+    //~
 
 public:
     //TODO: add everything inside UMovieSceneToolsProjectSettings here ? or inherit from it ?

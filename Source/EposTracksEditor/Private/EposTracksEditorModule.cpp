@@ -19,7 +19,6 @@ void
 FEposTracksEditorModule::StartupModule()
 {
     RegisterCommands();
-    RegisterSettings();
     RegisterTrackEditors();
 }
 
@@ -27,7 +26,6 @@ void
 FEposTracksEditorModule::ShutdownModule()
 {
     UnregisterTrackEditors();
-    UnregisterSettings();
     UnregisterCommands();
 }
 
@@ -66,28 +64,6 @@ FEposTracksEditorModule::UnregisterTrackEditors()
 
     SequencerModule.UnRegisterTrackEditor( CinematicBoardTrackCreateEditorHandle );
     SequencerModule.UnRegisterTrackEditor( SingleCameraCutTrackCreateEditorHandle );
-}
-
-void
-FEposTracksEditorModule::RegisterSettings()
-{
-    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
-    if( !SettingsModule )
-        return;
-
-    SettingsModule->RegisterSettings( "Project", "Plugins", "EposTracks",
-                                      LOCTEXT( "EposTracksSettingsName", "Epos Tracks" ),
-                                      LOCTEXT( "EposTracksSettingsDescription", "Configure the Epos Tracks Editor." ),
-                                      GetMutableDefault<UEposTracksSettings>() );
-}
-void
-FEposTracksEditorModule::UnregisterSettings()
-{
-    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
-    if( !SettingsModule )
-        return;
-
-    SettingsModule->UnregisterSettings( "Project", "Plugins", "EposTracks" );
 }
 
 //---

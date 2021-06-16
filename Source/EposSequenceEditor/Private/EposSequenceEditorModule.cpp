@@ -210,13 +210,6 @@ FEposSequenceEditorModule::RegisterSettings()
     if( !SettingsModule )
         return;
 
-    SettingsModule->RegisterSettings( "Project", "Plugins", "EposSequenceEditor",
-                                        LOCTEXT( "EposSequenceEditorSettingsName", "Epos Sequence" ),
-                                        LOCTEXT( "EposSequenceEditorSettingsDescription", "Configure the Epos Sequence Editor." ),
-                                        GetMutableDefault<UEposSequenceEditorSettings>() );
-
-    //---
-
     mSequencerSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequencerEditor" ) ); // May be initialized via Config directory.
 
     SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposSequencerEditor" /* Name used inside toolkit UniqueName */,
@@ -232,7 +225,6 @@ FEposSequenceEditorModule::UnregisterSettings()
     if( !SettingsModule )
         return;
 
-    SettingsModule->UnregisterSettings( "Project", "Plugins", "EposSequenceEditor" );
     SettingsModule->UnregisterSettings( "Editor", "ContentEditors", "EposSequencerEditor" );
 }
 

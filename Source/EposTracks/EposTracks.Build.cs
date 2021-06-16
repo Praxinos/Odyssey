@@ -41,6 +41,7 @@ public class EposTracks : ModuleRules
                 // [RUNTIME] custom engine dependencies
                 "MovieScene",
                 "MovieSceneTracks",
+                "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
             }

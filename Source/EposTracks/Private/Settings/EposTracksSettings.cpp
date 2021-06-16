@@ -3,7 +3,8 @@
 
 #include "Settings/EposTracksSettings.h"
 
-UEposTracksSettings::UEposTracksSettings()
+FName
+UEposTracksSettings::GetCategoryName() const
 {
-    BoardTrackSettings.ArrangeSections = EArrangeSections::OnTwoRowsShifted;
+    return TEXT( "Plugins" );
 }
