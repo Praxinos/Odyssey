@@ -43,6 +43,7 @@ public:
     virtual int32   OnPaintSection( FSequencerSectionPainter& ioPainter ) const override;
     virtual void    BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding ) override;
     virtual FText   GetSectionTitle() const override;
+    virtual FText   GetSectionToolTip() const override;
     virtual float   GetSectionHeight() const override;
     virtual FMargin GetContentPadding() const override;
     virtual bool    IsReadOnly() const override;

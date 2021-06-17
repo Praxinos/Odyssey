@@ -310,6 +310,11 @@ UMovieSceneCinematicBoardSection::IsMoving() const
 FString
 UMovieSceneCinematicBoardSection::GetBoardDisplayName() const
 {
+    if( mBoardDisplayName.IsEmpty() && GetSequence() )
+    {
+        return GetSequence()->GetName();
+    }
+
     return mBoardDisplayName;
 }
 

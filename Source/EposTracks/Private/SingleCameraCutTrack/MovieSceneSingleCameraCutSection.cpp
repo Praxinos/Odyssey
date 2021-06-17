@@ -143,7 +143,7 @@ void UMovieSceneSingleCameraCutSection::ImportEntityImpl(UMovieSceneEntitySystem
 {
     using namespace UE::MovieScene;
 
-    FMovieSceneTrackInstanceComponent TrackInstance { this, UMovieSceneSingleCameraCutTrackInstance::StaticClass() };
+    FMovieSceneTrackInstanceComponent TrackInstance { decltype( FMovieSceneTrackInstanceComponent::Owner )( this ), UMovieSceneSingleCameraCutTrackInstance::StaticClass() };
 
     OutImportedEntity->AddBuilder(
         FEntityBuilder()

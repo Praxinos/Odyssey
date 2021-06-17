@@ -127,7 +127,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         );
 
     mSequence = iSequences[0]; // =Root
-    mPlaybackContext = MakeShared<FEposSequenceEditorPlaybackContext>();
+    mPlaybackContext = MakeShared<FEposSequenceEditorPlaybackContext>( mSequence );
 
     // Mode sould always be world-centric (don't know how to have a standalone one)
     // in this case, SequencerDefs::ShotSequencerAppIdentifier & StandaloneDefaultLayout is not useful
@@ -148,7 +148,8 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         sequencerInitParams.HostCapabilities.bSupportsCurveEditor = true;
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
 
-        sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackContext );
+        sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackContextAsObject );
+        //sequencerInitParams.PlaybackClient.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackClientAsInterface );
 
         sequencerInitParams.ViewParams.UniqueName = "EposSequencerEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;

@@ -118,11 +118,22 @@ const TArray<UMovieSceneSection*>& UMovieSceneSingleCameraCutTrack::GetAllSectio
     return Sections;
 }
 
+bool UMovieSceneSingleCameraCutTrack::HasSection( const UMovieSceneSection& Section ) const
+{
+    return Sections.Contains( &Section );
+}
+
+
+bool UMovieSceneSingleCameraCutTrack::IsEmpty() const
+{
+    return Sections.Num() == 0;
+}
+
 void UMovieSceneSingleCameraCutTrack::RemoveSection(UMovieSceneSection& Section)
 {
     Sections.Remove(&Section);
 
-    MovieSceneHelpers::FixupConsecutiveBlendingSections(Sections, Section, true);
+    MovieSceneHelpers::FixupConsecutiveSections(Sections, Section, true);
 
     UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
     check( outer_sequence );
@@ -134,7 +145,7 @@ void UMovieSceneSingleCameraCutTrack::RemoveSection(UMovieSceneSection& Section)
 void UMovieSceneSingleCameraCutTrack::RemoveSectionAt(int32 SectionIndex)
 {
     UMovieSceneSection* SectionToDelete = Sections[SectionIndex];
-    MovieSceneHelpers::FixupConsecutiveBlendingSections(Sections, *SectionToDelete, true);
+    MovieSceneHelpers::FixupConsecutiveSections(Sections, *SectionToDelete, true);
 
     Sections.RemoveAt(SectionIndex);
     MovieSceneHelpers::SortConsecutiveSections(Sections);
