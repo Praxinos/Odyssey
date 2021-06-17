@@ -112,6 +112,8 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     FGuid camera_guid;
     ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, &camera_guid );
+    if( !camera )
+        return;
 
     ShotSequenceTools::CameraAdded( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame() );
 
@@ -168,6 +170,9 @@ ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 ACineCameraActor*
 ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
 {
+    if( !GCurrentLevelEditingViewportClient )
+        return nullptr;
+
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
     FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
 
@@ -313,6 +318,9 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iF
 void
 ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber )
 {
+    if( !GCurrentLevelEditingViewportClient )
+        return;
+
     const FScopedTransaction transaction( LOCTEXT( "SnapStoryCameraToViewport", "Snap Storyboard Camera To Viewport" ) );
 
     FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
@@ -597,6 +605,9 @@ ShotSequenceTools::StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFra
 void
 ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform )
 {
+    //TODO: this function is not necessary when we are inside a shot sequence, the stop piloting already create an new key
+    // but not for board sequence, see how to call it only for shot section in board track ? and see where it goes when we are in a shot sequence to see if we can connect to it ?
+
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene || movieScene->IsReadOnly() )
     {
@@ -609,6 +620,12 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
         return;
 
     UMovieScene3DTransformTrack* transform_track = movieScene->FindTrack<UMovieScene3DTransformTrack>( Binding );
+    if( !transform_track )
+        return;
+
+    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( transform_track->GetAllSections(), iFrameNumber );
+    if( !section )
+        return;
 
     //---
 
@@ -616,7 +633,6 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     //---
 
-    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( transform_track->GetAllSections(), iFrameNumber );
     FGeneratedTrackKeys generated_keys;
     GetTransformKeys( iSequencer, iPreviousTransform, iNewTransform, EMovieSceneTransformChannel::All, iCamera, section, generated_keys );
 
