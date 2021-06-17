@@ -40,6 +40,29 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                     .Padding(2)
                     .AutoHeight()
                     [
+                        SNew(STextBlock)
+                        .Text(FText::FromString("Select Actor"))
+                    ]
+                    + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SObjectPropertyEntryBox)
+                            .AllowedClass(AActor::StaticClass())
+                            .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintActorPath)
+                            .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged))
+                            .AllowClear(true)
+                            .DisplayUseSelected(true)
+                            .DisplayBrowse(true)
+                            .EnableContentPicker(true)
+                            .DisplayCompactSize(true)
+                            .DisplayThumbnail(true)
+                            .ThumbnailSizeOverride(FIntPoint(30, 30))
+                        ]
+                    +SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
+                    [
                         CreateMeshComponentMenuWidget()
                     ]
                     +SVerticalBox::Slot()
@@ -189,6 +212,15 @@ mMeshSelectComboButton = SNew(SComboButton)
 //----------------------------------------------------------------------- Widget Getters
 
 FString
+FOdysseyViewportDrawingEditorTextureSelectorTab::PaintActorPath() const
+{
+    if ( !mEditor->Actor() )
+        return FString();
+
+    return mEditor->Actor()->GetPathName();
+}
+
+FString
 FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath() const
 {
     if ( !mEditor->Material() )
@@ -207,12 +239,6 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath() const
 }
 
 bool
-FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData)
-{
-    return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
-}
-
-bool
 FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset(const FAssetData& iAssetData) const
 {
     TArray<UMaterialInterface*> materialsArray;
@@ -220,27 +246,40 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset(const
     return !(materialsArray.ContainsByPredicate([=](const UMaterialInterface* iMaterial) { return iMaterial->GetFullName() == iAssetData.GetFullName(); }));
 }
 
+bool
+FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
+{
+    return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnTextureChanged(const FAssetData& iAssetData)
+FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged(const FAssetData& iAssetData)
 {
-    UTexture2D* texture = Cast<UTexture2D>(iAssetData.GetAsset());
+    AActor* actor = Cast<AActor>(iAssetData.GetAsset());
 
-    if ( texture )
+    if ( actor )
     {
-        //check
-        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        if (texture != mEditor->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-        {
-            FText Title = LOCTEXT("TitleSelectedTextureAlreadyOpenedTitle", "Selected Texture Already Opened");
-            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedTextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
-            return;
-        }
-
-        mEditor->SetTexture( texture );
+        mEditor->SetActor( actor );
     }
+}
+
+
+FReply
+FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged(const FString iName)
+{
+    if( mEditor->Component()->GetName() == iName ) return FReply::Handled();
+
+    for( int i = 0; i < mEditor->SelectableComponents().Num(); i++ )
+    {
+        if( mEditor->SelectableComponents()[i]->GetName() == iName )
+        {
+            mEditor->SetComponent( mEditor->SelectableComponents()[i] );
+        }
+    }
+    return FReply::Handled();
 }
 
 void
@@ -254,28 +293,24 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged(const FAssetD
     }
 }
 
-FReply
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged(const FString iName)
+void
+FOdysseyViewportDrawingEditorTextureSelectorTab::OnTextureChanged(const FAssetData& iAssetData)
 {
-    UE_LOG(LogTemp, Display, TEXT("MeshChanged"));
+    UTexture2D* texture = Cast<UTexture2D>(iAssetData.GetAsset());
 
-    if( mEditor->Component()->GetName() == iName ) return FReply::Handled();
-
-    for( int i = 0; i < mEditor->SelectableComponents().Num(); i++ )
+    if ( texture )
     {
-        if( mEditor->SelectableComponents()[i]->GetName() == iName )
+        //check if texture is already edited by an other editor
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        if (texture != mEditor->Texture() && AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
         {
-            mEditor->SetComponent( mEditor->SelectableComponents()[i] );
+            FText Title = LOCTEXT("TitleSelectedTextureAlreadyOpenedTitle", "Selected Texture Already Opened");
+            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SelectedTextureAlreadyOpened", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), &Title);
+            return;
         }
-    }
-    return FReply::Handled();
-}
 
-ECheckBoxState
-FOdysseyViewportDrawingEditorTextureSelectorTab::GetMeshComponentCheckState(const FString iName)
-{
-    FString string = mEditor->Component() ? mEditor->Component()->GetName() : FString();
-    return ( string == iName ? ECheckBoxState::Checked : ECheckBoxState::Unchecked );
+        mEditor->SetTexture( texture );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

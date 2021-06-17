@@ -28,17 +28,18 @@ protected:
 
 protected:
     // Widget Getters
-    FString PaintTexturePath() const;
+    FString PaintActorPath() const;
     FString PaintMaterialPath() const;
-    bool ShouldFilterTextureAsset(const FAssetData& iAssetData);
+    FString PaintTexturePath() const;
     bool ShouldFilterMaterialAsset(const FAssetData& iAssetData) const;
+    bool ShouldFilterTextureAsset(const FAssetData& iAssetData) const;
 
 protected:
     // Event Listeners
-    void OnTextureChanged(const FAssetData& iAssetData);
-    void OnMaterialChanged(const FAssetData& iAssetData);
+    void OnActorChanged(const FAssetData& iAssetData);
     FReply OnMeshComponentChanged(const FString iName);
-    ECheckBoxState GetMeshComponentCheckState(const FString iName);
+    void OnMaterialChanged(const FAssetData& iAssetData);
+    void OnTextureChanged(const FAssetData& iAssetData);
 
 private:
     FOdysseyViewportDrawingEditor* mEditor;

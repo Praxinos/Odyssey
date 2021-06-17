@@ -20,6 +20,7 @@ FOdysseyViewportDrawingEditor::~FOdysseyViewportDrawingEditor()
 FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
     FOdysseyTexture2DEditor(),
     mGUI(nullptr),
+    mActor(nullptr),
     mComponent(nullptr),
     mMaterial(nullptr)
 {

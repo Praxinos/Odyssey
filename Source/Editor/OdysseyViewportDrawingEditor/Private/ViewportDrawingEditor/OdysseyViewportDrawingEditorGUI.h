@@ -33,25 +33,15 @@ public:
     // GettersFName
 	virtual FName GetLayoutName() override;
     TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab>& GetTextureSelectorTab();
-    EOdysseyViewportSelectedView GetSelectedView();
 
 public:
     // Layout
 	virtual TSharedPtr<SWidget> CreateWidget() override;
-    TSharedPtr<SWidget> CreateTabSelectorWidget();
-    SVerticalBox::FSlot& CreateSection(TSharedPtr<SWidget> iWidget, FText iName);
-
-public:
-    void SetSelectedView(EOdysseyViewportSelectedView iView);
-
-private:
-    EVisibility GetViewVisibility(EOdysseyViewportSelectedView iView) const;
 
 private:
 	FOdysseyViewportDrawingEditor* mEditor;
-    TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab>          mTextureSelectorTab;
+    TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab> mTextureSelectorTab;
 
 private:
-    EOdysseyViewportSelectedView mSelectedView;
-    TSharedPtr<FUICommandList>  mCommandList;
+    TSharedPtr<FUICommandList> mCommandList;
 };
