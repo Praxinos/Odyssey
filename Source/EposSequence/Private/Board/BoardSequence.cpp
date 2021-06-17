@@ -134,7 +134,7 @@ ETrackSupport
 UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
     if( InTrackClass == UMovieSceneCinematicBoardTrack::StaticClass() ||
-        InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() || //TMP
+        InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() || // The board sequence needs to support this track type, otherwise when opening a board sequence, inner shot sequence won't have this track available (even if supported in this class), because during opening the toolkit, all the track editors are not called
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )

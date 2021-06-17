@@ -2,9 +2,9 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
+
 #include "Widgets/SBoxPanel.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "Modules/ModuleManager.h"
 #include "Application/ThrottleManager.h"
 #include "Widgets/Layout/SBox.h"
@@ -13,8 +13,6 @@
 #include "EditorStyleSet.h"
 #include "GameFramework/WorldSettings.h"
 #include "LevelEditorViewport.h"
-#include "SingleCameraCutTrack/SingleCameraCutSection.h"
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SequencerUtilities.h"
 #include "Editor.h"
 #include "ActorEditorUtils.h"
@@ -24,6 +22,11 @@
 #include "MovieSceneObjectBindingIDPicker.h"
 #include "MovieSceneToolHelpers.h"
 #include "DragAndDrop/ActorDragDropGraphEdOp.h"
+
+#include "Shot/ShotSequence.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "SingleCameraCutTrack/SingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "FSingleCameraCutTrackEditor"
 
@@ -113,7 +116,9 @@ void FSingleCameraCutTrackEditor::BuildAddTrackMenu(FMenuBuilder& MenuBuilder)
         //FSlateIcon(FEditorStyle::GetStyleSetName(), "Sequencer.Tracks.SingleCameraCut"),
         FUIAction(
             FExecuteAction::CreateRaw(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryExecute),
-            FCanExecuteAction::CreateRaw(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryCanExecute)
+            FCanExecuteAction::CreateRaw(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryCanExecute),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateRaw( this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryIsVisible )
         )
     );
 }
@@ -404,7 +409,6 @@ bool FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryCanExecu
     return ((FocusedMovieScene != nullptr) && (FocusedMovieScene->GetCameraCutTrack() == nullptr));
 }
 
-
 void FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryExecute()
 {
     UMovieSceneSingleCameraCutTrack* CameraCutTrack = FindOrCreateSingleCameraCutTrack();
@@ -416,6 +420,13 @@ void FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryExecute(
             GetSequencer()->OnAddTrack(CameraCutTrack, FGuid());
         }
     }
+}
+
+bool FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryIsVisible()
+{
+    UMovieSceneSequence* FocusedSequence = GetSequencer()->GetFocusedMovieSceneSequence();
+
+    return ( ( FocusedSequence != nullptr ) && ( FocusedSequence->IsA<UShotSequence>() ) );
 }
 
 bool FSingleCameraCutTrackEditor::IsCameraPickable(const AActor* const PickableActor)

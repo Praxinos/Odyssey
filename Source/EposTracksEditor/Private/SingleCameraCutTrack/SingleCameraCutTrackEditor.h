@@ -84,6 +84,9 @@ private:
     /** Callback for executing the "Add Camera Cut Track" menu entry. */
     void HandleAddSingleCameraCutTrackMenuEntryExecute();
 
+    /** Callback for determining whether the "Add Camera Cut" menu entry is visible. */
+    bool HandleAddSingleCameraCutTrackMenuEntryIsVisible();
+
     /** Callback for generating the menu of the "Add Camera Cut" combo button. */
     TSharedRef<SWidget> HandleAddSingleCameraCutComboButtonGetMenuContent();
 
