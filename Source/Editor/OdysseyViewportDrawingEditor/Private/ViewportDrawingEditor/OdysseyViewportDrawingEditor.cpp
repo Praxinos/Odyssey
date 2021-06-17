@@ -18,8 +18,9 @@ FOdysseyViewportDrawingEditor::~FOdysseyViewportDrawingEditor()
 }
 
 FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
-	FOdysseyTexture2DEditor(),
-	mGUI(nullptr),
+    FOdysseyTexture2DEditor(),
+    mGUI(nullptr),
+    mComponent(nullptr),
     mMaterial(nullptr)
 {
 }
@@ -130,6 +131,7 @@ FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 
 	if (mComponent)
 	{
+        SelectDefaultMaterial();
 		UpdateSelectableTextures();
 		SelectDefaultTexture();
 	}
@@ -289,6 +291,20 @@ FOdysseyViewportDrawingEditor::UpdateSelectableTextures()
 
 	TSharedPtr<IMeshPaintGeometryAdapter> adapter = mComponentToAdapterMap.FindChecked(mComponent);
 	TexturePaintHelpers::RetrieveTexturesForComponent(mComponent, adapter.Get(), mSelectableTextures);
+}
+
+void
+FOdysseyViewportDrawingEditor::SelectDefaultMaterial()
+{
+    if (!mComponent)
+        SetMaterial(nullptr);
+    else
+    {
+        TArray<UMaterialInterface*> materialsArray;
+        SelectableMaterials( materialsArray );
+        if ( materialsArray.Num() > 0)
+            SetMaterial( materialsArray[0] );
+    }
 }
 
 void

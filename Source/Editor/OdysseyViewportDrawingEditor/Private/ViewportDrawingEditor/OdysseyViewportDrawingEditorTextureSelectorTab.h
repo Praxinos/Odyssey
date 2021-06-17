@@ -20,9 +20,10 @@ public:
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    TSharedRef<SWidget> GenerateMeshSelectorComboBoxItem( TSharedPtr<FString> iItem );
-    void HandleOnSelectionChanged( TSharedPtr<FString> iSelection, ESelectInfo::Type iSelectInfo );
-    TSharedRef<SWidget> CreateWidgetContentMeshSelectorComboBox();
+    TSharedRef<SWidget> OnGetMenuContent();
+    void OnMenuClosed( bool iOpen );
+    TSharedRef<SWidget> GenerateMeshSelectorComboButtonItem( TSharedPtr<FString> iItem );
+    FText CreateTextMeshSelector() const;
     TSharedRef<SWidget> CreateMeshComponentMenuWidget();
 
 protected:
@@ -36,12 +37,12 @@ protected:
     // Event Listeners
     void OnTextureChanged(const FAssetData& iAssetData);
     void OnMaterialChanged(const FAssetData& iAssetData);
-    void OnMeshComponentChanged(const FString iName);
+    FReply OnMeshComponentChanged(const FString iName);
     ECheckBoxState GetMeshComponentCheckState(const FString iName);
 
 private:
     FOdysseyViewportDrawingEditor* mEditor;
-    SVerticalBox::FSlot* mMeshComponentSelectionMenu;
-    TArray<TSharedPtr<FString>> mSComboBoxOptions;
+    TSharedPtr<SVerticalBox> mMeshSelectorVerticalBox;
+    TSharedPtr<SComboButton> mMeshSelectComboButton;
 };
 

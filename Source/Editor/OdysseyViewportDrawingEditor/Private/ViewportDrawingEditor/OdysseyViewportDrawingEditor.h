@@ -84,6 +84,7 @@ private:
 
     void ClearSelectableTextures();
     void UpdateSelectableTextures();
+    void SelectDefaultMaterial();
     void SelectDefaultTexture();
 
 private:
