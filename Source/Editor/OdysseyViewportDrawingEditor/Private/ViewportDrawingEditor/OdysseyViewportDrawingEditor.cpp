@@ -129,10 +129,10 @@ FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 
 	// Change the selected component
 	mComponent = iComponent;
+    SelectDefaultMaterial();
 
 	if (mComponent)
 	{
-        SelectDefaultMaterial();
 		UpdateSelectableTextures();
 		SelectDefaultTexture();
 	}

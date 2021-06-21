@@ -2,8 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Color/SOdysseyColorSliders.h"
+#include "Editor/UnrealEdEngine.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyViewportDrawingEditorTextureSelectorTab.h"
+#include "UnrealEdGlobals.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureSelectorTab"
 
@@ -51,9 +53,6 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                             .AllowedClass(AActor::StaticClass())
                             .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintActorPath)
                             .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged))
-                            .AllowClear(true)
-                            .DisplayUseSelected(true)
-                            .DisplayBrowse(true)
                             .EnableContentPicker(true)
                             .DisplayCompactSize(true)
                             .DisplayThumbnail(true)
@@ -81,8 +80,6 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                             .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath)
                             .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged))
                             .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset))
-                            .AllowClear(true)
-                            .DisplayUseSelected(true)
                             .DisplayBrowse(true)
                             .EnableContentPicker(true)
                             .DisplayCompactSize(true)
@@ -105,8 +102,6 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                                 .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath)
                                 .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnTextureChanged))
                                 .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset))
-                                .AllowClear(true)
-                                .DisplayUseSelected(true)
                                 .DisplayBrowse(true)
                                 .EnableContentPicker(true)
                                 .DisplayCompactSize(true)
@@ -262,7 +257,8 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged(const FAssetData
 
     if ( actor )
     {
-        mEditor->SetActor( actor );
+        GEditor->SelectNone( false, true, false );
+        GUnrealEd->SelectActor(actor, true, true, true);
     }
 }
 
@@ -291,6 +287,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged(const FAssetD
     {
         mEditor->SetMaterial( material );
     }
+    
 }
 
 void
