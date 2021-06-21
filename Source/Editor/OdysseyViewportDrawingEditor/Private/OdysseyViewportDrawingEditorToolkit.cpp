@@ -20,4 +20,13 @@ FText FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 	return LOCTEXT("ToolkitName", "Odyssey Mesh Paint");
 }
 
+/*
+void 
+FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames(TArray<FName>& PaletteNames) const
+{
+    PaletteNames.Add( FName( "MyTest" ));
+}*/
+
+
+
 #undef LOCTEXT_NAMESPACE // "OdysseyViewportDrawingEditorToolkit"

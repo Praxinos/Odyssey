@@ -10,6 +10,9 @@
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "OdysseyViewportDrawingEditorPainter.h"
 
+#include "UObject/UObjectGlobals.h"
+#include "Editor/EditorPerProjectUserSettings.h"
+
 #define LOCTEXT_NAMESPACE "FOdysseyViewportDrawingEditorEdMode"
 
 const FEditorModeID FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId = TEXT("EM_OdysseyViewportDrawingEditorEdMode");
@@ -100,6 +103,10 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     mViewportDrawingEditorPainter->Initialize();
     //mViewportDrawingEditorPainter->GetController()->EdModeEnter();
 	IMeshPaintEdMode::Enter();
+
+    //GetMutableDefault<UEditorPerProjectUserSettings>();
+
+    //GetModeManager()->MakeModeToolbarTab();
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()

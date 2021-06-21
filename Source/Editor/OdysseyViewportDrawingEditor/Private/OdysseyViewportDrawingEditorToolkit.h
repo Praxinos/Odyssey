@@ -15,4 +15,7 @@ public:
 	/** IToolkit interface */
 	virtual FName GetToolkitFName() const override;
 	virtual FText GetBaseToolkitName() const override;
+
+    //If we fill the array with names, a mode toolbar will pop in our edMode
+    //virtual void GetToolPaletteNames(TArray<FName>& PaletteNames) const override;
 };
