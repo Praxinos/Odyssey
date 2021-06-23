@@ -4,6 +4,7 @@
 #include "EposSequenceEditorModule.h"
 
 #include "AssetToolsModule.h"
+#include "Interfaces/IPluginManager.h" //PATCH
 #include "ISequencerModule.h"
 #include "ISettingsModule.h"
 #include "LevelEditor.h"
@@ -197,6 +198,12 @@ FEposSequenceEditorModule::RegisterSettings()
         return;
 
     mSequencerSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequencerEditor" ) ); // May be initialized via Config directory.
+
+    //PATCH: Should be done AUTOMATICALLY via EditorPerProjectUserSettings.ini config file, but doesn't work in 5.0
+    TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
+    FString PluginConfigDir = epos_plugin->GetBaseDir() / TEXT( "Config/" );
+    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "EditorPerProjectUserSettings.ini" ) ) );
+    //~
 
     SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposSequencerEditor" /* Name used inside toolkit UniqueName */,
                                         LOCTEXT( "EposSequencerEditorSettingsName", "Epos Sequencer Editor" ),

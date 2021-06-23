@@ -8,4 +8,6 @@
 UEposMovieSceneSequence::UEposMovieSceneSequence(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
+    //PATCH: Should be done via Engine.ini config file, but doesn't work in 5.0
+    DefaultCompletionMode = EMovieSceneCompletionMode::RestoreState;
 }
