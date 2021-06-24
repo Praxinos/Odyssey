@@ -5,6 +5,14 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyModeToolkit"
 
+/////////////////////////////////////////////////////
+// FOdysseyModeToolkit
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+FOdysseyModeToolkit::~FOdysseyModeToolkit()
+{
+}
+
 FOdysseyModeToolkit::FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode)
 	: TOdysseyToolkit<FModeToolkit>(iAppIdentifier, iEditor)
 	, mEditorMode(iEditorMode)
@@ -75,6 +83,20 @@ FOdysseyModeToolkit::IsPrimaryEditor() const
 }
 
 void
+FOdysseyModeToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
+{
+    FModeToolkit::RegisterTabSpawners( iTabManager );
+    WorkspaceMenuCategory = mEditor->RegisterTabSpawners( iTabManager );
+}
+
+void
+FOdysseyModeToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
+{
+    FModeToolkit::UnregisterTabSpawners( iTabManager );
+	mEditor->UnregisterTabSpawners(iTabManager);
+}
+
+void
 FOdysseyModeToolkit::InvokeTab(const struct FTabId& TabId)
 {
     //---
@@ -103,5 +125,6 @@ FOdysseyModeToolkit::RemoveEditingAsset(UObject* Asset)
 {
     //---
 }
+
 
 #undef LOCTEXT_NAMESPACE // "OdysseyModeToolkit"

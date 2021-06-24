@@ -35,6 +35,12 @@ FOdysseyViewportDrawingEditorGUI::CreateTabs()
     mMasterTab->Init();
 }
 
+TSharedRef<FTabManager::FSplitter>
+FOdysseyViewportDrawingEditorGUI::CreateMainSection()
+{
+	return FOdysseyTexture2DEditorGUI::CreateMainSection();
+}
+
 void
 FOdysseyViewportDrawingEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 {

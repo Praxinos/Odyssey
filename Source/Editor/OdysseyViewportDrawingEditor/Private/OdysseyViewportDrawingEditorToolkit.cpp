@@ -20,16 +20,6 @@ FText FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 	return LOCTEXT("ToolkitName", "Odyssey Mesh Paint");
 }
 
-void FOdysseyViewportDrawingEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
-{
-
-}
-
-void FOdysseyViewportDrawingEditorToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager)
-{
-
-}
-
 /*
 void 
 FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames(TArray<FName>& PaletteNames) const

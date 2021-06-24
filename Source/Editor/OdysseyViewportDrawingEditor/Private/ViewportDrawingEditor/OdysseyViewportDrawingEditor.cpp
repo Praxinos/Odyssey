@@ -186,6 +186,15 @@ FOdysseyViewportDrawingEditor::OnPostTextureChange()
     FOdysseyTexture2DEditor::OnPostTextureChange();
 }
 
+TSharedPtr<FWorkspaceItem>
+FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
+{
+    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"));
+    TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
+    GetGUI()->RegisterTabSpawners( iTabManager, workspaceMenuCategoryRef );
+    return workspaceMenuCategory;
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Private Methods
 

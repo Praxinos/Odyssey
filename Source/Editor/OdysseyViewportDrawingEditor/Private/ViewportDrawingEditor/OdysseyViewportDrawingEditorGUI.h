@@ -27,6 +27,7 @@ public:
 public:
     // Initialization
     virtual void CreateTabs() override;
+    TSharedRef<FTabManager::FSplitter> CreateMainSection() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:

@@ -30,7 +30,7 @@ public:
 
 protected:
 	// Internal widget creation
-	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection();
+	virtual TSharedRef<FTabManager::FSplitter>	CreateMainSection() override;
 
 private:
 	FOdysseyFlipbookEditor*						mEditor;

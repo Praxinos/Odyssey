@@ -14,9 +14,12 @@ class ODYSSEYEDITOR_API FOdysseyModeToolkit
       public IAssetEditorInstance
 {
 public:
-	FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode);
-	
-	virtual void Initialize() override;
+    // Construction / Destruction
+    virtual ~FOdysseyModeToolkit();
+    FOdysseyModeToolkit(const FName& iAppIdentifier, TSharedPtr<FOdysseyEditor> iEditor, class FEdMode* iEditorMode);
+
+public:
+    virtual void Initialize() override;
 
 	/** IToolkit interface */
 	virtual class FEdMode* GetEditorMode() const override;
@@ -25,17 +28,20 @@ public:
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
 
+    virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
+    virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
+
 public:
-    //IAssetEditorInstance
-	virtual FName GetEditorName() const;
-	virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr);
-	virtual bool CloseWindow();
-	virtual bool IsPrimaryEditor() const;
-	virtual void InvokeTab(const struct FTabId& TabId);
-	virtual FName GetToolbarTabId() const;
-	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager();
-	virtual double GetLastActivationTime();
-	virtual void RemoveEditingAsset(UObject* Asset);
+    //from IAssetEditorInstance
+	virtual FName GetEditorName() const override;
+	virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr) override;
+	virtual bool CloseWindow() override;
+	virtual bool IsPrimaryEditor() const override;
+	virtual void InvokeTab(const struct FTabId& TabId) override;
+	virtual FName GetToolbarTabId() const override;
+	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
+	virtual double GetLastActivationTime() override;
+	virtual void RemoveEditingAsset(UObject* Asset) override;
 
 private:
 	/** Owning editor mode */
