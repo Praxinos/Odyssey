@@ -6,7 +6,7 @@
 #include "OdysseyTexture2DEditorGUI.h"
 
 class FOdysseyViewportDrawingEditor;
-class FOdysseyViewportDrawingEditorTextureSelectorTab;
+class FOdysseyViewportDrawingEditorMasterTab;
 
 enum class EOdysseyViewportSelectedView: uint8
 {
@@ -32,7 +32,7 @@ public:
 public:
     // GettersFName
 	virtual FName GetLayoutName() override;
-    TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab>& GetTextureSelectorTab();
+    TSharedPtr<FOdysseyViewportDrawingEditorMasterTab>& GetMasterTab();
 
 public:
     // Layout
@@ -40,7 +40,7 @@ public:
 
 private:
 	FOdysseyViewportDrawingEditor* mEditor;
-    TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab> mTextureSelectorTab;
+    TSharedPtr<FOdysseyViewportDrawingEditorMasterTab> mMasterTab;
 
 private:
     TSharedPtr<FUICommandList> mCommandList;

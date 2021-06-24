@@ -5,6 +5,7 @@
 #include "EdMode.h"
 #include "EditorModeManager.h"
 #include "PhysicsEngine/PhysicsSettings.h"
+#include "Widgets/Docking/SDockableTab.h" 
 
 #include "OdysseyViewportDrawingEditor.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
@@ -103,10 +104,6 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     mViewportDrawingEditorPainter->Initialize();
     //mViewportDrawingEditorPainter->GetController()->EdModeEnter();
 	IMeshPaintEdMode::Enter();
-
-    //GetMutableDefault<UEditorPerProjectUserSettings>();
-
-    //GetModeManager()->MakeModeToolbarTab();
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()

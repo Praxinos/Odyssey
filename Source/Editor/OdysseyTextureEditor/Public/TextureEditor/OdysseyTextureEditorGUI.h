@@ -17,7 +17,6 @@
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 #include "OdysseyTextureEditorTopTab.h"
 
-class SDockableTab;
 class STextBlock;
 class SOdysseySurfaceViewport;
 class FOdysseyTextureEditor;

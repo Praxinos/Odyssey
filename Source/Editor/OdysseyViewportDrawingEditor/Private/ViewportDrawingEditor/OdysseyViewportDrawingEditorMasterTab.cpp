@@ -1,25 +1,26 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
+#include "OdysseyViewportDrawingEditorMasterTab.h"
+
 #include "Color/SOdysseyColorSliders.h"
 #include "Editor/UnrealEdEngine.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyViewportDrawingEditorTextureSelectorTab.h"
 #include "UnrealEdGlobals.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorTextureSelectorTab"
+#define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMasterTab"
 
 /////////////////////////////////////////////////////
-// FOdysseyViewportDrawingEditorTextureSelectorTab
+// FOdysseyViewportDrawingEditorMasterTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyViewportDrawingEditorTextureSelectorTab::~FOdysseyViewportDrawingEditorTextureSelectorTab()
+FOdysseyViewportDrawingEditorMasterTab::~FOdysseyViewportDrawingEditorMasterTab()
 {
 }
 
-FOdysseyViewportDrawingEditorTextureSelectorTab::FOdysseyViewportDrawingEditorTextureSelectorTab(FOdysseyViewportDrawingEditor* iEditor)
+FOdysseyViewportDrawingEditorMasterTab::FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditor* iEditor)
     : FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TextureSelector"),
-                            LOCTEXT( "OdysseyViewportDrawingEditorTextureSelectorTab", "Texture Selector" ),
+                            LOCTEXT( "OdysseyViewportDrawingEditorMasterTab", "Texture Selector" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.TextureSelector_16" ))
     , mEditor(iEditor)
 {
@@ -29,7 +30,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::FOdysseyViewportDrawingEditorTe
 //--------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
-FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
+FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
 {
     return
         SNew( SScrollBox )
@@ -51,8 +52,8 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                         [
                             SNew(SObjectPropertyEntryBox)
                             .AllowedClass(AActor::StaticClass())
-                            .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintActorPath)
-                            .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged))
+                            .ObjectPath(this, &FOdysseyViewportDrawingEditorMasterTab::PaintActorPath)
+                            .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::OnActorChanged))
                             .EnableContentPicker(true)
                             .DisplayCompactSize(true)
                             .DisplayThumbnail(true)
@@ -77,9 +78,9 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                         [
                             SNew(SObjectPropertyEntryBox)
                             .AllowedClass(UMaterial::StaticClass())
-                            .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath)
-                            .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged))
-                            .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset))
+                            .ObjectPath(this, &FOdysseyViewportDrawingEditorMasterTab::PaintMaterialPath)
+                            .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged))
+                            .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset))
                             .DisplayBrowse(true)
                             .EnableContentPicker(true)
                             .DisplayCompactSize(true)
@@ -99,9 +100,9 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
                         [
                             SNew(SObjectPropertyEntryBox)
                                 .AllowedClass(UTexture2D::StaticClass())
-                                .ObjectPath(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath)
-                                .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnTextureChanged))
-                                .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset))
+                                .ObjectPath(this, &FOdysseyViewportDrawingEditorMasterTab::PaintTexturePath)
+                                .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::OnTextureChanged))
+                                .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset))
                                 .DisplayBrowse(true)
                                 .EnableContentPicker(true)
                                 .DisplayCompactSize(true)
@@ -112,7 +113,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateWidget()
 }
 
 TSharedRef<SWidget>
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnGetMenuContent()
+FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent()
 {
     mMeshSelectorVerticalBox = SNew( SVerticalBox );
 
@@ -126,7 +127,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnGetMenuContent()
                     .ButtonStyle( FEditorStyle::Get(), "HoverHintOnly" )
                     .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
                     .Text( FText::FromString( mEditor->SelectableComponents()[i]->GetName() ) )
-                    .OnClicked( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged, mEditor->SelectableComponents()[i]->GetName() )
+                    .OnClicked( this, &FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged, mEditor->SelectableComponents()[i]->GetName() )
             ];
     }
 
@@ -134,7 +135,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnGetMenuContent()
 }
 
 void
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnMenuClosed( bool iOpen)
+FOdysseyViewportDrawingEditorMasterTab::OnMenuClosed( bool iOpen)
 {
     if ( iOpen == false )
         mMeshSelectComboButton->SetMenuContent(SNullWidget::NullWidget);
@@ -142,7 +143,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnMenuClosed( bool iOpen)
 
 
 TSharedRef<SWidget>
-FOdysseyViewportDrawingEditorTextureSelectorTab::GenerateMeshSelectorComboButtonItem( TSharedPtr<FString> iItem )
+FOdysseyViewportDrawingEditorMasterTab::GenerateMeshSelectorComboButtonItem( TSharedPtr<FString> iItem )
 {
     return SNew( STextBlock )
                 .Text( FText::FromString( *( iItem.Get() ) ) )
@@ -151,7 +152,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::GenerateMeshSelectorComboButton
 }
 
 FText
-FOdysseyViewportDrawingEditorTextureSelectorTab::CreateTextMeshSelector() const
+FOdysseyViewportDrawingEditorMasterTab::CreateTextMeshSelector() const
 {
     if( mEditor->Component() )
     {
@@ -161,13 +162,13 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::CreateTextMeshSelector() const
 }
 
 TSharedRef<SWidget>
-FOdysseyViewportDrawingEditorTextureSelectorTab::CreateMeshComponentMenuWidget()
+FOdysseyViewportDrawingEditorMasterTab::CreateMeshComponentMenuWidget()
 {
 mMeshSelectComboButton = SNew(SComboButton)
         .ButtonStyle( FEditorStyle::Get(), "PropertyEditor.AssetComboStyle" )
         .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
-        .OnGetMenuContent( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnGetMenuContent )
-        .OnMenuOpenChanged( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::OnMenuClosed )
+        .OnGetMenuContent( this, &FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent )
+        .OnMenuOpenChanged( this, &FOdysseyViewportDrawingEditorMasterTab::OnMenuClosed )
         .ContentPadding(2.0f)
         .ButtonContent()
         [
@@ -177,7 +178,7 @@ mMeshSelectComboButton = SNew(SComboButton)
                 .VAlign(VAlign_Center)
                 [
                     SNew( STextBlock )
-                       .Text( this, &FOdysseyViewportDrawingEditorTextureSelectorTab::CreateTextMeshSelector )
+                       .Text( this, &FOdysseyViewportDrawingEditorMasterTab::CreateTextMeshSelector )
                        .TextStyle( FEditorStyle::Get(), "PropertyEditor.AssetClass" )
                        .Font( FEditorStyle::GetFontStyle( "PropertyWindow.NormalFont" ) )
                 ]
@@ -207,7 +208,7 @@ mMeshSelectComboButton = SNew(SComboButton)
 //----------------------------------------------------------------------- Widget Getters
 
 FString
-FOdysseyViewportDrawingEditorTextureSelectorTab::PaintActorPath() const
+FOdysseyViewportDrawingEditorMasterTab::PaintActorPath() const
 {
     if ( !mEditor->Actor() )
         return FString();
@@ -216,7 +217,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintActorPath() const
 }
 
 FString
-FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath() const
+FOdysseyViewportDrawingEditorMasterTab::PaintMaterialPath() const
 {
     if ( !mEditor->Material() )
         return FString();
@@ -225,7 +226,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintMaterialPath() const
 }
 
 FString
-FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath() const
+FOdysseyViewportDrawingEditorMasterTab::PaintTexturePath() const
 {
     if( !mEditor->Texture() )
         return FString();
@@ -234,7 +235,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::PaintTexturePath() const
 }
 
 bool
-FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset(const FAssetData& iAssetData) const
+FOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset(const FAssetData& iAssetData) const
 {
     TArray<UMaterialInterface*> materialsArray;
     mEditor->SelectableMaterials( materialsArray );
@@ -242,7 +243,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterMaterialAsset(const
 }
 
 bool
-FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
+FOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
 {
     return !(mEditor->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return iTexture.Texture->GetFullName() == iAssetData.GetFullName(); }));
 }
@@ -251,7 +252,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::ShouldFilterTextureAsset(const 
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged(const FAssetData& iAssetData)
+FOdysseyViewportDrawingEditorMasterTab::OnActorChanged(const FAssetData& iAssetData)
 {
     AActor* actor = Cast<AActor>(iAssetData.GetAsset());
 
@@ -264,7 +265,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnActorChanged(const FAssetData
 
 
 FReply
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged(const FString iName)
+FOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged(const FString iName)
 {
     if( mEditor->Component()->GetName() == iName ) return FReply::Handled();
 
@@ -279,7 +280,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnMeshComponentChanged(const FS
 }
 
 void
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged(const FAssetData& iAssetData)
+FOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged(const FAssetData& iAssetData)
 {
     UMaterialInterface* material = Cast<UMaterialInterface>(iAssetData.GetAsset());
 
@@ -291,7 +292,7 @@ FOdysseyViewportDrawingEditorTextureSelectorTab::OnMaterialChanged(const FAssetD
 }
 
 void
-FOdysseyViewportDrawingEditorTextureSelectorTab::OnTextureChanged(const FAssetData& iAssetData)
+FOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAssetData)
 {
     UTexture2D* texture = Cast<UTexture2D>(iAssetData.GetAsset());
 

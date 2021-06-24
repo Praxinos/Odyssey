@@ -3,7 +3,7 @@
 
 #include "OdysseyViewportDrawingEditorGUI.h"
 
-#include "OdysseyViewportDrawingEditorTextureSelectorTab.h"
+#include "OdysseyViewportDrawingEditorMasterTab.h"
 #include "Widgets/Layout/SExpandableArea.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorToolkit"
@@ -31,8 +31,8 @@ FOdysseyViewportDrawingEditorGUI::CreateTabs()
 {
 	FOdysseyTexture2DEditorGUI::CreateTabs();
 
-	//ADD NEW TABS
-	ODYSSEY_ADD_TAB(mTextureSelectorTab, FOdysseyViewportDrawingEditorTextureSelectorTab, mEditor);
+    mMasterTab = MakeShareable(new FOdysseyViewportDrawingEditorMasterTab(mEditor));
+    mMasterTab->Init();
 }
 
 void
@@ -52,10 +52,10 @@ FOdysseyViewportDrawingEditorGUI::GetLayoutName()
 }
 
 
-TSharedPtr<FOdysseyViewportDrawingEditorTextureSelectorTab>&
-FOdysseyViewportDrawingEditorGUI::GetTextureSelectorTab()
+TSharedPtr<FOdysseyViewportDrawingEditorMasterTab>&
+FOdysseyViewportDrawingEditorGUI::GetMasterTab()
 {
-    return mTextureSelectorTab;
+    return mMasterTab;
 }
 
 //--------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ FOdysseyViewportDrawingEditorGUI::CreateWidget()
             .Padding(StandardPadding)
 	        .AutoHeight()
 	        [
-                GetTextureSelectorTab()->Widget()->AsShared()
+                GetMasterTab()->Widget()->AsShared()
             ]
         ];
 }

@@ -9,13 +9,13 @@
 
 class FOdysseyViewportDrawingEditor;
 
-class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorTextureSelectorTab :
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorMasterTab :
 	public FOdysseyEditorTab
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyViewportDrawingEditorTextureSelectorTab();
-    FOdysseyViewportDrawingEditorTextureSelectorTab(FOdysseyViewportDrawingEditor* iEditor);
+    virtual ~FOdysseyViewportDrawingEditorMasterTab();
+    FOdysseyViewportDrawingEditorMasterTab(FOdysseyViewportDrawingEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface

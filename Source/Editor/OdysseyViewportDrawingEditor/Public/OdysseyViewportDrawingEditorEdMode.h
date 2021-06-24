@@ -26,7 +26,7 @@ public:
 	virtual void Initialize() override;
 	virtual void Enter() override;
 	virtual void Exit() override;
-	virtual TSharedPtr< FModeToolkit> GetToolkit() override;
+	virtual TSharedPtr< FModeToolkit > GetToolkit() override;
 
 	// IMeshPaintEdMode interface.
 	virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent) override;
