@@ -192,6 +192,11 @@ FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabMa
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"));
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
     GetGUI()->RegisterTabSpawners( iTabManager, workspaceMenuCategoryRef );
+
+    //iTabManager->SpawnTab( FTabId( GetGUI()->GetBrushExposedParametersTab()->ID() ), nullptr );
+    iTabManager->TryInvokeTab(FTabId(GetGUI()->GetBrushExposedParametersTab()->ID()));
+    iTabManager->CloseAllAreas();
+
     return workspaceMenuCategory;
 }
 
