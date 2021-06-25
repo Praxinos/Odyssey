@@ -53,7 +53,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "OdysseyEditor",
                 "OdysseyPainterEditor",
                 "OdysseyTexture",
-				"OdysseyTextureEditor",
+                "OdysseyTextureEditor",
                 "OdysseyTexture2DEditor",
                 "OdysseyImaging",
                 "OdysseyTransaction",
@@ -69,6 +69,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "ViewportDrawingEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
+                Path.Combine(ModuleDirectory, "Private", "ModeToolbar"),
             }
         );
 

@@ -4,53 +4,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/StaticMesh.h"
-#include "Styling/SlateTypes.h"
-#include "Color/SOdysseyColorSlider.h"
 
-/**
- * The Model of the MeshSelector
- */
-class ODYSSEYWIDGETS_API FOdysseyViewportDrawingEditorModeToolbar :  public TSharedFromThis<FOdysseyMeshSelector>
+class FOdysseyViewportDrawingEditorGUI;
+
+struct TabState
 {
-
-    friend class SOdysseyMeshSelector; // For the access to private callbacks
-
+    FName mName;
+    bool bIsOpen;
+};
+/**
+ * The Model of the ModeToolbar
+ */
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorModeToolbar :  public TSharedFromThis<FOdysseyViewportDrawingEditorModeToolbar>
+{
 public:
     // Construction / Destruction
-    FOdysseyMeshSelector();
-    ~FOdysseyMeshSelector();
+    FOdysseyViewportDrawingEditorModeToolbar( TSharedRef<FTabManager> iTabManage, FOdysseyViewportDrawingEditorGUI* iGUI);
+    ~FOdysseyViewportDrawingEditorModeToolbar();
 
 public:
     //Getter / Setter
-    UStaticMesh* GetCurrentMesh() const;
-    void SetCurrentMesh( UStaticMesh* inCurrentMesh );
-    int GetCurrentLOD() const;
-    int GetCurrentUVChannel() const;
-    int GetMaxLOD() const;
-    int GetMaxUVChannelForCurrentLOD();
-    FLinearColor GetMeshColor() const;
 
-private:
+public:
     //CallBacks
-    void SetMeshColor( FLinearColor InNewColor );
-    void SetCurrentLOD(int InNewLOD);
-    void SetCurrentUVChannel(int InNewUV);
-    ECheckBoxState GetLODCheckState(int InLOD);
-    ECheckBoxState GetUVChannelCheckState( int InUVChannel );
-
+    void ToggleLayerStackTab();
 
 private:
-    // Private data
-    UStaticMesh* CurrentMesh;
-
-    /** The Level Of Detail we draw the UV Map of*/
-    int CurrentLOD;
-
-    /** The UV we currentlty wish to display */
-    int CurrentUV;
-
-    /** The HUD color of the Mesh */
-    FLinearColor MeshColor;
-
+    TSharedRef<FTabManager> mTabManager;
+    FOdysseyViewportDrawingEditorGUI* mGUI;
+    TArray<TabState> mTabStates;
 };

@@ -4,7 +4,7 @@
 #include "OdysseyViewportDrawingEditor.h"
 
 #include "OdysseyViewportDrawingEditorGUI.h"
-
+#include "FOdysseyViewportDrawingEditorModeToolbar.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditor"
 
@@ -20,6 +20,7 @@ FOdysseyViewportDrawingEditor::~FOdysseyViewportDrawingEditor()
 FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
     FOdysseyTexture2DEditor(),
     mGUI(nullptr),
+    mToolbar(nullptr),
     mActor(nullptr),
     mComponent(nullptr),
     mMaterial(nullptr)
@@ -86,6 +87,12 @@ const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>&
 FOdysseyViewportDrawingEditor::ComponentToAdapterMap() const
 {
 	return mComponentToAdapterMap;
+}
+
+FOdysseyViewportDrawingEditorModeToolbar*
+FOdysseyViewportDrawingEditor::GetToolbar() const
+{
+    return mToolbar.Get();
 }
 
 //--------------------------------------------------------------------------------------
@@ -192,21 +199,9 @@ FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabMa
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"));
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
     GetGUI()->RegisterTabSpawners( iTabManager, workspaceMenuCategoryRef );
-
-    iTabManager->TryInvokeTab(FTabId(GetGUI()->GetBrushExposedParametersTab()->ID()));
+    mToolbar = MakeShareable( new FOdysseyViewportDrawingEditorModeToolbar( iTabManager, GetGUI() ) );
 
     return workspaceMenuCategory;
-}
-
-void
-FOdysseyViewportDrawingEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
-{
-    TSharedPtr< SDockTab > tab2 = iTabManager->FindExistingLiveTab(FTabId(GetGUI()->GetBrushExposedParametersTab()->ID()));
-
-    if (tab2.IsValid())
-        tab2->RequestCloseTab();
-
-    return FOdysseyTexture2DEditor::UnregisterTabSpawners(iTabManager);
 }
 
 //--------------------------------------------------------------------------------------

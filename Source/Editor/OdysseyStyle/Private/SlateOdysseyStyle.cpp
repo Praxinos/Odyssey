@@ -200,8 +200,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Tools64", new IMAGE_BRUSH( "PainterEditor/tools_64", mIcon64x64 ) );
     Set( "PainterEditor.Tools16", new IMAGE_BRUSH( "PainterEditor/tools_16", mIcon16x16 ) );
 
-    Set( "TextureEditor.Layers64", new IMAGE_BRUSH( "PainterEditor/layers_64", mIcon64x64 ) );
-    Set( "TextureEditor.Layers16", new IMAGE_BRUSH( "PainterEditor/layers_16", mIcon16x16 ) );
+    Set( "PainterEditor.Layers64", new IMAGE_BRUSH( "PainterEditor/layers_64", mIcon64x64 ) );
+    Set( "PainterEditor.Layers16", new IMAGE_BRUSH( "PainterEditor/layers_16", mIcon16x16 ) );
 
     Set( "PainterEditor.ColorSliders64", new IMAGE_BRUSH( "PainterEditor/color_sliders_64", mIcon64x64 ) );
     Set( "PainterEditor.ColorSliders16", new IMAGE_BRUSH( "PainterEditor/color_sliders_16", mIcon16x16 ) );

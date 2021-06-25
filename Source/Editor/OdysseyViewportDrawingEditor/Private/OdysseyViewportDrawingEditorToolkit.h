@@ -17,5 +17,9 @@ public:
 	virtual FText GetBaseToolkitName() const override;
 
     //If we fill the array with names, a mode toolbar will pop in our edMode
-    //virtual void GetToolPaletteNames(TArray<FName>& PaletteNames) const override;
+    virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
+    virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
+
+private:
+    FOdysseyViewportDrawingEditorModeToolbar* mToolbar;
 };

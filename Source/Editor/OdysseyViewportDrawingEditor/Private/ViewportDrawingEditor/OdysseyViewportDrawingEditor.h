@@ -9,6 +9,7 @@
 struct FPaintableTexture;
 struct FInstanceTexturePaintSettings;
 class IMeshPaintGeometryAdapter;
+class FOdysseyViewportDrawingEditorModeToolbar;
 
 /** Struct representing the selected settings for a mesh
  *	It allow us to remember which settings were selected when we come back to a previously selected actor
@@ -56,7 +57,7 @@ public:
     void  SelectableMaterials( TArray<UMaterialInterface*>& ioSelectedMaterials ) const;
     const TArray<FPaintableTexture>& SelectableTextures() const;
     const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
-    
+    FOdysseyViewportDrawingEditorModeToolbar* GetToolbar() const;
 
 
 public:
@@ -72,7 +73,6 @@ public:
     virtual void OnPreTextureChange() override;
     virtual void OnPostTextureChange() override;
     TSharedPtr<FWorkspaceItem> RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
-    virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
 
 private:
     // Listeners
@@ -91,7 +91,8 @@ private:
 
 
 private:
-	TSharedPtr<FOdysseyViewportDrawingEditorGUI> mGUI;
+    TSharedPtr<FOdysseyViewportDrawingEditorGUI> mGUI;
+    TSharedPtr<FOdysseyViewportDrawingEditorModeToolbar> mToolbar;
     AActor* mActor;
     UMeshComponent* mComponent;
     UMaterialInterface* mMaterial; //Storage purposes only for the GUI -> Get path for it
@@ -102,6 +103,7 @@ private:
 	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap; //ES: I don't know exactly what this is
 
     //This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected)
-	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap; 
+	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
+
 };
 
