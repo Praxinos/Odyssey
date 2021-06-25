@@ -193,11 +193,20 @@ FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabMa
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
     GetGUI()->RegisterTabSpawners( iTabManager, workspaceMenuCategoryRef );
 
-    //iTabManager->SpawnTab( FTabId( GetGUI()->GetBrushExposedParametersTab()->ID() ), nullptr );
     iTabManager->TryInvokeTab(FTabId(GetGUI()->GetBrushExposedParametersTab()->ID()));
-    iTabManager->CloseAllAreas();
 
     return workspaceMenuCategory;
+}
+
+void
+FOdysseyViewportDrawingEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
+{
+    TSharedPtr< SDockTab > tab2 = iTabManager->FindExistingLiveTab(FTabId(GetGUI()->GetBrushExposedParametersTab()->ID()));
+
+    if (tab2.IsValid())
+        tab2->RequestCloseTab();
+
+    return FOdysseyTexture2DEditor::UnregisterTabSpawners(iTabManager);
 }
 
 //--------------------------------------------------------------------------------------
