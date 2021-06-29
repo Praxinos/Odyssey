@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
+#include "Tools/EposSequenceTools.h"
 
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
@@ -16,10 +16,66 @@
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
 
-#define LOCTEXT_NAMESPACE "CinematicBoardTrackHelpers"
+#define LOCTEXT_NAMESPACE "EposSequenceTools_Board"
 
 // Same functions as in MovieSceneToolHelpers.cpp
 // Convert ULevelSequence/UMovieSceneCinematicShotSection to UBoardSequence/UMovieSceneCinematicBoardSection
+
+//static
+UMovieSceneCinematicBoardTrack*
+BoardSequenceTools::FindCinematicBoardTrack( ISequencer* iSequencer )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return nullptr;
+
+    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
+    if( !focusedMovieScene )
+        return nullptr;
+
+    if( focusedMovieScene->IsReadOnly() )
+        return nullptr;
+
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !boardTrack )
+        return nullptr;
+
+    return boardTrack;
+}
+
+//static
+UMovieSceneCinematicBoardTrack*
+BoardSequenceTools::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    if( !sequence )
+        return nullptr;
+
+    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
+    if( !focusedMovieScene )
+        return nullptr;
+
+    if( focusedMovieScene->IsReadOnly() )
+    {
+        return nullptr;
+    }
+
+    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( boardTrack != nullptr )
+    {
+        return boardTrack;
+    }
+
+    const FScopedTransaction transaction( LOCTEXT( "AddCinematicBoardTrack_Transaction", "Add Board Track" ) );
+    focusedMovieScene->Modify();
+
+    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
+    ensure( newTrack );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+
+    return newTrack;
+}
 
 //---
 
@@ -70,7 +126,7 @@ FindMostReleventSubsequencePath( TArray<UMovieSceneSection*> iSections )
 
 //static
 FString
-CinematicBoardTrackHelpers::GenerateNewSequencePath( UMovieScene* iRootMovieScene, UMovieScene* iFocusedMovieScene, FString& ioNewSequenceName )
+CinematicBoardTrackTools::GenerateNewSequencePath( UMovieScene* iRootMovieScene, UMovieScene* iFocusedMovieScene, FString& ioNewSequenceName )
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
@@ -145,7 +201,7 @@ CinematicBoardTrackHelpers::GenerateNewSequencePath( UMovieScene* iRootMovieScen
 template<typename SequenceClass>
 //static
 FString
-CinematicBoardTrackHelpers::GenerateNewSectionName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime )
+CinematicBoardTrackTools::GenerateNewSectionName( const TArray<UMovieSceneSection*>& iAllSections, FFrameNumber iTime )
 {
     const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 
@@ -285,68 +341,12 @@ CinematicBoardTrackHelpers::GenerateNewSectionName( const TArray<UMovieSceneSect
 
 //---
 
-//static
-UMovieSceneCinematicBoardTrack*
-CinematicBoardTrackHelpers::FindCinematicBoardTrack( ISequencer* iSequencer )
-{
-    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
-    if( !sequence )
-        return nullptr;
-
-    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
-    if( !focusedMovieScene )
-        return nullptr;
-
-    if( focusedMovieScene->IsReadOnly() )
-        return nullptr;
-
-    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-    if( !boardTrack )
-        return nullptr;
-
-    return boardTrack;
-}
-
-//static
-UMovieSceneCinematicBoardTrack*
-CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
-{
-    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
-    if( !sequence )
-        return nullptr;
-
-    UMovieScene* focusedMovieScene = sequence->GetMovieScene();
-    if( !focusedMovieScene )
-        return nullptr;
-
-    if( focusedMovieScene->IsReadOnly() )
-    {
-        return nullptr;
-    }
-
-    UMovieSceneCinematicBoardTrack* boardTrack = focusedMovieScene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-    if( boardTrack != nullptr )
-    {
-        return boardTrack;
-    }
-
-    const FScopedTransaction transaction( LOCTEXT( "AddCinematicBoardTrack_Transaction", "Add Board Track" ) );
-    focusedMovieScene->Modify();
-
-    auto newTrack = focusedMovieScene->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
-    ensure( newTrack );
-
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-
-    return newTrack;
-}
-
 template<typename SequenceClass>
 //static
 UMovieSceneSubSection*
-CinematicBoardTrackHelpers::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
+CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
 {
-    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
 
     FString newBoardPath;
 
@@ -357,7 +357,7 @@ CinematicBoardTrackHelpers::CreateSequenceInternal( ISequencer* iSequencer, FStr
     }
     else
     {
-        newBoardPath = CinematicBoardTrackHelpers::GenerateNewSequencePath( iSequencer->GetRootMovieSceneSequence()->GetMovieScene(), iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
+        newBoardPath = GenerateNewSequencePath( iSequencer->GetRootMovieSceneSequence()->GetMovieScene(), iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
     }
 
     // Create a new level sequence asset with the appropriate name
@@ -418,14 +418,14 @@ CinematicBoardTrackHelpers::CreateSequenceInternal( ISequencer* iSequencer, FStr
 template<typename SequenceClass>
 //static
 void
-CinematicBoardTrackHelpers::InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     const FScopedTransaction transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
 
-    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
-    FString newBoardName = CinematicBoardTrackHelpers::GenerateNewSectionName<SequenceClass>( boardTrack->GetAllSections(), iFrameNumber );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
+    FString newBoardName = GenerateNewSectionName<SequenceClass>( boardTrack->GetAllSections(), iFrameNumber );
 
-    UMovieSceneSubSection* newBoard = CinematicBoardTrackHelpers::CreateSequenceInternal<SequenceClass>( iSequencer, newBoardName, iFrameNumber );
+    UMovieSceneSubSection* newBoard = CreateSequenceInternal<SequenceClass>( iSequencer, newBoardName, iFrameNumber );
     if( newBoard )
     {
         //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
@@ -441,20 +441,20 @@ CinematicBoardTrackHelpers::InsertSequence( ISequencer* iSequencer, FFrameNumber
 
 //static
 void
-CinematicBoardTrackHelpers::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    CinematicBoardTrackHelpers::InsertSequence<UBoardSequence>( iSequencer, iFrameNumber );
+    InsertSequence<UBoardSequence>( iSequencer, iFrameNumber );
 }
 //static
 void
-CinematicBoardTrackHelpers::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    CinematicBoardTrackHelpers::InsertSequence<UShotSequence>( iSequencer, iFrameNumber );
+    InsertSequence<UShotSequence>( iSequencer, iFrameNumber );
 }
 
 ////static
 //void
-//CinematicBoardTrackHelpers::InsertFiller( ISequencer* iSequencer )
+//CinematicBoardTrackTools::InsertFiller( ISequencer* iSequencer )
 //{
 //    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
 //
@@ -462,7 +462,7 @@ CinematicBoardTrackHelpers::InsertShot( ISequencer* iSequencer, FFrameNumber iFr
 //
 //    FQualifiedFrameTime currentTime = iSequencer->GetLocalTime();
 //
-//    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+//    UMovieSceneCinematicBoardTrack* boardTrack = FindOrCreateCinematicBoardTrack( iSequencer );
 //
 //    int32 duration = ( projectSettings->DefaultDuration * currentTime.Rate ).FrameNumber.Value;
 //
@@ -482,7 +482,7 @@ CinematicBoardTrackHelpers::InsertShot( ISequencer* iSequencer, FFrameNumber iFr
 
 //static
 void
-CinematicBoardTrackHelpers::DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection )
+CinematicBoardTrackTools::DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection )
 {
     UMovieSceneSequence* subsequence = iSection->GetSequence();
     if( !subsequence )
@@ -490,21 +490,21 @@ CinematicBoardTrackHelpers::DuplicateSection( ISequencer* iSequencer, UMovieScen
 
     const FScopedTransaction transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
 
-    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( iSequencer );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
 
     FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
     FString newBoardName;
     if( subsequence->IsA<UBoardSequence>() )
-        newBoardName = CinematicBoardTrackHelpers::GenerateNewSectionName<UBoardSequence>( boardTrack->GetAllSections(), startTime );
+        newBoardName = GenerateNewSectionName<UBoardSequence>( boardTrack->GetAllSections(), startTime );
     else
-        newBoardName = CinematicBoardTrackHelpers::GenerateNewSectionName<UShotSequence>( boardTrack->GetAllSections(), startTime );
+        newBoardName = GenerateNewSectionName<UShotSequence>( boardTrack->GetAllSections(), startTime );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* newBoard;
     if( subsequence->IsA<UBoardSequence>() )
-        newBoard = CinematicBoardTrackHelpers::CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, startTime, iSection );
+        newBoard = CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, startTime, iSection );
     else
-        newBoard = CinematicBoardTrackHelpers::CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, startTime, iSection );
+        newBoard = CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, startTime, iSection );
 
     if( newBoard )
     {

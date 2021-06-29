@@ -8,7 +8,6 @@
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
-#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceEditorCommands.h"
 #include "EposTracksModule.h"

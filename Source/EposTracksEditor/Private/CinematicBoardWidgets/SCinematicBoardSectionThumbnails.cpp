@@ -9,7 +9,7 @@
 #include "Styles/EposTracksEditorStyle.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
-#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionThumbnails"
 
@@ -88,7 +88,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
                                                                        {
                                                                            TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
                                                                            UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackHelpers::InsertBoard( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
+                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
                                                                        } ) ) );
 
     menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-before.label", "New Previous Shot" ),
@@ -98,7 +98,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
                                                                        {
                                                                            TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
                                                                            UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackHelpers::InsertShot( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
+                                                                           CinematicBoardTrackTools::InsertShot( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
                                                                        } ) ) );
 
     return menuBuilder.MakeWidget();
@@ -116,7 +116,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
                                                                        {
                                                                            TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
                                                                            UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackHelpers::InsertBoard( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
+                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
                                                                        } ) ) );
 
     menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-after.label", "New Next Shot" ),
@@ -126,7 +126,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
                                                                        {
                                                                            TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
                                                                            UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackHelpers::InsertShot( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
+                                                                           CinematicBoardTrackTools::InsertShot( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
                                                                        } ) ) );
 
     return menuBuilder.MakeWidget();

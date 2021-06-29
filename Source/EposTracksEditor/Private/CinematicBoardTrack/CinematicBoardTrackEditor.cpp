@@ -34,10 +34,10 @@
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditorCommands.h"
-#include "CinematicBoardTrack/CinematicBoardTrackHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardTrackEditor"
 
@@ -163,7 +163,7 @@ FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryCanExecute() co
 void
 FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryExecute()
 {
-    UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
     if( boardTrack )
     {
         if( GetSequencer().IsValid() )
@@ -288,7 +288,7 @@ FCinematicBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSc
 {
     FKeyPropertyResult keyPropertyResult;
 
-    auto boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+    auto boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
 
     const FFrameRate tickResolution = iSequence->GetMovieScene()->GetTickResolution();
     const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
@@ -410,7 +410,7 @@ FCinematicBoardTrackEditor::BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, 
 void
 FCinematicBoardTrackEditor::SetArrangeSections( EArrangeSections iArrangeSections )
 {
-    auto board_track = CinematicBoardTrackHelpers::FindCinematicBoardTrack( GetSequencer().Get() );
+    auto board_track = BoardSequenceTools::FindCinematicBoardTrack( GetSequencer().Get() );
     if( !board_track )
         return;
 
@@ -422,7 +422,7 @@ FCinematicBoardTrackEditor::SetArrangeSections( EArrangeSections iArrangeSection
 bool
 FCinematicBoardTrackEditor::IsArrangeSections( EArrangeSections iArrangeSections )
 {
-    auto board_track = CinematicBoardTrackHelpers::FindCinematicBoardTrack( GetSequencer().Get() );
+    auto board_track = BoardSequenceTools::FindCinematicBoardTrack( GetSequencer().Get() );
     if( !board_track )
         return false;
 
@@ -507,19 +507,19 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovie
 void
 FCinematicBoardTrackEditor::InsertBoard()
 {
-    CinematicBoardTrackHelpers::InsertBoard( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
+    CinematicBoardTrackTools::InsertBoard( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
 }
 
 void
 FCinematicBoardTrackEditor::InsertShot()
 {
-    CinematicBoardTrackHelpers::InsertShot( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
+    CinematicBoardTrackTools::InsertShot( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
 }
 
 void
 FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iSection )
 {
-    CinematicBoardTrackHelpers::DuplicateSection( GetSequencer().Get(), iSection );
+    CinematicBoardTrackTools::DuplicateSection( GetSequencer().Get(), iSection );
 }
 
 void
@@ -574,7 +574,7 @@ FCinematicBoardTrackEditor::RenameBoard( UMovieSceneCinematicBoardSection* iSect
 //
 //        if( NewShot )
 //        {
-//            UMovieSceneCinematicShotTrack* CinematicShotTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack(GetSequencer().Get());
+//            UMovieSceneCinematicShotTrack* CinematicShotTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack(GetSequencer().Get());
 //            CinematicShotTrack->RemoveSection( *Section );
 //
 //            NewShot->SetRange( NewShotRange );
@@ -672,7 +672,7 @@ FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSe
 
     if( CanAddSubSequence( *iMovieSceneSequence ) )
     {
-        UMovieSceneCinematicBoardTrack* boardTrack = CinematicBoardTrackHelpers::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
+        UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( GetSequencer().Get() );
 
         const FFrameRate tickResolution = iMovieSceneSequence->GetMovieScene()->GetTickResolution();
         const FQualifiedFrameTime innerDuration = FQualifiedFrameTime(
