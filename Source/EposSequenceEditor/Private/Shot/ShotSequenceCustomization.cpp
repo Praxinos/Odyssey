@@ -82,12 +82,12 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
 {
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().CreateCamera,
+            FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreateCamera( mSequencer ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return !ShotSequenceTools::GetCamera( mSequencer ); } )
         );
     else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -217,7 +217,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 {
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCamera );
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
     ToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeCameraMenu ),

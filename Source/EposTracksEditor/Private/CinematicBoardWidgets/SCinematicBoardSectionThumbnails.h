@@ -28,10 +28,14 @@ private:
     TSharedRef<SWidget> HandleAddBoardBeforeComboButtonGetMenuContent();
     TSharedRef<SWidget> HandleAddBoardAfterComboButtonGetMenuContent();
 
+    TSharedRef<SWidget> MakeCameraMenu();
+
 protected:
     // SWidget overrides.
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
+
+    TAttribute<EVisibility> mOptionalWidgetsVisibility;
 };

@@ -9,6 +9,7 @@
 #include "Styles/EposTracksEditorStyle.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionThumbnails"
@@ -19,6 +20,67 @@ void
 SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
+
+    //---
+
+    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+        ),
+        FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent ),
+        FText::GetEmpty(),
+        LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
+        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "SectionToolBar" );
+
+    //-
+
+    FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    MiddleToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() ); } ),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() ); } )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "CameraToolTip", "Create a new Camera" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateCamera" ) );
+    MiddleToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCameraMenu ),
+        LOCTEXT( "CameraOptions", "Options" ),
+        LOCTEXT( "CameraOptionsToolTip", "Camera Options" ),
+        TAttribute<FSlateIcon>(),
+        true );
+
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "SectionToolBar" );
+
+    //-
+
+    FSlimHorizontalToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    RightToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+        ),
+        FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent ),
+        FText::GetEmpty(),
+        LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
+        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "SectionToolBar" );
+
+    //---
 
     ChildSlot
     [
@@ -36,18 +98,37 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             .AutoWidth()
             .VAlign( VAlign_Center )
             [
-                SNew( SComboButton )
-                .HasDownArrow( false )
-                .ButtonStyle( FEditorStyle::Get(), "SimpleRoundButton" )
-                .ButtonColorAndOpacity( FLinearColor( FColor( 72, 72, 72, 255 ) ) ) // like in ...\UE_4.26\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp
-                .Cursor( EMouseCursor::Default )
-                .Visibility( InArgs._OptionalWidgetsVisibility )
-                .OnGetMenuContent( FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent ) )
-                .ButtonContent()
+                LeftToolbarBuilder.MakeWidget()
+            ]
+            + SHorizontalBox::Slot()
+            [
+                SNew( SSpacer )
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            [
+                SNew( SVerticalBox )
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .HAlign( HAlign_Center )
                 [
-                    SNew( SImage )
-                    .ColorAndOpacity( FLinearColor::White )
-                    .Image( FEditorStyle::GetBrush( "Plus" ) )
+                    MiddleToolbarBuilder.MakeWidget()
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "CreateCameraInfo", "Don't forget to set your POV before !" ) )
+                    .ColorAndOpacity( FLinearColor( .5f, .5f, .0f ) )
+                    .ShadowColorAndOpacity( FLinearColor::Black )
+                    .ShadowOffset( FVector2D( 1.f, 1.f ) )
+                    .Visibility_Lambda( [this]()
+                                        {
+                                            return BoardSequenceTools::CanCreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() )
+                                                && mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+                                                ? EVisibility::Visible : EVisibility::Collapsed;
+                                        } )
                 ]
             ]
             + SHorizontalBox::Slot()
@@ -58,22 +139,43 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             .AutoWidth()
             .VAlign( VAlign_Center )
             [
-                SNew( SComboButton )
-                .HasDownArrow( false )
-                .ButtonStyle( FEditorStyle::Get(), "SimpleRoundButton" )
-                .ButtonColorAndOpacity( FLinearColor( FColor( 72, 72, 72, 255 ) ) ) // like in ...\UE_4.26\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp
-                .Cursor( EMouseCursor::Default )
-                .Visibility( InArgs._OptionalWidgetsVisibility )
-                .OnGetMenuContent( FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent ) )
-                .ButtonContent()
-                [
-                    SNew( SImage )
-                    .ColorAndOpacity( FLinearColor::White )
-                    .Image( FEditorStyle::GetBrush( "Plus" ) )
-                ]
+                RightToolbarBuilder.MakeWidget()
             ]
         ]
     ];
+}
+
+TSharedRef<SWidget>
+SCinematicBoardSectionThumbnails::MakeCameraMenu()
+{
+    FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
+
+    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "CameraSettingsTitle", "Default Camera Settings" ) );
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+        // Create a detail view
+        FDetailsViewArgs Args;
+        Args.bAllowSearch = false;
+        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+        Args.ColumnWidth = .5f;
+        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
+
+        // Filter properties to only get CameraSettings ones
+        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
+        {
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, CameraSettings );
+        };
+        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
+        // Set the object to view
+        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
+
+        MenuBuilder.AddWidget( DetailView, FText(), true );
+    }
+    MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
 }
 
 TSharedRef<SWidget>

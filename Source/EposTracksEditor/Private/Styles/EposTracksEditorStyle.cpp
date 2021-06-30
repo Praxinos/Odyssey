@@ -11,6 +11,8 @@
 #include "Layout/Margin.h"
 #include "Misc/Paths.h"
 #include "Styling/SlateStyleRegistry.h"
+#include "Styling/StarshipCoreStyle.h"
+#include "Styling/ToolBarStyle.h"
 
 #define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 
@@ -61,6 +63,17 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
         .SetCheckedPressedImage( IMAGE_BRUSH( "LighttableOn_16x", Icon16x16 ) );
 
     Set( "EposTracksEditor.Lighttable", lighttable_style );
+
+    //---
+
+    Set( "EposTracksEditor.CreateCamera", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon24x24 ) );
+
+    FToolBarStyle SectionToolBarStyle = FStarshipCoreStyle::GetCoreStyle().GetWidgetStyle<FToolBarStyle>( "SlimToolBar" );
+
+    SectionToolBarStyle.SetBackground( FAppStyle::Get().GetWidgetStyle< FComboButtonStyle >( "ComboButton" ).ButtonStyle.Normal ); // To have the same background as the '+' button on each side
+    //SectionToolBarStyle.SetLabelPadding( FMargin( 2 ) );
+    SectionToolBarStyle.SetIconSize( Icon16x16 );
+    Set( "SectionToolBar", SectionToolBarStyle );
 
     //---
 

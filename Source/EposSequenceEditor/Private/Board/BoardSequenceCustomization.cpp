@@ -91,12 +91,12 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 {
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().CreateCamera,
+            FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCamera );
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -224,15 +224,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 {
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreateCamera );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeCameraMenu ),
-        LOCTEXT( "CameraOptions", "Options" ),
-        LOCTEXT( "CameraOptionsToolTip", "Camera Options" ),
-        TAttribute<FSlateIcon>(),
-        true );
-
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
 
     ToolbarBuilder.AddSeparator();
@@ -289,39 +280,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
         FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" )  );
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeCameraMenu()
-{
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
-
-    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "CameraSettingsTitle", "Default Camera Settings" ) );
-    {
-        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-
-        // Create a detail view
-        FDetailsViewArgs Args;
-        Args.bAllowSearch = false;
-        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        Args.ColumnWidth = .5f;
-        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
-
-        // Filter properties to only get CameraSettings ones
-        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
-        {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, CameraSettings );
-        };
-        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
-        // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
-
-        MenuBuilder.AddWidget( DetailView, FText(), true );
-    }
-    MenuBuilder.EndSection();
-
-    return MenuBuilder.MakeWidget();
 }
 
 TSharedRef<SWidget>
