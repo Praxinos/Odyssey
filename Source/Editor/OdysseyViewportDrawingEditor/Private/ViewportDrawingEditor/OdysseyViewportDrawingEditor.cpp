@@ -204,6 +204,12 @@ FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabMa
     return workspaceMenuCategory;
 }
 
+void FOdysseyViewportDrawingEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
+{
+    mToolbar = nullptr;
+    FOdysseyTexture2DEditor::UnregisterTabSpawners( iTabManager );
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Private Methods
 

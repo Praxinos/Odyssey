@@ -73,6 +73,7 @@ public:
     virtual void OnPreTextureChange() override;
     virtual void OnPostTextureChange() override;
     TSharedPtr<FWorkspaceItem> RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
 
 private:
     // Listeners

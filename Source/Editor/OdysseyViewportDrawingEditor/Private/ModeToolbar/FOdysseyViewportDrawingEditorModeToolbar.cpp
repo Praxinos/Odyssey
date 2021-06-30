@@ -17,13 +17,16 @@ FOdysseyViewportDrawingEditorModeToolbar::FOdysseyViewportDrawingEditorModeToolb
     : mGUI( iGUI )
 {
     FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(FName("LevelEditor"));
-
     mLevelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
 }
 
 
 FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeToolbar()
 {
+    TSharedPtr< SDockTab > tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
+
+    if (tab.IsValid())
+        tab->RequestCloseTab();
 }
 
 //--------------------------------------------------------------------------------------
@@ -39,18 +42,7 @@ void FOdysseyViewportDrawingEditorModeToolbar::ToggleLayerStackTab()
     if( !mLevelEditorTabManager )
         return;
 
-    /*
-    if( mTabStates[0].bIsOpen )
-    {
-        TSharedPtr< SDockTab > tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
-
-        if (tab.IsValid())
-            tab->RequestCloseTab();
-    }
-    else
-    {*/
-        mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetLayerStackTab()->ID()));
-    /*}*/
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetLayerStackTab()->ID()));
 }
 
 #undef LOCTEXT_NAMESPACE
