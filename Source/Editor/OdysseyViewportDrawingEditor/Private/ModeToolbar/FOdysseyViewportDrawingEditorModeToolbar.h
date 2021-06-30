@@ -7,11 +7,6 @@
 
 class FOdysseyViewportDrawingEditorGUI;
 
-struct TabState
-{
-    FName mName;
-    bool bIsOpen;
-};
 /**
  * The Model of the ModeToolbar
  */
@@ -19,7 +14,7 @@ class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorModeToolbar 
 {
 public:
     // Construction / Destruction
-    FOdysseyViewportDrawingEditorModeToolbar( TSharedRef<FTabManager> iTabManage, FOdysseyViewportDrawingEditorGUI* iGUI);
+    FOdysseyViewportDrawingEditorModeToolbar( FOdysseyViewportDrawingEditorGUI* iGUI);
     ~FOdysseyViewportDrawingEditorModeToolbar();
 
 public:
@@ -30,7 +25,6 @@ public:
     void ToggleLayerStackTab();
 
 private:
-    TSharedRef<FTabManager> mTabManager;
+    TSharedPtr<FTabManager> mLevelEditorTabManager;
     FOdysseyViewportDrawingEditorGUI* mGUI;
-    TArray<TabState> mTabStates;
 };

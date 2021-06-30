@@ -4,6 +4,8 @@
 #include "FOdysseyViewportDrawingEditorModeToolbar.h"
 #include "OdysseyViewportDrawingEditorGUI.h"
 
+#include "LevelEditor.h" 
+
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorModeToolbar"
 
 
@@ -11,14 +13,12 @@
 // FOdysseyViewportDrawingEditorModeToolbar
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyViewportDrawingEditorModeToolbar::FOdysseyViewportDrawingEditorModeToolbar( TSharedRef<FTabManager> iTabManager, FOdysseyViewportDrawingEditorGUI* iGUI )
-    : mTabManager( iTabManager )
-    , mGUI( iGUI )
+FOdysseyViewportDrawingEditorModeToolbar::FOdysseyViewportDrawingEditorModeToolbar( FOdysseyViewportDrawingEditorGUI* iGUI )
+    : mGUI( iGUI )
 {
-    TabState tabState;
-    tabState.mName = mGUI->GetLayerStackTab()->ID();
-    tabState.bIsOpen = false;
-    mTabStates.Add( tabState );
+    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(FName("LevelEditor"));
+
+    mLevelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
 }
 
 
@@ -36,18 +36,21 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
 
 void FOdysseyViewportDrawingEditorModeToolbar::ToggleLayerStackTab()
 {
+    if( !mLevelEditorTabManager )
+        return;
+
+    /*
     if( mTabStates[0].bIsOpen )
     {
-        TSharedPtr< SDockTab > tab = mTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
+        TSharedPtr< SDockTab > tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
 
         if (tab.IsValid())
             tab->RequestCloseTab();
     }
     else
-    { 
-        mTabManager->TryInvokeTab(FTabId(mGUI->GetLayerStackTab()->ID()));
-    }
-    mTabStates[0].bIsOpen = !mTabStates[0].bIsOpen;
+    {*/
+        mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetLayerStackTab()->ID()));
+    /*}*/
 }
 
 #undef LOCTEXT_NAMESPACE

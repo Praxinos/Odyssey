@@ -199,7 +199,7 @@ FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabMa
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_OdysseyViewportDrawingEditor", "Odyssey Viewport Drawing Editor"));
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
     GetGUI()->RegisterTabSpawners( iTabManager, workspaceMenuCategoryRef );
-    mToolbar = MakeShareable( new FOdysseyViewportDrawingEditorModeToolbar( iTabManager, GetGUI() ) );
+    mToolbar = MakeShareable( new FOdysseyViewportDrawingEditorModeToolbar( GetGUI() ) );
 
     return workspaceMenuCategory;
 }
