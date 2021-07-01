@@ -104,12 +104,12 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().CreatePlane,
+            FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceTools::GetCamera( mSequencer ); } )
         );
     else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -229,7 +229,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
     ToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeTextureMenu ),

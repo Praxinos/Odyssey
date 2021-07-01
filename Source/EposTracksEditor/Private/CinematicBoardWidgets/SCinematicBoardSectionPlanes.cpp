@@ -13,6 +13,7 @@
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "Tools/LighttableTools.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
@@ -812,21 +813,107 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     mRebuildPlaneListHandle = mSequencer.Pin()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlanes::RebuildPlaneList );
 
+    check( !mPossessables.Num() );
+
     //---
 
-    check( !mPossessables.Num() );
+    FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    MiddleToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlanes::CreatePlane ),
+            FCanExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlanes::CanCreatePlane ),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]() { return CanCreatePlane(); } ) ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "CreatePlane", "Create a new plane" ),
+        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        //FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreatePlane" ) );
+    MiddleToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]() { return CanCreatePlane(); } ) ),
+        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeTextureMenu ),
+        LOCTEXT( "TextureOptions", "Options" ),
+        LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
+        TAttribute<FSlateIcon>(),
+        true );
+
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionPlanesFooter.ToolBar" );
+
+    TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
+    middle_widget->SetVisibility( mOptionalWidgetsVisibility ); // To totally remove the verticalbox slot as the visibility is collapsed and not only hidden (keep space)
 
     //---
 
     ChildSlot
     [
-        SAssignNew( mWidgetPlaneList, SListView<TSharedRef<FMovieScenePossessable>> )
-        .ListItemsSource( &mPossessables )
-        .OnGenerateRow( this, &SCinematicBoardSectionPlanes::MakePlaneRow )
-        .SelectionMode( ESelectionMode::None )
+        SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SAssignNew( mWidgetPlaneList, SListView<TSharedRef<FMovieScenePossessable>> )
+            .ListItemsSource( &mPossessables )
+            .OnGenerateRow( this, &SCinematicBoardSectionPlanes::MakePlaneRow )
+            .SelectionMode( ESelectionMode::None )
+        ]
+        + SVerticalBox::Slot()
+        .HAlign( HAlign_Center )
+        .AutoHeight()
+        [
+            middle_widget
+        ]
     ];
 
     RebuildPlaneList();
+}
+
+void
+SCinematicBoardSectionPlanes::CreatePlane()
+{
+    BoardSequenceTools::CreatePlane( mSequencer.Pin().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() );
+}
+
+bool
+SCinematicBoardSectionPlanes::CanCreatePlane()
+{
+    return !!BoardSequenceTools::GetCamera( mSequencer.Pin().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() );
+}
+
+TSharedRef<SWidget>
+SCinematicBoardSectionPlanes::MakeTextureMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer.Pin()->GetCommandBindings() );
+
+    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "TextureSettingsTitle", "Default Texture Settings" ) );
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+        // Create a detail view
+        FDetailsViewArgs Args;
+        Args.bAllowSearch = false;
+        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+        Args.ColumnWidth = .5f;
+        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
+
+        // Filter properties to only get CameraSettings ones
+        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
+        {
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
+            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, TextureSettings );
+        };
+        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
+        // Set the object to view
+        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
+
+        MenuBuilder.AddWidget( DetailView, FText(), true );
+    }
+    MenuBuilder.EndSection();
+
+    return MenuBuilder.MakeWidget();
 }
 
 

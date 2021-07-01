@@ -54,8 +54,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
     Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
 
-    Set( "ShotSequenceEditor.CreatePlane", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreatePlane.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.DetachPlane", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.DetachPlane.Small", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon24x24 ) );
 

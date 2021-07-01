@@ -111,12 +111,12 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().CreatePlane,
+            FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceTools::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlane );
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
 
     //---
 
@@ -210,17 +210,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().CreatePlane );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeTextureMenu ),
-        LOCTEXT( "TextureOptions", "Options" ),
-        LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
-        TAttribute<FSlateIcon>(),
-        true );
-
-    ToolbarBuilder.AddSeparator();
-
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );
     // The 2 following buttons should be exclusive visible:
     // - the first button is displayed when there is only 1 plane (or 0) available
@@ -277,39 +266,6 @@ FBoardSequenceCustomization::MakeDrawingMenu()
             EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
         );
     }
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeTextureMenu()
-{
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
-
-    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "TextureSettingsTitle", "Default Texture Settings" ) );
-    {
-        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-
-        // Create a detail view
-        FDetailsViewArgs Args;
-        Args.bAllowSearch = false;
-        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        Args.ColumnWidth = .5f;
-        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
-
-        // Filter properties to only get CameraSettings ones
-        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
-        {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, TextureSettings );
-        };
-        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
-        // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
-
-        MenuBuilder.AddWidget( DetailView, FText(), true );
-    }
-    MenuBuilder.EndSection();
 
     return MenuBuilder.MakeWidget();
 }
