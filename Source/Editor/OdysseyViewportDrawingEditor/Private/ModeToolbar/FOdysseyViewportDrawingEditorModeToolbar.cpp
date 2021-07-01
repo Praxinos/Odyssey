@@ -40,42 +40,55 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
     IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath, true);
 
     FBufferArchive buffer;
+
     FString str = mGUI->GetLayerStackTab()->ID().ToString();
-
-    UE_LOG(LogTemp, Display, TEXT("%s"), *str );
-
     buffer << str;
+
     str = mGUI->GetColorSlidersTab()->ID().ToString();
-
-    UE_LOG(LogTemp, Display, TEXT("%s"), *str);
-
     buffer << str;
 
     fileHandle->Seek(0);
     fileHandle->Write(buffer.GetData(), buffer.Num());
-    fileHandle->Flush(true);
 
+    fileHandle->Flush(true);
     delete fileHandle;
 
 }
 
 void FOdysseyViewportDrawingEditorModeToolbar::LoadOpenedTabs()
 {
-/*
+    if( !mLevelEditorTabManager )
+        return;
+
     FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *FString("IliadEdModeLayout.save"));
     IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
     IFileHandle* fileHandle = platformFile.OpenRead(*tabsOpenedPath, true);
 
     FBufferArchive buffer;
+    buffer.SetNum( fileHandle->Size() );
 
     fileHandle->Seek(0);
-    fileHandle->Read(buffer.GetData(), fileHandle->Size() );
+    bool succeed = fileHandle->Read(buffer.GetData(), fileHandle->Size() );
+
+    //FString openedTabs;
+    TArray<uint8> openedTabs;
+    FFileHelper::LoadFileToArray( openedTabs, *tabsOpenedPath );
+    FString openedTabsString;
+    int start = 0;
+    for( int i = 0; i < openedTabs.Num(); i++)
+    {
+        if( openedTabs[i] == 0 )
+        {
+            start = i;
+            openedTabsString = FString( (char*) openedTabs.GetData() + start );
+            mLevelEditorTabManager->TryInvokeTab( FTabId( FName( openedTabsString ) ) );
+        }
+    }
+    //fileHandle->Read( (uint8*) *openedTabs, fileHandle->Size() );
+    // UE_LOG(LogTemp, Display, TEXT("%s"), *openedTabs );
+
     fileHandle->Flush(true);
-
-    FString openedTabs;
-    buffer << openedTabs;
-
-    int i = 0;*/
+    delete fileHandle;
 }
 
 //--------------------------------------------------------------------------------------
