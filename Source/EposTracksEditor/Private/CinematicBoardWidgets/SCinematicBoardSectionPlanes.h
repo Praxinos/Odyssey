@@ -9,35 +9,13 @@
 
 class FCinematicBoardSection;
 
-class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlane
-    : public SCompoundWidget
-{
-public:
-    SLATE_BEGIN_ARGS( SCinematicBoardSectionPlane )
-        : _Binding()
-        {}
-        SLATE_ARGUMENT( FMovieScenePossessable, Binding )
-    SLATE_END_ARGS()
-
-    // Construct the widget
-    void Construct(const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection);
-
-public:
-
-private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
-
-    FMovieScenePossessable mBinding;
-};
-
-//---
-
 class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlanes
     : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionPlanes )
         {}
+        SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
     SCinematicBoardSectionPlanes();
@@ -62,6 +40,9 @@ private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
     TWeakPtr<ISequencer> mSequencer;
 
+    TAttribute<EVisibility> mOptionalWidgetsVisibility;
+
+private:
     TArray<TSharedRef<FMovieScenePossessable>> mPossessables;
     TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetPlaneList;
     bool mNeedRebuildPlaneList;

@@ -46,6 +46,7 @@ SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<F
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlanes, iBoardSection )
+            .OptionalWidgetsVisibility( this, &SCinematicBoardSectionContent::OptionalWidgetsVisibility )
         ]
     ];
 }

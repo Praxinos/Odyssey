@@ -28,7 +28,6 @@ public:
 
 private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
-    TSharedRef<SWidget> MakePlaneMenu();
     TSharedRef<SWidget> MakeDrawingMenu();
     TSharedRef<SWidget> MakeTextureMenu();
     TSharedRef<SWidget> MakeHelpMenu();

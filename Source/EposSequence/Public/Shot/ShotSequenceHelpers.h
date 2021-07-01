@@ -24,7 +24,7 @@ struct FMovieSceneObjectPathChannel;
 
 enum class EGetPlane
 {
-    kAlwaysAll,
+    kAll,
     kSelectedOnly,
     kSelectedOrAll,
 };

@@ -94,7 +94,7 @@ ShotSequenceHelpers::GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequen
 
             switch( iPlaneSelection )
             {
-                case EGetPlane::kAlwaysAll:
+                case EGetPlane::kAll:
                     planes.Add( plane );
                     plane_bindings.Add( possessable.GetGuid() );
                     break;
@@ -194,7 +194,7 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
 
             switch( iPlaneSelection )
             {
-                case EGetPlane::kAlwaysAll:
+                case EGetPlane::kAll:
                     planes.Add( plane );
                     plane_bindings.Add( possessable.GetGuid() );
                     break;
@@ -530,7 +530,7 @@ ShotSequenceHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlaye
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> bindings;
-    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
+    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAll, &planes, &bindings );
 
     for( auto binding : bindings )
     {
@@ -585,7 +585,7 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> bindings;
-    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAlwaysAll, &planes, &bindings );
+    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAll, &planes, &bindings );
 
     for( auto binding : bindings )
     {

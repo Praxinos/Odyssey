@@ -15,6 +15,7 @@
 #include "Tools/LighttableTools.h"
 #include "Shot/ShotSequenceHelpers.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionPlanes"
 
@@ -25,9 +26,9 @@ class SCinematicBoardSectionPlaneTitle
 {
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionPlaneTitle )
-        : _Binding()
         {}
         SLATE_ARGUMENT( FMovieScenePossessable, Binding )
+        SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
     ~SCinematicBoardSectionPlaneTitle();
@@ -42,14 +43,20 @@ private:
     FText               GetLighttableTooltip() const;
     ECheckBoxState      IsLighttableOn() const;
 
+    void                DetachPlane();
+    bool                CanDetachPlane();
+
 private:
     TWeakPtr<FCinematicBoardSection> mBoardSection;
 
     FMovieScenePossessable mBinding;
+    TAttribute<EVisibility> mOptionalWidgetsVisibility;
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
     FDelegateHandle mMovieSceneDataChangedHandle;
 };
+
+//---
 
 SCinematicBoardSectionPlaneTitle::~SCinematicBoardSectionPlaneTitle()
 {
@@ -68,6 +75,74 @@ SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged( EMovieSceneDataChangeTy
     ////---
 
     //LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+}
+
+//---
+
+void
+SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+{
+    mBoardSection = iBoardSection;
+
+    mBinding = InArgs._Binding;
+    check( mBinding.GetGuid().IsValid() );
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
+
+    mMovieSceneDataChangedHandle = mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged ); //TODO: or do it elsewhere ? in the USection/UTrack/... ?
+
+    static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
+
+    //---
+
+    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::DetachPlane ),
+            FCanExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::CanDetachPlane ),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible /*&& CanDetachPlane()*/; } )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "DetachPlane", "Detach the plane" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.DetachPlane" ) );
+
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionPlane.ToolBar" );
+
+    //---
+
+    ChildSlot
+    [
+        SNew( SBorder )
+        .BorderImage( background_brush )
+        [
+            SNew( SHorizontalBox )
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            //[
+            //    SNew( SCheckBox )
+            //    .Style( FEposTracksEditorStyle::Get(), "EposTracksEditor.Lighttable" )
+            //    .Cursor( EMouseCursor::Default )
+            //    .IsChecked( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn )
+            //    .OnCheckStateChanged( this, &SCinematicBoardSectionPlaneTitle::OnToggleLighttable )
+            //    .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
+            //    // No content (text)
+            //]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                LeftToolbarBuilder.MakeWidget()
+            ]
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
+            .VAlign( VAlign_Center )
+            [
+                SNew( STextBlock )
+                .Text( FText::FromString( mBinding.GetName() ) )
+            ]
+        ]
+    ];
 }
 
 //---
@@ -115,45 +190,36 @@ SCinematicBoardSectionPlaneTitle::IsLighttableOn() const
 //---
 
 void
-SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+SCinematicBoardSectionPlaneTitle::DetachPlane()
 {
-    mBoardSection = iBoardSection;
+    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
-    mBinding = InArgs._Binding;
-    check( mBinding.GetGuid().IsValid() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
-    mMovieSceneDataChangedHandle = mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged ); //TODO: or do it elsewhere ? in the USection/UTrack/... ?
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> plane_bindings;
+    int plane_count = ShotSequenceHelpers::GetAttachedPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, &planes, &plane_bindings );
 
-    static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
+    for( int i = 0; i < plane_count; i++ )
+    {
+        if( plane_bindings[i] == mBinding.GetGuid() )
+            BoardSequenceTools::DetachPlane( sequencer, mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame(), planes[i] );
+    }
+}
 
-    //---
+bool
+SCinematicBoardSectionPlaneTitle::CanDetachPlane()
+{
+    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
-    ChildSlot
-    [
-        SNew( SBorder )
-        .BorderImage( background_brush )
-        [
-            SNew( SHorizontalBox )
-            //+ SHorizontalBox::Slot()
-            //.AutoWidth()
-            //[
-            //    SNew( SCheckBox )
-            //    .Style( FEposTracksEditorStyle::Get(), "EposTracksEditor.Lighttable" )
-            //    .Cursor( EMouseCursor::Default )
-            //    .IsChecked( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn )
-            //    .OnCheckStateChanged( this, &SCinematicBoardSectionPlaneTitle::OnToggleLighttable )
-            //    .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
-            //    // No content (text)
-            //]
-            + SHorizontalBox::Slot()
-            .HAlign( HAlign_Center )
-            .VAlign( VAlign_Center )
-            [
-                SNew( STextBlock )
-                .Text( FText::FromString( mBinding.GetName() ) )
-            ]
-        ]
-    ];
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    TArray<FGuid> plane_bindings;
+    int plane_count = ShotSequenceHelpers::GetAttachedPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );
+
+    return plane_bindings.Contains( mBinding.GetGuid() );
 }
 
 //---
@@ -163,7 +229,6 @@ class SCinematicBoardSectionPlaneKeys
 {
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionPlaneKeys )
-        : _Binding()
         {}
         SLATE_ARGUMENT( FMovieScenePossessable, Binding )
     SLATE_END_ARGS()
@@ -414,7 +479,6 @@ class SCinematicBoardSectionPlaneMaterialKeys
 {
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionPlaneMaterialKeys )
-        : _Binding()
         {}
         SLATE_ARGUMENT( FMovieScenePossessable, Binding )
     SLATE_END_ARGS()
@@ -662,12 +726,35 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
 //---
 //---
 
+class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlane
+    : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionPlane )
+        {}
+        SLATE_ARGUMENT( FMovieScenePossessable, Binding )
+        SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
+    SLATE_END_ARGS()
+
+    // Construct the widget
+    void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
+
+public:
+
+private:
+    TWeakPtr<FCinematicBoardSection> mBoardSection;
+
+    FMovieScenePossessable mBinding;
+    TAttribute<EVisibility> mOptionalWidgetsVisibility;
+};
+
 void
 SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     mBoardSection = iBoardSection;
 
     mBinding = InArgs._Binding;
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
 
     ChildSlot
     [
@@ -677,6 +764,7 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
         [
             SNew( SCinematicBoardSectionPlaneTitle, iBoardSection )
             .Binding( mBinding )
+            .OptionalWidgetsVisibility( mOptionalWidgetsVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -720,6 +808,8 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     mBoardSection = iBoardSection;
     mSequencer = mBoardSection.Pin()->GetSequencer();
 
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
+
     mRebuildPlaneListHandle = mSequencer.Pin()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlanes::RebuildPlaneList );
 
     //---
@@ -760,6 +850,7 @@ SCinematicBoardSectionPlanes::MakePlaneRow( TSharedRef<FMovieScenePossessable> i
         [
             SNew( SCinematicBoardSectionPlane, mBoardSection.Pin().ToSharedRef() )
             .Binding( *iItem )
+            .OptionalWidgetsVisibility( mOptionalWidgetsVisibility )
         ];
 }
 
@@ -803,7 +894,7 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
     TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAlwaysAll, nullptr, &bindings );
+    int plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &bindings );
 
     auto need_rebuild = [this]( const TArray<FGuid>& iBindings )
     {

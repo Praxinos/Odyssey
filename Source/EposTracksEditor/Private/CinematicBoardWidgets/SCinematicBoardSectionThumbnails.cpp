@@ -38,7 +38,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSection.ToolBar" );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionThumbnail.ToolBar" );
 
     //-
 
@@ -68,7 +68,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         TAttribute<FSlateIcon>(),
         true );
 
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSection.ToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionThumbnail.ToolBar" );
 
     //-
 
@@ -86,7 +86,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSection.ToolBar" );
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionThumbnail.ToolBar" );
 
     //---
 
@@ -127,7 +127,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
                 .AutoHeight()
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "CreateCameraInfo", "Don't forget to set your POV before !" ) )
+                    .Text( LOCTEXT( "CreateCameraInfo", "Don't forget to setup your camera settings" ) )
                     .ColorAndOpacity( FLinearColor( .5f, .5f, .0f ) )
                     .ShadowColorAndOpacity( FLinearColor::Black )
                     .ShadowOffset( FVector2D( 1.f, 1.f ) )
