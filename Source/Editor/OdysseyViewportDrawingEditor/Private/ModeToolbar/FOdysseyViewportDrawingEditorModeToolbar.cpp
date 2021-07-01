@@ -34,10 +34,12 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
 
 void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
 {
-
     FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *FString("IliadEdModeLayout.save"));
     IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
-    IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath, true);
+    IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath);
+
+    if( !fileHandle )
+        return;
 
     FBufferArchive buffer;
 
@@ -64,28 +66,27 @@ void FOdysseyViewportDrawingEditorModeToolbar::LoadOpenedTabs()
     IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
     IFileHandle* fileHandle = platformFile.OpenRead(*tabsOpenedPath, true);
 
+    if( !fileHandle )
+        return;
+
     FBufferArchive buffer;
     buffer.SetNum( fileHandle->Size() );
 
     fileHandle->Seek(0);
-    bool succeed = fileHandle->Read(buffer.GetData(), fileHandle->Size() );
+    fileHandle->Read(buffer.GetData(), fileHandle->Size() );
 
-    //FString openedTabs;
-    TArray<uint8> openedTabs;
-    FFileHelper::LoadFileToArray( openedTabs, *tabsOpenedPath );
-    FString openedTabsString;
-    int start = 0;
-    for( int i = 0; i < openedTabs.Num(); i++)
+    TArray<FString> tabNames;
+    int start = 4;
+    while (start < fileHandle->Size() )
     {
-        if( openedTabs[i] == 0 )
-        {
-            start = i;
-            openedTabsString = FString( (char*) openedTabs.GetData() + start );
-            mLevelEditorTabManager->TryInvokeTab( FTabId( FName( openedTabsString ) ) );
-        }
+        tabNames.Add( FString( (char*) buffer.GetData() + start ) );
+        start += tabNames[tabNames.Num() - 1].Len() + 5;
     }
-    //fileHandle->Read( (uint8*) *openedTabs, fileHandle->Size() );
-    // UE_LOG(LogTemp, Display, TEXT("%s"), *openedTabs );
+
+    for (int i = 0; i < tabNames.Num(); i++)
+    {
+        mLevelEditorTabManager->TryInvokeTab(FTabId(FName(tabNames[i])));
+    }
 
     fileHandle->Flush(true);
     delete fileHandle;
