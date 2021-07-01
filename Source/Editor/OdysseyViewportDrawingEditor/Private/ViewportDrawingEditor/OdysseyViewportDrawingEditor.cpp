@@ -200,12 +200,15 @@ FOdysseyViewportDrawingEditor::RegisterTabSpawners(const TSharedRef<class FTabMa
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
     GetGUI()->RegisterTabSpawners( iTabManager, workspaceMenuCategoryRef );
     mToolbar = MakeShareable( new FOdysseyViewportDrawingEditorModeToolbar( GetGUI() ) );
-
+    mToolbar->LoadOpenedTabs();
     return workspaceMenuCategory;
 }
 
 void FOdysseyViewportDrawingEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
+    if( mToolbar.IsValid() )
+        mToolbar->SaveOpenedTabs();
+
     mToolbar = nullptr;
     FOdysseyTexture2DEditor::UnregisterTabSpawners( iTabManager );
 }

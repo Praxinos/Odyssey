@@ -5,6 +5,9 @@
 #include "OdysseyViewportDrawingEditorGUI.h"
 
 #include "LevelEditor.h" 
+#include "Serialization/BufferArchive.h"
+#include "Serialization/MemoryReader.h"
+#include "Misc/FileHelper.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorModeToolbar"
 
@@ -27,6 +30,52 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
 
     if (tab.IsValid())
         tab->RequestCloseTab();
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
+{
+
+    FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *FString("IliadEdModeLayout.save"));
+    IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+    IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath, true);
+
+    FBufferArchive buffer;
+    FString str = mGUI->GetLayerStackTab()->ID().ToString();
+
+    UE_LOG(LogTemp, Display, TEXT("%s"), *str );
+
+    buffer << str;
+    str = mGUI->GetColorSlidersTab()->ID().ToString();
+
+    UE_LOG(LogTemp, Display, TEXT("%s"), *str);
+
+    buffer << str;
+
+    fileHandle->Seek(0);
+    fileHandle->Write(buffer.GetData(), buffer.Num());
+    fileHandle->Flush(true);
+
+    delete fileHandle;
+
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::LoadOpenedTabs()
+{
+/*
+    FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *FString("IliadEdModeLayout.save"));
+    IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+    IFileHandle* fileHandle = platformFile.OpenRead(*tabsOpenedPath, true);
+
+    FBufferArchive buffer;
+
+    fileHandle->Seek(0);
+    fileHandle->Read(buffer.GetData(), fileHandle->Size() );
+    fileHandle->Flush(true);
+
+    FString openedTabs;
+    buffer << openedTabs;
+
+    int i = 0;*/
 }
 
 //--------------------------------------------------------------------------------------

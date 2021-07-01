@@ -18,7 +18,8 @@ public:
     ~FOdysseyViewportDrawingEditorModeToolbar();
 
 public:
-    //Getter / Setter
+    void SaveOpenedTabs();
+    void LoadOpenedTabs();
 
 public:
     //CallBacks
