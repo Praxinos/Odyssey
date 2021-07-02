@@ -7,6 +7,7 @@
 
 class UMovieScene;
 class UMovieSceneSection;
+class UMovieSceneSequence;
 
 struct FShiftResult
 {
@@ -25,7 +26,7 @@ struct FShiftResult
 class EPOSTRACKS_API SectionsHelpersShift
 {
 public:
-    static FShiftResult GetShiftInfo( TArray< UMovieSceneSection* > iSections, FFrameNumber iStartTime, FFrameNumber iDuration );
+    static FShiftResult GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMovieSceneSequence* iSequence, FFrameNumber iStartTime, FFrameNumber iDuration );
 
     static void ShiftFollowingSections( TArray< UMovieSceneSection* > iSections, const UMovieSceneSection* iNewSection, FShiftResult iShiftResult );
 };

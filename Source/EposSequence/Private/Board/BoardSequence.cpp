@@ -184,7 +184,13 @@ UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackCla
 bool
 UBoardSequence::IsResizable() const //override
 {
-    return !GetMovieScene() || GetMovieScene()->GetMasterTracks().Num() == 0 && GetMovieScene()->GetBindings().Num() == 0;
+    if( !GetMovieScene() )
+        return true;
+
+    if( GetMovieScene()->GetAllSections().Num() == 0 )
+        return true;
+
+    return false;
 }
 
 void

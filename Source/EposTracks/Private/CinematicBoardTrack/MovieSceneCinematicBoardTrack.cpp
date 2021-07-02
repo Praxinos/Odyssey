@@ -54,7 +54,7 @@ UMovieSceneCinematicBoardTrack::AddSequence( UMovieSceneSequence* iSequence, FFr
 UMovieSceneSubSection*
 UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence, FFrameNumber iStartTime, int32 iDuration, int32 iRowIndex )
 {
-    FShiftResult shift_result = SectionsHelpersShift::GetShiftInfo( Sections, iStartTime, iDuration );
+    FShiftResult shift_result = SectionsHelpersShift::GetShiftInfo( Sections, iSequence, iStartTime, iDuration );
 
     //---
 
