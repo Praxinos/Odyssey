@@ -70,7 +70,7 @@
 - `<optional-body>`
     - just as in the description, use the imperative, present tense
 - `<optional-footer>`
-    - MAY be used for referencing issues like: `close #234` or `close #123, #245, #992`
+    - MAY be used for referencing issues like: `close #234` or `close #123, close #245, close #992`
     - MAY be used for BREAKING-CHANGE
 
 ## Example
