@@ -35,6 +35,43 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
     tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetColorSlidersTab()->ID()));
     if (tab.IsValid())
         tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetBrushExposedParametersTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetBrushSelectorTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetColorWheelTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetMeshSelectorTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetStrokeOptionsTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetTextureDetailsTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetToolsTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetTopTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetViewportTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
+
 }
 
 void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
@@ -58,6 +95,60 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
     if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetColorSlidersTab()->ID() ) )
     {
         str = mGUI->GetColorSlidersTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetBrushExposedParametersTab()->ID() ) )
+    {
+        str = mGUI->GetBrushExposedParametersTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetBrushSelectorTab()->ID() ) )
+    {
+        str = mGUI->GetBrushSelectorTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetColorWheelTab()->ID() ) )
+    {
+        str = mGUI->GetColorWheelTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetMeshSelectorTab()->ID() ) )
+    {
+        str = mGUI->GetMeshSelectorTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetStrokeOptionsTab()->ID() ) )
+    {
+        str = mGUI->GetStrokeOptionsTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetTextureDetailsTab()->ID() ) )
+    {
+        str = mGUI->GetTextureDetailsTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetToolsTab()->ID() ) )
+    {
+        str = mGUI->GetToolsTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetTopTab()->ID() ) )
+    {
+        str = mGUI->GetTopTab()->ID().ToString();
+        buffer << str;
+    }
+
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetViewportTab()->ID() ) )
+    {
+        str = mGUI->GetViewportTab()->ID().ToString();
         buffer << str;
     }
 
@@ -105,11 +196,7 @@ void FOdysseyViewportDrawingEditorModeToolbar::LoadOpenedTabs()
 }
 
 //--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------- Getter / Setter
-
-
-//--------------------------------------------------------------------------------------
-//-------------------------------------------------------------------- Callbacks / Toogle
+//---------------------------------------------------------------------------- Callbacks
 
 
 void FOdysseyViewportDrawingEditorModeToolbar::OpenLayerStackTab()
@@ -120,4 +207,85 @@ void FOdysseyViewportDrawingEditorModeToolbar::OpenLayerStackTab()
     mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetLayerStackTab()->ID()));
 }
 
+void FOdysseyViewportDrawingEditorModeToolbar::OpenColorSlidersTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetColorSlidersTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenBrushExposedParametersTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetBrushExposedParametersTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenBrushSelectorTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetBrushSelectorTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenColorWheelTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetColorWheelTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenMeshSelectorTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetMeshSelectorTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenStrokeOptionsTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetStrokeOptionsTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenTextureDetailsTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetTextureDetailsTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenToolsTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetToolsTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenTopTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetTopTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenViewportTab()
+{
+    if( !mLevelEditorTabManager )
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetViewportTab()->ID()));
+}
+
 #undef LOCTEXT_NAMESPACE
+

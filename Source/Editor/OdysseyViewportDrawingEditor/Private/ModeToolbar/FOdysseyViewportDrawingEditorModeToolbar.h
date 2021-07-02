@@ -23,6 +23,16 @@ public:
 
 public:
     void OpenLayerStackTab();
+    void OpenColorSlidersTab();
+    void OpenBrushExposedParametersTab();
+    void OpenBrushSelectorTab();
+    void OpenColorWheelTab();
+    void OpenMeshSelectorTab();
+    void OpenStrokeOptionsTab();
+    void OpenTextureDetailsTab();
+    void OpenToolsTab();
+    void OpenTopTab();
+    void OpenViewportTab();
 
 private:
     TSharedPtr<FTabManager> mLevelEditorTabManager;
