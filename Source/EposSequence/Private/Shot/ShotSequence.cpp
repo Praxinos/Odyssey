@@ -53,17 +53,23 @@ void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& Posse
 
     if( PossessedObject.IsA<ACineCameraActor>() )
     {
-        for( auto It = CameraBindingIdToReferences.CreateConstIterator(); It; ++It )
+        FMovieScenePossessable* possessable = MovieScene->FindPossessable( ObjectId );
+        // If it exists, it was added by FSequencer::CreateBinding()#1083, and then, juste remove everything about camera
+        if( possessable )
         {
-            FGuid binding = It.Key();
-            //FGuid binding = pair.Key;
-            //FLevelSequenceBindingReference reference = pair.Value;
+            for( auto It = CameraBindingIdToReferences.CreateConstIterator(); It; ++It )
+            {
+                FGuid binding = It.Key();
+                //FLevelSequenceBindingReference reference = It.Value();
 
-            MovieScene->RemovePossessable( binding );
-            UnbindPossessableObjects( binding );
+                MovieScene->RemovePossessable( binding );
+                UnbindPossessableObjects( binding );
+            }
+
+            check( !CameraBindingIdToReferences.Num() );
         }
-
-        check( !CameraBindingIdToReferences.Num() );
+        // Otherwise it comes from (at least) FSequencer::DoAssignActor()#7611,
+        // and in this case, just add the new camera and let this function update everything to keep all existing components and remove the old one
 
         CameraBindingIdToReferences.FindOrAdd( ObjectId ) = FLevelSequenceBindingReference( &PossessedObject, Context );
     }
