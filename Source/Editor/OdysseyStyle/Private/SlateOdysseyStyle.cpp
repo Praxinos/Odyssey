@@ -198,14 +198,17 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Notes16", new IMAGE_BRUSH( "PainterEditor/notes_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Tools64", new IMAGE_BRUSH( "PainterEditor/tools_64", mIcon64x64 ) );
+    Set( "PainterEditor.Tools20", new IMAGE_BRUSH( "PainterEditor/tools_20", mIcon20x20 ) );
     Set( "PainterEditor.Tools16", new IMAGE_BRUSH( "PainterEditor/tools_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Layers64", new IMAGE_BRUSH( "PainterEditor/layers_64", mIcon64x64 ) );
+    Set( "PainterEditor.Layers20", new IMAGE_BRUSH( "PainterEditor/layers_20", mIcon20x20 ) );
     Set( "PainterEditor.Layers16", new IMAGE_BRUSH( "PainterEditor/layers_16", mIcon16x16 ) );
 
     Set( "PainterEditor.ColorSliders64", new IMAGE_BRUSH( "PainterEditor/color_sliders_64", mIcon64x64 ) );
     Set( "PainterEditor.ColorSliders16", new IMAGE_BRUSH( "PainterEditor/color_sliders_16", mIcon16x16 ) );
     Set( "PainterEditor.ColorSliders_2_64", new IMAGE_BRUSH( "PainterEditor/color_sliders_2_64", mIcon64x64 ) );
+    Set( "PainterEditor.ColorSliders_2_20", new IMAGE_BRUSH( "PainterEditor/color_sliders_2_20", mIcon20x20 ) );
     Set( "PainterEditor.ColorSliders_2_16", new IMAGE_BRUSH( "PainterEditor/color_sliders_2_16", mIcon16x16 ) );
 
     Set( "PainterEditor.ColorSelector64", new IMAGE_BRUSH( "PainterEditor/color_selector_64", mIcon64x64 ) );
@@ -214,24 +217,29 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ColorSelectorBis16", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_16", mIcon16x16 ) );
 
     Set( "PainterEditor.StrokeOptions64", new IMAGE_BRUSH( "PainterEditor/stroke_options_64", mIcon64x64 ) );
+    Set( "PainterEditor.StrokeOptions20", new IMAGE_BRUSH( "PainterEditor/stroke_options_64", mIcon20x20 ) );
     Set( "PainterEditor.StrokeOptions16", new IMAGE_BRUSH( "PainterEditor/stroke_options_16", mIcon16x16 ) );
 
     Set( "PainterEditor.BrushExposedParameters64", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_64", mIcon64x64 ) );
+    Set( "PainterEditor.BrushExposedParameters20", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_20", mIcon20x20 ) );
     Set( "PainterEditor.BrushExposedParameters16", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_16", mIcon16x16 ) );
 
     Set( "PainterEditor.BrushSelector64", new IMAGE_BRUSH( "PainterEditor/brush_selector_64", mIcon64x64 ) );
+    Set( "PainterEditor.BrushSelector20", new IMAGE_BRUSH( "PainterEditor/brush_selector_20", mIcon20x20 ) );
     Set( "PainterEditor.BrushSelector16", new IMAGE_BRUSH( "PainterEditor/brush_selector_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Navigator64", new IMAGE_BRUSH( "PainterEditor/navigator_64", mIcon64x64 ) );
     Set( "PainterEditor.Navigator16", new IMAGE_BRUSH( "PainterEditor/navigator_16", mIcon16x16 ) );
 
     Set( "PainterEditor.BrushPreview64", new IMAGE_BRUSH( "PainterEditor/brush_preview_64", mIcon64x64 ) );
+    Set( "PainterEditor.BrushPreview20", new IMAGE_BRUSH( "PainterEditor/brush_preview_20", mIcon20x20 ) );
     Set( "PainterEditor.BrushPreview16", new IMAGE_BRUSH( "PainterEditor/brush_preview_16", mIcon16x16 ) );
 
     Set( "PainterEditor.PerformanceTools64", new IMAGE_BRUSH( "PainterEditor/performance_tools_64", mIcon64x64 ) );
     Set( "PainterEditor.PerformanceTools16", new IMAGE_BRUSH( "PainterEditor/performance_tools_16", mIcon16x16 ) );
 
     Set( "PainterEditor.TopBar64", new IMAGE_BRUSH( "PainterEditor/top_bar_64", mIcon64x64 ) );
+    Set( "PainterEditor.TopBar20", new IMAGE_BRUSH( "PainterEditor/top_bar_20", mIcon20x20 ) );
     Set( "PainterEditor.TopBar16", new IMAGE_BRUSH( "PainterEditor/top_bar_16", mIcon16x16 ) );
 
     Set( "PainterEditor.BotBar64", new IMAGE_BRUSH( "PainterEditor/bot_bar_64", mIcon64x64 ) );
@@ -247,12 +255,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Trash_2_16", new IMAGE_BRUSH( "PainterEditor/trash_2_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Viewport64", new IMAGE_BRUSH( "PainterEditor/viewport_64", mIcon64x64 ) );
+    Set( "PainterEditor.Viewport20", new IMAGE_BRUSH( "PainterEditor/viewport_20", mIcon20x20 ) );
     Set( "PainterEditor.Viewport16", new IMAGE_BRUSH( "PainterEditor/viewport_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Draw64", new IMAGE_BRUSH( "PainterEditor/draw_64", mIcon64x64 ) );
     Set( "PainterEditor.Draw16", new IMAGE_BRUSH( "PainterEditor/draw_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Mesh64", new IMAGE_BRUSH( "PainterEditor/mesh_64", mIcon64x64 ) );
+    Set( "PainterEditor.Mesh20", new IMAGE_BRUSH( "PainterEditor/mesh_20", mIcon20x20 ) );
     Set( "PainterEditor.Mesh16", new IMAGE_BRUSH( "PainterEditor/mesh_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Pan64", new IMAGE_BRUSH( "PainterEditor/pan_64", mIcon64x64 ) );
@@ -278,9 +288,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ArrowRight16", new IMAGE_BRUSH( "PainterEditor/arrow_right_16", mIcon16x16 ) );
 
     Set( "PainterEditor.ColorWheel64", new IMAGE_BRUSH( "PainterEditor/color_wheel_64", mIcon64x64 ) );
+    Set( "PainterEditor.ColorWheel20", new IMAGE_BRUSH( "PainterEditor/color_wheel_20", mIcon20x20 ) );
     Set( "PainterEditor.ColorWheel16", new IMAGE_BRUSH( "PainterEditor/color_wheel_16", mIcon16x16 ) );
 
     Set( "PainterEditor.Trombone64", new IMAGE_BRUSH( "PainterEditor/trombone_64", mIcon64x64 ) );
+    Set( "PainterEditor.Trombone20", new IMAGE_BRUSH( "PainterEditor/trombone_20", mIcon20x20 ) );
     Set( "PainterEditor.Trombone16", new IMAGE_BRUSH( "PainterEditor/trombone_16", mIcon16x16 ) );
 
     Set( "PainterEditor.UndoHistory64", new IMAGE_BRUSH( "PainterEditor/undo_history_64", mIcon64x64 ) );
