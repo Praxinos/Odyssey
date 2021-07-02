@@ -38,7 +38,7 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
     if( !viewportDrawingEditor ) return;
 
     ioToolbarBuilder.AddToolBarButton(
-        FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::ToggleLayerStackTab) ),
+        FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::OpenLayerStackTab) ),
         NAME_None,
         LOCTEXT("ViewportDrawingEditorToggleLayerStackTab", "Layerstack"),
         LOCTEXT("ViewportDrawingEditorToggleLayerStackTabTooltip", "Display Layerstack Panel"),

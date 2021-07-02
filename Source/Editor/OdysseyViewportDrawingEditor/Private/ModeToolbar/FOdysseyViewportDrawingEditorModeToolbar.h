@@ -22,8 +22,7 @@ public:
     void LoadOpenedTabs();
 
 public:
-    //CallBacks
-    void ToggleLayerStackTab();
+    void OpenLayerStackTab();
 
 private:
     TSharedPtr<FTabManager> mLevelEditorTabManager;

@@ -26,8 +26,13 @@ FOdysseyViewportDrawingEditorModeToolbar::FOdysseyViewportDrawingEditorModeToolb
 
 FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeToolbar()
 {
-    TSharedPtr< SDockTab > tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
+    TSharedPtr< SDockTab > tab = nullptr;
+    
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
 
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetColorSlidersTab()->ID()));
     if (tab.IsValid())
         tab->RequestCloseTab();
 }
@@ -42,12 +47,19 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
         return;
 
     FBufferArchive buffer;
+    FString str;
 
-    FString str = mGUI->GetLayerStackTab()->ID().ToString();
-    buffer << str;
+    if( mLevelEditorTabManager->FindExistingLiveTab( mGUI->GetLayerStackTab()->ID() ) )
+    {
+        str = mGUI->GetLayerStackTab()->ID().ToString();
+        buffer << str;
+    }
 
-    str = mGUI->GetColorSlidersTab()->ID().ToString();
-    buffer << str;
+    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetColorSlidersTab()->ID() ) )
+    {
+        str = mGUI->GetColorSlidersTab()->ID().ToString();
+        buffer << str;
+    }
 
     fileHandle->Seek(0);
     fileHandle->Write(buffer.GetData(), buffer.Num());
@@ -100,7 +112,7 @@ void FOdysseyViewportDrawingEditorModeToolbar::LoadOpenedTabs()
 //-------------------------------------------------------------------- Callbacks / Toogle
 
 
-void FOdysseyViewportDrawingEditorModeToolbar::ToggleLayerStackTab()
+void FOdysseyViewportDrawingEditorModeToolbar::OpenLayerStackTab()
 {
     if( !mLevelEditorTabManager )
         return;
