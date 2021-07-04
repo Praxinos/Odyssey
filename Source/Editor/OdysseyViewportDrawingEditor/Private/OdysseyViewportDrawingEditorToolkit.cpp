@@ -24,7 +24,6 @@ FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 	return LOCTEXT("ToolkitName", "Odyssey Mesh Paint");
 }
 
-
 void
 FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const
 {

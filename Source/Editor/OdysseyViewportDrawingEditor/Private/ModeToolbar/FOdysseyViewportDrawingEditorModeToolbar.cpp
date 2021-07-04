@@ -78,6 +78,7 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
 {
     FString tabsOpenedPath = FPaths::Combine(FPaths::EngineSavedDir(), *FString("IliadEdModeLayout.save"));
     IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+    FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*tabsOpenedPath);
     IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath);
 
     if( !fileHandle )

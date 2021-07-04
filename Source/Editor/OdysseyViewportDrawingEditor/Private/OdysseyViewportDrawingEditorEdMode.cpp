@@ -4,6 +4,8 @@
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EdMode.h"
 #include "EditorModeManager.h"
+#include "LevelEditor.h"
+#include "Interfaces/IMainFrameModule.h" 
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Widgets/Docking/SDockableTab.h" 
 
@@ -93,6 +95,14 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 	return GetWorld() ? GetWorld()->FeatureLevel >= ERHIFeatureLevel::SM5 : false;
 }
 
+void FOdysseyViewportDrawingEditorEdMode::CleanupTabsToolbar(const TSharedRef<SWindow>& Window)
+{
+    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(FName("LevelEditor"));
+    TSharedRef<FTabManager> tabManager = levelEditorModule.GetLevelEditorTabManager()->AsShared();
+
+    mEditor->UnregisterTabSpawners( tabManager );
+}
+
 void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
     if( !UPhysicsSettings::Get()->bSupportUVFromHitResults )
@@ -101,16 +111,16 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         FMessageDialog::Open(EAppMsgType::Ok,LOCTEXT("Enable FindCollisionUV","'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."),&Title);
     }
 
+    IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
+    const TSharedPtr<SWindow>& MainFrameParentWindow = MainFrameModule.GetParentWindow();
+    MainFrameParentWindow->SetOnWindowClosed(FOnWindowClosed::CreateSP(this, &FOdysseyViewportDrawingEditorEdMode::CleanupTabsToolbar));
+
     mViewportDrawingEditorPainter->Initialize();
-    //mViewportDrawingEditorPainter->GetController()->EdModeEnter();
 	IMeshPaintEdMode::Enter();
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()
 {
-    // mViewportDrawingEditorPainter->GetController()->EdModeExit();
-    // virer les tabs restantes.
-    // UnregisterTabSpawners(const TSharedRef< class FTabManager >& iTabManager)
     mViewportDrawingEditorPainter->Finalize();
 	IMeshPaintEdMode::Exit();
 }
