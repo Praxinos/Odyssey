@@ -4,6 +4,12 @@
 #include "Settings/EposTracksSettings.h"
 
 FName
+UEposTracksSettings::GetContainerName() const
+{
+    return TEXT( "Project" );
+}
+
+FName
 UEposTracksSettings::GetCategoryName() const
 {
     return TEXT( "Plugins" );

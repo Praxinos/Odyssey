@@ -45,13 +45,14 @@ public:
 /**
  * Epos Sequence Editor settings.
  */
-UCLASS(config=Epos, meta=(DisplayName="Epos Sequence"))
+UCLASS(config=Epos, meta=(DisplayName="Epos Sequence Editor"))
 class UEposSequenceEditorSettings
     : public UDeveloperSettings
 {
     GENERATED_BODY()
 
     //~ UDeveloperSettings Interface
+    virtual FName GetContainerName() const override;
     virtual FName GetCategoryName() const override;
     //~
 

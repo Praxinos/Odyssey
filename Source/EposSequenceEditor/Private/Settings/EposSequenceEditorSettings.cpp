@@ -4,6 +4,12 @@
 #include "Settings/EposSequenceEditorSettings.h"
 
 FName
+UEposSequenceEditorSettings::GetContainerName() const
+{
+    return TEXT( "Editor" );
+}
+
+FName
 UEposSequenceEditorSettings::GetCategoryName() const
 {
     return TEXT( "Plugins" );

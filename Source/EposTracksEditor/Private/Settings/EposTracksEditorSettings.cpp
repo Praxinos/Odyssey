@@ -12,6 +12,12 @@ UEposTracksEditorSettings::PostInitProperties()
 }
 
 FName
+UEposTracksEditorSettings::GetContainerName() const
+{
+    return TEXT( "Editor" );
+}
+
+FName
 UEposTracksEditorSettings::GetCategoryName() const
 {
     return TEXT( "Plugins" );

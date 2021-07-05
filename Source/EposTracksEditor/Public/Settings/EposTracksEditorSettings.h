@@ -82,6 +82,7 @@ class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
     GENERATED_BODY()
 
     //~ UDeveloperSettings Interface
+    virtual FName GetContainerName() const override;
     virtual FName GetCategoryName() const override;
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
