@@ -272,6 +272,7 @@ SAboutWindow::NewButtonImage( ELogo iLogo )
 
     TSharedRef<SButton> button = SNew( SButton )
         .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+        .IsEnabled( iLogo != ELogo::kEposUserDoc ) // Remove this line once everything's ok
         .Cursor( EMouseCursor::Hand )
         .ToolTipText( tooltip_with_url )
         .OnClicked_Lambda( [&]() { FPlatformProcess::LaunchURL( *logo.mUrl.ToString(), nullptr, nullptr ); return FReply::Handled(); } )
