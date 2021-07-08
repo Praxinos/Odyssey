@@ -8,6 +8,7 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "SequencerSettings.h"
 
 #include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
@@ -91,8 +92,6 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     mMovieSceneDataChangedHandle = mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged ); //TODO: or do it elsewhere ? in the USection/UTrack/... ?
 
-    static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
-
     //---
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
@@ -102,7 +101,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::DetachPlane ),
             FCanExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::CanDetachPlane ),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible /*&& CanDetachPlane()*/; } )
+            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible && CanDetachPlane(); } )
         ),
         NAME_None,
         FText::GetEmpty(),
@@ -116,10 +115,11 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     ChildSlot
     [
         SNew( SBorder )
-        .BorderImage( background_brush )
+        .BorderImage( FEditorStyle::GetBrush( "ToolPanel.GroupBorder" ) )
+        .BorderBackgroundColor( FLinearColor( .50f, .50f, .50f, 1.0f ) )
         [
             SNew( SHorizontalBox )
-            //+ SHorizontalBox::Slot()
+            //+ SHorizontalBox::Slot() // Add it to the toolbar
             //.AutoWidth()
             //[
             //    SNew( SCheckBox )
@@ -845,7 +845,9 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionPlanesFooter.ToolBar" );
 
     TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
-    middle_widget->SetVisibility( mOptionalWidgetsVisibility ); // To totally remove the verticalbox slot as the visibility is collapsed and not only hidden (keep space)
+    // To always keep the real space of the toolbar as hidden keeps space
+    // Otherwise the verticalbox is (a little) smaller when the toolbar is collapsed
+    middle_widget->SetVisibility( MakeAttributeLambda( [this]() { return mOptionalWidgetsVisibility.Get() == EVisibility::Visible ? EVisibility::Visible : EVisibility::Hidden; } ) );
 
     //---
 

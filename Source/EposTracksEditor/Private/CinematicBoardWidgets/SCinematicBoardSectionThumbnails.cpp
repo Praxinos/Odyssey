@@ -191,16 +191,6 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
 {
     FMenuBuilder menuBuilder( true, nullptr );
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "create-board-before.label", "New Previous Board" ),
-                              LOCTEXT( "create-board-before.description", "Create a new board inside a new section before this section" ),
-                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardBeforeSection" ),
-                              FUIAction( FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
-                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
-                                                                       } ) ) );
-
     menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-before.label", "New Previous Shot" ),
                               LOCTEXT( "create-shot-before.description", "Create a new shot inside a new section before this section" ),
                               FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithShotBeforeSection" ),
@@ -211,6 +201,16 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
                                                                            CinematicBoardTrackTools::InsertShot( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
                                                                        } ) ) );
 
+    menuBuilder.AddMenuEntry( LOCTEXT( "create-board-before.label", "New Previous Board" ),
+                              LOCTEXT( "create-board-before.description", "Create a new board inside a new section before this section" ),
+                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardBeforeSection" ),
+                              FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
+                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
+                                                                       } ) ) );
+
     return menuBuilder.MakeWidget();
 }
 
@@ -218,16 +218,6 @@ TSharedRef<SWidget>
 SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
 {
     FMenuBuilder menuBuilder( true, nullptr );
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "create-board-after.label", "New Next Board" ),
-                              LOCTEXT( "create-board-after.description", "Create a new board inside a new section after this section" ),
-                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardAfterSection" ),
-                              FUIAction( FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
-                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
-                                                                       } ) ) );
 
     menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-after.label", "New Next Shot" ),
                               LOCTEXT( "create-shot-after.description", "Create a new shot inside a new section after this section" ),
@@ -237,6 +227,16 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
                                                                            TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
                                                                            UMovieSceneSection* sectionObject = section->GetSectionObject();
                                                                            CinematicBoardTrackTools::InsertShot( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
+                                                                       } ) ) );
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "create-board-after.label", "New Next Board" ),
+                              LOCTEXT( "create-board-after.description", "Create a new board inside a new section after this section" ),
+                              FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardAfterSection" ),
+                              FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
+                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
                                                                        } ) ) );
 
     return menuBuilder.MakeWidget();

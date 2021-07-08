@@ -186,7 +186,7 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
         .AutoWidth()
         .VAlign( VAlign_Center )
         [
-            FSequencerUtilities::MakeAddButton( LOCTEXT( "CreateBoardShotText", "Board/Shot" ), FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), iParams.NodeIsHovered, GetSequencer() )
+            FSequencerUtilities::MakeAddButton( LOCTEXT( "CreateBoardShotText", "Shot/Board" ), FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent ), iParams.NodeIsHovered, GetSequencer() )
         ]
 
         // Add the camera check box
@@ -216,8 +216,8 @@ FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent()
 {
     FMenuBuilder menuBuilder( true, GetSequencer()->GetCommandBindings() );
 
-    menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
     menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
+    menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
 
     return menuBuilder.MakeWidget();
 }

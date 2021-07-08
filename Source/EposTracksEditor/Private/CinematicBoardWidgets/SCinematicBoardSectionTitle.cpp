@@ -19,17 +19,21 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     ChildSlot
     .HAlign( HAlign_Fill )
-    .Padding( 0.f, 4.f )
     [
-        SNew( SHorizontalBox ) // For future buttons
-        + SHorizontalBox::Slot()
-        .HAlign( HAlign_Center )
+        SNew( SBorder )
+        .BorderImage( FEditorStyle::GetBrush( "ToolPanel.GroupBorder" ) )
+        .BorderBackgroundColor( FLinearColor( .50f, .50f, .50f, 1.0f ) )
         [
-            SAssignNew( mWidgetName, SInlineEditableTextBlock )
-            .Text_Lambda( [this] { return HandleText(); } )
-            .ColorAndOpacity_Lambda( [this] { return HandleTextColor(); } )
-            .ShadowOffset( FVector2D( 1, 1 ) )
-            .OnTextCommitted( mBoardSection.Pin().ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
+            SNew( SHorizontalBox ) // For future buttons
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
+            [
+                SAssignNew( mWidgetName, SInlineEditableTextBlock )
+                .Text_Lambda( [this] { return HandleText(); } )
+                .ColorAndOpacity_Lambda( [this] { return HandleTextColor(); } )
+                .ShadowOffset( FVector2D( 1, 1 ) )
+                .OnTextCommitted( mBoardSection.Pin().ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
+            ]
         ]
     ];
 }
@@ -63,25 +67,6 @@ SCinematicBoardSectionTitle::HandleTextColor() const
         return FLinearColor( .75f, .75f, .75f );
 
     return FLinearColor( .25f, .25f, .25f );
-}
-
-int32
-SCinematicBoardSectionTitle::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
-{
-    static const FSlateBrush* background_brush = FEditorStyle::GetBrush( "ToolPanel.GroupBorder" );
-
-    FSlateDrawElement::MakeBox(
-        OutDrawElements,
-        LayerId++,
-        AllottedGeometry.ToPaintGeometry( AllottedGeometry.GetLocalSize(), FSlateLayoutTransform() ),
-        background_brush,
-        ESlateDrawEffect::None,
-        background_brush->GetTint( InWidgetStyle ) * FLinearColor( .5f, .5f, .5f ) // Same grey as TimeSlider widget
-    );
-
-    //---
-
-    return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }
 
 void
