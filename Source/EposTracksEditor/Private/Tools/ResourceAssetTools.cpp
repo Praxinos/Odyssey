@@ -9,6 +9,7 @@
 #include "CineCameraComponent.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
+#include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
 
@@ -118,6 +119,126 @@ MasterAssetTools::CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FSt
     UObject* new_object = assetToolsModule.Get().DuplicateAsset( oAssetName, package_path, texture_root );
 
     return Cast<UTexture2D>( new_object );
+}
+
+//---
+
+//static
+bool
+MasterAssetTools::GetBackgroundVisibility( UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    float use_background = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor" );
+
+    return use_background >= 0.5f;
+}
+//static
+void
+MasterAssetTools::SetBackgroundVisilibity( UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", iBackgroundVisibility ? 1.f : 0.f );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+//static
+void
+MasterAssetTools::ToggleBackgroundVisibility( UMovieSceneSequence* iRootSequence )
+{
+    SetBackgroundVisilibity( iRootSequence, !GetBackgroundVisibility( iRootSequence ) );
+}
+
+//static
+FLinearColor
+MasterAssetTools::GetBackgroundColor( UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    FLinearColor background_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "BackgroundColor" );
+
+    return background_color;
+}
+//static
+void
+MasterAssetTools::SetBackgroundColor( UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "BackgroundColor", iBackgroundColor );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", 1.f ); // Automatically use background if changing its color
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//-
+
+//static
+bool
+MasterAssetTools::GetGridVisibility( UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    float use_grid = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseGrid" );
+
+    return use_grid >= 0.5f;
+}
+//static
+void
+MasterAssetTools::SetGridVisilibity( UMovieSceneSequence* iRootSequence, bool iGridVisibility )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", iGridVisibility ? 1.f : 0.f );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+//static
+void
+MasterAssetTools::ToggleGridVisibility( UMovieSceneSequence* iRootSequence )
+{
+    SetGridVisilibity( iRootSequence, !GetGridVisibility( iRootSequence ) );
+}
+
+//static
+FLinearColor
+MasterAssetTools::GetGridColor( UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    FLinearColor grid_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "GridColor" );
+
+    return grid_color;
+}
+//static
+void
+MasterAssetTools::SetGridColor( UMovieSceneSequence* iRootSequence, FLinearColor iGridColor )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "GridColor", iGridColor );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its color
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//static
+EGridType
+MasterAssetTools::GetGridType( UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    int32 grid_type = int32( UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "GridType" ) );
+    grid_type = FMath::Clamp( grid_type, 0, 4 );
+
+    return static_cast<EGridType>( grid_type );
+}
+//static
+void
+MasterAssetTools::SetGridType( UMovieSceneSequence* iRootSequence, EGridType iGridType )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
+
+    int32 grid_type = static_cast<int32>( iGridType );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "GridType", grid_type );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its type
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
 }
 
 //---

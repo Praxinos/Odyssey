@@ -10,6 +10,7 @@
 #include "Board/BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceEditorCommands.h"
+#include "EposSequenceToolbarHelpers.h"
 #include "EposTracksModule.h"
 #include "Misc/SAboutWindow.h"
 #include "PlaneActor.h"
@@ -228,6 +229,13 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         FShotSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingSettingsMenu ),
+        LOCTEXT( "DrawingSettings", "Drawing Settings" ),
+        LOCTEXT( "DrawingSettingsToolTip", "Set material parameters of the all drawings" ),
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "ShotSequenceEditor.DrawingSettings" ) );
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddComboButton(
@@ -271,20 +279,21 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 }
 
 TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeDrawingSettingsMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( MenuBuilder, mSequencer );
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeHelpMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoPraxinos );
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoForum );
-
-    MenuBuilder.AddSeparator();
-
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
-
-    MenuBuilder.AddSeparator();
-
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
+    EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }

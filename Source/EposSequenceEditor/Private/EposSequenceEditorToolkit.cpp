@@ -32,7 +32,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
-#include "Helpers/ToolkitHelpers.h"
+#include "ToolkitHelpers.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Shot/ShotSequenceEditorCommands.h"
 

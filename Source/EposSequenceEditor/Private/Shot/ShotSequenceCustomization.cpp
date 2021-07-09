@@ -6,9 +6,9 @@
 #include "CineCameraActor.h"
 
 #include "EposSequenceEditorCommands.h"
+#include "EposSequenceToolbarHelpers.h"
 #include "Misc/SAboutWindow.h"
 #include "PlaneActor.h"
-#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
 #include "Styles/EposSequenceEditorStyle.h"
@@ -274,6 +274,13 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FShotSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeDrawingSettingsMenu ),
+        LOCTEXT( "DrawingSettings", "Drawing Settings" ),
+        LOCTEXT( "DrawingSettingsToolTip", "Set material parameters of the all drawings" ),
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "ShotSequenceEditor.DrawingSettings" ) );
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddComboButton(
@@ -282,29 +289,6 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
         FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" ) );
-
-    //TSharedRef<SHorizontalBox> Widget = SNew(SHorizontalBox)
-    //  +SHorizontalBox::Slot()
-    //  .AutoWidth()
-    //  .VAlign(VAlign_Center)
-    //  [
-    //      SNew(STextBlock)
-    //      .Text(LOCTEXT("BoundActorClassPicker", "Bound Actor Class"))
-        //]
-        //+SHorizontalBox::Slot()
-        //.AutoWidth()
-        //.VAlign(VAlign_Center)
-        //[
-        //  SNew(SComboButton)
-        //  .OnGetMenuContent_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassMenuContent)
-        //  .ButtonContent()
-        //  [
-        //      SNew(STextBlock)
-        //      .Text_Raw(this, &FTemplateSequenceCustomization::GetBoundActorClassName)
-        //  ]
-        //];
-
-    //ToolbarBuilder.AddWidget(Widget);
 }
 
 TSharedRef<SWidget>
@@ -312,30 +296,7 @@ FShotSequenceCustomization::MakeCameraMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "CameraSettingsTitle", "Default Camera Settings" ) );
-    {
-        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-
-        // Create a detail view
-        FDetailsViewArgs Args;
-        Args.bAllowSearch = false;
-        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        Args.ColumnWidth = .5f;
-        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
-
-        // Filter properties to only get CameraSettings ones
-        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
-        {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, CameraSettings );
-        };
-        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
-        // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
-
-        MenuBuilder.AddWidget( DetailView, FText(), true );
-    }
-    MenuBuilder.EndSection();
+    EposSequenceToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }
@@ -404,34 +365,21 @@ FShotSequenceCustomization::MakeDrawingMenu()
 }
 
 TSharedRef<SWidget>
+FShotSequenceCustomization::MakeDrawingSettingsMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( MenuBuilder, mSequencer );
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
 FShotSequenceCustomization::MakeTextureMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "TextureSettingsTitle", "Default Texture Settings" ) );
-    {
-        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-
-        // Create a detail view
-        FDetailsViewArgs Args;
-        Args.bAllowSearch = false;
-        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        Args.ColumnWidth = .5f;
-        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
-
-        // Filter properties to only get CameraSettings ones
-        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
-        {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, TextureSettings );
-        };
-        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
-        // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
-
-        MenuBuilder.AddWidget( DetailView, FText(), true );
-    }
-    MenuBuilder.EndSection();
+    EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }
@@ -441,16 +389,7 @@ FShotSequenceCustomization::MakeHelpMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoPraxinos );
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoForum );
-
-    MenuBuilder.AddSeparator();
-
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
-
-    MenuBuilder.AddSeparator();
-
-    MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
+    EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }

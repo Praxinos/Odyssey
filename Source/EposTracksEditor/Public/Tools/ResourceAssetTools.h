@@ -12,6 +12,16 @@ class UMaterialInterface;
 class UMovieSceneSequence;
 class UTexture2D;
 
+/** The grid type which must correspond to the value inside the material instance */
+enum class EGridType
+{
+    kNone = 0,
+    k2x2,
+    k3x3,
+    kCrosshair,
+    kAbatment,
+};
+
 /*
  * The management of master assets (copied from the plugins content directory to the project)
  */
@@ -29,6 +39,24 @@ private:
     static UMaterialInstanceConstant* CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName );
 
     friend class ProjectAssetTools;
+
+public:
+    static bool         GetBackgroundVisibility( UMovieSceneSequence* iRootSequence );
+    static void         SetBackgroundVisilibity( UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility );
+    static void         ToggleBackgroundVisibility( UMovieSceneSequence* iRootSequence );
+
+    static FLinearColor GetBackgroundColor( UMovieSceneSequence* iRootSequence );
+    static void         SetBackgroundColor( UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor );
+
+    static bool         GetGridVisibility( UMovieSceneSequence* iRootSequence );
+    static void         SetGridVisilibity( UMovieSceneSequence* iRootSequence, bool iGridVisibility );
+    static void         ToggleGridVisibility( UMovieSceneSequence* iRootSequence );
+
+    static FLinearColor GetGridColor( UMovieSceneSequence* iRootSequence );
+    static void         SetGridColor( UMovieSceneSequence* iRootSequence, FLinearColor iGridColor );
+
+    static EGridType    GetGridType( UMovieSceneSequence* iRootSequence );
+    static void         SetGridType( UMovieSceneSequence* iRootSequence, EGridType iGridType );
 };
 
 /*

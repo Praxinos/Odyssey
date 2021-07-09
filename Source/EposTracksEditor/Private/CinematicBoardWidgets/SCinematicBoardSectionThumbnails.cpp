@@ -8,6 +8,7 @@
 #include "SequencerSectionPainter.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "EposTracksToolbarHelpers.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
@@ -158,30 +159,7 @@ SCinematicBoardSectionThumbnails::MakeCameraMenu()
 {
     FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
 
-    MenuBuilder.BeginSection( NAME_None, LOCTEXT( "CameraSettingsTitle", "Default Camera Settings" ) );
-    {
-        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-
-        // Create a detail view
-        FDetailsViewArgs Args;
-        Args.bAllowSearch = false;
-        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        Args.ColumnWidth = .5f;
-        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
-
-        // Filter properties to only get CameraSettings ones
-        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
-        {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, CameraSettings );
-        };
-        DetailView->GetIsPropertyVisibleDelegate() = FIsPropertyVisible::CreateLambda( visible_property );
-        // Set the object to view
-        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
-
-        MenuBuilder.AddWidget( DetailView, FText(), true );
-    }
-    MenuBuilder.EndSection();
+    EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }
