@@ -77,7 +77,7 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                         .AutoHeight()
                         [
                             SNew(SObjectPropertyEntryBox)
-                            .AllowedClass(UMaterial::StaticClass())
+                            .AllowedClass(UMaterialInterface::StaticClass())
                             .ObjectPath(this, &FOdysseyViewportDrawingEditorMasterTab::PaintMaterialPath)
                             .OnObjectChanged(FOnSetObject::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged))
                             .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &FOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset))

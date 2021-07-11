@@ -131,24 +131,21 @@ FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 		texturePaintSettings.mSelectedTexture = Texture();
 	}
 
-	// Clear everything before changing component
-	ClearSelectableTextures(); // Also clears selected Texture
-
 	// Change the selected component
 	mComponent = iComponent;
     SelectDefaultMaterial();
-
-	if (mComponent)
-	{
-		UpdateSelectableTextures();
-		SelectDefaultTexture();
-	}
 }
 
 void
 FOdysseyViewportDrawingEditor::SetMaterial(UMaterialInterface* iMaterial)
 {
     mMaterial = iMaterial;
+    if (mMaterial)
+    {
+        ClearSelectableTextures(); // Also clears selected Texture
+        UpdateSelectableTextures();
+        SelectDefaultTexture();
+    }
 }
 
 void
@@ -392,7 +389,7 @@ FOdysseyViewportDrawingEditor::SelectDefaultTexture()
 
 		SetTexture(texture);
 		break;
-	}	
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

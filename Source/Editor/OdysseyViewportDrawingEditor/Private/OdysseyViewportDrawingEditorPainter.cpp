@@ -1446,99 +1446,113 @@ void FOdysseyViewportDrawingEditorPainter::Refresh()
 {
 	// Ensure that we call OnRemoved while adapter/components are still valid
 	// mPaintableComponents.Empty();
-	// Cleanup();
+// Cleanup();
 
-	// mDoRefreshCachedData = true;
+// mDoRefreshCachedData = true;
 }
 
 /* void FOdysseyViewportDrawingEditorPainter::Cleanup()
 {
-	for (auto meshAdapterPair : mComponentToAdapterMap)
-	{
-		meshAdapterPair.Value->OnRemoved();
-	}
-	mComponentToAdapterMap.Empty();
-	FMeshPaintAdapterFactory::CleanupGlobals();
+    for (auto meshAdapterPair : mComponentToAdapterMap)
+    {
+        meshAdapterPair.Value->OnRemoved();
+    }
+    mComponentToAdapterMap.Empty();
+    FMeshPaintAdapterFactory::CleanupGlobals();
 } */
 
 void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewportClient, float iDeltaTime)
 {
-	IMeshPainter::Tick(iViewportClient, iDeltaTime);
-	
-	/* if (mDoRefreshCachedData)
-	{
-		mDoRefreshCachedData = false;
-		CacheSelectionData();
-		CacheTexturePaintData();
+    IMeshPainter::Tick(iViewportClient, iDeltaTime);
 
-		mDoRestoreRenTargets = true;
-	} */
+    /* if (mDoRefreshCachedData)
+    {
+        mDoRefreshCachedData = false;
+        CacheSelectionData();
+        CacheTexturePaintData();
 
-	// Will set the texture override up for the selected texture, important for the drop down combo-list and selecting between material instances.
-	if (mEditor->Texture())
-	{
-		for (UMeshComponent* meshComponent : mEditor->SelectableComponents())
-		{
-			const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapter = mEditor->ComponentToAdapterMap().Find(meshComponent);
-			if (meshAdapter)
-			{
-				SetSpecificTextureOverrideForMesh(*meshAdapter->Get(), mEditor->Texture());
-			}
-		}
-	}
+        mDoRestoreRenTargets = true;
+    } */
 
-	// If this is true probably someone force deleted a texture out from under us
-	bool bBadAssetFound = false;
+    // Will set the texture override up for the selected texture, important for the drop down combo-list and selecting between material instances.
+    /*if (mEditor->Texture())
+    {
+        for (UMeshComponent* meshComponent : mEditor->SelectableComponents())
+        {
+            const TSharedPtr<IMeshPaintGeometryAdapter>* meshAdapter = mEditor->ComponentToAdapterMap().Find(meshComponent);
+            if (meshAdapter)
+            {
+                SetSpecificTextureOverrideForMesh(*meshAdapter->Get(), mEditor->Texture());
+            }
+        }
+    }*/
 
-	if (mDoRestoreRenTargets)
-	{
-		if (mPaintingTexture2D == nullptr)
-		{
-			for (TMap< UTexture2D*, FPaintTexture2DData >::TIterator it(mPaintTargetData); it; ++it)
-			{
-				
-				if (!it.Key())
-				{
-					bBadAssetFound = true;
-					break;
-				}
+    // If this is true probably someone force deleted a texture out from under us
+    bool bBadAssetFound = false;
 
-				FPaintTexture2DData* textureData = &it.Value();
-				if (textureData->PaintRenderTargetTexture != nullptr)
-				{
+    if (mDoRestoreRenTargets)
+    {
+        if (mPaintingTexture2D == nullptr)
+        {
+            for (TMap< UTexture2D*, FPaintTexture2DData >::TIterator it(mPaintTargetData); it; ++it)
+            {
 
-					bool bIsSourceTextureStreamedIn = textureData->PaintingTexture2D->IsFullyStreamedIn();
+                if (!it.Key())
+                {
+                    bBadAssetFound = true;
+                    break;
+                }
 
-					if (!bIsSourceTextureStreamedIn)
-					{
-						//   Make sure it is fully streamed in before we try to do anything with it.
-						textureData->PaintingTexture2D->SetForceMipLevelsToBeResident(30.0f);
-						textureData->PaintingTexture2D->WaitForStreaming();
-					}
+                FPaintTexture2DData* textureData = &it.Value();
+                if (textureData->PaintRenderTargetTexture != nullptr)
+                {
 
-					//Use the duplicate texture here because as we modify the texture and do undo's, it will be different over the original.
-					// TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture);
-					if (textureData->PaintingTexture2D->Source.IsValid())
-					{
-						TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-					}
-					else
-					{
-						check(textureData->PaintingTexture2D->IsFullyStreamedIn());
-						TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
-					}
+                    bool bIsSourceTextureStreamedIn = textureData->PaintingTexture2D->IsFullyStreamedIn();
 
-				}
-			}
-		}
-		// We attempted a restore of the rendertargets so go ahead and clear the flag
-		mDoRestoreRenTargets = false;
-	}
+                    if (!bIsSourceTextureStreamedIn)
+                    {
+                        //   Make sure it is fully streamed in before we try to do anything with it.
+                        textureData->PaintingTexture2D->SetForceMipLevelsToBeResident(30.0f);
+                        textureData->PaintingTexture2D->WaitForStreaming();
+                    }
 
-	if (bBadAssetFound)
-	{
-		mPaintTargetData.Empty();
-	}
+                    //Use the duplicate texture here because as we modify the texture and do undo's, it will be different over the original.
+                    // TexturePaintHelpers::SetupInitialRenderTargetData(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture);
+                    if (textureData->PaintingTexture2D->Source.IsValid())
+                    {
+                        TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+                    }
+                    else
+                    {
+                        check(textureData->PaintingTexture2D->IsFullyStreamedIn());
+                        TexturePaintHelpers::CopyTextureToRenderTargetTexture(textureData->PaintingTexture2D, textureData->PaintRenderTargetTexture, GEditor->GetEditorWorldContext().World()->FeatureLevel);
+                    }
+
+                }
+            }
+        }
+        // We attempted a restore of the rendertargets so go ahead and clear the flag
+        mDoRestoreRenTargets = false;
+    }
+
+    if (bBadAssetFound)
+    {
+        mPaintTargetData.Empty();
+    }
+
+    // TODO: This part should change when Epic Games creates a new delegate to know when an UObject changed from the sequencer. Until then, we're checking when we can
+    if( mEditor->Component() )
+    {
+        TArray<UMaterialInterface*> selectableMaterials;
+        mEditor->Component()->GetUsedMaterials(selectableMaterials);
+        if (selectableMaterials.Num() > 0)
+        {
+            if (selectableMaterials.Find(mEditor->Material()) == INDEX_NONE)
+            {
+                mEditor->SetMaterial(selectableMaterials[0]);
+            }
+        }
+    }
 
     if( mEditor->Texture() )
     {
