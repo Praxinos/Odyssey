@@ -432,6 +432,7 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     }
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    BoardSequenceTools::UpdateViewRange( iSequencer, newBoard ? newBoard->GetTrueRange() : TRange<FFrameNumber>::Empty() );
     iSequencer->EmptySelection();
     iSequencer->SelectSection( newBoard );
     iSequencer->ThrobSectionSelection();

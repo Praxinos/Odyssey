@@ -97,8 +97,7 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
         return;
     }
 
-    FGuid CameraGuid;
-    ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &CameraGuid );
+    ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID );
     if( ExistingCamera )
         return;
 

@@ -7,8 +7,27 @@
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
+#include "MovieSceneTimeHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools"
+
+//---
+
+void BoardSequenceTools::UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange )
+{
+    if( iNewRange.IsEmpty() )
+        return;
+
+    TRange<double> working_range = iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetWorkingRange(); // iSequencer->GetClampRange() is only inside FSequencer and not ISequencer
+    working_range = UE::MovieScene::DilateRange( working_range, 0., ( iNewRange / iSequencer->GetFocusedTickResolution() ).Size<double>() );
+    iSequencer->SetClampRange( working_range );
+
+    TRange<double> view_range = iSequencer->GetViewRange();
+    view_range = UE::MovieScene::DilateRange( view_range, 0., ( iNewRange / iSequencer->GetFocusedTickResolution() ).Size<double>() );
+    iSequencer->SetViewRange( view_range );
+}
+
+//---
 
 ShotSequenceTools::cTemporarySwitchInner::cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID )
     : mSequencer( iSequencer )

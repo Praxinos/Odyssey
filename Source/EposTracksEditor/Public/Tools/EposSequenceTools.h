@@ -115,6 +115,9 @@ public:
     /** Find or create a cinematic board track in the currently focused movie scene. */
     static UMovieSceneCinematicBoardTrack* FindOrCreateCinematicBoardTrack( ISequencer* iSequencer );
 
+    /** Stretch sequencer time range to view make the new range inside the view. */
+    static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
+
 // Inside EspoSequenceTools_Camera
 public:
     /**

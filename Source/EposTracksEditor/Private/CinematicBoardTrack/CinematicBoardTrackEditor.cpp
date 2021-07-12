@@ -301,6 +301,7 @@ FCinematicBoardTrackEditor::HandleSequenceAdded( FFrameNumber iKeyTime, UMovieSc
     UMovieSceneSubSection* newSection = boardTrack->AddSequenceOnRow( iSequence, iKeyTime, outerDuration, iRowIndex );
     keyPropertyResult.bTrackModified = true;
 
+    BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
     GetSequencer()->EmptySelection();
     GetSequencer()->SelectSection( newSection );
     GetSequencer()->ThrobSectionSelection();
@@ -685,6 +686,7 @@ FCinematicBoardTrackEditor::AddKeyInternal( FFrameNumber iKeyTime, UMovieSceneSe
         UMovieSceneSubSection* newSection = boardTrack->AddSequenceOnRow( iMovieSceneSequence, iDroppedFrame.IsSet() ? iDroppedFrame.GetValue() : iKeyTime, outerDuration, iRowIndex );
         keyPropertyResult.bTrackModified = true;
 
+        BoardSequenceTools::UpdateViewRange( GetSequencer().Get(), newSection->GetTrueRange() );
         GetSequencer()->EmptySelection();
         GetSequencer()->SelectSection( newSection );
         GetSequencer()->ThrobSectionSelection();
