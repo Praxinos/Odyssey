@@ -23,6 +23,11 @@ public:
 
     UPROPERTY(config, EditAnywhere, Category=Board)
     FFrameRate DefaultDisplayFrameRate { 24, 1 };
+
+    /** The default duration for new board sequences in seconds. */
+    UPROPERTY(config, EditAnywhere, Category=Board, meta=(ClampMin=0.00001f, Units=s))
+    float DefaultDuration { 3 };
+
 };
 
 //---
@@ -38,6 +43,10 @@ public:
 
     UPROPERTY(config, EditAnywhere, Category=Shot)
     FFrameRate DefaultDisplayFrameRate { 24, 1 };
+
+    /** The default duration for new shot sequences in seconds. */
+    UPROPERTY(config, EditAnywhere, Category=Shot, meta=(ClampMin=0.00001f, Units=s))
+    float DefaultDuration { 3 };
 };
 
 //---
@@ -59,8 +68,6 @@ class UEposSequenceEditorSettings
 public:
     //TODO: add everything inside UMovieSceneToolsProjectSettings here ? or inherit from it ?
     // it is used inside:
-    // ./Source/EposSequenceEditor/Private/Board/BoardSequenceFactoryNew.cpp
-    // ./Source/EposSequenceEditor/Private/Shot/ShotSequenceFactoryNew.cpp
     // ./Source/EposTracksEditor/Private/EposTracksEditorHelpers.cpp
 
     /** Specifies Board stuff. */

@@ -29,11 +29,8 @@ UObject* UShotSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iPa
     const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
     NewShotSequence->Initialize( SequenceSettings->ShotSettings.DefaultTickFrameRate, SequenceSettings->ShotSettings.DefaultDisplayFrameRate );
 
-    // Set up some sensible defaults
-    const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
-
     FFrameRate TickResolution = NewShotSequence->GetMovieScene()->GetTickResolution();
-    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0 /* ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame() */, ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
+    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0, ( SequenceSettings->ShotSettings.DefaultDuration * TickResolution ).FloorToFrame().Value );
 
     return NewShotSequence;
 }

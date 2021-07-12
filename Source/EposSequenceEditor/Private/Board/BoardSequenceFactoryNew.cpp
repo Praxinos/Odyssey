@@ -29,11 +29,8 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
     const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
     NewBoardSequence->Initialize( SequenceSettings->BoardSettings.DefaultTickFrameRate, SequenceSettings->BoardSettings.DefaultDisplayFrameRate );
 
-    // Set up some sensible defaults
-    const UMovieSceneToolsProjectSettings* ProjectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
-
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();
-    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0 /* ( ProjectSettings->DefaultStartTime*TickResolution ).FloorToFrame() */, ( ProjectSettings->DefaultDuration*TickResolution ).FloorToFrame().Value );
+    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0, ( SequenceSettings->BoardSettings.DefaultDuration * TickResolution ).FloorToFrame().Value );
 
     auto newTrack = NewBoardSequence->GetMovieScene()->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
 
