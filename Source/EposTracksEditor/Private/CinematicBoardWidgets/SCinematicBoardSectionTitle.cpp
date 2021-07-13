@@ -44,12 +44,14 @@ SCinematicBoardSectionTitle::HandleText() const
     if( !mBoardSection.IsValid() )
         return FText::GetEmpty();
 
-    FText section_text = mBoardSection.Pin()->HandleThumbnailTextBlockText();
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSequence*    subsequence = board_section->GetSubSectionObject().GetSequence();
+
+    FText section_text = board_section->HandleThumbnailTextBlockText();
     if( !section_text.IsEmpty() )
         return section_text;
 
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
-    FText sequence_text = subsection.GetSequence() ? subsection.GetSequence()->GetDisplayName() : FText::GetEmpty();
+    FText sequence_text = subsequence ? subsequence->GetDisplayName() : FText::GetEmpty();
     if( !sequence_text.IsEmpty() )
         return FText::Format( FText::FromString( "<{0}>" ), sequence_text );
 
@@ -62,12 +64,16 @@ SCinematicBoardSectionTitle::HandleTextColor() const
     if( !mBoardSection.IsValid() )
         return FLinearColor::White;
 
-    FText section_text = mBoardSection.Pin()->HandleThumbnailTextBlockText();
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+
+    FText section_text = board_section->HandleThumbnailTextBlockText();
     if( !section_text.IsEmpty() )
         return FLinearColor( .75f, .75f, .75f );
 
     return FLinearColor( .25f, .25f, .25f );
 }
+
+//---
 
 void
 SCinematicBoardSectionTitle::EnterRename()

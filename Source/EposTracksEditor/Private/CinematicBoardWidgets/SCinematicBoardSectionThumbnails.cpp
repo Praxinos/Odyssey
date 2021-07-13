@@ -172,22 +172,12 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
     menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-before.label", "New Previous Shot" ),
                               LOCTEXT( "create-shot-before.description", "Create a new shot inside a new section before this section" ),
                               FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithShotBeforeSection" ),
-                              FUIAction( FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
-                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackTools::InsertShot( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
-                                                                       } ) ) );
+                              FUIAction( FExecuteAction::CreateLambda( [this]() { CinematicBoardTrackTools::InsertShot( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() ); } ) ) );
 
     menuBuilder.AddMenuEntry( LOCTEXT( "create-board-before.label", "New Previous Board" ),
                               LOCTEXT( "create-board-before.description", "Create a new board inside a new section before this section" ),
                               FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardBeforeSection" ),
-                              FUIAction( FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
-                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetInclusiveStartFrame() );
-                                                                       } ) ) );
+                              FUIAction( FExecuteAction::CreateLambda( [this]() { CinematicBoardTrackTools::InsertBoard( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() ); } ) ) );
 
     return menuBuilder.MakeWidget();
 }
@@ -200,22 +190,12 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
     menuBuilder.AddMenuEntry( LOCTEXT( "create-shot-after.label", "New Next Shot" ),
                               LOCTEXT( "create-shot-after.description", "Create a new shot inside a new section after this section" ),
                               FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithShotAfterSection" ),
-                              FUIAction( FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
-                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackTools::InsertShot( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
-                                                                       } ) ) );
+                              FUIAction( FExecuteAction::CreateLambda( [this]() { CinematicBoardTrackTools::InsertShot( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetExclusiveEndFrame() - 1 ); } ) ) );
 
     menuBuilder.AddMenuEntry( LOCTEXT( "create-board-after.label", "New Next Board" ),
                               LOCTEXT( "create-board-after.description", "Create a new board inside a new section after this section" ),
                               FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.NewSectionWithBoardAfterSection" ),
-                              FUIAction( FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
-                                                                           UMovieSceneSection* sectionObject = section->GetSectionObject();
-                                                                           CinematicBoardTrackTools::InsertBoard( section->GetSequencer().Get(), sectionObject->GetExclusiveEndFrame() - 1 );
-                                                                       } ) ) );
+                              FUIAction( FExecuteAction::CreateLambda( [this]() { CinematicBoardTrackTools::InsertBoard( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetExclusiveEndFrame() - 1 ); } ) ) );
 
     return menuBuilder.MakeWidget();
 }
@@ -298,18 +278,16 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     //---
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSubSection*  subsection_object = &board_section->GetSubSectionObject();
 
-    UMovieSceneSection* sectionObject = section->GetSectionObject();
-    UMovieSceneSubSection* subsectionObject = Cast<UMovieSceneSubSection>( sectionObject );
-
-    FSequencerSectionPainterImpl painter( *sectionObject, OutDrawElements, AllottedGeometry );
+    FSequencerSectionPainterImpl painter( *subsection_object, OutDrawElements, AllottedGeometry );
     //painter.KeyAreaElements = ;
-    painter.SectionClippingRect = section->GetRootPainter( Args )->SectionClippingRect.IntersectionWith( MyCullingRect );
+    painter.SectionClippingRect = board_section->GetRootPainter( Args )->SectionClippingRect.IntersectionWith( MyCullingRect );
     painter.LayerId = LayerId;
-    painter.bParentEnabled = section->GetRootPainter( Args )->bParentEnabled;
-    painter.bIsHighlighted = section->GetRootPainter( Args )->bIsHighlighted;
-    painter.bIsSelected = section->GetRootPainter( Args )->bIsSelected;
+    painter.bParentEnabled = board_section->GetRootPainter( Args )->bParentEnabled;
+    painter.bIsHighlighted = board_section->GetRootPainter( Args )->bIsHighlighted;
+    painter.bIsSelected = board_section->GetRootPainter( Args )->bIsSelected;
 
     //---
 
@@ -334,16 +312,16 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     //---
 
-    painter.LayerId = section->FKeyThumbnailSection::OnPaintSection( painter );
+    painter.LayerId = board_section->FKeyThumbnailSection::OnPaintSection( painter );
 
     //---
 
     // Paint the sub-sequence information/looping boundaries/etc.
 
-    FSubSectionPainterParams subSectionPainterParams( section->GetContentPadding() );
+    FSubSectionPainterParams subSectionPainterParams( board_section->GetContentPadding() );
     subSectionPainterParams.bShowTrackNum = false;
 
-    FSubSectionPainterUtil::PaintSection( section->GetSequencer(), *subsectionObject, painter, subSectionPainterParams );
+    FSubSectionPainterUtil::PaintSection( board_section->GetSequencer(), *subsection_object, painter, subSectionPainterParams );
 
     //---
 

@@ -6,10 +6,13 @@
 #include "Brushes/SlateColorBrush.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "KeyDrawParams.h"
+#include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
 
+#include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
+#include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionCamera"
 
@@ -44,12 +47,13 @@ SCinematicBoardSectionCamera::ComputeDesiredSize( float ) const //override
 TSharedPtr<FMetaFloatChannel>
 SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
-    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
 
     FGeometry geometry;
-    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
     FFrameTime clicked_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
@@ -62,11 +66,48 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
 
     //---
 
-    TSharedPtr<FMetaFloatChannel> meta_channel = section->GetCameraTransformMetaChannel();
+    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetCameraTransformMetaChannel();
     if( !meta_channel )
         return nullptr;
 
     return meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
+}
+
+void
+SCinematicBoardSectionCamera::BeginTransaction( const FText& iTransactionDesc ) // From FEditToolDragOperation::BeginTransaction#95
+{
+    // Begin an editor transaction and mark the section as transactional so it's state will be saved
+    mTransaction.Reset( new FScopedTransaction( iTransactionDesc ) );
+
+    //---
+
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    FGuid camera_binding;
+    ShotSequenceHelpers::GetCamera( *sequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_binding );
+
+    auto transform_sections = ShotSequenceHelpers::GetCameraTransformSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, camera_binding );
+
+    for( auto transform_section : transform_sections )
+    {
+        transform_section->SetFlags( RF_Transactional );
+        // Save the current state of the section
+        transform_section->TryModify();
+    }
+}
+
+void
+SCinematicBoardSectionCamera::EndTransaction()
+{
+    mTransaction.Reset();
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer*             sequencer = board_section->GetSequencer().Get();
+
+    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //---
@@ -91,16 +132,18 @@ SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, co
 
     //---
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonDown" ) );
+    BeginTransaction( LOCTEXT( "MoveCameraKeyTransaction", "Move Camera Keys" ) );
+
     return FReply::Handled().CaptureMouse( SharedThis( this ) );
 }
 
 FReply
 SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
+    EndTransaction();
+
     mKeysUnderMouse = nullptr;
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonUp" ) );
     return FReply::Handled().ReleaseMouseCapture();
 }
 
@@ -113,29 +156,30 @@ SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FP
         return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
     }
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
     FGeometry geometry;
-    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
     FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     //---
 
-    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
     // For the moment should always be the case
     check( mKeysUnderMouse->NumMetaKeys() == 1 );
 
-    const bool snap = section->GetSequencer()->GetSequencerSettings()->GetIsSnapEnabled() && section->GetSequencer()->GetSequencerSettings()->GetSnapKeyTimesToInterval();
-    const FFrameRate inner_tick_resolution = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetTickResolution();
-    const FFrameRate inner_display_rate = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetDisplayRate();
+    const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+    const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
+    const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
     mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
 
-    section->ReBuildCameraTransformMetaChannel();
+    board_section->ReBuildCameraTransformMetaChannel();
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove" ) );
     return FReply::Handled();
 }
 
@@ -170,10 +214,11 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
 
     //---
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetCameraTransformChannelProxy();
-    TSharedPtr<FMetaFloatChannel> meta_channel = section->GetCameraTransformMetaChannel();
+    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetCameraTransformMetaChannel();
 
     if( !meta_channel.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
@@ -181,9 +226,9 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
     //---
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
-    FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
-    const UMovieScene* movie_scene = section->GetSubSectionObject().GetTypedOuter<UMovieScene>();
+    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 
     for( const auto& pair : meta_channel->GetMetaKeys() )

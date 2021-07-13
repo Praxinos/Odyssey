@@ -20,7 +20,6 @@ public:
         SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
-    SCinematicBoardSectionPlanes();
     virtual ~SCinematicBoardSectionPlanes();
 
     // Construct the widget
@@ -36,22 +35,23 @@ public:
 protected:
     TSharedRef<ITableRow> MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
-    void CreatePlane();
-    bool CanCreatePlane();
+    void                CreatePlane();
+    bool                CanCreatePlane();
     TSharedRef<SWidget> MakeTextureMenu();
 
     void RebuildPlaneList();
 
 private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
-    TWeakPtr<ISequencer> mSequencer;
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    TAttribute<EVisibility>             mOptionalWidgetsVisibility;
 
-    TAttribute<EVisibility> mOptionalWidgetsVisibility;
+    TWeakPtr<ISequencer>                mSequencer;
 
 private:
     TArray<TSharedRef<FMovieScenePossessable>> mPossessables;
     TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetPlaneList;
-    bool mNeedRebuildPlaneList;
+
+    bool mNeedRebuildPlaneList { true };
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
     FDelegateHandle mRebuildPlaneListHandle;

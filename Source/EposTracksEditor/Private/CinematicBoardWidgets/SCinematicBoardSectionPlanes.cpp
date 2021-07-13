@@ -7,6 +7,7 @@
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "SequencerSettings.h"
 
@@ -50,10 +51,9 @@ private:
     bool                CanDetachPlane();
 
 private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
-
-    FMovieScenePossessable mBinding;
-    TAttribute<EVisibility> mOptionalWidgetsVisibility;
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    FMovieScenePossessable              mBinding;
+    TAttribute<EVisibility>             mOptionalWidgetsVisibility;
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
     FDelegateHandle mMovieSceneDataChangedHandle;
@@ -152,10 +152,11 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 void
 SCinematicBoardSectionPlaneTitle::OnToggleLighttable( ECheckBoxState iNewState )
 {
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     if( iNewState == ECheckBoxState::Checked )
         LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
@@ -166,10 +167,11 @@ SCinematicBoardSectionPlaneTitle::OnToggleLighttable( ECheckBoxState iNewState )
 FText
 SCinematicBoardSectionPlaneTitle::GetLighttableTooltip() const
 {
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
     return lighttable_on ? LOCTEXT( "lighttable.on", "Lighttable On" ) : LOCTEXT( "lighttable.off", "Lighttable Off" );
@@ -178,10 +180,11 @@ SCinematicBoardSectionPlaneTitle::GetLighttableTooltip() const
 ECheckBoxState
 SCinematicBoardSectionPlaneTitle::IsLighttableOn() const
 {
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     //---
 
@@ -194,10 +197,11 @@ SCinematicBoardSectionPlaneTitle::IsLighttableOn() const
 void
 SCinematicBoardSectionPlaneTitle::DetachPlane()
 {
-    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
@@ -206,17 +210,18 @@ SCinematicBoardSectionPlaneTitle::DetachPlane()
     for( int i = 0; i < plane_count; i++ )
     {
         if( plane_bindings[i] == mBinding.GetGuid() )
-            BoardSequenceTools::DetachPlane( sequencer, mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame(), planes[i] );
+            BoardSequenceTools::DetachPlane( sequencer, subsection_object->GetInclusiveStartFrame(), planes[i] );
     }
 }
 
 bool
 SCinematicBoardSectionPlaneTitle::CanDetachPlane()
 {
-    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     TArray<FGuid> plane_bindings;
     int plane_count = ShotSequenceHelpers::GetAttachedPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );
@@ -256,10 +261,17 @@ protected:
 private:
     TSharedPtr<FMetaFloatChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
-private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
+    /** Start a transaction at mouse down */
+    void BeginTransaction( const FText& iTransactionDesc );
+    /** End the transaction at mouse up */
+    void EndTransaction();
 
-    FMovieScenePossessable mBinding;
+private:
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    FMovieScenePossessable              mBinding;
+
+    /** Scoped transaction for this drag operation */
+    TUniquePtr<FScopedTransaction>      mTransaction;
 
     TSharedPtr<FMetaFloatChannel>       mKeysUnderMouse;
 };
@@ -289,12 +301,13 @@ SCinematicBoardSectionPlaneKeys::ComputeDesiredSize( float ) const //override
 TSharedPtr<FMetaFloatChannel>
 SCinematicBoardSectionPlaneKeys::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
-    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
 
     FGeometry geometry;
-    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
     FFrameTime clicked_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
@@ -307,11 +320,45 @@ SCinematicBoardSectionPlaneKeys::GetKeysUnderMouse( const FPointerEvent& MouseEv
 
     //---
 
-    TSharedPtr<FMetaFloatChannel> meta_channel = section->GetPlaneTransformMetaChannel( mBinding );
+    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
     if( !meta_channel )
         return nullptr;
 
     return meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
+}
+
+void
+SCinematicBoardSectionPlaneKeys::BeginTransaction( const FText& iTransactionDesc ) // From FEditToolDragOperation::BeginTransaction#95
+{
+    // Begin an editor transaction and mark the section as transactional so it's state will be saved
+    mTransaction.Reset( new FScopedTransaction( iTransactionDesc ) );
+
+    //---
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    auto transform_sections = ShotSequenceHelpers::GetPlaneTransformSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    for( auto transform_section : transform_sections )
+    {
+        transform_section->SetFlags( RF_Transactional );
+        // Save the current state of the section
+        transform_section->TryModify();
+    }
+}
+
+void
+SCinematicBoardSectionPlaneKeys::EndTransaction()
+{
+    mTransaction.Reset();
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 FCursorReply
@@ -334,16 +381,18 @@ SCinematicBoardSectionPlaneKeys::OnMouseButtonDown( const FGeometry& MyGeometry,
 
     //---
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonDown" ) );
+    BeginTransaction( LOCTEXT( "MovePlaneKeyTransaction", "Move Plane Keys" ) );
+
     return FReply::Handled().CaptureMouse( SharedThis( this ) );
 }
 
 FReply
 SCinematicBoardSectionPlaneKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
+    EndTransaction();
+
     mKeysUnderMouse = nullptr;
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonUp" ) );
     return FReply::Handled().ReleaseMouseCapture();
 }
 
@@ -356,29 +405,30 @@ SCinematicBoardSectionPlaneKeys::OnMouseMove( const FGeometry& MyGeometry, const
         return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
     }
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
     FGeometry geometry;
-    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
     FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     //---
 
-    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
     // For the moment should always be the case
     check( mKeysUnderMouse->NumMetaKeys() == 1 );
 
-    const bool snap = section->GetSequencer()->GetSequencerSettings()->GetIsSnapEnabled() && section->GetSequencer()->GetSequencerSettings()->GetSnapKeyTimesToInterval();
-    const FFrameRate inner_tick_resolution = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetTickResolution();
-    const FFrameRate inner_display_rate = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetDisplayRate();
+    const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+    const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
+    const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
     mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
 
-    section->ReBuildPlanesTransformMetaChannel();
+    board_section->ReBuildPlanesTransformMetaChannel();
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove" ) );
     return FReply::Handled();
 }
 
@@ -416,10 +466,11 @@ SCinematicBoardSectionPlaneKeys::OnPaint( const FPaintArgs& Args, const FGeometr
 
     //---
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetPlaneTransformChannelProxy();
-    TSharedPtr<FMetaFloatChannel> meta_channel = section->GetPlaneTransformMetaChannel( mBinding );
+    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
 
     if( !meta_channel.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
@@ -427,9 +478,9 @@ SCinematicBoardSectionPlaneKeys::OnPaint( const FPaintArgs& Args, const FGeometr
     //---
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
-    FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
-    const UMovieScene* movie_scene = section->GetSubSectionObject().GetTypedOuter<UMovieScene>();
+    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 
     for( const auto& pair : meta_channel->GetMetaKeys() )
@@ -506,12 +557,19 @@ protected:
 private:
     TSharedPtr<FMetaMaterialChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
+    /** Start a transaction at mouse down */
+    void BeginTransaction( const FText& iTransactionDesc );
+    /** End the transaction at mouse up */
+    void EndTransaction();
+
 private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    FMovieScenePossessable              mBinding;
 
-    FMovieScenePossessable mBinding;
+    /** Scoped transaction for this drag operation */
+    TUniquePtr<FScopedTransaction>      mTransaction;
 
-    TSharedPtr<FMetaMaterialChannel>       mKeysUnderMouse;
+    TSharedPtr<FMetaMaterialChannel>    mKeysUnderMouse;
 };
 
 void
@@ -539,12 +597,13 @@ SCinematicBoardSectionPlaneMaterialKeys::ComputeDesiredSize( float ) const //ove
 TSharedPtr<FMetaMaterialChannel>
 SCinematicBoardSectionPlaneMaterialKeys::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
-    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
 
     FGeometry geometry;
-    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
     FFrameTime clicked_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
@@ -557,11 +616,45 @@ SCinematicBoardSectionPlaneMaterialKeys::GetKeysUnderMouse( const FPointerEvent&
 
     //---
 
-    TSharedPtr<FMetaMaterialChannel> meta_channel = section->GetPlaneMaterialMetaChannel( mBinding );
+    TSharedPtr<FMetaMaterialChannel> meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
     if( !meta_channel )
         return nullptr;
 
     return meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
+}
+
+void
+SCinematicBoardSectionPlaneMaterialKeys::BeginTransaction( const FText& iTransactionDesc ) // From FEditToolDragOperation::BeginTransaction#95
+{
+    // Begin an editor transaction and mark the section as transactional so it's state will be saved
+    mTransaction.Reset( new FScopedTransaction( iTransactionDesc ) );
+
+    //---
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    auto material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    for( auto material_section : material_sections )
+    {
+        material_section->SetFlags( RF_Transactional );
+        // Save the current state of the section
+        material_section->TryModify();
+    }
+}
+
+void
+SCinematicBoardSectionPlaneMaterialKeys::EndTransaction()
+{
+    mTransaction.Reset();
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 FCursorReply
@@ -584,16 +677,18 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyG
 
     //---
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonDown" ) );
+    BeginTransaction( LOCTEXT( "MovePlaneMaterialKeyTransaction", "Move Plane Material Keys" ) );
+
     return FReply::Handled().CaptureMouse( SharedThis( this ) );
 }
 
 FReply
 SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
+    EndTransaction();
+
     mKeysUnderMouse = nullptr;
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseButtonUp" ) );
     return FReply::Handled().ReleaseMouseCapture();
 }
 
@@ -606,29 +701,30 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseMove( const FGeometry& MyGeometr
         return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
     }
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+    ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
     FGeometry geometry;
-    FTimeToPixel converter = section->ConstructConverterForViewRange( &geometry );
+    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
     FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
 
     //---
 
-    const FMovieSceneSequenceTransform OuterToInnerTransform = section->GetSubSectionObject().OuterToInnerTransform();
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
     // For the moment should always be the case
     check( mKeysUnderMouse->NumMetaKeys() == 1 );
 
-    const bool snap = section->GetSequencer()->GetSequencerSettings()->GetIsSnapEnabled() && section->GetSequencer()->GetSequencerSettings()->GetSnapKeyTimesToInterval();
-    const FFrameRate inner_tick_resolution = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetTickResolution();
-    const FFrameRate inner_display_rate = section->GetSubSectionObject().GetSequence()->GetMovieScene()->GetDisplayRate();
+    const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+    const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
+    const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
     mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
 
-    section->ReBuildPlanesMaterialMetaChannel();
+    board_section->ReBuildPlanesMaterialMetaChannel();
 
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove" ) );
     return FReply::Handled();
 }
 
@@ -666,10 +762,11 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
 
     //---
 
-    TSharedPtr<FCinematicBoardSection> section = mBoardSection.Pin();
+    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetPlaneMaterialChannelProxy();
-    TSharedPtr<FMetaMaterialChannel> meta_channel = section->GetPlaneMaterialMetaChannel( mBinding );
+    TSharedPtr<FMetaMaterialChannel> meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
 
     if( !meta_channel.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
@@ -677,9 +774,9 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
     //---
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
-    FTimeToPixel converter = section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = section->GetSubSectionObject().OuterToInnerTransform().InverseLinearOnly();
-    const UMovieScene* movie_scene = section->GetSubSectionObject().GetTypedOuter<UMovieScene>();
+    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 
     for( const auto& pair : meta_channel->GetMetaKeys() )
@@ -744,10 +841,9 @@ public:
 public:
 
 private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
-
-    FMovieScenePossessable mBinding;
-    TAttribute<EVisibility> mOptionalWidgetsVisibility;
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    FMovieScenePossessable              mBinding;
+    TAttribute<EVisibility>             mOptionalWidgetsVisibility;
 };
 
 void
@@ -786,11 +882,6 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
 //---
 //---
 //---
-
-SCinematicBoardSectionPlanes::SCinematicBoardSectionPlanes()
-    : mNeedRebuildPlaneList( true )
-{
-}
 
 SCinematicBoardSectionPlanes::~SCinematicBoardSectionPlanes()
 {
@@ -955,13 +1046,12 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     //---
 
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer.Pin().Get(), subsection, mSequencer.Pin()->GetFocusedTemplateID() );
 
     TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &bindings );
+    int plane_count = ShotSequenceHelpers::GetAllPlanes( *mSequencer.Pin().Get(), result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &bindings );
 
     auto need_rebuild = [this]( const TArray<FGuid>& iBindings )
     {

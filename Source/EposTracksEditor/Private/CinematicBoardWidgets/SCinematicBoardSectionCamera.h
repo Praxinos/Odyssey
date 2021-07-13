@@ -32,9 +32,6 @@ public:
     virtual void OnMouseLeave( const FPointerEvent& MouseEvent ) override;
 
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
-    //virtual TOptional<TSharedRef<SWidget>> OnMapCursor( const FCursorReply& CursorReply ) const;
-
-public:
 
 protected:
     // SWidget overrides.
@@ -43,8 +40,16 @@ protected:
 private:
     TSharedPtr<FMetaFloatChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
+    /** Start a transaction at mouse down */
+    void BeginTransaction( const FText& iTransactionDesc );
+    /** End the transaction at mouse up */
+    void EndTransaction();
+
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
+
+    /** Scoped transaction for this drag operation */
+    TUniquePtr<FScopedTransaction>      mTransaction;
 
     TSharedPtr<FMetaFloatChannel>       mKeysUnderMouse;
 };
