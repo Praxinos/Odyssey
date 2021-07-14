@@ -48,7 +48,9 @@ public:
     virtual void Build( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
 
     /** Move all sub keys to the new time */
-    virtual void Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate );
+    virtual FFrameTime Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate );
+
+    virtual TArray<UMovieSceneSection*> GetSections( const TArray<UMovieSceneSection*>& iSections );
 
 public:
     /** Get the number of meta key */
@@ -297,9 +299,11 @@ TMetaChannel<ChannelType, ValueType>::FillWithTime( const FFrameTime& iTime, con
 //---
 
 template<typename ChannelType, typename ValueType>
-void
+FFrameTime
 TMetaChannel<ChannelType, ValueType>::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate )
 {
+    FFrameNumber last_inner_sub_key; // This is the last sub key in the last meta key moved (at this moment, there is always only one), mainly to set the current frame in the sequencer
+
     for( auto& pair : mMetaKeys )
     {
         for( auto& sub_key : pair.Value.mSubKeys )
@@ -315,21 +319,51 @@ TMetaChannel<ChannelType, ValueType>::Move( const FFrameTime& iTime, bool iSnap,
             TMovieSceneChannelData<ValueType> channel_data = channel->GetData();
             int32 key_index = channel_data.GetIndex( key_handle );
 
-            FFrameNumber inner_key_frame = channel_data.GetTimes()[key_index];
             FFrameTime inner_moved_key_frame = iTime - offset;
 
             // From ...\Source\Editor\Sequencer\Private\Tools\EditToolDragOperations.cpp -> OnDrag() -> SnapToInterval()
             if( iSnap )
             {
-                // Convert from resolution to DisplayRate, round to frame, then back again. We floor to frames when using the frame block scrubber, and round using the vanilla scrubber
-                FFrameTime   DisplayTime = FFrameRate::TransformTime( inner_moved_key_frame, iTickResolution, iDisplayRate );
-                //FFrameNumber PlayIntervalTime = ScrubStyle == ESequencerScrubberStyle::FrameBlock ? DisplayTime.FloorToFrame() : DisplayTime.RoundToFrame();
-                FFrameNumber PlayIntervalTime = DisplayTime.FloorToFrame();
-                inner_moved_key_frame = FFrameRate::TransformTime( PlayIntervalTime, iDisplayRate, iTickResolution ).FloorToFrame();
+                //// Convert from resolution to DisplayRate, round to frame, then back again. We floor to frames when using the frame block scrubber, and round using the vanilla scrubber
+                //FFrameTime   DisplayTime = FFrameRate::TransformTime( inner_moved_key_frame, iTickResolution, iDisplayRate );
+                ////FFrameNumber PlayIntervalTime = ScrubStyle == ESequencerScrubberStyle::FrameBlock ? DisplayTime.FloorToFrame() : DisplayTime.RoundToFrame();
+                //FFrameNumber PlayIntervalTime = DisplayTime.FloorToFrame();
+                //inner_moved_key_frame = FFrameRate::TransformTime( PlayIntervalTime, iDisplayRate, iTickResolution ).FloorToFrame();
+
+                // Simple syntax (== above) as we don't manage ScrubStyle
+                inner_moved_key_frame = FFrameRate::TransformTime( FFrameRate::TransformTime( inner_moved_key_frame, iTickResolution, iDisplayRate ).FloorToFrame(), iDisplayRate, iTickResolution );
             }
 
-            int32 new_key_index = channel_data.MoveKey( key_index, inner_moved_key_frame.GetFrame() );
+            last_inner_sub_key = inner_moved_key_frame.GetFrame();
+            int32 new_key_index = channel_data.MoveKey( key_index, last_inner_sub_key );
             key_handle = channel_data.GetHandle( new_key_index );
         }
     }
+
+    return last_inner_sub_key;
+}
+
+template<typename ChannelType, typename ValueType>
+TArray<UMovieSceneSection*>
+TMetaChannel<ChannelType, ValueType>::GetSections( const TArray<UMovieSceneSection*>& iSections )
+{
+    TArray<UMovieSceneSection*> sections;
+
+    for( auto section : iSections )
+    {
+        TArrayView<ChannelType*> ObjectPathChannels = section->GetChannelProxy().GetChannels<ChannelType>();
+        for( int32 i = 0; i < ObjectPathChannels.Num(); ++i )
+        {
+            for( auto pair : mMetaKeys )
+            {
+                for( auto meta_subkey : pair.Value.mSubKeys )
+                {
+                    if( ObjectPathChannels[i] == meta_subkey.mChannelHandle.Get() )
+                        sections.Add( section );
+                }
+            }
+        }
+    }
+
+    return sections;
 }

@@ -339,9 +339,9 @@ SCinematicBoardSectionPlaneKeys::BeginTransaction( const FText& iTransactionDesc
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    auto transform_sections = ShotSequenceHelpers::GetPlaneTransformSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-
+    auto all_transform_sections = BoardSequenceHelpers::GetPlaneTransformSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
+    TArray<UMovieSceneSection*> all_sections( all_transform_sections );
+    auto transform_sections = mKeysUnderMouse->GetSections( all_sections );
     for( auto transform_section : transform_sections )
     {
         transform_section->SetFlags( RF_Transactional );
@@ -378,6 +378,9 @@ SCinematicBoardSectionPlaneKeys::OnMouseButtonDown( const FGeometry& MyGeometry,
     check( !mKeysUnderMouse.IsValid() );
 
     mKeysUnderMouse = GetKeysUnderMouse( MouseEvent );
+
+    if( !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+        return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     //---
 
@@ -418,16 +421,39 @@ SCinematicBoardSectionPlaneKeys::OnMouseMove( const FGeometry& MyGeometry, const
     const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
-    // For the moment should always be the case
+    // For the moment, this should always be the case (until meta keys selection)
     check( mKeysUnderMouse->NumMetaKeys() == 1 );
 
     const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
     const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
     const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
-    mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+    FFrameTime local_inner_time = mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+    FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseLinearOnly();
 
+    //---
+
+    // Rebuild the full real meta channel
+    // This WON'T rebuild the mKeysUnderMouse as it is a copy of the a part of the real meta channel only available during the drag
     board_section->ReBuildPlanesTransformMetaChannel();
+
+    //---
+
+    // Modify all sections where keys have been moved (to force update the viewport)
+    auto all_material_sections = BoardSequenceHelpers::GetPlaneTransformSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
+    TArray<UMovieSceneSection*> all_sections( all_material_sections );
+    auto transform_sections = mKeysUnderMouse->GetSections( all_sections );
+    for( auto transform_section : transform_sections )
+        transform_section->TryModify();
+
+    // Update the current frame in the sequencer
+    if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
+    {
+        FFrameRate LocalResolution = sequencer->GetFocusedTickResolution();
+        FFrameRate LocalDisplayRate = sequencer->GetFocusedDisplayRate();
+        local_time = FFrameRate::TransformTime( FFrameRate::TransformTime( local_time, LocalResolution, LocalDisplayRate ).FloorToFrame(), LocalDisplayRate, LocalResolution );
+    }
+    sequencer->SetLocalTime( local_time );
 
     return FReply::Handled();
 }
@@ -635,9 +661,9 @@ SCinematicBoardSectionPlaneMaterialKeys::BeginTransaction( const FText& iTransac
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    auto material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-
+    auto all_material_sections = BoardSequenceHelpers::GetPlaneMaterialSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
+    TArray<UMovieSceneSection*> all_sections( all_material_sections );
+    auto material_sections = mKeysUnderMouse->GetSections( all_sections );
     for( auto material_section : material_sections )
     {
         material_section->SetFlags( RF_Transactional );
@@ -674,6 +700,9 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyG
     check( !mKeysUnderMouse.IsValid() );
 
     mKeysUnderMouse = GetKeysUnderMouse( MouseEvent );
+
+    if( !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+        return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     //---
 
@@ -714,16 +743,39 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseMove( const FGeometry& MyGeometr
     const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
     FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
 
-    // For the moment should always be the case
+    // For the moment, this should always be the case (until meta keys selection)
     check( mKeysUnderMouse->NumMetaKeys() == 1 );
 
     const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
     const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
     const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
-    mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+    FFrameTime local_inner_time = mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+    FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseLinearOnly();
 
+    //---
+
+    // Rebuild the full real meta channel
+    // This WON'T rebuild the mKeysUnderMouse as it is a copy of the a part of the real meta channel only available during the drag
     board_section->ReBuildPlanesMaterialMetaChannel();
+
+    //---
+
+    // Modify all sections where keys have been moved (to force update the viewport)
+    auto all_material_sections = BoardSequenceHelpers::GetPlaneMaterialSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
+    TArray<UMovieSceneSection*> all_sections( all_material_sections );
+    auto material_sections = mKeysUnderMouse->GetSections( all_sections );
+    for( auto material_section : material_sections )
+        material_section->TryModify();
+
+    // Update the current frame in the sequencer
+    if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
+    {
+        FFrameRate LocalResolution = sequencer->GetFocusedTickResolution();
+        FFrameRate LocalDisplayRate = sequencer->GetFocusedDisplayRate();
+        local_time = FFrameRate::TransformTime( FFrameRate::TransformTime( local_time, LocalResolution, LocalDisplayRate ).FloorToFrame(), LocalDisplayRate, LocalResolution );
+    }
+    sequencer->SetLocalTime( local_time );
 
     return FReply::Handled();
 }

@@ -74,6 +74,15 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneS
 
 //---
 
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetCamera( iPlayer, result.mInnerSequence, result.mInnerSequenceId, oCameraBinding );
+}
+
 static
 TArray<FFrameTime>
 InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iInnerKeys )
@@ -141,6 +150,33 @@ BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSect
 }
 
 //---
+
+//static
+TArray<UMovieScene3DTransformSection*>
+BoardSequenceHelpers::GetCameraTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetCameraTransformSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
+}
+
+//static
+TArray<UMovieScene3DTransformSection*>
+BoardSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetPlaneTransformSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+TArray<UMovieScenePrimitiveMaterialSection*>
+BoardSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
 
 //static
 TSharedPtr<FMovieSceneChannelProxy>
