@@ -4,6 +4,7 @@
 #include "EposSequenceToolbarHelpers.h"
 
 #include "ISequencer.h"
+#include "ISettingsModule.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
 
@@ -124,9 +125,23 @@ SColorPickerEntry::Construct( const FArguments& iArgs )
 
 //static
 void
-EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer )
+EposSequenceToolbarHelpers::OpenSequenceEditorSettings()
 {
-     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "drawing.material.section-label", "Material" ) );
+    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposSequenceEditorSettings" );
+}
+
+//static
+void
+EposSequenceToolbarHelpers::OpenTrackEditorSettings()
+{
+    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposTracksEditorSettings" );
+}
+
+//static
+void
+EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer )
+{
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.drawing-material.section-label", "Material" ) );
 
     UMovieSceneSequence* root_sequence = iSequencer->GetRootMovieSceneSequence();
 
@@ -138,12 +153,12 @@ EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( FMenuBuilder& iMenuBuild
                                    FGetActionCheckState::CreateLambda( [root_sequence]() { return MasterAssetTools::GetBackgroundVisibility( root_sequence ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
                                ),
                                SNew( SColorPickerEntry )
-                                   .Text( LOCTEXT( "drawing.material.background-label", "Background" ) )
+                                   .Text( LOCTEXT( "settings.drawing-material.background-label", "Background" ) )
                                    .Color( MasterAssetTools::GetBackgroundColor( root_sequence ) )
                                    .UseAlpha( true )
                                    .OnColorCommitted_Lambda( [root_sequence]( FLinearColor iColor ) { MasterAssetTools::SetBackgroundColor( root_sequence, iColor ); } ),
                                NAME_None,
-                               LOCTEXT( "drawing.material.background-tooltip", "Display background and select its color for the drawing materials" ),
+                               LOCTEXT( "settings.drawing-material.background-tooltip", "Display background and select its color for the drawing materials" ),
                                EUserInterfaceActionType::Check );
 
     //---
@@ -154,12 +169,12 @@ EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( FMenuBuilder& iMenuBuild
                                    FGetActionCheckState::CreateLambda( [root_sequence]() { return MasterAssetTools::GetGridVisibility( root_sequence ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
                                ),
                                SNew( SColorPickerEntry )
-                                   .Text( LOCTEXT( "drawing.material.grid-label", "Grid" ) )
+                                   .Text( LOCTEXT( "settings.drawing-material.grid-label", "Grid" ) )
                                    .Color( MasterAssetTools::GetGridColor( root_sequence ) )
                                    .UseAlpha( false )
                                    .OnColorCommitted_Lambda( [root_sequence]( FLinearColor iColor ) { MasterAssetTools::SetGridColor( root_sequence, iColor ); } ),
                                NAME_None,
-                               LOCTEXT( "drawing.material.grid-tooltip", "Display grid and select its color for the drawing materials" ),
+                               LOCTEXT( "settings.drawing-material.grid-tooltip", "Display grid and select its color for the drawing materials" ),
                                EUserInterfaceActionType::Check );
 
     //---
@@ -185,14 +200,23 @@ EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( FMenuBuilder& iMenuBuild
                                        EUserInterfaceActionType::RadioButton );
         };
 
-        CreateEntry( iMenuBuilder, EGridType::kNone, "FilmOverlay.Disabled", LOCTEXT( "drawing.material.grid-type-none-tooltip", "No grid" ) );
-        CreateEntry( iMenuBuilder, EGridType::k2x2, "FilmOverlay.2x2Grid", LOCTEXT( "drawing.material.grid-type-2x2-tooltip", "2x2" ) );
-        CreateEntry( iMenuBuilder, EGridType::k3x3, "FilmOverlay.3x3Grid", LOCTEXT( "drawing.material.grid-type-3x3-tooltip", "3x3" ) );
-        CreateEntry( iMenuBuilder, EGridType::kCrosshair, "FilmOverlay.Crosshair", LOCTEXT( "drawing.material.grid-type-crosshair-tooltip", "Crosshair" ) );
-        CreateEntry( iMenuBuilder, EGridType::kAbatment, "FilmOverlay.Rabatment", LOCTEXT( "drawing.material.grid-type-rabatment-tooltip", "Rabatment" ) );
+        CreateEntry( iMenuBuilder, EGridType::kNone, "FilmOverlay.Disabled", LOCTEXT( "settings.drawing-material.grid-type-none-tooltip", "No grid" ) );
+        CreateEntry( iMenuBuilder, EGridType::k2x2, "FilmOverlay.2x2Grid", LOCTEXT( "settings.drawing-material.grid-type-2x2-tooltip", "2x2" ) );
+        CreateEntry( iMenuBuilder, EGridType::k3x3, "FilmOverlay.3x3Grid", LOCTEXT( "settings.drawing-material.grid-type-3x3-tooltip", "3x3" ) );
+        CreateEntry( iMenuBuilder, EGridType::kCrosshair, "FilmOverlay.Crosshair", LOCTEXT( "settings.drawing-material.grid-type-crosshair-tooltip", "Crosshair" ) );
+        CreateEntry( iMenuBuilder, EGridType::kAbatment, "FilmOverlay.Rabatment", LOCTEXT( "settings.drawing-material.grid-type-rabatment-tooltip", "Rabatment" ) );
     };
 
-    iMenuBuilder.AddSubMenu( LOCTEXT( "drawing.material.grid-type-label", "Grid Type" ), LOCTEXT( "drawing.material.grid-type-tooltip", "Select the inner grid type" ), FNewMenuDelegate::CreateLambda( grid_submenu ) );
+    iMenuBuilder.AddSubMenu( LOCTEXT( "settings.drawing-material.grid-type-label", "Grid Type" ), LOCTEXT( "settings.drawing-material.grid-type-tooltip", "Select the inner grid type" ), FNewMenuDelegate::CreateLambda( grid_submenu ) );
+
+    iMenuBuilder.EndSection();
+
+    //---
+
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.advanced-settings.section-label", "Advanced Settings" ) );
+
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );
 
     iMenuBuilder.EndSection();
 }

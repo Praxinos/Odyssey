@@ -19,6 +19,9 @@ public:
 public:
     TSharedPtr<FUICommandInfo> ToggleStoryboardViewportCommand;
 
+    TSharedPtr<FUICommandInfo> OpenSequenceEditorSettings;
+    TSharedPtr<FUICommandInfo> OpenTrackEditorSettings;
+
     TSharedPtr<FUICommandInfo> GotoPraxinos;
     TSharedPtr<FUICommandInfo> GotoForum;
     TSharedPtr<FUICommandInfo> GotoUserDocumentation;

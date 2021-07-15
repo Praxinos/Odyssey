@@ -208,6 +208,24 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
+
+    //---
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
+            FExecuteAction::CreateStatic( &EposSequenceToolbarHelpers::OpenSequenceEditorSettings )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
+            FExecuteAction::CreateStatic( &EposSequenceToolbarHelpers::OpenTrackEditorSettings )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );
 }
 
 //---
@@ -274,12 +292,14 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FShotSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoNextDrawing );
 
+    ToolbarBuilder.AddSeparator();
+
     ToolbarBuilder.AddComboButton(
         FUIAction(),
-        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeDrawingSettingsMenu ),
-        LOCTEXT( "DrawingSettings", "Drawing Settings" ),
-        LOCTEXT( "DrawingSettingsToolTip", "Set material parameters of the all drawings" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "ShotSequenceEditor.DrawingSettings" ) );
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeSettingsMenu ),
+        LOCTEXT( "Settings", "Settings" ),
+        LOCTEXT( "SettingsToolTip", "Set sequence settings" ),
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Settings" ) );
 
     ToolbarBuilder.AddSeparator();
 
@@ -365,11 +385,11 @@ FShotSequenceCustomization::MakeDrawingMenu()
 }
 
 TSharedRef<SWidget>
-FShotSequenceCustomization::MakeDrawingSettingsMenu()
+FShotSequenceCustomization::MakeSettingsMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
 
-    EposSequenceToolbarHelpers::MakeDrawingSettingsEntries( MenuBuilder, mSequencer );
+    EposSequenceToolbarHelpers::MakeSettingsEntries( MenuBuilder, mSequencer );
 
     return MenuBuilder.MakeWidget();
 }

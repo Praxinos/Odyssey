@@ -29,7 +29,7 @@ private:
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakePlaneMenu();
     TSharedRef<SWidget> MakeDrawingMenu();
-    TSharedRef<SWidget> MakeDrawingSettingsMenu();
+    TSharedRef<SWidget> MakeSettingsMenu();
     TSharedRef<SWidget> MakeTextureMenu();
     TSharedRef<SWidget> MakeHelpMenu();
 

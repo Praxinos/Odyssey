@@ -17,6 +17,9 @@ FEposSequenceEditorCommands::RegisterCommands()
 {
     UI_COMMAND( ToggleStoryboardViewportCommand, "Storyboard Viewport", "A viewport layout tailored to storyboard preview", EUserInterfaceActionType::RadioButton, FInputChord() );
 
+    UI_COMMAND( OpenSequenceEditorSettings, "Sequence Settings...", "Open sequence settings", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( OpenTrackEditorSettings, "Track Settings...", "Open track settings", EUserInterfaceActionType::Button, FInputChord() );
+
     UI_COMMAND( GotoPraxinos, "Praxinos website...", "Go to Praxinos website", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoForum, "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoUserDocumentation, "Epos User Documentation...", "Go to User Documentation", EUserInterfaceActionType::Button, FInputChord() );

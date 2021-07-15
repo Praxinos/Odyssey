@@ -29,7 +29,7 @@ public:
 private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeDrawingMenu();
-    TSharedRef<SWidget> MakeDrawingSettingsMenu();
+    TSharedRef<SWidget> MakeSettingsMenu();
     TSharedRef<SWidget> MakeHelpMenu();
 
     enum EMapping

@@ -65,15 +65,20 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ShotSequenceEditor.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "drawing-previous-24x", Icon24x24 ) );
     Set( "ShotSequenceEditor.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.DrawingSettings", new IMAGE_BRUSH( "drawing-settings-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.DrawingSettings.Small", new IMAGE_BRUSH( "drawing-settings-24x", Icon24x24 ) );
 
     //---
 
+    Set( "EposSequenceEditor.Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
     Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
     Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "epos-help-24x", Icon24x24 ) );
     Set( "EposSequenceEditor.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
     Set( "EposSequenceEditor.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
+
+    Set( "EposSequenceEditor.OpenSequenceEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
+    Set( "EposSequenceEditor.OpenTrackEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.OpenTrackEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
 
     Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", FVector2D( 30, 30 ) ) );
     Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", FVector2D( 30, 30 ) ) );
