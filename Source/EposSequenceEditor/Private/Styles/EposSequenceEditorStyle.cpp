@@ -36,44 +36,44 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     //---
 
     // tab icons
-    Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH( "SequencerTab_16x", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
+    Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH( "sequencer-tab-16x", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
 
     // asset thumbnail
-    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH( "BoardSequence_16x", Icon16x16 ) );
-    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH( "BoardSequence_64x", Icon64x64 ) );
-    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH( "ShotSequence_16x", Icon16x16 ) );
-    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "ShotSequence_64x", Icon64x64 ) );
+    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
+    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH( "sequence-board-64x", Icon64x64 ) );
+    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
+    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "sequence-shot-64x", Icon64x64 ) );
 
-    Set( "BoardSequenceEditor.NewStoryboardWithSettings", new IMAGE_BRUSH( "NewStoryboardWithSettings", Icon16x16 ) );
-    Set( "BoardSequenceEditor.NewStoryboardWithSettings.Small", new IMAGE_BRUSH( "NewStoryboardWithSettings", Icon16x16 ) );
-
-    //---
-
-    Set( "ShotSequenceEditor.CreateCameraAtCurrentTime", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "IconCreateCamera_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "IconSnapCameraToViewport_24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
-
-    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "IconCreatePlane_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.DetachPlane", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.DetachPlane.Small", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon24x24 ) );
-
-    Set( "ShotSequenceEditor.CreateDrawing", new IMAGE_BRUSH( "IconCreateDrawing_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreateDrawing.Small", new IMAGE_BRUSH( "IconCreateDrawing_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.GotoPreviousDrawing", new IMAGE_BRUSH( "IconDrawingPrevious_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "IconDrawingPrevious_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.GotoNextDrawing", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "IconDrawingNext_24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.DrawingSettings", new IMAGE_BRUSH( "IconDrawingSettings_24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.DrawingSettings.Small", new IMAGE_BRUSH( "IconDrawingSettings_24x", Icon24x24 ) );
+    Set( "BoardSequenceEditor.NewStoryboardWithSettings", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
+    Set( "BoardSequenceEditor.NewStoryboardWithSettings.Small", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
 
     //---
 
-    Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "IconHelp_24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "IconHelp_24x", Icon24x24 ) );
-    Set( "EposSequenceEditor.OpenAboutWindow", new IMAGE_BRUSH( "IconAbout_24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.OpenAboutWindow.Small", new IMAGE_BRUSH( "IconAbout_24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.CreateCameraAtCurrentTime", new IMAGE_BRUSH( "camera-create-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
+
+    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.DetachPlane.Small", new IMAGE_BRUSH( "plane-detach-24x", Icon24x24 ) );
+
+    Set( "ShotSequenceEditor.CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.CreateDrawing.Small", new IMAGE_BRUSH( "drawing-create-24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.GotoPreviousDrawing", new IMAGE_BRUSH( "drawing-previous-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "drawing-previous-24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
+    Set( "ShotSequenceEditor.DrawingSettings", new IMAGE_BRUSH( "drawing-settings-24x", Icon48x48 ) );
+    Set( "ShotSequenceEditor.DrawingSettings.Small", new IMAGE_BRUSH( "drawing-settings-24x", Icon24x24 ) );
+
+    //---
+
+    Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "epos-help-24x", Icon24x24 ) );
+    Set( "EposSequenceEditor.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
 
     Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", FVector2D( 30, 30 ) ) );
     Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", FVector2D( 30, 30 ) ) );
