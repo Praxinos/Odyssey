@@ -26,7 +26,7 @@
 #include "Fonts/FontMeasure.h"
 #include "Editor.h"
 #include "Engine/Selection.h"
-#include "SEnumCombobox.h"
+#include "SEnumCombo.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -191,12 +191,13 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     ViewportClient = MakeShareable( new FStoryboardViewportClient() );
 
-    ViewportWidget = SNew(SStoryboardPreviewViewport)
+    FAssetEditorViewportConstructionArgs ViewportConstructionArgs;
+    ViewportConstructionArgs.ConfigKey = LayoutName;
+    ViewportConstructionArgs.ParentLayout = ParentLayout.Pin();
+    ViewportConstructionArgs.bRealtime = true;
+    ViewportWidget = SNew( SStoryboardPreviewViewport, ViewportConstructionArgs )
         .LevelEditorViewportClient(ViewportClient)
-        .ParentLevelEditor(InArgs._ParentLevelEditor)
-        .ParentLayout(ParentLayout.Pin())
-        .ConfigKey(LayoutName)
-        .Realtime(true);
+        .ParentLevelEditor(InArgs._ParentLevelEditor);
 
     FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( mViewportRotation )/*, FVector2D( 0, 0 )*/ );
     //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
@@ -1000,6 +1001,18 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
 
 FReply SStoryboardLevelViewport::OnKeyDown( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent )
 {
+    // Explicitly disallow the following keys which are by default mapped to navigate the sequencer timeline
+    // because we don't want viewport and timeline navigation at the same time. Viewport takes precedence.
+    if( InKeyEvent.GetKey() == EKeys::Up ||
+        InKeyEvent.GetKey() == EKeys::Down ||
+        InKeyEvent.GetKey() == EKeys::Left ||
+        InKeyEvent.GetKey() == EKeys::Right ||
+        InKeyEvent.GetKey() == EKeys::PageUp ||
+        InKeyEvent.GetKey() == EKeys::PageDown )
+    {
+        return FReply::Unhandled();
+    }
+
     if (CommandList->ProcessCommandBindings(InKeyEvent))
     {
         return FReply::Handled();

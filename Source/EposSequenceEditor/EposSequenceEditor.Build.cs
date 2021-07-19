@@ -67,6 +67,7 @@ public class EposSequenceEditor : ModuleRules
                 "EditorStyle",
                 "MovieSceneCaptureDialog",
                 "EditorWidgets",
+                "EditorFramework",
                 "EditorScriptingUtilities",
                 "MovieRenderPipelineEditor",
                 // [EDITOR] custom plugin dependencies

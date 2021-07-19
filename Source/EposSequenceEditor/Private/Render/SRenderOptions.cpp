@@ -14,7 +14,7 @@
 #include "MoviePipelineCommandLineEncoderSettings.h"
 #include "MoviePipelineMasterConfig.h"
 #include "MovieSceneSequence.h"
-#include "SEnumCombobox.h"
+#include "SEnumCombo.h"
 //#include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/STextComboBox.h"
 

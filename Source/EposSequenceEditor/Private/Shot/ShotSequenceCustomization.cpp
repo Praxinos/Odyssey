@@ -519,7 +519,7 @@ FShotSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr<
 }
 
 ESequencerDropResult
-FShotSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropGraphEdOp& iDragDropOp )
+FShotSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp )
 {
     return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }

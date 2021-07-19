@@ -4,6 +4,7 @@
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 
 #include "Widgets/SBoxPanel.h"
+#include "ActorTreeItem.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Modules/ModuleManager.h"
 #include "Application/ThrottleManager.h"
@@ -455,36 +456,33 @@ TSharedRef<SWidget> FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboBu
     auto CreateNewCamera =
         [this](FMenuBuilder& SubMenuBuilder)
         {
-            using namespace SceneOutliner;
-
-            SceneOutliner::FInitializationOptions InitOptions;
+            FSceneOutlinerInitializationOptions InitOptions;
             {
-                InitOptions.Mode = ESceneOutlinerMode::ActorPicker;
                 InitOptions.bShowHeaderRow = false;
                 InitOptions.bFocusSearchBoxWhenOpened = true;
                 InitOptions.bShowTransient = true;
                 InitOptions.bShowCreateNewFolder = false;
                 // Only want the actor label column
-                InitOptions.ColumnMap.Add(FBuiltInColumnTypes::Label(), FColumnInfo(EColumnVisibility::Visible, 0));
+                InitOptions.ColumnMap.Add( FSceneOutlinerBuiltInColumnTypes::Label(), FSceneOutlinerColumnInfo( ESceneOutlinerColumnVisibility::Visible, 0 ) );
 
                 // Only display Actors that we can attach too
-                InitOptions.Filters->AddFilterPredicate( SceneOutliner::FActorFilterPredicate::CreateRaw(this, &FSingleCameraCutTrackEditor::IsCameraPickable) );
+                InitOptions.Filters->AddFilterPredicate<FActorTreeItem>( FActorTreeItem::FFilterPredicate::CreateRaw( this, &FSingleCameraCutTrackEditor::IsCameraPickable ) );
             }
 
             // Actor selector to allow the user to choose a parent actor
             FSceneOutlinerModule& SceneOutlinerModule = FModuleManager::LoadModuleChecked<FSceneOutlinerModule>( "SceneOutliner" );
 
             TSharedRef< SWidget > MenuWidget =
-                SNew(SHorizontalBox)
+                SNew( SHorizontalBox )
 
-                +SHorizontalBox::Slot()
+                + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
-                    SNew(SBox)
-                    .MaxDesiredHeight(400.0f)
-                    .WidthOverride(300.0f)
+                    SNew( SBox )
+                    .MaxDesiredHeight( 400.0f )
+                    .WidthOverride( 300.0f )
                     [
-                        SceneOutlinerModule.CreateSceneOutliner(
+                        SceneOutlinerModule.CreateActorPicker(
                             InitOptions,
                             FOnActorPicked::CreateSP(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboButtonMenuEntryExecute )
                             )

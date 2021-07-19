@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AssetEditorViewportLayout.h"
 #include "LevelViewportLayout.h"
 
 //---
@@ -19,7 +20,7 @@ class FStoryboardViewportLayoutEntity
     : public ILevelViewportLayoutEntity
 {
 public:
-    FStoryboardViewportLayoutEntity( const FViewportConstructionArgs& iArgs );
+    FStoryboardViewportLayoutEntity( const FAssetEditorViewportConstructionArgs& iArgs, TSharedPtr<ILevelEditor> InLevelEditor );
 
     //~ ILevelViewportLayoutEntity interface
     virtual TSharedPtr<SLevelViewport> AsLevelViewport() const override;

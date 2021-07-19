@@ -61,6 +61,7 @@ public class EposTracksEditor : ModuleRules
                 "UnrealEd",
                 "EditorStyle",
                 "EditorWidgets",
+                "SceneOutliner",
                 "MaterialEditor",
                 "EditorScriptingUtilities",
                 "LevelEditor",
