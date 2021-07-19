@@ -56,7 +56,7 @@ public:
 
 public:
     UPROPERTY()
-    UMovieScene* MovieScene;
+    TObjectPtr<UMovieScene> MovieScene;
 
     // The map should contain only one root cinecamera actor and its multiple components
     // Only one entry should have an invalid guid

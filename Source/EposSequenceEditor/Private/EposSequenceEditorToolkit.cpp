@@ -186,8 +186,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
 
-    // Reopen the scene outliner so that is refreshed with the sequencer info column
-    if( mSequencer->GetSequencerSettings()->GetShowOutlinerInfoColumn() )
+    // Reopen the scene outliner so that is refreshed with the sequencer columns
     {
         TSharedPtr<FTabManager> levelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
         if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() ) // SceneOutliner == WorldOutliner ...
@@ -207,6 +206,9 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     {
         viewport->GetLevelViewportClient().SetViewportType(ELevelViewportType::LVT_Perspective); // Need to be called first
         viewport->SetViewportTypeWithinLayout("Storyboard"); // Same name as in EposSequenceEditorModule::RegisterLevelEditorExtensions()
+        //viewport->SetKeyboardFocusToThisViewport();
+        //FSlateApplication::Get().SetKeyboardFocus( viewport.ToSharedRef() );
+        //levelEditorModule.FocusViewport();
     }
 }
 

@@ -66,5 +66,5 @@ private:
 
     /** All movie scene sections. */
     UPROPERTY()
-    TArray<UMovieSceneSection*> Sections;
+    TArray<TObjectPtr<UMovieSceneSection>> Sections;
 };
