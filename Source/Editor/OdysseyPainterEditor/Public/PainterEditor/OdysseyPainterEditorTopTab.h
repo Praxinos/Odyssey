@@ -40,6 +40,9 @@ protected:
     virtual void OnFlowChanged( int32 iValue );
     virtual void OnBlendingModeChanged( int32 iValue );
     virtual void OnAlphaModeChanged( int32 iValue );
+//  virtual uint32 GetSize() TODO.
+//  virtual uint32 GetOpacity() TODO.
+//  virtual uint32 GetFlow() TODO.
 
 protected:
     // Methods

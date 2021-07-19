@@ -58,9 +58,9 @@ public:
 
 public:
     // Public Getters
-    float  GetSize();
-    float  GetOpacity();
-    float  GetFlow();
+    float  GetSize() const;
+    float  GetOpacity() const;
+    float  GetFlow() const;
     ::ul3::eBlendingMode  GetBlendingMode();
     ::ul3::eAlphaMode  GetAlphaMode();
 

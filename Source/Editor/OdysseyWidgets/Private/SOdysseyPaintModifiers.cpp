@@ -63,11 +63,13 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mSizeSpinBox, SSpinBox< float > )
                                 //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                .Value(mSize)
-                                .MaxFractionalDigits(2)
+                                //.Value(mSize)
+                                .Value( this, &SOdysseyPaintModifiers::GetSize )
+                                .MaxFractionalDigits(0)
                                 .MinValue( 1 )
                                 .MaxValue( 1000 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
                                 .Delta( 1 )
                             ]
                         ]
@@ -97,11 +99,14 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mOpacitySpinBox, SSpinBox< float > )
                                 //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                .Value(mOpacity)
-                                .MaxFractionalDigits(2)
+                                //.Value(mOpacity)
+                                .Value(this, &SOdysseyPaintModifiers::GetOpacity )
+                                .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
+                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -130,11 +135,14 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mFlowSpinBox, SSpinBox< float > )
                                 //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                .Value(mFlow)
-                                .MaxFractionalDigits(2)
+                                //.Value(mFlow)
+                                .Value(this, &SOdysseyPaintModifiers::GetFlow )
+                                .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
+                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -247,11 +255,13 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mSizeSpinBox, SSpinBox< float > )
                                 //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                .Value(mSize)
-                                .MaxFractionalDigits(2)
+                                //.Value(mSize)
+                                .Value( this, &SOdysseyPaintModifiers::GetSize )
+                                .MaxFractionalDigits(0)
                                 .MinValue( 1 )
                                 .MaxValue( 1000 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
                                 .Delta( 1 )
                             ]
                         ]
@@ -281,11 +291,14 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mOpacitySpinBox, SSpinBox< float > )
                                 //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                .Value(mOpacity)
-                                .MaxFractionalDigits(2)
+                                //.Value(mOpacity)
+                                .Value( this, &SOdysseyPaintModifiers::GetOpacity )
+                                .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
+                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -314,11 +327,14 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mFlowSpinBox, SSpinBox< float > )
                                 //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                .Value(mFlow)
-                                .MaxFractionalDigits(2)
+                                //.Value(mFlow)
+                                .Value( this, &SOdysseyPaintModifiers::GetFlow )
+                                .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
+                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -415,6 +431,7 @@ void
 SOdysseyPaintModifiers::SetOpacity( float iValue )
 {
     mOpacity = iValue;
+//    UE_LOG(LogTemp, Display, TEXT("%lf"), mOpacity.Get());
     mOnOpacityChangedCallback.ExecuteIfBound( iValue );
 }
 
@@ -444,19 +461,19 @@ SOdysseyPaintModifiers::SetAlphaMode( ::ul3::eAlphaMode iValue )
 }
 
 float
-SOdysseyPaintModifiers::GetSize()
+SOdysseyPaintModifiers::GetSize() const
 {
     return mSize.Get();
 }
 
 float
-SOdysseyPaintModifiers::GetOpacity()
+SOdysseyPaintModifiers::GetOpacity() const
 {
     return mOpacity.Get();
 }
 
 float
-SOdysseyPaintModifiers::GetFlow()
+SOdysseyPaintModifiers::GetFlow() const
 {
     return mFlow.Get();
 }
