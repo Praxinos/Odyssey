@@ -6,10 +6,10 @@
 #include "Brushes/SlateColorBrush.h"
 #include "MovieSceneToolsUserSettings.h"
 #include "SequencerSectionPainter.h"
-#include "Styles/EposTracksEditorStyle.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "Settings/EposTracksEditorSettings.h"
+#include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionThumbnails"
@@ -38,7 +38,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionThumbnail.ToolBar" );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
     //-
 
@@ -68,7 +68,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         TAttribute<FSlateIcon>(),
         true );
 
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionThumbnail.ToolBar" );
+    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
     //-
 
@@ -86,7 +86,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSectionThumbnail.ToolBar" );
+    RightToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
     //---
 

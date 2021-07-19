@@ -74,92 +74,62 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     Set( "EposTracksEditor.DetachPlane", new IMAGE_BRUSH( "IconDetachPlane_24x", Icon16x16 ) );
 
     // Sequencer & Curve Editor Toolbar Style ( Grabs core default, copies brushes, changes separator and block spacing )
-    Set( "EposSectionThumbnail.ToolBar.Background", new CORE_BOX_BRUSH( "Common/GroupBorder", FMargin( 4.0f / 16.0f ) ) );
-    Set( "EposSectionThumbnail.ToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
-    Set( "EposSectionThumbnail.ToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
-    Set( "EposSectionThumbnail.ToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
-    Set( "EposSectionThumbnail.ToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
-    Set( "EposSectionThumbnail.ToolBar.SToolBarButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
-    Set( "EposSectionThumbnail.ToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
-    Set( "EposSectionThumbnail.ToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
-    Set( "EposSectionThumbnail.ToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
+    Set( "EposSection.ToolBar.Background", new CORE_BOX_BRUSH( "Common/GroupBorder", FMargin( 4.0f / 16.0f ) ) );
+    Set( "EposSection.ToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
+    Set( "EposSection.ToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
+    Set( "EposSection.ToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
+    Set( "EposSection.ToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
+    Set( "EposSection.ToolBar.SToolBarButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
+    Set( "EposSection.ToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
+    Set( "EposSection.ToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
+    Set( "EposSection.ToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
 
     // Used only for WidgetBlocks
-    Set( "EposSectionThumbnail.ToolBar.Block.IndentedPadding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
-    Set( "EposSectionThumbnail.ToolBar.Block.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
+    Set( "EposSection.ToolBar.Block.IndentedPadding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
+    Set( "EposSection.ToolBar.Block.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
 
-    Set( "EposSectionThumbnail.ToolBar.Separator", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.Separator" ) );
-    Set( "EposSectionThumbnail.ToolBar.Separator.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
+    Set( "EposSection.ToolBar.Separator", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.Separator" ) );
+    Set( "EposSection.ToolBar.Separator.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
 
-    Set( "EposSectionThumbnail.ToolBar.Label", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
-    Set( "EposSectionThumbnail.ToolBar.EditableText", FEditorStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
-    Set( "EposSectionThumbnail.ToolBar.Keybinding", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
-    Set( "EposSectionThumbnail.ToolBar.Heading", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
-    Set( "EposSectionThumbnail.ToolBar.CheckBox", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
-    Set( "EposSectionThumbnail.Toolbar.Check", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
-    Set( "EposSectionThumbnail.ToolBar.RadioButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
-    Set( "EposSectionThumbnail.ToolBar.ToggleButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
-    Set( "EposSectionThumbnail.ToolBar.Button", FEditorStyle::Get().GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
+    Set( "EposSection.ToolBar.Label", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
+    Set( "EposSection.ToolBar.EditableText", FEditorStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
+    Set( "EposSection.ToolBar.Keybinding", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
+    Set( "EposSection.ToolBar.Heading", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
+    Set( "EposSection.ToolBar.CheckBox", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
+    Set( "EposSection.Toolbar.Check", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
+    Set( "EposSection.ToolBar.RadioButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
+    Set( "EposSection.ToolBar.ToggleButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
+    Set( "EposSection.ToolBar.Button", FEditorStyle::Get().GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
 
     //-
 
     // Sequencer & Curve Editor Toolbar Style ( Grabs core default, copies brushes, changes separator and block spacing )
-    Set( "EposSectionPlane.ToolBar.Background", new CORE_BOX_BRUSH( "Common/GroupBorder", FMargin( 4.0f / 16.0f ) ) );
-    Set( "EposSectionPlane.ToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
-    Set( "EposSectionPlane.ToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
-    Set( "EposSectionPlane.ToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
-    Set( "EposSectionPlane.ToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
-    Set( "EposSectionPlane.ToolBar.SToolBarButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
-    Set( "EposSectionPlane.ToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
-    Set( "EposSectionPlane.ToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
-    Set( "EposSectionPlane.ToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
+    Set( "EposSectionTitle.ToolBar.Background", new FSlateNoResource() );
+    Set( "EposSectionTitle.ToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
+    Set( "EposSectionTitle.ToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
+    Set( "EposSectionTitle.ToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
+    Set( "EposSectionTitle.ToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
+    Set( "EposSectionTitle.ToolBar.SToolBarButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
+    Set( "EposSectionTitle.ToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
+    Set( "EposSectionTitle.ToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
+    Set( "EposSectionTitle.ToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
 
     // Used only for WidgetBlocks
-    Set( "EposSectionPlane.ToolBar.Block.IndentedPadding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
-    Set( "EposSectionPlane.ToolBar.Block.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
+    Set( "EposSectionTitle.ToolBar.Block.IndentedPadding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
+    Set( "EposSectionTitle.ToolBar.Block.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
 
-    Set( "EposSectionPlane.ToolBar.Separator", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.Separator" ) );
-    Set( "EposSectionPlane.ToolBar.Separator.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
+    Set( "EposSectionTitle.ToolBar.Separator", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.Separator" ) );
+    Set( "EposSectionTitle.ToolBar.Separator.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
 
-    Set( "EposSectionPlane.ToolBar.Label", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
-    Set( "EposSectionPlane.ToolBar.EditableText", FEditorStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
-    Set( "EposSectionPlane.ToolBar.Keybinding", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
-    Set( "EposSectionPlane.ToolBar.Heading", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
-    Set( "EposSectionPlane.ToolBar.CheckBox", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
-    Set( "EposSectionPlane.Toolbar.Check", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
-    Set( "EposSectionPlane.ToolBar.RadioButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
-    Set( "EposSectionPlane.ToolBar.ToggleButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
-    Set( "EposSectionPlane.ToolBar.Button", FEditorStyle::Get().GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
-
-    //-
-
-    // Sequencer & Curve Editor Toolbar Style ( Grabs core default, copies brushes, changes separator and block spacing )
-    Set( "EposSectionPlanesFooter.ToolBar.Background", new CORE_BOX_BRUSH( "Common/GroupBorder", FMargin( 4.0f / 16.0f ) ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
-    Set( "EposSectionPlanesFooter.ToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
-    Set( "EposSectionPlanesFooter.ToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.SToolBarButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
-
-    // Used only for WidgetBlocks
-    Set( "EposSectionPlanesFooter.ToolBar.Block.IndentedPadding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Block.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
-
-    Set( "EposSectionPlanesFooter.ToolBar.Separator", FEditorStyle::Get().GetSlateColor( "Sequencer.ToolBar.Separator" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Separator.Padding", FEditorStyle::Get().GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
-
-    Set( "EposSectionPlanesFooter.ToolBar.Label", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.EditableText", FEditorStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Keybinding", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Heading", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.CheckBox", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
-    Set( "EposSectionPlanesFooter.Toolbar.Check", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.RadioButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.ToggleButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
-    Set( "EposSectionPlanesFooter.ToolBar.Button", FEditorStyle::Get().GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
+    Set( "EposSectionTitle.ToolBar.Label", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
+    Set( "EposSectionTitle.ToolBar.EditableText", FEditorStyle::Get().GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
+    Set( "EposSectionTitle.ToolBar.Keybinding", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
+    Set( "EposSectionTitle.ToolBar.Heading", FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
+    Set( "EposSectionTitle.ToolBar.CheckBox", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
+    Set( "EposSectionTitle.Toolbar.Check", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
+    Set( "EposSectionTitle.ToolBar.RadioButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
+    Set( "EposSectionTitle.ToolBar.ToggleButton", FEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
+    Set( "EposSectionTitle.ToolBar.Button", FEditorStyle::Get().GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
 
     //---
 
