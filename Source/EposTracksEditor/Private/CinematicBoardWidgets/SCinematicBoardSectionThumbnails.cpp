@@ -24,7 +24,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     LeftToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -37,11 +38,12 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "SectionToolBar" );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSection.ToolBar" );
 
     //-
 
-    FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() ); } ),
@@ -54,18 +56,24 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "CameraToolTip", "Create a new Camera" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateCamera" ) );
     MiddleToolbarBuilder.AddComboButton(
-        FUIAction(),
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() ); } )
+        ),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCameraMenu ),
         LOCTEXT( "CameraOptions", "Options" ),
         LOCTEXT( "CameraOptionsToolTip", "Camera Options" ),
         TAttribute<FSlateIcon>(),
         true );
 
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "SectionToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSection.ToolBar" );
 
     //-
 
-    FSlimHorizontalToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     RightToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -78,7 +86,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "SectionToolBar" );
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get().Get(), "EposSection.ToolBar" );
 
     //---
 
