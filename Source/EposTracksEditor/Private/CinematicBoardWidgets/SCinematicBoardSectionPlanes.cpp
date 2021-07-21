@@ -286,9 +286,8 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionTitleToolBar" );
 
     //-
 
@@ -465,9 +464,8 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+    FSlimHorizontalToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionTitleToolBar" );
 
     //-
 
@@ -1888,9 +1886,8 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     //---
 
-    FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(),

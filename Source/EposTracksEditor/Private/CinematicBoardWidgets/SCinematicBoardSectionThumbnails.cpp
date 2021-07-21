@@ -29,9 +29,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     LeftToolbarBuilder.AddComboButton(
         FUIAction(),
@@ -45,9 +44,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder TopToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    TopToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    TopToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder TopToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    TopToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     auto GetSwitchTakeTooltip = [this]() -> FText
     {
@@ -81,9 +79,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(),
@@ -104,9 +101,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     RightToolbarBuilder.AddComboButton(
         FUIAction(),
@@ -619,7 +615,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<int32> )
             .Style( FEposTracksEditorStyle::Get(), "HyperlinkSpinBox" )
@@ -643,7 +639,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<double> )
             .TypeInterface( sequencer->GetNumericTypeInterface() )
@@ -697,7 +693,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<int32> )
             .Style( FEposTracksEditorStyle::Get(), "HyperlinkSpinBox" )
@@ -721,7 +717,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( STextBlock )
             .TextStyle( &FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "NormalText.Subdued" ) )

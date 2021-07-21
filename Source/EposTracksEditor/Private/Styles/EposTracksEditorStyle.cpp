@@ -12,6 +12,8 @@
 #include "Misc/Paths.h"
 #include "SequencerSectionPainter.h"
 #include "Styling/SlateStyleRegistry.h"
+#include "Styling/StarshipCoreStyle.h"
+#include "Styling/ToolBarStyle.h"
 
 #define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 #define BORDER_BRUSH( RelativePath, ... ) FSlateBorderBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
@@ -135,66 +137,27 @@ FEposTracksEditorStyle::InitToolbar()
 
     //---
 
-    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
     SetCoreContentRoot( FPaths::EngineContentDir() / TEXT( "Slate" ) );
     {
-        // Sequencer & Curve Editor Toolbar Style ( Grabs core default, copies brushes, changes separator and block spacing )
-        Set( "BoardSection.FloatingToolBar.Background", new CORE_BOX_BRUSH( "Common/GroupBorder", FMargin( 4.0f / 16.0f ) ) );
-        Set( "BoardSection.FloatingToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
-        Set( "BoardSection.FloatingToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
-        Set( "BoardSection.FloatingToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
-        Set( "BoardSection.FloatingToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
-        Set( "BoardSection.FloatingToolBar.SToolBarButtonBlock.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
-        Set( "BoardSection.FloatingToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
-        Set( "BoardSection.FloatingToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
-        Set( "BoardSection.FloatingToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
+        FToolBarStyle SectionToolBarStyle = FStarshipCoreStyle::GetCoreStyle().GetWidgetStyle<FToolBarStyle>( "SlimToolBar" );
 
-        // Used only for WidgetBlocks
-        Set( "BoardSection.FloatingToolBar.Block.IndentedPadding", FEditorStyle::GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
-        Set( "BoardSection.FloatingToolBar.Block.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
-
-        Set( "BoardSection.FloatingToolBar.Separator", FEditorStyle::GetSlateColor( "Sequencer.ToolBar.Separator" ) );
-        Set( "BoardSection.FloatingToolBar.Separator.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
-
-        Set( "BoardSection.FloatingToolBar.Label", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
-        Set( "BoardSection.FloatingToolBar.EditableText", FEditorStyle::GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
-        Set( "BoardSection.FloatingToolBar.Keybinding", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
-        Set( "BoardSection.FloatingToolBar.Heading", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
-        Set( "BoardSection.FloatingToolBar.CheckBox", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
-        Set( "BoardSection.FloatingToolbar.Check", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
-        Set( "BoardSection.FloatingToolBar.RadioButton", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
-        Set( "BoardSection.FloatingToolBar.ToggleButton", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
-        Set( "BoardSection.FloatingToolBar.Button", FEditorStyle::GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
+        SectionToolBarStyle.SetBackground( FAppStyle::Get().GetWidgetStyle< FComboButtonStyle >( "ComboButton" ).ButtonStyle.Normal ); // To have the same background as the '+' button on each side
+        SectionToolBarStyle.SetIconSize( Icon16x16 );
+        SectionToolBarStyle.SetShowLabels( false );
+        SectionToolBarStyle.SetSettingsComboButtonStyle( SectionToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
+        Set( "SectionFloatingToolBar", SectionToolBarStyle );
 
         //-
 
-        // Sequencer & Curve Editor Toolbar Style ( Grabs core default, copies brushes, changes separator and block spacing )
-        Set( "BoardSection.TitleToolBar.Background", new FSlateNoResource() );
-        Set( "BoardSection.TitleToolBar.Icon", new CORE_IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
-        Set( "BoardSection.TitleToolBar.Expand", new CORE_IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
-        Set( "BoardSection.TitleToolBar.SubMenuIndicator", new CORE_IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
-        Set( "BoardSection.TitleToolBar.SToolBarComboButtonBlock.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarComboButtonBlock.Padding" ) );
-        Set( "BoardSection.TitleToolBar.SToolBarButtonBlock.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.Padding" ) );
-        Set( "BoardSection.TitleToolBar.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarCheckComboButtonBlock.Padding" ) );
-        Set( "BoardSection.TitleToolBar.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.SToolBarButtonBlock.CheckBox.Padding" ) );
-        Set( "BoardSection.TitleToolBar.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::GetSlateColor( "Sequencer.ToolBar.SToolBarComboButtonBlock.ComboButton.Color" ) );
+        FToolBarStyle SectionTitleToolBarStyle = FStarshipCoreStyle::GetCoreStyle().GetWidgetStyle<FToolBarStyle>( "SlimToolBar" );
 
-        // Used only for WidgetBlocks
-        Set( "BoardSection.TitleToolBar.Block.IndentedPadding", FEditorStyle::GetMargin( "Sequencer.ToolBar.Block.IndentedPadding" ) );
-        Set( "BoardSection.TitleToolBar.Block.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.Block.Padding" ) );
-
-        Set( "BoardSection.TitleToolBar.Separator", FEditorStyle::GetSlateColor( "Sequencer.ToolBar.Separator" ) );
-        Set( "BoardSection.TitleToolBar.Separator.Padding", FEditorStyle::GetMargin( "Sequencer.ToolBar.Separator.Padding" ) );
-
-        Set( "BoardSection.TitleToolBar.Label", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Label" ) );
-        Set( "BoardSection.TitleToolBar.EditableText", FEditorStyle::GetWidgetStyle<FEditableTextBoxStyle>( "Sequencer.ToolBar.EditableText" ) );
-        Set( "BoardSection.TitleToolBar.Keybinding", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Keybinding" ) );
-        Set( "BoardSection.TitleToolBar.Heading", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) );
-        Set( "BoardSection.TitleToolBar.CheckBox", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.CheckBox" ) );
-        Set( "BoardSection.TitleToolbar.Check", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.Check" ) );
-        Set( "BoardSection.TitleToolBar.RadioButton", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.RadioButton" ) );
-        Set( "BoardSection.TitleToolBar.ToggleButton", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Sequencer.ToolBar.ToggleButton" ) );
-        Set( "BoardSection.TitleToolBar.Button", FEditorStyle::GetWidgetStyle<FButtonStyle>( "Sequencer.ToolBar.Button" ) );
+        SectionTitleToolBarStyle.SetBackground( FSlateNoResource() );
+        SectionTitleToolBarStyle.SetButtonPadding( FMargin( 2, 0 ) );
+        SectionTitleToolBarStyle.SetBackgroundPadding( FMargin( 0 ) );
+        SectionTitleToolBarStyle.SetIconSize( Icon16x16 );
+        SectionTitleToolBarStyle.SetSettingsComboButtonStyle( SectionTitleToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
+        SectionTitleToolBarStyle.SetShowLabels( false );
+        Set( "SectionTitleToolBar", SectionTitleToolBarStyle );
     }
 }
 
