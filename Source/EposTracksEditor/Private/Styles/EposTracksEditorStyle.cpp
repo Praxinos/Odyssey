@@ -20,6 +20,10 @@
 #define CORE_IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( RootToCoreContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 #define CORE_BOX_BRUSH( RelativePath, ... ) FSlateBoxBrush( RootToCoreContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 
+#define IMAGE_BRUSH_SVG(RelativePath, ...)  FSlateVectorImageBrush(RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
+
+#define CORE_IMAGE_BRUSH_SVG(RelativePath, ...)  FSlateVectorImageBrush(RootToCoreContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
+
 namespace
 {
 static const FVector2D Icon8x8( 8.0f, 8.0f );

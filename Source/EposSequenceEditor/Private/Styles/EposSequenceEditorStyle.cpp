@@ -13,6 +13,7 @@
 #include "Styling/SlateStyleRegistry.h"
 
 #define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
+#define IMAGE_BRUSH_SVG(RelativePath, ...)  FSlateVectorImageBrush(RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
 #define BORDER_BRUSH(RelativePath, ...) FSlateBorderBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 
 #define DEFAULT_FONT(...) FCoreStyle::GetDefaultFontStyle(__VA_ARGS__)
@@ -66,7 +67,7 @@ FEposSequenceEditorStyle::InitSequencer()
     //---
 
     // tab icons
-    Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH( "sequencer-tab-16x", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
+    Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH_SVG( "sequencer-tab", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
 
     // asset thumbnail
     Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
@@ -80,13 +81,13 @@ FEposSequenceEditorStyle::InitSequencer()
          FTextBlockStyle( FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
          .SetFont( DEFAULT_FONT( "Regular", 10 ) )
          .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
-         );
+    );
 
-    Set( "Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );
+    Set( "Settings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
+    Set( "Settings.Small", new IMAGE_BRUSH_SVG( "epos-settings", FVector2D( 20.f, 20.f ) ) );
 
-    Set( "Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
-    Set( "Help.Small", new IMAGE_BRUSH( "epos-help-24x", FVector2D( 20.f, 20.f ) ) );
+    Set( "Help", new IMAGE_BRUSH_SVG( "epos-help", Icon48x48 ) );
+    Set( "Help.Small", new IMAGE_BRUSH_SVG( "epos-help", FVector2D( 20.f, 20.f ) ) );
 }
 
 void
@@ -124,15 +125,15 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
 
-    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon24x24 ) );
 
-    Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon24x24 ) );
 }
 
 void
@@ -145,16 +146,16 @@ FEposSequenceEditorStyle::InitAbout()
     static const FVector2D Icon30x30( 30.0f, 30.0f );
     static const FVector2D Icon128x128( 128.0f, 128.0f );
 
-    Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", Icon30x30 ) );
-    Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", Icon30x30 ) );
-    Set( "About.Youtube", new IMAGE_BRUSH( "About/youtube", Icon30x30 ) );
-    Set( "About.Twitter", new IMAGE_BRUSH( "About/twitter", Icon30x30 ) );
-    Set( "About.Instagram", new IMAGE_BRUSH( "About/instagram", Icon30x30 ) );
-    Set( "About.Discord", new IMAGE_BRUSH( "About/discord", Icon30x30 ) );
-    Set( "About.UserDoc", new IMAGE_BRUSH( "About/user-doc", Icon30x30 ) );
-    Set( "About.Git", new IMAGE_BRUSH( "About/git", Icon30x30 ) );
-    Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", Icon128x128 ) );
-    Set( "About.Epos", new IMAGE_BRUSH( "About/epos", Icon128x128 ) );
+    Set( "About.Facebook", new IMAGE_BRUSH_SVG( "About/facebook", Icon30x30 ) );
+    Set( "About.LinkedIn", new IMAGE_BRUSH_SVG( "About/linkedin", Icon30x30 ) );
+    Set( "About.Youtube", new IMAGE_BRUSH_SVG( "About/youtube", Icon30x30 ) );
+    Set( "About.Twitter", new IMAGE_BRUSH_SVG( "About/twitter", Icon30x30 ) );
+    Set( "About.Instagram", new IMAGE_BRUSH_SVG( "About/instagram", Icon30x30 ) );
+    Set( "About.Discord", new IMAGE_BRUSH_SVG( "About/discord", Icon30x30 ) );
+    Set( "About.UserDoc", new IMAGE_BRUSH_SVG( "About/user-doc", Icon30x30 ) );
+    Set( "About.Git", new IMAGE_BRUSH_SVG( "About/github", Icon30x30 ) );
+    Set( "About.Praxinos", new IMAGE_BRUSH_SVG( "About/praxinos", Icon128x128 ) );
+    Set( "About.Epos", new IMAGE_BRUSH_SVG( "About/epos", Icon128x128 ) );
 
     Set( "About.UnderlineText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
                                 .SetFontSize( 10 )
