@@ -8,6 +8,7 @@
 #include "ISequencer.h"
 
 #include "Settings/EposSequenceEditorSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceFactory"
@@ -29,8 +30,10 @@ UObject* UShotSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iPa
     const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
     NewShotSequence->Initialize( SequenceSettings->ShotSettings.DefaultTickFrameRate, SequenceSettings->ShotSettings.DefaultDisplayFrameRate );
 
+    const UEposTracksEditorSettings* TrackSettings = GetDefault<UEposTracksEditorSettings>();
+
     FFrameRate TickResolution = NewShotSequence->GetMovieScene()->GetTickResolution();
-    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0, ( SequenceSettings->ShotSettings.DefaultDuration * TickResolution ).FloorToFrame().Value );
+    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultDuration * TickResolution ).FloorToFrame().Value );
 
     return NewShotSequence;
 }

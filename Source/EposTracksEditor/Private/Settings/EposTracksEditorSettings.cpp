@@ -23,6 +23,16 @@ UEposTracksEditorSettings::GetCategoryName() const
     return TEXT( "Plugins" );
 }
 
+void
+UEposTracksEditorSettings::SetDefaultDuration( float iDefaultDuration )
+{
+    if( DefaultDuration == iDefaultDuration )
+        return;
+
+    DefaultDuration = iDefaultDuration;
+    SaveConfig();
+}
+
 #if WITH_EDITOR
 
 void

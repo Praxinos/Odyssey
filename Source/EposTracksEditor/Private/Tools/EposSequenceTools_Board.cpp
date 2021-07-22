@@ -344,7 +344,7 @@ CinematicBoardTrackTools::GenerateNewSectionName( const TArray<UMovieSceneSectio
 template<typename SequenceClass>
 //static
 UMovieSceneSubSection*
-CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
+CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FString& ioNewSequenceName, FFrameNumber iNewSectionStartTime, TOptional<int32> iDuration, UMovieSceneCinematicBoardSection* iSectionToDuplicate )
 {
     UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
 
@@ -399,10 +399,13 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FStrin
     int32 section_duration;
     if( iSectionToDuplicate )
         section_duration = UE::MovieScene::DiscreteSize( iSectionToDuplicate->GetRange() );
+    else if( iDuration.IsSet() )
+        section_duration = iDuration.GetValue();
     else if( !boardTrack->GetAllSections().Num() )
         section_duration = UE::MovieScene::DiscreteSize( iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange() );
     else
-        section_duration = UE::MovieScene::DiscreteSize( newSequence->GetMovieScene()->GetPlaybackRange() );
+        section_duration = -1; // To use the duration of the current section
+        // section_duration = UE::MovieScene::DiscreteSize( newSequence->GetMovieScene()->GetPlaybackRange() );
 
     // Create a board section.
     UMovieSceneSubSection* newSection = boardTrack->AddSequence( newSequence, iNewSectionStartTime, section_duration );
@@ -418,14 +421,14 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FStrin
 template<typename SequenceClass>
 //static
 void
-CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
     const FScopedTransaction transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
 
     UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
     FString newBoardName = GenerateNewSectionName<SequenceClass>( boardTrack->GetAllSections(), iFrameNumber );
 
-    UMovieSceneSubSection* newBoard = CreateSequenceInternal<SequenceClass>( iSequencer, newBoardName, iFrameNumber );
+    UMovieSceneSubSection* newBoard = CreateSequenceInternal<SequenceClass>( iSequencer, newBoardName, iFrameNumber, iDuration );
     if( newBoard )
     {
         //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
@@ -442,15 +445,15 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
 
 //static
 void
-CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
-    InsertSequence<UBoardSequence>( iSequencer, iFrameNumber );
+    InsertSequence<UBoardSequence>( iSequencer, iFrameNumber, iDuration );
 }
 //static
 void
-CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
-    InsertSequence<UShotSequence>( iSequencer, iFrameNumber );
+    InsertSequence<UShotSequence>( iSequencer, iFrameNumber, iDuration );
 }
 
 ////static
@@ -503,9 +506,9 @@ CinematicBoardTrackTools::DuplicateSection( ISequencer* iSequencer, UMovieSceneC
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* newBoard;
     if( subsequence->IsA<UBoardSequence>() )
-        newBoard = CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, startTime, iSection );
+        newBoard = CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, startTime, TOptional<int32>(), iSection );
     else
-        newBoard = CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, startTime, iSection );
+        newBoard = CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, startTime, TOptional<int32>(), iSection );
 
     if( newBoard )
     {

@@ -12,23 +12,16 @@
 
 //static
 FShiftResult
-SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMovieSceneSequence* iSequence, FFrameNumber iStartTime, FFrameNumber iDuration )
+SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMovieSceneSequence* iSequence, FFrameNumber iStartTime, TOptional<int32> iDuration )
 {
     iStartTime = FMath::Max( FFrameNumber( 0 ), iStartTime );
 
-    FFrameNumber inner_duration = 0;
-    auto sections = iSequence->GetMovieScene()->GetAllSections();
-    if( sections.Num() )
-    {
-        MovieSceneHelpers::SortConsecutiveSections( sections );
-        auto range = TRange<FFrameNumber>::Hull( sections[0]->GetTrueRange(), sections.Last()->GetTrueRange() );
-        inner_duration = UE::MovieScene::DiscreteSize( range );
-    }
-
     if( !iSections.Num() )
     {
+        check( iDuration.IsSet() );
+
         FShiftResult shift_result;
-        shift_result.mNewRange = TRange<FFrameNumber>( 0, 0 + ( inner_duration.Value ? inner_duration : iDuration ) );
+        shift_result.mNewRange = TRange<FFrameNumber>( 0, 0 + iDuration.GetValue() );
         shift_result.mFillGap = true;
         shift_result.mGap = shift_result.mNewRange; // It doesn't go in the ShiftFollowingSections() loop
         return shift_result;
@@ -44,7 +37,7 @@ SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMo
         // If iStartTime is inside a section
         if( current_section->IsTimeWithinSection( iStartTime ) )
         {
-            FFrameNumber duration = ( inner_duration.Value ? inner_duration : UE::MovieScene::DiscreteSize( current_section_range ) );
+            FFrameNumber duration = ( iDuration.IsSet() ? iDuration.GetValue() : UE::MovieScene::DiscreteSize( current_section_range ) );
 
             TArray<TRange<FFrameNumber>> ranges = current_section_range.Split( ( current_section_range.GetLowerBoundValue().Value + current_section_range.GetUpperBoundValue().Value ) / 2 );
             // Can't split the section -> return the section range
@@ -102,7 +95,7 @@ SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMo
     if( TRangeBound<FFrameNumber>::MinLower( new_start_bound, first_range.GetLowerBound() ) == new_start_bound )
     {
         FShiftResult shift_result;
-        FFrameNumber duration = ( inner_duration.Value ? inner_duration : UE::MovieScene::DiscreteSize( first_range ) );
+        FFrameNumber duration = ( iDuration.IsSet() ? iDuration.GetValue() : UE::MovieScene::DiscreteSize( first_range ) );
         shift_result.mNewRange = TRange<FFrameNumber>( first_range.GetLowerBound().GetValue() - duration, TRangeBound<FFrameNumber>::FlipInclusion( first_range.GetLowerBound() ).GetValue() );
         shift_result.mFillGap = true;
         shift_result.mGap = TRange<FFrameNumber>( shift_result.mNewRange.GetLowerBound(), first_range.GetLowerBound().GetValue() );
@@ -113,7 +106,7 @@ SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMo
     if( TRangeBound<FFrameNumber>::MaxUpper( new_start_bound, TRangeBound<FFrameNumber>::FlipInclusion( last_range.GetUpperBound() ) ) == new_start_bound )
     {
         FShiftResult shift_result;
-        FFrameNumber duration = ( inner_duration.Value ? inner_duration : UE::MovieScene::DiscreteSize( last_range ) );
+        FFrameNumber duration = ( iDuration.IsSet() ? iDuration.GetValue() : UE::MovieScene::DiscreteSize( last_range ) );
         shift_result.mNewRange = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( last_range.GetUpperBound() ).GetValue(), last_range.GetUpperBound().GetValue() + duration );
         shift_result.mFillGap = true;
         shift_result.mGap = TRange<FFrameNumber>( last_range.GetUpperBound().GetValue(), shift_result.mNewRange.GetUpperBound().GetValue() );
@@ -131,7 +124,7 @@ SectionsHelpersShift::GetShiftInfo( TArray< UMovieSceneSection* > iSections, UMo
         if( gap_range.Contains( iStartTime ) )
         {
             FShiftResult shift_result;
-            FFrameNumber duration = ( inner_duration.Value ? inner_duration : UE::MovieScene::DiscreteSize( previous_section->GetTrueRange() ) );
+            FFrameNumber duration = ( iDuration.IsSet() ? iDuration.GetValue() : UE::MovieScene::DiscreteSize( previous_section->GetTrueRange() ) );
             shift_result.mNewRange = TRange<FFrameNumber>( gap_range.GetLowerBound().GetValue(), gap_range.GetLowerBound().GetValue() + duration );
             shift_result.mFillGap = true;
             shift_result.mGap = gap_range;

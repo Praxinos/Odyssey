@@ -9,6 +9,7 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "Settings/EposSequenceEditorSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceFactory"
 
@@ -29,8 +30,10 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
     const UEposSequenceEditorSettings* SequenceSettings = GetDefault<UEposSequenceEditorSettings>();
     NewBoardSequence->Initialize( SequenceSettings->BoardSettings.DefaultTickFrameRate, SequenceSettings->BoardSettings.DefaultDisplayFrameRate );
 
+    const UEposTracksEditorSettings* TrackSettings = GetDefault<UEposTracksEditorSettings>();
+
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();
-    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0, ( SequenceSettings->BoardSettings.DefaultDuration * TickResolution ).FloorToFrame().Value );
+    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultDuration * TickResolution ).FloorToFrame().Value );
 
     auto newTrack = NewBoardSequence->GetMovieScene()->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
 
