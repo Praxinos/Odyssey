@@ -83,7 +83,7 @@ public:
     
     // Misc
     void SetCurrentStrokePoint(const FOdysseyStrokePoint& iPoint); //TODO: Rename,  it allows us to set what is the current cursor position when hovering the canvas
-    void UpdateStrokeOptions(); //TODO: Replace by a TAttribute<FStrokeOptions>
+    void UpdateStrokeOptions();
     void TriggerStateChanged(); //TODO: Rename, it allows us to rebuild the BrushInstance when the brush parameters changes
 
 public:
@@ -94,7 +94,6 @@ public:
     void IsLocked(TAttribute<bool> iIsLocked);
     void SetColor( const ::ul3::FPixelValue& iColor );
 
-    //TODO: Replace by a TAttribute<FPaintModifiers>
     void SetSizeModifier( float iValue );
     void SetOpacityModifier( float iValue );
     void SetFlowModifier( float iValue );
@@ -113,14 +112,12 @@ public:
     bool IsLocked() const;
     const ::ul3::FPixelValue& GetColor() const;
 
-    // TODO: Have a TAttribute system for modifiers like TAttribute<FPaintModifiers>
     float GetSizeModifier() const;
     float GetOpacityModifier() const;
     float GetFlowModifier() const;
     ::ul3::eBlendingMode GetBlendingModeModifier() const;
     ::ul3::eAlphaMode GetAlphaModeModifier() const;
     
-    // TODO: Have a TAttribute system for StrokeOptions like TAttribute<FStrokeOptions>
     FOdysseyStrokeOptions* StrokeOptions();
     bool GetSmoothingCatchUp() const;
 
@@ -210,7 +207,6 @@ private:
 private:
     // Stroke Options Management
 
-    // TODO: Have a TAttribute system for StrokeOptions like TAttribute<FStrokeOptions>
     void UpdateStrokeStep();
     void UpdateStrokeAdaptative();
     void UpdateInterpolationType();

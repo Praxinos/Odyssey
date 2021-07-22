@@ -2,11 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyPainterEditorTopTab.h"
-
-#include "OdysseyPainterEditor.h"
 #include "SOdysseyPaintModifiers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
+
+class FOdysseyPainterEditor;
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorTopTab
@@ -32,9 +32,9 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
 	return SNew( SOdysseyPaintModifiers )
-        .Size(this, &FOdysseyPainterEditorTopTab::Size)
-        .Opacity(this, &FOdysseyPainterEditorTopTab::Opacity)
-        .Flow(this, &FOdysseyPainterEditorTopTab::Flow)
+        .OnGetSize(this, &FOdysseyPainterEditorTopTab::OnGetSize)
+        .OnGetOpacity(this, &FOdysseyPainterEditorTopTab::OnGetOpacity)
+        .OnGetFlow(this, &FOdysseyPainterEditorTopTab::OnGetFlow)
         .BlendingMode(this, &FOdysseyPainterEditorTopTab::BlendingMode)
         .AlphaMode(this, &FOdysseyPainterEditorTopTab::AlphaMode)
         .OnSizeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnSizeChanged )
@@ -93,24 +93,6 @@ FOdysseyPainterEditorTopTab::IsVertical(bool iIsVertical)
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-float
-FOdysseyPainterEditorTopTab::Size() const
-{
-    return mEditor->PaintEngine()->GetSizeModifier();
-}
-
-float
-FOdysseyPainterEditorTopTab::Opacity() const
-{
-    return mEditor->PaintEngine()->GetOpacityModifier();
-}
-
-float
-FOdysseyPainterEditorTopTab::Flow() const
-{
-    return mEditor->PaintEngine()->GetFlowModifier();
-}
-
 ::ul3::eBlendingMode
 FOdysseyPainterEditorTopTab::BlendingMode() const
 {
@@ -156,6 +138,24 @@ FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 	mEditor->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
 }
 
+int
+FOdysseyPainterEditorTopTab::OnGetSize() const
+{
+    return static_cast<int>( mEditor->PaintEngine()->GetSizeModifier() );
+}
+
+float
+FOdysseyPainterEditorTopTab::OnGetOpacity() const
+{
+    return mEditor->PaintEngine()->GetOpacityModifier();
+}
+
+float
+FOdysseyPainterEditorTopTab::OnGetFlow() const
+{
+    return mEditor->PaintEngine()->GetFlowModifier();
+}
+
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
@@ -168,7 +168,7 @@ FOdysseyPainterEditorTopTab::SetAlphaMode(::ul3::eAlphaMode iAlphaMode)
 void
 FOdysseyPainterEditorTopTab::AddSize(int32 iValue)
 {
-    mEditor->PaintEngine()->SetSizeModifier( Size() + iValue );
+    mEditor->PaintEngine()->SetSizeModifier( mEditor->PaintEngine()->GetSizeModifier() + iValue );
 }
 
 #undef LOCTEXT_NAMESPACE

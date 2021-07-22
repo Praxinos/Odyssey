@@ -839,8 +839,8 @@ FOdysseyPaintEngine::BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool 
         if (overrides.bOverride_RealTime)      mStrokeOptions.RealTime = overrides.RealTime;
         if (overrides.bOverride_CatchUp)       mStrokeOptions.CatchUp = overrides.CatchUp;
         if (overrides.bOverride_Size)          mSizeModifier = overrides.Size;
-        if (overrides.bOverride_Opacity)       mOpacityModifier = overrides.Opacity;
-        if (overrides.bOverride_Flow)          mFlowModifier = overrides.Flow;
+        if (overrides.bOverride_Opacity)       mOpacityModifier = overrides.Opacity / 100.f;
+        if (overrides.bOverride_Flow)          mFlowModifier = overrides.Flow / 100.f;
         if (overrides.bOverride_BlendingMode)  mBlendingModeModifier = (::ul3::eBlendingMode)overrides.BlendingMode;
         if (overrides.bOverride_AlphaMode)     mAlphaModeModifier = (::ul3::eAlphaMode)overrides.AlphaMode;
     }

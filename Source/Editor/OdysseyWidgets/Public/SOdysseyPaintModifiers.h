@@ -26,20 +26,24 @@ class ODYSSEYWIDGETS_API SOdysseyPaintModifiers : public SCompoundWidget
     typedef TSharedPtr< FString >       FComboItemType;
 
 public:
+    DECLARE_DELEGATE_RetVal( int, FOnGetIntProperty );
+    DECLARE_DELEGATE_RetVal( float, FOnGetFloatProperty );
+
+public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPaintModifiers )
         {}
-        SLATE_ATTRIBUTE( float, Size )
-        SLATE_ATTRIBUTE( float, Opacity )
-        SLATE_ATTRIBUTE( float, Flow )
+        SLATE_ARGUMENT( bool, VerticalAspect )
         SLATE_ATTRIBUTE( ::ul3::eBlendingMode, BlendingMode )
         SLATE_ATTRIBUTE( ::ul3::eAlphaMode, AlphaMode )
+        SLATE_EVENT( FOnGetIntProperty, OnGetSize )
+        SLATE_EVENT( FOnGetFloatProperty, OnGetOpacity )
+        SLATE_EVENT( FOnGetFloatProperty, OnGetFlow )
         SLATE_EVENT( FOnInt32ValueChanged, OnSizeChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnOpacityChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnFlowChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnBlendingModeChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnAlphaModeChanged )
-        SLATE_ARGUMENT(bool, VerticalAspect)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
@@ -50,25 +54,25 @@ private:
 
 public:
     // Public Callbacks
-    void  SetSize( float iValue );
-    void  SetOpacity(float iValue );
-    void  SetFlow(float iValue );
+    void  SetSize( int iValue );
+    void  SetOpacity( int iValue );
+    void  SetFlow( int iValue );
     void  SetBlendingMode( ::ul3::eBlendingMode iValue );
     void  SetAlphaMode( ::ul3::eAlphaMode iValue );
 
 public:
     // Public Getters
-    float  GetSize() const;
-    float  GetOpacity() const;
-    float  GetFlow() const;
     ::ul3::eBlendingMode  GetBlendingMode();
     ::ul3::eAlphaMode  GetAlphaMode();
 
 private:
     // Private Callbacks
-    void HandleSizeSpinBoxChanged( float iValue, ETextCommit::Type iType );
-    void HandleOpacitySpinBoxChanged( float iValue, ETextCommit::Type iType );
-    void HandleFlowSpinBoxChanged( float iValue, ETextCommit::Type iType );
+    int OnGetSize() const;
+    int OnGetOpacity() const;
+    int OnGetFlow() const;
+    void HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type iType );
+    void HandleOpacitySpinBoxChanged( int iValue, ETextCommit::Type iType );
+    void HandleFlowSpinBoxChanged( int iValue, ETextCommit::Type iType );
 
 private:
     // Blending mode Callbacks
@@ -87,19 +91,20 @@ private:
     FText GetAlphaModeAsText() const;
 
 private:
-    // Private Data Members
-    TAttribute<float> mSize;
-    TAttribute<float> mOpacity;
-    TAttribute<float> mFlow;
+
+    FOnGetIntProperty mOnGetSize;
+    FOnGetFloatProperty mOnGetOpacity;
+    FOnGetFloatProperty mOnGetFlow;
+
     TAttribute<::ul3::eBlendingMode> mBlendingMode;
     TAttribute<::ul3::eAlphaMode> mAlphaMode;
 
-    ::ul3::eBlendingMode                       mCurrentBlendingMode; //cache value
-    ::ul3::eAlphaMode                          mCurrentAlphaMode; //cache value
+    ::ul3::eBlendingMode    mCurrentBlendingMode;   //cache value
+    ::ul3::eAlphaMode       mCurrentAlphaMode;      //cache value
 
-    TSharedPtr< SSpinBox< float > >   mSizeSpinBox;
-    TSharedPtr< SSpinBox< float > >   mOpacitySpinBox;
-    TSharedPtr< SSpinBox< float > >   mFlowSpinBox;
+    TSharedPtr< SSpinBox< int > >   mSizeSpinBox;
+    TSharedPtr< SSpinBox< int > >   mOpacitySpinBox;
+    TSharedPtr< SSpinBox< int > >   mFlowSpinBox;
 
     TSharedPtr<SComboBox<TSharedPtr<FText>>>    mBlendingBox;
     TArray< TSharedPtr<FText> >                 mBlendingModes;

@@ -27,9 +27,10 @@ public:
 
 protected:
     // Widget Getters
-    virtual float Size() const;
-    virtual float Opacity() const;
-    virtual float Flow() const;
+
+    virtual int OnGetSize() const;
+    virtual float OnGetOpacity() const;
+    virtual float OnGetFlow() const;
     virtual ::ul3::eBlendingMode BlendingMode() const;
     virtual ::ul3::eAlphaMode AlphaMode() const;
 
@@ -40,9 +41,6 @@ protected:
     virtual void OnFlowChanged( int32 iValue );
     virtual void OnBlendingModeChanged( int32 iValue );
     virtual void OnAlphaModeChanged( int32 iValue );
-//  virtual uint32 GetSize() TODO.
-//  virtual uint32 GetOpacity() TODO.
-//  virtual uint32 GetFlow() TODO.
 
 protected:
     // Methods

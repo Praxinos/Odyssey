@@ -3,6 +3,7 @@
 
 #include "SOdysseyPaintModifiers.h"
 
+
 #define LOCTEXT_NAMESPACE "OdysseyPaintModifiers"
 
 
@@ -13,21 +14,18 @@
 void
 SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 {
-    mSize = InArgs._Size;
-    mOpacity = InArgs._Opacity;
-    mFlow = InArgs._Flow;
+    mOnGetSize = InArgs._OnGetSize;
+    mOnGetOpacity = InArgs._OnGetOpacity;
+    mOnGetFlow = InArgs._OnGetFlow;
     mBlendingMode = InArgs._BlendingMode;
     mAlphaMode = InArgs._AlphaMode;
-
     mCurrentBlendingMode = mBlendingMode.Get();
     mCurrentAlphaMode = mAlphaMode.Get();
-
     mOnSizeChangedCallback      = InArgs._OnSizeChanged;
     mOnOpacityChangedCallback   = InArgs._OnOpacityChanged;
     mOnFlowChangedCallback      = InArgs._OnFlowChanged;
     mOnBlendingModeChangedCallback = InArgs._OnBlendingModeChanged;
     mBlendingModes = GetBlendingModesAsText();
-
     mOnAlphaModeChangedCallback = InArgs._OnAlphaModeChanged;
     mAlphaModes = GetAlphaModesAsText();
 
@@ -61,10 +59,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mSizeSpinBox, SSpinBox< float > )
-                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                //.Value(mSize)
-                                .Value( this, &SOdysseyPaintModifiers::GetSize )
+                                SAssignNew( mSizeSpinBox, SSpinBox< int > )
+                                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
                                 .MaxFractionalDigits(0)
                                 .MinValue( 1 )
                                 .MaxValue( 1000 )
@@ -97,10 +93,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mOpacitySpinBox, SSpinBox< float > )
-                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                //.Value(mOpacity)
-                                .Value(this, &SOdysseyPaintModifiers::GetOpacity )
+                                SAssignNew( mOpacitySpinBox, SSpinBox< int > )
+                                .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
                                 .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
@@ -133,10 +127,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mFlowSpinBox, SSpinBox< float > )
-                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                //.Value(mFlow)
-                                .Value(this, &SOdysseyPaintModifiers::GetFlow )
+                                SAssignNew( mFlowSpinBox, SSpinBox< int > )
+                                .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
                                 .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
@@ -253,10 +245,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mSizeSpinBox, SSpinBox< float > )
-                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                //.Value(mSize)
-                                .Value( this, &SOdysseyPaintModifiers::GetSize )
+                                SAssignNew( mSizeSpinBox, SSpinBox< int > )
+                                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
                                 .MaxFractionalDigits(0)
                                 .MinValue( 1 )
                                 .MaxValue( 1000 )
@@ -289,10 +279,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mOpacitySpinBox, SSpinBox< float > )
-                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                //.Value(mOpacity)
-                                .Value( this, &SOdysseyPaintModifiers::GetOpacity )
+                                SAssignNew( mOpacitySpinBox, SSpinBox< int > )
+                                .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
                                 .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
@@ -325,10 +313,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mFlowSpinBox, SSpinBox< float > )
-                                //.Style(&FOdysseyStyle::GetWidgetStyle<FSpinBoxStyle>("OdysseySpinBoxStyle.DarkSpinBox"))
-                                //.Value(mFlow)
-                                .Value( this, &SOdysseyPaintModifiers::GetFlow )
+                                SAssignNew( mFlowSpinBox, SSpinBox< int > )
+                                .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
                                 .MaxFractionalDigits(0)
                                 .MinValue( 0 )
                                 .MaxValue( 100 )
@@ -416,33 +402,26 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     }
 }
 
-
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
+
 void
-SOdysseyPaintModifiers::SetSize( float iValue )
+SOdysseyPaintModifiers::SetSize( int iValue )
 {
-    mSize = iValue;
     mOnSizeChangedCallback.ExecuteIfBound( iValue );
 }
 
-
 void
-SOdysseyPaintModifiers::SetOpacity( float iValue )
+SOdysseyPaintModifiers::SetOpacity( int iValue )
 {
-    mOpacity = iValue;
-//    UE_LOG(LogTemp, Display, TEXT("%lf"), mOpacity.Get());
     mOnOpacityChangedCallback.ExecuteIfBound( iValue );
 }
 
-
 void
-SOdysseyPaintModifiers::SetFlow( float iValue )
+SOdysseyPaintModifiers::SetFlow( int iValue )
 {
-    mFlow = iValue;
     mOnFlowChangedCallback.ExecuteIfBound( iValue );
 }
-
 
 void
 SOdysseyPaintModifiers::SetBlendingMode( ::ul3::eBlendingMode iValue )
@@ -460,24 +439,6 @@ SOdysseyPaintModifiers::SetAlphaMode( ::ul3::eAlphaMode iValue )
     HandleOnAlphaModeChanged( sel, ESelectInfo::Direct );
 }
 
-float
-SOdysseyPaintModifiers::GetSize() const
-{
-    return mSize.Get();
-}
-
-float
-SOdysseyPaintModifiers::GetOpacity() const
-{
-    return mOpacity.Get();
-}
-
-float
-SOdysseyPaintModifiers::GetFlow() const
-{
-    return mFlow.Get();
-}
-
 ::ul3::eBlendingMode
 SOdysseyPaintModifiers::GetBlendingMode()
 {
@@ -490,30 +451,62 @@ SOdysseyPaintModifiers::GetAlphaMode()
     return mAlphaMode.Get();
 }
 
+int
+SOdysseyPaintModifiers::OnGetSize() const
+{
+    if( mOnGetSize.IsBound() )
+    {
+        return mOnGetSize.Execute();
+    }
+    else 
+    {
+        return -1;
+    }
+}
 
-//--------------------------------------------------------------------------------------
-//-------------------------------------------------------------------- Private Callbacks
+int
+SOdysseyPaintModifiers::OnGetOpacity() const
+{
+    if( mOnGetOpacity.IsBound() )
+    {
+        return 100 * mOnGetOpacity.Execute();
+    }
+    else 
+    {
+        return -1;
+    }
+}
+
+int
+SOdysseyPaintModifiers::OnGetFlow() const
+{
+    if( mOnGetFlow.IsBound() )
+    {
+        return 100 * mOnGetFlow.Execute();
+    }
+    else 
+    {
+        return -1;
+    }
+}
 
 void
-SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( float iValue, ETextCommit::Type iType )
+SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type iType )
 {
     mOnSizeChangedCallback.ExecuteIfBound( iValue );
 }
 
-
 void
-SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged(float iValue, ETextCommit::Type iType )
+SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
     mOnOpacityChangedCallback.ExecuteIfBound( iValue );
 }
 
-
 void
-SOdysseyPaintModifiers::HandleFlowSpinBoxChanged(float iValue, ETextCommit::Type iType )
+SOdysseyPaintModifiers::HandleFlowSpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
     mOnFlowChangedCallback.ExecuteIfBound( iValue );
 }
-
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Blending mode Callbacks
@@ -524,14 +517,12 @@ SOdysseyPaintModifiers::GenerateBlendingComboBoxItem( TSharedPtr<FText> InItem )
            .Text(*(InItem.Get()));
 }
 
-
 TSharedRef<SWidget>
 SOdysseyPaintModifiers::CreateBlendingModeTextWidget()
 {
     return SNew(STextBlock)
            .Text_Lambda([&](){ return GetBlendingModeAsText(); });
 }
-
 
 void
 SOdysseyPaintModifiers::HandleOnBlendingModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
@@ -557,7 +548,6 @@ SOdysseyPaintModifiers::GetBlendingModesAsText()
         array.Add( MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) ) ) );
     return array;
 }
-
 
 FText
 SOdysseyPaintModifiers::GetBlendingModeAsText() const
@@ -586,7 +576,6 @@ SOdysseyPaintModifiers::Tick(const FGeometry& AllottedGeometry, const double InC
     }
 }
 
-
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------- Alpha mode Callbacks
 TSharedRef<SWidget>
@@ -596,14 +585,12 @@ SOdysseyPaintModifiers::GenerateAlphaComboBoxItem( TSharedPtr<FText> InItem )
            .Text(*(InItem.Get()));
 }
 
-
 TSharedRef<SWidget>
 SOdysseyPaintModifiers::CreateAlphaModeTextWidget()
 {
     return SNew(STextBlock)
            .Text_Lambda([&](){ return GetAlphaModeAsText(); });
 }
-
 
 void
 SOdysseyPaintModifiers::HandleOnAlphaModeChanged(TSharedPtr<FText> NewSelection, ESelectInfo::Type SelectInfo )
@@ -630,13 +617,11 @@ SOdysseyPaintModifiers::GetAlphaModesAsText()
     return array;
 }
 
-
 FText
 SOdysseyPaintModifiers::GetAlphaModeAsText() const
 {
     return  FText::FromString( ANSI_TO_TCHAR( ::ul3::kwAlphaMode[ static_cast< int >( mAlphaMode.Get() ) ] ) );
 }
-
 
 #undef LOCTEXT_NAMESPACE
 
