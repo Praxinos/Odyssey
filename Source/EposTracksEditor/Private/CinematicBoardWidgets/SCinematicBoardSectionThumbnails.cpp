@@ -28,6 +28,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+
     LeftToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -39,8 +41,6 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         FText::GetEmpty(),
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
-
-    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
     //-
 
@@ -60,6 +60,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreateCamera ),
@@ -84,12 +86,12 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         TAttribute<FSlateIcon>(),
         true );
 
-    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
-
     //-
 
     FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    RightToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+
     RightToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -101,8 +103,6 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         FText::GetEmpty(),
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
-
-    RightToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
     //---
 

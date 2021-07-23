@@ -25,8 +25,8 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
     //---
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
 
     auto Snap = [this]()
     {

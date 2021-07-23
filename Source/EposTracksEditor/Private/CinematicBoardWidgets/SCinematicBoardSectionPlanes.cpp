@@ -97,6 +97,8 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::DetachPlane ),
@@ -108,8 +110,6 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         FText::GetEmpty(),
         LOCTEXT( "DetachPlane", "Detach the plane" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.DetachPlane" ) );
-
-    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
 
     //---
 
@@ -977,6 +977,8 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreatePlane ),
@@ -999,8 +1001,6 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
         TAttribute<FSlateIcon>(),
         true );
-
-    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
     TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
     // To always keep the real space of the toolbar as hidden keeps space
