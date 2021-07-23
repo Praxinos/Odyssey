@@ -35,8 +35,6 @@ public:
 protected:
     TSharedRef<ITableRow> MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
-    void                CreatePlane();
-    bool                CanCreatePlane();
     TSharedRef<SWidget> MakeTextureMenu();
 
     void RebuildPlaneList();

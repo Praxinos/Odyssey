@@ -248,10 +248,44 @@ BoardSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumb
 }
 
 //static
+bool
+BoardSequenceTools::CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera )
+        return false;
+
+    return true;
+}
+
+//static
 void
 ShotSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     CreatePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceTools::CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
+    if( !sequence )
+        return false;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
+    if( !camera )
+        return false;
+
+    return true;
 }
 
 //static

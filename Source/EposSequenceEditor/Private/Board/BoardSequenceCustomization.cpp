@@ -114,7 +114,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceTools::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );

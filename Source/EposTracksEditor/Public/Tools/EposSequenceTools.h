@@ -182,6 +182,15 @@ public:
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
+    *  Can a plane be created in the board section ?
+    *
+    * @param ISequencer         iSequencer to get the camera.
+    * @param FFrameNumber       iFrameNumber to get the board section.
+    * @return bool
+    */
+    static bool CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
     *  Get all planes (actor & track bindings) in the board section
     *
     * @param ISequencer     iSequencer to get planes.
@@ -289,6 +298,8 @@ public:
     */
     static void CreateCamera( ISequencer* iSequencer );
 
+    static bool CanCreateCamera( ISequencer* iSequencer );
+
     /**
     *  Update the camera location from the viewport
     *
@@ -323,6 +334,8 @@ public:
     * @param ISequencer iSequencer to add a plane.
     */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     static int32 GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 

@@ -28,20 +28,6 @@
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Camera"
 
 //static
-bool
-BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return false;
-
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-        return false;
-
-    return !ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
-}
-
-//static
 ACineCameraActor*
 BoardSequenceTools::GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding )
 {
@@ -77,10 +63,44 @@ BoardSequenceTools::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNum
 }
 
 //static
+bool
+BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( camera )
+        return false;
+
+    return true;
+}
+
+//static
 void
 ShotSequenceTools::CreateCamera( ISequencer* iSequencer )
 {
     CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+}
+
+//static
+bool
+ShotSequenceTools::CanCreateCamera( ISequencer* iSequencer )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
+    if( !sequence )
+        return false;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
+    if( camera )
+        return false;
+
+    return true;
 }
 
 //static

@@ -84,7 +84,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreateCamera( mSequencer ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !ShotSequenceTools::GetCamera( mSequencer ); } )
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreateCamera( mSequencer ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
@@ -106,7 +106,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         CommandList->MapAction(
             FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceTools::GetCamera( mSequencer ); } )
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );

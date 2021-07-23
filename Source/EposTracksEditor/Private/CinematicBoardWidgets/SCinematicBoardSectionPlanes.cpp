@@ -961,14 +961,28 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     //---
 
+    auto CreatePlane = [this]()
+    {
+        ISequencer* sequencer = mSequencer.Pin().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
+    };
+
+    auto CanCreatePlane = [this]() -> bool
+    {
+        ISequencer* sequencer = mSequencer.Pin().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        return BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
+    };
+
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
-            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlanes::CreatePlane ),
-            FCanExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlanes::CanCreatePlane ),
+            FExecuteAction::CreateLambda( CreatePlane ),
+            FCanExecuteAction::CreateLambda( CanCreatePlane ),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this]() { return CanCreatePlane(); } ) ),
+            FIsActionButtonVisible::CreateLambda( CanCreatePlane ) ),
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "CreatePlane", "Create a new plane" ),
@@ -979,7 +993,7 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this]() { return CanCreatePlane(); } ) ),
+            FIsActionButtonVisible::CreateLambda( CanCreatePlane ) ),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeTextureMenu ),
         LOCTEXT( "TextureOptions", "Options" ),
         LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
@@ -1015,18 +1029,6 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     ];
 
     RebuildPlaneList();
-}
-
-void
-SCinematicBoardSectionPlanes::CreatePlane()
-{
-    BoardSequenceTools::CreatePlane( mSequencer.Pin().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() );
-}
-
-bool
-SCinematicBoardSectionPlanes::CanCreatePlane()
-{
-    return !!BoardSequenceTools::GetCamera( mSequencer.Pin().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() );
 }
 
 TSharedRef<SWidget>
