@@ -16,6 +16,7 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionTitle
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionTitle )
         {}
+        SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
     // Construct the widget
@@ -29,7 +30,8 @@ protected:
     FLinearColor    HandleTextColor() const;
 
 private:
-    TWeakPtr<FCinematicBoardSection> mBoardSection;
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    TAttribute<EVisibility>             mOptionalWidgetsVisibility;
 
     TSharedPtr<SInlineEditableTextBlock> mWidgetName;
 };

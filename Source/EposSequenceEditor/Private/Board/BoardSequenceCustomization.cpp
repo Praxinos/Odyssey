@@ -101,12 +101,12 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+            FShotSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!BoardSequenceTools::GetCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime );
 
     //---
 
@@ -223,10 +223,6 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
-    ToolbarBuilder.AddSeparator();
-
-    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
-
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().GotoPreviousDrawing );

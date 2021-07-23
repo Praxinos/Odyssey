@@ -51,8 +51,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     Set( "ShotSequenceEditor.CreateCameraAtCurrentTime", new IMAGE_BRUSH( "camera-create-24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewport", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "ShotSequenceEditor.SnapCameraToViewport.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
+    Set( "ShotSequenceEditor.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "ShotSequenceEditor.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
 
     Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
     Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );

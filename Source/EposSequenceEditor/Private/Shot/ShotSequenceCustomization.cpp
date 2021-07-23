@@ -91,14 +91,14 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FShotSequenceEditorCommands::Get().SnapCameraToViewport,
+            FShotSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
             FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
             // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
             //FExecuteAction::CreateStatic( &ShotSequenceTools::SnapCameraToViewport, mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ),
-            FCanExecuteAction::CreateLambda( [this](){ return !!ShotSequenceTools::GetCamera( mSequencer ); } )
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
         );
     else
-        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+        CommandList->UnmapAction( FShotSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime );
 
     //---
 
@@ -243,7 +243,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         LOCTEXT( "CameraOptionsToolTip", "Camera Options" ),
         TAttribute<FSlateIcon>(),
         true );
-    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewport );
+    ToolbarBuilder.AddToolBarButton( FShotSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime );
 
     ToolbarBuilder.AddSeparator();
 

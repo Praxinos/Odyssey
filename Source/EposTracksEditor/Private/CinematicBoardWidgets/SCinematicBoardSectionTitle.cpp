@@ -7,6 +7,9 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "Shot/ShotSequence.h"
+#include "Styles/EposTracksEditorStyle.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionTitle"
 
@@ -17,6 +20,50 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
 {
     mBoardSection = iBoardSection;
 
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
+
+    //---
+
+    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
+    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+
+    auto Snap = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        BoardSequenceTools::SnapCameraToViewport( sequencer, subsection_object, local_frame );
+    };
+
+    auto CanSnap = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        return BoardSequenceTools::CanSnapCameraToViewport( sequencer, subsection_object, local_frame );
+    };
+
+    auto IsSnapVisible = [this]() -> bool
+    {
+        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( Snap ),
+            FCanExecuteAction::CreateLambda( CanSnap ),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( IsSnapVisible )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "snap-camera-to-viewport-tooltip", "Snap the existing camera to the viewport (create a camera and set the current frame where to create the camera keyframe)" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.SnapCameraToViewport" ) );
+
+    //---
+
     ChildSlot
     .HAlign( HAlign_Fill )
     [
@@ -25,6 +72,11 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
         .BorderBackgroundColor( FLinearColor( .50f, .50f, .50f, 1.0f ) )
         [
             SNew( SHorizontalBox ) // For future buttons
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                LeftToolbarBuilder.MakeWidget()
+            ]
             + SHorizontalBox::Slot()
             .HAlign( HAlign_Center )
             [

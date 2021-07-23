@@ -302,6 +302,48 @@ ShotSequenceTools::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSeque
 
 //static
 void
+BoardSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return;
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
+    if( !camera )
+        return;
+
+    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
+    ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, inner_frame.GetFrame() );
+}
+
+//static
+bool
+BoardSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return false;
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
+    if( !camera )
+        return false;
+
+    return true;
+}
+
+//static
+void
 BoardSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
@@ -314,6 +356,24 @@ BoardSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber i
         return;
 
     ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, result.mInnerTime.GetFrame() );
+}
+
+//static
+bool
+BoardSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera )
+        return false;
+
+    return true;
 }
 
 //static
@@ -331,6 +391,22 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iF
         return;
 
     SnapCameraToViewport( *iSequencer, sequence, camera, camera_guid, iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
+    if( !sequence )
+        return false;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
+    if( !camera )
+        return false;
+
+    return true;
 }
 
 //static

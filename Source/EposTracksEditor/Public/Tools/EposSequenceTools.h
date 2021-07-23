@@ -161,6 +161,32 @@ public:
     static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
+    *  Check if camera can be snap to the viewport
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Update the camera location from the viewport
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void SnapCameraToViewport( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+    /**
+    *  Check if camera can be snap to the viewport
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool CanSnapCameraToViewport( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+    /**
     *  Stop piloting camera
     *
     * @param ISequencer                 iSequencer to stop piloting camera.
@@ -306,6 +332,8 @@ public:
     * @param ISequencer iSequencer to update camera.
     */
     static void SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
     *  Stop piloting camera
