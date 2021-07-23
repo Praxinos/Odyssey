@@ -15,6 +15,8 @@
 #define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 #define BORDER_BRUSH(RelativePath, ...) FSlateBorderBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 
+#define DEFAULT_FONT(...) FCoreStyle::GetDefaultFontStyle(__VA_ARGS__)
+
 //---
 
 TSharedPtr<FEposSequenceEditorStyle> FEposSequenceEditorStyle::smSingleton;
@@ -67,6 +69,12 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
 
     //---
+
+    Set( "EposSequenceEditor.ToolBar.Heading",
+         FTextBlockStyle( FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
+         .SetFont( DEFAULT_FONT( "Regular", 10 ) )
+         .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
+         );
 
     Set( "EposSequenceEditor.Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
     Set( "EposSequenceEditor.Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );

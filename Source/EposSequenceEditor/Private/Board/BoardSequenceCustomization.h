@@ -39,6 +39,8 @@ private:
     };
     void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
 
+    FText CreatInfoText() const;
+
 private:
     /**
      * Called before an actor or component transform changes

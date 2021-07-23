@@ -5,6 +5,7 @@
 
 #include "CineCameraActor.h"
 #include "Framework/Docking/TabManager.h"
+#include "MovieSceneTimeHelpers.h"
 
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceEditorCommands.h"
@@ -220,6 +221,21 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 
 //---
 
+FText
+FBoardSequenceCustomization::CreatInfoText() const
+{
+    UMovieSceneCinematicBoardTrack* board_track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    int number_of_sections = board_track ? board_track->GetAllSections().Num() : 0;
+
+    TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
+
+    TRange<FFrameNumber> playback_range = mBoardSequence->GetMovieScene()->GetPlaybackRange();
+    int32 duration_in_tick = UE::MovieScene::DiscreteSize( playback_range );
+    FString duration = type_interface->ToString( duration_in_tick ); //TOCHECK: convert duration like time, correct ?
+
+    return FText::Format( LOCTEXT( "info-bar", "Duration: {0} - Board Sections: {1}" ), FText::FromString( duration ), number_of_sections );
+}
+
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
@@ -260,6 +276,19 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
         FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" )  );
+
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddWidget( SNew( SBorder )
+                              .VAlign( VAlign_Center )
+                              .Padding( FMargin( 10.f, 3.f ) ) // To simulate a space with the previous separator
+                              .BorderImage( FEditorStyle::GetNoBrush() )
+                              [
+                                  SNew( STextBlock )
+                                  .Text_Raw( this, &FBoardSequenceCustomization::CreatInfoText )
+                                  .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "EposSequenceEditor.ToolBar.Heading" ) )
+                              ]
+                              );
 }
 
 TSharedRef<SWidget>
