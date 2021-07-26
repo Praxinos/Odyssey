@@ -24,12 +24,12 @@ UEposTracksEditorSettings::GetCategoryName() const
 }
 
 void
-UEposTracksEditorSettings::SetDefaultDuration( float iDefaultDuration )
+UEposTracksEditorSettings::SetDefaultSectionDuration( float iDuration )
 {
-    if( DefaultDuration == iDefaultDuration )
+    if( DefaultSectionDuration == iDuration )
         return;
 
-    DefaultDuration = iDefaultDuration;
+    DefaultSectionDuration = iDuration;
     SaveConfig();
 }
 

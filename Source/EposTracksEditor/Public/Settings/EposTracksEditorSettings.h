@@ -90,7 +90,7 @@ class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
     //~
 
 public:
-    void SetDefaultDuration( float iDefaultDuration );
+    void SetDefaultSectionDuration( float iDuration );
 
 protected:
     //~ UObject Interface
@@ -108,8 +108,8 @@ public:
     FTextureSettings TextureSettings;
 
     /** The default duration for new section in seconds. */
-    UPROPERTY(config, EditAnywhere, meta=(ClampMin=0.00001f, Units=s))
-    float DefaultDuration { 3 };
+    UPROPERTY(config, EditAnywhere, Category = BoardTrack, meta=(ClampMin=0.1f, Units=s))
+    float DefaultSectionDuration { 3 };
 
     /** Specifies Board track stuff. */
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))

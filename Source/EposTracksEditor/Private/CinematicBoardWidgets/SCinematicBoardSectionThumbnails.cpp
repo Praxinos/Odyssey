@@ -203,7 +203,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
-        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultDuration * tick_resolution;
+        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
         CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetInclusiveStartFrame(), time.RoundToFrame().Value );
     };
 
@@ -237,7 +237,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
-        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultDuration * tick_resolution;
+        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
         CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetInclusiveStartFrame(), time.RoundToFrame().Value );
     };
 
@@ -273,7 +273,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
-        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultDuration * tick_resolution;
+        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
         CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetExclusiveEndFrame() - 1, time.RoundToFrame().Value );
     };
 
@@ -307,7 +307,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
-        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultDuration * tick_resolution;
+        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
         CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetExclusiveEndFrame() - 1, time.RoundToFrame().Value );
     };
 
@@ -333,7 +333,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
 
         double new_value_as_seconds = tick_resolution.AsSeconds( time.RoundToFrame() );
 
-        GetMutableDefault<UEposTracksEditorSettings>()->SetDefaultDuration( new_value_as_seconds );
+        GetMutableDefault<UEposTracksEditorSettings>()->SetDefaultSectionDuration( new_value_as_seconds );
     };
 
     auto GetDuration = [=]() -> double
@@ -342,7 +342,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
         FFrameRate display_rate = sequencer->GetFocusedDisplayRate();
         // Convert default duration in seconds (fe: 3.2 seconds) to 76800 frames in tick resolution (3.2 * 24000)
-        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultDuration * tick_resolution;
+        FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
         // Convert the duration to display rate (-> 76) and back again to tick resolution (-> 76000) to have a multiple of 1000 (scale between display rate and tick resolution)
         // And in this case, as the gui is displayed in display rate, 76000 is displayed as "00076" (and not "00076*" for 76800)
         time = FFrameRate::TransformTime( FFrameRate::TransformTime( time, tick_resolution, display_rate ).FloorToFrame(), display_rate, tick_resolution );

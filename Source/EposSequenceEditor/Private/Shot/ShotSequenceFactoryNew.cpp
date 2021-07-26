@@ -33,7 +33,7 @@ UObject* UShotSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iPa
     const UEposTracksEditorSettings* TrackSettings = GetDefault<UEposTracksEditorSettings>();
 
     FFrameRate TickResolution = NewShotSequence->GetMovieScene()->GetTickResolution();
-    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultDuration * TickResolution ).FloorToFrame().Value );
+    NewShotSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultSectionDuration * TickResolution ).FloorToFrame().Value );
 
     return NewShotSequence;
 }

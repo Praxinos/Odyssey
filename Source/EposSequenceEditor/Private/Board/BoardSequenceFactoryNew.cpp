@@ -33,7 +33,7 @@ UObject* UBoardSequenceFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iP
     const UEposTracksEditorSettings* TrackSettings = GetDefault<UEposTracksEditorSettings>();
 
     FFrameRate TickResolution = NewBoardSequence->GetMovieScene()->GetTickResolution();
-    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultDuration * TickResolution ).FloorToFrame().Value );
+    NewBoardSequence->GetMovieScene()->SetPlaybackRange( 0, ( TrackSettings->DefaultSectionDuration * TickResolution ).FloorToFrame().Value );
 
     auto newTrack = NewBoardSequence->GetMovieScene()->AddMasterTrack<UMovieSceneCinematicBoardTrack>();
 
