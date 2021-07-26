@@ -27,7 +27,8 @@ public:
 private:
     TSharedRef<SWidget> HandleAddBoardBeforeComboButtonGetMenuContent();
     TSharedRef<SWidget> HandleAddBoardAfterComboButtonGetMenuContent();
-    TSharedRef<SWidget> CreatePopupNewSectionWithDurationWidget( FText iLabel );
+    TSharedRef<SWidget> CreatePopupEntryNewSectionWithDurationWidget( FText iLabel );
+    TSharedRef<SWidget> CreatePopupEntryNewSectionWithDurationText( FText iLabel );
 
     TSharedRef<SWidget> MakeCameraMenu();
 
