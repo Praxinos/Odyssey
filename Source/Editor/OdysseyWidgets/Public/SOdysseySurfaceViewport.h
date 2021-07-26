@@ -55,6 +55,7 @@ public:
 
 private:
     // Private Callbacks
+    float           GetGuiZoomValue() const;
     void            HandleHorizontalScrollBarScrolled( float InScrollOffsetFraction );
     EVisibility     HandleHorizontalScrollBarVisibility( ) const;
     void            HandleVerticalScrollBarScrolled( float InScrollOffsetFraction );

@@ -18,13 +18,14 @@
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyStyleSet.h"
-
+//#include "Math/UnitConversion.h"
+//#include "Widgets/Input/NumericTypeInterface.h"
 #include <ULIS3>
 
 
 
-#define MaxZoom 16.0
 #define MinZoom 0.01
+#define MaxZoom 20.0
 #define ZoomStep 0.025
 #define RotationStep 15
 
@@ -224,6 +225,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     ]
             ]
             + SHorizontalBox::Slot()
+            .HAlign(HAlign_Right)
             .VAlign(VAlign_Center)
             [
                 SNew(SHorizontalBox)
@@ -240,9 +242,16 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     .Padding(4.0f, 0.0f)
                     .VAlign(VAlign_Center)
                     [
-                        SNew(SSlider)
-                            .OnValueChanged(this, &SOdysseySurfaceViewport::HandleZoomSliderChanged)
-                            .Value(this, &SOdysseySurfaceViewport::HandleZoomSliderValue)
+                        SNew( SSpinBox< float > )
+                            .Value( this, &SOdysseySurfaceViewport::GetGuiZoomValue )
+                            .OnValueChanged( this, &SOdysseySurfaceViewport::HandleZoomSliderChanged )
+                            .LinearDeltaSensitivity( 20 )  /** If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. */
+                            .AlwaysUsesDeltaSnap( true )
+                            .Delta( 1.f )
+                            //.TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
+                            //.MaxFractionalDigits( 2 )
+                            //.MinFractionalDigits( 2 )
+                            //.Value(this, &SOdysseySurfaceViewport::HandleZoomSliderValue)
                     ]
 
                 + SHorizontalBox::Slot()
@@ -379,6 +388,13 @@ void SOdysseySurfaceViewport::Tick( const FGeometry& AllottedGeometry, const dou
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------- Private Callbacks
+
+float
+SOdysseySurfaceViewport::GetGuiZoomValue() const
+{
+    return Zoom * 100;
+}
+
 void
 SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled( float InScrollOffsetFraction )
 {
@@ -538,7 +554,8 @@ SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
 void
 SOdysseySurfaceViewport::HandleZoomSliderChanged( float NewValue )
 {
-    SetZoom( NewValue * MaxZoom );
+//    UE_LOG(LogTemp, Warning, TEXT("Zoom, %f"), NewValue );
+    SetZoom( NewValue / 100 );
 }
 
 
