@@ -65,7 +65,6 @@ private:
     void            HandleAutoFilterClicked();
     bool            IsZoomMenuFitChecked() const;
     bool            IsAutoFilterChecked() const;
-    FText           HandleZoomPercentageText( ) const;
     void            HandleZoomSliderChanged( float NewValue );
     float           HandleZoomSliderValue( ) const;
     void            HandleRotationLeft();
@@ -101,19 +100,20 @@ public:
 
 private:
     // Private Member Data
-    TAttribute<IOdysseySurface*>        Surface;
-    TSharedPtr<FViewportClient>         ViewportClient;
-    TSharedPtr<FOdysseySceneViewport>   Viewport;
-    TSharedPtr<SViewport>               ViewportWidget;
-    TSharedPtr<SScrollBar>              TextureViewportVerticalScrollBar;
-    TSharedPtr<SScrollBar>              TextureViewportHorizontalScrollBar;
-    double                              Zoom;
-    double                              Rotation;
-    FVector2D                           Pan;
-    bool                                IsFitToViewport;
+    TAttribute<IOdysseySurface*>        mSurface;
+    TSharedPtr<FViewportClient>         mViewportClient;
+    TSharedPtr<FOdysseySceneViewport>   mViewport;
+    TSharedPtr<SViewport>               mViewportWidget;
+    TSharedPtr<SScrollBar>              mTextureViewportVerticalScrollBar;
+    TSharedPtr<SScrollBar>              mTextureViewportHorizontalScrollBar;
+    TSharedPtr<SSpinBox< float >>       mZoomSpinBox;
+    double                              mZoom;
+    double                              mRotation;
+    FVector2D                           mPan;
+    bool                                mIsFitToViewport;
     bool                                mIsAutoFilter;
-    uint32                              PreviewEffectiveTextureWidth;
-    uint32                              PreviewEffectiveTextureHeight;
+    uint32                              mPreviewEffectiveTextureWidth;
+    uint32                              mPreviewEffectiveTextureHeight;
 
     FOnParameterChanged                 mOnParameterChanged;
 };

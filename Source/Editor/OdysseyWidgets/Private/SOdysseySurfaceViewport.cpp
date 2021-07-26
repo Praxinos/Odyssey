@@ -3,23 +3,24 @@
 
 #include "SOdysseySurfaceViewport.h"
 #include "ObjectEditorUtils.h"
+#include "Engine/Texture.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SButton.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Widgets/Layout/SScrollBar.h"
 #include "Widgets/SToolTip.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/Input/SSlider.h"
-#include "Engine/Texture.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "FOdysseySceneViewport.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyStyleSet.h"
-//#include "Math/UnitConversion.h"
-//#include "Widgets/Input/NumericTypeInterface.h"
+
 #include <ULIS3>
 
 
@@ -38,7 +39,7 @@
 void
 SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
 {
-    Surface = InArgs._Surface;
+    mSurface = InArgs._Surface;
     mOnParameterChanged = InArgs._OnParameterChanged;
 
     // create zoom menu
@@ -101,7 +102,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                                 // viewport canvas
                                 + SOverlay::Slot()
                                     [
-                                        SAssignNew(ViewportWidget, SViewport)
+                                        SAssignNew(mViewportWidget, SViewport)
                                             .EnableGammaCorrection(false)
                                             .IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
                                             .ShowEffectWhenDisabled(false)
@@ -114,7 +115,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     .AutoWidth()
                     [
                         // vertical scroll bar
-                        SAssignNew(TextureViewportVerticalScrollBar, SScrollBar)
+                        SAssignNew(mTextureViewportVerticalScrollBar, SScrollBar)
                             .AlwaysShowScrollbar(true)
                             // .Visibility(EVisibility::Visible)
                             // .Visibility(this, &SOdysseySurfaceViewport::HandleVerticalScrollBarVisibility)
@@ -126,7 +127,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
             .AutoHeight()
             [
                 // horizontal scrollbar
-                SAssignNew(TextureViewportHorizontalScrollBar, SScrollBar)
+                SAssignNew(mTextureViewportHorizontalScrollBar, SScrollBar)
                     .Orientation( Orient_Horizontal )
                     .AlwaysShowScrollbar(true)
                     // .Visibility(EVisibility::Visible)
@@ -141,7 +142,6 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                 SAssignNew(HorizontalBox, SHorizontalBox)
             ]
     ];
-
 
     // zoom slider and rotation
     HorizontalBox->AddSlot()
@@ -242,26 +242,16 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     .Padding(4.0f, 0.0f)
                     .VAlign(VAlign_Center)
                     [
-                        SNew( SSpinBox< float > )
-                            .Value( this, &SOdysseySurfaceViewport::GetGuiZoomValue )
-                            .OnValueChanged( this, &SOdysseySurfaceViewport::HandleZoomSliderChanged )
-                            .LinearDeltaSensitivity( 20 )  /** If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. */
-                            .AlwaysUsesDeltaSnap( true )
-                            .Delta( 1.f )
-                            //.TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
-                            //.MaxFractionalDigits( 2 )
-                            //.MinFractionalDigits( 2 )
-                            //.Value(this, &SOdysseySurfaceViewport::HandleZoomSliderValue)
-                    ]
-
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(STextBlock)
-                            .Text(this, &SOdysseySurfaceViewport::HandleZoomPercentageText)
-                    ]
-
+                        //TODO UE5: MaxFractionnal digits is set correctly in UE5. In UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
+                        SAssignNew( mZoomSpinBox, SSpinBox< float >)
+                            .Value(this, &SOdysseySurfaceViewport::GetGuiZoomValue)
+                            .OnValueChanged(this, &SOdysseySurfaceViewport::HandleZoomSliderChanged)
+                            .LinearDeltaSensitivity(20)  /** If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. */
+                            .Delta(1.f)
+                            .TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
+                            .MaxFractionalDigits(2)
+                            .MinFractionalDigits(2)
+                   ]
                 + SHorizontalBox::Slot()
                     .AutoWidth()
                     .Padding(2.0f, 0.0f, 0.0f, 0.0f)
@@ -277,6 +267,8 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
              ]
         ];
 
+    mZoomSpinBox->SetMaxFractionalDigits(2);
+    mZoomSpinBox->SetMinFractionalDigits(2);
     SetZoom( 1.0 );
     SetRotationInDegrees( 0.f );
     SetPan( FVector2D( 0.f, 0.f ) );
@@ -295,35 +287,35 @@ SOdysseySurfaceViewport::SetSurface( IOdysseySurface* iValue )
 TSharedPtr< FOdysseySceneViewport >
 SOdysseySurfaceViewport::GetViewport() const
 {
-    return  Viewport;
+    return  mViewport;
 }
 
 
 TSharedPtr< SViewport >
 SOdysseySurfaceViewport::GetViewportWidget( ) const
 {
-    return  ViewportWidget;
+    return  mViewportWidget;
 }
 
 
 TSharedPtr< SScrollBar >
 SOdysseySurfaceViewport::GetVerticalScrollBar( ) const
 {
-    return  TextureViewportVerticalScrollBar;
+    return  mTextureViewportVerticalScrollBar;
 }
 
 
 TSharedPtr< SScrollBar >
 SOdysseySurfaceViewport::GetHorizontalScrollBar( ) const
 {
-    return  TextureViewportHorizontalScrollBar;
+    return  mTextureViewportHorizontalScrollBar;
 }
 
 
 IOdysseySurface*
 SOdysseySurfaceViewport::GetSurface() const
 {
-    return  Surface.Get();
+    return  mSurface.Get();
 }
 
 
@@ -364,16 +356,16 @@ void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient
     if (!InViewportClient.IsValid())
         return;
 
-    if( ViewportClient.IsValid() )
+    if( mViewportClient.IsValid() )
     {
-        ViewportClient.Reset();
-        Viewport.Reset();
-        ViewportWidget.Reset();
+        mViewportClient.Reset();
+        mViewport.Reset();
+        mViewportWidget.Reset();
     }
 
-    ViewportClient  = InViewportClient;
-    Viewport        = MakeShareable(new FOdysseySceneViewport(ViewportClient.Get(), ViewportWidget));
-    ViewportWidget->SetViewportInterface(Viewport.ToSharedRef());
+    mViewportClient  = InViewportClient;
+    mViewport        = MakeShareable(new FOdysseySceneViewport(mViewportClient.Get(), mViewportWidget));
+    mViewportWidget->SetViewportInterface(mViewport.ToSharedRef());
 }
 
 
@@ -381,8 +373,8 @@ void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient
 //-------------------------------------------------------------------- SWidget overrides
 void SOdysseySurfaceViewport::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
-    Viewport->Invalidate();
-    Viewport->InvalidateDisplay();
+    mViewport->Invalidate();
+    mViewport->InvalidateDisplay();
 }
 
 
@@ -392,7 +384,7 @@ void SOdysseySurfaceViewport::Tick( const FGeometry& AllottedGeometry, const dou
 float
 SOdysseySurfaceViewport::GetGuiZoomValue() const
 {
-    return Zoom * 100;
+    return mZoom * 100;
 }
 
 void
@@ -401,7 +393,7 @@ SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled( float InScrollOffset
     float Ratio = GetViewportHorizontalScrollBarRatio();
     float MaxOffset = (Ratio < 1.0f) ? 1.0f - Ratio : 0.0f;
     InScrollOffsetFraction = FMath::Clamp(InScrollOffsetFraction, 0.0f, MaxOffset);
-    TextureViewportHorizontalScrollBar->SetState(InScrollOffsetFraction, Ratio);
+    mTextureViewportHorizontalScrollBar->SetState(InScrollOffsetFraction, Ratio);
 }
 
 
@@ -422,7 +414,7 @@ SOdysseySurfaceViewport::HandleVerticalScrollBarScrolled( float InScrollOffsetFr
     float MaxOffset = (Ratio < 1.0f) ? 1.0f - Ratio : 0.0f;
     InScrollOffsetFraction = FMath::Clamp(InScrollOffsetFraction, 0.0f, MaxOffset);
 
-    TextureViewportVerticalScrollBar->SetState(InScrollOffsetFraction, Ratio);
+    mTextureViewportVerticalScrollBar->SetState(InScrollOffsetFraction, Ratio);
 }
 
 
@@ -487,19 +479,6 @@ SOdysseySurfaceViewport::IsAutoFilterChecked() const
     return mIsAutoFilter;
 }
 
-FText
-SOdysseySurfaceViewport::HandleZoomPercentageText( ) const
-{
-    const bool bFitToViewport = GetFitToViewport();
-    if(bFitToViewport)
-    {
-        return LOCTEXT("ZoomFitText", "Fit");
-    }
-
-    return FText::AsPercent(GetZoom());
-}
-
-
 void
 SOdysseySurfaceViewport::HandleRotationChanged( int newRotation )
 {
@@ -554,8 +533,7 @@ SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
 void
 SOdysseySurfaceViewport::HandleZoomSliderChanged( float NewValue )
 {
-//    UE_LOG(LogTemp, Warning, TEXT("Zoom, %f"), NewValue );
-    SetZoom( NewValue / 100 );
+    SetZoom( NewValue / 100.f );
 }
 
 
@@ -571,14 +549,15 @@ SOdysseySurfaceViewport::HandleZoomSliderValue( ) const
 double
 SOdysseySurfaceViewport::GetZoom() const
 {
-    return Zoom;
+    return mZoom;
 }
 
 
 void
 SOdysseySurfaceViewport::SetZoom( double ZoomValue )
 {
-    Zoom = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
+    mZoom = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
+
     SetFitToViewport( false );
 
     IOdysseySurface* surface = GetSurface();
@@ -587,11 +566,11 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
         UTexture* texture       = surface->Texture();
         if (texture)
         {
-            if( Zoom >= 1.0 && texture->Filter != TextureFilter::TF_Nearest )
+            if( mZoom >= 1.0 && texture->Filter != TextureFilter::TF_Nearest )
             {
                 FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Nearest);
             }
-            else if( Zoom < 1.0 && texture->Filter != TextureFilter::TF_Bilinear )
+            else if( mZoom < 1.0 && texture->Filter != TextureFilter::TF_Bilinear )
             {
                 FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Bilinear);
             }
@@ -605,28 +584,28 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
 void
 SOdysseySurfaceViewport::ZoomIn()
 {
-    SetZoom( Zoom + ZoomStep );
+    SetZoom( mZoom + ZoomStep );
 }
 
 
 void
 SOdysseySurfaceViewport::ZoomOut()
 {
-    SetZoom( Zoom - ZoomStep );
+    SetZoom( mZoom - ZoomStep );
 }
 
 
 bool
 SOdysseySurfaceViewport::GetFitToViewport() const
 {
-    return IsFitToViewport;
+    return mIsFitToViewport;
 }
 
 
 void
 SOdysseySurfaceViewport::SetFitToViewport( bool bFitToViewport )
 {
-    IsFitToViewport = bFitToViewport;
+    mIsFitToViewport = bFitToViewport;
 }
 
 
@@ -646,31 +625,31 @@ SOdysseySurfaceViewport::ToggleAutoFilter()
 
 double SOdysseySurfaceViewport::GetRotationInDegrees() const
 {
-    return Rotation;
+    return mRotation;
 }
 
 void SOdysseySurfaceViewport::SetRotationInDegrees(double RotationValue)
 {
-    Rotation = RotationValue;
+    mRotation = RotationValue;
 
     mOnParameterChanged.ExecuteIfBound();
 }
 
 FVector2D SOdysseySurfaceViewport::GetPan() const
 {
-    return Pan;
+    return mPan;
 }
 
 void SOdysseySurfaceViewport::SetPan( FVector2D PanValue )
 {
-    Pan = PanValue;
+    mPan = PanValue;
 
     mOnParameterChanged.ExecuteIfBound();
 }
 
 void SOdysseySurfaceViewport::AddPan( FVector2D PanValue )
 {
-    Pan+=PanValue;
+    mPan+=PanValue;
 
     mOnParameterChanged.ExecuteIfBound();
 }
@@ -678,14 +657,14 @@ void SOdysseySurfaceViewport::AddPan( FVector2D PanValue )
 
 void SOdysseySurfaceViewport::RotateLeft()
 {
-    Rotation -= RotationStep;
+    mRotation -= RotationStep;
 
     mOnParameterChanged.ExecuteIfBound();
 }
 
 void SOdysseySurfaceViewport::RotateRight()
 {
-    Rotation += RotationStep;
+    mRotation += RotationStep;
 
     mOnParameterChanged.ExecuteIfBound();
 }
