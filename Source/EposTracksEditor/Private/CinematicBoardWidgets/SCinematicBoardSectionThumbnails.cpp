@@ -208,7 +208,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
     };
 
     menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShotWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-before-with-duration-label", "New Shot of" ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-before-with-duration-label", "New Shot" ) ),
                               NAME_None,
                               LOCTEXT( "section.create-shot-before-with-duration-tooltip", "Create a new section containing a new shot before this section with the specified duration" ) );
 
@@ -242,7 +242,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
     };
 
     menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoardWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-before-with-duration-label", "New Board of" ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-before-with-duration-label", "New Board" ) ),
                               NAME_None,
                               LOCTEXT( "section.create-board-before-with-duration-tooltip", "Create a new section containing a new board before this section with the specified duration" ) );
 
@@ -278,7 +278,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
     };
 
     menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShotWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-after-with-duration-label", "New Shot of" ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-after-with-duration-label", "New Shot" ) ),
                               NAME_None,
                               LOCTEXT( "section.create-shot-after-with-duration-tooltip", "Create a new section containing a new shot after this section with the specified duration" ) );
 
@@ -312,7 +312,7 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
     };
 
     menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoardWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-after-with-duration-label", "New Board of" ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-after-with-duration-label", "New Board" ) ),
                               NAME_None,
                               LOCTEXT( "section.create-board-after-with-duration-tooltip", "Create a new section containing a new board after this section with the specified duration" ) );
 
@@ -368,10 +368,12 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
+        .Padding( FMargin( 20.f, 0, 4, 0 ) )
         [
             SNew( SSpinBox<double> )
             .TypeInterface( sequencer->GetNumericTypeInterface() )
-            .Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
+            //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
             .OnValueCommitted_Lambda( [=] (double Value, ETextCommit::Type) { OnDurationChanged(Value); } )
             .OnValueChanged_Lambda( [=] (double Value) { OnDurationChanged(Value); } )
             .MinValue( FFrameRate::TransformTime( 1, display_rate, tick_resolution ).GetFrame().Value ) // Convert 1 frame in display rate (24fps) to 1000 frames in tick resolution (24000fps)
@@ -409,6 +411,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
+        .Padding( FMargin( 20.f, 0, 4, 0 ) )
         [
             SNew( STextBlock )
             .TextStyle( &FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "NormalText.Subdued" ) )

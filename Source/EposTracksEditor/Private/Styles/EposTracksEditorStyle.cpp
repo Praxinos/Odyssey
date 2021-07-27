@@ -13,6 +13,7 @@
 #include "Styling/SlateStyleRegistry.h"
 
 #define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
+#define BORDER_BRUSH( RelativePath, ... ) FSlateBorderBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 
 #define CORE_IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( RootToCoreContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 #define CORE_BOX_BRUSH( RelativePath, ... ) FSlateBoxBrush( RootToCoreContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
@@ -73,6 +74,15 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     Set( "EposTracksEditor.CreatePlane", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
     Set( "EposTracksEditor.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon16x16 ) );
     Set( "EposTracksEditor.SnapCameraToViewport", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon16x16 ) );
+
+    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
+    Set( "EposTracksEditor.HyperlinkSpinBox", FSpinBoxStyle( FEditorStyle::Get().GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+         .SetBackgroundBrush( BORDER_BRUSH( "Old/HyperlinkDotted", FMargin( 0, 0, 0, 3 / 16.0f ), FSlateColor::UseForeground() ) )
+         .SetForegroundColor( FSlateColor::UseForeground() )
+    );
+    SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
+
+    //---
 
     // Sequencer & Curve Editor Toolbar Style ( Grabs core default, copies brushes, changes separator and block spacing )
     Set( "EposSection.ToolBar.Background", new CORE_BOX_BRUSH( "Common/GroupBorder", FMargin( 4.0f / 16.0f ) ) );
