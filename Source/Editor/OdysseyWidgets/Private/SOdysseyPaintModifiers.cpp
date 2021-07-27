@@ -6,6 +6,8 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPaintModifiers"
 
+#define MinSize 1
+#define MaxSize 2000
 
 /////////////////////////////////////////////////////
 // SOdysseyPaintModifiers
@@ -58,6 +60,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                         [
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
+/*
                             [
                                 SAssignNew( mSizeSpinBox, SSpinBox< int > )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetSize )
@@ -68,6 +71,20 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
                                 .Delta( 1 )
                             ]
+*/
+                            [
+                            //TODO UE5: MaxFractionnal digits is set correctly in UE5. In UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
+                                SAssignNew( mSizeSpinBox, SSpinBox< int >)
+                                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
+                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
+                                .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                                .Delta(1)
+                                .MinDesiredWidth(70.0f)
+                            ]
+
+
+
                         ]
                     ]
 
@@ -245,18 +262,18 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
                             [
-                                SAssignNew( mSizeSpinBox, SSpinBox< int > )
+                                SAssignNew( mSizeSpinBox, SSpinBox< int >)
                                 .Value( this, &SOdysseyPaintModifiers::OnGetSize )
-                                .MaxFractionalDigits(0)
-                                .MinValue( 1 )
-                                .MaxValue( 1000 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
+                                .ShiftMouseMovePixelPerDelta( 15 )
                                 .Delta( 1 )
+                                .SliderExponent( 0.66f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                                .SliderExponentNeutralValue( 100 )
                             ]
+
                         ]
                     ]
-
                     +SHorizontalBox::Slot()
                     .HAlign( HAlign_Fill )
                     [
@@ -408,7 +425,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 void
 SOdysseyPaintModifiers::SetSize( int iValue )
 {
-    mOnSizeChangedCallback.ExecuteIfBound( iValue );
+    UE_LOG(LogTemp, Warning, TEXT("Size value is: %d"), iValue);
+    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ) );
 }
 
 void
@@ -493,7 +511,8 @@ SOdysseyPaintModifiers::OnGetFlow() const
 void
 SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type iType )
 {
-    mOnSizeChangedCallback.ExecuteIfBound( iValue );
+
+    mOnSizeChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, MinSize, MaxSize ) );
 }
 
 void
