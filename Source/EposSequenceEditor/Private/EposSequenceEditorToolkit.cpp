@@ -161,6 +161,8 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     GoToFocusedSequence( iSequences );
 
     mSequencer->OnActorAddedToSequencer().AddSP( this, &FEposSequenceEditorToolkit::HandleActorAddedToSequencer );
+    mSequencer->OnActivateSequence().AddSP( this, &FEposSequenceEditorToolkit::HandleOnActivateSequence );
+    mSequencer->GetSelectionChangedSections().AddSP( this, &FEposSequenceEditorToolkit::HandleOnSelectionChangedSections );
 
     //if( ToolkitParams.InitialBindingClass != nullptr )
     //{
@@ -408,6 +410,52 @@ void FEposSequenceEditorToolkit::HandleActorAddedToSequencer( AActor* iActor, co
 
     //PATCH: replace standard cameracut track (if exists) by our single cameracut track
     ToolkitHelpers::PatchStandardCameraCutTrack( mSequencer.Get(), iActor, iBinding );
+}
+
+void FEposSequenceEditorToolkit::HandleOnActivateSequence( FMovieSceneSequenceIDRef iSequenceID )
+{
+    check( iSequenceID == mSequencer->GetFocusedTemplateID() );
+
+    auto playback_range = mSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
+    FQualifiedFrameTime time = mSequencer->GetLocalTime();
+
+    if( playback_range.Contains( time.Time.GetFrame() ) )
+        return;
+
+    mSequencer->SetLocalTime( playback_range.GetLowerBoundValue() );
+}
+
+void FEposSequenceEditorToolkit::HandleOnSelectionChangedSections( TArray<UMovieSceneSection*> iSections )
+{
+    if( !iSections.Num() )
+        return;
+
+    //PATCH: sometimes the given section is not inside the current sequence
+    // first down (of the double click) on a section in the root sequence
+    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : local time 102000
+    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : 1 sections
+    //     [2021.07.27 - 08.40.02:647][497]LogTemp : Warning : GetSelectionChangedSections : xxxboard0010_01xxx
+    // unselect the section before changing the focused sequence
+    //     [2021.07.27 - 08.40.02:715][505]LogTemp : Warning : GetSelectionChangedSections : local time 0
+    //     [2021.07.27 - 08.40.02:716][505]LogTemp : Warning : GetSelectionChangedSections : 0 sections
+    // change the focused sequence to make the subsequence the focused one
+    //     [2021.07.27 - 08.40.02:716][505]LogTemp : Warning : OnActivateSequence
+    // !!!
+    // the section inside the root sequence (previous focused sequence) is still set as selected (but not everytime)
+    // and this makes the "set local time" wrong due to the lower bound value of the section which is related to the root sequence and not the new focused one
+    // !!!
+    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : local time 0
+    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : 1 sections
+    //     [2021.07.27 - 08.40.02:793][514]LogTemp : Warning : GetSelectionChangedSections : xxxboard0010_01xxx
+    // so we check the given section is one of the section in the focused sequence
+    if( !mSequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetAllSections().Contains( iSections.Last() ) )
+        return;
+
+    FQualifiedFrameTime time = mSequencer->GetLocalTime();
+    if( iSections.Last()->GetTrueRange().Contains( time.Time.GetFrame() ) )
+        return;
+
+    mSequencer->SetLocalTime( iSections.Last()->GetTrueRange().GetLowerBoundValue() );
 }
 
 void FEposSequenceEditorToolkit::HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType )
