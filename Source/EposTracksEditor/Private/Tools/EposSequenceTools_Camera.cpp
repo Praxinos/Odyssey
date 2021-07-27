@@ -211,8 +211,6 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
     //---
     // From FSequencer::NewCameraAdded( CameraGuid, camera )
 
-    // an option ?
-
     iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
 
     // Lock the viewport to this camera
@@ -426,15 +424,15 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequ
     //---
     // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
 
-    //iSequencer->SetPerspectiveViewportCameraCutEnabled( false );
+    iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
 
     // Lock the viewport to this camera
     if( ioCamera && ioCamera->GetLevel() )
     {
-        //GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-        //GCurrentLevelEditingViewportClient->SetActorLock( ExistingCamera );
-        //GCurrentLevelEditingViewportClient->bLockedCameraView = true;
-        //GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
+        GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
+        GCurrentLevelEditingViewportClient->SetActorLock( ioCamera );
+        GCurrentLevelEditingViewportClient->bLockedCameraView = true;
+        GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
         GCurrentLevelEditingViewportClient->Invalidate();
     }
     //---
