@@ -91,9 +91,16 @@ def ProcessArgumentForInputPath( iArgs ):
 
     plugin_name = uplugin_pathfile.stem
 
+    content_path = input_path / 'Content'
+
+    # Remove Mac .DS_Store files ...
+
+    for pathfile in content_path.rglob( '*' ):
+        if pathfile.name == '.DS_Store':
+            pathfile.unlink()
+
     # Check Content filenames validity
 
-    content_path = input_path / 'Content'
     invalid_subpathfiles = []
     for pathfile in content_path.rglob( '*' ):
         subpathfile = pathfile.relative_to( content_path )
