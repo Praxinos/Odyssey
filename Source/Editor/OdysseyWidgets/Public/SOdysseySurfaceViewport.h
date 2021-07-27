@@ -106,7 +106,7 @@ private:
     TSharedPtr<SViewport>               mViewportWidget;
     TSharedPtr<SScrollBar>              mTextureViewportVerticalScrollBar;
     TSharedPtr<SScrollBar>              mTextureViewportHorizontalScrollBar;
-    TSharedPtr<SSpinBox< float >>       mZoomSpinBox;
+    TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
     double                              mZoom;
     double                              mRotation;
     FVector2D                           mPan;

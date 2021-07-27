@@ -169,22 +169,18 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                         SNew(STextBlock)
                         .Text(LOCTEXT("RotationLabel", "Rotation: "))
                     ]
-
                 + SHorizontalBox::Slot()
                     .Padding(2.0f, 0.0f)
                     .VAlign(VAlign_Center)
                     [
-                        SNew( SBox )
-                        .WidthOverride( 50 )
-                        [
-                            SNew( SSpinBox< int > )
-                            .MinValue( -359 )
-                            .MaxValue( 359 )
-                            .OnValueChanged( this, &SOdysseySurfaceViewport::HandleRotationChanged )
+                        SNew(SSpinBox< int >)
                             .Value(this, &SOdysseySurfaceViewport::HandleRotationValue)
-                        ]
+                            .OnValueChanged(this, &SOdysseySurfaceViewport::HandleRotationChanged)
+                            .LinearDeltaSensitivity(10)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                            .Delta(1)
+                            .TypeInterface(MakeShared<TNumericUnitTypeInterface< int >>(EUnit::Degrees))
+                            .MinDesiredWidth(48.0f)
                     ]
-
                 + SHorizontalBox::Slot()
                     .AutoWidth()
                     .Padding(4.0f, 0.0f)
@@ -246,11 +242,12 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                         SAssignNew( mZoomSpinBox, SSpinBox< float >)
                             .Value(this, &SOdysseySurfaceViewport::GetGuiZoomValue)
                             .OnValueChanged(this, &SOdysseySurfaceViewport::HandleZoomSliderChanged)
-                            .LinearDeltaSensitivity(20)  /** If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. */
+                            .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
                             .Delta(1.f)
                             .TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
                             .MaxFractionalDigits(2)
                             .MinFractionalDigits(2)
+                            .MinDesiredWidth(70.0f)
                    ]
                 + SHorizontalBox::Slot()
                     .AutoWidth()
@@ -270,7 +267,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
     mZoomSpinBox->SetMaxFractionalDigits(2);
     mZoomSpinBox->SetMinFractionalDigits(2);
     SetZoom( 1.0 );
-    SetRotationInDegrees( 0.f );
+    SetRotationInDegrees( 0 );
     SetPan( FVector2D( 0.f, 0.f ) );
 }
 
