@@ -140,12 +140,11 @@ void
 FOdysseyViewportDrawingEditor::SetMaterial(UMaterialInterface* iMaterial)
 {
     mMaterial = iMaterial;
+    ClearSelectableTextures(); // Also clears selected Texture
+    UpdateSelectableTextures();
+    
     if (mMaterial)
-    {
-        ClearSelectableTextures(); // Also clears selected Texture
-        UpdateSelectableTextures();
         SelectDefaultTexture();
-    }
 }
 
 void
