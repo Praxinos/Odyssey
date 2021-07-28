@@ -4,7 +4,6 @@
 #include "EposSequenceToolbarHelpers.h"
 
 #include "ISequencer.h"
-#include "ISettingsModule.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
 
@@ -125,20 +124,6 @@ SColorPickerEntry::Construct( const FArguments& iArgs )
 
 //static
 void
-EposSequenceToolbarHelpers::OpenSequenceEditorSettings()
-{
-    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposSequenceEditorSettings" );
-}
-
-//static
-void
-EposSequenceToolbarHelpers::OpenTrackEditorSettings()
-{
-    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposTracksEditorSettings" );
-}
-
-//static
-void
 EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer )
 {
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.drawing-material.section-label", "Material" ) );
@@ -227,6 +212,7 @@ EposSequenceToolbarHelpers::MakeHelpEntries( FMenuBuilder& iMenuBuilder )
 {
     iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoPraxinos );
     iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoForum );
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoDiscord );
 
     iMenuBuilder.AddSeparator();
 

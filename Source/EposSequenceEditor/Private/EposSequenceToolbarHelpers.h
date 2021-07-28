@@ -16,7 +16,4 @@ public:
 
     static void MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer );
     static void MakeHelpEntries( FMenuBuilder& iMenuBuilder );
-
-    static void OpenSequenceEditorSettings();
-    static void OpenTrackEditorSettings();
 };

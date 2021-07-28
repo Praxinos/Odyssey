@@ -7,7 +7,6 @@
 
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceToolbarHelpers.h"
-#include "Misc/SAboutWindow.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "ShotSequenceEditorCommands.h"
@@ -179,7 +178,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().GotoPraxinos,
-            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop"), nullptr, nullptr ); } )
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoPraxinos )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
@@ -187,15 +186,23 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().GotoForum,
-            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/forum/"), nullptr, nullptr ); } )
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoForum )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
 
     if( iMap == kMap )
         CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoDiscord,
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoDiscord )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoDiscord );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
             FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-            FExecuteAction::CreateLambda( [this](){ FPlatformProcess::LaunchURL( TEXT("https://praxinos.coop/Documentation/Epos/User/html/"), nullptr, nullptr ); } ),
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation ),
             FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
         );
     else
@@ -204,7 +211,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().OpenAboutWindow,
-            FExecuteAction::CreateLambda( [this](){ TSharedPtr<SWindow> root = FGlobalTabmanager::Get()->GetRootWindow(); SAboutWindow::Open( root ); } )
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenAboutWindow )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
@@ -214,7 +221,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
-            FExecuteAction::CreateStatic( &EposSequenceToolbarHelpers::OpenSequenceEditorSettings )
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
@@ -222,7 +229,7 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     if( iMap == kMap )
         CommandList->MapAction(
             FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
-            FExecuteAction::CreateStatic( &EposSequenceToolbarHelpers::OpenTrackEditorSettings )
+            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
         );
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );

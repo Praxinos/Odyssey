@@ -24,6 +24,22 @@ public:
 
     TSharedPtr<FUICommandInfo> GotoPraxinos;
     TSharedPtr<FUICommandInfo> GotoForum;
+    TSharedPtr<FUICommandInfo> GotoDiscord;
     TSharedPtr<FUICommandInfo> GotoUserDocumentation;
     TSharedPtr<FUICommandInfo> OpenAboutWindow;
+};
+
+//---
+
+class FEposSequenceEditorActionCallbacks
+{
+public:
+    static void OpenSequenceEditorSettings();
+    static void OpenTrackEditorSettings();
+
+    static void GotoPraxinos();
+    static void GotoForum();
+    static void GotoDiscord();
+    static void GotoUserDocumentation();
+    static void OpenAboutWindow();
 };

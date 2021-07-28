@@ -3,6 +3,9 @@
 
 #include "EposSequenceEditorCommands.h"
 
+#include "ISettingsModule.h"
+
+#include "Misc/SAboutWindow.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorCommands"
@@ -22,9 +25,63 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     UI_COMMAND( GotoPraxinos, "Praxinos website...", "Go to Praxinos website", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoForum, "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoDiscord, "Praxinos discord...", "Go to Praxinos discord", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoUserDocumentation, "Epos User Documentation...", "Go to User Documentation", EUserInterfaceActionType::Button, FInputChord() );
 
     UI_COMMAND( OpenAboutWindow, "About Epos...", "Open the About window", EUserInterfaceActionType::Button, FInputChord() );
 }
+
+//---
+
+//static
+void
+FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings()
+{
+    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposSequenceEditorSettings" );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings()
+{
+    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposTracksEditorSettings" );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::GotoPraxinos()
+{
+    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop" ), nullptr, nullptr );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::GotoForum()
+{
+    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/forum/" ), nullptr, nullptr );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::GotoDiscord()
+{
+    FPlatformProcess::LaunchURL( TEXT( "https://discord.gg/gEd6pj7" ), nullptr, nullptr );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::GotoUserDocumentation()
+{
+    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/Documentation/Epos/User/html/" ), nullptr, nullptr );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::OpenAboutWindow()
+{
+    TSharedPtr<SWindow> root = FGlobalTabmanager::Get()->GetRootWindow();
+    SAboutWindow::Open( root );
+}
+
 
 #undef LOCTEXT_NAMESPACE
