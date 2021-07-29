@@ -253,3 +253,83 @@ FOdysseyMathUtils::ByteSwap(void* V,int32 Length)
         Swap(Ptr[Top--],Ptr[Bottom++]);
     }
 }
+
+/* In the next four functions, we want to map a linear slider value to an exponential function such that:
+The slider value is a classic floating number "s" on [0;1]
+At the far left, at 0.0, the resulting value is "m" (configurable), for example 1/20 = 0.05 = 5%
+At the far right, at 1.0, the resulting value is "M" (configurable), for example 20/1 = 20 = 2000%
+At the middle of the slider, at 0.5, the the resulting value is "nV" the Neutral Value, for exemple 1 = 100%
+The direct mapping range is 20 - 0.05 = 19.95
+The percentage range is 2000% - 5% = 1995%
+
+Let's find the ideal formula to apply to the slider, in order to get the resulting values.
+It would be the following : f( s ) = ( s ^ n ) * r + m
+where :
+s: linear position on the slider
+n: exposant ( we'll look for it later )
+r: range ( r = M - m )
+m: minimum ( decided by the user : here 1/20 )
+M: maximum ( decided by the user : here 20/1 )
+
+if "s" equals "0" :
+f( 0 )  = m
+        = ( 0 ^ n ) * r + m
+        = 0 * r + m
+        = 0.05 -> 5%
+
+if "s" equals "1" :
+f( 1 )  = M
+        = ( 1 ^ n ) * r + m
+        = 1 * r + m
+        = r + m
+        = 19.95 + 0.05
+        = 20 -> 2000%
+
+This means that : r = M - m
+
+Now, we look for the exponent "n" such that f( 0.5 ) = nV, i.e. being right in the middle of the slider at 0.5 corresponds to the value nV ( for example 1 = 100% ).
+
+f( 0.5 ) = nV
+( 0.5 ^ n ) * r + m = nV
+( 0.5 ^ n ) * r = nV - m
+( 0.5 ^ n ) = ( nV - m ) / r
+ln( 0.5 ^ n ) = ln( ( nV - m ) / r )
+n * ln( 0.5 ) = ln( ( nV - m ) / r )
+n = ln( ( nV - m ) / r ) / ln( 0.5 )
+
+Now we have the range "r" and the exponent "n".
+
+so we have the fonction : f( s ) = ( s ^ ( ln( ( nV - m ) / ( M - m ) ) / ln( 0.5 ) ) ) * ( M - m ) + m
+*/
+
+/*static*/
+inline
+double
+FOdysseyMathUtils::ExponentValue( const double iMin, const double iMax, const double iNeutralValue )
+{
+    return log( ((iNeutralValue - iMin) / (iMax - iMin)) ) / (log(0.5f));
+}
+
+/*static*/
+inline
+double
+FOdysseyMathUtils::RangeValue( const double iMin, const double iMax )
+{
+    return iMax - iMin;
+}
+
+/*static*/
+inline
+double
+FOdysseyMathUtils::ExponentialFunction( const double iMin, const double iMax, const double iNeutralValue, const double iValue )
+{
+    return ( RangeValue( iMin, iMax ) ) * pow( iValue, ExponentValue( iMin, iMax, iNeutralValue) ) + iMin;
+}
+
+/*static*/
+inline
+double
+FOdysseyMathUtils::ExponentialFunctionInvert( const double iMin, const double iMax, const double iNeutralValue, const double iValue )
+{
+    return exp( log( (iValue - iMin) / RangeValue( iMin, iMax ) ) / ExponentValue( iMin, iMax, iNeutralValue ) );
+}

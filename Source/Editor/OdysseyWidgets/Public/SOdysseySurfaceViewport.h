@@ -8,7 +8,6 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
-
 class FOdysseySceneViewport;
 class SScrollBar;
 class SViewport;
@@ -80,8 +79,8 @@ public:
     // Navigation API
     double          GetZoom() const;
     void            SetZoom(double ZoomValue);
-    void            ZoomIn();
-    void            ZoomOut();
+    void            ZoomInExponential();
+    void            ZoomOutExponential();
     bool            GetFitToViewport() const;
     void            SetFitToViewport( bool bFitToViewport );
     void            ToggleFitToViewport();

@@ -33,8 +33,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( SetZoom90Percent, "Set Zoom 90 Percent", "Set zoom at 90 percent",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetZoom100Percent, "Set Zoom 100 Percent", "Set zoom at 100 percent",              EUserInterfaceActionType::Button, FInputChord( EKeys::Z ) );
     UI_COMMAND( SetZoomFitScreen, "Set Zoom Fit Screen", "Set zoom fit screen",                    EUserInterfaceActionType::Button, FInputChord( EKeys::S ) );
-    UI_COMMAND( ZoomIn, "Zoom In", "Zoom in",                                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
-    UI_COMMAND( ZoomOut, "Zoom Out", "Zoom out",                                                   EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
+    UI_COMMAND( ZoomInExponential, "Zoom In (exponential)", "Zoom in (exponential)",                                           EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
+    UI_COMMAND( ZoomOutExponential, "Zoom Out (exponential)", "Zoom out (exponential)",                                        EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
    
     UI_COMMAND( RefreshBrush, "Refresh Brush", "Refresh Brush",                                    EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );
     
@@ -62,7 +62,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( Undo, "Undo Iliad", "Undo stroke in Iliad",                                        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Z ) );
     UI_COMMAND( Redo, "Redo Iliad", "Redo stroke in Iliad",                                        EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::Y ) );
 #endif
-    UI_COMMAND( ClearUndo, "Clear Undo Iliad", "Clears the Undo Stack in Iliad",                        EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( ClearUndo, "Clear Undo Iliad", "Clears the Undo Stack in Iliad",                   EUserInterfaceActionType::Button, FInputChord() );
     
 }
 

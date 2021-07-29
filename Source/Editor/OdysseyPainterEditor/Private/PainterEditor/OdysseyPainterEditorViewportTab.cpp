@@ -64,8 +64,8 @@ FOdysseyPainterEditorViewportTab::BindShortcuts(FBaseToolkit* iToolkit)
 	MAP_ACTION(painterEditorCommands.SetZoom90Percent, OnSetZoom, 0.9 )
 	MAP_ACTION(painterEditorCommands.SetZoom100Percent, OnSetZoom, 1.0 )
 	MAP_ACTION(painterEditorCommands.SetZoomFitScreen, OnSetZoomFitScreen )
-	MAP_ACTION(painterEditorCommands.ZoomIn, OnZoomIn )
-	MAP_ACTION(painterEditorCommands.ZoomOut, OnZoomOut )
+	MAP_ACTION(painterEditorCommands.ZoomInExponential, OnZoomInExponential )
+	MAP_ACTION(painterEditorCommands.ZoomOutExponential, OnZoomOutExponential )
 
     #undef MAP_ACTION
 }
@@ -152,15 +152,15 @@ FOdysseyPainterEditorViewportTab::OnSetZoomFitScreen()
 }
 
 void
-FOdysseyPainterEditorViewportTab::OnZoomIn()
+FOdysseyPainterEditorViewportTab::OnZoomInExponential()
 {
-    mViewport->ZoomIn();
+    mViewport->ZoomInExponential();
 }
 
 void
-FOdysseyPainterEditorViewportTab::OnZoomOut()
+FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 {
-    mViewport->ZoomOut();
+    mViewport->ZoomOutExponential();
 }
 
 #undef LOCTEXT_NAMESPACE

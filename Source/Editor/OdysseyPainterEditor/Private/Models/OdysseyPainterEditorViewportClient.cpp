@@ -463,13 +463,13 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             mCurrentToolState = eState::kPick;
             return true;
         }
-        else if( iKey == EKeys::MouseScrollUp )
+        else if( iKey == EKeys::MouseScrollUp && iEvent == EInputEvent::IE_Pressed )
         {
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             ZoomInInViewport( position_in_viewport );
             return true;
         }
-        else if( iKey == EKeys::MouseScrollDown )
+        else if( iKey == EKeys::MouseScrollDown && iEvent == EInputEvent::IE_Pressed )
         {
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             ZoomOutInViewport( position_in_viewport );
@@ -893,7 +893,7 @@ FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositio
     float oldHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
     float oldVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
 
-    mOdysseyPainterEditorViewportPtr.Pin()->ZoomIn();
+    mOdysseyPainterEditorViewportPtr.Pin()->ZoomInExponential();
 
     float newHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
     float newVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
@@ -939,7 +939,7 @@ FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositi
     float oldHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
     float oldVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
 
-    mOdysseyPainterEditorViewportPtr.Pin()->ZoomOut();
+    mOdysseyPainterEditorViewportPtr.Pin()->ZoomOutExponential();
 
     float newHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
     float newVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();

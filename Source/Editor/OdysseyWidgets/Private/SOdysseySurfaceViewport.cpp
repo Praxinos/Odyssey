@@ -20,6 +20,7 @@
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "OdysseyStyleSet.h"
+#include "OdysseyMathUtils.h"
 
 #include <ULIS3>
 
@@ -27,6 +28,7 @@
 
 #define MinZoom 0.01
 #define MaxZoom 20.0
+#define NeutralZoom 1.0
 #define ZoomStep 0.025
 #define RotationStep 15
 
@@ -239,15 +241,19 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     .VAlign(VAlign_Center)
                     [
                         //TODO UE5: MaxFractionnal digits is set correctly in UE5. In UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
-                        SAssignNew( mZoomSpinBox, SSpinBox< float >)
-                            .Value(this, &SOdysseySurfaceViewport::GetGuiZoomValue)
-                            .OnValueChanged(this, &SOdysseySurfaceViewport::HandleZoomSliderChanged)
-                            .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                            .Delta(1.f)
+                        SAssignNew( mZoomSpinBox, SSpinBox< float > )
+                            .Value( this, &SOdysseySurfaceViewport::GetGuiZoomValue )
+                            .OnValueChanged( this, &SOdysseySurfaceViewport::HandleZoomSliderChanged )
+                            // .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. But we choosed not to use this option here.
                             .TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
-                            .MaxFractionalDigits(2)
-                            .MinFractionalDigits(2)
-                            .MinDesiredWidth(70.0f)
+                            .ShiftMouseMovePixelPerDelta( 15 )
+                            .Delta( 1 )
+                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                            .SliderExponentNeutralValue( 100.0f )
+                            .MaxFractionalDigits( 2 )
+                            .MinFractionalDigits( 2 )
+                            .MinDesiredWidth( 70.0f )
+
                    ]
                 + SHorizontalBox::Slot()
                     .AutoWidth()
@@ -579,16 +585,22 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue )
 
 
 void
-SOdysseySurfaceViewport::ZoomIn()
+SOdysseySurfaceViewport::ZoomInExponential()
 {
-    SetZoom( mZoom + ZoomStep );
+    double sliderPos = FOdysseyMathUtils::ExponentialFunctionInvert( MinZoom, MaxZoom, NeutralZoom, mZoom );
+    sliderPos += 0.005;
+    double newZoom = FOdysseyMathUtils::ExponentialFunction( MinZoom, MaxZoom, NeutralZoom, sliderPos );
+    SetZoom( FMath::Clamp( newZoom, MinZoom, MaxZoom) );
 }
 
 
 void
-SOdysseySurfaceViewport::ZoomOut()
+SOdysseySurfaceViewport::ZoomOutExponential()
 {
-    SetZoom( mZoom - ZoomStep );
+    double sliderPos = FOdysseyMathUtils::ExponentialFunctionInvert( MinZoom, MaxZoom, NeutralZoom, mZoom );
+    sliderPos -= 0.005;
+    double newZoom = FOdysseyMathUtils::ExponentialFunction( MinZoom, MaxZoom, NeutralZoom, sliderPos );
+    SetZoom( FMath::Clamp( newZoom, MinZoom, MaxZoom) );
 }
 
 

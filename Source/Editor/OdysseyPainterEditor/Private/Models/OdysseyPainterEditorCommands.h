@@ -105,10 +105,10 @@ public:
     TSharedPtr<FUICommandInfo> SetZoomFitScreen; 
 
     /** Action to zoom in*/
-    TSharedPtr<FUICommandInfo> ZoomIn; 
+    TSharedPtr<FUICommandInfo> ZoomInExponential; 
 
     /** Action to set zoom out*/
-    TSharedPtr<FUICommandInfo> ZoomOut; 
+    TSharedPtr<FUICommandInfo> ZoomOutExponential; 
 
 
     //Brush actions

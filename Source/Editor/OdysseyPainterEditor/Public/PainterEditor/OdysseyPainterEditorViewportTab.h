@@ -43,8 +43,8 @@ protected:
     virtual void OnRotateViewportRight();
     virtual void OnSetZoom(double iZoomValue);
     virtual void OnSetZoomFitScreen();
-    virtual void OnZoomIn();
-    virtual void OnZoomOut();
+    virtual void OnZoomInExponential();
+    virtual void OnZoomOutExponential();
 
 private:
     FOdysseyPainterEditor* mEditor;

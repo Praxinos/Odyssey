@@ -268,7 +268,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
                                 .ShiftMouseMovePixelPerDelta( 15 )
                                 .Delta( 1 )
-                                .SliderExponent( 0.66f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
                                 .SliderExponentNeutralValue( 100 )
                             ]
 

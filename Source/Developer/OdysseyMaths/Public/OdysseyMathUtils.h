@@ -38,6 +38,12 @@ struct FOdysseyMathUtils
     static float QuadraticBezierGenerateLinearLUT_Imp( TArray< FOdysseyBezierLutElement >* ioArray, const FVector2D& iP0, const FVector2D& iP1, const FVector2D& iP2, int iAdaptativeLength = 3, float iOffset = 0.f );
 
     static void ByteSwap( void* iPtr, int32 iLength );
+
+    static double ExponentValue( const double iMin, const double iMax, const double iNeutralValue );
+    static double RangeValue( const double iMin, const double iMax );
+    static double ExponentialFunction( const double iMin, const double iMax, const double iNeutralValue, const double iValue );
+    static double ExponentialFunctionInvert( const double iMin, const double iMax, const double iNeutralValue, const double iValue );
+
 };
 
 #include "OdysseyMathUtils.inl"
