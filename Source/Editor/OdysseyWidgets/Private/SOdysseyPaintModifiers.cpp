@@ -78,9 +78,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetSize )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
-                                .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                                .LinearDeltaSensitivity(15)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
                                 .Delta(1)
-                                .MinDesiredWidth(70.0f)
+                                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                                .SliderExponentNeutralValue( 100 )
                             ]
 
 
@@ -112,12 +113,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mOpacitySpinBox, SSpinBox< int > )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
-                                .MaxFractionalDigits(0)
-                                .MinValue( 0 )
-                                .MaxValue( 100 )
+                                .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
+                                .Delta( 1 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
-                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -146,12 +145,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mFlowSpinBox, SSpinBox< int > )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
-                                .MaxFractionalDigits(0)
-                                .MinValue( 0 )
-                                .MaxValue( 100 )
+                                .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
+                                .Delta( 1 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
-                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -298,12 +295,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mOpacitySpinBox, SSpinBox< int > )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
-                                .MaxFractionalDigits(0)
-                                .MinValue( 0 )
-                                .MaxValue( 100 )
+                                .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
+                                .Delta( 1 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
-                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -332,12 +327,10 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                             [
                                 SAssignNew( mFlowSpinBox, SSpinBox< int > )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
-                                .MaxFractionalDigits(0)
-                                .MinValue( 0 )
-                                .MaxValue( 100 )
+                                .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
+                                .Delta( 1 )
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
-                                .Delta( 1 )
                             ]
                         ]
                     ]
@@ -432,13 +425,13 @@ SOdysseyPaintModifiers::SetSize( int iValue )
 void
 SOdysseyPaintModifiers::SetOpacity( int iValue )
 {
-    mOnOpacityChangedCallback.ExecuteIfBound( iValue );
+    mOnOpacityChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
 }
 
 void
 SOdysseyPaintModifiers::SetFlow( int iValue )
 {
-    mOnFlowChangedCallback.ExecuteIfBound( iValue );
+    mOnFlowChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
 }
 
 void
@@ -518,13 +511,14 @@ SOdysseyPaintModifiers::HandleSizeSpinBoxChanged( int iValue, ETextCommit::Type 
 void
 SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
-    mOnOpacityChangedCallback.ExecuteIfBound( iValue );
+    mOnOpacityChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
 }
 
 void
 SOdysseyPaintModifiers::HandleFlowSpinBoxChanged(int iValue, ETextCommit::Type iType )
 {
-    mOnFlowChangedCallback.ExecuteIfBound( iValue );
+
+    mOnFlowChangedCallback.ExecuteIfBound( FMath::Clamp( iValue, 0, 100 ) );
 }
 
 //--------------------------------------------------------------------------------------
