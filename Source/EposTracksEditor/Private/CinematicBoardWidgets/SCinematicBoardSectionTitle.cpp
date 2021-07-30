@@ -73,18 +73,25 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
         [
             SNew( SHorizontalBox ) // For future buttons
             + SHorizontalBox::Slot()
-            .AutoWidth()
+            .FillWidth( .5f )
             [
                 LeftToolbarBuilder.MakeWidget()
             ]
             + SHorizontalBox::Slot()
+            .AutoWidth()
             .HAlign( HAlign_Center )
+            .VAlign( VAlign_Center )
             [
                 SAssignNew( mWidgetName, SInlineEditableTextBlock )
                 .Text_Lambda( [this] { return HandleText(); } )
                 .ColorAndOpacity_Lambda( [this] { return HandleTextColor(); } )
                 .ShadowOffset( FVector2D( 1, 1 ) )
                 .OnTextCommitted( mBoardSection.Pin().ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
+            ]
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
             ]
         ]
     ];

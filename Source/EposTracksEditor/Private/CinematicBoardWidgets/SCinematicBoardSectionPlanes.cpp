@@ -138,16 +138,22 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             //    // No content (text)
             //]
             + SHorizontalBox::Slot()
-            .AutoWidth()
+            .FillWidth( .5f )
             [
                 LeftToolbarBuilder.MakeWidget()
             ]
             + SHorizontalBox::Slot()
+            .AutoWidth()
             .HAlign( HAlign_Center )
             .VAlign( VAlign_Center )
             [
                 SNew( STextBlock )
                 .Text( FText::FromString( mBinding.GetName() ) )
+            ]
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
             ]
         ]
     ];
