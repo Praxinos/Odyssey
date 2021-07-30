@@ -461,12 +461,16 @@ public:
                 [
                     SAssignNew( mSpinbox, SSpinBox< int > )
                     .Value(this, &tSelf::GetSpinboxValue )
-                    .MinValue( TSliderType::GetMinValue() )
-                    .MaxValue( TSliderType::GetMaxValue() )
+
                     .OnValueChanged( this, &tSelf::OnSpinboxValueChanged )
                     .OnValueCommitted( this, &tSelf::OnSpinboxValueCommited )
                     .OnBeginSliderMovement( this, &tSelf::OnSpinboxBeginSliderMovement )
                     .OnEndSliderMovement( this, &tSelf::OnSpinboxEndSliderMovement )
+                    // .LinearDeltaSensitivity and .Delta can't work with .MinValue and .MaxValue, so the function ToNormalized is doing a Clamp between 0 and 1
+                    .LinearDeltaSensitivity( 15 )
+                    .Delta(1)
+                    //.MinValue( TSliderType::GetMinValue() )
+                    //.MaxValue( TSliderType::GetMaxValue() )
                 ]
             ]
             +SHorizontalBox::Slot()
@@ -582,7 +586,8 @@ private:
     float ToNormalized( int iValue )
     {
         int delta = TSliderType::MaxValue - TSliderType::MinValue;
-        float result = ( iValue - TSliderType::MinValue ) / float( delta );
+        // The clamp avoid to set the .MinValue and .MaxValue in the Spinbox, so we can slow down the speed of the slider with .Delta and .LinearDeltaSensitivity
+        float result = FMath::Clamp( ( iValue - TSliderType::MinValue ) / float( delta ), 0.0f, 1.0f ) ;
         return  result;
     }
 
