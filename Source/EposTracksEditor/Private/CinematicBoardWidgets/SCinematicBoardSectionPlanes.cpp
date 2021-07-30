@@ -40,6 +40,9 @@ public:
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
 
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
 private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
@@ -49,6 +52,8 @@ private:
 
     void                DetachPlane();
     bool                CanDetachPlane();
+
+    FSlateColor         GetBackgroundTint() const;
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
@@ -116,8 +121,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     ChildSlot
     [
         SNew( SBorder )
-        .BorderImage( FEditorStyle::GetBrush( "ToolPanel.GroupBorder" ) )
-        .BorderBackgroundColor( FLinearColor( .50f, .50f, .50f, 1.0f ) )
+        .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
+        .BorderBackgroundColor( this, &SCinematicBoardSectionPlaneTitle::GetBackgroundTint )
+        .Cursor( EMouseCursor::Default )
         [
             SNew( SHorizontalBox )
             //+ SHorizontalBox::Slot() // Add it to the toolbar
@@ -145,6 +151,65 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             ]
         ]
     ];
+}
+
+//---
+
+FReply
+SCinematicBoardSectionPlaneTitle::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    // To not trigger the OnMouseButtonDown of SSequencerTrackArea
+    // Otherwise OnMouseButtonMove and OnMouseButtonUp will also trigger
+    // And OnMouseButtonDown will attempt to start a selection or a drag of the section (normal behavior)
+    // But as OnMouseButtonUp is handle here, the one of SSequencerTrackArea won't be handle and the normal section drag won't finish clean
+    // (For example, the cursor won't update to crosshair after the up on the empty zone of the SSequencerTrackArea)
+    return FReply::Handled();
+}
+
+FReply
+SCinematicBoardSectionPlaneTitle::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    UMovieSceneSection* section_object = board_section->GetSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    auto objects = sequencer->FindBoundObjects( mBinding.GetGuid(), result.mInnerSequenceId );
+
+    // To unselect section(s)
+    sequencer->EmptySelection();
+    // And then select the current one
+    sequencer->SelectSection( section_object );
+
+    // To unselect all actors
+    GEditor->SelectNone( true, true );
+    // And then select the current one
+    for( auto object : objects )
+        GEditor->SelectActor( Cast<AActor>( object ), true, true );
+
+    return FReply::Handled();
+}
+
+FSlateColor
+SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    auto objects = sequencer->FindBoundObjects( mBinding.GetGuid(), result.mInnerSequenceId );
+
+    auto is_selected = []( TWeakObjectPtr<> iObject )
+    {
+        return iObject->IsSelected();
+    };
+    // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
+    if( Algo::AnyOf( objects, is_selected ) )
+        return FEditorStyle::GetSlateColor( "SelectionColor_Pressed" );
+
+    return FSlateColor( FLinearColor( FColor( 48, 48, 48, 255 ) ) );
 }
 
 //---
