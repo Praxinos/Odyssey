@@ -133,22 +133,16 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         return BoardSequenceTools::CanCreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
     };
 
-    auto IsCreateDrawingVisible = [this]() -> bool
-    {
-        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
-                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
-    };
-
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreateDrawing ),
             FCanExecuteAction::CreateLambda( CanCreateDrawing ),
             FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( IsCreateDrawingVisible )
+            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
         ),
         NAME_None,
         FText::GetEmpty(),
-        LOCTEXT( "create-drawing", "Create a drawing" ),
+        LOCTEXT( "create-drawing", "Create a drawing (set the current frame where to create the drawing keyframe)" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ) );
 
     //-
