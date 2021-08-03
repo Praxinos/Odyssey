@@ -46,9 +46,8 @@ public:
 private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
-    void                OnToggleLighttable( ECheckBoxState iNewState );
-    FText               GetLighttableTooltip() const;
-    ECheckBoxState      IsLighttableOn() const;
+    //void                ToggleLighttable();
+    //ECheckBoxState      IsLighttableOn() const;
 
     void                DetachPlane();
     bool                CanDetachPlane();
@@ -152,6 +151,21 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "create-drawing", "Create a drawing" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ) );
 
+    //-
+
+    //LeftToolbarBuilder.AddToolBarButton(
+    //    FUIAction(
+    //        FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::ToggleLighttable ),
+    //        FCanExecuteAction(),
+    //        FGetActionCheckState::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn ),
+    //        FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+    //    ),
+    //    NAME_None,
+    //    FText::GetEmpty(),
+    //    LOCTEXT( "lighttable-tooltip", "Enables or disables the lighttable" ),
+    //    FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.Lighttable" ),
+    //    EUserInterfaceActionType::ToggleButton );
+
     //---
 
     ChildSlot
@@ -162,17 +176,6 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         .Cursor( EMouseCursor::Default )
         [
             SNew( SHorizontalBox )
-            //+ SHorizontalBox::Slot() // Add it to the toolbar
-            //.AutoWidth()
-            //[
-            //    SNew( SCheckBox )
-            //    .Style( FEposTracksEditorStyle::Get(), "EposTracksEditor.Lighttable" )
-            //    .Cursor( EMouseCursor::Default )
-            //    .IsChecked( this, &SCinematicBoardSectionPlaneTitle::IsLighttableOn )
-            //    .OnCheckStateChanged( this, &SCinematicBoardSectionPlaneTitle::OnToggleLighttable )
-            //    .ToolTipText( this, &SCinematicBoardSectionPlaneTitle::GetLighttableTooltip )
-            //    // No content (text)
-            //]
             + SHorizontalBox::Slot()
             .FillWidth( .5f )
             [
@@ -256,48 +259,35 @@ SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
 
 //---
 
-void
-SCinematicBoardSectionPlaneTitle::OnToggleLighttable( ECheckBoxState iNewState )
-{
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
-    if( iNewState == ECheckBoxState::Checked )
-        LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-    else
-        LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-}
-
-FText
-SCinematicBoardSectionPlaneTitle::GetLighttableTooltip() const
-{
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
-    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-    return lighttable_on ? LOCTEXT( "lighttable.on", "Lighttable On" ) : LOCTEXT( "lighttable.off", "Lighttable Off" );
-}
-
-ECheckBoxState
-SCinematicBoardSectionPlaneTitle::IsLighttableOn() const
-{
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
-    //---
-
-    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() ); //TODO: improve to don't call it every ticks ?
-    return lighttable_on ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-}
+//void
+//SCinematicBoardSectionPlaneTitle::ToggleLighttable()
+//{
+//    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+//    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+//    ISequencer*                     sequencer = board_section->GetSequencer().Get();
+//
+//    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+//
+//    if( IsLighttableOn() == ECheckBoxState::Checked )
+//        LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+//    else
+//        LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+//}
+//
+//ECheckBoxState
+//SCinematicBoardSectionPlaneTitle::IsLighttableOn() const
+//{
+//    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
+//    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
+//    ISequencer*                     sequencer = board_section->GetSequencer().Get();
+//
+//    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+//
+//    //---
+//
+//    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() ); //TODO: improve to don't call it every ticks ?
+//    return lighttable_on ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+//}
 
 //---
 
