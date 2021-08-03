@@ -8,7 +8,7 @@
 #define LOCTEXT_NAMESPACE "CinematicBoardTrackEditorCommands"
 
 FCinematicBoardTrackEditorCommands::FCinematicBoardTrackEditorCommands()
-    : TCommands<FCinematicBoardTrackEditorCommands>("EposTracksEditor" /* must match Set() parameter in style*/, LOCTEXT("EposTracksEditorStyle", "Epos Tracks Editor"), NAME_None, FEposTracksEditorStyle::Get()->GetStyleSetName() )
+    : TCommands<FCinematicBoardTrackEditorCommands>("EposTracksEditorCommands" /* must match Set() parameter in style*/, LOCTEXT("EposTracksEditorStyle", "Epos Tracks Editor"), NAME_None, FEposTracksEditorStyle::Get()->GetStyleSetName() )
 {
 }
 

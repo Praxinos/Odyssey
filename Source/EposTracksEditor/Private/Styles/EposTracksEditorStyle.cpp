@@ -42,20 +42,16 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
 
-    Set( "EposTracksEditor.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
-    Set( "EposTracksEditor.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
-
-    Set( "EposTracksEditor.NewSectionWithBoardBeforeSection", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
-    Set( "EposTracksEditor.NewSectionWithShotBeforeSection", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
-
-    Set( "EposTracksEditor.NewSectionWithBoardAfterSection", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
-    Set( "EposTracksEditor.NewSectionWithShotAfterSection", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
-
     //---
 
-    Set( "EposTracksEditor.ArrangeShotsManually", new IMAGE_BRUSH( "arrange-shots-manually-16x", Icon16x16 ) );
-    Set( "EposTracksEditor.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "arrange-shots-on-one-row-16x", Icon16x16 ) );
-    Set( "EposTracksEditor.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "arrange-shots-on-two-rows-16x", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
+
+    Set( "EposTracksEditorCommands.ArrangeShotsManually", new IMAGE_BRUSH( "arrange-shots-manually-16x", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsOnOneRow", new IMAGE_BRUSH( "arrange-shots-on-one-row-16x", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsOnTwoRows", new IMAGE_BRUSH( "arrange-shots-on-two-rows-16x", Icon16x16 ) );
+
+    //---
 
     FCheckBoxStyle lighttable_style = FCheckBoxStyle()
         //.SetCheckBoxType( ESlateCheckBoxType::ToggleButton )
@@ -68,7 +64,11 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 
     Set( "EposTracksEditor.Lighttable", lighttable_style );
 
-    //---
+    Set( "EposTracksEditor.NewSectionWithBoardBeforeSection", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
+    Set( "EposTracksEditor.NewSectionWithShotBeforeSection", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
+
+    Set( "EposTracksEditor.NewSectionWithBoardAfterSection", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
+    Set( "EposTracksEditor.NewSectionWithShotAfterSection", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
 
     Set( "EposTracksEditor.CreateCamera", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
     Set( "EposTracksEditor.CreatePlane", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
