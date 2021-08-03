@@ -5,7 +5,6 @@
 
 #include "CineCameraActor.h"
 
-#include "EposSequenceEditorCommands.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
@@ -172,67 +171,6 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
         );
     else
         CommandList->UnmapAction( FShotSequenceEditorCommands::Get().GotoNextDrawing );
-
-    //---
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoPraxinos,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoPraxinos )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoForum,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoForum )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoDiscord,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoDiscord )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoDiscord );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation ),
-            FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().OpenAboutWindow,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenAboutWindow )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
-
-    //---
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
-
-    if( iMap == kMap )
-        CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
-            FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
-        );
-    else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );
 }
 
 //---

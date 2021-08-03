@@ -32,6 +32,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
+#include "EposSequenceEditorCommands.h"
 #include "ToolkitHelpers.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 #include "Shot/ShotSequenceEditorCommands.h"
@@ -245,6 +246,43 @@ void FEposSequenceEditorToolkit::GoToFocusedSequence( TArray< UEposMovieSceneSeq
 void
 FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList )
 {
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoPraxinos,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoPraxinos )
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoForum,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoForum )
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoDiscord,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoDiscord )
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoUserDocumentation,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation ),
+        FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenAboutWindow,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenAboutWindow )
+    );
+
+    //---
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings )
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
+    );
 }
 
 //--- FGCObject interface
