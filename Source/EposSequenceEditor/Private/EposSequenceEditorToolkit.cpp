@@ -28,14 +28,12 @@
 #include "Widgets/Text/STextBlock.h"
 
 #include "Board/BoardSequence.h"
-#include "Board/BoardSequenceEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposMovieSceneSequence.h"
 #include "EposSequenceEditorCommands.h"
 #include "ToolkitHelpers.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
-#include "Shot/ShotSequenceEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorToolkit"
 

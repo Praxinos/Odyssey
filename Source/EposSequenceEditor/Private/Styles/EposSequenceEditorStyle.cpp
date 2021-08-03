@@ -46,27 +46,35 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "sequence-shot-64x", Icon64x64 ) );
 
-    Set( "BoardSequenceEditor.NewStoryboardWithSettings", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
-    Set( "BoardSequenceEditor.NewStoryboardWithSettings.Small", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
-
     //---
 
-    Set( "ShotSequenceEditor.CreateCameraAtCurrentTime", new IMAGE_BRUSH( "camera-create-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "ShotSequenceEditor.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
+    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH( "new-storyboard-with-settings-16x", Icon16x16 ) );
 
-    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.DetachPlane.Small", new IMAGE_BRUSH( "plane-detach-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH( "camera-create-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
 
-    Set( "ShotSequenceEditor.CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.CreateDrawing.Small", new IMAGE_BRUSH( "drawing-create-24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.GotoPreviousDrawing", new IMAGE_BRUSH( "drawing-previous-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "drawing-previous-24x", Icon24x24 ) );
-    Set( "ShotSequenceEditor.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );
-    Set( "ShotSequenceEditor.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.DetachPlane.Small", new IMAGE_BRUSH( "plane-detach-24x", Icon24x24 ) );
+
+    Set( "EposSequenceCommands.CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreateDrawing.Small", new IMAGE_BRUSH( "drawing-create-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH( "drawing-previous-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "drawing-previous-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH( "drawing-next-24x", Icon24x24 ) );
+
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
+
+    Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
 
     //---
 
@@ -78,15 +86,11 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     Set( "EposSequenceEditor.Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
     Set( "EposSequenceEditor.Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );
-    Set( "EposSequenceEditor.OpenSequenceEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
-    Set( "EposSequenceEditor.OpenTrackEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.OpenTrackEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
 
     Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
     Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "epos-help-24x", FVector2D( 20.f, 20.f ) ) );
-    Set( "EposSequenceEditor.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
+
+    //---
 
     Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", FVector2D( 30, 30 ) ) );
     Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", FVector2D( 30, 30 ) ) );

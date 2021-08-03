@@ -13,13 +13,11 @@
 #include "Board/BoardSequence.h"
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
-#include "Board/BoardSequenceEditorCommands.h"
 #include "EposSequenceEditorCommands.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceActions.h"
 #include "Shot/ShotSequenceCustomization.h"
-#include "Shot/ShotSequenceEditorCommands.h"
 #include "StoryboardViewport/StoryboardViewportLayoutEntity.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
@@ -73,15 +71,11 @@ void
 FEposSequenceEditorModule::RegisterCommands()
 {
     FEposSequenceEditorCommands::Register();
-    FBoardSequenceEditorCommands::Register();
-    FShotSequenceEditorCommands::Register();
 }
 
 void
 FEposSequenceEditorModule::UnregisterCommands()
 {
-    FShotSequenceEditorCommands::Unregister();
-    FBoardSequenceEditorCommands::Unregister();
     FEposSequenceEditorCommands::Unregister();
 }
 
@@ -150,7 +144,7 @@ FEposSequenceEditorModule::RegisterMenuExtensions()
 {
     mCommandList = MakeShareable( new FUICommandList );
     mCommandList->MapAction(
-        FBoardSequenceEditorCommands::Get().NewStoryboardWithSettings,
+        FEposSequenceEditorCommands::Get().NewStoryboardWithSettings,
         FExecuteAction::CreateStatic( &FEposSequenceEditorModule::OnCreateNewAssetWithSettings, UBoardSequence::StaticClass() )
     );
 
@@ -159,7 +153,7 @@ FEposSequenceEditorModule::RegisterMenuExtensions()
     {
         MenuBuilder.BeginSection( "CinematicsEpos", LOCTEXT( "CinematicsEpos", "Epos" ) );
         {
-            MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().NewStoryboardWithSettings );
+            MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardWithSettings );
         }
         MenuBuilder.EndSection();
     } ) );

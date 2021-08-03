@@ -17,7 +17,22 @@ public:
     virtual void RegisterCommands() override;
 
 public:
+    TSharedPtr<FUICommandInfo> NewStoryboardWithSettings;
     TSharedPtr<FUICommandInfo> ToggleStoryboardViewportCommand;
+
+    //---
+
+    TSharedPtr<FUICommandInfo> CreateCameraAtCurrentTime;
+    TSharedPtr<FUICommandInfo> SnapCameraToViewportAtCurrentTime;
+
+    TSharedPtr<FUICommandInfo> CreatePlaneAtCurrentTime;
+    TSharedPtr<FUICommandInfo> DetachPlane;
+
+    TSharedPtr<FUICommandInfo> CreateDrawing;
+    TSharedPtr<FUICommandInfo> GotoPreviousDrawing;
+    TSharedPtr<FUICommandInfo> GotoNextDrawing;
+
+    //---
 
     TSharedPtr<FUICommandInfo> OpenSequenceEditorSettings;
     TSharedPtr<FUICommandInfo> OpenTrackEditorSettings;

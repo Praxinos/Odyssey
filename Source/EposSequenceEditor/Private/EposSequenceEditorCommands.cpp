@@ -11,24 +11,39 @@
 #define LOCTEXT_NAMESPACE "EposSequenceEditorCommands"
 
 FEposSequenceEditorCommands::FEposSequenceEditorCommands()
-    : TCommands<FEposSequenceEditorCommands>("EposSequenceEditor" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor (Epos)"), NAME_None, FEposSequenceEditorStyle::Get()->GetStyleSetName() )
+    : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor"), NAME_None, FEposSequenceEditorStyle::Get()->GetStyleSetName() )
 {
 }
 
 void
 FEposSequenceEditorCommands::RegisterCommands()
 {
-    UI_COMMAND( ToggleStoryboardViewportCommand, "Storyboard Viewport", "A viewport layout tailored to storyboard preview", EUserInterfaceActionType::RadioButton, FInputChord() );
+    UI_COMMAND( NewStoryboardWithSettings,          "New Storyboard", "Create a new storyboard with settings", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( ToggleStoryboardViewportCommand,    "Storyboard Viewport", "A viewport layout tailored to storyboard preview", EUserInterfaceActionType::RadioButton, FInputChord() );
 
-    UI_COMMAND( OpenSequenceEditorSettings, "Sequence Settings...", "Open sequence settings", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( OpenTrackEditorSettings, "Track Settings...", "Open track settings", EUserInterfaceActionType::Button, FInputChord() );
+    //---
 
-    UI_COMMAND( GotoPraxinos, "Praxinos website...", "Go to Praxinos website", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoForum, "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoDiscord, "Praxinos discord...", "Go to Praxinos discord", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoUserDocumentation, "Epos User Documentation...", "Go to User Documentation", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( CreateCameraAtCurrentTime,          "Create Camera", "Create a new camera and set it as the current camera cut", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( SnapCameraToViewportAtCurrentTime,  "Snap Camera to Viewport", "Snap the existing camera to the viewport", EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_COMMAND( OpenAboutWindow, "About Epos...", "Open the About window", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( CreatePlaneAtCurrentTime,           "Create Plane", "Create a new plane in front of the current camera", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( DetachPlane,                        "Detach Plane", "Detach the plane of the current camera", EUserInterfaceActionType::Button, FInputChord() );
+
+    UI_COMMAND( CreateDrawing,                      "Create Drawing", "Create a new drawing", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoPreviousDrawing,                "Go to Previous Drawing", "Go to the previous drawing", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoNextDrawing,                    "Go to Next Drawing", "Go to the next drawing", EUserInterfaceActionType::Button, FInputChord() );
+
+    //---
+
+    UI_COMMAND( OpenSequenceEditorSettings,         "Sequence Settings...", "Open sequence settings", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( OpenTrackEditorSettings,            "Track Settings...", "Open track settings", EUserInterfaceActionType::Button, FInputChord() );
+
+    UI_COMMAND( GotoPraxinos,                       "Praxinos website...", "Go to Praxinos website", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoForum,                          "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoDiscord,                        "Praxinos discord...", "Go to Praxinos discord", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoUserDocumentation,              "Epos User Documentation...", "Go to User Documentation", EUserInterfaceActionType::Button, FInputChord() );
+
+    UI_COMMAND( OpenAboutWindow,                    "About Epos...", "Open the About window", EUserInterfaceActionType::Button, FInputChord() );
 }
 
 //---
