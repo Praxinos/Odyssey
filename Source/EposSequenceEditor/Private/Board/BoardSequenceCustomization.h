@@ -39,7 +39,7 @@ private:
     };
     void ProcessCommands( TSharedPtr<FUICommandList> CommandList, EMapping iMap );
 
-    FText CreatInfoText() const;
+    FText CreateInfoText() const;
 
 private:
     /**

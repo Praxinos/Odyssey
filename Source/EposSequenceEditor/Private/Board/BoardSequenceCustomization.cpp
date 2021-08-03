@@ -18,6 +18,7 @@
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
+#include "Widgets/SInfoBar.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
 
@@ -194,7 +195,7 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 //---
 
 FText
-FBoardSequenceCustomization::CreatInfoText() const
+FBoardSequenceCustomization::CreateInfoText() const
 {
     UMovieSceneCinematicBoardTrack* board_track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     int number_of_sections = board_track ? board_track->GetAllSections().Num() : 0;
@@ -236,15 +237,9 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddWidget( SNew( SBorder )
-                              .VAlign( VAlign_Center )
+    ToolbarBuilder.AddWidget( SNew( SInfoBar )
                               .Padding( FMargin( 10.f, 3.f ) ) // To simulate a space with the previous separator
-                              .BorderImage( FEditorStyle::GetNoBrush() )
-                              [
-                                  SNew( STextBlock )
-                                  .Text_Raw( this, &FBoardSequenceCustomization::CreatInfoText )
-                                  .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "EposSequenceEditor.ToolBar.Heading" ) )
-                              ]
+                              .Text_Raw( this, &FBoardSequenceCustomization::CreateInfoText )
                               );
 }
 
