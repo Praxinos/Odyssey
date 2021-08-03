@@ -11,13 +11,12 @@
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "SequencerSettings.h"
 
-#include "Board/BoardSequenceHelpers.h"
+#include "EposSequenceHelpers.h"
 #include "EposTracksToolbarHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "Tools/LighttableTools.h"
 #include "Settings/EposTracksEditorSettings.h"
-#include "Shot/ShotSequenceHelpers.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 

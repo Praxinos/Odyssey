@@ -20,8 +20,8 @@
 #include "Camera/CameraComponent.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 
+#include "EposSequenceHelpers.h"
 #include "Helpers/SectionHelpersConvert.h"
-#include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 
 #define LOCTEXT_NAMESPACE "FSingleCameraCutSection"

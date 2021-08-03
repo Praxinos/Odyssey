@@ -22,10 +22,9 @@
 #include "MovieSceneSequence.h"
 
 #include "Board/BoardSequence.h"
-#include "Board/BoardSequenceHelpers.h"
+#include "EposSequenceHelpers.h"
 #include "PlaneActor.h"
 #include "Tools/ResourceAssetTools.h"
-#include "Shot/ShotSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Plane"
 

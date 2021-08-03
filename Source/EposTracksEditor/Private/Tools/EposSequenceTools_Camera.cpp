@@ -18,10 +18,9 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 
 #include "Board/BoardSequence.h"
-#include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposSequenceHelpers.h"
 #include "Settings/EposTracksEditorSettings.h"
-#include "Shot/ShotSequenceHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 

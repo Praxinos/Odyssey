@@ -9,10 +9,9 @@
 #include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
 
-#include "Board/BoardSequenceHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
-#include "Shot/ShotSequenceHelpers.h"
+#include "EposSequenceHelpers.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionCamera"
 
