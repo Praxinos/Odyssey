@@ -111,48 +111,48 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().DetachPlane,
+            FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this]()
-                {
-                    TArray<APlaneActor*> planes;
-                    int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, &planes, nullptr );
-                    if( !plane_count )
-                        return;
-                    ShotSequenceTools::DetachPlane( mSequencer, planes[0] );
-                } ),
+                                          {
+                                              TArray<APlaneActor*> planes;
+                                              int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, &planes, nullptr );
+                                              if( plane_count != 1 )
+                                                  return;
+                                              ShotSequenceTools::DetachPlane( mSequencer, planes[0] );
+                                          } ),
             FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) == 1; } ),
             FIsActionChecked(),
             FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) <= 1; } )
         );
     else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().DetachPlane );
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime );
 
     //---
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreateDrawing,
+            FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
             FExecuteAction::CreateLambda( [this]()
-                {
-                    TArray<FGuid> plane_bindings;
-                    int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                    if( !plane_count )
-                        return;
-                    ShotSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                } ),
+                                          {
+                                              TArray<FGuid> plane_bindings;
+                                              int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+                                              if( plane_count != 1 )
+                                                  return;
+                                              ShotSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                          } ),
             FCanExecuteAction::CreateLambda( [this]()
-                {
-                    TArray<FGuid> plane_bindings;
-                    int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                    if( !plane_count )
-                        return false;
-                    return ShotSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                } ),
+                                             {
+                                                 TArray<FGuid> plane_bindings;
+                                                 int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+                                                 if( plane_count != 1 )
+                                                     return false;
+                                                 return ShotSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                             } ),
             FIsActionChecked(),
             FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) <= 1; } )
         );
     else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateDrawing );
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -203,7 +203,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     // The 2 following buttons should be exclusive visible:
     // - the first button is displayed when there is only 1 plane (or 0) available
     // - the second button is displayed when there are more than 2 planes available
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().DetachPlane );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime );
     ToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -212,9 +212,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) > 1; } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakePlaneMenu ),
-        FEposSequenceEditorCommands::Get().DetachPlane->GetLabel(),
-        FEposSequenceEditorCommands::Get().DetachPlane->GetDescription(),
-        FEposSequenceEditorCommands::Get().DetachPlane->GetIcon() );
+        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetLabel(),
+        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetDescription(),
+        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetIcon() );
 
 
     ToolbarBuilder.AddSeparator();
@@ -223,7 +223,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     // The 2 following buttons should be exclusive visible:
     // - the first button is displayed when there is only 1 plane (or 0) available
     // - the second button is displayed when there are more than 2 planes available
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateDrawing );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime );
     ToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -232,9 +232,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) > 1; } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeDrawingMenu ),
-        FEposSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
-        FEposSequenceEditorCommands::Get().CreateDrawing->GetDescription(),
-        FEposSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
+        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetLabel(),
+        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetDescription(),
+        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextDrawing );
 
     ToolbarBuilder.AddSeparator();

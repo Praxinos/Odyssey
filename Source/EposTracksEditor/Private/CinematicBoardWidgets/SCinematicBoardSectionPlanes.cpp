@@ -17,6 +17,7 @@
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "Tools/LighttableTools.h"
 #include "Settings/EposTracksEditorSettings.h"
+#include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
@@ -114,6 +115,42 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         FText::GetEmpty(),
         LOCTEXT( "DetachPlane", "Detach the plane" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.DetachPlane" ) );
+
+    //-
+
+    auto CreateDrawing = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    auto CanCreateDrawing = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        return BoardSequenceTools::CanCreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    auto IsCreateDrawingVisible = [this]() -> bool
+    {
+        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( CreateDrawing ),
+            FCanExecuteAction::CreateLambda( CanCreateDrawing ),
+            FIsActionChecked(),
+            FIsActionButtonVisible::CreateLambda( IsCreateDrawingVisible )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "create-drawing", "Create a drawing" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ) );
 
     //---
 

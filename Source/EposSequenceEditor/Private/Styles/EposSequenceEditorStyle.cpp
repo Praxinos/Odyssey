@@ -58,11 +58,11 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
-    Set( "EposSequenceCommands.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.DetachPlane.Small", new IMAGE_BRUSH( "plane-detach-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH( "plane-detach-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-detach-24x", Icon24x24 ) );
 
-    Set( "EposSequenceCommands.CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon48x48 ) );
-    Set( "EposSequenceCommands.CreateDrawing.Small", new IMAGE_BRUSH( "drawing-create-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime", new IMAGE_BRUSH( "drawing-create-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.CreateDrawingAtCurrentTime.Small", new IMAGE_BRUSH( "drawing-create-24x", Icon24x24 ) );
     Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH( "drawing-previous-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH( "drawing-previous-24x", Icon24x24 ) );
     Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH( "drawing-next-24x", Icon48x48 ) );

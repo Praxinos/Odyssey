@@ -73,6 +73,7 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     Set( "EposTracksEditor.CreateCamera", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
     Set( "EposTracksEditor.CreatePlane", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
     Set( "EposTracksEditor.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon16x16 ) );
+    Set( "EposTracksEditor.CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon16x16 ) );
     Set( "EposTracksEditor.SnapCameraToViewport", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon16x16 ) );
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );

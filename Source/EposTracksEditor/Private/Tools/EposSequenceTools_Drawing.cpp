@@ -22,6 +22,44 @@
 
 //static
 bool
+BoardSequenceTools::CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
+    return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding ) == INDEX_NONE;
+}
+
+//static
+void
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
+    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding );
+}
+
+//---
+
+//static
+bool
 BoardSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );

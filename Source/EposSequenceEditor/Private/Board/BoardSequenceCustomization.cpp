@@ -5,7 +5,9 @@
 
 #include "CineCameraActor.h"
 #include "Framework/Docking/TabManager.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "MovieSceneTimeHelpers.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -115,32 +117,60 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
 
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
+            FExecuteAction::CreateLambda( [this]()
+                                          {
+                                              TArray<APlaneActor*> planes;
+                                              int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, nullptr );
+                                              if( plane_count != 1 )
+                                                  return;
+                                              BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes[0] );
+                                          } ),
+            FCanExecuteAction::CreateLambda( [this]()
+                                             {
+                                                 int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
+                                                 if( plane_count > 1 )
+                                                 {
+                                                     FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
+                                                     Info.ExpireDuration = 5.0f;
+                                                     FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                                 }
+                                                 return plane_count == 1;
+                                             } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime );
+
     //---
 
     if( iMap == kMap )
         CommandList->MapAction(
-            FEposSequenceEditorCommands::Get().CreateDrawing,
+            FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
             FExecuteAction::CreateLambda( [this]()
-                {
-                    TArray<FGuid> plane_bindings;
-                    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                    if( !plane_count )
-                        return;
-                    BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                } ),
+                                          {
+                                              TArray<FGuid> plane_bindings;
+                                              int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                              if( plane_count != 1 )
+                                                  return;
+                                              BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                          } ),
             FCanExecuteAction::CreateLambda( [this]()
-                {
-                    TArray<FGuid> plane_bindings;
-                    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                    if( !plane_count )
-                        return false;
-                    return BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                } ),
-            FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1; } )
+                                             {
+                                                 TArray<FGuid> plane_bindings;
+                                                 int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                                 if( plane_count > 1 )
+                                                 {
+                                                     FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
+                                                     Info.ExpireDuration = 5.0f;
+                                                     FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                                 }
+                                                 return plane_count == 1 && BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                             } )
         );
     else
-        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateDrawing );
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime );
 
     if( iMap == kMap )
         CommandList->MapAction(
@@ -184,21 +214,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );
-    // The 2 following buttons should be exclusive visible:
-    // - the first button is displayed when there is only 1 plane (or 0) available
-    // - the second button is displayed when there are more than 2 planes available
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateDrawing );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1; } )
-        ),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingMenu ),
-        FEposSequenceEditorCommands::Get().CreateDrawing->GetLabel(),
-        FEposSequenceEditorCommands::Get().CreateDrawing->GetDescription(),
-        FEposSequenceEditorCommands::Get().CreateDrawing->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextDrawing );
 
     ToolbarBuilder.AddSeparator();

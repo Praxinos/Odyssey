@@ -257,14 +257,35 @@ public:
     static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
     /**
+    *  Create a new drawing (material & texture) in a plane in the board section
+    *
+    * @param ISequencer     iSequencer to add a new drawing.
+    * @param UMovieSceneSubSection  iSubSection to get the plane.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iPlaneBinding to get the plane track.
+    */
+    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
+    /**
     *  Can a drawing be created in the board section ?
     *
-    * @param ISequencer     iSequencer to get the camera.
+    * @param ISequencer     iSequencer to get the plane.
     * @param FFrameNumber   iFrameNumber to get the board section.
     * @param FGuid          iPlaneBinding to get the plane track.
     * @return bool
     */
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
+    /**
+    *  Can a drawing be created in the board section ?
+    *
+    * @param ISequencer             iSequencer to get the plane.
+    * @param UMovieSceneSubSection  iSubSection to get the plane.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    * @param FGuid                  iPlaneBinding to get the plane track.
+    * @return bool
+    */
+    static bool CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
 public:
     /**
