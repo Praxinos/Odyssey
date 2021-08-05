@@ -116,6 +116,24 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime );
 
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
+
     //---
 
     if( iMap == kMap )
@@ -234,6 +252,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetIcon() );
 
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
 
     ToolbarBuilder.AddSeparator();
 

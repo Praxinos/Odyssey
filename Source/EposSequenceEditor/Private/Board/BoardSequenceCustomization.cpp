@@ -125,6 +125,24 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime );
 
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
+            FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
+
     //---
 
     if( iMap == kMap )
@@ -230,6 +248,11 @@ FBoardSequenceCustomization::CreateInfoText() const
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );

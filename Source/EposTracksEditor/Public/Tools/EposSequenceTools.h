@@ -287,6 +287,39 @@ public:
     */
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
+public:
+    /**
+    *  Go to the previous camera position in the board section
+    *
+    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
+    static void GotoPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Is there a previous camera position in the board section ?
+    *
+    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
+    static bool HasPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Go to the next camera position in the board section
+    *
+    * @param ISequencer     iSequencer to find the next drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
+    static void GotoNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Is there a next camera position in the board section ?
+    *
+    * @param ISequencer     iSequencer to find the next drawing.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
+    static bool HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
 // Inside EspoSequenceTools_Plane
 public:
     /**
@@ -479,6 +512,29 @@ private:
     static void EjectCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static bool CanEjectCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
+
+public:
+    /**
+    *  Go to the previous camera position
+    *
+    * @param ISequencer iSequencer to get camera.
+    */
+    static void GotoPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool HasPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Go to the next camera position
+    *
+    * @param ISequencer iSequencer to get camera.
+    */
+    static void GotoNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+private:
+    static void GotoPreviousCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
 // Inside EspoSequenceTools_Plane
 public:

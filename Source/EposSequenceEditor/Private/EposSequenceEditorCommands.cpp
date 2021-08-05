@@ -27,6 +27,8 @@ FEposSequenceEditorCommands::RegisterCommands()
     UI_COMMAND( SnapCameraToViewportAtCurrentTime,  "Snap Camera to Viewport", "Snap the existing camera to the viewport", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( PilotCameraAtCurrentTime,           "Pilot Camera", "Pilot the existing camera", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( EjectCameraAtCurrentTime,           "Eject Camera", "Eject the existing camera", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoPreviousCameraPosition,         "Go to Previous Camera Position", "Go to the previous camera position", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoNextCameraPosition,             "Go to Next Camera Position", "Go to the next camera position", EUserInterfaceActionType::Button, FInputChord() );
 
     UI_COMMAND( CreatePlaneAtCurrentTime,           "Create Plane", "Create a new plane in front of the current camera", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( DetachPlaneAtCurrentTime,           "Detach Plane", "Detach the plane of the current camera", EUserInterfaceActionType::Button, FInputChord() );

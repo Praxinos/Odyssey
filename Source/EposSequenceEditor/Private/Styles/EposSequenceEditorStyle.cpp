@@ -59,6 +59,10 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-pilot-16x", Icon24x24 ) );
     //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH( "camera-eject-16x", Icon48x48 ) );
     //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-eject-16x", Icon24x24 ) ); // Not used in a widget, only in shortcuts for the moment
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH( "camera-previous-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH( "camera-previous-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH( "camera-next-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH( "camera-next-24x", Icon24x24 ) );
 
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );

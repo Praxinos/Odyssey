@@ -1059,4 +1059,156 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
+//---
+//---
+//---
+
+//static
+void
+BoardSequenceTools::GotoPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::GotoPreviousCameraPosition( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+}
+
+//static
+bool
+BoardSequenceTools::HasPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetCameraTransformTimes( result.mInnerSequence );
+    int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
+
+    return index != INDEX_NONE;
+}
+
+//static
+void
+ShotSequenceTools::GotoPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    ShotSequenceTools::GotoPreviousCameraPosition( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceTools::HasPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UShotSequence>() );
+
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetCameraTransformTimes( iSequencer->GetFocusedMovieSceneSequence() );
+    int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
+
+    return index != INDEX_NONE;
+}
+
+//static
+void
+ShotSequenceTools::GotoPreviousCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    check( iSequence->IsA<UShotSequence>() );
+
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetCameraTransformTimes( iSequence );
+
+    int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
+    if( index == INDEX_NONE )
+        return;
+
+    FFrameNumber previous_time = times[index];
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
+
+    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+}
+
+//-
+
+//static
+void
+BoardSequenceTools::GotoNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::GotoNextCameraPosition( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+}
+
+//static
+bool
+BoardSequenceTools::HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetCameraTransformTimes( result.mInnerSequence );
+    FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
+
+    return !!next_time;
+}
+
+//static
+void
+ShotSequenceTools::GotoNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    ShotSequenceTools::GotoNextCameraPosition( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+}
+
+//static
+bool
+ShotSequenceTools::HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UShotSequence>() );
+
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetCameraTransformTimes( iSequencer->GetFocusedMovieSceneSequence() );
+    FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
+
+    return !!next_time;
+}
+
+//static
+void
+ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    check( iSequence->IsA<UShotSequence>() );
+
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetCameraTransformTimes( iSequence );
+
+    FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
+    if( !next_time )
+        return;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
+
+    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+}
+
 #undef LOCTEXT_NAMESPACE
