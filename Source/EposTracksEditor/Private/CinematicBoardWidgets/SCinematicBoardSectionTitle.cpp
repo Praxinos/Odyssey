@@ -28,6 +28,84 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
 
+    auto PilotEject = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
+            BoardSequenceTools::EjectCamera( sequencer, subsection_object, local_frame );
+        else
+            BoardSequenceTools::PilotCamera( sequencer, subsection_object, local_frame );
+    };
+
+    auto CanPilotEject = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        return BoardSequenceTools::CanPilotCamera( sequencer, subsection_object, local_frame )
+                || BoardSequenceTools::CanEjectCamera( sequencer, subsection_object, local_frame );
+    };
+
+    auto IsPilotChecked = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        return BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object );
+    };
+
+    auto IsPilotEjectVisible = [this]() -> bool
+    {
+        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+            && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
+    };
+
+    TAttribute<FText> GetTooltip = MakeAttributeLambda(
+        [this]() -> FText
+        {
+            ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+            const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+            FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+            if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
+                return LOCTEXT( "eject-camera-tooltip", "Eject the existing camera" );
+            else
+                return LOCTEXT( "pilot-camera-tooltip", "Pilot the existing camera (create a camera and set the current frame where to create the camera keyframe)" );
+        } );
+
+    TAttribute<FSlateIcon> GetIcon = MakeAttributeLambda(
+        [this]() -> FSlateIcon
+        {
+            ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+            const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+            FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+            if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
+                return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.EjectCamera" );
+            else
+                return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.PilotCamera" );
+        } );
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( PilotEject ),
+            FCanExecuteAction::CreateLambda( CanPilotEject ),
+            FIsActionChecked::CreateLambda( IsPilotChecked ),
+            FIsActionButtonVisible::CreateLambda( IsPilotEjectVisible )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        GetTooltip,
+        GetIcon,
+        EUserInterfaceActionType::ToggleButton );
+
+    //-
+
     auto Snap = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();

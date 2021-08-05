@@ -64,6 +64,8 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     Set( "EposTracksEditor.NewSectionWithShotAfterSection", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
 
     Set( "EposTracksEditor.CreateCamera", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
+    Set( "EposTracksEditor.PilotCamera", new IMAGE_BRUSH( "camera-pilot-16x", Icon16x16 ) );
+    Set( "EposTracksEditor.EjectCamera", new IMAGE_BRUSH( "camera-eject-16x", Icon16x16 ) );
     Set( "EposTracksEditor.CreatePlane", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );
     Set( "EposTracksEditor.DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon16x16 ) );
     Set( "EposTracksEditor.CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon16x16 ) );

@@ -98,6 +98,24 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
     else
         CommandList->UnmapAction( FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime );
 
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime );
+
+    if( iMap == kMap )
+        CommandList->MapAction(
+            FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
+            FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+            FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        );
+    else
+        CommandList->UnmapAction( FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime );
+
     //---
 
     if( iMap == kMap )

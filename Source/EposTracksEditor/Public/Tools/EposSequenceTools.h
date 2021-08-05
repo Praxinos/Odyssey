@@ -152,6 +152,7 @@ public:
     */
     static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+public:
     /**
     *  Update the camera location from the viewport
     *
@@ -185,6 +186,95 @@ public:
     * @param FFrameNumber           iFrameNumber to get the board section.
     */
     static bool CanSnapCameraToViewport( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+public:
+    /**
+    * Check if camera is in piloting mode in the subsection at the given frame
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool IsPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    * Check if camera is in piloting mode in the given subsection
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    */
+    static bool IsPilotingCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
+
+    /**
+    * Start piloting the camera in the subsection at the given frame
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void PilotCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    * Start piloting the camera in the given subsection
+    * (The given frame must be inside the subsection)
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void PilotCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+    /**
+    *  Check if camera can be pilot in the subsection at the given frame
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool CanPilotCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Check if camera can be pilot in the given subsection
+    * (The given frame must be inside the subsection)
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool CanPilotCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+    /**
+    *  Eject the camera in the subsection at the given frame
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void EjectCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Eject the camera in the given subsection
+    * (The given frame must be inside the subsection)
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void EjectCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+    /**
+    *  Check if camera can be eject in the subsection at the given frame
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool CanEjectCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    /**
+    *  Check if camera can be eject in the given subsection
+    * (The given frame must be inside the subsection)
+    *
+    * @param ISequencer             iSequencer to update camera.
+    * @param UMovieSceneSubSection  iSubSection to update camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static bool CanEjectCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
 
     /**
     *  Stop piloting camera
@@ -356,6 +446,16 @@ public:
 
     static bool CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    static bool IsPilotingCamera( ISequencer* iSequencer );
+
+    static void PilotCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool CanPilotCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static void EjectCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool CanEjectCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
     /**
     *  Stop piloting camera
     *
@@ -373,6 +473,11 @@ private:
 
     static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static bool IsPilotingCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static void PilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static bool CanPilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void EjectCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static bool CanEjectCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
 // Inside EspoSequenceTools_Plane

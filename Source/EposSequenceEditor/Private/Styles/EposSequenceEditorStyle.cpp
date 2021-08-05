@@ -55,6 +55,10 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-create-24x", Icon24x24 ) );
     Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon48x48 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
     Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH( "camera-snap-to-viewport-24x", Icon24x24 ) );   // in the toolbar, stretch to the size Icon..x..
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH( "camera-pilot-16x", Icon48x48 ) );
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-pilot-16x", Icon24x24 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH( "camera-eject-16x", Icon48x48 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH( "camera-eject-16x", Icon24x24 ) ); // Not used in a widget, only in shortcuts for the moment
 
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH( "plane-create-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH( "plane-create-24x", Icon24x24 ) );

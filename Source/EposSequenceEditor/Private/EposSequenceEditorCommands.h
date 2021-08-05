@@ -24,6 +24,8 @@ public:
 
     TSharedPtr<FUICommandInfo> CreateCameraAtCurrentTime;
     TSharedPtr<FUICommandInfo> SnapCameraToViewportAtCurrentTime;
+    TSharedPtr<FUICommandInfo> PilotCameraAtCurrentTime;
+    TSharedPtr<FUICommandInfo> EjectCameraAtCurrentTime;
 
     TSharedPtr<FUICommandInfo> CreatePlaneAtCurrentTime;
     TSharedPtr<FUICommandInfo> DetachPlaneAtCurrentTime;
