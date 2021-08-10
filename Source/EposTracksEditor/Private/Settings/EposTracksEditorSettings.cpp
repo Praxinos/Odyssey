@@ -53,6 +53,12 @@ UEposTracksEditorSettings::PostEditChangeProperty( FPropertyChangedEvent& Proper
 
     // Recalculate everything based on any new values.
     UpdateValues();
+
+    // This is done when the settings are used inside a IDetailsView
+    // Because in this case, the SSettingsEditor::NotifyPostChange() (when changing values inside Editor/ProjectSettings) which saved the new value in the config file, is not called for IDetailsView
+    // So add a save here
+    if( PropertyChangedEvent.ChangeType != EPropertyChangeType::Interactive )
+        SaveConfig();
 }
 
 #endif
