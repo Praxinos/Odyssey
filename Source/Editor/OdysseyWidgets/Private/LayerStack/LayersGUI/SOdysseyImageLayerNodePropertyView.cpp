@@ -9,6 +9,8 @@
 #include "OdysseyImageLayer.h"
 #include "PropertyEditorModule.h"
 #include "Modules/ModuleManager.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 
 #define LOCTEXT_NAMESPACE "SOdysseyImageLayerNodePropertyView"
@@ -68,9 +70,9 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
                 SNew(SSpinBox<int>)
                 //.Style( FEditorStyle::Get(), "NoBorder" )
                 .Value(this, &SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue, iImageLayer)
-                .MinValue(0)
-                .MaxValue(100)
                 .Delta(1)
+                .LinearDeltaSensitivity( 15 )
+                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueChanged(this, &SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged, iImageLayer, iLayerStack, iImageNode )
                 .OnValueCommitted(this, &SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue, iImageLayer, iLayerStack, iImageNode )
              ]
@@ -119,7 +121,7 @@ void SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOp
 {
     // iImageLayer->SetOpacity( iOpacity / 100.f );
     // iImageNode->RefreshOpacityText();
-    mTmpLayerOpacity = iOpacity;
+    mTmpLayerOpacity = FMath::Clamp( iOpacity, 0, 100 );
 }
 
 void SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
