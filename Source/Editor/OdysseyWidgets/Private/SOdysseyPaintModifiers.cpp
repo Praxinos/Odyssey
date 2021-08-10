@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "SOdysseyPaintModifiers.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 
 #define LOCTEXT_NAMESPACE "OdysseyPaintModifiers"
@@ -60,18 +62,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                         [
                             SNew( SBox )
                             .HAlign( HAlign_Fill )
-/*
-                            [
-                                SAssignNew( mSizeSpinBox, SSpinBox< int > )
-                                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
-                                .MaxFractionalDigits(0)
-                                .MinValue( 1 )
-                                .MaxValue( 1000 )
-                                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
-                                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
-                                .Delta( 1 )
-                            ]
-*/
                             [
                             //TODO UE5: MaxFractionnal digits is set correctly in UE5. In UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
                                 SAssignNew( mSizeSpinBox, SSpinBox< int >)
@@ -115,6 +105,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
                                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                                 .Delta( 1 )
+                                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
                             ]
@@ -147,6 +138,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
                                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                                 .Delta( 1 )
+                                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
                             ]
@@ -297,6 +289,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
                                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                                 .Delta( 1 )
+                                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
                             ]
@@ -329,6 +322,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                                 .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
                                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                                 .Delta( 1 )
+                                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
                             ]
