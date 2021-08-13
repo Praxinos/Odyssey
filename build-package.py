@@ -19,7 +19,7 @@ init( autoreset=True )
 
 #---
 
-gVersionUE = '4.26'
+gVersionUE = '4.27'
 
 gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
@@ -63,7 +63,7 @@ def GetArguments():
         default_upload_path = Path.home() / 'pCloud Drive' / 'Praxinos' / 'Developpement' / 'Package'
 
     # Example with full parameters used
-    # $(WORK)> 4.26\Epos\build-package.py --input-dir "C:\Users\Mike\work\4.26\Epos" --output-dir "C:\Users\Mike\work\4.26\package2" -u --upload-dir "C:\Users\Mike\work\4.26\upload2" -s test-script-parameters
+    # $(WORK)> 4.27\Epos\build-package.py --input-dir "C:\Users\Mike\work\4.27\Epos" --output-dir "C:\Users\Mike\work\4.27\package2" -u --upload-dir "C:\Users\Mike\work\4.27\upload2" -s test-script-parameters
 
     parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
     parser.add_argument( '-t', '--target', type=eTarget, choices=eTarget, required=True, help=f'package for the specific target:\n- dev: binaries + sources\n- beta: binaries only\n- marketplace: sources only' )
