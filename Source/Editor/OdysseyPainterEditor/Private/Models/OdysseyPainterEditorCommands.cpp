@@ -18,6 +18,11 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...",                EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( VisitPraxinosForums, "Praxinos Forums...", "Praxinos Forums...",                   EUserInterfaceActionType::Button, FInputChord() );
 
+    UI_COMMAND( PanViewport, "Pan Viewport", "Hold the key to pan the viewport",                   EUserInterfaceActionType::None, FInputChord(EKeys::P));
+    UI_COMMAND( RotateViewport, "Rotate Viewport", "Hold the key to Rotate the viewport",          EUserInterfaceActionType::None, FInputChord(EKeys::R));
+    UI_COMMAND( ZoomViewport, "Zoom Viewport", "Hold the key to Zoom the viewport",                EUserInterfaceActionType::None, FInputChord(EKeys::Z));
+    UI_COMMAND( PickColorInViewport, "Pick Color in Viewport", "Hold the key to Pick a color in the viewport", EUserInterfaceActionType::None, FInputChord(EKeys::I));
+
     UI_COMMAND( ResetViewportRotation, "Reset Viewport Rotation", "Reset viewport rotation",       EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::R ) );
     UI_COMMAND( ResetViewportPosition, "Reset Viewport Position", "Reset viewport position",       EUserInterfaceActionType::Button, FInputChord( EKeys::Escape ) );
     UI_COMMAND( RotateViewportLeft, "Rotate Viewport Left", "Rotate viewport left",                EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::L ) );
@@ -31,7 +36,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( SetZoom70Percent, "Set Zoom 70 Percent", "Set zoom at 70 percent",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetZoom80Percent, "Set Zoom 80 Percent", "Set zoom at 80 percent",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetZoom90Percent, "Set Zoom 90 Percent", "Set zoom at 90 percent",                 EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( SetZoom100Percent, "Set Zoom 100 Percent", "Set zoom at 100 percent",              EUserInterfaceActionType::Button, FInputChord( EKeys::Z ) );
+    UI_COMMAND( SetZoom100Percent, "Set Zoom 100 Percent", "Set zoom at 100 percent",              EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::Z ) );
     UI_COMMAND( SetZoomFitScreen, "Set Zoom Fit Screen", "Set zoom fit screen",                    EUserInterfaceActionType::Button, FInputChord( EKeys::S ) );
     UI_COMMAND( ZoomInExponential, "Zoom In (exponential)", "Zoom in (exponential)",                                           EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
     UI_COMMAND( ZoomOutExponential, "Zoom Out (exponential)", "Zoom out (exponential)",                                        EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );

@@ -31,6 +31,7 @@
 #include "OdysseySurface.h"
 #include "SOdysseyCursorWidget.h"
 #include "SOdysseySurfaceViewport.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #include <memory>
 #include <chrono>
@@ -438,29 +439,13 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
             mCurrentToolState = eState::kDrawing;
-            //mOdysseyPainterEditor.Pin()->BeginTransaction( LOCTEXT("Stroke in ILIAD", "Stroke in ILIAD") );
-            //mOdysseyPainterEditor.Pin()->MarkTransactionAsDirty();
 			mOdysseyPainterEditor->PaintEngine()->BeginStroke( mCurrentPointInTexture, lastPointInTexture );
             return true;
         }
         else if( iKey == EKeys::Escape && iEvent == EInputEvent::IE_Pressed )
         {
 			mOdysseyPainterEditor->PaintEngine()->AbortStroke();
-            return true;
-        }
-        else if( iKey == EKeys::P && iEvent == EInputEvent::IE_Pressed )
-        {
-            mCurrentToolState = eState::kPan;
-            return true;
-        }
-        else if( iKey == EKeys::R && iEvent == EInputEvent::IE_Pressed )
-        {
-            mCurrentToolState = eState::kRotate;
-            return true;
-        }
-        else if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Pressed )
-        {
-            mCurrentToolState = eState::kPick;
+            //mCurrentToolState = eState::kIdle;
             return true;
         }
         else if( iKey == EKeys::MouseScrollUp && iEvent == EInputEvent::IE_Pressed )
@@ -476,28 +461,9 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             return true;
         }
     }
-
-    else if( mCurrentToolState == eState::kDrawing )
-    {
-        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kIdle;
-
-			mOdysseyPainterEditor->PaintEngine()->EndStroke();
-            //mOdysseyPainterEditor->EndTransaction();
-
-            return true;
-        }
-    }
-
     else if( mCurrentToolState == eState::kRotate )
     {
-        if( iKey == EKeys::R && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kIdle;
-            return true;
-        }
-        else if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
             mCurrentToolState = eState::kRotating;
 
@@ -510,28 +476,9 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             return true;
         }
     }
-    else if( mCurrentToolState == eState::kRotating )
-    {
-        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kRotate;
-            return true;
-        }
-        else if( iKey == EKeys::R && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kIdle;
-            return true;
-        }
-    }
-
     else if( mCurrentToolState == eState::kPan )
     {
-        if( iKey == EKeys::P && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kIdle;
-            return true;
-        }
-        else if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
             mCurrentToolState = eState::kPanning;
 
@@ -539,28 +486,9 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             return true;
         }
     }
-    else if( mCurrentToolState == eState::kPanning )
-    {
-        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kPan;
-            return true;
-        }
-        else if( iKey == EKeys::P && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kIdle;
-            return true;
-        }
-    }
-
     else if( mCurrentToolState == eState::kPick )
     {
-        if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Released )
-        {
-            mCurrentToolState = eState::kIdle;
-            return true;
-        }
-        else if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
         {
             mCurrentToolState = eState::kPicking;
 
@@ -571,24 +499,82 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             return true;
         }
     }
+
+    // Releases
+    else if( mCurrentToolState == eState::kDrawing )
+    {
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
+        {
+			mOdysseyPainterEditor->PaintEngine()->EndStroke();
+            mCurrentToolState = eState::kIdle;
+        }
+    }
+    else if( mCurrentToolState == eState::kRotating )
+    {
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
+        {
+            mCurrentToolState = eState::kIdle;
+        }
+    }
+    else if( mCurrentToolState == eState::kPanning )
+    {
+        if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
+        {
+            mCurrentToolState = eState::kIdle;
+        }
+    }
     else if( mCurrentToolState == eState::kPicking )
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
         {
-            mCurrentToolState = eState::kPick;
-
             FOdysseyStrokePoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
             FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
 			mOnPickColor.Broadcast(eOdysseyEventState::kSet, position_in_texture);
-            return true;
+
+            mCurrentToolState = eState::kIdle;
         }
-        else if( iKey == EKeys::LeftAlt && iEvent == EInputEvent::IE_Released )
+    }
+
+    if ( !(mCurrentToolState == eState::kDrawing || mCurrentToolState == eState::kRotating || mCurrentToolState == eState::kPanning || mCurrentToolState == eState::kPicking))
+    {
+        if (mKeysPressed.Num() == 1)
+        {
+
+            FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
+            const FInputChord activeChord(mKeysPressed[0],
+                                        EModifierKey::FromBools(
+                                            ModifierKeysState.IsControlDown(),
+                                            ModifierKeysState.IsAltDown(),
+                                            ModifierKeysState.IsShiftDown(),
+                                            ModifierKeysState.IsCommandDown()
+                                        )
+                                    );
+
+            if (FOdysseyPainterEditorCommands::Get().PanViewport->HasActiveChord(activeChord))
+            {
+                mCurrentToolState = eState::kPan;
+                return true;
+            }
+            if (FOdysseyPainterEditorCommands::Get().RotateViewport->HasActiveChord(activeChord))
+            {
+                mCurrentToolState = eState::kRotate;
+                return true;
+            }
+            if (FOdysseyPainterEditorCommands::Get().ZoomViewport->HasActiveChord(activeChord))
+            {
+                //TODO:
+                return true;
+            }
+            if (FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord(activeChord))
+            {
+                mCurrentToolState = eState::kPick;
+                return true;
+            }
+        }
+        
+        if (mCurrentToolState != eState::kIdle)
         {
             mCurrentToolState = eState::kIdle;
-
-            FOdysseyStrokePoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
-            FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
-			mOnPickColor.Broadcast(eOdysseyEventState::kSet, position_in_texture);
             return true;
         }
     }

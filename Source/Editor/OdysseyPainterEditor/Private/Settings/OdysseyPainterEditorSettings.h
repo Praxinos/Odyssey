@@ -76,15 +76,6 @@ public:
     /** The size of the checkered background tiles. */
     UPROPERTY(config, EditAnywhere, Category=Background, meta=(ClampMin="2", ClampMax="4096"))
     int32 CheckerSize;
-    
-    UPROPERTY(config, EditAnywhere, Category=Shortcuts )
-    FKey Rotation;
-    
-    UPROPERTY(config, EditAnywhere, Category=Shortcuts )
-    FKey Pan;
-    
-    UPROPERTY(config, EditAnywhere, Category=Shortcuts )
-    FKey PickColor;
 
 public:
     /** Whether the texture should scale to fit the view port. */
