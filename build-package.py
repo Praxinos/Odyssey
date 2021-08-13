@@ -65,12 +65,12 @@ def GetArguments():
     # $(WORK)> 4.25\Iliad\build-package.py --input-dir "C:\Users\Mike\work\4.25\Iliad" --output-dir "C:\Users\Mike\work\4.25\package2" -u --upload-dir "C:\Users\Mike\work\4.25\upload2" -s test-script-parameters
 
     parser = argparse.ArgumentParser( description='Build package.', formatter_class=CustomArgumentDefaultsHelpFormatter )
+    parser.add_argument( '-t', '--target', type=eTarget, choices=eTarget, required=True, help=f'package for the specific target:\n- dev: binaries + sources\n- beta: binaries only\n- marketplace: sources only' )
     parser.add_argument( '-i', '--input-dir', default=f'{default_input_path}', help=f'the input path\nit must contains a uplugin file' )
     parser.add_argument( '-o', '--output-dir', default=f'{default_output_path}', help=f'the output path\nsuffix folders will be append to it' )
     parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
     parser.add_argument( '-p', '--upload-dir', default=f'{default_upload_path}', help=f'the upload path\nsuffix folders will be append to it' )
     parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
-    parser.add_argument( '-t', '--target', type=eTarget, choices=eTarget, default=eTarget.kDev, help=f'package for the specific target' )
     args = parser.parse_args()
     
     return args
