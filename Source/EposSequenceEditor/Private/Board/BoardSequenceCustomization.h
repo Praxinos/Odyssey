@@ -86,8 +86,6 @@ private:
     ISequencer*     mSequencer;
     UBoardSequence* mBoardSequence;
 
-    FDelegateHandle mPatchNotifySequencerHandle;
-
     /** Mapping of objects to their existing transform data (for comparing against new transform data) */
     TMap< TWeakObjectPtr<UObject>, FTransformData > mObjectToExistingTransform;
 };

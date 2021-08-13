@@ -234,10 +234,6 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
 
             board_section->StopResizing();
 
-            //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
-            // as Arrange() may move the current section and FMoveKeysAndSections::OnEndDrag() won't call it (=Notify())
-            FEposTracksModule::GetTracksCustomizationManager().PatchNotifySequencer();
-
             return EMovieSceneSectionMovedResult::SectionsChanged;
         }
     }
@@ -280,12 +276,6 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 mPreviousMove.Remove( board_section );
                 mLastGapMove.Remove( board_section );
                 mCacheOverlapPriority.Remove( board_section );
-
-                UpdateEasing();
-
-                //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
-                // as FixPostMoveSections()/Arrange() may move the current section and FMoveKeysAndSections::OnEndDrag() won't call it (=Notify())
-                FEposTracksModule::GetTracksCustomizationManager().PatchNotifySequencer();
 
                 return EMovieSceneSectionMovedResult::SectionsChanged;
             }

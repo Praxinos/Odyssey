@@ -47,8 +47,6 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPostPropertyChanged );
 
-    mPatchNotifySequencerHandle = FEposTracksModule::GetTracksCustomizationManager().Register( FOnNotifySequencer::CreateLambda( [this](){ mSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::Unknown ); } ) );
-
     ProcessCommands( mSequencer->GetCommandBindings(), kMap );
 
     //---
@@ -72,7 +70,6 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 void
 FBoardSequenceCustomization::UnregisterSequencerCustomization()
 {
-    FEposTracksModule::GetTracksCustomizationManager().Unregister( mPatchNotifySequencerHandle );
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll( this );
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll( this );
 
