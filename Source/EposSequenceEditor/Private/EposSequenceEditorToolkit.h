@@ -18,6 +18,7 @@ class FAssetDragDropOp;
 class FClassDragDropOp;
 class FActorDragDropGraphEdOp;
 class UEposMovieSceneSequence;
+class UMovieSceneSection;
 
 /**
  * Implements an Editor toolkit for template sequences.

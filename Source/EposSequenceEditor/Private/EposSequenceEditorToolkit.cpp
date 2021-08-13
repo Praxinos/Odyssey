@@ -146,7 +146,10 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         //sequencerInitParams.SpawnRegister = SpawnRegister;
         sequencerInitParams.HostCapabilities.bSupportsCurveEditor = true;
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
+        //sequencerInitParams.HostCapabilities.bSupportsRecording = true;
+        //sequencerInitParams.HostCapabilities.bSupportsRenderMovie = true;
 
+        //sequencerInitParams.EventContexts.Bind( PlaybackContext.ToSharedRef(), &FLevelSequencePlaybackContext::GetEventContexts );
         sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackContextAsObject );
         //sequencerInitParams.PlaybackClient.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackClientAsInterface );
 
@@ -175,7 +178,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     FLevelEditorSequencerIntegrationOptions options;
     options.bRequiresLevelEvents = true;
     options.bRequiresActorEvents = true;
-    options.bCanRecord = true;
     FLevelEditorSequencerIntegration::Get().AddSequencer( mSequencer.ToSharedRef(), options );
 
     FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );

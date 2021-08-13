@@ -169,11 +169,11 @@ FText UMovieSceneSingleCameraCutTrack::GetDefaultDisplayName() const
 
 
 #if WITH_EDITOR
-void UMovieSceneSingleCameraCutTrack::OnSectionMoved(UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams)
+EMovieSceneSectionMovedResult UMovieSceneSingleCameraCutTrack::OnSectionMoved(UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams)
 {
     UMovieSceneSingleCameraCutSection* cut_section = Cast<UMovieSceneSingleCameraCutSection>( &ioSection );
     if( !cut_section )
-        return;
+        return EMovieSceneSectionMovedResult::None;
 
     cut_section->SetStartFrameAuto();
 
@@ -191,7 +191,11 @@ void UMovieSceneSingleCameraCutTrack::OnSectionMoved(UMovieSceneSection& ioSecti
         UEposMovieSceneSequence* outer_sequence = GetTypedOuter<UEposMovieSceneSequence>();
         check( outer_sequence );
         outer_sequence->SectionResized( cut_section );
+
+        return EMovieSceneSectionMovedResult::SectionsChanged;
     }
+
+    return EMovieSceneSectionMovedResult::None;
 }
 #endif
 

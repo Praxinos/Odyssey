@@ -655,12 +655,31 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
             FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::DuplicateBoard, &sectionObject ) )
         );
 
-        ioMenuBuilder.AddMenuEntry(
-            LOCTEXT( "RenderBoard", "Render Board" ),
-            FText::Format( LOCTEXT( "RenderBoardTooltip", "Render board movie" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
-            FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::RenderBoard, &sectionObject ) )
-        );
+        //ioMenuBuilder.AddMenuEntry(
+        //    LOCTEXT( "RenderBoard", "Render Board" ),
+        //    FText::Format( LOCTEXT( "RenderBoardTooltip", "Render board movie" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
+        //    FSlateIcon(),
+        //    FUIAction( FExecuteAction::CreateLambda( [this, &sectionObject]()
+        //                                             {
+        //                                                 TArray<UMovieSceneCinematicBoardSection*> BoardSections;
+        //                                                 TArray<UMovieSceneSection*> Sections;
+        //                                                 GetSequencer()->GetSelectedSections( Sections );
+        //                                                 for( UMovieSceneSection* Section : Sections )
+        //                                                 {
+        //                                                     if( UMovieSceneCinematicBoardSection* BoardSection = Cast<UMovieSceneCinematicBoardSection>( Section ) )
+        //                                                     {
+        //                                                         BoardSections.Add( BoardSection );
+        //                                                     }
+        //                                                 }
+
+        //                                                 if( !BoardSections.Contains( &sectionObject ) )
+        //                                                 {
+        //                                                     BoardSections.Add( &sectionObject );
+        //                                                 }
+
+        //                                                 mCinematicBoardTrackEditor.Pin()->RenderBoards( BoardSections );
+        //                                             } ) )
+        //);
 
         ioMenuBuilder.AddMenuEntry(
             LOCTEXT( "RenameBoard", "Rename Board" ),

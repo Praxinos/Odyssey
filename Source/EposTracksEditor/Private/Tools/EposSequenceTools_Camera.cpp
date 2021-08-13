@@ -209,19 +209,8 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
     iSequencer.OnActorAddedToSequencer().Broadcast( camera, CameraGuid );
 
     //---
-    // From FSequencer::NewCameraAdded( CameraGuid, camera )
 
-    iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
-
-    // Lock the viewport to this camera
-    if( camera && camera->GetLevel() )
-    {
-        GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-        GCurrentLevelEditingViewportClient->SetActorLock( camera );
-        GCurrentLevelEditingViewportClient->bLockedCameraView = true;
-        GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
-        GCurrentLevelEditingViewportClient->Invalidate();
-    }
+    MovieSceneToolHelpers::LockCameraActorToViewport( iSequencer.AsShared(), camera );
 
     *oGuid = CameraGuid;
     return camera;
@@ -280,9 +269,8 @@ ShotSequenceTools::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSeque
         else
         {
             UMovieSceneSingleCameraCutTrack* single_cameracut_track = Cast<UMovieSceneSingleCameraCutTrack>( CameraCutTrack );
-            FMovieSceneObjectBindingID binding_id( iCameraGuid, MovieSceneSequenceID::Root, EMovieSceneObjectBindingSpace::Local ); // Like in UMovieSceneSingleCameraCutSection::SetCameraGuid()
 
-            single_cameracut_track->AddNewSingleCameraCut( binding_id, 0 /*iFrameNumber*/ );
+            single_cameracut_track->AddNewSingleCameraCut( UE::MovieScene::FRelativeObjectBindingID( iCameraGuid ), 0 /*iFrameNumber*/ ); // Like in UMovieSceneSingleCameraCutSection::SetCameraGuid()
 
             //CameraCutTrack->Modify();
 
@@ -421,21 +409,7 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequ
     if( !snapped )
         return;
 
-    //---
-    // From FSequencer::NewCameraAdded( CameraGuid, NewCamera )
-
-    iSequencer.SetPerspectiveViewportCameraCutEnabled( false );
-
-    // Lock the viewport to this camera
-    if( ioCamera && ioCamera->GetLevel() )
-    {
-        GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-        GCurrentLevelEditingViewportClient->SetActorLock( ioCamera );
-        GCurrentLevelEditingViewportClient->bLockedCameraView = true;
-        GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
-        GCurrentLevelEditingViewportClient->Invalidate();
-    }
-    //---
+    MovieSceneToolHelpers::LockCameraActorToViewport( iSequencer.AsShared(), ioCamera );
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
@@ -626,12 +600,7 @@ ShotSequenceTools::PilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSe
 
     if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->GetViewMode() != VMI_Unknown && GCurrentLevelEditingViewportClient->AllowsCinematicControl() )
     {
-        iSequencer->SetPerspectiveViewportCameraCutEnabled( false );
-        GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
-        GCurrentLevelEditingViewportClient->SetActorLock( camera );
-        GCurrentLevelEditingViewportClient->bLockedCameraView = true;
-        GCurrentLevelEditingViewportClient->UpdateViewForLockedActor();
-        GCurrentLevelEditingViewportClient->Invalidate();
+        MovieSceneToolHelpers::LockCameraActorToViewport( iSequencer->AsShared(), camera );
     }
 }
 
@@ -752,7 +721,7 @@ ShotSequenceTools::EjectCamera( ISequencer* iSequencer, UMovieSceneSequence* iSe
 
     if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->GetViewMode() != VMI_Unknown && GCurrentLevelEditingViewportClient->AllowsCinematicControl() )
     {
-        GCurrentLevelEditingViewportClient->SetMatineeActorLock( nullptr );
+        GCurrentLevelEditingViewportClient->SetCinematicActorLock( nullptr );
         GCurrentLevelEditingViewportClient->SetActorLock( nullptr );
         GCurrentLevelEditingViewportClient->bLockedCameraView = false;
         GCurrentLevelEditingViewportClient->ViewFOV = GCurrentLevelEditingViewportClient->FOVAngle;

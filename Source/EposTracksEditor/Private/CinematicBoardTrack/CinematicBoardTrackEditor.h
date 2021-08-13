@@ -67,8 +67,8 @@ public:
     virtual void Tick( float iDeltaTime ) override;
     virtual void BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, UMovieSceneTrack* iTrack ) override;
     virtual const FSlateBrush* GetIconBrush() const override;
-    virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
-    virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) override;
+    virtual bool OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) override;
+    virtual FReply OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) override;
 
     /** Insert board. */
     void InsertBoard();
@@ -88,7 +88,7 @@ public:
      *
      * @param Section The section to render
      */
-    void RenderBoard( UMovieSceneCinematicBoardSection* iSection );
+    //void RenderBoards( const TArray<UMovieSceneCinematicBoardSection*>& Sections );
 
     /*
      * Rename board.

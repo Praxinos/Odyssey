@@ -17,8 +17,8 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
 {
     GENERATED_BODY()
 
-    /** Default constructor. */
-    UMovieSceneCinematicBoardSection();
+    /** Object constructor. */
+    UMovieSceneCinematicBoardSection( const FObjectInitializer& ObjInitializer );
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;

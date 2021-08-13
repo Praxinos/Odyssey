@@ -41,7 +41,8 @@ FKeyThumbnailSection::FKeyThumbnailSection( TSharedPtr<ISequencer> InSequencer, 
 
 FKeyThumbnailSection::~FKeyThumbnailSection()
 {
-    SequencerPtr.Pin()->OnMovieSceneDataChanged().Remove( mRebuildKeysDelegateHandle );
+    if( SequencerPtr.IsValid() )
+        SequencerPtr.Pin()->OnMovieSceneDataChanged().Remove( mRebuildKeysDelegateHandle );
 }
 
 

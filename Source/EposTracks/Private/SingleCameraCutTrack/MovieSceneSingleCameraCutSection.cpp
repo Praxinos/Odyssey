@@ -96,14 +96,7 @@ void UMovieSceneSingleCameraCutSection::PostLoad()
 
 UCameraComponent* UMovieSceneSingleCameraCutSection::GetFirstCamera(IMovieScenePlayer& Player, FMovieSceneSequenceID SequenceID) const
 {
-    if (CameraBindingID.GetSequenceID().IsValid())
-    {
-        // Ensure that this ID is resolvable from the root, based on the current local sequence ID
-        FMovieSceneObjectBindingID RootBindingID = CameraBindingID.ResolveLocalToRoot(SequenceID, Player);
-        SequenceID = RootBindingID.GetSequenceID();
-    }
-
-    for (TWeakObjectPtr<>& WeakObject : Player.FindBoundObjects(CameraBindingID.GetGuid(), SequenceID))
+    for( TWeakObjectPtr<> WeakObject : CameraBindingID.ResolveBoundObjects( SequenceID, Player ) )
     {
         if (UObject* Object = WeakObject .Get())
         {

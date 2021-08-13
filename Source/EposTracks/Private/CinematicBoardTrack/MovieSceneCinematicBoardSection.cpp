@@ -13,8 +13,8 @@
 
 //---
 
-UMovieSceneCinematicBoardSection::UMovieSceneCinematicBoardSection()
-    : UMovieSceneSubSection()
+UMovieSceneCinematicBoardSection::UMovieSceneCinematicBoardSection( const FObjectInitializer& ObjInitializer )
+    : Super( ObjInitializer )
 {
     SetBlendType( EMovieSceneBlendType::Absolute );
 

@@ -214,12 +214,12 @@ UMovieSceneCinematicBoardTrack::GetRowSegmentBlender() const
 //---
 
 #if WITH_EDITOR
-void
+EMovieSceneSectionMovedResult
 UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &ioSection );
     if( !board_section )
-        return;
+        return EMovieSceneSectionMovedResult::None;
 
     if( board_section->IsResizing() )
     {
@@ -237,6 +237,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
             // as Arrange() may move the current section and FMoveKeysAndSections::OnEndDrag() won't call it (=Notify())
             FEposTracksModule::GetTracksCustomizationManager().PatchNotifySequencer();
+
+            return EMovieSceneSectionMovedResult::SectionsChanged;
         }
     }
     else
@@ -284,6 +286,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
                 //TODO: find a way to call Sequencer.NotifyMovieSceneDataChanged(EMovieSceneDataChangeType::TrackValueChanged); to be clean ?
                 // as FixPostMoveSections()/Arrange() may move the current section and FMoveKeysAndSections::OnEndDrag() won't call it (=Notify())
                 FEposTracksModule::GetTracksCustomizationManager().PatchNotifySequencer();
+
+                return EMovieSceneSectionMovedResult::SectionsChanged;
             }
             else
             {
@@ -293,6 +297,8 @@ UMovieSceneCinematicBoardTrack::OnSectionMoved( UMovieSceneSection& ioSection, c
             }
         }
     }
+
+    return EMovieSceneSectionMovedResult::None;
 }
 #endif
 

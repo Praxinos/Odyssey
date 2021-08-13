@@ -439,9 +439,9 @@ FCinematicBoardTrackEditor::GetIconBrush() const //override
 }
 
 bool
-FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) //override
+FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) //override
 {
-    if( !iTrack->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
+    if( !DragDropParams.Track->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
     {
         return false;
     }
@@ -457,8 +457,16 @@ FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, U
 
     for( const FAssetData& assetData : dragDropOp->GetAssets() )
     {
-        if( Cast<UMovieSceneSequence>( assetData.GetAsset() ) )
+        if( UMovieSceneSequence* Sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() ) )
         {
+            FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
+
+            const FQualifiedFrameTime InnerDuration = FQualifiedFrameTime(
+                UE::MovieScene::DiscreteSize( Sequence->GetMovieScene()->GetPlaybackRange() ),
+                Sequence->GetMovieScene()->GetTickResolution() );
+
+            FFrameNumber LengthInFrames = InnerDuration.ConvertTo( TickResolution ).FrameNumber;
+            DragDropParams.FrameRange = TRange<FFrameNumber>( DragDropParams.FrameNumber, DragDropParams.FrameNumber + LengthInFrames );
             return true;
         }
     }
@@ -467,9 +475,9 @@ FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, U
 }
 
 FReply
-FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovieSceneTrack* iTrack, int32 iRowIndex, const FGuid& iTargetObjectGuid ) //override
+FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) //override
 {
-    if( !iTrack->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
+    if( !DragDropParams.Track->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
     {
         return FReply::Unhandled();
     }
@@ -481,7 +489,11 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovie
         return FReply::Unhandled();
     }
 
+    const FScopedTransaction Transaction( LOCTEXT( "DropAssets", "Drop Assets" ) );
+
     TSharedPtr<FAssetDragDropOp> dragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( operation );
+
+    FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
 
     bool anyDropped = false;
     for( const FAssetData& assetData : dragDropOp->GetAssets() )
@@ -490,11 +502,7 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, UMovie
 
         if( sequence )
         {
-            FGeometry geometry( GetSequencer()->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
-            FTimeToPixel converter( geometry, GetSequencer()->GetViewRange(), GetSequencer()->GetFocusedTickResolution() );
-            TOptional<FFrameNumber> dropped_frame( converter.PixelToFrame( geometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() ).X ).RoundToFrame() );
-
-            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, iRowIndex, dropped_frame ) );
+            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FCinematicBoardTrackEditor::AddKeyInternal, sequence, DragDropParams.RowIndex, TOptional<FFrameNumber>( DragDropParams.FrameNumber ) ) );
 
             anyDropped = true;
         }
@@ -523,11 +531,11 @@ FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iS
     CinematicBoardTrackTools::DuplicateSection( GetSequencer().Get(), iSection );
 }
 
-void
-FCinematicBoardTrackEditor::RenderBoard( UMovieSceneCinematicBoardSection* iSection )
-{
-    GetSequencer()->RenderMovie( iSection );
-}
+//void
+//FCinematicBoardTrackEditor::RenderBoards( const TArray<UMovieSceneCinematicBoardSection*>& iSections )
+//{
+//    GetSequencer()->RenderMovie( iSections ); // It takes UMovieSceneCinematicSHOTSection !!!
+//}
 
 void
 FCinematicBoardTrackEditor::RenameBoard( UMovieSceneCinematicBoardSection* iSection )
