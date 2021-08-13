@@ -27,11 +27,11 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
 
 public:
     /** @return The board display name. if empty, returns the sequence's name*/
-    UFUNCTION( BlueprintPure, Category = "Movie Scene Section" )
+    UFUNCTION( BlueprintPure, Category = "Sequencer|Section" )
     FString GetBoardDisplayName() const;
 
     /** Set the board display name */
-    UFUNCTION( BlueprintCallable, Category = "Movie Scene Section" )
+    UFUNCTION( BlueprintCallable, Category = "Sequencer|Section" )
     void SetBoardDisplayName( const FString& BoardDisplayName );
 
 private:

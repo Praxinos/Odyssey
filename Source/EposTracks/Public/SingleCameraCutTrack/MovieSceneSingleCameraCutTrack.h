@@ -60,7 +60,7 @@ public:
 
 protected:
 
-    virtual void PreCompileImpl() override;
+    virtual void PreCompileImpl( FMovieSceneTrackPreCompileResult& OutPreCompileResult ) override;
 
 private:
 

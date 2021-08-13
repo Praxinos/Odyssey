@@ -72,7 +72,7 @@ public:
     virtual void AddReferencedObjects( FReferenceCollector& iCollector ) override;
 
     //~ FAssetEditorToolkit interface
-    virtual bool OnRequestClose() override;
+    virtual void OnClose() override;
     virtual bool CanFindInContentBrowser() const override;
 
     //~ IToolkit interface

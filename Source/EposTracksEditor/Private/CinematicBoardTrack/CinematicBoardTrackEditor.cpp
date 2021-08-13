@@ -250,10 +250,8 @@ FCinematicBoardTrackEditor::HandleAssetAdded( UObject* iAsset, const FGuid& iTar
         return false;
     }
 
-    //@todo If there's already a subscenes track, allow that track to handle this asset
-    UMovieScene* focusedMovieScene = GetFocusedMovieScene();
-
-    if( focusedMovieScene != nullptr && focusedMovieScene->FindMasterTrack<UMovieSceneSubTrack>() != nullptr )
+    // Only allow sequences with a camera cut track to be dropped as a shot. Otherwise, it'll be dropped as a subsequence.s
+    if( !sequence->GetMovieScene()->GetCameraCutTrack() )
     {
         return false;
     }

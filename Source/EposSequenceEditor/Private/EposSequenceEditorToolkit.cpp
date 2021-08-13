@@ -296,13 +296,11 @@ FEposSequenceEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollecto
 
 //--- FAssetEditorToolkit interface
 
-bool FEposSequenceEditorToolkit::OnRequestClose()
+void FEposSequenceEditorToolkit::OnClose()
 {
     sgOpenToolkits.Remove( this );
 
     mOnClosedEvent.Broadcast();
-
-    return true;
 }
 
 bool FEposSequenceEditorToolkit::CanFindInContentBrowser() const
