@@ -26,7 +26,7 @@
 #include "Texture2DPreview.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
-#include "MeshPaintTypes.h"
+#include "LevelEditorSequencerIntegration.h"
 #include "TexturePaintHelpers.h"
 
 #include "VREditorMode.h"
@@ -110,6 +110,9 @@ void FOdysseyViewportDrawingEditorPainter::Initialize()
         }
     }
 
+    FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().AddRaw( this, &FOdysseyViewportDrawingEditorPainter::OnSequencersChanged );
+    OnSequencersChanged(); //Init the potential sequencers already present
+
 	//Initialize Data / View / Controller
     // mController->GetData()->Init(mPaintSettings->mTexturePaintSettings.mPaintTexture);
     // mWidget->Init(this);
@@ -138,6 +141,8 @@ void FOdysseyViewportDrawingEditorPainter::Finalize()
 	mBrushSettings->RemoveFromRoot();
 
     mEditor->SetActor(nullptr); //Unselect the actor to cleanup the editor
+    FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().RemoveAll(this);
+    ClearAllDelegatesSequencers();
 	// Cleanup(); //Why ?
 	// mComponentToTexturePaintSettingsMap.Empty(); //Why ?
 }
@@ -1442,6 +1447,96 @@ void FOdysseyViewportDrawingEditorPainter::SaveModifiedTextures()
 	}
 }
 
+void FOdysseyViewportDrawingEditorPainter::OnSequencersChanged()
+{
+    //Delete delegates of previous sequencers
+    ClearAllDelegatesSequencers();
+
+    //Getting the new sequencers
+    mSequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
+
+    for (int i = 0; i < mSequencers.Num(); i++)
+    {
+        if( TSharedPtr<ISequencer> itSequencer =  mSequencers[i].Pin() )
+        {
+            //When we're playing or scrubbing, we delete the delegates of the sequencer with DisableDelegatesSequencer
+            itSequencer->OnBeginScrubbingEvent().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::DisableDelegatesSequencer);
+            itSequencer->OnPlayEvent().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::DisableDelegatesSequencer);
+
+            //When we're done, we put them back with EnableDelegatesSequencer
+            itSequencer->OnEndScrubbingEvent().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::EnableDelegatesSequencer);
+            itSequencer->OnStopEvent().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::EnableDelegatesSequencer);
+            
+            //By default, they are enabled
+            itSequencer->OnGlobalTimeChanged().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencer);
+            itSequencer->OnMovieSceneDataChanged().AddRaw( this, &FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencerMovieSceneChanged );
+        }
+    }
+}
+
+void FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencer()
+{
+    if (mEditor->Component())
+    {
+        TArray<UMaterialInterface*> selectableMaterials;
+        mEditor->Component()->GetUsedMaterials(selectableMaterials);
+        if (selectableMaterials.Num() > 0)
+        {
+            if (selectableMaterials.Find(mEditor->Material()) == INDEX_NONE)
+            {
+                mEditor->SetMaterial(selectableMaterials[0]);
+            }
+        }
+    }
+}
+
+void FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencerMovieSceneChanged(EMovieSceneDataChangeType iChangedType)
+{
+    OnSyncPaintingWithSequencer();
+}
+
+void FOdysseyViewportDrawingEditorPainter::DisableDelegatesSequencer()
+{
+    for (int i = 0; i < mSequencers.Num(); i++)
+    {
+        if (TSharedPtr<ISequencer> itSequencer = mSequencers[i].Pin())
+        {
+            itSequencer->OnGlobalTimeChanged().RemoveAll( this );
+            itSequencer->OnMovieSceneDataChanged().RemoveAll( this );
+        }
+    }
+}
+
+void FOdysseyViewportDrawingEditorPainter::EnableDelegatesSequencer()
+{
+    for (int i = 0; i < mSequencers.Num(); i++)
+    {
+        if (TSharedPtr<ISequencer> itSequencer = mSequencers[i].Pin())
+        {
+            itSequencer->OnGlobalTimeChanged().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencer);
+            itSequencer->OnMovieSceneDataChanged().AddRaw(this, &FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencerMovieSceneChanged);
+        }
+    }
+    OnSyncPaintingWithSequencer();
+}
+
+
+void FOdysseyViewportDrawingEditorPainter::ClearAllDelegatesSequencers()
+{
+    for (int i = 0; i < mSequencers.Num(); i++)
+    {
+        if (TSharedPtr<ISequencer> itSequencer = mSequencers[i].Pin())
+        {
+            itSequencer->OnBeginScrubbingEvent().RemoveAll(this);
+            itSequencer->OnPlayEvent().RemoveAll(this);
+            itSequencer->OnEndScrubbingEvent().RemoveAll(this);
+            itSequencer->OnStopEvent().RemoveAll(this);
+            itSequencer->OnGlobalTimeChanged().RemoveAll(this);
+            itSequencer->OnMovieSceneDataChanged().RemoveAll(this);
+        }
+    }
+}
+
 void FOdysseyViewportDrawingEditorPainter::Refresh()
 {
 	// Ensure that we call OnRemoved while adapter/components are still valid
@@ -1538,20 +1633,6 @@ void FOdysseyViewportDrawingEditorPainter::Tick(FEditorViewportClient* iViewport
     if (bBadAssetFound)
     {
         mPaintTargetData.Empty();
-    }
-
-    // TODO: This part should change when Epic Games creates a new delegate to know when an UObject changed from the sequencer. Until then, we're checking when we can
-    if( mEditor->Component() )
-    {
-        TArray<UMaterialInterface*> selectableMaterials;
-        mEditor->Component()->GetUsedMaterials(selectableMaterials);
-        if (selectableMaterials.Num() > 0)
-        {
-            if (selectableMaterials.Find(mEditor->Material()) == INDEX_NONE)
-            {
-                mEditor->SetMaterial(selectableMaterials[0]);
-            }
-        }
     }
 
     if( mEditor->Texture() )

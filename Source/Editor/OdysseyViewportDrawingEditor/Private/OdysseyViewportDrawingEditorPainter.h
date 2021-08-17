@@ -9,6 +9,7 @@
 #include "IStylusState.h"
 #include "OdysseyStrokePoint.h"
 #include "MeshPaintTypes.h"
+#include "ISequencer.h"
 #include "Engine/StaticMesh.h"
 #include "OdysseyMeshPaintRendering.h"
 #include "OdysseyViewportDrawingEditorViewportClient.h"
@@ -215,6 +216,15 @@ private:
 	// void Cleanup();
 
 private:
+    /** Sequencer related */
+    void OnSequencersChanged();
+    void OnSyncPaintingWithSequencer();
+    void OnSyncPaintingWithSequencerMovieSceneChanged( EMovieSceneDataChangeType iChangedType );
+	void DisableDelegatesSequencer();
+	void EnableDelegatesSequencer();
+	void ClearAllDelegatesSequencers();
+
+private:
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex ) override;
 
 protected:	
@@ -282,6 +292,10 @@ protected:
 	// TArray<UMeshComponent*> mPaintableComponents;
 
     FViewport* mFocusedViewport;
+
+    //Sequencers used thorough the editor. They may change the current actor selected, so we need to keep track of what they are doing
+    TArray<TWeakPtr<ISequencer>> mSequencers;
+
     // FOdysseyViewportDrawingEditorViewportClient* mTemporaryViewportClient;
 
     FOdysseyStrokePoint mLastEvent;

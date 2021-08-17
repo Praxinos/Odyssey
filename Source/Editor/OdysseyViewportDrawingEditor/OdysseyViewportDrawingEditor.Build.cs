@@ -37,6 +37,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "RHI",
                 "Slate",
                 "SlateCore",
+                "Sequencer",
                 "EditorStyle",
                 "UnrealEd",
                 "RawMesh",
