@@ -43,11 +43,11 @@ FOdysseyPainterEditorDrawingState::Zoom()
 }
 
 float
-FOdysseyPainterEditorDrawingState::RotationInDegrees()
+FOdysseyPainterEditorDrawingState::Rotation()
 {
     if (!mEditor->GetGUI()->GetViewportTab())
         return 0.0f;
-    return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetRotationInDegrees();
+    return mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetGuiRotationValue();
 }
 
 FVector2D

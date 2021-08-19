@@ -20,14 +20,10 @@ class UTexture2D;
 class ODYSSEYWIDGETS_API SOdysseySurfaceViewport : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE( FOnParameterChanged );
-
-public:
 
     SLATE_BEGIN_ARGS(SOdysseySurfaceViewport)
         {}
         SLATE_ATTRIBUTE(IOdysseySurface*, Surface)
-        SLATE_EVENT(FOnParameterChanged, OnParameterChanged)
     SLATE_END_ARGS()
 
 public:
@@ -36,66 +32,159 @@ public:
 
 public:
     // Public API
-    // void                        SetSurface( IOdysseySurface* iValue );
-    void                        SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
 
+    /* Ge the Surface the viewport is displaying */
+    IOdysseySurface* GetSurface() const;
+
+    /* Get the scene viewport object */
     TSharedPtr<FOdysseySceneViewport>   GetViewport()              const;
-    TSharedPtr<SViewport>               GetViewportWidget()        const;
-    TSharedPtr<SScrollBar>              GetVerticalScrollBar()     const;
-    TSharedPtr<SScrollBar>              GetHorizontalScrollBar()   const;
-    IOdysseySurface*                    GetSurface() const;
 
-    float                       GetViewportVerticalScrollBarRatio() const;
-    float                       GetViewportHorizontalScrollBarRatio() const;
+    /* Get the viewport widget */
+    TSharedPtr<SViewport>               GetViewportWidget()        const;
+
+    /* Returns the tranformation matrix */
+    const FTransform2D& GetTransform() const;
+
+    /* Get the current Zoom value */
+    double          GetZoom() const;
+
+    /* Get the rotation value in Radians */
+    double          GetRotation() const;
+
+    /* Return the Rotation Value to display (in degrees) */
+    int             GetGuiRotationValue() const;
+
+    /* Get the Pan value*/
+    FVector2D       GetPan() const;
+
+    /* Returns the center point of the viewport widget */
+    FVector2D       GetViewportCenter() const;
+
+    /* Get the Fit To Viewport option state */
+    bool            GetFitToViewport() const;
+
+    /* Set the viewport client to use */
+    void            SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
+    
+    /* Add PanValue to current pan, panning in the widget coordinates system **/
+    void            AddPan(FVector2D PanValue);
+    
+    /* Resets the Pan valule to its defalut value */
+    void            ResetPan();
+
+    /* Sets the new zoom value by zooming according to iZoomPosition
+        iZoomPosition is the offset of the point to zoom from the center of the viewport
+    */
+    void            SetZoom(double ZoomValue, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
+
+    /* Set the rotation value in Radians, rotating according to the given PivotPoint 
+        PivotPoint is the offset of the pivot point from the center of the Viewport
+    */
+    void            SetRotation(double RotationValue, const FVector2D& PivotPoint = FVector2D(0.0f, 0.0f));
+
+    /* Set the Fit To Viewport option state */
+    void            SetFitToViewport(bool bFitToViewport);
+
+    /* Toggle the Fit To Viewport option state */
+    void            ToggleFitToViewport();
+
+    /* Returns the dimensions of the texture when displayed in the viewport (this is not a AABB) */
+    void            ComputeTextureDisplayDimensions(uint32& Width, uint32& Height) const;
+
+    /* Converts the given point from WorldCoodinates to LocalCoordinates (texture Coordinates, (0,0) being the center of the texture)*/
+    FVector2D       ToLocal(const FVector2D& iPoint) const;
+
+    /* Converts the given point from LocalCoordinates (texture Coordinates, (0,0) being the center of the texture) to WorldCoodinates */
+    FVector2D       ToWorld(const FVector2D& iPoint) const;
 
 public:
+    // Public Shortcuts Methods
+    
+    /* Zoom in by adding iSliderOffsetToAdd to the zoom slider position */
+    void            ZoomExponential(float iSliderOffsetToAdd, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
+
+    /* Rotate the canvas to the Left, the Pivot point for the Rotation being in the middle of the viewport */
+    void            RotateLeft();
+    
+    /* Rotate the canvas to the Right, the Pivot point for the Rotation being in the middle of the viewport */
+    void            RotateRight();
+
+private:
+    // Private API
+
+    /* Pans to the given PanValue **/
+    void            Pan(FVector2D PanValue);
+
+    /* Zooms at the given zoom value
+        iZoomPosition is the offset of the point to zoom from the center of the viewport
+    */
+    void            Zoom(double ZoomValue, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
+
+    /* Rotate to the given Rotation value
+        PivotPoint is the offset of the pivot point from the center of the Viewport
+    */
+    void            Rotate(double RotationValue, const FVector2D& PivotPoint = FVector2D(0.0f, 0.0f));
+
+    /* Fits the displayed texture to the viewport */
+    void            FitToViewport();
+
+    /* Get the Vertical Scrollbar Widget */
+    TSharedPtr<SScrollBar>              GetVerticalScrollBar()     const;
+
+    /* Get the Horizontal Scrolbar Widget */
+    TSharedPtr<SScrollBar>              GetHorizontalScrollBar()   const;
+
+private:
+    //Private probably unneeded API
+
+    /* Returns the expected translation from the given scrollbars offsets */
+    FVector2D                   GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
+
+    /* Update the scrollbars according to the surface transform */
+    void                        UpdateScrollBars();
+
+private:
     // SWidget overrides
     virtual void    Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 private:
-    // Private Callbacks
+    // Private Slate Callbacks
+
+    /* Return the Zoom Value to display */
     float           GetGuiZoomValue() const;
-    void            HandleHorizontalScrollBarScrolled( float InScrollOffsetFraction );
-    EVisibility     HandleHorizontalScrollBarVisibility( ) const;
-    void            HandleVerticalScrollBarScrolled( float InScrollOffsetFraction );
-    EVisibility     HandleVerticalScrollBarVisibility( ) const;
-    void            HandleZoomMenuEntryClicked( double ZoomValue );
-    void            HandleZoomMenuFitClicked();
-    void            HandleAutoFilterClicked();
+
+    /* Return the zoom menu Fit To Viewport option state */
     bool            IsZoomMenuFitChecked() const;
-    bool            IsAutoFilterChecked() const;
+
+    /* Return the Surface Infos to display */
+    FText           GetSurfaceInfosValue() const;
+
+    /* Handles the horizontal scrollbar scroll event */
+    void            HandleHorizontalScrollBarScrolled( float InScrollOffsetFraction );
+
+    /* Handles the vertical scrollbar scroll event */
+    void            HandleVerticalScrollBarScrolled(float InScrollOffsetFraction);
+
+    /* Handles the zoom menu option (X %) clicked event */
+    void            HandleZoomMenuEntryClicked( double ZoomValue );
+
+    /* Handles the zoom menu Fit To Viewport option clicked event */
+    void            HandleZoomMenuFitClicked();
+
+    /* Handles the zoom slider changed event */
     void            HandleZoomSliderChanged( float NewValue );
-    float           HandleZoomSliderValue( ) const;
+
+    /* Handles Rotate Left button clicked event */
     void            HandleRotationLeft();
+
+    /* Handles Rotate Right button clicked event */
     void            HandleRotationRight();
+
+    /* Handles Viewport Reset button clicked event */
     void            HandleViewportReset();
+
+    /* Handles Rotation Spinbox value changed event */
     void            HandleRotationChanged( int newRotation );
-    int             HandleRotationValue() const;
-    FText           HandleSurfaceInfosTextValue() const;
-
-
-
-public:
-    // Navigation API
-    double          GetZoom() const;
-    void            SetZoom(double ZoomValue);
-    void            ZoomInExponential();
-    void            ZoomOutExponential();
-    bool            GetFitToViewport() const;
-    void            SetFitToViewport( bool bFitToViewport );
-    void            ToggleFitToViewport();
-    void            ToggleAutoFilter();
-    double          GetRotationInDegrees() const;
-    void            SetRotationInDegrees(double RotationValue);
-    FVector2D       GetPan() const;
-    void            SetPan( FVector2D PanValue );
-
-    /* Add Pan in parameter to current pan **/
-    void            AddPan( FVector2D PanValue );
-
-    void            RotateLeft();
-    void            RotateRight();
-    void            CalculateTextureDisplayDimensions(uint32& Width, uint32& Height) const;
 
 private:
     // Private Member Data
@@ -103,16 +192,9 @@ private:
     TSharedPtr<FViewportClient>         mViewportClient;
     TSharedPtr<FOdysseySceneViewport>   mViewport;
     TSharedPtr<SViewport>               mViewportWidget;
-    TSharedPtr<SScrollBar>              mTextureViewportVerticalScrollBar;
-    TSharedPtr<SScrollBar>              mTextureViewportHorizontalScrollBar;
+    TSharedPtr<SScrollBar>              mVerticalScrollBar;
+    TSharedPtr<SScrollBar>              mHorizontalScrollBar;
     TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
-    double                              mZoom;
-    double                              mRotation;
-    FVector2D                           mPan;
+    FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
-    bool                                mIsAutoFilter;
-    uint32                              mPreviewEffectiveTextureWidth;
-    uint32                              mPreviewEffectiveTextureHeight;
-
-    FOnParameterChanged                 mOnParameterChanged;
 };

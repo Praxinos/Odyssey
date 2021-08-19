@@ -110,13 +110,11 @@ public:
 
 private:
     // Private API
-    void        UpdateScrollBars();
-    FVector2D   GetViewportScrollBarPositions() const;
     void        DestroyCheckerboardTexture();
     void        ZoomInInViewport( const FVector2D& iPositionInViewport );
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );
     double      GetZoom() const;
-    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation = true ) const;
+    FVector2D   GetLocalMousePosition( const FVector2D& iMouseInViewport ) const;
     FOdysseyStrokePoint   GetLocalMousePosition( const FOdysseyStrokePoint& iPointInViewport ) const;
     void        DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices );
 

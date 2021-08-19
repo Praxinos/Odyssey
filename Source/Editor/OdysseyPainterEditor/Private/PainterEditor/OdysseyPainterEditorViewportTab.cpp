@@ -117,14 +117,14 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
 void
 FOdysseyPainterEditorViewportTab::OnResetViewportPosition()
 {
-    mViewport->SetRotationInDegrees( 0 );
-    mViewport->SetPan(FVector2D(0, 0));
+    mViewport->SetRotation( 0 );
+    mViewport->ResetPan();
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnResetViewportRotation()
 {
-    mViewport->SetRotationInDegrees( 0 );
+    mViewport->SetRotation( 0 );
 }
 
 void
@@ -142,7 +142,7 @@ FOdysseyPainterEditorViewportTab::OnRotateViewportRight()
 void
 FOdysseyPainterEditorViewportTab::OnSetZoom(double iZoomValue)
 {
-    mViewport->SetZoom(iZoomValue);
+    mViewport->SetZoom(iZoomValue, mViewport->GetViewportCenter());
 }
 
 void
@@ -154,13 +154,13 @@ FOdysseyPainterEditorViewportTab::OnSetZoomFitScreen()
 void
 FOdysseyPainterEditorViewportTab::OnZoomInExponential()
 {
-    mViewport->ZoomInExponential();
+    mViewport->ZoomExponential(0.005);
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 {
-    mViewport->ZoomOutExponential();
+    mViewport->ZoomExponential(-0.005);
 }
 
 #undef LOCTEXT_NAMESPACE

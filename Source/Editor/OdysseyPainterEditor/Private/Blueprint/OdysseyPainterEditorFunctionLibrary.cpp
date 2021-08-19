@@ -65,7 +65,7 @@ UOdysseyPainterEditorFunctionLibrary::GetViewportRotation( UOdysseyBrushAssetBas
 
     //---
 
-    return state->RotationInDegrees();
+    return state->Rotation();
 }
 
 //static

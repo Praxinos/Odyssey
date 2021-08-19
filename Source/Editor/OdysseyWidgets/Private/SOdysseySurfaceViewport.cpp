@@ -32,6 +32,10 @@
 #define ZoomStep 0.025
 #define RotationStep 15
 
+#define ScrollbarThumbRatio 0.1f
+#define ScrollbarSpaceRatio (1.f - ScrollbarThumbRatio)
+
+
 #define LOCTEXT_NAMESPACE "OdysseySurfaceViewport"
 
 /////////////////////////////////////////////////////
@@ -42,7 +46,8 @@ void
 SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
 {
     mSurface = InArgs._Surface;
-    mOnParameterChanged = InArgs._OnParameterChanged;
+
+    mTransform = FTransform2D(1.0f, FVector2D(0.0f, 0.0f));
 
     // create zoom menu
     FMenuBuilder ZoomMenuBuilder(true, NULL);
@@ -70,13 +75,6 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
             FIsActionChecked::CreateSP(this, &SOdysseySurfaceViewport::IsZoomMenuFitChecked)
             );
         ZoomMenuBuilder.AddMenuEntry(LOCTEXT("ZoomFitAction", "Scale To Fit"), LOCTEXT("ZoomFillActionHint", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
-
-        /*FUIAction AutoFilterAction(
-        FExecuteAction::CreateSP(this,&SOdysseySurfaceViewport::HandleAutoFilterClicked),
-        FCanExecuteAction(),
-        FIsActionChecked::CreateSP(this,&SOdysseySurfaceViewport::IsAutoFilterChecked)
-        );
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("AutoFilterAction","Auto filter"),LOCTEXT("AutoFilterActionHint","Select the best filter (Nearest Neighbour or Bilinear) for the texture depending on the zoom level"),FSlateIcon(),AutoFilterAction,NAME_None,EUserInterfaceActionType::ToggleButton);*/
     }
 
 
@@ -117,10 +115,9 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     .AutoWidth()
                     [
                         // vertical scroll bar
-                        SAssignNew(mTextureViewportVerticalScrollBar, SScrollBar)
+                        SAssignNew(mVerticalScrollBar, SScrollBar)
                             .AlwaysShowScrollbar(true)
-                            // .Visibility(EVisibility::Visible)
-                            // .Visibility(this, &SOdysseySurfaceViewport::HandleVerticalScrollBarVisibility)
+                            .Thickness(FVector2D(10.f, 10.f))
                             .OnUserScrolled(this, &SOdysseySurfaceViewport::HandleVerticalScrollBarScrolled)
                     ]
             ]
@@ -129,11 +126,10 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
             .AutoHeight()
             [
                 // horizontal scrollbar
-                SAssignNew(mTextureViewportHorizontalScrollBar, SScrollBar)
+                SAssignNew(mHorizontalScrollBar, SScrollBar)
                     .Orientation( Orient_Horizontal )
                     .AlwaysShowScrollbar(true)
-                    // .Visibility(EVisibility::Visible)
-                    // .Visibility(this, &SOdysseySurfaceViewport::HandleHorizontalScrollBarVisibility)
+                    .Thickness(FVector2D(10.f, 10.f))
                     .OnUserScrolled(this, &SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled)
             ]
 
@@ -155,7 +151,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
             .VAlign(VAlign_Center)
             [
                 SNew(STextBlock)
-                .Text( this, &SOdysseySurfaceViewport::HandleSurfaceInfosTextValue )
+                .Text( this, &SOdysseySurfaceViewport::GetSurfaceInfosValue)
             ]
             + SHorizontalBox::Slot()
             .HAlign(HAlign_Left)
@@ -176,7 +172,7 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
                     .VAlign(VAlign_Center)
                     [
                         SNew(SSpinBox< int >)
-                            .Value(this, &SOdysseySurfaceViewport::HandleRotationValue)
+                            .Value(this, &SOdysseySurfaceViewport::GetGuiRotationValue)
                             .OnValueChanged(this, &SOdysseySurfaceViewport::HandleRotationChanged)
                             .LinearDeltaSensitivity(10)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
                             .Delta(1)
@@ -272,19 +268,11 @@ SOdysseySurfaceViewport::Construct( const FArguments& InArgs )
 
     mZoomSpinBox->SetMaxFractionalDigits(2);
     mZoomSpinBox->SetMinFractionalDigits(2);
-    SetZoom( 1.0 );
-    SetRotationInDegrees( 0 );
-    SetPan( FVector2D( 0.f, 0.f ) );
 }
 
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
-/* void
-SOdysseySurfaceViewport::SetSurface( IOdysseySurface* iValue )
-{
-    Surface = iValue;
-} */
 
 
 TSharedPtr< FOdysseySceneViewport >
@@ -304,14 +292,14 @@ SOdysseySurfaceViewport::GetViewportWidget( ) const
 TSharedPtr< SScrollBar >
 SOdysseySurfaceViewport::GetVerticalScrollBar( ) const
 {
-    return  mTextureViewportVerticalScrollBar;
+    return  mVerticalScrollBar;
 }
 
 
 TSharedPtr< SScrollBar >
 SOdysseySurfaceViewport::GetHorizontalScrollBar( ) const
 {
-    return  mTextureViewportHorizontalScrollBar;
+    return  mHorizontalScrollBar;
 }
 
 
@@ -322,35 +310,43 @@ SOdysseySurfaceViewport::GetSurface() const
 }
 
 
-float SOdysseySurfaceViewport::GetViewportVerticalScrollBarRatio() const
+void
+SOdysseySurfaceViewport::UpdateScrollBars()
 {
-    uint32 Height = 1;
-    uint32 Width = 1;
-    float WidgetHeight = 1.0f;
-    if (GetVerticalScrollBar().IsValid())
-    {
-        CalculateTextureDisplayDimensions(Width, Height);
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
+        return;
 
-        WidgetHeight = GetViewport()->GetSizeXY().Y;
-    }
+    UTexture* texture = surface->Texture();
+    if (!texture)
+        return;
 
-    return WidgetHeight / Height;
-}
+    float width = texture->GetSurfaceWidth();
+    float height = texture->GetSurfaceHeight();
 
+    //Get the BoundingBox
 
-float SOdysseySurfaceViewport::GetViewportHorizontalScrollBarRatio() const
-{
-    uint32 Width = 1;
-    uint32 Height = 1;
-    float WidgetWidth = 1.0f;
-    if (GetHorizontalScrollBar().IsValid())
-    {
-        CalculateTextureDisplayDimensions(Width, Height);
+    //All calculations are done in the Transform Coodinate system
+    //So (0,0) is bottom left
+    TArray<FVector2D> points;
+    points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
 
-        WidgetWidth = GetViewport()->GetSizeXY().X;
-    }
+    FBox2D bbox(points);
+    
+    FVector2D minPos( -bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
+    FVector2D maxPos( mViewport->GetSizeXY().X + bbox.GetSize().X / 2.f, mViewport->GetSizeXY().Y + bbox.GetSize().Y / 2.f);
+    
+    FVector2D dist = maxPos - minPos;
+    FVector2D center = bbox.GetCenter() + GetViewportCenter();
 
-    return WidgetWidth / Width;
+    FVector2D pos = (center - minPos) / dist;
+    pos = pos.ClampAxes(0.f, 1.f) ;
+
+    mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+    mVerticalScrollBar->SetState(pos.Y * ScrollbarSpaceRatio, ScrollbarThumbRatio);
 }
 
 
@@ -369,6 +365,8 @@ void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient
     mViewportClient  = InViewportClient;
     mViewport        = MakeShareable(new FOdysseySceneViewport(mViewportClient.Get(), mViewportWidget));
     mViewportWidget->SetViewportInterface(mViewport.ToSharedRef());
+
+    UpdateScrollBars();
 }
 
 
@@ -376,6 +374,9 @@ void SOdysseySurfaceViewport::SetViewportClient(TSharedPtr<class FViewportClient
 //-------------------------------------------------------------------- SWidget overrides
 void SOdysseySurfaceViewport::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
+    if (mIsFitToViewport) //If someone wants to, find somewhere else than the tick method to fit the viewport continuously
+        FitToViewport();
+
     mViewport->Invalidate();
     mViewport->InvalidateDisplay();
 }
@@ -387,47 +388,67 @@ void SOdysseySurfaceViewport::Tick( const FGeometry& AllottedGeometry, const dou
 float
 SOdysseySurfaceViewport::GetGuiZoomValue() const
 {
-    return mZoom * 100;
+    return GetZoom() * 100;
 }
+
+FVector2D
+SOdysseySurfaceViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetFractionX, float InScrollOffsetFractionY )
+{
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
+        return FVector2D(0.f, 0.f);
+
+    UTexture* texture = surface->Texture();
+    if (!texture)
+        return FVector2D(0.f, 0.f);
+
+    float width = texture->GetSurfaceWidth();
+    float height = texture->GetSurfaceHeight();
+
+    //Get the BoundingBox
+
+    //All calculations are done in the Transform Coodinate system
+    //So (0,0) is bottom left
+    TArray<FVector2D> points;
+    points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+
+    FBox2D bbox(points);
+
+    FVector2D minPos(-bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
+    FVector2D maxPos(mViewport->GetSizeXY().X + bbox.GetSize().X / 2.f, mViewport->GetSizeXY().Y + bbox.GetSize().Y / 2.f);
+
+    FVector2D dist = maxPos - minPos;
+
+    FVector2D pos = FVector2D( 1.f - (InScrollOffsetFractionX / (ScrollbarSpaceRatio)), InScrollOffsetFractionY / (ScrollbarSpaceRatio));
+    pos *= dist;
+    pos += minPos;
+    pos -= GetViewportCenter();
+
+    return pos; 
+}
+
+
 
 void
-SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled( float InScrollOffsetFraction )
+SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled(float InScrollOffsetFraction)
 {
-    float Ratio = GetViewportHorizontalScrollBarRatio();
-    float MaxOffset = (Ratio < 1.0f) ? 1.0f - Ratio : 0.0f;
-    InScrollOffsetFraction = FMath::Clamp(InScrollOffsetFraction, 0.0f, MaxOffset);
-    mTextureViewportHorizontalScrollBar->SetState(InScrollOffsetFraction, Ratio);
-}
-
-
-EVisibility
-SOdysseySurfaceViewport::HandleHorizontalScrollBarVisibility() const
-{
-    if( GetViewportHorizontalScrollBarRatio() < 1.0f )
-        return  EVisibility::Visible;
-
-    return  EVisibility::Collapsed;
+    FVector2D translation = GetTranslationFromSlidersOffsets(InScrollOffsetFraction, mVerticalScrollBar->DistanceFromTop());
+    mTransform.SetTranslation(FVector2D(translation.X, mTransform.GetTranslation().Y));
+    mHorizontalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
+    SetFitToViewport(false);
 }
 
 
 void
 SOdysseySurfaceViewport::HandleVerticalScrollBarScrolled( float InScrollOffsetFraction )
 {
-    float Ratio = GetViewportVerticalScrollBarRatio();
-    float MaxOffset = (Ratio < 1.0f) ? 1.0f - Ratio : 0.0f;
-    InScrollOffsetFraction = FMath::Clamp(InScrollOffsetFraction, 0.0f, MaxOffset);
-
-    mTextureViewportVerticalScrollBar->SetState(InScrollOffsetFraction, Ratio);
-}
-
-
-EVisibility
-SOdysseySurfaceViewport::HandleVerticalScrollBarVisibility()  const
-{
-    if (GetViewportVerticalScrollBarRatio() < 1.0f)
-        return  EVisibility::Visible;
-
-    return  EVisibility::Collapsed;
+    FVector2D translation = GetTranslationFromSlidersOffsets(mHorizontalScrollBar->DistanceFromTop(), InScrollOffsetFraction);
+    mTransform.SetTranslation(FVector2D(mTransform.GetTranslation().X, translation.Y));
+    mVerticalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
+    SetFitToViewport(false);
 }
 
 
@@ -445,12 +466,6 @@ SOdysseySurfaceViewport::HandleZoomMenuFitClicked()
 }
 
 void
-SOdysseySurfaceViewport::HandleAutoFilterClicked()
-{
-    ToggleAutoFilter();
-}
-
-void
 SOdysseySurfaceViewport::HandleRotationLeft()
 {
     RotateLeft();
@@ -465,8 +480,11 @@ SOdysseySurfaceViewport::HandleRotationRight()
 void
 SOdysseySurfaceViewport::HandleViewportReset()
 {
-    SetRotationInDegrees( 0 );
-    SetPan(FVector2D(0, 0));
+    Pan(FVector2D(0.f, 0.f));
+    Rotate( 0 );
+    Zoom(1.f);
+    SetFitToViewport(false);
+    UpdateScrollBars();
 }
 
 
@@ -476,26 +494,23 @@ SOdysseySurfaceViewport::IsZoomMenuFitChecked() const
     return GetFitToViewport();
 }
 
-bool
-SOdysseySurfaceViewport::IsAutoFilterChecked() const
-{
-    return mIsAutoFilter;
-}
-
 void
 SOdysseySurfaceViewport::HandleRotationChanged( int newRotation )
 {
-    SetRotationInDegrees( newRotation );
+    SetRotation( -FMath::DegreesToRadians(newRotation) );
 }
 
 int
-SOdysseySurfaceViewport::HandleRotationValue( ) const
+SOdysseySurfaceViewport::GetGuiRotationValue() const
 {
-    return ( fmod(GetRotationInDegrees(), 360.0) );
+    float angle = -FMath::RadiansToDegrees(GetRotation());
+    if (angle < 0)
+        angle += 360.0;
+    return FMath::RoundHalfFromZero(angle);
 }
 
 FText
-SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
+SOdysseySurfaceViewport::GetSurfaceInfosValue( ) const
 {
     IOdysseySurface* surface = GetSurface();
     if (!surface)
@@ -536,14 +551,7 @@ SOdysseySurfaceViewport::HandleSurfaceInfosTextValue( ) const
 void
 SOdysseySurfaceViewport::HandleZoomSliderChanged( float NewValue )
 {
-    SetZoom( NewValue / 100.f );
-}
-
-
-float
-SOdysseySurfaceViewport::HandleZoomSliderValue( ) const
-{
-    return  ( GetZoom() / MaxZoom );
+    SetZoom( NewValue / 100.f);
 }
 
 
@@ -552,57 +560,59 @@ SOdysseySurfaceViewport::HandleZoomSliderValue( ) const
 double
 SOdysseySurfaceViewport::GetZoom() const
 {
-    return mZoom;
+    return mTransform.GetMatrix().GetScale().GetVector()[0];
 }
 
 
 void
-SOdysseySurfaceViewport::SetZoom( double ZoomValue )
+SOdysseySurfaceViewport::SetZoom( double ZoomValue, const FVector2D& iZoomPosition)
 {
-    mZoom = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
+    Zoom(ZoomValue, iZoomPosition);
+    SetFitToViewport(false);
+    UpdateScrollBars();
+}
 
-    SetFitToViewport( false );
+void
+SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
+{
+    FVector2D inverse(1.f, -1.f);
+    FVector2D translation = iZoomPosition * inverse;
+
+    mTransform = mTransform.Concatenate(FTransform2D(-translation));
+    mTransform = mTransform.Concatenate(FTransform2D(ZoomValue / GetZoom()));
+    mTransform = mTransform.Concatenate(FTransform2D(translation));
 
     IOdysseySurface* surface = GetSurface();
     if (surface)
     {
-        UTexture* texture       = surface->Texture();
+        UTexture* texture = surface->Texture();
         if (texture)
         {
-            if( mZoom >= 1.0 && texture->Filter != TextureFilter::TF_Nearest )
+            if (GetZoom() >= 1.0 && texture->Filter != TextureFilter::TF_Nearest)
             {
                 FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Nearest);
             }
-            else if( mZoom < 1.0 && texture->Filter != TextureFilter::TF_Bilinear )
+            else if (GetZoom() < 1.0 && texture->Filter != TextureFilter::TF_Bilinear)
             {
                 FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Bilinear);
             }
         }
     }
-
-    mOnParameterChanged.ExecuteIfBound();
 }
-
 
 void
-SOdysseySurfaceViewport::ZoomInExponential()
+SOdysseySurfaceViewport::ZoomExponential(float iSliderOffsetToAdd, const FVector2D& iZoomPosition)
 {
-    double sliderPos = FOdysseyMathUtils::ExponentialFunctionInvert( MinZoom, MaxZoom, NeutralZoom, mZoom );
-    sliderPos += 0.005;
+    double sliderPos = FOdysseyMathUtils::ExponentialFunctionInvert( MinZoom, MaxZoom, NeutralZoom, GetZoom() );
+    sliderPos += iSliderOffsetToAdd;
     double newZoom = FOdysseyMathUtils::ExponentialFunction( MinZoom, MaxZoom, NeutralZoom, sliderPos );
-    SetZoom( FMath::Clamp( newZoom, MinZoom, MaxZoom) );
+    SetZoom( FMath::Clamp( newZoom, MinZoom, MaxZoom), iZoomPosition);
 }
 
-
-void
-SOdysseySurfaceViewport::ZoomOutExponential()
+const FTransform2D& SOdysseySurfaceViewport::GetTransform() const
 {
-    double sliderPos = FOdysseyMathUtils::ExponentialFunctionInvert( MinZoom, MaxZoom, NeutralZoom, mZoom );
-    sliderPos -= 0.005;
-    double newZoom = FOdysseyMathUtils::ExponentialFunction( MinZoom, MaxZoom, NeutralZoom, sliderPos );
-    SetZoom( FMath::Clamp( newZoom, MinZoom, MaxZoom) );
+    return mTransform;
 }
-
 
 bool
 SOdysseySurfaceViewport::GetFitToViewport() const
@@ -614,150 +624,173 @@ SOdysseySurfaceViewport::GetFitToViewport() const
 void
 SOdysseySurfaceViewport::SetFitToViewport( bool bFitToViewport )
 {
+    if (!bFitToViewport)
+    {
+        mIsFitToViewport = bFitToViewport;
+        return;
+    }
+
     mIsFitToViewport = bFitToViewport;
+}
+
+void
+SOdysseySurfaceViewport::FitToViewport()
+{
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
+        return;
+
+    UTexture* texture = surface->Texture();
+    if (!texture)
+        return;
+
+    float width = texture->GetSurfaceWidth();
+    float height = texture->GetSurfaceHeight();
+
+    //Get the BoundingBox
+
+    //All calculations are done in the Transform Coodinate system
+    //So (0,0) is bottom left
+    TArray<FVector2D> points;
+    points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
+    points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+
+    FBox2D bbox(points);
+
+    float viewportRatio = mViewport->GetSizeXY().X / mViewport->GetSizeXY().Y;
+    float textureRatio = bbox.GetSize().X / bbox.GetSize().Y;
+
+    float zoom = GetZoom();
+    if (textureRatio > viewportRatio)
+    {
+        //width
+        zoom = GetZoom() * (mViewport->GetSizeXY().X / bbox.GetSize().X);
+    }
+    else
+    {
+        //height
+        zoom = GetZoom() * (mViewport->GetSizeXY().Y / bbox.GetSize().Y);
+    }
+
+    Zoom(zoom);
+    Pan(FVector2D(0.0f, 0.0f));
+    UpdateScrollBars();
 }
 
 
 void
 SOdysseySurfaceViewport::ToggleFitToViewport()
 {
-    bool bFitToViewport = GetFitToViewport();
-    SetFitToViewport(!bFitToViewport);
-}
-
-void
-SOdysseySurfaceViewport::ToggleAutoFilter()
-{
-    mIsAutoFilter = !mIsAutoFilter;
+    SetFitToViewport(!mIsFitToViewport);
 }
 
 
-double SOdysseySurfaceViewport::GetRotationInDegrees() const
+double SOdysseySurfaceViewport::GetRotation() const
 {
-    return mRotation;
+    //PATCH: At first I wanted to use t.GetMatrix().GetRotationAngle(), but it uses Atan instead of Atan2 leading to wrong angles
+    float A, B, C, D;
+    mTransform.GetMatrix().GetMatrix(A, B, C, D);
+    return FMath::Atan2(B, D);
+    //return mTransform.GetMatrix().GetRotationAngle();
 }
 
-void SOdysseySurfaceViewport::SetRotationInDegrees(double RotationValue)
+void SOdysseySurfaceViewport::SetRotation(double RotationValue, const FVector2D& iPivotPoint)
 {
-    mRotation = RotationValue;
+    Rotate(RotationValue, iPivotPoint);
+    UpdateScrollBars();
+    //SetFitToViewport(false);
+}
 
-    mOnParameterChanged.ExecuteIfBound();
+void SOdysseySurfaceViewport::Rotate(double RotationValue, const FVector2D& iPivotPoint)
+{
+    mTransform = mTransform.Concatenate(FTransform2D(FVector2D(FVector2D(iPivotPoint.X, -iPivotPoint.Y))));
+    mTransform = mTransform.Concatenate(FTransform2D(FQuat2D(RotationValue - GetRotation())));
+    mTransform = mTransform.Concatenate(FTransform2D(FVector2D(-FVector2D(iPivotPoint.X, -iPivotPoint.Y))));
 }
 
 FVector2D SOdysseySurfaceViewport::GetPan() const
 {
-    return mPan;
+    //ordinate inversion because the computer coordinate system is inverted
+    return FVector2D(mTransform.GetTranslation().X, -mTransform.GetTranslation().Y);
 }
 
-void SOdysseySurfaceViewport::SetPan( FVector2D PanValue )
+FVector2D SOdysseySurfaceViewport::GetViewportCenter() const
 {
-    mPan = PanValue;
-
-    mOnParameterChanged.ExecuteIfBound();
+    return FVector2D(mViewport->GetSizeXY().X / 2.0f, mViewport->GetSizeXY().Y / 2.0f);
 }
 
-void SOdysseySurfaceViewport::AddPan( FVector2D PanValue )
+void SOdysseySurfaceViewport::AddPan( FVector2D iPanValue )
 {
-    mPan+=PanValue;
+    //ordinate inversion because the computer coordinate system is inverted
+    FVector2D panValue = mTransform.GetTranslation() + FVector2D(iPanValue.X, -iPanValue.Y);
+    Pan(panValue);
+    UpdateScrollBars();
+    SetFitToViewport(false);
+}
 
-    mOnParameterChanged.ExecuteIfBound();
+void
+SOdysseySurfaceViewport::SOdysseySurfaceViewport::Pan(FVector2D iPanValue)
+{
+    mTransform.SetTranslation(iPanValue);
+}
+
+void SOdysseySurfaceViewport::ResetPan()
+{
+    mTransform.SetTranslation(FVector2D(0.0f, 0.0f));
+    UpdateScrollBars();
+    SetFitToViewport(false);
 }
 
 
 void SOdysseySurfaceViewport::RotateLeft()
 {
-    mRotation -= RotationStep;
-
-    mOnParameterChanged.ExecuteIfBound();
+    SetRotation(GetRotation() + FMath::DegreesToRadians(RotationStep));
 }
 
 void SOdysseySurfaceViewport::RotateRight()
 {
-    mRotation += RotationStep;
-
-    mOnParameterChanged.ExecuteIfBound();
+    SetRotation(GetRotation() - FMath::DegreesToRadians(RotationStep));
 }
 
-void SOdysseySurfaceViewport::CalculateTextureDisplayDimensions( uint32& Width, uint32& Height ) const
+void SOdysseySurfaceViewport::ComputeTextureDisplayDimensions( uint32& Width, uint32& Height ) const
 {
+    Width = 0;
+    Height = 0;
+
     IOdysseySurface* surface = GetSurface();
     if (!surface)
-    {
-        Width = 0;
-        Height = 0;
         return;
-    }
 
     UTexture* texture = surface->Texture();
     if (!texture)
-    {
-        Width = 0;
-        Height = 0;
         return;
-    }
-
-    uint32 ImportedWidth = texture->GetSurfaceWidth(); //Get the displayed size of the texture instead of its Source size
-    uint32 ImportedHeight = texture->GetSurfaceHeight();
-
-    Width = ImportedWidth;
-    Height = ImportedHeight;
-
-
-    // catch if the Width and Height are still zero for some reason
-    if ((Width == 0) || (Height == 0))
-    {
-        Width = 0;
-        Height = 0;
-
-        return;
-    }
-
-    // See if we need to uniformly scale it to fit in viewport
-    // Cap the size to effective dimensions
-    uint32 ViewportW = GetViewport()->GetSizeXY().X;
-    uint32 ViewportH = GetViewport()->GetSizeXY().Y;
-    uint32 MaxWidth;
-    uint32 MaxHeight;
-
-    const bool bFitToViewport = GetFitToViewport();
-    if (bFitToViewport)
-    {
-        // Subtract off the viewport space devoted to padding (2 * PreviewPadding)
-        // so that the texture is padded on all sides
-        MaxWidth = ViewportW;
-        MaxHeight = ViewportH;
-
-
-        // First, scale up based on the size of the viewport
-        if (MaxWidth > MaxHeight)
-        {
-            Height = Height * MaxWidth / Width;
-            Width = MaxWidth;
-        }
-        else
-        {
-            Width = Width * MaxHeight / Height;
-            Height = MaxHeight;
-        }
-
-        // then, scale again if our width and height is impacted by the scaling
-        if (Width > MaxWidth)
-        {
-            Height = Height * MaxWidth / Width;
-            Width = MaxWidth;
-        }
-        if (Height > MaxHeight)
-        {
-            Width = Width * MaxHeight / Height;
-            Height = MaxHeight;
-        }
-    }
-    else
-    {
-        Width = texture->GetSurfaceWidth() * GetZoom();
-        Height = texture->GetSurfaceHeight() * GetZoom();
-    }
+    
+    Width = texture->GetSurfaceWidth() * GetZoom();
+    Height = texture->GetSurfaceHeight() * GetZoom();
 }
 
+FVector2D
+SOdysseySurfaceViewport::ToLocal(const FVector2D& iPoint) const
+{
+    FVector2D inverse(1.f, -1.f);
+    FVector2D center = GetViewportCenter();
+    FVector2D pos = (iPoint - center) * inverse;
+    FVector2D tpos = mTransform.Inverse().TransformPoint(pos) * inverse;
+
+    return tpos;
+}
+
+FVector2D
+SOdysseySurfaceViewport::ToWorld(const FVector2D& iPoint) const
+{
+    FVector2D inverse(1.f, -1.f);
+    FVector2D center = GetViewportCenter();
+    FVector2D pos = iPoint * inverse;
+    FVector2D tpos = (mTransform.TransformPoint(pos) * inverse) + center;
+
+    return tpos;
+}
 
 #undef LOCTEXT_NAMESPACE

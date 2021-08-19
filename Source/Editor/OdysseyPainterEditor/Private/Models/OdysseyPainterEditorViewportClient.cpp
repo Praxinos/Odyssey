@@ -106,19 +106,16 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if (!texture)
         return;
 
-    double rotation         = mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees();
-    FVector2D pan           = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
-    FVector2D ratio         = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(),
-                                         mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
-    FVector2D viewportSize  = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X,
-                                         mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
-    FVector2D scrollBarPos  = GetViewportScrollBarPositions();
-    int32 yOffset           = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) + pan.Y: pan.Y;
-    int32 yPos              = yOffset - scrollBarPos.Y;
-    int32 xOffset           = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) + pan.X: pan.X;
-    int32 xPos              = xOffset - scrollBarPos.X;
+    uint32 width = 0;
+    uint32 height = 0;
+    mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions( width, height );
 
-    UpdateScrollBars();
+    double rotation         = -FMath::RadiansToDegrees(mOdysseyPainterEditorViewportPtr.Pin()->GetRotation());
+    FVector2D pivotPoint = FVector2D(0.5f, 0.5f);
+
+    //if SViewport->GetPan() == 0,0, it means the center of the texture should be centered in the viewport
+    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    pan += mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() - (FVector2D(width, height) / 2.0f);
 
     // Fully stream in the texture before drawing it.
     if(texture)
@@ -128,8 +125,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     // Figure out the size we need
-    uint32 width, height;
-    mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
     const float mipLevel = 0; //should be -1, but as we are editing only the first mipmap, then the other mipmaps are not updated and so we cannot use -1 to have automatic mipmap selection.
 
     TRefCountPtr<FBatchedElementParameters> batchedElementParameters;
@@ -149,14 +144,14 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
     FVector2D viewport_center( iViewport->GetSizeXY().X / 2, iViewport->GetSizeXY().Y / 2 );
-    FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
-    mPivotPointRatio = FVector2D( position_in_texture.X / texture->GetSurfaceWidth(), position_in_texture.Y / texture->GetSurfaceHeight());
+    //FVector2D position_in_texture = GetLocalMousePosition( viewport_center, false );
+    //mPivotPointRatio = FVector2D( position_in_texture.X / texture->GetSurfaceWidth(), position_in_texture.Y / texture->GetSurfaceHeight());
 
     // Draw background Checker
     {
-        FCanvasTileItem tileItem( FVector2D( xPos, yPos ), mCheckerboardTexture->Resource, FVector2D( width, height ), FVector2D( 0.f, 0.f ), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
+        FCanvasTileItem tileItem(pan, mCheckerboardTexture->Resource, FVector2D( width, height ), FVector2D( 0.f, 0.f ), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
         tileItem.BlendMode = SE_BLEND_Opaque;
-        tileItem.PivotPoint.Set( mPivotPointRatio.X, mPivotPointRatio.Y );
+        tileItem.PivotPoint = pivotPoint;
         tileItem.Rotation.Add( 0, rotation, 0 );
         ioCanvas->DrawItem( tileItem );
     }
@@ -164,7 +159,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw Drawing Surface
     if( texture->Resource != nullptr )
     {
-        FCanvasTileItem tileItem( FVector2D( xPos, yPos ), texture->Resource, FVector2D( width, height ), FLinearColor::White );
+        FCanvasTileItem tileItem(pan, texture->Resource, FVector2D( width, height ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
@@ -172,7 +167,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         result += ( 1 << 2 );
         result += ( 1 << 3 );
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
-        tileItem.PivotPoint.Set( mPivotPointRatio.X, mPivotPointRatio.Y );
+        tileItem.PivotPoint = pivotPoint;
         tileItem.Rotation.Add( 0, rotation, 0 );
         ioCanvas->DrawItem( tileItem );
 
@@ -221,8 +216,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
             //mMeshSelector->GetCurrentMesh()->SourceModels[currentLOD].LoadRawMesh(RawMesh);
             mMeshSelector->GetCurrentMesh()->GetSourceModel( currentLOD ).LoadRawMesh( rawMesh );
 
-            FIndexArrayView indexBuffer = mMeshSelector->GetCurrentMesh()->RenderData.Get()->LODResources[currentLOD].IndexBuffer.GetArrayView();
-            DrawUVsOntoViewport( iViewport, ioCanvas, currentUV, mMeshSelector->GetCurrentMesh()->RenderData.Get()->LODResources[0].VertexBuffers.StaticMeshVertexBuffer, indexBuffer );
+            FIndexArrayView indexBuffer = mMeshSelector->GetCurrentMesh()->GetRenderData()->LODResources[currentLOD].IndexBuffer.GetArrayView();
+            DrawUVsOntoViewport( iViewport, ioCanvas, currentUV, mMeshSelector->GetCurrentMesh()->GetRenderData()->LODResources[0].VertexBuffers.StaticMeshVertexBuffer, indexBuffer );
         }
     }
 }
@@ -234,11 +229,12 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 
     if( iEvent == EInputEvent::IE_Pressed )
     {
-        mKeysPressed.Add( iKey );
+        if (!mKeysPressed.Contains(iKey))
+            mKeysPressed.Add( iKey );
     }
     else if( iEvent == EInputEvent::IE_Released )
     {
-        mKeysPressed.Remove( iKey );
+        mKeysPressed.Remove(iKey);
     }
 
     mLastKey = iKey;
@@ -471,7 +467,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
             FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
             FVector2D deltaCenter = position_in_viewport - center;
-            mRotationReference = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+            mRotationReference = FMath::Atan2( deltaCenter.Y, deltaCenter.X );
 
             return true;
         }
@@ -611,14 +607,8 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
     else if( mCurrentToolState == eState::kPanning )
     {
         FVector2D deltaReference( iPointInViewport.x - mPanReference.X, iPointInViewport.y - mPanReference.Y );
-        FVector2D delta_in_viewport = FVector2D(0,0);
 
-        float rotation = FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
-
-        delta_in_viewport.X = deltaReference.X * FMath::Cos( rotation ) + deltaReference.Y * FMath::Sin( rotation );
-        delta_in_viewport.Y = -deltaReference.X * FMath::Sin( rotation ) + deltaReference.Y * FMath::Cos( rotation );
-
-        mOdysseyPainterEditorViewportPtr.Pin()->AddPan( delta_in_viewport );
+        mOdysseyPainterEditorViewportPtr.Pin()->AddPan( deltaReference );
         mPanReference = FVector2D( iPointInViewport.x, iPointInViewport.y );
     }
     else if( mCurrentToolState == eState::kRotating )
@@ -628,10 +618,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
         FVector2D center = FVector2D( size.X / 2, size.Y / 2 );
         FVector2D position_in_viewport( iPointInViewport.x, iPointInViewport.y );
         FVector2D deltaCenter = position_in_viewport - center;
-        float newRotation = FMath::Atan2( -deltaCenter.Y, deltaCenter.X );
+        float newRotation = FMath::Atan2( deltaCenter.Y, deltaCenter.X );
         float deltaRotation = mRotationReference - newRotation;
 
-        mOdysseyPainterEditorViewportPtr.Pin()->SetRotationInDegrees( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() + FMath::RadiansToDegrees( deltaRotation ) );
+        mOdysseyPainterEditorViewportPtr.Pin()->SetRotation( mOdysseyPainterEditorViewportPtr.Pin()->GetRotation() + deltaRotation );
 
         mRotationReference = newRotation;
     }
@@ -755,7 +745,7 @@ FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
 {
     uint32 height = 1;
     uint32 width = 1;
-    mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
+    mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions( width, height );
     return FText::Format( NSLOCTEXT( "OdysseyPainterEditor",
                                       "DisplayedResolution",
                                       "Displayed: {0}x{1}" ),
@@ -765,87 +755,6 @@ FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
 
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
-void
-FOdysseyPainterEditorViewportClient::UpdateScrollBars()
-{
-    TSharedPtr<SOdysseySurfaceViewport> viewport = mOdysseyPainterEditorViewportPtr.Pin();
-
-    if( !viewport.IsValid() || !viewport->GetVerticalScrollBar().IsValid() || !viewport->GetHorizontalScrollBar().IsValid() )
-        return;
-
-    float vRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
-    float hRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float vDistFromBottom = viewport->GetVerticalScrollBar()->DistanceFromBottom();
-    float hDistFromBottom = viewport->GetHorizontalScrollBar()->DistanceFromBottom();
-
-    if( vRatio < 1.0f )
-    {
-        if( vDistFromBottom < 1.0f )
-        {
-            viewport->GetVerticalScrollBar()->SetState( FMath::Clamp( 1.0f - vRatio - vDistFromBottom, 0.0f, 1.0f ), vRatio );
-        }
-        else
-        {
-            viewport->GetVerticalScrollBar()->SetState( 0.0f, vRatio );
-        }
-    }
-    else
-    {
-        viewport->GetVerticalScrollBar()->SetState(0.0f, 1.0f);
-    }
-
-    if( hRatio < 1.0f )
-    {
-        if( hDistFromBottom < 1.0f )
-        {
-            viewport->GetHorizontalScrollBar()->SetState( FMath::Clamp( 1.0f - hRatio - hDistFromBottom, 0.0f, 1.0f ), hRatio );
-        }
-        else
-        {
-            viewport->GetHorizontalScrollBar()->SetState( 0.0f, hRatio );
-        }
-    }
-    else
-    {
-        viewport->GetHorizontalScrollBar()->SetState(0.0f, 1.0f);
-    }
-}
-
-FVector2D
-FOdysseyPainterEditorViewportClient::GetViewportScrollBarPositions() const
-{
-    FVector2D positions = FVector2D::ZeroVector;
-    if( mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar().IsValid() && mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar().IsValid() )
-    {
-        uint32 width, height;
-        float vRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
-        float hRatio = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-        float vDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
-        float hDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
-
-        mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
-
-        if( ( mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->GetVisibility() == EVisibility::Visible ) && vDistFromBottom < 1.0f )
-        {
-            positions.Y = FMath::Clamp( 1.0f - vRatio - vDistFromBottom, 0.0f, 1.0f ) * height;
-        }
-        else
-        {
-            positions.Y = 0.0f;
-        }
-
-        if( ( mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->GetVisibility() == EVisibility::Visible ) && hDistFromBottom < 1.0f )
-        {
-            positions.X = FMath::Clamp( 1.0f - hRatio - hDistFromBottom, 0.0f, 1.0f ) * width;
-        }
-        else
-        {
-            positions.X = 0.0f;
-        }
-    }
-
-    return positions;
-}
 
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
@@ -864,130 +773,51 @@ FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 void
 FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositionInViewport )
 {
-    //If we don't have a surface, then we don't interact with anything
+    //If we don't have a surface, then we don't have a local mouse position
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
     if (!surface)
         return;
 
-    UTexture* texture       = surface->Texture();
+    UTexture* texture = surface->Texture();
     if (!texture)
         return;
 
-    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    int textureWidth = texture->GetSurfaceWidth();
+    int textureHeight = texture->GetSurfaceHeight();
 
-    // Diff between before and after the zoom
-    float oldHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float oldVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    FVector2D pos = iPositionInViewport - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter();
 
-    mOdysseyPainterEditorViewportPtr.Pin()->ZoomInExponential();
-
-    float newHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float newVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
-
-
-    float hScrollSizeDiff = newHScrollSize - oldHScrollSize;
-    float vScrollSizeDiff = newVScrollSize - oldVScrollSize;
-    //-------
-
-    //Useful variables to determine the new position of the scrollbars
-    float vDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
-    float hDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
-
-    float xCursorOnViewport = iPositionInViewport.X;
-    float yCursorOnViewport = iPositionInViewport.Y;
-
-    FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
-
-    float ratioX = ( xCursorOnViewport - pan.X ) / FMath::Max( float( size.X ), 1.f );
-    float ratioY = ( yCursorOnViewport - pan.Y ) / FMath::Max( float( size.Y ), 1.f );
-    //------
-
-    //Set the scrollbars
-    mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->SetState( FMath::Clamp( 1 - ( hDistFromBottom + newHScrollSize - hScrollSizeDiff * ( 1 - ratioX ) ), 0.0f, 1.0f - newHScrollSize ), newHScrollSize );
-    mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->SetState( FMath::Clamp( 1 - ( vDistFromBottom + newVScrollSize - vScrollSizeDiff * ( 1 - ratioY ) ), 0.0f, 1.0f - newVScrollSize ), newVScrollSize );
+    mOdysseyPainterEditorViewportPtr.Pin()->ZoomExponential(0.005, pos);
 }
 
 void
 FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositionInViewport )
 {
-    //If we don't have a surface, then we don't interact with anything
+    //If we don't have a surface, then we don't have a local mouse position
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
     if (!surface)
         return;
 
-    UTexture* texture       = surface->Texture();
+    UTexture* texture = surface->Texture();
     if (!texture)
         return;
 
-    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
+    int textureWidth = texture->GetSurfaceWidth();
+    int textureHeight = texture->GetSurfaceHeight();
 
-    // Diff between before and after the zoom
-    float oldHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float oldVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
+    FVector2D pos = iPositionInViewport - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter();
 
-    mOdysseyPainterEditorViewportPtr.Pin()->ZoomOutExponential();
-
-    float newHScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio();
-    float newVScrollSize = mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio();
-
-
-    float hScrollSizeDiff = newHScrollSize - oldHScrollSize;
-    float vScrollSizeDiff = newVScrollSize - oldVScrollSize;
-    //-------
-
-    //Useful variables to determine the new position of the scrollbars
-    float vDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->DistanceFromBottom();
-    float hDistFromBottom = mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->DistanceFromBottom();
-
-    float xCursorOnViewport = iPositionInViewport.X;
-    float yCursorOnViewport = iPositionInViewport.Y;
-
-    FIntPoint size = mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY();
-
-    float ratioX = ( xCursorOnViewport - pan.X ) / FMath::Max( float( size.X ), 1.f );
-    float ratioY = ( yCursorOnViewport - pan.Y ) / FMath::Max( float( size.Y ), 1.f );
-    //------
-
-    //Set the scrollbars
-    mOdysseyPainterEditorViewportPtr.Pin()->GetHorizontalScrollBar()->SetState( FMath::Clamp( 1 - ( hDistFromBottom + newHScrollSize - hScrollSizeDiff * ( 1 - ratioX ) ), 0.0f, 1.0f - newHScrollSize ), newHScrollSize );
-    mOdysseyPainterEditorViewportPtr.Pin()->GetVerticalScrollBar()->SetState( FMath::Clamp( 1 - ( vDistFromBottom + newVScrollSize - vScrollSizeDiff * ( 1 - ratioY ) ), 0.0f, 1.0f - newVScrollSize ), newVScrollSize );
+    mOdysseyPainterEditorViewportPtr.Pin()->ZoomExponential(-0.005, pos);
 }
 
 double
 FOdysseyPainterEditorViewportClient::GetZoom() const
 {
-    //If we don't have a surface, then we return a default 100% zoom
-    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
-    if (!surface)
-        return 1.0;
-
-    UTexture* texture       = surface->Texture();
-    if (!texture)
-        return 1.0;
-
-    //mOdysseyPainterEditor.Pin()->PaintEngine()->Invalidate();
-
-    double zoom = 1.0;
-    bool fitToViewport = mOdysseyPainterEditorViewportPtr.Pin()->GetFitToViewport();
-
-    if( fitToViewport )
-    {
-        //The member zoom is overriden by the fit to viewport. The drawing function uses another way to calculate the effective zoom, and we do the same here
-        uint32 width, height;
-        mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
-        zoom = static_cast<double>( width ) / static_cast<double>( texture->GetSurfaceWidth() );
-    }
-    else
-    {
-        //The member zoom is used to draw the viewport, we can use it
-        zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
-    }
-
-    return zoom;
+    return mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
 }
 
 FVector2D
-FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport, const bool iWithRotation ) const
+FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport ) const
 {
     //If we don't have a surface, then we don't have a local mouse position
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
@@ -998,42 +828,13 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMo
     if (!texture)
         return FVector2D(0,0);
 
-    double zoom = GetZoom();
-    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
-    FVector2D textureViewportPosition = GetViewportScrollBarPositions();
-    FVector2D ratio = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(), mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
-    FVector2D viewportSize = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
-    int32 yOffset = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) : 0;
-    int32 xOffset = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) : 0;
 
     int textureWidth = texture->GetSurfaceWidth();
     int textureHeight = texture->GetSurfaceHeight();
 
-    FVector2D texturePanPivot = FVector2D( mPivotPointRatio.X * textureWidth, mPivotPointRatio.Y * textureHeight ) - 0.5 * FVector2D( textureWidth, textureHeight );
+    FVector2D tpos = mOdysseyPainterEditorViewportPtr.Pin()->ToLocal(iMouseInViewport);
 
-    FVector2D position = FVector2D( ( iMouseInViewport.X + textureViewportPosition.X - xOffset - pan.X ) / zoom, ( iMouseInViewport.Y + textureViewportPosition.Y - yOffset - pan.Y ) / zoom );
-
-    if( iWithRotation )
-    {
-        if( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
-        {
-            float rotation = FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
-            FVector2D center = FVector2D(textureWidth, textureHeight) / 2;
-            position -= center;
-
-            FVector2D pivotPan = texturePanPivot;
-            pivotPan.X = texturePanPivot.X * FMath::Cos( rotation ) + texturePanPivot.Y * FMath::Sin( rotation ) - texturePanPivot.X;
-            pivotPan.Y = -texturePanPivot.X * FMath::Sin( rotation ) + texturePanPivot.Y * FMath::Cos( rotation ) - texturePanPivot.Y;
-
-            float x = position.X * FMath::Cos( rotation ) + position.Y * FMath::Sin( rotation ) + center.X;
-            float y = -position.X * FMath::Sin( rotation ) + position.Y * FMath::Cos( rotation ) + center.Y;
-
-            position.X = x - pivotPan.X;
-            position.Y = y - pivotPan.Y;
-        }
-    }
-
-    return position;
+    return tpos + FVector2D(textureWidth / 2.f, textureHeight / 2.f);
 }
 
 FOdysseyStrokePoint
@@ -1085,168 +886,105 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyStroke
 void 
 FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices )
 {
-    //If we don't have a surface, we can't draw UVs
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
     if (!surface)
         return;
 
-    UTexture* texture       = surface->Texture();
+    UTexture* texture = surface->Texture();
     if (!texture)
         return;
 
-    FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
-
-    uint32 width, height;
-    mOdysseyPainterEditorViewportPtr.Pin()->CalculateTextureDisplayDimensions( width, height );
-    float rotation = -FMath::DegreesToRadians( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() );
-
-    double zoom = GetZoom();
-    FVector2D ratio = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewportHorizontalScrollBarRatio(), mOdysseyPainterEditorViewportPtr.Pin()->GetViewportVerticalScrollBarRatio() );
-    FVector2D viewportSize = FVector2D( mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().X, mOdysseyPainterEditorViewportPtr.Pin()->GetViewport()->GetSizeXY().Y );
-    int32 YOffset = ( ratio.Y > 1.0f ) ? ( ( viewportSize.Y - ( viewportSize.Y / ratio.Y ) ) * 0.5f ) : 0;
-    int32 XOffset = ( ratio.X > 1.0f ) ? ( ( viewportSize.X - ( viewportSize.X / ratio.X ) ) * 0.5f ) : 0;
-
-    FVector2D scrollBarPos = GetViewportScrollBarPositions();
-    int32 yPos = FMath::Min( int( YOffset - scrollBarPos.Y ), 0 );
-    int32 xPos = FMath::Min( int( XOffset - scrollBarPos.X ), 0 );
-
-    if( ( (uint32)iUVChannel < iVertexBuffer.GetNumTexCoords() ) )
+    if (((uint32)iUVChannel < iVertexBuffer.GetNumTexCoords()))
     {
-        //calculate scaling
-        const int32 minY = YOffset;
-        const int32 minX = XOffset;
-        
-        FVector2D pivotPan;
-        
-        pivotPan.X = pan.X * FMath::Cos( rotation ) + pan.Y * FMath::Sin( rotation );
-        pivotPan.Y = -pan.X * FMath::Sin( rotation ) + pan.Y * FMath::Cos( rotation );
-        
-        const FVector2D uvBoxOrigin( minX + xPos + pivotPan.X, minY + yPos + pivotPan.Y );
+        TSharedPtr<SOdysseySurfaceViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
 
-        // If we want to draw a bounding box to the UV
-        // FCanvasTileItem BoxBackgroundTileItem(uvBoxOrigin, GWhiteTexture, FVector2D(Width, Height), FLinearColor(0, 0, 0, 0.0f));
-        // BoxBackgroundTileItem.PivotPoint = FVector2D( 0.5, 0.5 );
-        // BoxBackgroundTileItem.Rotation.Add(0, mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees(), 0 );
-        // BoxBackgroundTileItem.BlendMode = SE_BLEND_AlphaComposite;
-        // InCanvas->DrawItem(BoxBackgroundTileItem);
+        uint32 width, height;
+        viewportWidget->ComputeTextureDisplayDimensions(width, height);
+
+        FVector vp1(0.f, 0.f, 0.f);
+        FVector vp2(iViewport->GetSizeXY().X, 0.f, 0.f);
+        FVector vp3(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y, 0.f);
+        FVector vp4(0.f, iViewport->GetSizeXY().Y, 0.f);
+
+        FVector2D textureSurfaceSize(texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
 
         //draw triangles
         uint32 numIndices = iIndices.Num();
-        FCanvasLineItem lineItem; // still useful ?!
-        for( uint32 i = 0; i < numIndices - 2; i += 3 )
+        for (uint32 i = 0; i < numIndices - 2; i += 3)
         {
             FVector2D UVs[3];
             bool isOutOfBounds[3];
 
             float fudgeFactor = 1.0f / 1024.0f;
-            for( int32 Corner = 0; Corner < 3; Corner++ )
+            for (int32 Corner = 0; Corner < 3; Corner++)
             {
-                UVs[Corner] = ( iVertexBuffer.GetVertexUV( iIndices[i + Corner], iUVChannel ) );
+                UVs[Corner] = (iVertexBuffer.GetVertexUV(iIndices[i + Corner], iUVChannel));
 
-                isOutOfBounds[Corner] = ( UVs[Corner].X < -fudgeFactor || UVs[Corner].X >( 1.0f + fudgeFactor ) ) || ( UVs[Corner].Y < -fudgeFactor || UVs[Corner].Y >( 1.0f + fudgeFactor ) );
+                isOutOfBounds[Corner] = (UVs[Corner].X < -fudgeFactor || UVs[Corner].X >(1.0f + fudgeFactor)) || (UVs[Corner].Y < -fudgeFactor || UVs[Corner].Y >(1.0f + fudgeFactor));
             }
 
             // Clamp the UV triangle to the [0,1] range (with some fudge).
             int32 numUVs = 3;
             fudgeFactor = 0.1f;
-            FVector2D bias( 0.0f, 0.0f );
+            FVector2D bias(0.0f, 0.0f);
 
             float minU = UVs[0].X;
             float minV = UVs[0].Y;
-            for( int32 j = 1; j < numUVs; ++j )
+            for (int32 j = 1; j < numUVs; ++j)
             {
-                minU = FMath::Min( minU, UVs[j].X );
-                minV = FMath::Min( minU, UVs[j].Y );
+                minU = FMath::Min(minU, UVs[j].X);
+                minV = FMath::Min(minU, UVs[j].Y);
             }
 
-            if( minU < -fudgeFactor || minU >( 1.0f + fudgeFactor ) )
+            if (minU < -fudgeFactor || minU >(1.0f + fudgeFactor))
             {
-                bias.X = FMath::FloorToFloat( minU );
+                bias.X = FMath::FloorToFloat(minU);
             }
-            if( minV < -fudgeFactor || minV >( 1.0f + fudgeFactor ) )
+            if (minV < -fudgeFactor || minV >(1.0f + fudgeFactor))
             {
-                bias.Y = FMath::FloorToFloat( minV );
+                bias.Y = FMath::FloorToFloat(minV);
             }
 
-            for( int32 j = 0; j < numUVs; j++ )
+            for (int32 j = 0; j < numUVs; j++)
             {
                 UVs[j] += bias;
             }
 
-            int maxX = iViewport->GetSizeXY().X;
-            int maxY = iViewport->GetSizeXY().Y;
-            float distSquared = ( maxX * maxX / 2 + maxY * maxY / 2 );
-
-            for( int32 edge = 0; edge < 3; edge++ )
+            for (int32 edge = 0; edge < 3; edge++)
             {
                 int32 corner1 = edge;
-                int32 corner2 = ( edge + 1 ) % 3;
+                int32 corner2 = (edge + 1) % 3;
                 FLinearColor lc = mMeshSelector->GetMeshColor();
-                ::ul3::FPixelValue c = ::ul3::FPixelValue::FromRGBAF( lc.R, lc.G, lc.B, lc.A );
+                ::ul3::FPixelValue c = ::ul3::FPixelValue::FromRGBAF(lc.R, lc.G, lc.B, lc.A);
 
-                FLinearColor color = ( isOutOfBounds[corner1] || isOutOfBounds[corner2] ) ? FLinearColor( 0.6f, 0.0f, 0.0f ) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
-                lineItem.SetColor( color );
+                FLinearColor color = (isOutOfBounds[corner1] || isOutOfBounds[corner2]) ? FLinearColor(0.6f, 0.0f, 0.0f) : FLinearColor(c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF());
 
-                if( mOdysseyPainterEditorViewportPtr.Pin()->GetRotationInDegrees() != 0 )
+          
+                FVector pIntersect;
+                FVector2D p1 = viewportWidget->ToWorld(UVs[corner1] * textureSurfaceSize - textureSurfaceSize / 2.f);
+                FVector2D p2 = viewportWidget->ToWorld(UVs[corner2] * textureSurfaceSize - textureSurfaceSize / 2.f);
+
+                #define V(p) FVector(p, 0.f)
+                bool intersect = FMath::SegmentIntersection2D(V(p1), V(p2), vp1, vp2, pIntersect) ||
+                                 FMath::SegmentIntersection2D(V(p1), V(p2), vp2, vp3, pIntersect) ||
+                                 FMath::SegmentIntersection2D(V(p1), V(p2), vp3, vp4, pIntersect) ||
+                                 FMath::SegmentIntersection2D(V(p1), V(p2), vp4, vp1, pIntersect);
+                #undef V
+
+                //Clipping. We don't even begin to calculate the coordinates of points we know won't be visible in the viewport
+                if ( !intersect &&
+                     !(p1.X >= vp1.X && p1.X < vp3.X && p1.Y >= vp1.Y && p1.Y < vp3.Y) &&
+                     !(p2.X >= vp1.X && p2.X < vp3.X && p2.Y >= vp1.Y && p2.Y < vp3.Y) )
                 {
-                    FVector2D center = FVector2D( uvBoxOrigin.X + ( ( surface->Width() * zoom ) / 2 ), uvBoxOrigin.Y + ( ( surface->Height() * zoom ) / 2 ) );
-
-                    FVector2D positionP1( UVs[corner1] * FVector2D( width, height ) + uvBoxOrigin );
-                    FVector2D positionP2( UVs[corner2] * FVector2D( width, height ) + uvBoxOrigin );
-                    positionP1 -= center;
-                    positionP2 -= center;
-
-                    //Clipping. We don't even begin to calculate the coordinates of points we know won't be visible in the viewport
-                    if( ( ( positionP1.X * positionP1.X + positionP1.Y * positionP1.Y ) > distSquared && ( positionP2.X * positionP2.X + positionP2.Y * positionP2.Y ) > distSquared ) )
-                    {
-                        continue;
-                    }
-
-                    float x1 = positionP1.X * FMath::Cos( rotation ) + positionP1.Y * FMath::Sin( rotation ) + center.X;
-                    float y1 = -positionP1.X * FMath::Sin( rotation ) + positionP1.Y * FMath::Cos( rotation ) + center.Y;
-
-                    float x2 = positionP2.X * FMath::Cos( rotation ) + positionP2.Y * FMath::Sin( rotation ) + center.X;
-                    float y2 = -positionP2.X * FMath::Sin( rotation ) + positionP2.Y * FMath::Cos( rotation ) + center.Y;
-
-                    FVector origin = FVector();
-                    FVector endPos = FVector();
-
-                    origin.X = x1;
-                    origin.Y = y1;
-                    origin.Z = 0;
-                    endPos.X = x2;
-                    endPos.Y = y2;
-                    endPos.Z = 0;
-
-                    FBatchedElements* batchedElements = ioCanvas->GetBatchedElements( FCanvas::ET_Line );
-                    FHitProxyId hitProxyId = ioCanvas->GetHitProxyId();
-                    batchedElements->AddTranslucentLine( origin, endPos, color, hitProxyId, 1.f );
+                    continue;
                 }
-                else
-                {
-                    FVector2D origin2D = FVector2D( UVs[corner1] * FVector2D( width, height ) + uvBoxOrigin );
-                    FVector2D endPos2D = FVector2D( UVs[corner2] * FVector2D( width, height ) + uvBoxOrigin );
 
-                    FVector origin = FVector();
-                    FVector endPos = FVector();
+                FVector origin = FVector(p1, 0.f);
+                FVector endPos = FVector(p2, 0.f);
 
-                    origin.X = origin2D.X;
-                    origin.Y = origin2D.Y;
-                    origin.Z = 0;
-                    endPos.X = endPos2D.X;
-                    endPos.Y = endPos2D.Y;
-                    endPos.Z = 0;
-
-                    //Clipping. We don't even begin to calculate the coordinates of points we know won't be visible in the viewport
-                    if( ( origin.X < 0 && endPos.X < 0 ) || ( origin.X > maxX && endPos.X > maxX ) || ( origin.Y < 0 && endPos.Y < 0 ) || ( origin.Y > maxY && endPos.Y > maxY ) )
-                    {
-                        continue;
-                    }
-
-                    FBatchedElements* batchedElements = ioCanvas->GetBatchedElements( FCanvas::ET_Line );
-                    FHitProxyId hitProxyId = ioCanvas->GetHitProxyId();
-                    batchedElements->AddTranslucentLine( origin, endPos, color, hitProxyId, 1.f );
-                }
+                FBatchedElements* batchedElements = ioCanvas->GetBatchedElements(FCanvas::ET_Line);
+                FHitProxyId hitProxyId = ioCanvas->GetHitProxyId();
+                batchedElements->AddTranslucentLine(origin, endPos, color, hitProxyId, 1.f);
             }
         }
     }

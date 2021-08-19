@@ -24,7 +24,7 @@ public:
 
 public:
     float               Zoom();
-    float               RotationInDegrees();
+    float               Rotation();
     FVector2D    Pan();
 
 private:
