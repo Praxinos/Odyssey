@@ -27,7 +27,7 @@ FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
 FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditor* iEditor)
 	: FOdysseyEditorTab(TEXT("OdysseyTextureEditor_LayerStack")
     , LOCTEXT( "OdysseyTextureEditorLayerStackTab", "Layer Stack" )
-    , FSlateIcon( "OdysseyStyle", "TextureEditor.Layers16" ))
+    , FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mEditor(iEditor)
 {
 }
