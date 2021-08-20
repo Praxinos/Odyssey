@@ -575,6 +575,8 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue, const FVector2D& iZoomPositi
 void
 SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
 {
+    ZoomValue = FMath::Clamp(ZoomValue, MinZoom, MaxZoom);
+
     FVector2D inverse(1.f, -1.f);
     FVector2D translation = iZoomPosition * inverse;
 
@@ -606,7 +608,7 @@ SOdysseySurfaceViewport::ZoomExponential(float iSliderOffsetToAdd, const FVector
     double sliderPos = FOdysseyMathUtils::ExponentialFunctionInvert( MinZoom, MaxZoom, NeutralZoom, GetZoom() );
     sliderPos += iSliderOffsetToAdd;
     double newZoom = FOdysseyMathUtils::ExponentialFunction( MinZoom, MaxZoom, NeutralZoom, sliderPos );
-    SetZoom( FMath::Clamp( newZoom, MinZoom, MaxZoom), iZoomPosition);
+    SetZoom( newZoom, iZoomPosition);
 }
 
 const FTransform2D& SOdysseySurfaceViewport::GetTransform() const

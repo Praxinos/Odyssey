@@ -482,6 +482,24 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             return true;
         }
     }
+    else if (mCurrentToolState == eState::kZoom)
+    {
+        if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
+        {
+            mCurrentToolState = eState::kZooming;
+
+            uint32 width;
+            uint32 height;
+            mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions(width, height);
+
+            mZoomReference = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
+            mZoomSizeReference = width;
+            mZoomViewportPointReference = FVector2D(iPointInViewport.x, iPointInViewport.y);
+            //mZoomTexturePointReference = mOdysseyPainterEditorViewportPtr.Pin()->ToLocal(mZoomViewportPointReference );
+            
+            return true;
+        }
+    }
     else if( mCurrentToolState == eState::kPick )
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed )
@@ -519,6 +537,13 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             mCurrentToolState = eState::kIdle;
         }
     }
+    else if (mCurrentToolState == eState::kZooming)
+    {
+        if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released)
+        {
+            mCurrentToolState = eState::kIdle;
+        }
+    }
     else if( mCurrentToolState == eState::kPicking )
     {
         if( iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released )
@@ -531,7 +556,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
         }
     }
 
-    if ( !(mCurrentToolState == eState::kDrawing || mCurrentToolState == eState::kRotating || mCurrentToolState == eState::kPanning || mCurrentToolState == eState::kPicking))
+    if ( !(mCurrentToolState == eState::kDrawing || mCurrentToolState == eState::kRotating || mCurrentToolState == eState::kPanning || mCurrentToolState == eState::kZooming || mCurrentToolState == eState::kPicking))
     {
         if (mKeysPressed.Num() == 1)
         {
@@ -558,7 +583,7 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             }
             if (FOdysseyPainterEditorCommands::Get().ZoomViewport->HasActiveChord(activeChord))
             {
-                //TODO:
+                mCurrentToolState = eState::kZoom;
                 return true;
             }
             if (FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord(activeChord))
@@ -625,6 +650,20 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 
         mRotationReference = newRotation;
     }
+    else if (mCurrentToolState == eState::kZooming)
+    {   
+        TSharedPtr<SOdysseySurfaceViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+
+        FVector2D viewportMousePosition(iPointInViewport.x, iPointInViewport.y);
+        float dist = viewportMousePosition.X - mZoomViewportPointReference.X;
+        
+        if (dist > KINDA_SMALL_NUMBER || dist < KINDA_SMALL_NUMBER)
+        {
+            float width = mZoomSizeReference + dist;
+            float zoom = mZoomReference * width / mZoomSizeReference;
+            viewportWidget->SetZoom(zoom, mZoomViewportPointReference - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter());
+        }
+    }
     else if( mCurrentToolState == eState::kPicking )
     {
         FOdysseyStrokePoint strokePoint_in_texture = GetLocalMousePosition(iPointInViewport);
@@ -644,6 +683,7 @@ FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX,
     if( mCurrentToolState == eState::kDrawing
         || mCurrentToolState == eState::kPanning
         || mCurrentToolState == eState::kRotating
+        || mCurrentToolState == eState::kZooming
         || mCurrentToolState == eState::kPicking )
         return;
 
@@ -656,6 +696,7 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
     if( mCurrentToolState == eState::kDrawing
         || mCurrentToolState == eState::kPanning
         || mCurrentToolState == eState::kRotating
+        || mCurrentToolState == eState::kZooming
         || mCurrentToolState == eState::kPicking )
         return;
 

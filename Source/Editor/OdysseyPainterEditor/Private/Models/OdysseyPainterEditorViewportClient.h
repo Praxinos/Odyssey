@@ -72,6 +72,8 @@ public:
         kRotating,
         kPan,
         kPanning,
+        kZoom,
+        kZooming,
         kPick,
         kPicking,
     };
@@ -135,6 +137,10 @@ private:
     EMouseCursor::Type                      mCurrentMouseCursor;
     float                                   mRotationReference; // The reference from which we determine the new rotation
     FVector2D                               mPanReference; //Where did we begin the pan ?
+    float                                   mZoomReference;
+    float                                   mZoomSizeReference;
+    FVector2D                               mZoomViewportPointReference; //Where did we begin the zoom ?
+    //FVector2D                               mZoomTexturePointReference; //Where did we begin the zoom ?
     FVector2D                               mPivotPointRatio; //Where is the center of the viewport from the center of the texture as a ratio, rotation independant
 
     eState                                  mCurrentToolState;
