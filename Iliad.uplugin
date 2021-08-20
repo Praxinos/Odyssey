@@ -76,6 +76,11 @@
       "LoadingPhase": "PostEngineInit"
     },
     {
+      "Name": "OdysseyContentBrowserExtensions",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"

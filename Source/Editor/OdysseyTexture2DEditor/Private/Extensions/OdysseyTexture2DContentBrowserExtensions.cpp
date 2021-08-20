@@ -130,7 +130,7 @@ public:
                 , LOCTEXT("TitleExportTexture", "Select Export Path & Name").ToString()
                 , FPaths::ProjectDir()
                 , currentTexture->GetName()
-                , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|HDR Image (.HDR)|*.hdr")
+                , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
                 , EFileDialogFlags::None
                 , filenames
             );
