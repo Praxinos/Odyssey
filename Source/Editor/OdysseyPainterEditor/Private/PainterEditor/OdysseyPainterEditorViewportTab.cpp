@@ -154,13 +154,13 @@ FOdysseyPainterEditorViewportTab::OnSetZoomFitScreen()
 void
 FOdysseyPainterEditorViewportTab::OnZoomInExponential()
 {
-    mViewport->ZoomExponential(0.005);
+    mViewport->ZoomExponential(mViewport->GetZoom(), 0.1);
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 {
-    mViewport->ZoomExponential(-0.005);
+    mViewport->ZoomExponential(mViewport->GetZoom(), -0.1);
 }
 
 #undef LOCTEXT_NAMESPACE

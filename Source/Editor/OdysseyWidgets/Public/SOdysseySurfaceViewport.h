@@ -101,7 +101,7 @@ public:
     // Public Shortcuts Methods
     
     /* Zoom in by adding iSliderOffsetToAdd to the zoom slider position */
-    void            ZoomExponential(float iSliderOffsetToAdd, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
+    void            ZoomExponential(float iBaseZoom, float iSliderOffsetToAdd, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
 
     /* Rotate the canvas to the Left, the Pivot point for the Rotation being in the middle of the viewport */
     void            RotateLeft();

@@ -227,8 +227,19 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 {
     //UE_LOG( LogStylusInput, Log, TEXT( "InputKey Key:%s Event:%d" ), *iKey.GetFName().ToString(), iEvent );
 
+    //Cleanup PressedKeys
+    TSharedPtr<SOdysseySurfaceViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    for (int i = mKeysPressed.Num() - 1; i >= 0; i--)
+    {
+        if (!viewportWidget->GetViewport()->KeyState(mKeysPressed[i]))
+        {
+            mKeysPressed.RemoveAt(i);
+        }
+    }
+
     if( iEvent == EInputEvent::IE_Pressed )
     {
+        ;
         if (!mKeysPressed.Contains(iKey))
             mKeysPressed.Add( iKey );
     }
@@ -492,7 +503,8 @@ FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint( const FOdysseyStro
             uint32 height;
             mOdysseyPainterEditorViewportPtr.Pin()->ComputeTextureDisplayDimensions(width, height);
 
-            mZoomReference = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
+            double zoom = mOdysseyPainterEditorViewportPtr.Pin()->GetZoom();
+            mZoomReference = ::FMath::Loge(zoom);
             mZoomSizeReference = width;
             mZoomViewportPointReference = FVector2D(iPointInViewport.x, iPointInViewport.y);
             //mZoomTexturePointReference = mOdysseyPainterEditorViewportPtr.Pin()->ToLocal(mZoomViewportPointReference );
@@ -656,11 +668,12 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 
         FVector2D viewportMousePosition(iPointInViewport.x, iPointInViewport.y);
         float dist = viewportMousePosition.X - mZoomViewportPointReference.X;
-        
+        float smoothness = 200.f; //TODO: do a Setting to let the user change it at will
+
         if (dist > KINDA_SMALL_NUMBER || dist < KINDA_SMALL_NUMBER)
         {
-            float width = mZoomSizeReference + dist;
-            float zoom = mZoomReference * width / mZoomSizeReference;
+            float newDist = mZoomReference + (dist / smoothness);
+            float zoom = ::FMath::Exp(newDist);
             viewportWidget->SetZoom(zoom, mZoomViewportPointReference - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter());
         }
     }
@@ -814,8 +827,10 @@ FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 void
 FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositionInViewport )
 {
+    TSharedPtr<SOdysseySurfaceViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+
     //If we don't have a surface, then we don't have a local mouse position
-    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    IOdysseySurface* surface = viewportWidget->GetSurface();
     if (!surface)
         return;
 
@@ -826,16 +841,18 @@ FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositio
     int textureWidth = texture->GetSurfaceWidth();
     int textureHeight = texture->GetSurfaceHeight();
 
-    FVector2D pos = iPositionInViewport - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter();
+    FVector2D pos = iPositionInViewport - viewportWidget->GetViewportCenter();
 
-    mOdysseyPainterEditorViewportPtr.Pin()->ZoomExponential(0.005, pos);
+    viewportWidget->ZoomExponential(viewportWidget->GetZoom(), 0.1, pos);
 }
 
 void
 FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositionInViewport )
 {
+    TSharedPtr<SOdysseySurfaceViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+
     //If we don't have a surface, then we don't have a local mouse position
-    IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
+    IOdysseySurface* surface = viewportWidget->GetSurface();
     if (!surface)
         return;
 
@@ -846,9 +863,9 @@ FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositi
     int textureWidth = texture->GetSurfaceWidth();
     int textureHeight = texture->GetSurfaceHeight();
 
-    FVector2D pos = iPositionInViewport - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter();
+    FVector2D pos = iPositionInViewport - viewportWidget->GetViewportCenter();
 
-    mOdysseyPainterEditorViewportPtr.Pin()->ZoomExponential(-0.005, pos);
+    viewportWidget->ZoomExponential(viewportWidget->GetZoom(), -0.1, pos);
 }
 
 double

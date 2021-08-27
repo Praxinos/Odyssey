@@ -323,7 +323,7 @@ inline
 double
 FOdysseyMathUtils::ExponentialFunction( const double iMin, const double iMax, const double iNeutralValue, const double iValue )
 {
-    return ( RangeValue( iMin, iMax ) ) * pow( iValue, ExponentValue( iMin, iMax, iNeutralValue) ) + iMin;
+    return ::FMath::Clamp(( RangeValue( iMin, iMax ) ) * pow( iValue, ExponentValue( iMin, iMax, iNeutralValue) ) + iMin, iMin, iMax);
 }
 
 /*static*/
@@ -331,5 +331,6 @@ inline
 double
 FOdysseyMathUtils::ExponentialFunctionInvert( const double iMin, const double iMax, const double iNeutralValue, const double iValue )
 {
-    return exp( log( (iValue - iMin) / RangeValue( iMin, iMax ) ) / ExponentValue( iMin, iMax, iNeutralValue ) );
+    double value = ::FMath::Clamp(iValue, iMin, iMax);
+    return exp( log( (value - iMin) / RangeValue( iMin, iMax ) ) / ExponentValue( iMin, iMax, iNeutralValue ) );
 }
