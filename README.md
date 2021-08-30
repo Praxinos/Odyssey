@@ -5,7 +5,7 @@
 - go to `.git/hooks` folder
 - rename `pre-commit.sample` to `pre-commit`
 - open `pre-commit` file
-- add the line at the end of the file: `exec .githooks/check.py`
+- add this line after the last `fi`: `exec .githooks/check.py`
 
 # Commit comment rules
 
