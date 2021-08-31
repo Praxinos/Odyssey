@@ -120,18 +120,6 @@ FShotSequenceActions::HasActions(const TArray<UObject*>& iObjects) const
 void
 FShotSequenceActions::GetActions(const TArray<UObject*>& InObjects, FMenuBuilder& ioMenuBuilder)
 {
-    ioMenuBuilder.AddSubMenu(
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions", "EPOS Actions" ),
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions_ToolTip", "All actions related to EPOS" ),
-        FNewMenuDelegate::CreateRaw(this, &FShotSequenceActions::GetEposActions, InObjects ),
-        false,
-        FSlateIcon( "EposSequenceEditorStyle", "About.Epos" )
-    );
-}
-
-void
-FShotSequenceActions::GetEposActions(FMenuBuilder& ioMenuBuilder, const TArray<UObject*> InObjects)
-{
     TArray<UEposMovieSceneSequence*> objects;
     for( int i = 0; i < InObjects.Num(); i++ )
     {
@@ -141,7 +129,7 @@ FShotSequenceActions::GetEposActions(FMenuBuilder& ioMenuBuilder, const TArray<U
     }
 
     ioMenuBuilder.AddMenuEntry(
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence", "Create Level Sequence" ),
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence", "Create Level Sequence to Render" ),
         LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence_ToolTip", "Creates Level Sequence containing all selected Board/Shot Assets" ),
         FSlateIcon( "LevelSequenceEditorStyle", "LevelSequenceEditor.CreateNewLevelSequenceInLevel" ),
         FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences, objects ) )

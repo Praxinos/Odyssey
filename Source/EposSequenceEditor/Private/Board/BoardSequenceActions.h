@@ -39,11 +39,6 @@ public:
 
 private:
 
-    // Fills ioMenuBuilder with the "Epos Actions" submenu actions
-    void GetEposActions( FMenuBuilder& ioMenuBuilder, const TArray<UObject*> InObjects );
-
-private:
-
     /** Pointer to the style set to use for toolkits. */
     TSharedRef<ISlateStyle> mStyle;
 };
