@@ -6,11 +6,13 @@
 #include "AssetToolsModule.h"
 #include "AutomatedLevelSequenceCapture.h"
 #include "Factories/Factory.h"
+#include "FileHelpers.h"
 #include "FrameNumberNumericInterface.h"
 #include "ISequencerModule.h"
 #include "LevelEditor.h"
 #include "LevelSequence.h"
 #include "MovieSceneCaptureDialogModule.h"
+#include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneCinematicShotSection.h"
 #include "SequencerSettings.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
@@ -51,17 +53,38 @@ EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences( TArray<UEposMov
     if( iSequences.Num() <= 0 )
         return;
 
-    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >( "AssetTools" ).Get();
-    UObject* object = AssetTools.CreateAssetWithDialog( ULevelSequence::StaticClass(), GetLevelSequenceFactory() );
-
-    if( !object )
+    // Prompt the user to save their changes so that they'll be in the movie, since we're not saving temporary copies of the level.
+    bool bPromptUserToSave = true;
+    bool bSaveMapPackages = true;
+    bool bSaveContentPackages = true;
+    if( !FEditorFileUtils::SaveDirtyPackages( bPromptUserToSave, bSaveMapPackages, bSaveContentPackages ) )
         return;
+
+    //---
 
     //Sort in alphabetical order
     iSequences.Sort( []( UEposMovieSceneSequence& iA, UEposMovieSceneSequence& iB )
                      {
                          return iA.GetDisplayName().ToString() < iB.GetDisplayName().ToString();
                      } );
+
+    //---
+
+    FString sequence_pathname = iSequences[0]->GetPathName();
+    FString sequence_path = FPaths::GetPath( sequence_pathname );
+    FString sequence_name = FPaths::GetBaseFilename( sequence_pathname );
+
+    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >( "AssetTools" ).Get();
+
+    FString PackageName;
+    FString AssetName;
+    AssetTools.CreateUniqueAssetName( sequence_path / TEXT("LS_") + sequence_name, TEXT( "" ), PackageName, AssetName );
+
+    UObject* object = AssetTools.CreateAssetWithDialog( AssetName, sequence_path, ULevelSequence::StaticClass(), GetLevelSequenceFactory() );
+    if( !object )
+        return;
+
+    //---
 
     ULevelSequence* levelSequence = Cast<ULevelSequence>( object );
     UMovieScene* levelMovieScene = levelSequence->GetMovieScene();
@@ -122,6 +145,10 @@ EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences( TArray<UEposMov
     // Set StartFrame and EndFrame
     TRange<FFrameNumber> levelPlaybackRange( FFrameNumber( 0 ), lastFrame.GetFrame() );
     levelMovieScene->SetPlaybackRange( levelPlaybackRange );
+
+    //---
+
+    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset( levelSequence );
 }
 
 //static
