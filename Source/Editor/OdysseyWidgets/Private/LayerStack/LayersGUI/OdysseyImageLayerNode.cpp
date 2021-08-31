@@ -88,17 +88,21 @@ TSharedRef<SWidget> FOdysseyImageLayerNode::GetCustomOutlinerContent()
     return SNew(SHorizontalBox)
 
         +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
         .HAlign( HAlign_Left )
         .VAlign( VAlign_Center )
         .Expose( mBlendingModeText )
+        .AutoWidth()
         [
             SNew(STextBlock).Text( layer->GetBlendingModeAsText() )
         ]
 
         +SHorizontalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
         .HAlign( HAlign_Left )
         .VAlign( VAlign_Center )
         .Expose( mOpacityText )
+        .AutoWidth()
         [
             SNew(STextBlock).Text( FText::AsPercent( layer->GetOpacity() ) )
         ]

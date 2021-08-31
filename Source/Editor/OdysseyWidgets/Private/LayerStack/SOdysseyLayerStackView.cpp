@@ -59,7 +59,7 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 				//Here we put the current layer infos
 				+SVerticalBox::Slot()
 				.AutoHeight()
-				.Padding(16.f)
+				.Padding(4.f)
 				.Expose(mTreeView->GetPropertyView())
 				[
 					SNullWidget::NullWidget

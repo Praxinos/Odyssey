@@ -98,14 +98,15 @@ void SOdysseyLayerStackOutlinerTreeNode::Construct( const FArguments& InArgs, TS
                                 // Label Slot
                                 + SHorizontalBox::Slot()
                                 .VAlign(VAlign_Center)
-                                .AutoWidth()
-                                .Padding(FMargin(0.f, 0.f, 20.f, 0.f))
+                                //.AutoWidth()
+                                .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
                                 [
                                     mEditableLabel.ToSharedRef()
                                 ]
                                 // Arbitrary customization slot
                                 + SHorizontalBox::Slot()
                                 .HAlign(HAlign_Fill)
+                                .AutoWidth()
                                 [
                                     InArgs._CustomContent.Widget
                                 ]

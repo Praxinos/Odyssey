@@ -50,9 +50,11 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
     TSharedRef<SWidget>    finalWidget =
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew(SHorizontalBox )
             + SHorizontalBox::Slot()
+            .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
             .FillWidth(0.5f)
             [
                 SNew( STextBlock )
@@ -60,7 +62,6 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
             ]
 
             +SHorizontalBox::Slot()
-            .Padding( FMargin( 20.f, 0.f, 0.f, 0.f) )
             .FillWidth(0.5f)
             .VAlign( VAlign_Center )
             [
@@ -75,10 +76,12 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
              ]
          ]
         + SVerticalBox::Slot()
-        .Padding( FMargin( 0.f, 3.f, 0.f, 0.f) )
+        .Padding(FMargin(0.f, 3.f, 0.f, 0.f))
+        .AutoHeight()
         [
             SNew(SHorizontalBox )
             + SHorizontalBox::Slot()
+            .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
             .FillWidth(0.5f)
             [
                 SNew( STextBlock )
@@ -86,7 +89,6 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
             ]
 
              + SHorizontalBox::Slot()
-             .Padding( FMargin( 20.f, 0.f, 0.f, 0.f) )
              .FillWidth(0.5f)
              .VAlign( VAlign_Center )
              [

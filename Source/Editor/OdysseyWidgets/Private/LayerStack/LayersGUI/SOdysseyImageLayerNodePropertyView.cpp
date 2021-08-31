@@ -53,9 +53,11 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
     TSharedRef<SWidget>    finalWidget =
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew(SHorizontalBox )
             + SHorizontalBox::Slot()
+            .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
             .FillWidth(0.5f)
             [
                 SNew( STextBlock )
@@ -63,7 +65,6 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
             ]
 
             +SHorizontalBox::Slot()
-            .Padding( FMargin( 20.f, 0.f, 0.f, 0.f) )
             .FillWidth(0.5f)
             .VAlign( VAlign_Center )
             [
@@ -78,10 +79,12 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
              ]
          ]
         + SVerticalBox::Slot()
+        .AutoHeight()
         .Padding( FMargin( 0.f, 3.f, 0.f, 0.f) )
         [
             SNew(SHorizontalBox )
             + SHorizontalBox::Slot()
+            .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
             .FillWidth(0.5f)
             [
                 SNew( STextBlock )
@@ -89,7 +92,6 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
             ]
 
              + SHorizontalBox::Slot()
-             .Padding( FMargin( 20.f, 0.f, 0.f, 0.f) )
              .FillWidth(0.5f)
              .VAlign( VAlign_Center )
              [
