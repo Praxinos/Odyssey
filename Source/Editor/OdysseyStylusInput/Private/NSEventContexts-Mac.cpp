@@ -7,6 +7,7 @@
 
 //For coordinates conversion purposes
 #include "Mac/MacApplication.h"
+#include "Mac/MacPlatformApplicationMisc.h"
 
 FCriticalSection sgMutex;
 
@@ -70,6 +71,32 @@ FNSEventContexts::CloseContext()
     }
 }
 
+FVector2D Internal_ConvertCocoaPositionToSlate(NSPoint const& CursorPosition)
+{
+#if UE_BUILD_DEBUG
+    // This function has to be on the main thread
+    check([NSThread isMainThread]);
+#endif
+
+    NSScreen* TargetScreen = [NSScreen mainScreen];
+    {
+        NSArray<NSScreen*>* Screens = [NSScreen screens];
+        for (NSScreen* Screen in Screens)
+        {
+            if (NSPointInRect(CursorPosition, Screen.frame))
+            {
+                TargetScreen = Screen;
+                break;
+            }
+        }
+    }
+
+    const bool bUseHighDPIMode = FPlatformApplicationMisc::IsHighDPIModeEnabled();
+    const float DPIScaleFactor = bUseHighDPIMode ? TargetScreen.backingScaleFactor : 1.f;
+    const FVector2D OffsetOnScreen = FVector2D(CursorPosition.x - TargetScreen.frame.origin.x, TargetScreen.frame.origin.y + TargetScreen.frame.size.height - CursorPosition.y) * DPIScaleFactor;
+    return FVector2D(TargetScreen.frame.origin.x * DPIScaleFactor + OffsetOnScreen.X, -TargetScreen.frame.origin.y * DPIScaleFactor + OffsetOnScreen.Y);
+}
+
 
 NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
 {
@@ -83,7 +110,7 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
     //Sometimes, NSEvent.mouseLocation isn't initialized, so we have to make sure it exists before we convert it to cocoaPosition
     if( &cursorPosition != 0 )
     {
-        state.Position = FMacApplication::ConvertCocoaPositionToSlate( cursorPosition.x, cursorPosition.y );
+        state.Position = Internal_ConvertCocoaPositionToSlate(cursorPosition);
     }
     else
     {
