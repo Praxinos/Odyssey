@@ -47,6 +47,9 @@ public class EposSequenceEditor : ModuleRules
                 "AppFrameWork",
                 "DeveloperSettings",
                 "Settings", // Developer
+                "LevelSequence",
+                "TimeManagement",
+                "MovieSceneCapture",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
@@ -60,6 +63,7 @@ public class EposSequenceEditor : ModuleRules
                 "UnrealEd",
                 "LevelEditor",
                 "EditorStyle",
+                "MovieSceneCaptureDialog",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
             }

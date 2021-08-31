@@ -35,6 +35,12 @@ public:
     virtual bool ShouldForceWorldCentric() override;
     virtual bool CanLocalize() const override;
     virtual bool HasActions( const TArray<UObject*>& iObjects ) const override;
+    virtual void GetActions(const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder) override;
+
+private:
+
+    // Fills ioMenuBuilder with the "Epos Actions" submenu actions
+    void GetEposActions(FMenuBuilder& ioMenuBuilder, const TArray<UObject*> InObjects);
 
 private:
 

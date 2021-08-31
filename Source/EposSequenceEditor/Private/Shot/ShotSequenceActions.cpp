@@ -11,6 +11,7 @@
 #include "Shot/ShotSequence.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceEditorModule.h"
+#include "EposSequenceRenderHelpers.h"
 
 #define LOCTEXT_NAMESPACE "ShotAssetTypeActions"
 
@@ -111,9 +112,40 @@ FShotSequenceActions::CanLocalize() const
 }
 
 bool
-FShotSequenceActions::HasActions( const TArray<UObject*>& iObjects ) const
+FShotSequenceActions::HasActions(const TArray<UObject*>& iObjects) const
 {
-    return false;
+    return true;
+}
+
+void
+FShotSequenceActions::GetActions(const TArray<UObject*>& InObjects, FMenuBuilder& ioMenuBuilder)
+{
+    ioMenuBuilder.AddSubMenu(
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions", "EPOS Actions" ),
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions_ToolTip", "All actions related to EPOS" ),
+        FNewMenuDelegate::CreateRaw(this, &FShotSequenceActions::GetEposActions, InObjects ),
+        false,
+        FSlateIcon( "EposSequenceEditorStyle", "About.Epos" )
+    );
+}
+
+void
+FShotSequenceActions::GetEposActions(FMenuBuilder& ioMenuBuilder, const TArray<UObject*> InObjects)
+{
+    TArray<UEposMovieSceneSequence*> objects;
+    for( int i = 0; i < InObjects.Num(); i++ )
+    {
+        UEposMovieSceneSequence* sequence = Cast<UEposMovieSceneSequence>( InObjects[i] );
+        if( sequence )
+            objects.Add( sequence );
+    }
+
+    ioMenuBuilder.AddMenuEntry(
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence", "Create Level Sequence" ),
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence_ToolTip", "Creates Level Sequence containing all selected Board/Shot Assets" ),
+        FSlateIcon( "LevelSequenceEditorStyle", "LevelSequenceEditor.CreateNewLevelSequenceInLevel" ),
+        FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences, objects ) )
+    );
 }
 
 #undef LOCTEXT_NAMESPACE
