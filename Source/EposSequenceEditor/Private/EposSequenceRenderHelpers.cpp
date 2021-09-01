@@ -11,6 +11,7 @@
 #include "ISequencerModule.h"
 #include "LevelEditor.h"
 #include "LevelSequence.h"
+#include "LevelEditorSequencerIntegration.h"
 #include "MovieSceneCaptureDialogModule.h"
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneCinematicShotSection.h"
@@ -46,9 +47,9 @@ GetLevelSequenceFactory()
     return nullptr;
 }
 
-//static
+static
 void
-EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences( TArray<UEposMovieSceneSequence*> iSequences )
+RenderSequencesByCreatingLevelSequenceAsset( TArray<UEposMovieSceneSequence*> iSequences )
 {
     if( iSequences.Num() <= 0 )
         return;
@@ -109,51 +110,169 @@ EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences( TArray<UEposMov
     UMovieSceneCinematicShotTrack* shotTrack = levelMovieScene->AddMasterTrack<UMovieSceneCinematicShotTrack>();
 
     // Add Shot Sections
-    FFrameTime lastFrame;
     for( int i = 0; i < iSequences.Num(); i++ )
     {
         UEposMovieSceneSequence* eposSequence = iSequences[i];
         UMovieScene* eposMovieScene = eposSequence->GetMovieScene();
 
-        //Compute shot length
-        TRange<FFrameNumber> eposPlaybackRange = eposMovieScene->GetPlaybackRange();
-        FFrameTime eposFrameCount = FFrameRate::Snap( FFrameTime( eposPlaybackRange.GetUpperBoundValue() - eposPlaybackRange.GetLowerBoundValue() ), eposMovieScene->GetTickResolution(), tickResolution );
-
         // Add Section to Cinematic shot track
-        UMovieSceneSection* section = shotTrack->CreateNewSection();
-        if( section )
+        UMovieSceneCinematicShotSection* shotSection = Cast<UMovieSceneCinematicShotSection>( shotTrack->CreateNewSection() );
+        if( shotSection )
         {
             shotTrack->Modify();
-            shotTrack->AddSection( *section );
+            shotTrack->AddSection( *shotSection );
         }
-        UMovieSceneCinematicShotSection* shotSection = Cast<UMovieSceneCinematicShotSection>( section );
-
 
         // Add boardSequence to section
         shotSection->SetSequence( eposSequence );
 
-        // Set Section StartFrame and EndFrame
-        // Set EndFrame First to avoid having an intermediate state where StartFrame > EndFrame
-        // Actually needed because there is a check for that
-        FFrameTime firstFrame = lastFrame;
-        lastFrame += eposFrameCount;
+        // Compute new shot range
+        TRange<FFrameNumber> eposPlaybackRange = eposMovieScene->GetPlaybackRange();
+        TRange<FFrameNumber> sectionRange = TRange<FFrameNumber>( FFrameRate::TransformTime( eposPlaybackRange.GetLowerBoundValue(), eposMovieScene->GetTickResolution(), tickResolution ).GetFrame(),
+                                                                          FFrameRate::TransformTime( eposPlaybackRange.GetUpperBoundValue(), eposMovieScene->GetTickResolution(), tickResolution ).GetFrame() );
+        if( i == 0 )
+        {
+            levelMovieScene->SetPlaybackRange( sectionRange );
+        }
+        else
+        {
+            sectionRange = UE::MovieScene::TranslateRange( sectionRange, levelMovieScene->GetPlaybackRange().GetUpperBoundValue() - sectionRange.GetLowerBoundValue() );
 
-        shotSection->SetEndFrame( lastFrame.GetFrame() );
-        shotSection->SetStartFrame( firstFrame.GetFrame() );
+            TRange<FFrameNumber> levelPlaybackRange( levelMovieScene->GetPlaybackRange() );
+            levelPlaybackRange.SetUpperBoundValue( sectionRange.GetUpperBoundValue() );
+            levelMovieScene->SetPlaybackRange( levelPlaybackRange );
+        }
+
+        shotSection->SetRange( sectionRange );
     }
-
-    // Set StartFrame and EndFrame
-    TRange<FFrameNumber> levelPlaybackRange( FFrameNumber( 0 ), lastFrame.GetFrame() );
-    levelMovieScene->SetPlaybackRange( levelPlaybackRange );
 
     //---
 
-    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset( levelSequence );
+    TArray<TWeakPtr<ISequencer>> sequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
+    if( !sequencers.Num() )
+        return;
+
+    ISequencer* sequencer = sequencers[0].Pin().Get();
+    if( !sequencer )
+        return;
+
+    USequencerSettings* sequencerSettings = sequencer->GetSequencerSettings();
+
+    //--- from FSequencer::RenderMovieInternal()#3678
+
+    //ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
+    //if( IMovieRendererInterface* MovieRenderer = SequencerModule.GetMovieRenderer( sequencer->GetMovieRendererName() ) )
+    //{
+    //    MovieRenderer->RenderMovie( sequencer->GetRootMovieSceneSequence(), TArray<UMovieSceneCinematicShotSection*>() );
+    //    return;
+    //}
+
+    //TRange<FFrameNumber> Range = levelPlaybackRange;
+    //if( Range.GetLowerBound().IsOpen() || Range.GetUpperBound().IsOpen() )
+    //{
+    //    Range = TRange<FFrameNumber>::Hull( Range, GetPlaybackRange() );
+    //}
+    TRange<FFrameNumber> Range = levelMovieScene->GetPlaybackRange();
+
+    //// If focused on a subsequence, transform the playback range to the root in order to always render from the root
+    //if( sequencer->GetRootMovieSceneSequence() != sequencer->GetFocusedMovieSceneSequence() )
+    //{
+    //    //bSetFrameOverrides = true;
+
+    //    if( const FMovieSceneSubSequenceData* SubSequenceData = RootTemplateInstance.FindSubData( GetFocusedTemplateID() ) )
+    //    {
+    //        Range = Range * SubSequenceData->RootToSequenceTransform.InverseLinearOnly();
+    //    }
+    //}
+
+    // Create a new movie scene capture object for an automated level sequence, and open the tab
+    UAutomatedLevelSequenceCapture* MovieSceneCapture = NewObject<UAutomatedLevelSequenceCapture>( GetTransientPackage(), UAutomatedLevelSequenceCapture::StaticClass(), UMovieSceneCapture::MovieSceneCaptureUIName, RF_Transient );
+    MovieSceneCapture->LoadFromConfig();
+
+    // Always render from the root
+    MovieSceneCapture->LevelSequenceAsset = levelMovieScene->GetOuter()->GetPathName();
+
+    FFrameRate DisplayRate = levelMovieScene->GetDisplayRate();
+    FFrameRate TickResolution = levelMovieScene->GetTickResolution();
+
+    MovieSceneCapture->Settings.FrameRate = DisplayRate;
+    MovieSceneCapture->Settings.ZeroPadFrameNumbers = sequencerSettings->GetZeroPadFrames();
+    MovieSceneCapture->Settings.bUseRelativeFrameNumbers = false;
+
+    FFrameNumber StartFrame = UE::MovieScene::DiscreteInclusiveLower( Range );
+    FFrameNumber EndFrame = UE::MovieScene::DiscreteExclusiveUpper( Range );
+
+    FFrameNumber RoundedStartFrame = FFrameRate::TransformTime( StartFrame, TickResolution, DisplayRate ).CeilToFrame();
+    FFrameNumber RoundedEndFrame = FFrameRate::TransformTime( EndFrame, TickResolution, DisplayRate ).CeilToFrame();
+
+    //if( bSetFrameOverrides )
+    {
+        MovieSceneCapture->SetFrameOverrides( RoundedStartFrame, RoundedEndFrame );
+    }
+    //else
+    //{
+    //    if( !MovieSceneCapture->bUseCustomStartFrame )
+    //    {
+    //        MovieSceneCapture->CustomStartFrame = RoundedStartFrame;
+    //    }
+
+    //    if( !MovieSceneCapture->bUseCustomEndFrame )
+    //    {
+    //        MovieSceneCapture->CustomEndFrame = RoundedEndFrame;
+    //    }
+    //}
+
+    // We create a new Numeric Type Interface that ties it's Capture/Resolution rates to the Capture Object so that it converts UI entries
+    // to the correct resolution for the capture, and not for the original sequence.
+    USequencerSettings* LocalSettings = sequencerSettings;
+
+    TAttribute<EFrameNumberDisplayFormats> GetDisplayFormatAttr = MakeAttributeLambda(
+        [LocalSettings]
+        {
+            if( LocalSettings )
+            {
+                return LocalSettings->GetTimeDisplayFormat();
+            }
+            return EFrameNumberDisplayFormats::Frames;
+        }
+        );
+
+    TAttribute<uint8> GetZeroPadFramesAttr = MakeAttributeLambda(
+        [LocalSettings]()->uint8
+        {
+            if( LocalSettings )
+            {
+                return LocalSettings->GetZeroPadFrames();
+            }
+            return 0;
+        }
+    );
+
+    // By using a TickResolution/DisplayRate that match the numbers entered via the numeric interface don't change frames of reference.
+    // This is used here because the movie scene capture works entirely on play rate resolution and has no knowledge of the internal resolution
+    // so we don't need to convert the user's input into internal resolution.
+    TAttribute<FFrameRate> GetFrameRateAttr = MakeAttributeLambda(
+        [MovieSceneCapture]
+        {
+            if( MovieSceneCapture )
+            {
+                return MovieSceneCapture->GetSettings().FrameRate;
+            }
+            return FFrameRate( 30, 1 );
+        }
+        );
+
+    // Create our numeric type interface so we can pass it to the time slider below.
+    TSharedPtr<INumericTypeInterface<double>> MovieSceneCaptureNumericInterface = MakeShareable( new FFrameNumberInterface( GetDisplayFormatAttr, GetZeroPadFramesAttr, GetFrameRateAttr, GetFrameRateAttr ) );
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+
+    IMovieSceneCaptureDialogModule::Get().OpenDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef(), MovieSceneCapture, MovieSceneCaptureNumericInterface );
 }
 
 //static
 void
-EposSequenceRenderHelpers::RenderSequences( TArray<UEposMovieSceneSequence*> iSequences )
+RenderSequencesByCreatingLevelSequenceTransient( TArray<UEposMovieSceneSequence*> iSequences )
 {
     //The following code works but, we need to have the Render as a modal window to make it work properly
 
@@ -305,6 +424,14 @@ EposSequenceRenderHelpers::RenderSequences( TArray<UEposMovieSceneSequence*> iSe
             );
         }
     }
+}
+
+//static
+void
+EposSequenceRenderHelpers::RenderMovie( TArray<UEposMovieSceneSequence*> iSequences )
+{
+    RenderSequencesByCreatingLevelSequenceAsset( iSequences );
+    //RenderSequencesByCreatingLevelSequenceTrandient( iSequences );
 }
 
 #undef LOCTEXT_NAMESPACE

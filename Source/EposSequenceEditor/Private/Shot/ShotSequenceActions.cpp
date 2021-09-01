@@ -129,10 +129,10 @@ FShotSequenceActions::GetActions(const TArray<UObject*>& InObjects, FMenuBuilder
     }
 
     ioMenuBuilder.AddMenuEntry(
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence", "Create Level Sequence to Render" ),
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions_CreateLevelSequence_ToolTip", "Creates Level Sequence containing all selected Board/Shot Assets" ),
-        FSlateIcon( "LevelSequenceEditorStyle", "LevelSequenceEditor.CreateNewLevelSequenceInLevel" ),
-        FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::CreateLevelSequenceFromEposSequences, objects ) )
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions_RenderSequence", "Render Movie" ),
+        LOCTEXT( "CB_Extension_ShotSequence_EposActions_RenderSequence_ToolTip", "Render a Movie for each selected Shot Asset" ),
+        FSlateIcon( "EditorStyle", "Sequencer.RenderMovie.Small" ),
+        FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::RenderMovie, objects ) )
     );
 }
 

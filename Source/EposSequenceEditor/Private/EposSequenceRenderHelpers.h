@@ -10,21 +10,11 @@ class UEposMovieSceneSequence;
 class EposSequenceRenderHelpers
 {
 public:
-    /*
-    * Creates a new LevelSequence containing the given sequences in shots
-    * Shots are ordered alphabetical order according to the sequences names
-    *
-    * @param iSequences The Epos sequences to creates the level sequence from
-    * @return
-    */
-    static void CreateLevelSequenceFromEposSequences( TArray<UEposMovieSceneSequence*> iSequences );
-
     /**
      * Renders the given board sequence.
      *
-     * @param iSequence The epos sequence to render
-     * @return
+     * @param iSequences The epos sequences to render
      */
-    static void RenderSequences( TArray<UEposMovieSceneSequence*> iSequences );
+    static void RenderMovie( TArray<UEposMovieSceneSequence*> iSequences );
 
 };
