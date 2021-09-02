@@ -12,6 +12,7 @@
 #include "OdysseyBlock.h"
 #include "OdysseyTextureEditor.h"
 #include "ULISLoaderModule.h"
+#include "Factories/Texture2dFactoryNew.h"  
 #include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
@@ -53,6 +54,7 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
     MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
+    MAP_ACTION(textureEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
     MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
     MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
     MAP_ACTION(textureEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
@@ -93,6 +95,7 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile(FMenuBuilder& ioMenuBuilder)
     {
         ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
         ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
+        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
         ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
     }
 }
@@ -233,6 +236,36 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
             object->MarkPackageDirty();
         }
     }
+}
+
+void           
+FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
+{
+    TSharedPtr<IOdysseyLayer> layer = mEditor->LayerStack()->GetCurrentLayer();
+    if (!layer->ImplementsCapability(IOdysseyLayerImageRenderingCapability::GetGuid()))
+        return;
+
+    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >("AssetTools").Get();
+    UObject* object = AssetTools.CreateAssetWithDialog(UTexture2D::StaticClass(), UTexture2DFactoryNew::StaticClass()->GetDefaultObject<UFactory>());
+
+    if (!object)
+        return;
+
+    UTexture2D* texture = Cast<UTexture2D>(object);
+    texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+
+    IOdysseyLayerImageRenderingCapability* renderCap = layer->GetCapability<IOdysseyLayerImageRenderingCapability>();
+    FOdysseyBlock block(mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height(), mEditor->LayerStack()->Format());
+    renderCap->RenderImage(block.GetBlock(), block.GetBlock()->Rect(), ::ul3::FVec2F(0.f, 0.f));
+
+    InitTextureWithBlockData(&block, texture, mEditor->Texture()->Source.GetFormat());
+
+    texture->PostEditChange();
+    texture->UpdateResource();
+
+    texture->MarkPackageDirty();
 }
 
 void

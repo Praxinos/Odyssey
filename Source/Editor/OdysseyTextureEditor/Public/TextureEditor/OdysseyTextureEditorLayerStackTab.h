@@ -37,6 +37,7 @@ private:
     virtual void ImportTexturesAsLayers();
     virtual void ExportTextureToOperatingSystem();
     virtual void ExportLayersAsTextures();
+    virtual void ExportCurrentLayerAsTexture();
     virtual void CreateNewLayer();
     virtual void DuplicateCurrentLayer();
     virtual void DeleteCurrentLayer();

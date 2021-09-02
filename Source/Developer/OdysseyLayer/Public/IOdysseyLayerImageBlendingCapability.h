@@ -59,7 +59,7 @@ public:
         if (GetGuid() == iGuid)
             return reinterpret_cast<void*>(static_cast<IOdysseyLayerImageBlendingCapability*>(iValue));
 
-        return nullptr;
+        return IOdysseyLayerImageRenderingCapability::GetCapabilityPtrFromGuid(iValue, iGuid);
     }
 
 public:

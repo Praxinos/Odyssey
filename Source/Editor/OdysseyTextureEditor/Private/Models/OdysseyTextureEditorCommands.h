@@ -35,6 +35,9 @@ public:
     /** Action used to export Layers as Textures */
     TSharedPtr<FUICommandInfo> ExportLayersAsTextures;
 
+    /** Action used to export current Layer as Texture */
+    TSharedPtr<FUICommandInfo> ExportCurrentLayerAsTexture;
+
     //Layers Actions
 
     /** Action for creating a new layer */
