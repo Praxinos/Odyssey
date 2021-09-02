@@ -18,7 +18,7 @@ init( autoreset=True )
 
 #---
 
-gVersionUE = '4.26'
+gVersionUE = '4.27'
 
 gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
