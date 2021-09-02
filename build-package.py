@@ -14,12 +14,11 @@ import shutil
 import subprocess
 import sys
 
+from pygit2 import Repository
 from colorama import init, Fore, Back, Style
 init( autoreset=True )
 
 #---
-
-gVersionUE = '4.27'
 
 gOperatingSystem = platform.system().lower() # 'windows', 'darwin', 'linux', ...
 if gOperatingSystem != 'windows' and gOperatingSystem != 'darwin':
@@ -72,6 +71,7 @@ def GetArguments():
     parser.add_argument( '-u', '--upload', action="store_true", help=f'start uploading after building' )
     parser.add_argument( '-p', '--upload-dir', default=f'{default_upload_path}', help=f'the upload path\nsuffix folders will be append to it' )
     parser.add_argument( '-s', '--suffix', help=f'a suffix to the output directory name' )
+    parser.add_argument( '-e', '--ue-version', help=f'the version of the ue engine: 4.xx or 5.xx\nonly useful if it can\'t be deduce from the current branch' )
     args = parser.parse_args()
 
     return args
@@ -88,7 +88,7 @@ def ProcessArgumentForInputPath( iArgs ):
         sys.exit( 10 )
 
     uplugin_pathfile = uplugin_pathfiles[0]
-    print( Fore.GREEN + f'Input uplugin file: {uplugin_pathfile}' )
+    print( Fore.GREEN + f'{"Input uplugin file":20}: {uplugin_pathfile}' )
 
     plugin_name = uplugin_pathfile.stem
 
@@ -111,15 +111,58 @@ def ProcessArgumentForInputPath( iArgs ):
 
     if invalid_subpathfiles:
         for invalid_subpathfile in invalid_subpathfiles:
-            print( f'Invalid characters: {content_path} {Fore.RED}{invalid_subpathfile}' )
+            print( Fore.RED + f'Invalid characters: {content_path} {Fore.RED}{invalid_subpathfile}' )
 
         sys.exit( 12 )
 
     return uplugin_pathfile, plugin_name
 
+# Get ue version
+def GetUEVersion( iArgs, iUPluginPathFile ):
+    repo = Repository( iUPluginPathFile.resolve().parent )
+
+    current_branch = repo.head.shorthand
+    print( Fore.GREEN + f'{"Current branch":20}: {current_branch}' )
+
+    match = re.match( "(dev|release)-(?P<version_major>[0-9])\.(?P<version_minor>[0-9]+)", current_branch )
+
+    # Can't deduce ue version from branch name, so try to get it from argument
+    if match is None:
+        if iArgs.ue_version is None:
+            print( Fore.RED + f'Can\'t determine ue version from current branch name "{current_branch}", add ue version as argument: -e 4.xx' )
+            sys.exit( 22 )
+
+        match = re.match( "(?P<version_major>[0-9])\.(?P<version_minor>[0-9]+)", iArgs.ue_version )
+        if match is None:
+            print( Fore.RED + f'Can\'t determine ue version from argument "{iArgs.ue_version}", please check the syntax: -e 4.xx' )
+            sys.exit( 23 )
+    else:
+        if iArgs.ue_version is not None:
+            print( Fore.YELLOW + f'ue version is guess from the current branch name "{current_branch}", the ue version as argument "{iArgs.ue_version}" will NOT be used' )
+
+    branch_versions = [ match.group('version_major'), match.group('version_minor') ]
+    branch_version = '.'.join( branch_versions )
+    branch_version_without_dot = ''.join( branch_versions )
+
+    # Get version number in uplugin file
+    uplugin_data = {}
+    with iUPluginPathFile.open() as infile:
+        uplugin_data = json.load( infile )
+
+    uplugin_version = uplugin_data['VersionName']
+    uplugin_versions = uplugin_version.split( '.' )
+
+    # Check version number of uplugin file to match the branch version
+    if branch_version_without_dot != uplugin_versions[-1]:
+        print( Fore.RED + f'ue version from branch name "{current_branch}" differs from ue version in uplugin file "{uplugin_versions[-1]}", please update uplugin file' )
+        sys.exit( 24 )
+        
+    print( Fore.GREEN + f'{"Build with UE":20}: {branch_version}' )
+
+    return branch_version
+
 # Get intermediate folders (with date/version/...)
-def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
-    global gVersionUE
+def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName, iUEVersion ):
     global gOperatingSystem
 
     uplugin_data = {}
@@ -130,7 +173,7 @@ def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
 
     date_folder = []
     date_folder.append( now.strftime( '%Y%m%d.%H%M%S' ) )
-    date_folder.append( gVersionUE )
+    date_folder.append( iUEVersion )
     date_folder.append( uplugin_data["VersionName"] )
     date_folder.append( 'beta' if uplugin_data['IsBetaVersion'] else '' )
     if iArgs.target in [eTarget.kDev, eTarget.kBeta]:
@@ -141,7 +184,7 @@ def GetIntermediateFolders( iArgs, iUPluginPathFile, iPluginName ):
 
     main_folder = []
     main_folder.append( iPluginName )
-    main_folder.append( gVersionUE )
+    main_folder.append( iUEVersion )
     main_folder.append( iArgs.target.value )
     main_folder = list( filter( None, main_folder ) )
     main_folder = '-'.join( main_folder )
@@ -174,14 +217,14 @@ def ProcessArgumentForOutputPath( iArgs, iIntermediateFolders ):
     output_path = ( output_path / iIntermediateFolders )
     output_path.mkdir( parents=True, exist_ok=True )
 
-    print( Fore.GREEN + f'Output path: {output_path}' )
+    print( Fore.GREEN + f'{"Output path":20}: {output_path}' )
 
     return output_path
 
 # Get upload package directory
 def ProcessArgumentForUploadPath( iArgs, iIntermediateFolders ):
     if not iArgs.upload:
-        print( Fore.GREEN + f'NO upload' )
+        print( Fore.GREEN + f'{"Upload":20}: NO' )
         return None
 
     upload_path = Path( iArgs.upload_dir ).resolve()
@@ -189,20 +232,24 @@ def ProcessArgumentForUploadPath( iArgs, iIntermediateFolders ):
     upload_path.mkdir( parents=True, exist_ok=True )
     upload_path = upload_path / iIntermediateFolders
 
-    print( Fore.GREEN + f'Upload path: {upload_path}' )
+    print( Fore.GREEN + f'{"Upload path":20}: {upload_path}' )
 
     return upload_path
 
 # Print info for target
 def ProcessArgumentForTarget( iArgs ):
-    print( Fore.GREEN + f'Build for {iArgs.target.value}' )
+    print( Fore.GREEN + f'{"Build for target":20}: {iArgs.target.value}', end='' )
+    if iArgs.target == eTarget.kDev:
+        print( Fore.GREEN + f' (sources & binaries)' )
+    elif iArgs.target == eTarget.kBeta:
+        print( Fore.GREEN + f' (binaries only)' )
+    elif iArgs.target == eTarget.kMarketplace:
+        print( Fore.GREEN + f' (sources only)' )
 
 #---
 
 # Process the compilation
-def Build( iUPluginPathFile, iOutputPath ):
-    global gVersionUE
-
+def Build( iUPluginPathFile, iUEVersion, iOutputPath ):
     # Backup uplugin file
     uplugin_backup_pathfile = iUPluginPathFile.with_suffix( iUPluginPathFile.suffix + '.backup' )
     if not uplugin_backup_pathfile.exists(): # Otherwise, an already modified file will be copied
@@ -229,12 +276,19 @@ def Build( iUPluginPathFile, iOutputPath ):
     #---
 
     if gOperatingSystem == 'windows':
-        bat = Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / f'UE_{gVersionUE}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
+        bat = Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / f'UE_{iUEVersion}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
         if not bat.exists():
-            bat = Path( 'D:\\' ) / 'Epic Games' / f'UE_{gVersionUE}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
+            bat = Path( 'C:\\' ) / 'Program Files' / 'Epic Games' / f'UE_{iUEVersion}EA' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
+        if not bat.exists():
+            bat = Path( 'D:\\' ) / 'Epic Games' / f'UE_{iUEVersion}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
+        if not bat.exists():
+            bat = Path( 'D:\\' ) / 'Epic Games' / f'UE_{iUEVersion}EA' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.bat'
         uat = [ str( bat ) ]
     elif gOperatingSystem == 'darwin':
-        uat = [ str( Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{gVersionUE}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh' ) ]
+        sh = Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{iUEVersion}' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh'
+        if not sh.exists():
+            sh = Path( '/' ) / 'Users' / 'Shared' / 'Epic Games' / f'UE_{iUEVersion}EA' / 'Engine' / 'Build' / 'BatchFiles' / 'RunUAT.sh'
+        uat = [ str( sh ) ]
     uat_args = [ 'BuildPlugin', '-Plugin=' + str( iUPluginPathFile ) + '', '-Package=' + str( iOutputPath ) + '', '-CreateSubFolder', '-Rocket' ]
 
     # Run packaging script
@@ -320,15 +374,23 @@ def Upload( iArgs, iOutputPath, iUploadPath ):
 args = GetArguments()
 
 uplugin_pathfile, plugin_name   = ProcessArgumentForInputPath( args )
-intermediate_folders            = GetIntermediateFolders( args, uplugin_pathfile, plugin_name )
+ProcessArgumentForTarget( args )
+ue_version                      = GetUEVersion( args, uplugin_pathfile )
+intermediate_folders            = GetIntermediateFolders( args, uplugin_pathfile, plugin_name, ue_version )
 zip_name                        = GetZipName( args, uplugin_pathfile, plugin_name )
 output_path                     = ProcessArgumentForOutputPath( args, intermediate_folders )
 upload_path                     = ProcessArgumentForUploadPath( args, intermediate_folders )
-ProcessArgumentForTarget( args )
 
 #---
 
-Build( uplugin_pathfile, output_path )
+print( 'Everything\'s ok ? [Y/n]: ' )
+choice = input().lower()
+if choice not in [ 'yes', 'y', '' ]:
+    sys.exit( 50 )
+
+#---
+
+Build( uplugin_pathfile, ue_version, output_path )
 
 PostBuildFix( args, output_path )
 
