@@ -48,10 +48,21 @@ public:
     void SetThumbnailReferenceOffset( float iNewOffset );
 
 private:
-
     /** The board's reference frame offset for single thumbnail rendering */
     UPROPERTY()
     float mThumbnailReferenceOffset;
+
+public:
+    /** @return The board background color */
+    FLinearColor GetBackgroundColor() const;
+
+    /** Set the background color */
+    void SetBackgroundColor( FLinearColor iColor );
+
+private:
+    /** The board's background color */
+    UPROPERTY()
+    FLinearColor mBackgroundColor { FLinearColor::Transparent };
 
 public:
     /** Get the height of this track's rows */

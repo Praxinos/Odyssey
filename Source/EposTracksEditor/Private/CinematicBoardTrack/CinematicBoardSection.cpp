@@ -24,6 +24,8 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Engine/StaticMeshActor.h"
 #include "CineCameraActor.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
@@ -604,9 +606,9 @@ FCinematicBoardSection::OnPaintSection( FSequencerSectionPainter& ioPainter ) co
     const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
 
     if( Cast<UBoardSequence>( sectionObject.GetSequence() ) )
-        ioPainter.LayerId = ioPainter.PaintSectionBackground( settings->BoardTrackSettings.BoardSectionColor );
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( sectionObject.GetBackgroundColor() == FLinearColor::Transparent ? settings->BoardTrackSettings.BoardSectionColor : sectionObject.GetBackgroundColor() );
     else if( Cast<UShotSequence>( sectionObject.GetSequence() ) )
-        ioPainter.LayerId = ioPainter.PaintSectionBackground( settings->BoardTrackSettings.ShotSectionColor );
+        ioPainter.LayerId = ioPainter.PaintSectionBackground( sectionObject.GetBackgroundColor() == FLinearColor::Transparent ? settings->BoardTrackSettings.ShotSectionColor : sectionObject.GetBackgroundColor() );
     else
         ioPainter.LayerId = ioPainter.PaintSectionBackground();
 
@@ -621,6 +623,66 @@ void
 FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, const FGuid& iObjectBinding )
 {
     FKeyThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
+
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "GUIMenuText", "GUI" ) );
+    {
+        auto GetColor = [this]()
+        {
+                                                                    // const_cast is because in the lambda, the compiler doesn't know which this->GetSectionObjectAs() method (const or not) should be used
+            const UMovieSceneCinematicBoardSection& sectionObject = const_cast<FCinematicBoardSection*>( this )->GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+            const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+            return sectionObject.GetBackgroundColor() == FLinearColor::Transparent ? settings->BoardTrackSettings.BoardSectionColor : sectionObject.GetBackgroundColor();
+        };
+
+        auto SetColor = [this]( FLinearColor iNewColor )
+        {
+            TArray<UMovieSceneSection*> selected_sections;
+            GetSequencer()->GetSelectedSections( selected_sections );
+
+            for( auto section : selected_sections )
+            {
+                UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+                board_section->SetBackgroundColor( iNewColor );
+            }
+        };
+
+        auto OnGetMenuContent = [=]() -> TSharedRef<SWidget>
+        {
+            // Open a color picker
+            return SNew( SColorPicker )
+                .TargetColorAttribute_Lambda( GetColor )
+                .UseAlpha( true )
+                .DisplayInlineVersion( true )
+                .OnColorCommitted_Lambda( SetColor );
+        };
+
+        ioMenuBuilder.AddWidget(
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            [
+                SNew( SSpacer )
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew( SComboButton )
+                .ContentPadding( 0 )
+                .HasDownArrow( false )
+                .ButtonStyle( FEditorStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip" )
+                .OnGetMenuContent_Lambda( OnGetMenuContent )
+                .CollapseMenuOnParentFocus( true )
+                .ToolTipText( LOCTEXT( "SectionBackgroundColorTooltip", "Change the background color of this section\n(set to 0 to use the default (settings) one)" ) )
+                .ButtonContent()
+                [
+                    SNew( SColorBlock )
+                    .Color_Lambda( GetColor )
+                    .ShowBackgroundForAlpha( true )
+                    .Size( FVector2D( 50.0f, 16.0f ) )
+                ]
+            ],
+            LOCTEXT( "SectionBackgroundColor", "Background Color" ) );
+    }
+    ioMenuBuilder.EndSection();
 
     UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
 

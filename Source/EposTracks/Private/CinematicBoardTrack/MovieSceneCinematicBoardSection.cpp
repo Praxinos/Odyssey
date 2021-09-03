@@ -344,6 +344,19 @@ UMovieSceneCinematicBoardSection::SetThumbnailReferenceOffset( float iNewOffset 
     mThumbnailReferenceOffset = iNewOffset;
 }
 
+FLinearColor
+UMovieSceneCinematicBoardSection::GetBackgroundColor() const
+{
+    return mBackgroundColor;
+}
+
+void
+UMovieSceneCinematicBoardSection::SetBackgroundColor( FLinearColor iColor )
+{
+    Modify();
+    mBackgroundColor = iColor;
+}
+
 float
 UMovieSceneCinematicBoardSection::GetWidgetHeight() const
 {
