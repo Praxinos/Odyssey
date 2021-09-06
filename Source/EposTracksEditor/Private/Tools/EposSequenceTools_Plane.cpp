@@ -94,6 +94,39 @@ ShotSequenceTools::ComputePlaneScale( const ACineCameraActor* iCamera, float iDi
     //return FVector( 1.5f, 1.f, 1.f );
 }
 
+static
+FVector
+FindNextFreePlaneLocation( UWorld* iWorld, FVector iPlaneLocation, FVector iCameraLocation )
+{
+    FVector next_location = iPlaneLocation;
+
+    TArray<AActor*> existing_planes;
+    UGameplayStatics::GetAllActorsOfClass( iWorld, APlaneActor::StaticClass(), existing_planes );
+
+    auto ExistingPlaneOnLocation = [&existing_planes]( FVector iPlaneLocation )
+    {
+        for( auto existing_plane : existing_planes )
+        {
+            if( existing_plane->GetActorLocation().Equals( iPlaneLocation ) )
+                return true;
+        }
+
+        return false;
+    };
+
+    while( true )
+    {
+        bool used_location = ExistingPlaneOnLocation( next_location );
+        if( !used_location )
+            break;
+
+        FVector direction = ( iCameraLocation - next_location ).GetSafeNormal();
+        next_location += direction * 0.01f;
+    }
+
+    return next_location;
+}
+
 //static
 APlaneActor*
 ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial )
@@ -109,6 +142,7 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMater
     // Make a function GuessPlaneLocation(...)
     float FocusDistance = 200;
     FVector plane_location = CamLocation + CamDir * FocusDistance;
+    plane_location = FindNextFreePlaneLocation( iWorld, plane_location, CamLocation );
 
     FVector plane_scale = ShotSequenceTools::ComputePlaneScale( iCamera, FocusDistance );
 
