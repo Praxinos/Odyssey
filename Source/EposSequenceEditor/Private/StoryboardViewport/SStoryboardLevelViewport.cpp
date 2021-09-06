@@ -29,6 +29,9 @@
 #include "LevelEditorSequencerIntegration.h"
 #include "Fonts/FontMeasure.h"
 #include "Editor.h"
+#include "Engine/Selection.h"
+
+#include "PlaneActor.h"
 
 
 #define LOCTEXT_NAMESPACE "SStoryboardLevelViewport"
@@ -345,6 +348,17 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .ColorAndOpacity(Gray)
                                     .Text_Lambda([=] { return UIData.CameraName; })
                                     .ToolTipText(LOCTEXT("CurrentCamera", "The name of the current camera."))
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .HAlign(HAlign_Right)
+                                .AutoWidth()
+                                .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([=] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
+                                    .ToolTipText(LOCTEXT("SelectedPlanes", "The name of all selected planes."))
                                 ]
                             ]
 
@@ -758,6 +772,16 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     {
         UIData.Filmback = FText();
     }
+
+    UIData.SelectedPlanes.Empty();
+
+    USelection* SelectedActors = GEditor->GetSelectedSet( APlaneActor::StaticClass() );
+    TArray<APlaneActor*> selected_planes;
+    SelectedActors->GetSelectedObjects( selected_planes );
+
+    for( auto selected_plane : selected_planes )
+        UIData.SelectedPlanes.Add( FText::FromString( selected_plane->GetName() ) );
+
 }
 
 #undef LOCTEXT_NAMESPACE

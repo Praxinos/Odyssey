@@ -53,6 +53,9 @@ struct FUIData
     /** The text that represents the master end frame */
     FText MasterEndText;
 
+    /** The text that represents the selected planes */
+    TArray<FText> SelectedPlanes;
+
     /** The tick resolution of the master */
     FFrameRate OuterResolution;
     /** The play rate of the master */

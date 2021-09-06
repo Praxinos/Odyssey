@@ -4,6 +4,7 @@
 #include "Board/BoardSequenceCustomization.h"
 
 #include "CineCameraActor.h"
+#include "Engine/Selection.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "MovieSceneTimeHelpers.h"
@@ -233,13 +234,35 @@ FBoardSequenceCustomization::CreateInfoText() const
     UMovieSceneCinematicBoardTrack* board_track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     int number_of_sections = board_track ? board_track->GetAllSections().Num() : 0;
 
+    //---
+
     TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
 
     TRange<FFrameNumber> playback_range = mBoardSequence->GetMovieScene()->GetPlaybackRange();
     int32 duration_in_tick = UE::MovieScene::DiscreteSize( playback_range );
     FString duration = type_interface->ToString( duration_in_tick ); //TOCHECK: convert duration like time, correct ?
 
-    return FText::Format( LOCTEXT( "info-bar", "Duration: {0} - Board Sections: {1}" ), FText::FromString( duration ), number_of_sections );
+    //---
+
+    USelection* SelectedActors = GEditor->GetSelectedSet( APlaneActor::StaticClass() );
+    TArray<APlaneActor*> selected_planes;
+    SelectedActors->GetSelectedObjects( selected_planes );
+
+    TArray<FString> planes;
+    for( auto selected_plane : selected_planes )
+        planes.Add( selected_plane->GetName() );
+    FString planes_list = FString::Join( planes, TEXT( ", " ) );
+
+    //---
+
+    FFormatOrderedArguments args;
+    args.Add( FText::Format( LOCTEXT( "info-bar.duration", "Duration: {0}" ), FText::FromString( duration ) ) );
+    args.Add( FText::Format( LOCTEXT( "info-bar.board-section-count", "Board Sections: {0}" ), number_of_sections ) );
+    if( planes.Num() )
+        args.Add( FText::Format( LOCTEXT( "info-bar.selected-planes", "Selected Planes: {0}" ), FText::FromString( planes_list ) ) );
+
+    return FText::Join( FText::FromString( TEXT( " - " ) ), args );
+    //return FText::Format( LOCTEXT( "info-bar", "Duration: {0} - Board Sections: {1} - Selected Planes: [{2}]" ), FText::FromString( duration ), number_of_sections, FText::FromString( planes_list ) );
 }
 
 void
