@@ -31,6 +31,14 @@ SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
     DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Hide;
     details_view = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 
+    details_view->SetIsPropertyVisibleDelegate(FIsPropertyVisible::CreateLambda(
+            [](const FPropertyAndParent& iPropertyAndParent) -> bool
+            {
+            return !(iPropertyAndParent.Objects.Num() == 1 && iPropertyAndParent.Property.GetNameCPP() == "Preferences"); //Brush Overrides
+            }
+        )
+    );
+
     this->ChildSlot
     [
         SNew(SVerticalBox)
