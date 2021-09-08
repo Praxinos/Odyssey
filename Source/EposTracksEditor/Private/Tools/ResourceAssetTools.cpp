@@ -7,6 +7,7 @@
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
+#include "EditorAssetLibrary.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "MaterialEditingLibrary.h"
@@ -363,6 +364,22 @@ ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSe
 }
 
 //static
+UMaterialInstanceConstant*
+ProjectAssetTools::CloneMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName )
+{
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+
+    UPackage* package = iSequence->GetPackage();
+    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
+
+    assetToolsModule.Get().CreateUniqueAssetName( package_name, "_MI_01", oPackageName, oAssetName );
+
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iMaterialToClone, oPackageName );
+
+    return Cast<UMaterialInstanceConstant>( new_object );
+}
+
+//static
 UTexture2D*
 ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
 {
@@ -395,6 +412,23 @@ ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneS
 
         new_texture->PostEditChange();
     }
+
+    return new_texture;
+}
+
+//static
+UTexture*
+ProjectAssetTools::CloneTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName )
+{
+    UPackage* package = iMaterial->GetPackage();
+    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/M_Plane_Basic_Inst
+
+    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    Module.Get().CreateUniqueAssetName( package_name, "_T_01", oPackageName, oAssetName );
+
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iTextureToClone, oPackageName );
+
+    UTexture* new_texture = Cast<UTexture>( new_object );
 
     return new_texture;
 }
@@ -435,7 +469,32 @@ ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACi
     UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, texture_size, package_name, asset_name );
     if( !new_texture )
     {
-        new_material->MarkPendingKill();
+        UEditorAssetLibrary::DeleteLoadedAsset( new_material );
+        return nullptr;
+    }
+
+    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
+
+    return new_material;
+}
+
+//static
+UMaterialInstanceConstant*
+ProjectAssetTools::CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, UMovieSceneSequence* iRootSequence )
+{
+    FString package_name;
+    FString asset_name;
+    UMaterialInstanceConstant* new_material = CloneMaterial( iSequence, iRootSequence, iMaterialToClone, package_name, asset_name );
+    if( !new_material )
+        return nullptr;
+
+    UTexture* texture_to_clone;
+    iMaterialToClone->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture_to_clone );
+
+    UTexture* new_texture = CloneTexture( iSequence, iRootSequence, new_material, texture_to_clone, package_name, asset_name );
+    if( !new_texture )
+    {
+        UEditorAssetLibrary::DeleteLoadedAsset( new_material );
         return nullptr;
     }
 

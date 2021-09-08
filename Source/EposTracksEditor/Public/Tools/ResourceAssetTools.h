@@ -66,10 +66,13 @@ class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
     static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence );
+    static UMaterialInstanceConstant* CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, UMovieSceneSequence* iRootSequence );
 
 private:
     static UMaterialInstanceConstant* CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
+    static UMaterialInstanceConstant* CloneMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName );
     static UTexture2D* CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName );
+    static UTexture*   CloneTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName );
 
     static FIntPoint ComputeTextureSize( ACineCameraActor* iCamera );
 };

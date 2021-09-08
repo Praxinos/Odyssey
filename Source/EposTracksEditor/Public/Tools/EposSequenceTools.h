@@ -410,6 +410,8 @@ public:
     */
     static bool CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
+    static void CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
 public:
     /**
     *  Go to the previous drawing in the board section
@@ -572,8 +574,11 @@ public:
 
     static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
+    static void CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
 private:
     static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
 public:
     /**

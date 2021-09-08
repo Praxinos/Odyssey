@@ -674,6 +674,8 @@ protected:
 private:
     TSharedPtr<FMetaMaterialChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
+    void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
+
     /** Start a transaction at mouse down */
     void BeginTransaction( const FText& iTransactionDesc );
     /** End the transaction at mouse up */
@@ -774,6 +776,68 @@ SCinematicBoardSectionPlaneMaterialKeys::EndTransaction()
     sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
+void
+SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
+{
+    auto CloneKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
+    {
+        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
+            return;
+
+        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
+            return;
+
+        FFrameNumber key_framenumber = it.Key();
+
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+        ShotSequenceHelpers::FDrawingData drawing_data;
+        int32 key_index = ShotSequenceHelpers::GetDrawingIndex( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid(), &drawing_data );
+        if( key_index == INDEX_NONE )
+            return;
+
+        UObject* object = drawing_data.mChannel->GetData().GetValues()[key_index].Get();
+        UMaterialInstance* material_to_clone = Cast<UMaterialInstance>( object );
+
+        BoardSequenceTools::CloneDrawing( sequencer, material_to_clone, sequencer->GetLocalTime().Time.FrameNumber, mBinding.GetGuid() );
+    };
+
+    auto CanCloneKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
+    {
+        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
+            return false;
+
+        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
+            return false;
+
+        FFrameNumber key_framenumber = it.Key();
+
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
+
+        int32 key_index = ShotSequenceHelpers::GetDrawingIndex( *sequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), mBinding.GetGuid() );
+
+        return key_index == INDEX_NONE;
+    };
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
+                                LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
+                                FSlateIcon(),
+                                FUIAction( FExecuteAction::CreateLambda( CloneKey, mKeysUnderMouse ),
+                                           FCanExecuteAction::CreateLambda( CanCloneKey, mKeysUnderMouse ) ) );
+}
+
 FCursorReply
 SCinematicBoardSectionPlaneMaterialKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
@@ -796,6 +860,20 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyG
         return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     //---
+
+    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    {
+        FMenuBuilder menu_builder( true, nullptr );
+        BuildKeyContextMenu( menu_builder );
+
+        TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
+        FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+        FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
+
+        mKeysUnderMouse = nullptr; // doesn't go inside OnMouseButtonUp(), so reset it here
+
+        return FReply::Handled();
+    }
 
     BeginTransaction( LOCTEXT( "MovePlaneMaterialKeyTransaction", "Move Plane Material Keys" ) );
 

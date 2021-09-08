@@ -134,6 +134,59 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
+//static
+void
+BoardSequenceTools::CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::CloneDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iMaterialToClone, result.mInnerTime.GetFrame(), iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    CloneDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iMaterialToClone, iFrameNumber, iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    ShotSequenceHelpers::FDrawingData drawing_data;
+    int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
+    if( key_index != INDEX_NONE )
+        return;
+
+    if( !drawing_data.mSection )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "CloneDrawing", "Clone drawing" ) );
+
+    drawing_data.mSection->Modify();
+
+    //---
+
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequence, iMaterialToClone, iSequencer.GetRootMovieSceneSequence() );
+    if( !new_material )
+        return;
+
+    //---
+
+    FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
+
+    UE::MovieScene::AddKeyToChannel( drawing_data.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
 //---
 //---
 //---
