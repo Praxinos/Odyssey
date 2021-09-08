@@ -57,7 +57,8 @@ bool UBoardSequence::CanPossessObject(UObject& Object, UObject* InPlaybackContex
 {
     return Object.IsA<AStaticMeshActor>()
         || Object.IsA<ASkeletalMeshActor>()
-        || Object.IsA<UActorComponent>();
+        || Object.IsA<UActorComponent>()
+        || ExactCast<AActor>( &Object ); // Empty Actor
 }
 
 bool UBoardSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const

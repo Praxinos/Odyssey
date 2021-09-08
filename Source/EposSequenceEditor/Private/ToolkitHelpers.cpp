@@ -347,6 +347,10 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
         CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
         CreateTrack( iSequencer, iActor, iBinding, UMovieSceneSkeletalAnimationTrack::StaticClass() );
     }
+    // For empty actor
+    else if( ExactCast<AActor>( iActor ) )
+    {
+    }
 }
 
 void

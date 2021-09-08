@@ -94,7 +94,8 @@ bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContex
         || Object.IsA<AStaticMeshActor>()
         || Object.IsA<ASkeletalMeshActor>()
         || Object.IsA<ACineCameraActor>()
-        || Object.IsA<UActorComponent>();
+        || Object.IsA<UActorComponent>()
+        || ExactCast<AActor>( &Object ); // Empty Actor
 }
 
 bool UShotSequence::CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const
