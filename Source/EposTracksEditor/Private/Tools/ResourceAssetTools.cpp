@@ -13,6 +13,7 @@
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
+#include "ObjectTools.h"
 
 #include "Settings/EposTracksEditorSettings.h"
 
@@ -501,6 +502,25 @@ ProjectAssetTools::CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMat
     new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
 
     return new_material;
+}
+
+//static
+int32
+ProjectAssetTools::DeleteMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToDelete, UMovieSceneSequence* iRootSequence )
+{
+    check( iMaterialToDelete );
+
+    UTexture* texture_to_delete;
+    iMaterialToDelete->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture_to_delete );
+
+    //TODO: disable lighttable before ?
+
+    //static TArray<FString> UEditorAssetLibrary::FindPackageReferencersForAsset( const FString & AssetPath, bool bLoadAssetsToConfirm = false );
+
+    TArray<UObject*> objects_to_delete;
+    objects_to_delete.Add( iMaterialToDelete );
+    objects_to_delete.Add( texture_to_delete );
+    return ObjectTools::DeleteObjects( objects_to_delete );
 }
 
 #undef LOCTEXT_NAMESPACE

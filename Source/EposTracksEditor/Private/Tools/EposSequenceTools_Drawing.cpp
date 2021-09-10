@@ -3,10 +3,12 @@
 
 #include "Tools/EposSequenceTools.h"
 
+#include "AssetRegistryModule.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
+#include "EditorAssetLibrary.h"
 #include "ISequencer.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieScene.h"
@@ -181,6 +183,90 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
     UE::MovieScene::AddKeyToChannel( drawing_data.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+//static
+void
+BoardSequenceTools::DeleteDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DeleteDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::DeleteDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    DeleteDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    ShotSequenceHelpers::FDrawingData drawing_data;
+    int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
+    if( key_index == INDEX_NONE )
+        return;
+
+    if( !drawing_data.mSection )
+        return;
+
+    FKeyHandle key_handle = drawing_data.mChannel->GetData().GetHandle( key_index );
+
+    IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( "AssetRegistry" ).Get();
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "DeleteDrawing", "Delete drawing" ) );
+
+    drawing_data.mSection->Modify();
+
+    //---
+
+    // Get the current key and its material
+    FMovieSceneObjectPathChannelKeyValue key_value;
+    UE::MovieScene::GetKeyValue( drawing_data.mChannel, key_handle, key_value );
+    UMaterialInstance* material_to_delete = Cast<UMaterialInstance>( key_value.Get() );
+
+    // Reset the current key to break the link between key and material asset
+    UE::MovieScene::AssignValue( drawing_data.mChannel, key_handle, nullptr );
+
+    //-
+
+    UEditorAssetLibrary::SaveLoadedAsset( iSequence );
+
+    TArray<FString> paths;
+    paths.Add( FPaths::GetPath( iSequence->GetPathName() ) );
+    AssetRegistry.ScanPathsSynchronous( paths, true );
+
+    //-
+
+    // Delete the material asset
+    int32 count_deleted = 1; // Arbitrary set to 1 to delete the key if no material
+    if( material_to_delete )
+        count_deleted = ProjectAssetTools::DeleteMaterialAndTexture( iSequence, material_to_delete, iSequencer.GetRootMovieSceneSequence() );
+
+    drawing_data.mSection->Modify();
+
+    // Delete the key if material asset was really deleted or set again the key value to its original value
+    if( count_deleted )
+        drawing_data.mChannel->DeleteKeys( MakeArrayView( &key_handle, 1 ) );
+    else
+        UE::MovieScene::AssignValue( drawing_data.mChannel, key_handle, material_to_delete );
+
+    //-
+
+    UEditorAssetLibrary::SaveLoadedAsset( iSequence );
+
+    AssetRegistry.ScanPathsSynchronous( paths, true );
 
     //---
 

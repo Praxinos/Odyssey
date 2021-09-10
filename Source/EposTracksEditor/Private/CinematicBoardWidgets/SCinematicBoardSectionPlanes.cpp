@@ -828,6 +828,37 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         return key_index == INDEX_NONE;
     };
 
+    //-
+
+    auto DeleteKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
+    {
+        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
+            return;
+
+        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
+            return;
+
+        FFrameNumber key_framenumber = it.Key();
+
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        //BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+        //ShotSequenceHelpers::FDrawingData drawing_data;
+        //int32 key_index = ShotSequenceHelpers::GetDrawingIndex( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid(), &drawing_data );
+        //if( key_index == INDEX_NONE )
+        //    return;
+
+        FFrameNumber key_outer_framenumber = ( key_framenumber * subsection_object->OuterToInnerTransform().InverseLinearOnly() ).GetFrame();
+
+        BoardSequenceTools::DeleteDrawing( sequencer, key_outer_framenumber, mBinding.GetGuid() ); //TODO: maybe try to avoid computing the outer frame number of the key and give the key ? or the drawing data ?
+    };
+
+    //-
+
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
@@ -836,6 +867,11 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
                                 FSlateIcon(),
                                 FUIAction( FExecuteAction::CreateLambda( CloneKey, mKeysUnderMouse ),
                                            FCanExecuteAction::CreateLambda( CanCloneKey, mKeysUnderMouse ) ) );
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ),
+                                LOCTEXT( "delete-material-key-tooltip", "Delete the current key (material and texture)" ),
+                                FSlateIcon(),
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ) ) );
 }
 
 FCursorReply
