@@ -420,7 +420,7 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FStrin
 
 template<typename SequenceClass>
 //static
-void
+UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
     const FScopedTransaction transaction( LOCTEXT( "InsertBoard_Transaction", "Insert Board" ) );
@@ -439,21 +439,23 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     iSequencer->EmptySelection();
     iSequencer->SelectSection( newBoard );
     iSequencer->ThrobSectionSelection();
+
+    return newBoard;
 }
 
 //---
 
 //static
-void
+UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
-    InsertSequence<UBoardSequence>( iSequencer, iFrameNumber, iDuration );
+    return InsertSequence<UBoardSequence>( iSequencer, iFrameNumber, iDuration );
 }
 //static
-void
+UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
-    InsertSequence<UShotSequence>( iSequencer, iFrameNumber, iDuration );
+    return InsertSequence<UShotSequence>( iSequencer, iFrameNumber, iDuration );
 }
 
 ////static

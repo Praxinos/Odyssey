@@ -184,31 +184,39 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
 {
     FMenuBuilder menuBuilder( true, nullptr );
 
-    auto InsertShot = [this]()
+    TSharedRef<int32> numberOfNewSequence( new int32( 1 ) );
+
+    auto InsertShot = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetInclusiveStartFrame() );
+        for( int i = 0; i < *iNumberOfNewSequence; i++ )
+        {
+            CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetInclusiveStartFrame() );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShot ) ),
-                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-shot-before-label", "New Shot" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShot, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-shot-before-label", "New {0}|plural(one=Shot,other=Shots)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-shot-before-tooltip", "Create a new section containing a new shot before this section with the same duration as the current section" ) );
 
     //-
 
-    auto InsertShotWithDuration = [this]()
+    auto InsertShotWithDuration = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
         FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
-        CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetInclusiveStartFrame(), time.RoundToFrame().Value );
+        for( int i = 0; i < *iNumberOfNewSequence; i++ )
+        {
+            CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetInclusiveStartFrame(), time.RoundToFrame().Value );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShotWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-before-with-duration-label", "New Shot" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShotWithDuration, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-before-with-duration-label", "New {0}|plural(one=Shot,other=Shots)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-shot-before-with-duration-tooltip", "Create a new section containing a new shot before this section with the specified duration" ) );
 
@@ -218,31 +226,37 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
 
     //-
 
-    auto InsertBoard = [this]()
+    auto InsertBoard = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetInclusiveStartFrame() );
+        for( int i = 0; i < *iNumberOfNewSequence; i++ )
+        {
+            CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetInclusiveStartFrame() );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoard ) ),
-                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-board-before-label", "New Board" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoard, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-board-before-label", "New {0}|plural(one=Board,other=Boards)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-board-before-tooltip", "Create a new section containing a new board before this section with the same duration as the current section" ) );
 
     //-
 
-    auto InsertBoardWithDuration = [this]()
+    auto InsertBoardWithDuration = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
         FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
-        CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetInclusiveStartFrame(), time.RoundToFrame().Value );
+        for( int i = 0; i < *iNumberOfNewSequence; i++ )
+        {
+            CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetInclusiveStartFrame(), time.RoundToFrame().Value );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoardWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-before-with-duration-label", "New Board" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoardWithDuration, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-before-with-duration-label", "New {0}|plural(one=Board,other=Boards)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-board-before-with-duration-tooltip", "Create a new section containing a new board before this section with the specified duration" ) );
 
@@ -254,31 +268,39 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
 {
     FMenuBuilder menuBuilder( true, nullptr );
 
-    auto InsertShot = [this]()
+    TSharedRef<int32> numberOfNewSequence( new int32( 1 ) );
+
+    auto InsertShot = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetExclusiveEndFrame() - 1 );
+        UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
+        for( int i = 0; i < *iNumberOfNewSequence && subsection_object; i++ )
+        {
+            subsection_object = CinematicBoardTrackTools::InsertShot( sequencer, subsection_object->GetExclusiveEndFrame() - 1 );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShot ) ),
-                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-shot-after-label", "New Shot" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShot, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-shot-after-label", "New {0}|plural(one=Shot,other=Shots)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-shot-after-tooltip", "Create a new section containing a new shot after this section with the same duration as the current section" ) );
 
     //-
 
-    auto InsertShotWithDuration = [this]()
+    auto InsertShotWithDuration = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
         FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
-        CinematicBoardTrackTools::InsertShot( sequencer, section_object->GetExclusiveEndFrame() - 1, time.RoundToFrame().Value );
+        for( int i = 0; i < *iNumberOfNewSequence && subsection_object; i++ )
+        {
+            subsection_object = CinematicBoardTrackTools::InsertShot( sequencer, subsection_object->GetExclusiveEndFrame() - 1, time.RoundToFrame().Value );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShotWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-after-with-duration-label", "New Shot" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertShotWithDuration, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-shot-after-with-duration-label", "New {0}|plural(one=Shot,other=Shots)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-shot-after-with-duration-tooltip", "Create a new section containing a new shot after this section with the specified duration" ) );
 
@@ -288,31 +310,37 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
 
     //-
 
-    auto InsertBoard = [this]()
+    auto InsertBoard = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetExclusiveEndFrame() - 1 );
+        UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
+        for( int i = 0; i < *iNumberOfNewSequence && subsection_object; i++ )
+        {
+            subsection_object = CinematicBoardTrackTools::InsertBoard( sequencer, subsection_object->GetExclusiveEndFrame() - 1 );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoard ) ),
-                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-board-after-label", "New Board" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoard, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationText( LOCTEXT( "section.create-board-after-label", "New {0}|plural(one=Board,other=Boards)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-board-after-tooltip", "Create a new section containing a new board after this section with the same duration as the current section" ) );
 
     //-
 
-    auto InsertBoardWithDuration = [this]()
+    auto InsertBoardWithDuration = [this]( TSharedPtr<int32> iNumberOfNewSequence )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
         FFrameRate tick_resolution = sequencer->GetFocusedTickResolution();
         FFrameTime time = GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration * tick_resolution;
-        CinematicBoardTrackTools::InsertBoard( sequencer, section_object->GetExclusiveEndFrame() - 1, time.RoundToFrame().Value );
+        for( int i = 0; i < *iNumberOfNewSequence && subsection_object; i++ )
+        {
+            subsection_object = CinematicBoardTrackTools::InsertBoard( sequencer, subsection_object->GetExclusiveEndFrame() - 1, time.RoundToFrame().Value );
+        }
     };
 
-    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoardWithDuration ) ),
-                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-after-with-duration-label", "New Board" ) ),
+    menuBuilder.AddMenuEntry( FUIAction( FExecuteAction::CreateLambda( InsertBoardWithDuration, numberOfNewSequence ) ),
+                              CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-after-with-duration-label", "New {0}|plural(one=Board,other=Boards)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-board-after-with-duration-tooltip", "Create a new section containing a new board after this section with the specified duration" ) );
 
@@ -320,8 +348,22 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
 }
 
 TSharedRef<SWidget>
-SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( FText iLabel )
+SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( FText iLabel, TSharedRef<int32> iNumberOfNewSequence )
 {
+    *iNumberOfNewSequence = 1; // Always create 1 by default
+
+    auto OnNumberOfNewSequenceChanged = [=]( int32 iNewValue )
+    {
+        *iNumberOfNewSequence = iNewValue;
+    };
+
+    auto GetNumberOfNewSequence = [=]() -> int32
+    {
+        return *iNumberOfNewSequence;
+    };
+
+    //-
+
     auto OnDurationChanged = [=]( double iNewValue )
     {
         FFrameTime time = FFrameTime::FromDecimal( iNewValue );
@@ -350,6 +392,15 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         return time.GetFrame().Value;
     };
 
+    //-
+
+    auto GetLabel = [=]() -> FText
+    {
+        return FText::Format( iLabel, *iNumberOfNewSequence );
+    };
+
+    //-
+
     ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
     FFrameRate tick_resolution = sequencer->GetFocusedTickResolution(); // For the example below: 24000 fps
     FFrameRate display_rate = sequencer->GetFocusedDisplayRate();       // For the example below: 24fps
@@ -359,8 +410,22 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         .AutoWidth()
         .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
         [
+            SNew( SSpinBox<int32> )
+            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
+            //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+            .OnValueCommitted_Lambda( [=] (int32 Value, ETextCommit::Type) { OnNumberOfNewSequenceChanged(Value); } )
+            .OnValueChanged_Lambda( [=] (int32 Value) { OnNumberOfNewSequenceChanged(Value); } )
+            .MinValue( 1 )
+            .MaxValue( 10 )
+            .Value_Lambda( GetNumberOfNewSequence )
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding( FMargin( 5, 0, 0, 0 ) )
+        .VAlign( VAlign_Center )
+        [
             SNew( STextBlock )
-            .Text( iLabel )
+            .Text_Lambda( GetLabel )
         ]
         + SHorizontalBox::Slot()
         [
@@ -368,7 +433,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FMargin( 20.f, 0, 4, 0 ) )
+        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<double> )
             .TypeInterface( sequencer->GetNumericTypeInterface() )
@@ -382,8 +447,22 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
 }
 
 TSharedRef<SWidget>
-SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FText iLabel )
+SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FText iLabel, TSharedRef<int32> iNumberOfNewSequence )
 {
+    *iNumberOfNewSequence = 1; // Always create 1 by default
+
+    auto OnNumberOfNewSequenceChanged = [=]( int32 iNewValue )
+    {
+        *iNumberOfNewSequence = iNewValue;
+    };
+
+    auto GetNumberOfNewSequence = [=]() -> int32
+    {
+        return *iNumberOfNewSequence;
+    };
+
+    //-
+
     auto GetDuration = [this]() -> FString
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
@@ -397,13 +476,36 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         return time_string;
     };
 
+    //-
+
+    auto GetLabel = [=]() -> FText
+    {
+        return FText::Format( iLabel, *iNumberOfNewSequence );
+    };
+
+    //-
+
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
         .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
         [
+            SNew( SSpinBox<int32> )
+            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
+            //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+            .OnValueCommitted_Lambda( [=] (int32 Value, ETextCommit::Type) { OnNumberOfNewSequenceChanged(Value); } )
+            .OnValueChanged_Lambda( [=] (int32 Value) { OnNumberOfNewSequenceChanged(Value); } )
+            .MinValue( 1 )
+            .MaxValue( 10 )
+            .Value_Lambda( GetNumberOfNewSequence )
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding( FMargin( 5, 0, 0, 0 ) )
+        .VAlign( VAlign_Center )
+        [
             SNew( STextBlock )
-            .Text( iLabel )
+            .Text_Lambda( GetLabel )
         ]
         + SHorizontalBox::Slot()
         [
@@ -411,7 +513,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FMargin( 20.f, 0, 4, 0 ) )
+        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
         [
             SNew( STextBlock )
             .TextStyle( &FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "NormalText.Subdued" ) )

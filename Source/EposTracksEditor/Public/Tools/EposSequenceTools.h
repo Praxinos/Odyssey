@@ -36,7 +36,7 @@ public:
      * @param iFrameNumber The start frame of the new section/board
      * @param iDuration The (optional) duration of the new section/board
      */
-    static void InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
+    static UMovieSceneSubSection* InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
 
     /*
      * Insert Shot.
@@ -45,7 +45,7 @@ public:
      * @param iFrameNumber The start frame of the new section/shot
      * @param iDuration The (optional) duration of the new section/shot
      */
-    static void InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
+    static UMovieSceneSubSection* InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
 
     /*
      * Insert Filler.
@@ -105,7 +105,7 @@ private:
      * @param iDuration The (optional) duration of the new section/board
      */
     template<typename SequenceClass>
-    static void InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
+    static UMovieSceneSubSection* InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
 };
 
 //---
