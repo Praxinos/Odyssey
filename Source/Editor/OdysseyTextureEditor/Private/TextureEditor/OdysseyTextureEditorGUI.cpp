@@ -53,14 +53,14 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 			FTabManager::NewStack()
 			->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.2f)
+			->SetSizeCoefficient(0.35f)
 		)
 		->Split
 		(
 			FTabManager::NewStack()
 			->AddTab(mTextureDetailsTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.4f)
+			->SetSizeCoefficient(0.15f)
 		);
 }
 
