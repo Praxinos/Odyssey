@@ -20,11 +20,11 @@ protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
-protected:
+public:
     // Widget Getters
     virtual UOdysseyBrushAssetBase* BrushInstance() const;
 
-protected:
+public:
     // Event Listeners
     virtual void OnParameterChanged();
 

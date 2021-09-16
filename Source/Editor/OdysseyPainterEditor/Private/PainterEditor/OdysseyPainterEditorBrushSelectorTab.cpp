@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyPainterEditorBrushSelectorTab.h"
-
 #include "Brush/SOdysseyBrushSelector.h"
+#include "Brush/SOdysseyBrushExposedParameters.h"
 #include "OdysseyBrushPreferencesOverrides.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditor.h"
@@ -12,6 +12,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyStrokeOptions.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushSelectorTab"
 
@@ -37,9 +38,32 @@ FOdysseyPainterEditorBrushSelectorTab::FOdysseyPainterEditorBrushSelectorTab(FOd
 TSharedPtr<SWidget>
 FOdysseyPainterEditorBrushSelectorTab::CreateWidget()
 {
-	return SNew( SOdysseyBrushSelector )
-        .Brush(this, &FOdysseyPainterEditorBrushSelectorTab::Brush)
-        .OnBrushChanged_Raw( this, &FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected );
+    return SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+//                SNew( SHorizontalBox )
+//                    + SHorizontalBox::Slot()
+//                        .AutoWidth()
+//                        [
+                            SNew( SOdysseyBrushSelector )
+                            .Brush( this, &FOdysseyPainterEditorBrushSelectorTab::Brush )
+                            .OnBrushChanged_Raw( this, &FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected )
+//                        ]
+            ]
+        + SVerticalBox::Slot()
+//          .AutoHeight()
+            .FillHeight(1.0f)
+            [
+//                SNew( SHorizontalBox )
+//                    + SHorizontalBox::Slot()
+//                        .AutoWidth()
+//                        [
+                            SNew( SOdysseyBrushExposedParameters )
+                            .BrushInstance( this, &FOdysseyPainterEditorBrushSelectorTab::BrushInstance )
+                            .OnParameterChanged_Raw( this, &FOdysseyPainterEditorBrushSelectorTab::OnParameterChanged )
+//                        ]
+            ];
 }
 
 TSharedRef< SDockTab >
@@ -49,7 +73,7 @@ FOdysseyPainterEditorBrushSelectorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 
     return SNew( SDockTab )
         .Label( DisplayName() )
-        .ShouldAutosize( true )
+//        .ShouldAutosize( true )
         [
             Widget().ToSharedRef()
         ];
@@ -99,5 +123,24 @@ FOdysseyPainterEditorBrushSelectorTab::RefreshBrush()
         mEditor->PaintEngine()->Brush(brush);
     }
 }
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Getters
+
+UOdysseyBrushAssetBase*
+FOdysseyPainterEditorBrushSelectorTab::BrushInstance() const
+{
+    return mEditor->PaintEngine()->BrushInstance();
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Event Listeners
+
+void
+FOdysseyPainterEditorBrushSelectorTab::OnParameterChanged()
+{   
+    mEditor->PaintEngine()->TriggerStateChanged();
+}
+
 
 #undef LOCTEXT_NAMESPACE

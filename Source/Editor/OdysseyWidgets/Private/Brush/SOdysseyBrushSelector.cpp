@@ -26,9 +26,10 @@ void SOdysseyBrushSelector::Construct(const FArguments& InArgs)
     [
         SNew( SHorizontalBox )
             + SHorizontalBox::Slot()
-            .HAlign(HAlign_Fill)
-            .VAlign(VAlign_Fill)
-            .Padding( 2 )
+//            .HAlign(HAlign_Fill)
+//            .VAlign(VAlign_Fill)
+//            .Padding( 2 )
+            .FillWidth(1.0f)
             [
                 SNew(SObjectPropertyEntryBox)
                     .AllowedClass(          UOdysseyBrush::StaticClass() )

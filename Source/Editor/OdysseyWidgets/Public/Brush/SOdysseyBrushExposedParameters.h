@@ -44,6 +44,6 @@ private:
     TAttribute<UOdysseyBrushAssetBase*>     mBrushInstance;
     UOdysseyBrushAssetBase*                 mCurrentBrushInstance;
 
-    FOnParameterChanged         OnParameterChangedCallback;
-    TSharedPtr< IDetailsView >  details_view;
+    FOnParameterChanged                     OnParameterChangedCallback;
+    TSharedPtr< IDetailsView >              details_view;
 };
