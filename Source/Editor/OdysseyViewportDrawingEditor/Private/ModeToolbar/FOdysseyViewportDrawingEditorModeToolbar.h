@@ -24,7 +24,6 @@ public:
 public:
     void OpenLayerStackTab();
     void OpenColorSlidersTab();
-    void OpenBrushExposedParametersTab();
     void OpenBrushSelectorTab();
     void OpenColorWheelTab();
     void OpenMeshSelectorTab();

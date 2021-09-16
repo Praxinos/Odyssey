@@ -6,7 +6,6 @@
 #include "OdysseyEditorGUI.h"
 
 #include "OdysseyPainterEditorBrushSelectorTab.h"
-#include "OdysseyPainterEditorBrushExposedParametersTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
@@ -55,7 +54,6 @@ public:
     TSharedPtr<FOdysseyPainterEditorViewportTab>& GetViewportTab();
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>& GetBrushSelectorTab();
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>& GetMeshSelectorTab();
-    TSharedPtr<FOdysseyPainterEditorBrushExposedParametersTab>& GetBrushExposedParametersTab();
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>& GetColorWheelTab();
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>& GetColorSlidersTab();
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>& GetStrokeOptionsTab();
@@ -76,7 +74,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
     TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
     TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
-    TSharedPtr<FOdysseyPainterEditorBrushExposedParametersTab>  mBrushExposedParametersTab;
     TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
     TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>           mStrokeOptionsTab;

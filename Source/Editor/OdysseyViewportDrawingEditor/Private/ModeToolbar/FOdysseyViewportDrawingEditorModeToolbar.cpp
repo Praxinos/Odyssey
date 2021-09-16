@@ -36,10 +36,6 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
     if (tab.IsValid())
         tab->RequestCloseTab();
 
-    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetBrushExposedParametersTab()->ID()));
-    if (tab.IsValid())
-        tab->RequestCloseTab();
-
     tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetBrushSelectorTab()->ID()));
     if (tab.IsValid())
         tab->RequestCloseTab();
@@ -96,12 +92,6 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
     if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetColorSlidersTab()->ID() ) )
     {
         str = mGUI->GetColorSlidersTab()->ID().ToString();
-        buffer << str;
-    }
-
-    if( mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetBrushExposedParametersTab()->ID() ) )
-    {
-        str = mGUI->GetBrushExposedParametersTab()->ID().ToString();
         buffer << str;
     }
 
@@ -214,14 +204,6 @@ void FOdysseyViewportDrawingEditorModeToolbar::OpenColorSlidersTab()
         return;
 
     mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetColorSlidersTab()->ID()));
-}
-
-void FOdysseyViewportDrawingEditorModeToolbar::OpenBrushExposedParametersTab()
-{
-    if( !mLevelEditorTabManager )
-        return;
-
-    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetBrushExposedParametersTab()->ID()));
 }
 
 void FOdysseyViewportDrawingEditorModeToolbar::OpenBrushSelectorTab()

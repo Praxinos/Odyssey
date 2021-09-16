@@ -42,27 +42,17 @@ FOdysseyPainterEditorBrushSelectorTab::CreateWidget()
         + SVerticalBox::Slot()
             .AutoHeight()
             [
-//                SNew( SHorizontalBox )
-//                    + SHorizontalBox::Slot()
-//                        .AutoWidth()
-//                        [
                             SNew( SOdysseyBrushSelector )
                             .Brush( this, &FOdysseyPainterEditorBrushSelectorTab::Brush )
                             .OnBrushChanged_Raw( this, &FOdysseyPainterEditorBrushSelectorTab::OnBrushSelected )
-//                        ]
             ]
         + SVerticalBox::Slot()
-//          .AutoHeight()
             .FillHeight(1.0f)
             [
-//                SNew( SHorizontalBox )
-//                    + SHorizontalBox::Slot()
-//                        .AutoWidth()
-//                        [
+            //TODO: Should have a Brush or BrushInstance Getter
                             SNew( SOdysseyBrushExposedParameters )
                             .BrushInstance( this, &FOdysseyPainterEditorBrushSelectorTab::BrushInstance )
                             .OnParameterChanged_Raw( this, &FOdysseyPainterEditorBrushSelectorTab::OnParameterChanged )
-//                        ]
             ];
 }
 
@@ -73,7 +63,6 @@ FOdysseyPainterEditorBrushSelectorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 
     return SNew( SDockTab )
         .Label( DisplayName() )
-//        .ShouldAutosize( true )
         [
             Widget().ToSharedRef()
         ];

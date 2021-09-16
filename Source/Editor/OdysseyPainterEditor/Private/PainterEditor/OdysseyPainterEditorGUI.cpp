@@ -6,7 +6,6 @@
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorBrushSelectorTab.h"
-#include "OdysseyPainterEditorBrushExposedParametersTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
@@ -14,9 +13,9 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
-
 #include "SOdysseyAboutScreen.h"
 #include "SOdysseyTabletAPISwitcher.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
 
@@ -45,7 +44,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
 	ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
 	ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
 	ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
-	ODYSSEY_ADD_TAB(mBrushExposedParametersTab, FOdysseyPainterEditorBrushExposedParametersTab, mEditor);
 	ODYSSEY_ADD_TAB(mColorWheelTab, FOdysseyPainterEditorColorWheelTab, mEditor);
 	ODYSSEY_ADD_TAB(mColorSlidersTab, FOdysseyPainterEditorColorSlidersTab, mEditor);
 	ODYSSEY_ADD_TAB(mToolsTab, FOdysseyPainterEditorToolsTab, mEditor);
@@ -126,38 +124,29 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
 {
 	return FTabManager::NewSplitter()
 		->SetOrientation(Orient_Vertical)
-		->SetSizeCoefficient(0.2f)
+		->SetSizeCoefficient(0.15f)
 		// Brush Selector
 		->Split
 		(
 			FTabManager::NewStack()
 			->AddTab(mBrushSelectorTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.1f)
+			->SetSizeCoefficient(0.33f)
 		)
-		// Brush Preview
-		->Split
-		(
-			FTabManager::NewStack()
-			// Brush Params
-			->AddTab(mBrushExposedParametersTab->ID(), ETabState::OpenedTab)
-			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.1f)
-		)
-		// Brush Params + Stroke Options
+		// Mesh Selector + Stroke Options
 		->Split
 		(
 			FTabManager::NewStack()
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.3f)
+			->SetSizeCoefficient(0.33f)
 			// Stroke Options
 			->AddTab(mStrokeOptionsTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.3f)
+			->SetSizeCoefficient(0.33f)
 			// Mesh Selector
 			->AddTab(mMeshSelectorTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.3f)
+			->SetSizeCoefficient(0.33f)
 		)
 		// Tools
 		->Split
@@ -165,7 +154,7 @@ FOdysseyPainterEditorGUI::CreateLeftSection()
 			FTabManager::NewStack()
 			->AddTab(mToolsTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.2f)
+			->SetSizeCoefficient(0.33f)
 		);
 }
 
@@ -173,7 +162,7 @@ TSharedRef<FTabManager::FSplitter>
 FOdysseyPainterEditorGUI::CreateRightSection()
 {
 	return FTabManager::NewSplitter()
-		->SetSizeCoefficient(0.16f)
+		->SetSizeCoefficient(0.15f)
 		->SetOrientation(Orient_Vertical)
 		// ColorSelector
 		->Split
@@ -181,7 +170,7 @@ FOdysseyPainterEditorGUI::CreateRightSection()
 			FTabManager::NewStack()
 			->AddTab(mColorWheelTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.2f)
+			->SetSizeCoefficient(0.5f)
 		)
 		// ColorSliders
 		->Split
@@ -189,7 +178,7 @@ FOdysseyPainterEditorGUI::CreateRightSection()
 			FTabManager::NewStack()
 			->AddTab(mColorSlidersTab->ID(), ETabState::OpenedTab)
 			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.2f)
+			->SetSizeCoefficient(0.5f)
 		);
 }
 
@@ -199,7 +188,7 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
 
 	return FTabManager::NewSplitter()
 		->SetOrientation(Orient_Vertical)
-		->SetSizeCoefficient(1.0f)
+		->SetSizeCoefficient(0.7f)
 		// Top Bar
 		->Split
 		(
@@ -269,12 +258,6 @@ TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>&
 FOdysseyPainterEditorGUI::GetMeshSelectorTab()
 {
 	return mMeshSelectorTab;
-}
-
-TSharedPtr<FOdysseyPainterEditorBrushExposedParametersTab>&
-FOdysseyPainterEditorGUI::GetBrushExposedParametersTab()
-{
-	return mBrushExposedParametersTab;
 }
 
 TSharedPtr<FOdysseyPainterEditorColorWheelTab>&

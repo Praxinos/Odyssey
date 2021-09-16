@@ -77,14 +77,6 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
     );
 
     ioToolbarBuilder.AddToolBarButton(
-        FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::OpenBrushExposedParametersTab) ),
-        NAME_None,
-        LOCTEXT("ViewportDrawingEditorToggleBrushExposedParametersTab", "Exposed Param"),
-        LOCTEXT("ViewportDrawingEditorToggleBrushExposedParametersTabTooltip", "Display Brush Exposed Parameters"),
-        FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters20" )
-    );
-
-    ioToolbarBuilder.AddToolBarButton(
         FUIAction(FExecuteAction::CreateSP( viewportDrawingEditor->GetToolbar(), &FOdysseyViewportDrawingEditorModeToolbar::OpenToolsTab) ),
         NAME_None,
         LOCTEXT("ViewportDrawingEditorToggleToolsTab", "Tools"),
