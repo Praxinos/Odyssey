@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
+#include "OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
@@ -21,7 +23,6 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ))
     , mEditor(iEditor)
-    , mIsVertical(false)
 {
 }
 
@@ -41,21 +42,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
         .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
         .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
-        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged )
-        .VerticalAspect(mIsVertical);
-}
-
-TSharedRef< SDockTab >
-FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
-{
-    check( iArgs.GetTabId() == ID() );
-
-    return SNew( SDockTab )
-        .Label( DisplayName() )
-        .ShouldAutosize( true )
-        [
-            Widget().ToSharedRef()
-        ];
+        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged );
 }
 
 void
@@ -79,15 +66,6 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
 
     #undef MAP_ACTION
-}
-
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Setters
-
-void
-FOdysseyPainterEditorTopTab::IsVertical(bool iIsVertical)
-{
-    mIsVertical = iIsVertical;
 }
 
 //--------------------------------------------------------------------------------------

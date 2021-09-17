@@ -49,23 +49,10 @@ FOdysseyPainterEditorBrushSelectorTab::CreateWidget()
         + SVerticalBox::Slot()
             .FillHeight(1.0f)
             [
-            //TODO: Should have a Brush or BrushInstance Getter
                             SNew( SOdysseyBrushExposedParameters )
                             .BrushInstance( this, &FOdysseyPainterEditorBrushSelectorTab::BrushInstance )
                             .OnParameterChanged_Raw( this, &FOdysseyPainterEditorBrushSelectorTab::OnParameterChanged )
             ];
-}
-
-TSharedRef< SDockTab >
-FOdysseyPainterEditorBrushSelectorTab::SpawnTab( const FSpawnTabArgs& iArgs )
-{
-    check( iArgs.GetTabId() == ID() );
-
-    return SNew( SDockTab )
-        .Label( DisplayName() )
-        [
-            Widget().ToSharedRef()
-        ];
 }
 
 void

@@ -3,7 +3,16 @@
 // see: https://udn.unrealengine.com/s/question/0D54z0000775oOGCAY/spackagereportdialog-and-sdiscoveringassetsdialog-are-private
 
 #include "SOdysseyDiscoveringAssetsDialog.h"
+#include "Modules/ModuleManager.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SWindow.h"
+#include "Layout/WidgetPath.h"
 #include "SlateOptMacros.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Input/SButton.h"
+#include "EditorStyleSet.h"
 #include "AssetRegistryModule.h"
 #include "EditorWidgetsModule.h"
 #include "Interfaces/IMainFrameModule.h"

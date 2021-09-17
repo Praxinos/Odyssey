@@ -24,26 +24,18 @@ void SOdysseyBrushSelector::Construct(const FArguments& InArgs)
 
     ChildSlot
     [
-        SNew( SHorizontalBox )
-            + SHorizontalBox::Slot()
-            .HAlign(HAlign_Fill)
-            .VAlign(VAlign_Fill)
-            .Padding( 2 )
-            .FillWidth(1.0f)
-            [
-                SNew(SObjectPropertyEntryBox)
-                    .AllowedClass(          UOdysseyBrush::StaticClass() )
-                    .ObjectPath(            this, &SOdysseyBrushSelector::ObjectPath )
-                    .ThumbnailPool(         asset_thumbnail_pool )
-                    .OnObjectChanged(       this, &SOdysseyBrushSelector::OnObjectChanged )
-                    .AllowClear(            true )
-                    .DisplayUseSelected(    true )
-                    .DisplayBrowse(         true )
-                    .EnableContentPicker(   true )
-                    .DisplayCompactSize(    true )
-                    .DisplayThumbnail(      true )
-                    .ThumbnailSizeOverride( FIntPoint( 30, 30 ) )
-            ]
+        SNew(SObjectPropertyEntryBox)
+            .AllowedClass(          UOdysseyBrush::StaticClass() )
+            .ObjectPath(            this, &SOdysseyBrushSelector::ObjectPath )
+            .ThumbnailPool(         asset_thumbnail_pool )
+            .OnObjectChanged(       this, &SOdysseyBrushSelector::OnObjectChanged )
+            .AllowClear(            true )
+            .DisplayUseSelected(    true )
+            .DisplayBrowse(         true )
+            .EnableContentPicker(   true )
+            .DisplayCompactSize(    true )
+            .DisplayThumbnail(      true )
+            .ThumbnailSizeOverride( FIntPoint( 30, 30 ) )
     ];
 }
 

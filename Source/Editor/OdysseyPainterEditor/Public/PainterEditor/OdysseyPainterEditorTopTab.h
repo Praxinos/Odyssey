@@ -18,12 +18,7 @@ public:
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual TSharedRef< SDockTab > SpawnTab( const FSpawnTabArgs& iArgs ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-
-public:
-    // Setters
-    void IsVertical(bool iIsVertical);
 
 protected:
     // Widget Getters
@@ -49,6 +44,6 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
-    bool mIsVertical;
+
 };
 

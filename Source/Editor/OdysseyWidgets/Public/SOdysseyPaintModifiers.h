@@ -33,7 +33,6 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPaintModifiers )
         {}
-        SLATE_ARGUMENT( bool, VerticalAspect )
         SLATE_ATTRIBUTE( ::ul3::eBlendingMode, BlendingMode )
         SLATE_ATTRIBUTE( ::ul3::eAlphaMode, AlphaMode )
         SLATE_EVENT( FOnGetIntProperty, OnGetSize )

@@ -4,8 +4,16 @@
 
 
 #include "SOdysseyPackageReportDialog.h"
-#include "Widgets/Layout/SUniformGridPanel.h"
+#include "Modules/ModuleManager.h"
+#include "Widgets/SWindow.h"
+#include "Layout/WidgetPath.h"
 #include "SlateOptMacros.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/SButton.h"
+#include "EditorStyleSet.h"
 #include "Interfaces/IMainFrameModule.h"
 
 #define LOCTEXT_NAMESPACE "PackageReportDialog"

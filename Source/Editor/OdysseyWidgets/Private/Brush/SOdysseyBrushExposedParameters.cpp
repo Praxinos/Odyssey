@@ -41,12 +41,7 @@ SOdysseyBrushExposedParameters::Construct( const FArguments& InArgs )
 
     this->ChildSlot
     [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                    .FillWidth(1.0f)
-                    [
-                        details_view.ToSharedRef()
-                    ]
+        details_view.ToSharedRef()
     ];
 }
 

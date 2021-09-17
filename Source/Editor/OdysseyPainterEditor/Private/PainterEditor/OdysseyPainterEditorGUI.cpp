@@ -195,7 +195,7 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
             FTabManager::NewStack()
             ->AddTab(mTopTab->ID(), ETabState::OpenedTab)
             ->SetHideTabWell(true)
-            ->SetSizeCoefficient(0.1f)
+            ->SetSizeCoefficient(0.025f)
         )
         // Viewport
         ->Split
@@ -203,7 +203,7 @@ FOdysseyPainterEditorGUI::CreateMiddleSection()
             FTabManager::NewStack()
             ->AddTab(mViewportTab->ID(), ETabState::OpenedTab)
             ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.9f)
+            ->SetSizeCoefficient(0.975f)
         );
 }
 
