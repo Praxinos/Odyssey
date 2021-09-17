@@ -3,7 +3,6 @@
 
 #include "Tools/EposSequenceTools.h"
 
-#include "AssetRegistryModule.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
@@ -221,8 +220,6 @@ ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
     FKeyHandle key_handle = drawing_data.mChannel->GetData().GetHandle( key_index );
 
-    IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( "AssetRegistry" ).Get();
-
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "DeleteDrawing", "Delete drawing" ) );
@@ -231,42 +228,7 @@ ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
     //---
 
-    // Get the current key and its material
-    FMovieSceneObjectPathChannelKeyValue key_value;
-    UE::MovieScene::GetKeyValue( drawing_data.mChannel, key_handle, key_value );
-    UMaterialInstance* material_to_delete = Cast<UMaterialInstance>( key_value.Get() );
-
-    // Reset the current key to break the link between key and material asset
-    UE::MovieScene::AssignValue( drawing_data.mChannel, key_handle, nullptr );
-
-    //-
-
-    UEditorAssetLibrary::SaveLoadedAsset( iSequence );
-
-    TArray<FString> paths;
-    paths.Add( FPaths::GetPath( iSequence->GetPathName() ) );
-    AssetRegistry.ScanPathsSynchronous( paths, true );
-
-    //-
-
-    // Delete the material asset
-    int32 count_deleted = 1; // Arbitrary set to 1 to delete the key if no material
-    if( material_to_delete )
-        count_deleted = ProjectAssetTools::DeleteMaterialAndTexture( iSequence, material_to_delete, iSequencer.GetRootMovieSceneSequence() );
-
-    drawing_data.mSection->Modify();
-
-    // Delete the key if material asset was really deleted or set again the key value to its original value
-    if( count_deleted )
-        drawing_data.mChannel->DeleteKeys( MakeArrayView( &key_handle, 1 ) );
-    else
-        UE::MovieScene::AssignValue( drawing_data.mChannel, key_handle, material_to_delete );
-
-    //-
-
-    UEditorAssetLibrary::SaveLoadedAsset( iSequence );
-
-    AssetRegistry.ScanPathsSynchronous( paths, true );
+    drawing_data.mChannel->DeleteKeys( MakeArrayView( &key_handle, 1 ) );
 
     //---
 
