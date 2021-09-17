@@ -4,7 +4,8 @@
 #include "SOdysseyPaintModifiers.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
-
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPaintModifiers"
 
@@ -35,184 +36,158 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 
     ChildSlot
     [
-        SNew( SBox )
-            .HeightOverride( 25 )
+        SNew( SWrapBox )
+		.UseAllottedWidth( true )
+		+SWrapBox::Slot()
+		[
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+//            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
             [
-                SNew( SHorizontalBox )
+                SNew( STextBlock )
+                .Text( LOCTEXT( "Size", "Size:    " ) )
+            ]
 
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SAssignNew( mSizeSpinBox, SSpinBox< int >)
+                .Value( this, &SOdysseyPaintModifiers::OnGetSize )
+                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
+                .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
+                .ShiftMouseMovePixelPerDelta( 15 )
+                .Delta( 1 )
+                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                .SliderExponentNeutralValue( 100 )
+                .MinDesiredWidth( 80.0f )
+            ]
+
+		]
+		+SWrapBox::Slot()
+		[
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+//            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SNew( STextBlock )
+                .Text( LOCTEXT( "Opacity", "Opacity:" ) )
+            ]
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SAssignNew( mOpacitySpinBox, SSpinBox< int > )
+                .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
+                .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
+                .Delta( 1 )
+                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
+                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
+                .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
+                .MinDesiredWidth( 80.0f )
+            ]
+		]
+		+SWrapBox::Slot()
+		[
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SNew( STextBlock )
+                .Text( LOCTEXT( "Flow", "Flow:" ) )
+            ]
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SAssignNew( mFlowSpinBox, SSpinBox< int > )
+                .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
+                .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
+                .Delta( 1 )
+                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
+                .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
+                .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
+                .MinDesiredWidth( 80.0f )
+            ]
+        ]
+		+SWrapBox::Slot()
+		[
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+//            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SNew( STextBlock )
+                .Text( LOCTEXT( "Blend", "Blend:" ) )
+            ]
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+                .IsFocusable(false)
+                .OptionsSource(&mBlendingModes)
+                .InitiallySelectedItem(mBlendingModes[mBlendingMode.Get()])
+                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem)
+                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
+                .Content()
                 [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Size", "Size:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mSizeSpinBox, SSpinBox< int >)
-                            .Value( this, &SOdysseyPaintModifiers::OnGetSize )
-                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleSizeSpinBoxChanged )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
-                            .ShiftMouseMovePixelPerDelta( 15 )
-                            .Delta( 1 )
-                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                            .SliderExponentNeutralValue( 100 )
-                        ]
-
-                    ]
-                ]
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Opacity", "Opacity:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mOpacitySpinBox, SSpinBox< int > )
-                            .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
-                            .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
-                            .Delta( 1 )
-                            .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
-                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
-                        ]
-                    ]
-                ]
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Flow", "Flow:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mFlowSpinBox, SSpinBox< int > )
-                            .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
-                            .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
-                            .Delta( 1 )
-                            .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
-                            .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
-                            .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
-                        ]
-                    ]
-                ]
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Blend", "Blend:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                            .IsFocusable(false)
-                            .OptionsSource(&mBlendingModes)
-                            .InitiallySelectedItem(mBlendingModes[mBlendingMode.Get()])
-                            .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem)
-                            .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
-                            .Content()
-                            [
-                                CreateBlendingModeTextWidget()
-                            ]
-                        ]
-                    ]
-                ]
-
-
-                +SHorizontalBox::Slot()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( SHorizontalBox )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign( VAlign_Center )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Left )
-                        [
-                            SNew( STextBlock )
-                            .Text( LOCTEXT( "Alpha", "Alpha:" ) )
-                        ]
-                    ]
-                    +SHorizontalBox::Slot()
-                    .VAlign( VAlign_Center )
-                    .Padding( 6.f, 0.f )
-                    [
-                        SNew( SBox )
-                        .HAlign( HAlign_Fill )
-                        [
-                            SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
-                            .IsFocusable( false )
-                            .OptionsSource(&mAlphaModes)
-                            .InitiallySelectedItem(mAlphaModes[mAlphaMode.Get()])
-                            .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
-                            .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
-                            .Content()
-                            [
-                                CreateAlphaModeTextWidget()
-                            ]
-                        ]
-                    ]
+                    CreateBlendingModeTextWidget()
                 ]
             ]
+        ]
+		+SWrapBox::Slot()
+		[
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+//            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SNew( STextBlock )
+                .Text( LOCTEXT( "Alpha", "Alpha:" ) )
+            ]
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .HAlign( HAlign_Left )
+            .Padding( 3.f, 3.f )
+            [
+                SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
+                .IsFocusable( false )
+                .OptionsSource(&mAlphaModes)
+                .InitiallySelectedItem(mAlphaModes[mAlphaMode.Get()])
+                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
+                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                .Content()
+                [
+                    CreateAlphaModeTextWidget()
+                ]
+            ]
+        ]
     ];
 }
 
