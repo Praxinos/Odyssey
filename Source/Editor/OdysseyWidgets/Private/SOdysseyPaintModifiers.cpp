@@ -37,7 +37,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     ChildSlot
     [
         SNew( SWrapBox )
-		.UseAllottedWidth( true )
+		.UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot horizontally
 		+SWrapBox::Slot()
 		[
             SNew( SHorizontalBox )
@@ -45,17 +45,16 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             +SHorizontalBox::Slot()
 //            .AutoWidth()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            .MaxWidth( 45.f )
             [
                 SNew( STextBlock )
-                .Text( LOCTEXT( "Size", "Size:    " ) )
+                .Text( LOCTEXT( "Size", "Size :" ) )
             ]
 
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 13.f, 3.f )
             [
                 SAssignNew( mSizeSpinBox, SSpinBox< int >)
                 .Value( this, &SOdysseyPaintModifiers::OnGetSize )
@@ -65,7 +64,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .Delta( 1 )
                 .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
                 .SliderExponentNeutralValue( 100 )
-                .MinDesiredWidth( 80.0f )
+                .MinDesiredWidth( 100.0f )
             ]
 
 		]
@@ -76,8 +75,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             +SHorizontalBox::Slot()
 //            .AutoWidth()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            .MaxWidth( 45.f )
             [
                 SNew( STextBlock )
                 .Text( LOCTEXT( "Opacity", "Opacity:" ) )
@@ -85,8 +84,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 13.f, 3.f )
             [
                 SAssignNew( mOpacitySpinBox, SSpinBox< int > )
                 .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
@@ -95,7 +93,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
-                .MinDesiredWidth( 80.0f )
+                .MinDesiredWidth( 83.0f )
             ]
 		]
 		+SWrapBox::Slot()
@@ -104,17 +102,16 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
 
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            .MaxWidth( 45.f )
             [
                 SNew( STextBlock )
-                .Text( LOCTEXT( "Flow", "Flow:" ) )
+                .Text( LOCTEXT( "Flow", "Flow :" ) )
             ]
 
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 13.f, 3.f )
             [
                 SAssignNew( mFlowSpinBox, SSpinBox< int > )
                 .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
@@ -123,7 +120,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
-                .MinDesiredWidth( 80.0f )
+                .MinDesiredWidth( 96.0f )
             ]
         ]
 		+SWrapBox::Slot()
@@ -131,19 +128,18 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
-//            .AutoWidth()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 10.f, 3.f )
+            .MaxWidth( 45.f )
             [
                 SNew( STextBlock )
-                .Text( LOCTEXT( "Blend", "Blend:" ) )
+                .Text( LOCTEXT( "Blend", "Blend :" ) )
             ]
 
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 33.f, 3.f )
+            .AutoWidth()
             [
                 SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
                 .IsFocusable(false)
@@ -164,17 +160,17 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             +SHorizontalBox::Slot()
 //            .AutoWidth()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 9.f, 3.f )
+            .MaxWidth( 45.f )
             [
                 SNew( STextBlock )
-                .Text( LOCTEXT( "Alpha", "Alpha:" ) )
+                .Text( LOCTEXT( "Alpha", "Alpha :" ) )
             ]
 
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
-            .HAlign( HAlign_Left )
-            .Padding( 3.f, 3.f )
+            .Padding( 3.f, 3.f, 13.f, 3.f )
+            .AutoWidth()
             [
                 SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
                 .IsFocusable( false )
