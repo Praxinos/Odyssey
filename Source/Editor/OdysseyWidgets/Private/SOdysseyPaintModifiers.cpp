@@ -43,7 +43,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
-//            .AutoWidth()
             .VAlign( VAlign_Center )
             .Padding( 3.f, 3.f, 3.f, 3.f )
             .MaxWidth( 45.f )
@@ -62,9 +61,9 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetSize )
                 .ShiftMouseMovePixelPerDelta( 15 )
                 .Delta( 1 )
-                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  LinearDeltaSensitivity MinValue MaxValue
                 .SliderExponentNeutralValue( 100 )
-                .MinDesiredWidth( 100.0f )
+                .MinDesiredWidth( 100.0f ) // Depends on the size of the text in the previous slot
             ]
 
 		]
@@ -73,7 +72,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
-//            .AutoWidth()
             .VAlign( VAlign_Center )
             .Padding( 3.f, 3.f, 3.f, 3.f )
             .MaxWidth( 45.f )
@@ -93,7 +91,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
-                .MinDesiredWidth( 83.0f )
+                .MinDesiredWidth( 83.0f ) // Depends on the size of the text in the previous slot
             ]
 		]
 		+SWrapBox::Slot()
@@ -120,7 +118,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
-                .MinDesiredWidth( 96.0f )
+                .MinDesiredWidth( 96.0f ) // Depends on the size of the text in the previous slot
             ]
         ]
 		+SWrapBox::Slot()
@@ -139,7 +137,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
             .Padding( 3.f, 3.f, 33.f, 3.f )
-            .AutoWidth()
+            .AutoWidth() // The size of the SComboBox will automatically adapt to the text it contains, according to the user's choice
             [
                 SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
                 .IsFocusable(false)
@@ -158,7 +156,6 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
-//            .AutoWidth()
             .VAlign( VAlign_Center )
             .Padding( 3.f, 3.f, 9.f, 3.f )
             .MaxWidth( 45.f )
@@ -170,7 +167,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
             .Padding( 3.f, 3.f, 13.f, 3.f )
-            .AutoWidth()
+            .AutoWidth() // The size of the SComboBox will automatically adapt to the text it contains, according to the user's choice
             [
                 SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
                 .IsFocusable( false )
