@@ -5,7 +5,9 @@
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPaintModifiers"
 
@@ -38,6 +40,68 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     [
         SNew( SWrapBox )
 		.UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot horizontally
+        +SWrapBox::Slot()
+		[
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+            .Padding( 6.f, 3.f, 3.f, 3.f )
+            [
+ 		    SNew( SButton )
+		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("SaveCurrentImageButton", "Save the current image within the current project.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin(0.0, 0.0) )
+		    .OnClicked( InArgs._OnSaveButtonClicked )
+		        [
+			        SNew( SImage )
+			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Save32" ) )
+		        ]
+            ]
+            +SHorizontalBox::Slot()
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            [
+            SNew( SButton )
+		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("UndoActionButton", "Undo the previous action.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin(0.0, 0.0) )
+		    .OnClicked( InArgs._OnUndoButtonClicked )
+		        [
+			        SNew( SImage )
+			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Undo32" ) )
+		        ]
+            ]
+            +SHorizontalBox::Slot()
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            [
+            SNew( SButton )
+		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("RedoActionButton", "Redo the next action.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin(0.0, 0.0) )
+		    .OnClicked( InArgs._OnRedoButtonClicked )
+		        [
+			        SNew( SImage )
+			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Redo32" ) )
+		        ]
+            ]
+            +SHorizontalBox::Slot()
+            .Padding( 3.f, 3.f, 33.f, 3.f )
+            [
+            SNew( SButton )
+		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ToolTipText( LOCTEXT("EraserButton", "Switch the current tool to Eraser mode.") )
+            .VAlign( VAlign_Center )
+            .ContentPadding( FMargin(0.0, 0.0) )
+		    .OnClicked( InArgs._OnEraserButtonClicked )
+		        [
+			        SNew( SImage )
+			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Eraser32" ) )
+                    .ColorAndOpacity( FLinearColor( 0.968f, 0.576f, 0.117f, 1 ) )
+		        ]
+            ]
+		]
 		+SWrapBox::Slot()
 		[
             SNew( SHorizontalBox )
@@ -88,7 +152,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .Value( this, &SOdysseyPaintModifiers::OnGetOpacity )
                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                 .Delta( 1 )
-                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
+                .TypeInterface( MakeShared<TNumericUnitTypeInterface<int>>( EUnit::Percentage ) )
                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleOpacitySpinBoxChanged )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
                 .MinDesiredWidth( 83.0f ) // Depends on the size of the text in the previous slot
@@ -115,7 +179,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .Value( this, &SOdysseyPaintModifiers::OnGetFlow )
                 .LinearDeltaSensitivity( 15 ) // Doesn't work with MinValue, MinSliderValue ...
                 .Delta( 1 )
-                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
+                .TypeInterface( MakeShared<TNumericUnitTypeInterface<int>>( EUnit::Percentage ) )
                 .OnValueCommitted( this, &SOdysseyPaintModifiers::HandleFlowSpinBoxChanged )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetFlow )
                 .MinDesiredWidth( 96.0f ) // Depends on the size of the text in the previous slot
@@ -139,12 +203,12 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             .Padding( 3.f, 3.f, 33.f, 3.f )
             .AutoWidth() // The size of the SComboBox will automatically adapt to the text it contains, according to the user's choice
             [
-                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                .IsFocusable(false)
-                .OptionsSource(&mBlendingModes)
-                .InitiallySelectedItem(mBlendingModes[mBlendingMode.Get()])
-                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
+                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>> )
+                .IsFocusable( false )
+                .OptionsSource( &mBlendingModes )
+                .InitiallySelectedItem( mBlendingModes[mBlendingMode.Get()] )
+                .OnGenerateWidget( this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem )
+                .OnSelectionChanged( this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
                 .Content()
                 [
                     CreateBlendingModeTextWidget()
@@ -169,12 +233,12 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             .Padding( 3.f, 3.f, 13.f, 3.f )
             .AutoWidth() // The size of the SComboBox will automatically adapt to the text it contains, according to the user's choice
             [
-                SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>>)
+                SAssignNew( mAlphaModeComboBox, SComboBox<TSharedPtr<FText>> )
                 .IsFocusable( false )
-                .OptionsSource(&mAlphaModes)
-                .InitiallySelectedItem(mAlphaModes[mAlphaMode.Get()])
-                .OnGenerateWidget(this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                .OptionsSource( &mAlphaModes )
+                .InitiallySelectedItem( mAlphaModes[mAlphaMode.Get()] )
+                .OnGenerateWidget( this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem )
+                .OnSelectionChanged( this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
                 .Content()
                 [
                     CreateAlphaModeTextWidget()

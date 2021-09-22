@@ -301,6 +301,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.RotateReset64", new IMAGE_BRUSH( "PainterEditor/rotate_reset_64", mIcon64x64 ) );
     Set( "PainterEditor.RotateReset16", new IMAGE_BRUSH( "PainterEditor/rotate_reset_16", mIcon16x16 ) );
 
+    //PainterEditor - Top Bar
+    Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH( "PainterEditor/undo_32", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.Redo32", new IMAGE_BRUSH( "PainterEditor/redo_32", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.Save32", new IMAGE_BRUSH( "PainterEditor/save_32", mIcon32x32 ) );
+    Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH( "PainterEditor/eraser_32", mIcon32x32 ) );
+
     //PainterEditor - ToolsTab
     Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ClearLayer32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_32", mIcon32x32 ) );
@@ -332,10 +338,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.ColorPicker64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_64", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ColorPicker32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.ColorPicker16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/color_picker_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.ToolsTab.Undo32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/undo_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Redo32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/redo_32", mIcon32x32 ) );
-
 
     //OdysseyLayerStack
     Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) );

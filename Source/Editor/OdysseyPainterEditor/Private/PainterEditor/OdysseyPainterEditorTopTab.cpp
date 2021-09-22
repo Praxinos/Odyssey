@@ -33,16 +33,20 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
 {
 	return SNew( SOdysseyPaintModifiers )
-        .OnGetSize(this, &FOdysseyPainterEditorTopTab::OnGetSize)
-        .OnGetOpacity(this, &FOdysseyPainterEditorTopTab::OnGetOpacity)
-        .OnGetFlow(this, &FOdysseyPainterEditorTopTab::OnGetFlow)
-        .BlendingMode(this, &FOdysseyPainterEditorTopTab::BlendingMode)
-        .AlphaMode(this, &FOdysseyPainterEditorTopTab::AlphaMode)
-        .OnSizeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnSizeChanged )
-        .OnOpacityChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
-        .OnFlowChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
-        .OnBlendingModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
-        .OnAlphaModeChanged_Raw(this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged );
+        .OnGetSize( this, &FOdysseyPainterEditorTopTab::OnGetSize )
+        .OnGetOpacity( this, &FOdysseyPainterEditorTopTab::OnGetOpacity )
+        .OnGetFlow( this, &FOdysseyPainterEditorTopTab::OnGetFlow )
+        .BlendingMode( this, &FOdysseyPainterEditorTopTab::BlendingMode )
+        .AlphaMode( this, &FOdysseyPainterEditorTopTab::AlphaMode )
+        .OnSizeChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnSizeChanged )
+        .OnOpacityChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnOpacityChanged )
+        .OnFlowChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnFlowChanged )
+        .OnBlendingModeChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnBlendingModeChanged )
+        .OnAlphaModeChanged_Raw( this, &FOdysseyPainterEditorTopTab::OnAlphaModeChanged )
+        .OnSaveButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnSaveButtonClicked )
+        .OnUndoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked )
+        .OnRedoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked )
+        .OnEraserButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked );
 }
 
 void
@@ -53,17 +57,17 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorTopTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    MAP_ACTION(painterEditorCommands.IncreaseBrushSize, AddSize, 1 )
-    MAP_ACTION(painterEditorCommands.DecreaseBrushSize, AddSize, -1 )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeNormal, SetAlphaMode, ::ul3::eAlphaMode::AM_NORMAL )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeErase, SetAlphaMode, ::ul3::eAlphaMode::AM_ERASE )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeTop, SetAlphaMode, ::ul3::eAlphaMode::AM_TOP )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeBack, SetAlphaMode, ::ul3::eAlphaMode::AM_BACK )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeSub, SetAlphaMode, ::ul3::eAlphaMode::AM_SUB )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeAdd, SetAlphaMode, ::ul3::eAlphaMode::AM_ADD )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeMul, SetAlphaMode, ::ul3::eAlphaMode::AM_MUL )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeMin, SetAlphaMode, ::ul3::eAlphaMode::AM_MIN )
-    MAP_ACTION(painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
+    MAP_ACTION( painterEditorCommands.IncreaseBrushSize, AddSize, 1 )
+    MAP_ACTION( painterEditorCommands.DecreaseBrushSize, AddSize, -1 )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeNormal, SetAlphaMode, ::ul3::eAlphaMode::AM_NORMAL )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeErase, SetAlphaMode, ::ul3::eAlphaMode::AM_ERASE )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeTop, SetAlphaMode, ::ul3::eAlphaMode::AM_TOP )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeBack, SetAlphaMode, ::ul3::eAlphaMode::AM_BACK )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeSub, SetAlphaMode, ::ul3::eAlphaMode::AM_SUB )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeAdd, SetAlphaMode, ::ul3::eAlphaMode::AM_ADD )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMul, SetAlphaMode, ::ul3::eAlphaMode::AM_MUL )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMin, SetAlphaMode, ::ul3::eAlphaMode::AM_MIN )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
 
     #undef MAP_ACTION
 }
@@ -133,6 +137,33 @@ FOdysseyPainterEditorTopTab::OnGetFlow() const
 {
     return mEditor->PaintEngine()->GetFlowModifier();
 }
+
+FReply
+FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
+{
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorTopTab::OnUndoButtonClicked()
+{
+    mEditor->Undo();
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
+{
+    mEditor->Redo();
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
+{
+    return FReply::Handled();
+}
+
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners

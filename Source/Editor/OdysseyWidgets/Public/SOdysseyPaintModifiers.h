@@ -43,6 +43,10 @@ public:
         SLATE_EVENT( FOnInt32ValueChanged, OnFlowChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnBlendingModeChanged )
         SLATE_EVENT( FOnInt32ValueChanged, OnAlphaModeChanged )
+        SLATE_EVENT( FOnClicked, OnSaveButtonClicked )
+        SLATE_EVENT( FOnClicked, OnUndoButtonClicked )
+        SLATE_EVENT( FOnClicked, OnRedoButtonClicked )
+        SLATE_EVENT( FOnClicked, OnEraserButtonClicked )
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
@@ -118,5 +122,6 @@ private:
     FOnInt32ValueChanged            mOnFlowChangedCallback;
     FOnInt32ValueChanged            mOnBlendingModeChangedCallback;
     FOnInt32ValueChanged            mOnAlphaModeChangedCallback;
+
 };
 

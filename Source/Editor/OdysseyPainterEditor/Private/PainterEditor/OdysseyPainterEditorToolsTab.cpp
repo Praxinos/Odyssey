@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyPainterEditorToolsTab.h"
-
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SExpandableArea.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyPainterEditor.h"
@@ -91,7 +91,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
 					.OnClicked_Raw(this, &FOdysseyPainterEditorToolsTab::OnUndo)
 					[
-						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Undo32"))
+						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.Undo32"))
 					]
 				]
 				+SWrapBox::Slot()
@@ -100,7 +100,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
 					.OnClicked_Raw(this, &FOdysseyPainterEditorToolsTab::OnRedo)
 					[
-						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Redo32"))
+						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.Redo32"))
 					]
 				]
 				+SWrapBox::Slot()

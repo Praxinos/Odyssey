@@ -13,12 +13,12 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTopTab :
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorTopTab();
-    FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor);
+    FOdysseyPainterEditorTopTab( FOdysseyPainterEditor* iEditor );
 
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
 
 protected:
     // Widget Getters
@@ -36,11 +36,15 @@ protected:
     virtual void OnFlowChanged( int32 iValue );
     virtual void OnBlendingModeChanged( int32 iValue );
     virtual void OnAlphaModeChanged( int32 iValue );
+    virtual FReply OnSaveButtonClicked();
+    virtual FReply OnUndoButtonClicked();
+    virtual FReply OnRedoButtonClicked();
+    virtual FReply OnEraserButtonClicked();
 
 protected:
     // Methods
-    virtual void SetAlphaMode(::ul3::eAlphaMode iAlphaMode);
-    virtual void AddSize(int32 iValue);
+    virtual void SetAlphaMode( ::ul3::eAlphaMode iAlphaMode );
+    virtual void AddSize( int32 iValue );
 
 private:
     FOdysseyPainterEditor* mEditor;
