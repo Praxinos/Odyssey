@@ -359,9 +359,53 @@ ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSeq
     {
         oData->mChannel = channels[0];
         oData->mSection = section;
+        oData->mKeyIndex = key_index;
     }
 
     return key_index;
+}
+
+//static
+int32
+ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TArray<FDrawingData>* oDrawings )
+{
+    oDrawings->Reset();
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return 0;
+
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return 0;
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    if( !plane )
+        return 0;
+
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return 0;
+
+    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+    if( !track )
+        return 0;
+
+    for( auto section : track->GetAllSections() )
+    {
+        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
+        if( !section_material )
+            continue;
+
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        check( channels.Num() == 1 );
+        for( int k = 0; k < channels[0]->GetNumKeys(); k++ )
+        {
+            FDrawingData drawing = { channels[0], section, k };
+            oDrawings->Add( drawing );
+        }
+    }
+
+    return oDrawings->Num();
 }
 
 //static

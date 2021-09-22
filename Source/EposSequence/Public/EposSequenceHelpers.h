@@ -68,8 +68,10 @@ public:
     {
         FMovieSceneObjectPathChannel* mChannel;
         UMovieSceneSection* mSection;
+        int32 mKeyIndex;
     };
     static int32 GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding, FDrawingData* oData = nullptr );
+    static int32 GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TArray<FDrawingData>* oDrawings );
     static TArray<FFrameNumber> GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
 
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );

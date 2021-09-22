@@ -81,7 +81,14 @@ public:
      *
      * @param Section The section to duplicate
      */
-    void DuplicateBoard( UMovieSceneCinematicBoardSection* iSection );
+    //void DuplicateBoard( UMovieSceneCinematicBoardSection* iSection );
+
+    /*
+     * Duplicate board.
+     *
+     * @param Section The section to duplicate
+     */
+    //void CloneSection( UMovieSceneCinematicBoardSection* iSection );
 
     /*
      * Render board.

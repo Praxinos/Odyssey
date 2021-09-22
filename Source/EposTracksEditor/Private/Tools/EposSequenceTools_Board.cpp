@@ -5,7 +5,10 @@
 
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Channels/MovieSceneObjectPathChannel.h"
+#include "CineCameraActor.h"
 #include "IAssetTools.h"
+#include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
@@ -13,8 +16,11 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposSequenceHelpers.h"
+#include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
+#include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Board"
 
@@ -350,12 +356,13 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, FStrin
 
     FString newBoardPath;
 
-    if( iSectionToDuplicate != nullptr )
-    {
-        // If duplicating a board, use that board's path
-        newBoardPath = FPaths::GetPath( iSectionToDuplicate->GetSequence()->GetPathName() );
-    }
-    else
+    //if( iSectionToDuplicate != nullptr )
+    //{
+    //    // If duplicating a board, use that board's path
+    //    newBoardPath = FPaths::GetPath( iSectionToDuplicate->GetSequence()->GetPathName() );
+    //}
+    //else
+    // Should be ok to generate the cloned path the same way as new shot/board
     {
         newBoardPath = GenerateNewSequencePath( iSequencer->GetRootMovieSceneSequence()->GetMovieScene(), iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene(), ioNewSequenceName );
     }
@@ -486,46 +493,218 @@ CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFram
 //    iSequencer->ThrobSectionSelection();
 //}
 
+////static
+//void
+//CinematicBoardTrackTools::DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection )
+//{
+//    UMovieSceneSequence* subsequence = iSection->GetSequence();
+//    if( !subsequence )
+//        return;
+//
+//    const FScopedTransaction transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
+//
+//    UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
+//
+//    FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
+//    FString newBoardName;
+//    if( subsequence->IsA<UBoardSequence>() )
+//        newBoardName = GenerateNewSectionName<UBoardSequence>( boardTrack->GetAllSections(), startTime );
+//    else
+//        newBoardName = GenerateNewSectionName<UShotSequence>( boardTrack->GetAllSections(), startTime );
+//
+//    // Duplicate the board and put it on the next available row
+//    UMovieSceneSubSection* newBoard;
+//    if( subsequence->IsA<UBoardSequence>() )
+//        newBoard = CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, startTime, TOptional<int32>(), iSection );
+//    else
+//        newBoard = CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, startTime, TOptional<int32>(), iSection );
+//
+//    if( !newBoard )
+//        return;
+//
+//    //newBoard->SetRange( iSection->GetRange() );
+//    //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+//    newBoard->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
+//    newBoard->Parameters.TimeScale = iSection->Parameters.TimeScale;
+//    newBoard->SetPreRollFrames( iSection->GetPreRollFrames() );
+//
+//    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+//    BoardSequenceTools::UpdateViewRange( iSequencer, newBoard ? newBoard->GetTrueRange() : TRange<FFrameNumber>::Empty() );
+//    iSequencer->EmptySelection();
+//    iSequencer->SelectSection( newBoard );
+//    iSequencer->ThrobSectionSelection();
+//}
+
 //static
 void
-CinematicBoardTrackTools::DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection )
+CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber )
 {
     UMovieSceneSequence* subsequence = iSection->GetSequence();
     if( !subsequence )
         return;
 
-    const FScopedTransaction transaction( LOCTEXT( "DuplicateBoard_Transaction", "Duplicate Board" ) );
+    const FScopedTransaction transaction( LOCTEXT( "CloneBoard_Transaction", "Clone Board" ) );
 
     UMovieSceneCinematicBoardTrack* boardTrack = BoardSequenceTools::FindOrCreateCinematicBoardTrack( iSequencer );
 
-    FFrameNumber startTime = iSection->HasStartFrame() ? iSection->GetInclusiveStartFrame() : 0;
     FString newBoardName;
     if( subsequence->IsA<UBoardSequence>() )
-        newBoardName = GenerateNewSectionName<UBoardSequence>( boardTrack->GetAllSections(), startTime );
+        newBoardName = GenerateNewSectionName<UBoardSequence>( boardTrack->GetAllSections(), iFrameNumber );
     else
-        newBoardName = GenerateNewSectionName<UShotSequence>( boardTrack->GetAllSections(), startTime );
+        newBoardName = GenerateNewSectionName<UShotSequence>( boardTrack->GetAllSections(), iFrameNumber );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* newBoard;
     if( subsequence->IsA<UBoardSequence>() )
-        newBoard = CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, startTime, TOptional<int32>(), iSection );
+        newBoard = CreateSequenceInternal<UBoardSequence>( iSequencer, newBoardName, iFrameNumber, TOptional<int32>(), iSection );
     else
-        newBoard = CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, startTime, TOptional<int32>(), iSection );
+        newBoard = CreateSequenceInternal<UShotSequence>( iSequencer, newBoardName, iFrameNumber, TOptional<int32>(), iSection );
 
-    if( newBoard )
+    if( !newBoard )
+        return;
+
+    //newBoard->SetRange( iSection->GetRange() );
+    //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
+    newBoard->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
+    newBoard->Parameters.TimeScale = iSection->Parameters.TimeScale;
+    newBoard->SetPreRollFrames( iSection->GetPreRollFrames() );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    BoardSequenceTools::UpdateViewRange( iSequencer, newBoard ? newBoard->GetTrueRange() : TRange<FFrameNumber>::Empty() );
+    iSequencer->EmptySelection();
+    iSequencer->SelectSection( newBoard );
+    iSequencer->ThrobSectionSelection();
+
+    if( !newBoard->GetSequence() )
+        return;
+
+    if( newBoard->GetSequence()->IsA<UShotSequence>() )
+        ShotSequenceTools::CloneInnerContent( iSequencer, newBoard );
+}
+
+//static
+void
+ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSection* iSection )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, *iSection, iSequencer->GetFocusedTemplateID() );
+
+    result.mInnerSequence->Modify();
+    result.mInnerMovieScene->Modify();
+
+    //---
+
+    FGuid camera_guid;
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
+    if( !camera )
+        return;
+
+    FActorSpawnParameters cameraSpawnParams;
+    cameraSpawnParams.Template = camera;
+    ACineCameraActor* cloned_camera = camera->GetWorld()->SpawnActor<ACineCameraActor>( cameraSpawnParams );
+    if( !cloned_camera )
+        return;
+
+    cloned_camera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer->GetRootMovieSceneSequence()->GetPathName() ) );
+    FActorLabelUtilities::SetActorLabelUnique( cloned_camera, TEXT( "Camera_1" ) ); // The shot name is displayed in another column in the world outliner
+
+    //-
+
+    result.mInnerSequence->UnbindPossessableObjects( camera_guid );
+    result.mInnerSequence->BindPossessableObject( camera_guid, *cloned_camera, iSequencer->GetPlaybackContext() );
+    result.mInnerMovieScene->FindPossessable( camera_guid )->SetName( cloned_camera->GetActorLabel() );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+
+    //---
+
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> plane_bindings;
+    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, &planes, &plane_bindings );
+
+    for( int i = 0; i < plane_count; i++ )
     {
-        //newBoard->SetRange( iSection->GetRange() );
-        //newBoard->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, newBoard ) );
-        newBoard->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
-        newBoard->Parameters.TimeScale = iSection->Parameters.TimeScale;
-        newBoard->SetPreRollFrames( iSection->GetPreRollFrames() );
+        bool attachPlaneToCamera = false;
+        USceneComponent* RootComp = planes[i]->GetRootComponent();
+        if( RootComp && RootComp->GetAttachParent() )
+        {
+            AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+            attachPlaneToCamera = ( ParentActor == camera );
+        }
 
-        iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-        iSequencer->EmptySelection();
-        iSequencer->SelectSection( newBoard );
-        iSequencer->ThrobSectionSelection();
+        CloneInnerPlane( iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerMovieScene, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
     }
 }
 
+//static
+void
+ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera )
+{
+    FActorSpawnParameters planeSpawnParams;
+    planeSpawnParams.Template = iPlaneToClone;
+    APlaneActor* cloned_plane = iPlaneToClone->GetWorld()->SpawnActor<APlaneActor>( planeSpawnParams );
+    if( !cloned_plane )
+        return;
+
+    cloned_plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer->GetRootMovieSceneSequence()->GetPathName() ) );
+    FActorLabelUtilities::SetActorLabelUnique( cloned_plane, TEXT( "Plane_1" ) ); // The shot name is displayed in another column in the world outliner
+
+    cloned_plane->SetActorTransform( iPlaneToClone->GetTransform() );
+
+    //-
+
+    if( iAttachPlaneToCamera )
+        GEditor->ParentActors( iClonedCamera, cloned_plane, NAME_None );
+
+    //-
+
+    iSequence->UnbindPossessableObjects( iPlaneBinding );
+    iSequence->BindPossessableObject( iPlaneBinding, *cloned_plane, iSequencer->GetPlaybackContext() );
+    iMovieScene->FindPossessable( iPlaneBinding )->SetName( cloned_plane->GetActorLabel() );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+
+    //---
+
+    TArray<ShotSequenceHelpers::FDrawingData> drawings;
+    int32 drawing_count = ShotSequenceHelpers::GetAllDrawings( *iSequencer, iSequence, iSequenceID, iPlaneBinding, &drawings );
+
+    for( auto& drawing : drawings )
+    {
+        drawing.mSection->Modify();
+
+        FKeyHandle key_handle = drawing.mChannel->GetData().GetHandle( drawing.mKeyIndex );
+
+        FMovieSceneObjectPathChannelKeyValue value;
+        UE::MovieScene::GetKeyValue( drawing.mChannel, key_handle, value );
+        UMaterialInstance* material = Cast<UMaterialInstance>( value.Get() );
+        if( !material )
+            continue;
+
+        UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequence, material, iSequencer->GetRootMovieSceneSequence() );
+        if( !new_material )
+            continue;
+
+        FMovieSceneObjectPathChannelKeyValue new_value( new_material );
+        UE::MovieScene::AssignValue( drawing.mChannel, key_handle, new_value );
+    }
+
+    if( drawing_count )
+        UE::MovieScene::SetChannelDefault( drawings[0].mChannel, nullptr );
+
+    //-
+
+    if( drawing_count )
+    {
+        FKeyHandle key_handle = drawings[0].mChannel->GetData().GetHandle( drawings[0].mKeyIndex );
+
+        FMovieSceneObjectPathChannelKeyValue value;
+        UE::MovieScene::GetKeyValue( drawings[0].mChannel, key_handle, value );
+        UMaterialInstance* material = Cast<UMaterialInstance>( value.Get() );
+
+        cloned_plane->GetStaticMeshComponent()->SetMaterial( 0, material );
+    }
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
 
 #undef LOCTEXT_NAMESPACE

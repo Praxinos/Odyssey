@@ -60,7 +60,15 @@ public:
      * @param iSequencer The sequencer
      * @param iSection The section to duplicate
      */
-    static void DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection );
+    //static void DuplicateSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection );
+
+    /*
+     * Clone board.
+     *
+     * @param iSequencer The sequencer
+     * @param iSection The section to clone
+     */
+    static void CloneSection( ISequencer* iSequencer, UMovieSceneCinematicBoardSection* iSection, FFrameNumber iFrameNumber );
 
 private:
 
@@ -455,6 +463,19 @@ class EPOSTRACKSEDITOR_API ShotSequenceTools
 private:
     friend class BoardSequenceTools;
     friend class ToolkitHelpers;
+
+// Inside EspoSequenceTools_Board
+public:
+    /**
+    *  Clone the content of the section
+    *
+    * @param ISequencer             iSequencer to clone the section.
+    * @param UMovieSceneSubSection* iSection   the section to clone.
+    */
+    static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSection* iSection );
+
+private:
+    static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );
 
 // Inside EspoSequenceTools_Camera
 public:

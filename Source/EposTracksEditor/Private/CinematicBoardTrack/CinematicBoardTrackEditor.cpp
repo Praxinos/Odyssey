@@ -523,11 +523,17 @@ FCinematicBoardTrackEditor::InsertShot()
     CinematicBoardTrackTools::InsertShot( GetSequencer().Get(), GetSequencer()->GetLocalTime().Time.FrameNumber );
 }
 
-void
-FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iSection )
-{
-    CinematicBoardTrackTools::DuplicateSection( GetSequencer().Get(), iSection );
-}
+//void
+//FCinematicBoardTrackEditor::DuplicateBoard( UMovieSceneCinematicBoardSection* iSection )
+//{
+//    CinematicBoardTrackTools::DuplicateSection( GetSequencer().Get(), iSection );
+//}
+
+//void
+//FCinematicBoardTrackEditor::CloneSection( UMovieSceneCinematicBoardSection* iSection )
+//{
+//    CinematicBoardTrackTools::CloneSection( GetSequencer().Get(), iSection, GetSequencer()->GetLocalTime().Time.FrameNumber );
+//}
 
 //void
 //FCinematicBoardTrackEditor::RenderBoards( const TArray<UMovieSceneCinematicBoardSection*>& iSections )

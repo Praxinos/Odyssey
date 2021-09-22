@@ -703,19 +703,27 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
         //    FUIAction( FExecuteAction::CreateSP( CinematicShotTrackEditor.Pin().ToSharedRef(), &FCinematicShotTrackEditor::NewTake, &SectionObject ) )
         //);
 
-        ioMenuBuilder.AddMenuEntry(
-            LOCTEXT( "InsertNewBoard", "Insert Board" ),
-            LOCTEXT( "InsertNewBoardTooltip", "Insert a new board at the current time" ),
-            FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::InsertBoard ) )
-        );
+        //ioMenuBuilder.AddMenuEntry(
+        //    LOCTEXT( "InsertNewBoard", "Insert Board" ),
+        //    LOCTEXT( "InsertNewBoardTooltip", "Insert a new board at the current time" ),
+        //    FSlateIcon(),
+        //    FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::InsertBoard ) )
+        //);
 
-        ioMenuBuilder.AddMenuEntry(
-            LOCTEXT( "DuplicateBoard", "Duplicate Board" ),
-            FText::Format( LOCTEXT( "DuplicateBoardTooltip", "Duplicate {0} to create a new board" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
-            FSlateIcon(),
-            FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::DuplicateBoard, &sectionObject ) )
-        );
+        //ioMenuBuilder.AddMenuEntry(
+        //    LOCTEXT( "DuplicateBoard", "Duplicate Board" ),
+        //    FText::Format( LOCTEXT( "DuplicateBoardTooltip", "Duplicate {0} to create a new board" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
+        //    FSlateIcon(),
+        //    FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::DuplicateBoard, &sectionObject ),
+        //               FCanExecuteAction::CreateLambda( []() { return false; } ) )
+        //);
+
+        //ioMenuBuilder.AddMenuEntry(
+        //    LOCTEXT( "CloneBoard", "Clone Board" ),
+        //    FText::Format( LOCTEXT( "CloneBoardTooltip", "Clone {0} to create a new board (with its own new actors and drawings)" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
+        //    FSlateIcon(),
+        //    FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::CloneBoard, &sectionObject ) )
+        //);
 
         //ioMenuBuilder.AddMenuEntry(
         //    LOCTEXT( "RenderBoard", "Render Board" ),

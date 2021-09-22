@@ -260,6 +260,26 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
                               NAME_None,
                               LOCTEXT( "section.create-board-before-with-duration-tooltip", "Create a new section containing a new board before this section with the specified duration" ) );
 
+    //-
+
+    menuBuilder.AddSeparator();
+
+    //-
+
+    auto CloneBoard = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
+        UMovieSceneCinematicBoardSection* board_section = CastChecked<UMovieSceneCinematicBoardSection>( subsection_object );
+
+        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetInclusiveStartFrame() );
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-before-label", "Clone Section" ),
+                              LOCTEXT( "section.clone-section-before-tooltip", "Clone this section before (actors and drawing assets will be cloned as well)" ),
+                              FSlateIcon(),
+                              FUIAction( FExecuteAction::CreateLambda( CloneBoard ) ) );
+
     return menuBuilder.MakeWidget();
 }
 
@@ -343,6 +363,26 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
                               CreatePopupEntryNewSectionWithDurationWidget( LOCTEXT( "section.create-board-after-with-duration-label", "New {0}|plural(one=Board,other=Boards)" ), numberOfNewSequence ),
                               NAME_None,
                               LOCTEXT( "section.create-board-after-with-duration-tooltip", "Create a new section containing a new board after this section with the specified duration" ) );
+
+    //-
+
+    menuBuilder.AddSeparator();
+
+    //-
+
+    auto CloneBoard = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
+        UMovieSceneCinematicBoardSection* board_section = CastChecked<UMovieSceneCinematicBoardSection>( subsection_object );
+
+        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetExclusiveEndFrame() - 1 );
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-after-label", "Clone Section" ),
+                              LOCTEXT( "section.clone-section-after-tooltip", "Clone this section after (actors and drawing assets will be cloned as well)" ),
+                              FSlateIcon(),
+                              FUIAction( FExecuteAction::CreateLambda( CloneBoard ) ) );
 
     return menuBuilder.MakeWidget();
 }
