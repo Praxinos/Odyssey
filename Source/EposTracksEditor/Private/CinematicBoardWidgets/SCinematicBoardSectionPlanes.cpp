@@ -796,13 +796,9 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
-        ShotSequenceHelpers::FDrawingData drawing_data;
-        int32 key_index = ShotSequenceHelpers::GetDrawingIndex( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid(), &drawing_data );
-        if( key_index == INDEX_NONE )
-            return;
+        FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid() );
 
-        UObject* object = drawing_data.mChannel->GetData().GetValues()[key_index].Get();
-        UMaterialInstance* material_to_clone = Cast<UMaterialInstance>( object );
+        UMaterialInstance* material_to_clone = drawing.GetMaterial();
 
         BoardSequenceTools::CloneDrawing( sequencer, material_to_clone, sequencer->GetLocalTime().Time.FrameNumber, mBinding.GetGuid() );
     };
@@ -823,9 +819,9 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
 
-        int32 key_index = ShotSequenceHelpers::GetDrawingIndex( *sequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), mBinding.GetGuid() );
+        FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), mBinding.GetGuid() );
 
-        return key_index == INDEX_NONE;
+        return !drawing.Exists();
     };
 
     //-
@@ -847,8 +843,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
         //BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
-        //ShotSequenceHelpers::FDrawingData drawing_data;
-        //int32 key_index = ShotSequenceHelpers::GetDrawingIndex( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid(), &drawing_data );
+        //FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid() );
         //if( key_index == INDEX_NONE )
         //    return;
 

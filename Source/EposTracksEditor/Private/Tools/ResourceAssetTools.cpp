@@ -3,9 +3,11 @@
 
 #include "Tools/ResourceAssetTools.h"
 
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
+#include "EditorAssetLibrary.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "MaterialEditingLibrary.h"
@@ -464,6 +466,32 @@ ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACi
         return nullptr;
 
     FIntPoint texture_size = ComputeTextureSize( iCamera );
+
+    UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, texture_size, package_name, asset_name );
+    if( !new_texture )
+    {
+        UEditorAssetLibrary::DeleteLoadedAsset( new_material );
+        return nullptr;
+    }
+
+    new_material->SetTextureParameterValueEditorOnly( TEXT( "DrawingTexture" ), new_texture );
+
+    return new_material;
+}
+
+//static
+UMaterialInstanceConstant*
+ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate, UMovieSceneSequence* iRootSequence )
+{
+    FString package_name;
+    FString asset_name;
+    UMaterialInstanceConstant* new_material = CreateMaterial( iSequence, iRootSequence, package_name, asset_name );
+    if( !new_material )
+        return nullptr;
+
+    UTexture* texture;
+    iMaterialTemplate->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture );
+    FIntPoint texture_size( texture->GetSurfaceWidth(), texture->GetSurfaceHeight() ); // For UTexture2D, GetSurfaceWidth() returns GetSizeX() which returns an int32, so it should be ok
 
     UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, texture_size, package_name, asset_name );
     if( !new_texture )

@@ -14,6 +14,7 @@ class UMaterialInstanceConstant;
 class UMovieScene;
 class UMovieScene3DTransformSection;
 class UMovieScenePrimitiveMaterialSection;
+class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
@@ -57,6 +58,20 @@ enum class EGetPlane
     kSelectedOrAll,
 };
 
+struct EPOSSEQUENCE_API FDrawing
+{
+    FMovieSceneObjectPathChannel*   mChannel { nullptr };
+    UMovieSceneSection*             mSection { nullptr };
+    int32                           mKeyIndex { INDEX_NONE };
+    FKeyHandle                      mKeyHandle;
+
+    bool Exists();
+
+    UMaterialInstance* GetMaterial();
+
+    void SetMaterial( UMaterialInstance* iMaterial );
+};
+
 class EPOSSEQUENCE_API ShotSequenceHelpers
 {
 public:
@@ -64,14 +79,9 @@ public:
 
     static int32 GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
     static int32 GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
-    struct FDrawingData
-    {
-        FMovieSceneObjectPathChannel* mChannel;
-        UMovieSceneSection* mSection;
-        int32 mKeyIndex;
-    };
-    static int32 GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding, FDrawingData* oData = nullptr );
-    static int32 GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TArray<FDrawingData>* oDrawings );
+
+    static FDrawing             GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static TArray<FDrawing>     GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static TArray<FFrameNumber> GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
 
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );

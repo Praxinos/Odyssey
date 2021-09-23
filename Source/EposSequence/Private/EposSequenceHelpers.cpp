@@ -315,80 +315,107 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
     }
 }
 
-//static
-int32
-ShotSequenceHelpers::GetDrawingIndex( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding, FDrawingData* oData )
+
+bool
+FDrawing::Exists()
 {
-    if( oData )
-    {
-        oData->mChannel = nullptr;
-        oData->mSection = nullptr;
-    }
+    return mKeyIndex != INDEX_NONE;
+}
+
+UMaterialInstance*
+FDrawing::GetMaterial()
+{
+    if( !mChannel || mKeyHandle == FKeyHandle::Invalid() )
+        return nullptr;
+
+    FMovieSceneObjectPathChannelKeyValue value;
+    UE::MovieScene::GetKeyValue( mChannel, mKeyHandle, value );
+    UMaterialInstance* material = Cast<UMaterialInstance>( value.Get() );
+
+    return material;
+}
+
+void
+FDrawing::SetMaterial( UMaterialInstance* iMaterial )
+{
+    if( !mChannel || mKeyHandle == FKeyHandle::Invalid() )
+        return;
+
+    mSection->Modify();
+
+    FMovieSceneObjectPathChannelKeyValue new_value( iMaterial );
+    UE::MovieScene::AssignValue( mChannel, mKeyHandle, new_value );
+}
+
+//static
+FDrawing
+ShotSequenceHelpers::GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    FDrawing drawing;
 
     UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !moviescene )
-        return INDEX_NONE;
+        return drawing;
 
     TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
     if( objects.Num() != 1 )
-        return INDEX_NONE;
+        return drawing;
     APlaneActor* plane = Cast<APlaneActor>( objects[0] );
     if( !plane )
-        return INDEX_NONE;
+        return drawing;
 
     FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
     if( !plane_component.IsValid() )
-        return INDEX_NONE;
+        return drawing;
 
     UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
     if( !track )
-        return INDEX_NONE;
+        return drawing;
 
     UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
     if( !section )
-        return INDEX_NONE;
+        return drawing;
 
     if( !moviescene->GetPlaybackRange().Contains( iFrameNumber ) )
-        return INDEX_NONE;
+        return drawing;
 
     TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
     check( channels.Num() == 1 );
     int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
 
-    if( oData )
-    {
-        oData->mChannel = channels[0];
-        oData->mSection = section;
-        oData->mKeyIndex = key_index;
-    }
+    drawing.mChannel = channels[0];
+    drawing.mSection = section;
+    drawing.mKeyIndex = key_index;
+    if( key_index != INDEX_NONE )
+        drawing.mKeyHandle = channels[0]->GetData().GetHandle( key_index );
 
-    return key_index;
+    return drawing;
 }
 
 //static
-int32
-ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TArray<FDrawingData>* oDrawings )
+TArray<FDrawing>
+ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
 {
-    oDrawings->Reset();
+    TArray<FDrawing> drawings;
 
     UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !moviescene )
-        return 0;
+        return drawings;
 
     TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
     if( objects.Num() != 1 )
-        return 0;
+        return drawings;
     APlaneActor* plane = Cast<APlaneActor>( objects[0] );
     if( !plane )
-        return 0;
+        return drawings;
 
     FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
     if( !plane_component.IsValid() )
-        return 0;
+        return drawings;
 
     UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
     if( !track )
-        return 0;
+        return drawings;
 
     for( auto section : track->GetAllSections() )
     {
@@ -400,12 +427,12 @@ ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequ
         check( channels.Num() == 1 );
         for( int k = 0; k < channels[0]->GetNumKeys(); k++ )
         {
-            FDrawingData drawing = { channels[0], section, k };
-            oDrawings->Add( drawing );
+            FDrawing drawing = { channels[0], section, k, channels[0]->GetData().GetHandle( k ) };
+            drawings.Add( drawing );
         }
     }
 
-    return oDrawings->Num();
+    return drawings;
 }
 
 //static

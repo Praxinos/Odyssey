@@ -36,7 +36,9 @@ BoardSequenceTools::CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneS
         return false;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding ) == INDEX_NONE;
+    FDrawing drawing = ShotSequenceHelpers::GetDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding );
+
+    return !drawing.Exists();
 }
 
 //static
@@ -70,14 +72,18 @@ BoardSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFram
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding ) == INDEX_NONE;
+    FDrawing drawing = ShotSequenceHelpers::GetDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
+
+    return !drawing.Exists();
 }
 
 //static
 bool
 ShotSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    return ShotSequenceHelpers::GetDrawingIndex( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding ) == INDEX_NONE;
+    FDrawing drawing = ShotSequenceHelpers::GetDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
+
+    return !drawing.Exists();
 }
 
 //---
@@ -104,19 +110,18 @@ ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNum
 void
 ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    ShotSequenceHelpers::FDrawingData drawing_data;
-    int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
-    if( key_index != INDEX_NONE )
+    FDrawing drawing = ShotSequenceHelpers::GetDrawing( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding );
+    if( drawing.Exists() )
         return;
 
-    if( !drawing_data.mSection )
+    if( !drawing.mSection )
         return;
 
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "CreateDrawing", "Create a new drawing" ) );
 
-    drawing_data.mSection->Modify();
+    drawing.mSection->Modify();
 
     //---
 
@@ -124,11 +129,9 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
     if( !new_material )
         return;
 
-    //---
-
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
-    UE::MovieScene::AddKeyToChannel( drawing_data.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+    UE::MovieScene::AddKeyToChannel( drawing.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
 
     //---
 
@@ -157,19 +160,21 @@ ShotSequenceTools::CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMat
 void
 ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    ShotSequenceHelpers::FDrawingData drawing_data;
-    int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
-    if( key_index != INDEX_NONE )
+    FDrawing drawing = ShotSequenceHelpers::GetDrawing( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding );
+    if( drawing.Exists() )
         return;
 
-    if( !drawing_data.mSection )
+    if( !drawing.mSection )
+        return;
+
+    if( !iMaterialToClone )
         return;
 
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "CloneDrawing", "Clone drawing" ) );
 
-    drawing_data.mSection->Modify();
+    drawing.mSection->Modify();
 
     //---
 
@@ -177,11 +182,9 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
     if( !new_material )
         return;
 
-    //---
-
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
-    UE::MovieScene::AddKeyToChannel( drawing_data.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+    UE::MovieScene::AddKeyToChannel( drawing.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
 
     //---
 
@@ -210,25 +213,20 @@ ShotSequenceTools::DeleteDrawing( ISequencer* iSequencer, FFrameNumber iFrameNum
 void
 ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    ShotSequenceHelpers::FDrawingData drawing_data;
-    int32 key_index = ShotSequenceHelpers::GetDrawingIndex( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding, &drawing_data );
-    if( key_index == INDEX_NONE )
+    FDrawing drawing = ShotSequenceHelpers::GetDrawing( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding );
+    if( !drawing.Exists() )
         return;
-
-    if( !drawing_data.mSection )
-        return;
-
-    FKeyHandle key_handle = drawing_data.mChannel->GetData().GetHandle( key_index );
 
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "DeleteDrawing", "Delete drawing" ) );
 
-    drawing_data.mSection->Modify();
+    check( drawing.mSection );
+    drawing.mSection->Modify();
 
     //---
 
-    drawing_data.mChannel->DeleteKeys( MakeArrayView( &key_handle, 1 ) );
+    drawing.mChannel->DeleteKeys( MakeArrayView( &drawing.mKeyHandle, 1 ) );
 
     //---
 

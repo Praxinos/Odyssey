@@ -200,7 +200,7 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
     //---
 
     camera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::SetActorLabelUnique( camera, TEXT( "Camera_1" ) ); // The shot name is displayed in another column in the world outliner
+    FActorLabelUtilities::RenameExistingActor( camera, TEXT( "Camera_1" ), true ); // The shot name is displayed in another column in the world outliner
 
     FGuid CameraGuid = iSequencer.CreateBinding( *camera, camera->GetActorLabel() );
     if( !CameraGuid.IsValid() )

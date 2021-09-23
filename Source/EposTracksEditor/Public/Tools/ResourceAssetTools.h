@@ -66,6 +66,7 @@ class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
     static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence );
+    static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate, UMovieSceneSequence* iRootSequence );
     static UMaterialInstanceConstant* CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, UMovieSceneSequence* iRootSequence );
 
 private:

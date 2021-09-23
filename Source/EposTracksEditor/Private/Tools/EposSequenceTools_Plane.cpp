@@ -259,7 +259,7 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     GEditor->ParentActors( iCamera, plane, NAME_None );
 
     plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::SetActorLabelUnique( plane, TEXT( "Plane_1" ) ); // The shot name is displayed in another column in the world outliner
+    FActorLabelUtilities::RenameExistingActor( plane, TEXT( "Plane_1" ), true ); // The shot name is displayed in another column in the world outliner
     //SetPlaneLabelUnique( plane, TEXT("Plane_01_") + iSequence->GetDisplayName().ToString() );
 
     FGuid planeGuid = iSequencer.CreateBinding( *plane, plane->GetActorLabel() );
