@@ -5,6 +5,7 @@
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
+#include "FileHelpers.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorTopTab"
 
@@ -145,6 +146,13 @@ FOdysseyPainterEditorTopTab::OnGetFlow() const
 FReply
 FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
 {
+    TArray<UPackage*> packages;
+    for( int i=0; i<mEditor->GetEditedObjects().Num(); i++ )
+    {
+        packages.Add( mEditor->GetEditedObjects()[i]->GetOutermost() );
+    }
+    FEditorFileUtils::PromptForCheckoutAndSave(packages, /*bCheckDirtyOnAssetSave*/ true, /*bPromptToSave=*/ false);
+    
     return FReply::Handled();
 }
 
@@ -181,7 +189,6 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
     }
     return FReply::Handled();
 }
-
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners

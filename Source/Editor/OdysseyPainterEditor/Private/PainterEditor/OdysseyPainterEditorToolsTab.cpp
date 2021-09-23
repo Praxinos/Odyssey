@@ -88,24 +88,6 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 				+SWrapBox::Slot()
 				[
 					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					.OnClicked_Raw(this, &FOdysseyPainterEditorToolsTab::OnUndo)
-					[
-						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.Undo32"))
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
-					.ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-					.OnClicked_Raw(this, &FOdysseyPainterEditorToolsTab::OnRedo)
-					[
-						SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.TopBar.Redo32"))
-					]
-				]
-				+SWrapBox::Slot()
-				[
-					SNew( SButton )
 					.Text( LOCTEXT( "Clear Undo History", "Clear Undo History" ) )
 					.ToolTipText( LOCTEXT( "Clear Undos tooltip", "If the undo/redo is slow, clear the cache by clicking this button" ))
                     .VAlign(EVerticalAlignment::VAlign_Center)
@@ -146,20 +128,6 @@ FReply
 FOdysseyPainterEditorToolsTab::OnFill()
 {
     Fill();
-    return FReply::Handled();
-}
-
-FReply
-FOdysseyPainterEditorToolsTab::OnUndo()
-{
-    mEditor->Undo();
-    return FReply::Handled();
-}
-
-FReply
-FOdysseyPainterEditorToolsTab::OnRedo()
-{
-    mEditor->Redo();
     return FReply::Handled();
 }
 

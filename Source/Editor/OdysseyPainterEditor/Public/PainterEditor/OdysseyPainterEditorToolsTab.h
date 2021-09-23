@@ -28,8 +28,6 @@ protected:
     // Event Listeners
     virtual FReply OnClear();
     virtual FReply OnFill();
-    virtual FReply OnUndo();
-    virtual FReply OnRedo();
     virtual FReply OnClearUndo();
 
 protected:
