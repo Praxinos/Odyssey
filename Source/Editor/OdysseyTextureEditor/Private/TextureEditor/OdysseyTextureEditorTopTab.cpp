@@ -31,10 +31,11 @@ FOdysseyTextureEditorTopTab::AlphaMode() const
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
+
 void
-FOdysseyTextureEditorTopTab::OnAlphaModeChanged( int32 iValue )
+FOdysseyTextureEditorTopTab::SetAlphaMode(::ul3::eAlphaMode iAlphaMode)
 {
-    mEditor->SelectedAlphaMode(static_cast<::ul3::eAlphaMode>(iValue));
+    mEditor->SelectedAlphaMode( iAlphaMode );
 }
 
 #undef LOCTEXT_NAMESPACE

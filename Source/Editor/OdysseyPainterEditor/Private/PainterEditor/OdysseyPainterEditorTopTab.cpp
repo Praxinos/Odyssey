@@ -22,7 +22,10 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
 	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TopBar"),
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
                             FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ))
-    , mEditor(iEditor)
+    , mEditor( iEditor )
+    , mToolDefaultBlendingMode( ::ul3::eBlendingMode::BM_NORMAL )
+    , mToolDefaultAlphaMode( ::ul3::eAlphaMode::AM_NORMAL )
+    , mIsEraserButtonActive( false )
 {
 }
 
@@ -46,7 +49,8 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnSaveButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnSaveButtonClicked )
         .OnUndoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked )
         .OnRedoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked )
-        .OnEraserButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked );
+        .OnEraserButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked )
+        .IsEraserButtonActive_Lambda( [this](){return mIsEraserButtonActive;} );
 }
 
 void
@@ -117,7 +121,7 @@ FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
-	mEditor->PaintEngine()->SetAlphaModeModifier( static_cast<::ul3::eAlphaMode>(iValue) );
+	SetAlphaMode( static_cast<::ul3::eAlphaMode>(iValue) );
 }
 
 int
@@ -161,6 +165,20 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
 FReply
 FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 {
+    if( mIsEraserButtonActive == false )
+    {
+        mToolDefaultBlendingMode = mEditor->PaintEngine()->GetBlendingModeModifier();
+        mToolDefaultAlphaMode = mEditor->PaintEngine()->GetAlphaModeModifier();
+        SetAlphaMode( ::ul3::eAlphaMode::AM_ERASE );
+	    mEditor->PaintEngine()->SetBlendingModeModifier( ::ul3::eBlendingMode::BM_BACK );
+        mIsEraserButtonActive = true;
+    }
+    else
+    {
+        SetAlphaMode( mToolDefaultAlphaMode );
+	    mEditor->PaintEngine()->SetBlendingModeModifier( mToolDefaultBlendingMode );
+        mIsEraserButtonActive = false;
+    }
     return FReply::Handled();
 }
 

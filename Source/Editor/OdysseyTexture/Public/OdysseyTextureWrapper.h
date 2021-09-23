@@ -52,10 +52,6 @@ public:
     FOnPostSave& OnPostSaveDelegate();
     FOnPreTextureChange& OnPreTextureChangeDelegate();
     FOnPostTextureChange& OnPostTextureChangeDelegate();
-    FOnLayerStackInitialize& OnLayerStackInitializeDelegate();
-    FOnLayerStackFinalize& OnLayerStackFinalizeDelegate();
-    FOnSurfaceInitialize& OnSurfaceInitializeDelegate();
-    FOnSurfaceFinalize& OnSurfaceFinalizeDelegate();
 
 protected:
     //Private Wrapper Interface

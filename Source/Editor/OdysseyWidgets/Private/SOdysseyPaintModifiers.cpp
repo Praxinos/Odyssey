@@ -32,78 +32,79 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     mOnOpacityChangedCallback   = InArgs._OnOpacityChanged;
     mOnFlowChangedCallback      = InArgs._OnFlowChanged;
     mOnBlendingModeChangedCallback = InArgs._OnBlendingModeChanged;
-    mBlendingModes = GetBlendingModesAsText();
     mOnAlphaModeChangedCallback = InArgs._OnAlphaModeChanged;
     mAlphaModes = GetAlphaModesAsText();
+    mBlendingModes = GetBlendingModesAsText();
+    mIsEraserButtonActive = InArgs._IsEraserButtonActive;
 
     ChildSlot
     [
         SNew( SWrapBox )
-		.UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot horizontally
+        .UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot horizontally
         +SWrapBox::Slot()
-		[
+        [
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
             .Padding( 6.f, 3.f, 3.f, 3.f )
             [
- 		    SNew( SButton )
-		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+             SNew( SButton )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
             .ToolTipText( LOCTEXT("SaveCurrentImageButton", "Save the current image within the current project.") )
             .VAlign( VAlign_Center )
-            .ContentPadding( FMargin(0.0, 0.0) )
-		    .OnClicked( InArgs._OnSaveButtonClicked )
-		        [
-			        SNew( SImage )
-			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Save32" ) )
-		        ]
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( InArgs._OnSaveButtonClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Save32" ) )
+                ]
             ]
             +SHorizontalBox::Slot()
             .Padding( 3.f, 3.f, 3.f, 3.f )
             [
             SNew( SButton )
-		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
             .ToolTipText( LOCTEXT("UndoActionButton", "Undo the previous action.") )
             .VAlign( VAlign_Center )
-            .ContentPadding( FMargin(0.0, 0.0) )
-		    .OnClicked( InArgs._OnUndoButtonClicked )
-		        [
-			        SNew( SImage )
-			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Undo32" ) )
-		        ]
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( InArgs._OnUndoButtonClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Undo32" ) )
+                ]
             ]
             +SHorizontalBox::Slot()
             .Padding( 3.f, 3.f, 3.f, 3.f )
             [
             SNew( SButton )
-		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
             .ToolTipText( LOCTEXT("RedoActionButton", "Redo the next action.") )
             .VAlign( VAlign_Center )
-            .ContentPadding( FMargin(0.0, 0.0) )
-		    .OnClicked( InArgs._OnRedoButtonClicked )
-		        [
-			        SNew( SImage )
-			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Redo32" ) )
-		        ]
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( InArgs._OnRedoButtonClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Redo32" ) )
+                ]
             ]
             +SHorizontalBox::Slot()
             .Padding( 3.f, 3.f, 33.f, 3.f )
             [
             SNew( SButton )
-		    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
             .ToolTipText( LOCTEXT("EraserButton", "Switch the current tool to Eraser mode.") )
             .VAlign( VAlign_Center )
-            .ContentPadding( FMargin(0.0, 0.0) )
-		    .OnClicked( InArgs._OnEraserButtonClicked )
-		        [
-			        SNew( SImage )
-			        .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Eraser32" ) )
-                    .ColorAndOpacity( FLinearColor( 0.968f, 0.576f, 0.117f, 1 ) )
-		        ]
+            .ContentPadding( FMargin( 0.0, 0.0 ) )
+            .OnClicked( InArgs._OnEraserButtonClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Eraser32" ) )
+                    .ColorAndOpacity_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? FSlateColor( FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) ) : FSlateColor( FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f ) ) ); } )
+                ]
             ]
-		]
-		+SWrapBox::Slot()
-		[
+        ]
+        +SWrapBox::Slot()
+        [
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
@@ -130,9 +131,9 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .MinDesiredWidth( 100.0f ) // Depends on the size of the text in the previous slot
             ]
 
-		]
-		+SWrapBox::Slot()
-		[
+        ]
+        +SWrapBox::Slot()
+        [
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
@@ -157,9 +158,9 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .OnValueChanged( this, &SOdysseyPaintModifiers::SetOpacity )
                 .MinDesiredWidth( 83.0f ) // Depends on the size of the text in the previous slot
             ]
-		]
-		+SWrapBox::Slot()
-		[
+        ]
+        +SWrapBox::Slot()
+        [
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
@@ -185,8 +186,8 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .MinDesiredWidth( 96.0f ) // Depends on the size of the text in the previous slot
             ]
         ]
-		+SWrapBox::Slot()
-		[
+        +SWrapBox::Slot()
+        [
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
@@ -209,14 +210,15 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .InitiallySelectedItem( mBlendingModes[mBlendingMode.Get()] )
                 .OnGenerateWidget( this, &SOdysseyPaintModifiers::GenerateBlendingComboBoxItem )
                 .OnSelectionChanged( this, &SOdysseyPaintModifiers::HandleOnBlendingModeChanged )
+                .IsEnabled_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? false : true ); } )
                 .Content()
                 [
                     CreateBlendingModeTextWidget()
                 ]
             ]
         ]
-		+SWrapBox::Slot()
-		[
+        +SWrapBox::Slot()
+        [
             SNew( SHorizontalBox )
 
             +SHorizontalBox::Slot()
@@ -239,6 +241,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 .InitiallySelectedItem( mAlphaModes[mAlphaMode.Get()] )
                 .OnGenerateWidget( this, &SOdysseyPaintModifiers::GenerateAlphaComboBoxItem )
                 .OnSelectionChanged( this, &SOdysseyPaintModifiers::HandleOnAlphaModeChanged )
+                .IsEnabled_Lambda( [this](){ return ( mIsEraserButtonActive.Get() == true ? false : true ); } )
                 .Content()
                 [
                     CreateAlphaModeTextWidget()

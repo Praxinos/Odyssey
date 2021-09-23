@@ -21,7 +21,7 @@ protected:
 
 protected:
     // Event Listeners
-    virtual void OnAlphaModeChanged( int32 iValue ) override;
+    virtual void SetAlphaMode( ::ul3::eAlphaMode iAlphaMode ) override;
 
 private:
     FOdysseyTextureEditor* mEditor;

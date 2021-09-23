@@ -48,6 +48,8 @@ protected:
 
 private:
     FOdysseyPainterEditor* mEditor;
-
+    ::ul3::eBlendingMode mToolDefaultBlendingMode;
+    ::ul3::eAlphaMode mToolDefaultAlphaMode;
+    bool mIsEraserButtonActive;
 };
 
