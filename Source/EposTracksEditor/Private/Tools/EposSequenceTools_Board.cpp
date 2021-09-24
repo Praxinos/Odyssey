@@ -648,6 +648,7 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
     FActorLabelUtilities::RenameExistingActor( cloned_plane, TEXT( "Plane_1" ), true ); // The shot name is displayed in another column in the world outliner
 
     cloned_plane->SetActorTransform( iPlaneToClone->GetTransform() ); // Should be done, because for attached plane, its new transform are totally weird
+    cloned_plane->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
 
     //-
 
