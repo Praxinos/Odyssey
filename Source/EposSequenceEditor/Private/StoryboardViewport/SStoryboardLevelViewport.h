@@ -12,6 +12,7 @@
 #include "LevelEditorViewport.h"
 #include "Misc/FrameRate.h"
 
+class APlaneActor;
 class FEposSequenceEditorToolkit;
 class FLevelViewportLayout;
 class FUICommandList;
@@ -135,6 +136,15 @@ private:
     float GetPlayTimeMinDesiredWidth() const;
 
 private:
+    EVisibility GetMoveAndScalePlaneVisibility() const;
+
+    float GetMoveAndScalePlaneDistance() const;
+    void SetMoveAndScalePlaneDistance( float iDistance );
+
+    ECheckBoxState GetScalePlaneState() const;
+    void OnScalePlaneStateChanged( ECheckBoxState iState );
+
+private:
 
     /** Widget where the scene viewport is drawn in */
     TSharedPtr<SStoryboardPreviewViewport> ViewportWidget;
@@ -176,4 +186,7 @@ private:
 
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
+
+    APlaneActor*    mPlaneToMove { nullptr };
+    bool            mScalePlane { true };
 };

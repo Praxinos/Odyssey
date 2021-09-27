@@ -270,6 +270,54 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 //---
 
 //static
+bool
+ShotSequenceTools::CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineCameraActor* iCamera )
+{
+    if( !iPlane || !iCamera )
+        return false;
+
+    // Already normalized
+    FVector camera_lookat = iCamera->GetActorForwardVector();
+    FVector plane_lookat = iPlane->GetActorUpVector();
+
+    if( !FVector::Parallel( camera_lookat, plane_lookat ) )
+        return false;
+
+    FVector camera_to_plane( iPlane->GetActorLocation() - iCamera->GetActorLocation() );
+    camera_to_plane.Normalize();
+
+    if( !FVector::Coplanar( iCamera->GetActorLocation(), camera_lookat, iCamera->GetActorLocation(), camera_to_plane ) )
+        return false;
+
+    return true;
+};
+
+//static
+bool
+ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, bool iScale )
+{
+    if( !ShotSequenceTools::CanMoveAndScalePlane( ioPlane, iCamera ) )
+        return false;
+
+    if( FMath::IsNearlyZero( iNewDistance ) )
+        return false;
+
+    FVector new_plane_location = iCamera->GetActorLocation() + ( ioPlane->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
+
+    ioPlane->SetActorLocation( new_plane_location );
+
+    if( iScale )
+    {
+        FVector scale = ComputePlaneScale( iCamera, iNewDistance );
+        ioPlane->SetActorScale3D( scale );
+    }
+
+    return true;
+}
+
+//---
+
+//static
 void
 BoardSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
