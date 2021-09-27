@@ -31,7 +31,33 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyEditorTab interface
+//------------------------------------------------------------------------ Public Getter
+
+bool
+FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
+{
+    return mIsEraserButtonActive;
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Public Setters
+
+void 
+FOdysseyPainterEditorTopTab::SetToolDefaultBlendingMode( ::ul3::eBlendingMode iBlendingMode )
+{
+    mToolDefaultBlendingMode = iBlendingMode;
+    return;
+}
+
+void 
+FOdysseyPainterEditorTopTab::SetToolDefaultAlphaMode( ::ul3::eAlphaMode iAlphaMode )
+{
+    mToolDefaultAlphaMode = iAlphaMode;
+    return;
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------- FOdysseyEditorTab interface
 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorTopTab::CreateWidget()
@@ -116,13 +142,19 @@ FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
 void
 FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 {
-	mEditor->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
+//    if( !mIsEraserButtonActive)
+        mEditor->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
+//    else
+//        mToolDefaultBlendingMode = mEditor->PaintEngine()->GetBlendingModeModifier();
 }
 
 void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
-	SetAlphaMode( static_cast<::ul3::eAlphaMode>(iValue) );
+//    if( !mIsEraserButtonActive)
+        SetAlphaMode( static_cast<::ul3::eAlphaMode>(iValue) );
+//    else
+//        mToolDefaultAlphaMode = mEditor->PaintEngine()->GetAlphaModeModifier();
 }
 
 int
@@ -173,18 +205,18 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
 FReply
 FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 {
-    if( mIsEraserButtonActive == false )
+    if( !mIsEraserButtonActive )
     {
         mToolDefaultBlendingMode = mEditor->PaintEngine()->GetBlendingModeModifier();
         mToolDefaultAlphaMode = mEditor->PaintEngine()->GetAlphaModeModifier();
         SetAlphaMode( ::ul3::eAlphaMode::AM_ERASE );
-	    mEditor->PaintEngine()->SetBlendingModeModifier( ::ul3::eBlendingMode::BM_BACK );
+        mEditor->PaintEngine()->SetBlendingModeModifier( ::ul3::eBlendingMode::BM_BACK );
         mIsEraserButtonActive = true;
     }
     else
     {
         SetAlphaMode( mToolDefaultAlphaMode );
-	    mEditor->PaintEngine()->SetBlendingModeModifier( mToolDefaultBlendingMode );
+        mEditor->PaintEngine()->SetBlendingModeModifier( mToolDefaultBlendingMode );
         mIsEraserButtonActive = false;
     }
     return FReply::Handled();

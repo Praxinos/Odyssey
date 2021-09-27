@@ -40,7 +40,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
     ChildSlot
     [
         SNew( SWrapBox )
-        .UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot horizontally
+        .UseAllottedWidth( true ) // if true put all slot horizontally   if false put all slot vertically
         +SWrapBox::Slot()
         [
             SNew( SHorizontalBox )

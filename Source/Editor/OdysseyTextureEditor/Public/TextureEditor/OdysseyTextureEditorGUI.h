@@ -15,6 +15,7 @@
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"
+#include "OdysseyTextureEditorBrushSelectorTab.h"
 #include "OdysseyTextureEditorTopTab.h"
 
 class STextBlock;

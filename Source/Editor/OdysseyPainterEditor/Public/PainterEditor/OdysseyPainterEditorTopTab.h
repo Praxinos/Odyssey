@@ -15,6 +15,15 @@ public:
     virtual ~FOdysseyPainterEditorTopTab();
     FOdysseyPainterEditorTopTab( FOdysseyPainterEditor* iEditor );
 
+    // Public Getters
+public:
+    virtual bool IsEraserButtonActive() const;
+
+    // Public Setters
+public:
+    virtual void SetToolDefaultBlendingMode( ::ul3::eBlendingMode );
+    virtual void SetToolDefaultAlphaMode( ::ul3::eAlphaMode );
+
 protected:
     // FOdysseyEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
