@@ -224,7 +224,11 @@ UMovieSceneCinematicBoardSection::GuessStartMoving( TRange<FFrameNumber>& oRange
     if( !sections_without_selected.Num() )
     {
         StartMoving(); // Backup value is not valid, but shouldn't be a problem for this case, where there is only 1 section and it is moving
-        mSectionRangeBackup = GetTrueRange(); // wrong, but doesn't impact after as there is no previous/next sections
+
+        //PATCH: sometimes, GetTrueRange() doesn't start at frame 0 when the only section is moved very quickly
+        // It's certainly something above during FMoveKeysAndSections::OnDrag/OnEndDrag which don't call UMovieSceneCinematicBoardTrack::OnSectionMoved very synchronously ?
+        mSectionRangeBackup = TRange<FFrameNumber>( 0, GetTrueRange().Size<FFrameNumber>() ); // wrong, but doesn't impact after as there is no previous/next sections
+
         oRangeBackup = mSectionRangeBackup;
 
         return true;

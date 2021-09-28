@@ -864,7 +864,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
                                            FCanExecuteAction::CreateLambda( CanCloneKey, mKeysUnderMouse ) ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ),
-                                LOCTEXT( "delete-material-key-tooltip", "Delete the current key (material and texture)" ),
+                                LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
                                 FSlateIcon(),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ) ) );
 }
