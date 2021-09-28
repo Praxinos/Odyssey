@@ -41,7 +41,7 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
         NAME_None,
         LOCTEXT("ViewportDrawingEditorToggleTopTab", "Top Bar"),
         LOCTEXT("ViewportDrawingEditorToggleTopTabTooltip", "Display Top Bar"),
-        FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar20" )
+        FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters20" )
     );
 
     ioToolbarBuilder.AddToolBarButton(
