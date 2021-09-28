@@ -2,11 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyFlipbookModule.h"
-
 #include "AssetToolsModule.h"
 #include "Settings/ContentBrowserSettings.h"
-
-#include "OdysseyFlipbook_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookModule"
 

@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Toolkits/IToolkitHost.h"
 
-class ODYSSEYFLIPBOOK_API FOdysseyFlipbookAssetTypeActions
+class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:
@@ -19,7 +19,7 @@ public:
     virtual UClass* GetSupportedClass() const override;
     virtual uint32 GetCategories() override;
     virtual void BuildBackendFilter( FARFilter & InFilter ) override;
-	//virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
+	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
     // End of IAssetTypeActions interface
 
 private:

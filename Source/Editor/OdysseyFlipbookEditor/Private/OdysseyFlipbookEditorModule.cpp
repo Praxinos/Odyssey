@@ -15,7 +15,7 @@
 #include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorSettings.h"
 #include "OdysseyFlipbookEditorToolkit.h"
-#include "OdysseyFlipbook_AssetTypeActions.h"
+#include "OdysseyFlipbookAssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbookEditorModule"
 
