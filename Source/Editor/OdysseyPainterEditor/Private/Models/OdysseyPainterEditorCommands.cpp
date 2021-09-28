@@ -38,15 +38,15 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( SetZoom90Percent, "Set Zoom 90 Percent", "Set zoom at 90 percent",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetZoom100Percent, "Set Zoom 100 Percent", "Set zoom at 100 percent",              EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::Z ) );
     UI_COMMAND( SetZoomFitScreen, "Set Zoom Fit Screen", "Set zoom fit screen",                    EUserInterfaceActionType::Button, FInputChord( EKeys::S ) );
-    UI_COMMAND( ZoomInExponential, "Zoom In (exponential)", "Zoom in (exponential)",                                           EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
-    UI_COMMAND( ZoomOutExponential, "Zoom Out (exponential)", "Zoom out (exponential)",                                        EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
+    UI_COMMAND( ZoomInExponential, "Zoom In (exponential)", "Zoom in (exponential)",               EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
+    UI_COMMAND( ZoomOutExponential, "Zoom Out (exponential)", "Zoom out (exponential)",            EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
    
     UI_COMMAND( RefreshBrush, "Refresh Brush", "Refresh Brush",                                    EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );
     
     UI_COMMAND( IncreaseBrushSize, "Increase Brush Size", "Increase Brush Size by 1",              EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
     UI_COMMAND( DecreaseBrushSize, "Decrease Brush Size", "Decrease Brush Size by 1",              EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
     UI_COMMAND( SetAlphaModeNormal, "Set Alpha Mode to Normal", "Set Alpha Mode to Normal",        EUserInterfaceActionType::Button, FInputChord( EKeys::B ) );
-    UI_COMMAND( SetAlphaModeErase, "Set Alpha Mode to Erase", "Set Alpha Mode to Erase",           EUserInterfaceActionType::Button, FInputChord( EKeys::E ) );
+    UI_COMMAND( SetAlphaModeErase, "Set Alpha Mode to Erase", "Set Alpha Mode to Erase",           EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetAlphaModeTop, "Set Alpha Mode to Top", "Set Alpha Mode to Top",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetAlphaModeBack, "Set Alpha Mode to Back", "Set Alpha Mode to Back",              EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetAlphaModeSub, "Set Alpha Mode to Sub", "Set Alpha Mode to Sub",                 EUserInterfaceActionType::Button, FInputChord() );
@@ -54,6 +54,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( SetAlphaModeMul, "Set Alpha Mode to Mul", "Set Alpha Mode to Mul",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetAlphaModeMin, "Set Alpha Mode to Min", "Set Alpha Mode to Min",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetAlphaModeMax, "Set Alpha Mode to Max", "Set Alpha Mode to Max",                 EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( ToggleEraserButton, "Toggle Eraser", "Toggle Eraser",                              EUserInterfaceActionType::Button, FInputChord( EKeys::E ) );
 
     UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EKeys::F12 ) );
    

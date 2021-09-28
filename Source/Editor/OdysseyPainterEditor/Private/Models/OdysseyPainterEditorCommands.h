@@ -162,6 +162,8 @@ public:
     /** Action to switch to Max alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeMax;
 
+    /** Action to toggle the eraser button */
+    TSharedPtr<FUICommandInfo> ToggleEraserButton;
 
     //Switch tablet API
 

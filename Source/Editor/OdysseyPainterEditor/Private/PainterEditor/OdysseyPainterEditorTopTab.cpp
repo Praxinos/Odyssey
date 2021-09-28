@@ -22,7 +22,7 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
 	: FOdysseyEditorTab(TEXT("OdysseyPainterEditor_TopBar"),
                             LOCTEXT( "OdysseyPainterEditorTopTab", "Top Bar" ),
-                            FSlateIcon( "OdysseyStyle", "PainterEditor.TopBar16" ))
+                            FSlateIcon( "OdysseyStyle", "PainterEditor.BrushExposedParameters16" ))
     , mEditor( iEditor )
     , mToolDefaultBlendingMode( ::ul3::eBlendingMode::BM_NORMAL )
     , mToolDefaultAlphaMode( ::ul3::eAlphaMode::AM_NORMAL )
@@ -127,6 +127,7 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION( painterEditorCommands.SetAlphaModeMul, SetAlphaMode, ::ul3::eAlphaMode::AM_MUL )
     MAP_ACTION( painterEditorCommands.SetAlphaModeMin, SetAlphaMode, ::ul3::eAlphaMode::AM_MIN )
     MAP_ACTION( painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
+    MAP_ACTION( painterEditorCommands.ToggleEraserButton, ToggleEraserButton )
 
     #undef MAP_ACTION
 }
@@ -224,8 +225,8 @@ FOdysseyPainterEditorTopTab::OnRedoButtonClicked()
     return FReply::Handled();
 }
 
-FReply
-FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
+void
+FOdysseyPainterEditorTopTab::ToggleEraserButton()
 {
     if( !mIsEraserButtonActive )
     {
@@ -241,6 +242,12 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
         mEditor->PaintEngine()->SetBlendingModeModifier( mToolDefaultBlendingMode );
         mIsEraserButtonActive = false;
     }
+}
+
+FReply
+FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
+{
+    FOdysseyPainterEditorTopTab::ToggleEraserButton();
     return FReply::Handled();
 }
 

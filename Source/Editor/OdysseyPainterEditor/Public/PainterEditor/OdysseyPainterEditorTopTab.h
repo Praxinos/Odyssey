@@ -56,6 +56,7 @@ protected:
 
 protected:
     // Methods
+    virtual void ToggleEraserButton();
     virtual void SetAlphaMode( ::ul3::eAlphaMode iAlphaMode );
     virtual void AddSize( int32 iValue );
 
