@@ -1,59 +1,56 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyTexture_AssetTypeActions.h"
+#include "OdysseyTexture2DAssetTypeActions.h"
 
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTexture2DEditorModule.h"
 
-
-#include "OdysseyTexture.h"
-
-#define LOCTEXT_NAMESPACE "OdysseyTexture_AssetTypeActions"
+#define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 
 //////////////////////////////////////////////////////////////////////////
-// FOdysseyTextureAssetTypeActions
-FOdysseyTextureAssetTypeActions::FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
+// FOdysseyTexture2DAssetTypeActions
+FOdysseyTexture2DAssetTypeActions::FOdysseyTexture2DAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
     : mMyAssetCategory( iAssetCategory )
 {
 }
 
 FText
-FOdysseyTextureAssetTypeActions::GetName() const
+FOdysseyTexture2DAssetTypeActions::GetName() const
 {
     return LOCTEXT( "FOdysseyTextureTypeActionsName", "Texture" );
 }
 
 FColor
-FOdysseyTextureAssetTypeActions::GetTypeColor() const
+FOdysseyTexture2DAssetTypeActions::GetTypeColor() const
 {
-    return FColor( 255, 0, 0 );
+    return FColor( 200, 50, 50 );
 }
 
 UClass*
-FOdysseyTextureAssetTypeActions::GetSupportedClass() const
+FOdysseyTexture2DAssetTypeActions::GetSupportedClass() const
 {
-    return UOdysseyTexture::StaticClass();
+    return UTexture2D::StaticClass();
 }
 
 uint32
-FOdysseyTextureAssetTypeActions::GetCategories()
+FOdysseyTexture2DAssetTypeActions::GetCategories()
 {
     return EAssetTypeCategories::MaterialsAndTextures | mMyAssetCategory;
 }
 
 void 
-FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
+FOdysseyTexture2DAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassNames.Add( UTexture2D::StaticClass()->GetFName());
 }
 
 //Works, but suppress the normal editor of UTexture2D, need to find a better solution to keep both editors
-/*
-void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
+
+void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
-	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
     TArray<UObject*> noUserDataObjects;
     
 	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
@@ -66,7 +63,7 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
             if( userData )
             {
                 FOdysseyTexture2DEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTexture2DEditorModule>("OdysseyTexture2DEditor");
-                odysseyTextureModule->CreateOdysseyTexture2DEditor(Mode, EditWithinLevelEditor, odysseyTexture);
+                odysseyTextureModule->CreateOdysseyTexture2DEditor(odysseyTexture);
             }
             else
             {
@@ -77,6 +74,6 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
     
     if( noUserDataObjects.Num() != 0 )
         FAssetTypeActions_Base::OpenAssetEditor( noUserDataObjects, EditWithinLevelEditor );
-}*/
+}
 
 #undef LOCTEXT_NAMESPACE

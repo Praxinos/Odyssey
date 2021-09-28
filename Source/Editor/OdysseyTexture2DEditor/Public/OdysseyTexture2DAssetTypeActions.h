@@ -7,11 +7,12 @@
 #include "CoreMinimal.h"
 #include "Toolkits/IToolkitHost.h"
 
-class ODYSSEYTEXTURE_API FOdysseyTextureAssetTypeActions
+
+class ODYSSEYTEXTURE2DEDITOR_API FOdysseyTexture2DAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:
-    FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory );
+    FOdysseyTexture2DAssetTypeActions( EAssetTypeCategories::Type iAssetCategory );
 
     // IAssetTypeActions interface
     virtual FText GetName() const override;
@@ -19,7 +20,7 @@ public:
     virtual UClass* GetSupportedClass() const override;
     virtual uint32 GetCategories() override;
     virtual void BuildBackendFilter( FARFilter & InFilter ) override;
-	//virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
+	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
     // End of IAssetTypeActions interface
 
 private:

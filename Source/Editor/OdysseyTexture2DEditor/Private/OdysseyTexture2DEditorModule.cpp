@@ -15,7 +15,7 @@
 #include "OdysseyTexture2DEditor.h"
 #include "OdysseyTexture2DEditorSettings.h"
 #include "OdysseyTexture2DEditorToolkit.h"
-#include "OdysseyTexture_AssetTypeActions.h"
+#include "OdysseyTexture2DAssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DEditorModule"
 
@@ -77,7 +77,7 @@ FOdysseyTexture2DEditorModule::RegisterAssetTypeActions()
 	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
 
 	//Create Asset Types Actions
-	mTypeActions.Add(MakeShareable(new FOdysseyTextureAssetTypeActions(category)));
+	mTypeActions.Add(MakeShareable(new FOdysseyTexture2DAssetTypeActions(category)));
 
 	//Register created Asset Type Actions
 	for (int32 index = 0; index < mTypeActions.Num(); ++index)

@@ -6,8 +6,6 @@
 #include "AssetToolsModule.h"
 #include "Settings/ContentBrowserSettings.h"
 
-#include "OdysseyTexture_AssetTypeActions.h"
-
 #define LOCTEXT_NAMESPACE "OdysseyTextureModule"
 
 // From ...\UnrealEngine\Engine\Source\Editor\ContentBrowser\Private\SAssetView.cpp#3543

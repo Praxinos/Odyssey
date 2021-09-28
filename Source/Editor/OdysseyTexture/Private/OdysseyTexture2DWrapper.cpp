@@ -3,6 +3,7 @@
 
 #include "OdysseyTexture2DWrapper.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTextureAssetUserData.h"
 
 FOdysseyTexture2DWrapper::~FOdysseyTexture2DWrapper()
 {

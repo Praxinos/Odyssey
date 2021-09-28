@@ -10,7 +10,6 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyTexture.h"
 #include "OdysseyPsdOperations.h"
 
 #include <ULIS3>
@@ -23,7 +22,7 @@ UOdysseyTextureImportFactory::UOdysseyTextureImportFactory( const FObjectInitial
     // From UFactory
     bEditorImport = true;
     ImportPriority = 101; //Default other factories importing textures are at 100
-    SupportedClass = UOdysseyTexture::StaticClass();
+    SupportedClass = UTexture2D::StaticClass();
 
     Formats.Add(TEXT("psd;Texture"));
 }

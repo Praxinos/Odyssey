@@ -13,7 +13,6 @@
 
 #include "OdysseyTextureEditor.h"
 #include "OdysseyTextureEditorSettings.h"
-#include "OdysseyTexture_AssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorModule"
 
