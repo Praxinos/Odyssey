@@ -54,6 +54,7 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
             .VAlign( VAlign_Center )
             .ContentPadding( FMargin( 0.0, 0.0 ) )
             .OnClicked( InArgs._OnSaveButtonClicked )
+            .IsEnabled( InArgs._IsPackageEdited )
                 [
                     SNew( SImage )
                     .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Save32" ) )

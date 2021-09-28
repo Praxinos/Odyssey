@@ -31,12 +31,39 @@ FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* 
 }
 
 //--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------- Spawner callback
+
+TSharedRef< SDockTab >
+FOdysseyPainterEditorTopTab::SpawnTab( const FSpawnTabArgs& iArgs )
+{
+    check( iArgs.GetTabId() == ID() );
+
+    return SNew( SDockTab )
+        .Label( DisplayName() )
+        .ShouldAutosize( true )
+        [
+            Widget().ToSharedRef()
+        ];
+}
+
+//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------ Public Getter
 
 bool
 FOdysseyPainterEditorTopTab::IsEraserButtonActive() const
 {
     return mIsEraserButtonActive;
+}
+
+bool
+FOdysseyPainterEditorTopTab::IsPackageEdited() const
+{
+    for( int i=0; i<mEditor->GetEditedObjects().Num(); i++ )
+    {
+        if( mEditor->GetEditedObjects()[i]->GetOutermost()->IsDirty() )
+            return true;
+    }
+    return false;
 }
 
 //--------------------------------------------------------------------------------------
@@ -77,6 +104,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
         .OnUndoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnUndoButtonClicked )
         .OnRedoButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnRedoButtonClicked )
         .OnEraserButtonClicked_Raw( this, &FOdysseyPainterEditorTopTab::OnEraserButtonClicked )
+        .IsPackageEdited_Raw( this, &FOdysseyPainterEditorTopTab::IsPackageEdited )
         .IsEraserButtonActive_Lambda( [this](){return mIsEraserButtonActive;} );
 }
 
@@ -142,19 +170,13 @@ FOdysseyPainterEditorTopTab::OnFlowChanged( int32 iValue )
 void
 FOdysseyPainterEditorTopTab::OnBlendingModeChanged( int32 iValue )
 {
-//    if( !mIsEraserButtonActive)
         mEditor->PaintEngine()->SetBlendingModeModifier( static_cast<::ul3::eBlendingMode>( iValue ) );
-//    else
-//        mToolDefaultBlendingMode = mEditor->PaintEngine()->GetBlendingModeModifier();
 }
 
 void
 FOdysseyPainterEditorTopTab::OnAlphaModeChanged( int32 iValue )
 {
-//    if( !mIsEraserButtonActive)
         SetAlphaMode( static_cast<::ul3::eAlphaMode>(iValue) );
-//    else
-//        mToolDefaultAlphaMode = mEditor->PaintEngine()->GetAlphaModeModifier();
 }
 
 int

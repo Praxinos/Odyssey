@@ -36,6 +36,7 @@ public:
         SLATE_ATTRIBUTE( ::ul3::eBlendingMode, BlendingMode )
         SLATE_ATTRIBUTE( ::ul3::eAlphaMode, AlphaMode )
         SLATE_ATTRIBUTE( bool, IsEraserButtonActive )
+        SLATE_ATTRIBUTE( bool, IsPackageEdited )
         SLATE_EVENT( FOnGetIntProperty, OnGetSize )
         SLATE_EVENT( FOnGetFloatProperty, OnGetOpacity )
         SLATE_EVENT( FOnGetFloatProperty, OnGetFlow )
@@ -103,6 +104,7 @@ private:
     TAttribute<::ul3::eBlendingMode> mBlendingMode;
     TAttribute<::ul3::eAlphaMode> mAlphaMode;
     TAttribute<bool> mIsEraserButtonActive;
+    TAttribute<bool> mIsPackageEdited;
 
     ::ul3::eBlendingMode    mCurrentBlendingMode;   //cache value
     ::ul3::eAlphaMode       mCurrentAlphaMode;      //cache value

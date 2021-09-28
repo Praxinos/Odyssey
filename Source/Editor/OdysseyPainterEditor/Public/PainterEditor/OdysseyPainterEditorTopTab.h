@@ -15,9 +15,13 @@ public:
     virtual ~FOdysseyPainterEditorTopTab();
     FOdysseyPainterEditorTopTab( FOdysseyPainterEditor* iEditor );
 
+    // Spawner callback
+virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs) override;
+
     // Public Getters
 public:
     virtual bool IsEraserButtonActive() const;
+    virtual bool IsPackageEdited() const;
 
     // Public Setters
 public:
