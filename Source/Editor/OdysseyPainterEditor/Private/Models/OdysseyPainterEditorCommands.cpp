@@ -16,7 +16,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 {
     UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::F1 ) );
     UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...",                EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( VisitPraxinosForums, "Praxinos Forums...", "Praxinos Forums...",                   EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( ReleaseNotes, "Release Notes...", "Release Notes...",                              EUserInterfaceActionType::Button, FInputChord() );
 
     UI_COMMAND( PanViewport, "Pan Viewport", "Hold the key to pan the viewport",                   EUserInterfaceActionType::None, FInputChord(EKeys::P));
     UI_COMMAND( RotateViewport, "Rotate Viewport", "Hold the key to Rotate the viewport",          EUserInterfaceActionType::None, FInputChord(EKeys::R));
@@ -56,7 +56,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( SetAlphaModeMax, "Set Alpha Mode to Max", "Set Alpha Mode to Max",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( ToggleEraserButton, "Toggle Eraser", "Toggle Eraser",                              EUserInterfaceActionType::Button, FInputChord( EKeys::E ) );
 
-    UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EKeys::F12 ) );
+    UI_COMMAND( SwitchTabletAPI, "Switch Tablet API", "Switch tablet API",                         EUserInterfaceActionType::Button, FInputChord( EKeys::F8 ) );
    
     UI_COMMAND( FillCurrentLayer, "Fill Current Layer", "Fill current layer",                      EUserInterfaceActionType::Button, FInputChord( EKeys::F ) );
     UI_COMMAND( ClearCurrentLayer, "Clear Current Layer", "Clear current layer",                   EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );

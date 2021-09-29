@@ -64,8 +64,8 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
     MAP_ACTION(painterEditorCommands.AboutIliad, AboutIliad )
     MAP_ACTION(painterEditorCommands.VisitPraxinosWebsite, VisitPraxinosWebsite )
-    MAP_ACTION(painterEditorCommands.VisitPraxinosForums, VisitPraxinosForums )
-    MAP_ACTION(painterEditorCommands.SwitchTabletAPI, VisitPraxinosForums )
+    MAP_ACTION(painterEditorCommands.ReleaseNotes, ReleaseNotes )
+    MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
 
     #undef MAP_ACTION
 }
@@ -95,7 +95,7 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FMenuBuilder& ioMenuBuilder )
     {
         ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().AboutIliad );
         ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosForums );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ReleaseNotes );
     }
 }
 
@@ -301,9 +301,9 @@ FOdysseyPainterEditorGUI::VisitPraxinosWebsite()
 }
 
 void
-FOdysseyPainterEditorGUI::VisitPraxinosForums()
+FOdysseyPainterEditorGUI::ReleaseNotes()
 {
-    FString URL = "https://praxinos.coop/forum";
+    FString URL = "https://praxinos.coop/forum/viewtopic.php?f=15&t=168";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
 }
 

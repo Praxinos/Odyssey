@@ -32,8 +32,8 @@ public:
     /** Action to go to praxinos' website */
     TSharedPtr<FUICommandInfo> VisitPraxinosWebsite;
 
-    /** Action to go to praxinos' forum */
-    TSharedPtr<FUICommandInfo> VisitPraxinosForums;
+    /** Action to go to praxinos' forum Release Notes*/
+    TSharedPtr<FUICommandInfo> ReleaseNotes;
     
 
     //Undo Redo
