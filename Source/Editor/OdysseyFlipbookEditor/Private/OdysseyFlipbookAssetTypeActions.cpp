@@ -7,9 +7,10 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "OdysseyFlipbookEditorModule.h"
-#include "OdysseyFlipbook.h"
 #include "OdysseyFlipbookWrapper.h"
 #include "OdysseyTextureAssetUserData.h"
+#include "OdysseyPainterEditorSettings.h"
+
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbook_AssetTypeActions"
 
@@ -35,7 +36,7 @@ FOdysseyFlipbookAssetTypeActions::GetTypeColor() const
 UClass*
 FOdysseyFlipbookAssetTypeActions::GetSupportedClass() const
 {
-    return UOdysseyFlipbook::StaticClass();
+    return UPaperFlipbook::StaticClass();
 }
 
 uint32
@@ -50,22 +51,10 @@ FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
     InFilter.ClassNames.Add( UPaperFlipbook::StaticClass()->GetFName());
 }
 
-//Works, but suppress the normal editor of Paper2DFlipbook, need to find a better solution to keep both editors
-
 void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
-    for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
-    {
-       auto odysseyFlipbook = Cast<UPaperFlipbook>(*ObjIt);
-        if (odysseyFlipbook != NULL)
-        {
-            FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-            odysseyFlipbookModule->CreateOdysseyFlipbookEditor(odysseyFlipbook);
-        }
-    }
-    /*
-    TArray<UObject*> noUserDataObjects;
-    
+    TArray<UObject*> objects;
+
     for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
     {
         auto odysseyFlipbook = Cast<UPaperFlipbook>(*ObjIt);
@@ -73,23 +62,20 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
         if (odysseyFlipbook != NULL)
         {
             FOdysseyFlipbookWrapper odysseyFlipbookWrapper( odysseyFlipbook );
-            UTexture2D* texture2D = odysseyFlipbookWrapper.GetKeyframeTexture(0);  //  BUG Keyframe 0 = NULL ??
-            UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(texture2D->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-            if( userData )
+
+            if( UOdysseyPainterEditorSettings::Get()->IliadDefaultEditorEnabled )
             {
                 FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
                 odysseyFlipbookModule->CreateOdysseyFlipbookEditor(odysseyFlipbook);
             }
             else
             {
-                noUserDataObjects.Add(odysseyFlipbook);
+                objects.Add(odysseyFlipbook);
             }
         }
     }
-    
-    if( noUserDataObjects.Num() != 0 )
-        FAssetTypeActions_Base::OpenAssetEditor( noUserDataObjects, EditWithinLevelEditor );
-*/
+    if( objects.Num() != 0 )
+        FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
 }
 
 #undef LOCTEXT_NAMESPACE
