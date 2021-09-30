@@ -9,7 +9,6 @@
 
 #include "ULISLoaderModule.h"
 #include "OdysseyBlock.h"
-#include "OdysseyTexture.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "SOdysseyTextureConfigureWindow.h"
 
@@ -23,7 +22,7 @@ UOdysseyTextureFactory::UOdysseyTextureFactory( const FObjectInitializer& iObjec
     // From UFactory
     bCreateNew = true;
     bEditAfterNew = true;
-    SupportedClass = UOdysseyTexture::StaticClass();
+    SupportedClass = UTexture2D::StaticClass();
 }
 
 bool UOdysseyTextureFactory::ConfigureProperties()
@@ -51,7 +50,7 @@ UOdysseyTextureFactory::GetDefaultNewAssetName() const
 UObject*
 UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
-    check(iClass->IsChildOf(UOdysseyTexture::StaticClass()));
+    check(iClass->IsChildOf(UTexture2D::StaticClass()));
 
     // Init internal data
     FOdysseyBlock block( mTextureWidth, mTextureHeight, ULISFormatForUE4TextureSourceFormat(mTextureFormat), nullptr, nullptr, true );

@@ -99,6 +99,6 @@ public:
     FBrushDefaults BrushDefaults;
 
     /** If true, set Iliad as default editor when double-click on a Texture or FlipBook. */
-    /*UPROPERTY(config, EditAnywhere, Category = Defaults, DisplayName = "Set Iliad as default editor for textures and flipbooks")
-    bool IliadDefaultEditorEnabled;*/
+    UPROPERTY(config, EditAnywhere, Category = Defaults, DisplayName = "Set Iliad as default editor for textures")
+    bool IliadDefaultEditorEnabled;
 };

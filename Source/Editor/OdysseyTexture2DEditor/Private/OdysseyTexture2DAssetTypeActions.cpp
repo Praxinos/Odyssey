@@ -6,8 +6,9 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "OdysseyTextureAssetUserData.h"
+#include "OdysseyTexture2DEditorModule.h"
 #include "OdysseyPainterEditorSettings.h"
-#include "OdysseyTexture.h"
+#include "Interfaces/ITextureEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 
@@ -33,7 +34,7 @@ FOdysseyTexture2DAssetTypeActions::GetTypeColor() const
 UClass*
 FOdysseyTexture2DAssetTypeActions::GetSupportedClass() const
 {
-    return UOdysseyTexture::StaticClass();
+    return UTexture2D::StaticClass();
 }
 
 uint32
@@ -48,7 +49,7 @@ FOdysseyTexture2DAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
     InFilter.ClassNames.Add( UTexture2D::StaticClass()->GetFName());
 }
 
-/*
+
 void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {    
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
@@ -70,6 +71,6 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
             }
 		}
 	}
-}*/
+}
 
 #undef LOCTEXT_NAMESPACE

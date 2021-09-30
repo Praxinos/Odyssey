@@ -20,7 +20,7 @@ public:
     virtual UClass* GetSupportedClass() const override;
     virtual uint32 GetCategories() override;
     virtual void BuildBackendFilter( FARFilter & InFilter ) override;
-	//virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
+	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
     // End of IAssetTypeActions interface
 
 private:
