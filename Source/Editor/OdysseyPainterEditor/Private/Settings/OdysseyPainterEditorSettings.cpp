@@ -23,6 +23,7 @@ UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectIniti
     , FitToViewport( true )
     , TextureBorderColor( FColor::White )
     , TextureBorderEnabled( false )
+    , IliadDefaultEditorEnabled( true )
     , BrushDefaults()
 {
 }

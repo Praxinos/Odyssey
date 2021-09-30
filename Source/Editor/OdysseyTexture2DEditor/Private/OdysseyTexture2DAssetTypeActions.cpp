@@ -7,6 +7,7 @@
 #include "IContentBrowserSingleton.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseyTexture2DEditorModule.h"
+#include "OdysseyPainterEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 
@@ -51,29 +52,27 @@ FOdysseyTexture2DAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 
 void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
-    TArray<UObject*> noUserDataObjects;
+    TArray<UObject*> objects;
     
 	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
 	{
 		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
 		if (odysseyTexture != NULL)
 		{
-            UOdysseyTextureAssetUserData* userData = Cast<UOdysseyTextureAssetUserData>(odysseyTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
-            
-            if( userData )
+            if( UOdysseyPainterEditorSettings::Get()->IliadDefaultEditorEnabled )
             {
                 FOdysseyTexture2DEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTexture2DEditorModule>("OdysseyTexture2DEditor");
                 odysseyTextureModule->CreateOdysseyTexture2DEditor(odysseyTexture);
             }
             else
             {
-                noUserDataObjects.Add(odysseyTexture);
+                objects.Add(*ObjIt);
             }
 		}
 	}
     
-    if( noUserDataObjects.Num() != 0 )
-        FAssetTypeActions_Base::OpenAssetEditor( noUserDataObjects, EditWithinLevelEditor );
+    if( objects.Num() != 0 )
+        FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
 }
 
 #undef LOCTEXT_NAMESPACE
