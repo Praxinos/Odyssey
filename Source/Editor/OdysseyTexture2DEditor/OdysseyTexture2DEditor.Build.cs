@@ -45,6 +45,7 @@ namespace UnrealBuildTool.Rules
                     "DesktopPlatform",
                 	"EditorStyle",
 					"Engine",
+					"TextureEditor",
 					"OdysseyBrush",
 					"OdysseyPaintEngine",
 					"OdysseyImaging",

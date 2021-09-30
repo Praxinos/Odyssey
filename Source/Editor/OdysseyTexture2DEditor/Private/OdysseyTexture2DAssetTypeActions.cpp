@@ -8,6 +8,7 @@
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseyTexture2DEditorModule.h"
 #include "OdysseyPainterEditorSettings.h"
+#include "Interfaces/ITextureEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 
@@ -51,9 +52,9 @@ FOdysseyTexture2DAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 //Works, but suppress the normal editor of UTexture2D, need to find a better solution to keep both editors
 
 void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
-{
-    TArray<UObject*> objects;
-    
+{    
+    EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
+
 	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
 	{
 		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
@@ -66,13 +67,11 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
             }
             else
             {
-                objects.Add(*ObjIt);
+                ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
+                TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
             }
 		}
 	}
-    
-    if( objects.Num() != 0 )
-        FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
 }
 
 #undef LOCTEXT_NAMESPACE
