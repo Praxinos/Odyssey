@@ -42,16 +42,15 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
 {
     UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
     mTabletAPISelected = MakeShared<EOdysseyStylusInputDriver>(settings->StylusInputDriver);
-    TArray<TSharedPtr<EOdysseyStylusInputDriver>> options;
 
     #if PLATFORM_WINDOWS
-        options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Ink));
-        options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Wintab));
+        mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Ink));
+        mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Wintab));
     #elif PLATFORM_MAC
-        options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_NSEvent));
+        mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_NSEvent));
     #endif
 
-    options.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_None));
+    mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_None));
 
     ChildSlot
     [
@@ -64,7 +63,7 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
 		+ SVerticalBox::Slot()
 		[
 			SNew(SComboBox<TSharedPtr<EOdysseyStylusInputDriver>>)
-            .OptionsSource(&options)
+            .OptionsSource(&mOptions)
             .OnGenerateWidget(this, &SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem)
             .OnSelectionChanged( this, &SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem )
             [
