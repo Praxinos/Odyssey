@@ -24,4 +24,5 @@ private:
 private:
     FDelegateHandle CinematicBoardTrackCreateEditorHandle;
     FDelegateHandle SingleCameraCutTrackCreateEditorHandle;
+    FDelegateHandle NoteTrackCreateEditorHandle;
 };
