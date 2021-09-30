@@ -6,11 +6,7 @@
 #include "PaperFlipbook.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
-#include "OdysseyFlipbookEditorModule.h"
-#include "OdysseyFlipbookWrapper.h"
-#include "OdysseyTextureAssetUserData.h"
-#include "OdysseyPainterEditorSettings.h"
-
+#include "OdysseyFlipbook.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbook_AssetTypeActions"
 
@@ -36,7 +32,7 @@ FOdysseyFlipbookAssetTypeActions::GetTypeColor() const
 UClass*
 FOdysseyFlipbookAssetTypeActions::GetSupportedClass() const
 {
-    return UPaperFlipbook::StaticClass();
+    return UOdysseyFlipbook::StaticClass();
 }
 
 uint32
@@ -51,6 +47,7 @@ FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
     InFilter.ClassNames.Add( UPaperFlipbook::StaticClass()->GetFName());
 }
 
+/*
 void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
     TArray<UObject*> objects;
@@ -76,6 +73,6 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
     }
     if( objects.Num() != 0 )
         FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
-}
+}*/
 
 #undef LOCTEXT_NAMESPACE

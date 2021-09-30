@@ -4,6 +4,7 @@
 #include "OdysseyFlipbookFactory.h"
 
 #include "PaperFlipbook.h"
+#include "OdysseyFlipbook.h"
 
 //---
 
@@ -12,7 +13,7 @@
 UOdysseyFlipbookFactory::UOdysseyFlipbookFactory( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
 {
-    SupportedClass = UPaperFlipbook::StaticClass();
+    SupportedClass = UOdysseyFlipbook::StaticClass();
 }
 
 UObject*

@@ -6,9 +6,8 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "OdysseyTextureAssetUserData.h"
-#include "OdysseyTexture2DEditorModule.h"
 #include "OdysseyPainterEditorSettings.h"
-#include "Interfaces/ITextureEditorModule.h"
+#include "OdysseyTexture.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 
@@ -34,7 +33,7 @@ FOdysseyTexture2DAssetTypeActions::GetTypeColor() const
 UClass*
 FOdysseyTexture2DAssetTypeActions::GetSupportedClass() const
 {
-    return UTexture2D::StaticClass();
+    return UOdysseyTexture::StaticClass();
 }
 
 uint32
@@ -49,8 +48,7 @@ FOdysseyTexture2DAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
     InFilter.ClassNames.Add( UTexture2D::StaticClass()->GetFName());
 }
 
-//Works, but suppress the normal editor of UTexture2D, need to find a better solution to keep both editors
-
+/*
 void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {    
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
@@ -72,6 +70,6 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
             }
 		}
 	}
-}
+}*/
 
 #undef LOCTEXT_NAMESPACE

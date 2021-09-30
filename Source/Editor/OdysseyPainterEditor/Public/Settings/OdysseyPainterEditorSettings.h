@@ -54,10 +54,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorSettings
 
 public:
 
-    static UOdysseyPainterEditorSettings* Get()
-    { 
-        return CastChecked<UOdysseyPainterEditorSettings>( UOdysseyPainterEditorSettings::StaticClass()->GetDefaultObject() );
-    }
+    static UOdysseyPainterEditorSettings* Get();
 
 public:
     /** The type of background to draw in the texture editor view port. */
@@ -102,6 +99,6 @@ public:
     FBrushDefaults BrushDefaults;
 
     /** If true, set Iliad as default editor when double-click on a Texture or FlipBook. */
-    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Set Iliad as default editor for textures and flipbooks" )
-    bool IliadDefaultEditorEnabled;
+    /*UPROPERTY(config, EditAnywhere, Category = Defaults, DisplayName = "Set Iliad as default editor for textures and flipbooks")
+    bool IliadDefaultEditorEnabled;*/
 };
