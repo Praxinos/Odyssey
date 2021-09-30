@@ -10,6 +10,7 @@
 
 class ACineCameraActor;
 class APlaneActor;
+class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
 class UMovieScene3DTransformSection;
