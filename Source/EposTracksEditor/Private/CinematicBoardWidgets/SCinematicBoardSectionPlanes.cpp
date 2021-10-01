@@ -10,12 +10,14 @@
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "SequencerSettings.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 
 #include "EposSequenceHelpers.h"
 #include "EposTracksToolbarHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "Tools/LighttableTools.h"
+#include "Tools/ResourceAssetTools.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
@@ -803,7 +805,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         BoardSequenceTools::CloneDrawing( sequencer, material_to_clone, sequencer->GetLocalTime().Time.FrameNumber, mBinding.GetGuid() );
     };
 
-    auto CanCloneKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
+    auto CanCloneKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse ) -> bool
     {
         if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return false;
@@ -852,10 +854,81 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         BoardSequenceTools::DeleteDrawing( sequencer, key_outer_framenumber, mBinding.GetGuid() ); //TODO: maybe try to avoid computing the outer frame number of the key and give the key ? or the drawing data ?
     };
 
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse ) -> bool
+    {
+        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
+            return false;
+
+        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
+            return false;
+
+        return true;
+    };
+
+    //-
+
+    auto EditKey = [=]( UTexture2D* iTexture )
+    {
+        if( !iTexture )
+            return;
+
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        check( !AssetEditorSubsystem->FindEditorsForAsset( iTexture ).Num() );
+
+        AssetEditorSubsystem->OpenEditorForAsset( iTexture );
+    };
+
+    auto CanEditKey = [=]( UTexture2D* iTexture ) -> bool
+    {
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+        TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( iTexture );
+        //FName name = opened_editors.Num() ? opened_editors[0]->GetEditorName() : NAME_None;
+
+        return !opened_editors.Num();
+    };
+
     //-
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    UMaterialInstance* material = nullptr;
+    UTexture2D* texture = nullptr;
+    FString material_name( TEXT( "Multiple" ) );
+    FString texture_name( TEXT( "Multiple" ) );
+
+    if( mKeysUnderMouse->NumMetaKeys() == 1 ) // For the moment, only 1 metakey can be cloned
+    {
+        auto it = mKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        if( it.Value().mSubKeys.Num() == 1 ) // For the moment, only 1 subkey can be cloned
+        {
+            FFrameNumber key_framenumber = it.Key();
+
+            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+            FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid() );
+            material = drawing.GetMaterial();
+            texture = ProjectAssetTools::GetTexture2D( result.mInnerSequence, material );
+
+            material_name = material ? material->GetName() : TEXT( "None" );
+            texture_name = texture ? texture->GetName() : TEXT( "None" );
+        }
+    }
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "texture-key-section-label", "Texture: {0}" ), FText::FromString( texture_name ) ) );
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-texture-key-label", "Edit..." ),
+                                LOCTEXT( "edit-texture-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
+                                FSlateIcon(),
+                                FUIAction( FExecuteAction::CreateLambda( EditKey, texture ),
+                                           FCanExecuteAction::CreateLambda( CanEditKey, texture ) ) );
+
+    ioMenuBuilder.EndSection();
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "material-key-section-label", "Material: {0}" ), FText::FromString( material_name ) ) );
 
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
@@ -866,7 +939,10 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ),
                                 LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
                                 FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+
+    ioMenuBuilder.EndSection();
 }
 
 FCursorReply

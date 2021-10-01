@@ -333,6 +333,21 @@ MasterAssetTools::CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTex
 //---
 
 //static
+UTexture2D*
+ProjectAssetTools::GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterial )
+{
+    if( !iMaterial )
+        return nullptr;
+
+    UTexture* texture;
+    iMaterial->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture );
+
+    return Cast<UTexture2D>( texture );
+}
+
+//---
+
+//static
 UMaterialInstanceConstant*
 ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
