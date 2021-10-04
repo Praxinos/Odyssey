@@ -20,6 +20,7 @@
 #include "Board/BoardHelpers.h"
 #include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "NoteTrack/MovieSceneNoteTrack.h"
 
 //---
 
@@ -243,6 +244,7 @@ ETrackSupport
 UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
     if( InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() ||
+        InTrackClass == UMovieSceneNoteTrack::StaticClass() ||
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )

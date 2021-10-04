@@ -9,6 +9,8 @@
 
 #include "MovieSceneNoteTrack.generated.h"
 
+class UStoryNote;
+
 /**
  * Handles manipulation of note.
  */
@@ -20,16 +22,16 @@ class EPOSTRACKS_API UMovieSceneNoteTrack
 
 public:
     /** Adds a new sound cue to the audio */
-    virtual UMovieSceneSection* AddNewNoteOnRow( FString iText, FFrameNumber Time, int32 RowIndex );
+    virtual UMovieSceneSection* AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber Time, int32 RowIndex );
 
     /** Adds a new sound cue on the next available/non-overlapping row */
-    virtual UMovieSceneSection* AddNewNote( FString iText, FFrameNumber Time )
+    virtual UMovieSceneSection* AddNewNote( UStoryNote* iNote, FFrameNumber Time )
     {
-        return AddNewNoteOnRow( iText, Time, INDEX_NONE );
+        return AddNewNoteOnRow( iNote, Time, INDEX_NONE );
     }
 
     /** @return The audio sections on this track */
-    const TArray<UMovieSceneSection*>& GetAudioSections() const
+    const TArray<UMovieSceneSection*>& GetNoteSections() const
     {
         return NoteSections;
     }

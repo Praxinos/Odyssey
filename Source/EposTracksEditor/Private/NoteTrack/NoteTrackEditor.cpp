@@ -4,8 +4,11 @@
 #include "NoteTrack/NoteTrackEditor.h"
 
 #include "AssetRegistryModule.h"
+#include "AssetToolsModule.h"
+#include "ContentBrowserModule.h"
 #include "Rendering/DrawElements.h"
 #include "SequencerSectionPainter.h"
+#include "DragAndDrop/AssetDragDropOp.h"
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"
 #include "CommonMovieSceneTools.h"
@@ -16,6 +19,7 @@
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/NoteSection.h"
+#include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "FNoteTrackEditor"
 
@@ -49,13 +53,15 @@ void FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder )
 
 void FNoteTrackEditor::BuildObjectBindingTrackMenu( FMenuBuilder& MenuBuilder, const TArray<FGuid>& ObjectBindings, const UClass* ObjectClass )
 {
-    if( ObjectClass != nullptr && ObjectClass->IsChildOf( AActor::StaticClass() ) )
-    {
-        MenuBuilder.AddSubMenu(
-            LOCTEXT( "AddAttachedNoteTrack", "Note" ),
-            LOCTEXT( "AddAttachedNoteTooltip", "Adds an note track attached to the object." ),
-            FNewMenuDelegate::CreateSP( this, &FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute, ObjectBindings ) );
-    }
+    //TODO: doesn't work when pressing Enter key for new note
+
+    //if( ObjectClass != nullptr && ObjectClass->IsChildOf( AActor::StaticClass() ) )
+    //{
+    //    MenuBuilder.AddSubMenu(
+    //        LOCTEXT( "AddAttachedNoteTrack", "Note" ),
+    //        LOCTEXT( "AddAttachedNoteTooltip", "Adds an note track attached to the object." ),
+    //        FNewMenuDelegate::CreateSP( this, &FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute, ObjectBindings ) );
+    //}
 }
 
 bool FNoteTrackEditor::SupportsType( TSubclassOf<UMovieSceneTrack> Type ) const
@@ -102,83 +108,84 @@ void FNoteTrackEditor::Resize( float NewSize, UMovieSceneTrack* InTrack )
 
 bool FNoteTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, FSequencerDragDropParams& DragDropParams )
 {
-    //if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
-    //{
-    //    return false;
-    //}
+    if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
+    {
+        return false;
+    }
 
-    //TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
+    TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
 
-    //if( !Operation.IsValid() || !Operation->IsOfType<FAssetDragDropOp>() )
-    //{
-    //    return false;
-    //}
+    if( !Operation.IsValid() || !Operation->IsOfType<FAssetDragDropOp>() )
+    {
+        return false;
+    }
 
-    //TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
+    TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
 
-    //for( const FAssetData& AssetData : DragDropOp->GetAssets() )
-    //{
-    //    if( USoundBase* Sound = Cast<USoundBase>( AssetData.GetAsset() ) )
-    //    {
-    //        FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
-    //        FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( Sound->GetDuration() );
-    //        DragDropParams.FrameRange = TRange<FFrameNumber>( DragDropParams.FrameNumber, DragDropParams.FrameNumber + LengthInFrames );
-    //        return true;
-    //    }
-    //}
+    for( const FAssetData& AssetData : DragDropOp->GetAssets() )
+    {
+        if( UStoryNote* Note = Cast<UStoryNote>( AssetData.GetAsset() ) )
+        {
+            FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
+            FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( 8.f ); //TODO: but what ? find the corresponding board section ? and its start frame ?
+            //FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( Note->GetDuration() );
+            DragDropParams.FrameRange = TRange<FFrameNumber>( DragDropParams.FrameNumber, DragDropParams.FrameNumber + LengthInFrames );
+            return true;
+        }
+    }
 
     return false;
 }
 
 FReply FNoteTrackEditor::OnDrop( const FDragDropEvent& DragDropEvent, const FSequencerDragDropParams& DragDropParams )
 {
-    //if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
-    //{
-    //    return FReply::Unhandled();
-    //}
+    if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
+    {
+        return FReply::Unhandled();
+    }
 
-    //TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
+    TSharedPtr<FDragDropOperation> Operation = DragDropEvent.GetOperation();
 
-    //if( !Operation.IsValid() || !Operation->IsOfType<FAssetDragDropOp>() )
-    //{
-    //    return FReply::Unhandled();
-    //}
+    if( !Operation.IsValid() || !Operation->IsOfType<FAssetDragDropOp>() )
+    {
+        return FReply::Unhandled();
+    }
 
-    //UMovieSceneAudioTrack* AudioTrack = Cast<UMovieSceneAudioTrack>( DragDropParams.Track );
+    UMovieSceneNoteTrack* NoteTrack = Cast<UMovieSceneNoteTrack>( DragDropParams.Track );
 
-    //const FScopedTransaction Transaction( LOCTEXT( "DropAssets", "Drop Assets" ) );
+    const FScopedTransaction Transaction( LOCTEXT( "DropAssets", "Drop Assets" ) );
 
-    //TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
+    TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
 
-    //FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
+    FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
 
     bool bAnyDropped = false;
-    //for( const FAssetData& AssetData : DragDropOp->GetAssets() )
-    //{
-    //    USoundBase* Sound = Cast<USoundBase>( AssetData.GetAsset() );
+    for( const FAssetData& AssetData : DragDropOp->GetAssets() )
+    {
+        UStoryNote* Note = Cast<UStoryNote>( AssetData.GetAsset() );
 
-    //    if( Sound )
-    //    {
-    //        if( DragDropParams.TargetObjectGuid.IsValid() )
-    //        {
-    //            TArray<TWeakObjectPtr<>> OutObjects;
-    //            for( TWeakObjectPtr<> Object : GetSequencer()->FindObjectsInCurrentSequence( DragDropParams.TargetObjectGuid ) )
-    //            {
-    //                OutObjects.Add( Object );
-    //            }
+        if( Note )
+        {
+            if( DragDropParams.TargetObjectGuid.IsValid() )
+            {
+                TArray<TWeakObjectPtr<>> OutObjects;
+                for( TWeakObjectPtr<> Object : GetSequencer()->FindObjectsInCurrentSequence( DragDropParams.TargetObjectGuid ) )
+                {
+                    OutObjects.Add( Object );
+                }
 
-    //            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FAudioTrackEditor::AddNewAttachedSound, Sound, AudioTrack, OutObjects ) );
-    //        }
-    //        else
-    //        {
-    //            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FAudioTrackEditor::AddNewMasterSound, Sound, AudioTrack, DragDropParams.RowIndex ) );
-    //        }
+                AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FNoteTrackEditor::AddNewAttachedNote, Note, NoteTrack, OutObjects ) );
+            }
+            else
+            {
+                AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FNoteTrackEditor::AddNewMasterNote, Note, NoteTrack, DragDropParams.RowIndex ) );
+            }
 
-    //        bAnyDropped = true;
-    //    }
-    //}
+            bAnyDropped = true;
+        }
+    }
 
-    //FMovieSceneTrackEditor::EndKeying();
+    FMovieSceneTrackEditor::EndKeying();
 
     return bAnyDropped ? FReply::Handled() : FReply::Unhandled();
 }
@@ -199,42 +206,41 @@ TSharedPtr<SWidget> FNoteTrackEditor::BuildOutlinerEditWidget( const FGuid& Obje
         .AutoWidth()
         .VAlign( VAlign_Center )
         [
-            FSequencerUtilities::MakeAddButton( LOCTEXT( "NoteText", "Note" ), FOnGetContent::CreateSP( this, &FNoteTrackEditor::BuildNoteSubMenu2, FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnNoteTextCommited, Track ) ), Params.NodeIsHovered, GetSequencer() )
-            //FSequencerUtilities::MakeAddButton( LOCTEXT( "NoteText", "Note" ), FOnGetContent::CreateSP( this, &FNoteTrackEditor::BuildNoteSubMenu, FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetSelected, Track ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetEnterPressed, Track ) ), Params.NodeIsHovered, GetSequencer() )
+            FSequencerUtilities::MakeAddButton( LOCTEXT( "NoteText", "Note" ), FOnGetContent::CreateSP( this, &FNoteTrackEditor::BuildNoteSubMenu, FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetSelected, Track ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetEnterPressed, Track ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnNoteTextCommited, Track ) ), Params.NodeIsHovered, GetSequencer() )
         ];
 }
 
 bool FNoteTrackEditor::HandleAssetAdded( UObject* Asset, const FGuid& TargetObjectGuid )
 {
-    //if( Asset->IsA<USoundBase>() )
-    //{
-    //    auto Sound = Cast<USoundBase>( Asset );
-    //    UMovieSceneAudioTrack* DummyTrack = nullptr;
+    if( Asset->IsA<UStoryNote>() )
+    {
+        auto Note = Cast<UStoryNote>( Asset );
+        UMovieSceneNoteTrack* DummyTrack = nullptr;
 
-    //    const FScopedTransaction Transaction( LOCTEXT( "AddAudio_Transaction", "Add Audio" ) );
+        const FScopedTransaction Transaction( LOCTEXT( "AddNote_Transaction", "Add Note" ) );
 
-    //    if( TargetObjectGuid.IsValid() )
-    //    {
-    //        TArray<TWeakObjectPtr<>> OutObjects;
-    //        for( TWeakObjectPtr<> Object : GetSequencer()->FindObjectsInCurrentSequence( TargetObjectGuid ) )
-    //        {
-    //            OutObjects.Add( Object );
-    //        }
+        if( TargetObjectGuid.IsValid() )
+        {
+            TArray<TWeakObjectPtr<>> OutObjects;
+            for( TWeakObjectPtr<> Object : GetSequencer()->FindObjectsInCurrentSequence( TargetObjectGuid ) )
+            {
+                OutObjects.Add( Object );
+            }
 
-    //        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FAudioTrackEditor::AddNewAttachedSound, Sound, DummyTrack, OutObjects ) );
-    //    }
-    //    else
-    //    {
-    //        int32 RowIndex = INDEX_NONE;
-    //        AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FAudioTrackEditor::AddNewMasterSound, Sound, DummyTrack, RowIndex ) );
-    //    }
+            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FNoteTrackEditor::AddNewAttachedNote, Note, DummyTrack, OutObjects ) );
+        }
+        else
+        {
+            int32 RowIndex = INDEX_NONE;
+            AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FNoteTrackEditor::AddNewMasterNote, Note, DummyTrack, RowIndex ) );
+        }
 
-    //    return true;
-    //}
+        return true;
+    }
     return false;
 }
 
-FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, FString iText, UMovieSceneNoteTrack* NoteTrack, int32 RowIndex )
+FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, int32 RowIndex )
 {
     FKeyPropertyResult KeyPropertyResult;
 
@@ -258,7 +264,7 @@ FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, FSt
     {
         NoteTrack->Modify();
 
-        UMovieSceneSection* NewSection = NoteTrack->AddNewNoteOnRow( iText, KeyTime, RowIndex );
+        UMovieSceneSection* NewSection = NoteTrack->AddNewNoteOnRow( iNote, KeyTime, RowIndex );
 
         if( TrackResult.bWasCreated )
         {
@@ -277,7 +283,7 @@ FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, FSt
     return KeyPropertyResult;
 }
 
-FKeyPropertyResult FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, FString iText, UMovieSceneNoteTrack* NoteTrack, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo )
+FKeyPropertyResult FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo )
 {
     FKeyPropertyResult KeyPropertyResult;
 
@@ -305,7 +311,7 @@ FKeyPropertyResult FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, F
             {
                 NoteTrack->Modify();
 
-                UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iText, KeyTime );
+                UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iNote, KeyTime );
                 NoteTrack->SetDisplayName( LOCTEXT( "NoteTrackName", "Note" ) );
                 KeyPropertyResult.bTrackModified = true;
                 KeyPropertyResult.SectionsCreated.Add( NewSection );
@@ -353,50 +359,15 @@ void FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
 
 void FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute( FMenuBuilder& MenuBuilder, TArray<FGuid> ObjectBindings )
 {
-    MenuBuilder.AddWidget( BuildNoteSubMenu( FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ) ), FText::GetEmpty(), true );
+    //BuildNoteSubMenu( MenuBuilder, FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) );
+    MenuBuilder.AddWidget( BuildNoteSubMenu( FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) ), FText::GetEmpty(), true );
 }
 
-TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEnterPressed OnAssetEnterPressed )
-{
-    //FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-    //TArray<FName> ClassNames;
-    //ClassNames.Add( USoundBase::StaticClass()->GetFName() );
-    //TSet<FName> DerivedClassNames;
-    //AssetRegistryModule.Get().GetDerivedClassNames( ClassNames, TSet<FName>(), DerivedClassNames );
-
-    //FMenuBuilder MenuBuilder( true, nullptr );
-
-    //FAssetPickerConfig AssetPickerConfig;
-    //{
-    //    AssetPickerConfig.OnAssetSelected = OnAssetSelected;
-    //    AssetPickerConfig.OnAssetEnterPressed = OnAssetEnterPressed;
-    //    AssetPickerConfig.bAllowNullSelection = false;
-    //    AssetPickerConfig.InitialAssetViewType = EAssetViewType::List;
-    //    for( auto ClassName : DerivedClassNames )
-    //    {
-    //        AssetPickerConfig.Filter.ClassNames.Add( ClassName );
-    //    }
-    //}
-
-    //FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
-
-    //TSharedPtr<SBox> MenuEntry = SNew( SBox )
-    //    .WidthOverride( 300.0f )
-    //    .HeightOverride( 300.f )
-    //    [
-    //        ContentBrowserModule.Get().CreateAssetPicker( AssetPickerConfig )
-    //    ];
-
-    //MenuBuilder.AddWidget( MenuEntry.ToSharedRef(), FText::GetEmpty(), true );
-
-    //return MenuBuilder.MakeWidget();
-
-    return SNullWidget::NullWidget;
-}
-
-TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu2( FOnTextCommitted OnTextCommited )
+TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEnterPressed OnAssetEnterPressed, FOnTextCommitted OnTextCommited )
 {
     FMenuBuilder MenuBuilder( true, nullptr );
+
+    //-
 
     //MenuBuilder.AddEditableText( LOCTEXT( "text-label", "Text" ), FText::GetEmpty(), FSlateIcon(), FText::GetEmpty(), OnTextCommited );
 
@@ -414,28 +385,87 @@ TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu2( FOnTextCommitted OnText
 
     // D:\Epic Games\UE_4.27\Engine\Source\Developer\OutputLog\Private\SOutputLog.cpp
 
-    MenuBuilder.AddWidget( SNew( SBox )
-                           .MinDesiredWidth( 500 )
-                           .MinDesiredHeight( 70 )
-                           [
-                               SNew( SMultiLineEditableTextBox )
-                               //.ModiferKeyForNewLine( EModifierKey::Shift )
-                               .OnTextCommitted( OnTextCommited )
-                           ]
-                           , LOCTEXT( "multitextbox-label", "MultiTextBox" ) );
+    TSharedPtr<SBox> MenuEntry = SNew( SBox )
+        .MinDesiredWidth( 400 )
+        .MinDesiredHeight( 50 )
+        [
+            SNew( SMultiLineEditableTextBox )
+            .ModiferKeyForNewLine( EModifierKey::Shift )
+            .OnTextCommitted( OnTextCommited )
+        ];
+
+    MenuBuilder.AddWidget( MenuEntry.ToSharedRef(), LOCTEXT( "menu-new-note-label", "New Note Text" ) );
+
+    //-
+
+    auto OnExistingNotes = [=]( FMenuBuilder& iMenuBuilder )
+    {
+        FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+        TArray<FName> ClassNames;
+        ClassNames.Add( UStoryNote::StaticClass()->GetFName() );
+        TSet<FName> DerivedClassNames;
+        AssetRegistryModule.Get().GetDerivedClassNames( ClassNames, TSet<FName>(), DerivedClassNames );
+
+        FAssetPickerConfig AssetPickerConfig;
+        {
+            AssetPickerConfig.OnAssetSelected = OnAssetSelected;
+            AssetPickerConfig.OnAssetEnterPressed = OnAssetEnterPressed;
+            AssetPickerConfig.bAllowNullSelection = false;
+            AssetPickerConfig.InitialAssetViewType = EAssetViewType::List;
+            for( auto ClassName : DerivedClassNames )
+            {
+                AssetPickerConfig.Filter.ClassNames.Add( ClassName );
+            }
+        }
+
+        FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
+
+        TSharedPtr<SBox> MenuEntry = SNew( SBox )
+            .WidthOverride( 300.0f )
+            .HeightOverride( 300.f )
+            [
+                ContentBrowserModule.Get().CreateAssetPicker( AssetPickerConfig )
+            ];
+
+        iMenuBuilder.AddWidget( MenuEntry.ToSharedRef(), FText::GetEmpty(), true );
+    };
+
+    MenuBuilder.AddSubMenu( LOCTEXT( "submenu-existing-notes-label", "Existing Notes" ), LOCTEXT( "submenu-existing-notes-tooltip", "Link to one of the existing notes" ), FNewMenuDelegate::CreateLambda( OnExistingNotes ) );
 
     return MenuBuilder.MakeWidget();
 }
 
 void FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iType, UMovieSceneTrack* Track )
 {
+    if( iType != ETextCommit::OnEnter )
+        return;
+
     const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddNote_Transaction", "Add Note" ) );
 
     auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
     NoteTrack->Modify();
 
+    //TODO:
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+
+    UPackage* package = GetSequencer()->GetRootMovieSceneSequence()->GetPackage();
+    FString package_pathname = package->GetName(); // ie. /Game/MyStoryboard2
+    FString package_name = FPaths::GetBaseFilename( GetSequencer()->GetFocusedMovieSceneSequence()->GetPackage()->GetName() ); // ie. shot_0002_01
+
+    FString note_package_name;
+    FString note_asset_name;
+    assetToolsModule.Get().CreateUniqueAssetName( FPaths::Combine( package_pathname, TEXT("Notes"), package_name ), "_N_01", note_package_name, note_asset_name );
+
+    FString package_path = FPackageName::GetLongPackagePath( note_package_name );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( note_asset_name, package_path, UStoryNote::StaticClass(), nullptr );
+    UStoryNote* new_note = Cast<UStoryNote>( new_object );
+    check( new_note );
+
+    new_note->Text = iText.ToString();
+    //
+
     FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
-    UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iText.ToString(), KeyTime.FrameNumber );
+    UMovieSceneSection* NewSection = NoteTrack->AddNewNote( new_note, KeyTime.FrameNumber );
 
     GetSequencer()->EmptySelection();
     GetSequencer()->SelectSection( NewSection );
@@ -450,26 +480,26 @@ void FNoteTrackEditor::OnNoteAssetSelected( const FAssetData& AssetData, UMovieS
 
     UObject* SelectedObject = AssetData.GetAsset();
 
-    //if( SelectedObject )
-    //{
-    //    USoundBase* NewSound = CastChecked<USoundBase>( AssetData.GetAsset() );
-    //    if( NewSound != nullptr )
-    //    {
-    //        const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddAudio_Transaction", "Add Audio" ) );
+    if( SelectedObject )
+    {
+        UStoryNote* NewNote = CastChecked<UStoryNote>( AssetData.GetAsset() );
+        if( NewNote != nullptr )
+        {
+            const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddNote_Transaction", "Add Note" ) );
 
-    //        auto AudioTrack = Cast<UMovieSceneAudioTrack>( Track );
-    //        AudioTrack->Modify();
+            auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
+            NoteTrack->Modify();
 
-    //        FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
-    //        UMovieSceneSection* NewSection = AudioTrack->AddNewSound( NewSound, KeyTime.FrameNumber );
+            FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
+            UMovieSceneSection* NewSection = NoteTrack->AddNewNote( NewNote, KeyTime.FrameNumber );
 
-    //        GetSequencer()->EmptySelection();
-    //        GetSequencer()->SelectSection( NewSection );
-    //        GetSequencer()->ThrobSectionSelection();
+            GetSequencer()->EmptySelection();
+            GetSequencer()->SelectSection( NewSection );
+            GetSequencer()->ThrobSectionSelection();
 
-    //        GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-    //    }
-    //}
+            GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+        }
+    }
 }
 
 void FNoteTrackEditor::OnNoteAssetEnterPressed( const TArray<FAssetData>& AssetData, UMovieSceneTrack* Track )
@@ -503,6 +533,25 @@ void FNoteTrackEditor::OnAttachedNoteEnterPressed( const TArray<FAssetData>& Ass
     {
         OnAttachedNoteAssetSelected( AssetData[0].GetAsset(), ObjectBindings );
     }
+}
+
+void FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::Type iType, TArray<FGuid> ObjectBindings )
+{
+    //const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddNote_Transaction", "Add Note" ) );
+
+    //auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
+    //NoteTrack->Modify();
+
+    //TODO: create note asset here ?
+
+    //FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
+    //UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iText.ToString(), KeyTime.FrameNumber );
+
+    //GetSequencer()->EmptySelection();
+    //GetSequencer()->SelectSection( NewSection );
+    //GetSequencer()->ThrobSectionSelection();
+
+    //GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
 }
 
 #undef LOCTEXT_NAMESPACE

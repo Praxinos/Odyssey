@@ -9,6 +9,7 @@
 #include "MovieSceneCommonHelpers.h"
 
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "MovieSceneNoteTrack"
 
@@ -69,7 +70,7 @@ bool UMovieSceneNoteTrack::IsEmpty() const
     return NoteSections.Num() == 0;
 }
 
-UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( FString iText, FFrameNumber Time, int32 RowIndex )
+UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber Time, int32 RowIndex )
 {
     FFrameRate FrameRate = GetTypedOuter<UMovieScene>()->GetTickResolution();
 
@@ -88,7 +89,7 @@ UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( FString iText, FFrame
     // add the section
     UMovieSceneNoteSection* NewSection = NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
     NewSection->InitialPlacementOnRow( NoteSections, Time, DurationToUse.FrameNumber.Value, RowIndex );
-    NewSection->SetText( iText );
+    NewSection->SetNote( iNote );
 
     NoteSections.Add( NewSection );
 

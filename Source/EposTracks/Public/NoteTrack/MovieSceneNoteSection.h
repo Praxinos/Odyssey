@@ -10,6 +10,7 @@
 
 #include "MovieSceneNoteSection.generated.h"
 
+class UStoryNote;
 
 /**
  * A single note section.
@@ -23,20 +24,20 @@ class UMovieSceneNoteSection
 public:
     /** Sets this section's text */
     UFUNCTION( BlueprintCallable, Category = "Sequencer|Section" )
-    void SetText( FString iText )
+    void SetNote( UStoryNote* iNote )
     {
-        Text = iText;
+        Note = iNote;
     }
 
     /** Gets the text for this section */
     UFUNCTION( BlueprintPure, Category = "Sequencer|Section" )
-    FString GetText() const
+    UStoryNote* GetNote() const
     {
-        return Text;
+        return Note;
     }
 
 private:
     /** The text that this section manage */
     UPROPERTY( EditAnywhere, Category = "Note" )
-    FString Text;
+    UStoryNote* Note;
 };

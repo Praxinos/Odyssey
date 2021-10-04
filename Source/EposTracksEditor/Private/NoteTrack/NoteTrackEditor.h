@@ -13,6 +13,7 @@
 #include "ISequencerTrackEditor.h"
 #include "IContentBrowserSingleton.h"
 
+class UStoryNote;
 class UMovieSceneNoteTrack;
 
 /**
@@ -60,10 +61,10 @@ public:
 
 protected:
     /** Delegate for AnimatablePropertyChanged in HandleAssetAdded for master sounds */
-    FKeyPropertyResult AddNewMasterNote( FFrameNumber KeyTime, FString iText, UMovieSceneNoteTrack* Track, int32 RowIndex );
+    FKeyPropertyResult AddNewMasterNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* Track, int32 RowIndex );
 
     /** Delegate for AnimatablePropertyChanged in HandleAssetAdded for attached sounds */
-    FKeyPropertyResult AddNewAttachedNote( FFrameNumber KeyTime, FString iText, UMovieSceneNoteTrack* Track, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo );
+    FKeyPropertyResult AddNewAttachedNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* Track, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo );
 
 private:
     /** Callback for executing the "Add Note Track" menu entry. */
@@ -73,13 +74,13 @@ private:
     void HandleAddAttachedNoteTrackMenuEntryExecute( FMenuBuilder& MenuBuilder, TArray<FGuid> ObjectBindings );
 
     /** Note sub menu */
-    TSharedRef<SWidget> BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEnterPressed OnAssetEnterPressed );
-
-    /** Note sub menu */
-    TSharedRef<SWidget> BuildNoteSubMenu2( FOnTextCommitted OnTextCommited );
+    TSharedRef<SWidget> BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEnterPressed OnAssetEnterPressed, FOnTextCommitted OnTextCommited );
 
     /** Note text commited */
     void OnNoteTextCommited( const FText& iText, ETextCommit::Type iType, UMovieSceneTrack* Track );
+
+    /** Note text commited */
+    void OnAttachedNoteTextCommited( const FText& iText, ETextCommit::Type iType, TArray<FGuid> ObjectBindings );
 
     /** Note asset selected */
     void OnNoteAssetSelected( const FAssetData& AssetData, UMovieSceneTrack* Track );

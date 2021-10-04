@@ -50,6 +50,7 @@ public class EposTracksEditor : ModuleRules
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
+                "EposNote",
                 "EposTracks",
                 "EposActors",
 

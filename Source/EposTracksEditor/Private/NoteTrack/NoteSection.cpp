@@ -12,6 +12,7 @@
 
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "FNoteSection"
 
@@ -37,7 +38,7 @@ FText FNoteSection::GetSectionTitle() const
     UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
     check( NoteSection );
 
-    return FText::FromString( NoteSection->GetText() );
+    return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
 }
 
 FText FNoteSection::GetSectionToolTip() const
@@ -45,7 +46,7 @@ FText FNoteSection::GetSectionToolTip() const
     UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
     check( NoteSection );
 
-    return FText::FromString( NoteSection->GetText() );
+    return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
 }
 
 float FNoteSection::GetSectionHeight() const
