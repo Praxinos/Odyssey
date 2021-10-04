@@ -43,6 +43,7 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     //---
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
+    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
 
     //---
 

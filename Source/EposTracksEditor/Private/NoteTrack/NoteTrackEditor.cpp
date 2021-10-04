@@ -20,6 +20,7 @@
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/NoteSection.h"
 #include "StoryNote.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FNoteTrackEditor"
 
@@ -44,7 +45,7 @@ void FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder )
     MenuBuilder.AddMenuEntry(
         LOCTEXT( "AddTrack", "Note Track" ),
         LOCTEXT( "AddTooltip", "Adds a new master note track that can play sounds." ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Tracks.Note" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "Sequencer.Tracks.Note" ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute )
         )
@@ -81,7 +82,7 @@ void FNoteTrackEditor::BuildTrackContextMenu( FMenuBuilder& MenuBuilder, UMovieS
 
 const FSlateBrush* FNoteTrackEditor::GetIconBrush() const
 {
-    return FEditorStyle::GetBrush( "Sequencer.Tracks.Note" );
+    return FEposTracksEditorStyle::Get()->GetBrush( "Sequencer.Tracks.Note" );
 }
 
 bool FNoteTrackEditor::IsResizable( UMovieSceneTrack* InTrack ) const
