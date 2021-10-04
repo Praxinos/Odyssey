@@ -93,36 +93,3 @@ private:
     /** Attached Note asset enter pressed */
     void OnAttachedNoteEnterPressed( const TArray<FAssetData>& AssetData, TArray<FGuid> ObjectBindings );
 };
-
-//---
-
-/**
- * Class for audio sections, handles drawing of all waveform previews.
- */
-class FNoteSection
-    : public ISequencerSection
-    , public TSharedFromThis<FNoteSection>
-{
-public:
-    /** Constructor. */
-    FNoteSection( UMovieSceneSection& InSection, TWeakPtr<ISequencer> InSequencer );
-
-    /** Virtual destructor. */
-    virtual ~FNoteSection();
-
-public:
-    // ISequencerSection interface
-
-    virtual UMovieSceneSection* GetSectionObject() override;
-    virtual FText GetSectionTitle() const override;
-    virtual FText GetSectionToolTip() const override;
-    virtual float GetSectionHeight() const override;
-    //virtual int32 OnPaintSection( FSequencerSectionPainter& Painter ) const override;
-    //virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ParentGeometry, const double InCurrentTime, const float InDeltaTime ) override;
-
-private:
-    /** The section we are visualizing. */
-    UMovieSceneSection& Section;
-
-    TWeakPtr<ISequencer> Sequencer;
-};

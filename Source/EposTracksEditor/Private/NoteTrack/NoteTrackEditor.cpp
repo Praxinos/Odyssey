@@ -15,62 +15,10 @@
 
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "NoteTrack/NoteSection.h"
 
 #define LOCTEXT_NAMESPACE "FNoteTrackEditor"
 
-//---
-
-FNoteSection::FNoteSection( UMovieSceneSection& InSection, TWeakPtr<ISequencer> InSequencer )
-    : Section( InSection )
-    , Sequencer( InSequencer )
-{
-}
-
-FNoteSection::~FNoteSection()
-{
-}
-
-UMovieSceneSection* FNoteSection::GetSectionObject()
-{
-    return &Section;
-}
-
-FText FNoteSection::GetSectionTitle() const
-{
-    UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
-    check( NoteSection );
-
-    return FText::FromString( NoteSection->GetText() );
-}
-
-FText FNoteSection::GetSectionToolTip() const
-{
-    UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
-    check( NoteSection );
-
-    return FText::FromString( NoteSection->GetText() );
-}
-
-float FNoteSection::GetSectionHeight() const
-{
-    return Section.GetTypedOuter<UMovieSceneNoteTrack>()->GetRowHeight();
-}
-
-//int32 FNoteSection::OnPaintSection( FSequencerSectionPainter& Painter ) const
-//{
-//    int32 LayerId = Painter.PaintSectionBackground();
-//
-//    return LayerId;
-//}
-
-
-//void FNoteSection::Tick( const FGeometry& AllottedGeometry, const FGeometry& ParentGeometry, const double InCurrentTime, const float InDeltaTime )
-//{
-//}
-
-
-//---
-//---
 //---
 
 FNoteTrackEditor::FNoteTrackEditor( TSharedRef<ISequencer> InSequencer )
