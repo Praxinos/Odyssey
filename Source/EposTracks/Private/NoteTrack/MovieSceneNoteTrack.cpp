@@ -12,75 +12,26 @@
 
 #define LOCTEXT_NAMESPACE "MovieSceneNoteTrack"
 
-
-/* UMovieScenePatchStringTrack interface
- *****************************************************************************/
-
-UMovieScenePatchStringTrack::UMovieScenePatchStringTrack( const FObjectInitializer& ObjectInitializer )
-    : Super( ObjectInitializer )
-{
-    SupportedBlendTypes = FMovieSceneBlendTypeField::All();
-}
-
-void UMovieScenePatchStringTrack::AddSection( UMovieSceneSection& Section )
-{
-    Sections.Add( &Section );
-}
-
-
-//bool UMovieScenePatchStringTrack::SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const
-//{
-//    return SectionClass == UMovieSceneStringSection::StaticClass();
-//}
-//
-//UMovieSceneSection* UMovieScenePatchStringTrack::CreateNewSection()
-//{
-//    return NewObject<UMovieSceneStringSection>( this, NAME_None, RF_Transactional );
-//}
-
-
-const TArray<UMovieSceneSection*>& UMovieScenePatchStringTrack::GetAllSections() const
-{
-    return Sections;
-}
-
-
-bool UMovieScenePatchStringTrack::HasSection( const UMovieSceneSection& Section ) const
-{
-    return Sections.Contains( &Section );
-}
-
-
-bool UMovieScenePatchStringTrack::IsEmpty() const
-{
-    return ( Sections.Num() == 0 );
-}
-
-
-void UMovieScenePatchStringTrack::RemoveAllAnimationData()
-{
-    Sections.Empty();
-}
-
-
-void UMovieScenePatchStringTrack::RemoveSection( UMovieSceneSection& Section )
-{
-    Sections.Remove( &Section );
-}
-
-
-void UMovieScenePatchStringTrack::RemoveSectionAt( int32 SectionIndex )
-{
-    Sections.RemoveAt( SectionIndex );
-}
-
 //---
 
-//UMovieSceneNoteTrack::UMovieSceneNoteTrack()
-//    : Super()
-UMovieSceneNoteTrack::UMovieSceneNoteTrack(const FObjectInitializer& Init)
-    : Super(Init)
+UMovieSceneNoteTrack::UMovieSceneNoteTrack( const FObjectInitializer& ObjectInitializer )
+    : Super( ObjectInitializer )
 {
+    SupportedBlendTypes.Add( EMovieSceneBlendType::Absolute );
+#if WITH_EDITORONLY_DATA
+    TrackTint = FColor( 136, 95, 93 );
+    RowHeight = 50;
+#endif
+}
+
+const TArray<UMovieSceneSection*>& UMovieSceneNoteTrack::GetAllSections() const
+{
+    return NoteSections;
+}
+
+bool UMovieSceneNoteTrack::SupportsMultipleRows() const
+{
+    return true;
 }
 
 bool UMovieSceneNoteTrack::SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const
@@ -88,16 +39,71 @@ bool UMovieSceneNoteTrack::SupportsType( TSubclassOf<UMovieSceneSection> Section
     return SectionClass == UMovieSceneNoteSection::StaticClass();
 }
 
+void UMovieSceneNoteTrack::RemoveAllAnimationData()
+{
+    NoteSections.Empty();
+}
+
+bool UMovieSceneNoteTrack::HasSection( const UMovieSceneSection& Section ) const
+{
+    return NoteSections.Contains( &Section );
+}
+
+void UMovieSceneNoteTrack::AddSection( UMovieSceneSection& Section )
+{
+    NoteSections.Add( &Section );
+}
+
+void UMovieSceneNoteTrack::RemoveSection( UMovieSceneSection& Section )
+{
+    NoteSections.Remove( &Section );
+}
+
+void UMovieSceneNoteTrack::RemoveSectionAt( int32 SectionIndex )
+{
+    NoteSections.RemoveAt( SectionIndex );
+}
+
+bool UMovieSceneNoteTrack::IsEmpty() const
+{
+    return NoteSections.Num() == 0;
+}
+
+UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( FString iText, FFrameNumber Time, int32 RowIndex )
+{
+    FFrameRate FrameRate = GetTypedOuter<UMovieScene>()->GetTickResolution();
+
+    // determine initial duration
+    // @todo Once we have infinite sections, we can remove this
+    // @todo ^^ Why? Infinte sections would mean there's no starting time?
+    FFrameTime DurationToUse = 1.f * FrameRate; // if all else fails, use 1 second duration
+
+    float NoteDuration = 5.f; //TODO
+    //float SoundDuration = MovieSceneHelpers::GetSoundDuration( Sound );
+    if( NoteDuration != INDEFINITELY_LOOPING_DURATION )
+    {
+        DurationToUse = NoteDuration * FrameRate;
+    }
+
+    // add the section
+    UMovieSceneNoteSection* NewSection = NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
+    NewSection->InitialPlacementOnRow( NoteSections, Time, DurationToUse.FrameNumber.Value, RowIndex );
+    NewSection->SetText( iText );
+
+    NoteSections.Add( NewSection );
+
+    return NewSection;
+}
+
+bool UMovieSceneNoteTrack::IsAMasterTrack() const
+{
+    UMovieScene* MovieScene = Cast<UMovieScene>( GetOuter() );
+    return MovieScene ? MovieScene->IsAMasterTrack( *this ) : false;
+}
+
 UMovieSceneSection* UMovieSceneNoteTrack::CreateNewSection()
 {
     return NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
 }
-
-#if WITH_EDITORONLY_DATA
-FText UMovieSceneNoteTrack::GetDefaultDisplayName() const
-{
-    return LOCTEXT( "TrackName", "Note" );
-}
-#endif
 
 #undef LOCTEXT_NAMESPACE

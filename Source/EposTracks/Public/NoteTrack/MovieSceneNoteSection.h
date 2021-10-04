@@ -7,6 +7,7 @@
 #include "UObject/ObjectMacros.h"
 #include "Sections/MovieSceneStringSection.h"
 #include "Sections/MovieSceneFloatSection.h"
+
 #include "MovieSceneNoteSection.generated.h"
 
 
@@ -17,19 +18,25 @@ UCLASS( MinimalAPI )
 class UMovieSceneNoteSection
     : public UMovieSceneSection
 {
-    GENERATED_BODY()
-
-    /** Default constructor. */
-    UMovieSceneNoteSection();
+    GENERATED_UCLASS_BODY()
 
 public:
+    /** Sets this section's text */
+    UFUNCTION( BlueprintCallable, Category = "Sequencer|Section" )
+    void SetText( FString iText )
+    {
+        Text = iText;
+    }
 
-    /** Float data */
-    UPROPERTY()
-    FMovieSceneStringChannel StringCurve;
+    /** Gets the text for this section */
+    UFUNCTION( BlueprintPure, Category = "Sequencer|Section" )
+    FString GetText() const
+    {
+        return Text;
+    }
 
-    UPROPERTY()
-    FMovieSceneStringChannel TestCurve;
-    UPROPERTY()
-    FMovieSceneFloatChannel Test2Curve;
+private:
+    /** The text that this section manage */
+    UPROPERTY( EditAnywhere, Category = "Note" )
+    FString Text;
 };

@@ -5,81 +5,60 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-//#include "Tracks/MovieSceneStringTrack.h"
-//#include "Tracks/MovieSceneFloatTrack.h"
-#include "Tracks/MovieScenePropertyTrack.h"
+#include "MovieSceneNameableTrack.h"
+
 #include "MovieSceneNoteTrack.generated.h"
-
-
-/**
- * Implements a movie scene track that holds a series of strings.
- */
-UCLASS( MinimalAPI )
-class UMovieScenePatchStringTrack
-    : public UMovieScenePropertyTrack
-    //, public IMovieSceneTrackTemplateProducer
-{
-    GENERATED_UCLASS_BODY()
-
-public:
-
-//    /** Default constructor. */
-//    UMovieSceneStringTrack()
-//    {
-//#if WITH_EDITORONLY_DATA
-//        TrackTint = FColor( 128, 128, 128 );
-//#endif
-//    }
-
-public:
-
-    //~ UMovieSceneTrack interface
-
-    virtual void AddSection( UMovieSceneSection& Section ) override;
-    //virtual bool SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const override;
-    //virtual UMovieSceneSection* CreateNewSection() override;
-    //virtual FMovieSceneEvalTemplatePtr CreateTemplateForSection( const UMovieSceneSection& InSection ) const override;
-    virtual const TArray<UMovieSceneSection*>& GetAllSections() const override;
-    virtual bool HasSection( const UMovieSceneSection& Section ) const override;
-    virtual bool IsEmpty() const override;
-    virtual void RemoveAllAnimationData() override;
-    virtual void RemoveSection( UMovieSceneSection& Section ) override;
-    virtual void RemoveSectionAt( int32 SectionIndex ) override;
-};
 
 /**
  * Handles manipulation of note.
  */
 UCLASS()
 class EPOSTRACKS_API UMovieSceneNoteTrack
-    : public UMovieScenePatchStringTrack
-    //: public UMovieSceneStringTrack
-    //: public UMovieSceneFloatTrack
+    : public UMovieSceneNameableTrack
 {
-    GENERATED_BODY()
+    GENERATED_UCLASS_BODY()
 
 public:
+    /** Adds a new sound cue to the audio */
+    virtual UMovieSceneSection* AddNewNoteOnRow( FString iText, FFrameNumber Time, int32 RowIndex );
 
-    //UMovieSceneNoteTrack();
-    UMovieSceneNoteTrack( const FObjectInitializer& Init );
+    /** Adds a new sound cue on the next available/non-overlapping row */
+    virtual UMovieSceneSection* AddNewNote( FString iText, FFrameNumber Time )
+    {
+        return AddNewNoteOnRow( iText, Time, INDEX_NONE );
+    }
 
+    /** @return The audio sections on this track */
+    const TArray<UMovieSceneSection*>& GetAudioSections() const
+    {
+        return NoteSections;
+    }
+
+    /** @return true if this is a master audio track */
+    bool IsAMasterTrack() const;
+
+public:
     // UMovieSceneTrack interface
 
     virtual bool SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const override;
+    virtual void RemoveAllAnimationData() override;
+    virtual bool HasSection( const UMovieSceneSection& Section ) const override;
+    virtual void AddSection( UMovieSceneSection& Section ) override;
+    virtual void RemoveSection( UMovieSceneSection& Section ) override;
+    virtual void RemoveSectionAt( int32 SectionIndex ) override;
+    virtual bool IsEmpty() const override;
+    virtual const TArray<UMovieSceneSection*>& GetAllSections() const override;
+    virtual bool SupportsMultipleRows() const override;
     virtual UMovieSceneSection* CreateNewSection() override;
 
-#if WITH_EDITORONLY_DATA
-    virtual FText GetDefaultDisplayName() const override;
-    virtual bool CanRename() const override
-    {
-        return true;
-    }
-#endif
+private:
+    /** List of all master audio sections */
+    UPROPERTY()
+    TArray<UMovieSceneSection*> NoteSections;
 
 #if WITH_EDITORONLY_DATA
 
 public:
-
     /**
      * Get the height of this track's rows
      */
@@ -91,13 +70,12 @@ public:
     /**
      * Set the height of this track's rows
      */
-    void SetRowHeight(int32 NewRowHeight)
+    void SetRowHeight( int32 NewRowHeight )
     {
-        RowHeight = FMath::Max(16, NewRowHeight);
+        RowHeight = FMath::Max( 16, NewRowHeight );
     }
 
 private:
-
     /** The height for each row of this track */
     UPROPERTY()
     int32 RowHeight;
