@@ -10,8 +10,9 @@
 #include "PropertyEditorModule.h"
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
-
 #include "OdysseyPainterEditorSettings.h"
+#include "Models/OdysseyPainterEditorCommands.h"
+#include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
 

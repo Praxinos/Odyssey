@@ -249,6 +249,19 @@ SOdysseyPaintModifiers::Construct( const FArguments& InArgs )
                 ]
             ]
         ]
+        +SWrapBox::Slot() // just to add a line when it's docked on the sides.
+        [
+            SNew( SHorizontalBox )
+
+            +SHorizontalBox::Slot()
+            .VAlign( VAlign_Center )
+            .Padding( 3.f, 3.f, 3.f, 3.f )
+            .MaxWidth( 45.f )
+            [
+                SNew( STextBlock )
+                .Text( LOCTEXT( "    ", "    " ) )
+            ]
+        ]
     ];
 }
 

@@ -62,9 +62,11 @@ public:
 
 protected:
     // Shortcuts
-    virtual void VisitPraxinosWebsite();
-    virtual void ReleaseNotes();
     virtual void AboutIliad();
+    virtual void VisitPraxinosWebsite();
+    virtual void ManualAndReleaseNotes();
+    virtual void GetBrushPack();
+    virtual void Discord();
     virtual void SwitchTabletAPI();
 
 private:

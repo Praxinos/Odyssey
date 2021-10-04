@@ -140,14 +140,16 @@ void
 FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 {
 #if WITH_EDITOR
-    //OdysseyTexture
+    // OdysseyTexture
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
     Set( "ClassIcon.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_16x", mIcon16x16));
     Set( "ClassThumbnail.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_64x", mIcon64x64));
     Set( "OdysseyTexture.ExportTexture_16", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_16", mIcon16x16));
     Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64));
-    Set( "OdysseyTexture.Iliad16", new IMAGE_BRUSH("OdysseyTexture/Iliad16", mIcon16x16));
 
+    // OdysseyLogo
+    Set( "OdysseyLogo.Iliad16", new IMAGE_BRUSH("OdysseyTexture/Iliad16", mIcon16x16));
+    Set( "OdysseyLogo.PraxinosLogo16", new IMAGE_BRUSH("Logo/Praxinos_Logo_16", mIcon16x16));
 
     // OdysseyBrush
     Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
@@ -184,6 +186,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
     Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
     Set( "About.Iliad", new IMAGE_BRUSH( "About/iliad", FVector2D( 128, 128 ) ) );
+    Set( "About.Manual16", new IMAGE_BRUSH("About/Manual_16", mIcon16x16));
+    Set( "About.MorePencils16", new IMAGE_BRUSH("About/More_Pencils_16", mIcon16x16));
+    Set( "About.Discord2_16", new IMAGE_BRUSH("About/Discord2_16", mIcon16x16));
 
     //IliadPainterEditor Commands
     // Example of how to define icons for Actions / Commands

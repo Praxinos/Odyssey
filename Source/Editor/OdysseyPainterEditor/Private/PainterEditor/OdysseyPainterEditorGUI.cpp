@@ -64,7 +64,9 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
     MAP_ACTION(painterEditorCommands.AboutIliad, AboutIliad )
     MAP_ACTION(painterEditorCommands.VisitPraxinosWebsite, VisitPraxinosWebsite )
-    MAP_ACTION(painterEditorCommands.ReleaseNotes, ReleaseNotes )
+    MAP_ACTION(painterEditorCommands.ManualAndReleaseNotes, ManualAndReleaseNotes )
+    MAP_ACTION(painterEditorCommands.GetBrushPack, GetBrushPack )
+    MAP_ACTION(painterEditorCommands.Discord, Discord )
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
 
     #undef MAP_ACTION
@@ -93,9 +95,31 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FMenuBuilder& ioMenuBuilder )
 {
     ioMenuBuilder.BeginSection( "About", LOCTEXT( "OdysseyPainter", "ILIAD" ) );
     {
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().AboutIliad );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ReleaseNotes );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().AboutIliad
+        , NAME_None
+        , LOCTEXT( "AboutIliad", "About Iliad" )
+        , LOCTEXT( "AboutIliad_Tooltip", "to get more information about the plugin, the team that created it, etc." )
+        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" ) );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite
+        , NAME_None
+        , LOCTEXT( "VisitPraxinosWebsite", "About Praxinos ..." )
+        , LOCTEXT( "VisitPraxinosWebsite_Tooltip", "to get more information about the company Praxinos, its projects, etc." )
+        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.PraxinosLogo16" ) );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ManualAndReleaseNotes
+        , NAME_None
+        , LOCTEXT( "ManualAndReleaseNotes", "Manual and Release Notes ..." )
+        , LOCTEXT( "ReleaseNotes_Tooltip", "to get a full changelog of each Iliad version." )
+        , FSlateIcon( "OdysseyStyle", "About.Manual16" ) );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().GetBrushPack
+        , NAME_None
+        , LOCTEXT( "GetMoreBrushes", "Get more brushes ..." )
+        , LOCTEXT( "ReleaseNotes_Tooltip", "Want more brushes ? Just follow this link !" )
+        , FSlateIcon( "OdysseyStyle", "About.MorePencils16" ) );
+        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().Discord
+        , NAME_None
+        , LOCTEXT( "TalkWithTheDeveloppers", "Talk with the developpers ..." )
+        , LOCTEXT( "ReleaseNotes_Tooltip", "For those who want to discuss with us about the next improvements" )
+        , FSlateIcon( "OdysseyStyle", "About.Discord2_16" ) );
     }
 }
 
@@ -294,6 +318,13 @@ FOdysseyPainterEditorGUI::GetToolsTab()
 //---------------------------------------------------------------------------- Shortcuts
 
 void
+FOdysseyPainterEditorGUI::AboutIliad()
+{
+    TSharedPtr<SWindow> parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
+    SOdysseyAboutScreen::Open(parentWindow);
+}
+
+void
 FOdysseyPainterEditorGUI::VisitPraxinosWebsite()
 {
     FString URL = "https://praxinos.coop/";
@@ -301,17 +332,24 @@ FOdysseyPainterEditorGUI::VisitPraxinosWebsite()
 }
 
 void
-FOdysseyPainterEditorGUI::ReleaseNotes()
+FOdysseyPainterEditorGUI::ManualAndReleaseNotes()
 {
-    FString URL = "https://praxinos.coop/forum/viewtopic.php?f=15&t=168";
+    FString URL = "https://praxinos.coop/Documentation/Iliad/User/html/";
     FPlatformProcess::LaunchURL( *URL, NULL, NULL );
 }
 
 void
-FOdysseyPainterEditorGUI::AboutIliad()
+FOdysseyPainterEditorGUI::GetBrushPack()
 {
-    TSharedPtr<SWindow> parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
-    SOdysseyAboutScreen::Open(parentWindow);
+    FString URL = "https://www.unrealengine.com/marketplace/en-US/product/brush-pack-for-iliad";
+    FPlatformProcess::LaunchURL( *URL, NULL, NULL );
+}
+
+void
+FOdysseyPainterEditorGUI::Discord()
+{
+    FString URL = "https://discord.gg/gEd6pj7";
+    FPlatformProcess::LaunchURL( *URL, NULL, NULL );
 }
 
 void

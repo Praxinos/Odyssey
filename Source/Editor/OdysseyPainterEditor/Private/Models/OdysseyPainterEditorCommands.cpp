@@ -14,9 +14,11 @@ FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
 void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
-    UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::F1 ) );
+    UI_COMMAND( AboutIliad, "About ILIAD", "About ILIAD",                                          EUserInterfaceActionType::Button, FInputChord( EKeys::F2 ) );
     UI_COMMAND( VisitPraxinosWebsite, "Praxinos Website...", "Praxinos Website...",                EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( ReleaseNotes, "Release Notes...", "Release Notes...",                              EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( ManualAndReleaseNotes, "Manual and Release Notes ...", "Manual and Release Notes ...", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GetBrushPack, "Get more brushes ...", "Get more brushes ...",                      EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( Discord, "Talk with the developpers ...", "Talk with the developpers ...",         EUserInterfaceActionType::Button, FInputChord() );
 
     UI_COMMAND( PanViewport, "Pan Viewport", "Hold the key to pan the viewport",                   EUserInterfaceActionType::None, FInputChord(EKeys::P));
     UI_COMMAND( RotateViewport, "Rotate Viewport", "Hold the key to Rotate the viewport",          EUserInterfaceActionType::None, FInputChord(EKeys::R));

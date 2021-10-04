@@ -33,8 +33,13 @@ public:
     TSharedPtr<FUICommandInfo> VisitPraxinosWebsite;
 
     /** Action to go to praxinos' forum Release Notes*/
-    TSharedPtr<FUICommandInfo> ReleaseNotes;
-    
+    TSharedPtr<FUICommandInfo> ManualAndReleaseNotes;
+
+    /** Action to go to the brush pack on the marketplace*/
+    TSharedPtr<FUICommandInfo> GetBrushPack;
+
+    /** Action to go to praxinos' Discord server*/
+    TSharedPtr<FUICommandInfo> Discord;
 
     //Undo Redo
 
