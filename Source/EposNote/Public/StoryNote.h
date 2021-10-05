@@ -20,12 +20,6 @@ public:
     UStoryNote( const FObjectInitializer& ObjectInitializer );
 
 public:
-    UPROPERTY( BlueprintReadWrite, EditAnywhere, Category = "StoryNote", meta=(MultiLine))
+    UPROPERTY( BlueprintReadWrite, EditAnywhere, Category = "StoryNote", meta=(MultiLine="true") )
     FString Text;
-
-    UPROPERTY( BlueprintReadWrite, EditAnywhere, Category = "StoryNote" )
-    int TmpSize;
-
-    UPROPERTY( BlueprintReadWrite, EditAnywhere, Category = "StoryNote" )
-    FLinearColor TmpColor;
 };

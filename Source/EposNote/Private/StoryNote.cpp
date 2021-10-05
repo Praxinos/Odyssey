@@ -7,7 +7,5 @@
 
 UStoryNote::UStoryNote( const FObjectInitializer& ObjectInitializer )
     : Super( ObjectInitializer )
-    , TmpSize( 10 )
-    , TmpColor( FLinearColor::Blue )
 {
 }
