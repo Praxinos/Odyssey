@@ -8,6 +8,7 @@
 #include "Compilation/MovieSceneSegmentCompiler.h"
 #include "MovieSceneCommonHelpers.h"
 
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "StoryNote.h"
 
@@ -70,25 +71,11 @@ bool UMovieSceneNoteTrack::IsEmpty() const
     return NoteSections.Num() == 0;
 }
 
-UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber Time, int32 RowIndex )
+UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration, int32 RowIndex )
 {
-    FFrameRate FrameRate = GetTypedOuter<UMovieScene>()->GetTickResolution();
-
-    // determine initial duration
-    // @todo Once we have infinite sections, we can remove this
-    // @todo ^^ Why? Infinte sections would mean there's no starting time?
-    FFrameTime DurationToUse = 1.f * FrameRate; // if all else fails, use 1 second duration
-
-    float NoteDuration = 5.f; //TODO
-    //float SoundDuration = MovieSceneHelpers::GetSoundDuration( Sound );
-    if( NoteDuration != INDEFINITELY_LOOPING_DURATION )
-    {
-        DurationToUse = NoteDuration * FrameRate;
-    }
-
     // add the section
     UMovieSceneNoteSection* NewSection = NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
-    NewSection->InitialPlacementOnRow( NoteSections, Time, DurationToUse.FrameNumber.Value, RowIndex );
+    NewSection->InitialPlacementOnRow( NoteSections, iStartTime, iDuration, RowIndex );
     NewSection->SetNote( iNote );
 
     NoteSections.Add( NewSection );

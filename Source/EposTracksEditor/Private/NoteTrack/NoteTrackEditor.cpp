@@ -12,15 +12,20 @@
 #include "EditorStyleSet.h"
 #include "ISequencerSection.h"
 #include "CommonMovieSceneTools.h"
+#include "MovieSceneTimeHelpers.h"
 #include "SequencerUtilities.h"
 #include "Widgets/Text/SMultiLineEditableText.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/NoteSection.h"
+#include "Settings/EposTracksEditorSettings.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "StoryNote.h"
 #include "Styles/EposTracksEditorStyle.h"
+#include "Tools/NoteTools.h"
 
 #define LOCTEXT_NAMESPACE "FNoteTrackEditor"
 
@@ -127,10 +132,8 @@ bool FNoteTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, FSequen
     {
         if( UStoryNote* Note = Cast<UStoryNote>( AssetData.GetAsset() ) )
         {
-            FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
-            FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( 8.f ); //TODO: but what ? find the corresponding board section ? and its start frame ?
-            //FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( Note->GetDuration() );
-            DragDropParams.FrameRange = TRange<FFrameNumber>( DragDropParams.FrameNumber, DragDropParams.FrameNumber + LengthInFrames );
+            DragDropParams.FrameRange = GetReferenceRange( DragDropParams.FrameNumber );
+
             return true;
         }
     }
@@ -158,7 +161,8 @@ FReply FNoteTrackEditor::OnDrop( const FDragDropEvent& DragDropEvent, const FSeq
 
     TSharedPtr<FAssetDragDropOp> DragDropOp = StaticCastSharedPtr<FAssetDragDropOp>( Operation );
 
-    FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
+    FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameRange.GetLowerBoundValue() );
+    //FMovieSceneTrackEditor::BeginKeying( DragDropParams.FrameNumber );
 
     bool bAnyDropped = false;
     for( const FAssetData& AssetData : DragDropOp->GetAssets() )
@@ -241,6 +245,26 @@ bool FNoteTrackEditor::HandleAssetAdded( UObject* Asset, const FGuid& TargetObje
     return false;
 }
 
+TRange<FFrameNumber>
+FNoteTrackEditor::GetReferenceRange( FFrameNumber iFrame )
+{
+    UMovieSceneSequence* sequence = GetSequencer()->GetFocusedMovieSceneSequence();
+    UMovieSceneTrack* track = sequence ? sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+    UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
+    if( section )
+        return section->GetTrueRange();
+
+    track = sequence ? sequence->GetMovieScene()->GetCameraCutTrack() : nullptr;
+    section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
+    if( section )
+        return section->GetTrueRange();
+
+    FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
+    FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration );
+
+    return TRange<FFrameNumber>( iFrame, iFrame + LengthInFrames );
+}
+
 FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, int32 RowIndex )
 {
     FKeyPropertyResult KeyPropertyResult;
@@ -265,7 +289,10 @@ FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, USt
     {
         NoteTrack->Modify();
 
-        UMovieSceneSection* NewSection = NoteTrack->AddNewNoteOnRow( iNote, KeyTime, RowIndex );
+        TRange<FFrameNumber> range = GetReferenceRange( KeyTime );
+
+        UMovieSceneSection* NewSection = NoteTrack->AddNewNoteOnRow( iNote, range.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( range ), RowIndex );
+        //UMovieSceneSection* NewSection = NoteTrack->AddNewNoteOnRow( iNote, KeyTime, RowIndex );
 
         if( TrackResult.bWasCreated )
         {
@@ -312,7 +339,9 @@ FKeyPropertyResult FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, U
             {
                 NoteTrack->Modify();
 
-                UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iNote, KeyTime );
+                TRange<FFrameNumber> range = GetReferenceRange( KeyTime );
+
+                UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iNote, range.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( range ) );
                 NoteTrack->SetDisplayName( LOCTEXT( "NoteTrackName", "Note" ) );
                 KeyPropertyResult.bTrackModified = true;
                 KeyPropertyResult.SectionsCreated.Add( NewSection );
@@ -360,7 +389,6 @@ void FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
 
 void FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute( FMenuBuilder& MenuBuilder, TArray<FGuid> ObjectBindings )
 {
-    //BuildNoteSubMenu( MenuBuilder, FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) );
     MenuBuilder.AddWidget( BuildNoteSubMenu( FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) ), FText::GetEmpty(), true );
 }
 
@@ -436,6 +464,8 @@ TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAsset
     return MenuBuilder.MakeWidget();
 }
 
+//---
+
 void FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iType, UMovieSceneTrack* Track )
 {
     if( iType != ETextCommit::OnEnter )
@@ -446,27 +476,17 @@ void FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type
     auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
     NoteTrack->Modify();
 
-    //TODO:
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    FString package_name;
+    FString asset_name;
+    UStoryNote* note = NoteTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence(), package_name, asset_name );
+    if( !note )
+        return;
 
-    UPackage* package = GetSequencer()->GetRootMovieSceneSequence()->GetPackage();
-    FString package_pathname = package->GetName(); // ie. /Game/MyStoryboard2
-    FString package_name = FPaths::GetBaseFilename( GetSequencer()->GetFocusedMovieSceneSequence()->GetPackage()->GetName() ); // ie. shot_0002_01
+    note->Text = iText.ToString();
 
-    FString note_package_name;
-    FString note_asset_name;
-    assetToolsModule.Get().CreateUniqueAssetName( FPaths::Combine( package_pathname, TEXT("Notes"), package_name ), "_N_01", note_package_name, note_asset_name );
+    TRange<FFrameNumber> range = GetReferenceRange( GetSequencer()->GetLocalTime().Time.FrameNumber );
 
-    FString package_path = FPackageName::GetLongPackagePath( note_package_name );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( note_asset_name, package_path, UStoryNote::StaticClass(), nullptr );
-    UStoryNote* new_note = Cast<UStoryNote>( new_object );
-    check( new_note );
-
-    new_note->Text = iText.ToString();
-    //
-
-    FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
-    UMovieSceneSection* NewSection = NoteTrack->AddNewNote( new_note, KeyTime.FrameNumber );
+    UMovieSceneSection* NewSection = NoteTrack->AddNewNote( note, range.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( range ) );
 
     GetSequencer()->EmptySelection();
     GetSequencer()->SelectSection( NewSection );
@@ -491,8 +511,9 @@ void FNoteTrackEditor::OnNoteAssetSelected( const FAssetData& AssetData, UMovieS
             auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
             NoteTrack->Modify();
 
-            FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
-            UMovieSceneSection* NewSection = NoteTrack->AddNewNote( NewNote, KeyTime.FrameNumber );
+            TRange<FFrameNumber> range = GetReferenceRange( GetSequencer()->GetLocalTime().Time.FrameNumber );
+
+            UMovieSceneSection* NewSection = NoteTrack->AddNewNote( NewNote, range.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( range ) );
 
             GetSequencer()->EmptySelection();
             GetSequencer()->SelectSection( NewSection );
@@ -510,6 +531,8 @@ void FNoteTrackEditor::OnNoteAssetEnterPressed( const TArray<FAssetData>& AssetD
         OnNoteAssetSelected( AssetData[0].GetAsset(), Track );
     }
 }
+
+//---
 
 void FNoteTrackEditor::OnAttachedNoteAssetSelected( const FAssetData& AssetData, TArray<FGuid> ObjectBindings )
 {
@@ -538,21 +561,23 @@ void FNoteTrackEditor::OnAttachedNoteEnterPressed( const TArray<FAssetData>& Ass
 
 void FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::Type iType, TArray<FGuid> ObjectBindings )
 {
-    //const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddNote_Transaction", "Add Note" ) );
+    if( iType != ETextCommit::OnEnter )
+        return;
 
-    //auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
-    //NoteTrack->Modify();
+    FString package_name;
+    FString asset_name;
+    UStoryNote* note = NoteTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence(), package_name, asset_name );
+    if( !note )
+        return;
 
-    //TODO: create note asset here ?
+    note->Text = iText.ToString();
 
-    //FFrameTime KeyTime = GetSequencer()->GetLocalTime().Time;
-    //UMovieSceneSection* NewSection = NoteTrack->AddNewNote( iText.ToString(), KeyTime.FrameNumber );
+    const FScopedTransaction Transaction( NSLOCTEXT( "Sequencer", "AddNote_Transaction", "Add Note" ) );
 
-    //GetSequencer()->EmptySelection();
-    //GetSequencer()->SelectSection( NewSection );
-    //GetSequencer()->ThrobSectionSelection();
-
-    //GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    for( FGuid ObjectBinding : ObjectBindings )
+    {
+        HandleAssetAdded( note, ObjectBinding );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

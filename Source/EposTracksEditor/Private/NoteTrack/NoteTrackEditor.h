@@ -66,6 +66,8 @@ protected:
     /** Delegate for AnimatablePropertyChanged in HandleAssetAdded for attached sounds */
     FKeyPropertyResult AddNewAttachedNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* Track, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo );
 
+    TRange<FFrameNumber> GetReferenceRange( FFrameNumber iFrame );
+
 private:
     /** Callback for executing the "Add Note Track" menu entry. */
     void HandleAddNoteTrackMenuEntryExecute();
