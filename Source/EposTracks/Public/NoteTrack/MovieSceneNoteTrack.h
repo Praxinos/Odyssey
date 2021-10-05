@@ -25,16 +25,10 @@ public:
     virtual UMovieSceneSection* AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration, int32 RowIndex );
 
     /** Adds a new sound cue on the next available/non-overlapping row */
-    virtual UMovieSceneSection* AddNewNote( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration )
-    {
-        return AddNewNoteOnRow( iNote, iStartTime, iDuration, INDEX_NONE );
-    }
+    virtual UMovieSceneSection* AddNewNote( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration );
 
     /** @return The audio sections on this track */
-    const TArray<UMovieSceneSection*>& GetNoteSections() const
-    {
-        return NoteSections;
-    }
+    const TArray<UMovieSceneSection*>& GetNoteSections() const;
 
     /** @return true if this is a master audio track */
     bool IsAMasterTrack() const;
@@ -64,18 +58,12 @@ public:
     /**
      * Get the height of this track's rows
      */
-    int32 GetRowHeight() const
-    {
-        return RowHeight;
-    }
+    int32 GetRowHeight() const;
 
     /**
      * Set the height of this track's rows
      */
-    void SetRowHeight( int32 NewRowHeight )
-    {
-        RowHeight = FMath::Max( 16, NewRowHeight );
-    }
+    void SetRowHeight( int32 NewRowHeight );
 
 private:
     /** The height for each row of this track */

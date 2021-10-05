@@ -28,12 +28,14 @@ FNoteSection::~FNoteSection()
 {
 }
 
-UMovieSceneSection* FNoteSection::GetSectionObject()
+UMovieSceneSection*
+FNoteSection::GetSectionObject()
 {
     return &Section;
 }
 
-FText FNoteSection::GetSectionTitle() const
+FText
+FNoteSection::GetSectionTitle() const
 {
     UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
     check( NoteSection );
@@ -41,7 +43,8 @@ FText FNoteSection::GetSectionTitle() const
     return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
 }
 
-FText FNoteSection::GetSectionToolTip() const
+FText
+FNoteSection::GetSectionToolTip() const
 {
     UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
     check( NoteSection );
@@ -49,12 +52,14 @@ FText FNoteSection::GetSectionToolTip() const
     return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
 }
 
-float FNoteSection::GetSectionHeight() const
+float
+FNoteSection::GetSectionHeight() const
 {
     return Section.GetTypedOuter<UMovieSceneNoteTrack>()->GetRowHeight();
 }
 
-int32 FNoteSection::OnPaintSection( FSequencerSectionPainter& Painter ) const
+int32
+FNoteSection::OnPaintSection( FSequencerSectionPainter& Painter ) const
 {
     int32 LayerId = Painter.PaintSectionBackground();
 

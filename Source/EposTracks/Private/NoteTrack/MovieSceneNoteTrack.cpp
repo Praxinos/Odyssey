@@ -26,52 +26,82 @@ UMovieSceneNoteTrack::UMovieSceneNoteTrack( const FObjectInitializer& ObjectInit
 #endif
 }
 
-const TArray<UMovieSceneSection*>& UMovieSceneNoteTrack::GetAllSections() const
+const TArray<UMovieSceneSection*>&
+UMovieSceneNoteTrack::GetAllSections() const //override
 {
     return NoteSections;
 }
 
-bool UMovieSceneNoteTrack::SupportsMultipleRows() const
+bool
+UMovieSceneNoteTrack::SupportsMultipleRows() const //override
 {
     return true;
 }
 
-bool UMovieSceneNoteTrack::SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const
+bool
+UMovieSceneNoteTrack::SupportsType( TSubclassOf<UMovieSceneSection> SectionClass ) const //override
 {
     return SectionClass == UMovieSceneNoteSection::StaticClass();
 }
 
-void UMovieSceneNoteTrack::RemoveAllAnimationData()
+void
+UMovieSceneNoteTrack::RemoveAllAnimationData() //override
 {
     NoteSections.Empty();
 }
 
-bool UMovieSceneNoteTrack::HasSection( const UMovieSceneSection& Section ) const
+bool
+UMovieSceneNoteTrack::HasSection( const UMovieSceneSection& Section ) const //override
 {
     return NoteSections.Contains( &Section );
 }
 
-void UMovieSceneNoteTrack::AddSection( UMovieSceneSection& Section )
+void
+UMovieSceneNoteTrack::AddSection( UMovieSceneSection& Section ) //override
 {
     NoteSections.Add( &Section );
 }
 
-void UMovieSceneNoteTrack::RemoveSection( UMovieSceneSection& Section )
+void
+UMovieSceneNoteTrack::RemoveSection( UMovieSceneSection& Section ) //override
 {
     NoteSections.Remove( &Section );
 }
 
-void UMovieSceneNoteTrack::RemoveSectionAt( int32 SectionIndex )
+void
+UMovieSceneNoteTrack::RemoveSectionAt( int32 SectionIndex ) //override
 {
     NoteSections.RemoveAt( SectionIndex );
 }
 
-bool UMovieSceneNoteTrack::IsEmpty() const
+bool
+UMovieSceneNoteTrack::IsEmpty() const //override
 {
     return NoteSections.Num() == 0;
 }
 
-UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration, int32 RowIndex )
+UMovieSceneSection*
+UMovieSceneNoteTrack::CreateNewSection() //override
+{
+    return NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
+}
+
+//---
+
+const TArray<UMovieSceneSection*>&
+UMovieSceneNoteTrack::GetNoteSections() const
+{
+    return NoteSections;
+}
+
+UMovieSceneSection*
+UMovieSceneNoteTrack::AddNewNote( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration )
+{
+    return AddNewNoteOnRow( iNote, iStartTime, iDuration, INDEX_NONE );
+}
+
+UMovieSceneSection*
+UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber iStartTime, int32 iDuration, int32 RowIndex )
 {
     // add the section
     UMovieSceneNoteSection* NewSection = NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
@@ -83,15 +113,25 @@ UMovieSceneSection* UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FF
     return NewSection;
 }
 
-bool UMovieSceneNoteTrack::IsAMasterTrack() const
+bool
+UMovieSceneNoteTrack::IsAMasterTrack() const
 {
     UMovieScene* MovieScene = Cast<UMovieScene>( GetOuter() );
     return MovieScene ? MovieScene->IsAMasterTrack( *this ) : false;
 }
 
-UMovieSceneSection* UMovieSceneNoteTrack::CreateNewSection()
+//---
+
+int32
+UMovieSceneNoteTrack::GetRowHeight() const
 {
-    return NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
+    return RowHeight;
+}
+
+void
+UMovieSceneNoteTrack::SetRowHeight( int32 NewRowHeight )
+{
+    RowHeight = FMath::Max( 16, NewRowHeight );
 }
 
 #undef LOCTEXT_NAMESPACE

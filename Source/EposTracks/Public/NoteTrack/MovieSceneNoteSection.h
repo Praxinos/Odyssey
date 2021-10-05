@@ -24,17 +24,11 @@ class UMovieSceneNoteSection
 public:
     /** Sets this section's text */
     UFUNCTION( BlueprintCallable, Category = "Sequencer|Section" )
-    void SetNote( UStoryNote* iNote )
-    {
-        Note = iNote;
-    }
+    EPOSTRACKS_API void SetNote( UStoryNote* Note );
 
     /** Gets the text for this section */
     UFUNCTION( BlueprintPure, Category = "Sequencer|Section" )
-    UStoryNote* GetNote() const
-    {
-        return Note;
-    }
+    EPOSTRACKS_API UStoryNote* GetNote() const;
 
 private:
     /** The text that this section manage */

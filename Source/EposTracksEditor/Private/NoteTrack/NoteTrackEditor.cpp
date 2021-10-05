@@ -40,12 +40,14 @@ FNoteTrackEditor::~FNoteTrackEditor()
 {
 }
 
-TSharedRef<ISequencerTrackEditor> FNoteTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> InSequencer )
+TSharedRef<ISequencerTrackEditor>
+FNoteTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> InSequencer )
 {
     return MakeShareable( new FNoteTrackEditor( InSequencer ) );
 }
 
-void FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder )
+void
+FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder ) //override
 {
     MenuBuilder.AddMenuEntry(
         LOCTEXT( "AddTrack", "Note Track" ),
@@ -57,7 +59,8 @@ void FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder )
     );
 }
 
-void FNoteTrackEditor::BuildObjectBindingTrackMenu( FMenuBuilder& MenuBuilder, const TArray<FGuid>& ObjectBindings, const UClass* ObjectClass )
+void
+FNoteTrackEditor::BuildObjectBindingTrackMenu( FMenuBuilder& MenuBuilder, const TArray<FGuid>& ObjectBindings, const UClass* ObjectClass ) //override
 {
     //TODO: doesn't work when pressing Enter key for new note
 
@@ -70,32 +73,38 @@ void FNoteTrackEditor::BuildObjectBindingTrackMenu( FMenuBuilder& MenuBuilder, c
     //}
 }
 
-bool FNoteTrackEditor::SupportsType( TSubclassOf<UMovieSceneTrack> Type ) const
+bool
+FNoteTrackEditor::SupportsType( TSubclassOf<UMovieSceneTrack> Type ) const //override
 {
     return Type == UMovieSceneNoteTrack::StaticClass();
 }
 
-bool FNoteTrackEditor::SupportsSequence( UMovieSceneSequence* InSequence ) const
+bool
+FNoteTrackEditor::SupportsSequence( UMovieSceneSequence* InSequence ) const //override
 {
     ETrackSupport TrackSupported = InSequence ? InSequence->IsTrackSupported( UMovieSceneNoteTrack::StaticClass() ) : ETrackSupport::NotSupported;
     return TrackSupported == ETrackSupport::Supported;
 }
 
-void FNoteTrackEditor::BuildTrackContextMenu( FMenuBuilder& MenuBuilder, UMovieSceneTrack* Track )
+void
+FNoteTrackEditor::BuildTrackContextMenu( FMenuBuilder& MenuBuilder, UMovieSceneTrack* Track ) //override
 {
 }
 
-const FSlateBrush* FNoteTrackEditor::GetIconBrush() const
+const FSlateBrush*
+FNoteTrackEditor::GetIconBrush() const //override
 {
     return FEposTracksEditorStyle::Get()->GetBrush( "Sequencer.Tracks.Note" );
 }
 
-bool FNoteTrackEditor::IsResizable( UMovieSceneTrack* InTrack ) const
+bool
+FNoteTrackEditor::IsResizable( UMovieSceneTrack* InTrack ) const //override
 {
     return true;
 }
 
-void FNoteTrackEditor::Resize( float NewSize, UMovieSceneTrack* InTrack )
+void
+FNoteTrackEditor::Resize( float NewSize, UMovieSceneTrack* InTrack ) //override
 {
     UMovieSceneNoteTrack* NoteTrack = Cast<UMovieSceneNoteTrack>( InTrack );
     if( NoteTrack )
@@ -112,7 +121,8 @@ void FNoteTrackEditor::Resize( float NewSize, UMovieSceneTrack* InTrack )
     }
 }
 
-bool FNoteTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, FSequencerDragDropParams& DragDropParams )
+bool
+FNoteTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, FSequencerDragDropParams& DragDropParams ) //override
 {
     if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
     {
@@ -141,7 +151,8 @@ bool FNoteTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, FSequen
     return false;
 }
 
-FReply FNoteTrackEditor::OnDrop( const FDragDropEvent& DragDropEvent, const FSequencerDragDropParams& DragDropParams )
+FReply
+FNoteTrackEditor::OnDrop( const FDragDropEvent& DragDropEvent, const FSequencerDragDropParams& DragDropParams ) //override
 {
     if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
     {
@@ -195,13 +206,15 @@ FReply FNoteTrackEditor::OnDrop( const FDragDropEvent& DragDropEvent, const FSeq
     return bAnyDropped ? FReply::Handled() : FReply::Unhandled();
 }
 
-TSharedRef<ISequencerSection> FNoteTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding )
+TSharedRef<ISequencerSection>
+FNoteTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding ) //override
 {
     check( SupportsType( SectionObject.GetOuter()->GetClass() ) );
     return MakeShareable( new FNoteSection( SectionObject, GetSequencer() ) );
 }
 
-TSharedPtr<SWidget> FNoteTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params )
+TSharedPtr<SWidget>
+FNoteTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params ) //override
 {
     // Create a container edit box
     return SNew( SHorizontalBox )
@@ -215,7 +228,8 @@ TSharedPtr<SWidget> FNoteTrackEditor::BuildOutlinerEditWidget( const FGuid& Obje
         ];
 }
 
-bool FNoteTrackEditor::HandleAssetAdded( UObject* Asset, const FGuid& TargetObjectGuid )
+bool
+FNoteTrackEditor::HandleAssetAdded( UObject* Asset, const FGuid& TargetObjectGuid ) //override
 {
     if( Asset->IsA<UStoryNote>() )
     {
@@ -265,7 +279,8 @@ FNoteTrackEditor::GetReferenceRange( FFrameNumber iFrame )
     return TRange<FFrameNumber>( iFrame, iFrame + LengthInFrames );
 }
 
-FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, int32 RowIndex )
+FKeyPropertyResult
+FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, int32 RowIndex )
 {
     FKeyPropertyResult KeyPropertyResult;
 
@@ -311,7 +326,8 @@ FKeyPropertyResult FNoteTrackEditor::AddNewMasterNote( FFrameNumber KeyTime, USt
     return KeyPropertyResult;
 }
 
-FKeyPropertyResult FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo )
+FKeyPropertyResult
+FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, UStoryNote* iNote, UMovieSceneNoteTrack* NoteTrack, TArray<TWeakObjectPtr<UObject>> ObjectsToAttachTo )
 {
     FKeyPropertyResult KeyPropertyResult;
 
@@ -359,7 +375,8 @@ FKeyPropertyResult FNoteTrackEditor::AddNewAttachedNote( FFrameNumber KeyTime, U
 /* FAudioTrackEditor callbacks
  *****************************************************************************/
 
-void FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
+void
+FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
 {
     UMovieScene* FocusedMovieScene = GetFocusedMovieScene();
 
@@ -387,12 +404,14 @@ void FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
     }
 }
 
-void FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute( FMenuBuilder& MenuBuilder, TArray<FGuid> ObjectBindings )
+void
+FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute( FMenuBuilder& MenuBuilder, TArray<FGuid> ObjectBindings )
 {
     MenuBuilder.AddWidget( BuildNoteSubMenu( FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) ), FText::GetEmpty(), true );
 }
 
-TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEnterPressed OnAssetEnterPressed, FOnTextCommitted OnTextCommited )
+TSharedRef<SWidget>
+FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEnterPressed OnAssetEnterPressed, FOnTextCommitted OnTextCommited )
 {
     FMenuBuilder MenuBuilder( true, nullptr );
 
@@ -466,7 +485,8 @@ TSharedRef<SWidget> FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAsset
 
 //---
 
-void FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iType, UMovieSceneTrack* Track )
+void
+FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iType, UMovieSceneTrack* Track )
 {
     if( iType != ETextCommit::OnEnter )
         return;
@@ -495,7 +515,8 @@ void FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type
     GetSequencer()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
 }
 
-void FNoteTrackEditor::OnNoteAssetSelected( const FAssetData& AssetData, UMovieSceneTrack* Track )
+void
+FNoteTrackEditor::OnNoteAssetSelected( const FAssetData& AssetData, UMovieSceneTrack* Track )
 {
     FSlateApplication::Get().DismissAllMenus();
 
@@ -524,7 +545,8 @@ void FNoteTrackEditor::OnNoteAssetSelected( const FAssetData& AssetData, UMovieS
     }
 }
 
-void FNoteTrackEditor::OnNoteAssetEnterPressed( const TArray<FAssetData>& AssetData, UMovieSceneTrack* Track )
+void
+FNoteTrackEditor::OnNoteAssetEnterPressed( const TArray<FAssetData>& AssetData, UMovieSceneTrack* Track )
 {
     if( AssetData.Num() > 0 )
     {
@@ -534,7 +556,8 @@ void FNoteTrackEditor::OnNoteAssetEnterPressed( const TArray<FAssetData>& AssetD
 
 //---
 
-void FNoteTrackEditor::OnAttachedNoteAssetSelected( const FAssetData& AssetData, TArray<FGuid> ObjectBindings )
+void
+FNoteTrackEditor::OnAttachedNoteAssetSelected( const FAssetData& AssetData, TArray<FGuid> ObjectBindings )
 {
     FSlateApplication::Get().DismissAllMenus();
 
@@ -551,7 +574,8 @@ void FNoteTrackEditor::OnAttachedNoteAssetSelected( const FAssetData& AssetData,
     }
 }
 
-void FNoteTrackEditor::OnAttachedNoteEnterPressed( const TArray<FAssetData>& AssetData, TArray<FGuid> ObjectBindings )
+void
+FNoteTrackEditor::OnAttachedNoteEnterPressed( const TArray<FAssetData>& AssetData, TArray<FGuid> ObjectBindings )
 {
     if( AssetData.Num() > 0 )
     {
@@ -559,7 +583,8 @@ void FNoteTrackEditor::OnAttachedNoteEnterPressed( const TArray<FAssetData>& Ass
     }
 }
 
-void FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::Type iType, TArray<FGuid> ObjectBindings )
+void
+FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::Type iType, TArray<FGuid> ObjectBindings )
 {
     if( iType != ETextCommit::OnEnter )
         return;

@@ -16,4 +16,16 @@ UMovieSceneNoteSection::UMovieSceneNoteSection( const FObjectInitializer& Object
     BlendType = EMovieSceneBlendType::Absolute;
 }
 
+void
+UMovieSceneNoteSection::SetNote( UStoryNote* iNote )
+{
+    Note = iNote;
+}
+
+UStoryNote*
+UMovieSceneNoteSection::GetNote() const
+{
+    return Note;
+}
+
 #undef LOCTEXT_NAMESPACE
