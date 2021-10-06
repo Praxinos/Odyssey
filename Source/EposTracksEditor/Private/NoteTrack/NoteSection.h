@@ -30,6 +30,7 @@ public:
 public:
     // ISequencerSection interface
 
+    virtual TSharedRef<SWidget> GenerateSectionWidget() override;
     virtual UMovieSceneSection* GetSectionObject() override;
     virtual FText GetSectionTitle() const override;
     virtual FText GetSectionToolTip() const override;

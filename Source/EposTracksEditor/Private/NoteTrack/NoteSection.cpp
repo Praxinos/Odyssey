@@ -12,6 +12,7 @@
 
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "NoteTrack/SNoteSectionContent.h"
 #include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "FNoteSection"
@@ -28,6 +29,12 @@ FNoteSection::~FNoteSection()
 {
 }
 
+TSharedRef<SWidget>
+FNoteSection::GenerateSectionWidget()
+{
+    return SNew( SNoteSectionContent, SharedThis( this ) );
+}
+
 UMovieSceneSection*
 FNoteSection::GetSectionObject()
 {
@@ -37,10 +44,7 @@ FNoteSection::GetSectionObject()
 FText
 FNoteSection::GetSectionTitle() const
 {
-    UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
-    check( NoteSection );
-
-    return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
+    return FText::GetEmpty();
 }
 
 FText
