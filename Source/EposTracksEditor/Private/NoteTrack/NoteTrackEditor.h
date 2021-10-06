@@ -45,6 +45,8 @@ public:
 public:
     // ISequencerTrackEditor interface
 
+    virtual void OnInitialize() override;
+    virtual void OnRelease() override;
     virtual void BuildAddTrackMenu( FMenuBuilder& MenuBuilder ) override;
     virtual void BuildObjectBindingTrackMenu( FMenuBuilder& MenuBuilder, const TArray<FGuid>& ObjectBindings, const UClass* ObjectClass ) override;
     virtual TSharedPtr<SWidget> BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params ) override;

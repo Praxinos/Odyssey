@@ -7,7 +7,7 @@
 #include "ISettingsModule.h"
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
-#include "CinematicBoardTrack/CinematicBoardTrackEditorCommands.h"
+#include "EposTracksEditorCommands.h"
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 #include "NoteTrack/NoteTrackEditor.h"
 #include "Settings/EposTracksSettings.h"
@@ -35,13 +35,13 @@ FEposTracksEditorModule::ShutdownModule()
 void
 FEposTracksEditorModule::RegisterCommands()
 {
-    FCinematicBoardTrackEditorCommands::Register();
+    FEposTracksEditorCommands::Register();
 }
 
 void
 FEposTracksEditorModule::UnregisterCommands()
 {
-    FCinematicBoardTrackEditorCommands::Unregister();
+    FEposTracksEditorCommands::Unregister();
 }
 
 //---

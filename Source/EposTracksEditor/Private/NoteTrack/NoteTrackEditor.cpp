@@ -18,6 +18,7 @@
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposTracksEditorCommands.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/NoteSection.h"
@@ -38,6 +39,38 @@ FNoteTrackEditor::FNoteTrackEditor( TSharedRef<ISequencer> InSequencer )
 
 FNoteTrackEditor::~FNoteTrackEditor()
 {
+}
+
+void
+FNoteTrackEditor::OnInitialize() //override
+{
+    TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
+    if( command_list )
+    {
+        command_list->MapAction(
+            FEposTracksEditorCommands::Get().NewSectionWithNoteAtCurrentFrame,
+            FExecuteAction::CreateLambda( [=]()
+                                          {
+                                              FString package_name;
+                                              FString asset_name;
+                                              UStoryNote* note = NoteTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence(), package_name, asset_name );
+                                              if( !note )
+                                                  return;
+
+                                              HandleAssetAdded( note, FGuid() );
+                                          } )
+            );
+    }
+}
+
+void
+FNoteTrackEditor::OnRelease() //override
+{
+    TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
+    if( command_list )
+    {
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithNoteAtCurrentFrame );
+    }
 }
 
 TSharedRef<ISequencerTrackEditor>
