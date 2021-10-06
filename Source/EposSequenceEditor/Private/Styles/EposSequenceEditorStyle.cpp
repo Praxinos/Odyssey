@@ -130,6 +130,10 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     Set( "EposSequenceEditor.CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
 
+    Set( "EposSequenceEditor.CinematicViewportNoteBackground", new FSlateColorBrush( FLinearColor( .01f, .01f, .01f ) ) );
+
+    //---
+
     Set( "FilmOverlay.DefaultThumbnail", new IMAGE_BRUSH( "DefaultFilmOverlayThumbnail", FVector2D( 36, 24 ) ) );
 
     Set( "FilmOverlay.Disabled", new IMAGE_BRUSH( "FilmOverlay.Disabled", FVector2D( 36, 24 ) ) );

@@ -47,6 +47,7 @@ public class EposSequence : ModuleRules
                 "EposMovieScene",
                 "EposTracks",
                 "EposActors",
+                "EposNote",
             }
             );
 

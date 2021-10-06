@@ -24,9 +24,12 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "NoteTrack/MovieSceneNoteTrack.h"
+#include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceHelpers"
 
@@ -898,6 +901,60 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
     }
 
     return maps;
+}
+
+//---
+
+//static
+TArray<TWeakObjectPtr<UStoryNote>>
+EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    TArray<TWeakObjectPtr<UStoryNote>> notes;
+
+    auto tracks = iSequence->GetMovieScene()->GetMasterTracks();
+    for( auto track : tracks )
+    {
+        if( !track->IsA<UMovieSceneNoteTrack>() )
+            continue;
+
+        auto sections = track->GetAllSections();
+        for( auto section : sections )
+        {
+            //MovieSceneHelpers::FindSectionAtTime()
+            if( section->IsTimeWithinSection( iFrameNumber ) && section->IsActive() )
+            {
+                UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
+                notes.Add( note_section->GetNote() );
+            }
+        }
+    }
+
+    for( auto track : tracks )
+    {
+        if( !track->IsA<UMovieSceneCinematicBoardTrack>() )
+            continue;
+
+        auto sections = track->GetAllSections();
+        for( auto section : sections )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber ) && section->IsActive() )
+            {
+                UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+
+                BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
+                FFrameTime inner_time = iFrameNumber * subsection->OuterToInnerTransform();
+
+                if( !result.mInnerSequence )
+                    continue;
+
+                TArray<TWeakObjectPtr<UStoryNote>> inner_notes = GetNotesRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, inner_time.GetFrame() );
+
+                notes.Append( inner_notes );
+            }
+        }
+    }
+
+    return notes;
 }
 
 #undef LOCTEXT_NAMESPACE

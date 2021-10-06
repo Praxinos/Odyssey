@@ -55,6 +55,7 @@ public class EposSequenceEditor : ModuleRules
                 "EposSequence",
                 "EposTracks",
                 "EposActors",
+                "EposNote",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies

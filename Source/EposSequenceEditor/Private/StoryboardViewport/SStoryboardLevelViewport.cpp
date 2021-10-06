@@ -34,7 +34,10 @@
 
 //#include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorToolkit.h"
+#include "EposSequenceHelpers.h"
 #include "PlaneActor.h"
+#include "StoryNote.h"
+#include "Styles/EposSequenceEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
 
@@ -398,6 +401,19 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
                             + SVerticalBox::Slot()
                             .AutoHeight()
+                            .HAlign(HAlign_Fill)
+                            [
+                                SNew( SBorder )
+                                .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.CinematicViewportNoteBackground" ) )
+                                .HAlign( HAlign_Center )
+                                [
+                                    SNew( STextBlock )
+                                    .Text( this, &SStoryboardLevelViewport::GetNoteText )
+                                ]
+                            ]
+
+                            + SVerticalBox::Slot()
+                            .AutoHeight()
                             .HAlign(HAlign_Center)
                             //.Padding(0, 5, 0, 0)
                             [
@@ -411,7 +427,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
+                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -664,29 +680,38 @@ FOptionalSize SStoryboardLevelViewport::GetDesiredViewportHeight() const
 EVisibility
 SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility() const
 {
-    ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
+    if( !mPlaneToMove.IsValid() )
+        return EVisibility::Hidden;
 
-    return ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove, camera ) ? EVisibility::Visible : EVisibility::Hidden;
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+
+    return ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove.Get(), camera ) ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 float
 SStoryboardLevelViewport::GetMoveAndScalePlaneDistance() const
 {
-    ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
-
-    if( !ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove, camera ) )
+    if( !mPlaneToMove.IsValid() )
         return 0.f;
 
-    float distance = camera->GetDistanceTo( mPlaneToMove );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+
+    if( !ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove.Get(), camera ) )
+        return 0.f;
+
+    float distance = camera->GetDistanceTo( mPlaneToMove.Get() );
 
     return distance;
 }
 void
 SStoryboardLevelViewport::SetMoveAndScalePlaneDistance( float iDistance )
 {
-    ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
+    if( !mPlaneToMove.IsValid() )
+        return;
 
-    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove, camera, iDistance, mScalePlaneType );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+
+    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, iDistance, mScalePlaneType );
 }
 
 int32
@@ -698,6 +723,18 @@ void
 SStoryboardLevelViewport::OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType )
 {
     mScalePlaneType = EScalePlane( iScalePlaneType );
+}
+
+FText
+SStoryboardLevelViewport::GetNoteText() const
+{
+    TArray<FString> all_notes;
+    for( auto note : mNotes )
+    {
+        all_notes.Add( note->Text );
+    }
+
+    return FText::FromString( FString::Join( all_notes, TEXT( "\n" ) ) );
 }
 
 //---
@@ -911,6 +948,8 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
         APlaneActor* plane = selected_planes[0];
         mPlaneToMove = plane;
     }
+
+    mNotes = EposSequenceHelpers::GetNotesRecursive( *Sequencer, Sequence, Sequencer->GetFocusedTemplateID(), OuterTime.FrameNumber );
 }
 
 #undef LOCTEXT_NAMESPACE

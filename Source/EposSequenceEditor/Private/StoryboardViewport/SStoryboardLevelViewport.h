@@ -25,6 +25,7 @@ class SStoryboardPreviewViewport;
 class SStoryboardTransportRange;
 class SEditorViewport;
 class SLevelViewport;
+class UStoryNote;
 
 struct FQualifiedFrameTime;
 struct FTypeInterfaceProxy;
@@ -146,6 +147,8 @@ private:
     int32 GetScalePlaneType() const;
     void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
 
+    FText GetNoteText() const;
+
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -189,6 +192,7 @@ private:
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
 
-    APlaneActor*    mPlaneToMove    { nullptr };
-    EScalePlane     mScalePlaneType { EScalePlane::kFitToCamera };
+    TWeakObjectPtr<APlaneActor>         mPlaneToMove;
+    EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
+    TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
 };
