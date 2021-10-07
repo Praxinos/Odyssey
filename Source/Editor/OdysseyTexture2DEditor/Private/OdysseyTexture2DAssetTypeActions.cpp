@@ -5,10 +5,10 @@
 
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
+#include "Interfaces/ITextureEditorModule.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseyTexture2DEditorModule.h"
 #include "OdysseyPainterEditorSettings.h"
-#include "Interfaces/ITextureEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 

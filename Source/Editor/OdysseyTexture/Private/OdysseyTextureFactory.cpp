@@ -3,12 +3,13 @@
 
 #include "OdysseyTextureFactory.h"
 
- #include "Editor.h"
+#include "Editor.h"
 #include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
 
 #include "ULISLoaderModule.h"
 #include "OdysseyBlock.h"
+#include "OdysseyTexture.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "SOdysseyTextureConfigureWindow.h"
 
@@ -22,7 +23,7 @@ UOdysseyTextureFactory::UOdysseyTextureFactory( const FObjectInitializer& iObjec
     // From UFactory
     bCreateNew = true;
     bEditAfterNew = true;
-    SupportedClass = UTexture2D::StaticClass();
+    SupportedClass = UOdysseyTexture::StaticClass();
 }
 
 bool UOdysseyTextureFactory::ConfigureProperties()
@@ -50,7 +51,7 @@ UOdysseyTextureFactory::GetDefaultNewAssetName() const
 UObject*
 UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
-    check(iClass->IsChildOf(UTexture2D::StaticClass()));
+    check(iClass->IsChildOf(UOdysseyTexture::StaticClass()));
 
     // Init internal data
     FOdysseyBlock block( mTextureWidth, mTextureHeight, ULISFormatForUE4TextureSourceFormat(mTextureFormat), nullptr, nullptr, true );

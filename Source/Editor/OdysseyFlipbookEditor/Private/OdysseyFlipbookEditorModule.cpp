@@ -11,6 +11,7 @@
 #include "PropertyEditorModule.h"
 #include "Settings/ContentBrowserSettings.h"
 #include "Toolkits/AssetEditorToolkit.h"
+#include "PaperFlipbook.h"
 
 #include "OdysseyFlipbookEditor.h"
 #include "OdysseyFlipbookEditorSettings.h"
@@ -26,8 +27,9 @@
 void
 FOdysseyFlipbookEditorModule::StartupModule()
 {
-	// Register Assets Types Actions
-	RegisterAssetTypeActions();
+    // Register Assets Types Actions once the main loop is initialized
+    // see here : https://udn.unrealengine.com/s/question/0D54z00007DVU5KCAX/two-assettypeactions-for-the-same-type-force-priority-
+    FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyFlipbookEditorModule::RegisterAssetTypeActions);
 
 	// Register Commands
 	RegisterCommands();
@@ -45,6 +47,9 @@ FOdysseyFlipbookEditorModule::StartupModule()
 void
 FOdysseyFlipbookEditorModule::ShutdownModule()
 {
+    // Unregister Assets Types Actions
+    FCoreDelegates::OnFEngineLoopInitComplete.RemoveAll(this);
+
 	// Uninstall Content Browser Extionsion Hooks
 	FOdysseyFlipbookContentBrowserExtensions::RemoveHooks();
 
@@ -66,6 +71,13 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 	// Create Asset Categories
 	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
 
+	// Remove old AssetTypeAction
+	TWeakPtr<IAssetTypeActions> oldAssetTypeAction = assetTools.GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass());
+	if ( oldAssetTypeAction.IsValid() )
+	{
+		assetTools.UnregisterAssetTypeActions(oldAssetTypeAction.Pin().ToSharedRef());
+	}
+
 	//Create Asset Types Actions
 	mTypeActions.Add(MakeShareable(new FOdysseyFlipbookAssetTypeActions(category)));
 
@@ -75,6 +87,7 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 		assetTools.RegisterAssetTypeActions(mTypeActions[index].ToSharedRef());
 	}
 }
+
 
 void
 FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()

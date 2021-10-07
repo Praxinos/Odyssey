@@ -36,8 +36,9 @@ FOdysseyTexture2DEditorModule::CreateOdysseyTexture2DEditor( UTexture2D* iTextur
 void
 FOdysseyTexture2DEditorModule::StartupModule()
 {
-	// Register Assets Types Actions
-	RegisterAssetTypeActions();
+    // Register Assets Types Actions once the main loop is initialized
+    // see here : https://udn.unrealengine.com/s/question/0D54z00007DVU5KCAX/two-assettypeactions-for-the-same-type-force-priority-
+    FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyTexture2DEditorModule::RegisterAssetTypeActions);
 
 	// Register Commands
 	RegisterCommands();
@@ -55,6 +56,9 @@ FOdysseyTexture2DEditorModule::StartupModule()
 void
 FOdysseyTexture2DEditorModule::ShutdownModule()
 {
+    // Unregister Assets Types Actions
+    FCoreDelegates::OnFEngineLoopInitComplete.RemoveAll(this);
+
 	// Uninstall Content Browser Extionsion Hooks
 	FOdysseyTexture2DContentBrowserExtensions::RemoveHooks();
 
@@ -75,6 +79,13 @@ FOdysseyTexture2DEditorModule::RegisterAssetTypeActions()
 
 	// Create Asset Categories
 	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
+
+    // Remove old AssetTypeAction
+	TWeakPtr<IAssetTypeActions> oldAssetTypeAction = assetTools.GetAssetTypeActionsForClass(UTexture::StaticClass());
+	if ( oldAssetTypeAction.IsValid() )
+	{
+		assetTools.UnregisterAssetTypeActions(oldAssetTypeAction.Pin().ToSharedRef());
+	}
 
 	//Create Asset Types Actions
 	mTypeActions.Add(MakeShareable(new FOdysseyTexture2DAssetTypeActions(category)));
