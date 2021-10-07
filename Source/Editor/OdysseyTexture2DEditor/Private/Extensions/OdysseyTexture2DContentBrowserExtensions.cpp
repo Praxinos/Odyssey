@@ -232,7 +232,7 @@ FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMen
         , LOCTEXT( "CB_Extension_Texture_IliadActions_ToolTip", "All actions related to ILIAD" )
         , FNewMenuDelegate::CreateStatic( &FOdysseyTexture2DContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu, iSelectedAssets )
         , false
-        , FSlateIcon( "OdysseyStyle", "OdysseyTexture.Iliad16" )
+        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
     );
 }
 
