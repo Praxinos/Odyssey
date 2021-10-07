@@ -76,6 +76,20 @@ SNoteSectionContent::OnNoteTextCommited( const FText& iText, ETextCommit::Type C
 FReply
 SNoteSectionContent::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) //override
 {
+    if( InMouseEvent.IsControlDown() )
+    {
+        FNoteSection* note_section = mNoteSection.Pin().Get();
+        UMovieSceneNoteSection* note_section_object = note_section ? Cast<UMovieSceneNoteSection>( note_section->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+        if( !note )
+            return FReply::Unhandled();
+
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        AssetEditorSubsystem->OpenEditorForAsset( note );
+
+        return FReply::Handled();
+    }
+
     mNoteTextWidget->EnterEditingMode();
 
     return FReply::Handled();
