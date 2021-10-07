@@ -43,7 +43,7 @@ FOdysseyExportFolderExtension::Register( FContentBrowserModule& iContentBrowserM
                 , LOCTEXT( "CB_Extension_Texture_IliadActions_ToolTip", "All actions related to ILIAD" )
                 , FNewMenuDelegate::CreateStatic( &FOdysseyExportFolderExtension::PopulateIliadActionsSubMenu, iSelectedPaths )
                 , false
-                , FSlateIcon( "OdysseyStyle", "OdysseyTexture.Iliad16" )
+                , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
                 );
             }));
         return extender;
