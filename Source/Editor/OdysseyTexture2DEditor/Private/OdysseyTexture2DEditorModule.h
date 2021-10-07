@@ -16,14 +16,13 @@ public:
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
-
     virtual void ShutdownModule() override;
 
-private:
-	//Asset Type Action
+    //Asset Type Action
     void RegisterAssetTypeActions();
 	void UnregisterAssetTypeActions();
 
+private:
 	//Settings
 	void RegisterSettings();
 	void UnregisterSettings();

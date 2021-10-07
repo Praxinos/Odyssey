@@ -19,7 +19,19 @@ class ODYSSEYFLIPBOOKEDITOR_API UOdysseyFlipbookEditorSettings
 {
     GENERATED_UCLASS_BODY()
 
+private:
+    #if WITH_EDITOR
+        virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+    #endif
+
 public:
+    static UOdysseyFlipbookEditorSettings* Get();
+
+public:
+    /** If checked, set Iliad as default editor when double-click on a FlipBook. If unchecked, removes the Flipbook creation icon from the Iliad menu */
+    UPROPERTY(config, EditAnywhere, Category = Defaults, DisplayName = "Set Iliad as default editor for Flipbooks")
+    bool IliadDefaultEditorEnabled;
+
     /* UPROPERTY(config, EditAnywhere, Category=Shortcuts )
     FInputChord PreviousFrame;
 

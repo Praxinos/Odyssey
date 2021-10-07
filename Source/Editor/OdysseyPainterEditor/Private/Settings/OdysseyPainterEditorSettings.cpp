@@ -24,7 +24,6 @@ UOdysseyPainterEditorSettings::UOdysseyPainterEditorSettings( const FObjectIniti
     , TextureBorderColor( FColor::White )
     , TextureBorderEnabled( false )
     , BrushDefaults()
-    , IliadDefaultEditorEnabled( true )
 {
 }
 

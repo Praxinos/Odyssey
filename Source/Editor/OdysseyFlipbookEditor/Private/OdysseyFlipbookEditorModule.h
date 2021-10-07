@@ -16,10 +16,11 @@ public:
 
     virtual void ShutdownModule() override;
 
-private:
 	// AssetTypeActions
     void RegisterAssetTypeActions();
 	void UnregisterAssetTypeActions();
+
+private:
 
 	// Settings
 	void RegisterSettings();
@@ -31,5 +32,7 @@ private:
 
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TArray< TSharedPtr<IAssetTypeActions> > mTypeActions;
+	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
+    // AssetTypeActions that don't belong to us, we keep track of them to be able to (un)register them, based on Iliad preferences
+    TSharedPtr<IAssetTypeActions> mUETypeActions;
 };

@@ -62,17 +62,8 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
 
         if (odysseyFlipbook != NULL)
         {
-            FOdysseyFlipbookWrapper odysseyFlipbookWrapper( odysseyFlipbook );
-
-            if( UOdysseyPainterEditorSettings::Get()->IliadDefaultEditorEnabled )
-            {
-                FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-                odysseyFlipbookModule->CreateOdysseyFlipbookEditor(odysseyFlipbook);
-            }
-            else
-            {
-                objects.Add(odysseyFlipbook);
-            }
+            FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
+            odysseyFlipbookModule->CreateOdysseyFlipbookEditor(odysseyFlipbook);
         }
     }
     if( objects.Num() != 0 )

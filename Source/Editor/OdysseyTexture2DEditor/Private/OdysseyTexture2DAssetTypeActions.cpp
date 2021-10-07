@@ -59,6 +59,9 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
 		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
 		if (odysseyTexture != NULL)
 		{
+            FOdysseyTexture2DEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTexture2DEditorModule>("OdysseyTexture2DEditor");
+            odysseyTextureModule->CreateOdysseyTexture2DEditor(odysseyTexture);
+            /*
             if( UOdysseyPainterEditorSettings::Get()->IliadDefaultEditorEnabled )
             {
                 FOdysseyTexture2DEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTexture2DEditorModule>("OdysseyTexture2DEditor");
@@ -68,7 +71,7 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
             {
                 ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
                 TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
-            }
+            }*/
 		}
 	}
 }

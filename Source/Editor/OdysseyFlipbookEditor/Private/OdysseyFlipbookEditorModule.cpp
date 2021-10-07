@@ -27,6 +27,9 @@
 void
 FOdysseyFlipbookEditorModule::StartupModule()
 {
+    mIliadTypeActions = nullptr;
+    mUETypeActions = nullptr;
+
     // Register Assets Types Actions once the main loop is initialized
     // see here : https://udn.unrealengine.com/s/question/0D54z00007DVU5KCAX/two-assettypeactions-for-the-same-type-force-priority-
     FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyFlipbookEditorModule::RegisterAssetTypeActions);
@@ -67,27 +70,32 @@ void
 FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 {
 	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-
-	// Create Asset Categories
+    // Create Asset Categories
 	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
 
-	// Remove old AssetTypeAction
-	TWeakPtr<IAssetTypeActions> oldAssetTypeAction = assetTools.GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass());
-	if ( oldAssetTypeAction.IsValid() )
-	{
-		assetTools.UnregisterAssetTypeActions(oldAssetTypeAction.Pin().ToSharedRef());
-	}
+    if( !mUETypeActions )
+        mUETypeActions = assetTools.GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass() ).Pin();
+    if( !mIliadTypeActions )
+	    mIliadTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
 
-	//Create Asset Types Actions
-	mTypeActions.Add(MakeShareable(new FOdysseyFlipbookAssetTypeActions(category)));
+    if( UOdysseyFlipbookEditorSettings::Get()->IliadDefaultEditorEnabled )
+    {
+	    // Remove old AssetTypeAction from UE
+        assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
 
-	//Register created Asset Type Actions
-	for (int32 index = 0; index < mTypeActions.Num(); ++index)
-	{
-		assetTools.RegisterAssetTypeActions(mTypeActions[index].ToSharedRef());
-	}
+        //Register created Asset Type Actions
+        assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+
+    }
+    else
+    {
+	    // Remove old AssetTypeAction
+	    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+
+	    //Register created Asset Type Actions from UE
+        assetTools.RegisterAssetTypeActions(mUETypeActions.ToSharedRef());
+    }
 }
-
 
 void
 FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
@@ -96,10 +104,8 @@ FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
 		return;
 	
 	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	for (int32 index = 0; index < mTypeActions.Num(); ++index)
-	{
-		assetTools.UnregisterAssetTypeActions(mTypeActions[index].ToSharedRef());
-	}
+    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
 }
 
 void
