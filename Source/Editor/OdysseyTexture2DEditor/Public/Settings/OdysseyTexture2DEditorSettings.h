@@ -21,15 +21,9 @@ class ODYSSEYTEXTURE2DEDITOR_API UOdysseyTexture2DEditorSettings
 public:
     static UOdysseyTexture2DEditorSettings* Get();
 
-private:
-    #if WITH_EDITOR
-        virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    #endif
-
 public:
     /** If true, set Iliad as default editor when double-click on a Texture. */
     UPROPERTY(config, EditAnywhere, Category = Defaults, DisplayName = "Set Iliad as default editor for textures")
     bool IliadDefaultEditorEnabled;
-
 };
 

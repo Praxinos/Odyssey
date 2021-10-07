@@ -80,21 +80,11 @@ FOdysseyTexture2DEditorModule::RegisterAssetTypeActions()
 	// Create Asset Categories
 	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("IliadPainterAssetCategory", "ILIAD"));
 
-    // Remove old AssetTypeAction
-	TWeakPtr<IAssetTypeActions> oldAssetTypeAction = assetTools.GetAssetTypeActionsForClass(UTexture::StaticClass());
-	if ( oldAssetTypeAction.IsValid() )
-	{
-		assetTools.UnregisterAssetTypeActions(oldAssetTypeAction.Pin().ToSharedRef());
-	}
-
 	//Create Asset Types Actions
-	mTypeActions.Add(MakeShareable(new FOdysseyTexture2DAssetTypeActions(category)));
+	mIliadTypeActions = MakeShareable(new FOdysseyTexture2DAssetTypeActions(category));
 
 	//Register created Asset Type Actions
-	for (int32 index = 0; index < mTypeActions.Num(); ++index)
-	{
-		assetTools.RegisterAssetTypeActions(mTypeActions[index].ToSharedRef());
-	}
+	assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
 
 void
@@ -104,10 +94,7 @@ FOdysseyTexture2DEditorModule::UnregisterAssetTypeActions()
 		return;
 	
 	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	for (int32 index = 0; index < mTypeActions.Num(); ++index)
-	{
-		assetTools.UnregisterAssetTypeActions(mTypeActions[index].ToSharedRef());
-	}
+    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
 
 void

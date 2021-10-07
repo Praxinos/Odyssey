@@ -8,7 +8,8 @@
 #include "Interfaces/ITextureEditorModule.h"
 #include "OdysseyTextureAssetUserData.h"
 #include "OdysseyTexture2DEditorModule.h"
-#include "OdysseyPainterEditorSettings.h"
+#include "OdysseyTexture2DEditorSettings.h"
+#include "OdysseyTexture.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DAssetTypeActions"
 
@@ -59,10 +60,7 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
 		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
 		if (odysseyTexture != NULL)
 		{
-            FOdysseyTexture2DEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTexture2DEditorModule>("OdysseyTexture2DEditor");
-            odysseyTextureModule->CreateOdysseyTexture2DEditor(odysseyTexture);
-            /*
-            if( UOdysseyPainterEditorSettings::Get()->IliadDefaultEditorEnabled )
+            if( UOdysseyTexture2DEditorSettings::Get()->IliadDefaultEditorEnabled )
             {
                 FOdysseyTexture2DEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTexture2DEditorModule>("OdysseyTexture2DEditor");
                 odysseyTextureModule->CreateOdysseyTexture2DEditor(odysseyTexture);
@@ -71,7 +69,7 @@ void FOdysseyTexture2DAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
             {
                 ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
                 TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
-            }*/
+            }
 		}
 	}
 }
