@@ -16,6 +16,7 @@
 #include "SequencerUtilities.h"
 #include "Widgets/Text/SMultiLineEditableText.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
+#include "Framework/Application/SlateApplication.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposTracksEditorCommands.h"
@@ -466,52 +467,71 @@ FNoteTrackEditor::BuildNoteSubMenu( FOnAssetSelected OnAssetSelected, FOnAssetEn
 
     // D:\Epic Games\UE_4.27\Engine\Source\Developer\OutputLog\Private\SOutputLog.cpp
 
+    TSharedPtr<SMultiLineEditableTextBox> text;
+
     TSharedPtr<SBox> MenuEntry = SNew( SBox )
         .MinDesiredWidth( 400 )
         .MinDesiredHeight( 50 )
         [
-            SNew( SMultiLineEditableTextBox )
+            SAssignNew( text, SMultiLineEditableTextBox )
             .ModiferKeyForNewLine( EModifierKey::Shift )
             .OnTextCommitted( OnTextCommited )
         ];
 
-    MenuBuilder.AddWidget( MenuEntry.ToSharedRef(), LOCTEXT( "menu-new-note-label", "New Note Text" ) );
+    // Same as in D:\Epic Games\UE_4.27\Engine\Source\Editor\ContentBrowser\Private\SAssetPicker.cpp
+    text->RegisterActiveTimer( 0.f, FWidgetActiveTimerDelegate::CreateLambda( [=]( double InCurrentTime, float InDeltaTime ) -> EActiveTimerReturnType
+                                                                              {
+                                                                                  if( text.IsValid() )
+                                                                                  {
+                                                                                      FWidgetPath WidgetToFocusPath;
+                                                                                      FSlateApplication::Get().GeneratePathToWidgetUnchecked( text.ToSharedRef(), WidgetToFocusPath );
+                                                                                      FSlateApplication::Get().SetKeyboardFocus( WidgetToFocusPath, EFocusCause::SetDirectly );
+                                                                                      WidgetToFocusPath.GetWindow()->SetWidgetToFocusOnActivate( text );
+
+                                                                                      return EActiveTimerReturnType::Stop;
+                                                                                  }
+
+                                                                                  return EActiveTimerReturnType::Continue;
+                                                                              } ) );
+
+    MenuBuilder.AddWidget( MenuEntry.ToSharedRef(), LOCTEXT( "menu-new-note-label", "New Note" ) );
 
     //-
 
-    auto OnExistingNotes = [=]( FMenuBuilder& iMenuBuilder )
-    {
-        FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-        TArray<FName> ClassNames;
-        ClassNames.Add( UStoryNote::StaticClass()->GetFName() );
-        TSet<FName> DerivedClassNames;
-        AssetRegistryModule.Get().GetDerivedClassNames( ClassNames, TSet<FName>(), DerivedClassNames );
+    //auto OnExistingNotes = [=]( FMenuBuilder& iMenuBuilder )
+    //{
+    //    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
+    //    TArray<FName> ClassNames;
+    //    ClassNames.Add( UStoryNote::StaticClass()->GetFName() );
+    //    TSet<FName> DerivedClassNames;
+    //    AssetRegistryModule.Get().GetDerivedClassNames( ClassNames, TSet<FName>(), DerivedClassNames );
 
-        FAssetPickerConfig AssetPickerConfig;
-        {
-            AssetPickerConfig.OnAssetSelected = OnAssetSelected;
-            AssetPickerConfig.OnAssetEnterPressed = OnAssetEnterPressed;
-            AssetPickerConfig.bAllowNullSelection = false;
-            AssetPickerConfig.InitialAssetViewType = EAssetViewType::List;
-            for( auto ClassName : DerivedClassNames )
-            {
-                AssetPickerConfig.Filter.ClassNames.Add( ClassName );
-            }
-        }
+    //    FAssetPickerConfig AssetPickerConfig;
+    //    {
+    //        AssetPickerConfig.OnAssetSelected = OnAssetSelected;
+    //        AssetPickerConfig.OnAssetEnterPressed = OnAssetEnterPressed;
+    //        AssetPickerConfig.bAllowNullSelection = false;
+    //        AssetPickerConfig.InitialAssetViewType = EAssetViewType::List;
+    //        //AssetPickerConfig.bFocusSearchBoxWhenOpened = ;
+    //        for( auto ClassName : DerivedClassNames )
+    //        {
+    //            AssetPickerConfig.Filter.ClassNames.Add( ClassName );
+    //        }
+    //    }
 
-        FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
+    //    FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
 
-        TSharedPtr<SBox> MenuEntry = SNew( SBox )
-            .WidthOverride( 300.0f )
-            .HeightOverride( 300.f )
-            [
-                ContentBrowserModule.Get().CreateAssetPicker( AssetPickerConfig )
-            ];
+    //    TSharedPtr<SBox> MenuEntry = SNew( SBox )
+    //        .WidthOverride( 300.0f )
+    //        .HeightOverride( 300.f )
+    //        [
+    //            ContentBrowserModule.Get().CreateAssetPicker( AssetPickerConfig )
+    //        ];
 
-        iMenuBuilder.AddWidget( MenuEntry.ToSharedRef(), FText::GetEmpty(), true );
-    };
+    //    iMenuBuilder.AddWidget( MenuEntry.ToSharedRef(), FText::GetEmpty(), true );
+    //};
 
-    MenuBuilder.AddSubMenu( LOCTEXT( "submenu-existing-notes-label", "Existing Notes" ), LOCTEXT( "submenu-existing-notes-tooltip", "Link to one of the existing notes" ), FNewMenuDelegate::CreateLambda( OnExistingNotes ) );
+    //MenuBuilder.AddSubMenu( LOCTEXT( "submenu-existing-notes-label", "Existing Notes" ), LOCTEXT( "submenu-existing-notes-tooltip", "Link to one of the existing notes" ), FNewMenuDelegate::CreateLambda( OnExistingNotes ) );
 
     return MenuBuilder.MakeWidget();
 }
