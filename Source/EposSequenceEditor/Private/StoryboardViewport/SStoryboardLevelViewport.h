@@ -147,7 +147,7 @@ private:
     int32 GetScalePlaneType() const;
     void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
 
-    FText GetNoteText() const;
+    TSharedRef<ITableRow> MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
 private:
 
@@ -195,4 +195,5 @@ private:
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
+    TSharedPtr<SListView<TWeakObjectPtr<UStoryNote>>> mWidgetNoteList;
 };

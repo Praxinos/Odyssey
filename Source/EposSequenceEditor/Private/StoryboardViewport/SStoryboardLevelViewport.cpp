@@ -403,13 +403,10 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                             .AutoHeight()
                             .HAlign(HAlign_Fill)
                             [
-                                SNew( SBorder )
-                                .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.CinematicViewportNoteBackground" ) )
-                                .HAlign( HAlign_Center )
-                                [
-                                    SNew( STextBlock )
-                                    .Text( this, &SStoryboardLevelViewport::GetNoteText )
-                                ]
+                                SAssignNew( mWidgetNoteList, SListView<TWeakObjectPtr<UStoryNote>> )
+                                .ListItemsSource( &mNotes )
+                                .OnGenerateRow( this, &SStoryboardLevelViewport::MakeNoteRow )
+                                .SelectionMode( ESelectionMode::None )
                             ]
 
                             + SVerticalBox::Slot()
@@ -725,16 +722,26 @@ SStoryboardLevelViewport::OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelec
     mScalePlaneType = EScalePlane( iScalePlaneType );
 }
 
-FText
-SStoryboardLevelViewport::GetNoteText() const
+TSharedRef<ITableRow>
+SStoryboardLevelViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
-    TArray<FString> all_notes;
-    for( auto note : mNotes )
-    {
-        all_notes.Add( note->Text );
-    }
-
-    return FText::FromString( FString::Join( all_notes, TEXT( "\n" ) ) );
+    return
+        SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
+        .Padding( FMargin( 0, 2 ) )
+        [
+            SNew( SBorder )
+            .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.CinematicViewportNoteBackground" ) )
+            .Padding( FMargin( 3 ) )
+            [
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .HAlign( HAlign_Center )
+                [
+                    SNew( STextBlock )
+                    .Text( FText::FromString( iItem->Text ) )
+                ]
+            ]
+        ];
 }
 
 //---
@@ -950,6 +957,9 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     }
 
     mNotes = EposSequenceHelpers::GetNotesRecursive( *Sequencer, Sequence, Sequencer->GetFocusedTemplateID(), OuterTime.FrameNumber );
+    if( mWidgetNoteList.IsValid() )
+        //mWidgetNoteList->RebuildList();
+        mWidgetNoteList->RequestListRefresh();
 }
 
 #undef LOCTEXT_NAMESPACE
