@@ -36,3 +36,28 @@ private:
 private:
     TSharedPtr<SListView<TWeakObjectPtr<UStoryNote>>> mWidgetList;
 };
+
+//---
+
+/** A custom widget that displays all notes */
+class SNotesAsOverlay
+    : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS( SNotesAsOverlay )
+        {}
+        SLATE_ARGUMENT( const TArray<TWeakObjectPtr<UStoryNote>>*, ListItemsSource )
+    SLATE_END_ARGS()
+
+    /** Construct this widget */
+    void Construct(const FArguments& InArgs);
+
+public:
+    void RefreshList();
+
+private:
+    TSharedRef<ITableRow> MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+
+private:
+    TSharedPtr<SListView<TWeakObjectPtr<UStoryNote>>> mWidgetList;
+};

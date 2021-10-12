@@ -122,11 +122,16 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     //---
 
-    Set( "EposSequenceEditor.NoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-                                       .SetFont( DEFAULT_FONT( "Italic", 10 ) )
-                                       .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
-
     Set( "EposSequenceEditor.NoteDisplaySettings", new IMAGE_BRUSH( "note-24x", FVector2D( 24, 24 ) ) );
+
+    //-
+
+    Set( "EposSequenceEditor.OverlayNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+                                            .SetShadowOffset( FVector2D( 1.0f, 1.0f ) )
+                                            .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
+    Set( "EposSequenceEditor.OverlayNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) );
+
+    //-
 
     SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );
 
@@ -138,6 +143,10 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     Set( "EposSequenceEditor.StoryboardViewportNotesBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0 ) ) ) );
     Set( "EposSequenceEditor.StoryboardViewportNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
+
+    Set( "EposSequenceEditor.StoryboardViewportNoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+                                                         .SetFont( DEFAULT_FONT( "Italic", 10 ) )
+                                                         .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
 
     //---
 

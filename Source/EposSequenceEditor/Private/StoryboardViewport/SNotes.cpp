@@ -54,7 +54,7 @@ SNotesInViewport::Construct(const FArguments& InArgs)
         [
             SNew( STextBlock )
             .Text( LOCTEXT("notes-in-viewport.no-notes", "No Notes") )
-            .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.NoNotes" )
+            .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.StoryboardViewportNoNotes" )
         ]
     ];
 }
@@ -83,6 +83,58 @@ SNotesInViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRe
 
 void
 SNotesInViewport::RefreshList()
+{
+    if( !mWidgetList.IsValid() )
+        return;
+
+    //mWidgetList->RebuildList();
+    mWidgetList->RequestListRefresh();
+}
+
+//---
+//---
+//---
+
+void
+SNotesAsOverlay::Construct(const FArguments& InArgs)
+{
+    ChildSlot
+    .VAlign( VAlign_Bottom )
+    .Padding( 20 )
+    [
+        SAssignNew( mWidgetList, SListView<TWeakObjectPtr<UStoryNote>> )
+        .ListItemsSource( InArgs._ListItemsSource )
+        .OnGenerateRow( this, &SNotesAsOverlay::MakeNoteRow )
+        .SelectionMode( ESelectionMode::None )
+    ];
+}
+
+TSharedRef<ITableRow>
+SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
+{
+    return
+        SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
+        .Padding( FMargin( 5, 2 ) )
+        [
+            //SNew( SBox )
+            SNew( SBorder )
+            .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.OverlayNoteBackground" ) )
+            .Padding( FMargin( 3 ) )
+            [
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .HAlign( HAlign_Center )
+                [
+                    SNew( STextBlock )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.OverlayNotes" )
+                    .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
+                ]
+            ]
+        ];
+}
+
+void
+SNotesAsOverlay::RefreshList()
 {
     if( !mWidgetList.IsValid() )
         return;

@@ -27,6 +27,7 @@ class SEditorViewport;
 class SSplitter;
 class SLevelViewport;
 class SNotesInViewport;
+class SNotesAsOverlay;
 class UStoryNote;
 
 struct FQualifiedFrameTime;
@@ -197,5 +198,6 @@ private:
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
-    TSharedPtr<SNotesInViewport>        mWidgetNoteList;
+    TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
+    TSharedPtr<SNotesAsOverlay>         mWidgetNotesAsOverlay;
 };

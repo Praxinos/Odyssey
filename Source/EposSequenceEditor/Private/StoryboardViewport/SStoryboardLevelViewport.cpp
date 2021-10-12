@@ -306,6 +306,13 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                         [
                             FilmOverlayOptions->GetFilmOverlayWidget()
                         ]
+
+                        + SOverlay::Slot()
+                        [
+                            SAssignNew( mWidgetNotesAsOverlay, SNotesAsOverlay )
+                            .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay /*&& SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0*/ ) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; } )
+                            .ListItemsSource( &mNotes )
+                        ]
                     ]
                 ]
 
@@ -452,7 +459,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         + SSplitter::Slot()
         .Value( 0.1 )
         [
-            SAssignNew( mWidgetNoteList, SNotesInViewport )
+            SAssignNew( mWidgetNotesInViewport, SNotesInViewport )
             .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport && SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0 ) ? EVisibility::Visible : EVisibility::Collapsed; } )
             .ListItemsSource( &mNotes )
         ];
@@ -966,8 +973,10 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     mNotes.Empty();
     EposSequenceHelpers::GetNotesRecursive( *Sequencer, Sequence, Sequencer->GetFocusedTemplateID(), OuterTime.FrameNumber, mNotes );
 
-    if( mWidgetNoteList.IsValid() )
-        mWidgetNoteList->RefreshList();
+    if( mWidgetNotesInViewport.IsValid() )
+        mWidgetNotesInViewport->RefreshList();
+    if( mWidgetNotesAsOverlay.IsValid() )
+        mWidgetNotesAsOverlay->RefreshList();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -58,12 +58,33 @@ SNoteSettings::GetMenuContent()
         return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "note-settings.display-in-viewport", "Display notes in viewport" ),
-                              LOCTEXT( "note-settings.display-in-viewport-tooltip", "Display the notes at the current frame under the 3D scene" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "note-settings.display-in-viewport-label", "Display notes in viewport" ),
+                              LOCTEXT( "note-settings.display-in-viewport-tooltip", "Display the notes at the current frame under the 3D scene." ),
                               FSlateIcon(),
                               FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteInViewport ),
                                          FCanExecuteAction(),
                                          FIsActionChecked::CreateLambda( IsDisplayNoteInViewport ) ),
+                              NAME_None,
+                              EUserInterfaceActionType::ToggleButton );
+
+    //
+
+    auto ExecuteDisplayNoteAsOverlay = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+    };
+
+    auto IsDisplayNoteAsOverlay = [=]() -> bool
+    {
+        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "note-settings.display-as-overlay-label", "Display notes as overlay" ),
+                              LOCTEXT( "note-settings.display-as-overlay-tooltip", "Display the notes at the current frame on the 3D scene." ),
+                              FSlateIcon(),
+                              FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteAsOverlay ),
+                                         FCanExecuteAction(),
+                                         FIsActionChecked::CreateLambda( IsDisplayNoteAsOverlay ) ),
                               NAME_None,
                               EUserInterfaceActionType::ToggleButton );
 

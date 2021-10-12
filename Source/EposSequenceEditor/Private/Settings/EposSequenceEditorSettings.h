@@ -51,6 +51,9 @@ struct FNoteSettings
 public:
     UPROPERTY(config, EditAnywhere, Category=Note)
     bool DisplayNoteInViewport { false };
+
+    UPROPERTY(config, EditAnywhere, Category=Note)
+    bool DisplayNoteAsOverlay { false };
 };
 
 //---
