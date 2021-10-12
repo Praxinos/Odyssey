@@ -103,5 +103,5 @@ public:
 class EPOSSEQUENCE_API EposSequenceHelpers
 {
 public:
-    static TArray<TWeakObjectPtr<UStoryNote>> GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<TWeakObjectPtr<UStoryNote>>& oNotes );
 };

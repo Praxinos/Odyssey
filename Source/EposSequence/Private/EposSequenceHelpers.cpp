@@ -906,11 +906,9 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
 //---
 
 //static
-TArray<TWeakObjectPtr<UStoryNote>>
-EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+void
+EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<TWeakObjectPtr<UStoryNote>>& oNotes )
 {
-    TArray<TWeakObjectPtr<UStoryNote>> notes;
-
     auto tracks = iSequence->GetMovieScene()->GetMasterTracks();
     for( auto track : tracks )
     {
@@ -924,7 +922,7 @@ EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneS
             if( section->IsTimeWithinSection( iFrameNumber ) && section->IsActive() )
             {
                 UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
-                notes.Add( note_section->GetNote() );
+                oNotes.Add( note_section->GetNote() );
             }
         }
     }
@@ -947,14 +945,10 @@ EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneS
                 if( !result.mInnerSequence )
                     continue;
 
-                TArray<TWeakObjectPtr<UStoryNote>> inner_notes = GetNotesRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, inner_time.GetFrame() );
-
-                notes.Append( inner_notes );
+                GetNotesRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, inner_time.GetFrame(), oNotes );
             }
         }
     }
-
-    return notes;
 }
 
 #undef LOCTEXT_NAMESPACE

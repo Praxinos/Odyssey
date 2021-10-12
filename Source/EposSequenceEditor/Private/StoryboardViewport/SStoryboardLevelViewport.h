@@ -24,7 +24,9 @@ class SBox;
 class SStoryboardPreviewViewport;
 class SStoryboardTransportRange;
 class SEditorViewport;
+class SSplitter;
 class SLevelViewport;
+class SNotesInViewport;
 class UStoryNote;
 
 struct FQualifiedFrameTime;
@@ -147,8 +149,6 @@ private:
     int32 GetScalePlaneType() const;
     void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
 
-    TSharedRef<ITableRow> MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
-
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -192,8 +192,10 @@ private:
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
 
+    TSharedPtr<SSplitter> mNoteSplitter;
+
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
-    TSharedPtr<SListView<TWeakObjectPtr<UStoryNote>>> mWidgetNoteList;
+    TSharedPtr<SNotesInViewport>        mWidgetNoteList;
 };
