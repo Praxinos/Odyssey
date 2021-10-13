@@ -242,7 +242,7 @@ SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
 
     auto is_selected = []( TWeakObjectPtr<> iObject )
     {
-        return iObject->IsSelected();
+        return iObject.IsValid() ? iObject->IsSelected() : false;
     };
     // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
     if( Algo::AnyOf( objects, is_selected ) )
