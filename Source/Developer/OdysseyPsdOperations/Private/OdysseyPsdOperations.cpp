@@ -307,7 +307,7 @@ bool FOdysseyPsdOperations::ReadLayers()
         mLayersInfo[currLayer].mExtraRead  += mLayersInfo[currLayer].mNameSize + 4 - mLayersInfo[currLayer].mNameSize%4;
 
         if(mLayersInfo[currLayer].mName[0] == 0)
-            strcpy(mLayersInfo[currLayer].mName,"background");
+            strcpy_s(mLayersInfo[currLayer].mName,"background");
 
         //UE_LOG(LogTemp, Display, TEXT("%s"), mLayersInfo[currLayer].mName);
 

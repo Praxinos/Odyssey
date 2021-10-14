@@ -52,10 +52,10 @@ int FOdysseyMeshSelector::GetMaxLOD() const
     if( !CurrentMesh )
         return -1;
 
-    if( !CurrentMesh->RenderData )
+    if( !CurrentMesh->GetRenderData() )
         return -1;
 
-    return CurrentMesh->RenderData->LODResources.Num();
+    return CurrentMesh->GetRenderData()->LODResources.Num();
 }
 
 int FOdysseyMeshSelector::GetMaxUVChannelForCurrentLOD()
@@ -63,13 +63,13 @@ int FOdysseyMeshSelector::GetMaxUVChannelForCurrentLOD()
     if( !CurrentMesh )
         return -1;
 
-    int NumLODLevels = CurrentMesh->RenderData->LODResources.Num();
+    int NumLODLevels = CurrentMesh->GetRenderData()->LODResources.Num();
 
     if( CurrentLOD < 0 || CurrentLOD > NumLODLevels )
         return -1;
 
 
-    return CurrentMesh->RenderData->LODResources[CurrentLOD].VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
+    return CurrentMesh->GetRenderData()->LODResources[CurrentLOD].VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
 }
 
 FLinearColor FOdysseyMeshSelector::GetMeshColor() const
