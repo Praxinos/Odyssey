@@ -20,8 +20,8 @@
 //---
 
 FNoteSection::FNoteSection( UMovieSceneSection& InSection, TWeakPtr<ISequencer> InSequencer )
-    : Section( InSection )
-    , Sequencer( InSequencer )
+    : mSection( InSection )
+    , mSequencer( InSequencer )
 {
 }
 
@@ -38,7 +38,7 @@ FNoteSection::GenerateSectionWidget()
 UMovieSceneSection*
 FNoteSection::GetSectionObject()
 {
-    return &Section;
+    return &mSection;
 }
 
 FText
@@ -50,7 +50,7 @@ FNoteSection::GetSectionTitle() const
 FText
 FNoteSection::GetSectionToolTip() const
 {
-    UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &Section );
+    UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &mSection );
     check( NoteSection );
 
     return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
@@ -59,13 +59,13 @@ FNoteSection::GetSectionToolTip() const
 float
 FNoteSection::GetSectionHeight() const
 {
-    return Section.GetTypedOuter<UMovieSceneNoteTrack>()->GetRowHeight();
+    return mSection.GetTypedOuter<UMovieSceneNoteTrack>()->GetRowHeight();
 }
 
 int32
-FNoteSection::OnPaintSection( FSequencerSectionPainter& Painter ) const
+FNoteSection::OnPaintSection( FSequencerSectionPainter& iPainter ) const
 {
-    int32 LayerId = Painter.PaintSectionBackground();
+    int32 LayerId = iPainter.PaintSectionBackground();
 
     return LayerId;
 }
@@ -73,5 +73,11 @@ FNoteSection::OnPaintSection( FSequencerSectionPainter& Painter ) const
 //void FNoteSection::Tick( const FGeometry& AllottedGeometry, const FGeometry& ParentGeometry, const double InCurrentTime, const float InDeltaTime )
 //{
 //}
+
+TSharedPtr<ISequencer>
+FNoteSection::GetSequencer() const
+{
+    return mSequencer.Pin();
+}
 
 #undef LOCTEXT_NAMESPACE

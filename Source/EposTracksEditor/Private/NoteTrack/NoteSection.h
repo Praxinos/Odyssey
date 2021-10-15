@@ -35,12 +35,15 @@ public:
     virtual FText GetSectionTitle() const override;
     virtual FText GetSectionToolTip() const override;
     virtual float GetSectionHeight() const override;
-    virtual int32 OnPaintSection( FSequencerSectionPainter& Painter ) const override;
+    virtual int32 OnPaintSection( FSequencerSectionPainter& iPainter ) const override;
     //virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ParentGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+
+public:
+    TSharedPtr<ISequencer> GetSequencer() const;
 
 private:
     /** The section we are visualizing. */
-    UMovieSceneSection& Section;
+    UMovieSceneSection& mSection;
 
-    TWeakPtr<ISequencer> Sequencer;
+    TWeakPtr<ISequencer> mSequencer;
 };

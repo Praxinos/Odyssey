@@ -58,6 +58,7 @@ void
 SNoteSectionContent::OnNoteTextCommited( const FText& iText, ETextCommit::Type CommitType )
 {
     FNoteSection* note_section = mNoteSection.Pin().Get();
+    ISequencer* sequencer = note_section->GetSequencer().Get();
     UMovieSceneNoteSection* note_section_object = note_section ? Cast<UMovieSceneNoteSection>( note_section->GetSectionObject() ) : nullptr;
     UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
     if( !note )
@@ -66,11 +67,14 @@ SNoteSectionContent::OnNoteTextCommited( const FText& iText, ETextCommit::Type C
     if( CommitType != ETextCommit::OnEnter || iText.ToString() == note->Text )
         return;
 
-    note_section_object->Modify();
+    //---
 
     const FScopedTransaction Transaction( LOCTEXT( "SetNewNoteText", "Set Note Text" ) );
 
+    note->Modify();
     note->Text = iText.ToString();
+
+    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 FReply
