@@ -306,13 +306,8 @@ bool FOdysseyPsdOperations::ReadLayers()
         mFileHandle->Seek( mFileHandle->Tell() + (3 - mLayersInfo[currLayer].mNameSize % 4) ); //4 bytes increments for the name
         mLayersInfo[currLayer].mExtraRead  += mLayersInfo[currLayer].mNameSize + 4 - mLayersInfo[currLayer].mNameSize%4;
 
-        #if PLATFORM_MAC
         if(mLayersInfo[currLayer].mName[0] == 0)
-            strcpy(mLayersInfo[currLayer].mName,"background");
-        #else
-        if (mLayersInfo[currLayer].mName[0] == 0)
-            strcpy_s(mLayersInfo[currLayer].mName, "background");
-        #endif
+            FPlatformString::Strcpy(mLayersInfo[currLayer].mName, FPlatformString::Strlen("background"), "background");
 
         //UE_LOG(LogTemp, Display, TEXT("%s"), mLayersInfo[currLayer].mName);
 
