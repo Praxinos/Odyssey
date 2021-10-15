@@ -457,6 +457,7 @@ ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     //---
 
+    GEditor->SelectNone( true, true );
     GEditor->SelectActor( iPlane, true, true );
 
     GEditor->DetachSelectedActors();
