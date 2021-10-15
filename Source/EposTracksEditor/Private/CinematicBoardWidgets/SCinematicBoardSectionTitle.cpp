@@ -15,6 +15,24 @@
 
 //---
 
+class SInlineEditableTextBlockOnDoubleClick2
+    : public SInlineEditableTextBlock
+{
+    virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
+};
+
+FReply
+SInlineEditableTextBlockOnDoubleClick2::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) //override
+{
+    SInlineEditableTextBlock::OnMouseButtonDoubleClick( InMyGeometry, InMouseEvent );
+
+    EnterEditingMode();
+
+    return FReply::Handled();
+}
+
+//---
+
 void
 SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
@@ -160,9 +178,9 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
             .HAlign( HAlign_Center )
             .VAlign( VAlign_Center )
             [
-                SAssignNew( mWidgetName, SInlineEditableTextBlock )
-                .Text_Lambda( [this] { return HandleText(); } )
-                .ColorAndOpacity_Lambda( [this] { return HandleTextColor(); } )
+                SAssignNew( mWidgetName, SInlineEditableTextBlockOnDoubleClick2 )
+                .Text( this, &SCinematicBoardSectionTitle::HandleTitleText )
+                .ColorAndOpacity( this, &SCinematicBoardSectionTitle::HandleTitleTextColor )
                 .ShadowOffset( FVector2D( 1, 1 ) )
                 .OnTextCommitted( mBoardSection.Pin().ToSharedRef(), &FCinematicBoardSection::HandleThumbnailTextBlockTextCommitted )
             ]
@@ -176,7 +194,7 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
 }
 
 FText
-SCinematicBoardSectionTitle::HandleText() const
+SCinematicBoardSectionTitle::HandleTitleText() const
 {
     if( !mBoardSection.IsValid() )
         return FText::GetEmpty();
@@ -195,8 +213,8 @@ SCinematicBoardSectionTitle::HandleText() const
     return FText::GetEmpty();
 }
 
-FLinearColor
-SCinematicBoardSectionTitle::HandleTextColor() const
+FSlateColor
+SCinematicBoardSectionTitle::HandleTitleTextColor() const
 {
     if( !mBoardSection.IsValid() )
         return FLinearColor::White;

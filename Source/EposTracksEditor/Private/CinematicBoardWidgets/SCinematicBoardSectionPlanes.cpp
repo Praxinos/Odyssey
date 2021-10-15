@@ -11,6 +11,7 @@
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "SequencerSettings.h"
 #include "Subsystems/AssetEditorSubsystem.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "EposSequenceHelpers.h"
 #include "EposTracksToolbarHelpers.h"
@@ -24,6 +25,24 @@
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionPlanes"
+
+//---
+
+class SInlineEditableTextBlockOnDoubleClick
+    : public SInlineEditableTextBlock
+{
+    virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
+};
+
+FReply
+SInlineEditableTextBlockOnDoubleClick::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) //override
+{
+    SInlineEditableTextBlock::OnMouseButtonDoubleClick( InMyGeometry, InMouseEvent );
+
+    EnterEditingMode();
+
+    return FReply::Handled();
+}
 
 //---
 
@@ -55,6 +74,9 @@ private:
     bool                CanDetachPlane();
 
     FSlateColor         GetBackgroundTint() const;
+
+    FText               HandleTitleText() const;
+    void                HandleTitleTextOnCommited( const FText& iText, ETextCommit::Type iType );
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
@@ -182,8 +204,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             .HAlign( HAlign_Center )
             .VAlign( VAlign_Center )
             [
-                SNew( STextBlock )
-                .Text( FText::FromString( mBinding.GetName() ) )
+                SNew( SInlineEditableTextBlockOnDoubleClick )
+                .Text( this, &SCinematicBoardSectionPlaneTitle::HandleTitleText )
+                .OnTextCommitted( this, &SCinematicBoardSectionPlaneTitle::HandleTitleTextOnCommited )
             ]
             + SHorizontalBox::Slot()
             .FillWidth( .5f )
@@ -230,6 +253,41 @@ SCinematicBoardSectionPlaneTitle::OnMouseButtonUp( const FGeometry& MyGeometry, 
         GEditor->SelectActor( Cast<AActor>( object ), true, true );
 
     return FReply::Handled();
+}
+
+FText
+SCinematicBoardSectionPlaneTitle::HandleTitleText() const
+{
+    return FText::FromString( mBinding.GetName() );
+}
+
+void
+SCinematicBoardSectionPlaneTitle::HandleTitleTextOnCommited( const FText& iText, ETextCommit::Type iType )
+{
+    if( iType != ETextCommit::OnEnter )
+        return;
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    UMovieSceneSequence* sequence = subsection_object->GetSequence();
+    UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
+    FMovieScenePossessable* possessable = movie_scene ? movie_scene->FindPossessable( mBinding.GetGuid() ) : nullptr;
+    if( !possessable )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "SetTrackPlaneName", "Set Track Plane Name" ) );
+
+    FMovieScenePossessable new_possessable( *possessable );
+    new_possessable.SetName( iText.ToString() );
+    movie_scene->ReplacePossessable( mBinding.GetGuid(), new_possessable );
+
+    mBinding = *possessable; // Update the cached one
+
+    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 FSlateColor

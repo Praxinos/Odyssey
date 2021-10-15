@@ -26,8 +26,8 @@ public:
     virtual void EnterRename();
 
 protected:
-    FText           HandleText() const;
-    FLinearColor    HandleTextColor() const;
+    FText           HandleTitleText() const;
+    FSlateColor     HandleTitleTextColor() const;
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
