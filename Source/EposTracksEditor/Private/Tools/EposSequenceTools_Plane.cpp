@@ -252,6 +252,8 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
 
+    GEditor->SelectNone( true, true );
+
     APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera, new_material );
 
     //---
@@ -263,6 +265,9 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     //SetPlaneLabelUnique( plane, TEXT("Plane_01_") + iSequence->GetDisplayName().ToString() );
 
     FGuid planeGuid = iSequencer.CreateBinding( *plane, plane->GetActorLabel() );
+
+    // Should be done after CreateBinding(), otherwise CreateBinding() seems to unselect all actors but only when actors were selected before
+    GEditor->SelectActor( plane, true, true );
 
     iSequencer.OnActorAddedToSequencer().Broadcast( plane, planeGuid );
 }
