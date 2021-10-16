@@ -486,6 +486,58 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 //---
 
 //static
+void
+BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::DeleteCameraKey( iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
+}
+
+//static
+void
+ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle )
+{
+    ShotSequenceTools::DeleteCameraKey( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
+}
+
+//static
+void
+ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle )
+{
+    if( !iSection )
+        return;
+
+    TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandle.Cast<FMovieSceneFloatChannel>();
+    FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+    if( !float_channel )
+        return;
+
+    const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKey", "Delete camera key" ) );
+
+    iSection->Modify();
+
+    //---
+
+    float_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
+
+    //---
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+//---
+//---
+//---
+
+//static
 bool
 BoardSequenceTools::IsPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {

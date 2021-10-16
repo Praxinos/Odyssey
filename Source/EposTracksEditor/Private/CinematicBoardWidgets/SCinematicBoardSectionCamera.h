@@ -40,6 +40,8 @@ protected:
 private:
     TSharedPtr<FMetaFloatChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
+    void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
+
     /** Start a transaction at mouse down */
     void BeginTransaction( const FText& iTransactionDesc );
     /** End the transaction at mouse up */

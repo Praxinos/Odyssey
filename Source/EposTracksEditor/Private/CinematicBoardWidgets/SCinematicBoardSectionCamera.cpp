@@ -107,6 +107,42 @@ SCinematicBoardSectionCamera::EndTransaction()
     sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
+void
+SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
+{
+    auto DeleteKey = [=]( TSharedPtr<FMetaFloatChannel> iKeysUnderMouse )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKeys", "Delete camera keys" ) );
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::DeleteCameraKey( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+            }
+        }
+    };
+
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaFloatChannel> iKeysUnderMouse ) -> bool
+    {
+        return true;
+    };
+
+    //-
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-camera-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for the 9 (maybe more or less) channels
+                                LOCTEXT( "delete-camera-key-tooltip", "Delete the current key" ),
+                                FSlateIcon(),
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+
+
+}
+
 //---
 
 FCursorReply
@@ -131,6 +167,20 @@ SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, co
         return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     //---
+
+    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    {
+        FMenuBuilder menu_builder( true, nullptr );
+        BuildKeyContextMenu( menu_builder );
+
+        TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
+        FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+        FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
+
+        mKeysUnderMouse = nullptr; // doesn't go inside OnMouseButtonUp(), so reset it here
+
+        return FReply::Handled();
+    }
 
     BeginTransaction( LOCTEXT( "MoveCameraKeyTransaction", "Move Camera Keys" ) );
 

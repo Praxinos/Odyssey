@@ -197,6 +197,15 @@ public:
 
 public:
     /**
+    * Delete a transform key of the camera
+    *
+    * @param ISequencer             iSequencer to delete the camera key.
+    */
+    static void DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle );
+
+
+public:
+    /**
     * Check if camera is in piloting mode in the subsection at the given frame
     *
     * @param ISequencer             iSequencer to update camera.
@@ -504,6 +513,8 @@ public:
 
     static bool CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    static void DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle );
+
     static bool IsPilotingCamera( ISequencer* iSequencer );
 
     static void PilotCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber );
@@ -531,6 +542,7 @@ private:
 
     static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );
     static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static void DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle );
     static bool IsPilotingCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static void PilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static bool CanPilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
