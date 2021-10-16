@@ -705,7 +705,7 @@ ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovi
 //---
 
 //static
-TSharedPtr<FMovieSceneChannelProxy>
+FChannelProxyBySectionMap
 BoardSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
@@ -714,10 +714,10 @@ BoardSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlay
 }
 
 //static
-TSharedPtr<FMovieSceneChannelProxy>
+FChannelProxyBySectionMap
 ShotSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    FMovieSceneChannelProxyData ChannelIndirection;
+    FChannelProxyBySectionMap map;
 
     FGuid camera_binding;
     /*ACineCameraActor* camera =*/ ShotSequenceHelpers::GetCamera( iPlayer, iSequence, iSequenceID, &camera_binding );
@@ -727,6 +727,8 @@ ShotSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlaye
     TArray<UMovieScene3DTransformSection*> camera_transform_sections = ShotSequenceHelpers::GetCameraTransformSections( iPlayer, iSequence, iSequenceID, camera_binding );
     for( auto camera_transform_section : camera_transform_sections )
     {
+        FMovieSceneChannelProxyData ChannelIndirection;
+
         const FMovieSceneChannelEntry* FloatChannelEntry = camera_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
         if( FloatChannelEntry )
         {
@@ -749,14 +751,17 @@ ShotSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlaye
 #endif
         }
 
+        TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+        map.Add( camera_transform_section, ChannelProxy );
+
         // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
         // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
         //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
         //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
     }
 
-    TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
-    return ChannelProxy;
+    return map;
 }
 
 //static

@@ -421,7 +421,7 @@ FCinematicBoardSection::BuildCameraTransformChannelProxy()
     ReBuildCameraTransformMetaChannel();
 }
 
-TSharedPtr<FMovieSceneChannelProxy>
+FChannelProxyBySectionMap
 FCinematicBoardSection::GetCameraTransformChannelProxy() const
 {
     return mCameraTransformKeys;

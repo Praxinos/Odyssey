@@ -10,6 +10,7 @@
 #include "TrackEditors/SubTrackEditorBase.h"
 
 #include "KeyThumbnail/KeyThumbnailSection.h"
+#include "EposSequenceHelpers.h"
 
 class FCinematicBoardTrackEditor;
 class FMenuBuilder;
@@ -78,7 +79,7 @@ public:
     //---
 
     virtual void BuildCameraTransformChannelProxy();
-    virtual TSharedPtr<FMovieSceneChannelProxy> GetCameraTransformChannelProxy() const;
+    virtual FChannelProxyBySectionMap GetCameraTransformChannelProxy() const;
     virtual void ReBuildCameraTransformMetaChannel();
     virtual TSharedPtr<FMetaFloatChannel> GetCameraTransformMetaChannel() const;
 
@@ -94,7 +95,7 @@ public:
 
 private:
     TArray<double> mThumbnailKeys;
-    TSharedPtr<FMovieSceneChannelProxy> mCameraTransformKeys;
+    FChannelProxyBySectionMap           mCameraTransformKeys;
     TSharedPtr<FMetaFloatChannel>       mCameraTransformMetaKeys;
     TMap<FGuid, TSharedPtr<FMovieSceneChannelProxy>>    mPlanesTransformsKeys;
     TMap<FGuid, TSharedPtr<FMetaFloatChannel>>          mPlanesTransformsMetaKeys;

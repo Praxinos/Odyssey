@@ -12,6 +12,7 @@
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "EposSequenceHelpers.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionCamera"
 
@@ -80,21 +81,18 @@ SCinematicBoardSectionCamera::BeginTransaction( const FText& iTransactionDesc ) 
 
     //---
 
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    FGuid camera_binding;
-    BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
-
-    auto all_transform_sections = BoardSequenceHelpers::GetCameraTransformSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
-    TArray<UMovieSceneSection*> all_sections( all_transform_sections );
-    auto transform_sections = mKeysUnderMouse->GetSections( all_sections );
-    for( auto transform_section : transform_sections )
+    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
     {
-        transform_section->SetFlags( RF_Transactional );
-        // Save the current state of the section
-        transform_section->TryModify();
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UMovieSceneSection* section = subkey.mSection.Get();
+            if( !section )
+                continue;
+
+            section->SetFlags( RF_Transactional );
+            // Save the current state of the section
+            section->TryModify();
+        }
     }
 }
 
@@ -189,15 +187,18 @@ SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FP
 
     //---
 
-    FGuid camera_binding;
-    BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
-
     // Modify all sections where keys have been moved (to force update the viewport)
-    auto all_material_sections = BoardSequenceHelpers::GetCameraTransformSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
-    TArray<UMovieSceneSection*> all_sections( all_material_sections );
-    auto transform_sections = mKeysUnderMouse->GetSections( all_sections );
-    for( auto transform_section : transform_sections )
-        transform_section->TryModify();
+    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
+    {
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UMovieSceneSection* section = subkey.mSection.Get();
+            if( !section )
+                continue;
+
+            section->TryModify();
+        }
+    }
 
     // Update the current frame in the sequencer
     if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
