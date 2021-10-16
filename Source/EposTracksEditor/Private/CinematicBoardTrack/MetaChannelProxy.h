@@ -46,13 +46,10 @@ public:
     virtual ~TMetaChannel();
 
     /** Build the meta channel from a channel proxy depending of the ChannelType */
-    virtual void Build( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
     virtual void Build( const FChannelProxyBySectionMap& iChannelProxyMap );
 
     /** Move all sub keys to the new time */
     virtual FFrameTime Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate );
-
-    virtual TArray<UMovieSceneSection*> GetSections( const TArray<UMovieSceneSection*>& iSections );
 
 public:
     /** Get the number of meta key */
@@ -63,7 +60,6 @@ public:
 
 protected:
     /** Build all the sub keys */
-    virtual void BuildSubKeys( TSharedPtr<FMovieSceneChannelProxy> iChannelProxy );
     virtual void BuildSubKeys( const FChannelProxyBySectionMap& iChannelProxyMap );
     /** Build all the FKeyDrawParams of all sub keys */
     virtual void BuildDrawKeys() = 0;
@@ -147,15 +143,6 @@ TMetaChannel<ChannelType, ValueType>::GetMetaKeys() const
 
 template<typename ChannelType, typename ValueType>
 void
-TMetaChannel<ChannelType, ValueType>::Build( const TSharedPtr<FMovieSceneChannelProxy> iChannelProxy )
-{
-    BuildSubKeys( iChannelProxy );
-    BuildDrawKeys();
-    BuildFlags();
-}
-
-template<typename ChannelType, typename ValueType>
-void
 TMetaChannel<ChannelType, ValueType>::Build( const FChannelProxyBySectionMap& iChannelProxyMap )
 {
     BuildSubKeys( iChannelProxyMap );
@@ -231,90 +218,6 @@ TMetaChannel<ChannelType, ValueType>::BuildSubKeys( const FChannelProxyBySection
                     meta_key.mSubKeys.Add( sub_key );
                     meta_key.mFlags = FMetaKey::EFlags::kNone;
                 }
-            }
-        }
-    }
-
-    check( !mMetaKeys.Num() );
-
-    for( const auto& pair : meta_keys )
-    {
-        FMetaKey meta_key = pair.Value;
-        FFrameNumber sum = 0;
-        for( auto sub_key : meta_key.mSubKeys )
-        {
-            FFrameNumber time;
-            sub_key.mChannelHandle.Get()->GetKeyTime( sub_key.mKeyHandle, time );
-            sum += time;
-        }
-        FFrameNumber average_time = sum / meta_key.mSubKeys.Num();
-
-        mMetaKeys.Add( average_time, meta_key );
-    }
-}
-
-template<typename ChannelType, typename ValueType>
-void
-TMetaChannel<ChannelType, ValueType>::BuildSubKeys( TSharedPtr<FMovieSceneChannelProxy> iChannelProxy )
-{
-    if( !iChannelProxy.IsValid() )
-        return;
-
-    TMap<FFrameNumber, FMetaKey> meta_keys;
-
-    TArrayView<ChannelType*> channels = iChannelProxy->GetChannels<ChannelType>();
-
-    for( int32 channel_index = 0; channel_index < channels.Num(); ++channel_index )
-    {
-        TMovieSceneChannelHandle<ChannelType> channel_handle = iChannelProxy->MakeHandle<ChannelType>( channel_index );
-
-        ChannelType* channel = channel_handle.Get();
-        if( !channel || !channel->GetNumKeys() )
-            continue;
-
-        TMovieSceneChannelData<ValueType> channel_data = channel->GetData();
-
-        for( int32 key_index = 0; key_index < channel->GetNumKeys(); ++key_index )
-        {
-            FKeyHandle key_handle = channel_data.GetHandle( key_index );
-
-            // Create the new sub key corresponding to the current key
-            FMetaKey::FSubKey sub_key;
-            sub_key.mChannelHandle = channel_handle;
-            sub_key.mKeyHandle = key_handle;
-
-            FFrameNumber time = channel_data.GetTimes()[key_index];
-
-            // Check if the current sub key time is already near an existing meta key
-            bool found_key = false;
-            FFrameNumber key_to_add;
-            for( const auto& pair : meta_keys )
-            {
-                TRange<FFrameNumber> range_tolerance( pair.Key - mMergeTolerance, pair.Key + 1 + mMergeTolerance );
-
-                if( range_tolerance.Contains( time ) )
-                {
-                    found_key = true;
-                    key_to_add = pair.Key;
-                    break;
-                }
-            }
-
-            // If the current sub key time is near an existing meta key
-            if( found_key )
-            {
-                FMetaKey* meta_key = meta_keys.Find( key_to_add );
-                check( meta_key );
-
-                meta_key->mSubKeys.Add( sub_key );
-            }
-            // Otherwise, just add a new meta key with the new sub key
-            else
-            {
-                FMetaKey& meta_key = meta_keys.FindOrAdd( time );
-
-                meta_key.mSubKeys.Add( sub_key );
-                meta_key.mFlags = FMetaKey::EFlags::kNone;
             }
         }
     }
@@ -443,29 +346,4 @@ TMetaChannel<ChannelType, ValueType>::Move( const FFrameTime& iTime, bool iSnap,
     }
 
     return last_inner_sub_key;
-}
-
-template<typename ChannelType, typename ValueType>
-TArray<UMovieSceneSection*>
-TMetaChannel<ChannelType, ValueType>::GetSections( const TArray<UMovieSceneSection*>& iSections )
-{
-    TArray<UMovieSceneSection*> sections;
-
-    for( auto section : iSections )
-    {
-        TArrayView<ChannelType*> ObjectPathChannels = section->GetChannelProxy().GetChannels<ChannelType>();
-        for( int32 i = 0; i < ObjectPathChannels.Num(); ++i )
-        {
-            for( auto pair : mMetaKeys )
-            {
-                for( auto meta_subkey : pair.Value.mSubKeys )
-                {
-                    if( ObjectPathChannels[i] == meta_subkey.mChannelHandle.Get() )
-                        sections.Add( section );
-                }
-            }
-        }
-    }
-
-    return sections;
 }

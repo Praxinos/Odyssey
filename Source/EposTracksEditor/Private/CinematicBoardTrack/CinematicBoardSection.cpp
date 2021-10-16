@@ -458,11 +458,11 @@ FCinematicBoardSection::BuildPlanesTransformChannelProxy()
     ReBuildPlanesTransformMetaChannel();
 }
 
-TSharedPtr<FMovieSceneChannelProxy>
+FChannelProxyBySectionMap
 FCinematicBoardSection::GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const
 {
     if( !mPlanesTransformsKeys.Contains( iPossessable.GetGuid() ) )
-        return nullptr;
+        return FChannelProxyBySectionMap();
 
     return mPlanesTransformsKeys[iPossessable.GetGuid()];
 }
@@ -482,10 +482,10 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
     for( const auto& pair : mPlanesTransformsKeys )
     {
         FGuid guid = pair.Key;
-        TSharedPtr<FMovieSceneChannelProxy> proxy = pair.Value;
+        FChannelProxyBySectionMap map = pair.Value;
 
         TSharedPtr<FMetaFloatChannel> meta_channel = MakeShared<FMetaFloatChannel>( inner_tolerance );
-        meta_channel->Build( proxy );
+        meta_channel->Build( map );
 
         mPlanesTransformsMetaKeys.Add( guid, meta_channel );
     }
@@ -510,11 +510,11 @@ FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
     ReBuildPlanesMaterialMetaChannel();
 }
 
-TSharedPtr<FMovieSceneChannelProxy>
+FChannelProxyBySectionMap
 FCinematicBoardSection::GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const
 {
     if( !mPlanesMaterialsKeys.Contains( iPossessable.GetGuid() ) )
-        return nullptr;
+        return FChannelProxyBySectionMap();
 
     return mPlanesMaterialsKeys[iPossessable.GetGuid()];
 }
@@ -534,10 +534,10 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
     for( const auto& pair : mPlanesMaterialsKeys )
     {
         FGuid guid = pair.Key;
-        TSharedPtr<FMovieSceneChannelProxy> proxy = pair.Value;
+        FChannelProxyBySectionMap map = pair.Value;
 
         TSharedPtr<FMetaMaterialChannel> meta_channel = MakeShared<FMetaMaterialChannel>( inner_tolerance );
-        meta_channel->Build( proxy );
+        meta_channel->Build( map );
 
         mPlanesMaterialsMetaKeys.Add( guid, meta_channel );
     }

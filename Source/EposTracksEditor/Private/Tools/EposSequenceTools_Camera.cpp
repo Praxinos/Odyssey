@@ -487,7 +487,7 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 
 //static
 void
-BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle )
+BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
 {
     check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
 
@@ -498,19 +498,19 @@ BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSu
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return;
 
-    ShotSequenceTools::DeleteCameraKey( iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
+    ShotSequenceTools::DeleteCameraKey( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
 }
 
 //static
 void
-ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle )
+ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
 {
-    ShotSequenceTools::DeleteCameraKey( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
+    ShotSequenceTools::DeleteCameraKey( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
 }
 
 //static
 void
-ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, FMovieSceneChannelHandle iChannelHandle, FKeyHandle iKeyHandle )
+ShotSequenceTools::DeleteCameraKey( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
 {
     if( !iSection )
         return;
@@ -520,17 +520,17 @@ ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSequence*
     if( !float_channel )
         return;
 
+    //---
+
     const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKey", "Delete camera key" ) );
 
     iSection->Modify();
-
-    //---
 
     float_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
 
     //---
 
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //---

@@ -486,18 +486,18 @@ SCinematicBoardSectionPlaneKeys::BeginTransaction( const FText& iTransactionDesc
 
     //---
 
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
-
-    auto all_transform_sections = BoardSequenceHelpers::GetPlaneTransformSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
-    TArray<UMovieSceneSection*> all_sections( all_transform_sections );
-    auto transform_sections = mKeysUnderMouse->GetSections( all_sections );
-    for( auto transform_section : transform_sections )
+    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
     {
-        transform_section->SetFlags( RF_Transactional );
-        // Save the current state of the section
-        transform_section->TryModify();
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UMovieSceneSection* section = subkey.mSection.Get();
+            if( !section )
+                continue;
+
+            section->SetFlags( RF_Transactional );
+            // Save the current state of the section
+            section->TryModify();
+        }
     }
 }
 
@@ -591,11 +591,17 @@ SCinematicBoardSectionPlaneKeys::OnMouseMove( const FGeometry& MyGeometry, const
     //---
 
     // Modify all sections where keys have been moved (to force update the viewport)
-    auto all_material_sections = BoardSequenceHelpers::GetPlaneTransformSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
-    TArray<UMovieSceneSection*> all_sections( all_material_sections );
-    auto transform_sections = mKeysUnderMouse->GetSections( all_sections );
-    for( auto transform_section : transform_sections )
-        transform_section->TryModify();
+    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
+    {
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UMovieSceneSection* section = subkey.mSection.Get();
+            if( !section )
+                continue;
+
+            section->TryModify();
+        }
+    }
 
     // Update the current frame in the sequencer
     if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
@@ -810,18 +816,18 @@ SCinematicBoardSectionPlaneMaterialKeys::BeginTransaction( const FText& iTransac
 
     //---
 
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
-
-    auto all_material_sections = BoardSequenceHelpers::GetPlaneMaterialSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
-    TArray<UMovieSceneSection*> all_sections( all_material_sections );
-    auto material_sections = mKeysUnderMouse->GetSections( all_sections );
-    for( auto material_section : material_sections )
+    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
     {
-        material_section->SetFlags( RF_Transactional );
-        // Save the current state of the section
-        material_section->TryModify();
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UMovieSceneSection* section = subkey.mSection.Get();
+            if( !section )
+                continue;
+
+            section->SetFlags( RF_Transactional );
+            // Save the current state of the section
+            section->TryModify();
+        }
     }
 }
 
@@ -888,39 +894,23 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     auto DeleteKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
     {
-        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
-            return;
-
-        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
-        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
-            return;
-
-        FFrameNumber key_framenumber = it.Key();
-
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        //BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+        const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKeys", "Delete camera keys" ) );
 
-        //FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid() );
-        //if( key_index == INDEX_NONE )
-        //    return;
-
-        FFrameNumber key_outer_framenumber = ( key_framenumber * subsection_object->OuterToInnerTransform().InverseLinearOnly() ).GetFrame();
-
-        BoardSequenceTools::DeleteDrawing( sequencer, key_outer_framenumber, mBinding.GetGuid() ); //TODO: maybe try to avoid computing the outer frame number of the key and give the key ? or the drawing data ?
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::DeleteDrawing( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+            }
+        }
     };
 
     auto CanDeleteKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse ) -> bool
     {
-        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
-            return false;
-
-        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
-        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
-            return false;
-
         return true;
     };
 
@@ -994,7 +984,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
                                 FUIAction( FExecuteAction::CreateLambda( CloneKey, mKeysUnderMouse ),
                                            FCanExecuteAction::CreateLambda( CanCloneKey, mKeysUnderMouse ) ) );
 
-    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ),
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for all the channels -> see camera key delete
                                 LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
                                 FSlateIcon(),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
@@ -1096,11 +1086,17 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseMove( const FGeometry& MyGeometr
     //---
 
     // Modify all sections where keys have been moved (to force update the viewport)
-    auto all_material_sections = BoardSequenceHelpers::GetPlaneMaterialSections( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), mBinding.GetGuid() );
-    TArray<UMovieSceneSection*> all_sections( all_material_sections );
-    auto material_sections = mKeysUnderMouse->GetSections( all_sections );
-    for( auto material_section : material_sections )
-        material_section->TryModify();
+    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
+    {
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UMovieSceneSection* section = subkey.mSection.Get();
+            if( !section )
+                continue;
+
+            section->TryModify();
+        }
+    }
 
     // Update the current frame in the sequencer
     if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )

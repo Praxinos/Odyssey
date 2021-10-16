@@ -193,40 +193,46 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
 
 //static
 void
-BoardSequenceTools::DeleteDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::DeleteDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::DeleteDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding );
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::DeleteDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
 }
 
 //static
 void
-ShotSequenceTools::DeleteDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::DeleteDrawing( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
 {
-    DeleteDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding );
+    DeleteDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
 }
 
 //static
 void
-ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
 {
-    FDrawing drawing = ShotSequenceHelpers::GetDrawing( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding );
-    if( !drawing.Exists() )
+    if( !iSection )
+        return;
+
+    TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = iChannelHandle.Cast<FMovieSceneObjectPathChannel>();
+    FMovieSceneObjectPathChannel* material_channel = channel_handle.Get();
+    if( !material_channel )
         return;
 
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "DeleteDrawing", "Delete drawing" ) );
 
-    check( drawing.mSection );
-    drawing.mSection->Modify();
+    iSection->Modify();
 
-    //---
-
-    drawing.mChannel->DeleteKeys( MakeArrayView( &drawing.mKeyHandle, 1 ) );
+    material_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
 
     //---
 
