@@ -164,7 +164,11 @@ SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, co
     mKeysUnderMouse = GetKeysUnderMouse( MouseEvent );
 
     if( !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+    {
+        mKeysUnderMouse = nullptr; // doesn't go inside OnMouseButtonUp(), so reset it here
+
         return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+    }
 
     //---
 

@@ -543,7 +543,11 @@ SCinematicBoardSectionPlaneKeys::OnMouseButtonDown( const FGeometry& MyGeometry,
     mKeysUnderMouse = GetKeysUnderMouse( MouseEvent );
 
     if( !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+    {
+        mKeysUnderMouse = nullptr;
+
         return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+    }
 
     //---
 
@@ -1024,7 +1028,11 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyG
     mKeysUnderMouse = GetKeysUnderMouse( MouseEvent );
 
     if( !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+    {
+        mKeysUnderMouse = nullptr;
+
         return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+    }
 
     //---
 
