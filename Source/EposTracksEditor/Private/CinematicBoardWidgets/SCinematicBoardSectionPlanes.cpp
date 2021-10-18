@@ -64,6 +64,8 @@ public:
     virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
     virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
 
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
 private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
@@ -191,7 +193,6 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         SNew( SBorder )
         .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
         .BorderBackgroundColor( this, &SCinematicBoardSectionPlaneTitle::GetBackgroundTint )
-        .Cursor( EMouseCursor::Default )
         [
             SNew( SHorizontalBox )
             + SHorizontalBox::Slot()
@@ -219,6 +220,12 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
 //---
 
+FCursorReply
+SCinematicBoardSectionPlaneTitle::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+{
+    return FCursorReply::Cursor( EMouseCursor::Default );
+}
+
 FReply
 SCinematicBoardSectionPlaneTitle::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
@@ -227,7 +234,12 @@ SCinematicBoardSectionPlaneTitle::OnMouseButtonDown( const FGeometry& MyGeometry
     // And OnMouseButtonDown will attempt to start a selection or a drag of the section (normal behavior)
     // But as OnMouseButtonUp is handle here, the one of SSequencerTrackArea won't be handle and the normal section drag won't finish clean
     // (For example, the cursor won't update to crosshair after the up on the empty zone of the SSequencerTrackArea)
-    return FReply::Handled();
+    //return FReply::Handled();
+
+    // To be able to move the section through a title plane, otherwise (Handled) it's no more possible
+    // Let's see if it's a problem to not handled now (see the comment above)
+    // (Or maybe process the Up here ? to avoid this problem ? but in this case, it should also be unhandled to allow SSequencerTrackArea to manage the drag section)
+    return FReply::Unhandled();
 }
 
 FReply
