@@ -172,7 +172,13 @@ SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, co
 
     //---
 
-    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        BeginTransaction( LOCTEXT( "MoveCameraKeyTransaction", "Move Camera Keys" ) );
+
+        return FReply::Handled().CaptureMouse( SharedThis( this ) );
+    }
+    else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
     {
         FMenuBuilder menu_builder( true, nullptr );
         BuildKeyContextMenu( menu_builder );
@@ -186,19 +192,24 @@ SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, co
         return FReply::Handled();
     }
 
-    BeginTransaction( LOCTEXT( "MoveCameraKeyTransaction", "Move Camera Keys" ) );
+    mKeysUnderMouse = nullptr;
 
-    return FReply::Handled().CaptureMouse( SharedThis( this ) );
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
 SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    EndTransaction();
+    if( HasMouseCapture() && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        EndTransaction();
 
-    mKeysUnderMouse = nullptr;
+        mKeysUnderMouse = nullptr;
 
-    return FReply::Handled().ReleaseMouseCapture();
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply

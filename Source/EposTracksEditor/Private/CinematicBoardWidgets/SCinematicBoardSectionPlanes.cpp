@@ -245,26 +245,31 @@ SCinematicBoardSectionPlaneTitle::OnMouseButtonDown( const FGeometry& MyGeometry
 FReply
 SCinematicBoardSectionPlaneTitle::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    UMovieSceneSection* section_object = board_section->GetSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        UMovieSceneSection* section_object = board_section->GetSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    auto objects = sequencer->FindBoundObjects( mBinding.GetGuid(), result.mInnerSequenceId );
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+        auto objects = sequencer->FindBoundObjects( mBinding.GetGuid(), result.mInnerSequenceId );
 
-    // To unselect section(s)
-    sequencer->EmptySelection();
-    // And then select the current one
-    sequencer->SelectSection( section_object );
+        // To unselect section(s)
+        sequencer->EmptySelection();
+        // And then select the current one
+        sequencer->SelectSection( section_object );
 
-    // To unselect all actors
-    GEditor->SelectNone( true, true );
-    // And then select the current one
-    for( auto object : objects )
-        GEditor->SelectActor( Cast<AActor>( object ), true, true );
+        // To unselect all actors
+        GEditor->SelectNone( true, true );
+        // And then select the current one
+        for( auto object : objects )
+            GEditor->SelectActor( Cast<AActor>( object ), true, true );
 
-    return FReply::Handled();
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
 FText
@@ -551,19 +556,31 @@ SCinematicBoardSectionPlaneKeys::OnMouseButtonDown( const FGeometry& MyGeometry,
 
     //---
 
-    BeginTransaction( LOCTEXT( "MovePlaneKeyTransaction", "Move Plane Keys" ) );
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        BeginTransaction( LOCTEXT( "MovePlaneKeyTransaction", "Move Plane Keys" ) );
 
-    return FReply::Handled().CaptureMouse( SharedThis( this ) );
+        return FReply::Handled().CaptureMouse( SharedThis( this ) );
+    }
+
+    mKeysUnderMouse = nullptr;
+
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
 SCinematicBoardSectionPlaneKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    EndTransaction();
+    if( HasMouseCapture() && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        EndTransaction();
 
-    mKeysUnderMouse = nullptr;
+        mKeysUnderMouse = nullptr;
 
-    return FReply::Handled().ReleaseMouseCapture();
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
@@ -1036,7 +1053,13 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyG
 
     //---
 
-    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        BeginTransaction( LOCTEXT( "MovePlaneMaterialKeyTransaction", "Move Plane Material Keys" ) );
+
+        return FReply::Handled().CaptureMouse( SharedThis( this ) );
+    }
+    else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
     {
         FMenuBuilder menu_builder( true, nullptr );
         BuildKeyContextMenu( menu_builder );
@@ -1050,19 +1073,24 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonDown( const FGeometry& MyG
         return FReply::Handled();
     }
 
-    BeginTransaction( LOCTEXT( "MovePlaneMaterialKeyTransaction", "Move Plane Material Keys" ) );
+    mKeysUnderMouse = nullptr;
 
-    return FReply::Handled().CaptureMouse( SharedThis( this ) );
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
 SCinematicBoardSectionPlaneMaterialKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    EndTransaction();
+    if( HasMouseCapture() && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        EndTransaction();
 
-    mKeysUnderMouse = nullptr;
+        mKeysUnderMouse = nullptr;
 
-    return FReply::Handled().ReleaseMouseCapture();
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
