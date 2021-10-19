@@ -427,43 +427,96 @@ ShotSequenceTools::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* o
 //---
 
 //static
+bool
+BoardSequenceTools::CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    return ShotSequenceTools::CanDetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+bool
+ShotSequenceTools::CanDetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    return ShotSequenceTools::CanDetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//static
+bool
+ShotSequenceTools::CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    TArray<APlaneActor*> planes;
+    for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID ) )
+        planes.Add( Cast<APlaneActor>( WeakObject.Get() ) );
+
+    bool can_detach = false;
+    for( auto plane : planes )
+    {
+        USceneComponent* RootComp = plane->GetRootComponent();
+        if( !RootComp || !RootComp->GetAttachParent() )
+            continue;
+
+        AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+        if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the planes are in the movie scene ?
+            continue;
+
+        can_detach = true;
+    }
+
+    return can_detach;
+}
+
+//-
+
+//static
 void
-BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, APlaneActor* iPlane )
+BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlane );
+    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
 }
 
 //static
 void
-ShotSequenceTools::DetachPlane( ISequencer* iSequencer, APlaneActor* iPlane )
+BoardSequenceTools::DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
 {
-    DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlane );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
 }
 
 //static
 void
-ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane )
+ShotSequenceTools::DetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding )
 {
-    //FGuid camera_guid;
-    //ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
+    DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
 
-    //if( !camera )
-    //    return;
+//static
+void
+ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    TArray<APlaneActor*> planes;
+    for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID ) )
+        planes.Add( Cast<APlaneActor>( WeakObject.Get() ) );
 
     //---
 
-    //const FScopedTransaction transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
-
-    //cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
+    const FScopedTransaction transaction( LOCTEXT( "DetachPlane", "Detach Plane" ) );
 
     //---
 
     GEditor->SelectNone( true, true );
-    GEditor->SelectActor( iPlane, true, true );
+    for( auto plane : planes )
+        GEditor->SelectActor( plane, true, true );
 
     GEditor->DetachSelectedActors();
 

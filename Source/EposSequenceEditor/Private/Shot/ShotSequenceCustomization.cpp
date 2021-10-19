@@ -150,11 +150,11 @@ FShotSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> CommandL
             FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this]()
                                           {
-                                              TArray<APlaneActor*> planes;
-                                              int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, &planes, nullptr );
+                                              TArray<FGuid> plane_bindings;
+                                              int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, nullptr, &plane_bindings );
                                               if( plane_count != 1 )
                                                   return;
-                                              ShotSequenceTools::DetachPlane( mSequencer, planes[0] );
+                                              ShotSequenceTools::DetachPlane( mSequencer, plane_bindings[0] );
                                           } ),
             FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) == 1; } ),
             FIsActionChecked(),
@@ -325,7 +325,7 @@ FShotSequenceCustomization::MakePlaneMenu()
             FText::GetEmpty(),
             FSlateIcon(),
             FUIAction(
-                FExecuteAction::CreateLambda( [this, plane](){ ShotSequenceTools::DetachPlane( mSequencer, plane ); } )
+                FExecuteAction::CreateLambda( [this, plane_binding](){ ShotSequenceTools::DetachPlane( mSequencer, plane_binding ); } )
             )
         );
     }

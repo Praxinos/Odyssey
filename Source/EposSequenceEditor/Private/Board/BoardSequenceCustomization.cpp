@@ -157,11 +157,11 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
             FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
             FExecuteAction::CreateLambda( [this]()
                                           {
-                                              TArray<APlaneActor*> planes;
-                                              int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, nullptr );
+                                              TArray<FGuid> plane_bindings;
+                                              int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                                               if( plane_count != 1 )
                                                   return;
-                                              BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, planes[0] );
+                                              BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                                           } ),
             FCanExecuteAction::CreateLambda( [this]()
                                              {

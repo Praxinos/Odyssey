@@ -72,9 +72,6 @@ private:
     //void                ToggleLighttable();
     //ECheckBoxState      IsLighttableOn() const;
 
-    void                DetachPlane();
-    bool                CanDetachPlane();
-
     FSlateColor         GetBackgroundTint() const;
 
     FText               HandleTitleText() const;
@@ -129,12 +126,26 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
 
+    auto DetachPlane = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        BoardSequenceTools::DetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+    };
+
+    auto CanDetachPlane = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        return BoardSequenceTools::CanDetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+    };
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
-            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::DetachPlane ),
-            FCanExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::CanDetachPlane ),
+            FExecuteAction::CreateLambda( DetachPlane ),
+            FCanExecuteAction::CreateLambda( CanDetachPlane ),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible && CanDetachPlane(); } )
+            FIsActionButtonVisible::CreateLambda( [=](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible && CanDetachPlane(); } )
         ),
         NAME_None,
         FText::GetEmpty(),
@@ -359,43 +370,6 @@ SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
 //    bool lighttable_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() ); //TODO: improve to don't call it every ticks ?
 //    return lighttable_on ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 //}
-
-//---
-
-void
-SCinematicBoardSectionPlaneTitle::DetachPlane()
-{
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    int plane_count = ShotSequenceHelpers::GetAttachedPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, &planes, &plane_bindings );
-
-    for( int i = 0; i < plane_count; i++ )
-    {
-        if( plane_bindings[i] == mBinding.GetGuid() )
-            BoardSequenceTools::DetachPlane( sequencer, subsection_object->GetInclusiveStartFrame(), planes[i] );
-    }
-}
-
-bool
-SCinematicBoardSectionPlaneTitle::CanDetachPlane()
-{
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
-    TArray<FGuid> plane_bindings;
-    int plane_count = ShotSequenceHelpers::GetAttachedPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );
-
-    return plane_bindings.Contains( mBinding.GetGuid() );
-}
 
 //---
 
