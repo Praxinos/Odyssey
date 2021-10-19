@@ -1242,7 +1242,11 @@ public:
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
 
-public:
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
+private:
+    void BuildContextMenu( FMenuBuilder& ioMenuBuilder );
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
@@ -1281,6 +1285,97 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
             .Binding( mBinding )
         ]
     ];
+}
+
+void
+SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    FText plane_name = FText::FromString( mBinding.GetName() );
+    FText current_frame = FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) );
+
+    //---
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_name ) );
+
+    auto DetachPlane = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        BoardSequenceTools::DetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+    };
+
+    auto CanDetachPlane = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        return BoardSequenceTools::CanDetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+    };
+
+    ioMenuBuilder.AddMenuEntry(
+        FText::Format( LOCTEXT( "detach-plane-label", "Detach {0}" ), plane_name ),
+        LOCTEXT( "detach-plane-tooltip", "Detach the plane" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.DetachPlane" ),
+        FUIAction(
+            FExecuteAction::CreateLambda( DetachPlane ),
+            FCanExecuteAction::CreateLambda( CanDetachPlane )
+        ) );
+
+    //-
+
+    auto CreateDrawing = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    auto CanCreateDrawing = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        return BoardSequenceTools::CanCreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    ioMenuBuilder.AddMenuEntry(
+        FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame ),
+        LOCTEXT( "create-drawing-tooltip", "Create a drawing (set the current frame where to create the drawing keyframe)" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ),
+        FUIAction(
+            FExecuteAction::CreateLambda( CreateDrawing ),
+            FCanExecuteAction::CreateLambda( CanCreateDrawing )
+        ) );
+
+    ioMenuBuilder.EndSection();
+}
+
+FReply
+SCinematicBoardSectionPlane::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlane::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    {
+        FMenuBuilder menu_builder( true, nullptr );
+        BuildContextMenu( menu_builder );
+
+        TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
+        FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+        FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
+
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
 //---
