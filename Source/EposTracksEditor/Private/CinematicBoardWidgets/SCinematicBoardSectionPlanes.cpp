@@ -1324,7 +1324,25 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
             FCanExecuteAction::CreateLambda( CanDetachPlane )
         ) );
 
-    //-
+    ioMenuBuilder.AddSeparator();
+
+    auto DeletePlane = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        BoardSequenceTools::DeletePlane( sequencer, subsection_object, mBinding.GetGuid() );
+    };
+
+    ioMenuBuilder.AddMenuEntry(
+        FText::Format( LOCTEXT( "delete-plane-label", "Delete {0}" ), plane_name ),
+        LOCTEXT( "delete-plane-tooltip", "Delete the plane and its corresponding actor" ),
+        FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+        FUIAction( FExecuteAction::CreateLambda( DeletePlane ) ) );
+
+    ioMenuBuilder.EndSection();
+
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "drawing-section-label", "Drawing" ) );
 
     auto CreateDrawing = [this]()
     {

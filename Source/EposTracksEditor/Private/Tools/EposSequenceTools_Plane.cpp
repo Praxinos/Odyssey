@@ -15,6 +15,7 @@
 #include "Factories/Texture2dFactoryNew.h"
 #include "ISequencer.h"
 #include "Kismet/GameplayStatics.h"
+#include "LevelEditorActions.h"
 #include "LevelEditorViewport.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieScene.h"
@@ -548,5 +549,107 @@ ShotSequenceTools::GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor
     return ShotSequenceHelpers::GetAttachedPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 }
 
+//---
+
+//static
+void
+BoardSequenceTools::DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DeletePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+BoardSequenceTools::DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DeletePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    ShotSequenceTools::DeletePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    TArray<APlaneActor*> planes;
+    for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID ) )
+        planes.Add( Cast<APlaneActor>( WeakObject.Get() ) );
+
+    UMovieScene* movieScene = iSequence->GetMovieScene();
+
+    //---
+
+    // This will make a level traversal order: https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846#ce5c
+    // And then, reverse this order to start by the children
+    //
+    // This part may need to checked
+    // It works but for the moment, plane has only 1 component, and the component can't have other subcomponents, so it's a simple parent-child relation for plane
+
+    TQueue<FGuid> queue;
+    TArray<FGuid> bindings;
+
+    queue.Enqueue( iPlaneBinding );
+
+    while( !queue.IsEmpty() )
+    {
+        FGuid binding;
+        queue.Dequeue( binding );
+
+        bindings.Add( binding );
+
+        // Enqueue all the children of the current binding
+        for( int32 PossessableIndex = 0; PossessableIndex < movieScene->GetPossessableCount(); ++PossessableIndex )
+        {
+            const FMovieScenePossessable& Possessable = movieScene->GetPossessable( PossessableIndex );
+
+            if( Possessable.GetParent() == binding )
+                queue.Enqueue( Possessable.GetGuid() );
+        }
+    }
+
+    Algo::Reverse( bindings ); // To start with children first
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "DeletePlane", "Delete Plane" ) );
+
+    movieScene->Modify();
+    iSequence->Modify();
+
+    //---
+
+    for( auto binding : bindings )
+    {
+        movieScene->RemovePossessable( binding );
+        iSequence->UnbindPossessableObjects( binding );
+    }
+
+    iSequencer.RestorePreAnimatedState();
+
+    //---
+
+    GEditor->SelectNone( true, true );
+    for( auto plane : planes )
+        GEditor->SelectActor( plane, true, true );
+
+    FLevelEditorActionCallbacks::ExecuteExecCommand( FString( TEXT( "DELETE" ) ) ); // In LevelEditor.cpp
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemRemoved );
+}
 
 #undef LOCTEXT_NAMESPACE

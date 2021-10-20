@@ -62,6 +62,7 @@ public class EposTracksEditor : ModuleRules
                 "EditorWidgets",
                 "MaterialEditor",
                 "EditorScriptingUtilities",
+                "LevelEditor",
                 // [EDITOR] custom plugin dependencies
             }
             );

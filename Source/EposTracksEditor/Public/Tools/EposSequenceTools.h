@@ -403,6 +403,24 @@ public:
     */
     static int32 GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
+    /**
+    *  Delete a plane (with its actor) of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to delete a plane.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iPlaneBinding to detach.
+    */
+    static void DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
+    /**
+    *  Delete a plane (with its actor) of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to delete a plane.
+    * @param UMovieSceneSubSection  iSubSection to delete a plane.
+    * @param FGuid                  iPlaneBinding to delete.
+    */
+    static void DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+
 // Inside EspoSequenceTools_Drawing
 public:
     /**
@@ -610,6 +628,8 @@ public:
 
     static int32 GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
+    static void DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding );
+
     static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, bool iScale );
     static bool CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineCameraActor* iCamera );
 
@@ -617,6 +637,7 @@ private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static bool CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+    static void DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
     static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
     static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
