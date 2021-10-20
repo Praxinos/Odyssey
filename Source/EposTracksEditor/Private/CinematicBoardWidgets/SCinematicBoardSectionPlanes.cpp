@@ -987,13 +987,13 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
-                                FSlateIcon(),
+                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Duplicate" ),
                                 FUIAction( FExecuteAction::CreateLambda( CloneKey, mKeysUnderMouse ),
                                            FCanExecuteAction::CreateLambda( CanCloneKey, mKeysUnderMouse ) ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for all the channels -> see camera key delete
                                 LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
-                                FSlateIcon(),
+                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
                                            FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
 
