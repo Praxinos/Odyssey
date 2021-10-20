@@ -1566,11 +1566,46 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
     //---
 
     UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+    if( !inner_moviescene )
+    {
+        mPossessables.Empty();
+
+        if( mWidgetPlaneList )
+            mWidgetPlaneList->RequestListRefresh();
+            //mWidgetPlaneList->RebuildList();
+
+        return;
+    }
+
+    //---
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer.Pin().Get(), subsection, mSequencer.Pin()->GetFocusedTemplateID() );
+    check( inner_sequence == result.mInnerSequence ); // Just to test
 
-    TArray<FGuid> bindings;
-    int plane_count = ShotSequenceHelpers::GetAllPlanes( *mSequencer.Pin().Get(), result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &bindings );
+    // Get all unordered planes
+    TArray<FGuid> unordered_plane_bindings;
+    int plane_count = ShotSequenceHelpers::GetAllPlanes( *mSequencer.Pin().Get(), result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &unordered_plane_bindings );
+
+    // Find their corresponding scene binding
+    TArray<FMovieSceneBinding*> ordered_scene_bindings;
+    for( auto unordered_plane_binding : unordered_plane_bindings )
+    {
+        ordered_scene_bindings.Add( inner_moviescene->FindBinding( unordered_plane_binding ) );
+    }
+
+    // Sort scene bindings by their sorting order
+    Algo::Sort( ordered_scene_bindings, []( FMovieSceneBinding* iA, FMovieSceneBinding* iB ) { return iA->GetSortingOrder() < iB->GetSortingOrder(); } );
+
+    // Get all planes in the gui order
+    TArray<FGuid> ordered_plane_bindings;
+    for( auto ordered_scene_binding : ordered_scene_bindings )
+    {
+        ordered_plane_bindings.Add( ordered_scene_binding->GetObjectGuid() );
+    }
+
+    //---
 
     auto need_rebuild = [this]( const TArray<FGuid>& iBindings )
     {
@@ -1586,15 +1621,10 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
         return false;
     };
-    if( !need_rebuild( bindings ) ) //TOCHECK: check if it's really ok
+    if( !need_rebuild( ordered_plane_bindings ) ) //TOCHECK: check if it's really ok
         return;
 
     mPossessables.Empty();
-
-    UMovieSceneSequence* inner_sequence = subsection.GetSequence();
-    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
-    if( !inner_moviescene )
-        return;
 
     // This doesn't work because this vertical box won't have the same size for all sections
     // and as the height of a track node is getting from the first section in the array (and not necessary the one at the first position in the gui)
@@ -1615,7 +1645,7 @@ SCinematicBoardSectionPlanes::RebuildPlaneList()
 
     for( int i = 0; i < plane_count; i++ )
     {
-        FMovieScenePossessable possessable = *inner_moviescene->FindPossessable( bindings[i] );
+        FMovieScenePossessable possessable = *inner_moviescene->FindPossessable( ordered_plane_bindings[i] );
 
         mPossessables.Add( MakeShared<FMovieScenePossessable>( possessable ) );
     }
