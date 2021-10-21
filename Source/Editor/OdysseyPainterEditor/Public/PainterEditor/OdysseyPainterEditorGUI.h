@@ -39,7 +39,7 @@ public:
 public:
     // Menu And Toolbar
     virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender);
-    virtual void ExtendMenuAbout(FMenuBuilder& ioMenuBuilder);
+    virtual void ExtendMenuAbout(FBaseToolkit* iToolkit);
 
 protected:
 	// Layout

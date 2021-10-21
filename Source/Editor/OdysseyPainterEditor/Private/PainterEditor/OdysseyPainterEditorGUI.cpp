@@ -12,9 +12,12 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
+#include "OdysseyAssetEditorToolkit.h"
 #include "SOdysseyAboutScreen.h"
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+
+#include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorGUI"
 
@@ -80,46 +83,54 @@ FOdysseyPainterEditorGUI::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExten
 {
     FOdysseyEditorGUI::FillExtender(iToolkit, ioExtender);
 
-    //---
-
-    ioExtender->AddMenuExtension(
-        "HelpApplication",
-        EExtensionHook::After,
-        iToolkit->GetToolkitCommands(),
-        FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorGUI::ExtendMenuAbout ) );
+    ExtendMenuAbout( iToolkit );
 }
 
-//static
 void
-FOdysseyPainterEditorGUI::ExtendMenuAbout( FMenuBuilder& ioMenuBuilder )
+FOdysseyPainterEditorGUI::ExtendMenuAbout(FBaseToolkit* iToolkit)
 {
-    ioMenuBuilder.BeginSection( "About", LOCTEXT( "OdysseyPainter", "ILIAD" ) );
+    FOdysseyAssetEditorToolkit* odysseyToolkit = (FOdysseyAssetEditorToolkit*)iToolkit;
+    const FName menuName = *( odysseyToolkit->GetToolMenuName().ToString() + TEXT(".Help") );
+
+    if (!UToolMenus::Get()->IsMenuRegistered(menuName))
     {
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().AboutIliad
-        , NAME_None
-        , LOCTEXT( "AboutIliad", "About Iliad" )
-        , LOCTEXT( "AboutIliad_Tooltip", "to get more information about the plugin, the team that created it, etc." )
-        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" ) );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite
-        , NAME_None
-        , LOCTEXT( "VisitPraxinosWebsite", "About Praxinos ..." )
-        , LOCTEXT( "VisitPraxinosWebsite_Tooltip", "to get more information about the company Praxinos, its projects, etc." )
-        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.PraxinosLogo16" ) );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ManualAndReleaseNotes
-        , NAME_None
-        , LOCTEXT( "ManualAndReleaseNotes", "Manual and Release Notes ..." )
-        , LOCTEXT( "ReleaseNotes_Tooltip", "to get a full changelog of each Iliad version." )
-        , FSlateIcon( "OdysseyStyle", "About.Manual16" ) );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().GetBrushPack
-        , NAME_None
-        , LOCTEXT( "GetMoreBrushes", "Get more brushes ..." )
-        , LOCTEXT( "ReleaseNotes_Tooltip", "Want more brushes ? Just follow this link !" )
-        , FSlateIcon( "OdysseyStyle", "About.MorePencils16" ) );
-        ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().Discord
-        , NAME_None
-        , LOCTEXT( "TalkWithTheDeveloppers", "Talk with the developpers ..." )
-        , LOCTEXT( "ReleaseNotes_Tooltip", "For those who want to discuss with us about the next improvements" )
-        , FSlateIcon( "OdysseyStyle", "About.Discord2_16" ) );
+        UToolMenus::Get()->RegisterMenu(menuName, "MainFrame.MainMenu.Help");
+    }
+
+    UToolMenu* menu = UToolMenus::Get()->FindMenu(menuName);
+
+    FToolMenuSection& aboutSection = menu->AddSection("About ILIAD", LOCTEXT("OdysseyPainter", "ILIAD"));
+    {
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().AboutIliad
+            , LOCTEXT("AboutIliad", "About Iliad")
+            , LOCTEXT("AboutIliad_Tooltip", "to get more information about the plugin, the team that created it, etc.")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+            , NAME_None);
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().VisitPraxinosWebsite
+            , LOCTEXT("VisitPraxinosWebsite", "About Praxinos ...")
+            , LOCTEXT("VisitPraxinosWebsite_Tooltip", "to get more information about the company Praxinos, its projects, etc.")
+            , FSlateIcon("OdysseyStyle", "OdysseyLogo.PraxinosLogo16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().ManualAndReleaseNotes
+            , LOCTEXT("ManualAndReleaseNotes", "Manual and Release Notes ...")
+            , LOCTEXT("ReleaseNotes_Tooltip", "to get a full changelog of each Iliad version.")
+            , FSlateIcon("OdysseyStyle", "About.Manual16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().GetBrushPack
+            , LOCTEXT("GetMoreBrushes", "Get more brushes ...")
+            , LOCTEXT("ReleaseNotes_Tooltip", "Want more brushes ? Just follow this link !")
+            , FSlateIcon("OdysseyStyle", "About.MorePencils16")
+            , NAME_None );
+        aboutSection.AddMenuEntry(
+            FOdysseyPainterEditorCommands::Get().Discord
+            , LOCTEXT("TalkWithTheDeveloppers", "Talk with the developpers ...")
+            , LOCTEXT("ReleaseNotes_Tooltip", "For those who want to discuss with us about the next improvements")
+            , FSlateIcon("OdysseyStyle", "About.Discord2_16")
+            , NAME_None );
     }
 }
 

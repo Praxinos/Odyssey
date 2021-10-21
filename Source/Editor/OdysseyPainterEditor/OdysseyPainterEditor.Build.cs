@@ -31,6 +31,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "RHI",
                 "RenderCore",
                 "RawMesh",
+                "ToolMenus",
                 "EditorStyle",
                 "PropertyEditor",
                 "Projects",
