@@ -33,12 +33,25 @@ struct FInstanceTexturePaintSettings
     UTexture2D* mSelectedTexture;
 };
 
+UENUM()
+enum EOdysseyViewportDrawingPaintingAdapterMethod
+{
+    OdysseyTextureBased     UMETA(DisplayName = "Texture Based"),
+    OdysseyMeshBased        UMETA(DisplayName = "Mesh Based"),
+    OdysseyScreenBased      UMETA(DisplayName = "Screen Based"),
+};
+
 /**
  * Implements an Editor for textures.
  */
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditor
     : public FOdysseyTexture2DEditor
 {
+public:
+    DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingTargetToPaintWillChange);
+    DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingTargetToPaintChanged);
+    DECLARE_MULTICAST_DELEGATE(FOdysseyPaintingAdapterChanged);
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditor();
@@ -58,6 +71,7 @@ public:
     const TArray<FPaintableTexture>& SelectableTextures() const;
     const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
     FOdysseyViewportDrawingEditorModeToolbar* GetToolbar() const;
+    EOdysseyViewportDrawingPaintingAdapterMethod PaintingAdapterMethod() const;
 
 
 public:
@@ -66,6 +80,7 @@ public:
     void SetComponent(UMeshComponent* iComponent);
     void SetMaterial(UMaterialInterface* iMaterial);
     void SetTexture(UTexture2D* iTexture);
+    void SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod);
 
 public:
     // Overrides
@@ -79,6 +94,12 @@ private:
     // Listeners
     void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
 
+public:
+    // Delegates
+    FOdysseyPaintingTargetToPaintWillChange& TargetToPaintWillChangeDelegate();
+    FOdysseyPaintingTargetToPaintChanged& TargetToPaintChangedDelegate();
+    FOdysseyPaintingAdapterChanged& AdapterChangedDelegate();
+    
 private:
     // Private Methods
     void ClearSelectableComponents();
@@ -106,5 +127,10 @@ private:
     //This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected)
 	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
 
+    EOdysseyViewportDrawingPaintingAdapterMethod mPaintingAdapterMethod;
+
+    FOdysseyPaintingTargetToPaintChanged mTargetToPaintChangedDelegate;
+    FOdysseyPaintingTargetToPaintWillChange mTargetToPaintWillChangeDelegate;
+    FOdysseyPaintingAdapterChanged mAdapterChangedDelegate;
 };
 

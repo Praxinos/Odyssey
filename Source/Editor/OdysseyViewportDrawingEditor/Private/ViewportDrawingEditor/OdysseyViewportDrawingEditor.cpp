@@ -23,7 +23,8 @@ FOdysseyViewportDrawingEditor::FOdysseyViewportDrawingEditor() :
     mToolbar(nullptr),
     mActor(nullptr),
     mComponent(nullptr),
-    mMaterial(nullptr)
+    mMaterial(nullptr),
+	mPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased)
 {
 }
 
@@ -95,6 +96,11 @@ FOdysseyViewportDrawingEditor::GetToolbar() const
     return mToolbar.Get();
 }
 
+EOdysseyViewportDrawingPaintingAdapterMethod FOdysseyViewportDrawingEditor::PaintingAdapterMethod() const
+{
+	return mPaintingAdapterMethod;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
@@ -103,6 +109,8 @@ FOdysseyViewportDrawingEditor::SetActor(AActor* iActor)
 {
 	if (mActor == iActor)
 		return;
+
+	mTargetToPaintWillChangeDelegate.Broadcast();
 
 	// Clear everything before changing actor
 	ClearSelectableComponents(); //also clear selected component / texture and selectable textures
@@ -124,6 +132,8 @@ FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 	if (mComponent == iComponent)
 		return;
 
+    mTargetToPaintWillChangeDelegate.Broadcast();
+
 	// Save Component Paint Settings
 	if (mComponent)
 	{
@@ -139,6 +149,11 @@ FOdysseyViewportDrawingEditor::SetComponent(UMeshComponent* iComponent)
 void
 FOdysseyViewportDrawingEditor::SetMaterial(UMaterialInterface* iMaterial)
 {
+	if( iMaterial == mMaterial )
+		return;
+
+    mTargetToPaintWillChangeDelegate.Broadcast();
+
     mMaterial = iMaterial;
     ClearSelectableTextures(); // Also clears selected Texture
     UpdateSelectableTextures();
@@ -150,7 +165,15 @@ FOdysseyViewportDrawingEditor::SetMaterial(UMaterialInterface* iMaterial)
 void
 FOdysseyViewportDrawingEditor::SetTexture(UTexture2D* iTexture)
 {
+    mTargetToPaintWillChangeDelegate.Broadcast();
 	TextureWrapper()->SetTexture(iTexture);
+    mTargetToPaintChangedDelegate.Broadcast();
+}
+
+void FOdysseyViewportDrawingEditor::SetPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod iNewMethod)
+{
+	mPaintingAdapterMethod = iNewMethod;
+	mAdapterChangedDelegate.Broadcast();
 }
 
 //--------------------------------------------------------------------------------------
@@ -231,6 +254,21 @@ FOdysseyViewportDrawingEditor::OnObjectPropertyChanged(UObject* iObject, struct 
 	}*/
 }
 
+
+FOdysseyViewportDrawingEditor::FOdysseyPaintingTargetToPaintWillChange& FOdysseyViewportDrawingEditor::TargetToPaintWillChangeDelegate()
+{
+    return mTargetToPaintWillChangeDelegate;
+}
+
+FOdysseyViewportDrawingEditor::FOdysseyPaintingTargetToPaintChanged& FOdysseyViewportDrawingEditor::TargetToPaintChangedDelegate()
+{
+	return mTargetToPaintChangedDelegate;
+}
+
+FOdysseyViewportDrawingEditor::FOdysseyPaintingAdapterChanged& FOdysseyViewportDrawingEditor::AdapterChangedDelegate()
+{
+	return mAdapterChangedDelegate;
+}
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Private Methods

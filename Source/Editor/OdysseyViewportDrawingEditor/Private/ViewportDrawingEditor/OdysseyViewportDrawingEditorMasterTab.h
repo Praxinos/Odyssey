@@ -25,6 +25,11 @@ protected:
     TSharedRef<SWidget> GenerateMeshSelectorComboButtonItem( TSharedPtr<FString> iItem );
     FText CreateTextMeshSelector() const;
     TSharedRef<SWidget> CreateMeshComponentMenuWidget();
+    
+    TSharedRef<SWidget> GeneratePaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iItem);
+    void ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo);
+    static FText GetMethodAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod);
+
 
 protected:
     // Widget Getters
@@ -45,5 +50,6 @@ private:
     FOdysseyViewportDrawingEditor* mEditor;
     TSharedPtr<SVerticalBox> mMeshSelectorVerticalBox;
     TSharedPtr<SComboButton> mMeshSelectComboButton;
+    TArray<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>> mOptions;
 };
 

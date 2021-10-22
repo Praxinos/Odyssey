@@ -7,6 +7,7 @@
 #include "Editor/UnrealEdEngine.h"
 #include "OdysseyPainterEditor.h"
 #include "UnrealEdGlobals.h"
+#include "Widgets/Layout/SSeparator.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyViewportDrawingEditorMasterTab"
 
@@ -32,6 +33,11 @@ FOdysseyViewportDrawingEditorMasterTab::FOdysseyViewportDrawingEditorMasterTab(F
 TSharedPtr<SWidget>
 FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
 {
+    mOptions.Empty();
+    mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased));
+    mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBased));
+    mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased));
+
     return
         SNew( SScrollBox )
             .Orientation( Orient_Vertical )
@@ -109,6 +115,39 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .DisplayThumbnail(true)
                                 .ThumbnailSizeOverride(FIntPoint(30, 30))
                         ]
+                    + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SSeparator)
+                        ]
+                    //Select painting method (texture based, mesh based...) ----
+                    + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(STextBlock)
+                            .Text(FText::FromString("Select painting method"))
+                        ]
+                    + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SComboBox<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>>)
+                            .ButtonStyle(FEditorStyle::Get(), "PropertyEditor.AssetComboStyle")
+                            .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+                            .ContentPadding(2.0f)
+                            .OptionsSource(&mOptions)
+                            .OnGenerateWidget(this, &FOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem)
+                            .OnSelectionChanged(this, &FOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem)
+                            [
+                                SNew(STextBlock)
+                                .TextStyle(FEditorStyle::Get(), "PropertyEditor.AssetClass")
+                                .Font(FEditorStyle::GetFontStyle("PropertyWindow.NormalFont"))
+                                .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mEditor->PaintingAdapterMethod());})
+                            ]
+                        ]
+                    //---
             ];
 }
 
@@ -164,7 +203,7 @@ FOdysseyViewportDrawingEditorMasterTab::CreateTextMeshSelector() const
 TSharedRef<SWidget>
 FOdysseyViewportDrawingEditorMasterTab::CreateMeshComponentMenuWidget()
 {
-mMeshSelectComboButton = SNew(SComboButton)
+    mMeshSelectComboButton = SNew(SComboButton)
         .ButtonStyle( FEditorStyle::Get(), "PropertyEditor.AssetComboStyle" )
         .ForegroundColor(FEditorStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
         .OnGetMenuContent( this, &FOdysseyViewportDrawingEditorMasterTab::OnGetMenuContent )
@@ -202,6 +241,29 @@ mMeshSelectComboButton = SNew(SComboButton)
         ];
         
     return widget;
+}
+
+TSharedRef<SWidget> FOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iItem)
+{
+    return  SNew(STextBlock)
+        .Text(FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(*(iItem.Get())));
+}
+
+void FOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo)
+{
+    mEditor->SetPaintingAdapterMethod(*(iNewSelection.Get()));
+}
+
+FText FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod)
+{
+    switch (iMethod)
+    {
+        case OdysseyTextureBased:        return LOCTEXT("OdysseyTextureBased", "Texture Based");
+        case OdysseyMeshBased:           return LOCTEXT("OdysseyMeshBased", "Mesh Based");
+        case OdysseyScreenBased:         return LOCTEXT("OdysseyScreenBased", "Screen Based");
+    }
+
+    return LOCTEXT("OdysseyInvalid", "Invalid");
 }
 
 //--------------------------------------------------------------------------------------
