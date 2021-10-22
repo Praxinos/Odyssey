@@ -38,9 +38,16 @@ public:
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
 
 private:
+    void CacheLines();
+
+private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     TWeakObjectPtr<UStoryNote>          mNote;
     TAttribute<EVisibility>             mOptionalWidgetsVisibility;
+
+    //TODO: maybe improve this by doing/storing it directly inside the note object ?
+    FString         mCachedText;
+    TArray<FString> mCachedLines;
 };
 
 void
@@ -51,16 +58,47 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
     mNote = InArgs._Note;
     mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
 
-    TArray<FString> lines;
-    mNote->Text.ParseIntoArrayLines( lines );
+    auto GetFirstLine = [=]() -> FText
+    {
+        CacheLines();
+
+        if( !mCachedLines.Num() )
+            return FText::GetEmpty();
+
+        if( mCachedLines.Num() == 1 )
+            return FText::FromString( mCachedLines[0] );
+
+        return FText::FromString( mCachedLines[0] + TEXT("...") );
+    };
+
+    auto GetTooltip = [=]() -> FText
+    {
+        return FText::FromString( mNote->Text );
+    };
 
     ChildSlot
     [
-        SNew( STextBlock )
-        .Text( lines.Num() ? FText::FromString( lines[0] ) : FText::GetEmpty() )
-        //.Text_Lambda( ...
-        .ShadowOffset( FVector2D( 1, 1 ) )
+        SNew( SHorizontalBox )
+
+        +SHorizontalBox::Slot()
+        .VAlign( VAlign_Center )
+        [
+            SNew( STextBlock )
+            .Text_Lambda( GetFirstLine )
+            .ToolTipText_Lambda( GetTooltip )
+            .ShadowOffset( FVector2D( 1, 1 ) )
+        ]
     ];
+}
+
+void
+SCinematicBoardSectionNote::CacheLines()
+{
+    if( mCachedText == mNote->Text )
+        return;
+
+    mCachedText = mNote->Text;
+    mCachedText.ParseIntoArrayLines( mCachedLines );
 }
 
 FCursorReply
