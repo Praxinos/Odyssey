@@ -113,14 +113,15 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     auto CreateNote = [this]()
     {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = mSequencer.Pin().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        //BoardSequenceTools::CreateNote( sequencer, section_object->GetInclusiveStartFrame() );
+        BoardSequenceTools::CreateNote( sequencer, *subsection_object, sequencer->GetLocalTime().Time.FrameNumber );
     };
 
     auto CanCreateNote = [this]() -> bool
     {
-        return false;
+        return true;
     };
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );

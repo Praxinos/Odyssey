@@ -86,6 +86,14 @@ UMovieSceneNoteTrack::CreateNewSection() //override
     return NewObject<UMovieSceneNoteSection>( this, NAME_None, RF_Transactional );
 }
 
+#if WITH_EDITORONLY_DATA
+FText
+UMovieSceneNoteTrack::GetDefaultDisplayName() const
+{
+    return LOCTEXT( "TrackName", "Note" );
+}
+#endif
+
 //---
 
 const TArray<UMovieSceneSection*>&

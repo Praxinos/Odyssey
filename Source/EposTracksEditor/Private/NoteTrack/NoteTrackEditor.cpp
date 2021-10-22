@@ -27,7 +27,7 @@
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "StoryNote.h"
 #include "Styles/EposTracksEditorStyle.h"
-#include "Tools/NoteTools.h"
+#include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "FNoteTrackEditor"
 
@@ -52,9 +52,7 @@ FNoteTrackEditor::OnInitialize() //override
             FEposTracksEditorCommands::Get().NewSectionWithNoteAtCurrentFrame,
             FExecuteAction::CreateLambda( [=]()
                                           {
-                                              FString package_name;
-                                              FString asset_name;
-                                              UStoryNote* note = NoteTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence(), package_name, asset_name );
+                                              UStoryNote* note = ProjectAssetTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence() );
                                               if( !note )
                                                   return;
 
@@ -549,9 +547,7 @@ FNoteTrackEditor::OnNoteTextCommited( const FText& iText, ETextCommit::Type iTyp
     auto NoteTrack = Cast<UMovieSceneNoteTrack>( Track );
     NoteTrack->Modify();
 
-    FString package_name;
-    FString asset_name;
-    UStoryNote* note = NoteTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence(), package_name, asset_name );
+    UStoryNote* note = ProjectAssetTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence() );
     if( !note )
         return;
 
@@ -642,9 +638,7 @@ FNoteTrackEditor::OnAttachedNoteTextCommited( const FText& iText, ETextCommit::T
     if( iType != ETextCommit::OnEnter )
         return;
 
-    FString package_name;
-    FString asset_name;
-    UStoryNote* note = NoteTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence(), package_name, asset_name );
+    UStoryNote* note = ProjectAssetTools::CreateNote( GetSequencer()->GetFocusedMovieSceneSequence(), GetSequencer()->GetRootMovieSceneSequence() );
     if( !note )
         return;
 

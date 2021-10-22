@@ -47,6 +47,10 @@ public:
     virtual bool SupportsMultipleRows() const override;
     virtual UMovieSceneSection* CreateNewSection() override;
 
+#if WITH_EDITORONLY_DATA
+    virtual FText GetDefaultDisplayName() const override;
+#endif
+
 private:
     /** List of all master audio sections */
     UPROPERTY()

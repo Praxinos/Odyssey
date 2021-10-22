@@ -332,6 +332,9 @@ ShotSequenceHelpers::GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequenc
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
 
+    TArray<TWeakObjectPtr<UStoryNote>> notes;
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections;
+
     TArray<UMovieSceneTrack*> tracks = movie_scene->GetMasterTracks();
     tracks.StableSort( []( const UMovieSceneTrack& iA, const UMovieSceneTrack& iB )
                        {
@@ -368,14 +371,19 @@ ShotSequenceHelpers::GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequenc
             if( !note )
                 continue;
 
-            if( oNotes )
-                oNotes->Add( note );
-            if( oSections )
-                oSections->Add( note_section );
+            notes.Add( note );
+            note_sections.Add( note_section );
         }
     }
 
-    return oNotes->Num();
+    check( notes.Num() == note_sections.Num() );
+
+    if( oNotes )
+        oNotes->Append( notes );
+    if( oSections )
+        oSections->Append( note_sections );
+
+    return notes.Num();
 }
 
 

@@ -10,6 +10,7 @@ class FString;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieSceneSequence;
+class UStoryNote;
 class UTexture2D;
 
 /** The grid type which must correspond to the value inside the material instance */
@@ -70,6 +71,9 @@ public:
     static UMaterialInstanceConstant* CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, UMovieSceneSequence* iRootSequence );
 
     static UTexture2D* GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterial );
+
+    static UStoryNote* CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence );
+    static UStoryNote* CloneNote( UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone, UMovieSceneSequence* iRootSequence );
 
 private:
     static UMaterialInstanceConstant* CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
