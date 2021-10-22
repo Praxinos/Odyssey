@@ -86,6 +86,8 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneS
 }
 
 //---
+//---
+//---
 
 //static
 ACineCameraActor*
@@ -316,6 +318,64 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
 
         return planes_not_selected.Num();
     }
+}
+
+
+//static
+int32
+ShotSequenceHelpers::GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<TWeakObjectPtr<UStoryNote>>* oNotes, TArray<TWeakObjectPtr<UMovieSceneNoteSection>>* oSections )
+{
+    if( oNotes )
+        oNotes->Empty();
+    if( oSections )
+        oSections->Empty();
+
+    UMovieScene* movie_scene = iSequence->GetMovieScene();
+
+    TArray<UMovieSceneTrack*> tracks = movie_scene->GetMasterTracks();
+    tracks.StableSort( []( const UMovieSceneTrack& iA, const UMovieSceneTrack& iB )
+                       {
+                           return iA.GetSortingOrder() < iB.GetSortingOrder();
+                       } );
+
+    for( auto track : tracks )
+    {
+        UMovieSceneNoteTrack* note_track = Cast<UMovieSceneNoteTrack>( track );
+        if( !note_track )
+            continue;
+
+        TArray<UMovieSceneSection*> sections = note_track->GetAllSections();
+
+        // It Should be MovieSceneHelpers::SortConsecutiveSections( sections ); but it doesn't use the stable sort
+        sections.StableSort( []( const UMovieSceneSection& iA, const UMovieSceneSection& iB )
+                             {
+                                 TRangeBound<FFrameNumber> LowerBoundA = iA.GetRange().GetLowerBound();
+                                 return TRangeBound<FFrameNumber>::MinLower( LowerBoundA, iB.GetRange().GetLowerBound() ) == LowerBoundA;
+                             } );
+        sections.StableSort( []( const UMovieSceneSection& iA, const UMovieSceneSection& iB )
+                             {
+                                 return iA.GetRowIndex() < iB.GetRowIndex();
+                             } );
+
+
+        for( auto section : sections )
+        {
+            UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
+            if( !note_section )
+                continue;
+
+            UStoryNote* note = note_section->GetNote();
+            if( !note )
+                continue;
+
+            if( oNotes )
+                oNotes->Add( note );
+            if( oSections )
+                oSections->Add( note_section );
+        }
+    }
+
+    return oNotes->Num();
 }
 
 

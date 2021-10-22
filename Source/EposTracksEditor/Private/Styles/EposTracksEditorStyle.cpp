@@ -185,6 +185,10 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
         SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
     }
 
+    //---
+
+    Set( "EposNotes.TableView.Row", FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.Row" ) );
+
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }
 

@@ -14,6 +14,7 @@ class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
 class UMovieScene3DTransformSection;
+class UMovieSceneNoteSection;
 class UMovieScenePrimitiveMaterialSection;
 class UMovieSceneSection;
 class UMovieSceneSequence;
@@ -89,6 +90,8 @@ public:
     static TArray<FFrameNumber> GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
 
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );
+
+    static int32 GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<TWeakObjectPtr<UStoryNote>>* oNotes, TArray<TWeakObjectPtr<UMovieSceneNoteSection>>* oSections );
 
 public:
     static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding );
