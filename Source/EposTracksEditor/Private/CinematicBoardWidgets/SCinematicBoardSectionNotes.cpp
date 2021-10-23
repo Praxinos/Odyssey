@@ -265,10 +265,21 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     static const FSlateColorBrush background = FSlateColorBrush( FSequencerSectionPainter::BlendColor( FColor( 90, 90, 150 ) ) ); // Same as the UMovieSceneNoteTrack
 
+    // It's needed for notes (unlike for planes) as there is a SBorder widget as parent with a colored background
+    // It's not wished for board section as everything available for board should be done directly on it)
+    auto IsNotesVisible = [=]() -> EVisibility
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+
+        return Cast<UShotSequence>( subsection_object->GetSequence() ) ? EVisibility::Visible : EVisibility::Hidden;
+    };
+
     ChildSlot
     [
         SNew( SBorder )
         .BorderImage( &background )
+        .Visibility_Lambda( IsNotesVisible )
         [
             SNew( SVerticalBox )
             + SVerticalBox::Slot()
