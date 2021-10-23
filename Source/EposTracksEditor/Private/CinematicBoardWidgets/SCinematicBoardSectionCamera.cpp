@@ -5,6 +5,7 @@
 
 #include "Brushes/SlateColorBrush.h"
 #include "Channels/MovieSceneChannelProxy.h"
+#include "CineCameraActor.h"
 #include "KeyDrawParams.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
@@ -134,13 +135,21 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 
     //-
 
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, sequencer->GetLocalTime().Time.FrameNumber );
+
+    FText camera_name = FText::FromString( camera->GetActorLabel() ); //TODO: or maybe get the binding (aka track) name like planes ?
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "camera-section-label", "Camera: {0}" ), camera_name ) );
+
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-camera-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for the 9 (maybe more or less) channels
                                 LOCTEXT( "delete-camera-key-tooltip", "Delete the current key" ),
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
                                            FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
 
-
+    ioMenuBuilder.EndSection();
 }
 
 //---
