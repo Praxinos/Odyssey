@@ -256,7 +256,13 @@ FNoteTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSce
         .AutoWidth()
         .VAlign( VAlign_Center )
         [
-            FSequencerUtilities::MakeAddButton( LOCTEXT( "NoteText", "Note" ), FOnGetContent::CreateSP( this, &FNoteTrackEditor::BuildNoteSubMenu, FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetSelected, Track ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetEnterPressed, Track ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnNoteTextCommited, Track ) ), Params.NodeIsHovered, GetSequencer() )
+            FSequencerUtilities::MakeAddButton( LOCTEXT( "NoteText", "Note" ),
+                                                FOnGetContent::CreateSP( this, &FNoteTrackEditor::BuildNoteSubMenu,
+                                                                         FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetSelected, Track ),
+                                                                         FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnNoteAssetEnterPressed, Track ),
+                                                                         FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnNoteTextCommited, Track ) ),
+                                                Params.NodeIsHovered,
+                                                GetSequencer() )
         ];
 }
 
@@ -294,21 +300,24 @@ FNoteTrackEditor::HandleAssetAdded( UObject* Asset, const FGuid& TargetObjectGui
 TRange<FFrameNumber>
 FNoteTrackEditor::GetReferenceRange( FFrameNumber iFrame )
 {
-    UMovieSceneSequence* sequence = GetSequencer()->GetFocusedMovieSceneSequence();
-    UMovieSceneTrack* track = sequence ? sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-    UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
-    if( section )
-        return section->GetTrueRange();
+    // When a note created on a board, let's assume it's the board length wanted (otherwise, add the note inside the inner shot/board)
+    return GetSequencer()->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
 
-    track = sequence ? sequence->GetMovieScene()->GetCameraCutTrack() : nullptr;
-    section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
-    if( section )
-        return section->GetTrueRange();
+    //UMovieSceneSequence* sequence = GetSequencer()->GetFocusedMovieSceneSequence();
+    //UMovieSceneTrack* track = sequence ? sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+    //UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
+    //if( section )
+    //    return section->GetTrueRange();
 
-    FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
-    FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration );
+    //track = sequence ? sequence->GetMovieScene()->GetCameraCutTrack() : nullptr;
+    //section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
+    //if( section )
+    //    return section->GetTrueRange();
 
-    return TRange<FFrameNumber>( iFrame, iFrame + LengthInFrames );
+    //FFrameRate TickResolution = GetSequencer()->GetFocusedTickResolution();
+    //FFrameNumber LengthInFrames = TickResolution.AsFrameNumber( GetDefault<UEposTracksEditorSettings>()->DefaultSectionDuration );
+
+    //return TRange<FFrameNumber>( iFrame, iFrame + LengthInFrames );
 }
 
 FKeyPropertyResult
@@ -439,7 +448,11 @@ FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute()
 void
 FNoteTrackEditor::HandleAddAttachedNoteTrackMenuEntryExecute( FMenuBuilder& MenuBuilder, TArray<FGuid> ObjectBindings )
 {
-    MenuBuilder.AddWidget( BuildNoteSubMenu( FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ), FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ), FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) ), FText::GetEmpty(), true );
+    MenuBuilder.AddWidget( BuildNoteSubMenu( FOnAssetSelected::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteAssetSelected, ObjectBindings ),
+                                             FOnAssetEnterPressed::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteEnterPressed, ObjectBindings ),
+                                             FOnTextCommitted::CreateRaw( this, &FNoteTrackEditor::OnAttachedNoteTextCommited, ObjectBindings ) ),
+                           FText::GetEmpty(),
+                           true );
 }
 
 TSharedRef<SWidget>
