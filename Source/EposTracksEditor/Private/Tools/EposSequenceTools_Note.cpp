@@ -53,10 +53,10 @@ ShotSequenceTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
     if( !note )
         return;
 
-    note->Text = TEXT( "Write a note here" );
-    //note->Text = iText.ToString();
+    //TODO: maybe make an internal CreateNoteInternal() to manage all track creation/section size/duplication/... like CinematicBoardTrackTools::InsertSequence() does ?
 
-    //TODO: maybe make an internal CreateNoteInternal() to manage all track creation/section size/duplication/... like CinematicBoardTrackTools::InsertSequence() does
+    movie_scene->Modify();
+    iSequence->Modify();
 
     auto newTrack = movie_scene->AddMasterTrack<UMovieSceneNoteTrack>();
     ensure( newTrack );
@@ -78,6 +78,59 @@ ShotSequenceTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
     // it will be after this function, and so after the switch_to have set the 'real' current sequence
     //
     //TODO: check why it's not the case for the planes ...
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+}
+
+//---
+
+//static
+void
+BoardSequenceTools::DeleteNote( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TWeakObjectPtr<UMovieSceneSection> iNoteSection )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DeleteNote( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iNoteSection );
+}
+
+//static
+void
+ShotSequenceTools::DeleteNote( ISequencer* iSequencer, TWeakObjectPtr<UMovieSceneSection> iNoteSection )
+{
+    ShotSequenceTools::DeleteNote( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iNoteSection );
+}
+
+//static
+void
+ShotSequenceTools::DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TWeakObjectPtr<UMovieSceneSection> iNoteSection )
+{
+    UMovieScene* movie_scene = iSequence->GetMovieScene();
+
+    if( !iNoteSection.IsValid() )
+        return;
+
+    UMovieSceneTrack* track = iNoteSection->GetTypedOuter<UMovieSceneTrack>();
+    if( !track )
+        return;
+
+    //---
+
+    const FScopedTransaction Transaction( LOCTEXT( "DeleteNote_Transaction", "Delete Note" ) );
+
+    movie_scene->Modify();
+    iSequence->Modify();
+
+    iSequencer.EmptySelection();
+
+    // Like in FSequencer::DeleteSections()
+    track->SetFlags( RF_Transactional );
+    track->Modify();
+    track->RemoveSection( *iNoteSection );
+
+    if( !track->GetAllSections().Num() )
+        movie_scene->RemoveMasterTrack( *track );
+
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 }
 

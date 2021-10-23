@@ -515,6 +515,15 @@ public:
     */
     static void CreateNote( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
 
+    /**
+    * Delete a note in the board section
+    * (The given frame must be inside the subsection)
+    *
+    * @param ISequencer             iSequencer to create note.
+    * @param UMovieSceneSubSection  iSubSection to create note.
+    * @param FFrameNumber           iFrameNumber to create note.
+    */
+    static void DeleteNote( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
 };
 
 //---
@@ -717,9 +726,11 @@ private:
 // Inside EposSequenceTools_Note
 public:
     static void CreateNote( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static void DeleteNote( ISequencer* iSequencer, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
 
 private:
     static void CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
 
 //---
 

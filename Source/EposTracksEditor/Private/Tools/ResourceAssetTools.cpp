@@ -567,6 +567,8 @@ ProjectAssetTools::CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequen
     UStoryNote* new_note = Cast<UStoryNote>( new_object );
     check( new_note );
 
+    new_note->Text = TEXT( "Write a note here" ); // default text
+
     return new_note;
 }
 

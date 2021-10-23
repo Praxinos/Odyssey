@@ -9,6 +9,7 @@
 #include "EposSequenceHelpers.h"
 #include "EposTracksToolbarHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "NoteTrack/MovieSceneNoteSection.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "StoryNote.h"
@@ -39,6 +40,10 @@ public:
 
 private:
     void CacheLines();
+
+    UMovieSceneNoteSection* GetSection(); //TODO: should be removed, see comment inside
+
+    void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
@@ -101,6 +106,67 @@ SCinematicBoardSectionNote::CacheLines()
     mCachedText.ParseIntoArrayLines( mCachedLines );
 }
 
+UMovieSceneNoteSection*
+SCinematicBoardSectionNote::GetSection()
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    //TODO: make it correct
+    // This is not the correct way to get section, as a note may be used inside multiple note sections
+    // And this way remove the first found one
+    // The correct way would be to store the section in the same time as the note, and this implies to have listview row of a complex type like "FNoteAndSection" or just a listview of UMovieSceneNoteSection ? (or even FGuid for attached note ?), let's talk about this
+
+    UMovieSceneNoteSection* section_of_note = nullptr;
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    if( result.mInnerMovieScene )
+    {
+        for( auto track : result.mInnerMovieScene->GetMasterTracks() )
+        {
+            for( auto section : track->GetAllSections() )
+            {
+                UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
+                if( note_section && note_section->GetNote() == mNote )
+                    section_of_note = Cast<UMovieSceneNoteSection>( note_section );
+            }
+        }
+    }
+
+    return section_of_note;
+}
+
+void
+SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
+{
+    auto DeleteKey = [=]()
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        BoardSequenceTools::DeleteNote( sequencer, *subsection_object, GetSection() );
+    };
+
+    auto CanDeleteKey = [=]() -> bool
+    {
+        return true;
+    };
+
+    //-
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-note-label", "Delete" ),
+                                LOCTEXT( "delete-note-tooltip", "Delete the note" ),
+                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey ) ) );
+
+
+}
+
+//---
+
 FCursorReply
 SCinematicBoardSectionNote::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
@@ -116,6 +182,18 @@ SCinematicBoardSectionNote::OnMouseButtonDown( const FGeometry& MyGeometry, cons
 FReply
 SCinematicBoardSectionNote::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
+    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    {
+        FMenuBuilder menu_builder( true, nullptr );
+        BuildKeyContextMenu( menu_builder );
+
+        TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
+        FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+        FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
+
+        return FReply::Handled();
+    }
+
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
