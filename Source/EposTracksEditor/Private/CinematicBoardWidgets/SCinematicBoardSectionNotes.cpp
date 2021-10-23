@@ -35,6 +35,7 @@ public:
 
     virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
     virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
 
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
 
@@ -82,6 +83,7 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
     };
 
     ChildSlot
+    .Padding( FMargin( 5, 3 ) )
     [
         SNew( SHorizontalBox )
 
@@ -140,7 +142,22 @@ SCinematicBoardSectionNote::GetSection()
 void
 SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 {
-    auto DeleteKey = [=]()
+    auto EditNote = [=]()
+    {
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        check( !AssetEditorSubsystem->FindEditorsForAsset( mNote.Get() ).Num() );
+
+        AssetEditorSubsystem->OpenEditorForAsset( mNote.Get() );
+    };
+
+    auto CanEditNote = [=]() -> bool
+    {
+        return !!mNote.Get();
+    };
+
+    //-
+
+    auto DeleteNote = [=]()
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -149,20 +166,29 @@ SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
         BoardSequenceTools::DeleteNote( sequencer, *subsection_object, GetSection() );
     };
 
-    auto CanDeleteKey = [=]() -> bool
-    {
-        return true;
-    };
-
     //-
+
+    CacheLines();
+    FString first_line = mCachedLines.Num() ? mCachedLines[0] : FString();
+    FString start_first_line = first_line.Left( 20 );
+    if( mCachedLines.Num() > 1 || start_first_line.Len() != first_line.Len() )
+        start_first_line += TEXT( "..." );
+    FText note_name = FText::FromString( start_first_line );
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "note-section-label", "Note: {0}" ), note_name ) );
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-note-label", "Edit" ),
+                                LOCTEXT( "edit-note-tooltip", "Edit the note in its editor" ),
+                                FSlateIcon(),
+                                FUIAction( FExecuteAction::CreateLambda( EditNote ),
+                                           FCanExecuteAction::CreateLambda( CanEditNote ) ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-note-label", "Delete" ),
                                 LOCTEXT( "delete-note-tooltip", "Delete the note" ),
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
-                                FUIAction( FExecuteAction::CreateLambda( DeleteKey ),
-                                           FCanExecuteAction::CreateLambda( CanDeleteKey ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( DeleteNote ) ) );
 
-
+    ioMenuBuilder.EndSection();
 }
 
 //---
@@ -195,6 +221,26 @@ SCinematicBoardSectionNote::OnMouseButtonUp( const FGeometry& MyGeometry, const 
     }
 
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionNote::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) //override
+{
+    if( InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton /*&& InMouseEvent.IsControlDown()*/ )
+    {
+        UStoryNote* note = mNote.Get();
+        if( !note )
+            return FReply::Unhandled();
+
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        check( !AssetEditorSubsystem->FindEditorsForAsset( note ).Num() );
+
+        AssetEditorSubsystem->OpenEditorForAsset( note );
+
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnMouseButtonDoubleClick( InMyGeometry, InMouseEvent );
 }
 
 //---
@@ -305,14 +351,14 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 //-
 
 class STableRowNote
-    : public STableRow<TSharedPtr<UStoryNote>>
+    : public STableRow<TWeakObjectPtr<UStoryNote>>
 {
 public:
     // Construct the widget
     virtual void ConstructChildren( ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent ) override;
 
 public:
-    FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
+    virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
 
 private:
     FTableRowStyle mTableRowStyle;
@@ -321,7 +367,7 @@ private:
 void
 STableRowNote::ConstructChildren( ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent ) //override
 {
-    STableRow<TSharedPtr<UStoryNote>>::ConstructChildren( InOwnerTableMode, InPadding, InContent );
+    STableRow<TWeakObjectPtr<UStoryNote>>::ConstructChildren( InOwnerTableMode, InPadding, InContent );
 
     //---
 
@@ -350,7 +396,6 @@ SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, cons
 
     return
         SNew( STableRowNote, iOwnerTable )
-        .Padding( FMargin( 5, 3 ) )
         [
             SNew( SCinematicBoardSectionNote, mBoardSection.Pin().ToSharedRef() )
             .Note( iItem )
