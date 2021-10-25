@@ -12,6 +12,8 @@
 #include "LevelEditorViewport.h"
 #include "Misc/FrameRate.h"
 
+#include "Tools/EposSequenceTools.h"
+
 class APlaneActor;
 class FEposSequenceEditorToolkit;
 class FLevelViewportLayout;
@@ -141,8 +143,8 @@ private:
     float GetMoveAndScalePlaneDistance() const;
     void SetMoveAndScalePlaneDistance( float iDistance );
 
-    ECheckBoxState GetScalePlaneState() const;
-    void OnScalePlaneStateChanged( ECheckBoxState iState );
+    int32 GetScalePlaneType() const;
+    void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
 
 private:
 
@@ -187,6 +189,6 @@ private:
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
 
-    APlaneActor*    mPlaneToMove { nullptr };
-    bool            mScalePlane { true };
+    APlaneActor*    mPlaneToMove    { nullptr };
+    EScalePlane     mScalePlaneType { EScalePlane::kFitToCamera };
 };

@@ -10,6 +10,8 @@
 #include "MovieSceneSequenceID.h"
 #include "TransformData.h"
 
+#include "EposSequenceTools.generated.h"
+
 class AActor;
 class ACineCameraActor;
 class APlaneActor;
@@ -25,6 +27,7 @@ class UMovieSceneTrack;
 class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
+struct FMovieSceneChannelHandle;
 
 class EPOSTRACKSEDITOR_API CinematicBoardTrackTools
 {
@@ -503,6 +506,18 @@ public:
 
 //---
 
+UENUM()
+enum class EScalePlane : int32
+{
+    // The plane won't scale
+    kNo                 UMETA( DisplayName = "No Scale" ),
+    // The plane will scale relatively to its original size
+    // If the plane is already 100% camera FOV, it will act as the option "100% Camera"
+    kRelativeScale      UMETA( DisplayName = "Relative Scale" ),
+    // The plane will auto-scale to match the 100% camera FOV
+    kFitToCamera        UMETA( DisplayName = "Scale 100% Camera" ),
+};
+
 class EPOSTRACKSEDITOR_API ShotSequenceTools
 {
 private:
@@ -630,7 +645,7 @@ public:
 
     static void DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding );
 
-    static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, bool iScale );
+    static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType );
     static bool CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineCameraActor* iCamera );
 
 private:

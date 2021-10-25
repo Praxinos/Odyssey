@@ -64,6 +64,7 @@ public class EposSequenceEditor : ModuleRules
                 "LevelEditor",
                 "EditorStyle",
                 "MovieSceneCaptureDialog",
+                "EditorWidgets",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
             }

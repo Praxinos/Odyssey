@@ -300,7 +300,7 @@ ShotSequenceTools::CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineC
 
 //static
 bool
-ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, bool iScale )
+ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType )
 {
     if( !ShotSequenceTools::CanMoveAndScalePlane( ioPlane, iCamera ) )
         return false;
@@ -308,14 +308,38 @@ ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraAct
     if( FMath::IsNearlyZero( iNewDistance ) )
         return false;
 
+    float old_distance = FVector::Distance( iCamera->GetActorLocation(), ioPlane->GetActorLocation() );
+    FVector old_scale = ioPlane->GetActorScale3D();
+    FVector old_scale_camera100 = ComputePlaneScale( iCamera, old_distance );
+
     FVector new_plane_location = iCamera->GetActorLocation() + ( ioPlane->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
 
     ioPlane->SetActorLocation( new_plane_location );
 
-    if( iScale )
+    switch( iScaleType )
     {
-        FVector scale = ComputePlaneScale( iCamera, iNewDistance );
-        ioPlane->SetActorScale3D( scale );
+        case EScalePlane::kFitToCamera:
+            {
+                FVector scale = ComputePlaneScale( iCamera, iNewDistance );
+                ioPlane->SetActorScale3D( scale );
+            }
+            break;
+
+        case EScalePlane::kRelativeScale:
+            {
+                FVector new_scale_camera100 = ComputePlaneScale( iCamera, iNewDistance );
+                FVector ratio = new_scale_camera100 / old_scale_camera100;
+                FVector new_scale = old_scale * ratio;
+
+                ioPlane->SetActorScale3D( new_scale );
+            }
+            break;
+
+        case EScalePlane::kNo:
+            // nothing to do
+            break;
+
+        default: checkNoEntry();
     }
 
     return true;

@@ -30,6 +30,7 @@
 #include "Fonts/FontMeasure.h"
 #include "Editor.h"
 #include "Engine/Selection.h"
+#include "SEnumCombobox.h"
 
 //#include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorToolkit.h"
@@ -258,6 +259,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     //HACK: ue4
     TSharedPtr<SSpinBox<float>> planeDistanceSpinBox;
 
+    const UEnum* scalePlaneEnum = FindObject<UEnum>( ANY_PACKAGE, TEXT( "EScalePlane" ) );
+
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
         .BorderImage(FEditorStyle::GetBrush("BlackBrush"))
         .ForegroundColor(Gray)
@@ -408,7 +411,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return LOCTEXT( "PlaneDistanceLabel", "Plane Distance" ); })
+                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -439,10 +442,13 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
                                 [
-                                    SNew( SCheckBox )
-                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Move and scale the plane accordingly to its parent camera. Otherwise the plane is only moved." ) )
-                                    .IsChecked( this, &SStoryboardLevelViewport::GetScalePlaneState )
-                                    .OnCheckStateChanged( this, &SStoryboardLevelViewport::OnScalePlaneStateChanged )
+                                    SNew( SEnumComboBox, scalePlaneEnum )
+                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
+                                    //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
+                                    //.ContentPadding( FMargin( 2, 0 ) )
+                                    //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
+                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
+                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
                                 ]
                             ]
                         ]
@@ -680,18 +686,18 @@ SStoryboardLevelViewport::SetMoveAndScalePlaneDistance( float iDistance )
 {
     ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
 
-    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove, camera, iDistance, mScalePlane );
+    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove, camera, iDistance, mScalePlaneType );
 }
 
-ECheckBoxState
-SStoryboardLevelViewport::GetScalePlaneState() const
+int32
+SStoryboardLevelViewport::GetScalePlaneType() const
 {
-    return mScalePlane ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return int32( mScalePlaneType );
 }
 void
-SStoryboardLevelViewport::OnScalePlaneStateChanged( ECheckBoxState iState )
+SStoryboardLevelViewport::OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType )
 {
-    mScalePlane = ( iState == ECheckBoxState::Checked );
+    mScalePlaneType = EScalePlane( iScalePlaneType );
 }
 
 //---
