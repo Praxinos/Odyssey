@@ -57,7 +57,9 @@ protected:
 protected:
     // Methods
     virtual void ToggleEraserButton();
+    virtual void SetAlphaModeShortcut( ::ul3::eAlphaMode iAlphaMode );
     virtual void SetAlphaMode( ::ul3::eAlphaMode iAlphaMode );
+    virtual void SetBlendingMode(::ul3::eBlendingMode iBlendingMode);
     virtual void AddSize( int32 iValue );
 
 private:

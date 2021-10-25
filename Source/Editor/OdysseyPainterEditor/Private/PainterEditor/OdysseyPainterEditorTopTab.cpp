@@ -116,18 +116,58 @@ FOdysseyPainterEditorTopTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorTopTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    MAP_ACTION( painterEditorCommands.IncreaseBrushSize, AddSize, 1 )
-    MAP_ACTION( painterEditorCommands.DecreaseBrushSize, AddSize, -1 )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeNormal, SetAlphaMode, ::ul3::eAlphaMode::AM_NORMAL )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeErase, SetAlphaMode, ::ul3::eAlphaMode::AM_ERASE )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeTop, SetAlphaMode, ::ul3::eAlphaMode::AM_TOP )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeBack, SetAlphaMode, ::ul3::eAlphaMode::AM_BACK )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeSub, SetAlphaMode, ::ul3::eAlphaMode::AM_SUB )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeAdd, SetAlphaMode, ::ul3::eAlphaMode::AM_ADD )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeMul, SetAlphaMode, ::ul3::eAlphaMode::AM_MUL )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeMin, SetAlphaMode, ::ul3::eAlphaMode::AM_MIN )
-    MAP_ACTION( painterEditorCommands.SetAlphaModeMax, SetAlphaMode, ::ul3::eAlphaMode::AM_MAX )
-    MAP_ACTION( painterEditorCommands.ToggleEraserButton, ToggleEraserButton )
+    MAP_ACTION( painterEditorCommands.IncreaseBrushSize,              AddSize,                  1 )
+    MAP_ACTION( painterEditorCommands.DecreaseBrushSize,              AddSize,                 -1 )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeNormal,             SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_NORMAL )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeErase,              SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_ERASE )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeTop,                SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_TOP )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeBack,               SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_BACK )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeSub,                SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_SUB )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeAdd,                SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_ADD )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMul,                SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_MUL )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMin,                SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_MIN )
+    MAP_ACTION( painterEditorCommands.SetAlphaModeMax,                SetAlphaModeShortcut,    ::ul3::eAlphaMode::AM_MAX )
+    MAP_ACTION( painterEditorCommands.SetBlendModeNormal,             SetBlendingMode,         ::ul3::eBlendingMode::BM_NORMAL )
+    MAP_ACTION( painterEditorCommands.SetBlendModeTop,                SetBlendingMode,         ::ul3::eBlendingMode::BM_TOP )
+    MAP_ACTION( painterEditorCommands.SetBlendModeBack,               SetBlendingMode,         ::ul3::eBlendingMode::BM_BACK )
+    MAP_ACTION( painterEditorCommands.SetBlendModeBehind,             SetBlendingMode,         ::ul3::eBlendingMode::BM_BEHIND )
+    MAP_ACTION( painterEditorCommands.SetBlendModeDissolve,           SetBlendingMode,         ::ul3::eBlendingMode::BM_DISSOLVE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeBayerDither8x8,     SetBlendingMode,         ::ul3::eBlendingMode::BM_BAYERDITHER8x8 )
+    MAP_ACTION( painterEditorCommands.SetBlendModeDarken,             SetBlendingMode,         ::ul3::eBlendingMode::BM_DARKEN )
+    MAP_ACTION( painterEditorCommands.SetBlendModeMultiply,           SetBlendingMode,         ::ul3::eBlendingMode::BM_MULTIPLY )
+    MAP_ACTION( painterEditorCommands.SetBlendModeColorBurn,          SetBlendingMode,         ::ul3::eBlendingMode::BM_COLORBURN )
+    MAP_ACTION( painterEditorCommands.SetBlendModeLinearBurn,         SetBlendingMode,         ::ul3::eBlendingMode::BM_LINEARBURN )
+    MAP_ACTION( painterEditorCommands.SetBlendModeDarkerColor,        SetBlendingMode,         ::ul3::eBlendingMode::BM_DARKERCOLOR )
+    MAP_ACTION( painterEditorCommands.SetBlendModeLighten,            SetBlendingMode,         ::ul3::eBlendingMode::BM_LIGHTEN )
+    MAP_ACTION( painterEditorCommands.SetBlendModeScreen,             SetBlendingMode,         ::ul3::eBlendingMode::BM_SCREEN )
+    MAP_ACTION( painterEditorCommands.SetBlendModeColorDodge,         SetBlendingMode,         ::ul3::eBlendingMode::BM_COLORDODGE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeLinearDodge,        SetBlendingMode,         ::ul3::eBlendingMode::BM_LINEARDODGE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeLighterColor,       SetBlendingMode,         ::ul3::eBlendingMode::BM_LIGHTERCOLOR )
+    MAP_ACTION( painterEditorCommands.SetBlendModeOverlay,            SetBlendingMode,         ::ul3::eBlendingMode::BM_OVERLAY )
+    MAP_ACTION( painterEditorCommands.SetBlendModeSoftLight,          SetBlendingMode,         ::ul3::eBlendingMode::BM_SOFTLIGHT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeHardLight,          SetBlendingMode,         ::ul3::eBlendingMode::BM_HARDLIGHT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeVividLight,         SetBlendingMode,         ::ul3::eBlendingMode::BM_VIVIDLIGHT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeLinearLight,        SetBlendingMode,         ::ul3::eBlendingMode::BM_LINEARLIGHT )
+    MAP_ACTION( painterEditorCommands.SetBlendModePinLight,           SetBlendingMode,         ::ul3::eBlendingMode::BM_PINLIGHT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeHardMix,            SetBlendingMode,         ::ul3::eBlendingMode::BM_HARDMIX )
+    MAP_ACTION( painterEditorCommands.SetBlendModePhoenix,            SetBlendingMode,         ::ul3::eBlendingMode::BM_PHOENIX )
+    MAP_ACTION( painterEditorCommands.SetBlendModeReflect,            SetBlendingMode,         ::ul3::eBlendingMode::BM_REFLECT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeGlow,               SetBlendingMode,         ::ul3::eBlendingMode::BM_GLOW )
+    MAP_ACTION( painterEditorCommands.SetBlendModeDifference,         SetBlendingMode,         ::ul3::eBlendingMode::BM_DIFFERENCE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeExclusion,          SetBlendingMode,         ::ul3::eBlendingMode::BM_EXCLUSION )
+    MAP_ACTION( painterEditorCommands.SetBlendModeAdd,                SetBlendingMode,         ::ul3::eBlendingMode::BM_ADD )
+    MAP_ACTION( painterEditorCommands.SetBlendModeSubstract,          SetBlendingMode,         ::ul3::eBlendingMode::BM_SUBSTRACT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeDivide,             SetBlendingMode,         ::ul3::eBlendingMode::BM_DIVIDE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeAverage,            SetBlendingMode,         ::ul3::eBlendingMode::BM_AVERAGE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeNegation,           SetBlendingMode,         ::ul3::eBlendingMode::BM_NEGATION )
+    MAP_ACTION( painterEditorCommands.SetBlendModeHue,                SetBlendingMode,         ::ul3::eBlendingMode::BM_HUE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeSaturation,         SetBlendingMode,         ::ul3::eBlendingMode::BM_SATURATION )
+    MAP_ACTION( painterEditorCommands.SetBlendModeColor,              SetBlendingMode,         ::ul3::eBlendingMode::BM_COLOR )
+    MAP_ACTION( painterEditorCommands.SetBlendModeLuminosity,         SetBlendingMode,         ::ul3::eBlendingMode::BM_LUMINOSITY )
+    MAP_ACTION( painterEditorCommands.SetBlendModePartialDerivative,  SetBlendingMode,         ::ul3::eBlendingMode::BM_PARTIALDERIVATIVE )
+    MAP_ACTION( painterEditorCommands.SetBlendModeWhiteOut,           SetBlendingMode,         ::ul3::eBlendingMode::BM_WHITEOUT )
+    MAP_ACTION( painterEditorCommands.SetBlendModeAngleCorrected,     SetBlendingMode,         ::ul3::eBlendingMode::BM_ANGLECORRECTED )
+    MAP_ACTION( painterEditorCommands.ToggleEraserButton,             ToggleEraserButton )
 
     #undef MAP_ACTION
 }
@@ -255,9 +295,27 @@ FOdysseyPainterEditorTopTab::OnEraserButtonClicked()
 //---------------------------------------------------------------------- Event Listeners
 
 void
+FOdysseyPainterEditorTopTab::SetAlphaModeShortcut(::ul3::eAlphaMode iAlphaMode)
+{
+    if( !mIsEraserButtonActive )
+    {
+        SetAlphaMode( iAlphaMode );
+    }
+}
+
+void
 FOdysseyPainterEditorTopTab::SetAlphaMode(::ul3::eAlphaMode iAlphaMode)
 {
-    mEditor->PaintEngine()->SetAlphaModeModifier( iAlphaMode );
+        mEditor->PaintEngine()->SetAlphaModeModifier( iAlphaMode );
+}
+
+void
+FOdysseyPainterEditorTopTab::SetBlendingMode(::ul3::eBlendingMode iBlendingMode)
+{
+    if( !mIsEraserButtonActive )
+    {
+        mEditor->PaintEngine()->SetBlendingModeModifier( iBlendingMode );
+    }
 }
 
 void
