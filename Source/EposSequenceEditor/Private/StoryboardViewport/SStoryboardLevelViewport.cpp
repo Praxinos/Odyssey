@@ -33,6 +33,7 @@
 //#include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceHelpers.h"
+#include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
 #include "StoryNote.h"
 #include "StoryboardViewport/FilmOverlays.h"
@@ -971,7 +972,9 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     //-
 
     mNotes.Empty();
-    EposSequenceHelpers::GetNotesRecursive( *Sequencer, Sequence, Sequencer->GetFocusedTemplateID(), OuterTime.FrameNumber, mNotes );
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = EposSequenceHelpers::GetNotesRecursive( *Sequencer, Sequence, Sequencer->GetFocusedTemplateID(), OuterTime.FrameNumber );
+    for( auto note_section : note_sections )
+        mNotes.Add( note_section->GetNote() );
 
     if( mWidgetNotesInViewport.IsValid() )
         mWidgetNotesInViewport->RefreshList();

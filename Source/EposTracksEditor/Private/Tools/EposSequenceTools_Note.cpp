@@ -158,11 +158,7 @@ ShotSequenceTools::GetAllNotes( ISequencer* iSequencer )
 TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
 ShotSequenceTools::GetAllNotes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
-    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> sections;
-
-    ShotSequenceHelpers::GetAllNotes( iSequencer, iSequence, iSequenceID, nullptr, &sections );
-
-    return sections;
+    return EposSequenceHelpers::GetNotes( iSequencer, iSequence, iSequenceID );
 }
 
 #undef LOCTEXT_NAMESPACE

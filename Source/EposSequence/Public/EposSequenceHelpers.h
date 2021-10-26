@@ -28,6 +28,14 @@ struct FMovieSceneObjectPathChannel;
 
 typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelProxy>> FChannelProxyBySectionMap;
 
+class EPOSSEQUENCE_API EposSequenceHelpers
+{
+public:
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+};
+
 class EPOSSEQUENCE_API BoardSequenceHelpers
 {
 public:
@@ -91,8 +99,6 @@ public:
 
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );
 
-    static int32 GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<TWeakObjectPtr<UStoryNote>>* oNotes, TArray<TWeakObjectPtr<UMovieSceneNoteSection>>* oSections );
-
 public:
     static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding );
     static TArray<UMovieScene3DTransformSection*> GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding );
@@ -101,10 +107,4 @@ public:
     static FChannelProxyBySectionMap BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap> BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
-};
-
-class EPOSSEQUENCE_API EposSequenceHelpers
-{
-public:
-    static void GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<TWeakObjectPtr<UStoryNote>>& oNotes );
 };

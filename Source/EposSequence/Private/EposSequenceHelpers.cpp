@@ -320,21 +320,45 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
     }
 }
 
-
 //static
-int32
-ShotSequenceHelpers::GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<TWeakObjectPtr<UStoryNote>>* oNotes, TArray<TWeakObjectPtr<UMovieSceneNoteSection>>* oSections )
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    if( oNotes )
-        oNotes->Empty();
-    if( oSections )
-        oSections->Empty();
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = GetNotes( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
+    UMovieSceneCinematicBoardTrack* track = movie_scene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !track )
+        return note_sections;
 
-    TArray<TWeakObjectPtr<UStoryNote>> notes;
+    auto sections = track->GetAllSections();
+    for( auto section : sections )
+    {
+        if( !section->IsTimeWithinSection( iFrameNumber ) || !section->IsActive() )
+            continue;
+
+        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
+        FFrameTime inner_time = iFrameNumber * subsection->OuterToInnerTransform();
+
+        if( !result.mInnerSequence )
+            continue;
+
+        TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections_recursive = GetNotesRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, inner_time.GetFrame() );
+        note_sections.Append( note_sections_recursive );
+    }
+
+    return note_sections;
+}
+
+//static
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber )
+{
     TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections;
 
+    UMovieScene* movie_scene = iSequence->GetMovieScene();
     TArray<UMovieSceneTrack*> tracks = movie_scene->GetMasterTracks();
     tracks.StableSort( []( const UMovieSceneTrack& iA, const UMovieSceneTrack& iB )
                        {
@@ -363,6 +387,13 @@ ShotSequenceHelpers::GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequenc
 
         for( auto section : sections )
         {
+            if( iFrameNumber.IsSet() )
+            {
+                //MovieSceneHelpers::FindSectionAtTime()
+                if( !section->IsTimeWithinSection( iFrameNumber.GetValue() ) || !section->IsActive() )
+                    continue;
+            }
+
             UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
             if( !note_section )
                 continue;
@@ -371,19 +402,11 @@ ShotSequenceHelpers::GetAllNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequenc
             if( !note )
                 continue;
 
-            notes.Add( note );
             note_sections.Add( note_section );
         }
     }
 
-    check( notes.Num() == note_sections.Num() );
-
-    if( oNotes )
-        oNotes->Append( notes );
-    if( oSections )
-        oSections->Append( note_sections );
-
-    return notes.Num();
+    return note_sections;
 }
 
 
@@ -969,54 +992,6 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
     }
 
     return maps;
-}
-
-//---
-
-//static
-void
-EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<TWeakObjectPtr<UStoryNote>>& oNotes )
-{
-    auto tracks = iSequence->GetMovieScene()->GetMasterTracks();
-    for( auto track : tracks )
-    {
-        if( !track->IsA<UMovieSceneNoteTrack>() )
-            continue;
-
-        auto sections = track->GetAllSections();
-        for( auto section : sections )
-        {
-            //MovieSceneHelpers::FindSectionAtTime()
-            if( section->IsTimeWithinSection( iFrameNumber ) && section->IsActive() )
-            {
-                UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
-                oNotes.Add( note_section->GetNote() );
-            }
-        }
-    }
-
-    for( auto track : tracks )
-    {
-        if( !track->IsA<UMovieSceneCinematicBoardTrack>() )
-            continue;
-
-        auto sections = track->GetAllSections();
-        for( auto section : sections )
-        {
-            if( section->IsTimeWithinSection( iFrameNumber ) && section->IsActive() )
-            {
-                UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
-
-                BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
-                FFrameTime inner_time = iFrameNumber * subsection->OuterToInnerTransform();
-
-                if( !result.mInnerSequence )
-                    continue;
-
-                GetNotesRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, inner_time.GetFrame(), oNotes );
-            }
-        }
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

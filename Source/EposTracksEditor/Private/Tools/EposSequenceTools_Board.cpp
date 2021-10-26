@@ -633,8 +633,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
 
     //---
 
-    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections;
-    int32 note_count = ShotSequenceHelpers::GetAllNotes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, nullptr, &note_sections );
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = EposSequenceHelpers::GetNotes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
 
     for( auto note_section : note_sections )
     {
