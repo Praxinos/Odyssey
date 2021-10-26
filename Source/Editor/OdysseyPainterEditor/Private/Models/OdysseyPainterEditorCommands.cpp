@@ -6,9 +6,15 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorCommands"
 
+namespace
+{
+	const FName BrushBlendingModeShortcut = "BrushBlendingModeShortcut";
+}
+
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
     : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
+        AddBundle(BrushBlendingModeShortcut, LOCTEXT("BrushBlendingMode", "Brush Blending Modes"));
 }
 
 void
@@ -57,11 +63,58 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_COMMAND( SetAlphaModeMin, "Set Brush Alpha Mode to Min", "Set Brush Alpha Mode to Min",                                                  EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetAlphaModeMax, "Set Brush Alpha Mode to Max", "Set Brush Alpha Mode to Max",                                                  EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( ToggleEraserButton, "Toggle current Brush to Eraser", "Toggle current Brush to Eraser",                                         EUserInterfaceActionType::Button, FInputChord( EKeys::E ) );
-                                                                                                                                                
-    UI_COMMAND( SetBlendModeNormal, "Set Brush Blend Mode to Normal", "Set Brush Blend Mode to Normal",                                         EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( SetBlendModeTop, "Set Brush Blend Mode to Top", "Set Brush Blend Mode to Top",                                                  EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( SetBlendModeBack, "Set Brush Blend Mode to Back", "Set Brush Blend Mode to Back",                                               EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( SetBlendModeBehind, "Set Brush Blend Mode to Behind", "Set Brush Blend Mode to Behind",                                         EUserInterfaceActionType::Button, FInputChord() );
+/*
+#define UI_COMMAND_( CommandId, FriendlyName, InDescription, CommandType, InDefaultChord, ... ) \
+	MakeUICommand_InternalUseOnly( this, CommandId, TEXT(LOCTEXT_NAMESPACE), TEXT(#CommandId), TEXT(#CommandId) TEXT("_ToolTip"), "." #CommandId, TEXT(FriendlyName), TEXT(InDescription), CommandType, InDefaultChord, ## __VA_ARGS__ );
+
+    UI_COMMAND_( SetBlendModeBehind, "Behind", "Set Brush Blend Mode to Behind",                                         EUserInterfaceActionType::Button, FInputChord() );
+*/
+
+#define UI_COMMAND_CATEGORY( CommandId, Category, FriendlyName, InDescription, CommandType, InDefaultChord )              \
+    CommandId = FUICommandInfoDecl(                                                                                       \
+                this->AsShared(),                                                                                         \
+                FName( TEXT( #CommandId ) ),                                                                              \
+                LOCTEXT( #CommandId "Label", FriendlyName ),                                                              \
+                LOCTEXT( #CommandId "ToolTip", InDescription ),                                                           \
+                Category)                                                                                                 \
+            .UserInterfaceType( CommandType )                                                                             \
+            .DefaultChord( InDefaultChord );
+
+
+UI_COMMAND_CATEGORY( SetBlendModeBehind, BrushBlendingModeShortcut, "Behind", "Set Brush Blend Mode to Behind", EUserInterfaceActionType::Button, FInputChord() );
+
+
+SetBlendModeNormal = FUICommandInfoDecl(
+				this->AsShared(),
+				FName( TEXT( "SetBlendModeNormal" ) ),
+				LOCTEXT( "SetBlendModeNormalLabel", "Normal" ),
+				LOCTEXT( "SetBlendModeNormalToolTip", "Set Brush Blend Mode to Normal" ),
+				BrushBlendingModeShortcut)
+			.UserInterfaceType( EUserInterfaceActionType::Button )
+			.DefaultChord( FInputChord() );
+
+SetBlendModeTop = FUICommandInfoDecl(
+				this->AsShared(),
+				FName( TEXT( "SetBlendModeTop" ) ),
+				LOCTEXT( "SetBlendModeTopLabel", "Top" ),
+				LOCTEXT( "SetBlendModeTopToolTip", "Set Brush Blend Mode to Top" ),
+				BrushBlendingModeShortcut)
+			.UserInterfaceType( EUserInterfaceActionType::Button )
+			.DefaultChord( FInputChord() );
+
+SetBlendModeBack = FUICommandInfoDecl(
+				this->AsShared(),
+				FName( TEXT( "SetBlendModeBack" ) ),
+				LOCTEXT( "SetBlendModeBackLabel", "Back" ),
+				LOCTEXT( "SetBlendModeBackToolTip", "Set Brush Blend Mode to Back" ),
+				BrushBlendingModeShortcut)
+			.UserInterfaceType( EUserInterfaceActionType::Button )
+			.DefaultChord( FInputChord() );
+
+
+//    UI_COMMAND( SetBlendModeNormal, "Set Brush Blend Mode to Normal", "Set Brush Blend Mode to Normal",                                         EUserInterfaceActionType::Button, FInputChord() );
+//    UI_COMMAND( SetBlendModeTop, "Set Brush Blend Mode to Top", "Set Brush Blend Mode to Top",                                                  EUserInterfaceActionType::Button, FInputChord() );
+//    UI_COMMAND( SetBlendModeBack, "Set Brush Blend Mode to Back", "Set Brush Blend Mode to Back",                                               EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetBlendModeDissolve, "Set Brush Blend Mode to Dissolve", "Set Brush Blend Mode to Dissolve",                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetBlendModeBayerDither8x8, "Set Brush Blend Mode to BayerDither8x8", "Set Brush Blend Mode to BayerDither8x8",                 EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( SetBlendModeDarken, "Set Brush Blend Mode to Darken", "Set Brush Blend Mode to Darken",                                         EUserInterfaceActionType::Button, FInputChord() );
