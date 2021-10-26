@@ -6,8 +6,6 @@
 #include "Brushes/SlateColorBrush.h"
 #include "SequencerSettings.h"
 
-#include "EposSequenceHelpers.h"
-#include "EposTracksToolbarHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -26,7 +24,7 @@ class EPOSTRACKSEDITOR_API SCinematicBoardSectionNote
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionNote )
         {}
-        SLATE_ARGUMENT( TWeakObjectPtr<UStoryNote>, Note )
+        SLATE_ARGUMENT( TWeakObjectPtr<UMovieSceneNoteSection>, NoteSection )
         SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
@@ -42,14 +40,12 @@ public:
 private:
     void CacheLines();
 
-    UMovieSceneNoteSection* GetSection(); //TODO: should be removed, see comment inside
-
     void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
 
 private:
-    TWeakPtr<FCinematicBoardSection>    mBoardSection;
-    TWeakObjectPtr<UStoryNote>          mNote;
-    TAttribute<EVisibility>             mOptionalWidgetsVisibility;
+    TWeakPtr<FCinematicBoardSection>        mBoardSection;
+    TWeakObjectPtr<UMovieSceneNoteSection>  mNoteSection;
+    TAttribute<EVisibility>                 mOptionalWidgetsVisibility;
 
     //TODO: maybe improve this by doing/storing it directly inside the note object ?
     FString         mCachedText;
@@ -61,7 +57,7 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
 {
     mBoardSection = iBoardSection;
 
-    mNote = InArgs._Note;
+    mNoteSection = InArgs._NoteSection;
     mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
 
     auto GetFirstLine = [=]() -> FText
@@ -79,7 +75,10 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
 
     auto GetTooltip = [=]() -> FText
     {
-        return FText::FromString( mNote->Text );
+        if( !mNoteSection.IsValid() || !mNoteSection->GetNote() )
+            return FText::GetEmpty();
+
+        return FText::FromString( mNoteSection->GetNote()->Text );
     };
 
     ChildSlot
@@ -101,42 +100,14 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
 void
 SCinematicBoardSectionNote::CacheLines()
 {
-    if( mCachedText == mNote->Text )
+    if( !mNoteSection.IsValid() || !mNoteSection->GetNote() )
         return;
 
-    mCachedText = mNote->Text;
+    if( mCachedText == mNoteSection->GetNote()->Text )
+        return;
+
+    mCachedText = mNoteSection->GetNote()->Text;
     mCachedText.ParseIntoArrayLines( mCachedLines );
-}
-
-UMovieSceneNoteSection*
-SCinematicBoardSectionNote::GetSection()
-{
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
-
-    //TODO: make it correct
-    // This is not the correct way to get section, as a note may be used inside multiple note sections
-    // And this way remove the first found one
-    // The correct way would be to store the section in the same time as the note, and this implies to have listview row of a complex type like "FNoteAndSection" or just a listview of UMovieSceneNoteSection ? (or even FGuid for attached note ?), let's talk about this
-
-    UMovieSceneNoteSection* section_of_note = nullptr;
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    if( result.mInnerMovieScene )
-    {
-        for( auto track : result.mInnerMovieScene->GetMasterTracks() )
-        {
-            for( auto section : track->GetAllSections() )
-            {
-                UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
-                if( note_section && note_section->GetNote() == mNote )
-                    section_of_note = Cast<UMovieSceneNoteSection>( note_section );
-            }
-        }
-    }
-
-    return section_of_note;
 }
 
 void
@@ -145,14 +116,14 @@ SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
     auto EditNote = [=]()
     {
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        check( !AssetEditorSubsystem->FindEditorsForAsset( mNote.Get() ).Num() );
+        check( !AssetEditorSubsystem->FindEditorsForAsset( mNoteSection->GetNote() ).Num() );
 
-        AssetEditorSubsystem->OpenEditorForAsset( mNote.Get() );
+        AssetEditorSubsystem->OpenEditorForAsset( mNoteSection->GetNote() );
     };
 
     auto CanEditNote = [=]() -> bool
     {
-        return !!mNote.Get();
+        return mNoteSection.IsValid() && mNoteSection->GetNote();
     };
 
     //-
@@ -163,7 +134,7 @@ SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        BoardSequenceTools::DeleteNote( sequencer, *subsection_object, GetSection() );
+        BoardSequenceTools::DeleteNote( sequencer, *subsection_object, mNoteSection );
     };
 
     //-
@@ -177,7 +148,7 @@ SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 
     ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "note-section-label", "Note: {0}" ), note_name ) );
 
-    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-note-label", "Edit" ),
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-note-label", "Edit..." ),
                                 LOCTEXT( "edit-note-tooltip", "Edit the note in its editor" ),
                                 FSlateIcon(),
                                 FUIAction( FExecuteAction::CreateLambda( EditNote ),
@@ -228,14 +199,13 @@ SCinematicBoardSectionNote::OnMouseButtonDoubleClick( const FGeometry& InMyGeome
 {
     if( InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton /*&& InMouseEvent.IsControlDown()*/ )
     {
-        UStoryNote* note = mNote.Get();
-        if( !note )
+        if( !mNoteSection.IsValid() || !mNoteSection->GetNote() )
             return FReply::Unhandled();
 
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        check( !AssetEditorSubsystem->FindEditorsForAsset( note ).Num() );
+        check( !AssetEditorSubsystem->FindEditorsForAsset( mNoteSection->GetNote() ).Num() );
 
-        AssetEditorSubsystem->OpenEditorForAsset( note );
+        AssetEditorSubsystem->OpenEditorForAsset( mNoteSection->GetNote() );
 
         return FReply::Handled();
     }
@@ -331,7 +301,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
             + SVerticalBox::Slot()
             .AutoHeight()
             [
-                SAssignNew( mWidgetNoteList, SListView<TWeakObjectPtr<UStoryNote>> )
+                SAssignNew( mWidgetNoteList, SListView<TWeakObjectPtr<UMovieSceneNoteSection>> )
                 .ListItemsSource( &mNotes )
                 .OnGenerateRow( this, &SCinematicBoardSectionNotes::MakeNoteRow )
                 .SelectionMode( ESelectionMode::None )
@@ -351,7 +321,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 //-
 
 class STableRowNote
-    : public STableRow<TWeakObjectPtr<UStoryNote>>
+    : public STableRow<TWeakObjectPtr<UMovieSceneNoteSection>>
 {
 public:
     // Construct the widget
@@ -367,7 +337,7 @@ private:
 void
 STableRowNote::ConstructChildren( ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent ) //override
 {
-    STableRow<TWeakObjectPtr<UStoryNote>>::ConstructChildren( InOwnerTableMode, InPadding, InContent );
+    STableRow<TWeakObjectPtr<UMovieSceneNoteSection>>::ConstructChildren( InOwnerTableMode, InPadding, InContent );
 
     //---
 
@@ -389,7 +359,7 @@ STableRowNote::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FP
 //-
 
 TSharedRef<ITableRow>
-SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
+SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UMovieSceneNoteSection> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
     if( !mBoardSection.IsValid() )
         return SNew( STableRowNote, iOwnerTable );
@@ -398,7 +368,7 @@ SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, cons
         SNew( STableRowNote, iOwnerTable )
         [
             SNew( SCinematicBoardSectionNote, mBoardSection.Pin().ToSharedRef() )
-            .Note( iItem )
+            .NoteSection( iItem )
             .OptionalWidgetsVisibility( mOptionalWidgetsVisibility )
         ];
 }
@@ -433,12 +403,7 @@ SCinematicBoardSectionNotes::RebuildNoteList()
 
     //---
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer.Pin().Get(), subsection, mSequencer.Pin()->GetFocusedTemplateID() );
-    check( inner_sequence == result.mInnerSequence ); // Just to test
-
-    // Get all unordered planes
-    TArray<TWeakObjectPtr<UStoryNote>> notes;
-    int note_count = ShotSequenceHelpers::GetAllNotes( *mSequencer.Pin().Get(), result.mInnerSequence, result.mInnerSequenceId, &notes, nullptr );
+    auto note_sections = BoardSequenceTools::GetAllNotes( mSequencer.Pin().Get(), subsection );
 
     //---
 
@@ -461,12 +426,7 @@ SCinematicBoardSectionNotes::RebuildNoteList()
 
     mNotes.Empty();
 
-    for( auto note : notes )
-    {
-        mNotes.Add( note );
-        //mNotes.Add( MakeShareable<UStoryNote>( note.Get() ) );
-        //mNotes.Add( MakeShared<UStoryNote>( note.Get() ) );
-    }
+    mNotes = note_sections;
 
     if( mWidgetNoteList )
         mWidgetNoteList->RequestListRefresh();

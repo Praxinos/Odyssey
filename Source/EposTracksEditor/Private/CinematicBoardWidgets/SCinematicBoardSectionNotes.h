@@ -10,7 +10,7 @@
 //---
 
 class FCinematicBoardSection;
-class UStoryNote;
+class UMovieSceneNoteSection;
 
 class EPOSTRACKSEDITOR_API SCinematicBoardSectionNotes
     : public SCompoundWidget
@@ -34,7 +34,7 @@ public:
     void RebuildNoteList( EMovieSceneDataChangeType iType );
 
 protected:
-    TSharedRef<ITableRow> MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+    TSharedRef<ITableRow> MakeNoteRow( TWeakObjectPtr<UMovieSceneNoteSection> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
     void RebuildNoteList();
 
@@ -45,8 +45,8 @@ private:
     TWeakPtr<ISequencer>                mSequencer;
 
 private:
-    TArray<TWeakObjectPtr<UStoryNote>> mNotes;
-    TSharedPtr<SListView<TWeakObjectPtr<UStoryNote>>> mWidgetNoteList;
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>>                  mNotes;
+    TSharedPtr<SListView<TWeakObjectPtr<UMovieSceneNoteSection>>>   mWidgetNoteList;
 
     bool mNeedRebuildNoteList { true };
 

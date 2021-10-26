@@ -134,4 +134,35 @@ ShotSequenceTools::DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 }
 
+//---
+
+//static
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+BoardSequenceTools::GetAllNotes( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return TArray<TWeakObjectPtr<UMovieSceneNoteSection>>();
+
+    return ShotSequenceTools::GetAllNotes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+ShotSequenceTools::GetAllNotes( ISequencer* iSequencer )
+{
+    return ShotSequenceTools::GetAllNotes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+}
+
+//static
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+ShotSequenceTools::GetAllNotes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> sections;
+
+    ShotSequenceHelpers::GetAllNotes( iSequencer, iSequence, iSequenceID, nullptr, &sections );
+
+    return sections;
+}
+
 #undef LOCTEXT_NAMESPACE

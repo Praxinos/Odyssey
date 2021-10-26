@@ -20,6 +20,7 @@ class UMaterialInterface;
 class UMovieScene;
 class UMovieSceneCinematicBoardSection;
 class UMovieSceneCinematicBoardTrack;
+class UMovieSceneNoteSection;
 class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
@@ -517,13 +518,14 @@ public:
 
     /**
     * Delete a note in the board section
-    * (The given frame must be inside the subsection)
     *
-    * @param ISequencer             iSequencer to create note.
-    * @param UMovieSceneSubSection  iSubSection to create note.
-    * @param FFrameNumber           iFrameNumber to create note.
+    * @param ISequencer             iSequencer to delete note.
+    * @param UMovieSceneSubSection  iSubSection to delete note.
+    * @param UMovieSceneSection     iNoteSection to delete.
     */
     static void DeleteNote( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
 };
 
 //---
@@ -728,9 +730,13 @@ public:
     static void CreateNote( ISequencer* iSequencer, FFrameNumber iFrameNumber );
     static void DeleteNote( ISequencer* iSequencer, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
 
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer* iSequencer );
+
 private:
     static void CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
 //---
 
