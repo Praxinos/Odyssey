@@ -20,12 +20,12 @@ namespace
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
     : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", NSLOCTEXT( "Contexts", "IliadPainterEditor", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
-        AddBundle(BrushBlendingModeShortcuts, LOCTEXT("BrushBlendingModeShortcutsCategory", "Brush Blending Mode Shortcuts"));
-        AddBundle(BrushAlphaModeShortcuts, LOCTEXT("BrushAlphaModeShortcutsCategory", "Brush Alpha Mode Shortcuts"));
-        AddBundle(ViewportShortcuts, LOCTEXT("ViewportShortcutsCategory", "Viewport Shortcuts"));
-        AddBundle(BrushStrokesShortcuts, LOCTEXT("Brushes&StrokesShortcutsShortcutsCategory", "Brushes & Strokes Shortcuts"));
-        AddBundle(HelpShortcuts, LOCTEXT("HelpShortcutsCategory", "Help Shortcuts"));
-        AddBundle(UncategorizedYetShortcuts, LOCTEXT("UncategorizedYetShortcutsCategory", "Uncategorized Yet Shortcuts"));
+    AddBundle(BrushBlendingModeShortcuts, LOCTEXT("BrushBlendingModeShortcutsCategory", "Brush Blending Mode Shortcuts"));
+    AddBundle(BrushAlphaModeShortcuts, LOCTEXT("BrushAlphaModeShortcutsCategory", "Brush Alpha Mode Shortcuts"));
+    AddBundle(ViewportShortcuts, LOCTEXT("ViewportShortcutsCategory", "Viewport Shortcuts"));
+    AddBundle(BrushStrokesShortcuts, LOCTEXT("Brushes&StrokesShortcutsShortcutsCategory", "Brushes & Strokes Shortcuts"));
+    AddBundle(HelpShortcuts, LOCTEXT("HelpShortcutsCategory", "Help Shortcuts"));
+    AddBundle(UncategorizedYetShortcuts, LOCTEXT("UncategorizedYetShortcutsCategory", "Uncategorized Yet Shortcuts"));
 }
 
 void
