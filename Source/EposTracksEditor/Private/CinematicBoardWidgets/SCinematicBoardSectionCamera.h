@@ -38,7 +38,7 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    TSharedPtr<FMetaFloatChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+    TSharedPtr<FMetaChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
     void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
 
@@ -53,5 +53,5 @@ private:
     /** Scoped transaction for this drag operation */
     TUniquePtr<FScopedTransaction>      mTransaction;
 
-    TSharedPtr<FMetaFloatChannel>       mKeysUnderMouse;
+    TSharedPtr<FMetaChannel>            mKeysUnderMouse;
 };

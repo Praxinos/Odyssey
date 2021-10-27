@@ -19,8 +19,7 @@ class FTrackEditorThumbnailPool;
 class SCinematicBoardSectionContent;
 class UMovieSceneCinematicBoardSection;
 struct FInnerSequenceData;
-struct FMetaFloatChannel;
-struct FMetaMaterialChannel;
+struct FMetaChannel;
 
 /**
  * Board section, which paints and ticks the appropriate section.
@@ -81,26 +80,26 @@ public:
     virtual void BuildCameraTransformChannelProxy();
     virtual FChannelProxyBySectionMap GetCameraTransformChannelProxy() const;
     virtual void ReBuildCameraTransformMetaChannel();
-    virtual TSharedPtr<FMetaFloatChannel> GetCameraTransformMetaChannel() const;
+    virtual TSharedPtr<FMetaChannel> GetCameraTransformMetaChannel() const;
 
     virtual void BuildPlanesTransformChannelProxy();
     virtual FChannelProxyBySectionMap GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
     virtual void ReBuildPlanesTransformMetaChannel();
-    virtual TSharedPtr<FMetaFloatChannel> GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
+    virtual TSharedPtr<FMetaChannel> GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
 
     virtual void BuildPlanesMaterialChannelProxy();
     virtual FChannelProxyBySectionMap GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const;
     virtual void ReBuildPlanesMaterialMetaChannel();
-    virtual TSharedPtr<FMetaMaterialChannel> GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const;
+    virtual TSharedPtr<FMetaChannel> GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const;
 
 private:
     TArray<double> mThumbnailKeys;
-    FChannelProxyBySectionMap           mCameraTransformKeys;
-    TSharedPtr<FMetaFloatChannel>       mCameraTransformMetaKeys;
-    TMap<FGuid, FChannelProxyBySectionMap>          mPlanesTransformsKeys;
-    TMap<FGuid, TSharedPtr<FMetaFloatChannel>>      mPlanesTransformsMetaKeys;
-    TMap<FGuid, FChannelProxyBySectionMap>          mPlanesMaterialsKeys;
-    TMap<FGuid, TSharedPtr<FMetaMaterialChannel>>   mPlanesMaterialsMetaKeys;
+    FChannelProxyBySectionMap   mCameraTransformKeys;
+    TSharedPtr<FMetaChannel>    mCameraTransformMetaKeys;
+    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesTransformsKeys;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesTransformsMetaKeys;
+    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesMaterialsKeys;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesMaterialsMetaKeys;
 
 private:
 

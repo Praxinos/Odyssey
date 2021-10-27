@@ -401,7 +401,7 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    TSharedPtr<FMetaFloatChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+    TSharedPtr<FMetaChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
     /** Start a transaction at mouse down */
     void BeginTransaction( const FText& iTransactionDesc );
@@ -415,7 +415,7 @@ private:
     /** Scoped transaction for this drag operation */
     TUniquePtr<FScopedTransaction>      mTransaction;
 
-    TSharedPtr<FMetaFloatChannel>       mKeysUnderMouse;
+    TSharedPtr<FMetaChannel>            mKeysUnderMouse;
 };
 
 void
@@ -440,7 +440,7 @@ SCinematicBoardSectionPlaneKeys::ComputeDesiredSize( float ) const //override
     return size;
 }
 
-TSharedPtr<FMetaFloatChannel>
+TSharedPtr<FMetaChannel>
 SCinematicBoardSectionPlaneKeys::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
     FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
@@ -462,7 +462,7 @@ SCinematicBoardSectionPlaneKeys::GetKeysUnderMouse( const FPointerEvent& MouseEv
 
     //---
 
-    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
+    TSharedPtr<FMetaChannel> meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
     if( !meta_channel )
         return nullptr;
 
@@ -506,7 +506,7 @@ SCinematicBoardSectionPlaneKeys::EndTransaction()
 FCursorReply
 SCinematicBoardSectionPlaneKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
-    TSharedPtr<FMetaFloatChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
+    TSharedPtr<FMetaChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
 
     if( meta_channel.IsValid() && meta_channel->NumMetaKeys() )
         return FCursorReply::Cursor( EMouseCursor::CardinalCross );
@@ -660,7 +660,7 @@ SCinematicBoardSectionPlaneKeys::OnPaint( const FPaintArgs& Args, const FGeometr
     const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetPlaneTransformChannelProxy();
-    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
+    TSharedPtr<FMetaChannel> meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
 
     if( !meta_channel.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
@@ -745,7 +745,7 @@ protected:
     virtual FVector2D ComputeDesiredSize( float ) const override;
 
 private:
-    TSharedPtr<FMetaMaterialChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+    TSharedPtr<FMetaChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
     void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
 
@@ -761,7 +761,7 @@ private:
     /** Scoped transaction for this drag operation */
     TUniquePtr<FScopedTransaction>      mTransaction;
 
-    TSharedPtr<FMetaMaterialChannel>    mKeysUnderMouse;
+    TSharedPtr<FMetaChannel>            mKeysUnderMouse;
 };
 
 void
@@ -786,7 +786,7 @@ SCinematicBoardSectionPlaneMaterialKeys::ComputeDesiredSize( float ) const //ove
     return size;
 }
 
-TSharedPtr<FMetaMaterialChannel>
+TSharedPtr<FMetaChannel>
 SCinematicBoardSectionPlaneMaterialKeys::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
     FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
@@ -808,7 +808,7 @@ SCinematicBoardSectionPlaneMaterialKeys::GetKeysUnderMouse( const FPointerEvent&
 
     //---
 
-    TSharedPtr<FMetaMaterialChannel> meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
+    TSharedPtr<FMetaChannel> meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
     if( !meta_channel )
         return nullptr;
 
@@ -852,7 +852,7 @@ SCinematicBoardSectionPlaneMaterialKeys::EndTransaction()
 void
 SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 {
-    auto CloneKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
+    auto CloneKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
     {
         if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return;
@@ -876,7 +876,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         BoardSequenceTools::CloneDrawing( sequencer, material_to_clone, sequencer->GetLocalTime().Time.FrameNumber, mBinding.GetGuid() );
     };
 
-    auto CanCloneKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse ) -> bool
+    auto CanCloneKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
     {
         if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return false;
@@ -899,7 +899,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     //-
 
-    auto DeleteKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse )
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -916,7 +916,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         }
     };
 
-    auto CanDeleteKey = [=]( TSharedPtr<FMetaMaterialChannel> iKeysUnderMouse ) -> bool
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
     {
         return true;
     };
@@ -1003,7 +1003,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 FCursorReply
 SCinematicBoardSectionPlaneMaterialKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
-    TSharedPtr<FMetaMaterialChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
+    TSharedPtr<FMetaChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
 
     if( meta_channel.IsValid() && meta_channel->NumMetaKeys() )
         return FCursorReply::Cursor( EMouseCursor::CardinalCross );
@@ -1170,7 +1170,7 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
     const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetPlaneMaterialChannelProxy();
-    TSharedPtr<FMetaMaterialChannel> meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
+    TSharedPtr<FMetaChannel> meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
 
     if( !meta_channel.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );

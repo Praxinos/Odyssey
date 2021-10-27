@@ -45,7 +45,7 @@ SCinematicBoardSectionCamera::ComputeDesiredSize( float ) const //override
 
 //---
 
-TSharedPtr<FMetaFloatChannel>
+TSharedPtr<FMetaChannel>
 SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
     FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
@@ -67,7 +67,7 @@ SCinematicBoardSectionCamera::GetKeysUnderMouse( const FPointerEvent& MouseEvent
 
     //---
 
-    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetCameraTransformMetaChannel();
+    TSharedPtr<FMetaChannel> meta_channel = board_section->GetCameraTransformMetaChannel();
     if( !meta_channel )
         return nullptr;
 
@@ -111,7 +111,7 @@ SCinematicBoardSectionCamera::EndTransaction()
 void
 SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 {
-    auto DeleteKey = [=]( TSharedPtr<FMetaFloatChannel> iKeysUnderMouse )
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -128,7 +128,7 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
         }
     };
 
-    auto CanDeleteKey = [=]( TSharedPtr<FMetaFloatChannel> iKeysUnderMouse ) -> bool
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
     {
         return true;
     };
@@ -157,7 +157,7 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 FCursorReply
 SCinematicBoardSectionCamera::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
-    TSharedPtr<FMetaFloatChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
+    TSharedPtr<FMetaChannel> meta_channel = GetKeysUnderMouse( CursorEvent );
 
     if( meta_channel.IsValid() && meta_channel->NumMetaKeys() )
         return FCursorReply::Cursor( EMouseCursor::CardinalCross );
@@ -321,7 +321,7 @@ SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& 
     const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
 
     //TSharedPtr<FMovieSceneChannelProxy> channel_proxy = section->GetCameraTransformChannelProxy();
-    TSharedPtr<FMetaFloatChannel> meta_channel = board_section->GetCameraTransformMetaChannel();
+    TSharedPtr<FMetaChannel> meta_channel = board_section->GetCameraTransformMetaChannel();
 
     if( !meta_channel.IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );

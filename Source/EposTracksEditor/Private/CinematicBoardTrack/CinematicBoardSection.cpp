@@ -438,11 +438,11 @@ FCinematicBoardSection::ReBuildCameraTransformMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mCameraTransformMetaKeys = MakeShared<FMetaFloatChannel>( inner_tolerance );
+    mCameraTransformMetaKeys = MakeShared<FMetaChannel>( inner_tolerance );
     mCameraTransformMetaKeys->Build( mCameraTransformKeys );
 }
 
-TSharedPtr<FMetaFloatChannel>
+TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetCameraTransformMetaChannel() const
 {
     return mCameraTransformMetaKeys;
@@ -484,14 +484,14 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
 
-        TSharedPtr<FMetaFloatChannel> meta_channel = MakeShared<FMetaFloatChannel>( inner_tolerance );
+        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
         mPlanesTransformsMetaKeys.Add( guid, meta_channel );
     }
 }
 
-TSharedPtr<FMetaFloatChannel>
+TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const
 {
     if( !mPlanesTransformsMetaKeys.Contains( iPossessable.GetGuid() ) )
@@ -536,14 +536,14 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
 
-        TSharedPtr<FMetaMaterialChannel> meta_channel = MakeShared<FMetaMaterialChannel>( inner_tolerance );
+        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
         mPlanesMaterialsMetaKeys.Add( guid, meta_channel );
     }
 }
 
-TSharedPtr<FMetaMaterialChannel>
+TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const
 {
     if( !mPlanesMaterialsMetaKeys.Contains( iPossessable.GetGuid() ) )
