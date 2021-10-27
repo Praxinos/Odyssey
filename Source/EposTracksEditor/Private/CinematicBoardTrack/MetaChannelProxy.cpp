@@ -12,10 +12,10 @@
 
 static
 ISequencerChannelInterface*
-FindChannelEditorInterface( FName iChannelTypeName )
+FindChannelEditorInterface( FMovieSceneChannelHandle iChannelHandle )
 {
     ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    ISequencerChannelInterface* EditorInterface = SequencerModule.FindChannelEditorInterface( iChannelTypeName );
+    ISequencerChannelInterface* EditorInterface = SequencerModule.FindChannelEditorInterface( iChannelHandle.GetChannelTypeName() );
     //ensureMsgf( EditorInterface, TEXT( "No channel interface found for type '%s'. Did you forget to call ISequencerModule::RegisterChannelInterface<ChannelType>()?" ), *ChannelHandle.GetChannelTypeName().ToString() );
     return EditorInterface;
 }
@@ -38,31 +38,6 @@ FMetaFloatChannel::CreateFromTime( const FFrameTime& iTime, const FFrameNumber& 
 }
 
 //---
-
-void
-FMetaFloatChannel::BuildDrawKeys()
-{
-    ISequencerChannelInterface* EditorInterface = FindChannelEditorInterface( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
-    //FMovieSceneChannel* Channel = ChannelHandle.Get();
-    //UMovieSceneSection* OwningSection = GetOwningSection();
-
-    for( auto& pair : mMetaKeys )
-    {
-        FMetaKey& meta_key = pair.Value;
-
-        for( auto& sub_key : meta_key.mSubKeys )
-        {
-            TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = sub_key.mChannelHandle.Cast<FMovieSceneFloatChannel>();
-            FMovieSceneFloatChannel* float_channel = channel_handle.Get();
-            if( !float_channel )
-                continue;
-
-            EditorInterface->DrawKeys_Raw( float_channel, MakeArrayView( &sub_key.mKeyHandle, 1 ), nullptr, MakeArrayView( &sub_key.mKeyDrawParam, 1 ) );
-        }
-    }
-}
-
-//---
 //---
 //---
 
@@ -79,29 +54,4 @@ FMetaMaterialChannel::CreateFromTime( const FFrameTime& iTime, const FFrameNumbe
     FillWithTime( iTime, iTolerance, new_meta_channel );
 
     return new_meta_channel;
-}
-
-//---
-
-void
-FMetaMaterialChannel::BuildDrawKeys()
-{
-    ISequencerChannelInterface* EditorInterface = FindChannelEditorInterface( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
-    //FMovieSceneChannel* Channel = ChannelHandle.Get();
-    //UMovieSceneSection* OwningSection = GetOwningSection();
-
-    for( auto& pair : mMetaKeys )
-    {
-        FMetaKey& meta_key = pair.Value;
-
-        for( auto& sub_key : meta_key.mSubKeys )
-        {
-            TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = sub_key.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-            FMovieSceneObjectPathChannel* material_channel = channel_handle.Get();
-            if( !material_channel )
-                continue;
-
-            EditorInterface->DrawKeys_Raw( material_channel, MakeArrayView( &sub_key.mKeyHandle, 1 ), nullptr, MakeArrayView( &sub_key.mKeyDrawParam, 1 ) );
-        }
-    }
 }
