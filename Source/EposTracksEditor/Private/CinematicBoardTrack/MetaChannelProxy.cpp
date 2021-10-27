@@ -34,7 +34,7 @@ FMetaChannel::GetMetaKeys() const
 }
 
 TSharedPtr<FMetaChannel>
-FMetaChannel::CreateFromTime( const FFrameTime& iTime, const FFrameNumber& iTolerance )
+FMetaChannel::CreateFromTime( const FFrameTime& iTime, const FFrameNumber& iTolerance ) const
 {
     TSharedPtr<FMetaChannel> new_meta_channel = MakeShared<FMetaChannel>( mMergeTolerance );
 
@@ -227,11 +227,11 @@ FMetaChannel::BuildFlags()
 //---
 
 void
-FMetaChannel::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<FMetaChannel> ioMetaChannel )
+FMetaChannel::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<FMetaChannel> ioMetaChannel ) const
 {
     TRange<FFrameNumber> range( ( iTime - iTolerance ).GetFrame(), ( iTime + iTolerance ).GetFrame() + 1 );
 
-    for( auto& pair : mMetaKeys )
+    for( const auto& pair : mMetaKeys )
     {
         if( range.Contains( pair.Key ) )
             ioMetaChannel->mMetaKeys.Add( pair.Key, pair.Value );

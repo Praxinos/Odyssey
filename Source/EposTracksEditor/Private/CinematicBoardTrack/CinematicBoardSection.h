@@ -14,12 +14,12 @@
 
 class FCinematicBoardTrackEditor;
 class FMenuBuilder;
+class FMetaChannel;
 class FSequencerSectionPainter;
 class FTrackEditorThumbnailPool;
 class SCinematicBoardSectionContent;
 class UMovieSceneCinematicBoardSection;
 struct FInnerSequenceData;
-struct FMetaChannel;
 
 /**
  * Board section, which paints and ticks the appropriate section.
