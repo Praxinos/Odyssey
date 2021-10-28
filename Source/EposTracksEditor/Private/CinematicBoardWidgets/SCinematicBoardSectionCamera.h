@@ -7,12 +7,14 @@
 #include "Channels/MovieSceneFloatChannel.h"
 #include "Widgets/SCompoundWidget.h"
 
+#include "CinematicBoardWidgets/SMetaKeysArea.h"
+
 //---
 
 class FCinematicBoardSection;
 
 class EPOSTRACKSEDITOR_API SCinematicBoardSectionCamera
-    : public SCompoundWidget
+    : public SMetaKeysArea
 {
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionCamera )
@@ -28,30 +30,16 @@ public:
     virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
     virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
     virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
-    virtual void OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
-    virtual void OnMouseLeave( const FPointerEvent& MouseEvent ) override;
 
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
 
 protected:
-    // SWidget overrides.
-    virtual FVector2D ComputeDesiredSize( float ) const override;
+    // SMetaKeysArea overrides
+    virtual TSharedPtr<FMetaChannel>        GetMetaChannel() override;
+    virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
+    virtual void                            RebuildMetaChannel() override;
 
-private:
-    TSharedPtr<FMetaChannel> GetKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
 
-    void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
-
-    /** Start a transaction at mouse down */
-    void BeginTransaction( const FText& iTransactionDesc );
-    /** End the transaction at mouse up */
-    void EndTransaction();
-
-private:
-    TWeakPtr<FCinematicBoardSection>    mBoardSection;
-
-    /** Scoped transaction for this drag operation */
-    TUniquePtr<FScopedTransaction>      mTransaction;
-
-    TSharedPtr<FMetaChannel>            mKeysUnderMouse;
+    virtual const FSlateBrush* GetBackgroundBrush() const override;
 };
