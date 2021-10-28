@@ -139,7 +139,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
 bool IOdysseyViewportDrawingEditorAdapter::InputKeyWithStrokeRay(const FOdysseyStrokeRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
 {
-    UE_LOG(LogTemp, Display, TEXT("InputKey"));
+    //UE_LOG(LogTemp, Display, TEXT("InputKey"));
 
     if(!IsReadyToDraw())
         return false;
