@@ -76,8 +76,8 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
                 .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueChanged(this, &SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged, iImageLayer, iLayerStack, iImageNode )
                 .OnValueCommitted(this, &SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue, iImageLayer, iLayerStack, iImageNode )
-             ]
-         ]
+            ]
+        ]
         + SVerticalBox::Slot()
         .AutoHeight()
         .Padding( FMargin( 0.f, 3.f, 0.f, 0.f) )
@@ -91,48 +91,41 @@ TSharedRef<SWidget> SOdysseyImageLayerNodePropertyView::ConstructPropertyViewFor
                 .Text(LOCTEXT("Blending Mode", "Blending Mode"))
             ]
 
-             + SHorizontalBox::Slot()
-             .FillWidth(0.5f)
-             .VAlign( VAlign_Center )
-             [
-                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                .OptionsSource(&mBlendingModes)
-                .OnGenerateWidget(this, &SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, iImageLayer, iLayerStack, iImageNode )
-                .Content()
-                [
-                    //The text in the main button
-                    CreateBlendingModeTextWidget( iImageLayer )
-                ]
-             ]
+            + SHorizontalBox::Slot()
+            .FillWidth(0.5f)
+            .VAlign( VAlign_Center )
+            [
+               SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+               .OptionsSource(&mBlendingModes)
+               .OnGenerateWidget(this, &SOdysseyImageLayerNodePropertyView::GenerateBlendingComboBoxItem)
+               .OnSelectionChanged(this, &SOdysseyImageLayerNodePropertyView::HandleOnBlendingModeChanged, iImageLayer, iLayerStack, iImageNode )
+               .Content()
+               [
+                   //The text in the main button
+                   CreateBlendingModeTextWidget( iImageLayer )
+               ]
+            ]
         ];
 
 
     return finalWidget;
 }
 
-
-
 int SOdysseyImageLayerNodePropertyView::GetLayerOpacityValue( TSharedPtr<FOdysseyImageLayer> iImageLayer ) const
 {
     return mTmpLayerOpacity >= 0.0f ? mTmpLayerOpacity : iImageLayer->GetOpacity() * 100;
 }
 
-
 void SOdysseyImageLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
 {
-    // iImageLayer->SetOpacity( iOpacity / 100.f );
-    // iImageNode->RefreshOpacityText();
     mTmpLayerOpacity = FMath::Clamp( iOpacity, 0, 100 );
 }
 
 void SOdysseyImageLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyImageLayer> iImageLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyImageLayerNode> iImageNode  )
 {
-    mTmpLayerOpacity = -1;
-    iImageLayer->SetOpacity( iOpacity / 100.f );
+    iImageLayer->SetOpacity( FMath::Clamp( iOpacity, 0, 100 ) / 100.f );
     iImageNode->RefreshOpacityText();
 }
-
 
 //PRIVATE
 
