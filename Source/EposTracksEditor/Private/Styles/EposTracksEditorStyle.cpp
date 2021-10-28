@@ -43,6 +43,7 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
     //---
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
+    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
 
     //---
 
@@ -183,6 +184,10 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 
         SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
     }
+
+    //---
+
+    Set( "EposNotes.TableView.Row", FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.Row" ) );
 
     FSlateStyleRegistry::RegisterSlateStyle( *this );
 }

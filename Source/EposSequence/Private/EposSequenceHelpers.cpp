@@ -24,9 +24,12 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "NoteTrack/MovieSceneNoteTrack.h"
+#include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
+#include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceHelpers"
 
@@ -82,6 +85,8 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneS
     return result;
 }
 
+//---
+//---
 //---
 
 //static
@@ -313,6 +318,95 @@ ShotSequenceHelpers::GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneS
 
         return planes_not_selected.Num();
     }
+}
+
+//static
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+{
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = GetNotes( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    UMovieScene* movie_scene = iSequence->GetMovieScene();
+    UMovieSceneCinematicBoardTrack* track = movie_scene->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !track )
+        return note_sections;
+
+    auto sections = track->GetAllSections();
+    for( auto section : sections )
+    {
+        if( !section->IsTimeWithinSection( iFrameNumber ) || !section->IsActive() )
+            continue;
+
+        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( iPlayer, *subsection, iSequenceID );
+        FFrameTime inner_time = iFrameNumber * subsection->OuterToInnerTransform();
+
+        if( !result.mInnerSequence )
+            continue;
+
+        TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections_recursive = GetNotesRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, inner_time.GetFrame() );
+        note_sections.Append( note_sections_recursive );
+    }
+
+    return note_sections;
+}
+
+//static
+TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
+EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber )
+{
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections;
+
+    UMovieScene* movie_scene = iSequence->GetMovieScene();
+    TArray<UMovieSceneTrack*> tracks = movie_scene->GetMasterTracks();
+    tracks.StableSort( []( const UMovieSceneTrack& iA, const UMovieSceneTrack& iB )
+                       {
+                           return iA.GetSortingOrder() < iB.GetSortingOrder();
+                       } );
+
+    for( auto track : tracks )
+    {
+        UMovieSceneNoteTrack* note_track = Cast<UMovieSceneNoteTrack>( track );
+        if( !note_track )
+            continue;
+
+        TArray<UMovieSceneSection*> sections = note_track->GetAllSections();
+
+        // It Should be MovieSceneHelpers::SortConsecutiveSections( sections ); but it doesn't use the stable sort
+        sections.StableSort( []( const UMovieSceneSection& iA, const UMovieSceneSection& iB )
+                             {
+                                 TRangeBound<FFrameNumber> LowerBoundA = iA.GetRange().GetLowerBound();
+                                 return TRangeBound<FFrameNumber>::MinLower( LowerBoundA, iB.GetRange().GetLowerBound() ) == LowerBoundA;
+                             } );
+        sections.StableSort( []( const UMovieSceneSection& iA, const UMovieSceneSection& iB )
+                             {
+                                 return iA.GetRowIndex() < iB.GetRowIndex();
+                             } );
+
+
+        for( auto section : sections )
+        {
+            if( iFrameNumber.IsSet() )
+            {
+                //MovieSceneHelpers::FindSectionAtTime()
+                if( !section->IsTimeWithinSection( iFrameNumber.GetValue() ) || !section->IsActive() )
+                    continue;
+            }
+
+            UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( section );
+            if( !note_section )
+                continue;
+
+            UStoryNote* note = note_section->GetNote();
+            if( !note )
+                continue;
+
+            note_sections.Add( note_section );
+        }
+    }
+
+    return note_sections;
 }
 
 

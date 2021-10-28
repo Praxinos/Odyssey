@@ -14,17 +14,27 @@ class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
 class UMovieScene3DTransformSection;
+class UMovieSceneNoteSection;
 class UMovieScenePrimitiveMaterialSection;
 class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
+class UStoryNote;
 class UWorld;
 class IMovieScenePlayer;
 struct FMovieSceneChannelProxy;
 struct FMovieSceneObjectPathChannel;
 
 typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelProxy>> FChannelProxyBySectionMap;
+
+class EPOSSEQUENCE_API EposSequenceHelpers
+{
+public:
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+};
 
 class EPOSSEQUENCE_API BoardSequenceHelpers
 {

@@ -6,12 +6,12 @@
 #include "CoreMinimal.h"
 #include "Framework/Commands/Commands.h"
 
-class FCinematicBoardTrackEditorCommands
-    : public TCommands<FCinematicBoardTrackEditorCommands>
+class FEposTracksEditorCommands
+    : public TCommands<FEposTracksEditorCommands>
 {
 public:
     /** Default constructor. */
-    FCinematicBoardTrackEditorCommands();
+    FEposTracksEditorCommands();
 
     /** Initialize commands */
     virtual void RegisterCommands() override;
@@ -23,4 +23,6 @@ public:
 
     TSharedPtr<FUICommandInfo> NewSectionWithBoardAtCurrentFrame;
     TSharedPtr<FUICommandInfo> NewSectionWithShotAtCurrentFrame;
+
+    TSharedPtr<FUICommandInfo> NewSectionWithNoteAtCurrentFrame;
 };

@@ -20,6 +20,7 @@ class UMaterialInterface;
 class UMovieScene;
 class UMovieSceneCinematicBoardSection;
 class UMovieSceneCinematicBoardTrack;
+class UMovieSceneNoteSection;
 class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
@@ -123,7 +124,7 @@ private:
 
 class EPOSTRACKSEDITOR_API BoardSequenceTools
 {
-// Inside EspoSequenceTools_Board
+// Inside EposSequenceTools_Board
 public:
     /** Find a cinematic board track in the currently focused movie scene. */
     static UMovieSceneCinematicBoardTrack* FindCinematicBoardTrack( ISequencer* iSequencer );
@@ -134,7 +135,7 @@ public:
     /** Stretch sequencer time range to view make the new range inside the view. */
     static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
 
-// Inside EspoSequenceTools_Camera
+// Inside EposSequenceTools_Camera
 public:
     /**
     *  Find the camera of the board section
@@ -340,7 +341,7 @@ public:
     */
     static bool HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-// Inside EspoSequenceTools_Plane
+// Inside EposSequenceTools_Plane
 public:
     /**
     *  Create a new plane (actor & track) in the board section
@@ -424,7 +425,7 @@ public:
     */
     static void DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
 
-// Inside EspoSequenceTools_Drawing
+// Inside EposSequenceTools_Drawing
 public:
     /**
     *  Create a new drawing (material & texture) in a plane in the board section
@@ -502,6 +503,29 @@ public:
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static bool HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+// Inside EposSequenceTools_Note
+public:
+    /**
+    * Create a note in the board section
+    * (The given frame must be inside the subsection)
+    *
+    * @param ISequencer             iSequencer to create note.
+    * @param UMovieSceneSubSection  iSubSection to create note.
+    * @param FFrameNumber           iFrameNumber to create note.
+    */
+    static void CreateNote( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber );
+
+    /**
+    * Delete a note in the board section
+    *
+    * @param ISequencer             iSequencer to delete note.
+    * @param UMovieSceneSubSection  iSubSection to delete note.
+    * @param UMovieSceneSection     iNoteSection to delete.
+    */
+    static void DeleteNote( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
 };
 
 //---
@@ -524,7 +548,7 @@ private:
     friend class BoardSequenceTools;
     friend class ToolkitHelpers;
 
-// Inside EspoSequenceTools_Board
+// Inside EposSequenceTools_Board
 public:
     /**
     *  Clone the content of the section
@@ -537,7 +561,7 @@ public:
 private:
     static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );
 
-// Inside EspoSequenceTools_Camera
+// Inside EposSequenceTools_Camera
 public:
     /**
     *  Find a Camera from the camera track
@@ -624,7 +648,7 @@ private:
     static void GotoPreviousCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
-// Inside EspoSequenceTools_Plane
+// Inside EposSequenceTools_Plane
 public:
     /**
     *  Add a Camera track
@@ -658,7 +682,7 @@ private:
     static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
     static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
-// Inside EspoSequenceTools_Drawing
+// Inside EposSequenceTools_Drawing
 public:
     /**
     *  Add a drawing (material/texture)
@@ -700,6 +724,19 @@ public:
 private:
     static void GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+
+// Inside EposSequenceTools_Note
+public:
+    static void CreateNote( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static void DeleteNote( ISequencer* iSequencer, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer* iSequencer );
+
+private:
+    static void CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
+
+    static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
 
 //---
 

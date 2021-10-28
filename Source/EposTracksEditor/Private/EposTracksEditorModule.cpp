@@ -7,8 +7,9 @@
 #include "ISettingsModule.h"
 
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
-#include "CinematicBoardTrack/CinematicBoardTrackEditorCommands.h"
+#include "EposTracksEditorCommands.h"
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
+#include "NoteTrack/NoteTrackEditor.h"
 #include "Settings/EposTracksSettings.h"
 
 #define LOCTEXT_NAMESPACE "FEposTracksEditorModule"
@@ -34,13 +35,13 @@ FEposTracksEditorModule::ShutdownModule()
 void
 FEposTracksEditorModule::RegisterCommands()
 {
-    FCinematicBoardTrackEditorCommands::Register();
+    FEposTracksEditorCommands::Register();
 }
 
 void
 FEposTracksEditorModule::UnregisterCommands()
 {
-    FCinematicBoardTrackEditorCommands::Unregister();
+    FEposTracksEditorCommands::Unregister();
 }
 
 //---
@@ -54,6 +55,7 @@ FEposTracksEditorModule::RegisterTrackEditors()
 
         CinematicBoardTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FCinematicBoardTrackEditor::CreateTrackEditor ) );
         SingleCameraCutTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FSingleCameraCutTrackEditor::CreateTrackEditor ) );
+        NoteTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FNoteTrackEditor::CreateTrackEditor ) );
     }
 
 }
@@ -64,6 +66,7 @@ FEposTracksEditorModule::UnregisterTrackEditors()
 
     SequencerModule.UnRegisterTrackEditor( CinematicBoardTrackCreateEditorHandle );
     SequencerModule.UnRegisterTrackEditor( SingleCameraCutTrackCreateEditorHandle );
+    SequencerModule.UnRegisterTrackEditor( NoteTrackCreateEditorHandle );
 }
 
 //---

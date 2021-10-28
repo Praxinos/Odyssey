@@ -4,9 +4,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class EposTracks : ModuleRules
+public class EposNote : ModuleRules
 {
-    public EposTracks(ReadOnlyTargetRules Target) : base(Target)
+    public EposNote(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -39,12 +39,7 @@ public class EposTracks : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
-                "MovieScene",
-                "MovieSceneTracks",
-                "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
-                "EposMovieScene",
-                "EposNote",
             }
             );
 

@@ -7,6 +7,7 @@
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionCamera.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionNotes.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionPlanes.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionThumbnails.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionTitle.h"
@@ -41,6 +42,12 @@ SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<F
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionThumbnails, iBoardSection )
+            .OptionalWidgetsVisibility( this, &SCinematicBoardSectionContent::OptionalWidgetsVisibility )
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SCinematicBoardSectionNotes, iBoardSection )
             .OptionalWidgetsVisibility( this, &SCinematicBoardSectionContent::OptionalWidgetsVisibility )
         ]
         + SVerticalBox::Slot()

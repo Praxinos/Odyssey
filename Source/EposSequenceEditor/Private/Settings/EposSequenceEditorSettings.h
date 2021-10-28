@@ -43,6 +43,21 @@ public:
 
 //---
 
+USTRUCT()
+struct FNoteSettings
+{
+    GENERATED_BODY()
+
+public:
+    UPROPERTY(config, EditAnywhere, Category=Note)
+    bool DisplayNoteInViewport { false };
+
+    UPROPERTY(config, EditAnywhere, Category=Note)
+    bool DisplayNoteAsOverlay { false };
+};
+
+//---
+
 /**
  * Epos Sequence Editor settings.
  */
@@ -69,4 +84,8 @@ public:
     /** Specifies Shot stuff. */
     UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
     FShotSettings ShotSettings;
+
+    /** Specifies Note stuff. */
+    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    FNoteSettings NoteSettings;
 };

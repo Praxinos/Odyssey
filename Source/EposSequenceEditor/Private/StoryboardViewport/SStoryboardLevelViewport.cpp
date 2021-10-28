@@ -18,11 +18,7 @@
 #include "MovieScene.h"
 #include "ISequencer.h"
 #include "MovieSceneSequence.h"
-#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "SequencerKeyCollection.h"
-#include "StoryboardViewport/SStoryboardTransportRange.h"
-#include "StoryboardViewport/FilmOverlays.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "CineCameraComponent.h"
 #include "Math/UnitConversion.h"
@@ -32,9 +28,19 @@
 #include "Engine/Selection.h"
 #include "SEnumCombobox.h"
 
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 //#include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorToolkit.h"
+#include "EposSequenceHelpers.h"
+#include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
+#include "StoryNote.h"
+#include "StoryboardViewport/FilmOverlays.h"
+#include "StoryboardViewport/SNotes.h"
+#include "StoryboardViewport/SNoteSettings.h"
+#include "StoryboardViewport/SStoryboardTransportRange.h"
+#include "Styles/EposSequenceEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
 
@@ -206,6 +212,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     TSharedRef<SFilmOverlayOptions> FilmOverlayOptions = SNew(SFilmOverlayOptions);
 
+    //---
+
     DecoratedTransportControls = SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
         [
@@ -256,10 +264,214 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             SNew(SSpacer)
         ];
 
+    //---
+
     //HACK: ue4
     TSharedPtr<SSpinBox<float>> planeDistanceSpinBox;
 
     const UEnum* scalePlaneEnum = FindObject<UEnum>( ANY_PACKAGE, TEXT( "EScalePlane" ) );
+
+    mNoteSplitter = SNew( SSplitter )
+        .Orientation( Orient_Vertical )
+        .Style( FEditorStyle::Get(), "SplitterDark" )
+        .PhysicalSplitterHandleSize( 2.0f )
+        .MinimumSlotHeight( 3 * 16.f ) // Roughly 3 lines (this is also used for the first (3D scene) part)
+        + SSplitter::Slot()
+        [
+            SNew(SPreArrangedBox)
+            .OnArrange(this, &SStoryboardLevelViewport::CacheDesiredViewportSize)
+            [
+                SNew(SVerticalBox)
+
+                + SVerticalBox::Slot()
+                [
+                    SNew(SSpacer)
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .HAlign(HAlign_Center)
+                [
+                    SNew(SBox)
+                    .HeightOverride(this, &SStoryboardLevelViewport::GetDesiredViewportHeight)
+                    .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
+                    [
+                        SNew(SOverlay)
+
+                        + SOverlay::Slot()
+                        [
+                            ViewportWidget.ToSharedRef()
+                        ]
+
+                        + SOverlay::Slot()
+                        [
+                            FilmOverlayOptions->GetFilmOverlayWidget()
+                        ]
+
+                        + SOverlay::Slot()
+                        [
+                            SAssignNew( mWidgetNotesAsOverlay, SNotesAsOverlay )
+                            .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay /*&& SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0*/ ) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; } )
+                            .ListItemsSource( &mNotes )
+                        ]
+                    ]
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .HAlign(HAlign_Center)
+                .Padding(10.f, 0.f)
+                [
+                    SAssignNew(ViewportControls, SBox)
+                    .Visibility(this, &SStoryboardLevelViewport::GetControlsVisibility)
+                    .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
+                    .Padding(FMargin(0.f, 10.f, 0.f, 0.f))
+                    [
+                        SNew(SVerticalBox)
+
+                        + SVerticalBox::Slot()
+                        [
+                            SNew(SHorizontalBox)
+
+                            + SHorizontalBox::Slot()
+                            .HAlign(HAlign_Left)
+                            [
+                                SNew(SHorizontalBox)
+
+                                + SHorizontalBox::Slot()
+                                .HAlign(HAlign_Left)
+                                .AutoWidth()
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([=]{ return UIData.ShotName; })
+                                    .ToolTipText(LOCTEXT("CurrentSequence", "The name of the currently evaluated sequence."))
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .HAlign(HAlign_Right)
+                                .AutoWidth()
+                                .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([=] { return UIData.CameraName; })
+                                    .ToolTipText(LOCTEXT("CurrentCamera", "The name of the current camera."))
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .HAlign(HAlign_Right)
+                                .AutoWidth()
+                                .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([=] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
+                                    .ToolTipText(LOCTEXT("SelectedPlanes", "The name of all selected planes."))
+                                ]
+                            ]
+
+                            + SHorizontalBox::Slot()
+                            .HAlign(HAlign_Center)
+                            .AutoWidth()
+                            [
+                                SNew(STextBlock)
+                                .ColorAndOpacity(Gray)
+                                .Text_Lambda([=] { return UIData.Filmback; })
+                                .ToolTipText(LOCTEXT("CurrentFilmback", "The name of the current shot's filmback (the imaging area of the frame/sensor)."))
+                            ]
+
+                            + SHorizontalBox::Slot()
+                            .HAlign(HAlign_Right)
+                            [
+                                SNew(STextBlock)
+                                .Font(FEditorStyle::GetFontStyle("Sequencer.FixedFont"))
+                                .ColorAndOpacity(Gray)
+                                .Text_Lambda([=] { return UIData.LocalPlaybackTime; })
+                                .ToolTipText(LOCTEXT("LocalPlaybackTime", "The current playback time relative to the currently evaluated sequence."))
+                            ]
+                        ]
+
+                        + SVerticalBox::Slot()
+                        .AutoHeight()
+                        .HAlign(HAlign_Center)
+                        .Padding(0, 5, 0, 2)
+                        [
+                            SNew( SHorizontalBox )
+                            .Visibility( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility )
+
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            .VAlign(VAlign_Center)
+                            .Padding( 10, 0 )
+                            [
+                                SNew(STextBlock)
+                                .ColorAndOpacity(Gray)
+                                .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
+                            ]
+
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            [
+                                SAssignNew( planeDistanceSpinBox, SSpinBox<float> )
+                                .ToolTipText( LOCTEXT( "PlaneDistanceTooltip", "Modify the distance between the selected plane and its parent camera." ) )
+                                .PreventThrottling( true ) // To refresh the viewport during value change
+                                .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                                .Delta( 1 )
+                                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                                .SliderExponentNeutralValue( 100 )
+                                .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
+                                .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
+                                .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
+                            ]
+
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            .VAlign(VAlign_Center)
+                            .Padding( 10, 0 )
+                            [
+                                SNew(STextBlock)
+                                .ColorAndOpacity(Gray)
+                                .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
+                            ]
+
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            [
+                                SNew( SEnumComboBox, scalePlaneEnum )
+                                .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
+                                //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
+                                //.ContentPadding( FMargin( 2, 0 ) )
+                                //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
+                                .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
+                                .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
+                            ]
+                        ]
+                    ]
+                ]
+
+                + SVerticalBox::Slot()
+                [
+                    SNew(SSpacer)
+                ]
+            ]
+        ]
+
+        + SSplitter::Slot()
+        .Value( 0.1 )
+        [
+            SAssignNew( mWidgetNotesInViewport, SNotesInViewport )
+            .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport && SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0 ) ? EVisibility::Visible : EVisibility::Collapsed; } )
+            .ListItemsSource( &mNotes )
+        ];
+
+    //TODO: HACK:
+    // UE5: MaxFractionnal digits is set correctly in UE5.
+    // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
+    planeDistanceSpinBox->SetMinFractionalDigits( 4 );
+    planeDistanceSpinBox->SetMaxFractionalDigits( 4 );
+
+    //---
 
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
         .BorderImage(FEditorStyle::GetBrush("BlackBrush"))
@@ -268,6 +480,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         [
             SNew(SVerticalBox)
 
+            // Toolbar
             + SVerticalBox::Slot()
             .Padding(5.f)
             .AutoHeight()
@@ -285,182 +498,22 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 [
                     FilmOverlayOptions
                 ]
-            ]
 
-            + SVerticalBox::Slot()
-            [
-                SNew(SPreArrangedBox)
-                .OnArrange(this, &SStoryboardLevelViewport::CacheDesiredViewportSize)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
                 [
-                    SNew(SVerticalBox)
-
-                    + SVerticalBox::Slot()
-                    [
-                        SNew(SSpacer)
-                    ]
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .HAlign(HAlign_Center)
-                    [
-                        SNew(SBox)
-                        .HeightOverride(this, &SStoryboardLevelViewport::GetDesiredViewportHeight)
-                        .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
-                        [
-                            SNew(SOverlay)
-
-                            + SOverlay::Slot()
-                            [
-                                ViewportWidget.ToSharedRef()
-                            ]
-
-                            + SOverlay::Slot()
-                            [
-                                FilmOverlayOptions->GetFilmOverlayWidget()
-                            ]
-                        ]
-                    ]
-
-                    + SVerticalBox::Slot()
-                    .AutoHeight()
-                    .HAlign(HAlign_Center)
-                    .Padding(10.f, 0.f)
-                    [
-                        SAssignNew(ViewportControls, SBox)
-                        .Visibility(this, &SStoryboardLevelViewport::GetControlsVisibility)
-                        .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
-                        .Padding(FMargin(0.f, 10.f, 0.f, 0.f))
-                        [
-                            SNew(SVerticalBox)
-
-                            + SVerticalBox::Slot()
-                            [
-                                SNew(SHorizontalBox)
-
-                                + SHorizontalBox::Slot()
-                                .HAlign(HAlign_Left)
-                                [
-                                    SNew(SHorizontalBox)
-
-                                    + SHorizontalBox::Slot()
-                                    .HAlign(HAlign_Left)
-                                    .AutoWidth()
-                                    [
-                                        SNew(STextBlock)
-                                        .ColorAndOpacity(Gray)
-                                        .Text_Lambda([=]{ return UIData.ShotName; })
-                                        .ToolTipText(LOCTEXT("CurrentSequence", "The name of the currently evaluated sequence."))
-                                    ]
-
-                                    + SHorizontalBox::Slot()
-                                    .HAlign(HAlign_Right)
-                                    .AutoWidth()
-                                    .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
-                                    [
-                                        SNew(STextBlock)
-                                        .ColorAndOpacity(Gray)
-                                        .Text_Lambda([=] { return UIData.CameraName; })
-                                        .ToolTipText(LOCTEXT("CurrentCamera", "The name of the current camera."))
-                                    ]
-
-                                    + SHorizontalBox::Slot()
-                                    .HAlign(HAlign_Right)
-                                    .AutoWidth()
-                                    .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
-                                    [
-                                        SNew(STextBlock)
-                                        .ColorAndOpacity(Gray)
-                                        .Text_Lambda([=] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
-                                        .ToolTipText(LOCTEXT("SelectedPlanes", "The name of all selected planes."))
-                                    ]
-                                ]
-
-                                + SHorizontalBox::Slot()
-                                .HAlign(HAlign_Center)
-                                .AutoWidth()
-                                [
-                                    SNew(STextBlock)
-                                    .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return UIData.Filmback; })
-                                    .ToolTipText(LOCTEXT("CurrentFilmback", "The name of the current shot's filmback (the imaging area of the frame/sensor)."))
-                                ]
-
-                                + SHorizontalBox::Slot()
-                                .HAlign(HAlign_Right)
-                                [
-                                    SNew(STextBlock)
-                                    .Font(FEditorStyle::GetFontStyle("Sequencer.FixedFont"))
-                                    .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return UIData.LocalPlaybackTime; })
-                                    .ToolTipText(LOCTEXT("LocalPlaybackTime", "The current playback time relative to the currently evaluated sequence."))
-                                ]
-                            ]
-
-                            + SVerticalBox::Slot()
-                            .AutoHeight()
-                            .HAlign(HAlign_Center)
-                            //.Padding(0, 5, 0, 0)
-                            [
-                                SNew( SHorizontalBox )
-                                .Visibility( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility )
-
-                                + SHorizontalBox::Slot()
-                                .AutoWidth()
-                                .VAlign(VAlign_Center)
-                                .Padding( 10, 0 )
-                                [
-                                    SNew(STextBlock)
-                                    .ColorAndOpacity(Gray)
-                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
-                                ]
-
-                                + SHorizontalBox::Slot()
-                                .AutoWidth()
-                                [
-                                    SAssignNew( planeDistanceSpinBox, SSpinBox<float> )
-                                    .ToolTipText( LOCTEXT( "PlaneDistanceTooltip", "Modify the distance between the selected plane and its parent camera." ) )
-                                    .PreventThrottling( true ) // To refresh the viewport during value change
-                                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                                    .Delta( 1 )
-                                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                                    .SliderExponentNeutralValue( 100 )
-                                    .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
-                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
-                                    .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
-                                ]
-
-                                + SHorizontalBox::Slot()
-                                .AutoWidth()
-                                .VAlign(VAlign_Center)
-                                .Padding( 10, 0 )
-                                [
-                                    SNew(STextBlock)
-                                    .ColorAndOpacity(Gray)
-                                    .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
-                                ]
-
-                                + SHorizontalBox::Slot()
-                                .AutoWidth()
-                                [
-                                    SNew( SEnumComboBox, scalePlaneEnum )
-                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
-                                    //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
-                                    //.ContentPadding( FMargin( 2, 0 ) )
-                                    //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
-                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
-                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
-                                ]
-                            ]
-                        ]
-                    ]
-
-                    + SVerticalBox::Slot()
-                    [
-                        SNew(SSpacer)
-                    ]
+                    SNew( SNoteSettings )
                 ]
             ]
 
+            // Viewport + options + notes
+            + SVerticalBox::Slot()
+            .Padding( 5.f, 0.f )
+            [
+                mNoteSplitter.ToSharedRef()
+            ]
+
+            // Timeline + playback
             + SVerticalBox::Slot()
             .Padding(5.f)
             .AutoHeight()
@@ -502,11 +555,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             ]
         ];
 
-    //TODO: HACK:
-    // UE5: MaxFractionnal digits is set correctly in UE5.
-    // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
-    planeDistanceSpinBox->SetMinFractionalDigits( 4 );
-    planeDistanceSpinBox->SetMaxFractionalDigits( 4 );
+    //---
 
     ChildSlot
     [
@@ -636,7 +685,7 @@ float SStoryboardLevelViewport::GetPlayTimeMinDesiredWidth() const
 void SStoryboardLevelViewport::CacheDesiredViewportSize(const FGeometry& AllottedGeometry)
 {
     FVector2D AllowableSpace = AllottedGeometry.GetLocalSize();
-    AllowableSpace.Y -= ViewportControls->GetDesiredSize().Y;
+    AllowableSpace.Y -= ViewportControls->GetVisibility().IsVisible() ? ViewportControls->GetDesiredSize().Y : 0.f;
 
     if (ViewportClient->IsAspectRatioConstrained())
     {
@@ -664,29 +713,38 @@ FOptionalSize SStoryboardLevelViewport::GetDesiredViewportHeight() const
 EVisibility
 SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility() const
 {
-    ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
+    if( !mPlaneToMove.IsValid() )
+        return EVisibility::Hidden;
 
-    return ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove, camera ) ? EVisibility::Visible : EVisibility::Hidden;
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+
+    return ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove.Get(), camera ) ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 float
 SStoryboardLevelViewport::GetMoveAndScalePlaneDistance() const
 {
-    ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
-
-    if( !ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove, camera ) )
+    if( !mPlaneToMove.IsValid() )
         return 0.f;
 
-    float distance = camera->GetDistanceTo( mPlaneToMove );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+
+    if( !ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove.Get(), camera ) )
+        return 0.f;
+
+    float distance = camera->GetDistanceTo( mPlaneToMove.Get() );
 
     return distance;
 }
 void
 SStoryboardLevelViewport::SetMoveAndScalePlaneDistance( float iDistance )
 {
-    ACineCameraActor* camera = mPlaneToMove ? Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() ) : nullptr;
+    if( !mPlaneToMove.IsValid() )
+        return;
 
-    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove, camera, iDistance, mScalePlaneType );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+
+    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, iDistance, mScalePlaneType );
 }
 
 int32
@@ -908,9 +966,20 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     mPlaneToMove = nullptr;
     if( selected_planes.Num() == 1 )
     {
-        APlaneActor* plane = selected_planes[0];
-        mPlaneToMove = plane;
+        mPlaneToMove = selected_planes[0];
     }
+
+    //-
+
+    mNotes.Empty();
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = EposSequenceHelpers::GetNotesRecursive( *Sequencer, Sequence, Sequencer->GetFocusedTemplateID(), OuterTime.FrameNumber );
+    for( auto note_section : note_sections )
+        mNotes.Add( note_section->GetNote() );
+
+    if( mWidgetNotesInViewport.IsValid() )
+        mWidgetNotesInViewport->RefreshList();
+    if( mWidgetNotesAsOverlay.IsValid() )
+        mWidgetNotesAsOverlay->RefreshList();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -33,9 +33,9 @@
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
-#include "CinematicBoardTrack/CinematicBoardTrackEditorCommands.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposTracksEditorCommands.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
@@ -76,28 +76,28 @@ FCinematicBoardTrackEditor::OnInitialize() //override
     if( command_list )
     {
         command_list->MapAction(
-            FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
+            FEposTracksEditorCommands::Get().NewSectionWithBoardAtCurrentFrame,
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::InsertBoard )
             );
         command_list->MapAction(
-            FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
+            FEposTracksEditorCommands::Get().NewSectionWithShotAtCurrentFrame,
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::InsertShot )
             );
 
         command_list->MapAction(
-            FCinematicBoardTrackEditorCommands::Get().ArrangeShotsManually,
+            FEposTracksEditorCommands::Get().ArrangeShotsManually,
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::SetArrangeSections, EArrangeSections::Manually ),
             FCanExecuteAction::CreateLambda( []() { return true; } ),
             FIsActionChecked::CreateRaw( this, &FCinematicBoardTrackEditor::IsArrangeSections, EArrangeSections::Manually )
         );
         command_list->MapAction(
-            FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnOneRow,
+            FEposTracksEditorCommands::Get().ArrangeShotsOnOneRow,
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::SetArrangeSections, EArrangeSections::OnOneRow ),
             FCanExecuteAction::CreateLambda( []() { return true; } ),
             FIsActionChecked::CreateRaw( this, &FCinematicBoardTrackEditor::IsArrangeSections, EArrangeSections::OnOneRow )
         );
         command_list->MapAction(
-            FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnTwoRows,
+            FEposTracksEditorCommands::Get().ArrangeShotsOnTwoRows,
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::SetArrangeSections, EArrangeSections::OnTwoRowsShifted ),
             FCanExecuteAction::CreateLambda( []() { return true; } ),
             FIsActionChecked::CreateRaw( this, &FCinematicBoardTrackEditor::IsArrangeSections, EArrangeSections::OnTwoRowsShifted )
@@ -124,12 +124,12 @@ FCinematicBoardTrackEditor::OnRelease() //override
     TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
     if( command_list )
     {
-        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
-        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
 
-        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsManually );
-        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnOneRow );
-        command_list->UnmapAction( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnTwoRows );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsManually );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsOnOneRow );
+        command_list->UnmapAction( FEposTracksEditorCommands::Get().ArrangeShotsOnTwoRows );
     }
 }
 
@@ -216,8 +216,8 @@ FCinematicBoardTrackEditor::HandleAddBoardComboButtonGetMenuContent()
 {
     FMenuBuilder menuBuilder( true, GetSequencer()->GetCommandBindings() );
 
-    menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
-    menuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
+    menuBuilder.AddMenuEntry( FEposTracksEditorCommands::Get().NewSectionWithShotAtCurrentFrame );
+    menuBuilder.AddMenuEntry( FEposTracksEditorCommands::Get().NewSectionWithBoardAtCurrentFrame );
 
     return menuBuilder.MakeWidget();
 }
@@ -365,9 +365,9 @@ FCinematicBoardTrackEditor::BuildTrackContextMenu( FMenuBuilder& ioMenuBuilder, 
         LOCTEXT( "ArrangeSectionsTooltip", "Arrange sections." ),
         FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioSubMenuBuilder )
                                         {
-                                            ioSubMenuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsManually );
-                                            ioSubMenuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnOneRow );
-                                            ioSubMenuBuilder.AddMenuEntry( FCinematicBoardTrackEditorCommands::Get().ArrangeShotsOnTwoRows );
+                                            ioSubMenuBuilder.AddMenuEntry( FEposTracksEditorCommands::Get().ArrangeShotsManually );
+                                            ioSubMenuBuilder.AddMenuEntry( FEposTracksEditorCommands::Get().ArrangeShotsOnOneRow );
+                                            ioSubMenuBuilder.AddMenuEntry( FEposTracksEditorCommands::Get().ArrangeShotsOnTwoRows );
                                         } )
     );
 

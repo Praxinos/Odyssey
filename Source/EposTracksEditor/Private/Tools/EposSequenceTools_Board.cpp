@@ -16,9 +16,11 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
+#include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
 #include "Shot/ShotSequence.h"
+#include "StoryNote.h"
 #include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Board"
@@ -627,6 +629,19 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
         }
 
         CloneInnerPlane( iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerMovieScene, iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
+    }
+
+    //---
+
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = EposSequenceHelpers::GetNotes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+
+    for( auto note_section : note_sections )
+    {
+        UStoryNote* original_note = note_section->GetNote();
+
+        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( result.mInnerSequence, original_note, iSequencer->GetRootMovieSceneSequence() );
+
+        note_section->SetNote( duplicate_note );
     }
 
     //---

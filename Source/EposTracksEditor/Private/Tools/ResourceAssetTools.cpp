@@ -16,6 +16,7 @@
 #include "ObjectTools.h"
 
 #include "Settings/EposTracksEditorSettings.h"
+#include "StoryNote.h"
 
 #define LOCTEXT_NAMESPACE "ResourceAssetTools"
 
@@ -544,5 +545,52 @@ ProjectAssetTools::CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMat
 
     return new_material;
 }
+
+//---
+
+//static
+UStoryNote*
+ProjectAssetTools::CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence )
+{
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+
+    UPackage* package = iRootSequence->GetPackage();
+    FString package_pathname = package->GetName(); // ie. /Game/MyStoryboard2
+    FString package_name = FPaths::GetBaseFilename( iSequence->GetPackage()->GetName() ); // ie. shot_0002_01
+
+    FString note_package_name;
+    FString note_asset_name;
+    assetToolsModule.Get().CreateUniqueAssetName( FPaths::Combine( package_pathname, TEXT( "Notes" ), package_name ), "_N_01", note_package_name, note_asset_name );
+
+    FString package_path = FPackageName::GetLongPackagePath( note_package_name );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( note_asset_name, package_path, UStoryNote::StaticClass(), nullptr );
+    UStoryNote* new_note = Cast<UStoryNote>( new_object );
+    check( new_note );
+
+    new_note->Text = TEXT( "Write a note here" ); // default text
+
+    return new_note;
+}
+
+//static
+UStoryNote*
+ProjectAssetTools::CloneNote( UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone, UMovieSceneSequence* iRootSequence )
+{
+    UPackage* package = iRootSequence->GetPackage();
+    FString package_pathname = package->GetName(); // ie. /Game/MyStoryboard2
+    FString package_name = FPaths::GetBaseFilename( iSequence->GetPackage()->GetName() ); // ie. shot_0002_01
+
+    FString note_package_name;
+    FString note_asset_name;
+    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    Module.Get().CreateUniqueAssetName( FPaths::Combine( package_pathname, TEXT( "Notes" ), package_name ), "_N_01", note_package_name, note_asset_name );
+
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_package_name );
+
+    UStoryNote* new_note = Cast<UStoryNote>( new_object );
+
+    return new_note;
+}
+
 
 #undef LOCTEXT_NAMESPACE

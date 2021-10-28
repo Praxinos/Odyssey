@@ -37,6 +37,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "EposNote",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "EposTracks",
       "Type": "Runtime",
       "LoadingPhase": "Default"

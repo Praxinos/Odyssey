@@ -24,7 +24,11 @@ class SBox;
 class SStoryboardPreviewViewport;
 class SStoryboardTransportRange;
 class SEditorViewport;
+class SSplitter;
 class SLevelViewport;
+class SNotesInViewport;
+class SNotesAsOverlay;
+class UStoryNote;
 
 struct FQualifiedFrameTime;
 struct FTypeInterfaceProxy;
@@ -189,6 +193,11 @@ private:
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
 
-    APlaneActor*    mPlaneToMove    { nullptr };
-    EScalePlane     mScalePlaneType { EScalePlane::kFitToCamera };
+    TSharedPtr<SSplitter> mNoteSplitter;
+
+    TWeakObjectPtr<APlaneActor>         mPlaneToMove;
+    EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
+    TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
+    TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
+    TSharedPtr<SNotesAsOverlay>         mWidgetNotesAsOverlay;
 };
