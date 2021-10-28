@@ -12,7 +12,8 @@
 #include "OdysseyBlock.h"
 #include "OdysseyTextureEditor.h"
 #include "ULISLoaderModule.h"
-#include "Factories/Texture2dFactoryNew.h"  
+#include "Factories/Texture2dFactoryNew.h"
+#include "IOdysseyLayerImageBlendingCapability.h"
 #include <ULIS3>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
@@ -59,6 +60,16 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
     MAP_ACTION(textureEditorCommands.DuplicateCurrentLayer, DuplicateCurrentLayer )
     MAP_ACTION(textureEditorCommands.DeleteCurrentLayer, DeleteCurrentLayer )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
 
     #undef MAP_ACTION
 }
@@ -305,6 +316,21 @@ FOdysseyTextureEditorLayerStackTab::DeleteCurrentLayer()
             mEditor->LayerStack()->DeleteLayer(mEditor->LayerStack()->GetCurrentLayer());
             mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block()->GetBlock());
             mEditor->DisplaySurface()->Invalidate();
+            mLayerStackView->RefreshView();
+        }
+    }
+}
+
+void
+FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
+{
+    TSharedPtr<IOdysseyLayer> currentLayer = mEditor->LayerStack()->GetCurrentLayer(); 
+    if( currentLayer )
+    {
+        if( currentLayer->ImplementsCapability( IOdysseyLayerImageBlendingCapability::GetGuid() ) )
+        {
+            IOdysseyLayerImageBlendingCapability* blendingCapability = currentLayer->GetCapability<IOdysseyLayerImageBlendingCapability>();
+            blendingCapability->SetOpacity( FMath::Clamp( iOpacity, 0.f , 1.f ) );
             mLayerStackView->RefreshView();
         }
     }

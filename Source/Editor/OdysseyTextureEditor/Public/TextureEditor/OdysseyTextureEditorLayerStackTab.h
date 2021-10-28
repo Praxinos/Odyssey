@@ -41,6 +41,7 @@ private:
     virtual void CreateNewLayer();
     virtual void DuplicateCurrentLayer();
     virtual void DeleteCurrentLayer();
+    virtual void ChangeLayerOpacity(float iOpacity);
 
 private:
     FOdysseyTextureEditor* mEditor;
