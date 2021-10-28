@@ -130,6 +130,8 @@ UMovieSceneNoteTrack::IsAMasterTrack() const
 
 //---
 
+#if WITH_EDITORONLY_DATA
+
 int32
 UMovieSceneNoteTrack::GetRowHeight() const
 {
@@ -141,5 +143,7 @@ UMovieSceneNoteTrack::SetRowHeight( int32 NewRowHeight )
 {
     RowHeight = FMath::Max( 16, NewRowHeight );
 }
+
+#endif
 
 #undef LOCTEXT_NAMESPACE

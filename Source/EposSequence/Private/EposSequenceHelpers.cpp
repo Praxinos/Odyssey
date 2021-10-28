@@ -360,10 +360,12 @@ EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* 
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
     TArray<UMovieSceneTrack*> tracks = movie_scene->GetMasterTracks();
+#if WITH_EDITORONLY_DATA
     tracks.StableSort( []( const UMovieSceneTrack& iA, const UMovieSceneTrack& iB )
                        {
                            return iA.GetSortingOrder() < iB.GetSortingOrder();
                        } );
+#endif
 
     for( auto track : tracks )
     {
