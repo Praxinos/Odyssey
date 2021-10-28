@@ -9,6 +9,8 @@
 #include "OdysseyFolderLayer.h"
 #include "PropertyEditorModule.h"
 #include "Modules/ModuleManager.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 
 #define LOCTEXT_NAMESPACE "SOdysseyFolderLayerNodePropertyView"
@@ -23,6 +25,8 @@ SOdysseyFolderLayerNodePropertyView::~SOdysseyFolderLayerNodePropertyView()
 
 void SOdysseyFolderLayerNodePropertyView::Construct( const FArguments& InArgs, TSharedRef<IOdysseyBaseLayerNode> iNode )
 {
+    mTmpFolderOpacity = -1;
+
     FOdysseyLayerStack* odysseyLayerStackPtr = iNode->GetLayerStack().GetLayerStackData();
     IOdysseyLayer::eType layerType = iNode->GetLayerDataPtr()->GetType();
 
@@ -68,13 +72,13 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
                 SNew(SSpinBox<int>)
                 //.Style( FEditorStyle::Get(), "NoBorder" )
                 .Value(this, &SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue, iFolderLayer)
-                .MinValue(0)
-                .MaxValue(100)
                 .Delta(1)
+                .LinearDeltaSensitivity( 15 )
+                .TypeInterface(MakeShared<TNumericUnitTypeInterface<int>>(EUnit::Percentage))
                 .OnValueChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged, iFolderLayer, iLayerStack, iFolderNode )
                 .OnValueCommitted(this, &SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue, iFolderLayer, iLayerStack, iFolderNode )
-             ]
-         ]
+            ]
+        ]
         + SVerticalBox::Slot()
         .Padding(FMargin(0.f, 3.f, 0.f, 0.f))
         .AutoHeight()
@@ -88,20 +92,20 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
                 .Text(LOCTEXT("Blending Mode", "Blending Mode"))
             ]
 
-             + SHorizontalBox::Slot()
-             .FillWidth(0.5f)
-             .VAlign( VAlign_Center )
-             [
-                SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
-                .OptionsSource(&mBlendingModes)
-                .OnGenerateWidget(this, &SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem)
-                .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, iFolderLayer, iLayerStack, iFolderNode )
-                .Content()
-                [
-                    //The text in the main button
-                    CreateBlendingModeTextWidget( iFolderLayer )
-                ]
-             ]
+            + SHorizontalBox::Slot()
+            .FillWidth(0.5f)
+            .VAlign( VAlign_Center )
+            [
+               SAssignNew( mBlendingModeComboBox, SComboBox<TSharedPtr<FText>>)
+               .OptionsSource(&mBlendingModes)
+               .OnGenerateWidget(this, &SOdysseyFolderLayerNodePropertyView::GenerateBlendingComboBoxItem)
+               .OnSelectionChanged(this, &SOdysseyFolderLayerNodePropertyView::HandleOnBlendingModeChanged, iFolderLayer, iLayerStack, iFolderNode )
+               .Content()
+               [
+                   //The text in the main button
+                   CreateBlendingModeTextWidget( iFolderLayer )
+               ]
+            ]
         ];
 
 
@@ -112,19 +116,18 @@ TSharedRef<SWidget> SOdysseyFolderLayerNodePropertyView::ConstructPropertyViewFo
 
 int SOdysseyFolderLayerNodePropertyView::GetLayerOpacityValue( TSharedPtr<FOdysseyFolderLayer> iFolderLayer ) const
 {
-    return iFolderLayer->GetOpacity() * 100;
+    return mTmpFolderOpacity >= 0.0f ? mTmpFolderOpacity : iFolderLayer->GetOpacity() * 100;
 }
 
 
 void SOdysseyFolderLayerNodePropertyView::HandleLayerOpacityValueChanged( int iOpacity, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
 {
-    iFolderLayer->SetOpacity( iOpacity / 100.f );
-    iFolderNode->RefreshOpacityText();
+    mTmpFolderOpacity = FMath::Clamp( iOpacity, 0, 100 );
 }
 
 void SOdysseyFolderLayerNodePropertyView::SetLayerOpacityValue( int iOpacity, ETextCommit::Type iType, TSharedPtr<FOdysseyFolderLayer> iFolderLayer, FOdysseyLayerStack* iLayerStack, TSharedRef<FOdysseyFolderLayerNode> iFolderNode  )
 {
-    iFolderLayer->SetOpacity( iOpacity / 100.f );
+    iFolderLayer->SetOpacity( FMath::Clamp( iOpacity, 0, 100 ) / 100.f );
     iFolderNode->RefreshOpacityText();
 }
 
