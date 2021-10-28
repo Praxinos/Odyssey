@@ -7,6 +7,30 @@
 - open `pre-commit` file
 - add this line after the last `fi`: `exec .githooks/check.py`
 
+# Making a Package
+
+- open a shell/cmd at the root of the plugin
+- execute `build-package.py ...`
+
+## Examples
+
+- display all options:  
+    ```
+    build-package.py -h
+    ```
+- build for beta (local):  
+    ```
+    build-package.py -t beta
+    ```
+- build for beta (with upload on pcloud):  
+    ```
+    build-package.py -t beta -u
+    ```
+- build for marketplace (with upload on pcloud):  
+    ```
+    build-package.py -t marketplace -u
+    ```
+
 # Commit comment rules
 
 ## Minimal Structure
@@ -82,6 +106,8 @@ refactor(EposTracksEditor): move Board* headers to private
 feat: add key thumbnail section for single cameracut track
 
 this may be improved because base class FTrackEditorThumbnail is not virtualized and FThumbnailSection class owns a plain object of FTrackEditorThumbnail class instead of a pointer
+
+close #12345
 ```
 </details>
 
