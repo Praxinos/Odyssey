@@ -283,6 +283,9 @@ FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList
         FEposSequenceEditorCommands::Get().OpenTrackEditorSettings,
         FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
     );
+
+    TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
+    levelEditor->AppendCommands( CommandList.ToSharedRef() );
 }
 
 //--- FGCObject interface
