@@ -156,6 +156,8 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     {
         Toolkit = GetToolkit();
         Toolkit->Init(Owner->GetToolkitHost());
+        TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
+        levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
 
     // Change the engine to draw selected objects without a color boost, but unselected objects will
