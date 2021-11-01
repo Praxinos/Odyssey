@@ -93,7 +93,7 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
     {
         mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-        //TODO -> Get previous point instead of passing the same point twice here ?
+        //TODO -> Get previous point instead of passing the same point twice here ? Requires to stock the previous point. Is there a better and cleaner method ?
         mEditor->PaintEngine()->BeginStroke(mCurrentStrokeRay.mStrokePoint, mCurrentStrokeRay.mStrokePoint);
     }
 

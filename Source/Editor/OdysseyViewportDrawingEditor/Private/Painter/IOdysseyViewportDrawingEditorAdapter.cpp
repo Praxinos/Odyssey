@@ -58,17 +58,6 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     mCurrentStrokeRay.mStrokePoint.y = iY;
     mCurrentStrokeRay.mStrokePoint.keysDown = mKeysPressed;
 
-    if (mState == eState::kIdleReady)
-    {
-        //TODO: save current point in viewport ?
-        //auto paintengine = mOdysseyPainterEditor->PaintEngine();
-
-        if (long(mCurrentStrokeRay.mStrokePoint.x) == long(lastRay.mStrokePoint.x) && long(mCurrentStrokeRay.mStrokePoint.y) == long(lastRay.mStrokePoint.y))
-            return true;
-
-        //paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
-    }
-
     return true;
 }
 
@@ -219,7 +208,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const 
 
 void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex)
 {
-    if ( !IsReadyToDraw() || !mLastKnownViewport )
+    if ( !IsReadyToDraw() || !mLastKnownViewport || !iWidget.IsValid() )
         return;
 
     //We only treat events on viewports
@@ -241,11 +230,13 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     const FViewportCursorLocation mouseViewportRay(view, viewportClient, mLastKnownViewport->GetMouseX(), mLastKnownViewport->GetMouseY());
 
     //Init our StrokeRay, having all the basic info to draw 
+    float scaleDPI = iWidget.Pin().Get()->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D positionInViewport = iWidget.Pin().Get()->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
     FOdysseyStrokeRay strokeRay;
     strokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     strokeRay.mRayDirection = mouseViewportRay.GetDirection();
-    strokeRay.mStrokePoint = FOdysseyStrokePoint( mLastKnownViewport->GetMouseX()
-                                                , mLastKnownViewport->GetMouseY() 
+    strokeRay.mStrokePoint = FOdysseyStrokePoint( positionInViewport.X
+                                                , positionInViewport.Y
                                                 , iState.GetZ()
                                                 , iState.GetPressure()
                                                 , iState.GetTimer()
@@ -283,7 +274,7 @@ void IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged(const TWeakPtr<S
     }
     else
     {
-        //TODO save current point in viewport ?
+        mCurrentStrokeRay = strokeRay;
     }
 
     mStylusLastEventTime = std::chrono::steady_clock::now();
