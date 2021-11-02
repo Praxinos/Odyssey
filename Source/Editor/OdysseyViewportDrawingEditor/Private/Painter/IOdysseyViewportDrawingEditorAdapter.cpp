@@ -66,6 +66,20 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     if (mLastKnownViewport != iViewport)
         mLastKnownViewport = iViewport;
 
+#if PLATFORM_MAC
+    if (iEvent == EInputEvent::IE_Pressed && iKey == EKeys::LeftMouseButton)
+    {
+        //No need to destroy it, it auto destroys itself
+        //This is only acceptable because it is a HUGE patch
+        //PATCH: Temporary viewportClient created for overriding highPrecision mouse events (useful for mac)
+        //TODO: remove this when we have a solution. It hurts to see it here
+        FOdysseyViewportDrawingEditorViewportClient* viewportClient = new FOdysseyViewportDrawingEditorViewportClient();
+        viewportClient->SetViewport(mLastKnownViewport);
+        viewportClient->SetViewportClient(mLastKnownViewport->GetClient());
+        mLastKnownViewport->SetViewportClient(viewportClient);
+    }
+#endif
+
     for (int i = mKeysPressed.Num() - 1; i >= 0; i--)
     {
         if (!iViewport->KeyState(mKeysPressed[i]))
