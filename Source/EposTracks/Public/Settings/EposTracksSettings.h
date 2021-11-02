@@ -42,6 +42,6 @@ class EPOSTRACKS_API UEposTracksSettings
 
 public:
     /** Specifies Board track stuff. */
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FBoardTrackSettings BoardTrackSettings;
 };

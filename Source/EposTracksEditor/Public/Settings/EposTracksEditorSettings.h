@@ -101,17 +101,17 @@ private:
     void UpdateValues();
 
 public:
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
 
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FTextureSettings TextureSettings;
 
     /** The default duration for new section in seconds. */
-    UPROPERTY(config, EditAnywhere, Category = BoardTrack, meta=(ClampMin=0.1f, Units=s))
+    UPROPERTY(config, EditAnywhere, Category=BoardTrack, meta=(ClampMin=0.1f, Units=s))
     float DefaultSectionDuration { 3 };
 
     /** Specifies Board track stuff. */
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FBoardSectionSettings BoardTrackSettings;
 };

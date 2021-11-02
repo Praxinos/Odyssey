@@ -78,14 +78,14 @@ public:
     // ./Source/EposTracksEditor/Private/EposTracksEditorHelpers.cpp
 
     /** Specifies Board stuff. */
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FBoardSettings BoardSettings;
 
     /** Specifies Shot stuff. */
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FShotSettings ShotSettings;
 
     /** Specifies Note stuff. */
-    UPROPERTY(config, EditAnywhere, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FNoteSettings NoteSettings;
 };
