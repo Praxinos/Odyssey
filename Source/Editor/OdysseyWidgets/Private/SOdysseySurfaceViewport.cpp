@@ -575,7 +575,7 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue, const FVector2D& iZoomPositi
 void
 SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
 {
-    ZoomValue = FMath::Clamp(ZoomValue, MinZoom, MaxZoom);
+    ZoomValue = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
 
     FVector2D inverse(1.f, -1.f);
     FVector2D translation = iZoomPosition * inverse;
@@ -583,23 +583,6 @@ SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
     mTransform = mTransform.Concatenate(FTransform2D(-translation));
     mTransform = mTransform.Concatenate(FTransform2D(ZoomValue / GetZoom()));
     mTransform = mTransform.Concatenate(FTransform2D(translation));
-
-    IOdysseySurface* surface = GetSurface();
-    if (surface)
-    {
-        UTexture* texture = surface->Texture();
-        if (texture)
-        {
-            if (GetZoom() >= 1.0 && texture->Filter != TextureFilter::TF_Nearest)
-            {
-                FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Nearest);
-            }
-            else if (GetZoom() < 1.0 && texture->Filter != TextureFilter::TF_Bilinear)
-            {
-                FObjectEditorUtils::SetPropertyValue(texture, "Filter", TextureFilter::TF_Bilinear);
-            }
-        }
-    }
 }
 
 void

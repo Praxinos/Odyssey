@@ -151,4 +151,7 @@ private:
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;
+
+    FTexture                                mNearestNeighbourTexture;
+    FTexture                                mBilinearTexture;
 };

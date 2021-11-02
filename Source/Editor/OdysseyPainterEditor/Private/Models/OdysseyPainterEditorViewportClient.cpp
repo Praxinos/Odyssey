@@ -57,6 +57,8 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     , mPivotPointRatio( FVector2D( 0.5, 0.5 ) )
     , mCurrentToolState( eState::kIdle )
     , mIsCapturedByStylus(false)
+    , mNearestNeighbourTexture()
+    , mBilinearTexture()
 {
     check( // mOdysseyPainterEditor.IsValid() &&
            mOdysseyPainterEditorViewportPtr.IsValid() );
@@ -70,6 +72,20 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 
     InputSubsystem->AddMessageHandler( *this );
     InputSubsystem->OnStylusInputChanged().BindRaw( this, &FOdysseyPainterEditorViewportClient::OnStylusInputChanged );
+
+    ENQUEUE_RENDER_COMMAND(InitOdysseyPainterEditorViewportClientTextures)(
+        [&](FRHICommandListImmediate& RHICmdList)
+        {
+            FSamplerStateInitializerRHI SamplerStateInitializerNN(SF_Point , AM_Clamp, AM_Clamp, AM_Clamp);
+            mNearestNeighbourTexture.SamplerStateRHI = RHICreateSamplerState(SamplerStateInitializerNN);
+            FSamplerStateInitializerRHI SamplerStateInitializerB(SF_Bilinear , AM_Clamp, AM_Clamp, AM_Clamp);
+            mBilinearTexture.SamplerStateRHI = RHICreateSamplerState(SamplerStateInitializerB);
+        }
+    );
+    
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
 
     ModifyCheckerboardTextureColors();
 }
@@ -106,6 +122,9 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     UTexture* texture       = surface->Texture();
     if (!texture)
         return;
+
+    mNearestNeighbourTexture.TextureRHI = texture->Resource->TextureRHI;
+    mBilinearTexture.TextureRHI = texture->Resource->TextureRHI;
 
     uint32 width = 0;
     uint32 height = 0;
@@ -160,7 +179,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw Drawing Surface
     if( texture->Resource != nullptr )
     {
-        FCanvasTileItem tileItem(pan, texture->Resource, FVector2D( width, height ), FLinearColor::White );
+        FCanvasTileItem tileItem(pan, GetZoom() <= 1.0 ? &mBilinearTexture : &mNearestNeighbourTexture, FVector2D( width, height ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
