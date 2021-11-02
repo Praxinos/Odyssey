@@ -103,7 +103,7 @@ FOdysseyTexture2DWrapper::FinalizeSurface()
 {
     if (mSurface)
     {
-        mSurface->Block()->GetBlock()->SetOnInvalid(::ul3::FOnInvalid());
+        mSurface->Block()->GetBlock()->OnInvalid(::ULIS::FOnInvalidBlock());
         delete mSurface;
         mSurface = nullptr;
 	}
@@ -142,7 +142,7 @@ FOdysseyTexture2DWrapper::FindOrCreateTextureUserData() const
         return userData;
 
     //Init user data
-    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
+    ::ULIS::eFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
     userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
     userData->GetLayerStack()->Init(mTexture->Source.GetSizeX(), mTexture->Source.GetSizeY(), format);
     mTexture->AddAssetUserData( userData );

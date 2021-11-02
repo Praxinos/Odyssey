@@ -10,9 +10,10 @@
 #include "OdysseySmoothingTypes.h"
 #include "OdysseyTransactionnable.h"
 #include "OdysseyBrushBlueprint.h"
-#include <ULIS3>
+#include <ULIS>
 #include <queue>
 #include <functional>
+#include <chrono>
 
 class UOdysseyBrushAssetBase;
 class FOdysseyDrawingState;
@@ -34,21 +35,21 @@ public:
 
     // User Stroke delegates
     DECLARE_MULTICAST_DELEGATE(FOnStrokeBegin);
-	DECLARE_MULTICAST_DELEGATE(FOnStrokeStep);
-	DECLARE_MULTICAST_DELEGATE(FOnStrokeEnd);
-	DECLARE_MULTICAST_DELEGATE(FOnStrokeAbort);
+    DECLARE_MULTICAST_DELEGATE(FOnStrokeStep);
+    DECLARE_MULTICAST_DELEGATE(FOnStrokeEnd);
+    DECLARE_MULTICAST_DELEGATE(FOnStrokeAbort);
 
     
     // Any Paint delegates (even Ticks)
     DECLARE_MULTICAST_DELEGATE(FOnPaintBegin);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintStep, const TArray<::ul3::FRect>& iChangedTiles);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintEnd, const TArray<::ul3::FRect>& iChangedTiles);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintAbort, const TArray<::ul3::FRect>& iChangedTiles);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintStep, const TArray<::ULIS::FRectI>& iChangedTiles);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintEnd, const TArray<::ULIS::FRectI>& iChangedTiles);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPaintAbort, const TArray<::ULIS::FRectI>& iChangedTiles);
 
     /* 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreviewBlockTilesChanged, const TArray<::ul3::FRect>&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesWillChange, const TArray<::ul3::FRect>&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesChanged, const TArray<::ul3::FRect>&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreviewBlockTilesChanged, const TArray<::ULIS::FRectI>&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesWillChange, const TArray<::ULIS::FRectI>&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEditedBlockTilesChanged, const TArray<::ULIS::FRectI>&);
     */
 
 protected:
@@ -70,7 +71,7 @@ public:
     
     bool PaintInitialize(ePaintState iPaintState);
     bool PaintCheck();
-    void PaintStep();
+    void PaintStep(bool iForceFinish);
     void PaintFinalize();
     void PaintAbort();
 
@@ -92,31 +93,31 @@ public:
     void Brush(UOdysseyBrush* iBrush);
     void BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool iApplyOverrides);
     void IsLocked(TAttribute<bool> iIsLocked);
-    void SetColor( const ::ul3::FPixelValue& iColor );
+    void SetColor( const ::ULIS::FColor& iColor );
 
     void SetSizeModifier( float iValue );
     void SetOpacityModifier( float iValue );
     void SetFlowModifier( float iValue );
-    void SetBlendingModeModifier( ::ul3::eBlendingMode iValue );
-    void SetAlphaModeModifier( ::ul3::eAlphaMode iValue );
+    void SetBlendingModeModifier( ::ULIS::eBlendMode iValue );
+    void SetAlphaModeModifier( ::ULIS::eAlphaMode iValue );
 
 public:
     // Getters
-	// FOdysseyBlock* PreviewBlock(); //TODO: Replace with new system OriginalBlock/EditedBlock/PaintBlock
-	FOdysseyBlock* PaintBlock();
+    // FOdysseyBlock* PreviewBlock(); //TODO: Replace with new system OriginalBlock/EditedBlock/PaintBlock
+    FOdysseyBlock* PaintBlock();
     FOdysseyBlock* EditedBlock();
     FOdysseyBlock* OriginalBlock();
 
     UOdysseyBrush* Brush() const;
     UOdysseyBrushAssetBase* BrushInstance() const;
     bool IsLocked() const;
-    const ::ul3::FPixelValue& GetColor() const;
+    const ::ULIS::FColor& GetColor() const;
 
     float GetSizeModifier() const;
     float GetOpacityModifier() const;
     float GetFlowModifier() const;
-    ::ul3::eBlendingMode GetBlendingModeModifier() const;
-    ::ul3::eAlphaMode GetAlphaModeModifier() const;
+    ::ULIS::eBlendMode GetBlendingModeModifier() const;
+    ::ULIS::eAlphaMode GetAlphaModeModifier() const;
     
     FOdysseyStrokeOptions* StrokeOptions();
     bool GetSmoothingCatchUp() const;
@@ -147,10 +148,10 @@ private:
     void ClearPaintBlock();
 
     // Copies EditedBlock Rects to Original Block
-    void UpdateOriginalBlock(bool iForceRefresh = false);
+    void UpdateOriginalBlock();
 
     // Blends PaintBlock on OriginalBlock and stores the result in EditedBlock
-    void UpdateEditedBlock();
+    void UpdateEditedBlock(bool iForceFinish);
 
 private:
     // Listeners
@@ -168,13 +169,13 @@ protected:
     void UpdateInvalidMaps();
 
     // Updates the invalid tiles structure from the given Rect
-    void UpdateInvalidMaps(::ul3::FRect iRect);
+    void UpdateInvalidMaps(::ULIS::FRectI iRect);
 
     // Returns the Sub Stroke Invalid Tiles structure 
-    TArray<::ul3::FRect> GetPaintBlockInvalidTiles();
+    TArray<::ULIS::FRectI> GetPaintBlockInvalidTiles();
 
     // Returns the Stroke Invalid Tiles structure 
-    TArray<::ul3::FRect> GetEditedBlockInvalidTiles();
+    TArray<::ULIS::FRectI> GetEditedBlockInvalidTiles();
 
     // Reallocates the Invalid Maps to match EditedBlock
     void ReallocInvalidMaps();
@@ -192,10 +193,10 @@ protected:
     void CopyInvalidMap(InvalidTileMap iSrcMap, InvalidTileMap ioDstMap);
     
     // MISC - Retrieve the Rect from a specific Tile
-    ::ul3::FRect MakeTileRect( int iTileX, int iTileY );
+    ::ULIS::FRectI MakeTileRect( int iTileX, int iTileY );
 
     // MISC - Set the InvalidMap tiles value from the given rect
-    void SetMapWithRect( InvalidTileMap ioMap, const ::ul3::FRect& iRect, bool iValue );
+    void SetMapWithRect( InvalidTileMap ioMap, const ::ULIS::FRectI& iRect, bool iValue );
 
 private:
     // Stroke Helpers
@@ -219,15 +220,15 @@ private:
 public:
     // Delegates
     FOnStrokeBegin& OnStrokeBegin() { return mOnStrokeBeginDelegate; }
-	FOnStrokeStep& OnStrokeStep() { return mOnStrokeStepDelegate; }
-	FOnStrokeEnd& OnStrokeEnd() { return mOnStrokeEndDelegate; }
-	FOnStrokeAbort& OnStrokeAbort() { return mOnStrokeAbortDelegate; }
+    FOnStrokeStep& OnStrokeStep() { return mOnStrokeStepDelegate; }
+    FOnStrokeEnd& OnStrokeEnd() { return mOnStrokeEndDelegate; }
+    FOnStrokeAbort& OnStrokeAbort() { return mOnStrokeAbortDelegate; }
 
     
-	FOnPaintBegin& OnPaintBegin() { return mOnPaintBeginDelegate; }
-	FOnPaintStep& OnPaintStep() { return mOnPaintStepDelegate; }
+    FOnPaintBegin& OnPaintBegin() { return mOnPaintBeginDelegate; }
+    FOnPaintStep& OnPaintStep() { return mOnPaintStepDelegate; }
     FOnPaintEnd& OnPaintEnd() { return mOnPaintEndDelegate; }
-	FOnPaintAbort& OnPaintAbort() { return mOnPaintAbortDelegate; }
+    FOnPaintAbort& OnPaintAbort() { return mOnPaintAbortDelegate; }
 
     /* FOnPreviewBlockTilesChanged& OnPreviewBlockTilesChanged() { return mOnPreviewBlockTilesChangedDelegate; }
     FOnEditedBlockTilesWillChange& OnEditedBlockTilesWillChange() { return mOnEditedBlockTilesWillChangeDelegate; }
@@ -250,9 +251,9 @@ protected:
     TAttribute<bool>                    mIsLocked;
     FOdysseyStrokeOptions               mStrokeOptions;
 
-	FOdysseyBlock*                      mEditedBlock; // Holds th original block to edit
-	FOdysseyBlock*                      mPaintBlock; //Holds the stroke tiles
-    FOdysseyBlock*                      mOriginalBlock; //Holds the stroke tiles
+    FOdysseyBlock*                      mEditedBlock; // Holds the original block to edit
+    FOdysseyBlock*                      mPaintBlock; //Holds the stroke tiles
+    FOdysseyBlock*                      mOriginalBlock; //Holds the stroke tiles // ? Unclear
 
     UOdysseyBrushAssetBase*             mBrushInstance;
 
@@ -267,13 +268,13 @@ protected:
     InvalidTileMap                      mPaintBlockInvalidMap;
     InvalidTileMap                      mEditedBlockInvalidMap;
 
-    ::ul3::FPixelValue                  mColor;
+    ::ULIS::FColor                      mColor;
 
     float                               mSizeModifier;
     float                               mOpacityModifier;
     float                               mFlowModifier;
-    ::ul3::eBlendingMode                mBlendingModeModifier;
-    ::ul3::eAlphaMode                   mAlphaModeModifier;
+    ::ULIS::eBlendMode                  mBlendingModeModifier;
+    ::ULIS::eAlphaMode                  mAlphaModeModifier;
     float                               mStepValue;
 
     IOdysseyInterpolation*              mInterpolator;
@@ -282,27 +283,26 @@ protected:
     
     bool                                mIsSmoothingEnabled;
     bool                                mIsRealTime;
-    //bool                                mIsCatchUp;
     bool                                mIsAdaptativeStep;
 
     std::queue<std::function<void()>>   mDrawingQueue;
 
     FOnStrokeBegin                      mOnStrokeBeginDelegate;
-	FOnStrokeStep                       mOnStrokeStepDelegate;
-	FOnStrokeEnd                        mOnStrokeEndDelegate;
-	FOnStrokeAbort                      mOnStrokeAbortDelegate;
+    FOnStrokeStep                       mOnStrokeStepDelegate;
+    FOnStrokeEnd                        mOnStrokeEndDelegate;
+    FOnStrokeAbort                      mOnStrokeAbortDelegate;
 
     FOnPaintBegin                       mOnPaintBeginDelegate;
-	FOnPaintStep                        mOnPaintStepDelegate;
+    FOnPaintStep                        mOnPaintStepDelegate;
     FOnPaintEnd                         mOnPaintEndDelegate;
-	FOnPaintAbort                       mOnPaintAbortDelegate;
+    FOnPaintAbort                       mOnPaintAbortDelegate;
 
     std::chrono::steady_clock::time_point mLastStrokeTimePoint;
 
     TArray<FOdysseyDrawingState*>       mDrawingStates;
 
 public:
-    FOdysseySurfaceTexture2DEditable*            mBrushCursorPreviewSurface;
+    FOdysseySurfaceTexture2DEditable*   mBrushCursorPreviewSurface;
     FVector2D                           mBrushCursorPreviewShift;
     long long                           mLastBrushCursorComputationTime;
     bool                                mBrushCursorInvalid;

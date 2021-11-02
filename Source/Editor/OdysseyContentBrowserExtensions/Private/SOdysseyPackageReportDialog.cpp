@@ -355,17 +355,17 @@ SOdysseyPackageReportDialog::GetSelectedExportImageFormat() const
     return mExportFormat;
 }
 
-::ul3::eImageFormat
+::ULIS::eFileFormat
 SOdysseyPackageReportDialog::GetUlisExportImageFormat( TEnumAsByte<EExportImageFormat> iExportImageFormat )
 {
     switch( iExportImageFormat )
     {
-        case ExportImageFormat_PNG:          return ::ul3::IM_PNG;
-        case ExportImageFormat_BMP:          return ::ul3::IM_BMP;
-        case ExportImageFormat_TGA:          return ::ul3::IM_TGA;
-        case ExportImageFormat_JPG:          return ::ul3::IM_JPG;
-        case ExportImageFormat_HDR:          return ::ul3::IM_HDR;
-        default: return ::ul3::IM_PNG;
+        case ExportImageFormat_PNG:          return ::ULIS::FileFormat_png;
+        case ExportImageFormat_BMP:          return ::ULIS::FileFormat_bmp;
+        case ExportImageFormat_TGA:          return ::ULIS::FileFormat_tga;
+        case ExportImageFormat_JPG:          return ::ULIS::FileFormat_jpg;
+        case ExportImageFormat_HDR:          return ::ULIS::FileFormat_hdr;
+        default: return ::ULIS::FileFormat_png;
     }
 }
 

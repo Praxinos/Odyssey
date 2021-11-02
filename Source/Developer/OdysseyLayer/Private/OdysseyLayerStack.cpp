@@ -1,5 +1,5 @@
-// Copyright © 2018-2020 Praxinos, Inc. All Rights Reserved.
-// IDDN FR.001.250001.002.S.P.2019.000.00000
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 #include "OdysseyLayerStack.h"
 #include "HAL/PlatformFilemanager.h"
 #include "Misc/FileHelper.h"
@@ -11,10 +11,10 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyLayerStack"
 
-::ul3::tFormat
-ComputationFormatForResultFormat(::ul3::tFormat iFormat)
+::ULIS::eFormat
+ComputationFormatForResultFormat(::ULIS::eFormat iFormat)
 {
-    return iFormat | ULIS3_W_ALPHA( 1 );
+    return  static_cast< ::ULIS::eFormat >( iFormat | ULIS_W_ALPHA( 1 ) );
 }
 
 //--------------------------------------------------------------------------------------
@@ -30,8 +30,8 @@ FOdysseyLayerStack::~FOdysseyLayerStack()
 FOdysseyLayerStack::FOdysseyLayerStack()
     : mWidth( -1 )
     , mHeight( -1 )
-    , mFormat(0)
-	, mOutputFormat(0)
+    , mFormat( static_cast< ::ULIS::eFormat >( 0 ) )
+    , mOutputFormat( static_cast< ::ULIS::eFormat >( 0 ) )
     , mLayerRoot(MakeShareable(new  FOdysseyRootLayer()))
     , mCurrentLayer( mLayerRoot )
     , mDrawingUndo( new  FOdysseyDrawingUndo(this) )
@@ -42,16 +42,16 @@ FOdysseyLayerStack::FOdysseyLayerStack()
 //--------------------------------------------------------------------------- Public API
 
 void
-FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ul3::tFormat iFormat)
+FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ULIS::eFormat iFormat)
 {
     mWidth = iWidth;
     mHeight = iHeight;
     mOutputFormat = iFormat;
-	mFormat = ComputationFormatForResultFormat(iFormat);
+    mFormat = ComputationFormatForResultFormat(iFormat);
 
-	mLayerRoot->ImageResultChangedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
-	mLayerRoot->NodeAdded().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
-	mLayerRoot->NodeRemoved().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+    mLayerRoot->ImageResultChangedDelegate().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+    mLayerRoot->NodeAdded().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
+    mLayerRoot->NodeRemoved().RemoveAll(this); //in case Init is walled twice, which should not happen.... but actually happened once
 
     mLayerRoot->ImageResultChangedDelegate().AddRaw(this, &FOdysseyLayerStack::OnLayerRootImageResultChanged);
     mLayerRoot->NodeAdded().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
@@ -59,123 +59,111 @@ FOdysseyLayerStack::Init(int iWidth,int iHeight, ::ul3::tFormat iFormat)
 }
 
 void
-FOdysseyLayerStack::ComputeResultInBlock( ::ul3::FBlock* ioBlock )
+FOdysseyLayerStack::ComputeResultInBlock( ::ULIS::FBlock* ioBlock )
 {
-    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, Width(), Height() );
-    ComputeResultInBlock(ioBlock, canvasRect);
+    ::ULIS::FRectI canvasRect = ::ULIS::FRectI(0, 0, Width(), Height());
+    ComputeResultInBlock( ioBlock, &canvasRect, 1 );
 }
 
-void ConvToPos(::ul3::FBlock* iSrc, ::ul3::FBlock* ioDst, const ::ul3::FVec2F& iPos)
+void
+FOdysseyLayerStack::ComputeResultInBlock( ::ULIS::FBlock* ioBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
-	IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-	uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    if (iNumRects == 0)
+        return;
 
-    ::ul3::FBlock* convDstBlock = ioDst;
-    ::ul3::FBlock* convSrcBlock = iSrc;
-    if (iSrc->Width() != ioDst->Width() || iSrc->Height() != ioDst->Height())
+    TArray< ::ULIS::FVec2I > pos;
+    TArray< ::ULIS::FVec2I > convPos;
+    TArray< ::ULIS::FVec2I > outputPos;
+    TArray< ::ULIS::FBlock* > output;
+    TArray< ::ULIS::FBlock* > conv;
+    pos.Reserve( iNumRects );
+    convPos.Reserve( iNumRects );
+    outputPos.Reserve( iNumRects );
+    output.Reserve( iNumRects );
+    conv.Reserve( iNumRects );
+    for( uint32 i = 0; i < iNumRects; ++i )
     {
-	    convDstBlock = new ::ul3::FBlock(iSrc->Width(), iSrc->Height(), ioDst->Format());
+        const ::ULIS::FVec2I rectPos = iRects[i].Position();
+        const ::ULIS::FVec2I rectSize = iRects[i].Size();
+        const bool predA = ioBlock->Format() != mOutputFormat;
+        const bool predB = mFormat != mOutputFormat;
+        pos.Emplace( rectPos );
+        convPos.Emplace( predA ? ::ULIS::FVec2I( 0 ) : predB ? ::ULIS::FVec2I( 0 ) : rectPos );
+        outputPos.Emplace( predA ?::ULIS:: FVec2I( 0 ) : rectPos );
+        output.Emplace( predA ? new ::ULIS::FBlock( rectSize.x, rectSize.y, mOutputFormat ) : ioBlock );
+        conv.Emplace( predB ? new ::ULIS::FBlock( rectSize.x, rectSize.y, mOutputFormat ) : output[i] );
     }
 
-    if (iSrc->HasAlpha() && !ioDst->HasAlpha())
-    {
-        convSrcBlock = new ::ul3::FBlock(iSrc->Width(), iSrc->Height(), iSrc->Format());
-        // ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, convSrcBlock, ::ul3::FPixelValue::FromGreyA8(0), convSrcBlock->Rect());
-        
+    TArray<::ULIS::FEvent> eventRender = mLayerRoot->RenderImage( conv.GetData(), iRects, convPos.GetData(), iNumRects );
 
-        //Use a copy and a Premultiply to accomplish the same behaviour as a Fill background with black if we keep only non alpha components
-        ::ul3::Copy(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, iSrc, convSrcBlock, iSrc->Rect(), ::ul3::FVec2F(0, 0));
-        ::ul3::Premultiply(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, convSrcBlock);
-    }
-
-	::ul3::Conv(hULIS.ThreadPool()
-		, ULIS3_BLOCKING
-		, perfIntent
-		, hULIS.HostDeviceInfo()
-		, ULIS3_NOCB
-		, convSrcBlock
-		, convDstBlock);
-
-	::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iSrc->Width(), iSrc->Height());
-	::ul3::Copy(hULIS.ThreadPool()
-		, ULIS3_BLOCKING
-		, perfIntent
-		, hULIS.HostDeviceInfo()
-		, ULIS3_NOCB
-		, convDstBlock
-		, ioDst
-		, rect
-		, iPos);
-
-    if (convDstBlock != ioDst)
-        delete convDstBlock;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ::ULIS::Format_RGBA8 );
     
-    if (convSrcBlock != iSrc)
-        delete convSrcBlock;
+    TArray<::ULIS::FEvent> eventA;
+    TArray<::ULIS::FEvent> eventB;
+    eventA.SetNum(iNumRects);
+    eventB.SetNum(iNumRects);
+    for( uint32 i = 0; i < iNumRects; ++i )
+    {
+        const bool predA = conv[i] != output[i];
+        const bool predB = output[i] != ioBlock;
+        if( predA ) {
+            eventA[i] = ::ULIS::FEvent( ::ULIS::FOnEventComplete( [ &conv, i ]( const ::ULIS::FRectI& ) {
+                delete  conv[i];
+            } ) );
+            ctx.ConvertFormat(
+                  *conv[i]
+                , *output[i]
+                , ::ULIS::FRectI::Auto, outputPos[i]
+                , ::ULIS::FSchedulePolicy::MonoScanlines
+                , 1
+                , &eventRender[i]
+                , &eventA[i]
+            );
+            ctx.Flush();
+        } else {
+            ctx.Dummy_OP(1, &eventRender[i], &eventA[i]);
+            ctx.Flush();
+            //::ULIS::FContext::FinishEventNo_OP( &eventA, ULIS_NO_ERROR );
+        }
+
+        if( predB )
+        {
+            eventB[i] = ::ULIS::FEvent( ::ULIS::FOnEventComplete( [ &output, i ]( const ::ULIS::FRectI& ) {
+                delete  output[i];
+            } ) );
+            ctx.ConvertFormat(
+                  *output[i]
+                , *ioBlock
+                , ::ULIS::FRectI::Auto
+                , pos[i]
+                , ::ULIS::FSchedulePolicy::MonoScanlines
+                , 1
+                , &eventA[i]
+                , &eventB[i]
+            );
+            ctx.Flush();
+        }
+    }
+    ctx.Fence();
 }
 
 void
-FOdysseyLayerStack::ComputeResultInBlock( ::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect ) 
+FOdysseyLayerStack::ComputeResultInBlockWithBlockAsCurrentLayer(::ULIS::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
-	::ul3::FVec2F pos(iRect.x, iRect.y);
-	::ul3::FVec2F convPos(iRect.x, iRect.y);
-	::ul3::FVec2F outputPos(iRect.x, iRect.y);
-
-	//Set the output block
-	::ul3::FBlock* output = ioBlock;
-	if (ioBlock->Format() != mOutputFormat)
-	{
-		output = new ::ul3::FBlock(iRect.w, iRect.h, mOutputFormat);
-		outputPos.x = 0;
-		outputPos.y = 0;
-		convPos.x = 0;
-		convPos.y = 0;
-	}
-
-	//convBlock
-	::ul3::FBlock* convBlock = output;
-	if (mFormat != mOutputFormat)
-	{
-		convBlock = new ::ul3::FBlock(iRect.w, iRect.h, mFormat);
-		convPos.x = 0;
-		convPos.y = 0;
-	}
-
-	mLayerRoot->RenderImage(convBlock, iRect, convPos);
-
-	if (convBlock != output)
-	{
-		//Copy convblock (0, 0) to output (outputPos)
-		ConvToPos(convBlock, output, outputPos);
-		delete convBlock;
-	}
-
-	if (output != ioBlock)
-	{
-		//Copy output (0, 0) to ioBlock (pos)
-		ConvToPos(output, ioBlock, pos);
-		delete output;
-	}
-}
-
-void
-FOdysseyLayerStack::ComputeResultInBlockWithBlockAsCurrentLayer(::ul3::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ul3::FRect& iRect)
-{
-    if (!mCurrentLayer)
+    if( !mCurrentLayer )
         return;
 
     IOdysseyLayer::eType type = mCurrentLayer->GetType();
-    if (type != IOdysseyLayer::eType::kImage || !mCurrentLayer->IsVisible())
-    {
-        ComputeResultInBlock(ioBlock, iRect);
+    if( type != IOdysseyLayer::eType::kImage || !mCurrentLayer->IsVisible() ) {
+        ComputeResultInBlock( ioBlock, iRects, iNumRects );
         return;
     }
 
-    TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mCurrentLayer);
+    TSharedPtr< FOdysseyImageLayer > imageLayer = StaticCastSharedPtr< FOdysseyImageLayer >( mCurrentLayer );
     FOdysseyBlock* block = imageLayer->GetBlock();
-    imageLayer->SetBlock(iTempBlock, false, false);
-    ComputeResultInBlock(ioBlock, iRect);
-    imageLayer->SetBlock(block, false, false);
+    imageLayer->SetBlock( iTempBlock, false, false );
+    ComputeResultInBlock( ioBlock, iRects, iNumRects );
+    imageLayer->SetBlock( block, false, false );
 }
 
 int
@@ -194,16 +182,16 @@ FOdysseyLayerStack::Height() const
     return mHeight;
 }
 
-int
+::ULIS::eFormat
 FOdysseyLayerStack::Format() const
 {
-	return mFormat;
+    return mFormat;
 }
 
-int
+::ULIS::eFormat
 FOdysseyLayerStack::OutputFormat() const
 {
-	return mOutputFormat;
+    return mOutputFormat;
 }
 
 FVector2D
@@ -219,14 +207,14 @@ void
 FOdysseyLayerStack::AddLayer( TSharedPtr<IOdysseyLayer> iLayer, TSharedPtr<IOdysseyLayer> iParent, int iIndex )
 {
     //TODO: Adding a layer should only add a layer, not set the currentlayer aswell
-	if (iParent)
-	{
-		iParent->AddNode(iLayer, iIndex);
-	}
-	else
-	{
-		mLayerRoot->AddNode(iLayer, iIndex);
-	}
+    if (iParent)
+    {
+        iParent->AddNode(iLayer, iIndex);
+    }
+    else
+    {
+        mLayerRoot->AddNode(iLayer, iIndex);
+    }
     SetCurrentLayer(iLayer);
 }
 
@@ -259,7 +247,7 @@ FOdysseyLayerStack::SetLayerRoot(TSharedPtr<FOdysseyRootLayer> iLayerRoot)
     mLayerRoot->NodeAdded().AddRaw(this, &FOdysseyLayerStack::OnLayerAdded);
     mLayerRoot->NodeRemoved().AddRaw(this, &FOdysseyLayerStack::OnLayerRemoved);
 
-	mOnRootLayerChanged.Broadcast(oldValue);
+    mOnRootLayerChanged.Broadcast(oldValue);
     
     SetCurrentLayer(mLayerRoot);
 }
@@ -300,8 +288,8 @@ void
 FOdysseyLayerStack::SetCurrentLayer(TSharedPtr<IOdysseyLayer> iLayer)
 {
     TSharedPtr<IOdysseyLayer> oldValue = mCurrentLayer;
-	mCurrentLayer = iLayer;
-	mOnCurrentLayerChanged.Broadcast(oldValue);
+    mCurrentLayer = iLayer;
+    mOnCurrentLayerChanged.Broadcast(oldValue);
     //mOnLayerStackDirty.Broadcast();
 }
 
@@ -347,13 +335,19 @@ void FOdysseyLayerStack::MergeDownLayer(TSharedPtr<IOdysseyLayer> iLayer)
         return;
 
     TSharedPtr<FOdysseyImageLayer> srcLayerImage = StaticCastSharedPtr<FOdysseyImageLayer>(iLayer);
-	TSharedPtr<FOdysseyImageLayer> dstLayerImage = StaticCastSharedPtr<FOdysseyImageLayer>(dstLayer);
+    TSharedPtr<FOdysseyImageLayer> dstLayerImage = StaticCastSharedPtr<FOdysseyImageLayer>(dstLayer);
 
-    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, Width(), Height());
-    ::ul3::FVec2F pos( 0, 0 );
+    ::ULIS::FRectI canvasRect = ::ULIS::FRectI( 0, 0, Width(), Height());
+    ::ULIS::FVec2I pos( 0, 0 );
 
-    srcLayerImage->Blend(dstLayerImage->GetBlock()->GetBlock(), canvasRect, pos);
-    dstLayerImage->ImageResultChangedDelegate().Broadcast(nullptr);
+    auto lvalue = dstLayerImage->GetBlock()->GetBlock();
+
+    ::ULIS::FEvent eventBlend = ::ULIS::FEvent::NoOP();
+    srcLayerImage->Blend( &lvalue, &canvasRect, &pos, 1, &eventBlend);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(lvalue->Format());
+    ctx.Finish();
+
+    dstLayerImage->ImageResultChangedDelegate().Broadcast( nullptr, 0 );
     DeleteLayer( iLayer );
 }
 
@@ -363,13 +357,18 @@ void FOdysseyLayerStack::FlattenLayer(TSharedPtr<IOdysseyLayer> iLayer)
         return;
 
     TSharedPtr<FOdysseyFolderLayer> folderLayer = StaticCastSharedPtr<FOdysseyFolderLayer>(iLayer);
-	TSharedPtr<IOdysseyLayer> parent = folderLayer->GetParent();
+    TSharedPtr<IOdysseyLayer> parent = folderLayer->GetParent();
     int index = folderLayer->GetIndexInParent();
     TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(iLayer->GetName(), FVector2D(Width(), Height()), Format()) );
 
-    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, Width(), Height());
-    ::ul3::FVec2F pos( 0, 0 );
-    folderLayer->Blend(imageLayer->GetBlock()->GetBlock(), canvasRect, pos);
+    ::ULIS::FRectI canvasRect = ::ULIS::FRectI( 0, 0, Width(), Height());
+    ::ULIS::FVec2I pos( 0, 0 );
+    auto lvalue = imageLayer->GetBlock()->GetBlock();
+
+    ::ULIS::FEvent eventBlend = ::ULIS::FEvent::NoOP();
+    folderLayer->Blend(&lvalue, &canvasRect, &pos, 1, &eventBlend);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(lvalue->Format());
+    ctx.Finish();
 
     DeleteLayer(folderLayer);
     AddLayer(imageLayer, parent, index);
@@ -385,7 +384,7 @@ void FOdysseyLayerStack::DuplicateLayer(TSharedPtr<IOdysseyLayer> iLayer)
     AddLayer(clone, parent, index + 1);
 
     //Clone at the end so that every callbacks are called when changing current layer before duplicating
-	IOdysseyLayer::CloneChildren(iLayer, clone);
+    IOdysseyLayer::CloneChildren(iLayer, clone);
 }
 
 void
@@ -394,25 +393,27 @@ FOdysseyLayerStack::ClearCurrentLayer()
     if(mCurrentLayer->GetType() == FOdysseyImageLayer::eType::kImage)
     {
         TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mCurrentLayer);
-        ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, Width(), Height());
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), canvasRect );
-        imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
+        ctx.Clear( *(imageLayer->GetBlock()->GetBlock()) );
+        ctx.Finish();
+
+        imageLayer->ImageResultChangedDelegate().Broadcast( nullptr, 0 );
     }
 }
 
 void
-FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
+FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ULIS::ISample& iColor)
 {
     if(mCurrentLayer->GetType() == FOdysseyImageLayer::eType::kImage)
     {
         TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mCurrentLayer);
-        ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, Width(), Height());
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, imageLayer->GetBlock()->GetBlock(), iColor, canvasRect );
-        imageLayer->ImageResultChangedDelegate().Broadcast(nullptr);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
+        ctx.Fill( *(imageLayer->GetBlock()->GetBlock()), iColor );
+        ctx.Finish();
+
+        imageLayer->ImageResultChangedDelegate().Broadcast( nullptr, 0 );
     }
 }
 
@@ -420,10 +421,14 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ul3::IPixel& iColor)
 //-------------------------------------------------------------------------- Private API
 
 void
-FOdysseyLayerStack::OnLayerRootImageResultChanged(const ::ul3::FRect* iRect)
+FOdysseyLayerStack::OnLayerRootImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
-    ::ul3::FRect rect(0, 0, Width(), Height());
-    mOnImageResultChanged.Broadcast(iRect ? *iRect : rect);
+    if( iRects && iNumRects ) {
+        mOnImageResultChanged.Broadcast( iRects, iNumRects );
+    } else {
+        ::ULIS::FRectI rect( 0, 0, Width(), Height() );
+        mOnImageResultChanged.Broadcast( &rect, 1 );
+    }
 }
 
 void
@@ -441,20 +446,20 @@ FOdysseyLayerStack::OnLayerRemoved(TSharedPtr<IOdysseyLayer> iNode, TSharedPtr<I
 // Custom serialization version for FOdysseyLayerStack
 struct FOdysseyLayerStackObjectVersion
 {
-	enum Type
-	{
-		// Before any version changes were made
-		SavePixelFormat,
-		
-		VersionPlusOne,
-		LatestVersion = VersionPlusOne - 1
-	};
+    enum Type
+    {
+        // Before any version changes were made
+        SavePixelFormat,
+        
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
 
-	// The GUID for this custom version number
-	const static FGuid GUID;
+    // The GUID for this custom version number
+    const static FGuid GUID;
 
 private:
-	FOdysseyLayerStackObjectVersion() {}
+    FOdysseyLayerStackObjectVersion() {}
 };
 
 const FGuid FOdysseyLayerStackObjectVersion::GUID(0x09295A41, 0x4809652E, 0xBE684D8E, 0x5BBAC5E0);
@@ -466,42 +471,49 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
     if( !ioSaveLayerStack )
         return Ar;
 
-	//Set the Object Version
-	Ar.UsingCustomVersion(FOdysseyLayerStackObjectVersion::GUID);
+    //Set the Object Version
+    Ar.UsingCustomVersion(FOdysseyLayerStackObjectVersion::GUID);
 
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;
 
     //WARNING: Here loading the root layer is not creating a new pointer for it in operator <<
-	// This is a special behaviour only for the root layer
-	TSharedPtr<IOdysseyLayer> layer = ioSaveLayerStack->mLayerRoot;
-	Ar << (layer);
-    
-    if (Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat)
+    // This is a special behaviour only for the root layer
+    TSharedPtr<IOdysseyLayer> layer = ioSaveLayerStack->mLayerRoot;
+    Ar << (layer);
+
+    if( Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat )
     {
-        Ar << ioSaveLayerStack->mOutputFormat;
+        uint32 fmt = static_cast< uint32 >( ioSaveLayerStack->mOutputFormat );
+        Ar << fmt;
+
+        // Hotfix to replace profile code in older texture files
+        if( ULIS_R_PROFILE( fmt ) == ULIS_None )
+            fmt = (fmt & ULIS_E_PROFILE) | ULIS_W_PROFILE( ::ULIS::FFormatMetrics::DefaultProfileCodeForColorModel( static_cast< ::ULIS::eColorModel >( ULIS_R_MODEL( fmt ) ) ) );
+
+        ioSaveLayerStack->mOutputFormat = static_cast< ULIS::eFormat >( fmt );
     }
     else
     {
-		ioSaveLayerStack->mOutputFormat = ULIS3_FORMAT_BGRA8;
+        ioSaveLayerStack->mOutputFormat = ::ULIS::Format_BGRA8;
     }
 
-	if (Ar.IsLoading())
-	{
-		ioSaveLayerStack->Init(ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mOutputFormat);
-		//Set the current layer to the first image layer
-		TArray< TSharedPtr<IOdysseyLayer> > layers;
-		layer->DepthFirstSearchTree(&layers, false);
-		for (int i = 0; i < layers.Num(); i++)
-		{
-			if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
-			{
-				ioSaveLayerStack->SetCurrentLayer(layers[i]);
-				break;
-			}
-		}
-	}
-	
+    if (Ar.IsLoading())
+    {
+        ioSaveLayerStack->Init(ioSaveLayerStack->mWidth, ioSaveLayerStack->mHeight, ioSaveLayerStack->mOutputFormat);
+        //Set the current layer to the first image layer
+        TArray< TSharedPtr<IOdysseyLayer> > layers;
+        layer->DepthFirstSearchTree(&layers, false);
+        for (int i = 0; i < layers.Num(); i++)
+        {
+            if (layers[i]->GetType() == IOdysseyLayer::eType::kImage)
+            {
+                ioSaveLayerStack->SetCurrentLayer(layers[i]);
+                break;
+            }
+        }
+    }
+    
     return Ar;
 }
 
@@ -513,13 +525,13 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
     mLayerStackPtr = iLayerStack;
 
     // mData = TArray<uint8>();
-	// FOdysseyBlock* tmp = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
+    // FOdysseyBlock* tmp = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
     mCurrentIndex = 0;
 
     //We reserve the maximum memory needed for a undo
 
     //mData.Reserve(tmp->GetBlock()->BytesTotal());
-	//delete tmp;
+    //delete tmp;
 
     static int numberUndoStack = 1;
 
@@ -532,7 +544,7 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
 
 FOdysseyDrawingUndo::~FOdysseyDrawingUndo()
 {
-	//delete mData;
+    //delete mData;
 }
 
 void
@@ -642,7 +654,7 @@ void FOdysseyDrawingUndo::Check()
 bool
 FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigned int iYTile,unsigned int iSizeX,unsigned int iSizeY)
 {
-	TArray< TSharedPtr<IOdysseyLayer> > layers;
+    TArray< TSharedPtr<IOdysseyLayer> > layers;
     mLayerStackPtr->GetLayerRoot()->DepthFirstSearchTree(&layers,false);
 
     TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
@@ -667,19 +679,11 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
 
     if(iXTile >= 0 && iYTile >= 0 && iSizeX > 0 && iSizeY > 0)
     {
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
         FOdysseyBlock* tileBlock = new FOdysseyBlock(iSizeX, iSizeY, imageLayer->GetBlock()->Format());
 
-        ::ul3::Copy(hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , imageLayer->GetBlock()->GetBlock()
-            , tileBlock->GetBlock()
-            , ::ul3::FRect(iXTile, iYTile, iSizeX, iSizeY)
-            , ::ul3::FVec2I(0, 0));
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( imageLayer->GetBlock()->Format() );
+        ctx.Copy( *(imageLayer->GetBlock()->GetBlock()), *(tileBlock->GetBlock()), ::ULIS::FRectI(iXTile, iYTile, iSizeX, iSizeY) );
+        ctx.Finish();
 
         mToBinary << tileBlock->GetArray();
 
@@ -692,41 +696,49 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
 }
 
 bool
-FOdysseyDrawingUndo::SaveData(unsigned int iXTile, unsigned int iYTile,unsigned int iSizeX,unsigned int iSizeY)
+FOdysseyDrawingUndo::SaveData(const TArray<::ULIS::FRectI>& iRects)
 {
-    if(mLayerStackPtr->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
+    if (mLayerStackPtr->GetCurrentLayer()->GetType() != IOdysseyLayer::eType::kImage)
         return false;
 
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mLayerStackPtr->GetCurrentLayer());
     UPTRINT address = (UPTRINT)imageLayer.Get();
-    mToBinary << address;
-    mToBinary << iXTile;
-    mToBinary << iYTile;
-    mToBinary << iSizeX;
-    mToBinary << iSizeY;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
 
-    if(iXTile >= 0 && iYTile >= 0 && iSizeX > 0 && iSizeY > 0)
+    TArray<FOdysseyBlock*> tileBlocks;
+    for (int i = 0; i < iRects.Num(); i++)
     {
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-        FOdysseyBlock* tileBlock = new FOdysseyBlock(iSizeX, iSizeY, imageLayer->GetBlock()->Format());
+        ::ULIS::FRectI rect = iRects[i];
+        FOdysseyBlock* tileBlock = new FOdysseyBlock(rect.w, rect.h, imageLayer->GetBlock()->Format());
+        tileBlocks.Add(tileBlock);
 
-        ::ul3::Copy(hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , imageLayer->GetBlock()->GetBlock()
-            , tileBlock->GetBlock()
-            , ::ul3::FRect(iXTile, iYTile, iSizeX, iSizeY)
-            , ::ul3::FVec2I(0, 0));
-
-        mToBinary << tileBlock->GetArray();
-
-        delete tileBlock;
+        if (rect.x >= 0 && rect.y >= 0 && rect.w > 0 && rect.h > 0)
+        {
+            ctx.Copy(*(imageLayer->GetBlock()->GetBlock()), *(tileBlock->GetBlock()), rect, ::ULIS::FVec2I(0,0), ::ULIS::FSchedulePolicy::MonoScanlines );
+            ctx.Flush();
+        }
     }
 
-    mNumberBlocksUndo[mCurrentIndex]++;
+    ctx.Finish();
+
+    for (int i = 0; i < iRects.Num(); i++)
+    {
+        ::ULIS::FRectI rect = iRects[i];
+        mToBinary << address;
+        mToBinary << rect.x;
+        mToBinary << rect.y;
+        mToBinary << rect.w;
+        mToBinary << rect.h;
+
+        if (rect.x >= 0 && rect.y >= 0 && rect.w > 0 && rect.h > 0)
+        {
+            mToBinary << tileBlocks[i]->GetArray();
+            delete tileBlocks[i];
+        }
+
+        mNumberBlocksUndo[mCurrentIndex]++;
+
+    }
 
     return true;
 }
@@ -745,8 +757,8 @@ FOdysseyDrawingUndo::LoadData()
     }
 
     UPTRINT address;
-	unsigned int tileX = 0;
-	unsigned int tileY = 0;
+    unsigned int tileX = 0;
+    unsigned int tileY = 0;
     unsigned int sizeX;
     unsigned int sizeY;
 
@@ -756,7 +768,7 @@ FOdysseyDrawingUndo::LoadData()
     FMemoryReader Ar = FMemoryReader(TheBinaryArray);
     Ar.Seek(mUndosPositions[mCurrentIndex]);
 
-	TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
+    TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
     for(int i = 0; i < mNumberBlocksUndo[mCurrentIndex]; i++)
     {
         Ar << address;
@@ -790,21 +802,13 @@ FOdysseyDrawingUndo::LoadData()
             FOdysseyBlock* tileBlock = new FOdysseyBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
             Ar << tileBlock->GetArray();
 
-            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-            uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-            ::ul3::FRect tileRect(tileX, tileY, sizeX, sizeY);
+            ::ULIS::FRectI tileRect(tileX, tileY, sizeX, sizeY);
 
-            ::ul3::Copy(hULIS.ThreadPool()
-                , ULIS3_BLOCKING
-                , perfIntent
-                , hULIS.HostDeviceInfo()
-                , ULIS3_NOCB
-                , tileBlock->GetBlock()
-                , imageLayer->GetBlock()->GetBlock()
-                , ::ul3::FRect(0, 0, sizeX, sizeY)
-                , ::ul3::FVec2I(tileX, tileY));
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
+            ctx.Copy(*(tileBlock->GetBlock()), *(imageLayer->GetBlock()->GetBlock()), ::ULIS::FRectI(0, 0, sizeX, sizeY), ::ULIS::FVec2I(tileX, tileY) );
+            ctx.Finish();
 
-            imageLayer->GetBlock()->GetBlock()->Invalidate(tileRect);
+            imageLayer->GetBlock()->GetBlock()->Dirty(tileRect);
             delete tileBlock;
         }
     }
@@ -821,8 +825,8 @@ bool
 FOdysseyDrawingUndo::Redo()
 {
     UPTRINT address;
-	unsigned int tileX;
-	unsigned int tileY;
+    unsigned int tileX;
+    unsigned int tileY;
     unsigned int sizeX;
     unsigned int sizeY;
 
@@ -832,7 +836,7 @@ FOdysseyDrawingUndo::Redo()
     FMemoryReader Ar = FMemoryReader(TheBinaryArray);
     Ar.Seek(mUndosPositions[mCurrentIndex]);
 
-	TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
+    TSharedPtr<FOdysseyImageLayer> imageLayer = nullptr;
     for(int i = 0; i < mNumberBlocksRedo[mCurrentIndex]; i++)
     {
         Ar << address;
@@ -861,21 +865,13 @@ FOdysseyDrawingUndo::Redo()
             FOdysseyBlock* tileBlock = new FOdysseyBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
             Ar << tileBlock->GetArray();
 
-            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-            uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-            ::ul3::FRect tileRect(tileX, tileY, sizeX, sizeY);
+            ::ULIS::FRectI tileRect(tileX, tileY, sizeX, sizeY);
 
-            ::ul3::Copy( hULIS.ThreadPool()
-                       , ULIS3_BLOCKING
-                       , perfIntent
-                       , hULIS.HostDeviceInfo()
-                       , ULIS3_NOCB
-                       , tileBlock->GetBlock()
-                       , imageLayer->GetBlock()->GetBlock()
-                       , ::ul3::FRect( 0, 0, sizeX, sizeY )
-                       , ::ul3::FVec2I( tileX, tileY ) );
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
+            ctx.Copy(*(tileBlock->GetBlock()), *(imageLayer->GetBlock()->GetBlock()), ::ULIS::FRectI(0, 0, sizeX, sizeY), ::ULIS::FVec2I(tileX, tileY));
+            ctx.Finish();
 
-            imageLayer->GetBlock()->GetBlock()->Invalidate(tileRect);
+            imageLayer->GetBlock()->GetBlock()->Dirty(tileRect);
             delete tileBlock;
         }
     }

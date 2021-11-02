@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "OdysseyRootLayer.h"
+#include "ULISLoaderModule.h"
 
 #include "IOdysseyLayerImageBlendingCapability.h"
 
@@ -33,30 +34,43 @@ FOdysseyRootLayer::Clone() const
 
 //---
 
-void
-FOdysseyRootLayer::RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
+TArray<::ULIS::FEvent>
+FOdysseyRootLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum)
 {
-    if (!IsVisible())
-        return;
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent =  ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::FRect rect = ::ul3::FRect::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h);
-    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, ioBlock, rect );
-
-    TArray<TSharedPtr<IOdysseyLayer>> children = GetNodes();
-    for (int i = children.Num() - 1; i >= 0; i--)
+    TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
+    TArray<::ULIS::FEvent> eventRender;
+    if( !IsVisible() || iNum == 0 || children.Num() == 0)
     {
-        TSharedPtr<IOdysseyLayer> child = children[i];
-        if (!child->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid()))
-            continue;
-
-        IOdysseyLayerImageBlendingCapability* layerBlendable = child->GetCapability<IOdysseyLayerImageBlendingCapability>();
-        if (!layerBlendable)
-            continue;
-
-        layerBlendable->Blend(ioBlock, iRect, iPos);
+        for (uint32 i = 0; i < iNum; i++)
+            eventRender.Add(::ULIS::FEvent::NoOP());
+        return eventRender;
     }
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlocks[0]->Format() );
+    TArray<::ULIS::FEvent> clearEvents;
+    clearEvents.SetNum(iNum);
+
+    for( uint32 i = 0; i < iNum; ++i ) {
+        ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( iPositions[i], iRects[i].Size() );
+        ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &clearEvents[i] );
+        ctx.Flush();
+    }
+    //ctx.Finish();
+
+    eventRender = clearEvents;
+    for( int i = children.Num() - 1; i >= 0; --i ) {
+        TSharedPtr< IOdysseyLayer > child = children[i];
+        if( !child->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid() ) )
+            continue;
+
+        IOdysseyLayerImageBlendingCapability* layerBlendable = child->GetCapability< IOdysseyLayerImageBlendingCapability >();
+        if( !layerBlendable )
+            continue;
+
+        eventRender = layerBlendable->Blend( ioBlocks, iRects, iPositions, iNum, eventRender.GetData() );
+    }
+
+    return eventRender;
 }
 
 bool
@@ -82,10 +96,10 @@ FOdysseyRootLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
     if (isBlendable)
     {
         IOdysseyLayerImageBlendingCapability* layerBlendable = iLayer->GetCapability<IOdysseyLayerImageBlendingCapability>();
-		layerBlendable->ImageResultChangedDelegate().AddRaw(this, &FOdysseyRootLayer::OnChildImageResultChanged, iLayer);
-        if (iLayer->IsVisible())
+        layerBlendable->ImageResultChangedDelegate().AddRaw( this, &FOdysseyRootLayer::OnChildImageResultChanged, iLayer );
+        if( iLayer->IsVisible() )
         {
-            mImageResultChangedDelegate.Broadcast(nullptr);
+            mImageResultChangedDelegate.Broadcast( nullptr, 0 );
         }
     }
 }
@@ -105,17 +119,17 @@ FOdysseyRootLayer::DeleteNode(int iIndex)
 
     if (isBlendable && layer->IsVisible())
     {
-        mImageResultChangedDelegate.Broadcast(nullptr);
+        mImageResultChangedDelegate.Broadcast( nullptr, 0 );
     }
 }
 
 void
-FOdysseyRootLayer::OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer)
+FOdysseyRootLayer::OnChildImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects, TSharedPtr< IOdysseyLayer > iLayer )
 {
-    bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
-    if (isBlendable)
+    bool isBlendable = iLayer->ImplementsCapability( IOdysseyLayerImageBlendingCapability::GetGuid() );
+    if( isBlendable )
     {
-        mImageResultChangedDelegate.Broadcast(iRect);
+        mImageResultChangedDelegate.Broadcast( iRects, iNumRects );
     }
 }
 

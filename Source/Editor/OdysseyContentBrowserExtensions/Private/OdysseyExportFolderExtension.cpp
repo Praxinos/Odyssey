@@ -210,7 +210,7 @@ void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNa
 void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder )
 {
     // Convert the Uenum into Ulis Enum
-    ::ul3::eImageFormat ulisExportImageFormat = SOdysseyPackageReportDialog::GetUlisExportImageFormat( iExportImageFormat );
+    ::ULIS::eFileFormat ulisExportImageFormat = SOdysseyPackageReportDialog::GetUlisExportImageFormat( iExportImageFormat );
 
     // Check if destination directory is empty
     TArray<FString> foundFiles;
@@ -266,7 +266,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
                     bool bFileOKToCopy = true;
 
                     FString destFilename = iDestinationFolder;
-                    const char* ext = ::ul3::kwImageFormat[ulisExportImageFormat];
+                    const char* ext = ::ULIS::kwImageFormat[ulisExportImageFormat];
 
                     FString subFolder;
                     if ( srcFilename.Split( TEXT("/Content/"), nullptr, &subFolder ) )
@@ -323,7 +323,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
 }
 
 // TODO : check is the OdysseyBlock format is correct according to the export file format
-void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ul3::eImageFormat iExportFormat )
+void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ULIS::eFileFormat iExportFormat )
 {
     std::string stringSystemPathNameExt = TCHAR_TO_UTF8( *iSystemPathNameExt );
     // The OdysseyBLock is required to be used with Ulis export function
@@ -331,7 +331,6 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
     FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( iCurrentTexture->Source.GetFormat() ) );
     FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( iCurrentTexture );
     CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, iCurrentTexture );
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
 
     // ::ul3::SaveToFile doesn't recreate directories
     if ( !IFileManager::Get().DirectoryExists( GetData( FPaths::GetPath( iSystemPathNameExt ) ) ) )
@@ -340,17 +339,54 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
         }
 
     // Exporting the actual image
-    ::ul3::SaveToFile(
-        hULIS.ThreadPool()
-        , true
-        , 0
-        , hULIS.HostDeviceInfo()
-        , false
-        , odysseyBlockToSave->GetBlock()
-        , stringSystemPathNameExt
-        , iExportFormat
-        , 100
-    );
+    IULISLoaderModule& ULISModule = IULISLoaderModule::Get();
+    ::ULIS::FContext& ctx = ULISModule.FindOrAddContext(odysseyBlockToSave->Format());
+
+
+    bool canSaveDirectly = false;
+    ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave->GetBlock(), iExportFormat, &canSaveDirectly);
+    if (canSaveDirectly)
+    {
+        ctx.SaveBlockToDisk(
+            *odysseyBlockToSave->GetBlock()
+            , stringSystemPathNameExt
+            , iExportFormat
+            , 100
+        );
+
+        ctx.Finish();
+    }
+    else
+    {
+        ::ULIS::eFormat format = odysseyBlockToSave->GetBlock()->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+        if (iExportFormat == ::ULIS::FileFormat_hdr)
+        {
+            format = ::ULIS::Format_RGBAF;
+        }
+
+        ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
+
+        ::ULIS::FEvent eventConvert;
+        ctx.ConvertFormat(
+            *odysseyBlockToSave->GetBlock()
+            , blockProxy
+            , ULIS::FRectI::Auto
+            , ULIS::FVec2I(0)
+            , ULIS::FSchedulePolicy::CacheEfficient
+            , 0
+            , nullptr
+            , &eventConvert
+        );
+
+        ctx.SaveBlockToDisk(
+            blockProxy
+            , stringSystemPathNameExt
+            , iExportFormat
+            , 100
+        );
+
+        ctx.Finish();
+    }
 
     delete odysseyBlockToSave;
 }

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
-#include <ULIS3>
+#include <ULIS>
 
 class IULISLoaderModule : public IModuleInterface
 {
@@ -19,9 +19,14 @@ public:
         return  FModuleManager::Get().IsModuleLoaded( "ULISLoader" );
     }
 
-    virtual ::ul3::FThreadPool* ThreadPool() =                      0;
-    virtual const ::ul3::FHostDeviceInfo& HostDeviceInfo()  const = 0;
-    virtual const ::ul3::FFontEngine& FontEngine()          const = 0;
-    virtual const ::ul3::FFontRegistry& FontRegistry()      const = 0;
+    static inline ::ULIS::FContext& StaticFindOrAddContext( ::ULIS::eFormat iFormat ) {
+        static IULISLoaderModule& module = Get();
+        return  module.FindOrAddContext( iFormat );
+    }
+
+    virtual ::ULIS::FThreadPool& ThreadPool() = 0;
+    virtual ::ULIS::FContext& FindOrAddContext( ::ULIS::eFormat iFormat ) = 0;
+    virtual void RemoveContext( ::ULIS::eFormat iFormat ) = 0;
+    virtual ::ULIS::FFontEngine& FontEngine() = 0;
 };
 

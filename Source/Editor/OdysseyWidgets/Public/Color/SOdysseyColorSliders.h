@@ -16,12 +16,12 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Layout/SScrollBox.h"
-#include <ULIS3>
+#include <ULIS>
 
 #include "SOdysseyColorSlider.h"
 
 //class IOdysseyGroupChannelSlider;
-//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
+//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::FColor& );
 
 class ODYSSEYWIDGETS_API SOdysseyColorSliders : public SCompoundWidget
 {
@@ -44,7 +44,7 @@ class ODYSSEYWIDGETS_API SOdysseyColorSliders : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS( SOdysseyColorSliders )
         {}
-    SLATE_ATTRIBUTE(::ul3::FPixelValue, Color)
+    SLATE_ATTRIBUTE(::ULIS::FColor, Color)
     SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
@@ -54,7 +54,7 @@ public:
 
 public:
     // Public Callbacks
-    // void SetColor( const ::ul3::FPixelValue& iColor );
+    // void SetColor( const ::ULIS::FColor& iColor );
 
 
 
@@ -81,7 +81,7 @@ private:
 
 private:
     // Private data members
-    TAttribute<::ul3::FPixelValue> mColor;
+    TAttribute<::ULIS::FColor> mColor;
     TArray< FSliderOptionItem > sliders_options;
     TSharedPtr< SComboButton > combo_button;
     TSharedPtr< SVerticalBox > combo_menu;

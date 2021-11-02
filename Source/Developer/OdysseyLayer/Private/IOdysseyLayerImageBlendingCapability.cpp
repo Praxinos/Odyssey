@@ -3,7 +3,7 @@
 
 #include "IOdysseyLayerImageBlendingCapability.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 //---
 
@@ -18,7 +18,7 @@ IOdysseyLayerImageBlendingCapability::IOdysseyLayerImageBlendingCapability(const
 {
 }
 
-IOdysseyLayerImageBlendingCapability::IOdysseyLayerImageBlendingCapability(::ul3::eBlendingMode iBlendingMode, float iOpacity )
+IOdysseyLayerImageBlendingCapability::IOdysseyLayerImageBlendingCapability(::ULIS::eBlendMode iBlendingMode, float iOpacity )
     : IOdysseyLayerImageRenderingCapability()
     , mBlendingMode(iBlendingMode)
     , mOpacity(iOpacity)
@@ -28,31 +28,31 @@ IOdysseyLayerImageBlendingCapability::IOdysseyLayerImageBlendingCapability(::ul3
 //---
 
 
-::ul3::eBlendingMode
+::ULIS::eBlendMode
 IOdysseyLayerImageBlendingCapability::GetBlendingMode() const
 {
     return mBlendingMode;
 }
 
 void
-IOdysseyLayerImageBlendingCapability::SetBlendingMode( ::ul3::eBlendingMode iBlendingMode )
+IOdysseyLayerImageBlendingCapability::SetBlendingMode( ::ULIS::eBlendMode iBlendingMode )
 {
-    ::ul3::eBlendingMode oldValue = mBlendingMode;
+    ::ULIS::eBlendMode oldValue = mBlendingMode;
     mBlendingMode = iBlendingMode;
     mBlendingModeChangedDelegate.Broadcast(oldValue);
-	ImageResultChangedDelegate().Broadcast(nullptr);
+	ImageResultChangedDelegate().Broadcast( nullptr, 0 );
 }
 
 void
 IOdysseyLayerImageBlendingCapability::SetBlendingMode( FText iBlendingMode )
 {
-    const int max = static_cast< int >( ::ul3::NUM_BLENDING_MODES );
+    const int max = static_cast< int >( ::ULIS::NumBlendModes );
     for( uint8 i = 0; i < max; ++i )
     {
-        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) );
+        auto entry = FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendMode[i] ) );
         if( iBlendingMode.EqualTo( entry ) )
         {
-            SetBlendingMode( static_cast<::ul3::eBlendingMode>( i ) );
+            SetBlendingMode( static_cast<::ULIS::eBlendMode>( i ) );
             return;
         }
     }
@@ -61,7 +61,7 @@ IOdysseyLayerImageBlendingCapability::SetBlendingMode( FText iBlendingMode )
 FText
 IOdysseyLayerImageBlendingCapability::GetBlendingModeAsText() const
 {
-    return FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[static_cast<int>( mBlendingMode )] ) );
+    return FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendMode[static_cast<int>( mBlendingMode )] ) );
 }
 
 float
@@ -78,8 +78,8 @@ IOdysseyLayerImageBlendingCapability::SetOpacity( float iOpacity )
 
     float oldValue = mOpacity;
     mOpacity = iOpacity;
-    mOpacityChangedDelegate.Broadcast(oldValue);
-	ImageResultChangedDelegate().Broadcast(nullptr);
+    mOpacityChangedDelegate.Broadcast( oldValue );
+    ImageResultChangedDelegate().Broadcast( nullptr, 0 );
 }
 
 void
@@ -91,7 +91,7 @@ IOdysseyLayerImageBlendingCapability::SerializeImageBlendingCapability(FArchive 
     
     if( Ar.IsLoading() )
     {
-        mBlendingMode = (::ul3::eBlendingMode)bm;
+        mBlendingMode = (::ULIS::eBlendMode)bm;
     }
 }
 
@@ -127,9 +127,9 @@ TArray< TSharedPtr< FText > >
 IOdysseyLayerImageBlendingCapability::GetBlendingModesAsText()
 {
     TArray< TSharedPtr< FText > > array;
-    const int max = static_cast< int >( ::ul3::NUM_BLENDING_MODES );
+    const int max = static_cast< int >( ::ULIS::NumBlendModes );
     for( int i = 0; i < max; ++i )
-        array.Add(MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ul3::kwBlendingMode[i] ) ) ) );
+        array.Add(MakeShared< FText >( FText::FromString( ANSI_TO_TCHAR( ::ULIS::kwBlendMode[i] ) ) ) );
 
     return  array;
 }

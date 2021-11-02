@@ -35,7 +35,7 @@
 
 #include <memory>
 #include <chrono>
-#include <ULIS3>
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportClientt"
 
@@ -93,6 +93,7 @@ void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
     // Send Tick to PaintEngine
+    // TODO: Move the call of Tick in a FTickableEditorObject, the PaintEngine itself should be a FTickableEditorObject
 	mOdysseyPainterEditor->PaintEngine()->Tick();
 
 	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
@@ -634,11 +635,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMoveWithStrokePoint( const FOd
 
     if( mCurrentToolState == eState::kDrawing )
     {
-        auto paintengine = mOdysseyPainterEditor->PaintEngine();
-
 		if (long(mCurrentPointInTexture.x) == long(lastPointInTexture.x) && long(mCurrentPointInTexture.y) == long(lastPointInTexture.y))
 			return;
 
+        auto paintengine = mOdysseyPainterEditor->PaintEngine();
         paintengine->PushStroke( mCurrentPointInTexture );
     }
     else if( mCurrentToolState == eState::kPanning )
@@ -738,11 +738,10 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
 
     if (mCurrentToolState == eState::kIdle)
     {
-        auto paintengine = mOdysseyPainterEditor->PaintEngine();
-
         if (long(mCurrentPointInTexture.x) == long(lastPointInTexture.x) && long(mCurrentPointInTexture.y) == long(lastPointInTexture.y))
             return;
 
+        auto paintengine = mOdysseyPainterEditor->PaintEngine();
         paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
     }
 }
@@ -1013,11 +1012,10 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
                 int32 corner1 = edge;
                 int32 corner2 = (edge + 1) % 3;
                 FLinearColor lc = mMeshSelector->GetMeshColor();
-                ::ul3::FPixelValue c = ::ul3::FPixelValue::FromRGBAF(lc.R, lc.G, lc.B, lc.A);
+                ::ULIS::FColor c = ::ULIS::FColor::RGBAF( lc.R, lc.G, lc.B, lc.A );
 
-                FLinearColor color = (isOutOfBounds[corner1] || isOutOfBounds[corner2]) ? FLinearColor(0.6f, 0.0f, 0.0f) : FLinearColor(c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF());
+                FLinearColor color = ( isOutOfBounds[corner1] || isOutOfBounds[corner2] ) ? FLinearColor( 0.6f, 0.0f, 0.0f ) : FLinearColor( c.RedF(), c.GreenF(), c.BlueF(), c.AlphaF() );
 
-          
                 FVector pIntersect;
                 FVector2D p1 = viewportWidget->ToWorld(UVs[corner1] * textureSurfaceSize - textureSurfaceSize / 2.f);
                 FVector2D p2 = viewportWidget->ToWorld(UVs[corner2] * textureSurfaceSize - textureSurfaceSize / 2.f);

@@ -21,7 +21,7 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 FOdysseyPainterEditor::FOdysseyPainterEditor()
     : mUndoHistory( new FOdysseyUndoHistory() )
     , mPaintEngine( new FOdysseyPaintEngine(mUndoHistory) )
-	, mPaintColor( ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 ) )
+	, mPaintColor( ::ULIS::FColor::RGBA8( 0, 0, 0 ) )
     , mDrawBrushPreview( true )
 {
 }
@@ -104,7 +104,7 @@ FOdysseyPainterEditor::DrawBrushPreview() const
 	return mDrawBrushPreview;
 }
 
-::ul3::FPixelValue
+::ULIS::FColor
 FOdysseyPainterEditor::PaintColor() const
 {
 	return mPaintColor;
@@ -120,7 +120,7 @@ FOdysseyPainterEditor::DrawBrushPreview(bool iDrawBrushPreview)
 }
 
 void
-FOdysseyPainterEditor::PaintColor(::ul3::FPixelValue iColor)
+FOdysseyPainterEditor::PaintColor(::ULIS::FColor iColor)
 {
 	mPaintColor = iColor;
 }

@@ -1,5 +1,14 @@
+// Copyright © 2018-2021 Praxinos, Inc. All Rights Reserved.
 // IDDN FR.001.250001.004.S.X.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+/*
+*   ULIS
+*__________________
+* @file         ULIS.Build.cs
+* @author       Clement Berthaud
+* @brief        Module description file for UnrealEngine4
+* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
+* @license      Please refer to LICENSE.md
+*/
 using System;
 using System.IO;
 using UnrealBuildTool;
@@ -12,66 +21,55 @@ public class ULIS : ModuleRules
         return Path.GetFullPath( Path.Combine( ModuleDirectory, "../../.." ) );
     }
 
-    private string CopyToBinaries(string Filepath, ReadOnlyTargetRules Target)
+    private string CopyToBinaries( string iSrcFilepath, ReadOnlyTargetRules iTarget )
     {
-        string BinariesDir      = Path.Combine( GetRootPath(), "Binaries", Target.Platform.ToString() );
-        string Filename         = Path.GetFileName( Filepath );
-        string FullBinariesDir  = Path.GetFullPath( BinariesDir );
+        string binariesDir  = Path.GetFullPath( Path.Combine( GetRootPath(), "Binaries", iTarget.Platform.ToString() ) );
+        string filename     = Path.GetFileName( iSrcFilepath );
+        string dstFilepath = Path.Combine( binariesDir, filename );
 
-        if( !Directory.Exists( FullBinariesDir ) ) {
-            Directory.CreateDirectory( FullBinariesDir );
-        }
+        if( !Directory.Exists( binariesDir ) )
+            Directory.CreateDirectory( binariesDir );
 
-        string FullFilePath = Path.Combine( FullBinariesDir, Filename );
+        if( !File.Exists( dstFilepath ) )
+            File.Copy( iSrcFilepath, dstFilepath, true);
 
-        if( File.Exists( FullFilePath ) )
-            return FullFilePath;
-
-        File.Copy( Filepath, Path.Combine( FullBinariesDir, Filename ), true);
-        return FullFilePath;
+        return dstFilepath;
     }
 
-    public ULIS( ReadOnlyTargetRules Target ) : base( Target )
+    public ULIS( ReadOnlyTargetRules iTarget ) : base( iTarget )
     {
         Type = ModuleType.External;
-        if (Target.Platform == UnrealTargetPlatform.Win64 ||
-            Target.Platform == UnrealTargetPlatform.Win32 )
+
+        string includePath  = Path.GetFullPath( Path.Combine( ModuleDirectory, "include" ) );
+        string libPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "lib" ) );
+        string binPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "bin" ) );
+        string baseName = "ULIS4";
+
+        if( iTarget.Platform == UnrealTargetPlatform.Win64 ||
+            iTarget.Platform == UnrealTargetPlatform.Win32 )
         {
-            string IncludeBase  = Path.GetFullPath( Path.Combine( ModuleDirectory, "redist", "include" ) );
-            string LibBase      = Path.GetFullPath( Path.Combine( ModuleDirectory, "redist", "lib" ) );
-            string BinBase      = Path.GetFullPath( Path.Combine( ModuleDirectory, "redist", "bin" ) );
-            string ULIS_Name = "ULIS3";
-            string ULIS_LibName = ULIS_Name + ".lib";
-            string ULIS_DLLName = ULIS_Name + ".dll";
+            string libName = baseName + ".lib";
+            string binName = baseName + ".dll";
 
-            PublicSystemIncludePaths.Add( Path.Combine( IncludeBase, ULIS_Name) );
-            PublicAdditionalLibraries.Add( Path.Combine( LibBase, ULIS_LibName ) );
+            PublicSystemIncludePaths.Add( includePath );
+            PublicAdditionalLibraries.Add( Path.Combine( libPath, libName ) );
 
-            PublicDefinitions.Add("ULIS3_DYNAMIC_LIBRARY");
+            string binariesPath = CopyToBinaries( Path.Combine( binPath, binName ), iTarget );
+            RuntimeDependencies.Add( "$(BinaryOutputDir)/" + binName, "$(ModuleDir)/bin/" + binName );
 
-            string pluginDLLPath = Path.Combine( BinBase, ULIS_DLLName );
-            string binariesPath = CopyToBinaries( pluginDLLPath, Target );
-            System.Console.WriteLine( "Using " + ULIS_Name +" DLL: " + binariesPath );
-
-            RuntimeDependencies.Add( "$(BinaryOutputDir)/ULIS3.dll", "$(ModuleDir)/redist/bin/ULIS3.dll" );
+            System.Console.WriteLine( "Using " + baseName +" DLL: " + binariesPath );
         }
-        else if ( Target.Platform == UnrealTargetPlatform.Mac )
+        else if ( iTarget.Platform == UnrealTargetPlatform.Mac )
         {
-            string IncludeBase  = Path.GetFullPath( Path.Combine( ModuleDirectory, "redist", "include" ) );
-            string BinBase      = Path.GetFullPath( Path.Combine( ModuleDirectory, "redist", "bin" ) );
-            string ULIS_Name = "ULIS3";
-            string ULIS_DylibName = ULIS_Name + ".dylib";
-            string pluginDylibPath = Path.Combine( BinBase, ULIS_DylibName );
+            string binName = baseName + ".dylib";
 
-            PublicSystemIncludePaths.Add( Path.Combine( IncludeBase, ULIS_Name) );
-            PublicAdditionalLibraries.Add( pluginDylibPath );
+            PublicSystemIncludePaths.Add( includePath );
+            PublicAdditionalLibraries.Add( Path.Combine( binPath, binName ) );
 
-            PublicDefinitions.Add("ULIS3_DYNAMIC_LIBRARY");
+            string binariesPath = CopyToBinaries( Path.Combine( binPath, binName ), iTarget );
+            RuntimeDependencies.Add( "$(BinaryOutputDir)/" + binName, "$(ModuleDir)/bin/" + binName );
 
-            string binariesPath = CopyToBinaries( pluginDylibPath, Target );
-            System.Console.WriteLine( "Using " + ULIS_Name +" DYLIB: " + binariesPath );
-
-            RuntimeDependencies.Add( "$(BinaryOutputDir)/ULIS3.dylib", "$(ModuleDir)/redist/bin/ULIS3.dylib" );
+            System.Console.WriteLine( "Using " + baseName +" DYLIB: " + binariesPath );
         }
     }
 }

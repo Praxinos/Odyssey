@@ -8,10 +8,10 @@
 #define LOCTEXT_NAMESPACE "OdysseyImageLayer"
 
 void
-OnBlockInvalidated(const ::ul3::FBlock* iData, void* iInfo, const ::ul3::FRect& iRect)
+OnBlockInvalidated( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo )
 {
-    FOdysseyImageLayer* layer = static_cast<FOdysseyImageLayer*>(iInfo);
-    layer->mImageResultChangedDelegate.Broadcast(&iRect);
+    FOdysseyImageLayer* layer = static_cast< FOdysseyImageLayer* >( iInfo );
+    layer->mImageResultChangedDelegate.Broadcast( iRects, iNumRects );
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,23 +28,19 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FOdysseyImageLayer& iLayer)
     , mIsAlphaLocked( iLayer.mIsAlphaLocked )
 {
     mBlock = new FOdysseyBlock( iLayer.mBlock->Width(), iLayer.mBlock->Height(), iLayer.mBlock->Format());
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::FVec2I pos(0, 0);
-    ::ul3::Copy( hULIS.ThreadPool()
-                , ULIS3_BLOCKING
-                , perfIntent
-                , hULIS.HostDeviceInfo()
-                , ULIS3_NOCB
-                , iLayer.mBlock->GetBlock()
-                , mBlock->GetBlock()
-                , mBlock->GetBlock()->Rect()
-                , pos );
 
-    mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iLayer.mBlock->Format());
+    ctx.Copy( *(iLayer.mBlock->GetBlock()), *(mBlock->GetBlock()), mBlock->GetBlock()->Rect() );
+    ctx.Finish();
+
+    static uint32 numCopy = 0;
+    numCopy++;
+    UE_LOG(LogTemp, Warning, TEXT("FOdysseyImageLayer::CopyCtor %d"), numCopy);
+
+    mBlock->GetBlock()->OnInvalid( ::ULIS::FOnInvalidBlock( &OnBlockInvalidated, static_cast<void*>( this ) ) );
 }
 
-FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ::ul3::tFormat iFormat)
+FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ::ULIS::eFormat iFormat)
     : IOdysseyLayer( iName, IOdysseyLayer::eType::kImage )
     , IOdysseyLayerImageBlendingCapability()
     , mBlock( nullptr )
@@ -53,17 +49,16 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FVector2D iSize, ::u
     check( iSize.X >= 0 && iSize.Y >= 0 );
 
     mBlock = new FOdysseyBlock( iSize.X, iSize.Y, iFormat);
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Clear( hULIS.ThreadPool()
-                , ULIS3_BLOCKING
-                , perfIntent
-                , hULIS.HostDeviceInfo()
-                , ULIS3_NOCB
-                , mBlock->GetBlock()
-                , mBlock->GetBlock()->Rect() );
 
-    mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mBlock->Format());
+    ctx.Clear( *(mBlock->GetBlock()) );
+    ctx.Finish();
+
+    static uint32 numCreate = 0;
+    numCreate++;
+    UE_LOG(LogTemp, Warning, TEXT("FOdysseyImageLayer::Constructor %d"), numCreate);
+
+    mBlock->GetBlock()->OnInvalid(::ULIS::FOnInvalidBlock(&OnBlockInvalidated, static_cast<void*>(this)));
 }
 
 FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBlock )
@@ -72,8 +67,8 @@ FOdysseyImageLayer::FOdysseyImageLayer( const FName& iName, FOdysseyBlock* iBloc
     , mBlock( iBlock )
     , mIsAlphaLocked( false )
 {
-    if (mBlock)
-        mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
+    if( mBlock )
+        mBlock->GetBlock()->OnInvalid( ::ULIS::FOnInvalidBlock( &OnBlockInvalidated, static_cast< void* >( this ) ) );
 }
 
 FOdysseyImageLayer*
@@ -96,17 +91,13 @@ FOdysseyImageLayer::SetBlock(FOdysseyBlock* iBlock, bool iSendEvents, bool iDest
 {
     FOdysseyBlock* block = mBlock;
     mBlock = iBlock;
-    mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
+    mBlock->GetBlock()->OnInvalid( ::ULIS::FOnInvalidBlock( &OnBlockInvalidated, static_cast< void* >( this ) ) );
 
     if (iSendEvents)
-    {
-        mImageResultChangedDelegate.Broadcast(nullptr);
-    }
+        mImageResultChangedDelegate.Broadcast( nullptr, 0 );
 
     if (iDestroyPreviousBlock)
-    {
         delete block;
-    }
 }
 
 bool
@@ -119,15 +110,15 @@ void
 FOdysseyImageLayer::SetIsAlphaLocked( bool iIsAlphaLocked )
 {
     bool oldValue = mIsAlphaLocked;
-	mIsAlphaLocked = iIsAlphaLocked;
+    mIsAlphaLocked = iIsAlphaLocked;
     mIsAlphaLockedChangedDelegate.Broadcast(oldValue);
 }
 
 void
 FOdysseyImageLayer::SetIsVisible(bool iIsVisible)
 {
-    IOdysseyLayer::SetIsVisible(iIsVisible);
-    mImageResultChangedDelegate.Broadcast(nullptr);
+    IOdysseyLayer::SetIsVisible( iIsVisible );
+    mImageResultChangedDelegate.Broadcast( nullptr, 0 );
 }
 
 bool
@@ -145,153 +136,87 @@ FOdysseyImageLayer::GetCapabilityPtrFromGuid(FGuid iGuid)
     return nullptr;
 }
 
-void
-FOdysseyImageLayer::Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
+TArray<::ULIS::FEvent>
+FOdysseyImageLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum, const ::ULIS::FEvent* iEvents )
 {
-    if (!IsVisible())
-        return;
+    TArray<::ULIS::FEvent> eventBlend;
+    if( !IsVisible() || iNum == 0 )
+        return TArray<::ULIS::FEvent>(iEvents, iNum);
 
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::FVec2F pos( iPos.x, iPos.y );
-    ::ul3::FBlock* convBlock = nullptr;
-    if (ioBlock->Format() != mBlock->Format())
-    {
-        convBlock = new ::ul3::FBlock(iRect.w, iRect.h, mBlock->Format());
-        ::ul3::Conv( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , ioBlock
-            , convBlock );
-        pos.x = 0;
-        pos.y = 0;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mBlock->GetBlock()->Format() );
+    eventBlend.SetNum(iNum);
+    if( ioBlocks[0]->Format() != mBlock->Format() ) {
+        TArray< ::ULIS::FBlock* > convBlocks;
+        convBlocks.Reserve( iNum );
+        for( uint32 i = 0; i < iNum; ++i ) {
+            convBlocks.Emplace( new ::ULIS::FBlock( iRects[i].w, iRects[i].h, mBlock->GetBlock()->Format() ) );
+            ::ULIS::FEvent eventConvertForward;
+            ctx.ConvertFormat( *ioBlocks[i], *( convBlocks[i] ), iRects[i], ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &iEvents[i], &eventConvertForward );
+            ::ULIS::FEvent eventBlend1;
+            ctx.Blend( *( mBlock->GetBlock() ), *( convBlocks[i] ), iRects[i], ::ULIS::FVec2I( 0 ), GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventConvertForward, &eventBlend1 );
+            eventBlend[i] = ::ULIS::FEvent(
+                ::ULIS::FOnEventComplete(
+                    [ convBlocks, i ]( const ::ULIS::FRectI& ) {
+                        delete  convBlocks[i];
+                    }
+                )
+            );
+            ctx.ConvertFormat( *( convBlocks[i] ), *ioBlocks[i], ::ULIS::FRectI::Auto, iPositions[i], ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventBlend1, &eventBlend[i] );
+        }
+    } else {
+        for( uint32 i = 0; i < iNum; ++i ) {
+            ctx.Blend( *( mBlock->GetBlock() ), *ioBlocks[i], iRects[i], iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &iEvents[i], &eventBlend[i] );
+        }
     }
+    ctx.Flush();
+    //ctx.Finish();
 
-    ::ul3::Blend( hULIS.ThreadPool()
-        , ULIS3_BLOCKING
-        , perfIntent
-        , hULIS.HostDeviceInfo()
-        , ULIS3_NOCB
-        , mBlock->GetBlock()
-        , convBlock ? convBlock : ioBlock
-        , iRect
-        , pos
-        , ULIS3_NOAA
-        , GetBlendingMode()
-        , ::ul3::AM_NORMAL
-        , GetOpacity() );
-    
-    if (convBlock)
-    {
-        ::ul3::FBlock* convBlock2 = new ::ul3::FBlock(convBlock->Width(), convBlock->Height(), ioBlock->Format());
-        ::ul3::Conv( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , convBlock
-            , convBlock2 );
-
-        ::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iRect.w, iRect.h);
-        ::ul3::Copy( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , convBlock2
-            , ioBlock
-            , rect
-            , iPos );
-        
-        delete convBlock;
-        delete convBlock2;
-    }
+    return eventBlend;
 }
 
-void
-FOdysseyImageLayer::RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
+TArray<::ULIS::FEvent>
+FOdysseyImageLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum )
 {
-    if (!IsVisible())
-        return;
-        
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    TArray<::ULIS::FEvent> eventRender;
 
-    ::ul3::FVec2F pos( iPos.x, iPos.y );
-    ::ul3::FBlock* convBlock = nullptr;
-    if (ioBlock->Format() != mBlock->Format())
+    if( !IsVisible() || iNum == 0 )
     {
-        convBlock = new ::ul3::FBlock(iRect.w, iRect.h, mBlock->Format());
-        ::ul3::Conv( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , ioBlock
-            , convBlock );
-        pos.x = 0;
-        pos.y = 0;
+        for (uint32 i = 0; i < iNum; i++)
+            eventRender.Add(::ULIS::FEvent::NoOP());
+        return eventRender;
     }
 
-    ::ul3::Copy( hULIS.ThreadPool()
-        , ULIS3_BLOCKING
-        , perfIntent
-        , hULIS.HostDeviceInfo()
-        , ULIS3_NOCB
-        , mBlock->GetBlock()
-        , convBlock ? convBlock : ioBlock
-        , iRect
-        , pos );
-    
-    if (convBlock)
-    {
-        ::ul3::FBlock* convBlock2 = new ::ul3::FBlock(convBlock->Width(), convBlock->Height(), ioBlock->Format());
-        ::ul3::Conv( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , convBlock
-            , convBlock2 );
-
-        ::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iRect.w, iRect.h);
-        ::ul3::Copy( hULIS.ThreadPool()
-            , ULIS3_BLOCKING
-            , perfIntent
-            , hULIS.HostDeviceInfo()
-            , ULIS3_NOCB
-            , convBlock2
-            , ioBlock
-            , rect
-            , iPos );
-        
-        delete convBlock;
-        delete convBlock2;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mBlock->Format() );
+    eventRender.SetNum(iNum);
+    for( uint32 i = 0; i < iNum; ++i ) {
+        // Auto fallback to copy if appropriate.
+        ctx.ConvertFormat( *( mBlock->GetBlock() ), *ioBlocks[i], iRects[i], iPositions[i], ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &eventRender[i] );
+        ctx.Flush();
     }
+    //ctx.Finish();
+
+    return eventRender;
 }
 
 // Custom serialization version for FOdysseyImageLayer
 struct FOdysseyImageLayerObjectVersion
 {
-	enum Type
-	{
-		// Before any version changes were made
-		SavePixelFormat,
+    enum Type
+    {
+        // Before any version changes were made
+        SavePixelFormat,
         SaveBlendable,
         SaveBlockArray64,
-		
-		VersionPlusOne,
-		LatestVersion = VersionPlusOne - 1
-	};
+        
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
 
-	// The GUID for this custom version number
-	const static FGuid GUID;
+    // The GUID for this custom version number
+    const static FGuid GUID;
 
 private:
-	FOdysseyImageLayerObjectVersion() {}
+    FOdysseyImageLayerObjectVersion() {}
 };
 
 const FGuid FOdysseyImageLayerObjectVersion::GUID(0xE2CA928C, 0x4FCB03A0, 0xE22252AA, 0xA88FC0B5);
@@ -303,19 +228,19 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
     IOdysseyLayer::Serialize(Ar);
 
     //Set the Object Version
-	Ar.UsingCustomVersion(FOdysseyImageLayerObjectVersion::GUID);
+    Ar.UsingCustomVersion(FOdysseyImageLayerObjectVersion::GUID);
 
     //Manage old saving order
-    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SaveBlendable)
+    if( Ar.CustomVer( FOdysseyImageLayerObjectVersion::GUID ) >= FOdysseyImageLayerObjectVersion::SaveBlendable )
     {
-        SerializeImageBlendingCapability(Ar);
+        SerializeImageBlendingCapability( Ar );
         Ar << mIsAlphaLocked;
     }
     else
     {
         //Manage old saving order
         Ar << mIsAlphaLocked;
-        SerializeImageBlendingCapability(Ar);
+        SerializeImageBlendingCapability( Ar );
     }
 
     //Load/Save Size
@@ -326,10 +251,17 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
     Ar << height;
 
     //Load/Save Format (compatibility with version version which don't save format)
-    ::ul3::tFormat format = ULIS3_FORMAT_BGRA8;
-    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat)
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    if( Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat )
     {
-        Ar << format;
+        uint32 fmt = static_cast< uint32 >( format );
+        Ar << fmt;
+
+        // Hotfix to replace profile code in older texture files
+        if( ULIS_R_PROFILE( fmt ) == ULIS_None )
+            fmt = (fmt & ULIS_E_PROFILE) | ULIS_W_PROFILE( ::ULIS::FFormatMetrics::DefaultProfileCodeForColorModel( static_cast< ::ULIS::eColorModel >( ULIS_R_MODEL( fmt ) ) ) );
+
+        format = static_cast< ULIS::eFormat >( fmt );
     }
 
     //Create mBlock if we are loading
@@ -337,7 +269,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
     {
         check(!mBlock);
         mBlock = new FOdysseyBlock(width, height, format);
-        mBlock->GetBlock()->SetOnInvalid(::ul3::FOnInvalid(&OnBlockInvalidated, static_cast<void*>(this)));
+        mBlock->GetBlock()->OnInvalid( ::ULIS::FOnInvalidBlock( &OnBlockInvalidated, static_cast< void* >( this ) ) );
     }
 
     //Load/Save mBlock content (compatibility with version which were saving/loading a TArray, but now we use TArray64)
@@ -352,7 +284,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
         Ar << layerData;
 
         for (int j = 0; j < layerData.Num(); j++) {
-            *(mBlock->GetBlock()->DataPtr() + j) = layerData[j];
+            *( mBlock->GetBlock()->Bits() + j ) = layerData[j];
         }
     }
 }

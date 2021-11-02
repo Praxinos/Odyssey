@@ -8,8 +8,8 @@
 /////////////////////////////////////////////////////
 // Utilities
 FRectF
-//::ul3::FRect
-ComputeRectWithPivot(TSharedPtr<FOdysseyBlock> iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
+//::ULIS::FRectI
+ComputeRectWithPivot(TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
 {
     int width = iBlock->Width();
     int height = iBlock->Height();
@@ -17,7 +17,7 @@ ComputeRectWithPivot(TSharedPtr<FOdysseyBlock> iBlock, const FOdysseyPivot& iPiv
     float height2 = height / 2.f;
 
     FRectF result;
-    //::ul3::FRect result;
+    //::ULIS::FRectI result;
     result.x = iX;
     result.y = iY;
     result.w = width;

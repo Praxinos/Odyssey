@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Texture.h"
-#include <ULIS3>
+#include <ULIS>
 
 //
 ODYSSEYIMAGING_API int UE4TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat);
@@ -13,25 +13,26 @@ ODYSSEYIMAGING_API bool UE4TextureSourceFormatNeedsConversionToULISFormat( EText
 ODYSSEYIMAGING_API void ConvertUE4TextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat);
 ODYSSEYIMAGING_API void ConvertULISFormatToUE4TextureSourceFormat(const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat);
 
-ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat );
-ODYSSEYIMAGING_API ::ul3::tFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat );
-ODYSSEYIMAGING_API ETextureSourceFormat UE4TextureSourceFormatForULISFormat(::ul3::tFormat iFormat);
-ODYSSEYIMAGING_API EPixelFormat UE4PixelFormatForULISFormat( ::ul3::tFormat iFormat );
+ODYSSEYIMAGING_API ::ULIS::eFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat );
+ODYSSEYIMAGING_API ::ULIS::eFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat );
+ODYSSEYIMAGING_API ETextureSourceFormat UE4TextureSourceFormatForULISFormat(::ULIS::eFormat iFormat);
+ODYSSEYIMAGING_API EPixelFormat UE4PixelFormatForULISFormat( ::ULIS::eFormat iFormat );
 
 /////////////////////////////////////////////////////
 // FOdysseyBlock
 // Block Wrapper for Odyssey
-class ODYSSEYIMAGING_API FOdysseyBlock : public TSharedFromThis<FOdysseyBlock>
+class ODYSSEYIMAGING_API FOdysseyBlock// : public TSharedFromThis<FOdysseyBlock>
 {
 public:
     // Construction / Destruction
     ~FOdysseyBlock();
-    FOdysseyBlock( int                          iWidth
-                 , int                          iHeight
-                 , ::ul3::tFormat               iFormat
-                 , ::ul3::fpInvalidateFunction  iInvFunc    = nullptr
-                 , void*                        iInvInfo    = nullptr
-                 , bool                         iInitializeData = false );
+    FOdysseyBlock(
+          int iWidth
+        , int iHeight
+        , ::ULIS::eFormat iFormat
+        , const ::ULIS::FOnInvalidBlock& iInvFunc = ::ULIS::FOnInvalidBlock()
+        , bool iInitializeData = false
+    );
 
 private:
     // Forbid Copy / Move / Default
@@ -42,32 +43,27 @@ private:
 
 public:
     // Public API
-	void						Reallocate(   int							iWidth
-											, int                           iHeight
-											, ::ul3::tFormat                iFormat
-											, ::ul3::fpInvalidateFunction   iInvFunc = nullptr
-											, void*                         iInvInfo = nullptr
-											, bool                          iInitializeData = false);
+    void Reallocate(
+          int  iWidth
+        , int  iHeight
+        , ::ULIS::eFormat iFormat
+        , const ::ULIS::FOnInvalidBlock& iInvFunc = ::ULIS::FOnInvalidBlock()
+        , bool iInitializeData = false
+    );
 
     TArray64< uint8 >&          GetArray();
     const TArray64< uint8 >&    GetArray() const;
-    ::ul3::FBlock*              GetBlock();
-    const ::ul3::FBlock*        GetBlock() const;
+    ::ULIS::FBlock*             GetBlock();
+    const ::ULIS::FBlock*       GetBlock() const;
     int                         Width() const;
     int                         Height() const;
     FVector2D                   Size() const;
-    ::ul3::tFormat              Format() const; 
-    // ETextureSourceFormat        GetUE4TextureSourceFormat() const;
-    // EPixelFormat				GetUE4PixelFormat() const;
-    // uint32                      GetULISFormat() const;
+    ::ULIS::eFormat             Format() const; 
     void                        ResyncData();
 
 private:
     // Private Data Members
-    // ETextureSourceFormat    mUE4TextureSourceFormat;
-	// EPixelFormat			mUE4PixelFormat;
-    // ::ul3::tFormat          mULISFormat;
-    ::ul3::FBlock*          mBlock;
-    TArray64<uint8>         mArray;
+    ::ULIS::FBlock* mBlock;
+    TArray64<uint8> mArray;
 };
 

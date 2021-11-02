@@ -5,7 +5,7 @@
 
 #include "CoreTypes.h"
 #include "UObject/ObjectMacros.h"
-#include <ULIS3>
+#include <ULIS>
 #include "OdysseyBrushPivot.generated.h"
 
 class FOdysseyBlock;
@@ -70,6 +70,6 @@ struct FRectF    //PATCH: until ::ulis3::FRectF
     float h;
 };
 
-FRectF ComputeRectWithPivot(TSharedPtr<FOdysseyBlock> iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
-//::ul3::FRect ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
+FRectF ComputeRectWithPivot(TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
+//::ULIS::FRectI ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
 

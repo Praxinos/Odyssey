@@ -21,7 +21,7 @@ FOdysseyTextureEditor::~FOdysseyTextureEditor()
 
 FOdysseyTextureEditor::FOdysseyTextureEditor() :
 	FOdysseyPainterEditor(),
-	mSelectedAlphaMode(::ul3::AM_NORMAL)
+	mSelectedAlphaMode(::ULIS::Alpha_Normal)
 {
 }
 
@@ -120,7 +120,7 @@ FOdysseyTextureEditor::LayerStack() const
     return TextureWrapper()->LayerStack();
 }
 
-::ul3::eAlphaMode
+::ULIS::eAlphaMode
 FOdysseyTextureEditor::SelectedAlphaMode() const
 {
 	return mSelectedAlphaMode;
@@ -130,7 +130,7 @@ FOdysseyTextureEditor::SelectedAlphaMode() const
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
+FOdysseyTextureEditor::SelectedAlphaMode(::ULIS::eAlphaMode iMode)
 {
 	mSelectedAlphaMode = iMode;
 
@@ -147,7 +147,7 @@ FOdysseyTextureEditor::SelectedAlphaMode(::ul3::eAlphaMode iMode)
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(LayerStack()->GetCurrentLayer());
     if (imageLayer && imageLayer->IsAlphaLocked())
     {
-        PaintEngine()->SetAlphaModeModifier(::ul3::AM_BACK);
+        PaintEngine()->SetAlphaModeModifier(::ULIS::Alpha_Back);
     }
     else
     {
@@ -219,14 +219,14 @@ void
 FOdysseyTextureEditor::OnPostTextureChange()
 {
     FOdysseyLayerStack* layerstack = LayerStack();
-    if (!layerstack)
-		return;
+    if( !layerstack )
+        return;
 
-	//Add Delegates
-    layerstack->OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged);
-    layerstack->OnStructureChanged().AddRaw(this, &FOdysseyTextureEditor::OnLayerStackStructureChanged);
-    layerstack->OnImageResultChanged().AddRaw(this, &FOdysseyTextureEditor::OnLayerStackImageResultChanged);
-    	  
+    //Add Delegates
+    layerstack->OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged );
+    layerstack->OnStructureChanged().AddRaw( this, &FOdysseyTextureEditor::OnLayerStackStructureChanged );
+    layerstack->OnImageResultChanged().AddRaw( this, &FOdysseyTextureEditor::OnLayerStackImageResultChanged );
+
     if ( layerstack->GetCurrentLayer() == layerstack->GetLayerRoot() )
     {
         // Set Image Layer as the current Layer
@@ -284,7 +284,7 @@ FOdysseyTextureEditor::OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer>
     PaintEngine()->Block(imageLayer->GetBlock());
 
     //Set AlphaLock Delegate
-    PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ul3::AM_BACK : mSelectedAlphaMode);
+    PaintEngine()->SetAlphaModeModifier(imageLayer->IsAlphaLocked() ? ::ULIS::Alpha_Back : mSelectedAlphaMode);
     imageLayer->IsAlphaLockedChangedDelegate().AddRaw(this, &FOdysseyTextureEditor::OnCurrentLayerIsAlphaLockedChanged);
 }
 
@@ -297,7 +297,7 @@ FOdysseyTextureEditor::OnCurrentLayerIsAlphaLockedChanged(bool iOldValue)
 
     //TODO: Find a good way to sync PaintEngine to LayerStack and other foreign parameters
     TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(layerstack->GetCurrentLayer());
-    PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ul3::AM_BACK : mSelectedAlphaMode);
+    PaintEngine()->SetAlphaModeModifier( (imageLayer && imageLayer->IsAlphaLocked()) ? ::ULIS::Alpha_Back : mSelectedAlphaMode);
 }
 
 void
@@ -308,20 +308,20 @@ FOdysseyTextureEditor::OnLayerStackStructureChanged()
 }
 
 void
-FOdysseyTextureEditor::OnLayerStackImageResultChanged(const ::ul3::FRect& iRect)
+FOdysseyTextureEditor::OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
-	FOdysseyLayerStack* layerstack = LayerStack();
-    if (!layerstack)
-		return;
-		
+    FOdysseyLayerStack* layerstack = LayerStack();
+    if( !layerstack )
+        return;
+
     //TODO: Move to TextureWrapper
     Texture()->MarkPackageDirty();
-    LayerStack()->ComputeResultInBlock(DisplaySurface()->Block()->GetBlock(), iRect);
-	DisplaySurface()->Invalidate(iRect);
+    LayerStack()->ComputeResultInBlock( DisplaySurface()->Block()->GetBlock(), iRects, iNumRects );
+    DisplaySurface()->Invalidate( iRects, iNumRects );
 }
 
 void
-FOdysseyTextureEditor::OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles)
+FOdysseyTextureEditor::OnPaintEnginePaintEnd(const TArray<::ULIS::FRectI>& iChangedTiles)
 {
     if (iChangedTiles.Num() <= 0)
         return;
@@ -349,10 +349,7 @@ FOdysseyTextureEditor::OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChange
     imageLayer->SetBlock(PaintEngine()->OriginalBlock(), false, false);
 
     layerstack->mDrawingUndo->StartRecord();
-    for (int i = 0; i < iChangedTiles.Num(); i++)
-    {
-        layerstack->mDrawingUndo->SaveData(iChangedTiles[i].x, iChangedTiles[i].y, iChangedTiles[i].w, iChangedTiles[i].h);
-    }
+    layerstack->mDrawingUndo->SaveData(iChangedTiles);
     layerstack->mDrawingUndo->EndRecord();
 
     imageLayer->SetBlock(PaintEngine()->EditedBlock(), false, false);

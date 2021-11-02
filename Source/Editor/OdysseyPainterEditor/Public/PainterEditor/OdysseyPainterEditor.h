@@ -5,7 +5,7 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyPaintEngine;
 class FOdysseyUndoHistory;
@@ -42,12 +42,12 @@ public:
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
 	virtual FOdysseyUndoHistory*		                UndoHistory() const;
 	virtual bool                                        DrawBrushPreview() const;
-	virtual ::ul3::FPixelValue                          PaintColor() const;
+	virtual ::ULIS::FColor                          PaintColor() const;
 
 public:
     // Setters
 	void                         DrawBrushPreview(bool iDrawBrushPreview);
-	void                         PaintColor(::ul3::FPixelValue iColor);
+	void                         PaintColor(::ULIS::FColor iColor);
 
 public:
     // Interface
@@ -56,6 +56,6 @@ public:
 private:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine*        mPaintEngine; //TODO: no need for a pointer here
-	::ul3::FPixelValue			mPaintColor;
+	::ULIS::FColor			mPaintColor;
 	bool                        mDrawBrushPreview;
 };

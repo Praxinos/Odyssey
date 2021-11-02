@@ -4,7 +4,7 @@
 #include "CoreTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/ObjectMacros.h"
-#include <ULIS3>
+#include <ULIS>
 
 #include "OdysseyBrushRect.generated.h"
 
@@ -18,14 +18,14 @@ public:
 
     FOdysseyBrushRect();
     FOdysseyBrushRect( int X, int Y, int Width, int Height );
-    FOdysseyBrushRect( const ::ul3::FRect& Rect );
-	FOdysseyBrushRect( ::ul3::FRect&& iVal );
+    FOdysseyBrushRect( const ::ULIS::FRectI& Rect );
+	FOdysseyBrushRect( ::ULIS::FRectI&& iVal );
     FOdysseyBrushRect( const FOdysseyBrushRect& iOther );
     FOdysseyBrushRect( FOdysseyBrushRect&& iOther );
     FOdysseyBrushRect& operator=( const FOdysseyBrushRect& iOther );
 
-    const ::ul3::FRect& GetValue() const;
-    void SetValue(const ::ul3::FRect&);
+    const ::ULIS::FRectI& GetValue() const;
+    void SetValue(const ::ULIS::FRectI&);
     void SetValue(int iX, int iY, int iW, int iH);
     bool IsInitialized() const;
     
@@ -34,9 +34,9 @@ public:
 	int Width() const;
 	int Height() const;
 
-    static  FOdysseyBrushRect FromTemp( ::ul3::FRect&& iVal );
+    static  FOdysseyBrushRect FromTemp( ::ULIS::FRectI&& iVal );
 private:
-    ::ul3::FRect m;
+    ::ULIS::FRectI m;
 	bool mIsInitialized;
 };
 

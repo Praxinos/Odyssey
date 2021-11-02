@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyBlock;
 class IOdysseyLayer;
@@ -16,9 +16,8 @@ class IOdysseyLayer;
 class ODYSSEYLAYER_API IOdysseyLayerImageRenderingCapability
 {
 public:
-    // Layer Blending Mode Changed Event
-    // ::ul3::eBlendingMode is for the previous value
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerImageResultChanged, const ::ul3::FRect*);
+    // Can be triggered with nullptr and 0 size, this means change the whole size.
+    DECLARE_MULTICAST_DELEGATE_TwoParams( FOdysseyLayerImageResultChanged, const ::ULIS::FRectI*, const uint32 );
 
 public:
     // Construction / Destruction
@@ -46,7 +45,7 @@ public:
     }
 
 public:
-    virtual void RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) = 0;
+    virtual TArray<::ULIS::FEvent> RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum ) = 0;
 
 public:
     FOdysseyLayerImageResultChanged& ImageResultChangedDelegate();

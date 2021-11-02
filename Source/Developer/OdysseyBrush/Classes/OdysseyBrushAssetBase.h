@@ -16,30 +16,32 @@
 #include "Proxies/OdysseyBrushPivot.h"
 #include "Proxies/OdysseyBrushBlock.h"
 #include "Proxies/OdysseyBrushRect.h"
-#include <ULIS3>
+#include <ULIS>
 #include "OdysseyBrushAssetBase.generated.h"
 
 class FOdysseyBlock;
 
 /////////////////////////////////////////////////////
 // FOdysseyBrushState
-struct  FOdysseyBrushState
+struct ODYSSEYBRUSH_API FOdysseyBrushState
 {
-    FOdysseyBrushState()
-    {}
+    FOdysseyBrushState();
+
+    void ResetEvent();
 
     FOdysseyBlock*                          target_temp_buffer;
     FOdysseyStrokePoint                     point;
-    ::ul3::FPixelValue                      color;
+    ::ULIS::FColor                      color;
     float                                   size_modifier;
     float                                   opacity_modifier;
     float                                   flow_modifier;
-    ::ul3::eBlendingMode                    blendingMode_modifier;
-    ::ul3::eAlphaMode                       alphaMode_modifier;
+    ::ULIS::eBlendMode                    blendingMode_modifier;
+    ::ULIS::eAlphaMode                       alphaMode_modifier;
     float                                   step;
     float                                   smoothing_strength;
     int                                     currentPointIndex;
     const  TArray< FOdysseyStrokePoint >*   currentStroke;
+    ::ULIS::FEvent                          event;
 };
 
 
@@ -64,8 +66,8 @@ public:
 
     // Public C++ API
     FOdysseyBrushState&             GetState();
-    const TArray< ::ul3::FRect >&   GetInvalidRects() const;
-    void                            PushInvalidRect( const  ::ul3::FRect& iRect );
+    const TArray< ::ULIS::FRectI >&   GetInvalidRects() const;
+    void                            PushInvalidRect( const  ::ULIS::FRectI& iRect );
     void                            ClearInvalidRects();
 
     void                            AddOrReplaceState( const FName& iKey, FOdysseyDrawingState* iState );
@@ -339,7 +341,7 @@ private:
     // Private Members Data
     FOdysseyBrushState                      state;
     TMap< FName, FOdysseyDrawingState* >    mStates;
-    TArray< ::ul3::FRect >                  invalid_rects;
+    TArray< ::ULIS::FRectI >                  invalid_rects;
 
 public:
     UPROPERTY(EditAnywhere,Category="Overrides")

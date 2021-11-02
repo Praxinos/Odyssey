@@ -22,7 +22,7 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyMathUtils.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 
 
@@ -520,7 +520,7 @@ SOdysseySurfaceViewport::GetSurfaceInfosValue( ) const
     if (!texture)
         return NSLOCTEXT("No Texture Provided","No Texture Provided", "No Texture Provided");
 
-    /* ::ul3::FFormatMetrics format(Surface->Block()->Format());
+    /* ::ULIS::FFormatMetrics format(Surface->Block()->Format());
     FText formatName;
     switch(format.CM)
     {

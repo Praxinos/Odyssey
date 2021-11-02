@@ -38,11 +38,11 @@ public:
     
 	virtual IOdysseySurfaceEditable*            DisplaySurface() const override;
     virtual FOdysseyLayerStack*					LayerStack() const;
-    ::ul3::eAlphaMode	                        SelectedAlphaMode() const;
+    ::ULIS::eAlphaMode	                        SelectedAlphaMode() const;
 
 public:
     // Setters
-    void SelectedAlphaMode(::ul3::eAlphaMode iMode);
+    void SelectedAlphaMode(::ULIS::eAlphaMode iMode);
 
 public:
     // Overrides
@@ -60,14 +60,14 @@ protected:
     virtual void OnPostTextureChange();
 
     //LayerStack
-	virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
-	virtual void OnLayerStackStructureChanged();
-	virtual void OnLayerStackImageResultChanged(const ::ul3::FRect& iRect);
-	virtual void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
+    virtual void OnLayerStackCurrentLayerChanged(TSharedPtr<IOdysseyLayer> iOldValue);
+    virtual void OnLayerStackStructureChanged();
+    virtual void OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects );
+    virtual void OnCurrentLayerIsAlphaLockedChanged(bool iOldValue);
 
     //Paint Engine
-    virtual void OnPaintEnginePaintEnd(const TArray<::ul3::FRect>& iChangedTiles);
+    virtual void OnPaintEnginePaintEnd(const TArray<::ULIS::FRectI>& iChangedTiles);
 
 private:
-    ::ul3::eAlphaMode                       mSelectedAlphaMode;
+    ::ULIS::eAlphaMode                       mSelectedAlphaMode;
 };

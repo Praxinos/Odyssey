@@ -12,7 +12,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "SOdysseyTextureConfigureWindow.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // UOdysseyTextureFactory
@@ -53,21 +53,20 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     check(iClass->IsChildOf(UTexture2D::StaticClass()));
 
     // Init internal data
-    FOdysseyBlock block( mTextureWidth, mTextureHeight, ULISFormatForUE4TextureSourceFormat(mTextureFormat), nullptr, nullptr, true );
+    FOdysseyBlock block( mTextureWidth, mTextureHeight, ULISFormatForUE4TextureSourceFormat(mTextureFormat), ::ULIS::FOnInvalidBlock(), true );
 
-    ::ul3::FPixelValue color( ::ul3::FPixelValue::FromRGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
+    ::ULIS::FColor color( ::ULIS::FColor::RGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
 
     //TODO: should fill the default native texture for the thumbnail
 
-    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, mTextureWidth, mTextureHeight );
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block.GetBlock(), color, canvasRect );
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
+    ctx.Fill(*(block.GetBlock()), color );
+    ctx.Finish();
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     InitTextureWithBlockData(&block, texture, mTextureFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-	::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat());
+	::ULIS::eFormat format = ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat());
     userData->GetLayerStack()->Init(mTextureWidth, mTextureHeight, format);
 
 	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();

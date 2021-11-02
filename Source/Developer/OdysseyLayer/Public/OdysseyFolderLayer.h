@@ -7,7 +7,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
 #include "IOdysseyLayerImageBlendingCapability.h"
-#include <ULIS3>
+#include <ULIS>
 
 
 /**
@@ -20,7 +20,7 @@ class ODYSSEYLAYER_API FOdysseyFolderLayer :
 public:
     // Layer Is Open State Changed Event
     // Bool is for the previous value
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerIsOpenChanged, bool);
+    DECLARE_MULTICAST_DELEGATE_OneParam( FOdysseyLayerIsOpenChanged, bool );
 
 public:
     // Construction / Destruction
@@ -30,8 +30,8 @@ public:
 
     virtual FOdysseyFolderLayer* Clone() const override;
     virtual void Serialize(FArchive &Ar);
-    virtual void Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
-    virtual void RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
+    virtual TArray<::ULIS::FEvent> Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum, const ::ULIS::FEvent* iEvents ) override;
+    virtual TArray<::ULIS::FEvent> RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum ) override;
     virtual bool ImplementsCapability(FGuid iGuid) const override;
     virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) override;
     
@@ -42,7 +42,7 @@ public:
     bool IsOpen() const;
     void SetIsOpen( bool iIsOpen );
 
-    void OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer);
+    void OnChildImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects, TSharedPtr< IOdysseyLayer > iLayer );
 
     virtual void SetIsVisible(bool iIsVisible) override;
 

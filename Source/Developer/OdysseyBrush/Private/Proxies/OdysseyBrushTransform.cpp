@@ -4,7 +4,7 @@
 #include "Proxies/OdysseyBrushTransform.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyBlock.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////
@@ -13,21 +13,9 @@ FOdysseyMatrix::FOdysseyMatrix()
     : m()
 {}
 
-FOdysseyMatrix::FOdysseyMatrix( const  ::ul3::FTransform2D&  iMat )
+FOdysseyMatrix::FOdysseyMatrix( const ::ULIS::FMat3F& iMat )
     : m( iMat )
 {}
-
-FString
-FOdysseyMatrix::ID() const
-{
-    return  FString::FromBlob( m.Ptr(), 9 * sizeof( float ) );
-}
-
-const ::ul3::FTransform2D&
-FOdysseyMatrix::GetValue() const
-{
-    return  m;
-}
 
 /////////////////////////////////////////////////////
 // UOdysseyTransformProxyLibrary
@@ -35,7 +23,7 @@ FOdysseyMatrix::GetValue() const
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeIdentityMatrix()
 {
-    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeIdentityTransform() );
+    return  FOdysseyMatrix( ::ULIS::FMat3F() );
 }
 
 
@@ -43,7 +31,7 @@ UOdysseyTransformProxyLibrary::MakeIdentityMatrix()
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeTranslationMatrix( float DeltaX, float DeltaY )
 {
-    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeTranslationTransform( DeltaX, DeltaY ) );
+    return  FOdysseyMatrix( ::ULIS::FMat3F::MakeTranslationMatrix( DeltaX, DeltaY ) );
 }
 
 
@@ -51,7 +39,7 @@ UOdysseyTransformProxyLibrary::MakeTranslationMatrix( float DeltaX, float DeltaY
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeRotationMatrix( float Deg )
 {
-    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeRotationTransform( Deg * 3.14159265359 / 180.0 ) );
+    return  FOdysseyMatrix( ::ULIS::FMat3F::MakeRotationMatrix( ::ULIS::FMath::DegToRadF( Deg ) ) );
 }
 
 
@@ -59,7 +47,7 @@ UOdysseyTransformProxyLibrary::MakeRotationMatrix( float Deg )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeScaleMatrix( float ScaleX, float ScaleY )
 {
-    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeScaleTransform( ScaleX, ScaleY ) );
+    return  FOdysseyMatrix( ::ULIS::FMat3F::MakeScaleMatrix( ScaleX, ScaleY ) );
 }
 
 
@@ -67,7 +55,7 @@ UOdysseyTransformProxyLibrary::MakeScaleMatrix( float ScaleX, float ScaleY )
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::MakeShearMatrix( float ShearX, float ShearY )
 {
-    return  FOdysseyMatrix( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
+    return  FOdysseyMatrix( ::ULIS::FMat3F::MakeSkewMatrix( ShearX, ShearY ) );
 }
 
 //static
@@ -77,10 +65,9 @@ UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
     , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD 
 )
 {
-    ::ul3::FVec2F src[4] = { ::ul3::FVec2F( SrcA.X, SrcA.Y ), ::ul3::FVec2F( SrcB.X, SrcB.Y ), ::ul3::FVec2F( SrcC.X, SrcC.Y ), ::ul3::FVec2F( SrcD.X, SrcD.Y ) };
-    ::ul3::FVec2F dst[4] = { ::ul3::FVec2F( DstA.X, DstA.Y ), ::ul3::FVec2F( DstB.X, DstB.Y ), ::ul3::FVec2F( DstC.X, DstC.Y ), ::ul3::FVec2F( DstD.X, DstD.Y ) };
-
-    return FOdysseyMatrix( ::ul3::FTransform2D::GetPerspectiveTransform( src, dst ) );
+    ::ULIS::FVec2F src[4] = { ::ULIS::FVec2F( SrcA.X, SrcA.Y ), ::ULIS::FVec2F( SrcB.X, SrcB.Y ), ::ULIS::FVec2F( SrcC.X, SrcC.Y ), ::ULIS::FVec2F( SrcD.X, SrcD.Y ) };
+    ::ULIS::FVec2F dst[4] = { ::ULIS::FVec2F( DstA.X, DstA.Y ), ::ULIS::FVec2F( DstB.X, DstB.Y ), ::ULIS::FVec2F( DstC.X, DstC.Y ), ::ULIS::FVec2F( DstD.X, DstD.Y ) };
+    return FOdysseyMatrix( ::ULIS::FMat3F::MakeHomography( src, dst ) );
 }
 
 
@@ -88,7 +75,8 @@ UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
 FOdysseyMatrix
 UOdysseyTransformProxyLibrary::ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second )
 {
-    return  FOdysseyMatrix( ::ul3::FTransform2D::ComposeTransforms( Second.GetValue(), First.GetValue() ) );
+    // TODO: Check non commutative order here in case we broke something in brushes
+    return  FOdysseyMatrix( Second.m * First.m );
 }
 
 
@@ -96,104 +84,116 @@ UOdysseyTransformProxyLibrary::ComposeMatrix( const FOdysseyMatrix& First, const
 FOdysseyBrushRect
 UOdysseyTransformProxyLibrary::GetMatrixResultRect( const FOdysseyMatrix& Matrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod )
 {
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( Rectangle.GetValue(), Matrix.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-    return FOdysseyBrushRect(box);
+    return FOdysseyBrushRect( ::ULIS::FContext::TransformAffineMetrics( Rectangle.GetValue(), Matrix.m ) );
 }
 
 //static
 FOdysseyBrushRect
 UOdysseyTransformProxyLibrary::GetPerspectiveMatrixResultRect( const FOdysseyMatrix& PerspectiveMatrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod )
 {
-    ::ul3::FRect box = ::ul3::TransformPerspectiveMetrics( Rectangle.GetValue(), PerspectiveMatrix.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-    return FOdysseyBrushRect(box);
+    return FOdysseyBrushRect( ::ULIS::FContext::TransformPerspectiveMetrics( Rectangle.GetValue(), PerspectiveMatrix.m ) );
 }
 
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     if( OutputWidth <= 0 || OutputHeight <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-	TSharedPtr<FOdysseyBlock> dst = MakeShared< FOdysseyBlock >( OutputWidth, OutputHeight, src->Format() );
-    ::ul3::ClearRaw(dst->GetBlock());
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable( new FOdysseyBlock( OutputWidth, OutputHeight, src_shared->Format() ));
 
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), Transform.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-    if( box.Area() <= 0 )
-        return FOdysseyBlockProxy(dst);
+    ::ULIS::FEvent eventClear;
+    ::ULIS::FEvent eventTransform;
+    {
+        using namespace ::ULIS;
+        FBlock& src = *( src_shared->GetBlock() );
+        FBlock& dst = *( dst_shared->GetBlock() );
+        FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+        ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
 
-    //::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , Transform.GetValue()
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
+        ctx.TransformAffine(
+              src
+            , dst
+            , FRectI::Auto
+            , Transform.m
+            , eResamplingMethod( ResamplingMethod )
+            , eBorderMode::Border_Transparent
+            , ::ULIS::FColor::Transparent
+            , FSchedulePolicy::MultiScanlines
+            , 1
+            , &eventClear
+            , &eventTransform
+        );
+        ctx.Flush();
+    }
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
+    // An old implementation we can keep in case we need to use it again later.
+    // It wasn't updated to the newer ULIS versions:
+    //::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::ComposeTransforms( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), Transform.GetValue() ) );
 }
 
 //static
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-    int src_width  = src->Width();
-    int src_height = src->Height();
+    // TODO: There is a lot of back and forth that we could optimize away in this function, namely, the fixed transform
+    // is processed twice and it is not needed.
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    using namespace ::ULIS;
+    FBlock& src = *( src_shared->GetBlock() );
+    float w = static_cast< float >( src.Width() );
+    float h = static_cast< float >( src.Height() );
 
-    ::ul3::FTransform2D fixedTransform(
-        ::ul3::FTransform2D::ComposeTransforms(
-            ::ul3::FTransform2D::MakeRotationTransform( ::ul3::FMaths::DegToRadF( Angle ) ),
-            ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
-        )
+    ::ULIS::FMat3F fixedTransform(
+          ::ULIS::FMat3F::MakeRotationMatrix( ::ULIS::FMath::DegToRadF( Angle ) )
+        * ::ULIS::FMat3F::MakeTranslationMatrix( -w / 2, -h / 2.f )
     );
 
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), fixedTransform, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    // This is pointless because the src will not be transformed into a null area destination since it has a valid size.
+    ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), fixedTransform );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    fixedTransform = ::ul3::FTransform2D::ComposeTransforms(::ul3::FTransform2D::MakeTranslationTransform(static_cast<float>(-box.x), static_cast<float>(-box.y)), fixedTransform);
+    // Fixing the transform to translate the result in the positive range
+    fixedTransform = ::ULIS::FMat3F::MakeTranslationMatrix( static_cast<float>( -box.x ), static_cast<float>( -box.y ) ) * fixedTransform;
+    box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), fixedTransform );
 
-    box = ::ul3::TransformAffineMetrics(src->GetBlock()->Rect(), fixedTransform, static_cast<::ul3::eResamplingMethod>(ResamplingMethod));
+    // This should never happen too
     if (box.Area() <= 0)
         return FOdysseyBlockProxy::MakeNullProxy();
 
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
+    FBlock& dst = *( dst_shared->GetBlock() );
 
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+    ::ULIS::FEvent eventClear;
+    ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
 
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , fixedTransform
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    ::ULIS::FEvent eventTransform;
+    ctx.TransformAffine(
+          src
+        , dst
+        , FRectI::Auto
+        , fixedTransform
+        , eResamplingMethod( ResamplingMethod )
+        , eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , FSchedulePolicy::MultiScanlines
+        , 1
+        , &eventClear
+        , &eventTransform
+    );
+    ctx.Flush();
 
-    return FOdysseyBlockProxy(dst);
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
 }
 
 
@@ -201,36 +201,41 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Scale, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-    ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( Scale, Scale ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    using namespace ::ULIS;
+    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FMat3F mat( ::ULIS::FMat3F::MakeScaleMatrix( Scale, Scale ) );
+    ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), mat );
+
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
+    FBlock& dst = *( dst_shared->GetBlock() );
 
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , fixedTransform
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
+    ::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * mat );
+    FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+    ::ULIS::FEvent eventClear;
+    ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
+    ::ULIS::FEvent eventTransform;
+    ctx.TransformAffine(
+          src
+        , dst
+        , FRectI::Auto
+        , fixedTransform
+        , eResamplingMethod( ResamplingMethod )
+        , eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , FSchedulePolicy::MultiScanlines
+        , 1
+        , &eventClear
+        , &eventTransform
+    );
+    ctx.Flush();
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
 }
 
 
@@ -238,37 +243,42 @@ UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Sc
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX, float ScaleY, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
-		
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-    ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeScaleTransform( ScaleX, ScaleY ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    using namespace ::ULIS;
+    FBlock& src = *( src_shared->GetBlock() );
+
+    ::ULIS::FMat3F mat( ::ULIS::FMat3F::MakeScaleMatrix( ScaleX, ScaleY ) );
+    ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), mat );
+
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
+    FBlock& dst = *( dst_shared->GetBlock() );
 
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , fixedTransform
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
+    ::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * mat );
+    FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+    ::ULIS::FEvent eventClear;
+    ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
+    ::ULIS::FEvent eventTransform;
+    ctx.TransformAffine(
+          src
+        , dst
+        , FRectI::Auto
+        , fixedTransform
+        , eResamplingMethod( ResamplingMethod )
+        , eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , FSchedulePolicy::MultiScanlines
+        , 1
+        , &eventClear
+        , &eventTransform
+    );
+    ctx.Flush();
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
 }
 
 
@@ -276,36 +286,41 @@ UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX,
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-    ::ul3::FTransform2D mat( ::ul3::FTransform2D::MakeShearTransform( ShearX, ShearY ) );
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), mat, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    using namespace ::ULIS;
+    FBlock& src = *( src_shared->GetBlock() );
+
+    ::ULIS::FMat3F mat( ::ULIS::FMat3F::MakeSkewMatrix( ShearX, ShearY ) );
+    ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), mat );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
+    FBlock& dst = *( dst_shared->GetBlock() );
 
-    ::ul3::FTransform2D fixedTransform( ::ul3::FTransform2D::ComposeTransforms( ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ), mat ) );
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , fixedTransform
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
+    ::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * mat );
+    FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+    ::ULIS::FEvent eventClear;
+    ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
+    ::ULIS::FEvent eventTransform;
+    ctx.TransformAffine(
+          src
+        , dst
+        , FRectI::Auto
+        , fixedTransform
+        , eResamplingMethod( ResamplingMethod )
+        , eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , FSchedulePolicy::MultiScanlines
+        , 1
+        , &eventClear
+        , &eventTransform
+    );
+    ctx.Flush();
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
 }
 
 
@@ -313,52 +328,57 @@ UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, f
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-    int src_width  = src->Width();
-    int src_height = src->Height();
-    float max = FMath::Max( src_width, src_height );
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    using namespace ::ULIS;
+    FBlock& src = *( src_shared->GetBlock() );
+
+    int src_width  = src.Width();
+    int src_height = src.Height();
+    float max = ::ULIS::FMath::Max( src_width, src_height );
     float ratio = Size / max;
 
-    ::ul3::FTransform2D fixedTransform(
-        ::ul3::FTransform2D::ComposeTransforms(
-            ::ul3::FTransform2D::MakeScaleTransform( ratio, ratio ),
-            ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
-        )
+    ::ULIS::FMat3F fixedTransform(
+              ::ULIS::FMat3F::MakeScaleMatrix( ratio, ratio )
+            * ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
     );
 
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), fixedTransform, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), fixedTransform );
+
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    fixedTransform = ::ul3::FTransform2D::ComposeTransforms(::ul3::FTransform2D::MakeTranslationTransform(static_cast<float>(-box.x), static_cast<float>(-box.y)), fixedTransform);
+    fixedTransform = ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * fixedTransform;
 
-    box = ::ul3::TransformAffineMetrics(src->GetBlock()->Rect(), fixedTransform, static_cast<::ul3::eResamplingMethod>(ResamplingMethod));
+    box = ::ULIS::FContext::TransformAffineMetrics(src.Rect(), fixedTransform );
+
     if (box.Area() <= 0)
         return FOdysseyBlockProxy::MakeNullProxy();
-    
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
 
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
+    FBlock& dst = *( dst_shared->GetBlock() );
 
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , fixedTransform
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
-
+    FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+    ::ULIS::FEvent eventClear;
+    ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
+    ::ULIS::FEvent eventTransform;
+    ctx.TransformAffine(
+          src
+        , dst
+        , FRectI::Auto
+        , fixedTransform
+        , eResamplingMethod( ResamplingMethod )
+        , eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , FSchedulePolicy::MultiScanlines
+        , 1
+        , &eventClear
+        , &eventTransform
+    );
+    ctx.Flush();
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
 }
 
 
@@ -366,51 +386,56 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-    float src_width  = src->Width();
-    float src_height = src->Height();
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    using namespace ::ULIS;
+    FBlock& src = *( src_shared->GetBlock() );
+
+    float src_width  = src.Width();
+    float src_height = src.Height();
     float ratioX = SizeX / src_width;
     float ratioY = SizeY / src_height;
 
-    ::ul3::FTransform2D fixedTransform(
-        ::ul3::FTransform2D::ComposeTransforms(
-            ::ul3::FTransform2D::MakeScaleTransform( ratioX, ratioY ),
-            ::ul3::FTransform2D::MakeTranslationTransform( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
-        )
+    ::ULIS::FMat3F fixedTransform(
+              ::ULIS::FMat3F::MakeScaleMatrix( ratioX, ratioY )
+            * ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -src_width / 2.f ), static_cast< float >( -src_height / 2.f ) )
     );
 
-    ::ul3::FRect box = ::ul3::TransformAffineMetrics( src->GetBlock()->Rect(), fixedTransform, static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
+    ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), fixedTransform );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    fixedTransform = ::ul3::FTransform2D::ComposeTransforms(::ul3::FTransform2D::MakeTranslationTransform(static_cast<float>(-box.x), static_cast<float>(-box.y)), fixedTransform);
+    fixedTransform = ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * fixedTransform;
 
-    box = ::ul3::TransformAffineMetrics(src->GetBlock()->Rect(), fixedTransform, static_cast<::ul3::eResamplingMethod>(ResamplingMethod));
+    box = ::ULIS::FContext::TransformAffineMetrics(src.Rect(), fixedTransform );
+
     if (box.Area() <= 0)
         return FOdysseyBlockProxy::MakeNullProxy();
-    
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( box.w, box.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
 
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
+    FBlock& dst = *( dst_shared->GetBlock() );
 
-    ::ul3::TransformAffine( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , fixedTransform
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
+    FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+    ::ULIS::FEvent eventClear;
+    ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
+    ::ULIS::FEvent eventTransform;
+    ctx.TransformAffine(
+          src
+        , dst
+        , FRectI::Auto
+        , fixedTransform
+        , eResamplingMethod( ResamplingMethod )
+        , eBorderMode::Border_Transparent
+        , ::ULIS::FColor::Transparent
+        , FSchedulePolicy::MultiScanlines
+        , 1
+        , &eventClear
+        , &eventTransform
+    );
+    ctx.Flush();
+    return FOdysseyBlockProxy::MakeProxy( dst_shared, 1, &eventTransform, 1, &Sample);
 }
 
 
@@ -441,34 +466,36 @@ UOdysseyTransformProxyLibrary::FlipXY( FOdysseyBlockProxy Sample, EResamplingMet
 FOdysseyBlockProxy
 UOdysseyTransformProxyLibrary::Perspective( FOdysseyBlockProxy Sample, FOdysseyMatrix PerspectiveMatrix, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod )
 {
-    if( !Sample.m )
+    if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
     if( OutputWidth <= 0 || OutputHeight <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock> src = Sample.m;
-	TSharedPtr<FOdysseyBlock> dst = MakeShared< FOdysseyBlock >( OutputWidth, OutputHeight, src->Format() );
-    ::ul3::ClearRaw(dst->GetBlock());
-
-    ::ul3::FRect box = ::ul3::TransformPerspectiveMetrics( src->GetBlock()->Rect(), PerspectiveMatrix.GetValue(), static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-    if( box.Area() <= 0 )
-        return FOdysseyBlockProxy(dst);
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = dst->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::TransformPerspective( hULIS.ThreadPool()
-                            , ULIS3_BLOCKING
-                            , perfIntent
-                            , hULIS.HostDeviceInfo()
-                            , ULIS3_NOCB
-                            , src->GetBlock()
-                            , dst->GetBlock()
-                            , src->GetBlock()->Rect()
-                            , PerspectiveMatrix.GetValue()
-                            , static_cast< ::ul3::eResamplingMethod >( ResamplingMethod ) );
-
-    return FOdysseyBlockProxy(dst);
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( OutputWidth, OutputHeight, src_shared->Format() ));
+    ::ULIS::FEvent eventClear;
+    ::ULIS::FEvent eventTransform;
+    {
+        using namespace ::ULIS;
+        FBlock& src = *( src_shared->GetBlock() );
+        FBlock& dst = *( dst_shared->GetBlock() );
+        FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
+        ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
+        ctx.TransformPerspective(
+              src
+            , dst
+            , FRectI::Auto
+            , PerspectiveMatrix.m
+            , eResamplingMethod( ResamplingMethod )
+            , eBorderMode::Border_Transparent
+            , ::ULIS::FColor::Transparent
+            , FSchedulePolicy::MultiScanlines
+            , 1
+            , &eventClear
+            , &eventTransform
+        );
+        ctx.Flush();
+    }
+    return FOdysseyBlockProxy::MakeProxy(dst_shared, 1, &eventTransform, 1, &Sample);
 }

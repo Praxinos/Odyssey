@@ -67,7 +67,7 @@ SOdysseyColorSliders::Construct( const FArguments& InArgs )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Public Callbacks
 /* void
-SOdysseyColorSliders::SetColor( const ::ul3::FPixelValue& iColor )
+SOdysseyColorSliders::SetColor( const ::ULIS::FColor& iColor )
 {
     if( bDisableNextCallback ) {
         bDisableNextCallback = false;

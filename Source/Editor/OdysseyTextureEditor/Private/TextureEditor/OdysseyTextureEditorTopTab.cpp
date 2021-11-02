@@ -21,7 +21,7 @@ FOdysseyTextureEditorTopTab::FOdysseyTextureEditorTopTab(FOdysseyTextureEditor* 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-::ul3::eAlphaMode
+::ULIS::eAlphaMode
 FOdysseyTextureEditorTopTab::AlphaMode() const
 {
     return mEditor->SelectedAlphaMode();
@@ -32,7 +32,7 @@ FOdysseyTextureEditorTopTab::AlphaMode() const
 
 
 void
-FOdysseyTextureEditorTopTab::SetAlphaMode(::ul3::eAlphaMode iAlphaMode)
+FOdysseyTextureEditorTopTab::SetAlphaMode(::ULIS::eAlphaMode iAlphaMode)
 {
     mEditor->SelectedAlphaMode( iAlphaMode );
 }

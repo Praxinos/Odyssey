@@ -19,7 +19,7 @@
 #include "SOdysseyLeafWidget.h"
 
 #include "Color/SOdysseyAdvancedColorWheel.h"
-#include <ULIS3>
+#include <ULIS>
 
 class ODYSSEYWIDGETS_API SOdysseyColorSelector : public SCompoundWidget
 {
@@ -30,7 +30,7 @@ class ODYSSEYWIDGETS_API SOdysseyColorSelector : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS( SOdysseyColorSelector )
         {}
-    SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )
+    SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
     SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
@@ -40,7 +40,7 @@ public:
 
 public:
     // Public Callbacks
-    //void SetColor( const ::ul3::FPixelValue& iColor );
+    //void SetColor( const ::ULIS::FColor& iColor );
 
 private:
     // Private Callbacks
@@ -65,6 +65,6 @@ private:
     FComboItemType CurrentItem;
     TSharedPtr< SEditableTextBox > hex_editable_text_box;
 
-    TAttribute<::ul3::FPixelValue> mColor;
+    TAttribute<::ULIS::FColor> mColor;
     FOnColorChange mOnColorChangeCallback;
 };

@@ -6,8 +6,20 @@
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
 #include "Proxies/OdysseyBrushColor.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
+
+FOdysseyBrushState::FOdysseyBrushState()
+{
+    //dummy context
+    ::ULIS::FContext::MarkEventFinished( &event );
+}
+
+void
+FOdysseyBrushState::ResetEvent()
+{
+    event = ::ULIS::FEvent::NoOP();
+}
 
 /////////////////////////////////////////////////////
 // BrushAssetBase
@@ -57,7 +69,7 @@ UOdysseyBrushAssetBase::AddOrReplaceState( const FName& iKey, FOdysseyDrawingSta
 }
 
 
-const TArray< ::ul3::FRect >&
+const TArray< ::ULIS::FRectI >&
 UOdysseyBrushAssetBase::GetInvalidRects() const
 {
     return  invalid_rects;
@@ -65,7 +77,7 @@ UOdysseyBrushAssetBase::GetInvalidRects() const
 
 
 void
-UOdysseyBrushAssetBase::PushInvalidRect( const  ::ul3::FRect& iRect )
+UOdysseyBrushAssetBase::PushInvalidRect( const  ::ULIS::FRectI& iRect )
 {
     invalid_rects.Add( iRect );
 }
@@ -416,31 +428,41 @@ UOdysseyBrushAssetBase::GetStrokeBlock( FOdysseyBrushRect Area )
 
     if (!state.target_temp_buffer)
     {
-        if (Area.IsInitialized())
+        if( Area.IsInitialized() )
         {
-            TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(Area.Width(), Area.Height(), ULIS3_FORMAT_RGBA8));
-            ::ul3::ClearRaw(dst->GetBlock());
-            return dst;
+            TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable( new FOdysseyBlock( Area.Width(), Area.Height(), ::ULIS::Format_RGBA8 ));
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ::ULIS::Format_RGBA8 );
+            ::ULIS::FEvent eventClear;
+            ctx.Clear( *( dst->GetBlock() ),
+                        ::ULIS::FRectI::Auto,
+                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                        0,
+                        nullptr,
+                        &eventClear);
+            ctx.Flush();
+            return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventClear);
         }
         return FOdysseyBlockProxy::MakeNullProxy();
     }
-        
-	FOdysseyBlock* src = state.target_temp_buffer;
-	::ul3::tFormat format = src->Format();
-	
-    ::ul3::FRect rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-    TSharedPtr<FOdysseyBlock> dst = MakeShareable(new FOdysseyBlock(rect.w, rect.h, format));
-    
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = rect.h > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
 
-	//be sure we copy only the needed part
-	::ul3::FRect src_rect = rect & src->GetBlock()->Rect();
-    ::ul3::FVec2I dst_pos(src_rect.x - rect.x, src_rect.y - rect.y);
-    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
 
-	return FOdysseyBlockProxy(dst);
+    FOdysseyBlock* src = state.target_temp_buffer;
+    ::ULIS::eFormat format = src->Format();
+
+    ::ULIS::FRectI rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+    TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new FOdysseyBlock( rect.w, rect.h, format ));
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
+
+    //be sure we copy only the needed part
+    ::ULIS::FRectI src_rect = rect & src->GetBlock()->Rect();
+    ::ULIS::FVec2I dst_pos(src_rect.x - rect.x, src_rect.y - rect.y);
+
+    ::ULIS::FEvent eventCopy;
+    ctx.Copy( *( src->GetBlock() ), *( dst->GetBlock() ), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &state.event, &eventCopy);
+    ctx.Flush();
+
+    return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
 }
 
 //static
@@ -450,44 +472,49 @@ UOdysseyBrushAssetBase::DebugStamp()
     if( !state.target_temp_buffer)
         return;
 
-    int size = ::ul3::FMaths::Max( GetSizeModifier() * GetPressure(), 1.f );
+    ::ULIS::FEvent eventInput = state.event;
 
-    ::ul3::FBlock debug_stamp( size, size, state.target_temp_buffer->Format() );
-    ::ul3::FPixelValue color = ::ul3::Conv( state.color, ULIS3_FORMAT_RGBAF );
+    int size = ::ULIS::FMath::Max( GetSizeModifier() * GetPressure(), 1.f );
+
+    ::ULIS::FBlock* debug_stamp = new ::ULIS::FBlock( size, size, state.target_temp_buffer->Format() );
+    ::ULIS::FColor color = state.color.ToFormat( ::ULIS::Format_RGBAF );
     color.SetAlphaF( GetFlowModifier() );
 
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = size > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-    ::ul3::Fill( hULIS.ThreadPool()
-               , ULIS3_BLOCKING
-               , perfIntent
-               , hULIS.HostDeviceInfo()
-               , ULIS3_NOCB
-               , &debug_stamp
-               , color
-               , debug_stamp.Rect() );
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( debug_stamp->Format() );
+    const bool bEnableMTPolicy = true;// size > 256;
+    ::ULIS::FEvent eventFill;
+    ctx.Fill( *debug_stamp, color, ::ULIS::FRectI::Auto, bEnableMTPolicy ? ::ULIS::FSchedulePolicy::AsyncCacheEfficient : ::ULIS::FSchedulePolicy::MonoChunk, 1, &eventInput, &eventFill );
+    ctx.Flush();
 
-    ::ul3::FRect invalidRect;
+    ::ULIS::FRectI invalidRect;
     invalidRect.x = GetX() - size / 2;
     invalidRect.y = GetY() - size / 2;
     invalidRect.w = size + 1;
     invalidRect.h = size + 1;
 
-    ::ul3::Blend( hULIS.ThreadPool()
-                , ULIS3_BLOCKING
-                , perfIntent
-                , hULIS.HostDeviceInfo()
-                , ULIS3_NOCB
-                , &debug_stamp
-                , state.target_temp_buffer->GetBlock()
-                , debug_stamp.Rect()
-                , ::ul3::FVec2F( GetX() - size / 2, GetY() - size / 2 )
-                , ULIS3_AA
-                , ::ul3::BM_NORMAL
-                , ::ul3::AM_NORMAL
-                , 1.f );
-
+    ::ULIS::FEvent eventBlend(
+        ::ULIS::FOnEventComplete(
+            [debug_stamp](const ::ULIS::FRectI& iRect)
+            {
+                delete debug_stamp;
+            }
+        )
+    );
+    ctx.Blend(
+          *debug_stamp
+        , *( state.target_temp_buffer->GetBlock() )
+        , ::ULIS::FRectI::Auto
+        , ::ULIS::FVec2F( GetX() - size / 2, GetY() - size / 2 )
+        , ::ULIS::Blend_Normal
+        , ::ULIS::Alpha_Normal
+        , 1.f
+        , bEnableMTPolicy ? ::ULIS::FSchedulePolicy::AsyncCacheEfficient : ::ULIS::FSchedulePolicy::MonoScanlines
+        , 1
+        , &eventFill
+        , &eventBlend
+    );
+    ctx.Flush();
+    state.event = eventBlend;
     PushInvalidRect( invalidRect );
 }
 
@@ -495,56 +522,88 @@ UOdysseyBrushAssetBase::DebugStamp()
 void
 UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode )
 {
-    if( !state.target_temp_buffer ) return;
-    if( !Sample.m )     return;
+    if( !state.target_temp_buffer )
+        return;
+        
+    if( !Sample.IsValid() )
+        return;
 
-	TSharedPtr<FOdysseyBlock> block = Sample.m;
+    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Sample.GetBlock();
     FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
-    //::ul3::FRect invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = block->Height() > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+    //::ULIS::FRectI invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
+    ::ULIS::eFormat block_format = block->Format();
+    ::ULIS::eFormat target_format = state.target_temp_buffer->Format();
 
-	::ul3::tFormat block_format = block->Format();
-	::ul3::tFormat target_format = state.target_temp_buffer->Format();
-	if (block_format == target_format)
-	{
-		::ul3::Blend(hULIS.ThreadPool()
-			, ULIS3_BLOCKING
-			, perfIntent
-			, hULIS.HostDeviceInfo()
-			, ULIS3_NOCB
-			, block->GetBlock()
-			, state.target_temp_buffer->GetBlock()
-			, block->GetBlock()->Rect()
-			, ::ul3::FVec2F(invalidRect.x, invalidRect.y)
-			, iAntiAliasing
-			, static_cast<::ul3::eBlendingMode>(BlendingMode)
-			, static_cast<::ul3::eAlphaMode>(AlphaMode)
-			, FMath::Clamp(Flow, 0.f, 1.f));
-	}
-	else
-	{
-		FOdysseyBlock* conv = new FOdysseyBlock(block->Width(), block->Height(), target_format);
-		::ul3::Conv(hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, block->GetBlock(), conv->GetBlock());
-		::ul3::Blend(hULIS.ThreadPool()
-			, ULIS3_BLOCKING
-			, perfIntent
-			, hULIS.HostDeviceInfo()
-			, ULIS3_NOCB
-			, conv->GetBlock()
-			, state.target_temp_buffer->GetBlock()
-			, conv->GetBlock()->Rect()
-			, ::ul3::FVec2F(invalidRect.x, invalidRect.y)
-			, iAntiAliasing
-			, static_cast<::ul3::eBlendingMode>(BlendingMode)
-			, static_cast<::ul3::eAlphaMode>(AlphaMode)
-			, FMath::Clamp(Flow, 0.f, 1.f));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(target_format);
+    const bool bEnableMTPolicy = true; //block->Height() > 256;
+    ::ULIS::FSchedulePolicy policy = bEnableMTPolicy ? ::ULIS::FSchedulePolicy::AsyncCacheEfficient : ::ULIS::FSchedulePolicy::MonoScanlines;
 
-		delete conv;
-	}
+    //should wait on that before anything
+    ::ULIS::FEvent stateEvent = state.event;
+    ::ULIS::FEvent eventInputs[] = { stateEvent, Sample.GetEvent() };
 
-    ::ul3::FRect invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
+    ::ULIS::FBlock* src = block->GetBlock();
+
+    ::ULIS::FEvent eventConv;
+    if( block_format == target_format )
+    {
+        src = new ::ULIS::FBlock(block->Width(), block->Height(), target_format);
+        ctx.ConvertFormat( *( block->GetBlock() ), *src, ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), policy, 2, eventInputs, &eventConv );
+    }
+    else
+    {
+        ctx.Dummy_OP(2, eventInputs, &eventConv);
+    }
+
+    ::ULIS::FEvent eventBlend = ::ULIS::FEvent(
+        ::ULIS::FOnEventComplete(
+            //Also, passing block as a copy maintains it alive until evenBlend finishes, it is very important
+            [block, src]( const ::ULIS::FRectI& iRect )
+            {
+                if (block->GetBlock() != src)
+                    delete  src;
+            }
+        )
+    );
+
+    if (iAntiAliasing)
+    {
+        ctx.BlendAA(
+              *src
+            , *( state.target_temp_buffer->GetBlock() )
+            , block->GetBlock()->Rect()
+            , ::ULIS::FVec2F(invalidRect.x, invalidRect.y)
+            , ::ULIS::eBlendMode( BlendingMode )
+            , ::ULIS::eAlphaMode( AlphaMode )
+            , FMath::Clamp(Flow, 0.f, 1.f)
+            , policy
+            , 1
+            , &eventConv
+            , &eventBlend
+        );
+    }
+    else
+    {
+        ctx.Blend(
+              *src
+            , *( state.target_temp_buffer->GetBlock() )
+            , block->GetBlock()->Rect()
+            , ::ULIS::FVec2F(invalidRect.x, invalidRect.y)
+            , ::ULIS::eBlendMode( BlendingMode )
+            , ::ULIS::eAlphaMode( AlphaMode )
+            , FMath::Clamp(Flow, 0.f, 1.f)
+            , policy
+            , 1
+            , &eventConv
+            , &eventBlend
+        );
+    }
+
+    ctx.Flush();
+
+    state.event = eventBlend;
+
+    ::ULIS::FRectI invalidRectI( FMath::FloorToInt( invalidRect.x ), FMath::FloorToInt( invalidRect.y ), FMath::CeilToInt( invalidRect.w + 2 ), FMath::CeilToInt( invalidRect.h + 2 ) );
     PushInvalidRect( invalidRectI );
 }
 

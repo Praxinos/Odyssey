@@ -3,7 +3,7 @@
 
 #include "OdysseyPsdOperations.h"
 #include "OdysseyMathUtils.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 #include "zlib.h"
 
@@ -775,7 +775,7 @@ bool FOdysseyPsdOperations::ReadLayerStackData32()
 
 void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 {
-    ::ul3::tFormat format;
+    ::ULIS::eFormat format;
 
     if(mBitDepth > 8)
         format = ULISFormatForUE4TextureSourceFormat(ETextureSourceFormat::TSF_RGBA16);
@@ -828,23 +828,12 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             PlanarByteConvertBitMapToBGRA8(planar,mImageDst,sizeBitmap);
             delete[] planar;
         }
-        ::ul3::FBlock* srcblock = new ::ul3::FBlock((::ul3::tByte*)mImageDst,mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);;
-        FOdysseyBlock* layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);
+        ::ULIS::FBlock* srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mImageDst,mImageWidth,mImageHeight,::ULIS::Format_BGRA8);;
+        FOdysseyBlock* layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
 
-        IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 MT_bit = ULIS3_PERF_MT;
-        ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-
-
-        ::ul3::Copy(hULIS.ThreadPool()
-                            ,ULIS3_BLOCKING
-                            ,perfIntent
-                            ,hULIS.HostDeviceInfo()
-                            ,ULIS3_NOCB
-                            ,srcblock
-                            ,layerBlock->GetBlock()
-                            ,srcblock->Rect()
-                            ,::ul3::FVec2I(0,0));
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ::ULIS::Format_BGRA8 );
+        ctx.Copy( *srcblock, *( layerBlock->GetBlock() ) );
+        ctx.Finish();
 
         TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(TEXT("Layer1"),layerBlock));
         mLayerStack->AddLayer( imageLayer );
@@ -863,7 +852,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             uint32_t w = mLayersInfo[i].mRight - mLayersInfo[i].mLeft;
             uint32_t h = mLayersInfo[i].mBottom - mLayersInfo[i].mTop;
 
-            ::ul3::FBlock* srcblock;
+            ::ULIS::FBlock* srcblock;
             FOdysseyBlock* convBlock;
             FOdysseyBlock* layerBlock;
 
@@ -874,33 +863,33 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                     case 1: //GrayScale
                     {
                         if(mLayersInfo[i].mNumChannels == 2)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_AGF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_AGF);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_GF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_GF);
                         break;
                     }
                     case 3: //RGB
                     {
                         if(mLayersInfo[i].mNumChannels == 4)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_ARGBF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_ARGBF);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_RGBF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_RGBF);
                         break;
                     }
                     case 4: //CMYK
                     {
                         if(mLayersInfo[i].mNumChannels == 5)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_ACMYKF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_ACMYKF);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_CMYKF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_CMYKF);
                         break;
                     }
                     case 9: //LAB
                     {
                         if(mLayersInfo[i].mNumChannels == 4)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_ALabF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_ALabF);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,ULIS3_FORMAT_LabF);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst32,w,h,::ULIS::Format_LabF);
                         break;
                     }
                     default: //ERROR
@@ -908,8 +897,8 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 }
 
                 //We don't handle drawing on 32 bits, so we convert to 16 bits
-                convBlock =  new FOdysseyBlock(w,h,ULIS3_FORMAT_RGBA16);
-                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_RGBA16);
+                convBlock =  new FOdysseyBlock(w,h,::ULIS::Format_RGBA16);
+                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
             }
             else if( mBitDepth == 16 )
             {
@@ -918,41 +907,41 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                     case 1: //GrayScale
                     {
                         if(mLayersInfo[i].mNumChannels == 2)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_AG16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_AG16);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_G16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_G16);
                         break;
                     }
                     case 3: //RGB
                     {
                         if( mLayersInfo[i].mNumChannels == 4 )
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_ARGB16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_ARGB16);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_RGB16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_RGB16);
                         break;
                     }
                     case 4: //CMYK
                     {
                         if( mLayersInfo[i].mNumChannels == 5 )
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_ACMYK16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_ACMYK16);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_CMYK16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_CMYK16);
                         break;
                     }
                     case 9: //LAB
                     {
                         if(mLayersInfo[i].mNumChannels == 4)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_ALab16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_ALab16);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,ULIS3_FORMAT_Lab16);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst16,w,h,::ULIS::Format_Lab16);
                         break;
                     }
                     default: //ERROR
                         return;
                 }
 
-                convBlock =  new FOdysseyBlock(w,h,ULIS3_FORMAT_RGBA16);
-                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_RGBA16);
+                convBlock =  new FOdysseyBlock(w,h,::ULIS::Format_RGBA16);
+                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
             }
             else if( mBitDepth == 8 )
             {
@@ -961,41 +950,41 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                     case 1: //GrayScale
                     {
                         if(mLayersInfo[i].mNumChannels == 2)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_AG8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_AG8);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_G8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_G8);
                         break;
                     }
                     case 3: //RGB
                     {
                         if(mLayersInfo[i].mNumChannels == 4)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_ARGB8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_ARGB8);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_RGB8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_RGB8);
                         break;
                     }
                     case 4: //CMYK
                     {
                         if(mLayersInfo[i].mNumChannels == 5)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_ACMYK8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_ACMYK8);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_CMYK8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_CMYK8);
                         break;
                     }
                     case 9: //LAB
                     {
                         if(mLayersInfo[i].mNumChannels == 4)
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_ALab8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_ALab8);
                         else
-                            srcblock = new ::ul3::FBlock((::ul3::tByte*)mLayersInfo[i].mLayerImageDst,w,h,ULIS3_FORMAT_Lab8);
+                            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mLayersInfo[i].mLayerImageDst,w,h,::ULIS::Format_Lab8);
                         break;
                     }
                     default: //ERROR
                         return;
                 }
 
-                convBlock =  new FOdysseyBlock(w,h,ULIS3_FORMAT_BGRA8);
-                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,ULIS3_FORMAT_BGRA8);
+                convBlock =  new FOdysseyBlock(w,h,::ULIS::Format_BGRA8);
+                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
             }
             else
             {
@@ -1003,21 +992,20 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 return;
             }
 
-            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-            ::ul3::uint32 MT_bit = ULIS3_PERF_MT;
-            ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
-            
-            ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, layerBlock->GetBlock(), layerBlock->GetBlock()->Rect() );
-            ::ul3::Conv(hULIS.ThreadPool(),ULIS3_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS3_NOCB,srcblock,convBlock->GetBlock());
-            ::ul3::Copy(hULIS.ThreadPool()
-                                ,ULIS3_BLOCKING
-                                ,perfIntent
-                                ,hULIS.HostDeviceInfo()
-                                ,ULIS3_NOCB
-                                ,convBlock->GetBlock()
-                                ,layerBlock->GetBlock()
-                                ,srcblock->Rect()
-                                ,::ul3::FVec2I( mLayersInfo[i].mLeft, mLayersInfo[i].mTop ));
+            {
+                // TODO: Optimizable, we can convert at the appropriate location src -> layer, we don't really need a
+                // conv block to do that anymore, leading to a single command instead of 3.
+                using namespace ::ULIS;
+                FBlock& src = *srcblock;
+                FBlock& conv = *( convBlock->GetBlock() );
+                FBlock& layer = *( layerBlock->GetBlock() );
+                FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( Format_BGRA8 );
+                ::ULIS::FEvent events[2];
+                ctx.Clear( layer, FRectI::Auto, FSchedulePolicy::CacheEfficient, 0, nullptr, &events[0] );
+                ctx.ConvertFormat( src, conv, FRectI::Auto, FVec2I( 0 ), FSchedulePolicy::CacheEfficient, 0, nullptr, &events[1] );
+                ctx.Copy( conv, layer, src.Rect(), FVec2I( mLayersInfo[i].mLeft, mLayersInfo[i].mTop ), FSchedulePolicy::MultiScanlines, 2, &events[0] );
+                ctx.Finish();
+            }
 
             TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName,layerBlock));
             if( currentRoot->GetType() == IOdysseyLayer::eType::kFolder )
@@ -1357,38 +1345,38 @@ void FOdysseyPsdOperations::lerp24BitsInto32Bits(uint32_t* ioSrc,uint32_t length
     }
 }
 
-::ul3::eBlendingMode FOdysseyPsdOperations::GetBlendingModeFromPSD(char iBlendModeKey[5])
+::ULIS::eBlendMode FOdysseyPsdOperations::GetBlendingModeFromPSD(char iBlendModeKey[5])
 {
-    if(strcmp(iBlendModeKey,"norm") == 0) { return ::ul3::eBlendingMode::BM_NORMAL; }
-    if(strcmp(iBlendModeKey,"diss") == 0) { return ::ul3::eBlendingMode::BM_DISSOLVE; }
-    if(strcmp(iBlendModeKey,"dark") == 0) { return ::ul3::eBlendingMode::BM_DARKEN; }
-    if(strcmp(iBlendModeKey,"mul ") == 0) { return ::ul3::eBlendingMode::BM_MULTIPLY; }
-    if(strcmp(iBlendModeKey,"idiv") == 0) { return ::ul3::eBlendingMode::BM_COLORBURN; }
-    if(strcmp(iBlendModeKey,"lbrn") == 0) { return ::ul3::eBlendingMode::BM_LINEARBURN; }
-    if(strcmp(iBlendModeKey,"dkCl") == 0) { return ::ul3::eBlendingMode::BM_DARKERCOLOR; }
-    if(strcmp(iBlendModeKey,"lite") == 0) { return ::ul3::eBlendingMode::BM_LIGHTEN; }
-    if(strcmp(iBlendModeKey,"scrn") == 0) { return ::ul3::eBlendingMode::BM_SCREEN; }
-    if(strcmp(iBlendModeKey,"div ") == 0) { return ::ul3::eBlendingMode::BM_COLORDODGE; }
-    if(strcmp(iBlendModeKey,"lddg") == 0) { return ::ul3::eBlendingMode::BM_LINEARDODGE; }
-    if(strcmp(iBlendModeKey,"lgCl") == 0) { return ::ul3::eBlendingMode::BM_LIGHTERCOLOR; }
-    if(strcmp(iBlendModeKey,"over") == 0) { return ::ul3::eBlendingMode::BM_OVERLAY; }
-    if(strcmp(iBlendModeKey,"sLit") == 0) { return ::ul3::eBlendingMode::BM_SOFTLIGHT; }
-    if(strcmp(iBlendModeKey,"hLit") == 0) { return ::ul3::eBlendingMode::BM_HARDLIGHT; }
-    if(strcmp(iBlendModeKey,"vLit") == 0) { return ::ul3::eBlendingMode::BM_VIVIDLIGHT; }
-    if(strcmp(iBlendModeKey,"lLit") == 0) { return ::ul3::eBlendingMode::BM_LINEARLIGHT; }
-    if(strcmp(iBlendModeKey,"pLit") == 0) { return ::ul3::eBlendingMode::BM_PINLIGHT; }
-    if(strcmp(iBlendModeKey,"hMix") == 0) { return ::ul3::eBlendingMode::BM_HARDMIX; }
-    if(strcmp(iBlendModeKey,"diff") == 0) { return ::ul3::eBlendingMode::BM_DIFFERENCE; }
-    if(strcmp(iBlendModeKey,"smud") == 0) { return ::ul3::eBlendingMode::BM_EXCLUSION; }
-    if(strcmp(iBlendModeKey,"fsub") == 0) { return ::ul3::eBlendingMode::BM_SUBSTRACT; }
-    if(strcmp(iBlendModeKey,"fdiv") == 0) { return ::ul3::eBlendingMode::BM_DIVIDE; }
-    if(strcmp(iBlendModeKey,"hue ") == 0) { return ::ul3::eBlendingMode::BM_HUE; }
-    if(strcmp(iBlendModeKey,"sat ") == 0) { return ::ul3::eBlendingMode::BM_SATURATION; }
-    if(strcmp(iBlendModeKey,"colr") == 0) { return ::ul3::eBlendingMode::BM_COLOR; }
-    if(strcmp(iBlendModeKey,"lum ") == 0) { return ::ul3::eBlendingMode::BM_LUMINOSITY; }
+    if( strcmp( iBlendModeKey, "norm" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Normal; }
+    if( strcmp( iBlendModeKey, "diss" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Dissolve; }
+    if( strcmp( iBlendModeKey, "dark" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Darken; }
+    if( strcmp( iBlendModeKey, "mul " ) == 0 ) { return ::ULIS::eBlendMode::Blend_Multiply; }
+    if( strcmp( iBlendModeKey, "idiv" ) == 0 ) { return ::ULIS::eBlendMode::Blend_ColorBurn; }
+    if( strcmp( iBlendModeKey, "lbrn" ) == 0 ) { return ::ULIS::eBlendMode::Blend_LinearBurn; }
+    if( strcmp( iBlendModeKey, "dkCl" ) == 0 ) { return ::ULIS::eBlendMode::Blend_DarkerColor; }
+    if( strcmp( iBlendModeKey, "lite" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Lighten; }
+    if( strcmp( iBlendModeKey, "scrn" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Screen; }
+    if( strcmp( iBlendModeKey, "div " ) == 0 ) { return ::ULIS::eBlendMode::Blend_ColorDodge; }
+    if( strcmp( iBlendModeKey, "lddg" ) == 0 ) { return ::ULIS::eBlendMode::Blend_LinearDodge; }
+    if( strcmp( iBlendModeKey, "lgCl" ) == 0 ) { return ::ULIS::eBlendMode::Blend_LighterColor; }
+    if( strcmp( iBlendModeKey, "over" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Overlay; }
+    if( strcmp( iBlendModeKey, "sLit" ) == 0 ) { return ::ULIS::eBlendMode::Blend_SoftLight; }
+    if( strcmp( iBlendModeKey, "hLit" ) == 0 ) { return ::ULIS::eBlendMode::Blend_HardLight; }
+    if( strcmp( iBlendModeKey, "vLit" ) == 0 ) { return ::ULIS::eBlendMode::Blend_VividLight; }
+    if( strcmp( iBlendModeKey, "lLit" ) == 0 ) { return ::ULIS::eBlendMode::Blend_LinearLight; }
+    if( strcmp( iBlendModeKey, "pLit" ) == 0 ) { return ::ULIS::eBlendMode::Blend_PinLight; }
+    if( strcmp( iBlendModeKey, "hMix" ) == 0 ) { return ::ULIS::eBlendMode::Blend_HardMix; }
+    if( strcmp( iBlendModeKey, "diff" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Difference; }
+    if( strcmp( iBlendModeKey, "smud" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Exclusion; }
+    if( strcmp( iBlendModeKey, "fsub" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Substract; }
+    if( strcmp( iBlendModeKey, "fdiv" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Divide; }
+    if( strcmp( iBlendModeKey, "hue " ) == 0 ) { return ::ULIS::eBlendMode::Blend_Hue; }
+    if( strcmp( iBlendModeKey, "sat " ) == 0 ) { return ::ULIS::eBlendMode::Blend_Saturation; }
+    if( strcmp( iBlendModeKey, "colr" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Color; }
+    if( strcmp( iBlendModeKey, "lum " ) == 0 ) { return ::ULIS::eBlendMode::Blend_Luminosity; }
 
     //unknown blending mode, we return the normal one by default
-    return ::ul3::eBlendingMode::BM_NORMAL;
+    return  ::ULIS::eBlendMode::Blend_Normal;
 }
 
 uint16_t FOdysseyPsdOperations::GetChannelsNumber()

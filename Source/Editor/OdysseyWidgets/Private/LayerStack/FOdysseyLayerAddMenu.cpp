@@ -54,7 +54,7 @@ void FOdysseyLayerAddMenu::HandleAddImageLayerMenuEntryExecute()
     TSharedPtr<IOdysseyLayer> currentLayer = model->GetLayerStackData()->GetCurrentLayer();
 	int w = model->GetLayerStackData()->Width();
 	int h = model->GetLayerStackData()->Height();
-	::ul3::tFormat format = model->GetLayerStackData()->Format();
+	::ULIS::eFormat format = model->GetLayerStackData()->Format();
 
 	FName layerName = model->GetLayerStackData()->GetLayerRoot()->GetNextLayerName();
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(w, h), format));

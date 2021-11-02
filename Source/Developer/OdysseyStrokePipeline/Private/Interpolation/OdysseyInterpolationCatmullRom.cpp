@@ -3,7 +3,7 @@
 
 #include "Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "OdysseyMathUtils.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyInterpolationCatmullRom"
@@ -41,12 +41,12 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoi
     if( !IsReady() )
         return mResultPoints;
 
-    ::ul3::FVec2F P0( mInputPoints[0].x, mInputPoints[0].y );
-    ::ul3::FVec2F P1( mInputPoints[1].x, mInputPoints[1].y );
-    ::ul3::FVec2F P2( mInputPoints[2].x, mInputPoints[2].y );
-    ::ul3::FVec2F P3( mInputPoints[3].x, mInputPoints[3].y );
-    ::ul3::FCatmullRomSpline spline( P0, P1, P2, P3 );
-    std::vector< ::ul3::FCatmullRomLUTElement > LUT;
+    ::ULIS::FVec2F P0( mInputPoints[0].x, mInputPoints[0].y );
+    ::ULIS::FVec2F P1( mInputPoints[1].x, mInputPoints[1].y );
+    ::ULIS::FVec2F P2( mInputPoints[2].x, mInputPoints[2].y );
+    ::ULIS::FVec2F P3( mInputPoints[3].x, mInputPoints[3].y );
+    ::ULIS::FCatmullRomSpline spline( P0, P1, P2, P3 );
+    std::vector< ::ULIS::FSplineLinearSample > LUT;
     spline.GenerateLinearLUT( &LUT, mStep );
     float length = LUT.back().length;
     mTotalStrokeLength += length;
@@ -65,8 +65,8 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoi
         for( float i = next; i <= length; i += mStep )
         {
             //Get prev and next element of the LUT
-            ::ul3::FCatmullRomLUTElement prevElement;
-            ::ul3::FCatmullRomLUTElement nextElement;
+            ::ULIS::FSplineLinearSample prevElement;
+            ::ULIS::FSplineLinearSample nextElement;
             for( int j = iLastSelectedLUTIndex; j < LUT.size() - 1; ++j )
             {
                 prevElement = LUT[j];
@@ -93,7 +93,7 @@ const TArray< FOdysseyStrokePoint >& FOdysseyInterpolationCatmullRom::ComputePoi
             float currPosParamDelta = ( posParamDelta == 0 ) ? 0 : ( currPosParam - prevPosParam ) / posParamDelta;
 
             //The lerp of the position
-            ::ul3::FVec2F posU = prevElement.position + ( nextElement.position - prevElement.position ) * currPosParamDelta;
+            ::ULIS::FVec2F posU = prevElement.point + ( nextElement.point - prevElement.point ) * currPosParamDelta;
             FVector2D pos( posU.x, posU.y );
 
             //Lerp the point parameters between input1 and input2 points

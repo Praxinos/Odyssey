@@ -241,7 +241,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
     InitTextureWithBlockData(blockPtr, texture, iFormat);
 
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-    userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), iFormat);
+    userData->GetLayerStack()->Init(blockPtr->Width(), blockPtr->Height(), ULISFormatForUE4TextureSourceFormat(iFormat) );
 
 	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
 
@@ -266,14 +266,12 @@ FOdysseyFlipbookWrapper::CreateTexture(FString iName, FOdysseyBlock* iBlock, ETe
 UTexture2D*
 FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor)
 {
-    FOdysseyBlock* blockPtr = new FOdysseyBlock( iWidth, iHeight, ULISFormatForUE4TextureSourceFormat(iFormat), nullptr, nullptr, true );
+    FOdysseyBlock* blockPtr = new FOdysseyBlock( iWidth, iHeight, ULISFormatForUE4TextureSourceFormat(iFormat), ::ULIS::FOnInvalidBlock(), true );
 
-    ::ul3::FRect canvasRect = ::ul3::FRect( 0, 0, iWidth, iHeight );
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-	::ul3::FPixelValue color(::ul3::FPixelValue::FromRGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
-    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, blockPtr->GetBlock(), color, canvasRect );
-
+	::ULIS::FColor color(::ULIS::FColor::RGBAF(iBackgroundColor.R, iBackgroundColor.G, iBackgroundColor.B, iBackgroundColor.A));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( blockPtr->Format());
+    ctx.Fill(*(blockPtr->GetBlock()), color);
+    ctx.Finish();
     IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     FString PackageName = FPaths::GetPath( mFlipbook->GetPathName() ) + "/";
     FString AssetName = iName; //mFlipbook->GetName() + "_Texture";
@@ -317,7 +315,7 @@ FOdysseyFlipbookWrapper::CreateTexture(int32 iWidth, int32 iHeight, ETextureSour
 void
 FOdysseyFlipbookWrapper::CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture)
 {
-    ::ul3::tFormat format = ULISFormatForUE4TextureSourceFormat(iSrcTexture->Source.GetFormat());
+    ::ULIS::eFormat format = ULISFormatForUE4TextureSourceFormat(iSrcTexture->Source.GetFormat());
     UOdysseyTextureAssetUserData* textureUserData = Cast<UOdysseyTextureAssetUserData>(iDstTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
     UOdysseyTextureAssetUserData* srcTextureUserData = Cast<UOdysseyTextureAssetUserData>(iSrcTexture->GetAssetUserDataOfClass(UOdysseyTextureAssetUserData::StaticClass()));
 

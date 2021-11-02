@@ -6,7 +6,7 @@
 #include "Engine/Texture2D.h"
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyBrushFunctionLibrary"

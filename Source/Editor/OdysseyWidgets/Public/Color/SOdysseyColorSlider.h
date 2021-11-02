@@ -18,9 +18,9 @@
 #include "Widgets/Input/SSpinBox.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyEventState.h"
-#include <ULIS3>
+#include <ULIS>
 
-DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ul3::FPixelValue& );
+DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ULIS::FColor& );
 /* DECLARE_DELEGATE_TwoParams( FOnChannelChanged, EOdysseyEventState, float ); */
 /* DECLARE_DELEGATE_TwoParams( FOnValueChanged, float ); */
 
@@ -40,7 +40,7 @@ public:
 public:
     // Construction / Destruction
     void Construct( const FArguments& InArgs );
-    IOdysseyChannelSlider( uint32 iFormat );
+    IOdysseyChannelSlider( ::ULIS::eFormat iFormat );
 
 protected:
     virtual void Init();
@@ -62,11 +62,11 @@ protected:
 
 public:
     // Public IOdysseyChannelSlider API
-    // void  SetColor( const ::ul3::FPixelValue& iColor );
+    // void  SetColor( const ::ULIS::FColor& iColor );
     // void  SetPosition( float iPos );
     // float GetPosition() const;
-    float  GetProportionForColor(const ::ul3::FPixelValue& iColor) const;
-    ::ul3::FPixelValue GetColorForProportion(float t) const;
+    float  GetProportionForColor(const ::ULIS::FColor& iColor) const;
+    ::ULIS::FColor GetColorForProportion(float t) const;
 
 public:
     // Event
@@ -76,16 +76,16 @@ public:
 
 private:
     // Private IOdysseyChannelSlider API
-    // virtual void SetColor_Imp( const ::ul3::FPixelValue& iColor ) = 0
+    // virtual void SetColor_Imp( const ::ULIS::FColor& iColor ) = 0
     float GetProportionForMousePosition( FVector2D iPos ) const;
-    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& iColor, float t ) const = 0;
-    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const = 0;
+    virtual void SetColorForProportion_Imp( ::ULIS::FColor& iColor, float t ) const = 0;
+    virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const = 0;
     //void  SetPosition( float iPos );
 
 protected:
     // Protected data members
-    TAttribute< ::ul3::FPixelValue > mColor;
-    uint32 mFormat;
+    TAttribute< ::ULIS::FColor > mColor;
+    ::ULIS::eFormat mFormat;
     FOnColorChange OnColorChangeCallback;
 
 private:
@@ -95,7 +95,7 @@ private:
     mutable FVector2D cursor_size;
     float cursor_t;
     mutable FVector2D cursor_pos;
-    mutable ::ul3::FPixelValue mDisplayedColor;
+    mutable ::ULIS::FColor mDisplayedColor;
     mutable bool bMarkedAsInvalid;
 };
 
@@ -112,7 +112,7 @@ public:                                                                         
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ARGS                                                          \
         {}                                                                                          \
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES                                                    \
-        SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )                                                \
+        SLATE_ATTRIBUTE( ::ULIS::FColor, Color )                                                \
         SLATE_EVENT( FOnColorChange, OnColorChange )                                                \
     SLATE_END_ARGS()                                                                                \
                                                                                                     \
@@ -139,11 +139,11 @@ public:                                                                         
 
 #define ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP( Setter, Getter )                                          \
 private:                                                                                            \
-    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& iColor, float t ) const override {  \
+    virtual void SetColorForProportion_Imp( ::ULIS::FColor& iColor, float t ) const override {  \
         iColor.Setter( t );                                                                         \
     }                                                                                               \
                                                                                                     \
-    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {    \
+    virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const override {    \
         return  iColor.Getter();                                                                    \
     }                                                                                               
 
@@ -160,7 +160,7 @@ public:                                                                         
 // R
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_R : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_R, ULIS3_FORMAT_RGBAF)
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_R, ::ULIS::Format_RGBAF)
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetRedF, RedF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 255, 'R', ' ')
 };
@@ -168,7 +168,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_R : public IOdysseyChannelSlider
 // G
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_G : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_G, ULIS3_FORMAT_RGBAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_G, ::ULIS::Format_RGBAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetGreenF, GreenF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 255, 'G', ' ')
 };
@@ -176,7 +176,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_G : public IOdysseyChannelSlider
 // B
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_B : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_B, ULIS3_FORMAT_RGBAF)
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_B, ::ULIS::Format_RGBAF)
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetBlueF, BlueF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 255, 'B', ' ')
 };
@@ -184,7 +184,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_B : public IOdysseyChannelSlider
 // A
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_A : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_A, ULIS3_FORMAT_RGBAF)
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_A, ::ULIS::Format_RGBAF)
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetAlphaF, AlphaF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 255, 'A', ' ')
 };
@@ -195,17 +195,17 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_A : public IOdysseyChannelSlider
 // H
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_H : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_H, ULIS3_FORMAT_HSVAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_H, ::ULIS::Format_HSVAF )
 
 private:
-    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& iColor, float t ) const override {
+    virtual void SetColorForProportion_Imp( ::ULIS::FColor& iColor, float t ) const override {
         iColor.SetHueF( t );
         // iColor.SetSaturationF( 1.f );
         // iColor.SetValueF( 1.f );
         // iColor.SetAlphaF( 1.f );
     }
 
-    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+    virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const override {
         return  iColor.HueF();
     }
 
@@ -215,7 +215,7 @@ private:
 // S
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_S : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_S, ULIS3_FORMAT_HSVAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_S, ::ULIS::Format_HSVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetSaturationF, SaturationF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'S', L'%')
 };
@@ -223,7 +223,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_S : public IOdysseyChannelSli
 // V
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_V : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_V, ULIS3_FORMAT_HSVAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_V, ::ULIS::Format_HSVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetValueF, ValueF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'V', L'%')
 };
@@ -234,17 +234,17 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_V : public IOdysseyChannelSli
 // H
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_H : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_H, ULIS3_FORMAT_HSLAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_H, ::ULIS::Format_HSLAF )
 
 private:
-    virtual void SetColorForProportion_Imp( ::ul3::FPixelValue& iColor, float t ) const override {
+    virtual void SetColorForProportion_Imp( ::ULIS::FColor& iColor, float t ) const override {
         iColor.SetHueF( t );
         // iColor.SetSaturationF( 1.f );
         // iColor.SetLightnessF( 0.5f );
         // iColor.SetAlphaF( 1.f );
     }
 
-    virtual float GetProportionForColor_Imp( const ::ul3::FPixelValue& iColor ) const override {
+    virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const override {
         return  iColor.HueF();
     }
     
@@ -254,7 +254,7 @@ private:
 // S
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_S : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_S, ULIS3_FORMAT_HSLAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_S, ::ULIS::Format_HSLAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetSaturationF, SaturationF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'S', L'%')
 };
@@ -262,7 +262,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_S : public IOdysseyChannelSli
 // L
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_L : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_L, ULIS3_FORMAT_HSLAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_L, ::ULIS::Format_HSLAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetLightnessF, LightnessF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'L', L'%')
 };
@@ -274,7 +274,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_L : public IOdysseyChannelSli
 // C
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_C : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_C, ULIS3_FORMAT_CMYKAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_C, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetCyanF, CyanF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'C', L'%')
 };
@@ -282,7 +282,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_C : public IOdysseyChannelSlider
 // M
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_M : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_M, ULIS3_FORMAT_CMYKAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_M, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetMagentaF, MagentaF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'M', L'%')
 };
@@ -290,7 +290,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_M : public IOdysseyChannelSlider
 // Y
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Y : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Y, ULIS3_FORMAT_CMYKAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Y, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetYellowF, YellowF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'Y', L'%')
 };
@@ -298,7 +298,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Y : public IOdysseyChannelSlider
 // K
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_K : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_K, ULIS3_FORMAT_CMYKAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_K, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetKeyF, KeyF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'K', L'%')
 };
@@ -308,7 +308,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_K : public IOdysseyChannelSlider
 // Y
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_Y : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_Y, ULIS3_FORMAT_YUVAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_Y, ::ULIS::Format_YUVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetLumaF, LumaF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'Y', L' ')
 };
@@ -316,7 +316,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_Y : public IOdysseyChannelSli
 // S
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_U : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_U, ULIS3_FORMAT_YUVAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_U, ::ULIS::Format_YUVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetUF, UF)
     ODYSSEY_CHANNEL_SLIDER_DATA(-127, 128, 'U', L' ')
 };
@@ -324,7 +324,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_U : public IOdysseyChannelSli
 // L
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_V : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_V, ULIS3_FORMAT_YUVAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_V, ::ULIS::Format_YUVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetVF, VF)
     ODYSSEY_CHANNEL_SLIDER_DATA(-127, 128, 'V', L' ')
 };
@@ -334,7 +334,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_V : public IOdysseyChannelSli
 // L
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_L : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_L, ULIS3_FORMAT_LabAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_L, ::ULIS::Format_LabAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetLF, LF)
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 100, 'L', L' ')
 };
@@ -342,7 +342,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_L : public IOdysseyChannelSli
 // a
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_a : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_a, ULIS3_FORMAT_LabAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_a, ::ULIS::Format_LabAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetaF, aF)
     ODYSSEY_CHANNEL_SLIDER_DATA(-127, 128, 'a', L' ')
 };
@@ -350,7 +350,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_a : public IOdysseyChannelSli
 // b
 class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_b : public IOdysseyChannelSlider
 {
-    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_b, ULIS3_FORMAT_LabAF )
+    ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_b, ::ULIS::Format_LabAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetbF, bF)
     ODYSSEY_CHANNEL_SLIDER_DATA(-127, 128, 'b', L' ')
 };
@@ -377,7 +377,7 @@ public:
     // API
     // virtual float GetValue() = 0;
     // virtual void SetValue( float ) = 0;
-    // virtual void SetColor( const ::ul3::FPixelValue& iColor ) = 0;
+    // virtual void SetColor( const ::ULIS::FColor& iColor ) = 0;
 };
 
 /////////////////////////////////////////////////////
@@ -393,13 +393,13 @@ public:
     SLATE_BEGIN_ARGS( TOdysseyPrettyChannelSlider )
         {}
     SLATE_ARGUMENT( int, HeightOverride )
-    SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )
+    SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
     SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
 private:
     // Private data members
-    TAttribute<::ul3::FPixelValue> mColor;
+    TAttribute<::ULIS::FColor> mColor;
     TSharedPtr< SSpinBox< int > > mSpinbox;
     TSharedPtr< TSliderType > mSlider;
     FOnColorChange mOnColorChangeCallback;
@@ -491,7 +491,7 @@ public:
 
 private:
     // Callbacks
-    void SendColorChangeEvent( eOdysseyEventState::Type iState, const ::ul3::FPixelValue& iValue )
+    void SendColorChangeEvent( eOdysseyEventState::Type iState, const ::ULIS::FColor& iValue )
     {
         bool isStateSendable = false;
 
@@ -548,7 +548,7 @@ private:
     void OnSpinboxValueChanged( int iValue )
     {
         float prop = ToNormalized( iValue );
-        ::ul3::FPixelValue value = mSlider->GetColorForProportion(prop);
+        ::ULIS::FColor value = mSlider->GetColorForProportion(prop);
         if (mEventState == eOdysseyEventState::kStart || mEventState == eOdysseyEventState::kAdjust)
         {
             SendColorChangeEvent(eOdysseyEventState::kAdjust, value);
@@ -559,7 +559,7 @@ private:
     void OnSpinboxValueCommited( int iValue, ETextCommit::Type iType )
     {
         float prop = ToNormalized( iValue );
-        ::ul3::FPixelValue value = mSlider->GetColorForProportion(prop);
+        ::ULIS::FColor value = mSlider->GetColorForProportion(prop);
         if (iType == ETextCommit::OnCleared)
         {
             SendColorChangeEvent(eOdysseyEventState::kAbort, value);
@@ -578,7 +578,7 @@ private:
     void OnSpinboxEndSliderMovement( int iValue )
     {
         float prop = ToNormalized( iValue );
-        ::ul3::FPixelValue value = mSlider->GetColorForProportion(prop);
+        ::ULIS::FColor value = mSlider->GetColorForProportion(prop);
         SendColorChangeEvent(eOdysseyEventState::kSet, value);
     }
 
@@ -612,7 +612,7 @@ public:
         slider->SetPosition( iValue );
     }
 
-    virtual void SetColor( const ::ul3::FPixelValue& iColor ) override
+    virtual void SetColor( const ::ULIS::FColor& iColor ) override
     {
         DisableCallbackPropagation = true;
         slider->SetColor( iColor );
@@ -635,11 +635,11 @@ public:
 
 protected:
     // Protected data members
-    TAttribute<::ul3::FPixelValue> mColor;
+    TAttribute<::ULIS::FColor> mColor;
     TArray< TSharedPtr< IOdysseyPrettyChannelSlider > > mSliders;
     FOnColorChange mOnColorChangeCallback;
     int mHeightOverride;
-    // ::ul3::FPixelValue mColor;
+    // ::ULIS::FColor mColor;
     // bool DisableCallbackPropagation;
 
 public:
@@ -681,7 +681,7 @@ public:
             OnColorChangedCallback.ExecuteIfBound( mColor );
     } */
 
-    /* void SetColor( const ::ul3::FPixelValue& iColor )
+    /* void SetColor( const ::ULIS::FColor& iColor )
     {
         ComputeColorOnSet( iColor );
         DisableCallbackPropagation = true;
@@ -690,12 +690,12 @@ public:
             sliders[i]->SetColor( iColor );
         }
         DisableCallbackPropagation = false;
-        ::ul3::Conv( iColor, mColor );
+        ::ULIS::Conv( iColor, mColor );
     } */
 
     /* virtual void ComputeColorOnChanged() = 0;
-    virtual void ComputeColorOnSet( const ::ul3::FPixelValue& iColor ) {
-        ::ul3::Conv( iColor, mColor );
+    virtual void ComputeColorOnSet( const ::ULIS::FColor& iColor ) {
+        ::ULIS::Conv( iColor, mColor );
     } */
 
 };
@@ -712,7 +712,7 @@ public:                                                     \
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ARGS                  \
         {}                                                  \
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES            \
-        SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )        \
+        SLATE_ATTRIBUTE( ::ULIS::FColor, Color )        \
         SLATE_EVENT( FOnColorChange, OnColorChange )        \
         SLATE_ARGUMENT( int, HeightOverride )               \
     SLATE_END_ARGS()                                        \
@@ -732,7 +732,7 @@ public:                                                     \
 // FOdysseyGroupChannelSlider_RGB
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGB, ULIS3_FORMAT_RGB8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGB, ::ULIS::Format_RGB8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_R > )
@@ -755,7 +755,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_RGBA
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGBA, ULIS3_FORMAT_RGBA8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGBA, ::ULIS::Format_RGBA8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_R > )
@@ -782,7 +782,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupC
 // FOdysseyGroupChannelSlider_HA (Hue, Alpha)
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HA, ULIS3_FORMAT_HSVA8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HA, ::ULIS::Format_HSVA8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_H > )
@@ -801,7 +801,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupCha
 // FOdysseyGroupChannelSlider_HSV
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSV, ULIS3_FORMAT_HSV8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSV, ::ULIS::Format_HSV8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_H > )
@@ -824,7 +824,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_HSL
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSL, ULIS3_FORMAT_HSL8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSL, ::ULIS::Format_HSL8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSL_H > )
@@ -849,7 +849,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_CMYK
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_CMYK, ULIS3_FORMAT_CMYK8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_CMYK, ::ULIS::Format_CMYK8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_C > )
@@ -876,7 +876,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupC
 // FOdysseyGroupChannelSlider_YUV
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_YUV, ULIS3_FORMAT_YUV8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_YUV, ::ULIS::Format_YUV8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_Y > )
@@ -900,7 +900,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupCh
 // FOdysseyGroupChannelSlider_Lab
 class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_Lab : public IOdysseyGroupChannelSlider
 {
-    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_Lab, ULIS3_FORMAT_Lab8 )
+    ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_Lab, ::ULIS::Format_Lab8 )
     void BuildWidgets()
     {
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_L > )

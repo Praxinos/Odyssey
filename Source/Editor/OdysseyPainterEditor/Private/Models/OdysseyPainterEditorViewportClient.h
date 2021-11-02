@@ -14,7 +14,7 @@
 #include "OdysseyStrokePoint.h"
 #include "OdysseyEventState.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 class UOdysseyStylusInputSubsystem;
 class FCanvas;

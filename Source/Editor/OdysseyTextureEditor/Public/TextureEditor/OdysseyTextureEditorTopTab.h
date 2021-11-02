@@ -17,11 +17,11 @@ public:
 
 protected:
     // Widget Getters
-    virtual ::ul3::eAlphaMode AlphaMode() const override;
+    virtual ::ULIS::eAlphaMode AlphaMode() const override;
 
 protected:
     // Event Listeners
-    virtual void SetAlphaMode( ::ul3::eAlphaMode iAlphaMode ) override;
+    virtual void SetAlphaMode( ::ULIS::eAlphaMode iAlphaMode ) override;
 
 private:
     FOdysseyTextureEditor* mEditor;

@@ -23,7 +23,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Textures/SlateIcon.h"
 #include "ULISLoaderModule.h"
-#include <ULIS3>
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyTexture2DContentBrowserExtensions"
 
@@ -155,13 +155,13 @@ public:
                 FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
                 std::string str = std::string( TCHAR_TO_UTF8( *path ) );
                 std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
-                ::ul3::eImageFormat exportImageFormat = ::ul3::eImageFormat::IM_PNG;
+                ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
                 bool extensionFound = false;
-                for( int i = 0; i <= ::ul3::eImageFormat::IM_HDR; ++i )
+                for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
                 {
-                    if( extension == ::ul3::kwImageFormat[i] )
+                    if( extension == ::ULIS::kwImageFormat[i] )
                     {
-                        exportImageFormat = static_cast< ::ul3::eImageFormat >( i );
+                        exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
                         extensionFound = true;
                         break;
                     }
@@ -178,18 +178,52 @@ public:
                 FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
                 FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( currentTexture );
                 CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
-                IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-                ::ul3::SaveToFile(
-                      hULIS.ThreadPool()
-                    , true
-                    , 0
-                    , hULIS.HostDeviceInfo()
-                    , false
-                    , odysseyBlockToSave->GetBlock()
-                    , str
-                    , exportImageFormat
-                    , 100
-                );
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
+
+                bool canSaveDirectly = false;
+                ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave->GetBlock(), exportImageFormat, &canSaveDirectly);
+                if (canSaveDirectly)
+                {
+                    ctx.SaveBlockToDisk(
+                        *odysseyBlockToSave->GetBlock()
+                        , str
+                        , exportImageFormat
+                        , 100
+                    );
+
+                    ctx.Finish();
+                }
+                else
+                {
+                    ::ULIS::eFormat format = odysseyBlockToSave->GetBlock()->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+                    if (exportImageFormat == ::ULIS::FileFormat_hdr)
+                    {
+                        format = ::ULIS::Format_RGBAF;
+                    }
+
+                    ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
+
+                    ::ULIS::FEvent eventConvert;
+                    ctx.ConvertFormat(
+                        *odysseyBlockToSave->GetBlock()
+                        , blockProxy
+                        , ULIS::FRectI::Auto
+                        , ULIS::FVec2I(0)
+                        , ULIS::FSchedulePolicy::CacheEfficient
+                        , 0
+                        , nullptr
+                        , &eventConvert
+                    );
+
+                    ctx.SaveBlockToDisk(
+                        blockProxy
+                        , str
+                        , exportImageFormat
+                        , 100
+                    );
+
+                    ctx.Finish();
+                }
 
                 delete odysseyBlockToSave;
             }

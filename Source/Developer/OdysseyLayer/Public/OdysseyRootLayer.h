@@ -7,7 +7,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
 #include "IOdysseyLayerImageRenderingCapability.h"
-#include <ULIS3>
+#include <ULIS>
 
 
 /**
@@ -25,7 +25,7 @@ public:
 
     virtual FOdysseyRootLayer* Clone() const override;
     virtual void Serialize(FArchive &Ar) override;
-    virtual void RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
+    virtual TArray<::ULIS::FEvent> RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum ) override;
     virtual bool ImplementsCapability(FGuid iGuid) const override;
     virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) override;
 
@@ -34,5 +34,5 @@ public:
 
 public:
     // Public API
-    void OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer);
+    void OnChildImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects, TSharedPtr< IOdysseyLayer > iLayer );
 };

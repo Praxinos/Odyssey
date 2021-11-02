@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "ContentBrowserModule.h"
 #include "SOdysseyPackageReportDialog.h"
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyExportFolderExtension
 {
@@ -18,7 +18,7 @@ private:
     static void ExportFolderTextures( const TArray<FName>& iPackageNamesToExport );
     static void PerformExportFolder( TArray<FName> iPackageNamesToExport );
     static void ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder );
-    static void ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ul3::eImageFormat iExportFormat );
+    static void ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ULIS::eFileFormat iExportFormat );
     static void RecursiveGetDependencies(const FName& iPackageName, TSet<FName>& ioAllDependencies, const FString& iOriginalRoot);
 };
 

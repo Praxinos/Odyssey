@@ -5,7 +5,7 @@
 #include "Rendering/DrawElements.h"
 #include "OdysseySurface.h"
 #include "OdysseyBlock.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyLeafWidget"
@@ -197,16 +197,9 @@ SOdysseyLeafWidget::InitInternalBuffers() const
 void
 SOdysseyLeafWidget::PaintInternalBuffer( int iReason ) const
 {
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_MT | ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Fill( hULIS.ThreadPool()
-               , ULIS3_BLOCKING
-               , perfIntent
-               , hULIS.HostDeviceInfo()
-               , ULIS3_NOCB
-               , surface->Block()->GetBlock()
-               , ::ul3::FPixelValue::FromRGBA8( 220, 220, 220 )
-               , surface->Block()->GetBlock()->Rect() );
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+    ctx.Fill(*(surface->Block()->GetBlock()), ::ULIS::FColor::RGBA8( 220, 220, 220 ));
+    ctx.Finish();
 
     surface->Invalidate();
 }

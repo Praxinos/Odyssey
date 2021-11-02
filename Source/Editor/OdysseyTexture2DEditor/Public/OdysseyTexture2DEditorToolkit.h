@@ -5,7 +5,7 @@
 
 #include "OdysseyAssetEditorToolkit.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyTexture2DEditorData;
 class FOdysseyTexture2DEditorGUI;

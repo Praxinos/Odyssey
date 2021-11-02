@@ -6,7 +6,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyTextureEditorDrawingState.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 
 //---
@@ -124,20 +124,22 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    ::ul3::FRect given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = given_rect.h > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
+    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+	TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->GetBlock()->Format());
+    
+    ::ULIS::FEvent eventClear;
+    ctx.Clear(*(dst->GetBlock()), ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
 	//be sure we copy only the needed part //TODO: Should be done directly in ULIS
-	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
-    ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
+	::ULIS::FRectI src_rect = given_rect & src->GetBlock()->Rect();
+    ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
 
-    return FOdysseyBlockProxy(dst);
+    ::ULIS::FEvent eventCopy;
+    ctx.Copy(*(src->GetBlock()), *(dst->GetBlock()), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
+    ctx.Flush();
+
+    return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
 }
 
 //static
@@ -163,20 +165,22 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    ::ul3::FRect given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = given_rect.h > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
-
+    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+	TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->Format());
+    ::ULIS::FEvent eventClear;
+    ctx.Clear(*(dst->GetBlock()), ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+    
 	//be sure we copy only the needed part
-	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
-    ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
+	::ULIS::FRectI src_rect = given_rect & src->GetBlock()->Rect();
+    ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
 
-    return FOdysseyBlockProxy(dst);
+    ::ULIS::FEvent eventCopy;
+    ctx.Copy(*(src->GetBlock()), *(dst->GetBlock()), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
+    ctx.Flush();
+
+    return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
 }
 
 //static
@@ -202,20 +206,22 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
     //---
 
     FOdysseyBlock* src = layer->GetBlock();
-    ::ul3::FRect given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-	TSharedPtr<FOdysseyBlock> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
-    ::ul3::ClearRaw(dst->GetBlock());
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 MT_bit = given_rect.h > 256 ? ULIS3_PERF_MT : 0;
-    ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42; //CRASH: ULIS3_PERF_SSE42 crash when copying block of 1-3 pixels wide
+    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
+	TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->GetBlock()->Format());
+    ::ULIS::FEvent eventClear;
+    ctx.Clear(*(dst->GetBlock()), ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
 	//be sure we copy only the needed part
-	::ul3::FRect src_rect = given_rect & src->GetBlock()->Rect();
-    ::ul3::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-    ::ul3::Copy( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, src->GetBlock(), dst->GetBlock(), src_rect, dst_pos );
+	::ULIS::FRectI src_rect = given_rect & src->GetBlock()->Rect();
+    ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
 
-    return FOdysseyBlockProxy(dst);
+    ::ULIS::FEvent eventCopy;
+    ctx.Copy(*(src->GetBlock()), *(dst->GetBlock()), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
+    ctx.Flush();
+
+    return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
 }
 
 #if 0

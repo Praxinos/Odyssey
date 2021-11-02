@@ -12,7 +12,7 @@
 #include "Toolkits/AssetEditorToolkit.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "Models/OdysseyPainterEditorCommands.h"
-#include <ULIS3>
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
 
@@ -20,7 +20,7 @@ class SimpleTestFramework {
 public:
     void RunTest() {
         const volatile int fenceA = 0;
-        ::ul3::FPixelValue* p = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
+        ::ULIS::FColor* p = new ::ULIS::FColor( ::ULIS::Format_RGBA8 );
         delete p; // No crash
         const volatile int fenceB = 0;
     }

@@ -15,7 +15,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/SPanel.h"
-#include <ULIS3>
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // SOdysseyPaintModifiers
@@ -33,8 +33,8 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyPaintModifiers )
         {}
-        SLATE_ATTRIBUTE( ::ul3::eBlendingMode, BlendingMode )
-        SLATE_ATTRIBUTE( ::ul3::eAlphaMode, AlphaMode )
+        SLATE_ATTRIBUTE( ::ULIS::eBlendMode, BlendingMode )
+        SLATE_ATTRIBUTE( ::ULIS::eAlphaMode, AlphaMode )
         SLATE_ATTRIBUTE( bool, IsEraserButtonActive )
         SLATE_ATTRIBUTE( bool, IsPackageEdited )
         SLATE_EVENT( FOnGetIntProperty, OnGetSize )
@@ -62,13 +62,13 @@ public:
     void  SetSize( int iValue );
     void  SetOpacity( int iValue );
     void  SetFlow( int iValue );
-    void  SetBlendingMode( ::ul3::eBlendingMode iValue );
-    void  SetAlphaMode( ::ul3::eAlphaMode iValue );
+    void  SetBlendingMode( ::ULIS::eBlendMode iValue );
+    void  SetAlphaMode( ::ULIS::eAlphaMode iValue );
 
 public:
     // Public Getters
-    ::ul3::eBlendingMode GetBlendingMode();
-    ::ul3::eAlphaMode GetAlphaMode();
+    ::ULIS::eBlendMode GetBlendingMode();
+    ::ULIS::eAlphaMode GetAlphaMode();
 
 private:
     // Private Callbacks
@@ -101,13 +101,13 @@ private:
     FOnGetFloatProperty mOnGetOpacity;
     FOnGetFloatProperty mOnGetFlow;
 
-    TAttribute<::ul3::eBlendingMode> mBlendingMode;
-    TAttribute<::ul3::eAlphaMode> mAlphaMode;
+    TAttribute<::ULIS::eBlendMode> mBlendingMode;
+    TAttribute<::ULIS::eAlphaMode> mAlphaMode;
     TAttribute<bool> mIsEraserButtonActive;
     TAttribute<bool> mIsPackageEdited;
 
-    ::ul3::eBlendingMode    mCurrentBlendingMode;   //cache value
-    ::ul3::eAlphaMode       mCurrentAlphaMode;      //cache value
+    ::ULIS::eBlendMode    mCurrentBlendingMode;   //cache value
+    ::ULIS::eAlphaMode       mCurrentAlphaMode;      //cache value
 
     TSharedPtr< SSpinBox< int > >   mSizeSpinBox;
     TSharedPtr< SSpinBox< int > >   mOpacitySpinBox;

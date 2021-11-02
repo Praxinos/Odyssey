@@ -4,7 +4,7 @@
 #include "Color/SOdysseyColorSlider.h"
 #include "Rendering/DrawElements.h"
 #include "OdysseyBlock.h"
-#include <ULIS3>
+#include <ULIS>
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyColorSlider"
@@ -22,9 +22,9 @@ IOdysseyChannelSlider::Construct( const FArguments& InArgs )
     Init();
 }
 
-IOdysseyChannelSlider::IOdysseyChannelSlider( uint32 iFormat )
-    : mFormat( iFormat ),
-      cursor_brush( MakeUnique< FSlateBrush >() )
+IOdysseyChannelSlider::IOdysseyChannelSlider( ::ULIS::eFormat iFormat )
+    : mFormat( iFormat )
+    , cursor_brush( MakeUnique< FSlateBrush >() )
 {
 }
 
@@ -88,24 +88,26 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {   
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    ::ul3::uint32 perfIntent = ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::Fill( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGB8, { 50, 50, 50 } ), surface->Block()->GetBlock()->Rect() );
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+    auto paintBuffer = surface->Block()->GetBlock();
+    ctx.Fill( *paintBuffer, ::ULIS::FColor( ::ULIS::Format_RGB8, { 50, 50, 50 } ) );
+    ctx.Finish();
 
     int range = InternalSize.X - 2;
     for( int x = 1; x < InternalSize.X - 2; ++x )
     {
         float t = float( x ) / float( range );
-        ::ul3::FPixelValue res = ::ul3::Conv( GetColorForProportion( t ), surface->Block()->GetBlock()->Format() );
+        ::ULIS::FColor res = GetColorForProportion( t ).ToFormat( surface->Block()->GetBlock()->Format() );
         for( int y = 1; y < InternalSize.Y - 1; ++y )
         {
-            surface->Block()->GetBlock()->PixelProxy( x,y ).AssignMemoryUnsafe( res );
+            // AssignMemoryUnsafe
+            memcpy( paintBuffer->PixelBits( x, y ), res.Bits(), res.BytesPerPixel() );
         }
     }
     surface->Invalidate();
-
-    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 5, 5, 5, 255 } ), ::ul3::FRect( 0, 0, cursor_surface->Width() - 1, cursor_surface->Height() - 1 ) );
-    ::ul3::DrawRectOutlineNoAA( cursor_surface->Block()->GetBlock(), ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8, { 255, 255, 255, 255 } ), ::ul3::FRect( 1, 1, cursor_surface->Width() - 2, cursor_surface->Height() - 2 ) );
+    ctx.DrawRectangle( *( cursor_surface->Block()->GetBlock() ), ::ULIS::FVec2I( 0, 0 ), ::ULIS::FVec2I( cursor_surface->Width() - 1, cursor_surface->Height() - 1 ), ::ULIS::FColor( ::ULIS::Format_RGBA8, { 5, 5, 5, 255 } ), false );
+    ctx.DrawRectangle( *( cursor_surface->Block()->GetBlock() ), ::ULIS::FVec2I( 1, 1 ), ::ULIS::FVec2I( cursor_surface->Width() - 2, cursor_surface->Height() - 2 ), ::ULIS::FColor( ::ULIS::Format_RGBA8, { 255, 255, 255, 255 } ), false );
+    ctx.Finish();
     cursor_surface->Invalidate();
 }
 
@@ -113,7 +115,7 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------- Public IOdysseyChannelSlider API
 /* void
-IOdysseyChannelSlider::SetColor( const ::ul3::FPixelValue& iColor )
+IOdysseyChannelSlider::SetColor( const ::ULIS::FColor& iColor )
 {
     if( mColor == iColor )
         return;
@@ -131,7 +133,7 @@ IOdysseyChannelSlider::SetPosition( float iPos )
         return;
 
     cursor_t = iPos;
-    FPixelValue value = ::ul3::Conv( GetColorForProportion( cursor_t ), mFormat );
+    FColor value = ::ULIS::Conv( GetColorForProportion( cursor_t ), mFormat );
     bMarkedAsInvalid = true;
     //OnColorChangeCallback.ExecuteIfBound( cursor_t );
 } */
@@ -196,16 +198,16 @@ IOdysseyChannelSlider::GetProportionForMousePosition( FVector2D iPos ) const
 //---------------------------------------------------- Private IOdysseyChannelSlider API
 
 float
-IOdysseyChannelSlider::GetProportionForColor( const ::ul3::FPixelValue& iColor ) const
+IOdysseyChannelSlider::GetProportionForColor( const ::ULIS::FColor& iColor ) const
 {
-    ::ul3::FPixelValue color = ::ul3::Conv( iColor, mFormat );
+    ::ULIS::FColor color = iColor.ToFormat( mFormat );
     return GetProportionForColor_Imp(color);
 }
 
-::ul3::FPixelValue
+::ULIS::FColor
 IOdysseyChannelSlider::GetColorForProportion( float t ) const
 {
-    ::ul3::FPixelValue result = ::ul3::Conv( mColor.Get(), mFormat );
+    ::ULIS::FColor result = mColor.Get().ToFormat( mFormat );
     SetColorForProportion_Imp( result, t );
     result.SetAlphaF( 1.f );
     return result;
@@ -213,7 +215,7 @@ IOdysseyChannelSlider::GetColorForProportion( float t ) const
 
 
 void
-IOdysseyChannelSlider::SetColorForProportion_Imp( ::ul3::FPixelValue& color, float t ) const
+IOdysseyChannelSlider::SetColorForProportion_Imp( ::ULIS::FColor& color, float t ) const
 {
     color.SetRedF( t );
 }

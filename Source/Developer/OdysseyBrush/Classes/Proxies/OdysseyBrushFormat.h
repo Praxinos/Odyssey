@@ -5,7 +5,7 @@
 
 #include "CoreTypes.h"
 #include "UObject/ObjectMacros.h"
-#include <ULIS3>
+#include <ULIS>
 
 #include "OdysseyBrushFormat.generated.h"
 
@@ -37,11 +37,11 @@ enum  class  EOdysseyChannelDepth : uint8
     kUninitializedChannelDepth UMETA( DisplayName="kUninitializedChannelDepth", Hidden ),
     k8 UMETA( DisplayName="8 bits" ),
     k16 UMETA( DisplayName="16 bits" ),
-    k32 UMETA( DisplayName="32 bits" ),
+    //k32 UMETA( DisplayName="32 bits" ),
     kFloat UMETA( DisplayName="32 bits floating-point" ),
-    kDouble UMETA( DisplayName="64 bits floating-point" )
+    //kDouble UMETA( DisplayName="64 bits floating-point" )
 };
 
-::ul3::tFormat ULISFormatFromModelAndDepth(EOdysseyColorModel iColorModel, EOdysseyChannelDepth iChannelDepth);
-EOdysseyColorModel OdysseyColorModelFromULISFormat(::ul3::tFormat iFormat);
-EOdysseyChannelDepth OdysseyChannelDepthFromULISFormat(::ul3::tFormat iFormat);
+::ULIS::eFormat ULISFormatFromModelAndDepth(EOdysseyColorModel iColorModel, EOdysseyChannelDepth iChannelDepth);
+EOdysseyColorModel OdysseyColorModelFromULISFormat(::ULIS::eFormat iFormat);
+EOdysseyChannelDepth OdysseyChannelDepthFromULISFormat(::ULIS::eFormat iFormat);

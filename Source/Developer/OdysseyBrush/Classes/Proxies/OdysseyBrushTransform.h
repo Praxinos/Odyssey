@@ -9,7 +9,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include "Proxies/OdysseyBrushBlock.h"
 #include "OdysseyBrushAssetBase.h"
-#include <ULIS3>
+#include <ULIS>
 
 #include "OdysseyBrushTransform.generated.h"
 
@@ -22,12 +22,8 @@ struct ODYSSEYBRUSH_API FOdysseyMatrix
 {
     GENERATED_BODY()
     FOdysseyMatrix();
-    FOdysseyMatrix( const  ::ul3::FTransform2D&  iMat );
-    FString ID() const;
-    const ::ul3::FTransform2D& GetValue() const;
-
-private:
-    ::ul3::FTransform2D m;
+    FOdysseyMatrix( const ::ULIS::FMat3F& iMat );
+    ::ULIS::FMat3F m;
 };
 
 /////////////////////////////////////////////////////

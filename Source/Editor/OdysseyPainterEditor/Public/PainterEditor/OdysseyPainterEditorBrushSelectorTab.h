@@ -6,7 +6,7 @@
 #include "OdysseyEditorTab.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushAssetBase.h"
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyPainterEditor;
 

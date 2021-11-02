@@ -21,11 +21,11 @@ protected:
 
 protected:
     // Widget Getters
-    virtual ::ul3::FPixelValue Color() const;
+    virtual ::ULIS::FColor Color() const;
 
 protected:
     // Event Listeners
-    virtual void OnColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor );
+    virtual void OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
 
 private:
     FOdysseyPainterEditor* mEditor;

@@ -12,7 +12,7 @@ FOdysseyBrushRect::FOdysseyBrushRect()
 {
 }
 
-FOdysseyBrushRect::FOdysseyBrushRect( const ::ul3::FRect& iVal )
+FOdysseyBrushRect::FOdysseyBrushRect( const ::ULIS::FRectI& iVal )
     : m( iVal )
     , mIsInitialized(true)
 {
@@ -24,7 +24,7 @@ FOdysseyBrushRect::FOdysseyBrushRect( int iX, int iY, int iW, int iH )
 {
 }
 
-FOdysseyBrushRect::FOdysseyBrushRect( ::ul3::FRect&& iVal )
+FOdysseyBrushRect::FOdysseyBrushRect( ::ULIS::FRectI&& iVal )
     : m( std::move( iVal ) )
     , mIsInitialized(true)
 {
@@ -51,17 +51,17 @@ FOdysseyBrushRect::operator=( const FOdysseyBrushRect& iOther ) {
 
 void
 FOdysseyBrushRect::SetValue( int iX, int iY, int iW, int iH ) {
-    m = ::ul3::FRect(iX, iY, iW, iH);
+    m = ::ULIS::FRectI(iX, iY, iW, iH);
     mIsInitialized = true;
 }
 
 void
-FOdysseyBrushRect::SetValue( const ::ul3::FRect& iVal ) {
+FOdysseyBrushRect::SetValue( const ::ULIS::FRectI& iVal ) {
     m = iVal;
     mIsInitialized = true;
 }
 
-const ::ul3::FRect&
+const ::ULIS::FRectI&
 FOdysseyBrushRect::GetValue() const {
     return  m;
 }
@@ -97,7 +97,7 @@ FOdysseyBrushRect::IsInitialized() const {
 
 //static
 FOdysseyBrushRect
-FOdysseyBrushRect::FromTemp( ::ul3::FRect&& iVal ) {
+FOdysseyBrushRect::FromTemp( ::ULIS::FRectI&& iVal ) {
     return  FOdysseyBrushRect( std::move( iVal ) );
 }
 
@@ -128,7 +128,7 @@ UOdysseyBrushRectFunctionLibrary::BreakToXYWH(FOdysseyBrushRect Rectangle, int& 
         Height = 0;
         return;
     }
-    const ::ul3::FRect& rect = Rectangle.GetValue();
+    const ::ULIS::FRectI& rect = Rectangle.GetValue();
     X = rect.x;
     Y = rect.y;
     Width = rect.w;

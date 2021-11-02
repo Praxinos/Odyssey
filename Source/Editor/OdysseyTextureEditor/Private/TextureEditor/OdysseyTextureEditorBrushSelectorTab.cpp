@@ -31,8 +31,8 @@ FOdysseyTextureEditorBrushSelectorTab::OnBrushSelected( UOdysseyBrush* iBrush )
     {
         mEditor->GetGUI()->GetTopTab()->SetToolDefaultAlphaMode( mEditor->PaintEngine()->GetAlphaModeModifier() );
         mEditor->GetGUI()->GetTopTab()->SetToolDefaultBlendingMode( mEditor->PaintEngine()->GetBlendingModeModifier() );
-        mEditor->PaintEngine()->SetAlphaModeModifier( ::ul3::eAlphaMode::AM_ERASE );
-        mEditor->PaintEngine()->SetBlendingModeModifier( ::ul3::eBlendingMode::BM_BACK );
+        mEditor->PaintEngine()->SetAlphaModeModifier( ::ULIS::eAlphaMode::Alpha_Erase );
+        mEditor->PaintEngine()->SetBlendingModeModifier( ::ULIS::eBlendMode::Blend_Back );
         mEditor->SelectedAlphaMode( mEditor->PaintEngine()->GetAlphaModeModifier() );
     }
     else

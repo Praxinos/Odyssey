@@ -3,97 +3,98 @@
 
 #include "Proxies/OdysseyBrushFormat.h"
 
-::ul3::tFormat
+::ULIS::eFormat
 ULISFormatFromModelAndDepth(EOdysseyColorModel iColorModel, EOdysseyChannelDepth iChannelDepth)
 {
-	::ul3::tFormat format = ULIS3_FORMAT_BGRA8;
-	switch (iColorModel)
-	{
-		case EOdysseyColorModel::kRGB: format = ULIS3_FORMAT_RGB8; break;
-		case EOdysseyColorModel::kGrey: format = ULIS3_FORMAT_G8; break;
-		case EOdysseyColorModel::kHSL: format = ULIS3_FORMAT_HSL8; break;
-		case EOdysseyColorModel::kHSV: format = ULIS3_FORMAT_HSV8; break;
-		case EOdysseyColorModel::kCMYK: format = ULIS3_FORMAT_CMYK8; break;
-		case EOdysseyColorModel::kLab: format = ULIS3_FORMAT_Lab8; break;
+    uint32 format = ::ULIS::Format_BGRA8;
+    switch (iColorModel)
+    {
+        case EOdysseyColorModel::kRGB: format = ::ULIS::Format_RGB8; break;
+        case EOdysseyColorModel::kGrey: format = ::ULIS::Format_G8; break;
+        case EOdysseyColorModel::kHSL: format = ::ULIS::Format_HSL8; break;
+        case EOdysseyColorModel::kHSV: format = ::ULIS::Format_HSV8; break;
+        case EOdysseyColorModel::kCMYK: format = ::ULIS::Format_CMYK8; break;
+        case EOdysseyColorModel::kLab: format = ::ULIS::Format_Lab8; break;
 
-		case EOdysseyColorModel::kRGBA:
-		{
-			//Force GBRA8 because RGBA8 is deprecated in ETextureSourceFormat. This will preserve performance most of the time
-			format = iChannelDepth == EOdysseyChannelDepth::k8 ? ULIS3_FORMAT_BGRA8 : ULIS3_FORMAT_RGBA8;
-		}
-		break;
-		case EOdysseyColorModel::kGreyA: format = ULIS3_FORMAT_GA8; break;
-		case EOdysseyColorModel::kHSLA: format = ULIS3_FORMAT_HSLA8; break;
-		case EOdysseyColorModel::kHSVA: format = ULIS3_FORMAT_HSVA8; break;
-		case EOdysseyColorModel::kCMYKA: format = ULIS3_FORMAT_CMYKA8; break;
-		case EOdysseyColorModel::kLabA: format = ULIS3_FORMAT_LabA8; break;
+        case EOdysseyColorModel::kRGBA:
+        {
+            //Force GBRA8 because RGBA8 is deprecated in ETextureSourceFormat. This will preserve performance most of the time
+            format = iChannelDepth == EOdysseyChannelDepth::k8 ? ::ULIS::Format_BGRA8 : ::ULIS::Format_RGBA8;
+        }
+        break;
+        case EOdysseyColorModel::kGreyA: format = ::ULIS::Format_GA8; break;
+        case EOdysseyColorModel::kHSLA: format = ::ULIS::Format_HSLA8; break;
+        case EOdysseyColorModel::kHSVA: format = ::ULIS::Format_HSVA8; break;
+        case EOdysseyColorModel::kCMYKA: format = ::ULIS::Format_CMYKA8; break;
+        case EOdysseyColorModel::kLabA: format = ::ULIS::Format_LabA8; break;
 
-		default: break;
-	}
+        default: break;
+    }
 
-	//if 8 bits channel depth, then no work to do
-	if (iChannelDepth == EOdysseyChannelDepth::k8)
-		return format;
+    //if 8 bits channel depth, then no work to do
+    if (iChannelDepth == EOdysseyChannelDepth::k8)
+        return  static_cast< ::ULIS::eFormat >( format );
 
-	//erase
-	format &= ULIS3_E_TYPE & ULIS3_E_DEPTH;
+    //erase
+    format &= ULIS_E_TYPE & ULIS_E_DEPTH;
 
-	switch (iChannelDepth)
-	{
-		case EOdysseyChannelDepth::k16: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT16) | ULIS3_W_DEPTH(2); break;
-		case EOdysseyChannelDepth::k32: format |= ULIS3_W_TYPE(ULIS3_TYPE_UINT32) | ULIS3_W_DEPTH(4); break;
-		case EOdysseyChannelDepth::kFloat: format |= ULIS3_W_TYPE(ULIS3_TYPE_UFLOAT) | ULIS3_W_DEPTH(4); break;
-		case EOdysseyChannelDepth::kDouble: format |= ULIS3_W_TYPE(ULIS3_TYPE_UDOUBLE) | ULIS3_W_DEPTH(8); break;
+    switch (iChannelDepth)
+    {
+        case EOdysseyChannelDepth::k16: format |= ULIS_W_TYPE(ULIS_TYPE_UINT16) | ULIS_W_DEPTH(2); break;
+        //case EOdysseyChannelDepth::k32: format |= ULIS_W_TYPE(ULIS_TYPE_UINT32) | ULIS_W_DEPTH(4); break;
+        case EOdysseyChannelDepth::kFloat: format |= ULIS_W_TYPE(ULIS_TYPE_UFLOAT) | ULIS_W_DEPTH(4); break;
+        //case EOdysseyChannelDepth::kDouble: format |= ULIS_W_TYPE(ULIS_TYPE_UDOUBLE) | ULIS_W_DEPTH(8); break;
 
-		default: break;
-	}
-	return format;
+        default: break;
+    }
+    return  static_cast< ::ULIS::eFormat >( format );
 }
 
 EOdysseyColorModel
-OdysseyColorModelFromULISFormat(::ul3::tFormat iFormat)
+OdysseyColorModelFromULISFormat(::ULIS::eFormat iFormat)
 {
-	//erase
-	iFormat &= ULIS3_E_TYPE & ULIS3_E_DEPTH;
+    uint32 format = iFormat;
+    //erase
+    format &= ULIS_E_TYPE & ULIS_E_DEPTH;
 
-	//set 8bits
-	iFormat |= ULIS3_W_TYPE(ULIS3_TYPE_UINT8) | ULIS3_W_DEPTH(1);
+    //set 8bits
+    format |= ULIS_W_TYPE(ULIS_TYPE_UINT8) | ULIS_W_DEPTH(1);
 
-	switch (iFormat)
-	{
-		case ULIS3_FORMAT_RGB8: return EOdysseyColorModel::kRGB;
-		case ULIS3_FORMAT_G8: return EOdysseyColorModel::kGrey;
-		case ULIS3_FORMAT_HSL8: return EOdysseyColorModel::kHSL;
-		case ULIS3_FORMAT_HSV8: return EOdysseyColorModel::kHSV;
-		case ULIS3_FORMAT_CMYK8: return EOdysseyColorModel::kCMYK;
-		case ULIS3_FORMAT_Lab8: return EOdysseyColorModel::kLab;
-		case ULIS3_FORMAT_BGRA8: return EOdysseyColorModel::kRGBA;
-		case ULIS3_FORMAT_RGBA8: return EOdysseyColorModel::kRGBA;
-		case ULIS3_FORMAT_GA8: return EOdysseyColorModel::kGreyA;
-		case ULIS3_FORMAT_HSLA8: return EOdysseyColorModel::kHSLA;
-		case ULIS3_FORMAT_HSVA8: return EOdysseyColorModel::kHSVA;
-		case ULIS3_FORMAT_CMYKA8: return EOdysseyColorModel::kCMYKA;
-		case ULIS3_FORMAT_LabA8: return EOdysseyColorModel::kLabA;
+    switch (format)
+    {
+        case ::ULIS::Format_RGB8: return EOdysseyColorModel::kRGB;
+        case ::ULIS::Format_G8: return EOdysseyColorModel::kGrey;
+        case ::ULIS::Format_HSL8: return EOdysseyColorModel::kHSL;
+        case ::ULIS::Format_HSV8: return EOdysseyColorModel::kHSV;
+        case ::ULIS::Format_CMYK8: return EOdysseyColorModel::kCMYK;
+        case ::ULIS::Format_Lab8: return EOdysseyColorModel::kLab;
+        case ::ULIS::Format_BGRA8: return EOdysseyColorModel::kRGBA;
+        case ::ULIS::Format_RGBA8: return EOdysseyColorModel::kRGBA;
+        case ::ULIS::Format_GA8: return EOdysseyColorModel::kGreyA;
+        case ::ULIS::Format_HSLA8: return EOdysseyColorModel::kHSLA;
+        case ::ULIS::Format_HSVA8: return EOdysseyColorModel::kHSVA;
+        case ::ULIS::Format_CMYKA8: return EOdysseyColorModel::kCMYKA;
+        case ::ULIS::Format_LabA8: return EOdysseyColorModel::kLabA;
 
-		default: break;
-	}
+        default: break;
+    }
 
-	return EOdysseyColorModel::kRGB;
+    return EOdysseyColorModel::kRGB;
 }
 
 EOdysseyChannelDepth
-OdysseyChannelDepthFromULISFormat(::ul3::tFormat iFormat)
+OdysseyChannelDepthFromULISFormat(::ULIS::eFormat iFormat)
 {
-	switch(ULIS3_R_TYPE(iFormat))
-	{
-		case ULIS3_TYPE_UINT8: return EOdysseyChannelDepth::k8;
-		case ULIS3_TYPE_UINT16: return EOdysseyChannelDepth::k16;
-		case ULIS3_TYPE_UINT32: return EOdysseyChannelDepth::k32;
-		case ULIS3_TYPE_UFLOAT: return EOdysseyChannelDepth::kFloat;
-		case ULIS3_TYPE_UDOUBLE: return EOdysseyChannelDepth::kDouble;
+    switch(ULIS_R_TYPE(iFormat))
+    {
+        case ULIS_TYPE_UINT8: return EOdysseyChannelDepth::k8;
+        case ULIS_TYPE_UINT16: return EOdysseyChannelDepth::k16;
+        //case ULIS_TYPE_UINT32: return EOdysseyChannelDepth::k32;
+        case ULIS_TYPE_UFLOAT: return EOdysseyChannelDepth::kFloat;
+        //case ULIS_TYPE_UDOUBLE: return EOdysseyChannelDepth::kDouble;
 
-		default: break;
-	}
-	
-	return EOdysseyChannelDepth::k8;
+        default: break;
+    }
+    
+    return EOdysseyChannelDepth::k8;
 }

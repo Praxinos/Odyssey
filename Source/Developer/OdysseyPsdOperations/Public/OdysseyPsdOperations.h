@@ -106,7 +106,7 @@ private:
 
     void lerp24BitsInto32Bits( uint32_t* ioSrc,uint32_t length );
 
-    ::ul3::eBlendingMode GetBlendingModeFromPSD( char iBlendModeKey[5] );
+    ::ULIS::eBlendMode GetBlendingModeFromPSD( char iBlendModeKey[5] );
 
 public:
 

@@ -1,5 +1,5 @@
-// Copyright © 2018-2020 Praxinos, Inc. All Rights Reserved.
-// IDDN FR.001.250001.002.S.P.2019.000.00000
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -12,7 +12,7 @@
 #include "OdysseyRootLayer.h"
 #include "IOdysseySerializable.h"
 #include "OdysseyBlock.h"
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyDrawingUndo;
 
@@ -22,42 +22,44 @@ public:
     // Current Layer Changed Event
     // Params :
     // - Previous current layer
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackCurrentLayerChanged, TSharedPtr<IOdysseyLayer>);
-    
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackCurrentLayerChanged, TSharedPtr<IOdysseyLayer>);
+
     // Root Layer Changed Event
     // Params :
     // - Previous Root layer
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackRootLayerChanged, TSharedPtr<FOdysseyRootLayer>);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackRootLayerChanged, TSharedPtr<FOdysseyRootLayer>);
 
     // Image Result Changed Event
-    // Params: None
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerStackImageResultChanged, const ::ul3::FRect&);
+    // Params:
+    // - Rects List
+    // - Num Rects
+    DECLARE_MULTICAST_DELEGATE_TwoParams( FOnLayerStackImageResultChanged, const ::ULIS::FRectI*, const uint32 );
 
     // Sent when children are changed (added, removed, moved)
     // Params: None
-	DECLARE_MULTICAST_DELEGATE(FOnLayerStackStructureChanged);
+    DECLARE_MULTICAST_DELEGATE(FOnLayerStackStructureChanged);
 
 public:
     // Construction / Destruction
     ~FOdysseyLayerStack();
     FOdysseyLayerStack();
 
-    void Init(int iWidth,int iHeight, ::ul3::tFormat iOutputFormat);
+    void Init(int iWidth,int iHeight, ::ULIS::eFormat iOutputFormat);
 
 public:
     // Public API / Result Computation
 
     // Computes the result of all layers into one given block
     // The given block is cleared at start
-    void ComputeResultInBlock( ::ul3::FBlock* ioBlock );
+    void ComputeResultInBlock( ::ULIS::FBlock* ioBlock );
 
     // Computes the result of one part defined by iRect of all layers into one given block
     // The given block is cleared at start
-    void ComputeResultInBlock( ::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect );
+    void ComputeResultInBlock( ::ULIS::FBlock* ioBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
 
     // Computes the result of one part defined by iRect of all layers into one given block
     // Adds a Temporary buffer above the current layer
-	void ComputeResultInBlockWithBlockAsCurrentLayer(::ul3::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ul3::FRect& iRect);
+    void ComputeResultInBlockWithBlockAsCurrentLayer( ::ULIS::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
 
 public:
     // Public API / Getters
@@ -68,11 +70,11 @@ public:
     // Return layer stack height
     int         Height() const;
 
-	// Return layer stack format
-	int         Format() const;
+    // Return layer stack format
+    ::ULIS::eFormat Format() const;
 
-	// Return layer stack output format
-	int         OutputFormat() const;
+    // Return layer stack output format
+    ::ULIS::eFormat OutputFormat() const;
 
     // Return layer stack width and height
     FVector2D   Size() const;
@@ -119,13 +121,13 @@ public:
     void                                ClearCurrentLayer();
 
     // Fills the content of the current layer with iColor
-    void                                FillCurrentLayerWithColor( const ::ul3::IPixel& iColor );
+    void                                FillCurrentLayerWithColor( const ::ULIS::ISample& iColor );
 
 public:
     //Public API / Callbacks
 
-    FOnLayerStackCurrentLayerChanged&	OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
-    FOnLayerStackRootLayerChanged&	    OnRootLayerChanged() { return mOnRootLayerChanged; }
+    FOnLayerStackCurrentLayerChanged&   OnCurrentLayerChanged() { return mOnCurrentLayerChanged; }
+    FOnLayerStackRootLayerChanged&      OnRootLayerChanged() { return mOnRootLayerChanged; }
     FOnLayerStackImageResultChanged&    OnImageResultChanged() { return mOnImageResultChanged; }
     FOnLayerStackStructureChanged&      OnStructureChanged() { return mOnStructureChanged; }
 
@@ -137,7 +139,7 @@ public:
 
 private:
     // Private API
-    void                                OnLayerRootImageResultChanged(const ::ul3::FRect* iRect);
+    void                                OnLayerRootImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects );
     void                                OnLayerAdded(TSharedPtr<IOdysseyLayer> iNode);
     void                                OnLayerRemoved(TSharedPtr<IOdysseyLayer> iNode, TSharedPtr<IOdysseyLayer> iOldParent, int iOldIndex);
 
@@ -145,14 +147,14 @@ private:
     // Private Data Members
     int                                 mWidth;
     int                                 mHeight;
-    ::ul3::tFormat                      mFormat;
-	::ul3::tFormat                      mOutputFormat;
+    ::ULIS::eFormat                     mFormat;
+    ::ULIS::eFormat                     mOutputFormat;
     TSharedPtr<FOdysseyRootLayer>       mLayerRoot;
     TSharedPtr<IOdysseyLayer>           mCurrentLayer;
     bool                                mIsInitialized;
 
-	FOnLayerStackCurrentLayerChanged	mOnCurrentLayerChanged;
-    FOnLayerStackRootLayerChanged	    mOnRootLayerChanged;
+    FOnLayerStackCurrentLayerChanged    mOnCurrentLayerChanged;
+    FOnLayerStackRootLayerChanged        mOnRootLayerChanged;
     FOnLayerStackImageResultChanged     mOnImageResultChanged;
     FOnLayerStackStructureChanged       mOnStructureChanged;
 
@@ -180,6 +182,7 @@ private:
 public:
     bool Clear();
     bool SaveData(unsigned int iXTile, unsigned int iYTile, unsigned int iSizeX, unsigned int iSizeY );
+    bool SaveData(const TArray<::ULIS::FRectI>& iRects);
     bool LoadData();
     bool Redo();
     void Check();
@@ -195,10 +198,10 @@ private:
     TArray<int>         mNumberBlocksUndo;
     TArray<int>         mNumberBlocksRedo;
     FBufferArchive      mToBinary;
-    // ::ul3::FBlock*      mTileData;
+    // ::ULIS::FBlock*      mTileData;
     FString mUndoPath;
     FString mRedoPath;
     // TArray64< uint8 > mData;
 
-	//FOdysseyBlock* mData;
+    //FOdysseyBlock* mData;
 };

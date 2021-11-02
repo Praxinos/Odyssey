@@ -4,7 +4,7 @@
 #include "OdysseyFolderLayer.h"
 
 #include "ULISLoaderModule.h"
-#include <ULIS3>
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyFolderLayer"
 
@@ -70,13 +70,13 @@ FOdysseyFolderLayer::AddNode(TSharedPtr<IOdysseyLayer> iLayer, int iIndex)
 {
     IOdysseyLayer::AddNode(iLayer, iIndex);
     bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
-    if (isBlendable)
+    if( isBlendable )
     {
         IOdysseyLayerImageBlendingCapability* layerBlendable = iLayer->GetCapability<IOdysseyLayerImageBlendingCapability>();
-		layerBlendable->ImageResultChangedDelegate().AddRaw(this, &FOdysseyFolderLayer::OnChildImageResultChanged, iLayer);
-        if (iLayer->IsVisible())
+        layerBlendable->ImageResultChangedDelegate().AddRaw( this, &FOdysseyFolderLayer::OnChildImageResultChanged, iLayer );
+        if( iLayer->IsVisible() )
         {
-            mImageResultChangedDelegate.Broadcast(nullptr);
+            mImageResultChangedDelegate.Broadcast( nullptr, 0 );
         }
     }
 }
@@ -96,73 +96,115 @@ FOdysseyFolderLayer::DeleteNode(int iIndex)
 
     if (isBlendable && layer->IsVisible())
     {
-        mImageResultChangedDelegate.Broadcast(nullptr);
+        mImageResultChangedDelegate.Broadcast( nullptr, 0 );
     }
 }
 
 void
-FOdysseyFolderLayer::OnChildImageResultChanged(const ::ul3::FRect* iRect, TSharedPtr<IOdysseyLayer> iLayer)
+FOdysseyFolderLayer::OnChildImageResultChanged( const ::ULIS::FRectI* iRects, const uint32 iNumRects, TSharedPtr< IOdysseyLayer > iLayer )
 {
-    bool isBlendable = iLayer->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid());
-    if (isBlendable)
+    bool isBlendable = iLayer->ImplementsCapability( IOdysseyLayerImageBlendingCapability::GetGuid() );
+    if( isBlendable )
+        mImageResultChangedDelegate.Broadcast( iRects, iNumRects );
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyFolderLayer::Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum, const ::ULIS::FEvent* iEvents )
+{
+    TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
+    if( !IsVisible() || iNum == 0 || children.Num() == 0)
+        return TArray<::ULIS::FEvent>(iEvents, iNum);
+
+    TArray< ::ULIS::FBlock* > folderBlocks;
+    folderBlocks.Reserve( iNum );
+    for( uint32 i = 0; i < iNum; ++i )
+        folderBlocks.Emplace( new ::ULIS::FBlock( iRects[i].w, iRects[i].h, ioBlocks[i]->Format() ) );
+
+    TArray< ::ULIS::FVec2I > pos;
+    pos.SetNum( iNum );
+    //RenderImage( folderBlocks.GetData(), iRects, pos.GetData(), iNum );
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( folderBlocks[0]->Format() );
+    TArray<::ULIS::FEvent> eventClear;
+    eventClear.SetNum(iNum);
+    for( uint32 i = 0; i < iNum; ++i )
     {
-        mImageResultChangedDelegate.Broadcast(iRect);
+        ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( pos[i], iRects[i].Size() );
+        ctx.Clear( *folderBlocks[i], rect, ::ULIS::FSchedulePolicy::CacheEfficient, 1, &iEvents[i], &eventClear[i] );
+        ctx.Flush();
     }
-}
+    //ctx.Finish();
 
-void
-FOdysseyFolderLayer::Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
-{
-    if (!IsVisible())
-        return;
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-
-    ::ul3::FBlock* folderBlock = new ::ul3::FBlock(iRect.w, iRect.h, ioBlock->Format());
-    ::ul3::FVec2F pos( 0, 0 );
-    RenderImage(folderBlock, iRect, pos);
-
-    ::ul3::FRect rect = ::ul3::FRect::FromXYWH(0, 0, iRect.w, iRect.h);
-    ::ul3::Blend( hULIS.ThreadPool()
-        , ULIS3_BLOCKING
-        , perfIntent
-        , hULIS.HostDeviceInfo()
-        , ULIS3_NOCB
-        , folderBlock
-        , ioBlock
-        , rect
-        , iPos
-        , ULIS3_NOAA
-        , GetBlendingMode()
-        , ::ul3::AM_NORMAL
-        , GetOpacity() );
-}
-
-void
-FOdysseyFolderLayer::RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos)
-{
-    if (!IsVisible())
-        return;
-
-    IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-    uint32 perfIntent = /*ULIS3_PERF_MT |*/ ULIS3_PERF_SSE42 | ULIS3_PERF_AVX2;
-    ::ul3::FRect rect = ::ul3::FRect::FromXYWH(iPos.x, iPos.y, iRect.w, iRect.h);
-    ::ul3::Clear( hULIS.ThreadPool(), ULIS3_BLOCKING, perfIntent, hULIS.HostDeviceInfo(), ULIS3_NOCB, ioBlock, rect );
-
-    TArray<TSharedPtr<IOdysseyLayer>> children = GetNodes();
-    for (int i = children.Num() - 1; i >= 0; i--)
-    {
-        TSharedPtr<IOdysseyLayer> child = children[i];
-        if (!child->ImplementsCapability(IOdysseyLayerImageBlendingCapability::GetGuid()))
+    TArray<::ULIS::FEvent> eventRender = eventClear;
+    for( int i = children.Num() - 1; i >= 0; --i ) {
+        TSharedPtr< IOdysseyLayer > child = children[i];
+        if( !child->ImplementsCapability( IOdysseyLayerImageBlendingCapability::GetGuid() ) )
             continue;
 
-        IOdysseyLayerImageBlendingCapability* layerBlendable = child->GetCapability<IOdysseyLayerImageBlendingCapability>();
-        if (!layerBlendable)
+        IOdysseyLayerImageBlendingCapability* layerBlendable = child->GetCapability< IOdysseyLayerImageBlendingCapability >();
+        if( !layerBlendable )
             continue;
 
-        layerBlendable->Blend(ioBlock, iRect, iPos);
+        eventRender = layerBlendable->Blend( folderBlocks.GetData(), iRects, pos.GetData(), iNum, eventRender.GetData() );
     }
+
+    //::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlocks[0]->Format() );
+    TArray<::ULIS::FEvent> eventBlend;
+    eventBlend.SetNum(iNum);
+    for( uint32 i = 0; i < iNum; ++i ) {
+        ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( ::ULIS::FVec2I( 0 ), iRects[i].Size() );
+        eventBlend[i] = ::ULIS::FEvent(
+            ::ULIS::FOnEventComplete(
+                [ folderBlocks, i ]( const ::ULIS::FRectI& ) {
+                    delete  folderBlocks[i];
+                }
+            )
+        );
+        ctx.Blend( *( folderBlocks[i] ), *ioBlocks[i], rect, iPositions[i], GetBlendingMode(), ::ULIS::Alpha_Normal, GetOpacity(), ::ULIS::FSchedulePolicy::MonoScanlines, 1, &eventRender[i], &eventBlend[i] );
+        ctx.Flush();
+    }
+    //ctx.Finish();
+
+    return eventBlend;
+}
+
+TArray<::ULIS::FEvent>
+FOdysseyFolderLayer::RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum )
+{
+    TArray<::ULIS::FEvent> eventRender;
+
+    if( !IsVisible() || iNum == 0 )
+    {
+        for (uint32 i = 0; i < iNum; i++)
+            eventRender.Add(::ULIS::FEvent::NoOP());
+        return eventRender;
+    }
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ioBlocks[0]->Format() );
+    TArray<::ULIS::FEvent> eventClear;
+    eventClear.SetNum(iNum);
+    for( uint32 i = 0; i < iNum; ++i )
+    {
+        ::ULIS::FRectI rect = ::ULIS::FRectI::FromPositionAndSize( iPositions[i], iRects[i].Size() );
+        ctx.Clear( *ioBlocks[i], rect, ::ULIS::FSchedulePolicy::MonoScanlines, 0, nullptr, &eventClear[i] );
+        ctx.Flush();
+    }
+    //ctx.Finish();
+
+    TArray< TSharedPtr< IOdysseyLayer > > children = GetNodes();
+    eventRender = eventClear;
+    for( int i = children.Num() - 1; i >= 0; --i ) {
+        TSharedPtr< IOdysseyLayer > child = children[i];
+        if( !child->ImplementsCapability( IOdysseyLayerImageBlendingCapability::GetGuid() ) )
+            continue;
+
+        IOdysseyLayerImageBlendingCapability* layerBlendable = child->GetCapability< IOdysseyLayerImageBlendingCapability >();
+        if( !layerBlendable )
+            continue;
+
+        eventRender = layerBlendable->Blend( ioBlocks, iRects, iPositions, iNum, eventRender.GetData() );
+    }
+
+    return eventRender;
 }
 
 // Custom serialization version for FOdysseyImageLayer
@@ -204,7 +246,7 @@ FOdysseyFolderLayer::Serialize(FArchive &Ar)
         Ar << mOpacity;
         if (Ar.IsLoading())
         {
-            mBlendingMode = (::ul3::eBlendingMode)bm;
+            mBlendingMode = (::ULIS::eBlendMode)bm;
         }
         return;
     }
@@ -223,7 +265,7 @@ void
 FOdysseyFolderLayer::SetIsVisible(bool iIsVisible)
 {
     IOdysseyLayer::SetIsVisible(iIsVisible);
-    mImageResultChangedDelegate.Broadcast(nullptr);
+    mImageResultChangedDelegate.Broadcast( nullptr, 0 );
 }
 
 #undef LOCTEXT_NAMESPACE

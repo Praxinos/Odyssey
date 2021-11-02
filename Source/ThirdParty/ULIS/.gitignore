@@ -1,3 +1,4 @@
-!ULIS*.dll
-!ULIS*.lib
-!ULIS*.dylib
+ULIS*.dll
+ULIS*.lib
+ULIS*.dylib
+ULIS*.pdb

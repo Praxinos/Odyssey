@@ -14,7 +14,7 @@
 #include "ULISLoaderModule.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "IOdysseyLayerImageBlendingCapability.h"
-#include <ULIS3>
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
 
@@ -133,13 +133,13 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
         FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
         std::string str = std::string( TCHAR_TO_UTF8( *path ) );
         std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
-        ::ul3::eImageFormat exportImageFormat = ::ul3::eImageFormat::IM_PNG;
+        ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
         bool extensionFound = false;
-        for( int i = 0; i <= ::ul3::eImageFormat::IM_HDR; ++i )
+        for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
         {
-            if( extension == ::ul3::kwImageFormat[i] )
+            if( extension == ::ULIS::kwImageFormat[i] )
             {
-                exportImageFormat = static_cast< ::ul3::eImageFormat >( i );
+                exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
                 extensionFound = true;
                 break;
             }
@@ -155,18 +155,52 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
             FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
             FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
             CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
-            IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-            ::ul3::SaveToFile(
-                    hULIS.ThreadPool()
-                , true
-                , 0
-                , hULIS.HostDeviceInfo()
-                , false
-                , odysseyBlockToSave->GetBlock()
-                , str
-                , exportImageFormat
-                , 100
-            );
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
+
+            bool canSaveDirectly = false;
+            ::ULIS::FContext::SaveBlockToDiskMetrics( *odysseyBlockToSave->GetBlock(), exportImageFormat, &canSaveDirectly );
+            if (canSaveDirectly)
+            {
+                ctx.SaveBlockToDisk(
+                    *odysseyBlockToSave->GetBlock()
+                    , str
+                    , exportImageFormat
+                    , 100
+                );
+
+                ctx.Finish();
+            }
+            else
+            {
+                ::ULIS::eFormat format = odysseyBlockToSave->GetBlock()->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+                if (exportImageFormat == ::ULIS::FileFormat_hdr)
+                {
+                    format = ::ULIS::Format_RGBAF;
+                }
+
+                ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
+
+                ::ULIS::FEvent eventConvert;
+                ctx.ConvertFormat(
+                    *odysseyBlockToSave->GetBlock()
+                    , blockProxy
+                    , ::ULIS::FRectI::Auto
+                    , ::ULIS::FVec2I( 0 )
+                    , ULIS::FSchedulePolicy::CacheEfficient
+                    , 0
+                    , nullptr
+                    , &eventConvert
+                );
+
+                ctx.SaveBlockToDisk(
+                    blockProxy
+                    , str
+                    , exportImageFormat
+                    , 100
+                );
+
+                ctx.Finish();
+            }
 
             delete odysseyBlockToSave;
         }
@@ -269,7 +303,17 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 
     IOdysseyLayerImageRenderingCapability* renderCap = layer->GetCapability<IOdysseyLayerImageRenderingCapability>();
     FOdysseyBlock block(mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height(), mEditor->LayerStack()->Format());
-    renderCap->RenderImage(block.GetBlock(), block.GetBlock()->Rect(), ::ul3::FVec2F(0.f, 0.f));
+
+    TArray< ::ULIS::FBlock* > blocks;
+    TArray< ::ULIS::FRectI > rects;
+    TArray< ::ULIS::FVec2I > pos;
+    blocks.Add(block.GetBlock());
+    rects.Add(block.GetBlock()->Rect());
+    pos.Add(::ULIS::FVec2F(0.f, 0.f));
+    renderCap->RenderImage(blocks.GetData(), rects.GetData(), pos.GetData(), 1);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.GetBlock()->Format());
+    ctx.Finish();
 
     InitTextureWithBlockData(&block, texture, mEditor->Texture()->Source.GetFormat());
 
@@ -285,7 +329,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     FName layerName = mEditor->LayerStack()->GetLayerRoot()->GetNextLayerName();
     int w = mEditor->LayerStack()->Width();
     int h = mEditor->LayerStack()->Height();
-    ::ul3::tFormat format = mEditor->LayerStack()->Format();
+    ::ULIS::eFormat format = mEditor->LayerStack()->Format();
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(w, h), format));
     mEditor->LayerStack()->AddLayer(imageLayer);
     mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block()->GetBlock());

@@ -5,7 +5,7 @@
 
 #include "OdysseyAssetEditorToolkit.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyFlipbookEditorData;
 class FOdysseyFlipbookEditorGUI;

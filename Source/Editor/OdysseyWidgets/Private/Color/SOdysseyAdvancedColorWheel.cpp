@@ -5,7 +5,7 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyBlock.h"
-#include <ULIS3>
+#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyAdvancedColorWheel"
 
@@ -154,8 +154,8 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
     bMarkedAsInvalid = false;
     Init();
 
-    // colorA = new ::ul3::FPixelValue( ULIS3_FORMAT_RGBA8 );
-    // ::ul3::FPixelValue start_color = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0, 255 );
+    // colorA = new ::ULIS::FColor( ::ULIS::Format_RGBA8 );
+    // ::ULIS::FColor start_color = ::ULIS::FColor::RGBA8( 0, 0, 0, 255 );
     // SetColor( start_color );
 }
 
@@ -167,7 +167,7 @@ void
 SOdysseyAdvancedColorWheel::UpdateColor() const
 {
     float u, v, w;
-    ::ul3::FPixelValue hsv_color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_HSVAF );
+    ::ULIS::FColor hsv_color = mColor.Get().ToFormat( ::ULIS::Format_HSVAF );
     float hue = hsv_color.HueF();
     float sat = hsv_color.SaturationF();
     float value = hsv_color.ValueF();
@@ -390,9 +390,9 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
     float triangleArea = triangle_buffer_size.X * triangle_buffer_size.Y * 0.5;
 
     // Bake base colors
-    ::ul3::FPixelValue Color1 = ::ul3::FPixelValue::FromRGBA8( 255, 255, 255 );             // pure white
-    ::ul3::FPixelValue Color2 = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 ); // pure hue, max sat
-    ::ul3::FPixelValue Color3 = ::ul3::FPixelValue::FromRGBA8( 0, 0, 0 );                   // pure black
+    ::ULIS::FColor Color1 = ::ULIS::FColor::RGBA8( 255, 255, 255 );             // pure white
+    ::ULIS::FColor Color2 = ::ULIS::FColor::HSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ).ToFormat( ::ULIS::Format_RGBA8 ); // pure hue, max sat
+    ::ULIS::FColor Color3 = ::ULIS::FColor::RGBA8( 0, 0, 0 );                   // pure black
 
     // Optimisation Constants
     float optconst1 = -triangle_buffer_size.Y / 2; // ( iPt2.Y - iPt3.Y )
@@ -430,7 +430,7 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
             int r  = ( Area1 * Color1.Red8()   + Area2 * Color2.Red8()   + Area3 * Color3.Red8()   ) / triangleArea;
             int g  = ( Area1 * Color1.Green8() + Area2 * Color2.Green8() + Area3 * Color3.Green8() ) / triangleArea;
             int b  = ( Area1 * Color1.Blue8()  + Area2 * Color2.Blue8()  + Area3 * Color3.Blue8()  ) / triangleArea;
-            uint8* pixel = surface->Block()->GetBlock()->PixelPtr( current.X, current.Y );
+            uint8* pixel = surface->Block()->GetBlock()->PixelBits( current.X, current.Y );
             pixel[2] = r;
             pixel[1] = g;
             pixel[0] = b;
@@ -581,17 +581,17 @@ SOdysseyAdvancedColorWheel::UpdateGeometry() const
 void
 SOdysseyAdvancedColorWheel::UpdateTint() const
 {
-    ::ul3::FPixelValue color = ::ul3::Conv( mColor.Get(), ULIS3_FORMAT_RGBA8 );
+    ::ULIS::FColor color = mColor.Get().ToFormat( ::ULIS::Format_RGBA8 );
     result_tint = FLinearColor( FColor( color.Red8(), color.Green8(), color.Blue8() ) );
-    ::ul3::FPixelValue hsv_tint = ::ul3::Conv( ::ul3::FPixelValue::FromHSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ), ULIS3_FORMAT_RGBA8 );
+    ::ULIS::FColor hsv_tint = ::ULIS::FColor::HSVA8( static_cast< int >( hue_deg / 360.f * 255), 255, 255 ).ToFormat( ::ULIS::Format_RGBA8 );
     hue_tint = FLinearColor( FColor( hsv_tint.Red8(), hsv_tint.Green8(), hsv_tint.Blue8() ) );
-    ::ul3::FPixelValue HSVColor = ::ul3::Conv( color, ULIS3_FORMAT_HSVA8 );
+    ::ULIS::FColor HSVColor = color.ToFormat( ::ULIS::Format_HSVA8 );
     sat_tint = FLinearColor( FColor( HSVColor.Value8(), HSVColor.Value8(), HSVColor.Value8(), HSVColor.Saturation8() ) );
     lum_tint = FLinearColor( FColor( HSVColor.Value8(), HSVColor.Value8(), HSVColor.Value8(), 255 ) );
 }
 
 
-::ul3::FPixelValue
+::ULIS::FColor
 SOdysseyAdvancedColorWheel::GetColorResult() const
 {
     // Bake tints
@@ -603,7 +603,7 @@ SOdysseyAdvancedColorWheel::GetColorResult() const
     float value = 1 - w;
     float sat = value != 0 ? v / value : 0.0f;
 
-    return ::ul3::FPixelValue::FromHSVAF( hue, sat, value, 1.0f );
+    return ::ULIS::FColor::HSVAF( hue, sat, value, 1.0f );
 }
 
 #undef LOCTEXT_NAMESPACE

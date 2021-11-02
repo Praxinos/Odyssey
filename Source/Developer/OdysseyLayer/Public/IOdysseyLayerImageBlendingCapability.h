@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "IOdysseyLayerImageRenderingCapability.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyBlock;
 class IOdysseyLayer;
@@ -19,8 +19,8 @@ class ODYSSEYLAYER_API IOdysseyLayerImageBlendingCapability : public IOdysseyLay
 {
 public:
     // Layer Blending Mode Changed Event
-    // ::ul3::eBlendingMode is for the previous value
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerBlendingModeChanged, ::ul3::eBlendingMode);
+    // ::ULIS::eBlendMode is for the previous value
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOdysseyLayerBlendingModeChanged, ::ULIS::eBlendMode);
     
     // Layer Opacity Changed Event
     // float is for the previous value
@@ -30,7 +30,7 @@ public:
     // Construction / Destruction
     virtual ~IOdysseyLayerImageBlendingCapability() = 0;
     IOdysseyLayerImageBlendingCapability( const IOdysseyLayerImageBlendingCapability& iLayer );
-    IOdysseyLayerImageBlendingCapability( ::ul3::eBlendingMode iBlendingMode = ::ul3::BM_NORMAL, float iOpacity = 1.0f );
+    IOdysseyLayerImageBlendingCapability( ::ULIS::eBlendMode iBlendingMode = ::ULIS::Blend_Normal, float iOpacity = 1.0f );
 
 public:
     //Returns all capabilities guid compatible with this capability
@@ -40,22 +40,21 @@ public:
     static const FGuid& GetGuid();
 
 public:
-    virtual ::ul3::eBlendingMode    GetBlendingMode() const;
-    virtual FText                   GetBlendingModeAsText() const;
-    virtual TArray< TSharedPtr< FText > > GetBlendingModesAsText();
-    virtual void                    SetBlendingMode(::ul3::eBlendingMode iBlendingMode);
-    virtual void                    SetBlendingMode(FText iBlendingMode);
+    virtual ::ULIS::eBlendMode              GetBlendingMode() const;
+    virtual FText                           GetBlendingModeAsText() const;
+    virtual TArray< TSharedPtr< FText > >   GetBlendingModesAsText();
+    virtual void                            SetBlendingMode(::ULIS::eBlendMode iBlendingMode);
+    virtual void                            SetBlendingMode(FText iBlendingMode);
 
     virtual float GetOpacity() const;
     virtual void  SetOpacity(float iOpacity);
 
-    virtual void Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) = 0;
+    virtual TArray<::ULIS::FEvent> Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum, const ::ULIS::FEvent* iEvents ) = 0;
 
     void SerializeImageBlendingCapability(FArchive &Ar);
 
-	template<typename T>
-    static void* GetCapabilityPtrFromGuid(T* iValue, FGuid iGuid)
-    {
+    template<typename T>
+    static void* GetCapabilityPtrFromGuid( T* iValue, FGuid iGuid ) {
         if (GetGuid() == iGuid)
             return reinterpret_cast<void*>(static_cast<IOdysseyLayerImageBlendingCapability*>(iValue));
 
@@ -67,13 +66,13 @@ public:
     FOdysseyLayerOpacityChanged& OpacityChangedDelegate();
 
 private:
-    void OnBlendingModeChanged(::ul3::eBlendingMode iOldValue);
+    void OnBlendingModeChanged(::ULIS::eBlendMode iOldValue);
     void OnOpacityChanged(float iOldValue);
 
 protected:
-    ::ul3::eBlendingMode    mBlendingMode;
-    float                   mOpacity;
+    ::ULIS::eBlendMode  mBlendingMode;
+    float               mOpacity;
 
-    FOdysseyLayerBlendingModeChanged mBlendingModeChangedDelegate;
-    FOdysseyLayerOpacityChanged mOpacityChangedDelegate;
+    FOdysseyLayerBlendingModeChanged    mBlendingModeChangedDelegate;
+    FOdysseyLayerOpacityChanged         mOpacityChangedDelegate;
 };

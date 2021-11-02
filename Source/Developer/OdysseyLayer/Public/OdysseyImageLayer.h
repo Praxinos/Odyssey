@@ -8,7 +8,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IOdysseyLayer.h"
 #include "IOdysseyLayerImageBlendingCapability.h"
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyBlock;
 
@@ -28,13 +28,13 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyImageLayer();
     FOdysseyImageLayer( const FOdysseyImageLayer& iLayer);
-    FOdysseyImageLayer( const FName& iName,FVector2D iSize, ::ul3::tFormat iFormat);
+    FOdysseyImageLayer( const FName& iName,FVector2D iSize, ::ULIS::eFormat iFormat);
     FOdysseyImageLayer( const FName& iName,FOdysseyBlock* iBlock);
 
     virtual FOdysseyImageLayer* Clone() const override; 
     virtual void Serialize(FArchive &Ar) override;
-    virtual void Blend(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
-    virtual void RenderImage(::ul3::FBlock* ioBlock, const ::ul3::FRect& iRect, ::ul3::FVec2F iPos) override;
+    virtual TArray<::ULIS::FEvent> Blend( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum, const ::ULIS::FEvent* iEvents ) override;
+    virtual TArray<::ULIS::FEvent> RenderImage( ::ULIS::FBlock** ioBlocks, const ::ULIS::FRectI* iRects, const ::ULIS::FVec2I* iPositions, const uint32 iNum ) override;
     virtual bool ImplementsCapability(FGuid iGuid) const override;
     virtual void* GetCapabilityPtrFromGuid(FGuid iGuid) override;
 

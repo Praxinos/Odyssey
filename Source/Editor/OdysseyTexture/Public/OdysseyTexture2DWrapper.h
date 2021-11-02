@@ -9,7 +9,7 @@
 #include "OdysseyTextureWrapper.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
-#include <ULIS3>
+#include <ULIS>
 
 class FOdysseyLayerStack;
 class UOdysseyTextureAssetUserData;

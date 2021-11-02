@@ -97,11 +97,11 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
 	if (!mEditor->DisplaySurface())
 		return;
 
-    ::ul3::FBlock* block = mEditor->DisplaySurface()->Block()->GetBlock();
+    ::ULIS::FBlock* block = mEditor->DisplaySurface()->Block()->GetBlock();
     if (iPositionInTexture.X >= 0 && iPositionInTexture.X < block->Width() &&
         iPositionInTexture.Y >= 0 && iPositionInTexture.Y < block->Height())
     {
-        const ::ul3::FPixelValue& color = block->PixelValue(iPositionInTexture.X, iPositionInTexture.Y);
+        const ::ULIS::FColor& color = block->Color(iPositionInTexture.X, iPositionInTexture.Y);
         mEditor->PaintColor(color);
     }
         

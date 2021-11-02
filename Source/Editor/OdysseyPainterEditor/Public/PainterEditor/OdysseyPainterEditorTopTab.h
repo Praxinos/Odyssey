@@ -25,8 +25,8 @@ public:
 
     // Public Setters
 public:
-    virtual void SetToolDefaultBlendingMode( ::ul3::eBlendingMode );
-    virtual void SetToolDefaultAlphaMode( ::ul3::eAlphaMode );
+    virtual void SetToolDefaultBlendingMode( ::ULIS::eBlendMode );
+    virtual void SetToolDefaultAlphaMode( ::ULIS::eAlphaMode );
 
 protected:
     // FOdysseyEditorTab interface
@@ -39,8 +39,8 @@ protected:
     virtual int OnGetSize() const;
     virtual float OnGetOpacity() const;
     virtual float OnGetFlow() const;
-    virtual ::ul3::eBlendingMode BlendingMode() const;
-    virtual ::ul3::eAlphaMode AlphaMode() const;
+    virtual ::ULIS::eBlendMode BlendingMode() const;
+    virtual ::ULIS::eAlphaMode AlphaMode() const;
 
 protected:
     // Event Listeners
@@ -57,15 +57,15 @@ protected:
 protected:
     // Methods
     virtual void ToggleEraserButton();
-    virtual void SetAlphaModeShortcut( ::ul3::eAlphaMode iAlphaMode );
-    virtual void SetAlphaMode( ::ul3::eAlphaMode iAlphaMode );
-    virtual void SetBlendingMode(::ul3::eBlendingMode iBlendingMode);
+    virtual void SetAlphaModeShortcut( ::ULIS::eAlphaMode iAlphaMode );
+    virtual void SetAlphaMode( ::ULIS::eAlphaMode iAlphaMode );
+    virtual void SetBlendingMode(::ULIS::eBlendMode iBlendingMode);
     virtual void AddSize( int32 iValue );
 
 private:
     FOdysseyPainterEditor* mEditor;
-    ::ul3::eBlendingMode mToolDefaultBlendingMode;
-    ::ul3::eAlphaMode mToolDefaultAlphaMode;
+    ::ULIS::eBlendMode mToolDefaultBlendingMode;
+    ::ULIS::eAlphaMode mToolDefaultAlphaMode;
     bool mIsEraserButtonActive;
 };
 

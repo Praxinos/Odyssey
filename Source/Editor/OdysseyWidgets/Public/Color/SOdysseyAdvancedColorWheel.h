@@ -14,10 +14,10 @@
 #include "Widgets/SPanel.h"
 #include "SOdysseyLeafWidget.h"
 #include "OdysseyEventState.h"
-#include <ULIS3>
+#include <ULIS>
 
-//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ul3::FPixelValue& );
-DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ul3::FPixelValue& );
+//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::FColor& );
+DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ULIS::FColor& );
 
 
 /////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ public:
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ARGS
         {}
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES
-        SLATE_ATTRIBUTE( ::ul3::FPixelValue, Color )
+        SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
         SLATE_EVENT( FOnColorChange, OnColorChange )
     SLATE_END_ARGS()
 
@@ -50,7 +50,7 @@ public:
 
 public:
     // Public Callback API
-    void SetColor( const ::ul3::FPixelValue& iColor );
+    void SetColor( const ::ULIS::FColor& iColor );
     FVector2D GetInternalSize() const;
     FVector2D GetInternalPadding() const;
     bool IsFullyVisible() const;
@@ -96,7 +96,7 @@ private:
     void  UpdateGeometry() const;
     void  UpdateTint() const;
     void  UpdateColor() const;
-    ::ul3::FPixelValue GetColorResult() const;
+    ::ULIS::FColor GetColorResult() const;
 
 private:
     // Painting Utilities
@@ -144,9 +144,9 @@ private:
     mutable FLinearColor lum_tint;
 
     mutable bool bMarkedAsInvalid;
-    mutable ::ul3::FPixelValue mDisplayedColor;
+    mutable ::ULIS::FColor mDisplayedColor;
 
     FOnColorChange OnColorChangeCallback;
-    TAttribute<::ul3::FPixelValue> mColor;
+    TAttribute<::ULIS::FColor> mColor;
 
 };

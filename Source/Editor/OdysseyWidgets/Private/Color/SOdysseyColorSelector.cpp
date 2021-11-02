@@ -275,7 +275,7 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int r = HexStringToDecimal( str_r );
     int g = HexStringToDecimal( str_g );
     int b = HexStringToDecimal( str_b );
-    ::ul3::FPixelValue newColor = ::ul3::FPixelValue::FromRGBA8( r, g, b );
+    ::ULIS::FColor newColor = ::ULIS::FColor::RGBA8( r, g, b );
 
     //adv_color_wheel->SetColor( newColor );
 
@@ -287,7 +287,7 @@ FText
 SOdysseyColorSelector::GetColorHex() const
 {
     //Can be null so we have to check
-    ::ul3::FPixelValue color = ::ul3::Conv(mColor.Get(), ULIS3_FORMAT_RGBA8);
+    ::ULIS::FColor color = mColor.Get().ToFormat( ::ULIS::Format_RGBA8 );
     uint8 r = color.Red8();
     uint8 g = color.Green8();
     uint8 b = color.Blue8();

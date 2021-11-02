@@ -12,7 +12,7 @@
 #include "OdysseyPsdOperations.h"
 
 #include "ULISLoaderModule.h"
-#include <ULIS3>
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // UOdysseyTextureFactory
@@ -44,13 +44,14 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
     
     if(psdReader.GetLayerStack())
     {
-        FOdysseyBlock* srcblock = new FOdysseyBlock(psdReader.GetLayerStack()->Width(),psdReader.GetLayerStack()->Height(),psdReader.GetLayerStack()->Format());
-        psdReader.GetLayerStack()->ComputeResultInBlock(srcblock->GetBlock(),::ul3::FRect(0,0,psdReader.GetImageWidth(),psdReader.GetImageHeight()));
+        FOdysseyBlock* srcblock = new FOdysseyBlock( psdReader.GetLayerStack()->Width(), psdReader.GetLayerStack()->Height(), psdReader.GetLayerStack()->Format() );
+        ::ULIS::FRectI rect( 0, 0, psdReader.GetImageWidth() , psdReader.GetImageHeight() );
+        psdReader.GetLayerStack()->ComputeResultInBlock( srcblock->GetBlock(), &rect, 1 );
         InitTextureWithBlockData(srcblock,object,UE4TextureSourceFormatForULISFormat(srcblock->Format()));
 
-        UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(object,NAME_None,RF_Public);
-        userData->SetLayerStack(psdReader.GetLayerStack());
-        object->AddAssetUserData(userData);
+        UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >( object, NAME_None, RF_Public );
+        userData->SetLayerStack( psdReader.GetLayerStack() );
+        object->AddAssetUserData( userData );
     }
 
 
@@ -58,17 +59,17 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
     if( psdReader.GetBitDepth() > 8 )
     {
         if( psdReader.GetChannelsNumber() == 4 )
-            srcblock = new ::ul3::FBlock((::ul3::tByte*)psdReader.GetImageDst16(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),ULIS3_FORMAT_RGBA16);
+            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)psdReader.GetImageDst16(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGBA16);
         else
-            srcblock = new ::ul3::FBlock((::ul3::tByte*)psdReader.GetImageDst16(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),ULIS3_FORMAT_RGB16);
+            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)psdReader.GetImageDst16(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGB16);
 
-        FOdysseyBlock* myBlock = new FOdysseyBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),ULIS3_FORMAT_RGBA16);
+        FOdysseyBlock* myBlock = new FOdysseyBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGBA16);
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 MT_bit = ULIS3_PERF_MT;
-        ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+        ::ULIS::uint32 MT_bit = ULIS_PERF_MT;
+        ::ULIS::uint32 perfIntent = MT_bit | ULIS_PERF_SSE42;
 
-        ::ul3::Conv(hULIS.ThreadPool(),ULIS3_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS3_NOCB,srcblock,myBlock->GetBlock());
+        ::ULIS::Conv(hULIS.ThreadPool(),ULIS_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS_NOCB,srcblock,myBlock->GetBlock());
 
         //UE_LOG(LogTemp,Display,TEXT("RGBBlock: %d, RGBABlock: %d"),srcblock->BytesTotal(),myBlock->GetArray().Num());
 
@@ -77,18 +78,18 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
     else
     {
         if(psdReader.GetChannelsNumber() == 4)
-            srcblock = new ::ul3::FBlock((::ul3::tByte*)psdReader.GetImageDst(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),ULIS3_FORMAT_ARGB8);
+            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)psdReader.GetImageDst(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_ARGB8);
         else
-            srcblock = new ::ul3::FBlock((::ul3::tByte*)psdReader.GetImageDst(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),ULIS3_FORMAT_RGB8);
+            srcblock = new ::ULIS::FBlock((::ULIS::tByte*)psdReader.GetImageDst(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGB8);
 
 
-        FOdysseyBlock* myBlock = new FOdysseyBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),ULIS3_FORMAT_BGRA8);
+        FOdysseyBlock* myBlock = new FOdysseyBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_BGRA8);
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
-        ::ul3::uint32 MT_bit = ULIS3_PERF_MT;
-        ::ul3::uint32 perfIntent = MT_bit | ULIS3_PERF_SSE42;
+        ::ULIS::uint32 MT_bit = ULIS_PERF_MT;
+        ::ULIS::uint32 perfIntent = MT_bit | ULIS_PERF_SSE42;
 
-        ::ul3::Conv(hULIS.ThreadPool(),ULIS3_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS3_NOCB,srcblock,myBlock->GetBlock());
+        ::ULIS::Conv(hULIS.ThreadPool(),ULIS_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS_NOCB,srcblock,myBlock->GetBlock());
 
         //UE_LOG(LogTemp,Display,TEXT("RGBBlock: %d, RGBABlock: %d"),srcblock->BytesTotal(),myBlock->GetArray().Num());
 

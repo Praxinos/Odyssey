@@ -38,7 +38,7 @@ FOdysseyPainterEditorColorSlidersTab::CreateWidget()
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-::ul3::FPixelValue
+::ULIS::FColor
 FOdysseyPainterEditorColorSlidersTab::Color() const
 {
     return mEditor->PaintColor();
@@ -48,7 +48,7 @@ FOdysseyPainterEditorColorSlidersTab::Color() const
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorColorSlidersTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ul3::FPixelValue& iColor )
+FOdysseyPainterEditorColorSlidersTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
     mEditor->PaintColor(iColor);
 

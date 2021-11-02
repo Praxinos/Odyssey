@@ -19,31 +19,43 @@ class  FOdysseyBlock;
 class  UFont;
 class  UOdysseyBrushAssetBase;
 
+
+
 /////////////////////////////////////////////////////
 // Odyssey Block Reference
+
+class FOdysseyBlockProxy_Internal;
+
 USTRUCT(BlueprintType, meta = (DisplayName = "Odyssey Block Reference"))
 struct ODYSSEYBRUSH_API FOdysseyBlockProxy
 {
     GENERATED_BODY()
+    
+    ~FOdysseyBlockProxy();
 
-    FOdysseyBlockProxy()
-        : m(        0       )
-    {}
+    FOdysseyBlockProxy();
 
-    FOdysseyBlockProxy( TSharedPtr<FOdysseyBlock> iBlock )
-        : m(        iBlock  )
-    {}
+private:
+    FOdysseyBlockProxy(const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents = 0, ::ULIS::FEvent* iEvents = nullptr, int iNumDeps = 0, FOdysseyBlockProxy* iDependencies = nullptr );
 
-    static
-    FOdysseyBlockProxy
-    MakeNullProxy()
-    {
-        return  FOdysseyBlockProxy();
-    }
+public:
+    //Create a Null (Invalid) Proxy
+    static FOdysseyBlockProxy MakeNullProxy();
+    static FOdysseyBlockProxy MakeProxy(const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock = nullptr, int iNumEvents = 0, ::ULIS::FEvent* iEvents = nullptr, int iNumDeps = 0, FOdysseyBlockProxy* iDependencies = nullptr);
 
-    TSharedPtr<FOdysseyBlock>   m;
+    //Returns wether this FOdysseyBlockProxy is Valid or NULL
+    //Always check if a FOdysseyBlockProxy is valid before using it
+    bool IsValid();
+
+    //Returns the block the proxy is holding
+    const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& GetBlock();
+
+    //Returns the Event on which to wait for the block to be "done"
+    const ::ULIS::FEvent& GetEvent();
+
+public:
+    TSharedPtr<FOdysseyBlockProxy_Internal, ESPMode::ThreadSafe> m = nullptr;
 };
-
 
 // Duplicate FFontCharacter (in Font.h#29) to be able to expose values in BP (as FFontCharacter is not tagged BlueprintType)
 USTRUCT(BlueprintType)
@@ -83,7 +95,8 @@ struct FOdysseyFontCharacter
 /////////////////////////////////////////////////////
 // UOdysseyBlockProxyFunctionLibrary
 UCLASS(meta=(ScriptName="OdysseyBlockProxyLibrary"))
-class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary : public UBlueprintFunctionLibrary
+class ODYSSEYBRUSH_API UOdysseyBlockProxyFunctionLibrary
+    : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -290,7 +303,6 @@ public:
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 
     /* Format Management */
-
     //Get the Odyssey Block Reference Color Model
     UFUNCTION(BlueprintPure, Category="Odyssey|Block", meta = ( DisplayName="Get Block Color Model" ))
     static EOdysseyColorModel GetColorModel(FOdysseyBlockProxy Block);
