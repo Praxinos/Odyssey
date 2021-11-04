@@ -18,8 +18,10 @@
 #include "MovieSceneSequence.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Sections/MovieScene3DTransformSection.h"
+#include "Sections/MovieSceneParameterSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
+#include "Tracks/MovieSceneMaterialTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
 
 #include "Board/BoardSequence.h"
@@ -788,12 +790,55 @@ ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovi
     if( !plane_component.IsValid() )
         return sections;
 
-    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
+    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
     if( !track )
         return sections;
 
     for( auto section : track->GetAllSections() )
         sections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
+
+    return sections;
+}
+
+//static
+TArray<UMovieSceneParameterSection*>
+BoardSequenceHelpers::GetPlaneOpacitySections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetPlaneOpacitySections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+TArray<UMovieSceneParameterSection*>
+ShotSequenceHelpers::GetPlaneOpacitySections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
+{
+    TArray<UMovieSceneParameterSection*> sections;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return sections;
+
+    if( !iPlaneBinding.IsValid() )
+        return sections;
+
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return sections;
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    if( !plane )
+        return sections;
+
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return sections;
+
+    UMovieSceneTrack* track = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( plane_component ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
+    if( !track )
+        return sections;
+
+    for( auto section : track->GetAllSections() )
+        sections.Add( Cast<UMovieSceneParameterSection>( section ) );
 
     return sections;
 }
@@ -983,6 +1028,75 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
             TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
 
             map.Add( plane_material_section, ChannelProxy );
+
+            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+        }
+
+        maps.Add( binding, map );
+    }
+
+    return maps;
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+BoardSequenceHelpers::BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildPlanesOpacityChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+ShotSequenceHelpers::BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TMap<FGuid, FChannelProxyBySectionMap> maps;
+
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> bindings;
+    /*int plane_count =*/ ShotSequenceHelpers::GetAllPlanes( iPlayer, iSequence, iSequenceID, EGetPlane::kAll, &planes, &bindings );
+
+    for( auto binding : bindings )
+    {
+        FChannelProxyBySectionMap map;
+
+        //---
+
+        TArray<UMovieSceneParameterSection*> plane_opacity_sections = ShotSequenceHelpers::GetPlaneOpacitySections( iPlayer, iSequence, iSequenceID, binding );
+        for( auto plane_opacity_section : plane_opacity_sections )
+        {
+            FMovieSceneChannelProxyData ChannelIndirection;
+
+            const FMovieSceneChannelEntry* FloatChannelEntry = plane_opacity_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
+            if( FloatChannelEntry )
+            {
+#if WITH_EDITOR
+                TArrayView<FMovieSceneChannel* const>                   FloatChannels = FloatChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>            MetaData = FloatChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<float>>       MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
+
+                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                {
+                    if( MetaData[Index].Name.IsEqual( TEXT("DrawingOpacity") ) )
+                        ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                }
+#else
+                TArrayView<FMovieSceneChannel* const>                   FloatChannels = FloatChannelEntry->GetChannels();
+
+                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ) );
+                }
+#endif
+            }
+
+            TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+            map.Add( plane_opacity_section, ChannelProxy );
 
             // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
             // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it

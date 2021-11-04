@@ -394,6 +394,7 @@ FCinematicBoardSection::BuildKeys() //override
     BuildCameraTransformChannelProxy();
     BuildPlanesTransformChannelProxy();
     BuildPlanesMaterialChannelProxy();
+    BuildPlanesOpacityChannelProxy();
 }
 
 void
@@ -416,7 +417,7 @@ FCinematicBoardSection::BuildCameraTransformChannelProxy()
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    mCameraTransformKeys = BoardSequenceHelpers::BuildCameraTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mCameraTransformChannelProxies = BoardSequenceHelpers::BuildCameraTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildCameraTransformMetaChannel();
 }
@@ -424,7 +425,7 @@ FCinematicBoardSection::BuildCameraTransformChannelProxy()
 FChannelProxyBySectionMap
 FCinematicBoardSection::GetCameraTransformChannelProxy() const
 {
-    return mCameraTransformKeys;
+    return mCameraTransformChannelProxies;
 }
 
 void
@@ -438,14 +439,14 @@ FCinematicBoardSection::ReBuildCameraTransformMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mCameraTransformMetaKeys = MakeShared<FMetaChannel>( inner_tolerance );
-    mCameraTransformMetaKeys->Build( mCameraTransformKeys );
+    mCameraTransformMetaChannel = MakeShared<FMetaChannel>( inner_tolerance );
+    mCameraTransformMetaChannel->Build( mCameraTransformChannelProxies );
 }
 
 TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetCameraTransformMetaChannel() const
 {
-    return mCameraTransformMetaKeys;
+    return mCameraTransformMetaChannel;
 }
 
 //-
@@ -453,7 +454,7 @@ FCinematicBoardSection::GetCameraTransformMetaChannel() const
 void
 FCinematicBoardSection::BuildPlanesTransformChannelProxy()
 {
-    mPlanesTransformsKeys = BoardSequenceHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mPlanesTransformChannelProxies = BoardSequenceHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildPlanesTransformMetaChannel();
 }
@@ -461,10 +462,10 @@ FCinematicBoardSection::BuildPlanesTransformChannelProxy()
 FChannelProxyBySectionMap
 FCinematicBoardSection::GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesTransformsKeys.Contains( iPossessable.GetGuid() ) )
+    if( !mPlanesTransformChannelProxies.Contains( iPossessable.GetGuid() ) )
         return FChannelProxyBySectionMap();
 
-    return mPlanesTransformsKeys[iPossessable.GetGuid()];
+    return mPlanesTransformChannelProxies[iPossessable.GetGuid()];
 }
 
 void
@@ -478,8 +479,8 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesTransformsMetaKeys.Empty();
-    for( const auto& pair : mPlanesTransformsKeys )
+    mPlanesTransformMetaChannel.Empty();
+    for( const auto& pair : mPlanesTransformChannelProxies )
     {
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
@@ -487,17 +488,17 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
         TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
-        mPlanesTransformsMetaKeys.Add( guid, meta_channel );
+        mPlanesTransformMetaChannel.Add( guid, meta_channel );
     }
 }
 
 TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesTransformsMetaKeys.Contains( iPossessable.GetGuid() ) )
+    if( !mPlanesTransformMetaChannel.Contains( iPossessable.GetGuid() ) )
         return nullptr;
 
-    return mPlanesTransformsMetaKeys[iPossessable.GetGuid()];
+    return mPlanesTransformMetaChannel[iPossessable.GetGuid()];
 }
 
 //-
@@ -505,7 +506,7 @@ FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPo
 void
 FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
 {
-    mPlanesMaterialsKeys = BoardSequenceHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mPlanesMaterialChannelProxies = BoardSequenceHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildPlanesMaterialMetaChannel();
 }
@@ -513,10 +514,10 @@ FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
 FChannelProxyBySectionMap
 FCinematicBoardSection::GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesMaterialsKeys.Contains( iPossessable.GetGuid() ) )
+    if( !mPlanesMaterialChannelProxies.Contains( iPossessable.GetGuid() ) )
         return FChannelProxyBySectionMap();
 
-    return mPlanesMaterialsKeys[iPossessable.GetGuid()];
+    return mPlanesMaterialChannelProxies[iPossessable.GetGuid()];
 }
 
 void
@@ -530,8 +531,8 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesMaterialsMetaKeys.Empty();
-    for( const auto& pair : mPlanesMaterialsKeys )
+    mPlanesMaterialMetaChannel.Empty();
+    for( const auto& pair : mPlanesMaterialChannelProxies )
     {
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
@@ -539,17 +540,69 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
         TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
-        mPlanesMaterialsMetaKeys.Add( guid, meta_channel );
+        mPlanesMaterialMetaChannel.Add( guid, meta_channel );
     }
 }
 
 TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesMaterialsMetaKeys.Contains( iPossessable.GetGuid() ) )
+    if( !mPlanesMaterialMetaChannel.Contains( iPossessable.GetGuid() ) )
         return nullptr;
 
-    return mPlanesMaterialsMetaKeys[iPossessable.GetGuid()];
+    return mPlanesMaterialMetaChannel[iPossessable.GetGuid()];
+}
+
+//-
+
+void
+FCinematicBoardSection::BuildPlanesOpacityChannelProxy()
+{
+    mPlanesOpacityChannelProxies = BoardSequenceHelpers::BuildPlanesOpacityChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+
+    ReBuildPlanesOpacityMetaChannel();
+}
+
+FChannelProxyBySectionMap
+FCinematicBoardSection::GetPlaneOpacityChannelProxy( FMovieScenePossessable iPossessable ) const
+{
+    if( !mPlanesOpacityChannelProxies.Contains( iPossessable.GetGuid() ) )
+        return FChannelProxyBySectionMap();
+
+    return mPlanesOpacityChannelProxies[iPossessable.GetGuid()];
+}
+
+void
+FCinematicBoardSection::ReBuildPlanesOpacityMetaChannel()
+{
+    FTimeToPixel converter( ConstructConverterForViewRange() );
+
+    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
+    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
+    FFrameTime clicked_frame = 0; // As if we are on frame 0
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
+
+    mPlanesOpacityMetaChannel.Empty();
+    for( const auto& pair : mPlanesOpacityChannelProxies )
+    {
+        FGuid guid = pair.Key;
+        FChannelProxyBySectionMap map = pair.Value;
+
+        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
+        meta_channel->Build( map );
+
+        mPlanesOpacityMetaChannel.Add( guid, meta_channel );
+    }
+}
+
+TSharedPtr<FMetaChannel>
+FCinematicBoardSection::GetPlaneOpacityMetaChannel( FMovieScenePossessable iPossessable ) const
+{
+    if( !mPlanesOpacityMetaChannel.Contains( iPossessable.GetGuid() ) )
+        return nullptr;
+
+    return mPlanesOpacityMetaChannel[iPossessable.GetGuid()];
 }
 
 //---

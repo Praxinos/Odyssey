@@ -755,6 +755,129 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
 //---
 //---
 
+//---
+
+class SCinematicBoardSectionPlaneOpacityKeys
+    : public SMetaKeysArea
+{
+public:
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionPlaneOpacityKeys )
+        {}
+        SLATE_ARGUMENT( FMovieScenePossessable, Binding )
+    SLATE_END_ARGS()
+
+    // Construct the widget
+    void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
+
+    // SWidget overrides
+    virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
+
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
+protected:
+    // SMetaKeysArea overrides
+    virtual TSharedPtr<FMetaChannel>        GetMetaChannel() override;
+    virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
+    virtual void                            RebuildMetaChannel() override;
+
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
+
+    virtual const FSlateBrush* GetBackgroundBrush() const override;
+
+private:
+    FMovieScenePossessable              mBinding;
+};
+
+void
+SCinematicBoardSectionPlaneOpacityKeys::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+{
+    mBoardSection = iBoardSection;
+
+    mBinding = InArgs._Binding;
+
+    ChildSlot
+    [
+        SNew( SBox )
+    ];
+}
+
+//---
+
+TSharedPtr<FMetaChannel>
+SCinematicBoardSectionPlaneOpacityKeys::GetMetaChannel() //override
+{
+    return mBoardSection.Pin()->GetPlaneOpacityMetaChannel( mBinding );
+}
+
+TSharedPtr<const FMetaChannel>
+SCinematicBoardSectionPlaneOpacityKeys::GetMetaChannel() const //override
+{
+    return mBoardSection.Pin()->GetPlaneOpacityMetaChannel( mBinding );
+}
+
+void
+SCinematicBoardSectionPlaneOpacityKeys::RebuildMetaChannel() //override
+{
+    mBoardSection.Pin()->ReBuildPlanesOpacityMetaChannel();
+}
+
+//---
+
+bool
+SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) //override
+{
+    return true;
+}
+
+FCursorReply
+SCinematicBoardSectionPlaneOpacityKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+{
+    return SMetaKeysArea::OnCursorQuery( MyGeometry, CursorEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneOpacityKeys::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SMetaKeysArea::OnMouseButtonDown( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneOpacityKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SMetaKeysArea::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneOpacityKeys::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SMetaKeysArea::OnMouseMove( MyGeometry, MouseEvent );
+}
+
+const FSlateBrush*
+SCinematicBoardSectionPlaneOpacityKeys::GetBackgroundBrush() const //override
+{
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+
+    return &background_brush;
+}
+
+int32
+SCinematicBoardSectionPlaneOpacityKeys::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    if( !mBinding.GetGuid().IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    return SMetaKeysArea::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+}
+
+//---
+//---
+//---
+
 class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlane
     : public SCompoundWidget
 {
@@ -808,6 +931,12 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
+            .Binding( mBinding )
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SCinematicBoardSectionPlaneOpacityKeys, iBoardSection )
             .Binding( mBinding )
         ]
     ];
@@ -888,7 +1017,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     ioMenuBuilder.AddMenuEntry(
         FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame ),
-        LOCTEXT( "create-drawing-tooltip", "Create a drawing (set the current frame where to create the drawing keyframe)" ),
+        LOCTEXT( "create-drawing-tooltip", "Create a drawing\n(set the current frame where to create the drawing keyframe)" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ),
         FUIAction(
             FExecuteAction::CreateLambda( CreateDrawing ),
