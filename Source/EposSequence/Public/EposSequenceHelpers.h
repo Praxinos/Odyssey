@@ -14,6 +14,7 @@ class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
 class UMovieScene3DTransformSection;
+class UMovieSceneComponentMaterialTrack;
 class UMovieSceneNoteSection;
 class UMovieSceneParameterSection;
 class UMovieScenePrimitiveMaterialSection;
@@ -25,6 +26,7 @@ class UStoryNote;
 class UWorld;
 class IMovieScenePlayer;
 struct FMovieSceneChannelProxy;
+struct FMovieSceneFloatChannel;
 struct FMovieSceneObjectPathChannel;
 
 typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelProxy>> FChannelProxyBySectionMap;
@@ -78,14 +80,26 @@ struct EPOSSEQUENCE_API FDrawing
 {
     FMovieSceneObjectPathChannel*   mChannel { nullptr };
     UMovieSceneSection*             mSection { nullptr };
-    int32                           mKeyIndex { INDEX_NONE };
-    FKeyHandle                      mKeyHandle;
+    FKeyHandle                      mKeyHandle { FKeyHandle::Invalid() };
 
     bool Exists();
 
     UMaterialInstance* GetMaterial();
 
     void SetMaterial( UMaterialInstance* iMaterial );
+};
+
+struct EPOSSEQUENCE_API FKeyOpacity
+{
+    FMovieSceneFloatChannel*            mChannel { nullptr };
+    TWeakObjectPtr<UMovieSceneSection>  mSection;
+    FKeyHandle                          mKeyHandle { FKeyHandle::Invalid() };
+
+    bool Exists();
+
+    bool GetOpacity( float& oOpacity );
+
+    void SetOpacity( float iOpacity );
 };
 
 class EPOSSEQUENCE_API ShotSequenceHelpers
@@ -99,6 +113,37 @@ public:
     static FDrawing             GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
     static TArray<FDrawing>     GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static TArray<FFrameNumber> GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
+
+    struct FFindMaterialParameterResult
+    {
+        TWeakObjectPtr<UMovieSceneComponentMaterialTrack>   mTrack;
+        TArray<TWeakObjectPtr<UMovieSceneParameterSection>> mSections;
+    };
+    static FFindMaterialParameterResult                 FindMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+    struct FFindOrCreateMaterialParameterResult
+    {
+        TWeakObjectPtr<UMovieSceneComponentMaterialTrack>   mTrack;
+        bool mTrackCreated { false };
+        TArray<TWeakObjectPtr<UMovieSceneParameterSection>> mSections;
+        bool mSectionsCreated { false };
+    };
+    static FFindOrCreateMaterialParameterResult         FindOrCreateMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+
+    static FMovieSceneFloatChannel*                     FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection );
+    struct FFindOrCreateParameterChannelResult
+    {
+        // In the future, instead of maybe using a generic FMovieSceneChannel*,
+        // we can use multiple data (one for FMovieSceneFloatChannel* and one for FMovieSceneVectorChannel*)
+        // because in the material track gui, we can only use material parameter which are float and color
+        // so it should be ok to have 2 data members instead of a generic single one which will be recast when needed
+        //
+        // or maybe use (also 2 members) FScalarParameterNameAndCurve and FColorParameterNameAndCurve instead of inner channel ?
+        FMovieSceneFloatChannel* mChannel;
+        bool mChannelCreated { false };
+    };
+    static FFindOrCreateParameterChannelResult          FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection );
+
+    static FKeyOpacity                                  GetOpacityKey( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );
 

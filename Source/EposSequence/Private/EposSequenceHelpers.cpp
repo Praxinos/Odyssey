@@ -417,7 +417,7 @@ EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* 
 bool
 FDrawing::Exists()
 {
-    return mKeyIndex != INDEX_NONE;
+    return mKeyHandle != FKeyHandle::Invalid();
 }
 
 UMaterialInstance*
@@ -483,7 +483,6 @@ ShotSequenceHelpers::GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence
 
     drawing.mChannel = channels[0];
     drawing.mSection = section;
-    drawing.mKeyIndex = key_index;
     if( key_index != INDEX_NONE )
         drawing.mKeyHandle = channels[0]->GetData().GetHandle( key_index );
 
@@ -525,7 +524,7 @@ ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequ
         check( channels.Num() == 1 );
         for( int k = 0; k < channels[0]->GetNumKeys(); k++ )
         {
-            FDrawing drawing = { channels[0], section, k, channels[0]->GetData().GetHandle( k ) };
+            FDrawing drawing = { channels[0], section, channels[0]->GetData().GetHandle( k ) };
             drawings.Add( drawing );
         }
     }
@@ -578,6 +577,246 @@ ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieScene
     times.Sort();
 
     return times;
+}
+
+bool
+FKeyOpacity::Exists()
+{
+    return mKeyHandle != FKeyHandle::Invalid();
+}
+
+bool
+FKeyOpacity::GetOpacity( float& oOpacity )
+{
+    if( !mChannel || mKeyHandle == FKeyHandle::Invalid() )
+        return false;
+
+    FMovieSceneFloatValue opacity;
+    UE::MovieScene::GetKeyValue( mChannel, mKeyHandle, opacity );
+    oOpacity = opacity.Value;
+
+    return true;
+}
+
+void
+FKeyOpacity::SetOpacity( float iOpacity )
+{
+    if( !mChannel || mKeyHandle == FKeyHandle::Invalid() )
+        return;
+
+    mSection->Modify();
+
+    AssignValue( mChannel, mKeyHandle, iOpacity );
+}
+
+//static
+ShotSequenceHelpers::FFindMaterialParameterResult
+ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindMaterialParameterResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return result;
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    if( !plane )
+        return result;
+
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return result;
+
+    //---
+
+    result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( plane_component ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
+    if( !result.mTrack.IsValid() )
+        return result;
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+    }
+
+    return result;
+}
+
+//static
+ShotSequenceHelpers::FFindOrCreateMaterialParameterResult
+ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreateMaterialParameterResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return result;
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    if( !plane )
+        return result;
+
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return result;
+
+    //---
+
+    result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( plane_component ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
+    if( !result.mTrack.IsValid() )
+    {
+        result.mTrackCreated = true;
+
+        UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieSceneComponentMaterialTrack::StaticClass(), plane_component );
+        result.mTrack = Cast<UMovieSceneComponentMaterialTrack>( track );
+
+        result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
+    }
+
+    check( result.mTrack.IsValid() );
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+    }
+
+    // Use GetAllSections() to be sure to have the 'real' number of section inside the track
+    // If we rely only on mSections and with a iFrameNumber set, we can create a section while there are ones but outside iFrameNumber
+    if( !result.mTrack->GetAllSections().Num() )
+    {
+        result.mSectionsCreated = true;
+
+        UMovieSceneSection* section = result.mTrack->CreateNewSection();
+        check( result.mTrack->IsEmpty() );
+        result.mTrack->AddSection( *section );
+
+        section->SetRange( TRange<FFrameNumber>::All() );
+
+        result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+    }
+
+    return result;
+}
+
+//static
+FMovieSceneFloatChannel*
+ShotSequenceHelpers::FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection )
+{
+    TArray<FScalarParameterNameAndCurve>& parameters = iSection->GetScalarParameterNamesAndCurves();
+    for( auto& parameter : parameters )
+    {
+        if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+        {
+            return &parameter.ParameterCurve;
+        }
+    }
+
+    return nullptr;
+}
+
+//static
+ShotSequenceHelpers::FFindOrCreateParameterChannelResult
+ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection )
+{
+    FFindOrCreateParameterChannelResult result;
+
+    TArray<FScalarParameterNameAndCurve>& parameters = iSection->GetScalarParameterNamesAndCurves();
+    for( auto& parameter : parameters )
+    {
+        if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+        {
+            result.mChannel = &parameter.ParameterCurve;
+            return result;
+        }
+    }
+
+    // This will create the channel named "DrawingOpacity" (as it not exists)
+    // and add a (dummy) key to be able to recache internal stuff (ChannelProxy) of the parameter section
+    // And once the parameter channel are created, next we remove the dummy key
+    iSection->AddScalarParameterKey( TEXT( "DrawingOpacity" ), 0, 1.f );
+
+    result.mChannelCreated = true;
+
+    for( auto& parameter : parameters )
+    {
+        if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+        {
+            TArray<FFrameNumber> key_times;
+            TArray<FKeyHandle> key_handles;
+            parameter.ParameterCurve.GetKeys( TRange<FFrameNumber>::All(), &key_times, &key_handles );
+            check( key_handles.Num() == 1 );
+
+            parameter.ParameterCurve.DeleteKeys( key_handles );
+
+            result.mChannel = &parameter.ParameterCurve;
+            return result;
+        }
+    }
+
+    return result;
+}
+
+//static
+FKeyOpacity
+ShotSequenceHelpers::GetOpacityKey( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    FKeyOpacity key_opacity;
+
+    if( !iSequence->GetMovieScene()->GetPlaybackRange().Contains( iFrameNumber ) )
+        return key_opacity;
+
+    FFindMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
+    if( !result.mTrack.IsValid() )
+        return key_opacity;
+
+    FMovieSceneFloatChannel* channel = FindMaterialOpacityChannel( iPlayer, iSequence, iSequenceID, iPlaneBinding, result.mSections[0] ); // Only the first one, should be nearly always the case
+    if( !channel )
+        return key_opacity;
+
+    //---
+
+    TArray<FKeyHandle> key_handles;
+    channel->GetKeys( TRange<FFrameNumber>( iFrameNumber ), nullptr, &key_handles );
+    if( !key_handles.Num() )
+        return key_opacity;
+
+    key_opacity.mChannel = channel;
+    key_opacity.mSection = result.mSections[0];
+    key_opacity.mKeyHandle = key_handles[0];
+
+    return key_opacity;
 }
 
 //static
