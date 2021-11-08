@@ -1028,12 +1028,12 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     //-
 
-    auto CreateOpacity = [this]()
+    auto CreateOpacity = [this]( float iOpacity )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        BoardSequenceTools::CreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+        BoardSequenceTools::CreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid(), iOpacity );
     };
 
     auto CanCreateOpacity = [this]() -> bool
@@ -1044,15 +1044,30 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
         return BoardSequenceTools::CanCreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
     };
 
-    ioMenuBuilder.AddMenuEntry(
+    auto CreateOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder )
+    {
+        int32 opacities[] = { 0, 10, 20, -1, 25, 30, 33, -1, 40, 50, 60, -1, 66, 70, 75, -1, 80, 90, 100 };
+        for( int32 opacity : opacities )
+        {
+            if( opacity == -1 )
+                ioMenuBuilder.AddSeparator();
+            else
+                ioMenuBuilder.AddMenuEntry(
+                    FText::Format( LOCTEXT( "create-drawing-opacity-0-label", "{0}%" ), opacity ),
+                    FText::Format( LOCTEXT( "create-drawing-opacity-0-tooltip", "Create the drawing opacity at {0}%" ), opacity ),
+                    FSlateIcon(),
+                    FUIAction(
+                        FExecuteAction::CreateLambda( CreateOpacity, opacity / 100.f ),
+                        FCanExecuteAction::CreateLambda( CanCreateOpacity )
+                    ) );
+        }
+    };
+
+    ioMenuBuilder.AddSubMenu(
         FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create Opacity at {0}" ), current_frame ),
         LOCTEXT( "create-drawing-opacity-tooltip", "Create the drawing opacity\n(set the current frame where to set the opacity)" ),
-        FSlateIcon(),
-        //FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateOpacity" ),
-        FUIAction(
-            FExecuteAction::CreateLambda( CreateOpacity ),
-            FCanExecuteAction::CreateLambda( CanCreateOpacity )
-        ) );
+        FNewMenuDelegate::CreateLambda( CreateOpacitySubMenu )
+    );
 
     ioMenuBuilder.EndSection();
 }
