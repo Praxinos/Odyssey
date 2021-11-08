@@ -164,8 +164,8 @@ ShotSequenceTools::DeleteOpacity( ISequencer& iSequencer, UMovieSceneSequence* i
         return;
 
     TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandle.Cast<FMovieSceneFloatChannel>();
-    FMovieSceneFloatChannel* material_channel = channel_handle.Get();
-    if( !material_channel )
+    FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+    if( !float_channel )
         return;
 
     //---
@@ -174,12 +174,61 @@ ShotSequenceTools::DeleteOpacity( ISequencer& iSequencer, UMovieSceneSequence* i
 
     iSection->Modify();
 
-    material_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
+    float_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
 
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
+//---
+
+//static
+void
+BoardSequenceTools::SetOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, float iOpacity )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::SetOpacity( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle, iOpacity );
+}
+
+//static
+void
+ShotSequenceTools::SetOpacity( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, float iOpacity )
+{
+    SetOpacity( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle, iOpacity );
+}
+
+//static
+void
+ShotSequenceTools::SetOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, float iOpacity )
+{
+    if( !iSection )
+        return;
+
+    TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandle.Cast<FMovieSceneFloatChannel>();
+    FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+    if( !float_channel )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "SetPlaneOpacity", "Set plane opacity" ) );
+
+    iSection->Modify();
+
+    AssignValue( float_channel, iKeyHandle, FMath::Clamp( iOpacity, 0.f, 1.f ) );
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
 
 #undef LOCTEXT_NAMESPACE

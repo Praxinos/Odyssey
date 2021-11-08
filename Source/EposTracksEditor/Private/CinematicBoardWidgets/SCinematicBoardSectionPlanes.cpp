@@ -854,6 +854,75 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
     //-
 
+    auto SetKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse, float iOpacity )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        const FScopedTransaction transaction( LOCTEXT( "SetPlaneOpacityKeys", "Set plane opacity" ) );
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::SetOpacity( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle, iOpacity );
+            }
+        }
+    };
+
+    auto CanSetKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    {
+        return true;
+    };
+
+    auto SetOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        float current_opacity = -1.0;
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneFloatChannel>();
+                FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+                if( !float_channel )
+                    return;
+
+                FMovieSceneFloatValue value;
+                UE::MovieScene::GetKeyValue( float_channel, subkey.mKeyHandle, value );
+                current_opacity = value.Value;
+            }
+        }
+
+        //-
+
+        int32 opacities[] = { 0, 10, 20, -1, 25, 30, 33, -1, 40, 50, 60, -1, 66, 70, 75, -1, 80, 90, 100 };
+        for( int32 opacity : opacities )
+        {
+            if( opacity == -1 )
+                ioMenuBuilder.AddSeparator();
+            else
+                ioMenuBuilder.AddMenuEntry(
+                    FText::Format( LOCTEXT( "set-drawing-opacity-0-label", "{0}%" ), opacity ),
+                    FText::Format( LOCTEXT( "set-drawing-opacity-0-tooltip", "Set the drawing opacity at {0}%" ), opacity ),
+                    FSlateIcon(),
+                    FUIAction(
+                        FExecuteAction::CreateLambda( SetKey, iKeysUnderMouse, opacity / 100.f ),
+                        FCanExecuteAction::CreateLambda( CanSetKey, iKeysUnderMouse ),
+                        FIsActionChecked::CreateLambda( [=]() { return FMath::IsNearlyEqual( opacity / 100.f, current_opacity, KINDA_SMALL_NUMBER ); } )
+                    ),
+                    NAME_None,
+                    EUserInterfaceActionType::Check );
+        }
+    };
+
+    //-
+
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     ISequencer* sequencer = board_section->GetSequencer().Get();
     ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, sequencer->GetLocalTime().Time.FrameNumber );
@@ -867,6 +936,12 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
                                            FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+
+    ioMenuBuilder.AddSubMenu(
+        LOCTEXT( "set-drawing-opacity-label", "Set Opacity" ),
+        LOCTEXT( "set-drawing-opacity-tooltip", "Set the current drawing opacity" ),
+        FNewMenuDelegate::CreateLambda( SetOpacitySubMenu, mKeysUnderMouse )
+    );
 
     ioMenuBuilder.EndSection();
 
