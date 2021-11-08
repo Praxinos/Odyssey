@@ -13,6 +13,7 @@
 #include "EditorReimportHandler.h"
 #include "MeshPaintHelpers.h"
 #include "MeshPaintSettings.h"
+#include "ToolMenus.h"
 
 #include "EditorWorldExtension.h"
 #include "ViewportWorldInteraction.h"
@@ -160,6 +161,9 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
 
+    if( mToolkit )
+        mToolkit->ExtendMenu();
+
     // Change the engine to draw selected objects without a color boost, but unselected objects will
     // be darkened slightly.  This just makes it easier to paint on selected objects without the
     // highlight effect distorting the appearance.
@@ -206,13 +210,14 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 
     if (Toolkit.IsValid())
     {
+        UToolMenus::Get()->UnregisterOwner( Toolkit.Get() );
         FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
         Toolkit.Reset();
     }
 
     // Unbind delegates
-    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-    AssetRegistryModule.Get().OnAssetRemoved().RemoveAll(this);
+    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    assetRegistryModule.Get().OnAssetRemoved().RemoveAll(this);
     FReimportManager::Instance()->OnPostReimport().RemoveAll(this);
     GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetPostImport.RemoveAll(this);
     FEditorDelegates::PreSaveWorld.RemoveAll(this);

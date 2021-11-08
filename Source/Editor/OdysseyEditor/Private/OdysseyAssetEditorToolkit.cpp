@@ -98,7 +98,7 @@ FOdysseyAssetEditorToolkit::GetToolkitToolTipText() const
 void
 FOdysseyAssetEditorToolkit::ExtendMenu()
 {
-    mEditor->ExtendMenu( GetToolMenuName() );
+    mEditor->ExtendMenu( this, GetToolMenuName() );
 }
 
 void

@@ -44,6 +44,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "SourceControl",
                 "ViewportInteraction",
                 "VREditor",
+                "ToolMenus",
                 "PropertyEditor",
                 "MainFrame",
                 "MeshPaint",

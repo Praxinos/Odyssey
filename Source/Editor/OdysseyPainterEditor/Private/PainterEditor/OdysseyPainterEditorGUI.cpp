@@ -79,15 +79,15 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------- Menu and Toolbar
 
 void
-FOdysseyPainterEditorGUI::ExtendMenu(FName iMenuName)
+FOdysseyPainterEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
-    FOdysseyEditorGUI::ExtendMenu(iMenuName);
+    FOdysseyEditorGUI::ExtendMenu( iOwner, iMenuName );
 
-    ExtendMenuAbout( iMenuName );
+    ExtendMenuAbout( iOwner, iMenuName );
 }
 
 void
-FOdysseyPainterEditorGUI::ExtendMenuAbout( FName iMenuName ) //Should have a name in paramters
+FOdysseyPainterEditorGUI::ExtendMenuAbout( FToolMenuOwner iOwner, FName iMenuName )
 {
     if (!UToolMenus::Get()->IsMenuRegistered( *(iMenuName.ToString() + FString(".Iliad") ) ) )
     {
@@ -95,7 +95,7 @@ FOdysseyPainterEditorGUI::ExtendMenuAbout( FName iMenuName ) //Should have a nam
 
         //Adding the Odyssey sub menu to our menu
         menu->AddSubMenu(
-            "MainMenu",
+            iOwner,
             NAME_None,
             "Iliad",
             LOCTEXT("IliadMenu", "Iliad"),

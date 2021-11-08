@@ -19,7 +19,7 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual void OnToolkitInitialized(FBaseToolkit* iToolkit);
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
-    virtual void ExtendMenu(FName iMenuName);
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
 
 public:
     const FName&                        ID() const;

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "ToolMenuOwner.h"
+
 class FOdysseyEditor;
 class FOdysseyEditorTab;
 
@@ -33,7 +35,7 @@ public:
 
 public:
     // Menu And Toolbar
-    virtual void ExtendMenu( FName iMenuName );
+    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName );
 
 public:
     // Listeners

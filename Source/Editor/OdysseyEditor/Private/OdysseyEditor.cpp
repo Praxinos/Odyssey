@@ -5,6 +5,7 @@
 
 #include "OdysseyEditorGUI.h"
 #include "ToolMenus.h"
+#include "ToolMenuOwner.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyEditor
@@ -115,9 +116,9 @@ FOdysseyEditor::OnCloseRequested()
 //---------------------------------------------------------------------------- Interface
 
 void
-FOdysseyEditor::ExtendMenu( FName iMenuName )
+FOdysseyEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
-	GetGUI()->ExtendMenu( iMenuName );
+	GetGUI()->ExtendMenu( iOwner, iMenuName );
     UToolMenus::Get()->RefreshAllWidgets();
 }
 

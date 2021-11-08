@@ -42,7 +42,7 @@ FOdysseyEditorTab::OnToolkitInitialized(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyEditorTab::ExtendMenu(FName iMenuName)
+FOdysseyEditorTab::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 }
 

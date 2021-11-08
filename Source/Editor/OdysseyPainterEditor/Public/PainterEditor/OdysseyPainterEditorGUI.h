@@ -38,8 +38,8 @@ public:
 
 public:
     // Menu And Toolbar
-    virtual void ExtendMenu(FName iMenuName);
-    virtual void ExtendMenuAbout(FName iMenuName);
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+    virtual void ExtendMenuAbout(FToolMenuOwner iOwner, FName iMenuName );
 
 protected:
 	// Layout

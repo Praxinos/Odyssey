@@ -76,9 +76,9 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenu(FName iMenuName)
+FOdysseyTextureEditorLayerStackTab::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
-    ExtendMenuFile( iMenuName );
+    ExtendMenuFile( iOwner, iMenuName );
 }
 
 //--------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ FOdysseyTextureEditorLayerStackTab::LayerStack() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenuFile(FName iMenuName)
+FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
 {
     UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
 

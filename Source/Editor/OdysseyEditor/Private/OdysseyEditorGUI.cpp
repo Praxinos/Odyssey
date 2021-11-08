@@ -84,11 +84,11 @@ FOdysseyEditorGUI::UnregisterTabSpawners( const TSharedRef< class FTabManager >&
 //--------------------------------------------------------------------- Menu and Toolbar
 
 void
-FOdysseyEditorGUI::ExtendMenu( FName iMenuName )
+FOdysseyEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
 {
 	for (int i = 0; i < mTabs.Num(); i++)
 	{
-		mTabs[i].Get()->ExtendMenu( iMenuName );
+		mTabs[i].Get()->ExtendMenu( iOwner, iMenuName );
 	}
 }
 
