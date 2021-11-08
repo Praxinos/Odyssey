@@ -131,4 +131,55 @@ ShotSequenceTools::CreateOpacity( ISequencer& iSequencer, UMovieSceneSequence* i
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
+//---
+
+//static
+void
+BoardSequenceTools::DeleteOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::DeleteOpacity( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
+}
+
+//static
+void
+ShotSequenceTools::DeleteOpacity( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+{
+    DeleteOpacity( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
+}
+
+//static
+void
+ShotSequenceTools::DeleteOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+{
+    if( !iSection )
+        return;
+
+    TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandle.Cast<FMovieSceneFloatChannel>();
+    FMovieSceneFloatChannel* material_channel = channel_handle.Get();
+    if( !material_channel )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "DeletePlaneOpacity", "Delete plane opacity" ) );
+
+    iSection->Modify();
+
+    material_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
+
+    //---
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+
 #undef LOCTEXT_NAMESPACE

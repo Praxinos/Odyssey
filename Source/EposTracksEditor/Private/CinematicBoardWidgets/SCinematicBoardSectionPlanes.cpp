@@ -830,6 +830,46 @@ SCinematicBoardSectionPlaneOpacityKeys::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) //override
 {
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        const FScopedTransaction transaction( LOCTEXT( "DeletePlaneOpacityKeys", "Delete plane opacity keys" ) );
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::DeleteOpacity( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+            }
+        }
+    };
+
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    {
+        return true;
+    };
+
+    //-
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, sequencer->GetLocalTime().Time.FrameNumber );
+
+    FText plane_name = FText::FromString( mBinding.GetName() );
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_name ) );
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-plane-opacity-key-label", "Delete" ),
+                                LOCTEXT( "delete-plane-opacity-key-tooltip", "Delete the current key" ),
+                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+
+    ioMenuBuilder.EndSection();
+
     return true;
 }
 
