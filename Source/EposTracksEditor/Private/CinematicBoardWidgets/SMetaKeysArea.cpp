@@ -99,7 +99,7 @@ SMetaKeysArea::EndTransaction()
 }
 
 bool
-SMetaKeysArea::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
+SMetaKeysArea::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys )
 {
     return false;
 }
@@ -142,7 +142,7 @@ SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEve
     else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
     {
         FMenuBuilder menu_builder( true, nullptr );
-        bool is_menu = BuildKeyContextMenu( menu_builder );
+        bool is_menu = BuildKeyContextMenu( menu_builder, mKeysUnderMouse );
         if( !is_menu )
         {
             mKeysUnderMouse = nullptr;

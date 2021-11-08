@@ -42,7 +42,7 @@ protected:
     virtual const FSlateBrush* GetBackgroundBrush() const = 0;
 
 protected:
-    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys );
 
     virtual TSharedPtr<FMetaChannel> CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 

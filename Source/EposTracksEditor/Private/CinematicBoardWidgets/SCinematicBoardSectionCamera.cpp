@@ -57,7 +57,7 @@ SCinematicBoardSectionCamera::RebuildMetaChannel() //override
 //---
 
 bool
-SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) //override
+SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
     auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
     {
@@ -94,8 +94,8 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-camera-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for the 9 (maybe more or less) channels
                                 LOCTEXT( "delete-camera-key-tooltip", "Delete the current key" ),
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
-                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
-                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 
     ioMenuBuilder.EndSection();
 

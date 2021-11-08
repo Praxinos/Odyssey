@@ -39,7 +39,7 @@ protected:
     virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
     virtual void                            RebuildMetaChannel() override;
 
-    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 };

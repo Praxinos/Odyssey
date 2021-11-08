@@ -401,7 +401,7 @@ protected:
     virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
     virtual void                            RebuildMetaChannel() override;
 
-    //virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
+    //virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
@@ -514,7 +514,7 @@ protected:
     virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
     virtual void                            RebuildMetaChannel() override;
 
-    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
@@ -558,7 +558,7 @@ SCinematicBoardSectionPlaneMaterialKeys::RebuildMetaChannel() //override
 //---
 
 bool
-SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) //override
+SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
     auto CloneKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
     {
@@ -663,9 +663,9 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
     FString material_name( TEXT( "Multiple" ) );
     FString texture_name( TEXT( "Multiple" ) );
 
-    if( mKeysUnderMouse->NumMetaKeys() == 1 ) // For the moment, only 1 metakey can be cloned
+    if( iKeys->NumMetaKeys() == 1 ) // For the moment, only 1 metakey can be cloned
     {
-        auto it = mKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        auto it = iKeys->GetMetaKeys().CreateConstIterator();
         if( it.Value().mSubKeys.Num() == 1 ) // For the moment, only 1 subkey can be cloned
         {
             FFrameNumber key_framenumber = it.Key();
@@ -696,14 +696,14 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Duplicate" ),
-                                FUIAction( FExecuteAction::CreateLambda( CloneKey, mKeysUnderMouse ),
-                                           FCanExecuteAction::CreateLambda( CanCloneKey, mKeysUnderMouse ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( CloneKey, iKeys ),
+                                           FCanExecuteAction::CreateLambda( CanCloneKey, iKeys ) ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for all the channels -> see camera key delete
                                 LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
-                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
-                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 
     ioMenuBuilder.EndSection();
 
@@ -784,7 +784,7 @@ protected:
     virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
     virtual void                            RebuildMetaChannel() override;
 
-    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
@@ -828,7 +828,7 @@ SCinematicBoardSectionPlaneOpacityKeys::RebuildMetaChannel() //override
 //---
 
 bool
-SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) //override
+SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
     auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
     {
@@ -934,13 +934,13 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-plane-opacity-key-label", "Delete" ),
                                 LOCTEXT( "delete-plane-opacity-key-tooltip", "Delete the current key" ),
                                 FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
-                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
-                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 
     ioMenuBuilder.AddSubMenu(
         LOCTEXT( "set-drawing-opacity-label", "Set Opacity" ),
         LOCTEXT( "set-drawing-opacity-tooltip", "Set the current drawing opacity" ),
-        FNewMenuDelegate::CreateLambda( SetOpacitySubMenu, mKeysUnderMouse )
+        FNewMenuDelegate::CreateLambda( SetOpacitySubMenu, iKeys )
     );
 
     ioMenuBuilder.EndSection();
