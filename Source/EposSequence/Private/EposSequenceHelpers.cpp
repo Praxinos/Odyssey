@@ -749,6 +749,8 @@ ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPla
             parameter.ParameterCurve.GetKeys( TRange<FFrameNumber>::All(), &key_times, &key_handles );
             check( key_handles.Num() == 1 );
 
+            UE::MovieScene::SetChannelDefault( &parameter.ParameterCurve, 1.f );
+
             parameter.ParameterCurve.DeleteKeys( key_handles );
 
             result.mChannel = &parameter.ParameterCurve;
