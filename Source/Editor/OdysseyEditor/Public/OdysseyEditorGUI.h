@@ -33,7 +33,7 @@ public:
 
 public:
     // Menu And Toolbar
-    virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender);
+    virtual void ExtendMenu( FName iMenuName );
 
 public:
     // Listeners

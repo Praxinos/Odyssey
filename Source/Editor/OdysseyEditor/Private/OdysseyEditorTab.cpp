@@ -42,7 +42,7 @@ FOdysseyEditorTab::OnToolkitInitialized(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyEditorTab::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
+FOdysseyEditorTab::ExtendMenu(FName iMenuName)
 {
 }
 

@@ -39,7 +39,7 @@ protected:
 	virtual void OpenAsset(UObject* iObject) = 0;
 
 private:
-	void InitExtender();
+	virtual void ExtendMenu() override;
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
 };

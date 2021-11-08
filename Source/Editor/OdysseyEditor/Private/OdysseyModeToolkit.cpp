@@ -32,6 +32,8 @@ FOdysseyModeToolkit::Initialize()
 	mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
 
+    ExtendMenu();
+
     //Finish Initialization
     TOdysseyToolkit<FModeToolkit>::Initialize();
 }
@@ -126,5 +128,10 @@ FOdysseyModeToolkit::RemoveEditingAsset(UObject* Asset)
     //---
 }
 
+
+void FOdysseyModeToolkit::ExtendMenu()
+{
+    mEditor->ExtendMenu( FName("LevelEditor.MainMenu") );
+}
 
 #undef LOCTEXT_NAMESPACE // "OdysseyModeToolkit"

@@ -31,6 +31,7 @@ public class OdysseyTextureEditor : ModuleRules
                 "Engine",
                 "RHI",
                 "RenderCore",
+                "ToolMenus",
                 "RawMesh",
                 "EditorStyle",
                 "PropertyEditor",

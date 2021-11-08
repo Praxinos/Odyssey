@@ -28,7 +28,7 @@ FOdysseyAssetEditorToolkit::Initialize()
     
     TArray<UObject*> editedObjects = mEditor->GetEditedObjects();
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->GetLayout(), true, false, editedObjects);
-    InitExtender();
+    ExtendMenu();
 
     //Finish Initialization
     TOdysseyToolkit<FAssetEditorToolkit>::Initialize();
@@ -96,13 +96,9 @@ FOdysseyAssetEditorToolkit::GetToolkitToolTipText() const
 //-------------------------------------------------------------------- Commands building
 
 void
-FOdysseyAssetEditorToolkit::InitExtender()
+FOdysseyAssetEditorToolkit::ExtendMenu()
 {
-	TSharedPtr<FExtender> extender = MakeShareable(new FExtender());
-    mEditor->FillExtender(this, extender);
-    AddMenuExtender(extender);
-    AddToolbarExtender(extender);
-    RegenerateMenusAndToolbars(); //TODO: check if really needed
+    mEditor->ExtendMenu( GetToolMenuName() );
 }
 
 void

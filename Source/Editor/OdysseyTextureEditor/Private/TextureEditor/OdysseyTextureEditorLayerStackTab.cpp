@@ -9,6 +9,7 @@
 #include "IContentBrowserSingleton.h"
 #include "IDesktopPlatform.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
+#include "ToolMenus.h"
 #include "OdysseyBlock.h"
 #include "OdysseyTextureEditor.h"
 #include "ULISLoaderModule.h"
@@ -75,13 +76,9 @@ FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
+FOdysseyTextureEditorLayerStackTab::ExtendMenu(FName iMenuName)
 {
-    ioExtender->AddMenuExtension(
-        "FileLoadAndSave",
-        EExtensionHook::After,
-		iToolkit->GetToolkitCommands(),
-        FMenuExtensionDelegate::CreateRaw( this, &FOdysseyTextureEditorLayerStackTab::ExtendMenuFile ) );
+    ExtendMenuFile( iMenuName );
 }
 
 //--------------------------------------------------------------------------------------
@@ -100,14 +97,16 @@ FOdysseyTextureEditorLayerStackTab::LayerStack() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenuFile(FMenuBuilder& ioMenuBuilder)
+FOdysseyTextureEditorLayerStackTab::ExtendMenuFile(FName iMenuName)
 {
-    ioMenuBuilder.BeginSection( "OdysseyTexture", LOCTEXT( "OdysseyTexture", "Odyssey Texture" ) );
+    UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
+
+    FToolMenuSection& section = menu->AddSection("OdysseyTexture", LOCTEXT("OdysseyTexture", "Odyssey Texture"), FToolMenuInsert("FileLoadAndSave", EToolMenuInsertType::After));
     {
-        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
-        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
-        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
-        ioMenuBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
+        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
+        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
+        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
+        section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
     }
 }
 

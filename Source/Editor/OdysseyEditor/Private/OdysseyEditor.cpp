@@ -4,6 +4,7 @@
 #include "OdysseyEditor.h"
 
 #include "OdysseyEditorGUI.h"
+#include "ToolMenus.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyEditor
@@ -114,9 +115,10 @@ FOdysseyEditor::OnCloseRequested()
 //---------------------------------------------------------------------------- Interface
 
 void
-FOdysseyEditor::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
+FOdysseyEditor::ExtendMenu( FName iMenuName )
 {
-	return GetGUI()->FillExtender(iToolkit, ioExtender);
+	GetGUI()->ExtendMenu( iMenuName );
+    UToolMenus::Get()->RefreshAllWidgets();
 }
 
 void

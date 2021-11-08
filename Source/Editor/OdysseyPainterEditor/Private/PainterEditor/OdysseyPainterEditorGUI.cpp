@@ -79,26 +79,32 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 //--------------------------------------------------------------------- Menu and Toolbar
 
 void
-FOdysseyPainterEditorGUI::FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender)
+FOdysseyPainterEditorGUI::ExtendMenu(FName iMenuName)
 {
-    FOdysseyEditorGUI::FillExtender(iToolkit, ioExtender);
+    FOdysseyEditorGUI::ExtendMenu(iMenuName);
 
-    ExtendMenuAbout( iToolkit );
+    ExtendMenuAbout( iMenuName );
 }
 
 void
-FOdysseyPainterEditorGUI::ExtendMenuAbout(FBaseToolkit* iToolkit)
+FOdysseyPainterEditorGUI::ExtendMenuAbout( FName iMenuName ) //Should have a name in paramters
 {
-    FOdysseyAssetEditorToolkit* odysseyToolkit = (FOdysseyAssetEditorToolkit*)iToolkit;
-    const FName menuName = *( odysseyToolkit->GetToolMenuName().ToString() + TEXT(".Help") );
-
-    if (!UToolMenus::Get()->IsMenuRegistered(menuName))
+    if (!UToolMenus::Get()->IsMenuRegistered( *(iMenuName.ToString() + FString(".Iliad") ) ) )
     {
-        UToolMenus::Get()->RegisterMenu(menuName, "MainFrame.MainMenu.Help");
+        UToolMenu* menu = UToolMenus::Get()->FindMenu(iMenuName); // We register our menu under the parenthood of MainFrame.MainMenu
+
+        //Adding the Odyssey sub menu to our menu
+        menu->AddSubMenu(
+            "MainMenu",
+            NAME_None,
+            "Iliad",
+            LOCTEXT("IliadMenu", "Iliad"),
+            LOCTEXT("IliadMenu_ToolTip", "Iliad Actions")
+        );
     }
+    UToolMenu* menu = UToolMenus::Get()->FindMenu( *(iMenuName.ToString() + FString(".Iliad") ) );
 
-    UToolMenu* menu = UToolMenus::Get()->FindMenu(menuName);
-
+    //Adding entries in our menu
     FToolMenuSection& aboutSection = menu->AddSection("About ILIAD", LOCTEXT("OdysseyPainter", "ILIAD"));
     {
         aboutSection.AddMenuEntry(

@@ -42,6 +42,7 @@ public:
 	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
 	virtual double GetLastActivationTime() override;
 	virtual void RemoveEditingAsset(UObject* Asset) override;
+	virtual void ExtendMenu() override;
 
 private:
 	/** Owning editor mode */

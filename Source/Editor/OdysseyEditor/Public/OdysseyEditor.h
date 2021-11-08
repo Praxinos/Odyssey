@@ -52,7 +52,7 @@ public:
 public:
     // Interface
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
-    virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender);
+    virtual void ExtendMenu( FName iMenuName );
     virtual TSharedPtr<FWorkspaceItem> RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager ) = 0;
     virtual void UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager );
     virtual void AddEditedObject(UObject* iObject);

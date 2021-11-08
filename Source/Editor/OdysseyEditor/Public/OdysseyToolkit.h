@@ -20,19 +20,19 @@ public:
 
 public:
     virtual void Initialize();
+    virtual void Finalize();
 
 protected:
     // FAssetEditorToolkit interface
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
     virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
     virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    virtual void ExtendMenu() = 0;
 
 protected:
     FName mAppIdentifier;
     TSharedPtr<FOdysseyEditor> mEditor;
 };
-
-
 
 /////////////////////////////////////////////////////
 // TOdysseyToolkit
@@ -57,6 +57,12 @@ TOdysseyToolkit<T>::Initialize()
 {
     mEditor->OnToolkitInitialized(this);
     mEditor->BindShortcuts(this);
+}
+
+
+template<typename T>
+void TOdysseyToolkit<T>::Finalize()
+{
 }
 
 //--------------------------------------------------------------------------------------

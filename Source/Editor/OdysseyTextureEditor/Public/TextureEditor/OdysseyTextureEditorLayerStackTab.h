@@ -22,7 +22,7 @@ protected:
     // FOdysseyTextureEditorTab interface
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void FillExtender(FBaseToolkit* iToolkit, TSharedPtr<FExtender>& ioExtender) override;
+    virtual void ExtendMenu(FName iMenuName) override;
 
 protected:
     // Widget Getters
@@ -33,7 +33,7 @@ protected:
 
 private:
     //Methods
-    virtual void ExtendMenuFile(FMenuBuilder& ioMenuBuilder);
+    virtual void ExtendMenuFile(FName iMenuName);
     virtual void ImportTexturesAsLayers();
     virtual void ExportTextureToOperatingSystem();
     virtual void ExportLayersAsTextures();
