@@ -46,6 +46,9 @@ protected:
 
     virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys );
 
+    virtual FText GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const;
+    virtual FText GetAreaTooltipText() const;
+
 protected:
     virtual TSharedPtr<FMetaChannel>        GetMetaChannel() = 0;
     virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const = 0;
@@ -60,6 +63,9 @@ private:
 
     /** Scoped transaction for this drag operation */
     TUniquePtr<FScopedTransaction>      mTransaction;
+
+    /** Not virtual. Override GetKeyTooltipText and GetAreaTooltipText to set tooltip content */
+    FText GetTooltipText() const;
 
 protected:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;

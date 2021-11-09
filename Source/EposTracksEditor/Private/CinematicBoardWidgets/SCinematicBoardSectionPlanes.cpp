@@ -405,6 +405,9 @@ protected:
 
     //virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
 
+    virtual FText GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const override;
+    virtual FText GetAreaTooltipText() const override;
+
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
 private:
@@ -442,6 +445,22 @@ void
 SCinematicBoardSectionPlaneKeys::RebuildMetaChannel() //override
 {
     mBoardSection.Pin()->ReBuildPlanesTransformMetaChannel();
+}
+
+//---
+
+FText
+SCinematicBoardSectionPlaneKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
+{
+    return GetAreaTooltipText();
+}
+
+FText
+SCinematicBoardSectionPlaneKeys::GetAreaTooltipText() const //override
+{
+    FText plane_track_text = FText::FromString( mBinding.GetName() );
+
+    return FText::Format( LOCTEXT( "tooltip-plane-transform", "Plane: {0}\nKeys: {1}" ), plane_track_text, GetMetaChannel()->NumMetaKeys() );
 }
 
 //---
@@ -519,6 +538,9 @@ protected:
     virtual void                            RebuildMetaChannel() override;
 
     virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
+
+    virtual FText GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const override;
+    virtual FText GetAreaTooltipText() const override;
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
@@ -714,6 +736,20 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
     return true;
 }
 
+FText
+SCinematicBoardSectionPlaneMaterialKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
+{
+    return GetAreaTooltipText();
+}
+
+FText
+SCinematicBoardSectionPlaneMaterialKeys::GetAreaTooltipText() const //override
+{
+    FText plane_track_text = FText::FromString( mBinding.GetName() );
+
+    return FText::Format( LOCTEXT( "tooltip-plane-material", "Plane: {0}\nKeys: {1}" ), plane_track_text, GetMetaChannel()->NumMetaKeys() );
+}
+
 FCursorReply
 SCinematicBoardSectionPlaneMaterialKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
@@ -787,6 +823,9 @@ protected:
     virtual void                            RebuildMetaChannel() override;
 
     virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
+
+    virtual FText GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const override;
+    virtual FText GetAreaTooltipText() const override;
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
@@ -947,6 +986,20 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
     ioMenuBuilder.EndSection();
 
     return true;
+}
+
+FText
+SCinematicBoardSectionPlaneOpacityKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
+{
+    return GetAreaTooltipText();
+}
+
+FText
+SCinematicBoardSectionPlaneOpacityKeys::GetAreaTooltipText() const //override
+{
+    FText plane_track_text = FText::FromString( mBinding.GetName() );
+
+    return FText::Format( LOCTEXT( "tooltip-plane-opacity", "Plane: {0}\nKeys: {1}" ), plane_track_text, GetMetaChannel()->NumMetaKeys() );
 }
 
 FCursorReply

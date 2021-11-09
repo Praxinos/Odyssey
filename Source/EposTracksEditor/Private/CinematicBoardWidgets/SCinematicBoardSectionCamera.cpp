@@ -103,6 +103,40 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
     return true;
 }
 
+FText
+SCinematicBoardSectionCamera::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
+{
+    return GetAreaTooltipText();
+}
+
+FText
+SCinematicBoardSectionCamera::GetAreaTooltipText() const //override
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSubSection& subsection = board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    FGuid camera_binding;
+    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, subsection, &camera_binding );
+
+    UMovieSceneSequence* inner_sequence = subsection.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+    FMovieScenePossessable* possessable = inner_moviescene ? inner_moviescene->FindPossessable( camera_binding ) : nullptr;
+
+    //-
+
+    FText camera_track_text = possessable ? FText::FromString( possessable->GetName() ) : FText::GetEmpty();
+    FText camera_actor_text = camera ? FText::FromString( camera->GetActorLabel() ) : FText::GetEmpty();
+
+    if( !camera_track_text.EqualTo( camera_actor_text ) )
+        return FText::Format( LOCTEXT( "tooltip-camera-track-actor", "Track: {0}\nActor: {1}\nKeys: {2}" ), camera_track_text, camera_actor_text, GetMetaChannel()->NumMetaKeys() );
+
+    if( camera_track_text.IsEmptyOrWhitespace() )
+        return LOCTEXT( "tooltip-camera-no", "No camera" );
+    else
+        return FText::Format( LOCTEXT( "tooltip-camera", "Camera: {0}\nKeys: {1}" ), camera_track_text, GetMetaChannel()->NumMetaKeys() );
+}
+
 //---
 
 FCursorReply

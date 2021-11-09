@@ -41,5 +41,8 @@ protected:
 
     virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
 
+    virtual FText GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const override;
+    virtual FText GetAreaTooltipText() const override;
+
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 };

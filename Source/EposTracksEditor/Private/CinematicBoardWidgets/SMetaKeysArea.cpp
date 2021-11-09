@@ -25,6 +25,8 @@ SMetaKeysArea::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSe
     // InArgs should never be used here as this Construct() is always called in child class with SMetaKeysArea::FArguments(), so InArgs is always 'empty'
 
     mBoardSection = iBoardSection;
+
+    SetToolTipText( MakeAttributeSP( this, &SMetaKeysArea::GetTooltipText ) );
 }
 
 FVector2D
@@ -37,6 +39,27 @@ SMetaKeysArea::ComputeDesiredSize( float ) const //override
 }
 
 //---
+
+FText
+SMetaKeysArea::GetTooltipText() const
+{
+    if( mHoveredKeys.IsValid() && mHoveredKeys->NumMetaKeys() )
+        return GetKeyTooltipText( mHoveredKeys );
+
+    return GetAreaTooltipText();
+}
+
+FText
+SMetaKeysArea::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const
+{
+    return FText::GetEmpty();
+}
+
+FText
+SMetaKeysArea::GetAreaTooltipText() const
+{
+    return FText::GetEmpty();
+}
 
 TSharedPtr<FMetaChannel>
 SMetaKeysArea::CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const
