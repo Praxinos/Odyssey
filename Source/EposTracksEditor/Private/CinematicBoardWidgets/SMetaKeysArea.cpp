@@ -18,11 +18,14 @@
 
 //---
 
-//void
-//SMetaKeysArea::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
-//{
-//    mBoardSection = iBoardSection;
-//}
+void
+SMetaKeysArea::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+{
+    // This function is only used to set inner variables
+    // InArgs should never be used here as this Construct() is always called in child class with SMetaKeysArea::FArguments(), so InArgs is always 'empty'
+
+    mBoardSection = iBoardSection;
+}
 
 FVector2D
 SMetaKeysArea::ComputeDesiredSize( float ) const //override
@@ -72,7 +75,7 @@ SMetaKeysArea::BeginTransaction( const FText& iTransactionDesc ) // From FEditTo
 
     //---
 
-    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
+    for( auto pair : mDraggedKeys->GetMetaKeys() )
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
@@ -120,128 +123,158 @@ SMetaKeysArea::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& 
 FReply
 SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    check( !mKeysUnderMouse.IsValid() );
+    check( !mDraggedKeys.IsValid() );
 
-    mKeysUnderMouse = CreateKeysUnderMouse( MouseEvent );
-
-    if( !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+    if( mState == EState::kIdle )
     {
-        mKeysUnderMouse = nullptr; // doesn't go inside OnMouseButtonUp(), so reset it here
+        TSharedPtr<FMetaChannel> keys = CreateKeysUnderMouse( MouseEvent );
+
+        if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton
+            && keys.IsValid()
+            && keys->NumMetaKeys() )
+        {
+            mState = EState::kDragging;
+
+            mDraggedKeys = keys; // Must be done before BeginTransaction
+
+            BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
+
+            return FReply::Handled().CaptureMouse( SharedThis( this ) );
+        }
+        else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton
+                 && keys.IsValid()
+                 && keys->NumMetaKeys() )
+        {
+            FMenuBuilder menu_builder( true, nullptr );
+            bool is_menu = BuildKeyContextMenu( menu_builder, keys );
+            if( !is_menu )
+                return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+
+            TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
+            FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+            FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
+
+            return FReply::Handled();
+        }
+        else
+        {
+            return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+        }
+    }
+    else
+    {
+        mState = EState::kIdle;
 
         return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
     }
 
-    //---
-
-    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
-    {
-        BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
-
-        return FReply::Handled().CaptureMouse( SharedThis( this ) );
-    }
-    else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
-    {
-        FMenuBuilder menu_builder( true, nullptr );
-        bool is_menu = BuildKeyContextMenu( menu_builder, mKeysUnderMouse );
-        if( !is_menu )
-        {
-            mKeysUnderMouse = nullptr;
-
-            return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
-        }
-
-        TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
-        FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
-        FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
-
-        mKeysUnderMouse = nullptr; // doesn't go inside OnMouseButtonUp(), so reset it here
-
-        return FReply::Handled();
-    }
-
-    mKeysUnderMouse = nullptr;
-
-    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+    checkNoEntry();
 }
 
 FReply
 SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( HasMouseCapture() && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    if( mState == EState::kDragging )
     {
+        check( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton );
+        check( HasMouseCapture() );
+        check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
+
+        //-
+
         EndTransaction();
 
-        mKeysUnderMouse = nullptr;
+        mDraggedKeys = nullptr;
+
+        mState = EState::kIdle;
 
         return FReply::Handled().ReleaseMouseCapture();
     }
+    else
+    {
+        mState = EState::kIdle;
 
-    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+        return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+    }
+
+    checkNoEntry();
 }
 
 FReply
 SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( !HasMouseCapture() || !mKeysUnderMouse.IsValid() || !mKeysUnderMouse->NumMetaKeys() )
+    if( mState == EState::kDragging )
     {
-        //return FReply::Handled();
+        check( HasMouseCapture() );
+        check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
+
+        //-
+
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        FGeometry geometry;
+        FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
+        FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
+
+        //---
+
+        const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
+        FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
+
+        // For the moment, this should always be the case (until meta keys selection)
+        check( mDraggedKeys->NumMetaKeys() == 1 );
+
+        const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+        const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
+        const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
+
+        FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
+        FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseLinearOnly();
+
+        //---
+
+        // Rebuild the full real meta channel
+        // This WON'T rebuild the mKeysUnderMouse as it is a copy of the a part of the real meta channel only available during the drag
+        RebuildMetaChannel();
+
+        //---
+
+        // Modify all sections where keys have been moved (to force update the viewport)
+        for( auto pair : mDraggedKeys->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                UMovieSceneSection* section = subkey.mSection.Get();
+                if( !section )
+                    continue;
+
+                section->TryModify();
+            }
+        }
+
+        // Update the current frame in the sequencer
+        if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
+        {
+            FFrameRate LocalResolution = sequencer->GetFocusedTickResolution();
+            FFrameRate LocalDisplayRate = sequencer->GetFocusedDisplayRate();
+            local_time = FFrameRate::TransformTime( FFrameRate::TransformTime( local_time, LocalResolution, LocalDisplayRate ).FloorToFrame(), LocalDisplayRate, LocalResolution );
+        }
+        sequencer->SetLocalTime( local_time );
+
+        return FReply::Handled();
+    }
+    else
+    {
+        mState = EState::kIdle;
+
+        mHoveredKeys = CreateKeysUnderMouse( MouseEvent );
+
         return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
     }
 
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-    ISequencer*                     sequencer = board_section->GetSequencer().Get();
-
-    FGeometry geometry;
-    FTimeToPixel converter = board_section->ConstructConverterForViewRange( &geometry );
-    FFrameTime moved_frame = converter.PixelToFrame( geometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ).X );
-
-    //---
-
-    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
-    FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
-
-    // For the moment, this should always be the case (until meta keys selection)
-    check( mKeysUnderMouse->NumMetaKeys() == 1 );
-
-    const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
-    const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
-    const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
-
-    FFrameTime local_inner_time = mKeysUnderMouse->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate );
-    FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseLinearOnly();
-
-    //---
-
-    // Rebuild the full real meta channel
-    // This WON'T rebuild the mKeysUnderMouse as it is a copy of the a part of the real meta channel only available during the drag
-    RebuildMetaChannel();
-
-    //---
-
-    // Modify all sections where keys have been moved (to force update the viewport)
-    for( auto pair : mKeysUnderMouse->GetMetaKeys() )
-    {
-        for( const auto& subkey : pair.Value.mSubKeys )
-        {
-            UMovieSceneSection* section = subkey.mSection.Get();
-            if( !section )
-                continue;
-
-            section->TryModify();
-        }
-    }
-
-    // Update the current frame in the sequencer
-    if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
-    {
-        FFrameRate LocalResolution = sequencer->GetFocusedTickResolution();
-        FFrameRate LocalDisplayRate = sequencer->GetFocusedDisplayRate();
-        local_time = FFrameRate::TransformTime( FFrameRate::TransformTime( local_time, LocalResolution, LocalDisplayRate ).FloorToFrame(), LocalDisplayRate, LocalResolution );
-    }
-    sequencer->SetLocalTime( local_time );
-
-    return FReply::Handled();
+    checkNoEntry();
 }
 
 void

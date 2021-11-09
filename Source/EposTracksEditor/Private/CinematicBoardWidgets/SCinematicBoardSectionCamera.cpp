@@ -22,7 +22,7 @@
 void
 SCinematicBoardSectionCamera::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
-    mBoardSection = iBoardSection; //TODO: maybe find a way to set it inside the parent ?
+    SMetaKeysArea::Construct( SMetaKeysArea::FArguments(), iBoardSection );
 
     ChildSlot
     [
@@ -59,7 +59,7 @@ SCinematicBoardSectionCamera::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -67,7 +67,7 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
 
         const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKeys", "Delete camera keys" ) );
 
-        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
@@ -76,7 +76,7 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
         }
     };
 
-    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
     {
         return true;
     };
@@ -84,8 +84,9 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
     //-
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSubSection& subsection = board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
-    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, sequencer->GetLocalTime().Time.FrameNumber );
+    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, subsection );
 
     FText camera_name = FText::FromString( camera->GetActorLabel() ); //TODO: or maybe get the binding (aka track) name like planes ?
 

@@ -373,6 +373,8 @@ SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
 //}
 
 //---
+//---
+//---
 
 class SCinematicBoardSectionPlaneKeys
     : public SMetaKeysArea
@@ -412,7 +414,7 @@ private:
 void
 SCinematicBoardSectionPlaneKeys::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
-    mBoardSection = iBoardSection;
+    SMetaKeysArea::Construct( SMetaKeysArea::FArguments(), iBoardSection );
 
     mBinding = InArgs._Binding;
 
@@ -486,6 +488,8 @@ SCinematicBoardSectionPlaneKeys::OnPaint( const FPaintArgs& Args, const FGeometr
 }
 
 //---
+//---
+//---
 
 class SCinematicBoardSectionPlaneMaterialKeys
     : public SMetaKeysArea
@@ -525,7 +529,7 @@ private:
 void
 SCinematicBoardSectionPlaneMaterialKeys::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
-    mBoardSection = iBoardSection;
+    SMetaKeysArea::Construct( SMetaKeysArea::FArguments(), iBoardSection );
 
     mBinding = InArgs._Binding;
 
@@ -560,12 +564,12 @@ SCinematicBoardSectionPlaneMaterialKeys::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto CloneKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    auto CloneKey = [=]( TSharedPtr<FMetaChannel> iKeys )
     {
-        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
+        if( iKeys->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return;
 
-        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        auto it = iKeys->GetMetaKeys().CreateConstIterator();
         if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
             return;
 
@@ -584,12 +588,12 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         BoardSequenceTools::CloneDrawing( sequencer, material_to_clone, sequencer->GetLocalTime().Time.FrameNumber, mBinding.GetGuid() );
     };
 
-    auto CanCloneKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    auto CanCloneKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
     {
-        if( iKeysUnderMouse->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
+        if( iKeys->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
             return false;
 
-        auto it = iKeysUnderMouse->GetMetaKeys().CreateConstIterator();
+        auto it = iKeys->GetMetaKeys().CreateConstIterator();
         if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
             return false;
 
@@ -607,7 +611,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     //-
 
-    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -615,7 +619,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
         const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKeys", "Delete camera keys" ) );
 
-        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
@@ -624,7 +628,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         }
     };
 
-    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
     {
         return true;
     };
@@ -755,8 +759,6 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
 //---
 //---
 
-//---
-
 class SCinematicBoardSectionPlaneOpacityKeys
     : public SMetaKeysArea
 {
@@ -795,7 +797,7 @@ private:
 void
 SCinematicBoardSectionPlaneOpacityKeys::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
-    mBoardSection = iBoardSection;
+    SMetaKeysArea::Construct( SMetaKeysArea::FArguments(), iBoardSection );
 
     mBinding = InArgs._Binding;
 
@@ -830,7 +832,7 @@ SCinematicBoardSectionPlaneOpacityKeys::RebuildMetaChannel() //override
 bool
 SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -838,7 +840,7 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
         const FScopedTransaction transaction( LOCTEXT( "DeletePlaneOpacityKeys", "Delete plane opacity keys" ) );
 
-        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
@@ -847,14 +849,14 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
         }
     };
 
-    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
     {
         return true;
     };
 
     //-
 
-    auto SetKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse, float iOpacity )
+    auto SetKey = [=]( TSharedPtr<FMetaChannel> iKeys, float iOpacity )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -862,7 +864,7 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
         const FScopedTransaction transaction( LOCTEXT( "SetPlaneOpacityKeys", "Set plane opacity" ) );
 
-        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
@@ -871,12 +873,12 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
         }
     };
 
-    auto CanSetKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    auto CanSetKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
     {
         return true;
     };
 
-    auto SetOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    auto SetOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -884,7 +886,7 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
         float current_opacity = -1.0;
 
-        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
@@ -912,8 +914,8 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
                     FText::Format( LOCTEXT( "set-drawing-opacity-0-tooltip", "Set the drawing opacity at {0}%" ), opacity ),
                     FSlateIcon(),
                     FUIAction(
-                        FExecuteAction::CreateLambda( SetKey, iKeysUnderMouse, opacity / 100.f ),
-                        FCanExecuteAction::CreateLambda( CanSetKey, iKeysUnderMouse ),
+                        FExecuteAction::CreateLambda( SetKey, iKeys, opacity / 100.f ),
+                        FCanExecuteAction::CreateLambda( CanSetKey, iKeys ),
                         FIsActionChecked::CreateLambda( [=]() { return FMath::IsNearlyEqual( opacity / 100.f, current_opacity, KINDA_SMALL_NUMBER ); } )
                     ),
                     NAME_None,
@@ -925,7 +927,6 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     ISequencer* sequencer = board_section->GetSequencer().Get();
-    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, sequencer->GetLocalTime().Time.FrameNumber );
 
     FText plane_name = FText::FromString( mBinding.GetName() );
 

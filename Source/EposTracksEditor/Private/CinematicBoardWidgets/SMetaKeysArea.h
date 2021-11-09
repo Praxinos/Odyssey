@@ -17,12 +17,12 @@ class SMetaKeysArea
     : public SCompoundWidget
 {
 public:
-    //SLATE_BEGIN_ARGS( SMetaKeysArea )
-    //    {}
-    //SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS( SMetaKeysArea )
+        {}
+    SLATE_END_ARGS()
 
     // Construct the widget
-    //void Construct(const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection);
+    void Construct(const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection);
 
     // SWidget overrides
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
@@ -42,9 +42,9 @@ protected:
     virtual const FSlateBrush* GetBackgroundBrush() const = 0;
 
 protected:
-    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys );
-
     virtual TSharedPtr<FMetaChannel> CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
+
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys );
 
 protected:
     virtual TSharedPtr<FMetaChannel>        GetMetaChannel() = 0;
@@ -64,5 +64,14 @@ private:
 protected:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-    TSharedPtr<FMetaChannel>            mKeysUnderMouse;
+private:
+    enum class EState
+    {
+        kIdle,
+        kDragging,
+    };
+    EState mState { EState::kIdle };
+
+    TSharedPtr<FMetaChannel> mDraggedKeys;
+    TSharedPtr<FMetaChannel> mHoveredKeys;
 };

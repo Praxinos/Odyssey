@@ -140,6 +140,16 @@ public:
     /**
     *  Find the camera of the board section
     *
+    * @param ISequencer             iSequencer to get the camera.
+    * @param UMovieSceneSubSection  iSubSection to get the camera.
+    * @param FGuid*                 oCameraBinding to get the camera binding.
+    * @return ACineCameraActor* the camera actor.
+    */
+    static ACineCameraActor* GetCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid* oCameraBinding = nullptr );
+
+    /**
+    *  Find the camera of the board section
+    *
     * @param ISequencer         iSequencer to get the camera.
     * @param FFrameNumber       iFrameNumber to get the board section.
     * @param FGuid*             oCameraBinding to get the camera binding.
