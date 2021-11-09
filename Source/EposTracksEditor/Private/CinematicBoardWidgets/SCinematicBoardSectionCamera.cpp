@@ -125,16 +125,20 @@ SCinematicBoardSectionCamera::GetAreaTooltipText() const //override
 
     //-
 
-    FText camera_track_text = possessable ? FText::FromString( possessable->GetName() ) : FText::GetEmpty();
-    FText camera_actor_text = camera ? FText::FromString( camera->GetActorLabel() ) : FText::GetEmpty();
+    FString camera_track_name = possessable ? possessable->GetName() : FString();
+    FString camera_actor_name = camera ? camera->GetActorLabel() : FString();
 
-    if( !camera_track_text.EqualTo( camera_actor_text ) )
-        return FText::Format( LOCTEXT( "tooltip-camera-track-actor", "Track: {0}\nActor: {1}\nKeys: {2}" ), camera_track_text, camera_actor_text, GetMetaChannel()->NumMetaKeys() );
+    FText camera_track_text = FText::Format( LOCTEXT( "tooltip-camera-area-track", "Camera: {0}" ), FText::FromString( camera_track_name ) );
+    FText camera_actor_text = FText::Format( LOCTEXT( "tooltip-camera-area-actor", "Actor: {0}" ), FText::FromString( camera_actor_name ) );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-camera-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
 
-    if( camera_track_text.IsEmptyOrWhitespace() )
+    if( !camera_track_name.Equals( camera_actor_name ) )
+        return FText::Join( FText::FromString( TEXT( "\n" ) ), camera_track_text, camera_actor_text, num_keys_text );
+
+    if( camera_track_name.IsEmpty() )
         return LOCTEXT( "tooltip-camera-no", "No camera" );
-    else
-        return FText::Format( LOCTEXT( "tooltip-camera", "Camera: {0}\nKeys: {1}" ), camera_track_text, GetMetaChannel()->NumMetaKeys() );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), camera_track_text, num_keys_text );
 }
 
 //---

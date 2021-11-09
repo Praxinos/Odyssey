@@ -991,15 +991,43 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 FText
 SCinematicBoardSectionPlaneOpacityKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
 {
-    return GetAreaTooltipText();
+    FText plane_track_text = FText::FromString( mBinding.GetName() );
+    plane_track_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-key-plane-name", "Plane: {0}" ), plane_track_text );
+
+    TArray<float> opacities;
+    for( const auto& pair : iKeys->GetMetaKeys() )
+    {
+        FFrameNumber frame_number = pair.Key;
+        const FMetaKey& meta_key = pair.Value;
+
+        for( const auto& subkey : meta_key.mSubKeys )
+        {
+            TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneFloatChannel>();
+            FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+            check( float_channel );
+
+            FMovieSceneFloatValue value;
+            UE::MovieScene::GetKeyValue( float_channel, subkey.mKeyHandle, value );
+
+            opacities.Add( value.Value );
+        }
+    }
+
+    TArray<FText> lines;
+    lines.Add( plane_track_text );
+    for( auto opacity : opacities )
+        lines.Add( FText::Format( LOCTEXT( "tooltip-plane-opacity-key-value", "Opacity: {0}" ), FText::AsPercent( opacity ) ) );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), lines );
 }
 
 FText
 SCinematicBoardSectionPlaneOpacityKeys::GetAreaTooltipText() const //override
 {
-    FText plane_track_text = FText::FromString( mBinding.GetName() );
+    FText plane_track_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-area-plane-name", "Plane: {0}" ), FText::FromString( mBinding.GetName() ) );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
 
-    return FText::Format( LOCTEXT( "tooltip-plane-opacity", "Plane: {0}\nKeys: {1}" ), plane_track_text, GetMetaChannel()->NumMetaKeys() );
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), plane_track_text, num_keys_text );
 }
 
 FCursorReply

@@ -309,6 +309,8 @@ SMetaKeysArea::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& M
 void
 SMetaKeysArea::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
 {
+    mHoveredKeys = nullptr;
+
     //UE_LOG( LogTemp, Warning, TEXT( "OnMouseLeave" ) );
 }
 
