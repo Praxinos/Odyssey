@@ -1263,7 +1263,11 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddSubMenu(
         FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create Opacity at {0}" ), current_frame ),
         LOCTEXT( "create-drawing-opacity-tooltip", "Create the drawing opacity\n(set the current frame where to set the opacity)" ),
-        FNewMenuDelegate::CreateLambda( CreateOpacitySubMenu )
+        FNewMenuDelegate::CreateLambda( CreateOpacitySubMenu ),
+        FUIAction( FExecuteAction(),
+                   FCanExecuteAction::CreateLambda( CanCreateOpacity ) ),
+        NAME_None,
+        EUserInterfaceActionType::None
     );
 
     ioMenuBuilder.EndSection();
