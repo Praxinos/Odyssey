@@ -942,23 +942,34 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
         //-
 
-        int32 opacities[] = { 0, 10, 20, -1, 25, 30, 33, -1, 40, 50, 60, -1, 66, 70, 75, -1, 80, 90, 100 };
-        for( int32 opacity : opacities )
+        float opacities[] = { 0.f, .1f, .2f,
+                                            -1.f, //sep
+                             .25f, .3f, .33f,
+                                            -1.f, //sep
+                             .4f, .5f, .6f,
+                                            -1.f, //sep
+                             .66f, .7f, .75f,
+                                            -1.f, //sep
+                             .8f, .9f, 1.f };
+        for( float opacity : opacities )
         {
-            if( opacity == -1 )
+            if( opacity < -0.1f )
+            {
                 ioMenuBuilder.AddSeparator();
-            else
-                ioMenuBuilder.AddMenuEntry(
-                    FText::Format( LOCTEXT( "set-drawing-opacity-0-label", "{0}%" ), opacity ),
-                    FText::Format( LOCTEXT( "set-drawing-opacity-0-tooltip", "Set the drawing opacity at {0}%" ), opacity ),
-                    FSlateIcon(),
-                    FUIAction(
-                        FExecuteAction::CreateLambda( SetKey, iKeys, opacity / 100.f ),
-                        FCanExecuteAction::CreateLambda( CanSetKey, iKeys ),
-                        FIsActionChecked::CreateLambda( [=]() { return FMath::IsNearlyEqual( opacity / 100.f, current_opacity, KINDA_SMALL_NUMBER ); } )
-                    ),
-                    NAME_None,
-                    EUserInterfaceActionType::Check );
+                continue;
+            }
+
+            ioMenuBuilder.AddMenuEntry(
+                FText::Format( LOCTEXT( "set-drawing-opacity-0-label", "{0}" ), FText::AsPercent( opacity ) ),
+                FText::Format( LOCTEXT( "set-drawing-opacity-0-tooltip", "Set the drawing opacity at {0}" ), FText::AsPercent( opacity ) ),
+                FSlateIcon(),
+                FUIAction(
+                    FExecuteAction::CreateLambda( SetKey, iKeys, opacity ),
+                    FCanExecuteAction::CreateLambda( CanSetKey, iKeys ),
+                    FIsActionChecked::CreateLambda( [=]() { return FMath::IsNearlyEqual( opacity, current_opacity, KINDA_SMALL_NUMBER ); } )
+                ),
+                NAME_None,
+                EUserInterfaceActionType::Check );
         }
     };
 
@@ -1243,20 +1254,31 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     auto CreateOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder )
     {
-        int32 opacities[] = { 0, 10, 20, -1, 25, 30, 33, -1, 40, 50, 60, -1, 66, 70, 75, -1, 80, 90, 100 };
-        for( int32 opacity : opacities )
+        float opacities[] = { 0.f, .1f, .2f,
+                                            -1.f, //sep
+                             .25f, .3f, .33f,
+                                            -1.f, //sep
+                             .4f, .5f, .6f,
+                                            -1.f, //sep
+                             .66f, .7f, .75f,
+                                            -1.f, //sep
+                             .8f, .9f, 1.f };
+        for( float opacity : opacities )
         {
-            if( opacity == -1 )
+            if( opacity < -0.1f )
+            {
                 ioMenuBuilder.AddSeparator();
-            else
-                ioMenuBuilder.AddMenuEntry(
-                    FText::Format( LOCTEXT( "create-drawing-opacity-0-label", "{0}%" ), opacity ),
-                    FText::Format( LOCTEXT( "create-drawing-opacity-0-tooltip", "Create the drawing opacity at {0}%" ), opacity ),
-                    FSlateIcon(),
-                    FUIAction(
-                        FExecuteAction::CreateLambda( CreateOpacity, opacity / 100.f ),
-                        FCanExecuteAction::CreateLambda( CanCreateOpacity )
-                    ) );
+                continue;
+            }
+
+            ioMenuBuilder.AddMenuEntry(
+                FText::Format( LOCTEXT( "create-drawing-opacity-0-label", "{0}" ), FText::AsPercent( opacity ) ),
+                FText::Format( LOCTEXT( "create-drawing-opacity-0-tooltip", "Create the drawing opacity at {0}" ), FText::AsPercent( opacity ) ),
+                FSlateIcon(),
+                FUIAction(
+                    FExecuteAction::CreateLambda( CreateOpacity, opacity ),
+                    FCanExecuteAction::CreateLambda( CanCreateOpacity )
+                ) );
         }
     };
 
