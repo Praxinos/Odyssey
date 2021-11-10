@@ -446,45 +446,127 @@ FDrawing::SetMaterial( UMaterialInstance* iMaterial )
 }
 
 //static
+ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult
+ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreateMaterialDrawingResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return result;
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    if( !plane )
+        return result;
+
+    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    if( !plane_component.IsValid() )
+        return result;
+
+    //---
+
+    result.mPlaneComponentBinding = plane_component;
+
+    result.mTrack = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( result.mPlaneComponentBinding ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
+    if( !result.mTrack.IsValid() )
+        return result;
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
+    }
+
+    return result;
+}
+
+//static
+ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult
+ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreateMaterialDrawingResult result = FindMaterialDrawingTrackAndSections( iPlayer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
+
+    // Return if we get track AND sections (with optional iFrameNumber taken into account)
+    if( result.mTrack.IsValid() && result.mSections.Num() )
+        return result;
+
+    // At this step, result.mSections is empty, but it doesn't necessarily mean that result.mTrack->GetAllSections() is also empty (if iFrameNumber is set but outside section(s) boundaries)
+    // So, we considere to create a new section only if there is really no existing section (no matter of iFrameNumber)
+
+    if( !result.mTrack.IsValid() )
+    {
+        result.mTrackCreated = true;
+
+        UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieScenePrimitiveMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
+        result.mTrack = Cast<UMovieScenePrimitiveMaterialTrack>( track );
+
+        result.mTrack->MaterialIndex = 0; //TODO: iMaterialTrackIndex;
+        result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->MaterialIndex ) ) );
+    }
+
+    check( result.mTrack.IsValid() );
+
+    //---
+
+    // Use GetAllSections() to be sure to have the 'real' number of section inside the track
+    // If we rely only on mSections and with a iFrameNumber set, we can create a section while there are ones but outside iFrameNumber
+    if( !result.mTrack->GetAllSections().Num() )
+    {
+        result.mSectionsCreated = true;
+
+        UMovieSceneSection* section = result.mTrack->CreateNewSection();
+        check( result.mTrack->IsEmpty() );
+        result.mTrack->AddSection( *section );
+
+        section->SetRange( TRange<FFrameNumber>::All() );
+
+        result.mSections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
+    }
+
+    return result;
+}
+
+//static
 FDrawing
 ShotSequenceHelpers::GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     FDrawing drawing;
 
-    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !moviescene )
+    if( !iSequence->GetMovieScene()->GetPlaybackRange().Contains( iFrameNumber ) )
         return drawing;
 
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return drawing;
-    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-    if( !plane )
+    FFindOrCreateMaterialDrawingResult result = FindMaterialDrawingTrackAndSections( iPlayer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
+    if( !result.mTrack.IsValid() || !result.mSections.Num() )
         return drawing;
 
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-    if( !plane_component.IsValid() )
+    UMovieScenePrimitiveMaterialSection* section = result.mSections[0].Get();
+    FMovieSceneObjectPathChannel* channel = &section->MaterialChannel;
+
+    //---
+
+    TArray<FKeyHandle> key_handles;
+    channel->GetKeys( TRange<FFrameNumber>( iFrameNumber ), nullptr, &key_handles );
+    if( !key_handles.Num() )
         return drawing;
 
-    UMovieScenePrimitiveMaterialTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component );
-    if( !track )
-        return drawing;
-
-    UMovieScenePrimitiveMaterialSection* section = Cast<UMovieScenePrimitiveMaterialSection>( MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) );
-    if( !section )
-        return drawing;
-
-    if( !moviescene->GetPlaybackRange().Contains( iFrameNumber ) )
-        return drawing;
-
-    TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
-    check( channels.Num() == 1 );
-    int32 key_index = channels[0]->GetData().FindKey( iFrameNumber );
-
-    drawing.mChannel = channels[0];
+    drawing.mChannel = channel;
     drawing.mSection = section;
-    if( key_index != INDEX_NONE )
-        drawing.mKeyHandle = channels[0]->GetData().GetHandle( key_index );
+    drawing.mKeyHandle = key_handles[0];
 
     return drawing;
 }
@@ -773,7 +855,7 @@ ShotSequenceHelpers::GetOpacityKey( IMovieScenePlayer& iPlayer, UMovieSceneSeque
         return key_opacity;
 
     FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
-    if( !result.mTrack.IsValid() )
+    if( !result.mTrack.IsValid() || !result.mSections.Num() )
         return key_opacity;
 
     FFindOrCreateParameterChannelResult channel_result = FindMaterialOpacityChannel( iPlayer, iSequence, iSequenceID, iPlaneBinding, result.mSections[0] ); // Only the first one, should be nearly always the case
@@ -953,40 +1035,6 @@ ShotSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMov
     return sections;
 }
 
-//static
-TArray<UMovieScenePrimitiveMaterialSection*>
-ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
-{
-    TArray<UMovieScenePrimitiveMaterialSection*> sections;
-
-    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !moviescene )
-        return sections;
-
-    if( !iPlaneBinding.IsValid() )
-        return sections;
-
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return sections;
-    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-    if( !plane )
-        return sections;
-
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-    if( !plane_component.IsValid() )
-        return sections;
-
-    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScenePrimitiveMaterialTrack>( plane_component ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
-    if( !track )
-        return sections;
-
-    for( auto section : track->GetAllSections() )
-        sections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
-
-    return sections;
-}
-
 //---
 
 //static
@@ -1142,8 +1190,9 @@ ShotSequenceHelpers::BuildPlanesMaterialChannelProxy( IMovieScenePlayer& iPlayer
 
         //---
 
-        TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, iSequence, iSequenceID, binding );
-        for( auto plane_material_section : plane_material_sections )
+        FFindOrCreateMaterialDrawingResult result = FindMaterialDrawingTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
+
+        for( auto plane_material_section : result.mSections )
         {
             FMovieSceneChannelProxyData ChannelIndirection;
 

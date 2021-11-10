@@ -21,9 +21,9 @@
 void
 LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
 {
-    TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+    ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
 
-    for( auto section : plane_material_sections )
+    for( auto section : result.mSections )
     {
         UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
         if( !section_material )
@@ -91,9 +91,9 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
 void
 LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
 {
-    TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+    ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
 
-    for( auto section : plane_material_sections )
+    for( auto section : result.mSections )
     {
         UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
         if( !section_material )
@@ -163,9 +163,9 @@ LighttableTools::Update( ISequencer& iSequencer, UMovieSceneSequence* iSequence,
 bool
 LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
 {
-    TArray<UMovieScenePrimitiveMaterialSection*> plane_material_sections = ShotSequenceHelpers::GetPlaneMaterialSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+    ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
 
-    for( auto section : plane_material_sections )
+    for( auto section : result.mSections )
     {
         UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
         if( !section_material )

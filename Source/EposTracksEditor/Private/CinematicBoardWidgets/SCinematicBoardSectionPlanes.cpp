@@ -595,19 +595,22 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
             return;
 
-        FFrameNumber key_framenumber = it.Key();
-
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
 
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+        //const FScopedTransaction transaction( LOCTEXT( "CloneMaterialKeys", "Clone drawing keys" ) ); // As for the moment, it should only be 1 key
 
-        FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid() );
+        for( auto pair : iKeys->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::CloneDrawing( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle, local_frame );
 
-        UMaterialInstance* material_to_clone = drawing.GetMaterial();
-
-        BoardSequenceTools::CloneDrawing( sequencer, material_to_clone, sequencer->GetLocalTime().Time.FrameNumber, mBinding.GetGuid() );
+                break;
+            }
+        }
     };
 
     auto CanCloneKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
@@ -619,16 +622,11 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
             return false;
 
-        FFrameNumber key_framenumber = it.Key();
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
 
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
-
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
-
-        FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), mBinding.GetGuid() );
-
-        return !drawing.Exists();
+        return BoardSequenceTools::CanCloneDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
     };
 
     //-
@@ -639,7 +637,7 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKeys", "Delete camera keys" ) );
+        const FScopedTransaction transaction( LOCTEXT( "DeleteMaterialKeys", "Delete drawing keys" ) );
 
         for( auto pair : iKeys->GetMetaKeys() )
         {

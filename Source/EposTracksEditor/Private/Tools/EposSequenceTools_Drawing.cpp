@@ -14,6 +14,7 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
+#include "Sections/MovieScenePrimitiveMaterialSection.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
@@ -40,26 +41,6 @@ BoardSequenceTools::CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneS
 
     return !drawing.Exists();
 }
-
-//static
-void
-BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-    if( !result.mInnerSequence )
-        return;
-
-    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
-        return;
-
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-        return;
-
-    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding );
-}
-
-//---
 
 //static
 bool
@@ -90,6 +71,24 @@ ShotSequenceTools::CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrame
 
 //static
 void
+BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
+    ShotSequenceTools::CreateDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding );
+}
+
+//static
+void
 BoardSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
@@ -110,20 +109,18 @@ ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNum
 void
 ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    FDrawing drawing = ShotSequenceHelpers::GetDrawing( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding );
-    if( drawing.Exists() )
-        return;
-
-    if( !drawing.mSection )
-        return;
-
-    //---
-
     const FScopedTransaction transaction( LOCTEXT( "CreateDrawing", "Create a new drawing" ) );
 
-    drawing.mSection->Modify();
+    ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
+    if( !result.mSections.Num() )
+        return;
+
+    UMovieScenePrimitiveMaterialSection* section = result.mSections[0].Get();
+    FMovieSceneObjectPathChannel* channel = &section->MaterialChannel;
 
     //---
+
+    section->Modify();
 
     UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID ), iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
@@ -131,65 +128,104 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
-    UE::MovieScene::AddKeyToChannel( drawing.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+    UE::MovieScene::AddKeyToChannel( channel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
 
     //---
 
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    if( result.mTrackCreated || result.mSectionsCreated )
+        iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    else
+        iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+//---
+
+//static
+bool
+BoardSequenceTools::CanCloneDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    return CanCreateDrawing( iSequencer, iSubSection, iFrameNumber, iPlaneBinding );
 }
 
 //static
+bool
+BoardSequenceTools::CanCloneDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    return CanCreateDrawing( iSequencer, iFrameNumber, iPlaneBinding );
+}
+
+//static
+bool
+ShotSequenceTools::CanCloneDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    return CanCreateDrawing( iSequencer, iFrameNumber, iPlaneBinding );
+}
+
+//---
+
+//static
 void
-BoardSequenceTools::CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::CloneDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::CloneDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iMaterialToClone, result.mInnerTime.GetFrame(), iPlaneBinding );
+    if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
+    ShotSequenceTools::CloneDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle, result.mInnerTime.GetFrame() );
 }
 
 //static
 void
-ShotSequenceTools::CloneDrawing( ISequencer* iSequencer, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::CloneDrawing( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber )
 {
-    CloneDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iMaterialToClone, iFrameNumber, iPlaneBinding );
+    CloneDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle, iFrameNumber );
 }
 
 //static
 void
-ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialToClone, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber )
 {
-    FDrawing drawing = ShotSequenceHelpers::GetDrawing( iSequencer, iSequence, iSequenceID, iFrameNumber, iPlaneBinding );
-    if( drawing.Exists() )
+    if( !iSection )
         return;
 
-    if( !drawing.mSection )
+    TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = iChannelHandle.Cast<FMovieSceneObjectPathChannel>();
+    FMovieSceneObjectPathChannel* material_channel = channel_handle.Get();
+    if( !material_channel )
         return;
 
-    if( !iMaterialToClone )
+    FMovieSceneObjectPathChannelKeyValue value;
+    UE::MovieScene::GetKeyValue( material_channel, iKeyHandle, value );
+    UMaterialInstance* existing_material = Cast<UMaterialInstance>( value.Get() );
+    if( !existing_material )
         return;
 
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "CloneDrawing", "Clone drawing" ) );
 
-    drawing.mSection->Modify();
+    iSection->Modify();
 
-    //---
-
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequence, iMaterialToClone, iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequence, existing_material, iSequencer.GetRootMovieSceneSequence() );
     if( !new_material )
         return;
 
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
-    UE::MovieScene::AddKeyToChannel( drawing.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+    UE::MovieScene::AddKeyToChannel( material_channel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
 
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
+
+//---
 
 //static
 void
