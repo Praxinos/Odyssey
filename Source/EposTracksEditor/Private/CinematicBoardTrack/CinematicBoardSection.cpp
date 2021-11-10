@@ -156,6 +156,8 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
     iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
+
+    BuildKeys();
 }
 
 
@@ -391,10 +393,8 @@ void
 FCinematicBoardSection::BuildKeys() //override
 {
     FKeyThumbnailSection::BuildKeys();
-    BuildCameraTransformChannelProxy();
-    BuildPlanesTransformChannelProxy();
-    BuildPlanesMaterialChannelProxy();
-    BuildPlanesOpacityChannelProxy();
+
+    RebuildChannelProxies();
 }
 
 void
@@ -410,6 +410,24 @@ TArray<double>
 FCinematicBoardSection::GetThumbnailKeys() const //override
 {
     return mThumbnailKeys;
+}
+
+void
+FCinematicBoardSection::RebuildChannelProxies()
+{
+    BuildCameraTransformChannelProxy();
+    BuildPlanesTransformChannelProxy();
+    BuildPlanesMaterialChannelProxy();
+    BuildPlanesOpacityChannelProxy();
+}
+
+void
+FCinematicBoardSection::RebuildMetaChannels()
+{
+    ReBuildCameraTransformMetaChannel();
+    ReBuildPlanesTransformMetaChannel();
+    ReBuildPlanesMaterialMetaChannel();
+    ReBuildPlanesOpacityMetaChannel();
 }
 
 void
@@ -628,7 +646,7 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
     FViewCachedState newCacheState( sectionObject, GetSequencer() );
     if( newCacheState != mViewCacheState )
     {
-        BuildKeys();
+        RebuildMetaChannels();
     }
     mViewCacheState = newCacheState;
 

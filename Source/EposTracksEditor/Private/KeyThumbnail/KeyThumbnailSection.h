@@ -46,7 +46,6 @@ private:
     virtual void RebuildKeys( EMovieSceneDataChangeType iType );
 
     FDelegateHandle mRebuildKeysDelegateHandle;
-    bool mNeedRebuildKeys;
 
 protected:
 

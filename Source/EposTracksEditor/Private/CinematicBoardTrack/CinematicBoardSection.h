@@ -77,6 +77,9 @@ public:
 
     //---
 
+    virtual void RebuildChannelProxies();
+    virtual void RebuildMetaChannels();
+
     virtual void BuildCameraTransformChannelProxy();
     virtual FChannelProxyBySectionMap GetCameraTransformChannelProxy() const;
     virtual void ReBuildCameraTransformMetaChannel();

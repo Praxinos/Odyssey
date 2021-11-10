@@ -148,6 +148,8 @@ SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEve
 {
     check( !mDraggedKeys.IsValid() );
 
+    mHoveredKeys = nullptr;
+
     if( mState == EState::kIdle )
     {
         TSharedPtr<FMetaChannel> keys = CreateKeysUnderMouse( MouseEvent );
@@ -197,6 +199,8 @@ SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEve
 FReply
 SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
+    mHoveredKeys = nullptr;
+
     if( mState == EState::kDragging )
     {
         check( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton );
@@ -205,11 +209,11 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
 
         //-
 
+        mState = EState::kIdle;
+
         EndTransaction();
 
         mDraggedKeys = nullptr;
-
-        mState = EState::kIdle;
 
         return FReply::Handled().ReleaseMouseCapture();
     }
@@ -309,8 +313,6 @@ SMetaKeysArea::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& M
 void
 SMetaKeysArea::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
 {
-    mHoveredKeys = nullptr;
-
     //UE_LOG( LogTemp, Warning, TEXT( "OnMouseLeave" ) );
 }
 
