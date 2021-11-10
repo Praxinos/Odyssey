@@ -909,15 +909,6 @@ BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSect
 
 //static
 TArray<UMovieScene3DTransformSection*>
-BoardSequenceHelpers::GetCameraTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
-
-    return ShotSequenceHelpers::GetCameraTransformSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
-}
-
-//static
-TArray<UMovieScene3DTransformSection*>
 ShotSequenceHelpers::GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding )
 {
     TArray<UMovieScene3DTransformSection*> sections;
@@ -941,15 +932,6 @@ ShotSequenceHelpers::GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMo
 
 //static
 TArray<UMovieScene3DTransformSection*>
-BoardSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
-
-    return ShotSequenceHelpers::GetPlaneTransformSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
-}
-
-//static
-TArray<UMovieScene3DTransformSection*>
 ShotSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
 {
     TArray<UMovieScene3DTransformSection*> sections;
@@ -969,15 +951,6 @@ ShotSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMov
         sections.Add( Cast<UMovieScene3DTransformSection>( section ) );
 
     return sections;
-}
-
-//static
-TArray<UMovieScenePrimitiveMaterialSection*>
-BoardSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
-
-    return ShotSequenceHelpers::GetPlaneMaterialSections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
 }
 
 //static
@@ -1010,49 +983,6 @@ ShotSequenceHelpers::GetPlaneMaterialSections( IMovieScenePlayer& iPlayer, UMovi
 
     for( auto section : track->GetAllSections() )
         sections.Add( Cast<UMovieScenePrimitiveMaterialSection>( section ) );
-
-    return sections;
-}
-
-//static
-TArray<UMovieSceneParameterSection*>
-BoardSequenceHelpers::GetPlaneOpacitySections( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
-
-    return ShotSequenceHelpers::GetPlaneOpacitySections( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
-}
-
-//static
-TArray<UMovieSceneParameterSection*>
-ShotSequenceHelpers::GetPlaneOpacitySections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iPlaneBinding )
-{
-    TArray<UMovieSceneParameterSection*> sections;
-
-    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !moviescene )
-        return sections;
-
-    if( !iPlaneBinding.IsValid() )
-        return sections;
-
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return sections;
-    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-    if( !plane )
-        return sections;
-
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
-    if( !plane_component.IsValid() )
-        return sections;
-
-    UMovieSceneTrack* track = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( plane_component ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
-    if( !track )
-        return sections;
-
-    for( auto section : track->GetAllSections() )
-        sections.Add( Cast<UMovieSceneParameterSection>( section ) );
 
     return sections;
 }
@@ -1280,8 +1210,9 @@ ShotSequenceHelpers::BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer,
 
         //---
 
-        TArray<UMovieSceneParameterSection*> plane_opacity_sections = ShotSequenceHelpers::GetPlaneOpacitySections( iPlayer, iSequence, iSequenceID, binding );
-        for( auto plane_opacity_section : plane_opacity_sections )
+        FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
+
+        for( auto plane_opacity_section : result.mSections )
         {
             FMovieSceneChannelProxyData ChannelIndirection;
 
