@@ -91,10 +91,15 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
     FVector2D coord;
     if (UGameplayStatics::FindCollisionUV(traceHitResult, 0, coord))
     {
-        mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
-        mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
-        //TODO -> Get previous point instead of passing the same point twice here ? Requires to stock the previous point. Is there a better and cleaner method ?
-        mEditor->PaintEngine()->BeginStroke(mCurrentStrokeRay.mStrokePoint, mCurrentStrokeRay.mStrokePoint);
+        FOdysseyStrokePoint currentStrokePoint = mCurrentStrokeRay.mStrokePoint;
+        FOdysseyStrokePoint lastStrokePoint = mLastStrokeRay.mStrokePoint;
+
+        currentStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
+        currentStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
+        lastStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
+        lastStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
+        
+        mEditor->PaintEngine()->BeginStroke(currentStrokePoint, lastStrokePoint);
     }
 
     //A simple copy is all we need for the texture based algorithm

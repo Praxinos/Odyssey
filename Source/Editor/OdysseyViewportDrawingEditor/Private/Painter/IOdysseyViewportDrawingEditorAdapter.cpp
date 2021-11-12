@@ -50,7 +50,8 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
     const FViewportCursorLocation mouseViewportRay(view, (FEditorViewportClient*)iViewport->GetClient(), iViewport->GetMouseX(), iViewport->GetMouseY());
 
-    FOdysseyStrokeRay lastRay = mCurrentStrokeRay;
+    mLastStrokeRay = mCurrentStrokeRay;
+    
     mCurrentStrokeRay.mRayOrigin = mouseViewportRay.GetOrigin();
     mCurrentStrokeRay.mRayDirection = mouseViewportRay.GetDirection();
     mCurrentStrokeRay.mStrokePoint = FOdysseyStrokePoint::DefaultPoint();
@@ -147,7 +148,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKeyWithStrokeRay(const FOdysseyS
     if(!IsReadyToDraw())
         return false;
 
-    FOdysseyStrokeRay lastRay = mCurrentStrokeRay;
+    mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
     if (mState == eState::kIdleReady)
@@ -206,12 +207,12 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMoveWithStrokeRay(const 
     if (!IsReadyToDraw())
         return false;
 
-    FOdysseyStrokeRay lastRay = mCurrentStrokeRay;
+    mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
     if (mState == eState::kDrawing)
     {
-        if (long(mCurrentStrokeRay.mStrokePoint.x) == long(lastRay.mStrokePoint.x) && long(mCurrentStrokeRay.mStrokePoint.y) == long(lastRay.mStrokePoint.y))
+        if (long(mCurrentStrokeRay.mStrokePoint.x) == long(mLastStrokeRay.mStrokePoint.x) && long(mCurrentStrokeRay.mStrokePoint.y) == long(mLastStrokeRay.mStrokePoint.y))
             return true;
 
         Paint();

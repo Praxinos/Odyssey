@@ -73,6 +73,9 @@ protected:
     /** The state of the adapter: Are we currently drawing ? Are we idle ? Are the preparations to draw ready ?*/
     eState mState;
 
+    /** The main information about the last ray. Useful for the begin stroke of the paint engine */
+    FOdysseyStrokeRay mLastStrokeRay;
+
     /** The main information about the current ray. We can use it to draw at the right place on the mesh */
     FOdysseyStrokeRay mCurrentStrokeRay;
 

@@ -182,7 +182,8 @@ void FOdysseyViewportDrawingEditorPainter::OnSequencersChanged()
 void FOdysseyViewportDrawingEditorPainter::OnSyncPaintingWithSequencer()
 {
     //Security, in case we're flipping in sequencer while drawing at the same time
-    mPaintingAdapter->FinishPainting();
+    if( mEditor->Texture() )
+        mPaintingAdapter->FinishPainting();
 
     if (mEditor->Component())
     {
