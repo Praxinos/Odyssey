@@ -26,6 +26,7 @@ class UMovieSceneTrack;
 class UStoryNote;
 class UWorld;
 class IMovieScenePlayer;
+struct FMovieSceneChannelHandle;
 struct FMovieSceneChannelProxy;
 struct FMovieSceneFloatChannel;
 struct FMovieSceneObjectPathChannel;
@@ -74,9 +75,9 @@ enum class EGetPlane
 
 struct EPOSSEQUENCE_API FDrawing
 {
-    FMovieSceneObjectPathChannel*   mChannel { nullptr };
-    UMovieSceneSection*             mSection { nullptr };
-    FKeyHandle                      mKeyHandle { FKeyHandle::Invalid() };
+    FMovieSceneObjectPathChannel*       mChannel { nullptr };
+    TWeakObjectPtr<UMovieSceneSection>  mSection;
+    FKeyHandle                          mKeyHandle { FKeyHandle::Invalid() };
 
     bool Exists();
 
@@ -125,6 +126,8 @@ public:
     static TArray<FDrawing>     GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static TArray<FFrameNumber> GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection );
 
+    static FDrawing             ConvertToDrawing( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle );
+
 public:
     struct FFindOrCreateMaterialParameterResult
     {
@@ -153,6 +156,8 @@ public:
     static FFindOrCreateParameterChannelResult          FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection );
 
     static FKeyOpacity                                  GetOpacityKey( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
+    static FKeyOpacity                                  ConvertToOpacityKey( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle );
 
 public:
     static TArray<UMovieScene3DTransformSection*> GetCameraTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iCameraBinding );

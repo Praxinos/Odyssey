@@ -337,6 +337,8 @@ MasterAssetTools::CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTex
 UTexture2D*
 ProjectAssetTools::GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterial )
 {
+    //TODO: iSequence may be null, check it if it must or not be the case
+
     if( !iMaterial )
         return nullptr;
 

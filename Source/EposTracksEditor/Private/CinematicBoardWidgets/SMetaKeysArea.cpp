@@ -307,13 +307,18 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
 void
 SMetaKeysArea::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseEnter" ) );
+    // Reset this variable, to not use the old one inside tooltip delegate
+    // It may crash because channel proxies and channel handles inside meta channel may be now invalid
+    // After doing some process inside popup delegate, it calls iSequencer->Notify() which broadcast message to FKeyThumbnailSection::RebuildKeys() which recompute all proxies
+    //
+    // the OnMouseEnter() is also called when the popup closes with the mouse over a SMetaKeysArea
+    mHoveredKeys = nullptr;
 }
 
 void
 SMetaKeysArea::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
 {
-    //UE_LOG( LogTemp, Warning, TEXT( "OnMouseLeave" ) );
+    mHoveredKeys = nullptr;
 }
 
 int32

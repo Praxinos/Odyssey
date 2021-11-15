@@ -65,15 +65,21 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKeys", "Delete camera keys" ) );
+        TArray<TWeakObjectPtr<UMovieSceneSection>> sections;
+        TArray<FMovieSceneChannelHandle> channelHandles;
+        TArray<FKeyHandle> keyHandles;
 
         for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
-                BoardSequenceTools::DeleteCameraKey( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+                sections.Add( subkey.mSection );
+                channelHandles.Add( subkey.mChannelHandle );
+                keyHandles.Add( subkey.mKeyHandle );
             }
         }
+
+        BoardSequenceTools::DeleteCameraKey( sequencer, *subsection_object, sections, channelHandles, keyHandles );
     };
 
     auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool

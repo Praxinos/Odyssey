@@ -109,7 +109,7 @@ ShotSequenceTools::CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNum
 void
 ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
-    const FScopedTransaction transaction( LOCTEXT( "CreateDrawing", "Create a new drawing" ) );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.create-plane-drawing", "Create a new drawing" ) );
 
     ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
     if( !result.mSections.Num() )
@@ -192,23 +192,17 @@ ShotSequenceTools::CloneDrawing( ISequencer* iSequencer, UMovieSceneSection* iSe
 void
 ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber )
 {
-    if( !iSection )
+    FDrawing drawing = ShotSequenceHelpers::ConvertToDrawing( iSection, iChannelHandle, iKeyHandle );
+    if( !drawing.Exists() )
         return;
 
-    TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = iChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-    FMovieSceneObjectPathChannel* material_channel = channel_handle.Get();
-    if( !material_channel )
-        return;
-
-    FMovieSceneObjectPathChannelKeyValue value;
-    UE::MovieScene::GetKeyValue( material_channel, iKeyHandle, value );
-    UMaterialInstance* existing_material = Cast<UMaterialInstance>( value.Get() );
+    UMaterialInstance* existing_material = drawing.GetMaterial();
     if( !existing_material )
         return;
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "CloneDrawing", "Clone drawing" ) );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.clone-plane-drawing", "Clone drawing" ) );
 
     iSection->Modify();
 
@@ -218,7 +212,7 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     FMovieSceneObjectPathChannelKeyValue material_objectpath( new_material );
 
-    UE::MovieScene::AddKeyToChannel( material_channel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
+    UE::MovieScene::AddKeyToChannel( drawing.mChannel, iFrameNumber, material_objectpath, iSequencer.GetKeyInterpolation() );
 
     //---
 
@@ -229,7 +223,7 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
 
 //static
 void
-BoardSequenceTools::DeleteDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+BoardSequenceTools::DeleteDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles )
 {
     check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
 
@@ -240,39 +234,42 @@ BoardSequenceTools::DeleteDrawing( ISequencer* iSequencer, const UMovieSceneSubS
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return;
 
-    ShotSequenceTools::DeleteDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
+    ShotSequenceTools::DeleteDrawing( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSections, iChannelHandles, iKeyHandles );
 }
 
 //static
 void
-ShotSequenceTools::DeleteDrawing( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+ShotSequenceTools::DeleteDrawing( ISequencer* iSequencer, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles )
 {
-    DeleteDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
+    DeleteDrawing( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSections, iChannelHandles, iKeyHandles );
 }
 
 //static
 void
-ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+ShotSequenceTools::DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles )
 {
-    if( !iSection )
+    check( iSections.Num() == iChannelHandles.Num() && iChannelHandles.Num() == iKeyHandles.Num() );
+
+    if( !iKeyHandles.Num() )
         return;
 
-    TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = iChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-    FMovieSceneObjectPathChannel* material_channel = channel_handle.Get();
-    if( !material_channel )
-        return;
+    const FScopedTransaction transaction( LOCTEXT( "transaction.delete-plane-drawing", "Delete drawing" ) );
 
-    //---
+    for( int i = 0; i < iKeyHandles.Num(); i++ )
+    {
+        FDrawing drawing = ShotSequenceHelpers::ConvertToDrawing( iSections[i], iChannelHandles[i], iKeyHandles[i] );
+        if( !drawing.Exists() )
+            return;
 
-    const FScopedTransaction transaction( LOCTEXT( "DeleteDrawing", "Delete drawing" ) );
+        drawing.mSection->Modify();
 
-    iSection->Modify();
-
-    material_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
+        drawing.mChannel->DeleteKeys( iKeyHandles.Slice( i, 1 ) );
+    }
 
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    // iChannelHandles are invalid at this point
 }
 
 //---

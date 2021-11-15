@@ -600,15 +600,13 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         ISequencer* sequencer = board_section->GetSequencer().Get();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
 
-        //const FScopedTransaction transaction( LOCTEXT( "CloneMaterialKeys", "Clone drawing keys" ) ); // As for the moment, it should only be 1 key
-
         for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
                 BoardSequenceTools::CloneDrawing( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle, local_frame );
 
-                break;
+                break; // Only 1 key for the moment, and otherwise, CloneDrawing should take 3 arrays like DeleteDrawing
             }
         }
     };
@@ -637,15 +635,21 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        const FScopedTransaction transaction( LOCTEXT( "DeleteMaterialKeys", "Delete drawing keys" ) );
+        TArray<TWeakObjectPtr<UMovieSceneSection>> sections;
+        TArray<FMovieSceneChannelHandle> channelHandles;
+        TArray<FKeyHandle> keyHandles;
 
         for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
-                BoardSequenceTools::DeleteDrawing( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+                sections.Add( subkey.mSection );
+                channelHandles.Add( subkey.mChannelHandle );
+                keyHandles.Add( subkey.mKeyHandle );
             }
         }
+
+        BoardSequenceTools::DeleteDrawing( sequencer, *subsection_object, sections, channelHandles, keyHandles );
     };
 
     auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
@@ -678,42 +682,65 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     //-
 
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
-
-    UMaterialInstance* material = nullptr;
-    UTexture2D* texture = nullptr;
-    FString material_name( TEXT( "Multiple" ) );
-    FString texture_name( TEXT( "Multiple" ) );
-
-    if( iKeys->NumMetaKeys() == 1 ) // For the moment, only 1 metakey can be cloned
+    TMap<FString, FString> map; // Maybe use a TMultiMap if we want to display multiple textures inside 1 material
+    TArray<UTexture2D*> textures;
+    for( auto pair : iKeys->GetMetaKeys() )
     {
-        auto it = iKeys->GetMetaKeys().CreateConstIterator();
-        if( it.Value().mSubKeys.Num() == 1 ) // For the moment, only 1 subkey can be cloned
+        for( const auto& subkey : pair.Value.mSubKeys )
         {
-            FFrameNumber key_framenumber = it.Key();
+            FDrawing drawing = ShotSequenceHelpers::ConvertToDrawing( subkey.mSection, subkey.mChannelHandle, subkey.mKeyHandle );
 
-            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+            UMaterialInstance* material = drawing.GetMaterial();
+            UTexture2D* texture = ProjectAssetTools::GetTexture2D( nullptr, material );
 
-            FDrawing drawing = ShotSequenceHelpers::GetDrawing( *sequencer, result.mInnerSequence, result.mInnerSequenceId, key_framenumber, mBinding.GetGuid() );
-            material = drawing.GetMaterial();
-            texture = ProjectAssetTools::GetTexture2D( result.mInnerSequence, material );
+            if( texture )
+                textures.Add( texture );
 
-            material_name = material ? material->GetName() : TEXT( "None" );
-            texture_name = texture ? texture->GetName() : TEXT( "None" );
+            if( material )
+            {
+                map.Add( material->GetName(), texture ? texture->GetName() : TEXT( "" ) );
+            }
         }
     }
 
-    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "texture-key-section-label", "Texture: {0}" ), FText::FromString( texture_name ) ) );
+    TArray<FString> material_names;
+    for( const auto& pair : map )
+        material_names.Add( pair.Key );
 
-    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-texture-key-label", "Edit..." ),
-                                LOCTEXT( "edit-texture-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
-                                FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( EditKey, texture ),
-                                           FCanExecuteAction::CreateLambda( CanEditKey, texture ) ) );
+    FString material_name = FString::Join( material_names, TEXT(", ") );
 
-    ioMenuBuilder.EndSection();
+    //-
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    if( textures.Num() > 1 )
+    {
+        ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "texture-multi-key-section-label", "Textures" ) );
+
+        for( auto texture : textures )
+        {
+            ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "edit-texture-multi-key-label", "Edit {0}..." ), FText::FromString( texture->GetName() ) ),
+                                        LOCTEXT( "edit-texture-multi-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
+                                        FSlateIcon(),
+                                        FUIAction( FExecuteAction::CreateLambda( EditKey, texture ),
+                                                   FCanExecuteAction::CreateLambda( CanEditKey, texture ) ) );
+        }
+
+        ioMenuBuilder.EndSection();
+    }
+    else if( textures.Num() == 1 )
+    {
+        ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "texture-key-section-label", "Texture: {0}" ), FText::FromString( textures[0]->GetName() ) ) );
+
+        ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-texture-key-label", "Edit..." ),
+                                    LOCTEXT( "edit-texture-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
+                                    FSlateIcon(),
+                                    FUIAction( FExecuteAction::CreateLambda( EditKey, textures[0] ),
+                                               FCanExecuteAction::CreateLambda( CanEditKey, textures[0] ) ) );
+
+        ioMenuBuilder.EndSection();
+    }
 
     ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "material-key-section-label", "Material: {0}" ), FText::FromString( material_name ) ) );
 
@@ -737,7 +764,39 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 FText
 SCinematicBoardSectionPlaneMaterialKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
 {
-    return GetAreaTooltipText();
+    FText plane_track_text = FText::FromString( mBinding.GetName() );
+    plane_track_text = FText::Format( LOCTEXT( "tooltip-plane-material-key-plane-name", "Plane: {0}" ), plane_track_text );
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    TMap<FString, FString> map; // Maybe use a TMultiMap if we want to display multiple textures inside 1 material
+    for( auto pair : iKeys->GetMetaKeys() )
+    {
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            FDrawing drawing = ShotSequenceHelpers::ConvertToDrawing( subkey.mSection, subkey.mChannelHandle, subkey.mKeyHandle );
+
+            UMaterialInstance* material = drawing.GetMaterial();
+            UTexture2D* texture = ProjectAssetTools::GetTexture2D( nullptr, material );
+
+            if( material )
+            {
+                map.Add( material->GetName(), texture ? texture->GetName() : TEXT( "" ) );
+            }
+        }
+    }
+
+    TArray<FText> lines;
+    lines.Add( plane_track_text );
+    for( const auto& pair : map )
+    {
+        lines.Add( FText::Format( LOCTEXT( "tooltip-plane-material-key-value-material", "Material: {0}" ), FText::FromString( pair.Key ) ) );
+        lines.Add( FText::Format( LOCTEXT( "tooltip-plane-material-key-value-texture", "Texture: {0}" ), FText::FromString( pair.Value ) ) );
+    }
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), lines );
 }
 
 FText
@@ -875,15 +934,21 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        const FScopedTransaction transaction( LOCTEXT( "DeletePlaneOpacityKeys", "Delete plane opacity keys" ) );
+        TArray<TWeakObjectPtr<UMovieSceneSection>> sections;
+        TArray<FMovieSceneChannelHandle> channelHandles;
+        TArray<FKeyHandle> keyHandles;
 
         for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
-                BoardSequenceTools::DeleteOpacity( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+                sections.Add( subkey.mSection );
+                channelHandles.Add( subkey.mChannelHandle );
+                keyHandles.Add( subkey.mKeyHandle );
             }
         }
+
+        BoardSequenceTools::DeleteOpacity( sequencer, *subsection_object, sections, channelHandles, keyHandles );
     };
 
     auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
@@ -899,15 +964,21 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
         const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        const FScopedTransaction transaction( LOCTEXT( "SetPlaneOpacityKeys", "Set plane opacity" ) );
+        TArray<TWeakObjectPtr<UMovieSceneSection>> sections;
+        TArray<FMovieSceneChannelHandle> channelHandles;
+        TArray<FKeyHandle> keyHandles;
 
         for( auto pair : iKeys->GetMetaKeys() )
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
-                BoardSequenceTools::SetOpacity( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle, iOpacity );
+                sections.Add( subkey.mSection );
+                channelHandles.Add( subkey.mChannelHandle );
+                keyHandles.Add( subkey.mKeyHandle );
             }
         }
+
+        BoardSequenceTools::SetOpacity( sequencer, *subsection_object, sections, channelHandles, keyHandles, iOpacity );
     };
 
     auto CanSetKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
@@ -927,14 +998,11 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
         {
             for( const auto& subkey : pair.Value.mSubKeys )
             {
-                TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneFloatChannel>();
-                FMovieSceneFloatChannel* float_channel = channel_handle.Get();
-                if( !float_channel )
-                    return;
+                FKeyOpacity opacity_key = ShotSequenceHelpers::ConvertToOpacityKey( subkey.mSection, subkey.mChannelHandle, subkey.mKeyHandle );
+                if( !opacity_key.Exists() )
+                    continue;
 
-                FMovieSceneFloatValue value;
-                UE::MovieScene::GetKeyValue( float_channel, subkey.mKeyHandle, value );
-                current_opacity = value.Value;
+                opacity_key.GetOpacity( current_opacity );
             }
         }
 
@@ -1011,14 +1079,14 @@ SCinematicBoardSectionPlaneOpacityKeys::GetKeyTooltipText( TSharedPtr<FMetaChann
 
         for( const auto& subkey : meta_key.mSubKeys )
         {
-            TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneFloatChannel>();
-            FMovieSceneFloatChannel* float_channel = channel_handle.Get();
-            check( float_channel );
+            FKeyOpacity opacity_key = ShotSequenceHelpers::ConvertToOpacityKey( subkey.mSection, subkey.mChannelHandle, subkey.mKeyHandle );
+            if( !opacity_key.Exists() )
+                continue;
 
-            FMovieSceneFloatValue value;
-            UE::MovieScene::GetKeyValue( float_channel, subkey.mKeyHandle, value );
+            float opacity;
+            opacity_key.GetOpacity( opacity );
 
-            opacities.Add( value.Value );
+            opacities.Add( opacity );
         }
     }
 

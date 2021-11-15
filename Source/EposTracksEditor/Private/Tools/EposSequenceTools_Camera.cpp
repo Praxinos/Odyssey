@@ -134,7 +134,7 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "CreateStoryCameraHere", "Create Storyboard Camera Here" ) );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.create-storycamera-here", "Create Storyboard Camera Here" ) );
 
     cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
@@ -413,7 +413,7 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequ
     if( !GCurrentLevelEditingViewportClient )
         return;
 
-    const FScopedTransaction transaction( LOCTEXT( "SnapStoryCameraToViewport", "Snap Storyboard Camera To Viewport" ) );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.snap-storycamera-to-viewport", "Snap Storyboard Camera To Viewport" ) );
 
     FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
     bool snapped = SnapCameraToViewport( iSequencer, iSequence, ioCamera, iCameraGuid, iFrameNumber, transform, iSequencer.GetKeyInterpolation() );
@@ -498,7 +498,7 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 
 //static
 void
-BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles )
 {
     check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
 
@@ -509,39 +509,45 @@ BoardSequenceTools::DeleteCameraKey( ISequencer* iSequencer, const UMovieSceneSu
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return;
 
-    ShotSequenceTools::DeleteCameraKey( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSection, iChannelHandle, iKeyHandle );
+    ShotSequenceTools::DeleteCameraKey( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iSections, iChannelHandles, iKeyHandles );
 }
 
 //static
 void
-ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+ShotSequenceTools::DeleteCameraKey( ISequencer* iSequencer, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles )
 {
-    ShotSequenceTools::DeleteCameraKey( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSection, iChannelHandle, iKeyHandle );
+    ShotSequenceTools::DeleteCameraKey( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSections, iChannelHandles, iKeyHandles );
 }
 
 //static
 void
-ShotSequenceTools::DeleteCameraKey( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+ShotSequenceTools::DeleteCameraKey( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles )
 {
-    if( !iSection )
+    check( iSections.Num() == iChannelHandles.Num() && iChannelHandles.Num() == iKeyHandles.Num() );
+
+    if( !iKeyHandles.Num() )
         return;
 
-    TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandle.Cast<FMovieSceneFloatChannel>();
-    FMovieSceneFloatChannel* float_channel = channel_handle.Get();
-    if( !float_channel )
-        return;
+    const FScopedTransaction transaction( LOCTEXT( "transaction.delete-storycamera-transform", "Delete camera keys" ) );
 
-    //---
+    for( int i = 0; i < iKeyHandles.Num(); i++ )
+    {
+        TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandles[i].Cast<FMovieSceneFloatChannel>();
+        FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+        if( !float_channel )
+            return;
 
-    const FScopedTransaction transaction( LOCTEXT( "DeleteCameraKey", "Delete camera key" ) );
+        //---
 
-    iSection->Modify();
+        iSections[i]->Modify();
 
-    float_channel->DeleteKeys( MakeArrayView( &iKeyHandle, 1 ) );
+        float_channel->DeleteKeys( iKeyHandles.Slice( i, 1 ) );
+    }
 
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    // iChannelHandles are invalid at this point
 }
 
 //---
@@ -1111,7 +1117,7 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "StopPilotingCamera", "Stop Piloting Storyboard Camera" ) );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.stop-piloting-storycamera", "Stop Piloting Storyboard Camera" ) );
 
     //---
 

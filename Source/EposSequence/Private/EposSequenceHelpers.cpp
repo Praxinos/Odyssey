@@ -446,6 +446,28 @@ FDrawing::SetMaterial( UMaterialInstance* iMaterial )
 }
 
 //static
+FDrawing
+ShotSequenceHelpers::ConvertToDrawing( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+{
+    FDrawing drawing;
+
+    if( !iSection.IsValid()
+        || iKeyHandle == FKeyHandle::Invalid() )
+        return drawing;
+
+    TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = iChannelHandle.Cast<FMovieSceneObjectPathChannel>();
+    FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
+    if( !object_channel )
+        return drawing;
+
+    drawing.mSection = iSection;
+    drawing.mKeyHandle = iKeyHandle;
+    drawing.mChannel = object_channel;
+
+    return drawing;
+}
+
+//static
 ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult
 ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
 {
@@ -554,7 +576,7 @@ ShotSequenceHelpers::GetDrawing( IMovieScenePlayer& iPlayer, UMovieSceneSequence
     if( !result.mTrack.IsValid() || !result.mSections.Num() )
         return drawing;
 
-    UMovieScenePrimitiveMaterialSection* section = result.mSections[0].Get();
+    TWeakObjectPtr<UMovieScenePrimitiveMaterialSection> section = result.mSections[0];
     FMovieSceneObjectPathChannel* channel = &section->MaterialChannel;
 
     //---
@@ -688,7 +710,29 @@ FKeyOpacity::SetOpacity( float iOpacity )
 
     mSection->Modify();
 
-    AssignValue( mChannel, mKeyHandle, iOpacity );
+    AssignValue( mChannel, mKeyHandle, FMath::Clamp( iOpacity, 0.f, 1.f ) );
+}
+
+//static
+FKeyOpacity
+ShotSequenceHelpers::ConvertToOpacityKey( TWeakObjectPtr<UMovieSceneSection> iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle )
+{
+    FKeyOpacity opacity_key;
+
+    if( !iSection.IsValid()
+        || iKeyHandle == FKeyHandle::Invalid() )
+        return opacity_key;
+
+    TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandle.Cast<FMovieSceneFloatChannel>();
+    FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+    if( !float_channel )
+        return opacity_key;
+
+    opacity_key.mSection = iSection;
+    opacity_key.mKeyHandle = iKeyHandle;
+    opacity_key.mChannel = float_channel;
+
+    return opacity_key;
 }
 
 //static
