@@ -227,7 +227,7 @@ private:
 };
 
 const FGuid FOdysseyFolderLayerObjectVersion::GUID(0x86E82FF2, 0x93913CF7, 0x85b41FC2, 0x4CCC10D9);
-FCustomVersionRegistration FOdysseyFolderLayerObjectVersionRegistration(FOdysseyFolderLayerObjectVersion::GUID, FOdysseyFolderLayerObjectVersion::LatestVersion, TEXT("FOdysseyFolderLayerObjectVersion::SavePixelFormat"));
+FCustomVersionRegistration FOdysseyFolderLayerObjectVersionRegistration(FOdysseyFolderLayerObjectVersion::GUID, FOdysseyFolderLayerObjectVersion::LatestVersion, TEXT("FOdysseyFolderLayerObjectVersion::SaveBlendable"));
 
 void
 FOdysseyFolderLayer::Serialize(FArchive &Ar)
