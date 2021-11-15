@@ -227,7 +227,7 @@ private:
 };
 
 const FGuid FOdysseyFolderLayerObjectVersion::GUID(0x86E82FF2, 0x93913CF7, 0x85b41FC2, 0x4CCC10D9);
-FCustomVersionRegistration FOdysseyFolderLayerObjectVersionRegistration(FOdysseyFolderLayerObjectVersion::GUID, FOdysseyFolderLayerObjectVersion::LatestVersion, TEXT("FOdysseyFolderLayerObjectVersion::SaveBlendable"));
+//FCustomVersionRegistration FOdysseyFolderLayerObjectVersionRegistration(FOdysseyFolderLayerObjectVersion::GUID, FOdysseyFolderLayerObjectVersion::LatestVersion, TEXT("FOdysseyFolderLayerObjectVersion::SavePixelFormat"));
 
 void
 FOdysseyFolderLayer::Serialize(FArchive &Ar)
@@ -235,10 +235,10 @@ FOdysseyFolderLayer::Serialize(FArchive &Ar)
     IOdysseyLayer::Serialize(Ar);
 
 	//Set the Object Version
-	Ar.UsingCustomVersion(FOdysseyFolderLayerObjectVersion::GUID);
+	//Ar.UsingCustomVersion(FOdysseyFolderLayerObjectVersion::GUID);
 
     //Manage old saving order
-    if (Ar.CustomVer(FOdysseyFolderLayerObjectVersion::GUID) < FOdysseyFolderLayerObjectVersion::SaveBlendable)
+    /*if (Ar.CustomVer(FOdysseyFolderLayerObjectVersion::GUID) < FOdysseyFolderLayerObjectVersion::SaveBlendable)
     {
         int bm = static_cast< int >( mBlendingMode );
         Ar << bm;
@@ -249,7 +249,7 @@ FOdysseyFolderLayer::Serialize(FArchive &Ar)
             mBlendingMode = (::ULIS::eBlendMode)bm;
         }
         return;
-    }
+    }*/
 
     SerializeImageBlendingCapability(Ar);
     Ar << mIsOpen;

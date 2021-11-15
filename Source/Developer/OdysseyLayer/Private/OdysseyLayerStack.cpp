@@ -463,7 +463,7 @@ private:
 };
 
 const FGuid FOdysseyLayerStackObjectVersion::GUID(0x09295A41, 0x4809652E, 0xBE684D8E, 0x5BBAC5E0);
-FCustomVersionRegistration FOdysseyLayerStackObjectVersionRegistration(FOdysseyLayerStackObjectVersion::GUID, FOdysseyLayerStackObjectVersion::LatestVersion, TEXT("FOdysseyLayerStackObjectVersion::SavePixelFormat"));
+//FCustomVersionRegistration FOdysseyLayerStackObjectVersionRegistration(FOdysseyLayerStackObjectVersion::GUID, FOdysseyLayerStackObjectVersion::LatestVersion, TEXT("FOdysseyLayerStackObjectVersion::SavePixelFormat"));
 
 FArchive& 
 operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
@@ -472,7 +472,7 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
         return Ar;
 
     //Set the Object Version
-    Ar.UsingCustomVersion(FOdysseyLayerStackObjectVersion::GUID);
+    //Ar.UsingCustomVersion(FOdysseyLayerStackObjectVersion::GUID);
 
     Ar << ioSaveLayerStack->mWidth;
     Ar << ioSaveLayerStack->mHeight;
@@ -482,8 +482,8 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
     TSharedPtr<IOdysseyLayer> layer = ioSaveLayerStack->mLayerRoot;
     Ar << (layer);
 
-    if( Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat )
-    {
+    //if( Ar.CustomVer(FOdysseyLayerStackObjectVersion::GUID) >= FOdysseyLayerStackObjectVersion::SavePixelFormat )
+    //{
         uint32 fmt = static_cast< uint32 >( ioSaveLayerStack->mOutputFormat );
         Ar << fmt;
 
@@ -492,11 +492,11 @@ operator<<(FArchive &Ar, FOdysseyLayerStack* ioSaveLayerStack )
             fmt = (fmt & ULIS_E_PROFILE) | ULIS_W_PROFILE( ::ULIS::FFormatMetrics::DefaultProfileCodeForColorModel( static_cast< ::ULIS::eColorModel >( ULIS_R_MODEL( fmt ) ) ) );
 
         ioSaveLayerStack->mOutputFormat = static_cast< ULIS::eFormat >( fmt );
-    }
-    else
+    //}
+    /*else
     {
         ioSaveLayerStack->mOutputFormat = ::ULIS::Format_BGRA8;
-    }
+    }*/
 
     if (Ar.IsLoading())
     {

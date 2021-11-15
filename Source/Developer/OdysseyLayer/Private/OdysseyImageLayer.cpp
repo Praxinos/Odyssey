@@ -220,7 +220,7 @@ private:
 };
 
 const FGuid FOdysseyImageLayerObjectVersion::GUID(0xE2CA928C, 0x4FCB03A0, 0xE22252AA, 0xA88FC0B5);
-FCustomVersionRegistration FOdysseyImageLayerObjectVersionRegistration(FOdysseyImageLayerObjectVersion::GUID, FOdysseyImageLayerObjectVersion::LatestVersion, TEXT("FOdysseyImageLayerObjectVersion::SavePixelFormat"));
+//FCustomVersionRegistration FOdysseyImageLayerObjectVersionRegistration(FOdysseyImageLayerObjectVersion::GUID, FOdysseyImageLayerObjectVersion::LatestVersion, TEXT("FOdysseyImageLayerObjectVersion::SavePixelFormat"));
 
 void
 FOdysseyImageLayer::Serialize(FArchive &Ar)
@@ -228,20 +228,20 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
     IOdysseyLayer::Serialize(Ar);
 
     //Set the Object Version
-    Ar.UsingCustomVersion(FOdysseyImageLayerObjectVersion::GUID);
+    //Ar.UsingCustomVersion(FOdysseyImageLayerObjectVersion::GUID);
 
     //Manage old saving order
-    if( Ar.CustomVer( FOdysseyImageLayerObjectVersion::GUID ) >= FOdysseyImageLayerObjectVersion::SaveBlendable )
-    {
+    //if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SaveBlendable)
+    //{
         SerializeImageBlendingCapability( Ar );
         Ar << mIsAlphaLocked;
-    }
-    else
+    //}
+    /*else
     {
         //Manage old saving order
         Ar << mIsAlphaLocked;
         SerializeImageBlendingCapability( Ar );
-    }
+    }*/
 
     //Load/Save Size
     int width = mBlock ? mBlock->Width() : 0;
@@ -252,8 +252,8 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
 
     //Load/Save Format (compatibility with version version which don't save format)
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    if( Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat )
-    {
+    //if( Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SavePixelFormat )
+    //{
         uint32 fmt = static_cast< uint32 >( format );
         Ar << fmt;
 
@@ -262,7 +262,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
             fmt = (fmt & ULIS_E_PROFILE) | ULIS_W_PROFILE( ::ULIS::FFormatMetrics::DefaultProfileCodeForColorModel( static_cast< ::ULIS::eColorModel >( ULIS_R_MODEL( fmt ) ) ) );
 
         format = static_cast< ULIS::eFormat >( fmt );
-    }
+    //}
 
     //Create mBlock if we are loading
     if (Ar.IsLoading())
@@ -273,11 +273,11 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
     }
 
     //Load/Save mBlock content (compatibility with version which were saving/loading a TArray, but now we use TArray64)
-    if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SaveBlockArray64)
-    {
+    //if (Ar.CustomVer(FOdysseyImageLayerObjectVersion::GUID) >= FOdysseyImageLayerObjectVersion::SaveBlockArray64)
+    //{
         Ar << mBlock->GetArray();
-    }
-    else
+    //}
+    /*else
     {
         TArray< uint8 > layerData = TArray< uint8 >();
         layerData.AddUninitialized(mBlock->GetBlock()->BytesTotal());
@@ -286,7 +286,7 @@ FOdysseyImageLayer::Serialize(FArchive &Ar)
         for (int j = 0; j < layerData.Num(); j++) {
             *( mBlock->GetBlock()->Bits() + j ) = layerData[j];
         }
-    }
+    }*/
 }
 
 //---
