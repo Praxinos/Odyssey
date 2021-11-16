@@ -91,12 +91,16 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     UMovieSceneSubSection& subsection = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
-    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, subsection );
 
-    FText camera_name = FText::FromString( camera->GetActorLabel() ); //TODO: or maybe get the binding (aka track) name like planes ?
+    FGuid camera_binding;
+    BoardSequenceTools::GetCamera( sequencer, subsection, &camera_binding );
 
-    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "camera-section-label", "Camera: {0}" ), camera_name ) );
+    FText camera_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "camera-section-label", "Camera: {0}" ), camera_track_text ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-camera-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for the 9 (maybe more or less) channels
                                 LOCTEXT( "delete-camera-key-tooltip", "Delete the current key" ),
@@ -120,31 +124,24 @@ SCinematicBoardSectionCamera::GetAreaTooltipText() const //override
 {
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     UMovieSceneSubSection& subsection = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
     FGuid camera_binding;
     ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, subsection, &camera_binding );
 
-    UMovieSceneSequence* inner_sequence = subsection.GetSequence();
-    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
-    FMovieScenePossessable* possessable = inner_moviescene ? inner_moviescene->FindPossessable( camera_binding ) : nullptr;
+    FText camera_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
 
     //-
 
-    FString camera_track_name = possessable ? possessable->GetName() : FString();
-    FString camera_actor_name = camera ? camera->GetActorLabel() : FString();
-
-    FText camera_track_text = FText::Format( LOCTEXT( "tooltip-camera-area-track", "Camera: {0}" ), FText::FromString( camera_track_name ) );
-    FText camera_actor_text = FText::Format( LOCTEXT( "tooltip-camera-area-actor", "Actor: {0}" ), FText::FromString( camera_actor_name ) );
-    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-camera-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
-
-    if( !camera_track_name.Equals( camera_actor_name ) )
-        return FText::Join( FText::FromString( TEXT( "\n" ) ), camera_track_text, camera_actor_text, num_keys_text );
-
-    if( camera_track_name.IsEmpty() )
+    if( camera_track_text.IsEmpty() )
         return LOCTEXT( "tooltip-camera-no", "No camera" );
 
-    return FText::Join( FText::FromString( TEXT( "\n" ) ), camera_track_text, num_keys_text );
+    FText camera_text = FText::Format( LOCTEXT( "tooltip-camera-area-track", "Camera: {0}" ), camera_track_text );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-camera-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), camera_text, num_keys_text );
 }
 
 //---

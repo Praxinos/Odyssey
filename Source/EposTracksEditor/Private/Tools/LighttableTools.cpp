@@ -25,11 +25,7 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
 
     for( auto section : result.mSections )
     {
-        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
-        if( !section_material )
-            continue;
-
-        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
         check( channels.Num() == 1 );
         FMovieSceneObjectPathChannel* channel = channels[0];
 
@@ -95,11 +91,7 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 
     for( auto section : result.mSections )
     {
-        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
-        if( !section_material )
-            continue;
-
-        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
         check( channels.Num() == 1 );
         FMovieSceneObjectPathChannel* channel = channels[0];
 
@@ -167,11 +159,7 @@ LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, F
 
     for( auto section : result.mSections )
     {
-        UMovieScenePrimitiveMaterialSection* section_material = Cast<UMovieScenePrimitiveMaterialSection>( section );
-        if( !section_material )
-            continue;
-
-        TArrayView<FMovieSceneObjectPathChannel*> channels = section_material->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
+        TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
         check( channels.Num() == 1 );
         FMovieSceneObjectPathChannel* channel = channels[0];
 

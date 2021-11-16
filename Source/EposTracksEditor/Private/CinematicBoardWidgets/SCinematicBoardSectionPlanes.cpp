@@ -458,9 +458,17 @@ SCinematicBoardSectionPlaneKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKe
 FText
 SCinematicBoardSectionPlaneKeys::GetAreaTooltipText() const //override
 {
-    FText plane_track_text = FText::FromString( mBinding.GetName() );
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
 
-    return FText::Format( LOCTEXT( "tooltip-plane-transform", "Plane: {0}\nKeys: {1}" ), plane_track_text, GetMetaChannel()->NumMetaKeys() );
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
+
+    FText plane_text = FText::Format( LOCTEXT( "tooltip-plane-transform-area-plane-name", "Plane: {0}" ), plane_track_text );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-plane-transform-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), plane_text, num_keys_text );
 }
 
 //---
@@ -764,12 +772,12 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 FText
 SCinematicBoardSectionPlaneMaterialKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
 {
-    FText plane_track_text = FText::FromString( mBinding.GetName() );
-    plane_track_text = FText::Format( LOCTEXT( "tooltip-plane-material-key-plane-name", "Plane: {0}" ), plane_track_text );
-
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
     TMap<FString, FString> map; // Maybe use a TMultiMap if we want to display multiple textures inside 1 material
     for( auto pair : iKeys->GetMetaKeys() )
@@ -789,7 +797,7 @@ SCinematicBoardSectionPlaneMaterialKeys::GetKeyTooltipText( TSharedPtr<FMetaChan
     }
 
     TArray<FText> lines;
-    lines.Add( plane_track_text );
+    lines.Add( FText::Format( LOCTEXT( "tooltip-plane-material-key-plane-name", "Plane: {0}" ), plane_track_text ) );
     for( const auto& pair : map )
     {
         lines.Add( FText::Format( LOCTEXT( "tooltip-plane-material-key-value-material", "Material: {0}" ), FText::FromString( pair.Key ) ) );
@@ -802,9 +810,17 @@ SCinematicBoardSectionPlaneMaterialKeys::GetKeyTooltipText( TSharedPtr<FMetaChan
 FText
 SCinematicBoardSectionPlaneMaterialKeys::GetAreaTooltipText() const //override
 {
-    FText plane_track_text = FText::FromString( mBinding.GetName() );
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
 
-    return FText::Format( LOCTEXT( "tooltip-plane-material", "Plane: {0}\nKeys: {1}" ), plane_track_text, GetMetaChannel()->NumMetaKeys() );
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
+
+    FText plane_text = FText::Format( LOCTEXT( "tooltip-plane-material-area-plane-name", "Plane: {0}" ), plane_track_text );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-plane-material-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), plane_text, num_keys_text );
 }
 
 FCursorReply
@@ -1042,11 +1058,14 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
     //-
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FText plane_name = FText::FromString( mBinding.GetName() );
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
-    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_name ) );
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_track_text ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-plane-opacity-key-label", "Delete" ),
                                 LOCTEXT( "delete-plane-opacity-key-tooltip", "Delete the current key" ),
@@ -1068,8 +1087,12 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 FText
 SCinematicBoardSectionPlaneOpacityKeys::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
 {
-    FText plane_track_text = FText::FromString( mBinding.GetName() );
-    plane_track_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-key-plane-name", "Plane: {0}" ), plane_track_text );
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
     TArray<float> opacities;
     for( const auto& pair : iKeys->GetMetaKeys() )
@@ -1091,7 +1114,7 @@ SCinematicBoardSectionPlaneOpacityKeys::GetKeyTooltipText( TSharedPtr<FMetaChann
     }
 
     TArray<FText> lines;
-    lines.Add( plane_track_text );
+    lines.Add( FText::Format( LOCTEXT( "tooltip-plane-opacity-key-plane-name", "Plane: {0}" ), plane_track_text ) );
     for( auto opacity : opacities )
         lines.Add( FText::Format( LOCTEXT( "tooltip-plane-opacity-key-value", "Opacity: {0}" ), FText::AsPercent( opacity ) ) );
 
@@ -1101,10 +1124,17 @@ SCinematicBoardSectionPlaneOpacityKeys::GetKeyTooltipText( TSharedPtr<FMetaChann
 FText
 SCinematicBoardSectionPlaneOpacityKeys::GetAreaTooltipText() const //override
 {
-    FText plane_track_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-area-plane-name", "Plane: {0}" ), FText::FromString( mBinding.GetName() ) );
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
+
+    FText plane_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-area-plane-name", "Plane: {0}" ), plane_track_text );
     FText num_keys_text = FText::Format( LOCTEXT( "tooltip-plane-opacity-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
 
-    return FText::Join( FText::FromString( TEXT( "\n" ) ), plane_track_text, num_keys_text );
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), plane_text, num_keys_text );
 }
 
 FCursorReply
@@ -1220,15 +1250,17 @@ void
 SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 {
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FText plane_name = FText::FromString( mBinding.GetName() );
-    FText current_frame = FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) );
+    FText plane_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
+    FText current_frame_text = FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) );
 
     //---
 
-    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_name ) );
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_track_text ) );
 
     auto DetachPlane = [this]()
     {
@@ -1245,7 +1277,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     };
 
     ioMenuBuilder.AddMenuEntry(
-        FText::Format( LOCTEXT( "detach-plane-label", "Detach {0}" ), plane_name ),
+        FText::Format( LOCTEXT( "detach-plane-label", "Detach {0}" ), plane_track_text ),
         LOCTEXT( "detach-plane-tooltip", "Detach the plane" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.DetachPlane" ),
         FUIAction(
@@ -1264,7 +1296,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     };
 
     ioMenuBuilder.AddMenuEntry(
-        FText::Format( LOCTEXT( "delete-plane-label", "Delete {0}" ), plane_name ),
+        FText::Format( LOCTEXT( "delete-plane-label", "Delete {0}" ), plane_track_text ),
         LOCTEXT( "delete-plane-tooltip", "Delete the plane and its corresponding actor" ),
         FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
         FUIAction( FExecuteAction::CreateLambda( DeletePlane ) ) );
@@ -1292,7 +1324,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     };
 
     ioMenuBuilder.AddMenuEntry(
-        FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame ),
+        FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame_text ),
         LOCTEXT( "create-drawing-tooltip", "Create a drawing\n(set the current frame where to create the drawing keyframe)" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ),
         FUIAction(
@@ -1349,7 +1381,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     };
 
     ioMenuBuilder.AddSubMenu(
-        FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create Opacity at {0}" ), current_frame ),
+        FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create Opacity at {0}" ), current_frame_text ),
         LOCTEXT( "create-drawing-opacity-tooltip", "Create the drawing opacity\n(set the current frame where to set the opacity)" ),
         FNewMenuDelegate::CreateLambda( CreateOpacitySubMenu ),
         FUIAction( FExecuteAction(),
