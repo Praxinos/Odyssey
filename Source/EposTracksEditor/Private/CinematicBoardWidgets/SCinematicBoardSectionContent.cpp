@@ -37,6 +37,7 @@ SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<F
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionCamera, iBoardSection )
+            .OptionalWidgetsVisibility( this, &SCinematicBoardSectionContent::OptionalWidgetsVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()

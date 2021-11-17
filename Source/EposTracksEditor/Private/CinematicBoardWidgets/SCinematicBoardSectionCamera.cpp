@@ -9,18 +9,379 @@
 #include "KeyDrawParams.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "EposSequenceHelpers.h"
+#include "Shot/ShotSequence.h"
+#include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionCamera"
 
 //---
 
+class SInlineEditableTextBlockOnDoubleClick3
+    : public SInlineEditableTextBlock
+{
+    virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
+};
+
+FReply
+SInlineEditableTextBlockOnDoubleClick3::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) //override
+{
+    SInlineEditableTextBlock::OnMouseButtonDoubleClick( InMyGeometry, InMouseEvent );
+
+    EnterEditingMode();
+
+    return FReply::Handled();
+}
+
+//---
+
+class EPOSTRACKSEDITOR_API SCinematicBoardSectionCameraTitle
+    : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionCameraTitle )
+        {}
+        SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
+    SLATE_END_ARGS()
+
+    // Construct the widget
+    void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
+
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
+private:
+    FSlateColor         GetBackgroundTint() const;
+
+    FText               HandleTitleText() const;
+    void                HandleTitleTextOnCommited( const FText& iText, ETextCommit::Type iType );
+
+private:
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    TAttribute<EVisibility>             mOptionalWidgetsVisibility;
+};
+
 void
-SCinematicBoardSectionCamera::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+{
+    mBoardSection = iBoardSection;
+
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
+
+    //---
+
+    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
+
+    auto PilotEject = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
+            BoardSequenceTools::EjectCamera( sequencer, subsection_object, local_frame );
+        else
+            BoardSequenceTools::PilotCamera( sequencer, subsection_object, local_frame );
+    };
+
+    auto CanPilotEject = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        return BoardSequenceTools::CanPilotCamera( sequencer, subsection_object, local_frame )
+                || BoardSequenceTools::CanEjectCamera( sequencer, subsection_object, local_frame );
+    };
+
+    auto IsPilotChecked = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        return BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object );
+    };
+
+    auto IsPilotEjectVisible = [this]() -> bool
+    {
+        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+            && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
+    };
+
+    TAttribute<FText> GetTooltip = MakeAttributeLambda(
+        [this]() -> FText
+        {
+            ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+            const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+            FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+            if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
+                return LOCTEXT( "eject-camera-tooltip", "Eject the existing camera" );
+            else
+                return LOCTEXT( "pilot-camera-tooltip", "Pilot the existing camera (create a camera and set the current frame where to create the camera keyframe)" );
+        } );
+
+    TAttribute<FSlateIcon> GetIcon = MakeAttributeLambda(
+        [this]() -> FSlateIcon
+        {
+            ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+            const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+            FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+            if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
+                return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.EjectCamera" );
+            else
+                return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.PilotCamera" );
+        } );
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( PilotEject ),
+            FCanExecuteAction::CreateLambda( CanPilotEject ),
+            FIsActionChecked::CreateLambda( IsPilotChecked ),
+            FIsActionButtonVisible::CreateLambda( IsPilotEjectVisible )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        GetTooltip,
+        GetIcon,
+        EUserInterfaceActionType::ToggleButton );
+
+    //-
+
+    auto Snap = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        BoardSequenceTools::SnapCameraToViewport( sequencer, subsection_object, local_frame );
+    };
+
+    auto CanSnap = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        return BoardSequenceTools::CanSnapCameraToViewport( sequencer, subsection_object, local_frame );
+    };
+
+    auto IsSnapVisible = [this]() -> bool
+    {
+        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( Snap ),
+            FCanExecuteAction::CreateLambda( CanSnap ),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( IsSnapVisible )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "snap-camera-to-viewport-tooltip", "Snap the existing camera to the viewport (create a camera and set the current frame where to create the camera keyframe)" ),
+        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.SnapCameraToViewport" ) );
+
+    //---
+
+    ChildSlot
+    .HAlign( HAlign_Fill )
+    [
+        SNew( SBorder )
+        .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
+        .BorderBackgroundColor( this, &SCinematicBoardSectionCameraTitle::GetBackgroundTint )
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                LeftToolbarBuilder.MakeWidget()
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .HAlign( HAlign_Center )
+            .VAlign( VAlign_Center )
+            [
+                SNew( SInlineEditableTextBlockOnDoubleClick3 )
+                .Text( this, &SCinematicBoardSectionCameraTitle::HandleTitleText )
+                .OnTextCommitted( this, &SCinematicBoardSectionCameraTitle::HandleTitleTextOnCommited )
+            ]
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
+            ]
+        ]
+    ];
+}
+
+//---
+
+FCursorReply
+SCinematicBoardSectionCameraTitle::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+{
+    return FCursorReply::Cursor( EMouseCursor::Default );
+}
+
+FReply
+SCinematicBoardSectionCameraTitle::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    // To not trigger the OnMouseButtonDown of SSequencerTrackArea
+    // Otherwise OnMouseButtonMove and OnMouseButtonUp will also trigger
+    // And OnMouseButtonDown will attempt to start a selection or a drag of the section (normal behavior)
+    // But as OnMouseButtonUp is handle here, the one of SSequencerTrackArea won't be handle and the normal section drag won't finish clean
+    // (For example, the cursor won't update to crosshair after the up on the empty zone of the SSequencerTrackArea)
+    //return FReply::Handled();
+
+    // To be able to move the section through a title plane, otherwise (Handled) it's no more possible
+    // Let's see if it's a problem to not handled now (see the comment above)
+    // (Or maybe process the Up here ? to avoid this problem ? but in this case, it should also be unhandled to allow SSequencerTrackArea to manage the drag section)
+    return FReply::Unhandled();
+}
+
+FReply
+SCinematicBoardSectionCameraTitle::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        UMovieSceneSection* section_object = board_section->GetSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+        // To unselect section(s)
+        sequencer->EmptySelection();
+        // And then select the current one
+        sequencer->SelectSection( section_object );
+
+        // To unselect all actors
+        GEditor->SelectNone( true, true );
+        // And then select the current one
+        GEditor->SelectActor( camera, true, true );
+
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+FText
+SCinematicBoardSectionCameraTitle::HandleTitleText() const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    FGuid camera_binding;
+    BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
+
+    UMovieSceneSequence* sequence = subsection_object->GetSequence();
+    UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
+
+    return movie_scene ? movie_scene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
+}
+
+void
+SCinematicBoardSectionCameraTitle::HandleTitleTextOnCommited( const FText& iText, ETextCommit::Type iType )
+{
+    if( iType != ETextCommit::OnEnter )
+        return;
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    FGuid camera_binding;
+    BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
+
+    UMovieSceneSequence* sequence = subsection_object->GetSequence();
+    UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
+    FMovieScenePossessable* possessable = movie_scene ? movie_scene->FindPossessable( camera_binding ) : nullptr;
+    if( !possessable )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "SetTrackCameraName", "Set Track Camera Name" ) );
+
+    FMovieScenePossessable new_possessable( *possessable );
+    new_possessable.SetName( iText.ToString() );
+    movie_scene->ReplacePossessable( camera_binding, new_possessable );
+
+    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+FSlateColor
+SCinematicBoardSectionCameraTitle::GetBackgroundTint() const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    ACineCameraActor* camera = BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+    // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
+    if( camera && camera->IsSelected() )
+        return FEditorStyle::GetSlateColor( "SelectionColor_Pressed" );
+
+    return FSlateColor( FLinearColor( FColor( 48, 48, 48, 255 ) ) );
+}
+
+//---
+//---
+//---
+
+class EPOSTRACKSEDITOR_API SCinematicBoardSectionCameraTransform
+    : public SMetaKeysArea
+{
+public:
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionCameraTransform )
+        {}
+    SLATE_END_ARGS()
+
+    // Construct the widget
+    void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
+
+    // SWidget overrides
+    virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
+
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
+protected:
+    // SMetaKeysArea overrides
+    virtual TSharedPtr<FMetaChannel>        GetMetaChannel() override;
+    virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
+    virtual void                            RebuildMetaChannel() override;
+
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) override;
+
+    virtual FText GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const override;
+    virtual FText GetAreaTooltipText() const override;
+
+    virtual const FSlateBrush* GetBackgroundBrush() const override;
+};
+
+//---
+
+void
+SCinematicBoardSectionCameraTransform::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
 {
     SMetaKeysArea::Construct( SMetaKeysArea::FArguments(), iBoardSection );
 
@@ -37,19 +398,19 @@ SCinematicBoardSectionCamera::Construct( const FArguments& InArgs, TSharedRef<FC
 //---
 
 TSharedPtr<FMetaChannel>
-SCinematicBoardSectionCamera::GetMetaChannel() //override
+SCinematicBoardSectionCameraTransform::GetMetaChannel() //override
 {
     return mBoardSection.Pin()->GetCameraTransformMetaChannel();
 }
 
 TSharedPtr<const FMetaChannel>
-SCinematicBoardSectionCamera::GetMetaChannel() const //override
+SCinematicBoardSectionCameraTransform::GetMetaChannel() const //override
 {
     return mBoardSection.Pin()->GetCameraTransformMetaChannel();
 }
 
 void
-SCinematicBoardSectionCamera::RebuildMetaChannel() //override
+SCinematicBoardSectionCameraTransform::RebuildMetaChannel() //override
 {
     mBoardSection.Pin()->ReBuildCameraTransformMetaChannel();
 }
@@ -57,7 +418,7 @@ SCinematicBoardSectionCamera::RebuildMetaChannel() //override
 //---
 
 bool
-SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
+SCinematicBoardSectionCameraTransform::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
     auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys )
     {
@@ -114,13 +475,13 @@ SCinematicBoardSectionCamera::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, 
 }
 
 FText
-SCinematicBoardSectionCamera::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
+SCinematicBoardSectionCameraTransform::GetKeyTooltipText( TSharedPtr<FMetaChannel> iKeys ) const //override
 {
     return GetAreaTooltipText();
 }
 
 FText
-SCinematicBoardSectionCamera::GetAreaTooltipText() const //override
+SCinematicBoardSectionCameraTransform::GetAreaTooltipText() const //override
 {
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     UMovieSceneSubSection& subsection = board_section->GetSubSectionObject();
@@ -147,31 +508,31 @@ SCinematicBoardSectionCamera::GetAreaTooltipText() const //override
 //---
 
 FCursorReply
-SCinematicBoardSectionCamera::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+SCinematicBoardSectionCameraTransform::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
     return SMetaKeysArea::OnCursorQuery( MyGeometry, CursorEvent );
 }
 
 FReply
-SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+SCinematicBoardSectionCameraTransform::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
     return SMetaKeysArea::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
-SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+SCinematicBoardSectionCameraTransform::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
     return SMetaKeysArea::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
 FReply
-SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+SCinematicBoardSectionCameraTransform::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
     return SMetaKeysArea::OnMouseMove( MyGeometry, MouseEvent );
 }
 
 const FSlateBrush*
-SCinematicBoardSectionCamera::GetBackgroundBrush() const //override
+SCinematicBoardSectionCameraTransform::GetBackgroundBrush() const //override
 {
     static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .15f, .06f, .14f ) );
 
@@ -179,9 +540,37 @@ SCinematicBoardSectionCamera::GetBackgroundBrush() const //override
 }
 
 int32
-SCinematicBoardSectionCamera::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+SCinematicBoardSectionCameraTransform::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
     return SMetaKeysArea::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+}
+
+//---
+//---
+//---
+
+void
+SCinematicBoardSectionCamera::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+{
+    mBoardSection = iBoardSection;
+
+    mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
+
+    ChildSlot
+    [
+        SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SCinematicBoardSectionCameraTitle, iBoardSection )
+            .OptionalWidgetsVisibility( mOptionalWidgetsVisibility )
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SCinematicBoardSectionCameraTransform, iBoardSection )
+        ]
+    ];
 }
 
 #undef LOCTEXT_NAMESPACE
