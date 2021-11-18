@@ -20,6 +20,7 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
+#include "PlaneActor.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -1289,6 +1290,67 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
     iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseLinearOnly() );
+}
+
+//---
+
+//static
+bool
+ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType )
+{
+    TArray<TWeakObjectPtr<APlaneActor>> planes;
+    TArray<float> current_distances;
+    TArray<FVector> old_scales;
+    TArray<FVector> old_scales_camera100;
+    for( auto plane : ioPlanes )
+    {
+        if( !plane.IsValid() || !ShotSequenceTools::CanMoveAndScalePlane( plane.Get(), ioCamera ) )
+            continue;
+
+        planes.Add( plane );
+        current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), plane->GetActorLocation() ) );
+        old_scales.Add( plane->GetActorScale3D() );
+        old_scales_camera100.Add( ComputePlaneScale( ioCamera, current_distances.Last() ) );
+    }
+
+    ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
+
+    for( int i = 0; i < planes.Num(); i++ )
+    {
+        APlaneActor* plane = planes[i].Get();
+        check( plane );
+        float current_distance = current_distances[i];
+        FVector old_scale = old_scales[i];
+        FVector old_scale_camera100 = old_scales_camera100[i];
+
+        switch( iScaleType )
+        {
+            case EScalePlane::kFitToCamera:
+            {
+                FVector scale = ComputePlaneScale( ioCamera, current_distance );
+                plane->SetActorScale3D( scale );
+            }
+            break;
+
+            case EScalePlane::kRelativeScale:
+            {
+                FVector new_scale_camera100 = ComputePlaneScale( ioCamera, current_distance );
+                FVector ratio = new_scale_camera100 / old_scale_camera100;
+                FVector new_scale = old_scale * ratio;
+
+                plane->SetActorScale3D( new_scale );
+            }
+            break;
+
+            case EScalePlane::kNo:
+                // nothing to do
+                break;
+
+            default: checkNoEntry();
+        }
+    }
+
+    return true;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -673,6 +673,9 @@ private:
     static void GotoPreviousCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
     static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
+public:
+    static bool SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType );
+
 // Inside EposSequenceTools_Plane
 public:
     /**

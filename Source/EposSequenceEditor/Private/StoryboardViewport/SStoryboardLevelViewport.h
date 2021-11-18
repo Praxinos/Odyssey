@@ -14,6 +14,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
+class ACineCameraActor;
 class APlaneActor;
 class FEposSequenceEditorToolkit;
 class FLevelViewportLayout;
@@ -142,6 +143,8 @@ private:
     float GetPlayTimeMinDesiredWidth() const;
 
 private:
+    int32 GetScaleVisibleWidgetIndex() const;
+
     EVisibility GetMoveAndScalePlaneVisibility() const;
 
     float GetMoveAndScalePlaneDistance() const;
@@ -149,6 +152,11 @@ private:
 
     int32 GetScalePlaneType() const;
     void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
+
+    EVisibility GetCameraFocalLengthVisibility() const;
+
+    float GetCameraFocalLength() const;
+    void SetCameraFocalLength( float iFocalLength );
 
 private:
 
@@ -195,6 +203,7 @@ private:
 
     TSharedPtr<SSplitter> mNoteSplitter;
 
+    TWeakObjectPtr<ACineCameraActor>    mCameraToFocalLength;
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;

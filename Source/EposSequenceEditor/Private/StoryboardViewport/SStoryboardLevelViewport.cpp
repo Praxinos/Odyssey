@@ -268,6 +268,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //HACK: ue4
     TSharedPtr<SSpinBox<float>> planeDistanceSpinBox;
+    TSharedPtr<SSpinBox<float>> cameraFocalLengthSpinBox;
 
     const UEnum* scalePlaneEnum = FindObject<UEnum>( ANY_PACKAGE, TEXT( "EScalePlane" ) );
 
@@ -397,54 +398,113 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                         .HAlign(HAlign_Center)
                         .Padding(0, 5, 0, 2)
                         [
-                            SNew( SHorizontalBox )
-                            .Visibility( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility )
+                            SNew( SWidgetSwitcher )
+                            .WidgetIndex( this, &SStoryboardLevelViewport::GetScaleVisibleWidgetIndex )
 
-                            + SHorizontalBox::Slot()
-                            .AutoWidth()
-                            .VAlign(VAlign_Center)
-                            .Padding( 10, 0 )
+                            + SWidgetSwitcher::Slot()
                             [
-                                SNew(STextBlock)
-                                .ColorAndOpacity(Gray)
-                                .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
+                                SNew( SHorizontalBox )
+                                .Visibility( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility )
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign(VAlign_Center)
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    SAssignNew( planeDistanceSpinBox, SSpinBox<float> )
+                                    .ToolTipText( LOCTEXT( "PlaneDistanceTooltip", "Modify the distance between the selected plane and its parent camera." ) )
+                                    .PreventThrottling( true ) // To refresh the viewport during value change
+                                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                                    .Delta( 1 )
+                                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                                    .SliderExponentNeutralValue( 100 )
+                                    .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
+                                    .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign(VAlign_Center)
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    SNew( SEnumComboBox, scalePlaneEnum )
+                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
+                                    //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
+                                    //.ContentPadding( FMargin( 2, 0 ) )
+                                    //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
+                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
+                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
+                                ]
                             ]
 
-                            + SHorizontalBox::Slot()
-                            .AutoWidth()
+                            + SWidgetSwitcher::Slot()
                             [
-                                SAssignNew( planeDistanceSpinBox, SSpinBox<float> )
-                                .ToolTipText( LOCTEXT( "PlaneDistanceTooltip", "Modify the distance between the selected plane and its parent camera." ) )
-                                .PreventThrottling( true ) // To refresh the viewport during value change
-                                .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                                .Delta( 1 )
-                                .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                                .SliderExponentNeutralValue( 100 )
-                                .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
-                                .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
-                                .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
-                            ]
+                                SNew( SHorizontalBox )
+                                .Visibility( this, &SStoryboardLevelViewport::GetCameraFocalLengthVisibility )
 
-                            + SHorizontalBox::Slot()
-                            .AutoWidth()
-                            .VAlign(VAlign_Center)
-                            .Padding( 10, 0 )
-                            [
-                                SNew(STextBlock)
-                                .ColorAndOpacity(Gray)
-                                .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
-                            ]
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign(VAlign_Center)
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([=] { return FText::Format( LOCTEXT( "CameraFocalLengthLabel", "{0} Focal Length" ), mCameraToFocalLength.IsValid() ? FText::FromString( mCameraToFocalLength->GetActorLabel() ) : FText::GetEmpty() ); })
+                                ]
 
-                            + SHorizontalBox::Slot()
-                            .AutoWidth()
-                            [
-                                SNew( SEnumComboBox, scalePlaneEnum )
-                                .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
-                                //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
-                                //.ContentPadding( FMargin( 2, 0 ) )
-                                //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
-                                .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
-                                .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    SAssignNew( cameraFocalLengthSpinBox, SSpinBox<float> )
+                                    .ToolTipText( LOCTEXT( "CameraFocalLengthTooltip", "Modify the current focal length of the camera." ) )
+                                    .PreventThrottling( true ) // To refresh the viewport during value change
+                                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                                    .Delta( 1 )
+                                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                                    .SliderExponentNeutralValue( 100 )
+                                    .Value( this, &SStoryboardLevelViewport::GetCameraFocalLength )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLength )
+                                    .OnValueCommitted_Lambda( [=]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue ); } )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign(VAlign_Center)
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    SNew( SEnumComboBox, scalePlaneEnum )
+                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
+                                    //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
+                                    //.ContentPadding( FMargin( 2, 0 ) )
+                                    //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
+                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
+                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
+                                ]
                             ]
                         ]
                     ]
@@ -470,6 +530,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
     planeDistanceSpinBox->SetMinFractionalDigits( 4 );
     planeDistanceSpinBox->SetMaxFractionalDigits( 4 );
+    cameraFocalLengthSpinBox->SetMinFractionalDigits( 4 );
+    cameraFocalLengthSpinBox->SetMaxFractionalDigits( 4 );
 
     //---
 
@@ -710,6 +772,15 @@ FOptionalSize SStoryboardLevelViewport::GetDesiredViewportHeight() const
 
 //---
 
+int32
+SStoryboardLevelViewport::GetScaleVisibleWidgetIndex() const
+{
+    if( GetCameraFocalLengthVisibility().IsVisible() )
+        return 1;
+
+    return 0;
+}
+
 EVisibility
 SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility() const
 {
@@ -756,6 +827,45 @@ void
 SStoryboardLevelViewport::OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType )
 {
     mScalePlaneType = EScalePlane( iScalePlaneType );
+}
+
+EVisibility
+SStoryboardLevelViewport::GetCameraFocalLengthVisibility() const
+{
+    if( !mCameraToFocalLength.IsValid() )
+        return EVisibility::Hidden;
+
+    return EVisibility::Visible;
+}
+
+float
+SStoryboardLevelViewport::GetCameraFocalLength() const
+{
+    if( !mCameraToFocalLength.IsValid() )
+        return 0.f;
+
+    float focal_length = mCameraToFocalLength->GetCineCameraComponent()->CurrentFocalLength;
+
+    return focal_length;
+}
+void
+SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
+{
+    if( !mCameraToFocalLength.IsValid() )
+        return;
+
+    TArray<AActor*> children;
+    mCameraToFocalLength->GetAttachedActors( children );
+
+    TArray<TWeakObjectPtr<APlaneActor>> planes;
+    for( auto child : children )
+    {
+        APlaneActor* plane = Cast<APlaneActor>( child );
+        if( plane )
+            planes.Add( plane );
+    }
+
+    ShotSequenceTools::SetCameraFocalLengthAndScalePlane( planes, mCameraToFocalLength.Get(), iFocalLength, mScalePlaneType );
 }
 
 //---
@@ -956,7 +1066,9 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
 
     USelection* SelectedActors = GEditor->GetSelectedActors();
     TArray<APlaneActor*> selected_planes;
+    TArray<ACineCameraActor*> selected_cameras;
     SelectedActors->GetSelectedObjects( selected_planes );
+    SelectedActors->GetSelectedObjects( selected_cameras );
 
     for( auto selected_plane : selected_planes )
         UIData.SelectedPlanes.Add( FText::FromString( selected_plane->GetName() ) );
@@ -967,6 +1079,12 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     if( selected_planes.Num() == 1 )
     {
         mPlaneToMove = selected_planes[0];
+    }
+
+    mCameraToFocalLength = nullptr;
+    if( selected_cameras.Num() == 1 )
+    {
+        mCameraToFocalLength = selected_cameras[0];
     }
 
     //-
