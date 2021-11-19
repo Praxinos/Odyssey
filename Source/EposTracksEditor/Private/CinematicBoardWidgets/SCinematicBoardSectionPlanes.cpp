@@ -62,6 +62,9 @@ public:
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
 
+    // SWidget overrides
+    virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
+
     virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
     virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
 
@@ -202,10 +205,12 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     ChildSlot
     [
-        SNew( SBorder )
-        .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
-        .BorderBackgroundColor( this, &SCinematicBoardSectionPlaneTitle::GetBackgroundTint )
+        SNew( SVerticalBox )
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
+            // Background color is done inside the paint function
             SNew( SHorizontalBox )
             + SHorizontalBox::Slot()
             .FillWidth( .5f )
@@ -226,6 +231,15 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             [
                 SNew( SSpacer )
             ]
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            // To display the key indications
+            SNew( SBox )
+            .HeightOverride( 8 )
+            //.Visibility( EVisibility::Collapsed )
         ]
     ];
 }
@@ -283,6 +297,87 @@ SCinematicBoardSectionPlaneTitle::OnMouseButtonUp( const FGeometry& MyGeometry, 
 
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
+
+int32
+SCinematicBoardSectionPlaneTitle::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    const FSlateBrush* background_brush = FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" );
+
+    // Gray title background
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId++,
+        AllottedGeometry.ToPaintGeometry( AllottedGeometry.GetLocalSize(), FSlateLayoutTransform() ),
+        background_brush,
+        ESlateDrawEffect::None,
+        background_brush->GetTint( InWidgetStyle ) * InWidgetStyle.GetColorAndOpacityTint() * GetBackgroundTint().GetColor( InWidgetStyle ) // Same as in SBorder
+    );
+
+    if( !mBoardSection.IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    //---
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+
+    FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
+    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+    check( movie_scene );
+
+    TSharedPtr<const FMetaChannel> material_meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
+    TSharedPtr<const FMetaChannel> transform_meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
+    TSharedPtr<const FMetaChannel> opacity_meta_channel = board_section->GetPlaneOpacityMetaChannel( mBinding );
+
+    auto FillKeyPositions = [=]( TSharedPtr<const FMetaChannel> iMetaChannel, TArray<float>& iKeyPositions )
+    {
+        for( const auto& pair : iMetaChannel->GetMetaKeys() )
+        {
+            FFrameNumber time = pair.Key;
+            //FMetaKey meta_key = pair.Value;
+
+            FFrameTime outer_time = time * inner_to_outer_transform;
+            double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
+
+            iKeyPositions.AddUnique( converter.SecondsToPixel( outer_second ) );
+        }
+    };
+
+    TArray<float> key_positions_in_pixel;
+    FillKeyPositions( material_meta_channel, key_positions_in_pixel );
+    FillKeyPositions( transform_meta_channel, key_positions_in_pixel );
+    FillKeyPositions( opacity_meta_channel, key_positions_in_pixel );
+
+    //---
+
+    for( float key_position : key_positions_in_pixel )
+    {
+        static const FVector2D KeyMarkSize = FVector2D( 3.f, 5.f );
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry(
+                FVector2D(
+                    key_position - FMath::CeilToFloat( KeyMarkSize.X / 2.f ),
+                    FMath::CeilToFloat( AllottedGeometry.GetLocalSize().Y - KeyMarkSize.Y - 1.f )
+                ),
+                KeyMarkSize
+            ),
+            FEditorStyle::GetBrush( "Sequencer.KeyMark" ),
+            ESlateDrawEffect::None,
+            FLinearColor( 1.f, 1.f, 1.f, 1.f )
+        );
+    }
+
+    LayerId++;
+
+    return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+}
+
+//---
 
 FText
 SCinematicBoardSectionPlaneTitle::HandleTitleText() const
