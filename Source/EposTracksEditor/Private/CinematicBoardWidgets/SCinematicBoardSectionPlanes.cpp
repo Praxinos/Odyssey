@@ -755,6 +755,244 @@ SCinematicBoardSectionPlaneMaterialKeys::OnPaint( const FPaintArgs& Args, const 
 //---
 //---
 
+//---
+
+class SCinematicBoardSectionPlaneOpacityKeys
+    : public SMetaKeysArea
+{
+public:
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionPlaneOpacityKeys )
+        {}
+        SLATE_ARGUMENT( FMovieScenePossessable, Binding )
+    SLATE_END_ARGS()
+
+    // Construct the widget
+    void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
+
+    // SWidget overrides
+    virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
+
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
+protected:
+    // SMetaKeysArea overrides
+    virtual TSharedPtr<FMetaChannel>        GetMetaChannel() override;
+    virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const override;
+    virtual void                            RebuildMetaChannel() override;
+
+    virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) override;
+
+    virtual const FSlateBrush* GetBackgroundBrush() const override;
+
+private:
+    FMovieScenePossessable              mBinding;
+};
+
+void
+SCinematicBoardSectionPlaneOpacityKeys::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection )
+{
+    mBoardSection = iBoardSection;
+
+    mBinding = InArgs._Binding;
+
+    ChildSlot
+    [
+        SNew( SBox )
+    ];
+}
+
+//---
+
+TSharedPtr<FMetaChannel>
+SCinematicBoardSectionPlaneOpacityKeys::GetMetaChannel() //override
+{
+    return mBoardSection.Pin()->GetPlaneOpacityMetaChannel( mBinding );
+}
+
+TSharedPtr<const FMetaChannel>
+SCinematicBoardSectionPlaneOpacityKeys::GetMetaChannel() const //override
+{
+    return mBoardSection.Pin()->GetPlaneOpacityMetaChannel( mBinding );
+}
+
+void
+SCinematicBoardSectionPlaneOpacityKeys::RebuildMetaChannel() //override
+{
+    mBoardSection.Pin()->ReBuildPlanesOpacityMetaChannel();
+}
+
+//---
+
+bool
+SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder ) //override
+{
+    auto DeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        const FScopedTransaction transaction( LOCTEXT( "DeletePlaneOpacityKeys", "Delete plane opacity keys" ) );
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::DeleteOpacity( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle );
+            }
+        }
+    };
+
+    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    {
+        return true;
+    };
+
+    //-
+
+    auto SetKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse, float iOpacity )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        const FScopedTransaction transaction( LOCTEXT( "SetPlaneOpacityKeys", "Set plane opacity" ) );
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                BoardSequenceTools::SetOpacity( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle, iOpacity );
+            }
+        }
+    };
+
+    auto CanSetKey = [=]( TSharedPtr<FMetaChannel> iKeysUnderMouse ) -> bool
+    {
+        return true;
+    };
+
+    auto SetOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeysUnderMouse )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        float current_opacity = -1.0;
+
+        for( auto pair : iKeysUnderMouse->GetMetaKeys() )
+        {
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneFloatChannel>();
+                FMovieSceneFloatChannel* float_channel = channel_handle.Get();
+                if( !float_channel )
+                    return;
+
+                FMovieSceneFloatValue value;
+                UE::MovieScene::GetKeyValue( float_channel, subkey.mKeyHandle, value );
+                current_opacity = value.Value;
+            }
+        }
+
+        //-
+
+        int32 opacities[] = { 0, 10, 20, -1, 25, 30, 33, -1, 40, 50, 60, -1, 66, 70, 75, -1, 80, 90, 100 };
+        for( int32 opacity : opacities )
+        {
+            if( opacity == -1 )
+                ioMenuBuilder.AddSeparator();
+            else
+                ioMenuBuilder.AddMenuEntry(
+                    FText::Format( LOCTEXT( "set-drawing-opacity-0-label", "{0}%" ), opacity ),
+                    FText::Format( LOCTEXT( "set-drawing-opacity-0-tooltip", "Set the drawing opacity at {0}%" ), opacity ),
+                    FSlateIcon(),
+                    FUIAction(
+                        FExecuteAction::CreateLambda( SetKey, iKeysUnderMouse, opacity / 100.f ),
+                        FCanExecuteAction::CreateLambda( CanSetKey, iKeysUnderMouse ),
+                        FIsActionChecked::CreateLambda( [=]() { return FMath::IsNearlyEqual( opacity / 100.f, current_opacity, KINDA_SMALL_NUMBER ); } )
+                    ),
+                    NAME_None,
+                    EUserInterfaceActionType::Check );
+        }
+    };
+
+    //-
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, sequencer->GetLocalTime().Time.FrameNumber );
+
+    FText plane_name = FText::FromString( mBinding.GetName() );
+
+    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_name ) );
+
+    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-plane-opacity-key-label", "Delete" ),
+                                LOCTEXT( "delete-plane-opacity-key-tooltip", "Delete the current key" ),
+                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, mKeysUnderMouse ),
+                                           FCanExecuteAction::CreateLambda( CanDeleteKey, mKeysUnderMouse ) ) );
+
+    ioMenuBuilder.AddSubMenu(
+        LOCTEXT( "set-drawing-opacity-label", "Set Opacity" ),
+        LOCTEXT( "set-drawing-opacity-tooltip", "Set the current drawing opacity" ),
+        FNewMenuDelegate::CreateLambda( SetOpacitySubMenu, mKeysUnderMouse )
+    );
+
+    ioMenuBuilder.EndSection();
+
+    return true;
+}
+
+FCursorReply
+SCinematicBoardSectionPlaneOpacityKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+{
+    return SMetaKeysArea::OnCursorQuery( MyGeometry, CursorEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneOpacityKeys::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SMetaKeysArea::OnMouseButtonDown( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneOpacityKeys::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SMetaKeysArea::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionPlaneOpacityKeys::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SMetaKeysArea::OnMouseMove( MyGeometry, MouseEvent );
+}
+
+const FSlateBrush*
+SCinematicBoardSectionPlaneOpacityKeys::GetBackgroundBrush() const //override
+{
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+
+    return &background_brush;
+}
+
+int32
+SCinematicBoardSectionPlaneOpacityKeys::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    if( !mBinding.GetGuid().IsValid() )
+        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    return SMetaKeysArea::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+}
+
+//---
+//---
+//---
+
 class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlane
     : public SCompoundWidget
 {
@@ -808,6 +1046,12 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
+            .Binding( mBinding )
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SCinematicBoardSectionPlaneOpacityKeys, iBoardSection )
             .Binding( mBinding )
         ]
     ];
@@ -868,6 +1112,8 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     ioMenuBuilder.EndSection();
 
+    //-
+
     ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "drawing-section-label", "Drawing" ) );
 
     auto CreateDrawing = [this]()
@@ -888,12 +1134,55 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     ioMenuBuilder.AddMenuEntry(
         FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame ),
-        LOCTEXT( "create-drawing-tooltip", "Create a drawing (set the current frame where to create the drawing keyframe)" ),
+        LOCTEXT( "create-drawing-tooltip", "Create a drawing\n(set the current frame where to create the drawing keyframe)" ),
         FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateDrawing" ),
         FUIAction(
             FExecuteAction::CreateLambda( CreateDrawing ),
             FCanExecuteAction::CreateLambda( CanCreateDrawing )
         ) );
+
+    //-
+
+    auto CreateOpacity = [this]( float iOpacity )
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        BoardSequenceTools::CreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid(), iOpacity );
+    };
+
+    auto CanCreateOpacity = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        return BoardSequenceTools::CanCreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    auto CreateOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder )
+    {
+        int32 opacities[] = { 0, 10, 20, -1, 25, 30, 33, -1, 40, 50, 60, -1, 66, 70, 75, -1, 80, 90, 100 };
+        for( int32 opacity : opacities )
+        {
+            if( opacity == -1 )
+                ioMenuBuilder.AddSeparator();
+            else
+                ioMenuBuilder.AddMenuEntry(
+                    FText::Format( LOCTEXT( "create-drawing-opacity-0-label", "{0}%" ), opacity ),
+                    FText::Format( LOCTEXT( "create-drawing-opacity-0-tooltip", "Create the drawing opacity at {0}%" ), opacity ),
+                    FSlateIcon(),
+                    FUIAction(
+                        FExecuteAction::CreateLambda( CreateOpacity, opacity / 100.f ),
+                        FCanExecuteAction::CreateLambda( CanCreateOpacity )
+                    ) );
+        }
+    };
+
+    ioMenuBuilder.AddSubMenu(
+        FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create Opacity at {0}" ), current_frame ),
+        LOCTEXT( "create-drawing-opacity-tooltip", "Create the drawing opacity\n(set the current frame where to set the opacity)" ),
+        FNewMenuDelegate::CreateLambda( CreateOpacitySubMenu )
+    );
 
     ioMenuBuilder.EndSection();
 }
