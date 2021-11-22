@@ -298,7 +298,7 @@ void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
     if( !mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel() )
         return;
 
-    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
+    if (mEditor->Texture() && mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
     {
         mState = eState::kIdle;
         return;
