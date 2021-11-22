@@ -143,8 +143,6 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
 bool IOdysseyViewportDrawingEditorAdapter::InputKeyWithStrokeRay(const FOdysseyStrokeRay& iRay, FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent)
 {
-    //UE_LOG(LogTemp, Display, TEXT("InputKey"));
-
     if(!IsReadyToDraw())
         return false;
 
@@ -300,15 +298,22 @@ void IOdysseyViewportDrawingEditorAdapter::RemoveTextureOverride()
     if( !mPaintingTexture2DRenderTarget || !mPaintingTexture2DRenderTarget->IsValidLowLevel() )
         return;
 
+    if (mEditor->Texture()->MipGenSettings == TextureMipGenSettings::TMGS_NoMipmaps)
+    {
+        mState = eState::kIdle;
+        return;
+    }
+
     if (mEditor->Component() != nullptr && mEditor->Texture() != nullptr)
     {
+        UE_LOG(LogTemp, Display, TEXT("Removing override for %s, %s-------------"), *(mEditor->Material()->GetFName().ToString()), *(mEditor->Texture()->GetFName().ToString() ) )
+
         const ERHIFeatureLevel::Type FeatureLevel = mEditor->Component()->GetWorld()->FeatureLevel;
         mEditor->Material()->OverrideTexture(mEditor->Texture(), nullptr, FeatureLevel);
         //IMeshPaintGeometryAdapter::DefaultApplyOrRemoveTextureOverride(mEditor->Component(), mEditor->Texture(), nullptr);
 
         mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
         mPaintingTexture2DRenderTarget = nullptr;
-        mState = eState::kIdle;
     }
 }
 
