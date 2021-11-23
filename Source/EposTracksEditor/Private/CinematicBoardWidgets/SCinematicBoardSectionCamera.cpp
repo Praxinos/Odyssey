@@ -309,21 +309,7 @@ SCinematicBoardSectionCameraTitle::HandleTitleTextOnCommited( const FText& iText
     FGuid camera_binding;
     BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
 
-    UMovieSceneSequence* sequence = subsection_object->GetSequence();
-    UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
-    FMovieScenePossessable* possessable = movie_scene ? movie_scene->FindPossessable( camera_binding ) : nullptr;
-    if( !possessable )
-        return;
-
-    //---
-
-    const FScopedTransaction transaction( LOCTEXT( "SetTrackCameraName", "Set Track Camera Name" ) );
-
-    FMovieScenePossessable new_possessable( *possessable );
-    new_possessable.SetName( iText.ToString() );
-    movie_scene->ReplacePossessable( camera_binding, new_possessable );
-
-    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    BoardSequenceTools::RenameBinding( sequencer, *subsection_object, camera_binding, iText.ToString() );
 }
 
 FSlateColor

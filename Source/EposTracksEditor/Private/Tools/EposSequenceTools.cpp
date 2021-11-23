@@ -9,6 +9,10 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
 
+#include "Board/BoardSequence.h"
+#include "EposSequenceHelpers.h"
+#include "Shot/ShotSequence.h"
+
 #define LOCTEXT_NAMESPACE "EposSequenceTools"
 
 //---
@@ -68,5 +72,63 @@ ShotSequenceTools::cTemporarySwitchInner::~cTemporarySwitchInner()
     FFrameRate tick_resolution = mSequencer.GetFocusedTickResolution();
     mSequencer.SetGlobalTime( ConvertFrameTime( mOriginalGlobalTime, display_rate, tick_resolution ) );
 }
+
+//---
+
+//static
+void
+BoardSequenceTools::RenameBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iBinding, FString iNewLabel )
+{
+    check( iSequencer->GetFocusedMovieSceneSequence()->IsA<UBoardSequence>() );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
+
+    ShotSequenceTools::RenameBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iBinding, iNewLabel );
+}
+
+//static
+void
+ShotSequenceTools::RenameBinding( ISequencer* iSequencer, FGuid iBinding, FString iNewLabel )
+{
+    ShotSequenceTools::RenameBinding( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iBinding, iNewLabel );
+}
+
+//static
+void
+ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, FString iNewLabel )
+{
+    check( iSequence->IsA<UShotSequence>() );
+
+    UMovieScene* movie_scene = iSequence->GetMovieScene();
+    FMovieScenePossessable* possessable = movie_scene ? movie_scene->FindPossessable( iBinding ) : nullptr;
+    if( !possessable )
+        return;
+
+    auto objects = iSequencer.FindBoundObjects( iBinding, iSequenceID );
+    AActor* actor = nullptr;
+    if( objects.Num() )
+        actor = Cast<AActor>( objects[0] );
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "SetTrackName", "Set Track Name" ) );
+
+    FMovieScenePossessable new_possessable( *possessable );
+    new_possessable.SetName( iNewLabel );
+    movie_scene->ReplacePossessable( iBinding, new_possessable );
+
+    //---
+
+    if( actor )
+        FActorLabelUtilities::RenameExistingActor( actor, new_possessable.GetName() );
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
 
 #undef LOCTEXT_NAMESPACE

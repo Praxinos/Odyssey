@@ -135,6 +135,10 @@ public:
     /** Stretch sequencer time range to view make the new range inside the view. */
     static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
 
+// Inside EposSequenceTools
+public:
+    static void RenameBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iBinding, FString iNewLabel );
+
 // Inside EposSequenceTools_Camera
 public:
     /**
@@ -586,6 +590,25 @@ public:
 private:
     static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );
 
+// Inside EposSequenceTools
+private:
+    class cTemporarySwitchInner
+    {
+    public:
+        cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID );
+        ~cTemporarySwitchInner();
+    private:
+        ISequencer& mSequencer;
+        FMovieSceneSequenceID mOriginalId;
+        FFrameTime mOriginalGlobalTime;
+    };
+
+public:
+    static void RenameBinding( ISequencer* iSequencer, FGuid iBinding, FString iNewLabel );
+
+private:
+    static void RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, FString iNewLabel );
+
 // Inside EposSequenceTools_Camera
 public:
     /**
@@ -782,18 +805,4 @@ private:
     static void DeleteNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TWeakObjectPtr<UMovieSceneSection> iNoteSection );
 
     static TArray<TWeakObjectPtr<UMovieSceneNoteSection>> GetAllNotes( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
-
-//---
-
-private:
-    class cTemporarySwitchInner
-    {
-    public:
-        cTemporarySwitchInner( ISequencer& iSequencer, FMovieSceneSequenceIDRef iInnerID );
-        ~cTemporarySwitchInner();
-    private:
-        ISequencer& mSequencer;
-        FMovieSceneSequenceID mOriginalId;
-        FFrameTime mOriginalGlobalTime;
-    };
 };

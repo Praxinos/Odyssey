@@ -457,23 +457,15 @@ SCinematicBoardSectionPlaneTitle::HandleTitleTextOnCommited( const FText& iText,
     UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    UMovieSceneSequence* sequence = subsection_object->GetSequence();
-    UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
-    FMovieScenePossessable* possessable = movie_scene ? movie_scene->FindPossessable( mBinding.GetGuid() ) : nullptr;
-    if( !possessable )
-        return;
+    BoardSequenceTools::RenameBinding( sequencer, *subsection_object, mBinding.GetGuid(), iText.ToString() );
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "SetTrackPlaneName", "Set Track Plane Name" ) );
-
-    FMovieScenePossessable new_possessable( *possessable );
-    new_possessable.SetName( iText.ToString() );
-    movie_scene->ReplacePossessable( mBinding.GetGuid(), new_possessable );
-
-    mBinding = *possessable; // Update the cached one
-
-    sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    UMovieSceneSequence* sequence = subsection_object->GetSequence();
+    UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
+    FMovieScenePossessable* possessable = movie_scene ? movie_scene->FindPossessable( mBinding.GetGuid() ) : nullptr;
+    if( possessable )
+        mBinding = *possessable; // Update the cached one
 }
 
 FSlateColor
