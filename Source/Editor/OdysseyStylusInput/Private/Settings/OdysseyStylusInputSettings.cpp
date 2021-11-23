@@ -10,12 +10,13 @@
 
 #define LOCTEXT_NAMESPACE "OdysseyStylusInputSettings"
 
+// The better default value for each OS
 #if PLATFORM_WINDOWS
-    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_Wintab
+    const EOdysseyStylusInputDriver OdysseyStylusInputDriver_Default = OdysseyStylusInputDriver_Wintab;
 #elif PLATFORM_MAC
-    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_NSEvent
+    const EOdysseyStylusInputDriver OdysseyStylusInputDriver_Default = OdysseyStylusInputDriver_NSEvent;
 #else
-    #define OdysseyStylusInputDriver_Default OdysseyStylusInputDriver_None
+    const EOdysseyStylusInputDriver OdysseyStylusInputDriver_Default = OdysseyStylusInputDriver_None;
 #endif
 
 UOdysseyStylusInputSettings::UOdysseyStylusInputSettings( const FObjectInitializer& iObjectInitializer )
@@ -28,8 +29,6 @@ void
 UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent )
 {
     Super::PostEditChangeProperty( iPropertyChangedEvent );
-
-    //UE_LOG( LogIliad, Log, TEXT( "posteditchangeproperty: %s" ), *iPropertyChangedEvent.GetPropertyName().ToString() );
 
     //Get the name of the property that was changed  
     FName PropertyName = ( iPropertyChangedEvent.Property != nullptr ) ? iPropertyChangedEvent.Property->GetFName() : NAME_None;
@@ -51,53 +50,23 @@ UOdysseyStylusInputSettings::GetStylusDriver() const
 void
 UOdysseyStylusInputSettings::RefreshStylusInputDriver()
 {
-    /*
-    TSharedPtr<IStylusInputInterfaceInternal> stylus_input;
-    
-    switch( StylusInputDriver )
-    {
-        case OdysseyStylusInputDriver_None:
-            stylus_input = nullptr;
-            break;
-    #if PLATFORM_WINDOWS
-        case OdysseyStylusInputDriver_Ink:
-            stylus_input = CreateStylusInputInterface();
-            break;
-        case OdysseyStylusInputDriver_Wintab:
-            stylus_input = CreateStylusInputInterfaceWintab();
-            break;
-    #elif PLATFORM_MAC
-        case OdysseyStylusInputDriver_NSEvent:
-            stylus_input = CreateStylusInputInterfaceNSEvent();
-            break;
-    #endif
-        default:
-            stylus_input = nullptr;
-    }
-    
-
-    if( !stylus_input.IsValid() )
-        StylusInputDriver = OdysseyStylusInputDriver_None;
-    */
-
     UOdysseyStylusInputSubsystem* input_subsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    //input_subsystem->SetStylusInputInterface( stylus_input );
     input_subsystem->SetStylusInputDriver(StylusInputDriver);
 }
 
 //static
 FText
-UOdysseyStylusInputSettings::GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iFormat )
+UOdysseyStylusInputSettings::GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iStylusInputDriver )
 {
-    switch( *iFormat )
+    switch( *iStylusInputDriver )
     {
-        case OdysseyStylusInputDriver_None:        return LOCTEXT( "OdysseyStylusInputDriver_None", "None" );
-        #if PLATFORM_WINDOWS
-        case OdysseyStylusInputDriver_Ink:     return LOCTEXT( "OdysseyStylusInputDriver_Ink", "Ink" );
-        case OdysseyStylusInputDriver_Wintab:     return LOCTEXT( "OdysseyStylusInputDriver_Wintab", "Wintab" );
-        #elif PLATFORM_MAC
-        case OdysseyStylusInputDriver_NSEvent:    return LOCTEXT( "OdysseyStylusInputDriver_NSEvent", "NSEvent" );
-        #endif
+        case OdysseyStylusInputDriver_None:     return LOCTEXT( "OdysseyStylusInputDriver_None", "None" );
+#if PLATFORM_WINDOWS
+        case OdysseyStylusInputDriver_Ink:      return LOCTEXT( "OdysseyStylusInputDriver_Ink", "Ink" );
+        case OdysseyStylusInputDriver_Wintab:   return LOCTEXT( "OdysseyStylusInputDriver_Wintab", "Wintab" );
+#elif PLATFORM_MAC
+        case OdysseyStylusInputDriver_NSEvent:  return LOCTEXT( "OdysseyStylusInputDriver_NSEvent", "NSEvent" );
+#endif
     }
 
     return LOCTEXT( "OdysseyStylusInputDriver_Invalid", "Invalid" );
