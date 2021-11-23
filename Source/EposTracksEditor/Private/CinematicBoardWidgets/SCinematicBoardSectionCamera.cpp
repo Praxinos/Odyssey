@@ -115,6 +115,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
     auto IsPilotEjectVisible = [this]() -> bool
     {
         return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+            && mBoardSection.Pin()->GetSubSectionObject().GetSequence()
             && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
     };
 
@@ -178,6 +179,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
     auto IsSnapVisible = [this]() -> bool
     {
         return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()
                 && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
     };
 
