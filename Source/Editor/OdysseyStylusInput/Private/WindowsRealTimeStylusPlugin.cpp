@@ -409,7 +409,7 @@ FCriticalSection sgMutex;
 void 
 FInkTabletContextInfo::Tick()
 {
-	// Move the current states to the previous ones
+	// Move the generic current states to the previous ones
     PreviousState = CurrentState;
     CurrentState.Empty();
 

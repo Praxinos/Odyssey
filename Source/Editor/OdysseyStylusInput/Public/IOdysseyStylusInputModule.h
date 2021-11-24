@@ -117,6 +117,6 @@ private:
 	// All the handlers to send the stylus events
 	TArray<IStylusMessageHandler*>				MessageHandlers;
 
-	// A delegate to know when the driver (wintab/ink/nsevent) is changed
+	// A delegate to know when the driver type (wintab/ink/nsevent) is changed
 	FOnStylusInputChanged						OnStylusInputChangedCB;
 };

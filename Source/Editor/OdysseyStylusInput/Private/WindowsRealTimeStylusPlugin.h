@@ -18,6 +18,8 @@
 
 #include "IStylusState.h"
 
+//---
+
 /**
  * Specialized ink stylus state for a single frame.
  */
@@ -92,11 +94,13 @@ struct FInkPacketDescription
 struct FInkTabletContextInfo
 	: public IStylusInputDevice
 {
+public:
 	/** The id of the input device */
 	TABLET_CONTEXT_ID ID;
 	/** The kind of the input device (mouse/pen/...) */
     TabletDeviceKind Kind;
 
+public:
 	/** List of all available properties for the given input device.
 	 *  Get from IRealTimeStylus::GetPacketDescriptionData() of the tablet
 	 *  Set when a new tablet is detected.
@@ -109,6 +113,12 @@ struct FInkTabletContextInfo
 	 */
 	TArray<EInkPacketType> SupportedPackets;
 
+	/** Fill all the available types (position/pressure/tilt/azimuth/...) in a generic way because it is used by the super class
+	 *  Set when a new tablet is detected.
+	 */
+	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
+
+public:
 	/** List of all new states received by the ink packets, converted to our ink state type.
 	 *  This is an array because between 2 ticks of the subsystem, multiple ink packets can be received.
 	 *  Filled each time an ink packet is get with FWindowsRealTimeStylusPlugin::HandlePacket.
@@ -117,11 +127,7 @@ struct FInkTabletContextInfo
 	/** To know when the stylus is on the tablet (between a down/up) */
     bool IsTouching;
 
-	/** Fill all the available types (position/pressure/tilt/azimuth/...) in a generic way because it is used by the super class
-	 *  Set when a new tablet is detected.
-	 */
-	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
-
+public:
 	/** To know when the InkStates must be processed by the subsystem tick */
 	void SetDirty() { Dirty = true; }
 

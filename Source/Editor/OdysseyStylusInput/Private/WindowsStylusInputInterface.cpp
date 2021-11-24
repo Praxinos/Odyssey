@@ -125,7 +125,7 @@ void FWindowsStylusInputInterface::Tick()
 				FPlatformProcess::Sleep( 0.03 );
 			}
 
-			// Store the plugin window
+			// Store the new referenced plugin window
 			Impl->Window = Window;
 			// Also store the widget
 			Impl->Widget = WidgetPath.GetLastWidget();
