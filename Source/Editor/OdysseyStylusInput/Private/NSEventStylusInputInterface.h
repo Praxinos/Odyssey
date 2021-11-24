@@ -7,7 +7,9 @@
 
 class FNSEventStylusInputInterfaceImpl;
 
-class FNSEventStylusInputInterface : public IStylusInputInterfaceInternal
+// Implementation of the NSEvent (MacOSX) driver
+class FNSEventStylusInputInterface
+	: public IStylusInputInterfaceInternal
 {
 public:
 	FNSEventStylusInputInterface(TUniquePtr<FNSEventStylusInputInterfaceImpl> InImpl);
@@ -21,6 +23,6 @@ public:
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// pImpl to avoid including Wintab headers.
+	// Impl to avoid including Wintab headers.
 	TUniquePtr<FNSEventStylusInputInterfaceImpl> Impl;
 };
