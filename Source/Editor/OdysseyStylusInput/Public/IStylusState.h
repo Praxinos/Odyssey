@@ -32,8 +32,9 @@ class ODYSSEYSTYLUSINPUT_API FStylusState
 {
 public:
 	FStylusState()
-		: Position(0, 0), Z(0), Timer(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0), Pressure(0)
-		, TangentPressure(0), Size(0, 0), IsDown(false), IsInverted(false)
+		: Position(0, 0), Z(0), Timer(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0)
+		, Pressure(0), TangentPressure(0), Size(0, 0)
+		, IsDown(false), IsInverted(false)
 	{
 	}
 
@@ -159,17 +160,19 @@ public:
 	virtual ~IStylusInputDevice() {}
 
 	/**
-	 * Get the current stylus state.
+	 * Get the current stylus states.
+	 * This is an array because between 2 subsystem ticks, multiple tablet packets can be received.
 	 */
 	const TArray<FStylusState>& GetCurrentState() const { return CurrentState; }
 
 	/**
-	 * Get the previous stylus state.
+	 * Get the previous stylus states.
+	 * This is an array because between 2 subsystem ticks, multiple tablet packets can be received.
 	 */
 	const TArray<FStylusState>& GetPreviousState() const { return PreviousState; }
 
 	/**
-	 * Get the supported inputs of this tablet.
+	 * Get the supported inputs of this tablet to know which data in FStylusState are valid or not.
 	 */
 	const TArray<EStylusInputType>& GetSupportedInputs() const { return SupportedInputs; }
 

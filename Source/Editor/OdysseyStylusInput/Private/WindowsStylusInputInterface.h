@@ -1,7 +1,5 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
-// IDDN FR.001.250001.004.S.X.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -9,7 +7,9 @@
 
 class FWindowsStylusInputInterfaceImpl;
 
-class FWindowsStylusInputInterface : public IStylusInputInterfaceInternal
+// Implementation of the Windows Ink driver
+class FWindowsStylusInputInterface
+	: public IStylusInputInterfaceInternal
 {
 public:
 	FWindowsStylusInputInterface(TUniquePtr<FWindowsStylusInputInterfaceImpl> InImpl);
@@ -23,7 +23,6 @@ public:
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// pImpl to avoid including Windows headers.
+	// Impl to avoid including Windows headers.
 	TUniquePtr<FWindowsStylusInputInterfaceImpl> Impl;
-	TArray<IStylusMessageHandler*> MessageHandlers;
 };

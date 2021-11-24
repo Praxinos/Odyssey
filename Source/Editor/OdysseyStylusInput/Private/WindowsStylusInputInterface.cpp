@@ -1,7 +1,5 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
-// IDDN FR.001.250001.004.S.X.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "WindowsStylusInputInterface.h"
 
@@ -13,18 +11,39 @@
 
 #if PLATFORM_WINDOWS
 
+// An implementation which represents the Windows Ink driver
 class FWindowsStylusInputInterfaceImpl
 {
 public:
 	~FWindowsStylusInputInterfaceImpl();
 
+	// The Windows Ink driver itself
 	TComPtr<IRealTimeStylus> RealTimeStylus;
+	// The object to connect to the driver to be able to override/manage all stylus messages (down/up/packets/...)
 	TSharedPtr<FWindowsRealTimeStylusPlugin> StylusPlugin;
 	void* DLLHandle { nullptr };
 
-    TWeakPtr<SWindow> Window;
-    TWeakPtr<SWidget> Widget;
+	TWeakPtr<SWindow> Window;
+	TWeakPtr<SWidget> Widget;
 };
+
+FWindowsStylusInputInterfaceImpl::~FWindowsStylusInputInterfaceImpl()
+{
+	RealTimeStylus->RemoveAllStylusSyncPlugins();
+	RealTimeStylus.Reset();
+
+	StylusPlugin.Reset();
+
+	if( DLLHandle != nullptr )
+	{
+		FPlatformProcess::FreeDllHandle( DLLHandle );
+		DLLHandle = nullptr;
+	}
+}
+
+//---
+//---
+//---
 
 FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsStylusInputInterfaceImpl> InImpl)
 {
@@ -38,7 +57,7 @@ FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsSt
 		GUID_PACKETPROPERTY_GUID_Y,
 		GUID_PACKETPROPERTY_GUID_Z,
 		GUID_PACKETPROPERTY_GUID_PACKET_STATUS,
-        GUID_PACKETPROPERTY_GUID_TIMER_TICK,
+		GUID_PACKETPROPERTY_GUID_TIMER_TICK,
 		GUID_PACKETPROPERTY_GUID_NORMAL_PRESSURE,
 		GUID_PACKETPROPERTY_GUID_TANGENT_PRESSURE,
 		GUID_PACKETPROPERTY_GUID_AZIMUTH_ORIENTATION,
@@ -57,44 +76,59 @@ FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsSt
 
 FWindowsStylusInputInterface::~FWindowsStylusInputInterface() = default;
 
+//---
+
 void FWindowsStylusInputInterface::Tick()
 {
-	for (const FTabletContextInfo& Context : Impl->StylusPlugin->TabletContexts)
+	// If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
+	// When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
+	// we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
+	for (const FInkTabletContextInfo& Context : Impl->StylusPlugin->TabletContexts)
 	{
-		// don't change focus if the stylus is down
 		if ( Context.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); }) )
 		{
 			return;
 		}
 	}
 
+	// Get the current window referenced by the plugin
 	HANDLE_PTR HCurrentWnd;
 	Impl->RealTimeStylus->get_HWND(&HCurrentWnd);
 
 	FSlateApplication& Application = FSlateApplication::Get();
 
+	// Get the widget hovered by the stylus/mouse
 	FWidgetPath WidgetPath = Application.LocateWindowUnderMouse(Application.GetCursorPos(), Application.GetInteractiveTopLevelWindows());
 	if (WidgetPath.IsValid())
 	{
+		// Get its corresponding window
 		TSharedPtr<SWindow> Window = WidgetPath.GetWindow();
 		if (Window.IsValid())
 		{
 			TSharedPtr<FGenericWindow> NativeWindow = Window->GetNativeWindow();
 			HWND Hwnd = reinterpret_cast<HWND>(NativeWindow->GetOSWindowHandle());
 
+			// If the current hovered window is different than the referenced window in the plugin, change it
 			if (reinterpret_cast<HWND>(HCurrentWnd) != Hwnd)
 			{
-				// changing the HWND isn't supported when the plugin is enabled
+				// Changing the HWND in the plugin isn't supported when the plugin is enabled
 				Impl->RealTimeStylus->put_Enabled(Windows::FALSE);
-                FPlatformProcess::Sleep( 0.03 );
+				//PATCH: add some delay to be sure that the plugin is disabled
+				FPlatformProcess::Sleep( 0.03 );
+				// Change the referenced window with the new one (hovered by the stylus/mouse)
 				Impl->RealTimeStylus->put_HWND(reinterpret_cast<uint64>(Hwnd));
-                FPlatformProcess::Sleep( 0.03 );
+				//PATCH: to be sure...
+				FPlatformProcess::Sleep( 0.03 );
+				// Reactivate the plugin with the new referenced window
 				Impl->RealTimeStylus->put_Enabled(Windows::TRUE);
-                FPlatformProcess::Sleep( 0.03 );
+				//PATCH: to be sure...
+				FPlatformProcess::Sleep( 0.03 );
 			}
 
-            Impl->Window = Window;
-            Impl->Widget = WidgetPath.GetLastWidget();
+			// Store the plugin window
+			Impl->Window = Window;
+			// Also store the widget
+			Impl->Widget = WidgetPath.GetLastWidget();
 		}
 	}
 }
@@ -116,28 +150,19 @@ IStylusInputDevice* FWindowsStylusInputInterface::GetInputDevice(int32 Index) co
 
 TWeakPtr<SWindow> FWindowsStylusInputInterface::Window() const
 {
-    return Impl->Window;
+	return Impl->Window;
 }
 
 TWeakPtr<SWidget> FWindowsStylusInputInterface::Widget() const
 {
-    return Impl->Widget;
+	return Impl->Widget;
 }
 
-FWindowsStylusInputInterfaceImpl::~FWindowsStylusInputInterfaceImpl()
-{
-	RealTimeStylus->RemoveAllStylusSyncPlugins();
-	RealTimeStylus.Reset();
+//---
+//---
+//---
 
-	StylusPlugin.Reset();
-
-	if (DLLHandle != nullptr)
-	{
-		FPlatformProcess::FreeDllHandle(DLLHandle);
-		DLLHandle = nullptr;
-	}
-}
-
+// Create the StylusInputInterface corresponding to the native Windows Ink driver
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface()
 {
 	if (!FWindowsPlatformMisc::CoInitialize()) 
