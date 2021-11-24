@@ -10,58 +10,31 @@
 #include "IStylusState.h"
 #include "Mac/CocoaWindow.h"
 
-#if __LP64__
-typedef unsigned int                    UInt32;
-#else
-typedef unsigned long                   UInt32;
-#endif
-
 /**
- * Packet types as derived from IRealTimeStylus::GetPacketDescriptionData.
- */
-enum class EWintabPacketType
-{
-	None,
-	X,
-	Y,
-	Z,
-	Status,
-    Timer,
-	NormalPressure,
-	TangentPressure,
-	ButtonPressure,
-	Azimuth,
-	Altitude,
-	Twist,
-	Width,
-	Height,
-};
-
-/**
- * Stylus state for a single frame.
+ * NSEvent Stylus state for a single frame.
  */
 struct FNSEventStylusState
 {
-	FVector2D Position;
-	float Z;
-    unsigned int Timer;
-    float Azimuth;
-    float Altitude;
-	float Twist;
-    FVector2D Tilt;
-	float NormalPressure;
-	float TangentPressure;
-	FVector2D Size;
-	bool IsTouching : 1;
-	bool IsInverted : 1;
+    FVector2D          Position;
+    float              Z;
+    unsigned int       Timer;
+    float              Azimuth;
+    float              Altitude;
+    float              Twist;
+    FVector2D          Tilt;
+    float              NormalPressure;
+    float              TangentPressure;
+    FVector2D          Size;
+    bool               IsTouching : 1;
+    bool               IsInverted : 1;
     
     FNSEventStylusState() :
-		Position(0, 0), Z(0), Timer(0), Azimuth(0), Altitude(0), Twist(0), Tilt(0, 0), NormalPressure(0), TangentPressure(0),
-		Size(0, 0), IsTouching(false), IsInverted(false)
-	{
-	}
+        Position( 0, 0 ), Z( 0 ), Timer( 0 ), Azimuth( 0 ), Altitude( 0 ), Twist( 0 ), Tilt( 0, 0 ), NormalPressure( 0 ), TangentPressure( 0 ), Size( 0, 0 ),
+        IsTouching( false ), IsInverted( false )
+    {
+    }
 
-    //Set the Altitude and Azimuth fields based on what is currently inside Tilt
+    //Set the Altitude and Azimuth fields based on the Tilt field
     void TiltToOrientation()
     {
         Azimuth = 0;
@@ -78,17 +51,26 @@ struct FNSEventStylusState
         Azimuth = FMath::RadiansToDegrees( Azimuth );
     }
 
-	FStylusState ToPublicState() const
-	{
-		return FStylusState(Position, Z, Timer, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted);
-	}
+    FStylusState ToPublicState() const
+    {
+        return FStylusState( Position, Z, Timer, Tilt, Azimuth, Altitude, Twist, NormalPressure, TangentPressure, Size, IsTouching, IsInverted );
+    }
 };
 
-struct FWTTabletContextInfo : public IStylusInputDevice
+/**
+* Description of an input device (context info) specialized for NSEvent.
+*/
+struct FNSEventTabletContextInfo 
+    : public IStylusInputDevice
 {
+    //Is the stylus upside down ?
     bool mIsInverted;
+
+    /** To know when the NSEvent States must be processed by the subsystem tick.
+    We dirty it when we handle a serie of NSEvent packets*/
     void SetDirty() { Dirty = true; }
-    bool IsDirty() { return Dirty; }
+
+    /** Clear the context info when we switch context */
     void Clear() { CurrentState.Empty(); PreviousState.Empty(); }
 
     TArray< FNSEventStylusState > mPacketsBuffer;
@@ -97,24 +79,28 @@ struct FWTTabletContextInfo : public IStylusInputDevice
 };
 
 /**
- * An implementation of an IStylusSyncPlugin for use with the RealTimeStylus API.
- */
-class FNSEventContexts
+* A container to store the currently used (tablet) context.
+*/
+class FNSEventContext
 {
 public:
-    FNSEventContexts();
-    ~FNSEventContexts();
+    FNSEventContext();
+    ~FNSEventContext();
     
+    /** Create a (tablet) context and link it to this windows */
     bool OpenContext( FCocoaWindow* iHwnd );
+    /** Destroy the context when not needed anymore */
     void CloseContext();
     
-public:
-	FWTTabletContextInfo mTabletContext;
-
 private:
+    /** The id of the monitor which receive the events */
     id mEventMonitor;
-    
+
+    /** The method which handles NSEvents and store them as packets in mTabletContext */
     NSEvent* HandleNSEvent(NSEvent* Event);
+
+public:
+    FNSEventTabletContextInfo mTabletContext;
 };
 
 #endif // PLATFORM_MAC

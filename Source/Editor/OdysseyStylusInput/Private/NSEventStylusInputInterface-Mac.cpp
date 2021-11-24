@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "NSEventStylusInputInterface.h"
+#include "NSEventStylusInputInterface-Mac.h"
 #include "Interfaces/IMainFrameModule.h"
 
 #include "Framework/Application/SlateApplication.h"
@@ -17,7 +17,7 @@ public:
     ~FNSEventStylusInputInterfaceImpl();
 
     /** All the contexts (tablets) detected (harcoded to 1) */
-    TSharedPtr<FNSEventContexts> mContexts;
+    TSharedPtr<FNSEventContext> mContext;
 
     FCocoaWindow* mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
@@ -26,7 +26,7 @@ public:
 
 FNSEventStylusInputInterfaceImpl::~FNSEventStylusInputInterfaceImpl()
 {
-    mContexts.Reset();
+    mContext.Reset();
 }
 
 //---
@@ -50,9 +50,9 @@ FNSEventStylusInputInterface::Tick()
     // If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
     // When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
     // we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
-    if( Impl->mContexts->mTabletContext.IsDirty() )
+    if( Impl->mContext->mTabletContext.IsDirty() )
     {
-        if( Impl->mContexts->mTabletContext.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
+        if( Impl->mContext->mTabletContext.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
         {
             return;
         }
@@ -74,12 +74,12 @@ FNSEventStylusInputInterface::Tick()
             // If the current hovered window is different than the referenced window in the plugin, change it
             if( Hwnd != Impl->mHwnd )
             {
-                // Remove all contexts (tablets) detected
-                Impl->mContexts->CloseContext();
+                // Remove the context (tablet) detected
+                Impl->mContext->CloseContext();
                 // Set the new referenced window in the plugin
                 Impl->mHwnd = Hwnd;
-                // Re-detect all tablets
-                Impl->mContexts->OpenContext( Impl->mHwnd );
+                // Re-detect the context
+                Impl->mContext->OpenContext( Impl->mHwnd );
             }
 
             // Store the new referenced plugin window
@@ -93,13 +93,14 @@ FNSEventStylusInputInterface::Tick()
 int32
 FNSEventStylusInputInterface::NumInputDevices() const
 {
+    //No simple way to check the number of different input devices on Mac. Instead, we retain one we can change: mTabletContext
     return 1;
 }
 
 IStylusInputDevice*
 FNSEventStylusInputInterface::GetInputDevice( int32 Index ) const
 {
-    return &Impl->mContexts->mTabletContext;
+    return &Impl->mContext->mTabletContext;
 }
 
 TWeakPtr<SWindow>
@@ -123,7 +124,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent()
 {
     TUniquePtr<FNSEventStylusInputInterfaceImpl> impl = MakeUnique<FNSEventStylusInputInterfaceImpl>();
 
-    impl->mContexts = MakeShareable( new FNSEventContexts() );
+    impl->mContext = MakeShareable( new FNSEventContext() );
 
     return MakeShared<FNSEventStylusInputInterface>( MoveTemp( impl ) );
 }
