@@ -7,7 +7,9 @@
 
 class FWintabStylusInputInterfaceImpl;
 
-class FWintabStylusInputInterface : public IStylusInputInterfaceInternal
+// Implementation of the Wintab driver
+class FWintabStylusInputInterface
+	: public IStylusInputInterfaceInternal
 {
 public:
 	FWintabStylusInputInterface(TUniquePtr<FWintabStylusInputInterfaceImpl> InImpl);
@@ -21,6 +23,6 @@ public:
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// pImpl to avoid including Wintab headers.
+	// Impl to avoid including Wintab headers.
 	TUniquePtr<FWintabStylusInputInterfaceImpl> Impl;
 };

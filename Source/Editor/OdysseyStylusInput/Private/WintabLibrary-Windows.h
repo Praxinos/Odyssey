@@ -10,6 +10,10 @@
 
 #include "Windows/WINTAB.H"
 
+/**
+ * Wrapper class to load and initialize our function pointers to wintab dll ones.
+ * So we have access to the wintab API.
+ */
 class FWintabLibrary
 {
 public:
