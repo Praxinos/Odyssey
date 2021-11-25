@@ -163,7 +163,7 @@ TWeakPtr<SWidget> FInkStylusInputInterface::Widget() const
 //---
 
 // Create the StylusInputInterface corresponding to the native Windows Ink driver
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface()
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
 {
 	if (!FWindowsPlatformMisc::CoInitialize()) 
 	{

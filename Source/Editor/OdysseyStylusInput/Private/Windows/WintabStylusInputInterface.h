@@ -26,3 +26,5 @@ private:
 	// Impl to avoid including Wintab headers.
 	TUniquePtr<FWintabStylusInputInterfaceImpl> Impl;
 };
+
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab();

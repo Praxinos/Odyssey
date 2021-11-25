@@ -26,3 +26,5 @@ private:
 	// Impl to avoid including Windows headers.
 	TUniquePtr<FInkStylusInputInterfaceImpl> Impl;
 };
+
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk();

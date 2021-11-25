@@ -26,3 +26,5 @@ private:
 	// Impl to avoid including MacOSX headers.
 	TUniquePtr<FNSEventStylusInputInterfaceImpl> Impl;
 };
+
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent();

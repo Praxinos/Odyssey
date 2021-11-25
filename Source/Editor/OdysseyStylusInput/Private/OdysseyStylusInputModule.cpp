@@ -15,6 +15,12 @@
 
 #include "SStylusInputDebugWidget.h"
 #include "OdysseyStylusInputSettings.h"
+#if PLATFORM_WINDOWS
+	#include "Windows/WintabStylusInputInterface.h"
+	#include "Windows/InkStylusInputInterface.h"
+#elif PLATFORM_MAC
+	#include "Mac/NSEventStylusInputInterface.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "FOdysseyStylusInputModule"
 
@@ -98,11 +104,6 @@ void UOdysseyStylusInputSubsystem::Deinitialize()
 
 //---
 
-// This is the function that all platform-specific implementations are required to implement.
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab();
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent();
-
 void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDriver iDriver)
 {
 	InputInterface.Reset();
@@ -114,7 +115,7 @@ void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDrive
 			break;
 #if PLATFORM_WINDOWS
 		case OdysseyStylusInputDriver_Ink:
-			InputInterface = CreateStylusInputInterface();
+			InputInterface = CreateStylusInputInterfaceInk();
 			break;
 		case OdysseyStylusInputDriver_Wintab:
 			InputInterface = CreateStylusInputInterfaceWintab();
