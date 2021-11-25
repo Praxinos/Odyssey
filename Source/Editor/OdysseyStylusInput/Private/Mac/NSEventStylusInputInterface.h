@@ -23,6 +23,6 @@ public:
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// Impl to avoid including Wintab headers.
+	// Impl to avoid including MacOSX headers.
 	TUniquePtr<FNSEventStylusInputInterfaceImpl> Impl;
 };

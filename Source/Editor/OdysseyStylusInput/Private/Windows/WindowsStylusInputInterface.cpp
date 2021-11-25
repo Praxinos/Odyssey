@@ -9,7 +9,7 @@
 
 #include "WindowsRealTimeStylusPlugin.h"
 
-#if PLATFORM_WINDOWS
+//---
 
 // An implementation which represents the Windows Ink driver
 class FWindowsStylusInputInterfaceImpl
@@ -221,5 +221,3 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface()
 	
 	return MakeShared<FWindowsStylusInputInterface>(MoveTemp(WindowsImpl));
 }
-
-#endif // PLATFORM_WINDOWS

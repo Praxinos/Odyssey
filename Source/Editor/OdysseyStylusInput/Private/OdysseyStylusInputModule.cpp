@@ -58,15 +58,6 @@ IMPLEMENT_MODULE(FOdysseyStylusInputModule, OdysseyStylusInput)
 //---
 //---
 
-// This is the function that all platform-specific implementations are required to implement.
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
-
-#if PLATFORM_WINDOWS
-#include "WindowsStylusInputInterface.h"
-#else
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface() { return TSharedPtr<IStylusInputInterfaceInternal>(); }
-#endif
-
 void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -106,6 +97,11 @@ void UOdysseyStylusInputSubsystem::Deinitialize()
 }
 
 //---
+
+// This is the function that all platform-specific implementations are required to implement.
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab();
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent();
 
 void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDriver iDriver)
 {

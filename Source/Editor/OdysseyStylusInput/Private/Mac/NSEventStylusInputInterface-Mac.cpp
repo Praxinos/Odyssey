@@ -2,13 +2,13 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "NSEventStylusInputInterface-Mac.h"
-#include "Interfaces/IMainFrameModule.h"
 
+#include "Interfaces/IMainFrameModule.h"
 #include "Framework/Application/SlateApplication.h"
 
-#if PLATFORM_MAC
-
 #include "NSEventContexts-Mac.h"
+
+//---
 
 // An implementation which represents the NSEvent 'driver'
 class FNSEventStylusInputInterfaceImpl
@@ -128,5 +128,3 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent()
 
     return MakeShared<FNSEventStylusInputInterface>( MoveTemp( impl ) );
 }
-
-#endif // PLATFORM_MAC

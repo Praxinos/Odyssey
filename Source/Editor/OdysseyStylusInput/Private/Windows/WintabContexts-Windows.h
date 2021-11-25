@@ -4,10 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#if PLATFORM_WINDOWS
-
 #include "Windows/WindowsHWrapper.h"
+
 #include "WintabLibrary-Windows.h"
 
 // Definition of which data/properties we want inside wintab packets
@@ -176,5 +174,3 @@ public:
 public:
 	TArray<FWintabTabletContextInfo> mTabletContexts;
 };
-
-#endif // PLATFORM_WINDOWS

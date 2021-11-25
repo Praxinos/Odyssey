@@ -2,13 +2,13 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "WintabStylusInputInterface.h"
-#include "Interfaces/IMainFrameModule.h"
 
+#include "Interfaces/IMainFrameModule.h"
 #include "Framework/Application/SlateApplication.h"
 
-#if PLATFORM_WINDOWS
-
 #include "WintabContexts-Windows.h"
+
+//---
 
 // An implementation which represents the Wintab driver
 class FWintabStylusInputInterfaceImpl
@@ -147,5 +147,3 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab()
 
     return MakeShared<FWintabStylusInputInterface>( MoveTemp( WindowsImpl ) );
 }
-
-#endif // PLATFORM_WINDOWS

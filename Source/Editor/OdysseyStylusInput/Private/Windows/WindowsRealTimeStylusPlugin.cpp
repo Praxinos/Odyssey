@@ -4,7 +4,7 @@
 #include "WindowsRealTimeStylusPlugin.h"
 //#include "IOdysseyStylusInputModule.h" // for UE_LOG
 
-#if PLATFORM_WINDOWS
+//---
 
 HRESULT FWindowsRealTimeStylusPlugin::QueryInterface(const IID& InterfaceID, void** Pointer)
 {
@@ -572,5 +572,3 @@ void FWindowsRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus,
 	TabletContext->InkStates.Append(states);
 	sgMutex.Unlock();
 }
-
-#endif // PLATFORM_WINDOWS

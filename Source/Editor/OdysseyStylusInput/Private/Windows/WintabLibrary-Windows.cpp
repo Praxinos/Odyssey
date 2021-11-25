@@ -1,11 +1,11 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#if PLATFORM_WINDOWS
-
 #include "WintabLibrary-Windows.h"
 
 #include "Framework/Application/SlateApplication.h"
+
+//---
 
 void* FWintabLibrary::DLLHandle = nullptr;
 int FWintabLibrary::mRefCount = 0;
@@ -126,5 +126,3 @@ FWintabLibrary::Unload()
     WTMgrDefContextEx = nullptr;
     WTMgrCsrPressureBtnMarksEx = nullptr;
 }
-
-#endif // PLATFORM_WINDOWS

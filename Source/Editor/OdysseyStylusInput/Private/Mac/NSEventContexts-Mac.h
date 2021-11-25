@@ -4,9 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#if PLATFORM_MAC
-
 #include "IStylusState.h"
 #include "Mac/CocoaWindow.h"
 
@@ -102,5 +99,3 @@ private:
 public:
     FNSEventTabletContextInfo mTabletContext;
 };
-
-#endif // PLATFORM_MAC

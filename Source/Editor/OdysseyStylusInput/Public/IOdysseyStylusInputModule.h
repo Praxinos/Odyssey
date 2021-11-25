@@ -58,10 +58,6 @@ public:
 	virtual TWeakPtr<SWidget> Widget() const = 0;
 };
 
-ODYSSEYSTYLUSINPUT_API TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
-ODYSSEYSTYLUSINPUT_API TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab();
-ODYSSEYSTYLUSINPUT_API TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent();
-
 //---
 
 DECLARE_DELEGATE_OneParam( FOnStylusInputChanged, TSharedPtr<IStylusInputInterfaceInternal> );

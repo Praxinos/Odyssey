@@ -3,8 +3,6 @@
 
 #pragma once
 
-#if PLATFORM_WINDOWS
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -79,5 +77,3 @@ private:
     FWintabLibrary(); // not implemented
     ~FWintabLibrary(); // not implemented
 };
-
-#endif // PLATFORM_WINDOWS

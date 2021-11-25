@@ -4,10 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
-
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/PreWindowsApi.h"
 #include "Windows/COMPointer.h"
@@ -249,5 +246,3 @@ private:
 private:
 	int RefCount { 1 };
 };
-
-#endif // PLATFORM_WINDOWS

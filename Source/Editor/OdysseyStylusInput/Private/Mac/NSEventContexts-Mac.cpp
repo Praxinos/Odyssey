@@ -3,13 +3,15 @@
 
 #include "NSEventContexts-Mac.h"
 
-#if PLATFORM_MAC
-
 //For coordinates conversion purposes
 #include "Mac/MacApplication.h"
 #include "Mac/MacPlatformApplicationMisc.h"
 
+//---
+
 FCriticalSection sgMutex;
+
+//---
 
 void
 FNSEventTabletContextInfo::Tick()
@@ -162,6 +164,3 @@ NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
 
     return Event;
 }
-
-
-#endif // PLATFORM_MAC
