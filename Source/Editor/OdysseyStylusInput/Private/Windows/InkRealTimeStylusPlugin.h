@@ -118,7 +118,7 @@ public:
 public:
 	/** List of all new states received by the ink packets, converted to our ink state type.
 	 *  This is an array because between 2 ticks of the subsystem, multiple ink packets can be received.
-	 *  Filled each time an ink packet is get with FWindowsRealTimeStylusPlugin::HandlePacket.
+	 *  Filled each time an ink packet is get with FInkRealTimeStylusPlugin::HandlePacket.
 	 */
 	TArray<FInkStylusState> InkStates;
 	/** To know when the stylus is on the tablet (between a down/up) */
@@ -144,11 +144,11 @@ public:
 /**
  * An implementation of an IStylusSyncPlugin for use with the RealTimeStylus API.
  */
-class FWindowsRealTimeStylusPlugin : public IStylusSyncPlugin
+class FInkRealTimeStylusPlugin : public IStylusSyncPlugin
 {
 public:
-	FWindowsRealTimeStylusPlugin() = default;
-	virtual ~FWindowsRealTimeStylusPlugin()
+	FInkRealTimeStylusPlugin() = default;
+	virtual ~FInkRealTimeStylusPlugin()
 	{
 		if (FreeThreadedMarshaller != nullptr)
 		{

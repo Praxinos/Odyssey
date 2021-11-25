@@ -5,15 +5,15 @@
 
 #include "IOdysseyStylusInputModule.h"
 
-class FWindowsStylusInputInterfaceImpl;
+class FInkStylusInputInterfaceImpl;
 
 // Implementation of the Windows Ink driver
-class FWindowsStylusInputInterface
+class FInkStylusInputInterface
 	: public IStylusInputInterfaceInternal
 {
 public:
-	FWindowsStylusInputInterface(TUniquePtr<FWindowsStylusInputInterfaceImpl> InImpl);
-	virtual ~FWindowsStylusInputInterface();
+	FInkStylusInputInterface(TUniquePtr<FInkStylusInputInterfaceImpl> InImpl);
+	virtual ~FInkStylusInputInterface();
 
 	virtual void Tick() override;
 	virtual int32 NumInputDevices() const override;
@@ -24,5 +24,5 @@ public:
 
 private:
 	// Impl to avoid including Windows headers.
-	TUniquePtr<FWindowsStylusInputInterfaceImpl> Impl;
+	TUniquePtr<FInkStylusInputInterfaceImpl> Impl;
 };

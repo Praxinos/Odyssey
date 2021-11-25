@@ -1,33 +1,33 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "WindowsStylusInputInterface.h"
+#include "InkStylusInputInterface.h"
 
 #include "Framework/Application/SlateApplication.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
 #include "Interfaces/IMainFrameModule.h"
 
-#include "WindowsRealTimeStylusPlugin.h"
+#include "InkRealTimeStylusPlugin.h"
 
 //---
 
 // An implementation which represents the Windows Ink driver
-class FWindowsStylusInputInterfaceImpl
+class FInkStylusInputInterfaceImpl
 {
 public:
-	~FWindowsStylusInputInterfaceImpl();
+	~FInkStylusInputInterfaceImpl();
 
 	// The Windows Ink driver itself
 	TComPtr<IRealTimeStylus> RealTimeStylus;
 	// The object to connect to the driver to be able to override/manage all stylus messages (down/up/packets/...)
-	TSharedPtr<FWindowsRealTimeStylusPlugin> StylusPlugin;
+	TSharedPtr<FInkRealTimeStylusPlugin> StylusPlugin;
 	void* DLLHandle { nullptr };
 
 	TWeakPtr<SWindow> Window;
 	TWeakPtr<SWidget> Widget;
 };
 
-FWindowsStylusInputInterfaceImpl::~FWindowsStylusInputInterfaceImpl()
+FInkStylusInputInterfaceImpl::~FInkStylusInputInterfaceImpl()
 {
 	RealTimeStylus->RemoveAllStylusSyncPlugins();
 	RealTimeStylus.Reset();
@@ -45,7 +45,7 @@ FWindowsStylusInputInterfaceImpl::~FWindowsStylusInputInterfaceImpl()
 //---
 //---
 
-FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsStylusInputInterfaceImpl> InImpl)
+FInkStylusInputInterface::FInkStylusInputInterface(TUniquePtr<FInkStylusInputInterfaceImpl> InImpl)
 {
 	check(InImpl.IsValid());
 
@@ -74,11 +74,11 @@ FWindowsStylusInputInterface::FWindowsStylusInputInterface(TUniquePtr<FWindowsSt
 	Impl->RealTimeStylus->SetDesiredPacketDescription(DesiredPackets.Num(), DesiredPackets.GetData());
 }
 
-FWindowsStylusInputInterface::~FWindowsStylusInputInterface() = default;
+FInkStylusInputInterface::~FInkStylusInputInterface() = default;
 
 //---
 
-void FWindowsStylusInputInterface::Tick()
+void FInkStylusInputInterface::Tick()
 {
 	// If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
 	// When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
@@ -133,12 +133,12 @@ void FWindowsStylusInputInterface::Tick()
 	}
 }
 
-int32 FWindowsStylusInputInterface::NumInputDevices() const
+int32 FInkStylusInputInterface::NumInputDevices() const
 {
 	return Impl->StylusPlugin->TabletContexts.Num();
 }
 
-IStylusInputDevice* FWindowsStylusInputInterface::GetInputDevice(int32 Index) const
+IStylusInputDevice* FInkStylusInputInterface::GetInputDevice(int32 Index) const
 {
 	if (Index < 0 || Index >= Impl->StylusPlugin->TabletContexts.Num())
 	{
@@ -148,12 +148,12 @@ IStylusInputDevice* FWindowsStylusInputInterface::GetInputDevice(int32 Index) co
 	return &Impl->StylusPlugin->TabletContexts[Index];
 }
 
-TWeakPtr<SWindow> FWindowsStylusInputInterface::Window() const
+TWeakPtr<SWindow> FInkStylusInputInterface::Window() const
 {
 	return Impl->Window;
 }
 
-TWeakPtr<SWidget> FWindowsStylusInputInterface::Widget() const
+TWeakPtr<SWidget> FInkStylusInputInterface::Widget() const
 {
 	return Impl->Widget;
 }
@@ -171,7 +171,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface()
 		return nullptr;
 	}
 
-	TUniquePtr<FWindowsStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FWindowsStylusInputInterfaceImpl>();
+	TUniquePtr<FInkStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FInkStylusInputInterfaceImpl>();
 
 	// Load RealTimeStylus DLL
 	const FString InkDLLDirectory = TEXT("C:\\Program Files\\Common Files\\microsoft shared\\ink");
@@ -199,7 +199,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface()
 	}
 
 	WindowsImpl->RealTimeStylus = static_cast<IRealTimeStylus*>(OutInstance);
-	WindowsImpl->StylusPlugin = MakeShareable(new FWindowsRealTimeStylusPlugin());
+	WindowsImpl->StylusPlugin = MakeShareable(new FInkRealTimeStylusPlugin());
 	
 	// Create free-threaded marshaller for the plugin
 	hr = ::CoCreateFreeThreadedMarshaler(WindowsImpl->StylusPlugin.Get(), &WindowsImpl->StylusPlugin->FreeThreadedMarshaller);
@@ -219,5 +219,5 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface()
 		return nullptr;
 	}
 	
-	return MakeShared<FWindowsStylusInputInterface>(MoveTemp(WindowsImpl));
+	return MakeShared<FInkStylusInputInterface>(MoveTemp(WindowsImpl));
 }
