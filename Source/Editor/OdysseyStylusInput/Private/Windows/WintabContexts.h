@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Windows/WindowsHWrapper.h"
 
-#include "WintabLibrary-Windows.h"
+#include "WintabLibrary.h"
 
 // Definition of which data/properties we want inside wintab packets
 // Processed in the following wintab #include
