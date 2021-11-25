@@ -1,11 +1,9 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
-// IDDN FR.001.250001.004.S.X.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "IOdysseyStylusInputModule.h"
-#include "CoreMinimal.h"
 
+#include "CoreMinimal.h"
 #include "Framework/Docking/TabManager.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "ISettingsModule.h"
@@ -14,16 +12,24 @@
 #include "Widgets/SWindow.h"
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
-#include "SStylusInputDebugWidget.h"
 
+#include "SStylusInputDebugWidget.h"
 #include "OdysseyStylusInputSettings.h"
+#if PLATFORM_WINDOWS
+	#include "Windows/WintabStylusInputInterface.h"
+	#include "Windows/InkStylusInputInterface.h"
+#elif PLATFORM_MAC
+	#include "Mac/NSEventStylusInputInterface.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "FOdysseyStylusInputModule"
 
+//---
 
 static const FName StylusInputDebugTabName = FName("StylusInputDebug");
 
-class FOdysseyStylusInputModule : public IModuleInterface
+class FOdysseyStylusInputModule
+	: public IModuleInterface
 {
 public:
 	virtual void StartupModule() override
@@ -54,16 +60,9 @@ public:
 
 IMPLEMENT_MODULE(FOdysseyStylusInputModule, OdysseyStylusInput)
 
-// This is the function that all platform-specific implementations are required to implement.
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface();
-
-#if PLATFORM_WINDOWS
-#include "WindowsStylusInputInterface.h"
-#else
-TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterface() { return TSharedPtr<IStylusInputInterfaceInternal>(); }
-#endif
-
-// TODO: Other platforms
+//---
+//---
+//---
 
 void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -72,8 +71,8 @@ void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 	UE_LOG(LogStylusInput, Log, TEXT("Initializing StylusInput subsystem."));
 
 	const UOdysseyStylusInputSettings& settings = *GetDefault<UOdysseyStylusInputSettings>();
+	// Create the StylusInputInterface corresponding to the wanted StylusInputDriver
 	SetStylusInputDriver(settings.GetStylusDriver());
-	//InputInterface = CreateStylusInputInterface();
 
 	if (!InputInterface.IsValid())
 	{
@@ -81,6 +80,7 @@ void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 		return;
 	}
 
+	// Manage registration of the debug tab
 	const TSharedRef<FGlobalTabmanager>& TabManager = FGlobalTabmanager::Get();
 	const IWorkspaceMenuStructure& MenuStructure = WorkspaceMenu::GetMenuStructure();
 
@@ -91,18 +91,18 @@ void UOdysseyStylusInputSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 		.SetGroup(MenuStructure.GetDeveloperToolsMiscCategory());
 }
 
-FOnStylusInputChanged& UOdysseyStylusInputSubsystem::OnStylusInputChanged()
+void UOdysseyStylusInputSubsystem::Deinitialize()
 {
-    return OnStylusInputChangedCB;
+	Super::Deinitialize();
+
+	FGlobalTabmanager::Get()->UnregisterTabSpawner( StylusInputDebugTabName );
+
+	InputInterface.Reset();
+
+	UE_LOG( LogStylusInput, Log, TEXT( "Shutting down StylusInput subsystem." ) );
 }
 
-void UOdysseyStylusInputSubsystem::SetStylusInputInterface( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
-{
-    InputInterface.Reset();
-    InputInterface = iStylusInput;
-
-    OnStylusInputChangedCB.ExecuteIfBound( InputInterface );
-}
+//---
 
 void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDriver iDriver)
 {
@@ -113,18 +113,18 @@ void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDrive
 		case OdysseyStylusInputDriver_None:
 			InputInterface = nullptr;
 			break;
-	#if PLATFORM_WINDOWS
+#if PLATFORM_WINDOWS
 		case OdysseyStylusInputDriver_Ink:
-			InputInterface = CreateStylusInputInterface();
+			InputInterface = CreateStylusInputInterfaceInk();
 			break;
 		case OdysseyStylusInputDriver_Wintab:
 			InputInterface = CreateStylusInputInterfaceWintab();
 			break;
-	#elif PLATFORM_MAC
+#elif PLATFORM_MAC
 		case OdysseyStylusInputDriver_NSEvent:
 			InputInterface = CreateStylusInputInterfaceNSEvent();
 			break;
-	#endif
+#endif
 		default:
 			InputInterface = nullptr;
 	}
@@ -132,45 +132,19 @@ void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDrive
 	OnStylusInputChangedCB.ExecuteIfBound(InputInterface);
 }
 
-/*
-	TSharedPtr<IStylusInputInterfaceInternal> stylus_input;
+//---
 
-	switch( StylusInputDriver )
-	{
-		case OdysseyStylusInputDriver_None:
-			stylus_input = nullptr;
-			break;
-	#if PLATFORM_WINDOWS
-		case OdysseyStylusInputDriver_Ink:
-			stylus_input = CreateStylusInputInterface();
-			break;
-		case OdysseyStylusInputDriver_Wintab:
-			stylus_input = CreateStylusInputInterfaceWintab();
-			break;
-	#elif PLATFORM_MAC
-		case OdysseyStylusInputDriver_NSEvent:
-			stylus_input = CreateStylusInputInterfaceNSEvent();
-			break;
-	#endif
-		default:
-			stylus_input = nullptr;
-	}
-
-
-	if( !stylus_input.IsValid() )
-		StylusInputDriver = OdysseyStylusInputDriver_None;
-	*/
-
-void UOdysseyStylusInputSubsystem::Deinitialize()
+void UOdysseyStylusInputSubsystem::AddMessageHandler(IStylusMessageHandler& InHandler)
 {
-	Super::Deinitialize();
-
-	FGlobalTabmanager::Get()->UnregisterTabSpawner(StylusInputDebugTabName);
-
-	InputInterface.Reset();
-
-	UE_LOG(LogStylusInput, Log, TEXT("Shutting down StylusInput subsystem."));
+	MessageHandlers.AddUnique(&InHandler);
 }
+
+void UOdysseyStylusInputSubsystem::RemoveMessageHandler(IStylusMessageHandler& InHandler)
+{
+	MessageHandlers.Remove(&InHandler);
+}
+
+//---
 
 int32 UOdysseyStylusInputSubsystem::NumInputDevices() const
 {
@@ -190,16 +164,6 @@ const IStylusInputDevice* UOdysseyStylusInputSubsystem::GetInputDevice(int32 Ind
 	return nullptr;
 }
 
-void UOdysseyStylusInputSubsystem::AddMessageHandler(IStylusMessageHandler& InHandler)
-{
-	MessageHandlers.AddUnique(&InHandler);
-}
-
-void UOdysseyStylusInputSubsystem::RemoveMessageHandler(IStylusMessageHandler& InHandler)
-{
-	MessageHandlers.Remove(&InHandler);
-}
-
 void UOdysseyStylusInputSubsystem::Tick(float DeltaTime)
 {
 	if (InputInterface.IsValid())
@@ -212,19 +176,21 @@ void UOdysseyStylusInputSubsystem::Tick(float DeltaTime)
 			if (InputDevice->IsDirty())
 			{
 				InputDevice->Tick();
-                TArray<FStylusState> tmp( InputDevice->GetCurrentState() );
+				TArray<FStylusState> tmp( InputDevice->GetCurrentState() );
 
 				for (IStylusMessageHandler* Handler : MessageHandlers)
 				{
-                    for( const FStylusState& stylus_state : tmp )
-                    {
-                        Handler->OnStylusStateChanged( InputInterface->Widget(), stylus_state, DeviceIdx );
-                    }
+					for( const FStylusState& stylus_state : tmp )
+					{
+						Handler->OnStylusStateChanged( InputInterface->Widget(), stylus_state, DeviceIdx );
+					}
 				}
 			}
 		}
 	}
 }
+
+//---
 
 TSharedRef<SDockTab> UOdysseyStylusInputSubsystem::OnSpawnPluginTab(const FSpawnTabArgs& Args)
 {
@@ -234,7 +200,5 @@ TSharedRef<SDockTab> UOdysseyStylusInputSubsystem::OnSpawnPluginTab(const FSpawn
 			SNew(SStylusInputDebugWidget, *this)
 		];
 }
-
-
 
 #undef LOCTEXT_NAMESPACE

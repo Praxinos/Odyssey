@@ -10,8 +10,10 @@
 #include "IOdysseyStylusInputModule.h"
 #include "IStylusState.h"
 
-class SStylusInputDebugWidget : public SCompoundWidget, 
-	public IStylusMessageHandler
+// A debug widget which implements the IStylusMessageHandler interface to get stylus messages
+class SStylusInputDebugWidget
+	: public SCompoundWidget
+	, public IStylusMessageHandler
 {
 public:
 	SStylusInputDebugWidget();
@@ -29,7 +31,6 @@ public:
 	}
 
 private:
-
     UOdysseyStylusInputSubsystem* InputSubsystem;
 	FStylusState State;
 	int32 LastIndex;

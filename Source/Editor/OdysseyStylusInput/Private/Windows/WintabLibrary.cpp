@@ -1,11 +1,11 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#if PLATFORM_WINDOWS
-
-#include "WintabLibrary-Windows.h"
+#include "WintabLibrary.h"
 
 #include "Framework/Application/SlateApplication.h"
+
+//---
 
 void* FWintabLibrary::DLLHandle = nullptr;
 int FWintabLibrary::mRefCount = 0;
@@ -35,19 +35,14 @@ FWintabLibrary::WTMGRCSRPRESSUREBTNMARKSEX FWintabLibrary::WTMgrCsrPressureBtnMa
 
 #pragma warning(suppress: 4191)
 
-/*static*/
+//---
+
+//static
 bool
 FWintabLibrary::Load()
 {
-    // should never be above 2, it happens when:
-    // InitSubsystem()
-    //      current = CreateStylusInputInterfaceWintab() [ref=1]
-    // ...
-    // new = CreateStylusInputInterfaceWintab() [ref=2]
-    // SetStylusInputInterface( new )
-    //      current.Reset() [ref=1]
-    //      current = new [ref=1]
-    check( mRefCount <= 1 );
+    // Load() should not be called more than once
+    check( mRefCount == 0 );
 
     if( DLLHandle )
     {
@@ -67,6 +62,7 @@ FWintabLibrary::Load()
 		func = reinterpret_cast<type>( reinterpret_cast<void*>( GetProcAddress(HMODULE(DLLHandle), #func) ) ); \
 		if( !func ) { Unload(); return false; }
 
+    // Associate all our function pointers to dll ones
     GETPROCADDRESS( WTOPENW, WTOpenW );
     GETPROCADDRESS( WTINFOW, WTInfoW );
     GETPROCADDRESS( WTGETA, WTGetA );
@@ -93,7 +89,7 @@ FWintabLibrary::Load()
     return true;
 }
 
-/*static*/
+//static
 void
 FWintabLibrary::Unload()
 {
@@ -130,5 +126,3 @@ FWintabLibrary::Unload()
     WTMgrDefContextEx = nullptr;
     WTMgrCsrPressureBtnMarksEx = nullptr;
 }
-
-#endif // PLATFORM_WINDOWS

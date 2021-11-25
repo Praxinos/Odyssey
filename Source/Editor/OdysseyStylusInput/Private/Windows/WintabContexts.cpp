@@ -1,55 +1,64 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#if PLATFORM_WINDOWS
-
-#include "WintabContexts-Windows.h"
+#include "WintabContexts.h"
 
 #include "IOdysseyStylusInputModule.h" // for UE_LOG
 #include <chrono>
+
 //---
 
+// Test if the desired packet type is available inside all packet descriptions
 static
-const FWTPacketDescription*
-PacketDescriptionFromType( const TArray<FWTPacketDescription>& iPacketDescriptions, EWintabPacketType iPacketType )
+const FWintabPacketDescription*
+PacketDescriptionFromType( const TArray<FWintabPacketDescription>& iPacketDescriptions, EWintabPacketType iPacketType )
 {
-    return iPacketDescriptions.FindByPredicate( [iPacketType]( const FWTPacketDescription& iDescription )
+    return iPacketDescriptions.FindByPredicate( [iPacketType]( const FWintabPacketDescription& iDescription )
     {
         return iDescription.Type == iPacketType;
     } );
 }
 
-static float Normalize( int Value, const FWTPacketDescription& Desc )
+//---
+
+static
+float
+Normalize( int Value, const FWintabPacketDescription& Desc )
 {
     return (float)( Value - Desc.Minimum ) / (float)( Desc.Maximum - Desc.Minimum );
 }
 
-static float ToDegrees( int Value, const FWTPacketDescription& Desc )
+static
+float
+ToDegrees( int Value, const FWintabPacketDescription& Desc )
 {
     return Value / 10.f;
-    //return Value / Desc.Resolution;
+    //return Value / Desc.Resolution; // Doesn't work
 }
 
 void 
-FWTTabletContextInfo::Tick()
+FWintabTabletContextInfo::Tick()
 {
     if( !mPacketsBuffer.Num() )
         mPacketsBuffer.AddUninitialized( 50 );
 
+    // Get all new native wintab packets
     int count = FWintabLibrary::WTPacketsGet( mTabletContext, mPacketsBuffer.Num(), mPacketsBuffer.GetData() );
 
-    const FWTPacketDescription* packet_description_z = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Z );
-    const FWTPacketDescription* packet_description_timer = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Timer );
-    const FWTPacketDescription* packet_description_npressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::NormalPressure );
-    const FWTPacketDescription* packet_description_tpressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::TangentPressure );
-    const FWTPacketDescription* packet_description_twist = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Twist );
-    const FWTPacketDescription* packet_description_azimuth = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Azimuth );
-    const FWTPacketDescription* packet_description_altitude = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Altitude );
+    // Get available descriptions (null if no description)
+    const FWintabPacketDescription* packet_description_z = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Z );
+    const FWintabPacketDescription* packet_description_timer = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Timer );
+    const FWintabPacketDescription* packet_description_npressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::NormalPressure );
+    const FWintabPacketDescription* packet_description_tpressure = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::TangentPressure );
+    const FWintabPacketDescription* packet_description_twist = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Twist );
+    const FWintabPacketDescription* packet_description_azimuth = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Azimuth );
+    const FWintabPacketDescription* packet_description_altitude = PacketDescriptionFromType( PacketDescriptions, EWintabPacketType::Altitude );
 
     for( int i = 0; i < count; i++ )
     {
         const PACKET& packet = mPacketsBuffer[i];
 
+        // Convert native wintab packet values to our wintab state
         FWintabStylusState state;
         state.Position = FVector2D( packet.pkX / 1000.f, packet.pkY / 1000.f );
         state.Z = packet_description_z ? packet.pkZ : 0.0;
@@ -65,6 +74,7 @@ FWTTabletContextInfo::Tick()
 
         //---
 
+        // Manage stylus down/up (store in each packet)
         if( HIWORD( packet.pkButtons ) & TBN_DOWN
             && !LOWORD( packet.pkButtons ) ) // to not take side buttons
         {
@@ -76,53 +86,46 @@ FWTTabletContextInfo::Tick()
             IsTouching = false;
         }
 
-        //if( packet->pkButtons )
-            //UE_LOG( LogStylusInput, Log, TEXT( "packet->pkButtons: 0x%X\n" ), packet->pkButtons );
-
+        // Manage stylus inversion
         state.IsInverted = ( packet.pkStatus & TPS_INVERT );
 
         //---
 
-        WindowsState.Add( state );
+        // Fill the array of states
+        WintabStates.Add( state );
     }
 
     //---
 
-    TArray<FWintabStylusState> tmp( WindowsState );
-    WindowsState.Empty();
+    // Copy all states inside a temporary array (mainly inspired by ink, maybe not necessary for wintab)
+    TArray<FWintabStylusState> tmp( WintabStates );
+    WintabStates.Empty();
 
+    // Move the generic current states to the previous ones
     PreviousState = CurrentState;
     CurrentState.Empty();
 
-    for( FWintabStylusState& window_state : tmp )
+    // Convert all wintab states to the generic ones and fill the generic state buffer
+    for( FWintabStylusState& wintab_state : tmp )
     {
-        window_state.IsTouching = IsTouching;
-        CurrentState.Push( window_state.ToPublicState() );
+        wintab_state.IsTouching = IsTouching;
+        CurrentState.Push( wintab_state.ToPublicState() );
     }
-
-    //Dirty = false;
 }
 
 //---
-
-FWintabContexts::FWintabContexts()
-{
-}
-
-FWintabContexts::~FWintabContexts()
-{
-    CloseTabletContexts();
-}
+//---
+//---
 
 #define FIX_TO_DOUBLE(x)   ((double)(INT(x))+((double)FRAC(x)/65536))
 
 static 
 bool 
-SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContext )
+SetupPacketDescriptions( int iIndexContext, FWintabTabletContextInfo* ioTabletContext )
 {
     ioTabletContext->PacketDescriptions.Empty();
 
-    FWTPacketDescription packet_description;
+    FWintabPacketDescription packet_description;
 
     AXIS tablet_x = { 0 };
     UINT wWTInfoRetVal = FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_X, &tablet_x );
@@ -133,13 +136,15 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
         packet_description.Maximum = tablet_x.axMax;
         packet_description.Resolution = FIX_TO_DOUBLE( tablet_x.axResolution );
 
+        // To have an idea of each description
         //UE_LOG( LogStylusInput, Log, TEXT( "info X: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, tablet_x.axUnits, packet_description.Resolution );
-        // info X: min:0 max:40639 unit:2 res:2000.000000
+        // -> info X: min:0 max:40639 unit:2 res:2000.000000
 
         ioTabletContext->PacketDescriptions.Add( packet_description );
     }
     else
     {
+        // If no X value, it's considered as an invalid packet
         return false;
     }
 
@@ -152,8 +157,9 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
         packet_description.Maximum = tablet_y.axMax;
         packet_description.Resolution = FIX_TO_DOUBLE( tablet_y.axResolution );
 
+        // To have an idea of each description
         //UE_LOG( LogStylusInput, Log, TEXT( "info Y: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, tablet_y.axUnits, packet_description.Resolution );
-        // info Y: min:0 max:30479 unit:2 res:2000.000000
+        // -> info Y: min:0 max:30479 unit:2 res:2000.000000
 
         ioTabletContext->PacketDescriptions.Add( packet_description );
     }
@@ -167,8 +173,9 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
         packet_description.Maximum = tablet_z.axMax;
         packet_description.Resolution = FIX_TO_DOUBLE( tablet_z.axResolution );
 
+        // To have an idea of each description
         //UE_LOG( LogStylusInput, Log, TEXT( "info Z: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, tablet_z.axUnits, packet_description.Resolution );
-        // info Z: min:-1023 max:1023 unit:2 res:2000.000000
+        // -> info Z: min:-1023 max:1023 unit:2 res:2000.000000
 
         ioTabletContext->PacketDescriptions.Add( packet_description );
     }
@@ -182,8 +189,9 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
         packet_description.Maximum = normal_pressure.axMax;
         packet_description.Resolution = FIX_TO_DOUBLE( normal_pressure.axResolution );
 
+        // To have an idea of each description
         //UE_LOG( LogStylusInput, Log, TEXT( "info NormalPressure: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, normal_pressure.axUnits, packet_description.Resolution );
-        // info NormalPressure: min:0 max:1023 unit:0 res:0.000000
+        // -> info NormalPressure: min:0 max:1023 unit:0 res:0.000000
 
         ioTabletContext->PacketDescriptions.Add( packet_description );
     }
@@ -197,8 +205,9 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
         packet_description.Maximum = tangent_pressure.axMax;
         packet_description.Resolution = FIX_TO_DOUBLE( tangent_pressure.axResolution );
 
+        // To have an idea of each description
         //UE_LOG( LogStylusInput, Log, TEXT( "info TangentPressure: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, tangent_pressure.axUnits, packet_description.Resolution );
-        // info TangentPressure: min:0 max:1023 unit:0 res:0.000000
+        // -> info TangentPressure: min:0 max:1023 unit:0 res:0.000000
 
         ioTabletContext->PacketDescriptions.Add( packet_description );
     }
@@ -207,20 +216,6 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
     FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_ORIENTATION, &orientation );
     if( wWTInfoRetVal )
     {
-#if 0 // from tilttest sample
-        /* convert azimuth resulution to double */
-        tpvar = FIX_DOUBLE( TpOri[0].axResolution );
-        /* convert from resolution to radians */
-        aziFactor = tpvar / ( 2 * pi );
-
-        /* convert altitude resolution to double */
-        tpvar = FIX_DOUBLE( TpOri[1].axResolution );
-        /* scale to arbitrary value to get decent line length */
-        altFactor = tpvar / 1000;
-        /* adjust for maximum value at vertical */
-        altAdjust = (double)TpOri[1].axMax / altFactor;
-#endif
-
         if( orientation[0].axResolution )
         {
             packet_description.Type = EWintabPacketType::Azimuth;
@@ -228,8 +223,9 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
             packet_description.Maximum = orientation[0].axMax;
             packet_description.Resolution = FIX_TO_DOUBLE( orientation[0].axResolution );
 
+            // To have an idea of each description
             //UE_LOG( LogStylusInput, Log, TEXT( "info Azimuth: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, orientation[0].axUnits, packet_description.Resolution );
-            // info Azimuth: min:0 max:3600 unit:3 res:3600.000000
+            // -> info Azimuth: min:0 max:3600 unit:3 res:3600.000000
 
             ioTabletContext->PacketDescriptions.Add( packet_description );
         }
@@ -241,8 +237,9 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
             packet_description.Maximum = orientation[1].axMax;
             packet_description.Resolution = FIX_TO_DOUBLE( orientation[1].axResolution );
 
+            // To have an idea of each description
             //UE_LOG( LogStylusInput, Log, TEXT( "info Altitude: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, orientation[1].axUnits, packet_description.Resolution );
-            // info Altitude: min:-900 max:900 unit:3 res:3600.000000
+            // -> info Altitude: min:-900 max:900 unit:3 res:3600.000000
 
             ioTabletContext->PacketDescriptions.Add( packet_description );
         }
@@ -254,12 +251,15 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
             packet_description.Maximum = orientation[2].axMax;
             packet_description.Resolution = FIX_TO_DOUBLE( orientation[2].axResolution );
 
+            // To have an idea of each description
             //UE_LOG( LogStylusInput, Log, TEXT( "info Twist: min:%d max:%d unit:%d res:%f" ), packet_description.Minimum, packet_description.Maximum, orientation[2].axUnits, packet_description.Resolution );
-            // info Twist: min:0 max:3600 unit:3 res:3600.000000
+            // -> info Twist: min:0 max:3600 unit:3 res:3600.000000
 
             ioTabletContext->PacketDescriptions.Add( packet_description );
         }
     }
+
+    //NOTE: if someday we need DVC_ROTATION to get Pitch, Roll, Yaw
 
     //AXIS rotation[3];
     //FWintabLibrary::WTInfoW( WTI_DEVICES + iIndexContext, DVC_ROTATION, &rotation );
@@ -301,7 +301,7 @@ SetupPacketDescriptions( int iIndexContext, FWTTabletContextInfo* ioTabletContex
 
 static 
 void 
-SetupTabletSupportedPackets( FWTTabletContextInfo* ioTabletContext )
+SetupTabletSupportedPackets( FWintabTabletContextInfo* ioTabletContext )
 {
     ioTabletContext->SupportedPackets.Empty();
     ioTabletContext->CleanSupportedInput();
@@ -359,6 +359,8 @@ SetupTabletSupportedPackets( FWTTabletContextInfo* ioTabletContext )
         ioTabletContext->AddSupportedInput( EStylusInputType::Twist );
     }
 
+    //REMINDER: if someday we need Pitch, Roll, Yaw
+
     //if( PacketDescriptionFromType( ioTabletContext->PacketDescriptions, EWintabPacketType::Pitch ) )
     //{
     //    ioTabletContext->SupportedPackets.Add( EWintabPacketType::Pitch );
@@ -376,6 +378,17 @@ SetupTabletSupportedPackets( FWTTabletContextInfo* ioTabletContext )
     //}
 }
 
+//---
+
+FWintabContexts::FWintabContexts()
+{
+}
+
+FWintabContexts::~FWintabContexts()
+{
+    CloseTabletContexts();
+}
+
 bool
 FWintabContexts::OpenTabletContexts( HWND iHwnd )
 {
@@ -387,8 +400,7 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
 
     int ctxIndex = 0;
     // Open/save contexts until first failure to open a context.
-    // Note that WTInfoA(WTI_STATUS, STA_CONTEXTS, &nOpenContexts);
-    // will not always let you enumerate through all contexts.
+    // Note that WTInfoA(WTI_STATUS, STA_CONTEXTS, &nOpenContexts); will not always let you enumerate through all contexts.
     do
     {
         UE_LOG( LogStylusInput, Log, TEXT( "Getting info on contextIndex: %i ..." ), ctxIndex );
@@ -407,7 +419,7 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
 
             //---
 
-            FWTTabletContextInfo tablet_context_info;
+            FWintabTabletContextInfo tablet_context_info;
             tablet_context_info.IsTouching = false;
             tablet_context_info.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
 
@@ -418,16 +430,19 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
             }
             SetupTabletSupportedPackets( &tablet_context_info );
 
-            const FWTPacketDescription* packet_description_x = tablet_context_info.PacketDescriptions.FindByPredicate( []( const FWTPacketDescription& iDescription ) { return iDescription.Type == EWintabPacketType::X; } );
-            const FWTPacketDescription* packet_description_y = tablet_context_info.PacketDescriptions.FindByPredicate( []( const FWTPacketDescription& iDescription ) { return iDescription.Type == EWintabPacketType::Y; } );
-
             //---
 
+            // Get X, Y descriptions of the context to compute some dimensions
+            const FWintabPacketDescription* packet_description_x = tablet_context_info.PacketDescriptions.FindByPredicate( []( const FWintabPacketDescription& iDescription ) { return iDescription.Type == EWintabPacketType::X; } );
+            const FWintabPacketDescription* packet_description_y = tablet_context_info.PacketDescriptions.FindByPredicate( []( const FWintabPacketDescription& iDescription ) { return iDescription.Type == EWintabPacketType::Y; } );
+
+            // Set input (~tablet) dimensions
             lcMine.lcInOrgX = 0;
             lcMine.lcInOrgY = 0;
             lcMine.lcInExtX = packet_description_x->Maximum + 1;
             lcMine.lcInExtY = packet_description_y->Maximum + 1;
 
+            // Set output (~screen) dimensions
             // Guarantee the output coordinate space to be in screen coordinates.  
             lcMine.lcOutOrgX = GetSystemMetrics( SM_XVIRTUALSCREEN ) * 1000.f; // Scaled to have subpixel with packet.pkX / 1000.f
             lcMine.lcOutOrgY = GetSystemMetrics( SM_YVIRTUALSCREEN ) * 1000.f;
@@ -476,7 +491,7 @@ void
 FWintabContexts::CloseTabletContexts()
 {
     // Close all contexts we opened so we don't have them lying around in prefs.
-    for( FWTTabletContextInfo& tablet_context_info: mTabletContexts )
+    for( FWintabTabletContextInfo& tablet_context_info: mTabletContexts )
     {
         UE_LOG( LogStylusInput, Log, TEXT( "Closing context: 0x%X" ), tablet_context_info.mTabletContext );
 
@@ -485,5 +500,3 @@ FWintabContexts::CloseTabletContexts()
 
     mTabletContexts.Empty();
 }
-
-#endif // PLATFORM_WINDOWS

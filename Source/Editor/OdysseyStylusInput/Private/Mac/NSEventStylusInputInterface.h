@@ -5,13 +5,15 @@
 
 #include "IOdysseyStylusInputModule.h"
 
-class FWintabStylusInputInterfaceImpl;
+class FNSEventStylusInputInterfaceImpl;
 
-class FWintabStylusInputInterface : public IStylusInputInterfaceInternal
+// Implementation of the NSEvent (MacOSX) driver
+class FNSEventStylusInputInterface
+	: public IStylusInputInterfaceInternal
 {
 public:
-	FWintabStylusInputInterface(TUniquePtr<FWintabStylusInputInterfaceImpl> InImpl);
-	virtual ~FWintabStylusInputInterface();
+	FNSEventStylusInputInterface(TUniquePtr<FNSEventStylusInputInterfaceImpl> InImpl);
+	virtual ~FNSEventStylusInputInterface();
 
 	virtual void Tick() override;
 	virtual int32 NumInputDevices() const override;
@@ -21,6 +23,8 @@ public:
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// pImpl to avoid including Wintab headers.
-	TUniquePtr<FWintabStylusInputInterfaceImpl> Impl;
+	// Impl to avoid including MacOSX headers.
+	TUniquePtr<FNSEventStylusInputInterfaceImpl> Impl;
 };
+
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent();

@@ -13,7 +13,7 @@
 #include "OdysseyStylusInputSettings.generated.h"
 
 /**
- * Implements the Editor's user settings.
+ * Implements the StylusInput settings.
  */
 UCLASS(config=EditorPerProjectUserSettings)
 class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSettings
@@ -23,9 +23,17 @@ class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSettings
 
 public:
     virtual void PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent ) override;
+
+public:
+    // Update the stylus input subsystem to use the current StylusInputDriver
     void RefreshStylusInputDriver();
+
+public:
+    // Get the current StylusInputDriver
     EOdysseyStylusInputDriver GetStylusDriver() const;
-    static FText GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iFormat );
+    // Get the localization text of the given StylusInputDriver
+    // (It is used outside of this StylusInput module) 
+    static FText GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iStylusInputDriver );
 
 public:
     /** Driver to use to interpret Stylus inputs. */

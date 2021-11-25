@@ -9,7 +9,7 @@
 
 #include "OdysseyStylusInputDriver.generated.h"
 
-
+// The available stylus drivers
 UENUM()
 enum EOdysseyStylusInputDriver
 {
@@ -18,4 +18,3 @@ enum EOdysseyStylusInputDriver
     OdysseyStylusInputDriver_Wintab     UMETA( DisplayName = "Wintab (Windows)" ),
     OdysseyStylusInputDriver_NSEvent    UMETA( DisplayName = "NSEvent (MacOS)" ),
 };
-

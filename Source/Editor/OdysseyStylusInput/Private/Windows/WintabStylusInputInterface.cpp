@@ -2,19 +2,21 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "WintabStylusInputInterface.h"
-#include "Interfaces/IMainFrameModule.h"
 
+#include "Interfaces/IMainFrameModule.h"
 #include "Framework/Application/SlateApplication.h"
 
-#if PLATFORM_WINDOWS
+#include "WintabContexts.h"
 
-#include "WintabContexts-Windows.h"
+//---
 
+// An implementation which represents the Wintab driver
 class FWintabStylusInputInterfaceImpl
 {
 public:
     ~FWintabStylusInputInterfaceImpl();
 
+    /** All the contexts (tablets) detected */
     TSharedPtr<FWintabContexts> mContexts;
 
     HWND mHwnd{ 0 };
@@ -29,6 +31,8 @@ FWintabStylusInputInterfaceImpl::~FWintabStylusInputInterfaceImpl()
     FWintabLibrary::Unload();
 }
 
+//---
+//---
 //---
 
 FWintabStylusInputInterface::FWintabStylusInputInterface( TUniquePtr<FWintabStylusInputInterfaceImpl> InImpl )
@@ -45,9 +49,11 @@ FWintabStylusInputInterface::~FWintabStylusInputInterface() = default;
 void
 FWintabStylusInputInterface::Tick()
 {
-    for( const FWTTabletContextInfo& Context : Impl->mContexts->mTabletContexts )
+    // If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
+    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
+    // we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
+    for( const FWintabTabletContextInfo& Context : Impl->mContexts->mTabletContexts )
     {
-        // don't change focus if the stylus is down
         if( Context.GetCurrentState().ContainsByPredicate( []( const FStylusState& iStylusState ) { return iStylusState.IsStylusDown(); } ) )
         {
             return;
@@ -56,23 +62,31 @@ FWintabStylusInputInterface::Tick()
 
     FSlateApplication& Application = FSlateApplication::Get();
 
+    // Get the widget hovered by the stylus/mouse
     FWidgetPath WidgetPath = Application.LocateWindowUnderMouse( Application.GetCursorPos(), Application.GetInteractiveTopLevelWindows() );
     if( WidgetPath.IsValid() )
     {
+        // Get its corresponding window
         TSharedPtr<SWindow> Window = WidgetPath.GetWindow();
         if( Window.IsValid() )
         {
             TSharedPtr<FGenericWindow> NativeWindow = Window->GetNativeWindow();
             HWND Hwnd = reinterpret_cast<HWND>( NativeWindow->GetOSWindowHandle() );
 
+            // If the current hovered window is different than the referenced window in the plugin, change it
             if( Hwnd != Impl->mHwnd )
             {
+                // Remove all contexts (tablets) detected
                 Impl->mContexts->CloseTabletContexts();
+                // Set the new referenced window in the plugin
                 Impl->mHwnd = Hwnd;
+                // Re-detect all tablets
                 Impl->mContexts->OpenTabletContexts( Impl->mHwnd );
             }
 
+            // Store the new referenced plugin window
             Impl->Window = Window;
+            // Also store the widget
             Impl->Widget = WidgetPath.GetLastWidget();
         }
     }
@@ -108,12 +122,15 @@ FWintabStylusInputInterface::Widget() const
 }
 
 //---
+//---
+//---
 
-TSharedPtr<IStylusInputInterfaceInternal>
-CreateStylusInputInterfaceWintab()
+// Create the StylusInputInterface corresponding to the Wintab driver
+TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab()
 {
     TUniquePtr<FWintabStylusInputInterfaceImpl> WindowsImpl = MakeUnique<FWintabStylusInputInterfaceImpl>();
 
+    // Load the wintab dll
     if( !FWintabLibrary::Load() )
     {
         UE_LOG( LogStylusInput, Error, TEXT( "Could not load Wintab32.dll!" ) );
@@ -130,5 +147,3 @@ CreateStylusInputInterfaceWintab()
 
     return MakeShared<FWintabStylusInputInterface>( MoveTemp( WindowsImpl ) );
 }
-
-#endif // PLATFORM_WINDOWS

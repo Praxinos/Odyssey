@@ -1,7 +1,5 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
-// IDDN FR.001.250001.004.S.X.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
 
@@ -14,7 +12,7 @@ enum class ODYSSEYSTYLUSINPUT_API EStylusInputType
 {
 	Position,
 	Z,
-    Timer,
+	Timer,
 	Pressure,
 	Tilt,
 	Azimuth,
@@ -25,31 +23,34 @@ enum class ODYSSEYSTYLUSINPUT_API EStylusInputType
 	Size
 };
 
+//---
+
 /**
  * The current state of a single stylus, as sent by IStylusMessageHandler. 
  */
 class ODYSSEYSTYLUSINPUT_API FStylusState
 {
 public:
-
-	FStylusState() : Position(0, 0), Z(0), Timer(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0), Pressure(0), 
-		TangentPressure(0), Size(0, 0), IsDown(false), IsInverted(false)
+	FStylusState()
+		: Position(0, 0), Z(0), Timer(0), Tilt(0, 0), Azimuth(0), Altitude(0), Twist(0)
+		, Pressure(0), TangentPressure(0), Size(0, 0)
+		, IsDown(false), IsInverted(false)
 	{
 	}
 
 	FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, FVector2D InTilt, float InAzimuth, float InAltitude, float InTwist,
 		float InPressure, float InTanPressure, FVector2D InSize, 
-		bool InDown, bool InInverted) : 
-		Position(InPosition), Z(InZ), Timer(InTimer), Tilt(InTilt), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist),
-		Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize),
-		IsDown(InDown), IsInverted(InInverted)
+		bool InDown, bool InInverted)
+		: Position(InPosition), Z(InZ), Timer(InTimer), Tilt(InTilt), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist)
+		, Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
+		, IsDown(InDown), IsInverted(InInverted)
 	{
 	}
 
-	FStylusState(const FStylusState& Other) :
-		Position(Other.Position), Z(Other.Z), Timer(Other.Timer), Tilt(Other.Tilt), Azimuth(Other.Azimuth), Altitude(Other.Altitude), Twist(Other.Twist),
-		Pressure(Other.Pressure), TangentPressure(Other.TangentPressure), Size(Other.Size),
-		IsDown(Other.IsDown), IsInverted(Other.IsInverted)
+	FStylusState(const FStylusState& Other)
+		: Position(Other.Position), Z(Other.Z), Timer(Other.Timer), Tilt(Other.Tilt), Azimuth(Other.Azimuth), Altitude(Other.Altitude), Twist(Other.Twist)
+		, Pressure(Other.Pressure), TangentPressure(Other.TangentPressure), Size(Other.Size)
+		, IsDown(Other.IsDown), IsInverted(Other.IsInverted)
 	{
 	}
 
@@ -69,7 +70,7 @@ public:
 
 	/**
 	 * Elapsed time in ms from the start of the tablet context
-     * Defaults to 0 if not supported
+	 * Defaults to 0 if not supported
 	 */
 	unsigned int GetTimer() const { return Timer; }
 
@@ -83,20 +84,20 @@ public:
 	 */
 	FVector2D GetTilt() const { return Tilt; }
 
-    /**
-     * The current azimuth, normalized to the range of [0, 360].
-     * A value of 0 means that the stylus is tilted forwards, away from the user.
-     * A value of 90 means that the stylus is tilted to the right direction, and so on in clockwise.
-     */
+	/**
+	 * The current azimuth, normalized to the range of [0, 360].
+	 * A value of 0 means that the stylus is tilted forwards, away from the user.
+	 * A value of 90 means that the stylus is tilted to the right direction, and so on in clockwise.
+	 */
 	float GetAzimuth() const { return Azimuth; }
 
-    /**
-     * The current altitude, normalized to the range of [90, 0].
-     * Defaults to (0,0) if EStylusInputType::Orientation is not supported.
-     * A value of 90 means that the stylus is perfectly vertical.
+	/**
+	 * The current altitude, normalized to the range of [90, 0].
+	 * Defaults to (0,0) if EStylusInputType::Orientation is not supported.
+	 * A value of 90 means that the stylus is perfectly vertical.
 	 * Defaults to 0 if EStylusInputType::Altitude is not supported.
-     */
-    float GetAltitude() const { return Altitude; }
+	 */
+	float GetAltitude() const { return Altitude; }
 
 	/**
 	 * The current twist amount around the stylus' own axis in degrees, normalized to the range of [0, 360).
@@ -135,44 +136,47 @@ public:
 	bool IsStylusDown() const { return IsDown; }
 
 private:
-
-	FVector2D Position;
-	float Z;
+	FVector2D	Position;
+	float		Z;
     unsigned int Timer;
-	FVector2D Tilt;
-	float Azimuth;
-	float Altitude;
-	float Twist;
-	float Pressure;
-	float TangentPressure;
-	FVector2D Size;
+	FVector2D	Tilt;
+	float		Azimuth;
+	float		Altitude;
+	float		Twist;
+	float		Pressure;
+	float		TangentPressure;
+	FVector2D	Size;
 
 	bool IsDown : 1;
 	bool IsInverted : 1;
 };
 
+//---
+
 /** An input device representing a stylus and its current state. */
 class ODYSSEYSTYLUSINPUT_API IStylusInputDevice
 {
 public:
-
 	virtual ~IStylusInputDevice() {}
 
 	/**
-	 * Get the current stylus state.
+	 * Get the current stylus states.
+	 * This is an array because between 2 subsystem ticks, multiple tablet packets can be received.
 	 */
 	const TArray<FStylusState>& GetCurrentState() const { return CurrentState; }
 
 	/**
-	 * Get the previous stylus state.
+	 * Get the previous stylus states.
+	 * This is an array because between 2 subsystem ticks, multiple tablet packets can be received.
 	 */
 	const TArray<FStylusState>& GetPreviousState() const { return PreviousState; }
 
 	/**
-	 * Get the supported inputs of this tablet.
+	 * Get the supported inputs of this tablet to know which data in FStylusState are valid or not.
 	 */
 	const TArray<EStylusInputType>& GetSupportedInputs() const { return SupportedInputs; }
 
+public:
 	/** Update the input device. Not intended to be called externally. */ 
 	virtual void Tick() = 0;
 
@@ -180,11 +184,14 @@ public:
 	bool IsDirty() const { return Dirty; }
 
 protected:
-    TArray<FStylusState> CurrentState;
-    TArray<FStylusState> PreviousState;
-	TArray<EStylusInputType> SupportedInputs;
+	TArray<FStylusState>		CurrentState;
+	TArray<FStylusState>		PreviousState;
+	TArray<EStylusInputType>	SupportedInputs;
+
 	bool Dirty : 1;
 };
+
+//---
 
 /**
  * Interface to implement for classes that want to receive messages when a stylus state change occurs.

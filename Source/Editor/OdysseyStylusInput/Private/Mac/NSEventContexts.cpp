@@ -1,18 +1,20 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "NSEventContexts-Mac.h"
-
-#if PLATFORM_MAC
+#include "NSEventContexts.h"
 
 //For coordinates conversion purposes
 #include "Mac/MacApplication.h"
 #include "Mac/MacPlatformApplicationMisc.h"
 
+//---
+
 FCriticalSection sgMutex;
 
+//---
+
 void
-FWTTabletContextInfo::Tick()
+FNSEventTabletContextInfo::Tick()
 {
     PreviousState = CurrentState;
     CurrentState.Empty();
@@ -26,30 +28,30 @@ FWTTabletContextInfo::Tick()
     {
         CurrentState.Push( tmp[i].ToPublicState() );
     }
+
+    Dirty = false;
 }
 
 
-FNSEventContexts::FNSEventContexts()
+FNSEventContext::FNSEventContext()
 {
     mEventMonitor = 0;
-    mTabletContext = FWTTabletContextInfo();
+    mTabletContext = FNSEventTabletContextInfo();
 }
 
-FNSEventContexts::~FNSEventContexts()
+FNSEventContext::~FNSEventContext()
 {
     CloseContext();
 }
 
-
-//Register the window to get NSEvents, enabling the window to get tablet events
 bool
-FNSEventContexts::OpenContext( FCocoaWindow* iHwnd )
+FNSEventContext::OpenContext( FCocoaWindow* iHwnd )
 {
     mTabletContext.mIsInverted = false;
         
     mTabletContext.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
     
-    //We listen to the NSEvents
+    //We listen to NSEvents
     if( !mEventMonitor )
     {
         mEventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskAny handler:^(NSEvent* Event) {
@@ -59,9 +61,8 @@ FNSEventContexts::OpenContext( FCocoaWindow* iHwnd )
     return true;
 }
 
-
 void
-FNSEventContexts::CloseContext()
+FNSEventContext::CloseContext()
 {
     if( mEventMonitor )
     {
@@ -71,6 +72,9 @@ FNSEventContexts::CloseContext()
     }
 }
 
+//Workaround method from https://udn.unrealengine.com/s/question/0D54z00006tN3iECAS/crash-on-macslatewacomissues--
+//Fixed here: https://github.com/EpicGames/UnrealEngine/commit/f5d99e2c68673d9b675d212cf2816840e0c99cf5
+//TODO: check if the slate crash is fixed by removing this workaround and draw during long sessions on mac
 FVector2D Internal_ConvertCocoaPositionToSlate(NSPoint const& CursorPosition)
 {
 #if UE_BUILD_DEBUG
@@ -96,9 +100,9 @@ FVector2D Internal_ConvertCocoaPositionToSlate(NSPoint const& CursorPosition)
     const FVector2D OffsetOnScreen = FVector2D(CursorPosition.x - TargetScreen.frame.origin.x, TargetScreen.frame.origin.y + TargetScreen.frame.size.height - CursorPosition.y) * DPIScaleFactor;
     return FVector2D(TargetScreen.frame.origin.x * DPIScaleFactor + OffsetOnScreen.X, -TargetScreen.frame.origin.y * DPIScaleFactor + OffsetOnScreen.Y);
 }
+//Workaround end--
 
-
-NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
+NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
 {
     if( !Event )
         return NULL;
@@ -114,16 +118,17 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
     }
     else
     {
-        UE_LOG(LogTemp, Display, TEXT("WARNING, ERROR POSITION"));
+        UE_LOG(LogTemp, Warning, TEXT("Warning: NSEvent cursor position not initialized"));
         return Event;
     }
     
-    if( state.Position == FVector2D( 0, 0 ))
-        UE_LOG(LogTemp, Display, TEXT("WARNING, ERROR IN STATE"));
+    //Todo: Check if useful
+    /*if (state.Position == FVector2D(0, 0))
+        UE_LOG(LogTemp, Display, TEXT("Warning: NSEvent cursor state not initialized"));*/
 
     state.Timer = Event.timestamp * 1000;
         
-    //Tablet and mouse events are under the same main type of event. To distinguish them, we can check the subtype of the event received
+    //Tablet and mouse events are under the same main type of event. To distinguish between them, we can check the subtype of the event received
     if( [Event type] == NSEventTypeLeftMouseDown || [Event type] == NSEventTypeLeftMouseDragged )
     {
         state.NormalPressure = Event.pressure;
@@ -153,11 +158,9 @@ NSEvent* FNSEventContexts::HandleNSEvent(NSEvent* Event)
     state.IsInverted = mTabletContext.mIsInverted;
     
     sgMutex.Lock();
+    mTabletContext.SetDirty();
     mTabletContext.mPacketsBuffer.Push( state );
     sgMutex.Unlock();
 
     return Event;
 }
-
-
-#endif // PLATFORM_MAC

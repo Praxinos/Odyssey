@@ -3,13 +3,15 @@
 
 #pragma once
 
-#if PLATFORM_WINDOWS
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include "Windows/WINTAB.H"
 
+/**
+ * Wrapper class to load and initialize our function pointers to wintab dll ones.
+ * So we have access to the wintab API.
+ */
 class FWintabLibrary
 {
 public:
@@ -75,5 +77,3 @@ private:
     FWintabLibrary(); // not implemented
     ~FWintabLibrary(); // not implemented
 };
-
-#endif // PLATFORM_WINDOWS
