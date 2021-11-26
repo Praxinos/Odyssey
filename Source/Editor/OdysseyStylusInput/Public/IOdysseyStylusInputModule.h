@@ -96,7 +96,6 @@ public:
 	/** Remove a previously registered message handler. */
 	void RemoveMessageHandler(IStylusMessageHandler& MessageHandler);
 
-private:
 	/** Retrieve the input device that is at the given index, or nullptr if not found. Corresponds to the StylusIndex in IStylusMessageHandler. */
 	const IStylusInputDevice* GetInputDevice(int32 Index) const;
 

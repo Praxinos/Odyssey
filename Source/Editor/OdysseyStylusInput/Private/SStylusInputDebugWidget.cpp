@@ -35,46 +35,48 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("MostRecentIndex", "Most Recent Index"))
 			]
 			+ SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(this, &SStylusInputDebugWidget::GetIndexText)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsPositionAvailable )
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("Position", "Position"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(this, &SStylusInputDebugWidget::GetPositionText)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsPressureAvailable )
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("NormalPressure", "Normal Pressure"))
 			]
-		+ SHorizontalBox::Slot()
+			+ SHorizontalBox::Slot()
 			.FillWidth(1)
 			[
 				SNew(STextBlock)
@@ -82,79 +84,120 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
-			[
+		.AutoHeight()
+		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsPressureTangentAvailable )
 			+ SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("TangentPressure", "Tangent Pressure"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(this, &SStylusInputDebugWidget::GetTangentPressureText)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsZAvailable )
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("Z", "Z"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(this, &SStylusInputDebugWidget::GetZText)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsTwistAvailable )
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("Twist", "Twist"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(this, &SStylusInputDebugWidget::GetTwistText)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsAzimuthAvailable )
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("Azimuth", "Azimuth"))
+			]
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(this, &SStylusInputDebugWidget::GetAzimuthText)
+			]
+		]
+		+SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsAltitudeAvailable )
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(LOCTEXT("Altitude", "Altitude"))
+			]
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
+			[
+				SNew(STextBlock)
+				.Text(this, &SStylusInputDebugWidget::GetAltitudeText)
+			]
+		]
+		+SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsTiltAvailable )
+			+SHorizontalBox::Slot()
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("Tilt", "Tilt"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(this, &SStylusInputDebugWidget::GetTiltText)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
+			.IsEnabled( this, &SStylusInputDebugWidget::IsSizeAvailable )
 			+ SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("Size", "Size"))
@@ -167,34 +210,34 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("IsTouching", "Is Touching?"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(SCheckBox)
 				.IsChecked(this, &SStylusInputDebugWidget::IsTouching)
 			]
 		]
 		+SVerticalBox::Slot()
-			.AutoHeight()
+		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(LOCTEXT("IsInverted", "Is Inverted?"))
 			]
 			+SHorizontalBox::Slot()
-				.FillWidth(1)
+			.FillWidth(1)
 			[
 				SNew(SCheckBox)
 				.IsChecked(this, &SStylusInputDebugWidget::IsInverted)	

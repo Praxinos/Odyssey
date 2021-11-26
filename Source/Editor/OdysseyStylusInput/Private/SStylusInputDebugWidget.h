@@ -39,15 +39,39 @@ private:
 	ECheckBoxState IsInverted() const;
 
 	FText GetPositionText() const { return GetVector2Text(State.GetPosition()); }
+	bool IsPositionAvailable() const { return IsAvailable( EStylusInputType::Position ); }
+	FText GetZText() const { return GetFloatText(State.GetZ()); }
+	bool IsZAvailable() const { return IsAvailable( EStylusInputType::Z ); }
+
 	FText GetTiltText() const { return GetVector2Text(State.GetTilt()); }
+	bool IsTiltAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+	FText GetAzimuthText() const { return GetFloatText(State.GetAzimuth()); }
+	bool IsAzimuthAvailable() const { return IsAvailable( EStylusInputType::Azimuth ); }
+	FText GetAltitudeText() const { return GetFloatText(State.GetAltitude()); }
+	bool IsAltitudeAvailable() const { return IsAvailable( EStylusInputType::Altitude ); }
+	FText GetTwistText() const { return GetFloatText(State.GetTwist()); }
+	bool IsTwistAvailable() const { return IsAvailable( EStylusInputType::Twist ); }
+
+	FText GetPressureText() const { return GetFloatText(State.GetPressure()); }
+	bool IsPressureAvailable() const { return IsAvailable( EStylusInputType::Pressure ); }
+	FText GetTangentPressureText() const { return GetFloatText(State.GetTangentPressure()); }
+	bool IsPressureTangentAvailable() const { return IsAvailable( EStylusInputType::TangentPressure ); }
+
 	FText GetSizeText() const { return GetVector2Text(State.GetSize()); }
+	bool IsSizeAvailable() const { return IsAvailable( EStylusInputType::Size ); }
 
 	FText GetIndexText() const { return FText::FromString(FString::FromInt(LastIndex)); }
 
-	FText GetPressureText() const { return GetFloatText(State.GetPressure()); }
-	FText GetTangentPressureText() const { return GetFloatText(State.GetTangentPressure()); }
-	FText GetZText() const { return GetFloatText(State.GetZ()); }
-	FText GetTwistText() const { return GetFloatText(State.GetTwist()); }
+	//...
+
+	bool IsAvailable( EStylusInputType iType ) const
+	{
+		const IStylusInputDevice* device = InputSubsystem->GetInputDevice( LastIndex );
+		if( !device )
+			return false;
+
+		return device->GetSupportedInputs().Contains( iType );
+	}
 
 	static FText GetVector2Text(FVector2D Value);
 	static FText GetFloatText(float Value);
