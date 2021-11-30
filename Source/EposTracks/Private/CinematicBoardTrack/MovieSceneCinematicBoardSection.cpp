@@ -361,6 +361,27 @@ UMovieSceneCinematicBoardSection::SetBackgroundColor( FLinearColor iColor )
     mBackgroundColor = iColor;
 }
 
+bool
+UMovieSceneCinematicBoardSection::IsPlaneKeysAreaVisible( FGuid iPlaneBinding ) const
+{
+    const bool* state = mPlaneKeysAreaVisibility.Find( iPlaneBinding );
+
+    return state ? *state : true;
+}
+
+void
+UMovieSceneCinematicBoardSection::SetPlaneKeysAreaVisibility( FGuid iPlaneBinding, bool iVisibility )
+{
+    TryModify();
+    mPlaneKeysAreaVisibility.Add( iPlaneBinding, iVisibility );
+}
+
+void
+UMovieSceneCinematicBoardSection::TogglePlaneKeysAreaVisibility( FGuid iPlaneBinding )
+{
+    SetPlaneKeysAreaVisibility( iPlaneBinding, !IsPlaneKeysAreaVisible( iPlaneBinding ) );
+}
+
 float
 UMovieSceneCinematicBoardSection::GetWidgetHeight() const
 {

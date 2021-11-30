@@ -17,6 +17,7 @@
 #include "EposTracksToolbarHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardWidgets/SMetaKeysArea.h"
 #include "Tools/LighttableTools.h"
 #include "Tools/ResourceAssetTools.h"
@@ -45,6 +46,113 @@ SInlineEditableTextBlockOnDoubleClick::OnMouseButtonDoubleClick( const FGeometry
     return FReply::Handled();
 }
 
+class SKeysOverviewBox
+    : public SBox
+{
+public:
+    // no SLATE_ARGS
+    // Because in the construct, we don't have to manage the SBox ones (HAlign, Padding, Content, ...)
+    // Otherwise we need to have HAlign::Halign( SBox::HAlign ), ...
+    // To avoid this for this specific widget, iPlaneBinding is given as a parameter instead of an arg
+    // So we can only call SBox::Construct( SBox::FArguments( InArgs ) );
+
+    // Construct the widget
+    void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection, FMovieScenePossessable iPlaneBinding );
+
+    // SWidget overrides
+    virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
+
+private:
+    TWeakPtr<FCinematicBoardSection>    mBoardSection;
+    FMovieScenePossessable              mBinding;
+};
+
+void
+SKeysOverviewBox::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection, FMovieScenePossessable iPlaneBinding )
+{
+    mBoardSection = iBoardSection;
+    mBinding = iPlaneBinding;
+
+    SBox::Construct( SBox::FArguments( InArgs ) );
+}
+
+int32
+SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId++,
+        AllottedGeometry.ToPaintGeometry( AllottedGeometry.GetLocalSize(), FSlateLayoutTransform() ),
+        &background_brush,
+        ESlateDrawEffect::None,
+        background_brush.GetTint( InWidgetStyle )
+    );
+
+    if( !mBoardSection.IsValid() )
+        return SBox::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    //---
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+
+    FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
+    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseLinearOnly();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+    check( movie_scene );
+
+    TSharedPtr<const FMetaChannel> material_meta_channel = board_section->GetPlaneMaterialMetaChannel( mBinding );
+    TSharedPtr<const FMetaChannel> transform_meta_channel = board_section->GetPlaneTransformMetaChannel( mBinding );
+    TSharedPtr<const FMetaChannel> opacity_meta_channel = board_section->GetPlaneOpacityMetaChannel( mBinding );
+
+    auto FillKeyPositions = [=]( TSharedPtr<const FMetaChannel> iMetaChannel, TArray<float>& iKeyPositions )
+    {
+        for( const auto& pair : iMetaChannel->GetMetaKeys() )
+        {
+            FFrameNumber time = pair.Key;
+            //FMetaKey meta_key = pair.Value;
+
+            FFrameTime outer_time = time * inner_to_outer_transform;
+            double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
+
+            iKeyPositions.AddUnique( converter.SecondsToPixel( outer_second ) );
+        }
+    };
+
+    TArray<float> key_positions_in_pixel;
+    FillKeyPositions( material_meta_channel, key_positions_in_pixel );
+    FillKeyPositions( transform_meta_channel, key_positions_in_pixel );
+    FillKeyPositions( opacity_meta_channel, key_positions_in_pixel );
+
+    //---
+
+    for( float key_position : key_positions_in_pixel )
+    {
+        const float offset_top_y = 1.f;
+        const float offset_bottom_y = 2.f;
+        const float full_height = AllottedGeometry.GetLocalSize().Y;
+        const FVector2D KeyMarkSize = FVector2D( 3.f, full_height - ( offset_top_y + offset_bottom_y ) );
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry( KeyMarkSize, FSlateLayoutTransform( FVector2D( key_position - FMath::CeilToFloat( KeyMarkSize.X / 2.f ), offset_top_y ) ) ),
+            FEditorStyle::GetBrush( "Sequencer.KeyMark" ),
+            ESlateDrawEffect::None,
+            FLinearColor( 1.f, 1.f, 1.f, 1.f )
+        );
+    }
+
+    LayerId++;
+
+    return SBox::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+}
+
+//---
+//---
 //---
 
 class SCinematicBoardSectionPlaneTitle
@@ -127,6 +235,47 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
 
+    //-
+
+    auto ToggleKeysAreaVisibility = [this]()
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
+    };
+
+    auto GetKeysAreaTooltip = [this]() -> FText
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" );
+        else
+            return LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
+    };
+
+    auto GetKeysAreaIcon = [this]() -> FSlateIcon
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return FSlateIcon( FEditorStyle::GetStyleSetName(), "TreeArrow_Expanded" );
+        else
+            return FSlateIcon( FEditorStyle::GetStyleSetName(), "TreeArrow_Collapsed" );
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility ),
+            FCanExecuteAction(),
+            FIsActionChecked(),
+            //FIsActionChecked::CreateLambda( IsKeysAreaVisible ),
+            FIsActionButtonVisible::CreateLambda( [=](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetKeysAreaTooltip ),
+        MakeAttributeLambda( GetKeysAreaIcon ) );
+
+    //-
+
     auto DetachPlane = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
@@ -206,25 +355,31 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
         .BorderBackgroundColor( this, &SCinematicBoardSectionPlaneTitle::GetBackgroundTint )
         [
-            SNew( SHorizontalBox )
-            + SHorizontalBox::Slot()
-            .FillWidth( .5f )
+            SNew( SVerticalBox )
+
+            + SVerticalBox::Slot()
+            .AutoHeight()
             [
-                LeftToolbarBuilder.MakeWidget()
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .HAlign( HAlign_Center )
-            .VAlign( VAlign_Center )
-            [
-                SNew( SInlineEditableTextBlockOnDoubleClick )
-                .Text( this, &SCinematicBoardSectionPlaneTitle::HandleTitleText )
-                .OnTextCommitted( this, &SCinematicBoardSectionPlaneTitle::HandleTitleTextOnCommited )
-            ]
-            + SHorizontalBox::Slot()
-            .FillWidth( .5f )
-            [
-                SNew( SSpacer )
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .FillWidth( .5f )
+                [
+                    LeftToolbarBuilder.MakeWidget()
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
+                [
+                    SNew( SInlineEditableTextBlockOnDoubleClick )
+                    .Text( this, &SCinematicBoardSectionPlaneTitle::HandleTitleText )
+                    .OnTextCommitted( this, &SCinematicBoardSectionPlaneTitle::HandleTitleTextOnCommited )
+                ]
+                + SHorizontalBox::Slot()
+                .FillWidth( .5f )
+                [
+                    SNew( SSpacer )
+                ]
             ]
         ]
     ];
@@ -283,6 +438,8 @@ SCinematicBoardSectionPlaneTitle::OnMouseButtonUp( const FGeometry& MyGeometry, 
 
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
+
+//---
 
 FText
 SCinematicBoardSectionPlaneTitle::HandleTitleText() const
@@ -1201,6 +1358,9 @@ public:
 private:
     void BuildContextMenu( FMenuBuilder& ioMenuBuilder );
 
+    EVisibility GetKeysAreaVisibility() const;
+    EVisibility GetKeysOverviewVisibility() const;
+
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     FMovieScenePossessable              mBinding;
@@ -1228,22 +1388,46 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
         + SVerticalBox::Slot()
         .AutoHeight()
         [
+            SNew( SKeysOverviewBox, iBoardSection, mBinding )
+            .HeightOverride( 8 )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysOverviewVisibility )
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
             SNew( SCinematicBoardSectionPlaneMaterialKeys, iBoardSection )
             .Binding( mBinding )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysAreaVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
             .Binding( mBinding )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysAreaVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneOpacityKeys, iBoardSection )
             .Binding( mBinding )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysAreaVisibility )
         ]
     ];
+}
+
+EVisibility
+SCinematicBoardSectionPlane::GetKeysOverviewVisibility() const
+{
+    return GetKeysAreaVisibility().IsVisible() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+EVisibility
+SCinematicBoardSectionPlane::GetKeysAreaVisibility() const
+{
+    UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+
+    return section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 void
@@ -1285,7 +1469,41 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
             FCanExecuteAction::CreateLambda( CanDetachPlane )
         ) );
 
-    ioMenuBuilder.AddSeparator();
+    //-
+
+    auto ToggleKeysAreaVisibility = [this]()
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
+    };
+
+    auto GetKeysAreaLabel = [this]() -> FText
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return LOCTEXT( "hide-plane-keys-area-tooltip", "Collapse" );
+        else
+            return LOCTEXT( "show-plane-keys-area-tooltip", "Expand" );
+    };
+
+    auto GetKeysAreaTooltip = [this]() -> FText
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" );
+        else
+            return LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
+    };
+
+    ioMenuBuilder.AddMenuEntry(
+        MakeAttributeLambda( GetKeysAreaLabel ),
+        MakeAttributeLambda( GetKeysAreaTooltip ),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility )
+        ) );
+
+    //-
 
     auto DeletePlane = [this]()
     {
