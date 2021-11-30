@@ -17,6 +17,7 @@
 #include "EposTracksToolbarHelpers.h"
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardWidgets/SMetaKeysArea.h"
 #include "Tools/LighttableTools.h"
 #include "Tools/ResourceAssetTools.h"
@@ -49,6 +50,12 @@ class SKeysOverviewBox
     : public SBox
 {
 public:
+    // no SLATE_ARGS
+    // Because in the construct, we don't have to manage the SBox ones (HAlign, Padding, Content, ...)
+    // Otherwise we need to have HAlign::Halign( SBox::HAlign ), ...
+    // To avoid this for this specific widget, iPlaneBinding is given as a parameter instead of an arg
+    // So we can only call SBox::Construct( SBox::FArguments( InArgs ) );
+
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection, FMovieScenePossessable iPlaneBinding );
 
@@ -72,6 +79,17 @@ SKeysOverviewBox::Construct( const FArguments& InArgs, TSharedRef<FCinematicBoar
 int32
 SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId++,
+        AllottedGeometry.ToPaintGeometry( AllottedGeometry.GetLocalSize(), FSlateLayoutTransform() ),
+        &background_brush,
+        ESlateDrawEffect::None,
+        background_brush.GetTint( InWidgetStyle )
+    );
+
     if( !mBoardSection.IsValid() )
         return SBox::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
@@ -113,14 +131,15 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
 
     for( float key_position : key_positions_in_pixel )
     {
-        const float offset_y = 0.f; //2.f;
+        const float offset_top_y = 1.f;
+        const float offset_bottom_y = 2.f;
         const float full_height = AllottedGeometry.GetLocalSize().Y;
-        const FVector2D KeyMarkSize = FVector2D( 3.f, full_height - 2 * offset_y );
+        const FVector2D KeyMarkSize = FVector2D( 3.f, full_height - ( offset_top_y + offset_bottom_y ) );
 
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId,
-            AllottedGeometry.ToPaintGeometry( KeyMarkSize, FSlateLayoutTransform( FVector2D( key_position - FMath::CeilToFloat( KeyMarkSize.X / 2.f ), offset_y ) ) ),
+            AllottedGeometry.ToPaintGeometry( KeyMarkSize, FSlateLayoutTransform( FVector2D( key_position - FMath::CeilToFloat( KeyMarkSize.X / 2.f ), offset_top_y ) ) ),
             FEditorStyle::GetBrush( "Sequencer.KeyMark" ),
             ESlateDrawEffect::None,
             FLinearColor( 1.f, 1.f, 1.f, 1.f )
@@ -132,6 +151,8 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
     return SBox::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }
 
+//---
+//---
 //---
 
 class SCinematicBoardSectionPlaneTitle
@@ -214,6 +235,47 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSectionTitle.ToolBar" );
 
+    //-
+
+    auto ToggleKeysAreaVisibility = [this]()
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
+    };
+
+    auto GetKeysAreaTooltip = [this]() -> FText
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" );
+        else
+            return LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
+    };
+
+    auto GetKeysAreaIcon = [this]() -> FSlateIcon
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return FSlateIcon( FEditorStyle::GetStyleSetName(), "TreeArrow_Expanded" );
+        else
+            return FSlateIcon( FEditorStyle::GetStyleSetName(), "TreeArrow_Collapsed" );
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility ),
+            FCanExecuteAction(),
+            FIsActionChecked(),
+            //FIsActionChecked::CreateLambda( IsKeysAreaVisible ),
+            FIsActionButtonVisible::CreateLambda( [=](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetKeysAreaTooltip ),
+        MakeAttributeLambda( GetKeysAreaIcon ) );
+
+    //-
+
     auto DetachPlane = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
@@ -292,10 +354,6 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         SNew( SBorder )
         .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
         .BorderBackgroundColor( this, &SCinematicBoardSectionPlaneTitle::GetBackgroundTint )
-        // Remove the X paddings of the border widget to have the 'real' full width of the section
-        // (the same pixel width as each SCinematicBoardSectionPlaneKeys, ...)
-        // to compute the same X pixel value of each key (due to the converter which takes the AllottedGeometry)
-        .Padding( FMargin( 0.f, 2.f ) )
         [
             SNew( SVerticalBox )
 
@@ -322,15 +380,6 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
                 [
                     SNew( SSpacer )
                 ]
-            ]
-
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            .Padding( 0.f, 2.f, 0.f, 0.f ) // To have a small space with the above button
-            [
-                SNew( SKeysOverviewBox, iBoardSection, mBinding )
-                .HeightOverride( 8 )
-                //.Visibility( EVisibility::Collapsed )
             ]
         ]
     ];
@@ -1309,6 +1358,9 @@ public:
 private:
     void BuildContextMenu( FMenuBuilder& ioMenuBuilder );
 
+    EVisibility GetKeysAreaVisibility() const;
+    EVisibility GetKeysOverviewVisibility() const;
+
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     FMovieScenePossessable              mBinding;
@@ -1336,22 +1388,46 @@ SCinematicBoardSectionPlane::Construct( const FArguments& InArgs, TSharedRef<FCi
         + SVerticalBox::Slot()
         .AutoHeight()
         [
+            SNew( SKeysOverviewBox, iBoardSection, mBinding )
+            .HeightOverride( 8 )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysOverviewVisibility )
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
             SNew( SCinematicBoardSectionPlaneMaterialKeys, iBoardSection )
             .Binding( mBinding )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysAreaVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneKeys, iBoardSection )
             .Binding( mBinding )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysAreaVisibility )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew( SCinematicBoardSectionPlaneOpacityKeys, iBoardSection )
             .Binding( mBinding )
+            .Visibility( this, &SCinematicBoardSectionPlane::GetKeysAreaVisibility )
         ]
     ];
+}
+
+EVisibility
+SCinematicBoardSectionPlane::GetKeysOverviewVisibility() const
+{
+    return GetKeysAreaVisibility().IsVisible() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+EVisibility
+SCinematicBoardSectionPlane::GetKeysAreaVisibility() const
+{
+    UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+
+    return section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 void
@@ -1393,7 +1469,41 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
             FCanExecuteAction::CreateLambda( CanDetachPlane )
         ) );
 
-    ioMenuBuilder.AddSeparator();
+    //-
+
+    auto ToggleKeysAreaVisibility = [this]()
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
+    };
+
+    auto GetKeysAreaLabel = [this]() -> FText
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return LOCTEXT( "hide-plane-keys-area-tooltip", "Collapse" );
+        else
+            return LOCTEXT( "show-plane-keys-area-tooltip", "Expand" );
+    };
+
+    auto GetKeysAreaTooltip = [this]() -> FText
+    {
+        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
+        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
+            return LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" );
+        else
+            return LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
+    };
+
+    ioMenuBuilder.AddMenuEntry(
+        MakeAttributeLambda( GetKeysAreaLabel ),
+        MakeAttributeLambda( GetKeysAreaTooltip ),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility )
+        ) );
+
+    //-
 
     auto DeletePlane = [this]()
     {
