@@ -538,7 +538,9 @@ ShotSequenceHelpers::FindOrCreateMaterialDrawingTrackAndSections( IMovieScenePla
         result.mTrack = Cast<UMovieScenePrimitiveMaterialTrack>( track );
 
         result.mTrack->MaterialIndex = 0; //TODO: iMaterialTrackIndex;
+#if WITH_EDITORONLY_DATA
         result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->MaterialIndex ) ) );
+#endif
     }
 
     check( result.mTrack.IsValid() );
@@ -806,7 +808,9 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
         result.mTrack = Cast<UMovieSceneComponentMaterialTrack>( track );
 
         result.mTrack->SetMaterialIndex( 0 ); //TODO: iMaterialTrackIndex;
+#if WITH_EDITORONLY_DATA
         result.mTrack->SetDisplayName( FText::Format( LOCTEXT( "MaterialTrackName_Format", "Material Element {0}" ), FText::AsNumber( result.mTrack->GetMaterialIndex() ) ) );
+#endif
     }
 
     check( result.mTrack.IsValid() );
