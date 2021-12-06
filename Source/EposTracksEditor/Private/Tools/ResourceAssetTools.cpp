@@ -15,6 +15,7 @@
 #include "MovieSceneSequence.h"
 #include "ObjectTools.h"
 
+#include "EposNamingConvention.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "StoryNote.h"
 
@@ -366,18 +367,20 @@ ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSe
 
     //---
 
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    FString material_path;
+    FString material_name;
+    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iRootSequence, iSequence, material_path, material_name );
 
-    UPackage* package = iSequence->GetPackage();
-    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
-
-    assetToolsModule.Get().CreateUniqueAssetName( package_name, "_MI_01", oPackageName, oAssetName );
+    //---
 
     UMaterialInstanceConstantFactoryNew* factory = NewObject<UMaterialInstanceConstantFactoryNew>();
     factory->InitialParent = master_material;
 
-    FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( oAssetName, package_path, UMaterialInstanceConstant::StaticClass(), factory );
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( material_name, material_path, UMaterialInstanceConstant::StaticClass(), factory );
+
+    oPackageName = material_pathname;
+    oAssetName = material_name;
 
     return Cast<UMaterialInstanceConstant>( new_object );
 }
@@ -386,14 +389,16 @@ ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSe
 UMaterialInstanceConstant*
 ProjectAssetTools::CloneMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName )
 {
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    FString material_path;
+    FString material_name;
+    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iRootSequence, iSequence, material_path, material_name );
 
-    UPackage* package = iSequence->GetPackage();
-    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/shot0001_01
+    //---
 
-    assetToolsModule.Get().CreateUniqueAssetName( package_name, "_MI_01", oPackageName, oAssetName );
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iMaterialToClone, material_pathname );
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iMaterialToClone, oPackageName );
+    oPackageName = material_pathname;
+    oAssetName = material_name;
 
     return Cast<UMaterialInstanceConstant>( new_object );
 }
@@ -406,16 +411,21 @@ ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneS
     if( !texture_master )
         return nullptr;
 
-    UPackage* package = iMaterial->GetPackage();
-    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/M_Plane_Basic_Inst
+    FString texture_path;
+    FString texture_name;
+    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iRootSequence, iSequence, iMaterial, texture_path, texture_name );
 
-    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    Module.Get().CreateUniqueAssetName( package_name, "_T_01", oPackageName, oAssetName );
+    //---
 
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    FString package_path = FPackageName::GetLongPackagePath( oPackageName );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( oAssetName, package_path, UTexture2D::StaticClass(), nullptr );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( texture_name, texture_path, UTexture2D::StaticClass(), nullptr );
+
     UTexture2D* new_texture = Cast<UTexture2D>( new_object );
+
+    oPackageName = texture_pathname;
+    oAssetName = texture_name;
+
+    //---
 
     // Init texture like in UTexture2DFactoryNew
     new_texture->Source.Init2DWithMipChain( iTextureSize.X, iTextureSize.Y, TSF_BGRA8 );
@@ -439,17 +449,18 @@ ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneS
 UTexture*
 ProjectAssetTools::CloneTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName )
 {
-    UPackage* package = iMaterial->GetPackage();
-    FString package_name = package->GetName(); // ie. /Game/MyStoryboard2/M_Plane_Basic_Inst
+    FString texture_path;
+    FString texture_name;
+    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iRootSequence, iSequence, iMaterial, texture_path, texture_name );
 
-    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    Module.Get().CreateUniqueAssetName( package_name, "_T_01", oPackageName, oAssetName );
+    //---
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iTextureToClone, oPackageName );
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iTextureToClone, texture_pathname );
 
-    UTexture* new_texture = Cast<UTexture>( new_object );
+    oPackageName = texture_pathname;
+    oAssetName = texture_name;
 
-    return new_texture;
+    return Cast<UTexture>( new_object );
 }
 
 //---
@@ -554,18 +565,14 @@ ProjectAssetTools::CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMat
 UStoryNote*
 ProjectAssetTools::CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence )
 {
+    FString note_path;
+    FString note_name;
+    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iRootSequence, iSequence, note_path, note_name );
+
+    //---
+
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-
-    UPackage* package = iRootSequence->GetPackage();
-    FString package_pathname = package->GetName(); // ie. /Game/MyStoryboard2
-    FString package_name = FPaths::GetBaseFilename( iSequence->GetPackage()->GetName() ); // ie. shot_0002_01
-
-    FString note_package_name;
-    FString note_asset_name;
-    assetToolsModule.Get().CreateUniqueAssetName( FPaths::Combine( package_pathname, TEXT( "Notes" ), package_name ), "_N_01", note_package_name, note_asset_name );
-
-    FString package_path = FPackageName::GetLongPackagePath( note_package_name );
-    UObject* new_object = assetToolsModule.Get().CreateAsset( note_asset_name, package_path, UStoryNote::StaticClass(), nullptr );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( note_name, note_path, UStoryNote::StaticClass(), nullptr );
     UStoryNote* new_note = Cast<UStoryNote>( new_object );
     check( new_note );
 
@@ -578,16 +585,13 @@ ProjectAssetTools::CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequen
 UStoryNote*
 ProjectAssetTools::CloneNote( UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone, UMovieSceneSequence* iRootSequence )
 {
-    UPackage* package = iRootSequence->GetPackage();
-    FString package_pathname = package->GetName(); // ie. /Game/MyStoryboard2
-    FString package_name = FPaths::GetBaseFilename( iSequence->GetPackage()->GetName() ); // ie. shot_0002_01
+    FString note_path;
+    FString note_name;
+    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iRootSequence, iSequence, note_path, note_name );
 
-    FString note_package_name;
-    FString note_asset_name;
-    FAssetToolsModule& Module = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    Module.Get().CreateUniqueAssetName( FPaths::Combine( package_pathname, TEXT( "Notes" ), package_name ), "_N_01", note_package_name, note_asset_name );
+    //---
 
-    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_package_name );
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iNoteToClone, note_pathname );
 
     UStoryNote* new_note = Cast<UStoryNote>( new_object );
 
