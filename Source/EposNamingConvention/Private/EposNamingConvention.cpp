@@ -57,6 +57,32 @@ NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iSequencer, c
 
 //static
 FString
+NamingConvention::GetMasterMaterialPathName( const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
+{
+    UPackage* root_package = iRootSequence->GetPackage();
+
+    oPath = root_package->GetName() / TEXT( "Master" );
+    oName = TEXT( "MI_Plane" );
+
+    return oPath / oName;
+}
+
+//static
+FString
+NamingConvention::GetMasterTexturePathName( const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
+{
+    UPackage* root_package = iRootSequence->GetPackage();
+
+    oPath = root_package->GetName() / TEXT( "Master" );
+    oName = TEXT( "T_Transparent" );
+
+    return oPath / oName;
+}
+
+//---
+
+//static
+FString
 NamingConvention::GenerateNoteAssetPathName( const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
 {
     FString root_package_pathname = iRootSequence->GetPackage()->GetName(); // ie. /Game/MyStoryboard2

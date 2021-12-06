@@ -79,15 +79,17 @@ MasterAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FStrin
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
-    UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
-    UPackage* root_package = root_asset->GetPackage();
-    FString root_package_name = root_package->GetName() / "Master" / "T_Transparent"; // ie. /Game/MyStoryboard2
+    FString texture_path;
+    FString texture_name;
+    FString texture_pathname = NamingConvention::GetMasterTexturePathName( iRootSequence, texture_path, texture_name );
+
+    //---
 
     TArray<FAssetData> asset_datas;
-    assetRegistryModule.Get().GetAssetsByPackageName( *root_package_name, asset_datas );
+    assetRegistryModule.Get().GetAssetsByPackageName( *texture_pathname, asset_datas );
     if( !asset_datas.Num() )
     {
-        assetToolsModule.Get().CreateUniqueAssetName( root_package_name, "", oPackageName, oAssetName );
+        assetToolsModule.Get().CreateUniqueAssetName( texture_pathname, "", oPackageName, oAssetName );
         //FString package_path = FPackageName::GetLongPackagePath( oPackageName );
         return nullptr;
     }
@@ -254,21 +256,24 @@ MasterAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
-    UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
-    UPackage* root_package = root_asset->GetPackage();
-    FString root_package_name = root_package->GetName() / "Master" / "MI_Plane"; // ie. /Game/MyStoryboard2
+    FString material_path;
+    FString material_name;
+    FString material_pathname = NamingConvention::GetMasterMaterialPathName( iRootSequence, material_path, material_name );
+
+    //---
 
     TArray<FAssetData> asset_datas;
-    assetRegistryModule.Get().GetAssetsByPackageName( *root_package_name, asset_datas );
+    assetRegistryModule.Get().GetAssetsByPackageName( *material_pathname, asset_datas );
     if( !asset_datas.Num() )
     {
-        assetToolsModule.Get().CreateUniqueAssetName( root_package_name, "", oPackageName, oAssetName );
+        assetToolsModule.Get().CreateUniqueAssetName( material_pathname, "", oPackageName, oAssetName );
         //FString package_path = FPackageName::GetLongPackagePath( oPackageName );
         return nullptr;
     }
 
     oPackageName = asset_datas[0].PackageName.ToString();
     oAssetName = asset_datas[0].AssetName.ToString();
+
     return Cast<UMaterialInstanceConstant>( asset_datas[0].GetAsset() );
 }
 

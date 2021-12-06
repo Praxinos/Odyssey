@@ -20,6 +20,10 @@ public:
     static FString GeneratePlaneTrackName( const IMovieScenePlayer& iSequencer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, APlaneActor* iPlane );
 
 public:
+    static FString GetMasterMaterialPathName( const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName );
+    static FString GetMasterTexturePathName( const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName );
+
+public:
     static FString GenerateNoteAssetPathName( const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName );
 
     static FString GenerateMaterialAssetPathName( const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName );
