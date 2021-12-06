@@ -65,6 +65,7 @@ public class EposTracksEditor : ModuleRules
                 "EditorScriptingUtilities",
                 "LevelEditor",
                 // [EDITOR] custom plugin dependencies
+                "EposNamingConvention"
             }
             );
 

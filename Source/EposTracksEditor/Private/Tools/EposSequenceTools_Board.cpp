@@ -15,6 +15,7 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
@@ -601,14 +602,20 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
     if( !cloned_camera )
         return;
 
-    cloned_camera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer->GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::RenameExistingActor( cloned_camera, TEXT( "Camera_1" ), true ); // The shot name is displayed in another column in the world outliner
+    FString cloned_camera_path;
+    FString cloned_camera_name;
+    NamingConvention::GenerateCameraActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), result.mInnerSequence, cloned_camera_path, cloned_camera_name );
+
+    cloned_camera->SetFolderPath( *cloned_camera_path );
+    FActorLabelUtilities::RenameExistingActor( cloned_camera, cloned_camera_name, true ); // The shot name is displayed in another column in the world outliner
 
     //-
 
+    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), result.mInnerSequence, cloned_camera );
+
     result.mInnerSequence->UnbindPossessableObjects( camera_guid );
     result.mInnerSequence->BindPossessableObject( camera_guid, *cloned_camera, iSequencer->GetPlaybackContext() );
-    result.mInnerMovieScene->FindPossessable( camera_guid )->SetName( cloned_camera->GetActorLabel() );
+    result.mInnerMovieScene->FindPossessable( camera_guid )->SetName( cloned_camera_name );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 
@@ -659,8 +666,12 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
     if( !cloned_plane )
         return;
 
-    cloned_plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer->GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::RenameExistingActor( cloned_plane, TEXT( "Plane_1" ), true ); // The shot name is displayed in another column in the world outliner
+    FString cloned_plane_path;
+    FString cloned_plane_name;
+    NamingConvention::GeneratePlaneActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane_path, cloned_plane_name );
+
+    cloned_plane->SetFolderPath( *cloned_plane_path );
+    FActorLabelUtilities::RenameExistingActor( cloned_plane, cloned_plane_name, true ); // The shot name is displayed in another column in the world outliner
 
     cloned_plane->SetActorTransform( iPlaneToClone->GetTransform() ); // Should be done, because for attached plane, its new transform are totally weird
     cloned_plane->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
@@ -672,9 +683,11 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
 
     //-
 
+    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane );
+
     iSequence->UnbindPossessableObjects( iPlaneBinding );
     iSequence->BindPossessableObject( iPlaneBinding, *cloned_plane, iSequencer->GetPlaybackContext() );
-    iMovieScene->FindPossessable( iPlaneBinding )->SetName( cloned_plane->GetActorLabel() );
+    iMovieScene->FindPossessable( iPlaneBinding )->SetName( cloned_plane_name );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 

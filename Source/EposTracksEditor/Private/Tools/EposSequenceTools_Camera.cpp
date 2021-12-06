@@ -19,6 +19,7 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
 #include "PlaneActor.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -211,10 +212,16 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     //---
 
-    camera->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::RenameExistingActor( camera, TEXT( "Camera_1" ), true ); // The shot name is displayed in another column in the world outliner
+    FString camera_path;
+    FString camera_name;
+    NamingConvention::GenerateCameraActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, camera_path, camera_name );
 
-    FGuid CameraGuid = iSequencer.CreateBinding( *camera, camera->GetActorLabel() );
+    camera->SetFolderPath( *camera_path );
+    FActorLabelUtilities::RenameExistingActor( camera, camera_name, true ); // The shot name is displayed in another column in the world outliner
+
+    camera_name = NamingConvention::GenerateCameraTrackName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, camera );
+
+    FGuid CameraGuid = iSequencer.CreateBinding( *camera, camera_name );
     if( !CameraGuid.IsValid() )
         return nullptr;
 

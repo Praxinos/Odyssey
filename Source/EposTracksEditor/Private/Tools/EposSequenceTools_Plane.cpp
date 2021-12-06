@@ -23,6 +23,7 @@
 #include "MovieSceneSequence.h"
 
 #include "Board/BoardSequence.h"
+#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
 #include "PlaneActor.h"
 #include "Tools/ResourceAssetTools.h"
@@ -168,76 +169,6 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMater
     return plane;
 }
 
-/*
-static
-int
-SplitActorLabel( const FString iPrefix, FString& ioLabel, int32& oIndex )
-{
-    ioLabel.RemoveFromStart( iPrefix );
-
-    // Look at the label and see if it begins in a number and separate them
-    FString index;
-    const TArray<TCHAR>& LabelCharArray = ioLabel.GetCharArray();
-    for( int32 CharIdx = 0; CharIdx < LabelCharArray.Num(); CharIdx++ )
-    {
-        if( !FChar::IsDigit( LabelCharArray[CharIdx] ) )
-            break;
-
-        index += LabelCharArray[CharIdx];
-    }
-
-    if( !index.Len() )
-        return 0;
-
-    ioLabel.RemoveFromStart( index );
-    oIndex = FCString::Atoi( *index );
-
-    return index.Len();
-}
-
-static
-void
-SetPlaneLabelUnique( AActor* Actor, const FString& NewActorLabel )
-{
-    check( Actor );
-
-    FString suffix = NewActorLabel;
-    FString ModifiedActorLabel = NewActorLabel;
-    int32   index = 0;
-
-    FCachedActorLabels ActorLabels;
-    TSet<AActor*> IgnoreActors;
-    IgnoreActors.Add( Actor );
-    ActorLabels.Populate( Actor->GetWorld(), IgnoreActors );
-
-    if( ActorLabels.Contains( ModifiedActorLabel ) )
-    {
-        // See if the current label begins in a number, and try to create a new label based on that
-        int index_length = SplitActorLabel( TEXT( "Plane_" ), suffix, index );
-        if( index_length == 0 )
-        {
-            // If there wasn't a number on there, append a number, starting from 2 (1 before incrementing below)
-            index = 1;
-        }
-
-        // Update the actor label until we find one that doesn't already exist
-        while( ActorLabels.Contains( ModifiedActorLabel ) )
-        {
-            ++index;
-
-            FString format = FString::Format( TEXT( "%0{0}d" ), { index_length } );
-            TCHAR format2[10] = { 0 };
-            for( int i = 0; i < FMath::Min( format.Len(), 10 ); i++ )
-                format2[i] = format[i];
-            FString index_string = FString::Printf( format2, index );
-            ModifiedActorLabel = TEXT( "Plane_" ) + index_string + suffix;
-        }
-    }
-
-    Actor->SetActorLabel( ModifiedActorLabel );
-}
-*/
-
 //static
 void
 ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
@@ -261,11 +192,16 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     GEditor->ParentActors( iCamera, plane, NAME_None );
 
-    plane->SetFolderPath( *FPaths::GetBaseFilename( iSequencer.GetRootMovieSceneSequence()->GetPathName() ) );
-    FActorLabelUtilities::RenameExistingActor( plane, TEXT( "Plane_1" ), true ); // The shot name is displayed in another column in the world outliner
-    //SetPlaneLabelUnique( plane, TEXT("Plane_01_") + iSequence->GetDisplayName().ToString() );
+    FString plane_path;
+    FString plane_name;
+    NamingConvention::GeneratePlaneActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane_path, plane_name );
 
-    FGuid planeGuid = iSequencer.CreateBinding( *plane, plane->GetActorLabel() );
+    plane->SetFolderPath( *plane_path );
+    FActorLabelUtilities::RenameExistingActor( plane, plane_name, true ); // The shot name is displayed in another column in the world outliner
+
+    plane_name = NamingConvention::GeneratePlaneTrackName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane );
+
+    FGuid planeGuid = iSequencer.CreateBinding( *plane, plane_name );
 
     // Should be done after CreateBinding(), otherwise CreateBinding() seems to unselect all actors but only when actors were selected before
     GEditor->SelectActor( plane, true, true );

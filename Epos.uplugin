@@ -27,11 +27,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "EposNamingConvention",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "EposActors",
       "Type": "Runtime",
       "LoadingPhase": "Default"
@@ -49,6 +44,11 @@
     {
       "Name": "EposTracks",
       "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "EposNamingConvention",
+      "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {

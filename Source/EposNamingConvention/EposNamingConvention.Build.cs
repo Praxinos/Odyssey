@@ -39,7 +39,9 @@ public class EposNamingConvention : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
+                "CinematicCamera",
                 // [RUNTIME] custom plugin dependencies
+                "EposActors",
             }
             );
 
