@@ -22,7 +22,7 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iSequenc
     oPath = FPaths::GetBaseFilename( iRootSequence->GetPathName() );
     oName = TEXT( "Camera_1" );
 
-    return FPaths::Combine( oPath, oName );
+    return oPath / oName;
 }
 
 //static
@@ -36,7 +36,7 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iSequence
     oPath = camera_path;
     oName = TEXT( "Plane_1" );
 
-    return FPaths::Combine( oPath, oName );
+    return oPath / oName;
 }
 
 //static
@@ -91,7 +91,7 @@ NamingConvention::GenerateNoteAssetPathName( const UMovieSceneSequence* iRootSeq
     FString note_pathname;
     FString note_name;
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    assetToolsModule.Get().CreateUniqueAssetName( FPaths::Combine( root_package_pathname, TEXT( "Notes" ), current_package_name ), "_N_01", note_pathname, note_name );
+    assetToolsModule.Get().CreateUniqueAssetName( root_package_pathname / TEXT( "Notes" ) / current_package_name, TEXT( "_N_01" ), note_pathname, note_name );
 
     oName = note_name;
     oPath = FPackageName::GetLongPackagePath( note_pathname );
@@ -109,7 +109,7 @@ NamingConvention::GenerateMaterialAssetPathName( const UMovieSceneSequence* iRoo
     FString material_pathname;
     FString material_name;
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    assetToolsModule.Get().CreateUniqueAssetName( current_package_pathname, "_MI_01", material_pathname, material_name );
+    assetToolsModule.Get().CreateUniqueAssetName( current_package_pathname, TEXT( "_MI_01" ), material_pathname, material_name );
 
     oName = material_name;
     oPath = FPackageName::GetLongPackagePath( material_pathname );
@@ -127,7 +127,7 @@ NamingConvention::GenerateTextureAssetPathName( const UMovieSceneSequence* iRoot
     FString texture_pathname;
     FString texture_name;
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    assetToolsModule.Get().CreateUniqueAssetName( current_package_pathname, "_T_01", texture_pathname, texture_name );
+    assetToolsModule.Get().CreateUniqueAssetName( current_package_pathname, TEXT( "_T_01" ), texture_pathname, texture_name );
 
     oName = texture_name;
     oPath = FPackageName::GetLongPackagePath( texture_pathname );
