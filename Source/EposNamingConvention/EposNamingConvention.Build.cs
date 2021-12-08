@@ -40,8 +40,11 @@ public class EposNamingConvention : ModuleRules
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
                 "CinematicCamera",
+                "LevelSequence",
                 // [RUNTIME] custom plugin dependencies
                 "EposActors",
+                "EposMovieScene",
+                "EposSequence",
             }
             );
 

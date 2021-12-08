@@ -29,6 +29,9 @@ public:
     static FString GenerateMaterialAssetPathName( const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName );
     static FString GenerateTextureAssetPathName( const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPath, FString& oName );
 
+public:
+    static FString GenerateSequenceAssetPathName( const IMovieScenePlayer& iSequencer, const UMovieSceneSequence* iRootSequence, UClass* iType, FString& oPath, FString& oName );
+
 private:
     static FString GetRootPath( const UMovieSceneSequence* iRootSequence );
     static FString GetMasterPath( const UMovieSceneSequence* iRootSequence );

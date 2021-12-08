@@ -7,9 +7,11 @@
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
 
+#include "Board/BoardSequence.h"
 #include "IMovieScenePlayer.h"
 #include "MovieSceneSequence.h"
 #include "PlaneActor.h"
+#include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "NamingConvention"
 
@@ -154,6 +156,31 @@ NamingConvention::GenerateTextureAssetPathName( const UMovieSceneSequence* iRoot
     oPath = FPackageName::GetLongPackagePath( texture_pathname );
 
     return texture_pathname;
+}
+
+//---
+
+//static
+FString
+NamingConvention::GenerateSequenceAssetPathName( const IMovieScenePlayer& iSequencer, const UMovieSceneSequence* iRootSequence, UClass* iType, FString& oPath, FString& oName )
+{
+    check( iType->IsChildOf<UBoardSequence>() || iType->IsChildOf<UShotSequence>() );
+
+    FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
+    FString current_sequence_base_name = iType->IsChildOf<UBoardSequence>() ? TEXT( "board" ) : TEXT( "shot" );
+
+    FString sequence_pathname_base = root_path / current_sequence_base_name;
+    FString sequence_suffix = TEXT( "_0010" );
+
+    FString sequence_pathname;
+    FString sequence_name;
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    assetToolsModule.Get().CreateUniqueAssetName( sequence_pathname_base, sequence_suffix, sequence_pathname, sequence_name );
+
+    oName = sequence_name;
+    oPath = FPackageName::GetLongPackagePath( sequence_pathname );
+
+    return sequence_pathname;
 }
 
 #undef LOCTEXT_NAMESPACE
