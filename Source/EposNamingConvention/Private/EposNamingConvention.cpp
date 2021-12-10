@@ -6,6 +6,9 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
+#include "EditorAssetLibrary.h"
+#include "MovieSceneToolHelpers.h"
+#include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
 #include "IMovieScenePlayer.h"
@@ -169,13 +172,28 @@ NamingConvention::GenerateSequenceAssetPathName( const IMovieScenePlayer& iSeque
     FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
     FString current_sequence_base_name = iType->IsChildOf<UBoardSequence>() ? TEXT( "board" ) : TEXT( "shot" );
 
-    FString sequence_pathname_base = root_path / current_sequence_base_name;
-    FString sequence_suffix = TEXT( "_0010" );
+    const UMovieSceneToolsProjectSettings* projectSettings = GetDefault<UMovieSceneToolsProjectSettings>();
+    uint32 shotNumber = projectSettings->FirstShotNumber;
+    uint32 takeNumber = projectSettings->FirstTakeNumber;
 
-    FString sequence_pathname;
-    FString sequence_name;
-    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-    assetToolsModule.Get().CreateUniqueAssetName( sequence_pathname_base, sequence_suffix, sequence_pathname, sequence_name );
+    FString sequence_name = MovieSceneToolHelpers::ComposeShotName( current_sequence_base_name, shotNumber, takeNumber );
+    FString sequence_pathname = root_path / sequence_name;
+
+    while( UEditorAssetLibrary::DoesAssetExist( sequence_pathname ) )
+    {
+        shotNumber += projectSettings->ShotIncrement;
+
+        sequence_name = MovieSceneToolHelpers::ComposeShotName( current_sequence_base_name, shotNumber, takeNumber );
+        sequence_pathname = root_path / sequence_name;
+    }
+
+    //FString sequence_pathname_base = root_path / current_sequence_base_name;
+    //FString sequence_suffix = TEXT( "_0010" );
+
+    //FString sequence_pathname;
+    //FString sequence_name;
+    //FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    //assetToolsModule.Get().CreateUniqueAssetName( sequence_pathname_base, sequence_suffix, sequence_pathname, sequence_name );
 
     oName = sequence_name;
     oPath = FPackageName::GetLongPackagePath( sequence_pathname );

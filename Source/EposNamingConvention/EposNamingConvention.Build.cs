@@ -45,6 +45,12 @@ public class EposNamingConvention : ModuleRules
                 "EposActors",
                 "EposMovieScene",
                 "EposSequence",
+
+                // [EDITOR]
+                // [EDITOR] custom engine dependencies
+                "MovieSceneTools",
+                "EditorScriptingUtilities",
+                // [EDITOR] custom plugin dependencies
             }
             );
 
