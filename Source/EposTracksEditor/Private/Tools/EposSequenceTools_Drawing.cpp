@@ -122,7 +122,7 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
     section->Modify();
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID ), iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID ) );
     if( !new_material )
         return;
 
@@ -206,7 +206,7 @@ ShotSequenceTools::CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     iSection->Modify();
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequence, existing_material, iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CloneMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, existing_material );
     if( !new_material )
         return;
 

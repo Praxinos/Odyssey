@@ -700,7 +700,7 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
         if( !material )
             continue;
 
-        UMaterialInstanceConstant* new_material = iEmptyDrawings ? ProjectAssetTools::CreateMaterialAndTexture( iSequence, material, iSequencer->GetRootMovieSceneSequence() ) : ProjectAssetTools::CloneMaterialAndTexture( iSequence, material, iSequencer->GetRootMovieSceneSequence() );
+        UMaterialInstanceConstant* new_material = iEmptyDrawings ? ProjectAssetTools::CreateMaterialAndTexture( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, material ) : ProjectAssetTools::CloneMaterialAndTexture( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, material );
         if( !new_material )
             continue;
 

@@ -358,7 +358,7 @@ ProjectAssetTools::GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstan
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, FString& oPackageName, FString& oAssetName )
 {
     FString package_name_tmp;
     FString asset_name_tmp;
@@ -374,7 +374,7 @@ ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSe
 
     FString material_path;
     FString material_name;
-    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iRootSequence, iSequence, material_path, material_name );
+    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iPlayer, iRootSequence, iSequence, material_path, material_name );
 
     //---
 
@@ -392,11 +392,11 @@ ProjectAssetTools::CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSe
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CloneMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName )
 {
     FString material_path;
     FString material_name;
-    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iRootSequence, iSequence, material_path, material_name );
+    FString material_pathname = NamingConvention::GenerateMaterialAssetPathName( iPlayer, iRootSequence, iSequence, material_path, material_name );
 
     //---
 
@@ -491,11 +491,11 @@ ProjectAssetTools::ComputeTextureSize( ACineCameraActor* iCamera )
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, ACineCameraActor* iCamera )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateMaterial( iSequence, iRootSequence, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iRootSequence, iSequence, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
@@ -515,11 +515,11 @@ ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACi
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CreateMaterial( iSequence, iRootSequence, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CreateMaterial( iPlayer, iRootSequence, iSequence, package_name, asset_name );
     if( !new_material )
         return nullptr;
 
@@ -541,11 +541,11 @@ ProjectAssetTools::CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMa
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone )
 {
     FString package_name;
     FString asset_name;
-    UMaterialInstanceConstant* new_material = CloneMaterial( iSequence, iRootSequence, iMaterialToClone, package_name, asset_name );
+    UMaterialInstanceConstant* new_material = CloneMaterial( iPlayer, iRootSequence, iSequence, iMaterialToClone, package_name, asset_name );
     if( !new_material )
         return nullptr;
 

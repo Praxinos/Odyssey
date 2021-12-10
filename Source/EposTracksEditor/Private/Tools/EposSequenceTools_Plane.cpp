@@ -176,7 +176,7 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     if( !GCurrentLevelEditingViewportClient )
         return;
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequence, iCamera, iSequencer.GetRootMovieSceneSequence() );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iCamera );
     if( !new_material )
         return;
 

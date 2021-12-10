@@ -14,6 +14,7 @@
 #include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
+#include "EposSequenceHelpers.h"
 #include "IMovieScenePlayer.h"
 #include "MovieSceneSequence.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
@@ -108,18 +109,22 @@ static
 TMap<FString, int32>
 FindNotePaths( const IMovieScenePlayer& iPlayer )
 {
-    TMap<FString, int32> map_path_to_count;
-
     IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate()
-
-    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
-
-    const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
 
     TArray<UMovieSceneSequence*> sequences;
     sequences.Add( player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
-    for( auto pair : subsequences )
-        sequences.Add( pair.Value.GetSequence() );
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
+        for( auto pair : subsequences )
+            sequences.Add( pair.Value.GetSequence() );
+    }
+
+    //-
+
+    TMap<FString, int32> map_path_to_count;
 
     for( auto sequence : sequences )
     {
@@ -195,12 +200,82 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     return note_pathname;
 }
 
+static
+TMap<FString, int32>
+FindMaterialPaths( const IMovieScenePlayer& iPlayer )
+{
+    IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_sequences;
+    map_sequences.Add( MovieSceneSequenceID::Root, player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
+        for( auto pair : subsequences )
+            map_sequences.Add( pair.Key, pair.Value.GetSequence() );
+    }
+
+    //-
+
+    TMap<FString, int32> map_path_to_count;
+
+    for( auto pair : map_sequences )
+    {
+        UMovieSceneSequence* sequence = pair.Value;
+        FMovieSceneSequenceID sequence_id = pair.Key;
+
+        TArray<FGuid> plane_bindings;
+        ShotSequenceHelpers::GetAllPlanes( player, sequence, sequence_id, EGetPlane::kAll, nullptr, &plane_bindings );
+
+        for( auto plane_binding : plane_bindings )
+        {
+            TArray<FDrawing> drawings = ShotSequenceHelpers::GetAllDrawings( player, sequence, sequence_id, plane_binding );
+
+            for( auto drawing : drawings )
+            {
+                if( !drawing.Exists() )
+                    continue;
+
+                const UMaterialInterface* material = drawing.GetMaterial();
+                if( !material )
+                    continue;
+
+                FString material_pathname = material->GetPackage()->GetName();
+                FString material_path = FPackageName::GetLongPackagePath( material_pathname );
+
+                int32* count = map_path_to_count.Find( material_path );
+                if( count )
+                    *count = *count + 1;
+                else
+                    map_path_to_count.Add( material_path, 1 );
+            }
+        }
+    }
+
+    map_path_to_count.ValueSort( TGreater<int32>() );
+
+    return map_path_to_count;
+}
+
 //static
 FString
-NamingConvention::GenerateMaterialAssetPathName( const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
+NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
 {
+    // Default path of the new material
     FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
     FString material_path = root_path;
+
+    // Try to find a better path from all existing materials
+    TMap<FString, int32> map_material_paths = FindMaterialPaths( iPlayer );
+    if( map_material_paths.Num() )
+    {
+        TArray<FString> keys;
+        map_material_paths.GetKeys( keys );
+
+        material_path = keys[0];
+    }
 
     //-
 
