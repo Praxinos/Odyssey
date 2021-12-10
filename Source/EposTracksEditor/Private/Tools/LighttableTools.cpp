@@ -11,6 +11,7 @@
 #include "ISequencer.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 
+#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
 #include "Tools/ResourceAssetTools.h"
 
@@ -119,7 +120,9 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
             if( use_lighttable >= .5f )
                 current_material->SetScalarParameterValueEditorOnly( TEXT( "UseLighttable" ), 0.f );
 
-            FString texture_transparent_pathname = iSequencer.GetRootMovieSceneSequence()->GetPackage()->GetName() / "Master" / "T_Transparent"; //TODO: change it when using naming convention !
+            FString texture_transparent_path;
+            FString texture_transparent_name;
+            FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
 
             if( current_material_previous_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
