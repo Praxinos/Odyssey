@@ -56,7 +56,8 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 
     //---
 
-    Set( "EposTracksEditor.Lighttable", new IMAGE_BRUSH( "lighttable-off-16x", Icon16x16 ) ); //TODO: get the correct image and rename to just 'lighttable' as the background of the button tells if it is enabled or not
+    Set( "EposTracksEditor.LighttableOff", new IMAGE_BRUSH( "lighttable-off-16x", Icon16x16 ) );
+    Set( "EposTracksEditor.LighttableOn", new IMAGE_BRUSH( "lighttable-on-16x", Icon16x16 ) );
 
     Set( "EposTracksEditor.NewSectionWithBoardBeforeSection", new IMAGE_BRUSH( "sequence-board-16x", Icon16x16 ) );
     Set( "EposTracksEditor.NewSectionWithShotBeforeSection", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
