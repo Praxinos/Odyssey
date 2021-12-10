@@ -7,6 +7,7 @@
 
 class ACineCameraActor;
 class FString;
+class ISequencer;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieSceneSequence;
@@ -72,8 +73,8 @@ public:
 
     static UTexture2D* GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterial );
 
-    static UStoryNote* CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence );
-    static UStoryNote* CloneNote( UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone, UMovieSceneSequence* iRootSequence );
+    static UStoryNote* CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence );
+    static UStoryNote* CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone );
 
 private:
     static UMaterialInstanceConstant* CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );

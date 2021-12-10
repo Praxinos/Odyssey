@@ -49,7 +49,7 @@ ShotSequenceTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
 
     cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
-    UStoryNote* note = ProjectAssetTools::CreateNote( iSequence, iSequencer.GetRootMovieSceneSequence() );
+    UStoryNote* note = ProjectAssetTools::CreateNote( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence );
     if( !note )
         return;
 

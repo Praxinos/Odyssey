@@ -568,11 +568,11 @@ ProjectAssetTools::CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMat
 
 //static
 UStoryNote*
-ProjectAssetTools::CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence )
 {
     FString note_path;
     FString note_name;
-    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iRootSequence, iSequence, note_path, note_name );
+    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, iRootSequence, iSequence, note_path, note_name );
 
     //---
 
@@ -588,11 +588,11 @@ ProjectAssetTools::CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequen
 
 //static
 UStoryNote*
-ProjectAssetTools::CloneNote( UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone, UMovieSceneSequence* iRootSequence )
+ProjectAssetTools::CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone )
 {
     FString note_path;
     FString note_name;
-    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iRootSequence, iSequence, note_path, note_name );
+    FString note_pathname = NamingConvention::GenerateNoteAssetPathName( iSequencer, iRootSequence, iSequence, note_path, note_name );
 
     //---
 

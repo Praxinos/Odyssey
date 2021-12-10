@@ -41,10 +41,13 @@ public class EposNamingConvention : ModuleRules
                 // [RUNTIME] custom engine dependencies
                 "CinematicCamera",
                 "LevelSequence",
+                "MovieScene",
                 // [RUNTIME] custom plugin dependencies
                 "EposActors",
                 "EposMovieScene",
                 "EposSequence",
+                "EposTracks",
+                "EposNote",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
