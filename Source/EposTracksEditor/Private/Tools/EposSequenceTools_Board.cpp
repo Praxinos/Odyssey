@@ -87,50 +87,50 @@ BoardSequenceTools::FindOrCreateCinematicBoardTrack( ISequencer* iSequencer )
 
 //---
 
-namespace
-{
-static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FString& iNewPackageName )
-{
-    for( auto AssetObject : iObjectList )
-    {
-        if( AssetObject.PackageName.ToString() == iNewPackageName )
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-static
-TArray<FString>
-FindSubsequencePaths( TArray<UMovieSceneSection*> iSections )
-{
-    TArray<FString> section_paths;
-    for( auto section : iSections )
-    {
-        UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
-
-        FString sequencePath = FPaths::GetPath( board_section->GetSequence()->GetPathName() );
-        if( sequencePath.IsEmpty() )
-            continue;
-
-        section_paths.Add( sequencePath );
-    }
-
-    return section_paths;
-}
-
-static
-FString
-FindMostReleventSubsequencePath( TArray<UMovieSceneSection*> iSections )
-{
-    TArray<FString> section_paths = FindSubsequencePaths( iSections );
-    if( !section_paths.Num() )
-        return FString();
-
-    return section_paths[0]; //TODO: improve by selecting the most relevent
-}
-}
+//namespace
+//{
+//static bool IsPackageNameUnique( const TArray<FAssetData>& iObjectList, const FString& iNewPackageName )
+//{
+//    for( auto AssetObject : iObjectList )
+//    {
+//        if( AssetObject.PackageName.ToString() == iNewPackageName )
+//        {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+//
+//static
+//TArray<FString>
+//FindSubsequencePaths( TArray<UMovieSceneSection*> iSections )
+//{
+//    TArray<FString> section_paths;
+//    for( auto section : iSections )
+//    {
+//        UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section );
+//
+//        FString sequencePath = FPaths::GetPath( board_section->GetSequence()->GetPathName() );
+//        if( sequencePath.IsEmpty() )
+//            continue;
+//
+//        section_paths.Add( sequencePath );
+//    }
+//
+//    return section_paths;
+//}
+//
+//static
+//FString
+//FindMostReleventSubsequencePath( TArray<UMovieSceneSection*> iSections )
+//{
+//    TArray<FString> section_paths = FindSubsequencePaths( iSections );
+//    if( !section_paths.Num() )
+//        return FString();
+//
+//    return section_paths[0]; //TODO: improve by selecting the most relevent
+//}
+//}
 
 ////static
 //FString
@@ -381,16 +381,16 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
             {
                 if( iSectionToDuplicate != nullptr )
                 {
-                    if( FindMostReleventSubsequencePath( boardTrack->GetAllSections() ).IsEmpty() )
-                        newAsset = assetTools.DuplicateAssetWithDialog( iNewSequenceName, iNewSequencePath, iSectionToDuplicate->GetSequence() );
-                    else
+                    //if( FindMostReleventSubsequencePath( boardTrack->GetAllSections() ).IsEmpty() )
+                    //    newAsset = assetTools.DuplicateAssetWithDialog( iNewSequenceName, iNewSequencePath, iSectionToDuplicate->GetSequence() );
+                    //else
                         newAsset = assetTools.DuplicateAsset( iNewSequenceName, iNewSequencePath, iSectionToDuplicate->GetSequence() );
                 }
                 else
                 {
-                    if( FindMostReleventSubsequencePath( boardTrack->GetAllSections() ).IsEmpty() )
-                        newAsset = assetTools.CreateAssetWithDialog( iNewSequenceName, iNewSequencePath, SequenceClass::StaticClass(), factory );
-                    else
+                    //if( FindMostReleventSubsequencePath( boardTrack->GetAllSections() ).IsEmpty() )
+                    //    newAsset = assetTools.CreateAssetWithDialog( iNewSequenceName, iNewSequencePath, SequenceClass::StaticClass(), factory );
+                    //else
                         newAsset = assetTools.CreateAsset( iNewSequenceName, iNewSequencePath, SequenceClass::StaticClass(), factory );
 
                 }

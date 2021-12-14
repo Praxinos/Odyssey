@@ -10,6 +10,7 @@
 #include "EditorAssetLibrary.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
+#include "IMovieScenePlayer.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
@@ -410,7 +411,7 @@ ProjectAssetTools::CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneS
 
 //static
 UTexture2D*
-ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
 {
     UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
     if( !texture_master )
@@ -418,7 +419,7 @@ ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneS
 
     FString texture_path;
     FString texture_name;
-    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iRootSequence, iSequence, iMaterial, texture_path, texture_name );
+    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iPlayer, iRootSequence, iSequence, iMaterial, texture_path, texture_name );
 
     //---
 
@@ -452,11 +453,11 @@ ProjectAssetTools::CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneS
 
 //static
 UTexture*
-ProjectAssetTools::CloneTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName )
+ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName )
 {
     FString texture_path;
     FString texture_name;
-    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iRootSequence, iSequence, iMaterial, texture_path, texture_name );
+    FString texture_pathname = NamingConvention::GenerateTextureAssetPathName( iPlayer, iRootSequence, iSequence, iMaterial, texture_path, texture_name );
 
     //---
 
@@ -501,7 +502,7 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
 
     FIntPoint texture_size = ComputeTextureSize( iCamera );
 
-    UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, texture_size, package_name, asset_name );
+    UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, texture_size, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );
@@ -527,7 +528,7 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
     iMaterialTemplate->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture );
     FIntPoint texture_size( texture->GetSurfaceWidth(), texture->GetSurfaceHeight() ); // For UTexture2D, GetSurfaceWidth() returns GetSizeX() which returns an int32, so it should be ok
 
-    UTexture2D* new_texture = CreateTexture2D( iSequence, iRootSequence, new_material, texture_size, package_name, asset_name );
+    UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, texture_size, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );
@@ -552,7 +553,7 @@ ProjectAssetTools::CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UM
     UTexture* texture_to_clone;
     iMaterialToClone->GetTextureParameterValue( TEXT( "DrawingTexture" ), texture_to_clone );
 
-    UTexture* new_texture = CloneTexture( iSequence, iRootSequence, new_material, texture_to_clone, package_name, asset_name );
+    UTexture* new_texture = CloneTexture( iPlayer, iRootSequence, iSequence, new_material, texture_to_clone, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );
