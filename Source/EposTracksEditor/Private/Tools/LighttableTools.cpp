@@ -122,18 +122,18 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 
             FString texture_transparent_path;
             FString texture_transparent_name;
-            FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
+            FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
 
             if( current_material_previous_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
-                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer.GetRootMovieSceneSequence() ); // Slow operation
+                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), texture_transparent );
                 modified = true;
             }
             if( current_material_next_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
-                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer.GetRootMovieSceneSequence() ); // Slow operation
+                UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), texture_transparent );
                 modified = true;

@@ -206,16 +206,16 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer )
 
 //static
 FString
-NamingConvention::GetRootPath( const UMovieSceneSequence* iRootSequence )
+NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence )
 {
     return iRootSequence->GetPackage()->GetName(); // ie. /Game/MyStoryboard2
 }
 
 //static
 FString
-NamingConvention::GetMasterPath( const UMovieSceneSequence* iRootSequence )
+NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence )
 {
-    return GetRootPath( iRootSequence ) / TEXT( "Master" ); // ie. /Game/MyStoryboard2/Master
+    return GetRootPath( iPlayer, iRootSequence ) / TEXT( "Master" ); // ie. /Game/MyStoryboard2/Master
 }
 
 //---
@@ -262,9 +262,9 @@ NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, cons
 
 //static
 FString
-NamingConvention::GetMasterMaterialPathName( const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
+NamingConvention::GetMasterMaterialPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
 {
-    oPath = GetMasterPath( iRootSequence );
+    oPath = GetMasterPath( iPlayer, iRootSequence );
     oName = TEXT( "MI_Plane" );
 
     return oPath / oName;
@@ -272,9 +272,9 @@ NamingConvention::GetMasterMaterialPathName( const UMovieSceneSequence* iRootSeq
 
 //static
 FString
-NamingConvention::GetMasterTexturePathName( const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
+NamingConvention::GetMasterTexturePathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName )
 {
-    oPath = GetMasterPath( iRootSequence );
+    oPath = GetMasterPath( iPlayer, iRootSequence );
     oName = TEXT( "T_Transparent" );
 
     return oPath / oName;
@@ -316,7 +316,7 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     if( note_path.IsEmpty() )
     {
         // Default path name of the new note
-        FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
         note_path = root_path / TEXT( "Notes" );
     }
 
@@ -372,7 +372,7 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
     if( material_path.IsEmpty() )
     {
         // Default path of the new material
-        FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
         material_path = root_path;
 
     }
@@ -401,7 +401,7 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
 FString
 NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPath, FString& oName )
 {
-    //FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
+    //FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
     //FString texture_path = root_path;
     FString material_path = FPackageName::GetLongPackagePath( iMaterial->GetPackage()->GetName() );
     FString texture_path = material_path;
@@ -448,7 +448,7 @@ NamingConvention::GenerateSequenceAssetPathName( const IMovieScenePlayer& iPlaye
 
     if( sequence_path.IsEmpty() )
     {
-        FString root_path = GetRootPath( iRootSequence ); // ie. /Game/MyStoryboard2
+        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
         sequence_path = root_path;
     }
 

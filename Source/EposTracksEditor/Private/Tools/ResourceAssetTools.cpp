@@ -74,15 +74,135 @@
 //---
 
 //static
+bool
+MasterAssetTools::GetBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    float use_background = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor" );
+
+    return use_background >= 0.5f;
+}
+//static
+void
+MasterAssetTools::SetBackgroundVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", iBackgroundVisibility ? 1.f : 0.f );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+//static
+void
+MasterAssetTools::ToggleBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    SetBackgroundVisilibity( iPlayer, iRootSequence, !GetBackgroundVisibility( iPlayer, iRootSequence ) );
+}
+
+//static
+FLinearColor
+MasterAssetTools::GetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    FLinearColor background_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "BackgroundColor" );
+
+    return background_color;
+}
+//static
+void
+MasterAssetTools::SetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "BackgroundColor", iBackgroundColor );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", 1.f ); // Automatically use background if changing its color
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//-
+
+//static
+bool
+MasterAssetTools::GetGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    float use_grid = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseGrid" );
+
+    return use_grid >= 0.5f;
+}
+//static
+void
+MasterAssetTools::SetGridVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, bool iGridVisibility )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", iGridVisibility ? 1.f : 0.f );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+//static
+void
+MasterAssetTools::ToggleGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    SetGridVisilibity( iPlayer, iRootSequence, !GetGridVisibility( iPlayer, iRootSequence ) );
+}
+
+//static
+FLinearColor
+MasterAssetTools::GetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    FLinearColor grid_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "GridColor" );
+
+    return grid_color;
+}
+//static
+void
+MasterAssetTools::SetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iGridColor )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "GridColor", iGridColor );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its color
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//static
+EGridType
+MasterAssetTools::GetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    int32 grid_type = int32( UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "GridType" ) );
+    grid_type = FMath::Clamp( grid_type, 0, 4 );
+
+    return static_cast<EGridType>( grid_type );
+}
+//static
+void
+MasterAssetTools::SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, EGridType iGridType )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    int32 grid_type = static_cast<int32>( iGridType );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "GridType", grid_type );
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its type
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//---
+
+//static
 UTexture2D*
-MasterAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
     FString texture_path;
     FString texture_name;
-    FString texture_pathname = NamingConvention::GetMasterTexturePathName( iRootSequence, texture_path, texture_name );
+    FString texture_pathname = NamingConvention::GetMasterTexturePathName( iPlayer, iRootSequence, texture_path, texture_name );
 
     //---
 
@@ -102,18 +222,18 @@ MasterAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FStrin
 
 //static
 UTexture2D*
-MasterAssetTools::GetMasterTexture2D( UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
 {
     FString package_name;
     FString asset_name;
-    return GetMasterTexture2D( iRootSequence, package_name, asset_name );
+    return GetMasterTexture2D( iPlayer, iRootSequence, package_name, asset_name );
 }
 
 //static
 UTexture2D*
-MasterAssetTools::CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::CreateMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
-    UTexture2D* texture_master = GetMasterTexture2D( iRootSequence, oPackageName, oAssetName );
+    UTexture2D* texture_master = GetMasterTexture2D( iPlayer, iRootSequence, oPackageName, oAssetName );
     if( texture_master )
         return texture_master;
 
@@ -131,135 +251,15 @@ MasterAssetTools::CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FSt
 //---
 
 //static
-bool
-MasterAssetTools::GetBackgroundVisibility( UMovieSceneSequence* iRootSequence )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    float use_background = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor" );
-
-    return use_background >= 0.5f;
-}
-//static
-void
-MasterAssetTools::SetBackgroundVisilibity( UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", iBackgroundVisibility ? 1.f : 0.f );
-    UMaterialEditingLibrary::UpdateMaterialInstance( material );
-}
-//static
-void
-MasterAssetTools::ToggleBackgroundVisibility( UMovieSceneSequence* iRootSequence )
-{
-    SetBackgroundVisilibity( iRootSequence, !GetBackgroundVisibility( iRootSequence ) );
-}
-
-//static
-FLinearColor
-MasterAssetTools::GetBackgroundColor( UMovieSceneSequence* iRootSequence )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    FLinearColor background_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "BackgroundColor" );
-
-    return background_color;
-}
-//static
-void
-MasterAssetTools::SetBackgroundColor( UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "BackgroundColor", iBackgroundColor );
-    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseBackgroundColor", 1.f ); // Automatically use background if changing its color
-    UMaterialEditingLibrary::UpdateMaterialInstance( material );
-}
-
-//-
-
-//static
-bool
-MasterAssetTools::GetGridVisibility( UMovieSceneSequence* iRootSequence )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    float use_grid = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "UseGrid" );
-
-    return use_grid >= 0.5f;
-}
-//static
-void
-MasterAssetTools::SetGridVisilibity( UMovieSceneSequence* iRootSequence, bool iGridVisibility )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", iGridVisibility ? 1.f : 0.f );
-    UMaterialEditingLibrary::UpdateMaterialInstance( material );
-}
-//static
-void
-MasterAssetTools::ToggleGridVisibility( UMovieSceneSequence* iRootSequence )
-{
-    SetGridVisilibity( iRootSequence, !GetGridVisibility( iRootSequence ) );
-}
-
-//static
-FLinearColor
-MasterAssetTools::GetGridColor( UMovieSceneSequence* iRootSequence )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    FLinearColor grid_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "GridColor" );
-
-    return grid_color;
-}
-//static
-void
-MasterAssetTools::SetGridColor( UMovieSceneSequence* iRootSequence, FLinearColor iGridColor )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "GridColor", iGridColor );
-    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its color
-    UMaterialEditingLibrary::UpdateMaterialInstance( material );
-}
-
-//static
-EGridType
-MasterAssetTools::GetGridType( UMovieSceneSequence* iRootSequence )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    int32 grid_type = int32( UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "GridType" ) );
-    grid_type = FMath::Clamp( grid_type, 0, 4 );
-
-    return static_cast<EGridType>( grid_type );
-}
-//static
-void
-MasterAssetTools::SetGridType( UMovieSceneSequence* iRootSequence, EGridType iGridType )
-{
-    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iRootSequence );
-
-    int32 grid_type = static_cast<int32>( iGridType );
-    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "GridType", grid_type );
-    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "UseGrid", 1.f ); // Automatically use grid if changing its type
-    UMaterialEditingLibrary::UpdateMaterialInstance( material );
-}
-
-//---
-
-//static
 UMaterialInstanceConstant*
-MasterAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
 
     FString material_path;
     FString material_name;
-    FString material_pathname = NamingConvention::GetMasterMaterialPathName( iRootSequence, material_path, material_name );
+    FString material_pathname = NamingConvention::GetMasterMaterialPathName( iPlayer, iRootSequence, material_path, material_name );
 
     //---
 
@@ -280,18 +280,18 @@ MasterAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString
 
 //static
 UMaterialInstanceConstant*
-MasterAssetTools::GetMasterMaterial( UMovieSceneSequence* iRootSequence )
+MasterAssetTools::GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
 {
     FString package_name;
     FString asset_name;
-    return GetMasterMaterial( iRootSequence, package_name, asset_name );
+    return GetMasterMaterial( iPlayer, iRootSequence, package_name, asset_name );
 }
 
 //static
 UMaterialInstanceConstant*
-MasterAssetTools::CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
+MasterAssetTools::CreateMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName )
 {
-    UMaterialInstanceConstant* material_master = GetMasterMaterial( iRootSequence, oPackageName, oAssetName );
+    UMaterialInstanceConstant* material_master = GetMasterMaterial( iPlayer, iRootSequence, oPackageName, oAssetName );
     if( material_master )
         return material_master;
 
@@ -363,11 +363,11 @@ ProjectAssetTools::CreateMaterial( const IMovieScenePlayer& iPlayer, UMovieScene
 {
     FString package_name_tmp;
     FString asset_name_tmp;
-    UTexture2D* master_texture = MasterAssetTools::CreateMasterTexture2D( iRootSequence, package_name_tmp, asset_name_tmp );
+    UTexture2D* master_texture = MasterAssetTools::CreateMasterTexture2D( iPlayer, iRootSequence, package_name_tmp, asset_name_tmp );
     if( !master_texture )
         return nullptr;
 
-    UMaterialInstanceConstant* master_material = MasterAssetTools::CreateMasterMaterial( iRootSequence, master_texture, package_name_tmp, asset_name_tmp );
+    UMaterialInstanceConstant* master_material = MasterAssetTools::CreateMasterMaterial( iPlayer, iRootSequence, master_texture, package_name_tmp, asset_name_tmp );
     if( !master_material )
         return nullptr;
 
@@ -413,7 +413,7 @@ ProjectAssetTools::CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneS
 UTexture2D*
 ProjectAssetTools::CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName )
 {
-    UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
+    UTexture2D* texture_master = MasterAssetTools::GetMasterTexture2D( iPlayer, iRootSequence ); // The master texture always exists as CreateMaterial() should be called before CreateTexture2D() (as it takes a material parameter)
     if( !texture_master )
         return nullptr;
 
