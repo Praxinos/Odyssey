@@ -145,7 +145,7 @@ FindNotePaths( const IMovieScenePlayer& iPlayer )
 
 static
 TMap<FString, int32>
-FindMaterialPaths( const IMovieScenePlayer& iPlayer )
+FindMaterialPaths( const IMovieScenePlayer& iPlayer, TMap<FString, int32>& oParentPaths )
 {
     IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -163,6 +163,7 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer )
     //-
 
     TMap<FString, int32> map_path_to_count;
+    oParentPaths.Empty();
 
     for( auto pair : map_sequences )
     {
@@ -181,9 +182,12 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer )
                 if( !drawing.Exists() )
                     continue;
 
-                const UMaterialInterface* material = drawing.GetMaterial();
+                const UMaterialInterface* material_interface = drawing.GetMaterial();
+                const UMaterialInstance* material = Cast<UMaterialInstance>( material_interface );
                 if( !material )
                     continue;
+
+                //-
 
                 FString material_pathname = material->GetPackage()->GetName();
                 FString material_path = FPackageName::GetLongPackagePath( material_pathname );
@@ -193,13 +197,37 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer )
                     *count = *count + 1;
                 else
                     map_path_to_count.Add( material_path, 1 );
+
+                //-
+
+                UMaterialInterface* parent_material = material->Parent;
+                check( parent_material );
+
+                FString parent_material_pathname = parent_material->GetPackage()->GetName();
+                FString parent_material_path = FPackageName::GetLongPackagePath( parent_material_pathname );
+
+
+                count = oParentPaths.Find( parent_material_path );
+                if( count )
+                    *count = *count + 1;
+                else
+                    oParentPaths.Add( parent_material_path, 1 );
             }
         }
     }
 
     map_path_to_count.ValueSort( TGreater<int32>() );
+    oParentPaths.ValueSort( TGreater<int32>() );
 
     return map_path_to_count;
+}
+
+static
+TMap<FString, int32>
+FindMaterialPaths( const IMovieScenePlayer& iPlayer )
+{
+    TMap<FString, int32> map_parent_material_paths;
+    return FindMaterialPaths( iPlayer, map_parent_material_paths );
 }
 
 //---
@@ -208,14 +236,78 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer )
 FString
 NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence )
 {
-    return iRootSequence->GetPackage()->GetName(); // ie. /Game/MyStoryboard2
+    FString root_path;
+
+    // Try to find the better path from all existing subsequences
+    TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+    if( map_sequence_paths.Num() )
+    {
+        TArray<FString> keys;
+        map_sequence_paths.GetKeys( keys );
+
+        root_path = keys[0];
+    }
+
+    if( root_path.IsEmpty() )
+    {
+        // Try to find the better path from all existing materials
+        TMap<FString, int32> map_material_paths = FindMaterialPaths( iPlayer );
+        if( map_material_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_material_paths.GetKeys( keys );
+
+            root_path = keys[0];
+        }
+    }
+
+    if( root_path.IsEmpty() )
+    {
+        // Default root path
+        root_path = iRootSequence->GetPackage()->GetName(); // ie. /Game/MyStoryboard2
+    }
+
+    return root_path;
 }
 
 //static
 FString
 NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence )
 {
-    return GetRootPath( iPlayer, iRootSequence ) / TEXT( "Master" ); // ie. /Game/MyStoryboard2/Master
+    FString master_path;
+
+    // Try to find the better path from all existing materials
+    TMap<FString, int32> map_parent_material_paths;
+    TMap<FString, int32> map_material_paths = FindMaterialPaths( iPlayer, map_parent_material_paths );
+    if( map_parent_material_paths.Num() )
+    {
+        TArray<FString> keys;
+        map_parent_material_paths.GetKeys( keys );
+
+        master_path = keys[0];
+    }
+
+    if( master_path.IsEmpty() )
+    {
+        if( map_material_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_material_paths.GetKeys( keys );
+
+            master_path = keys[0];
+
+            master_path /= TEXT( "Master" );
+        }
+    }
+
+    if( master_path.IsEmpty() )
+    {
+        // Default master path
+        FString root_path = GetRootPath( iPlayer, iRootSequence ) / TEXT( "Master" ); // ie. /Game/MyStoryboard2/Master
+        master_path = root_path;
+    }
+
+    return master_path;
 }
 
 //---
@@ -301,11 +393,11 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     if( note_path.IsEmpty() )
     {
         // Try to find the better path from all existing subsequences
-        map_note_paths = FindSequencePaths( iPlayer );
-        if( map_note_paths.Num() )
+        TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+        if( map_sequence_paths.Num() )
         {
             TArray<FString> keys;
-            map_note_paths.GetKeys( keys );
+            map_sequence_paths.GetKeys( keys );
 
             note_path = keys[0];
 
@@ -359,11 +451,11 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
     if( material_path.IsEmpty() )
     {
         // Try to find the better path from all existing subsequences
-        map_material_paths = FindSequencePaths( iPlayer );
-        if( map_material_paths.Num() )
+        TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+        if( map_sequence_paths.Num() )
         {
             TArray<FString> keys;
-            map_material_paths.GetKeys( keys );
+            map_sequence_paths.GetKeys( keys );
 
             material_path = keys[0];
         }
