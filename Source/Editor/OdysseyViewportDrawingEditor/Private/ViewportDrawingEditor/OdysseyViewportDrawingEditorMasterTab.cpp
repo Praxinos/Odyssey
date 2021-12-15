@@ -115,14 +115,14 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .DisplayThumbnail(true)
                                 .ThumbnailSizeOverride(FIntPoint(30, 30))
                         ]
-                    + SVerticalBox::Slot()
+                    /* + SVerticalBox::Slot()
                         .Padding(2)
                         .AutoHeight()
                         [
                             SNew(SSeparator)
                         ]
                     //Select painting method (texture based, mesh based...) ----
-                    + SVerticalBox::Slot()
+                     + SVerticalBox::Slot()
                         .Padding(2)
                         .AutoHeight()
                         [
@@ -146,7 +146,7 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .Font(FEditorStyle::GetFontStyle("PropertyWindow.NormalFont"))
                                 .Text_Lambda([=] { return FOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mEditor->PaintingAdapterMethod());})
                             ]
-                        ]
+                        ]*/
                     //---
             ];
 }
