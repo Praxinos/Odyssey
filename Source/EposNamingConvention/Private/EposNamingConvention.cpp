@@ -45,7 +45,7 @@ FindSequencePaths( const IMovieScenePlayer& iPlayer )
             map_sequences.Add( pair.Key, pair.Value.GetSequence() );
     }
 
-    //-
+    //---
 
     TMap<FString, int32> map_path_to_count;
 
@@ -86,7 +86,7 @@ FindNotePaths( const IMovieScenePlayer& iPlayer )
             sequences.Add( pair.Value.GetSequence() );
     }
 
-    //-
+    //---
 
     TMap<FString, int32> map_path_to_count;
 
@@ -123,7 +123,7 @@ FindNotePaths( const IMovieScenePlayer& iPlayer )
 
     map_path_to_count.ValueSort( TGreater<int32>() );
 
-    //-
+    //---
 
     if( map_path_to_count.Num() )
         return map_path_to_count;
@@ -160,7 +160,7 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer, TMap<FString, int32>& oPare
             map_sequences.Add( pair.Key, pair.Value.GetSequence() );
     }
 
-    //-
+    //---
 
     TMap<FString, int32> map_path_to_count;
     oParentPaths.Empty();
@@ -316,8 +316,19 @@ NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieS
 FString
 NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
 {
-    oPath = FPaths::GetBaseFilename( iRootSequence->GetPathName() );
-    oName = TEXT( "Camera_1" );
+    FString root_sequence_name = FPackageName::GetShortName( iRootSequence->GetPackage()->GetName() );
+    FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
+
+    FString camera_path = ( iRootSequence != iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
+
+    //---
+
+    FString camera_name = TEXT( "Camera_1" );
+
+    //---
+
+    oPath = camera_path;
+    oName = camera_name;
 
     return oPath / oName;
 }
@@ -326,12 +337,57 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 FString
 NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
 {
-    FString camera_path;
-    FString camera_name;
-    GenerateCameraActorPathName( iPlayer, iRootSequence, iSequence, camera_path, camera_name );
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+    UMovieSceneSequence* current_sequence = const_cast<UMovieSceneSequence*>( iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
 
-    oPath = camera_path;
-    oName = TEXT( "Plane_1" );
+    FMovieSceneSequenceID current_sequence_id; // invalid
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
+        for( auto pair : map )
+        {
+            if( pair.Value.GetSequence() == iSequence )
+            {
+                current_sequence_id = pair.Key;
+                break;
+            }
+        }
+    }
+    else
+    {
+        current_sequence_id = MovieSceneSequenceID::Root;
+        check( iRootSequence == iSequence );
+    }
+
+    //---
+
+    FString plane_path;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, current_sequence_id );
+    if( camera )
+    {
+        plane_path = camera->GetFolderPath().ToString();
+    }
+
+    if( plane_path.IsEmpty() )
+    {
+        FString camera_path;
+        FString camera_name;
+        GenerateCameraActorPathName( iPlayer, iRootSequence, iSequence, camera_path, camera_name );
+
+        plane_path = camera_path;
+    }
+
+    //---
+
+    FString plane_name = TEXT( "Plane_1" );
+
+    //---
+
+    oPath = plane_path;
+    oName = plane_name;
 
     return oPath / oName;
 }
@@ -412,14 +468,14 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
         note_path = root_path / TEXT( "Notes" );
     }
 
-    //-
+    //---
 
     FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage() ); // ie. shot_0002_01
 
     FString note_name_base = current_sequence_name;
     FString note_suffix = TEXT( "_N_01" );
 
-    //-
+    //---
 
     FString note_pathname;
     FString note_name;
@@ -469,14 +525,14 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
 
     }
 
-    //-
+    //---
 
     FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage() ); // ie. shot_0002_01
 
     FString material_name_base = current_sequence_name;
     FString material_suffix = TEXT( "_MI_01" );
 
-    //-
+    //---
 
     FString material_pathname;
     FString material_name;
@@ -498,14 +554,14 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
     FString material_path = FPackageName::GetLongPackagePath( iMaterial->GetPackage()->GetName() );
     FString texture_path = material_path;
 
-    //-
+    //---
 
     FString current_material_name = FPackageName::GetShortName( iMaterial->GetPackage() ); // ie. shot_0002_01_MI_01
 
     FString texture_name_base = current_material_name;
     FString texture_suffix = TEXT( "_T_01" );
 
-    //-
+    //---
 
     FString texture_pathname;
     FString texture_name;
@@ -544,7 +600,7 @@ NamingConvention::GenerateSequenceAssetPathName( const IMovieScenePlayer& iPlaye
         sequence_path = root_path;
     }
 
-    //-
+    //---
 
     FString current_sequence_base_name = iType->IsChildOf<UBoardSequence>() ? TEXT( "board" ) : TEXT( "shot" );
 
