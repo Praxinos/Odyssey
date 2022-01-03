@@ -13,18 +13,17 @@
 #include "Proxies/OdysseyBrushBlending.h"
 #include "Proxies/OdysseyBrushRect.h"
 
+#include <ULIS>
+
 #include "OdysseyBrushBlock.generated.h"
 
-class  FOdysseyBlock;
+
 class  UFont;
 class  UOdysseyBrushAssetBase;
-
-
+class  FOdysseyBlockProxy_Internal;
 
 /////////////////////////////////////////////////////
 // Odyssey Block Reference
-
-class FOdysseyBlockProxy_Internal;
 
 USTRUCT(BlueprintType, meta = (DisplayName = "Odyssey Block Reference"))
 struct ODYSSEYBRUSH_API FOdysseyBlockProxy
@@ -36,19 +35,19 @@ struct ODYSSEYBRUSH_API FOdysseyBlockProxy
     FOdysseyBlockProxy();
 
 private:
-    FOdysseyBlockProxy(const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents = 0, ::ULIS::FEvent* iEvents = nullptr, int iNumDeps = 0, FOdysseyBlockProxy* iDependencies = nullptr );
+    FOdysseyBlockProxy(const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents = 0, ::ULIS::FEvent* iEvents = nullptr, int iNumDeps = 0, FOdysseyBlockProxy* iDependencies = nullptr );
 
 public:
     //Create a Null (Invalid) Proxy
     static FOdysseyBlockProxy MakeNullProxy();
-    static FOdysseyBlockProxy MakeProxy(const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock = nullptr, int iNumEvents = 0, ::ULIS::FEvent* iEvents = nullptr, int iNumDeps = 0, FOdysseyBlockProxy* iDependencies = nullptr);
+    static FOdysseyBlockProxy MakeProxy(const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock = nullptr, int iNumEvents = 0, ::ULIS::FEvent* iEvents = nullptr, int iNumDeps = 0, FOdysseyBlockProxy* iDependencies = nullptr);
 
     //Returns wether this FOdysseyBlockProxy is Valid or NULL
     //Always check if a FOdysseyBlockProxy is valid before using it
     bool IsValid();
 
     //Returns the block the proxy is holding
-    const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& GetBlock();
+    const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& GetBlock();
 
     //Returns the Event on which to wait for the block to be "done"
     const ::ULIS::FEvent& GetEvent();

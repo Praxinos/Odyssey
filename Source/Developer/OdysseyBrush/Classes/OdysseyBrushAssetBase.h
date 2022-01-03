@@ -19,8 +19,6 @@
 #include <ULIS>
 #include "OdysseyBrushAssetBase.generated.h"
 
-class FOdysseyBlock;
-
 /////////////////////////////////////////////////////
 // FOdysseyBrushState
 struct ODYSSEYBRUSH_API FOdysseyBrushState
@@ -29,14 +27,14 @@ struct ODYSSEYBRUSH_API FOdysseyBrushState
 
     void ResetEvent();
 
-    FOdysseyBlock*                          target_temp_buffer;
+    ::ULIS::FBlock*                         target_temp_buffer;
     FOdysseyStrokePoint                     point;
-    ::ULIS::FColor                      color;
+    ::ULIS::FColor                          color;
     float                                   size_modifier;
     float                                   opacity_modifier;
     float                                   flow_modifier;
-    ::ULIS::eBlendMode                    blendingMode_modifier;
-    ::ULIS::eAlphaMode                       alphaMode_modifier;
+    ::ULIS::eBlendMode                      blendingMode_modifier;
+    ::ULIS::eAlphaMode                      alphaMode_modifier;
     float                                   step;
     float                                   smoothing_strength;
     int                                     currentPointIndex;

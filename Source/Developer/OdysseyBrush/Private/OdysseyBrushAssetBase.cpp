@@ -4,7 +4,6 @@
 #include "OdysseyBrushAssetBase.h"
 #include "Engine/Texture2D.h"
 #include "OdysseySurface.h"
-#include "OdysseyBlock.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -416,7 +415,7 @@ UOdysseyBrushAssetBase::GetCanvasRect()
     if (!state.target_temp_buffer)
         return FOdysseyBrushRect();
 
-    return FOdysseyBrushRect(state.target_temp_buffer->GetBlock()->Rect());
+    return FOdysseyBrushRect(state.target_temp_buffer->Rect());
 }
 
 /** Get Stroke Buffer*/
@@ -430,10 +429,10 @@ UOdysseyBrushAssetBase::GetStrokeBlock( FOdysseyBrushRect Area )
     {
         if( Area.IsInitialized() )
         {
-            TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable( new FOdysseyBlock( Area.Width(), Area.Height(), ::ULIS::Format_RGBA8 ));
+            TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable( new ::ULIS::FBlock( Area.Width(), Area.Height(), ::ULIS::Format_RGBA8 ));
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ::ULIS::Format_RGBA8 );
             ::ULIS::FEvent eventClear;
-            ctx.Clear( *( dst->GetBlock() ),
+            ctx.Clear( *dst,
                         ::ULIS::FRectI::Auto,
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
@@ -446,20 +445,20 @@ UOdysseyBrushAssetBase::GetStrokeBlock( FOdysseyBrushRect Area )
     }
 
 
-    FOdysseyBlock* src = state.target_temp_buffer;
+    ::ULIS::FBlock* src = state.target_temp_buffer;
     ::ULIS::eFormat format = src->Format();
 
-    ::ULIS::FRectI rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-    TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new FOdysseyBlock( rect.w, rect.h, format ));
+    ::ULIS::FRectI rect = Area.IsInitialized() ? Area.GetValue() : src->Rect();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(new ::ULIS::FBlock( rect.w, rect.h, format ));
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
 
     //be sure we copy only the needed part
-    ::ULIS::FRectI src_rect = rect & src->GetBlock()->Rect();
+    ::ULIS::FRectI src_rect = rect & src->Rect();
     ::ULIS::FVec2I dst_pos(src_rect.x - rect.x, src_rect.y - rect.y);
 
     ::ULIS::FEvent eventCopy;
-    ctx.Copy( *( src->GetBlock() ), *( dst->GetBlock() ), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &state.event, &eventCopy);
+    ctx.Copy( *src, *dst, src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &state.event, &eventCopy);
     ctx.Flush();
 
     return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
@@ -502,7 +501,7 @@ UOdysseyBrushAssetBase::DebugStamp()
     );
     ctx.Blend(
           *debug_stamp
-        , *( state.target_temp_buffer->GetBlock() )
+        , *state.target_temp_buffer
         , ::ULIS::FRectI::Auto
         , ::ULIS::FVec2F( GetX() - size / 2, GetY() - size / 2 )
         , ::ULIS::Blend_Normal
@@ -528,7 +527,7 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
     if( !Sample.IsValid() )
         return;
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Sample.GetBlock();
     FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
     //::ULIS::FRectI invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
     ::ULIS::eFormat block_format = block->Format();
@@ -542,13 +541,13 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
     ::ULIS::FEvent stateEvent = state.event;
     ::ULIS::FEvent eventInputs[] = { stateEvent, Sample.GetEvent() };
 
-    ::ULIS::FBlock* src = block->GetBlock();
+    ::ULIS::FBlock* src = block.Get();
 
     ::ULIS::FEvent eventConv;
     if( block_format == target_format )
     {
         src = new ::ULIS::FBlock(block->Width(), block->Height(), target_format);
-        ctx.ConvertFormat( *( block->GetBlock() ), *src, ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), policy, 2, eventInputs, &eventConv );
+        ctx.ConvertFormat( *block, *src, ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), policy, 2, eventInputs, &eventConv );
     }
     else
     {
@@ -560,7 +559,7 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
             //Also, passing block as a copy maintains it alive until evenBlend finishes, it is very important
             [block, src]( const ::ULIS::FRectI& iRect )
             {
-                if (block->GetBlock() != src)
+                if (src != block.Get())
                     delete  src;
             }
         )
@@ -570,8 +569,8 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
     {
         ctx.BlendAA(
               *src
-            , *( state.target_temp_buffer->GetBlock() )
-            , block->GetBlock()->Rect()
+            , *state.target_temp_buffer
+            , block->Rect()
             , ::ULIS::FVec2F(invalidRect.x, invalidRect.y)
             , ::ULIS::eBlendMode( BlendingMode )
             , ::ULIS::eAlphaMode( AlphaMode )
@@ -586,8 +585,8 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
     {
         ctx.Blend(
               *src
-            , *( state.target_temp_buffer->GetBlock() )
-            , block->GetBlock()->Rect()
+            , *state.target_temp_buffer
+            , block->Rect()
             , ::ULIS::FVec2F(invalidRect.x, invalidRect.y)
             , ::ULIS::eBlendMode( BlendingMode )
             , ::ULIS::eAlphaMode( AlphaMode )

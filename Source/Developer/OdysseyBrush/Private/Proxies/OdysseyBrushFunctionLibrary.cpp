@@ -5,7 +5,6 @@
 #include "OdysseyBrushAssetBase.h"
 #include "Engine/Texture2D.h"
 #include "OdysseySurface.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 

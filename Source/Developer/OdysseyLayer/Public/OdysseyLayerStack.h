@@ -11,7 +11,6 @@
 #include "OdysseyFolderLayer.h"
 #include "OdysseyRootLayer.h"
 #include "IOdysseySerializable.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 
 class FOdysseyDrawingUndo;
@@ -59,7 +58,7 @@ public:
 
     // Computes the result of one part defined by iRect of all layers into one given block
     // Adds a Temporary buffer above the current layer
-    void ComputeResultInBlockWithBlockAsCurrentLayer( ::ULIS::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
+    void ComputeResultInBlockWithBlockAsCurrentLayer( ::ULIS::FBlock* ioBlock, ::ULIS::FBlock* iTempBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
 
 public:
     // Public API / Getters
@@ -203,5 +202,5 @@ private:
     FString mRedoPath;
     // TArray64< uint8 > mData;
 
-    //FOdysseyBlock* mData;
+    //::ULIS::FBlock* mData;
 };

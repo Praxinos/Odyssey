@@ -6,10 +6,11 @@
 #include "CoreMinimal.h"
 #include "SOdysseyTextureConfigureWindow.h"
 
+#include <ULIS>
+
 class UTexture2D;
 class UPaperSprite;
 class UPaperFlipbook;
-class FOdysseyBlock;
 
 // DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyFrameAdded, int32 /* iIndex */)
 // DECLARE_MULTICAST_DELEGATE_TwoParams(FOnKeyFrameChanged, int32 /* iIndex */, FPaperFlipbookKeyFrame& /* iOldValue */)
@@ -81,7 +82,7 @@ public:
 private:
     void CreateEmptyKeyFrame(int32 iIndex);
     UTexture2D* CreateTexture(int32 iWidth, int32 iHeight, ETextureSourceFormat iFormat, FString iName, FLinearColor iBackgroundColor);
-    UTexture2D* CreateTexture(FString iName, FOdysseyBlock* iBlock, ETextureSourceFormat iFormat);
+    UTexture2D* CreateTexture(FString iName, ::ULIS::FBlock* iBlock, ETextureSourceFormat iFormat);
     void CopyTextureContent(UTexture2D* iSrcTexture, UTexture2D* iDstTexture);
 
     UPaperSprite* CreateSprite(FString iName);

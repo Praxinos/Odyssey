@@ -4,7 +4,6 @@
 #include "SOdysseyLeafWidget.h"
 #include "Rendering/DrawElements.h"
 #include "OdysseySurface.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
@@ -198,7 +197,7 @@ void
 SOdysseyLeafWidget::PaintInternalBuffer( int iReason ) const
 {
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    ctx.Fill(*(surface->Block()->GetBlock()), ::ULIS::FColor::RGBA8( 220, 220, 220 ));
+    ctx.Fill(*surface->Block(), ::ULIS::FColor::RGBA8( 220, 220, 220 ));
     ctx.Finish();
 
     surface->Invalidate();

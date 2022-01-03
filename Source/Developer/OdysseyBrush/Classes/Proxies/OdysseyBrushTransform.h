@@ -13,8 +13,6 @@
 
 #include "OdysseyBrushTransform.generated.h"
 
-class  FOdysseyBlock;
-
 /////////////////////////////////////////////////////
 // Odyssey Matrix
 USTRUCT(BlueprintType)

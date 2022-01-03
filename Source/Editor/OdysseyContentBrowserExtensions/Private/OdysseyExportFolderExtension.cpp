@@ -13,8 +13,8 @@
 #include "IDesktopPlatform.h"
 #include "DesktopPlatformModule.h"
 #include "OdysseyScopedTextureSettings.h"
-#include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyPixelFormat.h"
 #include "EditorDirectories.h"
 #include "ULISLoaderModule.h"
 #include "Misc/Paths.h"
@@ -328,7 +328,7 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
     std::string stringSystemPathNameExt = TCHAR_TO_UTF8( *iSystemPathNameExt );
     // The OdysseyBLock is required to be used with Ulis export function
     FTexturePlatformData* platformData = *iCurrentTexture->GetRunningPlatformData();
-    FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( iCurrentTexture->Source.GetFormat() ) );
+    ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( iCurrentTexture->Source.GetFormat() ) );
     FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( iCurrentTexture );
     CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, iCurrentTexture );
 
@@ -344,11 +344,11 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
 
 
     bool canSaveDirectly = false;
-    ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave->GetBlock(), iExportFormat, &canSaveDirectly);
+    ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave, iExportFormat, &canSaveDirectly);
     if (canSaveDirectly)
     {
         ctx.SaveBlockToDisk(
-            *odysseyBlockToSave->GetBlock()
+            *odysseyBlockToSave
             , stringSystemPathNameExt
             , iExportFormat
             , 100
@@ -358,7 +358,7 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
     }
     else
     {
-        ::ULIS::eFormat format = odysseyBlockToSave->GetBlock()->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+        ::ULIS::eFormat format = odysseyBlockToSave->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
         if (iExportFormat == ::ULIS::FileFormat_hdr)
         {
             format = ::ULIS::Format_RGBAF;
@@ -368,7 +368,7 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
 
         ::ULIS::FEvent eventConvert;
         ctx.ConvertFormat(
-            *odysseyBlockToSave->GetBlock()
+            *odysseyBlockToSave
             , blockProxy
             , ULIS::FRectI::Auto
             , ULIS::FVec2I(0)

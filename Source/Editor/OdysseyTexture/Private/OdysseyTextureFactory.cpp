@@ -8,7 +8,6 @@
 #include "Engine/Texture2D.h"
 
 #include "ULISLoaderModule.h"
-#include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "SOdysseyTextureConfigureWindow.h"
 
@@ -53,20 +52,20 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     check(iClass->IsChildOf(UTexture2D::StaticClass()));
 
     // Init internal data
-    FOdysseyBlock block( mTextureWidth, mTextureHeight, ULISFormatForUE4TextureSourceFormat(mTextureFormat), ::ULIS::FOnInvalidBlock(), true );
+    ::ULIS::FBlock block( mTextureWidth, mTextureHeight, ULISFormatForTextureSourceFormat(mTextureFormat), nullptr, ::ULIS::FOnInvalidBlock(), false );
 
     ::ULIS::FColor color( ::ULIS::FColor::RGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
 
     //TODO: should fill the default native texture for the thumbnail
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
-    ctx.Fill(*(block.GetBlock()), color );
+    ctx.Fill(block, color );
     ctx.Finish();
     
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags | RF_Transactional );
     InitTextureWithBlockData(&block, texture, mTextureFormat);
     UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >(texture, NAME_None, RF_Public);
-	::ULIS::eFormat format = ULISFormatForUE4TextureSourceFormat(texture->Source.GetFormat());
+	::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     userData->GetLayerStack()->Init(mTextureWidth, mTextureHeight, format);
 
 	FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();

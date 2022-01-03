@@ -4,8 +4,6 @@
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 
-class FOdysseyBlock;
-
 /////////////////////////////////////////////////////
 // FOdysseySurface
 // Allows pixel wise manipulation and easy interfacing with UTexture

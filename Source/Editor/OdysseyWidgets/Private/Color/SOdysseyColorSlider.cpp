@@ -3,7 +3,6 @@
 
 #include "Color/SOdysseyColorSlider.h"
 #include "Rendering/DrawElements.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
@@ -89,7 +88,7 @@ void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
 {   
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    auto paintBuffer = surface->Block()->GetBlock();
+    ::ULIS::FBlock* paintBuffer = surface->Block();
     ctx.Fill( *paintBuffer, ::ULIS::FColor( ::ULIS::Format_RGB8, { 50, 50, 50 } ) );
     ctx.Finish();
 
@@ -97,7 +96,7 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
     for( int x = 1; x < InternalSize.X - 2; ++x )
     {
         float t = float( x ) / float( range );
-        ::ULIS::FColor res = GetColorForProportion( t ).ToFormat( surface->Block()->GetBlock()->Format() );
+        ::ULIS::FColor res = GetColorForProportion( t ).ToFormat( surface->Block()->Format() );
         for( int y = 1; y < InternalSize.Y - 1; ++y )
         {
             // AssignMemoryUnsafe
@@ -105,8 +104,8 @@ IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
         }
     }
     surface->Invalidate();
-    ctx.DrawRectangle( *( cursor_surface->Block()->GetBlock() ), ::ULIS::FVec2I( 0, 0 ), ::ULIS::FVec2I( cursor_surface->Width() - 1, cursor_surface->Height() - 1 ), ::ULIS::FColor( ::ULIS::Format_RGBA8, { 5, 5, 5, 255 } ), false );
-    ctx.DrawRectangle( *( cursor_surface->Block()->GetBlock() ), ::ULIS::FVec2I( 1, 1 ), ::ULIS::FVec2I( cursor_surface->Width() - 2, cursor_surface->Height() - 2 ), ::ULIS::FColor( ::ULIS::Format_RGBA8, { 255, 255, 255, 255 } ), false );
+    ctx.DrawRectangle( *( cursor_surface->Block() ), ::ULIS::FVec2I( 0, 0 ), ::ULIS::FVec2I( cursor_surface->Width() - 1, cursor_surface->Height() - 1 ), ::ULIS::FColor( ::ULIS::Format_RGBA8, { 5, 5, 5, 255 } ), false );
+    ctx.DrawRectangle( *( cursor_surface->Block() ), ::ULIS::FVec2I( 1, 1 ), ::ULIS::FVec2I( cursor_surface->Width() - 2, cursor_surface->Height() - 2 ), ::ULIS::FColor( ::ULIS::Format_RGBA8, { 255, 255, 255, 255 } ), false );
     ctx.Finish();
     cursor_surface->Invalidate();
 }

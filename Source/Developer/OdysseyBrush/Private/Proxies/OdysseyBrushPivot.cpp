@@ -2,14 +2,13 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "Proxies/OdysseyBrushPivot.h"
-#include "OdysseyBlock.h"
 #include "OdysseySurface.h"
 
 /////////////////////////////////////////////////////
 // Utilities
 FRectF
 //::ULIS::FRectI
-ComputeRectWithPivot(TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
+ComputeRectWithPivot(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY )
 {
     int width = iBlock->Width();
     int height = iBlock->Height();

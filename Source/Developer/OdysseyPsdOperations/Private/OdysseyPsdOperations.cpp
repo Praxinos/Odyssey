@@ -3,8 +3,11 @@
 
 #include "OdysseyPsdOperations.h"
 #include "OdysseyMathUtils.h"
-#include <ULIS>
+#include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
+
+#include <ULIS>
+
 #include "zlib.h"
 
 FOdysseyPsdOperations::~FOdysseyPsdOperations()
@@ -778,9 +781,9 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
     ::ULIS::eFormat format;
 
     if(mBitDepth > 8)
-        format = ULISFormatForUE4TextureSourceFormat(ETextureSourceFormat::TSF_RGBA16);
+        format = ULISFormatForTextureSourceFormat(ETextureSourceFormat::TSF_RGBA16);
     else
-        format = ULISFormatForUE4TextureSourceFormat(ETextureSourceFormat::TSF_BGRA8);
+        format = ULISFormatForTextureSourceFormat(ETextureSourceFormat::TSF_BGRA8);
 
     if( mLayersInfo.Num() != 0 )
     {
@@ -829,10 +832,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             delete[] planar;
         }
         ::ULIS::FBlock* srcblock = new ::ULIS::FBlock((::ULIS::tByte*)mImageDst,mImageWidth,mImageHeight,::ULIS::Format_BGRA8);;
-        FOdysseyBlock* layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
+        ::ULIS::FBlock* layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( ::ULIS::Format_BGRA8 );
-        ctx.Copy( *srcblock, *( layerBlock->GetBlock() ) );
+        ctx.Copy( *srcblock, *layerBlock );
         ctx.Finish();
 
         TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(TEXT("Layer1"),layerBlock));
@@ -853,8 +856,8 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             uint32_t h = mLayersInfo[i].mBottom - mLayersInfo[i].mTop;
 
             ::ULIS::FBlock* srcblock;
-            FOdysseyBlock* convBlock;
-            FOdysseyBlock* layerBlock;
+            ::ULIS::FBlock* convBlock;
+            ::ULIS::FBlock* layerBlock;
 
             if( mBitDepth == 32 )
             {
@@ -897,8 +900,8 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 }
 
                 //We don't handle drawing on 32 bits, so we convert to 16 bits
-                convBlock =  new FOdysseyBlock(w,h,::ULIS::Format_RGBA16);
-                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
+                convBlock =  new ::ULIS::FBlock(w,h,::ULIS::Format_RGBA16);
+                layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
             }
             else if( mBitDepth == 16 )
             {
@@ -940,8 +943,8 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                         return;
                 }
 
-                convBlock =  new FOdysseyBlock(w,h,::ULIS::Format_RGBA16);
-                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
+                convBlock =  new ::ULIS::FBlock(w,h,::ULIS::Format_RGBA16);
+                layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_RGBA16);
             }
             else if( mBitDepth == 8 )
             {
@@ -983,8 +986,8 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                         return;
                 }
 
-                convBlock =  new FOdysseyBlock(w,h,::ULIS::Format_BGRA8);
-                layerBlock = new FOdysseyBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
+                convBlock =  new ::ULIS::FBlock(w,h,::ULIS::Format_BGRA8);
+                layerBlock = new ::ULIS::FBlock(mImageWidth,mImageHeight,::ULIS::Format_BGRA8);
             }
             else
             {
@@ -997,8 +1000,8 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 // conv block to do that anymore, leading to a single command instead of 3.
                 using namespace ::ULIS;
                 FBlock& src = *srcblock;
-                FBlock& conv = *( convBlock->GetBlock() );
-                FBlock& layer = *( layerBlock->GetBlock() );
+                FBlock& conv = *convBlock;
+                FBlock& layer = *layerBlock;
                 FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( Format_BGRA8 );
                 ::ULIS::FEvent events[2];
                 ctx.Clear( layer, FRectI::Auto, FSchedulePolicy::CacheEfficient, 0, nullptr, &events[0] );

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
@@ -89,7 +88,7 @@ public:
 
 public:
     // Setters
-    virtual void Block(FOdysseyBlock* iBlock);
+    virtual void Block(::ULIS::FBlock* iBlock);
     void Brush(UOdysseyBrush* iBrush);
     void BrushInstance(UOdysseyBrushAssetBase* iBrushInstance, bool iApplyOverrides);
     void IsLocked(TAttribute<bool> iIsLocked);
@@ -103,10 +102,10 @@ public:
 
 public:
     // Getters
-    // FOdysseyBlock* PreviewBlock(); //TODO: Replace with new system OriginalBlock/EditedBlock/PaintBlock
-    FOdysseyBlock* PaintBlock();
-    FOdysseyBlock* EditedBlock();
-    FOdysseyBlock* OriginalBlock();
+    // ::ULIS::FBlock* PreviewBlock(); //TODO: Replace with new system OriginalBlock/EditedBlock/PaintBlock
+    ::ULIS::FBlock* PaintBlock();
+    ::ULIS::FBlock* EditedBlock();
+    ::ULIS::FBlock* OriginalBlock();
 
     UOdysseyBrush* Brush() const;
     UOdysseyBrushAssetBase* BrushInstance() const;
@@ -251,9 +250,9 @@ protected:
     TAttribute<bool>                    mIsLocked;
     FOdysseyStrokeOptions               mStrokeOptions;
 
-    FOdysseyBlock*                      mEditedBlock; // Holds the original block to edit
-    FOdysseyBlock*                      mPaintBlock; //Holds the stroke tiles
-    FOdysseyBlock*                      mOriginalBlock; //Holds the stroke tiles // ? Unclear
+    ::ULIS::FBlock*                      mEditedBlock; // Holds the original block to edit
+    ::ULIS::FBlock*                      mPaintBlock; //Holds the stroke tiles
+    ::ULIS::FBlock*                      mOriginalBlock; //Holds the stroke tiles // ? Unclear
 
     UOdysseyBrushAssetBase*             mBrushInstance;
 

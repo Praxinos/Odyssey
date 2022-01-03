@@ -18,7 +18,6 @@
 #include "FOdysseySceneViewport.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseySurface.h"
-#include "OdysseyBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyMathUtils.h"
 

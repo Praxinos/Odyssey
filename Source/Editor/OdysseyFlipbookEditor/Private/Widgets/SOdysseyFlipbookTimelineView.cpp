@@ -10,7 +10,6 @@
 #include "SOdysseyPlaybackControls.h"
 #include "SOdysseyTimeline.h"
 #include "SOdysseyFlipbookTimelineTrack.h"
-#include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyFlipbook"

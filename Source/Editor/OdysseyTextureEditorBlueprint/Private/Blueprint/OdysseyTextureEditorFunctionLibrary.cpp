@@ -123,20 +123,20 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBrushAsset
 
     //---
 
-    FOdysseyBlock* src = layer->GetBlock();
-    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-	TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->GetBlock()->Format());
+    ::ULIS::FBlock* src = layer->GetBlock();
+    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->Rect();
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  ::ULIS::FBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->Format());
     
     ::ULIS::FEvent eventClear;
-    ctx.Clear(*(dst->GetBlock()), ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+    ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
 	//be sure we copy only the needed part //TODO: Should be done directly in ULIS
-	::ULIS::FRectI src_rect = given_rect & src->GetBlock()->Rect();
+	::ULIS::FRectI src_rect = given_rect & src->Rect();
     ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
 
     ::ULIS::FEvent eventCopy;
-    ctx.Copy(*(src->GetBlock()), *(dst->GetBlock()), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
+    ctx.Copy(*src, *dst, src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
     ctx.Flush();
 
     return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
@@ -164,20 +164,20 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBrushAssetB
 
     //---
 
-    FOdysseyBlock* src = layer->GetBlock();
-    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-	TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ULIS::FBlock* src = layer->GetBlock();
+    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->Rect();
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  ::ULIS::FBlock( given_rect.w, given_rect.h, src->Format() ));
     
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->Format());
     ::ULIS::FEvent eventClear;
-    ctx.Clear(*(dst->GetBlock()), ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+    ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
     
 	//be sure we copy only the needed part
-	::ULIS::FRectI src_rect = given_rect & src->GetBlock()->Rect();
+	::ULIS::FRectI src_rect = given_rect & src->Rect();
     ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
 
     ::ULIS::FEvent eventCopy;
-    ctx.Copy(*(src->GetBlock()), *(dst->GetBlock()), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
+    ctx.Copy(*src, *dst, src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
     ctx.Flush();
 
     return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
@@ -205,20 +205,20 @@ UOdysseyTextureEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAsset
 
     //---
 
-    FOdysseyBlock* src = layer->GetBlock();
-    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->GetBlock()->Rect();
-	TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  FOdysseyBlock( given_rect.w, given_rect.h, src->Format() ));
+    ::ULIS::FBlock* src = layer->GetBlock();
+    ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : src->Rect();
+	TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(new  ::ULIS::FBlock( given_rect.w, given_rect.h, src->Format() ));
     
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->GetBlock()->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(src->Format());
     ::ULIS::FEvent eventClear;
-    ctx.Clear(*(dst->GetBlock()), ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+    ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
 	//be sure we copy only the needed part
-	::ULIS::FRectI src_rect = given_rect & src->GetBlock()->Rect();
+	::ULIS::FRectI src_rect = given_rect & src->Rect();
     ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
 
     ::ULIS::FEvent eventCopy;
-    ctx.Copy(*(src->GetBlock()), *(dst->GetBlock()), src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
+    ctx.Copy(*src, *dst, src_rect, dst_pos, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventClear, &eventCopy);
     ctx.Flush();
 
     return FOdysseyBlockProxy::MakeProxy(dst, 1, &eventCopy);
@@ -243,8 +243,8 @@ UOdysseyTextureEditorFunctionLibrary::GetResultBlock( UOdysseyBrushAssetBase* Br
     FOdysseyLayerStack* stack = state->LayerStack();
     //FOdysseyLayerStack* stack = const_cast<FOdysseyLayerStack*>( s->LayerStack() );
 
-    FOdysseyBlock* block = stack->GetResultBlock();
-    //const FOdysseyBlock* block = s->LayerStack()->GetResultBlock();
+    ::ULIS::FBlock* block = stack->GetResultBlock();
+    //const ::ULIS::FBlock* block = s->LayerStack()->GetResultBlock();
     FString id( "blabla" );
 
     return FOdysseyBlockProxy(block);

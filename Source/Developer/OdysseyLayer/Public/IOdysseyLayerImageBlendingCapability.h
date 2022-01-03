@@ -8,7 +8,6 @@
 
 #include <ULIS>
 
-class FOdysseyBlock;
 class IOdysseyLayer;
 
 /**

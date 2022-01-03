@@ -316,7 +316,7 @@ FOdysseyTextureEditor::OnLayerStackImageResultChanged( const ::ULIS::FRectI* iRe
 
     //TODO: Move to TextureWrapper
     Texture()->MarkPackageDirty();
-    LayerStack()->ComputeResultInBlock( DisplaySurface()->Block()->GetBlock(), iRects, iNumRects );
+    LayerStack()->ComputeResultInBlock( DisplaySurface()->Block(), iRects, iNumRects );
     DisplaySurface()->Invalidate( iRects, iNumRects );
 }
 

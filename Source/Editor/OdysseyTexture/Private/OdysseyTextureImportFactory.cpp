@@ -7,7 +7,6 @@
 #include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
 
-#include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPsdOperations.h"
 
@@ -44,10 +43,10 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
     
     if(psdReader.GetLayerStack())
     {
-        FOdysseyBlock* srcblock = new FOdysseyBlock( psdReader.GetLayerStack()->Width(), psdReader.GetLayerStack()->Height(), psdReader.GetLayerStack()->Format() );
+        ::ULIS::FBlock* srcblock = new ::ULIS::FBlock( psdReader.GetLayerStack()->Width(), psdReader.GetLayerStack()->Height(), psdReader.GetLayerStack()->Format() );
         ::ULIS::FRectI rect( 0, 0, psdReader.GetImageWidth() , psdReader.GetImageHeight() );
-        psdReader.GetLayerStack()->ComputeResultInBlock( srcblock->GetBlock(), &rect, 1 );
-        InitTextureWithBlockData(srcblock,object,UE4TextureSourceFormatForULISFormat(srcblock->Format()));
+        psdReader.GetLayerStack()->ComputeResultInBlock( srcblock, &rect, 1 );
+        InitTextureWithBlockData(srcblock,object,TextureSourceFormatForULISFormat(srcblock->Format()));
 
         UOdysseyTextureAssetUserData* userData = NewObject< UOdysseyTextureAssetUserData >( object, NAME_None, RF_Public );
         userData->SetLayerStack( psdReader.GetLayerStack() );
@@ -63,15 +62,15 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
         else
             srcblock = new ::ULIS::FBlock((::ULIS::tByte*)psdReader.GetImageDst16(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGB16);
 
-        FOdysseyBlock* myBlock = new FOdysseyBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGBA16);
+        ::ULIS::FBlock* myBlock = new ::ULIS::FBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGBA16);
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ULIS::uint32 MT_bit = ULIS_PERF_MT;
         ::ULIS::uint32 perfIntent = MT_bit | ULIS_PERF_SSE42;
 
-        ::ULIS::Conv(hULIS.ThreadPool(),ULIS_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS_NOCB,srcblock,myBlock->GetBlock());
+        ::ULIS::Conv(hULIS.ThreadPool(),ULIS_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS_NOCB,srcblock,myBlock);
 
-        //UE_LOG(LogTemp,Display,TEXT("RGBBlock: %d, RGBABlock: %d"),srcblock->BytesTotal(),myBlock->GetArray().Num());
+        //UE_LOG(LogTemp,Display,TEXT("RGBBlock: %d, RGBABlock: %d"),srcblock->BytesTotal(),myBlock->BytesTotal());
 
         InitTextureWithBlockData(myBlock,object,ETextureSourceFormat::TSF_RGBA16);
     }
@@ -83,15 +82,15 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
             srcblock = new ::ULIS::FBlock((::ULIS::tByte*)psdReader.GetImageDst(),psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_RGB8);
 
 
-        FOdysseyBlock* myBlock = new FOdysseyBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_BGRA8);
+        ::ULIS::FBlock* myBlock = new ::ULIS::FBlock(psdReader.GetImageWidth(),psdReader.GetImageHeight(),::ULIS::Format_BGRA8);
 
         IULISLoaderModule& hULIS = IULISLoaderModule::Get();
         ::ULIS::uint32 MT_bit = ULIS_PERF_MT;
         ::ULIS::uint32 perfIntent = MT_bit | ULIS_PERF_SSE42;
 
-        ::ULIS::Conv(hULIS.ThreadPool(),ULIS_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS_NOCB,srcblock,myBlock->GetBlock());
+        ::ULIS::Conv(hULIS.ThreadPool(),ULIS_BLOCKING,perfIntent,hULIS.HostDeviceInfo(),ULIS_NOCB,srcblock,myBlock);
 
-        //UE_LOG(LogTemp,Display,TEXT("RGBBlock: %d, RGBABlock: %d"),srcblock->BytesTotal(),myBlock->GetArray().Num());
+        //UE_LOG(LogTemp,Display,TEXT("RGBBlock: %d, RGBABlock: %d"),srcblock->BytesTotal(),myBlock->BytesTotal());
 
         InitTextureWithBlockData(myBlock,object,ETextureSourceFormat::TSF_BGRA8);
     }

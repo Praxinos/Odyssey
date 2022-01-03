@@ -4,7 +4,6 @@
 #include "Color/SOdysseyAdvancedColorWheel.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyAdvancedColorWheel"
@@ -430,7 +429,7 @@ SOdysseyAdvancedColorWheel::PaintTriangle() const
             int r  = ( Area1 * Color1.Red8()   + Area2 * Color2.Red8()   + Area3 * Color3.Red8()   ) / triangleArea;
             int g  = ( Area1 * Color1.Green8() + Area2 * Color2.Green8() + Area3 * Color3.Green8() ) / triangleArea;
             int b  = ( Area1 * Color1.Blue8()  + Area2 * Color2.Blue8()  + Area3 * Color3.Blue8()  ) / triangleArea;
-            uint8* pixel = surface->Block()->GetBlock()->PixelBits( current.X, current.Y );
+            uint8* pixel = surface->Block()->PixelBits( current.X, current.Y );
             pixel[2] = r;
             pixel[1] = g;
             pixel[0] = b;

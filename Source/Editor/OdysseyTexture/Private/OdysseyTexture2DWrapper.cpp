@@ -4,6 +4,7 @@
 #include "OdysseyTexture2DWrapper.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureAssetUserData.h"
+#include "OdysseyPixelFormat.h"
 
 FOdysseyTexture2DWrapper::~FOdysseyTexture2DWrapper()
 {
@@ -103,7 +104,7 @@ FOdysseyTexture2DWrapper::FinalizeSurface()
 {
     if (mSurface)
     {
-        mSurface->Block()->GetBlock()->OnInvalid(::ULIS::FOnInvalidBlock());
+        mSurface->Block()->OnInvalid(::ULIS::FOnInvalidBlock());
         delete mSurface;
         mSurface = nullptr;
 	}
@@ -142,13 +143,13 @@ FOdysseyTexture2DWrapper::FindOrCreateTextureUserData() const
         return userData;
 
     //Init user data
-    ::ULIS::eFormat format = ULISFormatForUE4TextureSourceFormat(mTexture->Source.GetFormat());
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(mTexture->Source.GetFormat());
     userData = NewObject< UOdysseyTextureAssetUserData >(mTexture, NAME_None, RF_Public);
     userData->GetLayerStack()->Init(mTexture->Source.GetSizeX(), mTexture->Source.GetSizeY(), format);
     mTexture->AddAssetUserData( userData );
 
     //Create image layer
-    FOdysseyBlock* textureData = NewOdysseyBlockFromUTextureData( mTexture, userData->GetLayerStack()->Format() );
+    ::ULIS::FBlock* textureData = NewBlockFromUTextureData( mTexture, userData->GetLayerStack()->Format() );
     FName layerName = userData->GetLayerStack()->GetLayerRoot()->GetNextLayerName();
     TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, textureData));
 

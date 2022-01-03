@@ -8,7 +8,6 @@
 #include <ULIS>
 #include "OdysseyBrushPivot.generated.h"
 
-class FOdysseyBlock;
 /////////////////////////////////////////////////////
 // Pivot Enum
 UENUM( BlueprintType, meta=(DisplayName="EOdysseyHandlePositionReference"))
@@ -70,6 +69,6 @@ struct FRectF    //PATCH: until ::ulis3::FRectF
     float h;
 };
 
-FRectF ComputeRectWithPivot(TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
+FRectF ComputeRectWithPivot(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
 //::ULIS::FRectI ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
 

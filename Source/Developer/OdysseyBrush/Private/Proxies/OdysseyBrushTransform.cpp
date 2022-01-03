@@ -3,7 +3,6 @@
 
 #include "Proxies/OdysseyBrushTransform.h"
 #include "OdysseyBrushAssetBase.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
@@ -104,15 +103,15 @@ UOdysseyTransformProxyLibrary::Transform( FOdysseyBlockProxy Sample, FOdysseyMat
     if( OutputWidth <= 0 || OutputHeight <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable( new FOdysseyBlock( OutputWidth, OutputHeight, src_shared->Format() ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable( new ::ULIS::FBlock( OutputWidth, OutputHeight, src_shared->Format() ));
 
     ::ULIS::FEvent eventClear;
     ::ULIS::FEvent eventTransform;
     {
         using namespace ::ULIS;
-        FBlock& src = *( src_shared->GetBlock() );
-        FBlock& dst = *( dst_shared->GetBlock() );
+        ::ULIS::FBlock& src = *src_shared;
+        ::ULIS::FBlock& dst = *dst_shared;
         FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
         ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
 
@@ -146,9 +145,9 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
 
     // TODO: There is a lot of back and forth that we could optimize away in this function, namely, the fixed transform
     // is processed twice and it is not needed.
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
     using namespace ::ULIS;
-    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FBlock& src = *src_shared;
     float w = static_cast< float >( src.Width() );
     float h = static_cast< float >( src.Height() );
 
@@ -170,8 +169,8 @@ UOdysseyTransformProxyLibrary::Rotate( FOdysseyBlockProxy Sample, float Angle, E
     if (box.Area() <= 0)
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
-    FBlock& dst = *( dst_shared->GetBlock() );
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( box.w, box.h, src.Format() ));
+    ::ULIS::FBlock& dst = *dst_shared;
 
     FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
     ::ULIS::FEvent eventClear;
@@ -204,17 +203,17 @@ UOdysseyTransformProxyLibrary::ScaleUniform( FOdysseyBlockProxy Sample, float Sc
     if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
     using namespace ::ULIS;
-    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FBlock& src = *src_shared;
     ::ULIS::FMat3F mat( ::ULIS::FMat3F::MakeScaleMatrix( Scale, Scale ) );
     ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), mat );
 
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
-    FBlock& dst = *( dst_shared->GetBlock() );
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( box.w, box.h, src.Format() ));
+    ::ULIS::FBlock& dst = *dst_shared;
 
     ::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * mat );
     FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
@@ -246,9 +245,9 @@ UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX,
     if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
     using namespace ::ULIS;
-    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FBlock& src = *src_shared;
 
     ::ULIS::FMat3F mat( ::ULIS::FMat3F::MakeScaleMatrix( ScaleX, ScaleY ) );
     ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), mat );
@@ -256,8 +255,8 @@ UOdysseyTransformProxyLibrary::ScaleXY( FOdysseyBlockProxy Sample, float ScaleX,
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
-    FBlock& dst = *( dst_shared->GetBlock() );
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( box.w, box.h, src.Format() ));
+    ::ULIS::FBlock& dst = *dst_shared;
 
     ::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * mat );
     FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
@@ -289,17 +288,17 @@ UOdysseyTransformProxyLibrary::Shear( FOdysseyBlockProxy Sample, float ShearX, f
     if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
     using namespace ::ULIS;
-    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FBlock& src = *src_shared;
 
     ::ULIS::FMat3F mat( ::ULIS::FMat3F::MakeSkewMatrix( ShearX, ShearY ) );
     ::ULIS::FRectI box = ::ULIS::FContext::TransformAffineMetrics( src.Rect(), mat );
     if( box.Area() <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
-    FBlock& dst = *( dst_shared->GetBlock() );
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( box.w, box.h, src.Format() ));
+    ::ULIS::FBlock& dst = *dst_shared;
 
     ::ULIS::FMat3F fixedTransform( ::ULIS::FMat3F::MakeTranslationMatrix( static_cast< float >( -box.x ), static_cast< float >( -box.y ) ) * mat );
     FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
@@ -331,9 +330,9 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
     if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
     using namespace ::ULIS;
-    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FBlock& src = *src_shared;
 
     int src_width  = src.Width();
     int src_height = src.Height();
@@ -357,8 +356,8 @@ UOdysseyTransformProxyLibrary::ResizeUniform( FOdysseyBlockProxy Sample, float S
     if (box.Area() <= 0)
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
-    FBlock& dst = *( dst_shared->GetBlock() );
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( box.w, box.h, src.Format() ));
+    ::ULIS::FBlock& dst = *dst_shared;
 
     FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
     ::ULIS::FEvent eventClear;
@@ -389,9 +388,9 @@ UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, f
     if( !Sample.IsValid() )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
     using namespace ::ULIS;
-    FBlock& src = *( src_shared->GetBlock() );
+    ::ULIS::FBlock& src = *src_shared;
 
     float src_width  = src.Width();
     float src_height = src.Height();
@@ -414,8 +413,8 @@ UOdysseyTransformProxyLibrary::Resize( FOdysseyBlockProxy Sample, float SizeX, f
     if (box.Area() <= 0)
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( box.w, box.h, src.Format() ));
-    FBlock& dst = *( dst_shared->GetBlock() );
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( box.w, box.h, src.Format() ));
+    ::ULIS::FBlock& dst = *dst_shared;
 
     FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
     ::ULIS::FEvent eventClear;
@@ -472,14 +471,14 @@ UOdysseyTransformProxyLibrary::Perspective( FOdysseyBlockProxy Sample, FOdysseyM
     if( OutputWidth <= 0 || OutputHeight <= 0 )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new FOdysseyBlock( OutputWidth, OutputHeight, src_shared->Format() ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src_shared = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst_shared = MakeShareable(new ::ULIS::FBlock( OutputWidth, OutputHeight, src_shared->Format() ));
     ::ULIS::FEvent eventClear;
     ::ULIS::FEvent eventTransform;
     {
         using namespace ::ULIS;
-        FBlock& src = *( src_shared->GetBlock() );
-        FBlock& dst = *( dst_shared->GetBlock() );
+        ::ULIS::FBlock& src = *src_shared;
+        ::ULIS::FBlock& dst = *dst_shared;
         FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( src.Format() );
         ctx.Clear( dst, FRectI::Auto, FSchedulePolicy::CacheEfficient, 1, &Sample.GetEvent(), &eventClear );
         ctx.TransformPerspective(

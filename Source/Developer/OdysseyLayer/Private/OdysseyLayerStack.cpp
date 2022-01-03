@@ -148,7 +148,7 @@ FOdysseyLayerStack::ComputeResultInBlock( ::ULIS::FBlock* ioBlock, const ::ULIS:
 }
 
 void
-FOdysseyLayerStack::ComputeResultInBlockWithBlockAsCurrentLayer(::ULIS::FBlock* ioBlock, FOdysseyBlock* iTempBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects )
+FOdysseyLayerStack::ComputeResultInBlockWithBlockAsCurrentLayer(::ULIS::FBlock* ioBlock, ::ULIS::FBlock* iTempBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
     if( !mCurrentLayer )
         return;
@@ -160,7 +160,7 @@ FOdysseyLayerStack::ComputeResultInBlockWithBlockAsCurrentLayer(::ULIS::FBlock* 
     }
 
     TSharedPtr< FOdysseyImageLayer > imageLayer = StaticCastSharedPtr< FOdysseyImageLayer >( mCurrentLayer );
-    FOdysseyBlock* block = imageLayer->GetBlock();
+    ::ULIS::FBlock* block = imageLayer->GetBlock();
     imageLayer->SetBlock( iTempBlock, false, false );
     ComputeResultInBlock( ioBlock, iRects, iNumRects );
     imageLayer->SetBlock( block, false, false );
@@ -340,7 +340,7 @@ void FOdysseyLayerStack::MergeDownLayer(TSharedPtr<IOdysseyLayer> iLayer)
     ::ULIS::FRectI canvasRect = ::ULIS::FRectI( 0, 0, Width(), Height());
     ::ULIS::FVec2I pos( 0, 0 );
 
-    auto lvalue = dstLayerImage->GetBlock()->GetBlock();
+    ::ULIS::FBlock* lvalue = dstLayerImage->GetBlock();
 
     ::ULIS::FEvent eventBlend = ::ULIS::FEvent::NoOP();
     srcLayerImage->Blend( &lvalue, &canvasRect, &pos, 1, &eventBlend);
@@ -363,7 +363,7 @@ void FOdysseyLayerStack::FlattenLayer(TSharedPtr<IOdysseyLayer> iLayer)
 
     ::ULIS::FRectI canvasRect = ::ULIS::FRectI( 0, 0, Width(), Height());
     ::ULIS::FVec2I pos( 0, 0 );
-    auto lvalue = imageLayer->GetBlock()->GetBlock();
+    ::ULIS::FBlock* lvalue = imageLayer->GetBlock();
 
     ::ULIS::FEvent eventBlend = ::ULIS::FEvent::NoOP();
     folderLayer->Blend(&lvalue, &canvasRect, &pos, 1, &eventBlend);
@@ -395,7 +395,7 @@ FOdysseyLayerStack::ClearCurrentLayer()
         TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mCurrentLayer);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
-        ctx.Clear( *(imageLayer->GetBlock()->GetBlock()) );
+        ctx.Clear( *imageLayer->GetBlock() );
         ctx.Finish();
 
         imageLayer->ImageResultChangedDelegate().Broadcast( nullptr, 0 );
@@ -410,7 +410,7 @@ FOdysseyLayerStack::FillCurrentLayerWithColor(const ::ULIS::ISample& iColor)
         TSharedPtr<FOdysseyImageLayer> imageLayer = StaticCastSharedPtr<FOdysseyImageLayer>(mCurrentLayer);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
-        ctx.Fill( *(imageLayer->GetBlock()->GetBlock()), iColor );
+        ctx.Fill( *imageLayer->GetBlock(), iColor );
         ctx.Finish();
 
         imageLayer->ImageResultChangedDelegate().Broadcast( nullptr, 0 );
@@ -525,7 +525,7 @@ FOdysseyDrawingUndo::FOdysseyDrawingUndo(FOdysseyLayerStack* iLayerStack)
     mLayerStackPtr = iLayerStack;
 
     // mData = TArray<uint8>();
-    // FOdysseyBlock* tmp = new FOdysseyBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
+    // ::ULIS::FBlock* tmp = new ::ULIS::FBlock(iLayerStack->Width(), iLayerStack->Height(), iLayerStack->Format());
     mCurrentIndex = 0;
 
     //We reserve the maximum memory needed for a undo
@@ -679,13 +679,14 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
 
     if(iXTile >= 0 && iYTile >= 0 && iSizeX > 0 && iSizeY > 0)
     {
-        FOdysseyBlock* tileBlock = new FOdysseyBlock(iSizeX, iSizeY, imageLayer->GetBlock()->Format());
+        ::ULIS::FBlock* tileBlock = new ::ULIS::FBlock(iSizeX, iSizeY, imageLayer->GetBlock()->Format());
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( imageLayer->GetBlock()->Format() );
-        ctx.Copy( *(imageLayer->GetBlock()->GetBlock()), *(tileBlock->GetBlock()), ::ULIS::FRectI(iXTile, iYTile, iSizeX, iSizeY) );
+        ctx.Copy( *(imageLayer->GetBlock()), *tileBlock, ::ULIS::FRectI(iXTile, iYTile, iSizeX, iSizeY) );
         ctx.Finish();
 
-        mToBinary << tileBlock->GetArray();
+        //mToBinary << tileBlock->GetArray();
+        mToBinary.SerializeCompressed(tileBlock->Bits(), tileBlock->BytesTotal(), NAME_Zlib);
 
         delete tileBlock;
     }
@@ -705,16 +706,16 @@ FOdysseyDrawingUndo::SaveData(const TArray<::ULIS::FRectI>& iRects)
     UPTRINT address = (UPTRINT)imageLayer.Get();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
 
-    TArray<FOdysseyBlock*> tileBlocks;
+    TArray<::ULIS::FBlock*> tileBlocks;
     for (int i = 0; i < iRects.Num(); i++)
     {
         ::ULIS::FRectI rect = iRects[i];
-        FOdysseyBlock* tileBlock = new FOdysseyBlock(rect.w, rect.h, imageLayer->GetBlock()->Format());
+        ::ULIS::FBlock* tileBlock = new ::ULIS::FBlock(rect.w, rect.h, imageLayer->GetBlock()->Format());
         tileBlocks.Add(tileBlock);
 
         if (rect.x >= 0 && rect.y >= 0 && rect.w > 0 && rect.h > 0)
         {
-            ctx.Copy(*(imageLayer->GetBlock()->GetBlock()), *(tileBlock->GetBlock()), rect, ::ULIS::FVec2I(0,0), ::ULIS::FSchedulePolicy::MonoScanlines );
+            ctx.Copy(*(imageLayer->GetBlock()), *tileBlock, rect, ::ULIS::FVec2I(0,0), ::ULIS::FSchedulePolicy::MonoScanlines );
             ctx.Flush();
         }
     }
@@ -732,7 +733,8 @@ FOdysseyDrawingUndo::SaveData(const TArray<::ULIS::FRectI>& iRects)
 
         if (rect.x >= 0 && rect.y >= 0 && rect.w > 0 && rect.h > 0)
         {
-            mToBinary << tileBlocks[i]->GetArray();
+            //mToBinary << tileBlocks[i]->GetArray();
+            mToBinary.SerializeCompressed(tileBlocks[i]->Bits(), tileBlocks[i]->BytesTotal(), NAME_Zlib);
             delete tileBlocks[i];
         }
 
@@ -799,16 +801,17 @@ FOdysseyDrawingUndo::LoadData()
             if (imageLayer == nullptr)
                 return false;
 
-            FOdysseyBlock* tileBlock = new FOdysseyBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
-            Ar << tileBlock->GetArray();
+            ::ULIS::FBlock* tileBlock = new ::ULIS::FBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
+            //Ar << tileBlock->GetArray();
+            Ar.SerializeCompressed(tileBlock->Bits(), tileBlock->BytesTotal(), NAME_Zlib);
 
             ::ULIS::FRectI tileRect(tileX, tileY, sizeX, sizeY);
 
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
-            ctx.Copy(*(tileBlock->GetBlock()), *(imageLayer->GetBlock()->GetBlock()), ::ULIS::FRectI(0, 0, sizeX, sizeY), ::ULIS::FVec2I(tileX, tileY) );
+            ctx.Copy(*tileBlock, *imageLayer->GetBlock(), ::ULIS::FRectI(0, 0, sizeX, sizeY), ::ULIS::FVec2I(tileX, tileY) );
             ctx.Finish();
 
-            imageLayer->GetBlock()->GetBlock()->Dirty(tileRect);
+            imageLayer->GetBlock()->Dirty(tileRect);
             delete tileBlock;
         }
     }
@@ -862,16 +865,17 @@ FOdysseyDrawingUndo::Redo()
             if(imageLayer == nullptr)
                 return false;
 
-            FOdysseyBlock* tileBlock = new FOdysseyBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
-            Ar << tileBlock->GetArray();
+            ::ULIS::FBlock* tileBlock = new ::ULIS::FBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
+            //Ar << tileBlock->GetArray();
+            Ar.SerializeCompressed(tileBlock->Bits(), tileBlock->BytesTotal(), NAME_Zlib);
 
             ::ULIS::FRectI tileRect(tileX, tileY, sizeX, sizeY);
 
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(imageLayer->GetBlock()->Format());
-            ctx.Copy(*(tileBlock->GetBlock()), *(imageLayer->GetBlock()->GetBlock()), ::ULIS::FRectI(0, 0, sizeX, sizeY), ::ULIS::FVec2I(tileX, tileY));
+            ctx.Copy(*tileBlock, *imageLayer->GetBlock(), ::ULIS::FRectI(0, 0, sizeX, sizeY), ::ULIS::FVec2I(tileX, tileY));
             ctx.Finish();
 
-            imageLayer->GetBlock()->GetBlock()->Dirty(tileRect);
+            imageLayer->GetBlock()->Dirty(tileRect);
             delete tileBlock;
         }
     }

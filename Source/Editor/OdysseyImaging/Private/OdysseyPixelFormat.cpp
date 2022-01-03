@@ -1,13 +1,12 @@
 // IDDN FR.001.250001.004.S.X.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyBlock.h"
-#include <ULIS>
+#include "OdysseyPixelFormat.h"
 
 /////////////////////////////////////////////////////
 // Utlity
 
-int UE4TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
+int TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
 {
     switch (iFormat) {
         case TSF_G8:        return 1;
@@ -24,7 +23,7 @@ int UE4TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
     return 0;
 }
 
-bool UE4TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iFormat )
+bool TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iFormat )
 {
     switch( iFormat )
     {
@@ -39,7 +38,7 @@ bool UE4TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iFo
 }
 
 void
-ConvertUE4TextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat)
+ConvertTextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat)
 {
     switch( iFormat )
     {
@@ -104,7 +103,7 @@ ConvertUE4TextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int i
 }
 
 void
-ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat)
+ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ETextureSourceFormat iFormat)
 {
     switch( iFormat )
     {
@@ -164,7 +163,7 @@ ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int i
     }
 }
 
-::ULIS::eFormat ULISFormatForUE4TextureSourceFormat( ETextureSourceFormat iFormat )
+::ULIS::eFormat ULISFormatForTextureSourceFormat( ETextureSourceFormat iFormat )
 {
     uint32 ret = 0;
     switch( iFormat ) {
@@ -173,7 +172,7 @@ ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int i
         case TSF_BGRA8:     ret = ::ULIS::Format_BGRA8;     break;
         case TSF_BGRE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_RGBA16:    ret = ::ULIS::Format_RGBA16;    break;
-        case TSF_RGBA16F:   ret = ::ULIS::Format_RGBAF;     break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see UE4 implementation)
+        case TSF_RGBA16F:   ret = ::ULIS::Format_RGBAF;     break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see Unreal implementation)
         case TSF_RGBA8:     ret = ::ULIS::Format_RGBA8;     break;
         case TSF_RGBE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_MAX:       ret = 0;                        break;
@@ -183,7 +182,7 @@ ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int i
     return static_cast< ::ULIS::eFormat >( ret );
 }
 
-::ULIS::eFormat ULISFormatForUE4PixelFormat( EPixelFormat iFormat )
+::ULIS::eFormat ULISFormatForPixelFormat( EPixelFormat iFormat )
 {
     uint32 ret = 0;
     switch( iFormat ) {
@@ -208,7 +207,7 @@ ConvertULISFormatToUE4TextureSourceFormat( const uint8* iSrc, uint8* oDst, int i
     return  static_cast< ::ULIS::eFormat >( ret );
 }
 
-ETextureSourceFormat UE4TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
+ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
 {
     ETextureSourceFormat ret = TSF_Invalid;
     switch(iFormat) {
@@ -224,7 +223,7 @@ ETextureSourceFormat UE4TextureSourceFormatForULISFormat( ::ULIS::eFormat iForma
     return ret;
 }
 
-EPixelFormat UE4PixelFormatForULISFormat( ::ULIS::eFormat iFormat )
+EPixelFormat PixelFormatForULISFormat( ::ULIS::eFormat iFormat )
 {
     EPixelFormat ret = PF_Unknown;
     switch( iFormat ) {
@@ -241,141 +240,3 @@ EPixelFormat UE4PixelFormatForULISFormat( ::ULIS::eFormat iFormat )
     checkf( ret, TEXT( "Error, bad format !" ) ); // Crash
     return ret;
 }
-
-/////////////////////////////////////////////////////
-// FOdysseyBlock
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-FOdysseyBlock::~FOdysseyBlock()
-{
-    mArray.Empty();
-    delete mBlock;
-    mBlock = nullptr;
-}
-
-FOdysseyBlock::FOdysseyBlock(
-      int iWidth
-    , int iHeight
-    , ::ULIS::eFormat iFormat
-    , const ::ULIS::FOnInvalidBlock& iInvFunc
-    , bool iInitializeData
-)
-    : mBlock( nullptr )
-    , mArray()
-{
-    // Retrieve spec info from ULIS format hash.
-    ::ULIS::FFormatMetrics fmt( iFormat );
-
-    // Allocate and fill array ( primary data rep )
-    if( iInitializeData )
-        mArray.SetNumZeroed( iWidth * iHeight * fmt.BPP );
-    else
-        mArray.SetNumUninitialized( iWidth * iHeight * fmt.BPP );
-
-    // Allocate block from external array data
-    mBlock = new ::ULIS::FBlock(
-          mArray.GetData()
-        , iWidth
-        , iHeight
-        , iFormat
-        , nullptr
-        , ::ULIS::FOnInvalidBlock( iInvFunc )
-    );
-}
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------- Public API
-void
-FOdysseyBlock::Reallocate(
-      int iWidth
-    , int iHeight
-    , ::ULIS::eFormat iFormat
-    , const ::ULIS::FOnInvalidBlock& iInvFunc
-    , bool iInitializeData
-)
-{
-    // Retrieve spec info from ULIS format hash.
-    ::ULIS::FFormatMetrics fmt(iFormat);
-
-    // Allocate and fill array ( primary data rep )
-    if (iInitializeData)
-        mArray.SetNumZeroed(iWidth * iHeight * fmt.BPP);
-    else
-        mArray.SetNumUninitialized(iWidth * iHeight * fmt.BPP);
-
-    // Allocate block from external array data
-    delete mBlock;
-    mBlock = new ::ULIS::FBlock(
-          mArray.GetData()
-        , iWidth
-        , iHeight
-        , iFormat
-        , nullptr
-        , ::ULIS::FOnInvalidBlock( iInvFunc )
-    );
-}
-
-TArray64< uint8 >&
-FOdysseyBlock::GetArray()
-{
-    return mArray;
-}
-
-const TArray64< uint8 >&
-FOdysseyBlock::GetArray() const
-{
-    return mArray;
-}
-
-::ULIS::FBlock*
-FOdysseyBlock::GetBlock()
-{
-    return mBlock;
-}
-
-const ::ULIS::FBlock*
-FOdysseyBlock::GetBlock() const
-{
-    return mBlock;
-}
-
-int
-FOdysseyBlock::Width() const
-{
-    return mBlock->Width();
-}
-
-int
-FOdysseyBlock::Height() const
-{
-    return mBlock->Height();
-}
-
-FVector2D
-FOdysseyBlock::Size() const
-{
-    return FVector2D( Width(), Height() );
-}
-
-::ULIS::eFormat
-FOdysseyBlock::Format() const
-{
-    return mBlock->Format();
-}
-
-void
-FOdysseyBlock::ResyncData()
-{
-    checkf( mArray.Num() == mBlock->BytesTotal(), TEXT( "Error, resync sizes don't match !" ) );
-    // TODO: make getters in ULIS to retrieve the callbacks
-    mBlock->LoadFromData(
-          mArray.GetData()
-        , mBlock->Width()
-        , mBlock->Height()
-        , mBlock->Format()
-        , mBlock->ColorSpace()
-        , mBlock->OnInvalid()
-        , mBlock->OnCleanup()
-    );
-}
-

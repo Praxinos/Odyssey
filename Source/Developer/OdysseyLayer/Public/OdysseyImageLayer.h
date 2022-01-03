@@ -10,8 +10,6 @@
 #include "IOdysseyLayerImageBlendingCapability.h"
 #include <ULIS>
 
-class FOdysseyBlock;
-
 /**
  * Implements a layer which contains an image
  */
@@ -29,7 +27,7 @@ public:
     virtual ~FOdysseyImageLayer();
     FOdysseyImageLayer( const FOdysseyImageLayer& iLayer);
     FOdysseyImageLayer( const FName& iName,FVector2D iSize, ::ULIS::eFormat iFormat);
-    FOdysseyImageLayer( const FName& iName,FOdysseyBlock* iBlock);
+    FOdysseyImageLayer( const FName& iName,::ULIS::FBlock* iBlock);
 
     virtual FOdysseyImageLayer* Clone() const override; 
     virtual void Serialize(FArchive &Ar) override;
@@ -40,8 +38,8 @@ public:
 
 public:
     // Public API
-    FOdysseyBlock* GetBlock() const;
-    void SetBlock(FOdysseyBlock* iBlock, bool iSendEvents = true, bool iDestroyPreviousBlock = true);
+    ::ULIS::FBlock* GetBlock() const;
+    void SetBlock(::ULIS::FBlock* iBlock, bool iSendEvents = true, bool iDestroyPreviousBlock = true);
 
     bool  IsAlphaLocked() const;
     void  SetIsAlphaLocked(bool iIsAlphaLocked);
@@ -53,7 +51,7 @@ public:
 	
 private:
     // Private Data Members
-    FOdysseyBlock*          mBlock;
+    ::ULIS::FBlock*          mBlock;
     bool                    mIsAlphaLocked;
 
     FOdysseyLayerIsAlphaLockedChanged mIsAlphaLockedChangedDelegate;

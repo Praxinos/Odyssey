@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include <ULIS>
 
-class FOdysseyBlock;
 class IOdysseyLayer;
 
 /**

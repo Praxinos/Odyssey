@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "OdysseyTreeShared.h"
 
-class FOdysseyBlock;
 
 /**
  * Odyssey Layer

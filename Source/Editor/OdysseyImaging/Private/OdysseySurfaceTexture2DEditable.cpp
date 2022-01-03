@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "TextureDerivedData.h"
-#include "OdysseyBlock.h"
 #include "ULISLoaderModule.h"
 #include "ImageCore.h"
 #include "TextureCompressorModule.h"
@@ -27,41 +26,40 @@
 /////////////////////////////////////////////////////
 // Utlity
 void
-CopyUTextureSourceDataIntoBlock(FOdysseyBlock* iBlock,UTexture* iTexture)
+CopyUTextureSourceDataIntoBlock(::ULIS::FBlock* iBlock,UTexture* iTexture)
 {
     checkf(iBlock->Width() == iTexture->Source.GetSizeX() &&
            iBlock->Height() == iTexture->Source.GetSizeY()
            ,TEXT("Sizes do not match"));
 
-    if (UE4TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
+    TArray64<uint8> src;
+    src.SetNumUninitialized(iTexture->Source.CalcMipSize(0));
+    iTexture->Source.GetMipData(src,0);
+    if (TextureSourceFormatNeedsConversionToULISFormat(iTexture->Source.GetFormat()))
     {
-        TArray64<uint8> src;
-        src.SetNumUninitialized(iTexture->Source.CalcMipSize(0));
-        iTexture->Source.GetMipData(src,0);
-        ConvertUE4TextureSourceFormatToULISFormat(src.GetData(), iBlock->GetArray().GetData(), iBlock->Width(), iBlock->Height(), iTexture->Source.GetFormat());
+        ConvertTextureSourceFormatToULISFormat(src.GetData(), iBlock->Bits(), iBlock->Width(), iBlock->Height(), iTexture->Source.GetFormat());
     }
     else
     {
-        iTexture->Source.GetMipData(iBlock->GetArray(),0);
+        FMemory::Memcpy(iBlock->Bits(), src.GetData(), src.Num());
     }
-    iBlock->ResyncData();
 }
 
 void
-CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iOdysseyBlock, UTexture* iTexture)
+CopyUTexturePixelDataIntoBlock(::ULIS::FBlock* iBlock, UTexture* iTexture)
 {
     FTexturePlatformData* PlatformData = *iTexture->GetRunningPlatformData();
     checkf(
-           iOdysseyBlock->Width() == PlatformData->SizeX
-        && iOdysseyBlock->Height() == PlatformData->SizeY
+           iBlock->Width() == PlatformData->SizeX
+        && iBlock->Height() == PlatformData->SizeY
         , TEXT( "Sizes do not match" )
     );
 
     ENQUEUE_RENDER_COMMAND( GetTextureData )(
-        [ iTexture, iOdysseyBlock ]( FRHICommandListImmediate& RHICmdList )
+        [ iTexture, iBlock ]( FRHICommandListImmediate& RHICmdList )
         {
             FTexture2DRHIRef texture2DRHI = iTexture->Resource->GetTexture2DRHI();
-            uint32 bps = iOdysseyBlock->GetBlock()->BytesPerScanLine();
+            uint32 bps = iBlock->BytesPerScanLine();
 
             uint32 stride;
             // stride value is changed by RHILockTexture2D
@@ -74,12 +72,12 @@ CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iOdysseyBlock, UTexture* iTexture)
                 if ( stride == bps )
                 {
                     // Copy all raw
-                    FMemory::Memcpy( iOdysseyBlock->GetArray().GetData(), src, iOdysseyBlock->GetArray().Num() );
+                    FMemory::Memcpy( iBlock->Bits(), src, iBlock->BytesTotal() );
                 }
                 else
                 {
                     // Copy line by line
-                    uint8* dest( iOdysseyBlock->GetArray().GetData() );
+                    uint8* dest = iBlock->Bits();
                     for ( uint32 i = 0; i < texture2DRHI->GetSizeY(); ++i )
                     {
                         FMemory::Memcpy( dest, src, bps );
@@ -95,11 +93,10 @@ CopyUTexturePixelDataIntoBlock(FOdysseyBlock* iOdysseyBlock, UTexture* iTexture)
     FRenderCommandFence fence;
     fence.BeginFence();
     fence.Wait();
-    iOdysseyBlock->ResyncData();
 }
 
 void
-CopyURenderTargetPixelDataIntoBlock(FOdysseyBlock* iBlock, UTextureRenderTarget2D* iRenderTarget)
+CopyURenderTargetPixelDataIntoBlock(::ULIS::FBlock* iBlock, UTextureRenderTarget2D* iRenderTarget)
 {
     checkf(iBlock->Width() == iRenderTarget->GetSurfaceWidth()  &&
            iBlock->Height() == iRenderTarget->GetSurfaceHeight()
@@ -110,26 +107,26 @@ CopyURenderTargetPixelDataIntoBlock(FOdysseyBlock* iBlock, UTextureRenderTarget2
 }
 
 void
-InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
+InitTextureWithBlockData(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
 {
-    ::ULIS::eFormat targetFormat = ULISFormatForUE4TextureSourceFormat(iFormat);
-    const ::ULIS::FBlock* block = iBlock->GetBlock();
+    ::ULIS::eFormat targetFormat = ULISFormatForTextureSourceFormat(iFormat);
+    const ::ULIS::FBlock* block = iBlock;
     if (iBlock->Format() != targetFormat)
     {
         ::ULIS::FBlock* convblock = new ::ULIS::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-        ctx.ConvertFormat( *(iBlock->GetBlock()), *convblock );
+        ctx.ConvertFormat( *iBlock, *convblock );
         ctx.Finish();
 
         block = convblock;
     }
 
-    if (UE4TextureSourceFormatNeedsConversionToULISFormat(iFormat))
+    if (TextureSourceFormatNeedsConversionToULISFormat(iFormat))
     {
         TArray64<uint8> dst;
-        dst.SetNumUninitialized(iBlock->Width() * iBlock->Height() * UE4TextureSourceFormatBytesPerPixel(iFormat));
-        ConvertULISFormatToUE4TextureSourceFormat(block->Bits(), dst.GetData(), iBlock->Width(), iBlock->Height(), iFormat);
+        dst.SetNumUninitialized(iBlock->Width() * iBlock->Height() * TextureSourceFormatBytesPerPixel(iFormat));
+        ConvertULISFormatToTextureSourceFormat(block->Bits(), dst.GetData(), iBlock->Width(), iBlock->Height(), iFormat);
         iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iFormat, dst.GetData());
     }
     else
@@ -137,14 +134,14 @@ InitTextureWithBlockData(const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETex
         iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iFormat, block->Bits());
     }
 
-    if (block != iBlock->GetBlock())
+    if (block != iBlock)
     {
         delete block;
     }
 }
 
 void
-CopyBlockDataIntoUTexture( const FOdysseyBlock* iBlock, UTexture2D* iTexture )
+CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock, UTexture2D* iTexture )
 {
     checkf(  iBlock->Width() == iTexture->Source.GetSizeX() &&
              iBlock->Height() == iTexture->Source.GetSizeY()
@@ -153,37 +150,37 @@ CopyBlockDataIntoUTexture( const FOdysseyBlock* iBlock, UTexture2D* iTexture )
     InitTextureWithBlockData( iBlock, iTexture, iTexture->Source.GetFormat() );
 }
 
-FOdysseyBlock*
-NewOdysseyBlockFromUTextureData(UTexture2D* iTexture, ::ULIS::eFormat iFormat)
+::ULIS::FBlock*
+NewBlockFromUTextureData(UTexture2D* iTexture, ::ULIS::eFormat iFormat)
 {
-    FOdysseyBlock* block = new FOdysseyBlock( iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(), iFormat );
-    FillOdysseyBlockFromUTextureData( block,iTexture, iFormat );
+    ::ULIS::FBlock* block = new ::ULIS::FBlock( iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(), iFormat );
+    FillOdysseyBlockFromUTextureData( block, iTexture, iFormat );
     return block;
 }
 
 void
-FillOdysseyBlockFromUTextureData( FOdysseyBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat )
+FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat )
 {
     if (!ioBlock)
         return;
 
     if (ioBlock->Width() != iTexture->Source.GetSizeX() || ioBlock->Height() != iTexture->Source.GetSizeY() || ioBlock->Format() != iFormat)
     {
-        ioBlock->Reallocate(iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY(), iFormat);
+        ioBlock->ReallocInternalData(iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY(), iFormat);
     }
 
-    ::ULIS::eFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+    ::ULIS::eFormat sourceFormat = ULISFormatForTextureSourceFormat(iTexture->Source.GetFormat());
     if (iFormat == sourceFormat)
     {
-        CopyUTextureSourceDataIntoBlock(ioBlock,iTexture);
+        CopyUTextureSourceDataIntoBlock(ioBlock, iTexture);
     }
     else
     {
-        FOdysseyBlock* block = new FOdysseyBlock(iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(),sourceFormat);
+        ::ULIS::FBlock* block = new ::ULIS::FBlock(iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(),sourceFormat);
         CopyUTextureSourceDataIntoBlock(block,iTexture);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(sourceFormat);
-        ctx.ConvertFormat(*(block->GetBlock()), *(ioBlock->GetBlock()));
+        ctx.ConvertFormat(*block, *ioBlock);
         ctx.Finish();
 
         delete block;
@@ -381,7 +378,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
     {
         TArray< TArray< ::ULIS::FBlock > > tileBlocks;
         tileBlocks.Reserve( ioSrcRects.Num() );
-        const bool bPred = UE4TextureSourceFormatNeedsConversionToULISFormat( iTexture->Source.GetFormat() );
+        const bool bPred = TextureSourceFormatNeedsConversionToULISFormat( iTexture->Source.GetFormat() );
         const int w = iTexture->Source.IsValid() ? iTexture->Source.GetSizeX() : iTexture->GetSizeX();
         const int h = iTexture->Source.IsValid() ? iTexture->Source.GetSizeY() : iTexture->GetSizeY();
         const ERawImageFormat::Type fmt = GetRawImageFormatFromTextureSourceFormat( iTexture->Source.GetFormat() );
@@ -414,7 +411,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
                     // TODO: This part can be optimized and multithreaded
                     for( int k = 0; k < len; k++ ) {
                         checkf( false, TEXT( "Not implemented properly yet" ) );
-                        ConvertULISFormatToUE4TextureSourceFormat(
+                        ConvertULISFormatToTextureSourceFormat(
                               iData->PixelBits( ioSrcRects[i][j].x, ioSrcRects[i][j].y + k )
                             , tileImages[i][j][0].RawData.GetData() + rowSize * k
                             , ioSrcRects[i][j].w
@@ -577,7 +574,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     : mIsBorrowedTexture(false)
     , mIsBorrowedBlock(false)
 {
-    mTexture = UTexture2D::CreateTransient(iWidth, iHeight, UE4PixelFormatForULISFormat(iFormat));
+    mTexture = UTexture2D::CreateTransient(iWidth, iHeight, PixelFormatForULISFormat(iFormat));
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
@@ -589,19 +586,22 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     mTexture->AddToRoot();
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
-    mBlock = new FOdysseyBlock(iWidth,iHeight, iFormat, ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast<void*>(this) ), true);
+    mBlock = new ::ULIS::FBlock(iWidth,iHeight, iFormat, nullptr, ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast<void*>(this) ));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
+    ctx.Clear(*mBlock);
+    ctx.Finish();
     Invalidate();
     // load texture data from block
     //CopyBlockDataIntoUTexture(mBlock,mTexture);
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, FOdysseyBlock* iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, ::ULIS::FBlock* iBlock)
     : mIsBorrowedTexture(true)
     , mIsBorrowedBlock(true)
 {
     checkf(iTexture,TEXT("iTexture == NULL"));
     checkf(iBlock,TEXT("iBlock == NULL"));
-    ::ULIS::eFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
+    ::ULIS::eFormat sourceFormat = ULISFormatForTextureSourceFormat(iTexture->Source.GetFormat());
     checkf( sourceFormat == iBlock->Format(),TEXT("iBlock format does not correspond to the expected format"));
 
     mTexture = iTexture;
@@ -609,7 +609,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
 
     mBlock = iBlock;
 
-    mBlock->GetBlock()->OnInvalid(::ULIS::FOnInvalidBlock(&InvalidateSurfaceCallback, static_cast<void*>(this)));
+    mBlock->OnInvalid(::ULIS::FOnInvalidBlock(&InvalidateSurfaceCallback, static_cast<void*>(this)));
 }
 
 FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture)
@@ -621,25 +621,26 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
     mTexture->AddToRoot();
 
     // Warning: the block is allocated, then the texture data is copied into it.
-    ::ULIS::eFormat sourceFormat = ULISFormatForUE4TextureSourceFormat(iTexture->Source.GetFormat());
-    mBlock = new FOdysseyBlock(
+    ::ULIS::eFormat sourceFormat = ULISFormatForTextureSourceFormat(iTexture->Source.GetFormat());
+    mBlock = new ::ULIS::FBlock(
           mTexture->Source.GetSizeX()
         , mTexture->Source.GetSizeY()
         , sourceFormat
+        , nullptr
         , ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) )
     );
 
     CopyUTextureSourceDataIntoBlock( mBlock, mTexture );
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(FOdysseyBlock* iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(::ULIS::FBlock* iBlock)
     : mIsBorrowedTexture(false)
     ,mIsBorrowedBlock(true)
 {
     checkf(iBlock,TEXT("Cannot Initialize with Null borrowed block"));
     mBlock = iBlock;
 
-    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), UE4PixelFormatForULISFormat(mBlock->Format()));
+    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), PixelFormatForULISFormat(mBlock->Format()));
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
@@ -649,7 +650,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(FOdysseyBlock
     mTexture->UpdateResource();
     mTexture->AddToRoot();
 
-    mBlock->GetBlock()->OnInvalid( ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) ) );
+    mBlock->OnInvalid( ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) ) );
 
     // load texture data from block
     //CopyBlockDataIntoUTexture(mBlock,mTexture);
@@ -659,13 +660,13 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(FOdysseyBlock
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Public API
 
-FOdysseyBlock*
+::ULIS::FBlock*
 FOdysseySurfaceTexture2DEditable::Block()
 {
     return mBlock;
 }
 
-const FOdysseyBlock*
+const ::ULIS::FBlock*
 FOdysseySurfaceTexture2DEditable::Block() const
 {
     return mBlock;
@@ -706,26 +707,26 @@ FOdysseySurfaceTexture2DEditable::Height()
 void
 FOdysseySurfaceTexture2DEditable::Invalidate()
 {
-    mBlock->GetBlock()->Dirty();
+    mBlock->Dirty();
 }
 
 /*
 void
 FOdysseySurfaceTexture2DEditable::Invalidate(int iX1,int iY1,int iX2,int iY2)
 {
-    mBlock->GetBlock()->Dirty(::ULIS::FRectI::FromMinMax(iX1,iY1,iX2,iY2));
+    mBlock->Dirty(::ULIS::FRectI::FromMinMax(iX1,iY1,iX2,iY2));
 }
 
 void
 FOdysseySurfaceTexture2DEditable::Invalidate(const ::ULIS::FRectI& iRect)
 {
-    mBlock->GetBlock()->Dirty(iRect);
+    mBlock->Dirty(iRect);
 }
 */
 
 void
 FOdysseySurfaceTexture2DEditable::Invalidate( const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
-    mBlock->GetBlock()->Dirty( iRects, iNumRects );
+    mBlock->Dirty( iRects, iNumRects );
 }
 

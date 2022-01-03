@@ -281,10 +281,10 @@ FOdysseyPaintEngine::Fill()
 
     //Clear Edited Block
     
-    ::ULIS::FRectI rect = mPaintBlock->GetBlock()->Rect();
+    ::ULIS::FRectI rect = mPaintBlock->Rect();
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintBlock->GetBlock()->Format());
-    ctx.Fill(*(mPaintBlock->GetBlock()), mColor);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintBlock->Format());
+    ctx.Fill(*mPaintBlock, mColor);
     ctx.Finish();
 
     UpdateInvalidMaps(rect);
@@ -329,7 +329,7 @@ FOdysseyPaintEngine::TriggerStateChanged()
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
+FOdysseyPaintEngine::Block(::ULIS::FBlock* iBlock)
 {
     if (mEditedBlock == iBlock)
         return;
@@ -352,8 +352,8 @@ FOdysseyPaintEngine::Block(FOdysseyBlock* iBlock)
         delete mPaintBlock;
         delete mOriginalBlock;
 
-        mPaintBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
-        mOriginalBlock = new FOdysseyBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
+        mPaintBlock = new ::ULIS::FBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
+        mOriginalBlock = new ::ULIS::FBlock(mEditedBlock->Width(), mEditedBlock->Height(), mEditedBlock->Format());
 
         ReallocInvalidMaps();
     }
@@ -447,19 +447,19 @@ FOdysseyPaintEngine::SetAlphaModeModifier( ::ULIS::eAlphaMode iValue )
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyBlock*
+::ULIS::FBlock*
 FOdysseyPaintEngine::PaintBlock()
 {
     return mPaintBlock;
 }
 
-FOdysseyBlock*
+::ULIS::FBlock*
 FOdysseyPaintEngine::EditedBlock()
 {
     return mEditedBlock;
 }
 
-FOdysseyBlock*
+::ULIS::FBlock*
 FOdysseyPaintEngine::OriginalBlock()
 {
     return mOriginalBlock;
@@ -689,8 +689,8 @@ FOdysseyPaintEngine::ClearPaintBlock()
     if (!mPaintBlock)
         return;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintBlock->GetBlock()->Format());
-    ctx.Clear(*(mPaintBlock->GetBlock()));
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintBlock->Format());
+    ctx.Clear(*mPaintBlock);
     ctx.Finish();
 }
 
@@ -702,8 +702,8 @@ FOdysseyPaintEngine::UpdateOriginalBlock()
 
     ClearInvalidMap(mEditedBlockInvalidMap);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mEditedBlock->GetBlock()->Format() );
-    ctx.Copy(*(mEditedBlock->GetBlock()), *(mOriginalBlock->GetBlock()) );
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mEditedBlock->Format() );
+    ctx.Copy(*mEditedBlock, *mOriginalBlock);
     ctx.Finish();
 }
 
@@ -719,18 +719,18 @@ FOdysseyPaintEngine::UpdateEditedBlock(bool iForceFinish)
     {
         if (iForceFinish)
         {
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mOriginalBlock->GetBlock()->Format());
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mOriginalBlock->Format());
             ctx.Finish();
         }
             
         return;
     }
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mOriginalBlock->GetBlock()->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mOriginalBlock->Format());
 
-    ::ULIS::FBlock& original = *( mOriginalBlock->GetBlock() );
-    ::ULIS::FBlock& edited = *( mEditedBlock->GetBlock() );
-    ::ULIS::FBlock& paint = *( mPaintBlock->GetBlock() );
+    ::ULIS::FBlock& original = *mOriginalBlock;
+    ::ULIS::FBlock& edited = *mEditedBlock;
+    ::ULIS::FBlock& paint = *mPaintBlock;
 
     FOdysseyBrushState& state = mBrushInstance->GetState();
 
@@ -749,7 +749,7 @@ FOdysseyPaintEngine::UpdateEditedBlock(bool iForceFinish)
 
     state.ResetEvent();
 
-    mEditedBlock->GetBlock()->Dirty( changedTiles.GetData(), changedTiles.Num() );
+    mEditedBlock->Dirty( changedTiles.GetData(), changedTiles.Num() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -1008,8 +1008,8 @@ FOdysseyPaintEngine::MakeTileRect( int iTileX, int iTileY )
 {
     return { iTileX * TILE_SIZE,
              iTileY * TILE_SIZE,
-             mEditedBlock ? FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, mEditedBlock->Width() ) - iTileX * TILE_SIZE : 0,
-             mEditedBlock ? FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, mEditedBlock->Height() ) - iTileY * TILE_SIZE : 0 } ;
+             mEditedBlock ? FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, int32(mEditedBlock->Width()) ) - iTileX * TILE_SIZE : 0,
+             mEditedBlock ? FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, int32(mEditedBlock->Height()) ) - iTileY * TILE_SIZE : 0 } ;
 }
 
 
@@ -1238,7 +1238,7 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     state.point.y = 0;
 
     // Create a dummy 1px block to gather size information.
-    FOdysseyBlock* dummy1px = new FOdysseyBlock( 1, 1, mTextureSourceFormat );
+    ::ULIS::FBlock* dummy1px = new ::ULIS::FBlock( 1, 1, mTextureSourceFormat );
 
     // Set the dummy 1px block as target for brush
     state.target_temp_buffer = dummy1px;
@@ -1277,7 +1277,7 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     int preview_h = FMath::Max( 1, ymax - ymin );
 
     // Allocate preview_color & preview_outline to draw on step in
-    FOdysseyBlock* preview_color = new FOdysseyBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat), nullptr, nullptr, true );
+    ::ULIS::FBlock* preview_color = new ::ULIS::FBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat), nullptr, nullptr, true );
 
     // Set the preview_color block as target for brush
     state.target_temp_buffer = preview_color;
@@ -1316,8 +1316,8 @@ FOdysseyPaintEngine::UpdateBrushCursorPreview()
     mBrushCursorPreviewSurface = new FOdysseySurface( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat) );
 
     // Compute Outline in surface
-    FOdysseyBlock* preview_outline = new FOdysseyBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat) );
-    FOdysseyBlock* preview_shadow = new FOdysseyBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat) );
+    ::ULIS::FBlock* preview_outline = new ::ULIS::FBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat) );
+    ::ULIS::FBlock* preview_shadow = new ::ULIS::FBlock( preview_w, preview_h, ULISFormatForUE4TextureSourceFormat(mTextureSourceFormat) );
     ::ULIS::FFXContext::Convolution( preview_color->GetBlock(), preview_outline->GetBlock(), edge_kernel, true );
     ::ULIS::FClearFillContext::FillPreserveAlpha( preview_outline->GetBlock(), ::ULIS::FColor::RGBA8( 0, 0, 0 ) );
     ::ULIS::FFXContext::Convolution( preview_outline->GetBlock(), preview_shadow->GetBlock(), gaussian_kernel, true );

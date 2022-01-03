@@ -4,8 +4,7 @@
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 #include "OdysseySurface.h"
-
-class FOdysseyBlock;
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // FOdysseySurface
@@ -16,8 +15,8 @@ public:
     virtual ~IOdysseySurfaceEditable() {};
 public:
     // Public API
-    virtual FOdysseyBlock*          Block() = 0;
-    virtual const FOdysseyBlock*    Block() const = 0;
+    virtual ::ULIS::FBlock*          Block() = 0;
+    virtual const ::ULIS::FBlock*    Block() const = 0;
     virtual void Invalidate() = 0;
     //virtual void Invalidate(int iX1,int iY1,int iX2,int iY2) = 0;
     //virtual void Invalidate(const ::ULIS::FRectI& iRect) = 0;

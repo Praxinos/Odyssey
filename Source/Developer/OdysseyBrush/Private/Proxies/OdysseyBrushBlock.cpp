@@ -8,7 +8,6 @@
 
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyBrushAssetBase.h"
-#include "OdysseyBlock.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
@@ -18,7 +17,7 @@ class FOdysseyBlockProxy_Internal : public TSharedFromThis<FOdysseyBlockProxy_In
     class FBlockRetainer
     {
     public:
-        FBlockRetainer(const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock, int iNumDeps, FOdysseyBlockProxy* iDependencies)
+        FBlockRetainer(const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock, int iNumDeps, FOdysseyBlockProxy* iDependencies)
             : mBlock(iBlock)
             , mDeps()
         {
@@ -29,8 +28,8 @@ class FOdysseyBlockProxy_Internal : public TSharedFromThis<FOdysseyBlockProxy_In
         }
     private:
 
-        TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>   mBlock;
-        TArray<TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>> mDeps;
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>   mBlock;
+        TArray<TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>> mDeps;
     };
 
 public:
@@ -40,7 +39,7 @@ public:
     }
 
 public:
-    void Init( const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents, ::ULIS::FEvent* iEvents, int iNumDeps, FOdysseyBlockProxy* iDependencies )
+    void Init( const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents, ::ULIS::FEvent* iEvents, int iNumDeps, FOdysseyBlockProxy* iDependencies )
     {
         mBlock = iBlock;
 
@@ -78,7 +77,7 @@ public:
     }
 
     //Returns the block the proxy is holding
-    const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>&
+    const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>&
     GetBlock()
     {
         return mBlock;
@@ -92,7 +91,7 @@ public:
     }
 
 private:
-    TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>   mBlock;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>   mBlock;
     ::ULIS::FEvent  mEvent;
 };
 
@@ -106,7 +105,7 @@ FOdysseyBlockProxy::FOdysseyBlockProxy()
 {
 }
 
-FOdysseyBlockProxy::FOdysseyBlockProxy( const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents, ::ULIS::FEvent* iEvents, int iNumDeps, FOdysseyBlockProxy* iDependencies )
+FOdysseyBlockProxy::FOdysseyBlockProxy( const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents, ::ULIS::FEvent* iEvents, int iNumDeps, FOdysseyBlockProxy* iDependencies )
     : m(MakeShareable(new FOdysseyBlockProxy_Internal()))
 {
     m->Init(iBlock, iNumEvents, iEvents, iNumDeps, iDependencies);
@@ -118,7 +117,7 @@ FOdysseyBlockProxy::MakeNullProxy()
     return  FOdysseyBlockProxy();
 }
 
-FOdysseyBlockProxy FOdysseyBlockProxy::MakeProxy(const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents, ::ULIS::FEvent* iEvents, int iNumDeps, FOdysseyBlockProxy* iDependencies)
+FOdysseyBlockProxy FOdysseyBlockProxy::MakeProxy(const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>& iBlock, int iNumEvents, ::ULIS::FEvent* iEvents, int iNumDeps, FOdysseyBlockProxy* iDependencies)
 {
     return  FOdysseyBlockProxy(iBlock, iNumEvents, iEvents, iNumDeps, iDependencies);
 }
@@ -132,7 +131,7 @@ FOdysseyBlockProxy::IsValid()
 }
 
 //Returns the block the proxy is holding
-const TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe>&
+const TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>&
 FOdysseyBlockProxy::GetBlock()
 {
     return m->GetBlock();
@@ -153,7 +152,7 @@ UOdysseyBlockProxyFunctionLibrary::Conv_TextureToOdysseyBlockProxy( UTexture2D* 
         return  FOdysseyBlockProxy::MakeNullProxy();
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
-    TSharedRef< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( NewOdysseyBlockFromUTextureData( Texture, format ) );
+    TSharedRef< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( NewBlockFromUTextureData( Texture, format ) );
     return  FOdysseyBlockProxy::MakeProxy( dst );
 }
 
@@ -166,12 +165,12 @@ UOdysseyBlockProxyFunctionLibrary::ConvertToFormat(FOdysseyBlockProxy Block, EOd
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Block.GetBlock();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > conv = MakeShareable( new FOdysseyBlock(block->Width(), block->Height(), format ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Block.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > conv = MakeShareable( new ::ULIS::FBlock(block->Width(), block->Height(), format ));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
 
     ::ULIS::FEvent eventConvert;
-    ctx.ConvertFormat( *( block->GetBlock() ), *( conv->GetBlock() ), ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Block.GetEvent(), &eventConvert); // Auto fallback to copy if same format
+    ctx.ConvertFormat( *block, *conv, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Block.GetEvent(), &eventConvert); // Auto fallback to copy if same format
     ctx.Flush();
 
     return  FOdysseyBlockProxy::MakeProxy( conv, 1, &eventConvert, 1, &Block);
@@ -204,17 +203,17 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source,
     if( !Source.IsValid())
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > src = Source.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > src = Source.GetBlock();
     ::ULIS::eFormat format = src->Format();
     ::ULIS::FColor color = Color.GetValue().ToFormat( format );
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock( src->Width(), src->Height(), format ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock( src->Width(), src->Height(), format ));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
     
     ::ULIS::FEvent eventCopy;
-    ctx.Copy( *( src->GetBlock() ), *( dst->GetBlock() ), ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Source.GetEvent(), &eventCopy );
+    ctx.Copy( *src, *dst, ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Source.GetEvent(), &eventCopy );
     
     ::ULIS::FEvent eventFill;
-    ctx.FillPreserveAlpha( *( dst->GetBlock() ), color, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventCopy, &eventFill);
+    ctx.FillPreserveAlpha( *dst, color, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventCopy, &eventFill);
     ctx.Flush();
 
     return  FOdysseyBlockProxy::MakeProxy(dst, 1, &eventFill, 1, &Source);
@@ -236,15 +235,15 @@ UOdysseyBlockProxyFunctionLibrary::Fill(
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth(ColorModel, ChannelDepth);
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Block.GetBlock();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock(block->Width(), block->Height(), format ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Block.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(block->Width(), block->Height(), format ));
     ::ULIS::FColor color = Color.GetValue().ToFormat( format );
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
     ::ULIS::FEvent eventConvert;
     if( Area.IsInitialized() || PreserveAlpha) {
         ctx.ConvertFormat(
-            *(block->GetBlock() ),
-            *( dst->GetBlock() ),
+            *block,
+            *dst,
             ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0),
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
             1,   
@@ -263,9 +262,9 @@ UOdysseyBlockProxyFunctionLibrary::Fill(
         if (PreserveAlpha)
         {
             ctx.FillPreserveAlpha(
-                *(dst->GetBlock()),
+                *dst,
                 color,
-                Area.IsInitialized() ? Area.GetValue() : dst->GetBlock()->Rect(),
+                Area.IsInitialized() ? Area.GetValue() : dst->Rect(),
                 ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                 1,
                 &eventConvert,
@@ -275,8 +274,8 @@ UOdysseyBlockProxyFunctionLibrary::Fill(
         else
         {
             ctx.Fill(
-                *(dst->GetBlock()),
-                color, Area.IsInitialized() ? Area.GetValue() : dst->GetBlock()->Rect(),
+                *dst,
+                color, Area.IsInitialized() ? Area.GetValue() : dst->Rect(),
                 ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                 1,
                 &eventConvert,
@@ -310,11 +309,11 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
         return  FOdysseyBlockProxy::MakeNullProxy();
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth(ColorModel, ChannelDepth);
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Sample.GetBlock();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock (block->Width(), block->Height(), format ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Sample.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock (block->Width(), block->Height(), format ));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
     ::ULIS::FEvent eventConvert;
-    ctx.ConvertFormat( *( block->GetBlock() ), *( dst->GetBlock() ), ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Sample.GetEvent(), &eventConvert);
+    ctx.ConvertFormat( *block, *dst, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Sample.GetEvent(), &eventConvert);
 
     if (Area.IsInitialized() && (Area.Width() <= 0 || Area.Height() <= 0))
     {
@@ -325,8 +324,8 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
     ::ULIS::FEvent eventBlend;
     ctx.BlendColor(
             Color.GetValue()
-        , *( dst->GetBlock() )
-        , Area.IsInitialized() ? Area.GetValue() : dst->GetBlock()->Rect()
+        , *dst
+        , Area.IsInitialized() ? Area.GetValue() : dst->Rect()
         , ::ULIS::eBlendMode( BlendingMode )
         , ::ULIS::eAlphaMode( AlphaMode )
         , Opacity
@@ -357,7 +356,13 @@ UOdysseyBlockProxyFunctionLibrary::CreateBlock(
         return  FOdysseyBlockProxy::MakeNullProxy();
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock( Width, Height, format, ::ULIS::FOnInvalidBlock(), InitializeData ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock( Width, Height, format, nullptr, ::ULIS::FOnInvalidBlock() ));
+    if (InitializeData)
+    {
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        ctx.Clear(*dst);
+        ctx.Finish();
+    }
     return FOdysseyBlockProxy::MakeProxy(dst);
 }
 
@@ -374,17 +379,17 @@ UOdysseyBlockProxyFunctionLibrary::CropBlock(
     if( Area.IsInitialized() && ( Area.Width() <= 0 || Area.Height() <= 0 ) )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> block = Block.GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = Block.GetBlock();
     int w = Area.IsInitialized() ? Area.Width() : block->Width();
     int h = Area.IsInitialized() ? Area.Height() : block->Height();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format() );
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock( w, h, block->Format() ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock( w, h, block->Format() ));
 
     ::ULIS::FEvent eventCopy;
     ctx.Copy(
-        *(block->GetBlock())
-        , *(dst->GetBlock())
-        , Area.IsInitialized() ? Area.GetValue() : block->GetBlock()->Rect()
+          *block
+        , *dst
+        , Area.IsInitialized() ? Area.GetValue() : block->Rect()
         , ::ULIS::FVec2I(0)
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
         , 1
@@ -417,13 +422,13 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
 
-    TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> back = Back.GetBlock();
-    TSharedPtr<FOdysseyBlock, ESPMode::ThreadSafe> top = Top.GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> back = Back.GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> top = Top.GetBlock();
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock(back->Width(), back->Height(), format));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(back->Width(), back->Height(), format));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
 
-    ::ULIS::FBlock* src = top->GetBlock();
+    ::ULIS::FBlock* src = top.Get();
 
     // Pre-process Top ( optional conv, optional area )
     ::ULIS::FEvent eventInputs[] = { Top.GetEvent(), Back.GetEvent() };
@@ -435,8 +440,8 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
         const uint16 h = bInit ? TopArea.Height() : src->Height();
         src = new ::ULIS::FBlock( w, h, format );
         ctx.ConvertFormat(
-              *( top->GetBlock() )
-            , *( src ), TopArea.IsInitialized() ? TopArea.GetValue() : ::ULIS::FRectI::Auto
+              *top
+            , *src, TopArea.IsInitialized() ? TopArea.GetValue() : ::ULIS::FRectI::Auto
             , ::ULIS::FVec2I( 0 )
             , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
             , 2
@@ -450,8 +455,8 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
     ::ULIS::FEvent eventConvertBack;
     // Pre-process Back ( mandatory full rect copy/conv )
     ctx.ConvertFormat(
-          *( back->GetBlock() )
-        , *( dst->GetBlock() )
+          *back
+        , *dst
         , ::ULIS::FRectI::Auto
         , ::ULIS::FVec2I( 0 )
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -465,7 +470,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
             [top, src](const ::ULIS::FRectI& iRect)
             {
                 // cleanup source conv if necessary
-                if (top->GetBlock() != src)
+                if (src != top.Get())
                     delete src;
             }
         )
@@ -475,7 +480,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
 
     ctx.BlendAA(
           *src
-        , *( dst->GetBlock() )
+        , *dst
         , src->Rect()
         , ::ULIS::FVec2F( OffsetX, OffsetY )
         , ::ULIS::eBlendMode( BlendingMode )
@@ -514,8 +519,8 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
 
     TStrongObjectPtr<UCurveFloat>* curve = new TStrongObjectPtr<UCurveFloat>(Curve);
 
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Block.GetBlock();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock(block->Width(), block->Height(), block->Format() ));
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Block.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(block->Width(), block->Height(), block->Format() ));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format() );
 
     ::ULIS::FEvent eventFilter(
@@ -542,8 +547,8 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
             else
                 dstProxy.SetAlphaF( Curve->GetFloatValue( srcProxy.AlphaF() ) ); // Warning: this will fail if the format is not 8 bit depth !
         }
-        , *( block->GetBlock() )
-        , *( dst->GetBlock() )
+        , *block
+        , *dst
         , ::ULIS::FRectI::Auto
         , ::ULIS::FVec2I( 0 )
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -557,13 +562,13 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
 }
 
 #define ADJUST(format, filterFunc, adjustEvent)                                                                                                     \
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = Block.GetBlock();                                                                      \
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > dst = MakeShareable( new FOdysseyBlock(block->Width(), block->Height(), block->Format() ));    \
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Block.GetBlock();                                                                      \
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(block->Width(), block->Height(), block->Format() ));    \
                                                                                                                         \
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format() );                                \
                                                                                                                         \
-    ::ULIS::FBlock* src = block->GetBlock();                                                                            \
-    ::ULIS::FBlock* filterDst = dst->GetBlock();                                                                        \
+    ::ULIS::FBlock* src = block.Get();                                                                                  \
+    ::ULIS::FBlock* filterDst = dst.Get();                                                                              \
                                                                                                                         \
     EOdysseyChannelDepth channelDepth = OdysseyChannelDepthFromULISFormat( src->Format() );                             \
                                                                                                                         \
@@ -572,11 +577,11 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
     {                                                                                                                   \
         src = new ::ULIS::FBlock(block->Width(), block->Height(), format );                                             \
         ctx.ConvertFormat(                                                                                              \
-            *(block->GetBlock() ),                                                                                      \
+            *block,                                                                                                     \
             *src,                                                                                                       \
             ::ULIS::FRectI::Auto,                                                                                       \
             ::ULIS::FVec2I(0),                                                                                          \
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,                                                                    \
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,                                                               \
             1,                                                                                                          \
             &Block.GetEvent(),                                                                                          \
             &eventConvertSrc);                                                                                          \
@@ -590,11 +595,11 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
     ::ULIS::FEvent eventFilter;                                                                                         \
     ctx.FilterInto(                                                                                                     \
         filterFunc                                                                                                      \
-        , *( block->GetBlock() )                                                                                        \
-        , *( dst->GetBlock() )                                                                                          \
+        , *block                                                                                                        \
+        , *dst                                                                                                          \
         , ::ULIS::FRectI::Auto                                                                                          \
         , ::ULIS::FVec2I( 0 )                                                                                           \
-        , ::ULIS::FSchedulePolicy::AsyncCacheEfficient                                                                       \
+        , ::ULIS::FSchedulePolicy::AsyncCacheEfficient                                                                  \
         , 1                                                                                                             \
         , &eventConvertSrc                                                                                              \
         , &eventFilter                                                                                                  \
@@ -604,19 +609,19 @@ UOdysseyBlockProxyFunctionLibrary::AdjustAlpha(
         ::ULIS::FOnEventComplete(                                                                                       \
         [src, block](const ::ULIS::FRectI& iRect)                                                                       \
             {                                                                                                           \
-                if (src != block->GetBlock())                                                                           \
+                if (src != block.Get())                                                                                       \
                     delete  src;                                                                                        \
             }                                                                                                           \
         )                                                                                                               \
     );                                                                                                                  \
-    if( filterDst != dst->GetBlock() )                                                                                  \
+    if( filterDst != dst.Get() )                                                                                              \
     {                                                                                                                   \
         ctx.ConvertFormat(                                                                                              \
             *filterDst,                                                                                                 \
-            *( dst->GetBlock() ),                                                                                       \
+            *dst,                                                                                                       \
             ::ULIS::FRectI::Auto,                                                                                       \
             ::ULIS::FVec2I(0),                                                                                          \
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,                                                                    \
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,                                                               \
             1,                                                                                                          \
             &eventFilter,                                                                                               \
             &adjustEvent);                                                                                              \
@@ -926,7 +931,7 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( const UFont* iFont, EOdysseyCo
 
     for( auto texture : iFont->Textures )
     {
-        TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = MakeShareable(NewOdysseyBlockFromUTextureData( texture, format));
+        TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = MakeShareable(NewBlockFromUTextureData( texture, format));
         blocks.Add( FOdysseyBlockProxy::MakeProxy( block ) );
     }
     
@@ -992,7 +997,7 @@ UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy iBlock
 
     //Wait for any operation on the block to be done before reading it
     iBlock.GetEvent().Wait();
-    TSharedPtr< FOdysseyBlock, ESPMode::ThreadSafe > block = iBlock.GetBlock();
+    TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = iBlock.GetBlock();
     if( !block )
         return  false;
 
@@ -1001,7 +1006,7 @@ UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy iBlock
     if( y < 0 || y >= block->Height() )
         return  false;
 
-    ::ULIS::FColor p = block->GetBlock()->Color( x, y );
+    ::ULIS::FColor p = block->Color( x, y );
 
     FOdysseyBrushColor color( p );
     oColor = color;
@@ -1016,5 +1021,5 @@ UOdysseyBlockProxyFunctionLibrary::GetRect(FOdysseyBlockProxy Block)
     if( !Block.IsValid() )
         return  FOdysseyBrushRect();
 
-    return  FOdysseyBrushRect(Block.GetBlock()->GetBlock()->Rect());
+    return  FOdysseyBrushRect(Block.GetBlock()->Rect());
 }

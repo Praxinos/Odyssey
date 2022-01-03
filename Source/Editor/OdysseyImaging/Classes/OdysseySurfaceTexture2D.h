@@ -15,14 +15,14 @@ public:
     // Destruction will delete texture if Transient ( not borrowed )
     virtual ~FOdysseySurfaceTexture2D();
 
-    // Responsible for its underlyin FOdysseyBlock TArray allocation
+    // Responsible for its underlyin ::ULIS::FBlock TArray allocation
     // With borrowed UTexture, not responsible for its Allocation / Deallocation
     FOdysseySurfaceTexture2D(UTexture2D* iTexture);
 
 private:
     // Forbid Copy Constructor and Copy Assignement Operator
-    FOdysseySurfaceTexture2D(const FOdysseyBlock&)            = delete;
-    FOdysseySurfaceTexture2D& operator=(const FOdysseyBlock&) = delete;
+    FOdysseySurfaceTexture2D(const ::ULIS::FBlock&)            = delete;
+    FOdysseySurfaceTexture2D& operator=(const ::ULIS::FBlock&) = delete;
 
 public:
     // Public API

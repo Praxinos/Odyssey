@@ -10,11 +10,11 @@
 #include "IDesktopPlatform.h"
 #include "LayerStack/SOdysseyLayerStackView.h"
 #include "ToolMenus.h"
-#include "OdysseyBlock.h"
 #include "OdysseyTextureEditor.h"
 #include "ULISLoaderModule.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "IOdysseyLayerImageBlendingCapability.h"
+#include "OdysseyPixelFormat.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditorLayerStackTab"
@@ -152,16 +152,16 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
         else
         {
             FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
-            FOdysseyBlock* odysseyBlockToSave = new FOdysseyBlock( platformData->SizeX, platformData->SizeY, ULISFormatForUE4TextureSourceFormat( currentTexture->Source.GetFormat() ) );
+            ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( currentTexture->Source.GetFormat() ) );
             CopyUTexturePixelDataIntoBlock( odysseyBlockToSave, currentTexture );
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
 
             bool canSaveDirectly = false;
-            ::ULIS::FContext::SaveBlockToDiskMetrics( *odysseyBlockToSave->GetBlock(), exportImageFormat, &canSaveDirectly );
+            ::ULIS::FContext::SaveBlockToDiskMetrics( *odysseyBlockToSave, exportImageFormat, &canSaveDirectly );
             if (canSaveDirectly)
             {
                 ctx.SaveBlockToDisk(
-                    *odysseyBlockToSave->GetBlock()
+                    *odysseyBlockToSave
                     , str
                     , exportImageFormat
                     , 100
@@ -171,7 +171,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
             }
             else
             {
-                ::ULIS::eFormat format = odysseyBlockToSave->GetBlock()->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+                ::ULIS::eFormat format = odysseyBlockToSave->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
                 if (exportImageFormat == ::ULIS::FileFormat_hdr)
                 {
                     format = ::ULIS::Format_RGBAF;
@@ -181,7 +181,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 
                 ::ULIS::FEvent eventConvert;
                 ctx.ConvertFormat(
-                    *odysseyBlockToSave->GetBlock()
+                    *odysseyBlockToSave
                     , blockProxy
                     , ::ULIS::FRectI::Auto
                     , ::ULIS::FVec2I( 0 )
@@ -222,7 +222,7 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         UTexture2D* openedTexture = static_cast<UTexture2D*>( assetsData[i].GetAsset() );
-        FOdysseyBlock* textureBlock = NewOdysseyBlockFromUTextureData( openedTexture, mEditor->LayerStack()->Format() );
+        ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData( openedTexture, mEditor->LayerStack()->Format() );
 
 		FName layerName = mEditor->LayerStack()->GetLayerRoot()->GetNextLayerName();
 		TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(FName(*(openedTexture->GetName())), textureBlock));
@@ -230,7 +230,7 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
     }
 
     mLayerStackView->RefreshView();
-    mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block()->GetBlock());
+    mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
     mEditor->DisplaySurface()->Invalidate();
 }
 
@@ -301,17 +301,17 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
     IOdysseyLayerImageRenderingCapability* renderCap = layer->GetCapability<IOdysseyLayerImageRenderingCapability>();
-    FOdysseyBlock block(mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height(), mEditor->LayerStack()->Format());
+    ::ULIS::FBlock block(mEditor->LayerStack()->Width(), mEditor->LayerStack()->Height(), mEditor->LayerStack()->Format());
 
     TArray< ::ULIS::FBlock* > blocks;
     TArray< ::ULIS::FRectI > rects;
     TArray< ::ULIS::FVec2I > pos;
-    blocks.Add(block.GetBlock());
-    rects.Add(block.GetBlock()->Rect());
+    blocks.Add(&block);
+    rects.Add(block.Rect());
     pos.Add(::ULIS::FVec2F(0.f, 0.f));
     renderCap->RenderImage(blocks.GetData(), rects.GetData(), pos.GetData(), 1);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.GetBlock()->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
     ctx.Finish();
 
     InitTextureWithBlockData(&block, texture, mEditor->Texture()->Source.GetFormat());
@@ -331,7 +331,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
     ::ULIS::eFormat format = mEditor->LayerStack()->Format();
 	TSharedPtr<FOdysseyImageLayer> imageLayer = MakeShareable(new FOdysseyImageLayer(layerName, FVector2D(w, h), format));
     mEditor->LayerStack()->AddLayer(imageLayer);
-    mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block()->GetBlock());
+    mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
     mEditor->DisplaySurface()->Invalidate();
     mLayerStackView->RefreshView();
 }
@@ -342,7 +342,7 @@ FOdysseyTextureEditorLayerStackTab::DuplicateCurrentLayer()
     if( mEditor->LayerStack()->GetCurrentLayer() )
     {
         mEditor->LayerStack()->DuplicateLayer( mEditor->LayerStack()->GetCurrentLayer() );
-        mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block()->GetBlock());
+        mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
         mEditor->DisplaySurface()->Invalidate();
         mLayerStackView->RefreshView();
     }
@@ -357,7 +357,7 @@ FOdysseyTextureEditorLayerStackTab::DeleteCurrentLayer()
         if (FMessageDialog::Open(EAppMsgType::OkCancel, LOCTEXT("DeletingCurrentLayer", "Are you sure you want to delete this layer ?"), &Title) == EAppReturnType::Ok)
         {
             mEditor->LayerStack()->DeleteLayer(mEditor->LayerStack()->GetCurrentLayer());
-            mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block()->GetBlock());
+            mEditor->LayerStack()->ComputeResultInBlock(mEditor->DisplaySurface()->Block());
             mEditor->DisplaySurface()->Invalidate();
             mLayerStackView->RefreshView();
         }

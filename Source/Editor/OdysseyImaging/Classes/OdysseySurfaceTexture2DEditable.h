@@ -5,19 +5,18 @@
 #include <ULIS>
 
 class FOdysseySurfaceTexture2DEditable;
-class FOdysseyBlock;
 
 /////////////////////////////////////////////////////
 // Utlity
 
 //TODO: Convert to / Duplicate to UTexture* for each function here
-ODYSSEYIMAGING_API void CopyUTextureSourceDataIntoBlock( FOdysseyBlock* iBlock,UTexture* iTexture );
-ODYSSEYIMAGING_API void CopyUTexturePixelDataIntoBlock( FOdysseyBlock* iBlock, UTexture* iTexture );
-ODYSSEYIMAGING_API void CopyURenderTargetPixelDataIntoBlock( FOdysseyBlock* iBlock,UTextureRenderTarget2D* iRenderTarget );
-ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const FOdysseyBlock* iBlock,UTexture2D* iTexture );
-ODYSSEYIMAGING_API void InitTextureWithBlockData( const FOdysseyBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat );
-ODYSSEYIMAGING_API FOdysseyBlock* NewOdysseyBlockFromUTextureData( UTexture2D* iTexture, ::ULIS::eFormat iFormat );
-ODYSSEYIMAGING_API void FillOdysseyBlockFromUTextureData( FOdysseyBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat );
+ODYSSEYIMAGING_API void CopyUTextureSourceDataIntoBlock( ::ULIS::FBlock* iBlock,UTexture* iTexture );
+ODYSSEYIMAGING_API void CopyUTexturePixelDataIntoBlock( ::ULIS::FBlock* iBlock, UTexture* iTexture );
+ODYSSEYIMAGING_API void CopyURenderTargetPixelDataIntoBlock( ::ULIS::FBlock* iBlock,UTextureRenderTarget2D* iRenderTarget );
+ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock,UTexture2D* iTexture );
+ODYSSEYIMAGING_API void InitTextureWithBlockData( const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat );
+ODYSSEYIMAGING_API ::ULIS::FBlock* NewBlockFromUTextureData( UTexture2D* iTexture, ::ULIS::eFormat iFormat );
+ODYSSEYIMAGING_API void FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat );
 ODYSSEYIMAGING_API void InvalidateTextureFromData( const ::ULIS::FBlock* iData, UTexture2D* iTexture, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData( const ::ULIS::FBlock* iData, FOdysseySurfaceTexture2DEditable* iSurface, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
 ODYSSEYIMAGING_API void InvalidateSurfaceCallback( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo );
@@ -33,30 +32,30 @@ public:
     // Destruction will delete texture if Transient ( not borrowed )
     virtual ~FOdysseySurfaceTexture2DEditable();
 
-    // Responsible for its underlying FOdysseyBlock TArray allocation
+    // Responsible for its underlying ::ULIS::FBlock TArray allocation
     // With transient UTexture
     FOdysseySurfaceTexture2DEditable( int iWidth, int iHeight, ::ULIS::eFormat iFormat = ::ULIS::Format_BGRA8 );
 
     // Responsible for nothing
-    FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, FOdysseyBlock* iBlock);
+    FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, ::ULIS::FBlock* iBlock);
 
-    // Responsible for its underlying FOdysseyBlock & TArray allocation
+    // Responsible for its underlying ::ULIS::FBlock & TArray allocation
     // With borrowed UTexture, not responsible for its Allocation / Deallocation
     FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture);
 
     // Responsible for its underlying UTexture2D
-    // With borrowed FOdysseyBlock, not responsible for its Allocation / Deallocation
-    FOdysseySurfaceTexture2DEditable(FOdysseyBlock* iBlock);
+    // With borrowed ::ULIS::FBlock, not responsible for its Allocation / Deallocation
+    FOdysseySurfaceTexture2DEditable(::ULIS::FBlock* iBlock);
 
 private:
     // Forbid Copy Constructor and Copy Assignement Operator
-    FOdysseySurfaceTexture2DEditable( const FOdysseyBlock& ) = delete;
-    FOdysseySurfaceTexture2DEditable& operator=( const FOdysseyBlock& ) = delete;
+    FOdysseySurfaceTexture2DEditable( const ::ULIS::FBlock& ) = delete;
+    FOdysseySurfaceTexture2DEditable& operator=( const ::ULIS::FBlock& ) = delete;
 
 public:
     // Public API
-    FOdysseyBlock* Block() override;
-    const FOdysseyBlock* Block() const override;
+    ::ULIS::FBlock* Block() override;
+    const ::ULIS::FBlock* Block() const override;
     virtual UTexture2D* Texture();
     virtual const UTexture2D* Texture() const;
 
@@ -72,6 +71,6 @@ private:
     // Private Data
     const bool mIsBorrowedTexture;
     const bool mIsBorrowedBlock;
-    FOdysseyBlock* mBlock;
+    ::ULIS::FBlock* mBlock;
     UTexture2D* mTexture;
 };
