@@ -171,6 +171,7 @@ FOdysseyPaintEngine::BeginStroke( const FOdysseyStrokePoint& iPoint, const FOdys
 
     mLastStrokeTimePoint = std::chrono::steady_clock::now();
 
+    mRawStroke.Add( iPreviousPoint );
     mRawStroke.Add( iPoint );
 
     if( mIsSmoothingEnabled && mIsRealTime )
@@ -601,19 +602,27 @@ FOdysseyPaintEngine::SmoothingEndStroke()
             return;
 
         //BeginStroke
-        mSmoother->AddPoint(mRawStroke[0]);
+        mSmoother->AddPoint(mRawStroke[1]);
         
         for (int i = 0; i < mInterpolator->MinimumRequiredPoints(); i++)
         {
-            mInterpolator->AddPoint( mRawStroke[i] );
+            mInterpolator->AddPoint( mRawStroke[1] );
         }
 
-        TArray< FOdysseyStrokePoint > firstPoints;
+        /* TArray< FOdysseyStrokePoint > firstPoints;
         firstPoints.Add(mRawStroke[0]);
+        AddResultPoints(firstPoints); */
+
+        FOdysseyStrokePoint point = mRawStroke[1];
+        ComputePointRelativeParameters(point, mRawStroke[0]);
+
+        TArray<FOdysseyStrokePoint> firstPoints;
+        firstPoints.Add(point);
+
         AddResultPoints(firstPoints);
 
         //Steps
-        for (int i = 1; i < mRawStroke.Num(); i++)
+        for (int i = 2; i < mRawStroke.Num(); i++)
         {
             mSmoother->AddPoint(mRawStroke[i]);
 
