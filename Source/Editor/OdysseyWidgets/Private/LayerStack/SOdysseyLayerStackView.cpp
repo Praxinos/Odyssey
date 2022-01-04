@@ -50,7 +50,6 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 		]
 
 		+ SVerticalBox::Slot()
-		.AutoHeight()
 		[
 			SNew(SBorder)
 			.Visibility(this, &SOdysseyLayerStackView::LayerStackVisibility)
@@ -66,28 +65,20 @@ void SOdysseyLayerStackView::Construct(const FArguments& InArgs)
 				]
 
 				+ SVerticalBox::Slot()
+				.AutoHeight()
 				[
-					SNew(SSplitter)
-					.Orientation(Orient_Vertical)
-					.PhysicalSplitterHandleSize(0)
-					.HitDetectionSplitterHandleSize(0)
+					MakeAddButton()
+                ]
 
-					+ SSplitter::Slot()
-					.SizeRule(SSplitter::ESizeRule::SizeToContent)
-					[
-						MakeAddButton()
-					]
-
-					+ SSplitter::Slot()
-					[
-						SNew(SScrollBox)
-						.Orientation(Orient_Vertical)
-						.ScrollBarAlwaysVisible(false)
-						+ SScrollBox::Slot()
-						[
-							mTreeView.ToSharedRef()
-						]
-					]
+                + SVerticalBox::Slot()
+				[
+                    SNew(SScrollBox)
+                    .Orientation(Orient_Vertical)
+                    .ScrollBarAlwaysVisible(false)
+                    + SScrollBox::Slot()
+                    [
+                        mTreeView.ToSharedRef()
+                    ]
 				]
 			]
 		]
