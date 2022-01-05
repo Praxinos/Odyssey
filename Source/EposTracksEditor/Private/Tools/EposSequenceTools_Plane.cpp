@@ -23,8 +23,8 @@
 #include "MovieSceneSequence.h"
 
 #include "Board/BoardSequence.h"
-#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
+#include "NamingConvention.h"
 #include "PlaneActor.h"
 #include "Tools/ResourceAssetTools.h"
 
@@ -197,7 +197,7 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     NamingConvention::GeneratePlaneActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane_path, plane_name );
 
     plane->SetFolderPath( *plane_path );
-    FActorLabelUtilities::RenameExistingActor( plane, plane_name, true ); // The shot name is displayed in another column in the world outliner
+    FActorLabelUtilities::RenameExistingActor( plane, plane_name, false ); // The shot name is displayed in another column in the world outliner
 
     plane_name = NamingConvention::GeneratePlaneTrackName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane );
 

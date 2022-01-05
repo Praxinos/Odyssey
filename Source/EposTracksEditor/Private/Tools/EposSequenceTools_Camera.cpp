@@ -19,8 +19,8 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
+#include "NamingConvention.h"
 #include "PlaneActor.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"

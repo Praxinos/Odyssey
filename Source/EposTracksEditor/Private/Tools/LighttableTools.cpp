@@ -11,8 +11,8 @@
 #include "ISequencer.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 
-#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
+#include "NamingConvention.h"
 #include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "LighttableTools"

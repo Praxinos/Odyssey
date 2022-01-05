@@ -16,7 +16,7 @@
 #include "MovieSceneSequence.h"
 #include "ObjectTools.h"
 
-#include "EposNamingConvention.h"
+#include "NamingConvention.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "StoryNote.h"
 

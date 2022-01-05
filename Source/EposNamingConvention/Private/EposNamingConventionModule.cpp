@@ -3,17 +3,53 @@
 
 #include "EposNamingConventionModule.h"
 
+#include "PropertyEditorModule.h"
+
+#include "Settings/NamingConventionSettings.h"
+#include "Settings/NamingConventionSettingsCustomization.h"
+
 #define LOCTEXT_NAMESPACE "FEposNamingConventionModule"
 
-void FEposNamingConventionModule::StartupModule()
+void
+FEposNamingConventionModule::StartupModule()
 {
-    // This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+    RegisterPropertyCustomizations();
 }
 
-void FEposNamingConventionModule::ShutdownModule()
+void
+FEposNamingConventionModule::ShutdownModule()
 {
-    // This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-    // we call this function before unloading the module.
+    UnregisterPropertyCustomizations();
+}
+
+//---
+
+void
+FEposNamingConventionModule::RegisterPropertyCustomizations()
+{
+    // import the PropertyEditor module...
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+    // to register our custom property
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        // This is the name of the Struct
+        // this tells the property editor which is the struct property our customization will applied on.
+        FNamingConventionPlane::StaticStruct()->GetFName(),
+        // this is where our MakeInstance() method is usefull
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionPlaneCustomization::MakeInstance ) );
+
+    PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+void
+FEposNamingConventionModule::UnregisterPropertyCustomizations()
+{
+    if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionPlane::StaticStruct()->GetFName() );
+
+        PropertyModule.NotifyCustomizationModuleChanged();
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -1,7 +1,7 @@
 // IDDN.FR.001.220036.000.S.P.2021.000.00000
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "EposNamingConvention.h"
+#include "NamingConvention.h"
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
@@ -20,6 +20,7 @@
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "PlaneActor.h"
+#include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
 #include "StoryNote.h"
 
@@ -340,6 +341,8 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
     UMovieSceneSequence* current_sequence = const_cast<UMovieSceneSequence*>( iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
 
+    //--- Find the current sequence id from the sequence
+
     FMovieSceneSequenceID current_sequence_id; // invalid
 
     const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
@@ -361,28 +364,94 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
         check( iRootSequence == iSequence );
     }
 
-    //---
+    //--- Find the camera actor
 
     FString plane_path;
+    FString camera_name;
 
     ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, current_sequence_id );
     if( camera )
     {
         plane_path = camera->GetFolderPath().ToString();
+        camera_name = camera->GetActorLabel();
     }
 
     if( plane_path.IsEmpty() )
     {
         FString camera_path;
-        FString camera_name;
         GenerateCameraActorPathName( iPlayer, iRootSequence, iSequence, camera_path, camera_name );
 
         plane_path = camera_path;
     }
 
-    //---
+    //--- Find all plane track names
 
-    FString plane_name = TEXT( "Plane_1" );
+    const TArray<FMovieSceneBinding>& bindings = current_sequence->GetMovieScene()->GetBindings();
+    TArray<FString> binding_names;
+    for( auto binding : bindings )
+        binding_names.AddUnique( current_sequence->GetMovieScene()->GetObjectDisplayName( binding.GetObjectGuid() ).ToString() );
+        // Don't use binding.GetName() because (for example) it is not updated when the name is changed directly in the shot track label (instead of the board section view)
+        // binding.GetName() is still keeping the old "track" name
+
+    //--- Find all plane indexes inside their names (through a regex)
+
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionPlane plane_settings = settings->PlaneNaming;
+
+    //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
+    const FString plane_pattern_regex = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "([0-9]+)" ) )
+                                                              .Replace( TEXT( "{camera-name}" ), *camera_name )
+                                                              .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
+    const FString plane_pattern_display = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "{plane_index_formated}" ) )
+                                                                .Replace( TEXT( "{camera-name}" ), *camera_name )
+                                                                .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
+    FRegexPattern plane_pattern = plane_pattern_regex; // Mandatory as FRegexMatcher() takes a const reference
+
+    // https://stackoverflow.com/questions/3075130/what-is-the-difference-between-and-regular-expressions
+    // https://www.regular-expressions.info/refadv.html
+    // https://www.regular-expressions.info/atomic.html
+
+    TArray<int32> list_of_plane_index;
+
+    for( auto binding_name : binding_names )
+    {
+        FRegexMatcher matcher( plane_pattern, binding_name );
+
+        if( matcher.FindNext() )
+        {
+            int32 full_begin = matcher.GetMatchBeginning();
+            int32 full_end = matcher.GetMatchEnding();
+            FTextRange full_range( full_begin, full_end );
+            FString full_string = binding_name.Mid( full_range.BeginIndex, full_range.Len() );
+
+            int32 index_begin = matcher.GetCaptureGroupBeginning( 1 );
+            int32 index_end = matcher.GetCaptureGroupEnding( 1 );
+            FTextRange index_range( index_begin, index_end );
+            FString index_string = binding_name.Mid( index_range.BeginIndex, index_range.Len() );
+
+            int32 index = FCString::Atoi( *index_string );
+
+            list_of_plane_index.Add( index );
+        }
+    }
+
+    list_of_plane_index.Sort( TGreater<int32>() );
+
+    //--- Try to find the new plane name depending of the max existing index
+
+    int32 max_plane_index = list_of_plane_index.Num() ? list_of_plane_index[0] : plane_settings.StartNumber;
+
+    FStringFormatNamedArguments args;
+    args.Add( TEXT( "plane_index_formated" ), FString::Printf( TEXT( "%0*d" ), plane_settings.NumDigits, max_plane_index ) );
+    FString plane_name = FString::Format( *plane_pattern_display, args );
+
+    while( binding_names.Contains( plane_name ) )
+    {
+        max_plane_index += plane_settings.Increment;
+
+        args.FindChecked( TEXT( "plane_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), plane_settings.NumDigits, max_plane_index );
+        plane_name = FString::Format( *plane_pattern_display, args );
+    }
 
     //---
 
@@ -396,6 +465,7 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
 FString
 NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, ACineCameraActor* iCamera )
 {
+    // See comment in GeneratePlaneTrackName()
     return iCamera->GetActorLabel();
 }
 
@@ -403,6 +473,8 @@ NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, con
 FString
 NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, APlaneActor* iPlane )
 {
+    // For the moment, it's ok, but it will change, double-check (for example) the clone plane function...
+    // Or maybe name this function GeneratePlaneTrackNameFROMACTOR() et add another one which will really compute a new track name from the existing ones ?
     return iPlane->GetActorLabel();
 }
 

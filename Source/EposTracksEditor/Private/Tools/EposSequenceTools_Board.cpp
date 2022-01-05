@@ -15,8 +15,8 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
-#include "EposNamingConvention.h"
 #include "EposSequenceHelpers.h"
+#include "NamingConvention.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
@@ -668,9 +668,10 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
     FString cloned_plane_path;
     FString cloned_plane_name;
     NamingConvention::GeneratePlaneActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane_path, cloned_plane_name );
+    cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name
 
     cloned_plane->SetFolderPath( *cloned_plane_path );
-    FActorLabelUtilities::RenameExistingActor( cloned_plane, cloned_plane_name, true ); // The shot name is displayed in another column in the world outliner
+    FActorLabelUtilities::RenameExistingActor( cloned_plane, cloned_plane_name, false ); // The shot name is displayed in another column in the world outliner
 
     cloned_plane->SetActorTransform( iPlaneToClone->GetTransform() ); // Should be done, because for attached plane, its new transform are totally weird
     cloned_plane->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default

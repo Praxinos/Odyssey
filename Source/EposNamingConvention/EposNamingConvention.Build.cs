@@ -42,6 +42,7 @@ public class EposNamingConvention : ModuleRules
                 "CinematicCamera",
                 "LevelSequence",
                 "MovieScene",
+                "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
                 "EposActors",
                 "EposMovieScene",
@@ -53,6 +54,8 @@ public class EposNamingConvention : ModuleRules
                 // [EDITOR] custom engine dependencies
                 "MovieSceneTools",
                 "EditorScriptingUtilities",
+                "PropertyEditor",
+                "EditorStyle",
                 // [EDITOR] custom plugin dependencies
             }
             );
