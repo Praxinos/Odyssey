@@ -604,9 +604,10 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
     FString cloned_camera_path;
     FString cloned_camera_name;
     NamingConvention::GenerateCameraActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), result.mInnerSequence, cloned_camera_path, cloned_camera_name );
+    // We don't keep the same name as the original camera (like plane), to be able to increment the (global) index or to use the new shot name
 
     cloned_camera->SetFolderPath( *cloned_camera_path );
-    FActorLabelUtilities::RenameExistingActor( cloned_camera, cloned_camera_name, true ); // The shot name is displayed in another column in the world outliner
+    FActorLabelUtilities::RenameExistingActor( cloned_camera, cloned_camera_name, false ); // The shot name is displayed in another column in the world outliner
 
     //-
 
@@ -668,7 +669,7 @@ ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence*
     FString cloned_plane_path;
     FString cloned_plane_name;
     NamingConvention::GeneratePlaneActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_plane_path, cloned_plane_name );
-    cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name
+    cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name (let see when shot/camera name are a part of the plane name...)
 
     cloned_plane->SetFolderPath( *cloned_plane_path );
     FActorLabelUtilities::RenameExistingActor( cloned_plane, cloned_plane_name, false ); // The shot name is displayed in another column in the world outliner

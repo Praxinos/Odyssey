@@ -317,14 +317,100 @@ NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieS
 FString
 NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FString& oPath, FString& oName )
 {
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+    UMovieSceneSequence* current_sequence = const_cast<UMovieSceneSequence*>( iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
+
     FString root_sequence_name = FPackageName::GetShortName( iRootSequence->GetPackage()->GetName() );
     FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
 
     FString camera_path = ( iRootSequence != iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
 
-    //---
+    //--- Find all camera track names
 
-    FString camera_name = TEXT( "Camera_1" );
+    //FMovieSceneSequenceID current_sequence_id; // invalid
+    TArray<FString> camera_names;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
+        for( auto pair : map )
+        {
+            UMovieSceneSequence* sequence = pair.Value.GetSequence();
+            FMovieSceneSequenceID sequence_id = pair.Key;
+
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, sequence, sequence_id );
+            if( !camera )
+                continue;
+
+            camera_names.AddUnique( camera->GetActorLabel() );
+
+            //if( pair.Value.GetSequence() == iSequence )
+            //{
+            //    current_sequence_id = pair.Key;
+            //    break;
+            //}
+        }
+    }
+    else
+    {
+        //current_sequence_id = MovieSceneSequenceID::Root;
+        //check( iRootSequence == iSequence );
+    }
+
+    //--- Find all camera indexes inside their names (through a regex)
+
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionCamera camera_settings = settings->CameraNaming;
+
+    //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
+    const FString camera_pattern_regex = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "([0-9]+)" ) )
+                                                               .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
+    const FString camera_pattern_display = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "{camera_index_formated}" ) )
+                                                                .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
+    FRegexPattern camera_pattern = camera_pattern_regex; // Mandatory as FRegexMatcher() takes a const reference
+
+    TArray<int32> list_of_camera_index;
+
+    for( auto camera_name : camera_names )
+    {
+        FRegexMatcher matcher( camera_pattern, camera_name );
+
+        if( matcher.FindNext() )
+        {
+            int32 full_begin = matcher.GetMatchBeginning();
+            int32 full_end = matcher.GetMatchEnding();
+            FTextRange full_range( full_begin, full_end );
+            FString full_string = camera_name.Mid( full_range.BeginIndex, full_range.Len() );
+
+            int32 index_begin = matcher.GetCaptureGroupBeginning( 1 );
+            int32 index_end = matcher.GetCaptureGroupEnding( 1 );
+            FTextRange index_range( index_begin, index_end );
+            FString index_string = camera_name.Mid( index_range.BeginIndex, index_range.Len() );
+
+            int32 index = FCString::Atoi( *index_string );
+
+            list_of_camera_index.Add( index );
+        }
+    }
+
+    list_of_camera_index.Sort( TGreater<int32>() );
+
+    //--- Try to find the new plane name depending of the max existing index
+
+    int32 max_plane_index = list_of_camera_index.Num() ? list_of_camera_index[0] : camera_settings.StartNumber;
+
+    FStringFormatNamedArguments args;
+    args.Add( TEXT( "camera_index_formated" ), FString::Printf( TEXT( "%0*d" ), camera_settings.NumDigits, max_plane_index ) );
+    FString camera_name = FString::Format( *camera_pattern_display, args );
+
+    while( camera_names.Contains( camera_name ) )
+    {
+        max_plane_index += camera_settings.Increment;
+
+        args.FindChecked( TEXT( "camera_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), camera_settings.NumDigits, max_plane_index );
+        camera_name = FString::Format( *camera_pattern_display, args );
+    }
 
     //---
 

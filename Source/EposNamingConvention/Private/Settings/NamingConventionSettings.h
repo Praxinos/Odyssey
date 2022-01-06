@@ -45,6 +45,18 @@ public:
     /** The camera pattern. */
     UPROPERTY( config, EditAnywhere, Category=Camera )
     FString Pattern { TEXT( "camera_{camera-index}" ) };
+
+    /** The first plane number. */
+    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(UIMin = "1", UIMax = "100"))
+    uint32 StartNumber { 10 };
+
+    /** The default plane increment. */
+    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(UIMin = "1", UIMax = "100"))
+    uint32 Increment { 10 };
+
+    /** The number of digits for the plane number. */
+    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(UIMin = "1", UIMax = "10"))
+    uint32 NumDigits { 4 };
 };
 
 //---
@@ -67,6 +79,6 @@ public:
     FNamingConventionPlane PlaneNaming;
 
     /** The naming convention for cameras. */
-    //UPROPERTY(config, EditAnywhere, Category=CameraNamingConvention, meta=(ShowOnlyInnerProperties) )
-    //FNamingConventionCamera CameraNaming;
+    UPROPERTY(config, EditAnywhere, Category=CameraNamingConvention, meta=(ShowOnlyInnerProperties) )
+    FNamingConventionCamera CameraNaming;
 };

@@ -38,3 +38,30 @@ private:
     /** Custom widget to manage pattern text */
     TSharedPtr<SEditableTextBox> mPatternWidget;
 };
+
+//---
+
+struct FNamingConventionCameraCustomization
+    : public IPropertyTypeCustomization
+{
+public:
+    static TSharedRef<IPropertyTypeCustomization> MakeInstance();
+
+    /** IPropertyTypeCustomization interface */
+    virtual void CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
+    virtual void CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
+
+private:
+    FText GetPatternText() const;
+
+    void OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo );
+    void OnPatternTextChanged( const FText& iNewText );
+
+    bool CheckPatternValidity( const FString& iPattern );
+
+private:
+    /** Property handles of the properties we're editing */
+    TSharedPtr<IPropertyHandle> mPatternHandle;
+    /** Custom widget to manage pattern text */
+    TSharedPtr<SEditableTextBox> mPatternWidget;
+};

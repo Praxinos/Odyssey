@@ -29,6 +29,7 @@ FEposNamingConventionModule::RegisterPropertyCustomizations()
 {
     // import the PropertyEditor module...
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
     // to register our custom property
     PropertyModule.RegisterCustomPropertyTypeLayout(
         // This is the name of the Struct
@@ -36,6 +37,10 @@ FEposNamingConventionModule::RegisterPropertyCustomizations()
         FNamingConventionPlane::StaticStruct()->GetFName(),
         // this is where our MakeInstance() method is usefull
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionPlaneCustomization::MakeInstance ) );
+
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        FNamingConventionCamera::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionCameraCustomization::MakeInstance ) );
 
     PropertyModule.NotifyCustomizationModuleChanged();
 }
@@ -47,6 +52,7 @@ FEposNamingConventionModule::UnregisterPropertyCustomizations()
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionPlane::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionCamera::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
     }

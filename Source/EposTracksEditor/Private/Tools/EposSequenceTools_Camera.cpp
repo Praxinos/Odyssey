@@ -217,7 +217,7 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
     NamingConvention::GenerateCameraActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, camera_path, camera_name );
 
     camera->SetFolderPath( *camera_path );
-    FActorLabelUtilities::RenameExistingActor( camera, camera_name, true ); // The shot name is displayed in another column in the world outliner
+    FActorLabelUtilities::RenameExistingActor( camera, camera_name, false ); // The shot name is displayed in another column in the world outliner
 
     camera_name = NamingConvention::GenerateCameraTrackName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, camera );
 
