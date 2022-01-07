@@ -686,7 +686,7 @@ FOdysseyDrawingUndo::SaveDataRedo(UPTRINT iAddress, unsigned int iXTile, unsigne
         ctx.Finish();
 
         //mToBinary << tileBlock->GetArray();
-        mToBinary.SerializeCompressed(tileBlock->Bits(), tileBlock->BytesTotal(), NAME_Zlib);
+        mToBinary.Serialize(tileBlock->Bits(), tileBlock->BytesTotal());
 
         delete tileBlock;
     }
@@ -734,7 +734,7 @@ FOdysseyDrawingUndo::SaveData(const TArray<::ULIS::FRectI>& iRects)
         if (rect.x >= 0 && rect.y >= 0 && rect.w > 0 && rect.h > 0)
         {
             //mToBinary << tileBlocks[i]->GetArray();
-            mToBinary.SerializeCompressed(tileBlocks[i]->Bits(), tileBlocks[i]->BytesTotal(), NAME_Zlib);
+            mToBinary.Serialize(tileBlocks[i]->Bits(), tileBlocks[i]->BytesTotal());
             delete tileBlocks[i];
         }
 
@@ -803,7 +803,7 @@ FOdysseyDrawingUndo::LoadData()
 
             ::ULIS::FBlock* tileBlock = new ::ULIS::FBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
             //Ar << tileBlock->GetArray();
-            Ar.SerializeCompressed(tileBlock->Bits(), tileBlock->BytesTotal(), NAME_Zlib);
+            Ar.Serialize(tileBlock->Bits(), tileBlock->BytesTotal());
 
             ::ULIS::FRectI tileRect(tileX, tileY, sizeX, sizeY);
 
@@ -867,7 +867,7 @@ FOdysseyDrawingUndo::Redo()
 
             ::ULIS::FBlock* tileBlock = new ::ULIS::FBlock(sizeX, sizeY, imageLayer->GetBlock()->Format());
             //Ar << tileBlock->GetArray();
-            Ar.SerializeCompressed(tileBlock->Bits(), tileBlock->BytesTotal(), NAME_Zlib);
+            Ar.Serialize(tileBlock->Bits(), tileBlock->BytesTotal());
 
             ::ULIS::FRectI tileRect(tileX, tileY, sizeX, sizeY);
 
