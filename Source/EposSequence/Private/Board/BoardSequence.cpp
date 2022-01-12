@@ -18,6 +18,8 @@
 
 #include "Board/BoardHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "EposSequenceModule.h"
+#include "INamingFormatter.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h" //TMP
 #include "NoteTrack/MovieSceneNoteTrack.h"
 
@@ -28,6 +30,9 @@ UBoardSequence::UBoardSequence(const FObjectInitializer& ObjectInitializer)
     , MovieScene(nullptr)
 {
     bParentContextsAreSignificant = true;
+
+    FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+    mNamingFormatter = module.GetNamingFormatter<UNamingFormatterBoard>();
 }
 
 void UBoardSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
@@ -148,11 +153,15 @@ UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackCla
     return ETrackSupport::NotSupported;
 }
 
-//FText UBoardSequence::GetDisplayName() const
-//{
-//  return UMovieSceneSequence::GetDisplayName();
-//}
-//
+FText UBoardSequence::GetDisplayName() const
+{
+    //return UMovieSceneSequence::GetDisplayName();
+
+    FString name = mNamingFormatter->FormatName( this );
+
+    return FText::FromString( name );
+}
+
 //void UBoardSequence::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
 //{
 //  Super::GetAssetRegistryTags(OutTags);

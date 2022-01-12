@@ -10,6 +10,8 @@
 
 #include "BoardSequence.generated.h"
 
+class UNamingFormatter;
+
 /*
  * Movie scene animation that represents the hierarchical levels of the storyboard.
  */
@@ -37,8 +39,8 @@ public:
 
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
-//    virtual FText GetDisplayName() const override;
-//
+    virtual FText GetDisplayName() const override;
+
 //    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
 //    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
 #endif
@@ -58,4 +60,34 @@ public:
     // Only one entry should have an invalid guid
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+
+private:
+    UNamingFormatter* mNamingFormatter;
+
+//#if WITH_EDITORONLY_DATA
+//public:
+//    /** The studio name. */
+//    UPROPERTY() //TODO: maybe use UPROPERTY( config, EditAnywhere, Category = Global ) to be editable in the UI ?
+//    FString StudioName { TEXT( "MyStudio" ) };
+//
+//    /** The studio accronym. */
+//    UPROPERTY()
+//    FString StudioAccronym { TEXT( "MS" ) };
+//
+//    /** The title of the production. */
+//    UPROPERTY()
+//    FString ProductionName { TEXT( "MyProductionTitle" ) };
+//
+//    /** The accronym of the production. */
+//    UPROPERTY()
+//    FString ProductionAccronym { TEXT( "MPT" ) };
+//
+//    /** The initials of the user. */
+//    UPROPERTY()
+//    FString Initials { TEXT( "MI" ) };
+//
+//    /** The current index. */
+//    UPROPERTY()
+//    int32 Index { 0 };
+//#endif
 };

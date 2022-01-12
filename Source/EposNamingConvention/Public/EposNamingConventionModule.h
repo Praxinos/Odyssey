@@ -6,14 +6,27 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FEposNamingConventionModule : public IModuleInterface
+class UDefaultNamingFormatterBoard;
+
+class FEposNamingConventionModule
+    : public IModuleInterface
+    , public FGCObject
 {
 public:
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
 
+    /** FGCObject interface */
+    virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+
 private:
     void RegisterPropertyCustomizations();
     void UnregisterPropertyCustomizations();
+
+    void RegisterNamingFormatter();
+    void UnregisterNamingFormatter();
+
+private:
+    UDefaultNamingFormatterBoard* mNamingFormatterBoard;
 };

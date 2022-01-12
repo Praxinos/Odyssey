@@ -59,6 +59,33 @@ public:
     uint32 NumDigits { 4 };
 };
 
+USTRUCT()
+struct FNamingConventionGlobal
+{
+    GENERATED_BODY()
+
+public:
+    /** The studio name. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString StudioName { TEXT( "MyStudio" ) };
+
+    /** The studio accronym. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString StudioAccronym { TEXT( "MS" ) };
+
+    /** The title of the production. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString ProductionName { TEXT( "MyProductionTitle" ) };
+
+    /** The accronym of the production. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString ProductionAccronym { TEXT( "MPT" ) };
+
+    /** The initials of the user. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString Initials { TEXT( "MI" ) };
+};
+
 //---
 
 // Settings for the naming convention
@@ -74,6 +101,10 @@ public:
     virtual FName GetCategoryName() const override;
 
 public:
+    /** The naming convention for boards. */
+    UPROPERTY(config, EditAnywhere, Category=GlobalNamingConvention, meta=(ShowOnlyInnerProperties) )
+    FNamingConventionGlobal GlobalNaming;
+
     /** The naming convention for planes. */
     UPROPERTY(config, EditAnywhere, Category=PlaneNamingConvention, meta=(ShowOnlyInnerProperties) )
     FNamingConventionPlane PlaneNaming;

@@ -5,6 +5,8 @@
 
 #include "PropertyEditorModule.h"
 
+#include "EposSequenceModule.h"
+#include "NamingFormatter.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Settings/NamingConventionSettingsCustomization.h"
 
@@ -14,12 +16,21 @@ void
 FEposNamingConventionModule::StartupModule()
 {
     RegisterPropertyCustomizations();
+    RegisterNamingFormatter();
 }
 
 void
 FEposNamingConventionModule::ShutdownModule()
 {
     UnregisterPropertyCustomizations();
+    UnregisterNamingFormatter();
+}
+
+void
+FEposNamingConventionModule::AddReferencedObjects( FReferenceCollector& Collector )
+{
+    if( mNamingFormatterBoard )
+        Collector.AddReferencedObject( mNamingFormatterBoard );
 }
 
 //---
@@ -56,6 +67,23 @@ FEposNamingConventionModule::UnregisterPropertyCustomizations()
 
         PropertyModule.NotifyCustomizationModuleChanged();
     }
+}
+
+void
+FEposNamingConventionModule::RegisterNamingFormatter()
+{
+    FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+
+    mNamingFormatterBoard = NewObject<UDefaultNamingFormatterBoard>();
+    module.RegisterNamingFormatter( mNamingFormatterBoard );
+}
+
+void
+FEposNamingConventionModule::UnregisterNamingFormatter()
+{
+    FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+
+    module.UnregisterNamingFormatter( mNamingFormatterBoard );
 }
 
 #undef LOCTEXT_NAMESPACE
