@@ -11,7 +11,6 @@
 #include "SOdysseyPaintModifiers.h"
 #include "SOdysseyStrokeOptions.h"
 #include "SOdysseyTextureDetails.h"
-#include "UndoHistory/SOdysseyUndoHistory.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyTextureEditorLayerStackTab.h"
 #include "OdysseyTextureEditorTextureDetailsTab.h"

@@ -15,12 +15,10 @@
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
     delete mPaintEngine;
-    delete mUndoHistory;
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
-    : mUndoHistory( new FOdysseyUndoHistory() )
-    , mPaintEngine( new FOdysseyPaintEngine(mUndoHistory) )
+    : mPaintEngine( new FOdysseyPaintEngine() )
 	, mPaintColor( ::ULIS::FColor::RGBA8( 0, 0, 0 ) )
     , mDrawBrushPreview( true )
 {

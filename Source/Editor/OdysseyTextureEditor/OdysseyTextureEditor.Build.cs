@@ -47,7 +47,6 @@ public class OdysseyTextureEditor : ModuleRules
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyTexture",
-                "OdysseyTransaction",
             }
         );
 

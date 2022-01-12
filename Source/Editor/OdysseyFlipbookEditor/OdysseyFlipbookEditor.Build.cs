@@ -44,7 +44,6 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyPainterEditor",
                 "OdysseyPaintEngine",
                 "OdysseyStrokePipeline",
-                "OdysseyTransaction",
                 "OdysseyStylusInput",
                 "OdysseyFlipbook",
                 "OdysseyTexture",

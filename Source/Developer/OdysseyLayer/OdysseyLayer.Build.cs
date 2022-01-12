@@ -14,10 +14,8 @@ public class OdysseyLayer : ModuleRules
                 "Core",
                 "Engine",
                 "OdysseyImaging",
-                "OdysseyTransaction",
                 "ULIS",
                 "ULISLoader",
-                "OdysseySerializable",
                 "OdysseyMaths"
             }
         );

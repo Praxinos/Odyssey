@@ -40,7 +40,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
                 "OdysseyStrokePipeline",
-                "OdysseyTransaction",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyWidgets"

@@ -51,17 +51,7 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseySerializable",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyStrokePipeline",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyTransaction",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },

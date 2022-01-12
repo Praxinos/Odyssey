@@ -7,7 +7,6 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
-#include "OdysseyTransactionnable.h"
 #include "OdysseyBrushBlueprint.h"
 #include <ULIS>
 #include <queue>
@@ -58,7 +57,7 @@ protected:
 public:
     // Construction / Destruction
     virtual ~FOdysseyPaintEngine();
-    FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryRef = 0 );
+    FOdysseyPaintEngine();
 
 public:
     // Paint Engine API

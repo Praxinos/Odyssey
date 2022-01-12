@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.tpp": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "ulis": "cpp"
     }
 }

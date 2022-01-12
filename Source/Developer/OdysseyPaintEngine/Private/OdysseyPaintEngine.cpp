@@ -32,7 +32,7 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
         delete  mBrushCursorPreviewSurface;
 }
 
-FOdysseyPaintEngine::FOdysseyPaintEngine( FOdysseyUndoHistory* iUndoHistoryPtr )
+FOdysseyPaintEngine::FOdysseyPaintEngine()
     : mPaintState(kIDLE)
     , mBrush(nullptr)
     , mIsLocked(false)

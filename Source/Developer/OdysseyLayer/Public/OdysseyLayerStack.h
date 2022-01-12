@@ -10,7 +10,6 @@
 #include "OdysseyImageLayer.h"
 #include "OdysseyFolderLayer.h"
 #include "OdysseyRootLayer.h"
-#include "IOdysseySerializable.h"
 #include <ULIS>
 
 class FOdysseyDrawingUndo;
