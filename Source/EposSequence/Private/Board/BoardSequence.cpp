@@ -193,6 +193,58 @@ FText UBoardSequence::GetDisplayName() const
 
 //---
 
+void
+UBoardSequence::AddAssetUserData( UAssetUserData* iUserData )
+{
+    if( !iUserData )
+        return;
+
+    UAssetUserData* existing_data = GetAssetUserDataOfClass( iUserData->GetClass() );
+
+    if( existing_data )
+        mAssetUserData.Remove( existing_data );
+
+    mAssetUserData.Add( iUserData );
+}
+
+UAssetUserData*
+UBoardSequence::GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
+{
+    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
+    {
+        UAssetUserData* data = mAssetUserData[i];
+        if( data && data->IsA( iUserDataClass ) )
+        {
+            return data;
+        }
+    }
+
+    return nullptr;
+}
+
+const TArray<UAssetUserData*>*
+UBoardSequence::GetAssetUserDataArray() const
+{
+    return &mAssetUserData;
+}
+
+void
+UBoardSequence::RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
+{
+    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
+    {
+        UAssetUserData* data = mAssetUserData[i];
+        if( data != NULL && data->IsA( iUserDataClass ) )
+        {
+            mAssetUserData.RemoveAt( i );
+
+            return;
+        }
+    }
+}
+
+//---
+
 bool
 UBoardSequence::IsResizable() const //override
 {

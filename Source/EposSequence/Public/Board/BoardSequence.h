@@ -12,12 +12,45 @@
 
 class UNamingFormatter;
 
+UCLASS()
+ class EPOSSEQUENCE_API UBoardAssetUserData
+    : public UAssetUserData
+ {
+    GENERATED_BODY()
+
+public:
+    /** The studio name. */
+    UPROPERTY() //TODO: maybe use UPROPERTY( config, EditAnywhere, Category = Global ) to be editable in the UI ?
+    FString StudioName { TEXT( "MyStudio" ) };
+
+    /** The studio accronym. */
+    UPROPERTY()
+    FString StudioAccronym { TEXT( "MS" ) };
+
+    /** The title of the production. */
+    UPROPERTY()
+    FString ProductionName { TEXT( "MyProductionTitle" ) };
+
+    /** The accronym of the production. */
+    UPROPERTY()
+    FString ProductionAccronym { TEXT( "MPT" ) };
+
+    /** The initials of the user. */
+    UPROPERTY()
+    FString Initials { TEXT( "MI" ) };
+
+    /** The current index. */
+    UPROPERTY()
+    int32 Index { 0 };
+ };
+
 /*
  * Movie scene animation that represents the hierarchical levels of the storyboard.
  */
 UCLASS( BlueprintType )
 class EPOSSEQUENCE_API UBoardSequence
     : public UEposMovieSceneSequence
+    , public IInterface_AssetUserData
 {
 public:
     GENERATED_BODY()
@@ -45,6 +78,12 @@ public:
 //    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
 #endif
 
+    //~ IInterface_AssetUserData interface
+    virtual void AddAssetUserData( UAssetUserData* iUserData );
+    virtual UAssetUserData* GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass );
+    virtual const TArray<UAssetUserData*>* GetAssetUserDataArray() const;
+    virtual void RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass );
+
     //~ UEposMovieSceneSequence interface
     virtual bool IsResizable() const override;
     virtual void Resize( int32 iNewDuration ) override;
@@ -64,30 +103,5 @@ public:
 private:
     UNamingFormatter* mNamingFormatter;
 
-//#if WITH_EDITORONLY_DATA
-//public:
-//    /** The studio name. */
-//    UPROPERTY() //TODO: maybe use UPROPERTY( config, EditAnywhere, Category = Global ) to be editable in the UI ?
-//    FString StudioName { TEXT( "MyStudio" ) };
-//
-//    /** The studio accronym. */
-//    UPROPERTY()
-//    FString StudioAccronym { TEXT( "MS" ) };
-//
-//    /** The title of the production. */
-//    UPROPERTY()
-//    FString ProductionName { TEXT( "MyProductionTitle" ) };
-//
-//    /** The accronym of the production. */
-//    UPROPERTY()
-//    FString ProductionAccronym { TEXT( "MPT" ) };
-//
-//    /** The initials of the user. */
-//    UPROPERTY()
-//    FString Initials { TEXT( "MI" ) };
-//
-//    /** The current index. */
-//    UPROPERTY()
-//    int32 Index { 0 };
-//#endif
+    TArray<UAssetUserData*> mAssetUserData;
 };
