@@ -60,6 +60,29 @@ public:
 };
 
 USTRUCT()
+struct FNamingConventionBoard
+{
+    GENERATED_BODY()
+
+public:
+    /** The camera pattern. */
+    UPROPERTY( config, EditAnywhere, Category=Board )
+    FString Pattern { TEXT( "board_{board-index}" ) };
+
+    /** The first plane number. */
+    UPROPERTY(config, EditAnywhere, Category=Board, meta=(UIMin = "1", UIMax = "100"))
+    uint32 StartNumber { 10 };
+
+    /** The default plane increment. */
+    UPROPERTY(config, EditAnywhere, Category=Board, meta=(UIMin = "1", UIMax = "100"))
+    uint32 Increment { 10 };
+
+    /** The number of digits for the plane number. */
+    UPROPERTY(config, EditAnywhere, Category=Board, meta=(UIMin = "1", UIMax = "10"))
+    uint32 NumDigits { 4 };
+};
+
+USTRUCT()
 struct FNamingConventionGlobal
 {
     GENERATED_BODY()
@@ -104,6 +127,10 @@ public:
     /** The naming convention for boards. */
     UPROPERTY(config, EditAnywhere, Category=GlobalNamingConvention, meta=(ShowOnlyInnerProperties) )
     FNamingConventionGlobal GlobalNaming;
+
+    /** The naming convention for boards. */
+    UPROPERTY(config, EditAnywhere, Category=BoardNamingConvention, meta=(ShowOnlyInnerProperties) )
+    FNamingConventionBoard BoardNaming;
 
     /** The naming convention for planes. */
     UPROPERTY(config, EditAnywhere, Category=PlaneNamingConvention, meta=(ShowOnlyInnerProperties) )

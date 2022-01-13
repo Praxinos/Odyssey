@@ -736,6 +736,92 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
 
 //static
 FString
+NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents )
+{
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    //---
+
+    FString sequence_path;
+
+    // Try to find the better path from all existing sequences
+    TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+    if( map_sequence_paths.Num() )
+    {
+        TArray<FString> keys;
+        map_sequence_paths.GetKeys( keys );
+
+        sequence_path = keys[0];
+    }
+
+    if( sequence_path.IsEmpty() )
+    {
+        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        sequence_path = root_path;
+    }
+
+    //--- Find all board names
+
+    TArray<UBoardSequence*> board_sequences;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
+        for( auto pair : map )
+        {
+            UMovieSceneSequence* sequence = pair.Value.GetSequence();
+            FMovieSceneSequenceID sequence_id = pair.Key;
+
+            UBoardSequence* board_sequence = Cast<UBoardSequence>( sequence );
+            if( !board_sequence )
+                continue;
+
+            board_sequences.AddUnique( board_sequence );
+        }
+    }
+
+    //--- Compute the next valid board index
+
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionGlobal global_settings = settings->GlobalNaming;
+    FNamingConventionBoard board_settings = settings->BoardNaming;
+
+    int32 max_board_index = INDEX_NONE;
+
+    for( auto board_sequence : board_sequences )
+    {
+        const UBoardAssetUserData* data = board_sequence->GetAssetUserData<UBoardAssetUserData>();
+        if( !data )
+            continue;
+
+        if( data->Index > max_board_index )
+            max_board_index = data->Index;
+    }
+
+    if( max_board_index != INDEX_NONE )
+        max_board_index += board_settings.Increment;
+    else
+        max_board_index = board_settings.StartNumber;
+
+    //---
+
+    oComponents.mNextIndex = max_board_index;
+
+    oComponents.mStudioName = global_settings.StudioName;
+    oComponents.mStudioAccronym = global_settings.StudioAccronym;
+    oComponents.mProductionName = global_settings.ProductionName;
+    oComponents.mProductionAccronym = global_settings.ProductionAccronym;
+    oComponents.mInitials = global_settings.Initials;
+
+    oName = FGuid::NewGuid().ToString();
+    oPath = sequence_path;
+
+    return oPath / oName;
+}
+
+//static
+FString
 NamingConvention::GenerateSequenceAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, UClass* iType, FString& oPath, FString& oName )
 {
     check( iType->IsChildOf<UBoardSequence>() || iType->IsChildOf<UShotSequence>() );

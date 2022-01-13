@@ -392,7 +392,6 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
                     //    newAsset = assetTools.CreateAssetWithDialog( iNewSequenceName, iNewSequencePath, SequenceClass::StaticClass(), factory );
                     //else
                         newAsset = assetTools.CreateAsset( iNewSequenceName, iNewSequencePath, SequenceClass::StaticClass(), factory );
-
                 }
                 break;
             }
@@ -437,9 +436,32 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
 
     FString sequence_path;
     FString sequence_name;
-    FString sequence_pathname = NamingConvention::GenerateSequenceAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), SequenceClass::StaticClass(), sequence_path, sequence_name );
+    FString sequence_pathname;
+    NamingConvention::FBoardComponents board_components;
+
+    if( SequenceClass::StaticClass() == UBoardSequence::StaticClass() )
+        sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, board_components );
+    else
+        sequence_pathname = NamingConvention::GenerateSequenceAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), SequenceClass::StaticClass(), sequence_path, sequence_name );
 
     UMovieSceneSubSection* new_section = CreateSequenceInternal<SequenceClass>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
+
+    if( new_section && new_section->GetSequence() && new_section->GetSequence()->IsA<UBoardSequence>() )
+    {
+        UBoardSequence* board_sequence = Cast<UBoardSequence>( new_section->GetSequence() );
+
+        UBoardAssetUserData* data = NewObject<UBoardAssetUserData>( board_sequence, NAME_None, RF_Public );
+
+        data->Index = board_components.mNextIndex;
+
+        data->StudioName = board_components.mStudioName;
+        data->StudioAccronym = board_components.mStudioAccronym;
+        data->ProductionName = board_components.mProductionName;
+        data->ProductionAccronym = board_components.mProductionAccronym;
+        data->Initials = board_components.mInitials;
+
+        board_sequence->AddAssetUserData( data );
+    }
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     BoardSequenceTools::UpdateViewRange( iSequencer, new_section ? new_section->GetTrueRange() : TRange<FFrameNumber>::Empty() );

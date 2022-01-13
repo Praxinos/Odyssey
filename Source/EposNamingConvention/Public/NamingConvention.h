@@ -30,6 +30,18 @@ public:
     static FString GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPath, FString& oName );
 
 public:
+    struct FBoardComponents
+    {
+        int32 mNextIndex;
+
+        FString mStudioName;
+        FString mStudioAccronym;
+        FString mProductionName;
+        FString mProductionAccronym;
+        FString mInitials;
+    };
+    static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents );
+
     static FString GenerateSequenceAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, UClass* iType, FString& oPath, FString& oName );
 
 private:
