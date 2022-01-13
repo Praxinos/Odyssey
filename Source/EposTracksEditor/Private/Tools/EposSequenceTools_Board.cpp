@@ -453,36 +453,19 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
 
     if( new_section && new_section->GetSequence() && new_section->GetSequence()->IsA<UBoardSequence>() )
     {
-        UBoardSequence* board_sequence = Cast<UBoardSequence>( new_section->GetSequence() );
+        UBoardSequence* board_sequence = CastChecked<UBoardSequence>( new_section->GetSequence() );
 
-        UBoardAssetUserData* data = NewObject<UBoardAssetUserData>( board_sequence, NAME_None, RF_Public );
+        FBoardNamingElements& board_elements = board_sequence->GetNamingElements();
 
-        data->Index = board_components.mNextIndex;
-
-        data->StudioName = board_components.mStudioName;
-        data->StudioAccronym = board_components.mStudioAccronym;
-        data->ProductionName = board_components.mProductionName;
-        data->ProductionAccronym = board_components.mProductionAccronym;
-        data->Initials = board_components.mInitials;
-
-        board_sequence->AddAssetUserData( data );
+        board_components.ToBoardElements( board_elements );
     }
     else
     {
-        UShotSequence* shot_sequence = Cast<UShotSequence>( new_section->GetSequence() );
+        UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
 
-        UShotAssetUserData* data = NewObject<UShotAssetUserData>( shot_sequence, NAME_None, RF_Public );
+        FShotNamingElements& shot_elements = shot_sequence->GetNamingElements();
 
-        data->Index = shot_components.mNextIndex;
-        data->TakeIndex = shot_components.mNextTake;
-
-        data->StudioName = shot_components.mStudioName;
-        data->StudioAccronym = shot_components.mStudioAccronym;
-        data->ProductionName = shot_components.mProductionName;
-        data->ProductionAccronym = shot_components.mProductionAccronym;
-        data->Initials = shot_components.mInitials;
-
-        shot_sequence->AddAssetUserData( data );
+        shot_components.ToShotElements( shot_elements );
     }
 
     //---
@@ -610,20 +593,11 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 
     if( new_section->GetSequence() )
     {
-        UShotSequence* shot_sequence = Cast<UShotSequence>( new_section->GetSequence() );
+        UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
 
-        UShotAssetUserData* data = NewObject<UShotAssetUserData>( shot_sequence, NAME_None, RF_Public );
+        FShotNamingElements& shot_elements = shot_sequence->GetNamingElements();
 
-        data->Index = shot_components.mNextIndex;
-        data->TakeIndex = shot_components.mNextTake;
-
-        data->StudioName = shot_components.mStudioName;
-        data->StudioAccronym = shot_components.mStudioAccronym;
-        data->ProductionName = shot_components.mProductionName;
-        data->ProductionAccronym = shot_components.mProductionAccronym;
-        data->Initials = shot_components.mInitials;
-
-        shot_sequence->AddAssetUserData( data );
+        shot_components.ToShotElements( shot_elements );
     }
 
     //---

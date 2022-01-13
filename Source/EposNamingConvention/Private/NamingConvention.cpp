@@ -734,6 +734,31 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
 
 //---
 
+void
+NamingConvention::FBoardComponents::ToBoardElements( FBoardNamingElements& oElements )
+{
+    oElements.Index = mNextIndex;
+
+    oElements.StudioName = mStudioName;
+    oElements.StudioAccronym = mStudioAccronym;
+    oElements.ProductionName = mProductionName;
+    oElements.ProductionAccronym = mProductionAccronym;
+    oElements.Initials = mInitials;
+}
+
+void
+NamingConvention::FShotComponents::ToShotElements( FShotNamingElements& oElements )
+{
+    oElements.Index = mNextIndex;
+    oElements.TakeIndex = mNextTake;
+
+    oElements.StudioName = mStudioName;
+    oElements.StudioAccronym = mStudioAccronym;
+    oElements.ProductionName = mProductionName;
+    oElements.ProductionAccronym = mProductionAccronym;
+    oElements.Initials = mInitials;
+}
+
 //static
 FString
 NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents )
@@ -791,12 +816,12 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     for( auto board_sequence : board_sequences )
     {
-        const UBoardAssetUserData* data = board_sequence->GetAssetUserData<UBoardAssetUserData>();
-        if( !data )
+        const FBoardNamingElements& elements = board_sequence->GetNamingElements();
+        if( !elements.IsValid() )
             continue;
 
-        if( data->Index > max_board_index )
-            max_board_index = data->Index;
+        if( elements.Index > max_board_index )
+            max_board_index = elements.Index;
     }
 
     if( max_board_index != INDEX_NONE )
@@ -877,12 +902,12 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     for( auto shot_sequence : shot_sequences )
     {
-        const UShotAssetUserData* data = shot_sequence->GetAssetUserData<UShotAssetUserData>();
-        if( !data )
+        const FShotNamingElements& elements = shot_sequence->GetNamingElements();
+        if( !elements.IsValid() )
             continue;
 
-        if( data->Index > max_shot_index )
-            max_shot_index = data->Index;
+        if( elements.Index > max_shot_index )
+            max_shot_index = elements.Index;
     }
 
     if( max_shot_index != INDEX_NONE )

@@ -18,15 +18,15 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
     FNamingConventionBoard board_settings = settings->BoardNaming;
 
-    const UBoardAssetUserData* data = board_sequence->GetAssetUserData<UBoardAssetUserData>();
-    if( !data )
+    const FBoardNamingElements& naming_elements = board_sequence->GetNamingElements();
+    if( !naming_elements.IsValid() )
         return board_sequence->GetName();
 
-    const FString name = board_settings.Pattern.Replace( TEXT( "{board-index}" ), *FString::Printf( TEXT("%0*d"), board_settings.IndexFormat.NumDigits, data->Index ) )
-                                               .Replace( TEXT( "{studio-name}" ), *data->StudioName )
-                                               .Replace( TEXT( "{studio-accronym}" ), *data->StudioAccronym )
-                                               .Replace( TEXT( "{production-name}" ), *data->ProductionName )
-                                               .Replace( TEXT( "{production-accronym}" ), *data->ProductionAccronym );
+    const FString name = board_settings.Pattern.Replace( TEXT( "{board-index}" ), *FString::Printf( TEXT("%0*d"), board_settings.IndexFormat.NumDigits, naming_elements.Index ) )
+                                               .Replace( TEXT( "{studio-name}" ), *naming_elements.StudioName )
+                                               .Replace( TEXT( "{studio-accronym}" ), *naming_elements.StudioAccronym )
+                                               .Replace( TEXT( "{production-name}" ), *naming_elements.ProductionName )
+                                               .Replace( TEXT( "{production-accronym}" ), *naming_elements.ProductionAccronym );
 
     return name;
     //return board_sequence->GetName();
@@ -37,22 +37,21 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
 FString
 UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
 {
-    const UShotSequence* const_shot_sequence = Cast<UShotSequence>( iContext );
-    UShotSequence* shot_sequence = const_cast<UShotSequence*>( const_shot_sequence );
+    const UShotSequence* shot_sequence = Cast<UShotSequence>( iContext );
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
     FNamingConventionShot shot_settings = settings->ShotNaming;
 
-    const UShotAssetUserData* data = shot_sequence->GetAssetUserData<UShotAssetUserData>();
-    if( !data )
+    const FShotNamingElements& naming_elements = shot_sequence->GetNamingElements();
+    if( !naming_elements.IsValid() )
         return shot_sequence->GetName();
 
-    const FString name = shot_settings.Pattern.Replace( TEXT( "{shot-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.IndexFormat.NumDigits, data->Index ) )
-                                              .Replace( TEXT( "{take-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, data->TakeIndex ) )
-                                              .Replace( TEXT( "{studio-name}" ), *data->StudioName )
-                                              .Replace( TEXT( "{studio-accronym}" ), *data->StudioAccronym )
-                                              .Replace( TEXT( "{production-name}" ), *data->ProductionName )
-                                              .Replace( TEXT( "{production-accronym}" ), *data->ProductionAccronym );
+    const FString name = shot_settings.Pattern.Replace( TEXT( "{shot-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.IndexFormat.NumDigits, naming_elements.Index ) )
+                                              .Replace( TEXT( "{take-index}" ), *FString::Printf( TEXT( "%0*d" ), shot_settings.TakeFormat.NumDigits, naming_elements.TakeIndex ) )
+                                              .Replace( TEXT( "{studio-name}" ), *naming_elements.StudioName )
+                                              .Replace( TEXT( "{studio-accronym}" ), *naming_elements.StudioAccronym )
+                                              .Replace( TEXT( "{production-name}" ), *naming_elements.ProductionName )
+                                              .Replace( TEXT( "{production-accronym}" ), *naming_elements.ProductionAccronym );
 
     return name;
     //return shot->GetName();

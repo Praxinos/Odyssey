@@ -379,55 +379,27 @@ void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMe
 
 //---
 
-void
-UShotSequence::AddAssetUserData( UAssetUserData* iUserData )
+bool
+FShotNamingElements::IsValid() const
 {
-    if( !iUserData )
-        return;
-
-    UAssetUserData* existing_data = GetAssetUserDataOfClass( iUserData->GetClass() );
-
-    if( existing_data )
-        mAssetUserData.Remove( existing_data );
-
-    mAssetUserData.Add( iUserData );
+    return Index > INDEX_NONE && TakeIndex > INDEX_NONE;
 }
 
-UAssetUserData*
-UShotSequence::GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
-{
-    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
-    {
-        UAssetUserData* data = mAssetUserData[i];
-        if( data && data->IsA( iUserDataClass ) )
-        {
-            return data;
-        }
-    }
+#if WITH_EDITOR
 
-    return nullptr;
+FShotNamingElements&
+UShotSequence::GetNamingElements()
+{
+    return NamingElements;
 }
 
-const TArray<UAssetUserData*>*
-UShotSequence::GetAssetUserDataArray() const
+const FShotNamingElements&
+UShotSequence::GetNamingElements() const
 {
-    return &mAssetUserData;
+    return NamingElements;
 }
 
-void
-UShotSequence::RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
-{
-    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
-    {
-        UAssetUserData* data = mAssetUserData[i];
-        if( data != NULL && data->IsA( iUserDataClass ) )
-        {
-            mAssetUserData.RemoveAt( i );
-
-            return;
-        }
-    }
-}
+#endif
 
 //---
 

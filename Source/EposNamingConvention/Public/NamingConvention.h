@@ -9,6 +9,8 @@ class ACineCameraActor;
 class APlaneActor;
 class IMovieScenePlayer;
 class UMovieSceneSequence;
+struct FBoardNamingElements;
+struct FShotNamingElements;
 
 class EPOSNAMINGCONVENTION_API NamingConvention
 {
@@ -30,7 +32,7 @@ public:
     static FString GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPath, FString& oName );
 
 public:
-    struct FBoardComponents
+    struct EPOSNAMINGCONVENTION_API FBoardComponents
     {
         int32 mNextIndex;
 
@@ -39,13 +41,23 @@ public:
         FString mProductionName;
         FString mProductionAccronym;
         FString mInitials;
+
+        void ToBoardElements( FBoardNamingElements& oElements );
     };
     static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents );
 
-    struct FShotComponents
-        : public FBoardComponents
+    struct EPOSNAMINGCONVENTION_API FShotComponents
     {
+        int32 mNextIndex;
         int32 mNextTake;
+
+        FString mStudioName;
+        FString mStudioAccronym;
+        FString mProductionName;
+        FString mProductionAccronym;
+        FString mInitials;
+
+        void ToShotElements( FShotNamingElements& oElements );
     };
     static FString GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotComponents& oComponents );
 

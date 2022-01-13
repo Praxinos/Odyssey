@@ -12,41 +12,43 @@
 
 class UNamingFormatter;
 
-UCLASS()
- class EPOSSEQUENCE_API UShotAssetUserData
-    : public UAssetUserData
- {
+USTRUCT()
+struct EPOSSEQUENCE_API FShotNamingElements
+{
     GENERATED_BODY()
 
 public:
+    bool IsValid() const;
+
+public:
     /** The studio name. */
-    UPROPERTY() //TODO: maybe use UPROPERTY( config, EditAnywhere, Category = Global ) to be editable in the UI ?
-    FString StudioName { TEXT( "MyStudio" ) };
+    UPROPERTY( EditAnywhere )
+    FString StudioName;
 
     /** The studio accronym. */
-    UPROPERTY()
-    FString StudioAccronym { TEXT( "MS" ) };
+    UPROPERTY( EditAnywhere )
+    FString StudioAccronym;
 
     /** The title of the production. */
-    UPROPERTY()
-    FString ProductionName { TEXT( "MyProductionTitle" ) };
+    UPROPERTY( EditAnywhere )
+    FString ProductionName;
 
     /** The accronym of the production. */
-    UPROPERTY()
-    FString ProductionAccronym { TEXT( "MPT" ) };
+    UPROPERTY( EditAnywhere )
+    FString ProductionAccronym;
 
     /** The initials of the user. */
-    UPROPERTY()
-    FString Initials { TEXT( "MI" ) };
+    UPROPERTY( EditAnywhere )
+    FString Initials;
 
     /** The current index. */
-    UPROPERTY()
-    int32 Index { 0 };
+    UPROPERTY( EditAnywhere )
+    int32 Index { INDEX_NONE };
 
     /** The current take index. */
-    UPROPERTY()
-    int32 TakeIndex { 0 };
- };
+    UPROPERTY( EditAnywhere )
+    int32 TakeIndex { INDEX_NONE };
+};
 
 /*
  * Movie scene animation that represents the last level of the storyboard.
@@ -54,7 +56,6 @@ public:
 UCLASS( BlueprintType )
 class EPOSSEQUENCE_API UShotSequence
     : public UEposMovieSceneSequence
-    , public IInterface_AssetUserData
 {
 public:
     GENERATED_BODY()
@@ -82,18 +83,17 @@ public:
     virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
 #endif
 
-    //~ IInterface_AssetUserData interface
-    virtual void AddAssetUserData( UAssetUserData* iUserData );
-    virtual UAssetUserData* GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass );
-    virtual const TArray<UAssetUserData*>* GetAssetUserDataArray() const;
-    virtual void RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass );
-
     //~ UEposMovieSceneSequence interface
     virtual bool IsResizable() const override;
     virtual void Resize( int32 iNewDuration ) override;
 
     virtual void SectionResized( UMovieSceneSection* iSection ) override;
     virtual void SectionAddedOrRemoved( UMovieSceneSection* iSection ) override;
+
+#if WITH_EDITOR
+    FShotNamingElements& GetNamingElements();
+    const FShotNamingElements& GetNamingElements() const;
+#endif
 
 public:
     UPROPERTY()
@@ -115,5 +115,6 @@ public:
 private:
     UNamingFormatter* mNamingFormatter;
 
-    TArray<UAssetUserData*> mAssetUserData;
+    UPROPERTY(EditAnywhere, Category=NamingConvention)
+    FShotNamingElements NamingElements;
 };

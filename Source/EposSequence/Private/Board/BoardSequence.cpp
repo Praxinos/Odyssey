@@ -193,55 +193,27 @@ FText UBoardSequence::GetDisplayName() const
 
 //---
 
-void
-UBoardSequence::AddAssetUserData( UAssetUserData* iUserData )
+bool
+FBoardNamingElements::IsValid() const
 {
-    if( !iUserData )
-        return;
-
-    UAssetUserData* existing_data = GetAssetUserDataOfClass( iUserData->GetClass() );
-
-    if( existing_data )
-        mAssetUserData.Remove( existing_data );
-
-    mAssetUserData.Add( iUserData );
+    return Index > INDEX_NONE;
 }
 
-UAssetUserData*
-UBoardSequence::GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
-{
-    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
-    {
-        UAssetUserData* data = mAssetUserData[i];
-        if( data && data->IsA( iUserDataClass ) )
-        {
-            return data;
-        }
-    }
+#if WITH_EDITOR
 
-    return nullptr;
+FBoardNamingElements&
+UBoardSequence::GetNamingElements()
+{
+    return NamingElements;
 }
 
-const TArray<UAssetUserData*>*
-UBoardSequence::GetAssetUserDataArray() const
+const FBoardNamingElements&
+UBoardSequence::GetNamingElements() const
 {
-    return &mAssetUserData;
+    return NamingElements;
 }
 
-void
-UBoardSequence::RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
-{
-    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
-    {
-        UAssetUserData* data = mAssetUserData[i];
-        if( data != NULL && data->IsA( iUserDataClass ) )
-        {
-            mAssetUserData.RemoveAt( i );
-
-            return;
-        }
-    }
-}
+#endif
 
 //---
 
