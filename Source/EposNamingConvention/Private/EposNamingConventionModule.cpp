@@ -12,6 +12,8 @@
 
 #define LOCTEXT_NAMESPACE "FEposNamingConventionModule"
 
+//---
+
 void
 FEposNamingConventionModule::StartupModule()
 {
@@ -31,6 +33,8 @@ FEposNamingConventionModule::AddReferencedObjects( FReferenceCollector& Collecto
 {
     if( mNamingFormatterBoard )
         Collector.AddReferencedObject( mNamingFormatterBoard );
+    if( mNamingFormatterShot )
+        Collector.AddReferencedObject( mNamingFormatterShot );
 }
 
 //---
@@ -76,6 +80,9 @@ FEposNamingConventionModule::RegisterNamingFormatter()
 
     mNamingFormatterBoard = NewObject<UDefaultNamingFormatterBoard>();
     module.RegisterNamingFormatter( mNamingFormatterBoard );
+
+    mNamingFormatterShot = NewObject<UDefaultNamingFormatterShot>();
+    module.RegisterNamingFormatter( mNamingFormatterShot );
 }
 
 void
@@ -84,6 +91,7 @@ FEposNamingConventionModule::UnregisterNamingFormatter()
     FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
 
     module.UnregisterNamingFormatter( mNamingFormatterBoard );
+    module.UnregisterNamingFormatter( mNamingFormatterShot );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -11,6 +11,27 @@
 //---
 
 USTRUCT()
+struct FNamingConventionNumberFormat
+{
+    GENERATED_BODY()
+
+public:
+    /** The first number. */
+    UPROPERTY(config, EditAnywhere, meta=(UIMin = "1", UIMax = "100"))
+    uint32 StartNumber { 10 };
+
+    /** The default increment. */
+    UPROPERTY(config, EditAnywhere, meta=(UIMin = "1", UIMax = "100"))
+    uint32 Increment { 10 };
+
+    /** The number of digits. */
+    UPROPERTY(config, EditAnywhere, meta=(UIMin = "1", UIMax = "10"))
+    uint32 NumDigits { 4 };
+};
+
+//---
+
+USTRUCT()
 struct FNamingConventionPlane
 {
     GENERATED_BODY()
@@ -60,6 +81,25 @@ public:
 };
 
 USTRUCT()
+struct FNamingConventionShot
+{
+    GENERATED_BODY()
+
+public:
+    /** The shot pattern. */
+    UPROPERTY( config, EditAnywhere, Category=Shot )
+    FString Pattern { TEXT( "shot_{shot-index}" ) };
+
+    /** The shot number format. */
+    UPROPERTY(config, EditAnywhere, Category=Shot, meta=(ShowOnlyInnerProperties))
+    FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
+
+    /** The take number format. */
+    UPROPERTY(config, EditAnywhere, Category=Shot, meta=(ShowOnlyInnerProperties))
+    FNamingConventionNumberFormat TakeFormat { 1, 1, 2 };
+};
+
+USTRUCT()
 struct FNamingConventionBoard
 {
     GENERATED_BODY()
@@ -69,17 +109,9 @@ public:
     UPROPERTY( config, EditAnywhere, Category=Board )
     FString Pattern { TEXT( "board_{board-index}" ) };
 
-    /** The first plane number. */
-    UPROPERTY(config, EditAnywhere, Category=Board, meta=(UIMin = "1", UIMax = "100"))
-    uint32 StartNumber { 10 };
-
-    /** The default plane increment. */
-    UPROPERTY(config, EditAnywhere, Category=Board, meta=(UIMin = "1", UIMax = "100"))
-    uint32 Increment { 10 };
-
-    /** The number of digits for the plane number. */
-    UPROPERTY(config, EditAnywhere, Category=Board, meta=(UIMin = "1", UIMax = "10"))
-    uint32 NumDigits { 4 };
+    /** The shot number format. */
+    UPROPERTY(config, EditAnywhere, Category=Board, meta=(ShowOnlyInnerProperties))
+    FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
 USTRUCT()
@@ -131,6 +163,10 @@ public:
     /** The naming convention for boards. */
     UPROPERTY(config, EditAnywhere, Category=BoardNamingConvention, meta=(ShowOnlyInnerProperties) )
     FNamingConventionBoard BoardNaming;
+
+    /** The naming convention for boards. */
+    UPROPERTY(config, EditAnywhere, Category=ShotNamingConvention, meta=(ShowOnlyInnerProperties) )
+    FNamingConventionShot ShotNaming;
 
     /** The naming convention for planes. */
     UPROPERTY(config, EditAnywhere, Category=PlaneNamingConvention, meta=(ShowOnlyInnerProperties) )

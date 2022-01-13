@@ -42,6 +42,13 @@ public:
     };
     static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents );
 
+    struct FShotComponents
+        : public FBoardComponents
+    {
+        int32 mNextTake;
+    };
+    static FString GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotComponents& oComponents );
+
     static FString GenerateSequenceAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, UClass* iType, FString& oPath, FString& oName );
 
 private:

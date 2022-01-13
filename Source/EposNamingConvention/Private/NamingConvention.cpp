@@ -760,7 +760,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
         sequence_path = root_path;
     }
 
-    //--- Find all board names
+    //--- Find all boards
 
     TArray<UBoardSequence*> board_sequences;
 
@@ -800,13 +800,101 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
     }
 
     if( max_board_index != INDEX_NONE )
-        max_board_index += board_settings.Increment;
+        max_board_index += board_settings.IndexFormat.Increment;
     else
-        max_board_index = board_settings.StartNumber;
+        max_board_index = board_settings.IndexFormat.StartNumber;
 
     //---
 
     oComponents.mNextIndex = max_board_index;
+
+    oComponents.mStudioName = global_settings.StudioName;
+    oComponents.mStudioAccronym = global_settings.StudioAccronym;
+    oComponents.mProductionName = global_settings.ProductionName;
+    oComponents.mProductionAccronym = global_settings.ProductionAccronym;
+    oComponents.mInitials = global_settings.Initials;
+
+    oName = FGuid::NewGuid().ToString();
+    oPath = sequence_path;
+
+    return oPath / oName;
+}
+
+//static
+FString
+NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotComponents& oComponents )
+{
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    //---
+
+    FString sequence_path;
+
+    // Try to find the better path from all existing sequences
+    TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+    if( map_sequence_paths.Num() )
+    {
+        TArray<FString> keys;
+        map_sequence_paths.GetKeys( keys );
+
+        sequence_path = keys[0];
+    }
+
+    if( sequence_path.IsEmpty() )
+    {
+        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        sequence_path = root_path;
+    }
+
+    //--- Find all shots
+
+    TArray<UShotSequence*> shot_sequences;
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
+        for( auto pair : map )
+        {
+            UMovieSceneSequence* sequence = pair.Value.GetSequence();
+            FMovieSceneSequenceID sequence_id = pair.Key;
+
+            UShotSequence* shot_sequence = Cast<UShotSequence>( sequence );
+            if( !shot_sequence )
+                continue;
+
+            shot_sequences.AddUnique( shot_sequence );
+        }
+    }
+
+    //--- Compute the next valid shot index
+
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionGlobal global_settings = settings->GlobalNaming;
+    FNamingConventionShot shot_settings = settings->ShotNaming;
+
+    int32 max_shot_index = INDEX_NONE;
+
+    for( auto shot_sequence : shot_sequences )
+    {
+        const UShotAssetUserData* data = shot_sequence->GetAssetUserData<UShotAssetUserData>();
+        if( !data )
+            continue;
+
+        if( data->Index > max_shot_index )
+            max_shot_index = data->Index;
+    }
+
+    if( max_shot_index != INDEX_NONE )
+        max_shot_index += shot_settings.IndexFormat.Increment;
+    else
+        max_shot_index = shot_settings.IndexFormat.StartNumber;
+
+    //---
+
+    oComponents.mNextIndex = max_shot_index;
+
+    oComponents.mNextTake = shot_settings.TakeFormat.StartNumber;
 
     oComponents.mStudioName = global_settings.StudioName;
     oComponents.mStudioAccronym = global_settings.StudioAccronym;

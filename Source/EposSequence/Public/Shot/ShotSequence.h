@@ -10,12 +10,51 @@
 
 #include "ShotSequence.generated.h"
 
+class UNamingFormatter;
+
+UCLASS()
+ class EPOSSEQUENCE_API UShotAssetUserData
+    : public UAssetUserData
+ {
+    GENERATED_BODY()
+
+public:
+    /** The studio name. */
+    UPROPERTY() //TODO: maybe use UPROPERTY( config, EditAnywhere, Category = Global ) to be editable in the UI ?
+    FString StudioName { TEXT( "MyStudio" ) };
+
+    /** The studio accronym. */
+    UPROPERTY()
+    FString StudioAccronym { TEXT( "MS" ) };
+
+    /** The title of the production. */
+    UPROPERTY()
+    FString ProductionName { TEXT( "MyProductionTitle" ) };
+
+    /** The accronym of the production. */
+    UPROPERTY()
+    FString ProductionAccronym { TEXT( "MPT" ) };
+
+    /** The initials of the user. */
+    UPROPERTY()
+    FString Initials { TEXT( "MI" ) };
+
+    /** The current index. */
+    UPROPERTY()
+    int32 Index { 0 };
+
+    /** The current take index. */
+    UPROPERTY()
+    int32 TakeIndex { 0 };
+ };
+
 /*
  * Movie scene animation that represents the last level of the storyboard.
  */
 UCLASS( BlueprintType )
 class EPOSSEQUENCE_API UShotSequence
     : public UEposMovieSceneSequence
+    , public IInterface_AssetUserData
 {
 public:
     GENERATED_BODY()
@@ -37,11 +76,17 @@ public:
 
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
-//    virtual FText GetDisplayName() const override;
+    virtual FText GetDisplayName() const override;
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
     virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
 #endif
+
+    //~ IInterface_AssetUserData interface
+    virtual void AddAssetUserData( UAssetUserData* iUserData );
+    virtual UAssetUserData* GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass );
+    virtual const TArray<UAssetUserData*>* GetAssetUserDataArray() const;
+    virtual void RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass );
 
     //~ UEposMovieSceneSequence interface
     virtual bool IsResizable() const override;
@@ -66,4 +111,9 @@ public:
     // The map will contain multiple actors and all their multiple components
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+
+private:
+    UNamingFormatter* mNamingFormatter;
+
+    TArray<UAssetUserData*> mAssetUserData;
 };

@@ -7,6 +7,7 @@
 #include "Modules/ModuleManager.h"
 
 class UDefaultNamingFormatterBoard;
+class UDefaultNamingFormatterShot;
 
 class FEposNamingConventionModule
     : public IModuleInterface
@@ -29,4 +30,5 @@ private:
 
 private:
     UDefaultNamingFormatterBoard* mNamingFormatterBoard;
+    UDefaultNamingFormatterShot* mNamingFormatterShot;
 };

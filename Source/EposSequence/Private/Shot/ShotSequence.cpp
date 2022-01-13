@@ -18,6 +18,8 @@
 #include "Tracks/MovieSceneAudioTrack.h"
 
 #include "Board/BoardHelpers.h"
+#include "EposSequenceModule.h"
+#include "INamingFormatter.h"
 #include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
@@ -29,6 +31,9 @@ UShotSequence::UShotSequence( const FObjectInitializer& ObjectInitializer )
     , MovieScene( nullptr )
 {
     bParentContextsAreSignificant = true;
+
+    FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+    mNamingFormatter = module.GetNamingFormatter<UNamingFormatterShot>();
 }
 
 void UShotSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
@@ -256,10 +261,14 @@ UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClas
     //return Super::IsTrackSupported( InTrackClass );
 }
 
-//FText UShotSequence::GetDisplayName() const
-//{
-//  return UMovieSceneSequence::GetDisplayName();
-//}
+FText UShotSequence::GetDisplayName() const
+{
+    //return UMovieSceneSequence::GetDisplayName();
+
+    FString name = mNamingFormatter->FormatName( this );
+
+    return FText::FromString( name );
+}
 
 void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const
 {
@@ -367,6 +376,58 @@ void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMe
 }
 
 #endif
+
+//---
+
+void
+UShotSequence::AddAssetUserData( UAssetUserData* iUserData )
+{
+    if( !iUserData )
+        return;
+
+    UAssetUserData* existing_data = GetAssetUserDataOfClass( iUserData->GetClass() );
+
+    if( existing_data )
+        mAssetUserData.Remove( existing_data );
+
+    mAssetUserData.Add( iUserData );
+}
+
+UAssetUserData*
+UShotSequence::GetAssetUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
+{
+    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
+    {
+        UAssetUserData* data = mAssetUserData[i];
+        if( data && data->IsA( iUserDataClass ) )
+        {
+            return data;
+        }
+    }
+
+    return nullptr;
+}
+
+const TArray<UAssetUserData*>*
+UShotSequence::GetAssetUserDataArray() const
+{
+    return &mAssetUserData;
+}
+
+void
+UShotSequence::RemoveUserDataOfClass( TSubclassOf<UAssetUserData> iUserDataClass )
+{
+    for( int32 i = 0; i < mAssetUserData.Num(); i++ )
+    {
+        UAssetUserData* data = mAssetUserData[i];
+        if( data != NULL && data->IsA( iUserDataClass ) )
+        {
+            mAssetUserData.RemoveAt( i );
+
+            return;
+        }
+    }
+}
 
 //---
 

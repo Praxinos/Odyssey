@@ -438,13 +438,18 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     FString sequence_name;
     FString sequence_pathname;
     NamingConvention::FBoardComponents board_components;
+    NamingConvention::FShotComponents shot_components;
 
     if( SequenceClass::StaticClass() == UBoardSequence::StaticClass() )
         sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, board_components );
     else
-        sequence_pathname = NamingConvention::GenerateSequenceAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), SequenceClass::StaticClass(), sequence_path, sequence_name );
+        sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_components );
+
+    //---
 
     UMovieSceneSubSection* new_section = CreateSequenceInternal<SequenceClass>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
+
+    //---
 
     if( new_section && new_section->GetSequence() && new_section->GetSequence()->IsA<UBoardSequence>() )
     {
@@ -462,6 +467,25 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
 
         board_sequence->AddAssetUserData( data );
     }
+    else
+    {
+        UShotSequence* shot_sequence = Cast<UShotSequence>( new_section->GetSequence() );
+
+        UShotAssetUserData* data = NewObject<UShotAssetUserData>( shot_sequence, NAME_None, RF_Public );
+
+        data->Index = shot_components.mNextIndex;
+        data->TakeIndex = shot_components.mNextTake;
+
+        data->StudioName = shot_components.mStudioName;
+        data->StudioAccronym = shot_components.mStudioAccronym;
+        data->ProductionName = shot_components.mProductionName;
+        data->ProductionAccronym = shot_components.mProductionAccronym;
+        data->Initials = shot_components.mInitials;
+
+        shot_sequence->AddAssetUserData( data );
+    }
+
+    //---
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     BoardSequenceTools::UpdateViewRange( iSequencer, new_section ? new_section->GetTrueRange() : TRange<FFrameNumber>::Empty() );
@@ -575,13 +599,34 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 
     FString sequence_path;
     FString sequence_name;
-    FString sequence_pathname = NamingConvention::GenerateSequenceAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), UShotSequence::StaticClass(), sequence_path, sequence_name );
+    NamingConvention::FShotComponents shot_components;
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_components );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, TOptional<int32>(), iSection );
 
     if( !new_section )
         return;
+
+    if( new_section->GetSequence() )
+    {
+        UShotSequence* shot_sequence = Cast<UShotSequence>( new_section->GetSequence() );
+
+        UShotAssetUserData* data = NewObject<UShotAssetUserData>( shot_sequence, NAME_None, RF_Public );
+
+        data->Index = shot_components.mNextIndex;
+        data->TakeIndex = shot_components.mNextTake;
+
+        data->StudioName = shot_components.mStudioName;
+        data->StudioAccronym = shot_components.mStudioAccronym;
+        data->ProductionName = shot_components.mProductionName;
+        data->ProductionAccronym = shot_components.mProductionAccronym;
+        data->Initials = shot_components.mInitials;
+
+        shot_sequence->AddAssetUserData( data );
+    }
+
+    //---
 
     //new_section->SetRange( iSection->GetRange() );
     //new_section->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, new_section ) );
