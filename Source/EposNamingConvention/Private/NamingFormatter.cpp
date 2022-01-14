@@ -26,7 +26,8 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
                                                .Replace( TEXT( "{studio-name}" ), *naming_elements.StudioName )
                                                .Replace( TEXT( "{studio-accronym}" ), *naming_elements.StudioAccronym )
                                                .Replace( TEXT( "{production-name}" ), *naming_elements.ProductionName )
-                                               .Replace( TEXT( "{production-accronym}" ), *naming_elements.ProductionAccronym );
+                                               .Replace( TEXT( "{production-accronym}" ), *naming_elements.ProductionAccronym )
+                                               .Replace( TEXT( "{initials}" ), *naming_elements.Initials );
 
     return name;
     //return board_sequence->GetName();
@@ -51,7 +52,8 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
                                               .Replace( TEXT( "{studio-name}" ), *naming_elements.StudioName )
                                               .Replace( TEXT( "{studio-accronym}" ), *naming_elements.StudioAccronym )
                                               .Replace( TEXT( "{production-name}" ), *naming_elements.ProductionName )
-                                              .Replace( TEXT( "{production-accronym}" ), *naming_elements.ProductionAccronym );
+                                              .Replace( TEXT( "{production-accronym}" ), *naming_elements.ProductionAccronym )
+                                              .Replace( TEXT( "{initials}" ), *naming_elements.Initials );
 
     return name;
     //return shot->GetName();

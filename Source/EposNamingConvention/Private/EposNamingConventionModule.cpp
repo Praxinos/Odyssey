@@ -57,6 +57,14 @@ FEposNamingConventionModule::RegisterPropertyCustomizations()
         FNamingConventionCamera::StaticStruct()->GetFName(),
         FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionCameraCustomization::MakeInstance ) );
 
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        FNamingConventionShot::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionShotCustomization::MakeInstance ) );
+
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        FNamingConventionBoard::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionBoardCustomization::MakeInstance ) );
+
     PropertyModule.NotifyCustomizationModuleChanged();
 }
 
@@ -68,6 +76,8 @@ FEposNamingConventionModule::UnregisterPropertyCustomizations()
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionPlane::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionCamera::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionShot::StaticStruct()->GetFName() );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionBoard::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
     }

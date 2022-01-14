@@ -384,3 +384,206 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
         }
     }
 }
+
+//---
+//---
+//---
+
+//static
+TSharedRef<IPropertyTypeCustomization>
+FNamingConventionShotCustomization::MakeInstance()
+{
+    return MakeShareable( new FNamingConventionShotCustomization() );
+}
+
+FText
+FNamingConventionShotCustomization::GetTooltipText() const
+{
+    return LOCTEXT( "shot-pattern-info-label",
+R"(Some examples:
+
+- shot_{shot-index} ->
+    shot_10
+    shot_20
+    shot_30
+    ...
+- {studio-accronym}_shot_{shot-index}_{initials} ->
+    MS_shot_0010_xy
+    MS_shot_0020_xy
+    MS_shot_0030_xy
+    ...)" );
+}
+
+FText
+FNamingConventionShotCustomization::GetExplanationText() const
+{
+    return LOCTEXT( "shot-pattern-info",
+R"({shot-index} : an incremental index
+{take-index} : an incremental index for take (not used)
+{studio-name} : the full studio name
+{studio-accronym} : the studio name accronym
+{production-name} : the full production title
+{production-accronym} : the production title accronym
+{initials} : some initials)" );
+}
+
+void
+FNamingConventionShotCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+{
+    // No header needed (to avoid the collapsing)
+
+    //ioHeaderRow
+    //    .NameContent()
+    //    [
+    //        iStructPropertyHandle->CreatePropertyNameWidget()
+    //    ];
+}
+
+void
+FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+{
+    uint32 num_children;
+    FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
+
+    for( uint32 i = 0; i < num_children; i++ )
+    {
+        TSharedPtr<IPropertyHandle> handle = iStructPropertyHandle->GetChildHandle( i );
+        if( !handle.IsValid() )
+            continue;
+
+        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionShot, Pattern ) )
+        {
+            mPatternHandle = handle;
+
+            mPatternHandle->SetToolTipText( GetTooltipText() );
+
+            ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
+            .NameContent()
+            [
+                mPatternHandle->CreatePropertyNameWidget()
+            ]
+            .ValueContent()
+            .HAlign( HAlign_Fill )
+            [
+                SNew( SPatternTextBox, mPatternHandle )
+                .ToolTipText( GetTooltipText() )
+                .AdvancedExplanation( GetExplanationText() )
+                .ValidPatterns( { TEXT( "{shot-index}" ), TEXT( "{take-index}" ), TEXT( "{studio-name}" ), TEXT( "{studio-accronym}" ), TEXT( "{production-name}" ), TEXT( "{production-accronym}" ), TEXT( "{initials}" ) } )
+            ];
+        }
+        else
+        {
+            auto IsIndexPropertyEnabled = [=]() -> bool
+            {
+                FText pattern;
+                mPatternHandle->GetValueAsFormattedText( pattern );
+
+                return pattern.ToString().Contains( TEXT( "{shot-index}" ) ) || pattern.ToString().Contains( TEXT( "{take-index}" ) );
+            };
+
+            ioChildBuilder.AddProperty( handle.ToSharedRef() )
+                .IsEnabled( MakeAttributeLambda( IsIndexPropertyEnabled ) ); // For the moment, every other properties (except Pattern) concern the index key
+        }
+    }
+}
+
+//---
+//---
+//---
+
+//static
+TSharedRef<IPropertyTypeCustomization>
+FNamingConventionBoardCustomization::MakeInstance()
+{
+    return MakeShareable( new FNamingConventionBoardCustomization() );
+}
+
+FText
+FNamingConventionBoardCustomization::GetTooltipText() const
+{
+    return LOCTEXT( "board-pattern-info-label",
+R"(Some examples:
+
+- board_{board-index} ->
+    board_10
+    board_20
+    board_30
+    ...
+- {studio-accronym}_board_{board-index}_{initials} ->
+    MS_board_0010_xy
+    MS_board_0020_xy
+    MS_board_0030_xy
+    ...)" );
+}
+
+FText
+FNamingConventionBoardCustomization::GetExplanationText() const
+{
+    return LOCTEXT( "board-pattern-info",
+R"({board-index} : an incremental index
+{studio-name} : the full studio name
+{studio-accronym} : the studio name accronym
+{production-name} : the full production title
+{production-accronym} : the production title accronym
+{initials} : some initials)" );
+}
+
+void
+FNamingConventionBoardCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+{
+    // No header needed (to avoid the collapsing)
+
+    //ioHeaderRow
+    //    .NameContent()
+    //    [
+    //        iStructPropertyHandle->CreatePropertyNameWidget()
+    //    ];
+}
+
+void
+FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+{
+    uint32 num_children;
+    FPropertyAccess::Result result = iStructPropertyHandle->GetNumChildren( num_children );
+
+    for( uint32 i = 0; i < num_children; i++ )
+    {
+        TSharedPtr<IPropertyHandle> handle = iStructPropertyHandle->GetChildHandle( i );
+        if( !handle.IsValid() )
+            continue;
+
+        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, Pattern ) )
+        {
+            mPatternHandle = handle;
+
+            mPatternHandle->SetToolTipText( GetTooltipText() );
+
+            ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
+            .NameContent()
+            [
+                mPatternHandle->CreatePropertyNameWidget()
+            ]
+            .ValueContent()
+            .HAlign( HAlign_Fill )
+            [
+                SNew( SPatternTextBox, mPatternHandle )
+                .ToolTipText( GetTooltipText() )
+                .AdvancedExplanation( GetExplanationText() )
+                .ValidPatterns( { TEXT( "{board-index}" ), TEXT( "{studio-name}" ), TEXT( "{studio-accronym}" ), TEXT( "{production-name}" ), TEXT( "{production-accronym}" ), TEXT( "{initials}" ) } )
+            ];
+        }
+        else
+        {
+            auto IsIndexPropertyEnabled = [=]() -> bool
+            {
+                FText pattern;
+                mPatternHandle->GetValueAsFormattedText( pattern );
+
+                return pattern.ToString().Contains( TEXT( "{board-index}" ) ) || pattern.ToString().Contains( TEXT( "{take-index}" ) );
+            };
+
+            ioChildBuilder.AddProperty( handle.ToSharedRef() )
+                .IsEnabled( MakeAttributeLambda( IsIndexPropertyEnabled ) ); // For the moment, every other properties (except Pattern) concern the index key
+        }
+    }
+}

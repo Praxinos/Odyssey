@@ -54,3 +54,45 @@ private:
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;
 };
+
+//---
+
+struct FNamingConventionShotCustomization
+    : public IPropertyTypeCustomization
+{
+public:
+    static TSharedRef<IPropertyTypeCustomization> MakeInstance();
+
+    /** IPropertyTypeCustomization interface */
+    virtual void CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
+    virtual void CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
+
+private:
+    FText GetTooltipText() const;
+    FText GetExplanationText() const;
+
+private:
+    /** Property handles of the properties we're editing */
+    TSharedPtr<IPropertyHandle> mPatternHandle;
+};
+
+//---
+
+struct FNamingConventionBoardCustomization
+    : public IPropertyTypeCustomization
+{
+public:
+    static TSharedRef<IPropertyTypeCustomization> MakeInstance();
+
+    /** IPropertyTypeCustomization interface */
+    virtual void CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
+    virtual void CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) override;
+
+private:
+    FText GetTooltipText() const;
+    FText GetExplanationText() const;
+
+private:
+    /** Property handles of the properties we're editing */
+    TSharedPtr<IPropertyHandle> mPatternHandle;
+};
