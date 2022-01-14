@@ -27,7 +27,6 @@ public:
 
 private:
     FText GetTooltipText() const;
-    FText GetExplanationText() const;
 
 private:
     /** Property handles of the properties we're editing */
@@ -48,7 +47,6 @@ public:
 
 private:
     FText GetTooltipText() const;
-    FText GetExplanationText() const;
 
 private:
     /** Property handles of the properties we're editing */
@@ -69,7 +67,6 @@ public:
 
 private:
     FText GetTooltipText() const;
-    FText GetExplanationText() const;
 
 private:
     /** Property handles of the properties we're editing */
@@ -90,7 +87,6 @@ public:
 
 private:
     FText GetTooltipText() const;
-    FText GetExplanationText() const;
 
 private:
     /** Property handles of the properties we're editing */

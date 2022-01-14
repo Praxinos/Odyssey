@@ -29,6 +29,16 @@ public:
     uint32 NumDigits { 4 };
 };
 
+USTRUCT()
+struct FNamingConventionPatternKeyword
+{
+    GENERATED_BODY()
+
+public:
+    FString mKeywordWithBraces;
+    FText mHelp;
+};
+
 //---
 
 USTRUCT()
@@ -37,12 +47,19 @@ struct FNamingConventionPlane
     GENERATED_BODY()
 
 public:
-    bool CheckPattern();
+    FNamingConventionPlane();
 
 public:
     /** The plane pattern. */
     UPROPERTY(config, EditAnywhere, Category=Plane)
     FString Pattern { TEXT("plane_{plane-index}") };
+
+    /** List of all keywords.
+        This list is hidden in customization.
+        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
+    */
+    UPROPERTY( VisibleAnywhere )
+    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The plane number format. */
     UPROPERTY(config, EditAnywhere, Category=Plane, meta=(ShowOnlyInnerProperties))
@@ -55,9 +72,19 @@ struct FNamingConventionCamera
     GENERATED_BODY()
 
 public:
+    FNamingConventionCamera();
+
+public:
     /** The camera pattern. */
     UPROPERTY( config, EditAnywhere, Category=Camera )
     FString Pattern { TEXT( "camera_{camera-index}" ) };
+
+    /** List of all keywords.
+        This list is hidden in customization.
+        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
+    */
+    UPROPERTY( VisibleAnywhere )
+    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The camera number format. */
     UPROPERTY(config, EditAnywhere, Category=Camera, meta=(ShowOnlyInnerProperties))
@@ -70,9 +97,19 @@ struct FNamingConventionShot
     GENERATED_BODY()
 
 public:
+    FNamingConventionShot();
+
+public:
     /** The shot pattern. */
     UPROPERTY( config, EditAnywhere, Category=Shot )
     FString Pattern { TEXT( "shot_{shot-index}" ) };
+
+    /** List of all keywords.
+        This list is hidden in customization.
+        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
+    */
+    UPROPERTY( VisibleAnywhere )
+    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */
     UPROPERTY(config, EditAnywhere, Category=Shot, meta=(ShowOnlyInnerProperties))
@@ -89,9 +126,19 @@ struct FNamingConventionBoard
     GENERATED_BODY()
 
 public:
+    FNamingConventionBoard();
+
+public:
     /** The camera pattern. */
     UPROPERTY( config, EditAnywhere, Category=Board )
     FString Pattern { TEXT( "board_{board-index}" ) };
+
+    /** List of all keywords.
+        This list is hidden in customization.
+        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
+    */
+    UPROPERTY( VisibleAnywhere )
+    TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */
     UPROPERTY(config, EditAnywhere, Category=Board, meta=(ShowOnlyInnerProperties))

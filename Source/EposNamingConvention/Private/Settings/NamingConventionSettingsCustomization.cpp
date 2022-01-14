@@ -55,17 +55,45 @@ CheckPatternValidity( const FString& iPattern, const TArray<FString>& iValidPatt
 
     return true;
 }
+
+static
+TMap<FString, FNamingConventionPatternKeyword>
+GetPatternKeywordsMap( TSharedRef<IPropertyHandle> iStructPropertyHandle )
+{
+    TSharedPtr<IPropertyHandle> child_handle = iStructPropertyHandle->GetChildHandle( "PatternKeywords" );
+    if( child_handle.IsValid() )
+    {
+        TSharedPtr<IPropertyHandleMap> map_handle = child_handle->AsMap();
+        if( map_handle.IsValid() )
+        {
+            void* MapDataPtr = nullptr;
+            if( child_handle->GetValueData( MapDataPtr ) == FPropertyAccess::Success )
+            {
+                TMap<FString, FNamingConventionPatternKeyword>* map = ( TMap<FString, FNamingConventionPatternKeyword>* )MapDataPtr;
+                if( map )
+                {
+                    return *map;
+                }
+            }
+        }
+    }
+
+    return TMap<FString, FNamingConventionPatternKeyword>();
+}
 }
 
 class SPatternTextBox
     : public SCompoundWidget
     //: public SEditableTextBox
 {
+private:
+    typedef TMap<FString, FNamingConventionPatternKeyword> KeywordsMap;
+
 public:
     SLATE_BEGIN_ARGS( SPatternTextBox )
         {}
-        SLATE_ATTRIBUTE( FText, AdvancedExplanation )
-        SLATE_ARGUMENT( TArray<FString>, ValidPatterns )
+        SLATE_ARGUMENT( KeywordsMap, PatternKeywords )
+        SLATE_ATTRIBUTE( FText, MoreExplanation )
     SLATE_END_ARGS()
 
     /**
@@ -88,8 +116,7 @@ private:
 
     TSharedPtr<SEditableTextBox> mTextBoxWidget;
 
-    TAttribute<FText> mAdvancedExplanation;
-    TArray<FString> mValidPatterns;
+    TArray<FString> mValidKeywords;
 };
 
 void
@@ -97,14 +124,31 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
 {
     mPatternHandle = iPatternHandle;
 
-    mAdvancedExplanation = iArgs._AdvancedExplanation;
-    mValidPatterns = iArgs._ValidPatterns;
+    TSharedRef<SVerticalBox> keyword_labels_widget = SNew( SVerticalBox );
+    TSharedRef<SVerticalBox> keyword_values_widget = SNew( SVerticalBox );
 
-    if( iArgs._ToolTipText.IsSet() )
-        mPatternHandle->SetToolTipText( iArgs._ToolTipText.Get() );
+    for( auto pair : iArgs._PatternKeywords )
+    {
+        mValidKeywords.Add( pair.Value.mKeywordWithBraces );
 
-    ChildSlot
-    [
+        FText label = FText::FromString( pair.Value.mKeywordWithBraces );
+
+        keyword_labels_widget->AddSlot()
+            [
+                SNew( STextBlock )
+                .Text( label )
+            ];
+
+        FText value = FText::Format( LOCTEXT( "keywords-explanation-separator", " : {0}" ), pair.Value.mHelp );
+
+        keyword_values_widget->AddSlot()
+            [
+                SNew( STextBlock )
+                .Text( value )
+            ];
+    }
+
+    TSharedRef<SVerticalBox> main =
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -133,10 +177,33 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
         .AutoHeight()
         .Padding( 0, 4, 0, 0 )
         [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                keyword_labels_widget
+            ]
+
+            + SHorizontalBox::Slot()
+            [
+                keyword_values_widget
+            ]
+        ];
+
+    if( iArgs._MoreExplanation.IsSet() )
+    {
+        main->AddSlot()
+        .AutoHeight()
+        .Padding( 0, 4, 0, 0 )
+        [
             SNew( STextBlock )
-            .Text( mAdvancedExplanation )
-            .ToolTipText( iArgs._ToolTipText )
-        ]
+            .Text( iArgs._MoreExplanation )
+        ];
+    }
+
+    ChildSlot
+    [
+        main
     ];
 }
 
@@ -185,9 +252,11 @@ SPatternTextBox::OnPatternTextChanged( const FText& iNewText )
 bool
 SPatternTextBox::CheckPatternValidity( const FString& iPattern )
 {
-    return ::CheckPatternValidity( iPattern, mValidPatterns );
+    return ::CheckPatternValidity( iPattern, mValidKeywords );
 }
 
+//---
+//---
 //---
 
 //static
@@ -218,15 +287,6 @@ R"(Some examples:
     shot40_plane20_mycamera
     shot40_plane30_mycamera
     ...)" );
-}
-
-FText
-FNamingConventionPlaneCustomization::GetExplanationText() const
-{
-    return LOCTEXT( "plane-pattern-info",
-R"({plane-index} : an incremental index
-{camera-name} : the name of the shot camera
-{shot-name} : the name of the shot)" );
 }
 
 void
@@ -266,10 +326,13 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
             .HAlign( HAlign_Fill )
             [
                 SNew( SPatternTextBox, mPatternHandle )
-                .ToolTipText( GetTooltipText() )
-                .AdvancedExplanation( GetExplanationText() )
-                .ValidPatterns( { TEXT( "{plane-index}" ), TEXT( "{camera-name}" ), TEXT( "{shot-name}" ) } )
+                .ToolTipText( mPatternHandle->GetToolTipText() )
+                .PatternKeywords( GetPatternKeywordsMap( iStructPropertyHandle ) )
             ];
+        }
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
+        {
+            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -278,7 +341,7 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 FText pattern;
                 mPatternHandle->GetValueAsFormattedText( pattern );
 
-                return pattern.ToString().Contains( TEXT( "{plane-index}" ) );
+                return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
 
             ioChildBuilder.AddProperty( handle.ToSharedRef() )
@@ -314,15 +377,6 @@ R"(Some examples:
     shot40_mycamera
     shot40_mycamera
     ...)" );
-}
-
-FText
-FNamingConventionCameraCustomization::GetExplanationText() const
-{
-    return LOCTEXT( "camera-pattern-info",
-R"({camera-index} : an incremental index
-{shot-name} : the name of the shot
-(both keys are not intended to be used at the same time))" );
 }
 
 void
@@ -364,10 +418,14 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
             .HAlign( HAlign_Fill )
             [
                 SNew( SPatternTextBox, mPatternHandle )
-                .ToolTipText( GetTooltipText() )
-                .AdvancedExplanation( GetExplanationText() )
-                .ValidPatterns( { TEXT( "{camera-index}" ), TEXT( "{shot-name}" ) } )
+                .ToolTipText( mPatternHandle->GetToolTipText() )
+                .PatternKeywords( GetPatternKeywordsMap( iStructPropertyHandle ) )
+                .MoreExplanation( LOCTEXT( "camera-pattern-info", "(both keys are not intended to be used at the same time)" ) )
             ];
+        }
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
+        {
+            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -376,7 +434,7 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
                 FText pattern;
                 mPatternHandle->GetValueAsFormattedText( pattern );
 
-                return pattern.ToString().Contains( TEXT( "{camera-index}" ) );
+                return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
 
             ioChildBuilder.AddProperty( handle.ToSharedRef() )
@@ -412,19 +470,6 @@ R"(Some examples:
     MS_shot_0020_xy
     MS_shot_0030_xy
     ...)" );
-}
-
-FText
-FNamingConventionShotCustomization::GetExplanationText() const
-{
-    return LOCTEXT( "shot-pattern-info",
-R"({shot-index} : an incremental index
-{take-index} : an incremental index for take (not used)
-{studio-name} : the full studio name
-{studio-accronym} : the studio name accronym
-{production-name} : the full production title
-{production-accronym} : the production title accronym
-{initials} : some initials)" );
 }
 
 void
@@ -466,10 +511,13 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
             .HAlign( HAlign_Fill )
             [
                 SNew( SPatternTextBox, mPatternHandle )
-                .ToolTipText( GetTooltipText() )
-                .AdvancedExplanation( GetExplanationText() )
-                .ValidPatterns( { TEXT( "{shot-index}" ), TEXT( "{take-index}" ), TEXT( "{studio-name}" ), TEXT( "{studio-accronym}" ), TEXT( "{production-name}" ), TEXT( "{production-accronym}" ), TEXT( "{initials}" ) } )
+                .ToolTipText( mPatternHandle->GetToolTipText() )
+                .PatternKeywords( GetPatternKeywordsMap( iStructPropertyHandle ) )
             ];
+        }
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
+        {
+            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -478,7 +526,7 @@ FNamingConventionShotCustomization::CustomizeChildren( TSharedRef<IPropertyHandl
                 FText pattern;
                 mPatternHandle->GetValueAsFormattedText( pattern );
 
-                return pattern.ToString().Contains( TEXT( "{shot-index}" ) ) || pattern.ToString().Contains( TEXT( "{take-index}" ) );
+                return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
 
             ioChildBuilder.AddProperty( handle.ToSharedRef() )
@@ -514,18 +562,6 @@ R"(Some examples:
     MS_board_0020_xy
     MS_board_0030_xy
     ...)" );
-}
-
-FText
-FNamingConventionBoardCustomization::GetExplanationText() const
-{
-    return LOCTEXT( "board-pattern-info",
-R"({board-index} : an incremental index
-{studio-name} : the full studio name
-{studio-accronym} : the studio name accronym
-{production-name} : the full production title
-{production-accronym} : the production title accronym
-{initials} : some initials)" );
 }
 
 void
@@ -567,10 +603,13 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
             .HAlign( HAlign_Fill )
             [
                 SNew( SPatternTextBox, mPatternHandle )
-                .ToolTipText( GetTooltipText() )
-                .AdvancedExplanation( GetExplanationText() )
-                .ValidPatterns( { TEXT( "{board-index}" ), TEXT( "{studio-name}" ), TEXT( "{studio-accronym}" ), TEXT( "{production-name}" ), TEXT( "{production-accronym}" ), TEXT( "{initials}" ) } )
+                .ToolTipText( mPatternHandle->GetToolTipText() )
+                .PatternKeywords( GetPatternKeywordsMap( iStructPropertyHandle ) )
             ];
+        }
+        else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )
+        {
+            handle->MarkHiddenByCustomization();
         }
         else
         {
@@ -579,7 +618,7 @@ FNamingConventionBoardCustomization::CustomizeChildren( TSharedRef<IPropertyHand
                 FText pattern;
                 mPatternHandle->GetValueAsFormattedText( pattern );
 
-                return pattern.ToString().Contains( TEXT( "{board-index}" ) ) || pattern.ToString().Contains( TEXT( "{take-index}" ) );
+                return pattern.ToString().Contains( TEXT( "-index}" ) );
             };
 
             ioChildBuilder.AddProperty( handle.ToSharedRef() )
