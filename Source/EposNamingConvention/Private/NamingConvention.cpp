@@ -398,17 +398,17 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 
     //--- Try to find the new plane name depending of the max existing index
 
-    int32 max_plane_index = list_of_camera_index.Num() ? list_of_camera_index[0] : camera_settings.StartNumber;
+    int32 max_plane_index = list_of_camera_index.Num() ? list_of_camera_index[0] : camera_settings.IndexFormat.StartNumber;
 
     FStringFormatNamedArguments args;
-    args.Add( TEXT( "camera_index_formated" ), FString::Printf( TEXT( "%0*d" ), camera_settings.NumDigits, max_plane_index ) );
+    args.Add( TEXT( "camera_index_formated" ), FString::Printf( TEXT( "%0*d" ), camera_settings.IndexFormat.NumDigits, max_plane_index ) );
     FString camera_name = FString::Format( *camera_pattern_display, args );
 
     while( camera_names.Contains( camera_name ) )
     {
-        max_plane_index += camera_settings.Increment;
+        max_plane_index += camera_settings.IndexFormat.Increment;
 
-        args.FindChecked( TEXT( "camera_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), camera_settings.NumDigits, max_plane_index );
+        args.FindChecked( TEXT( "camera_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), camera_settings.IndexFormat.NumDigits, max_plane_index );
         camera_name = FString::Format( *camera_pattern_display, args );
     }
 
@@ -525,17 +525,17 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
 
     //--- Try to find the new plane name depending of the max existing index
 
-    int32 max_plane_index = list_of_plane_index.Num() ? list_of_plane_index[0] : plane_settings.StartNumber;
+    int32 max_plane_index = list_of_plane_index.Num() ? list_of_plane_index[0] : plane_settings.IndexFormat.StartNumber;
 
     FStringFormatNamedArguments args;
-    args.Add( TEXT( "plane_index_formated" ), FString::Printf( TEXT( "%0*d" ), plane_settings.NumDigits, max_plane_index ) );
+    args.Add( TEXT( "plane_index_formated" ), FString::Printf( TEXT( "%0*d" ), plane_settings.IndexFormat.NumDigits, max_plane_index ) );
     FString plane_name = FString::Format( *plane_pattern_display, args );
 
     while( binding_names.Contains( plane_name ) )
     {
-        max_plane_index += plane_settings.Increment;
+        max_plane_index += plane_settings.IndexFormat.Increment;
 
-        args.FindChecked( TEXT( "plane_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), plane_settings.NumDigits, max_plane_index );
+        args.FindChecked( TEXT( "plane_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), plane_settings.IndexFormat.NumDigits, max_plane_index );
         plane_name = FString::Format( *plane_pattern_display, args );
     }
 

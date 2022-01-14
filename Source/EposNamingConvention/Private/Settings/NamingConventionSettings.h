@@ -44,17 +44,9 @@ public:
     UPROPERTY(config, EditAnywhere, Category=Plane)
     FString Pattern { TEXT("plane_{plane-index}") };
 
-    /** The first plane number. */
-    UPROPERTY(config, EditAnywhere, Category=Plane, meta=(UIMin = "1", UIMax = "100"))
-    uint32 StartNumber { 10 };
-
-    /** The default plane increment. */
-    UPROPERTY(config, EditAnywhere, Category=Plane, meta=(UIMin = "1", UIMax = "100"))
-    uint32 Increment { 10 };
-
-    /** The number of digits for the plane number. */
-    UPROPERTY(config, EditAnywhere, Category=Plane, meta=(UIMin = "1", UIMax = "10"))
-    uint32 NumDigits { 4 };
+    /** The plane number format. */
+    UPROPERTY(config, EditAnywhere, Category=Plane, meta=(ShowOnlyInnerProperties))
+    FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
 USTRUCT()
@@ -67,17 +59,9 @@ public:
     UPROPERTY( config, EditAnywhere, Category=Camera )
     FString Pattern { TEXT( "camera_{camera-index}" ) };
 
-    /** The first plane number. */
-    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(UIMin = "1", UIMax = "100"))
-    uint32 StartNumber { 10 };
-
-    /** The default plane increment. */
-    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(UIMin = "1", UIMax = "100"))
-    uint32 Increment { 10 };
-
-    /** The number of digits for the plane number. */
-    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(UIMin = "1", UIMax = "10"))
-    uint32 NumDigits { 4 };
+    /** The camera number format. */
+    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(ShowOnlyInnerProperties))
+    FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
 USTRUCT()

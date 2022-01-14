@@ -57,6 +57,137 @@ CheckPatternValidity( const FString& iPattern, const TArray<FString>& iValidPatt
 }
 }
 
+class SPatternTextBox
+    : public SCompoundWidget
+    //: public SEditableTextBox
+{
+public:
+    SLATE_BEGIN_ARGS( SPatternTextBox )
+        {}
+        SLATE_ATTRIBUTE( FText, AdvancedExplanation )
+        SLATE_ARGUMENT( TArray<FString>, ValidPatterns )
+    SLATE_END_ARGS()
+
+    /**
+     * Construct this widget
+     *
+     * @param   InArgs  The declaration data for this widget
+     */
+    void Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle> iPatternHandle );
+
+private:
+    FText GetPatternText() const;
+
+    void OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo );
+    void OnPatternTextChanged( const FText& iNewText );
+
+    bool CheckPatternValidity( const FString& iPattern );
+
+private:
+    TSharedPtr<IPropertyHandle> mPatternHandle;
+
+    TSharedPtr<SEditableTextBox> mTextBoxWidget;
+
+    TAttribute<FText> mAdvancedExplanation;
+    TArray<FString> mValidPatterns;
+};
+
+void
+SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle> iPatternHandle )
+{
+    mPatternHandle = iPatternHandle;
+
+    mAdvancedExplanation = iArgs._AdvancedExplanation;
+    mValidPatterns = iArgs._ValidPatterns;
+
+    if( iArgs._ToolTipText.IsSet() )
+        mPatternHandle->SetToolTipText( iArgs._ToolTipText.Get() );
+
+    ChildSlot
+    [
+        SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            [
+                SAssignNew( mTextBoxWidget, SEditableTextBox )
+                .Text( this, &SPatternTextBox::GetPatternText )
+                .Font( FEditorStyle::GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
+                .SelectAllTextWhenFocused( true )
+                .ClearKeyboardFocusOnCommit( false )
+                .OnTextCommitted( this, &SPatternTextBox::OnPatternTextCommited )
+                .OnTextChanged( this, &SPatternTextBox::OnPatternTextChanged )
+                .SelectAllTextOnCommit( true )
+            ]
+
+            + SHorizontalBox::Slot()
+            .FillWidth( .1f )
+            [
+                SNew( SSpacer )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding( 0, 4, 0, 0 )
+        [
+            SNew( STextBlock )
+            .Text( mAdvancedExplanation )
+            .ToolTipText( iArgs._ToolTipText )
+        ]
+    ];
+}
+
+FText
+SPatternTextBox::GetPatternText() const
+{
+    FText pattern;
+    mPatternHandle->GetValueAsFormattedText( pattern );
+
+    return pattern;
+}
+
+void
+SPatternTextBox::OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo )
+{
+    FString new_pattern = iNewText.ToString();
+
+    FText current_pattern;
+    mPatternHandle->GetValueAsFormattedText( current_pattern );
+    if( new_pattern.Equals( current_pattern.ToString() ) )
+        return;
+
+    if( !CheckPatternValidity( new_pattern ) )
+        return;
+
+    //-
+
+    mPatternHandle->SetValueFromFormattedString( new_pattern );
+}
+
+void
+SPatternTextBox::OnPatternTextChanged( const FText& iNewText )
+{
+    if( CheckPatternValidity( iNewText.ToString() ) )
+    {
+        TAttribute<FSlateColor> empty;
+        mTextBoxWidget->SetTextBoxBackgroundColor( empty ); // Remove the attribute to use the "real" background style of the widget
+    }
+    else
+    {
+        mTextBoxWidget->SetTextBoxBackgroundColor( FLinearColor( 1, 0, 0, 0.35f ) );
+        //mTextBoxWidget->SetTextBoxBackgroundColor( FEditorStyle::GetColor( TEXT( "ErrorReporting.BackgroundColor" ) ) );
+    }
+}
+
+bool
+SPatternTextBox::CheckPatternValidity( const FString& iPattern )
+{
+    return ::CheckPatternValidity( iPattern, mValidPatterns );
+}
+
 //---
 
 //static
@@ -64,6 +195,38 @@ TSharedRef<IPropertyTypeCustomization>
 FNamingConventionPlaneCustomization::MakeInstance()
 {
     return MakeShareable( new FNamingConventionPlaneCustomization() );
+}
+
+FText
+FNamingConventionPlaneCustomization::GetTooltipText() const
+{
+    return LOCTEXT( "plane-pattern-info-label",
+R"(Some examples:
+
+- plane_{plane-index} ->
+    plane_10
+    plane_20
+    plane_30
+    ...
+- pl{plane-index}_{camera-name} ->
+    pl10_mycamera
+    pl20_mycamera
+    pl30_mycamera
+    ...
+- {shot-name}_plane{plane-index}_{camera-name} ->
+    shot40_plane10_mycamera
+    shot40_plane20_mycamera
+    shot40_plane30_mycamera
+    ...)" );
+}
+
+FText
+FNamingConventionPlaneCustomization::GetExplanationText() const
+{
+    return LOCTEXT( "plane-pattern-info",
+R"({plane-index} : an incremental index
+{camera-name} : the name of the shot camera
+{shot-name} : the name of the shot)" );
 }
 
 void
@@ -92,74 +255,30 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
 
         if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionPlane, Pattern ) )
         {
-            FText tooltip_examples = LOCTEXT( "plane-pattern-info-label", "\
-Some examples:\n\
-\n\
-- plane_{plane-index} ->\n\
-    plane_10\n\
-    plane_20\n\
-    plane_30\n\
-    ...\n\
-- pl{plane-index}_{camera-name} ->\n\
-    pl10_mycamera\n\
-    pl20_mycamera\n\
-    pl30_mycamera\n\
-    ...\n\
-- {shot-name}_plane{plane-index}_{camera-name} ->\n\
-    shot40_plane10_mycamera\n\
-    shot40_plane20_mycamera\n\
-    shot40_plane30_mycamera\n\
-    ..." );
-
             mPatternHandle = handle;
 
-            mPatternHandle->SetToolTipText( tooltip_examples );
-
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
-                .NameContent()
-                [
-                    mPatternHandle->CreatePropertyNameWidget()
-                ]
-                .ValueContent()
-                .HAlign( HAlign_Fill )
-                [
-                    // (Nearly) Same as in D:\Epic Games\UE_4.27\Engine\Source\Editor\PropertyEditor\Private\UserInterface\PropertyEditor\SPropertyEditorText.cpp
-                    SNew( SHorizontalBox )
-                    + SHorizontalBox::Slot()
-                    [
-                        SAssignNew( mPatternWidget, SEditableTextBox )
-                        .Text( this, &FNamingConventionPlaneCustomization::GetPatternText )
-                        .Font( FEditorStyle::GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
-                        .SelectAllTextWhenFocused( true )
-                        .ClearKeyboardFocusOnCommit( false )
-                        .OnTextCommitted( this, &FNamingConventionPlaneCustomization::OnPatternTextCommited )
-                        .OnTextChanged( this, &FNamingConventionPlaneCustomization::OnPatternTextChanged )
-                        .SelectAllTextOnCommit( true )
-                    ]
-                    + SHorizontalBox::Slot()
-                    .FillWidth( .1f )
-                    [
-                        SNew( SSpacer )
-                    ]
-                ];
-
-            ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
-                .ValueContent()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( STextBlock )
-                    .Text( LOCTEXT( "plane-pattern-info", "\
-{plane-index} : an incremental index\n\
-{camera-name} : the name of the shot camera\n\
-{shot-name} : the name of the shot" ) )
-                    .ToolTipText( tooltip_examples )
-                ];
+            .NameContent()
+            [
+                mPatternHandle->CreatePropertyNameWidget()
+            ]
+            .ValueContent()
+            .HAlign( HAlign_Fill )
+            [
+                SNew( SPatternTextBox, mPatternHandle )
+                .ToolTipText( GetTooltipText() )
+                .AdvancedExplanation( GetExplanationText() )
+                .ValidPatterns( { TEXT( "{plane-index}" ), TEXT( "{camera-name}" ), TEXT( "{shot-name}" ) } )
+            ];
         }
         else
         {
             auto IsIndexPropertyEnabled = [=]() -> bool
             {
-                return GetPatternText().ToString().Contains( TEXT( "{plane-index}" ) );
+                FText pattern;
+                mPatternHandle->GetValueAsFormattedText( pattern );
+
+                return pattern.ToString().Contains( TEXT( "{plane-index}" ) );
             };
 
             ioChildBuilder.AddProperty( handle.ToSharedRef() )
@@ -168,56 +287,8 @@ Some examples:\n\
     }
 }
 
-FText
-FNamingConventionPlaneCustomization::GetPatternText() const
-{
-    FText pattern;
-    mPatternHandle->GetValueAsFormattedText( pattern );
-
-    return pattern;
-}
-
-void
-FNamingConventionPlaneCustomization::OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo )
-{
-    FString new_pattern = iNewText.ToString();
-
-    FText current_pattern;
-    mPatternHandle->GetValueAsFormattedText( current_pattern );
-    if( new_pattern.Equals( current_pattern.ToString() ) )
-        return;
-
-    if( !CheckPatternValidity( new_pattern ) )
-        return;
-
-    //-
-
-    mPatternHandle->SetValueFromFormattedString( new_pattern );
-}
-
-void
-FNamingConventionPlaneCustomization::OnPatternTextChanged( const FText& iNewText )
-{
-    if( CheckPatternValidity( iNewText.ToString() ) )
-    {
-        TAttribute<FSlateColor> empty;
-        mPatternWidget->SetTextBoxBackgroundColor( empty ); // Remove the attribute to use the "real" background style of the widget
-    }
-    else
-    {
-        mPatternWidget->SetTextBoxBackgroundColor( FLinearColor( 1, 0, 0, 0.35f ) );
-        //mPatternWidget->SetTextBoxBackgroundColor( FEditorStyle::GetColor( TEXT( "ErrorReporting.BackgroundColor" ) ) );
-    }
-}
-
-bool
-FNamingConventionPlaneCustomization::CheckPatternValidity( const FString& iPattern )
-{
-    static TArray<FString> valid_patterns{ TEXT( "{plane-index}" ), TEXT( "{camera-name}" ), TEXT( "{shot-name}" ) };
-
-    return ::CheckPatternValidity( iPattern, valid_patterns );
-}
-
+//---
+//---
 //---
 
 //static
@@ -225,6 +296,33 @@ TSharedRef<IPropertyTypeCustomization>
 FNamingConventionCameraCustomization::MakeInstance()
 {
     return MakeShareable( new FNamingConventionCameraCustomization() );
+}
+
+FText
+FNamingConventionCameraCustomization::GetTooltipText() const
+{
+    return LOCTEXT( "camera-pattern-info-label",
+R"(Some examples:
+
+- camera_{camera-index} ->
+    camera_10
+    camera_20
+    camera_30
+    ...
+- {shot-name}_mycamera ->
+    shot40_mycamera
+    shot40_mycamera
+    shot40_mycamera
+    ...)" );
+}
+
+FText
+FNamingConventionCameraCustomization::GetExplanationText() const
+{
+    return LOCTEXT( "camera-pattern-info",
+R"({camera-index} : an incremental index
+{shot-name} : the name of the shot
+(both keys are not intended to be used at the same time))" );
 }
 
 void
@@ -253,23 +351,9 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
 
         if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionCamera, Pattern ) )
         {
-            FText tooltip_examples = LOCTEXT( "camera-pattern-info-label", "\
-Some examples:\n\
-\n\
-- camera_{camera-index} ->\n\
-    camera_10\n\
-    camera_20\n\
-    camera_30\n\
-    ...\n\
-- {shot-name}_mycamera ->\n\
-    shot40_mycamera\n\
-    shot40_mycamera\n\
-    shot40_mycamera\n\
-    ..." );
-
             mPatternHandle = handle;
 
-            mPatternHandle->SetToolTipText( tooltip_examples );
+            mPatternHandle->SetToolTipText( GetTooltipText() );
 
             ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
             .NameContent()
@@ -279,97 +363,24 @@ Some examples:\n\
             .ValueContent()
             .HAlign( HAlign_Fill )
             [
-                // (Nearly) Same as in D:\Epic Games\UE_4.27\Engine\Source\Editor\PropertyEditor\Private\UserInterface\PropertyEditor\SPropertyEditorText.cpp
-                SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
-                [
-                    SAssignNew( mPatternWidget, SEditableTextBox )
-                    .Text( this, &FNamingConventionCameraCustomization::GetPatternText )
-                    .Font( FEditorStyle::GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
-                    .SelectAllTextWhenFocused( true )
-                    .ClearKeyboardFocusOnCommit( false )
-                    .OnTextCommitted( this, &FNamingConventionCameraCustomization::OnPatternTextCommited )
-                    .OnTextChanged( this, &FNamingConventionCameraCustomization::OnPatternTextChanged )
-                    .SelectAllTextOnCommit( true )
-                ]
-                + SHorizontalBox::Slot()
-                .FillWidth( .1f )
-                [
-                    SNew( SSpacer )
-                ]
+                SNew( SPatternTextBox, mPatternHandle )
+                .ToolTipText( GetTooltipText() )
+                .AdvancedExplanation( GetExplanationText() )
+                .ValidPatterns( { TEXT( "{camera-index}" ), TEXT( "{shot-name}" ) } )
             ];
-
-            ioChildBuilder.AddCustomRow( LOCTEXT( "Pattern", "Pattern" ) )
-                .ValueContent()
-                .HAlign( HAlign_Fill )
-                [
-                    SNew( STextBlock )
-                    .Text( LOCTEXT( "camera-pattern-info", "\
-{camera-index} : an incremental index\n\
-{shot-name} : the name of the shot\n\
-(both keys are not intended to be used at the same time)" ) )
-.ToolTipText( tooltip_examples )
-                ];
         }
         else
         {
             auto IsIndexPropertyEnabled = [=]() -> bool
             {
-                return GetPatternText().ToString().Contains( TEXT( "{camera-index}" ) );
+                FText pattern;
+                mPatternHandle->GetValueAsFormattedText( pattern );
+
+                return pattern.ToString().Contains( TEXT( "{camera-index}" ) );
             };
 
             ioChildBuilder.AddProperty( handle.ToSharedRef() )
                 .IsEnabled( MakeAttributeLambda( IsIndexPropertyEnabled ) ); // For the moment, every other properties (except Pattern) concern the index key
         }
     }
-}
-
-FText
-FNamingConventionCameraCustomization::GetPatternText() const
-{
-    FText pattern;
-    mPatternHandle->GetValueAsFormattedText( pattern );
-
-    return pattern;
-}
-
-void
-FNamingConventionCameraCustomization::OnPatternTextCommited( const FText& iNewText, ETextCommit::Type iCommitInfo )
-{
-    FString new_pattern = iNewText.ToString();
-
-    FText current_pattern;
-    mPatternHandle->GetValueAsFormattedText( current_pattern );
-    if( new_pattern.Equals( current_pattern.ToString() ) )
-        return;
-
-    if( !CheckPatternValidity( new_pattern ) )
-        return;
-
-    //-
-
-    mPatternHandle->SetValueFromFormattedString( new_pattern );
-}
-
-void
-FNamingConventionCameraCustomization::OnPatternTextChanged( const FText& iNewText )
-{
-    //if( CheckPatternValidity( iNewText.ToString() ) )
-    //{
-    //    TAttribute<FSlateColor> empty;
-    //    mPatternWidget->SetTextBoxBackgroundColor( empty ); // Remove the attribute to use the "real" background style of the widget
-    //}
-    //else
-    //{
-    //    mPatternWidget->SetTextBoxBackgroundColor( FLinearColor( 1, 0, 0, 0.35f ) );
-    //    //mPatternWidget->SetTextBoxBackgroundColor( FEditorStyle::GetColor( TEXT( "ErrorReporting.BackgroundColor" ) ) );
-    //}
-}
-
-bool
-FNamingConventionCameraCustomization::CheckPatternValidity( const FString& iPattern )
-{
-    static TArray<FString> valid_patterns{ TEXT( "{camera-index}" ), TEXT( "{shot-name}" ) };
-
-    return ::CheckPatternValidity( iPattern, valid_patterns );
 }
