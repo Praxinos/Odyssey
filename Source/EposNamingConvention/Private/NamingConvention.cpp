@@ -321,7 +321,8 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
     UMovieSceneSequence* current_sequence = const_cast<UMovieSceneSequence*>( iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
 
     FString root_sequence_name = FPackageName::GetShortName( iRootSequence->GetPackage()->GetName() );
-    FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
+    FString current_sequence_name = FPackageName::GetShortName( iSequence->GetDisplayName().ToString() );
+    //FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
 
     FString camera_path = ( iRootSequence != iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
 
