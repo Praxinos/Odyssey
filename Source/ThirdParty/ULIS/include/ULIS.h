@@ -4,7 +4,7 @@
 *   ULIS
 *__________________
 * @file         ULIS.h
-* @author       Clement Berthaud
+* @author       Clement Berthaud && Eric Scholl
 * @brief        This file provides a unique way to include all the necessary library files.
 * @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
@@ -40,6 +40,14 @@
 #include "Math/Interpolation/Bezier.h"
 #include "Math/Interpolation/CatmullRom.h"
 #include "Math/Interpolation/Spline.h"
+#include "Math/ShapeGeneration/Arc.h"
+#include "Math/ShapeGeneration/Circle.h"
+#include "Math/ShapeGeneration/Ellipse.h"
+#include "Math/ShapeGeneration/Line.h"
+#include "Math/ShapeGeneration/Polygon.h"
+#include "Math/ShapeGeneration/QuadraticBezier.h"
+#include "Math/ShapeGeneration/Rectangle.h"
+#include "Math/ShapeGeneration/RotatedEllipse.h"
 #include "Math/Math.h"
 // Memory
 #include "Memory/Units.h"
