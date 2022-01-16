@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.004.S.X.2019.000.00000
+// IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #include "SOdysseyAboutScreen.h"
@@ -124,7 +124,7 @@ SOdysseyAboutScreen::Construct( const FArguments& iArgs )
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.iliad", "ILIAD : Intelligent Layered Imaging Architecture for Drawing" ), 15, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
 
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.copyright", "ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f ) ) ) );
-    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.iddn", "IDDN FR.001.250001.004.S.X.2019.000.00000" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
+    mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.iddn", "IDDN FR.001.250001.005.S.P.2019.000.00000" ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f, 0.f, 12.f ) ) ) );
 
     mAboutLines.Add( MakeShareable( new FLineDefinition( LOCTEXT( "copyright.team-1", "Praxinos Team : Elodie Moog, Fabrice Debarge, Thomas Schmitt, Clément Berthaud," ), 8, FLinearColor( 1.f, 1.f, 1.f ), FMargin( 0.f, 2.f ) ) ) );
                                                                                 // This spaces are here to match the start of the first person name in the first line
