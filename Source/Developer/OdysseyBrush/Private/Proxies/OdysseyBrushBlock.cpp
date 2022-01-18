@@ -416,44 +416,59 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
     , EOdysseyAlphaMode AlphaMode
 )
 {
-    if( ( !Top.IsValid() || !Back.IsValid())
-     || ( TopArea.IsInitialized() && ( TopArea.Width() <= 0 || TopArea.Height() <= 0 ) ) )
+    //Top and back must be valid
+    if( !Top.IsValid() || !Back.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
 
-    ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
+    //If TopArea is Initialized, it must contain positive non-zero width and height
+    if( TopArea.IsInitialized() && ( TopArea.Width() <= 0 || TopArea.Height() <= 0 ) )
+        return  FOdysseyBlockProxy::MakeNullProxy();
 
+    // Retrieve blocks and events for Top and Back
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> back = Back.GetBlock();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> top = Top.GetBlock();
+    ::ULIS::FEvent eventInputs[] = { Top.GetEvent(), Back.GetEvent() };
 
+    //Retrieve ULIS destination format
+    ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
     TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock(back->Width(), back->Height(), format));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
 
+    //Initialize the source block as being the top block
     ::ULIS::FBlock* src = top.Get();
 
     // Pre-process Top ( optional conv, optional area )
-    ::ULIS::FEvent eventInputs[] = { Top.GetEvent(), Back.GetEvent() };
-
     ::ULIS::FEvent eventConvertTop;
-    if( src->Format() != format ) {
-        const bool bInit = TopArea.IsInitialized();
-        const uint16 w = bInit ? TopArea.Width() : src->Width();
-        const uint16 h = bInit ? TopArea.Height() : src->Height();
+    if( src->Format() != format || TopArea.IsInitialized() )
+    {
+        //If source format and destination format are different, we need to use a temporary block with the right format
+        //If TopArea is Initialize we also need to use a temporary block with the right size
+
+        //Create the temporary block with the right size immediately (using TopArea if Initialized)
+        //The temporary block becoimes the src
+        const int w = TopArea.IsInitialized() ? TopArea.Width() : src->Width();
+        const int h = TopArea.IsInitialized() ? TopArea.Height() : src->Height();
         src = new ::ULIS::FBlock( w, h, format );
+
+        // Make a con
         ctx.ConvertFormat(
               *top
-            , *src, TopArea.IsInitialized() ? TopArea.GetValue() : ::ULIS::FRectI::Auto
+            , *src
+            , TopArea.IsInitialized() ? TopArea.GetValue() : ::ULIS::FRectI::Auto
             , ::ULIS::FVec2I( 0 )
             , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
             , 2
             , eventInputs
             , &eventConvertTop
         );
-    } else {
+    }
+    else
+    {
         ctx.Dummy_OP( 2, eventInputs, &eventConvertTop);
     }
 
-    ::ULIS::FEvent eventConvertBack;
     // Pre-process Back ( mandatory full rect copy/conv )
+    ::ULIS::FEvent eventConvertBack;
     ctx.ConvertFormat(
           *back
         , *dst
@@ -465,6 +480,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
         , &eventConvertBack
     );
 
+    //src destruction callback
     ::ULIS::FEvent eventBlend(
         ::ULIS::FOnEventComplete(
             [top, src](const ::ULIS::FRectI& iRect)
@@ -475,8 +491,6 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
             }
         )
     );
-
-    ctx.Finish();
 
     ctx.BlendAA(
           *src
