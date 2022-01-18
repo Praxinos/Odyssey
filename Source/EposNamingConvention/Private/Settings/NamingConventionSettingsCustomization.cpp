@@ -276,16 +276,6 @@ R"(Some examples:
     plane_10
     plane_20
     plane_30
-    ...
-- pl{plane-index}_{camera-name} ->
-    pl10_mycamera
-    pl20_mycamera
-    pl30_mycamera
-    ...
-- {shot-name}_plane{plane-index}_{camera-name} ->
-    shot40_plane10_mycamera
-    shot40_plane20_mycamera
-    shot40_plane30_mycamera
     ...)" );
 }
 
@@ -371,11 +361,6 @@ R"(Some examples:
     camera_10
     camera_20
     camera_30
-    ...
-- {shot-name}_mycamera ->
-    shot40_mycamera
-    shot40_mycamera
-    shot40_mycamera
     ...)" );
 }
 
@@ -420,7 +405,7 @@ FNamingConventionCameraCustomization::CustomizeChildren( TSharedRef<IPropertyHan
                 SNew( SPatternTextBox, mPatternHandle )
                 .ToolTipText( mPatternHandle->GetToolTipText() )
                 .PatternKeywords( GetPatternKeywordsMap( iStructPropertyHandle ) )
-                .MoreExplanation( LOCTEXT( "camera-pattern-info", "(both keys are not intended to be used at the same time)" ) )
+                //.MoreExplanation( LOCTEXT( "camera-pattern-info", "(both keys are not intended to be used at the same time)" ) )
             ];
         }
         else if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionBoard, PatternKeywords ) )

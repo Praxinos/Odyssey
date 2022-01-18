@@ -5,14 +5,14 @@
 
 #define LOCTEXT_NAMESPACE "NamingConventionSettings"
 
-#define ADD_PATTERN_KEYWORD( iMap, iKey, iTextKeyPrefix, iText )        \
+#define ADD_PATTERN_KEYWORD( ioMap, iKey, iTextKeyPrefix, iText )        \
 {                                                                       \
     FString key = TEXT( iKey );                                         \
                                                                         \
     FNamingConventionPatternKeyword value;                              \
     value.mKeywordWithBraces = FString::Printf( TEXT( "{%s}" ), *key ); \
     value.mHelp = LOCTEXT( iTextKeyPrefix ## "." ## iKey, iText );      \
-    PatternKeywords.Add( key, value );                                  \
+    ioMap.Add( key, value );                                            \
 }
 
 //---
@@ -20,14 +20,14 @@
 FNamingConventionPlane::FNamingConventionPlane()
 {
     ADD_PATTERN_KEYWORD( PatternKeywords, "plane-index",    "plane-pattern-keyword", "an incremental index" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "camera-name",    "plane-pattern-keyword", "the name of the camera (won't update if camera name changes)" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "shot-name",      "plane-pattern-keyword", "the name of the shot (won't update if shot name changes)" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "camera-name",    "plane-pattern-keyword", "the name of the camera (won't update if camera name changes)" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "shot-name",      "plane-pattern-keyword", "the name of the shot (won't update if shot name changes)" );
 }
 
 FNamingConventionCamera::FNamingConventionCamera()
 {
     ADD_PATTERN_KEYWORD( PatternKeywords, "camera-index",   "camera-pattern-keyword", "an incremental index" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "shot-name",      "camera-pattern-keyword", "the name of the shot (won't update if shot name changes)" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "shot-name",      "camera-pattern-keyword", "the name of the shot (won't update if shot name changes)" );
 }
 
 FNamingConventionShot::FNamingConventionShot()

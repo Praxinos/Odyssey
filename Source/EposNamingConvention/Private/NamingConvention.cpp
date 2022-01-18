@@ -355,10 +355,8 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
     FNamingConventionCamera camera_settings = settings->CameraNaming;
 
     //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
-    const FString camera_pattern_regex = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "([0-9]+)" ) )
-                                                               .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
-    const FString camera_pattern_display = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "{camera_index_formated}" ) )
-                                                                .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
+    const FString camera_pattern_regex = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "([0-9]+)" ) );
+    const FString camera_pattern_display = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "{camera_index_formated}" ) );
     FRegexPattern camera_pattern = camera_pattern_regex; // Mandatory as FRegexMatcher() takes a const reference
 
     TArray<int32> list_of_camera_index;
@@ -476,12 +474,8 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
     FNamingConventionPlane plane_settings = settings->PlaneNaming;
 
     //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
-    const FString plane_pattern_regex = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "([0-9]+)" ) )
-                                                              .Replace( TEXT( "{camera-name}" ), *camera_name )
-                                                              .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
-    const FString plane_pattern_display = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "{plane_index_formated}" ) )
-                                                                .Replace( TEXT( "{camera-name}" ), *camera_name )
-                                                                .Replace( TEXT( "{shot-name}" ), *current_sequence->GetDisplayName().ToString() );
+    const FString plane_pattern_regex = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "([0-9]+)" ) );
+    const FString plane_pattern_display = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "{plane_index_formated}" ) );
     FRegexPattern plane_pattern = plane_pattern_regex; // Mandatory as FRegexMatcher() takes a const reference
 
     // https://stackoverflow.com/questions/3075130/what-is-the-difference-between-and-regular-expressions
