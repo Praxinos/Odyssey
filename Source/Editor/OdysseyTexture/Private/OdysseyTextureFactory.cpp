@@ -52,7 +52,7 @@ UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNam
     check(iClass->IsChildOf(UTexture2D::StaticClass()));
 
     // Init internal data
-    ::ULIS::FBlock block( mTextureWidth, mTextureHeight, ULISFormatForTextureSourceFormat(mTextureFormat), nullptr, ::ULIS::FOnInvalidBlock(), false );
+    ::ULIS::FBlock block( mTextureWidth, mTextureHeight, ULISFormatForTextureSourceFormat(mTextureFormat) );
 
     ::ULIS::FColor color( ::ULIS::FColor::RGBAF( mBackgroundColor.R, mBackgroundColor.G, mBackgroundColor.B, mBackgroundColor.A ) );
 
