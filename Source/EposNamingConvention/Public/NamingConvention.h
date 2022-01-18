@@ -61,8 +61,6 @@ public:
     };
     static FString GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotComponents& oComponents );
 
-    static FString GenerateSequenceAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, UClass* iType, FString& oPath, FString& oName );
-
 private:
     static FString GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence );
     static FString GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence );
