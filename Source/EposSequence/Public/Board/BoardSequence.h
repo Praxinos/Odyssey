@@ -8,43 +8,11 @@
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "SequenceNameElements.h"
+
 #include "BoardSequence.generated.h"
 
 class UNamingFormatter;
-
-USTRUCT()
-struct EPOSSEQUENCE_API FBoardNamingElements
-{
-    GENERATED_BODY()
-
- public:
-     bool IsValid() const;
-
-public:
-    /** The studio name. */
-    UPROPERTY( EditAnywhere )
-    FString StudioName;
-
-    /** The studio accronym. */
-    UPROPERTY( EditAnywhere )
-    FString StudioAccronym;
-
-    /** The title of the production. */
-    UPROPERTY( EditAnywhere )
-    FString ProductionName;
-
-    /** The accronym of the production. */
-    UPROPERTY( EditAnywhere )
-    FString ProductionAccronym;
-
-    /** The initials of the user. */
-    UPROPERTY( EditAnywhere )
-    FString Initials;
-
-    /** The current index. */
-    UPROPERTY( EditAnywhere )
-    int32 Index { INDEX_NONE };
- };
 
 /*
  * Movie scene animation that represents the hierarchical levels of the storyboard.
@@ -86,11 +54,6 @@ public:
     virtual void SectionResized( UMovieSceneSection* iSection ) override;
     virtual void SectionAddedOrRemoved( UMovieSceneSection* iSection ) override;
 
-#if WITH_EDITOR
-    FBoardNamingElements& GetNamingElements();
-    const FBoardNamingElements& GetNamingElements() const;
-#endif
-
 public:
     UPROPERTY()
     UMovieScene* MovieScene;
@@ -100,9 +63,9 @@ public:
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
 
+    UPROPERTY(EditAnywhere, Category=NamingConvention)
+    FBoardNameElements NameElements;
+
 private:
     UNamingFormatter* mNamingFormatter;
-
-    UPROPERTY(EditAnywhere, Category=NamingConvention)
-    FBoardNamingElements NamingElements;
 };

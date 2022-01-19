@@ -697,34 +697,9 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
 
 //---
 
-void
-NamingConvention::FBoardComponents::ToBoardElements( FBoardNamingElements& oElements )
-{
-    oElements.Index = mNextIndex;
-
-    oElements.StudioName = mStudioName;
-    oElements.StudioAccronym = mStudioAccronym;
-    oElements.ProductionName = mProductionName;
-    oElements.ProductionAccronym = mProductionAccronym;
-    oElements.Initials = mInitials;
-}
-
-void
-NamingConvention::FShotComponents::ToShotElements( FShotNamingElements& oElements )
-{
-    oElements.Index = mNextIndex;
-    oElements.TakeIndex = mNextTake;
-
-    oElements.StudioName = mStudioName;
-    oElements.StudioAccronym = mStudioAccronym;
-    oElements.ProductionName = mProductionName;
-    oElements.ProductionAccronym = mProductionAccronym;
-    oElements.Initials = mInitials;
-}
-
 //static
 FString
-NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents )
+NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardNameComponents& oComponents )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -779,7 +754,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     for( auto board_sequence : board_sequences )
     {
-        const FBoardNamingElements& elements = board_sequence->GetNamingElements();
+        const FBoardNameElements& elements = board_sequence->NameElements;
         if( !elements.IsValid() )
             continue;
 
@@ -795,12 +770,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
     //---
 
     oComponents.mNextIndex = max_board_index;
-
-    oComponents.mStudioName = global_settings.StudioName;
-    oComponents.mStudioAccronym = global_settings.StudioAccronym;
-    oComponents.mProductionName = global_settings.ProductionName;
-    oComponents.mProductionAccronym = global_settings.ProductionAccronym;
-    oComponents.mInitials = global_settings.Initials;
+    oComponents.mGlobal = global_settings;
 
     oName = TEXT( "BS_" ) + FGuid::NewGuid().ToString();
     oPath = sequence_path;
@@ -810,7 +780,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
-NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotComponents& oComponents )
+NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotNameComponents& oComponents )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -865,7 +835,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     for( auto shot_sequence : shot_sequences )
     {
-        const FShotNamingElements& elements = shot_sequence->GetNamingElements();
+        const FShotNameElements& elements = shot_sequence->NameElements;
         if( !elements.IsValid() )
             continue;
 
@@ -881,14 +851,8 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     //---
 
     oComponents.mNextIndex = max_shot_index;
-
     oComponents.mNextTake = shot_settings.TakeFormat.StartNumber;
-
-    oComponents.mStudioName = global_settings.StudioName;
-    oComponents.mStudioAccronym = global_settings.StudioAccronym;
-    oComponents.mProductionName = global_settings.ProductionName;
-    oComponents.mProductionAccronym = global_settings.ProductionAccronym;
-    oComponents.mInitials = global_settings.Initials;
+    oComponents.mGlobal = global_settings;
 
     oName = TEXT( "SS_" ) + FGuid::NewGuid().ToString();
     oPath = sequence_path;

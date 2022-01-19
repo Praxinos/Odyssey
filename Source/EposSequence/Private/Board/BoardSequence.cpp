@@ -194,30 +194,6 @@ FText UBoardSequence::GetDisplayName() const
 //---
 
 bool
-FBoardNamingElements::IsValid() const
-{
-    return Index > INDEX_NONE;
-}
-
-#if WITH_EDITOR
-
-FBoardNamingElements&
-UBoardSequence::GetNamingElements()
-{
-    return NamingElements;
-}
-
-const FBoardNamingElements&
-UBoardSequence::GetNamingElements() const
-{
-    return NamingElements;
-}
-
-#endif
-
-//---
-
-bool
 UBoardSequence::IsResizable() const //override
 {
     if( !GetMovieScene() )

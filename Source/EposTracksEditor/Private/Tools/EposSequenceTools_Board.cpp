@@ -20,6 +20,7 @@
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
+#include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
 #include "StoryNote.h"
 #include "Tools/ResourceAssetTools.h"
@@ -427,6 +428,46 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
     return newSection;
 }
 
+namespace
+{
+static
+void
+FromComponentsToElements( const NamingConvention::FShotNameComponents& iComponents, FShotNameElements& oElements )
+{
+    oElements.Index = iComponents.mNextIndex;
+    oElements.TakeIndex = iComponents.mNextTake;
+
+    // Copy all 'global' members from settings global to shot elements
+    for( TFieldIterator<FProperty> settings_global_property_iterator( StaticStruct<FNamingConventionGlobal>() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    {
+        FProperty* settings_global_property = *settings_global_property_iterator;
+
+        FProperty* shot_global_property = StaticStruct<FShotNameElements>()->FindPropertyByName( settings_global_property->GetFName() );
+        check( shot_global_property );
+
+        shot_global_property->CopyCompleteValue_InContainer( &oElements, &iComponents.mGlobal );
+    }
+}
+
+static
+void
+FromComponentsToElements( const NamingConvention::FBoardNameComponents& iComponents, FBoardNameElements& oElements )
+{
+    oElements.Index = iComponents.mNextIndex;
+
+    // Copy all 'global' members from settings global to board elements
+    for( TFieldIterator<FProperty> settings_global_property_iterator( StaticStruct<FNamingConventionGlobal>() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    {
+        FProperty* settings_global_property = *settings_global_property_iterator;
+
+        FProperty* board_global_property = StaticStruct<FBoardNameElements>()->FindPropertyByName( settings_global_property->GetFName() );
+        check( board_global_property );
+
+        board_global_property->CopyCompleteValue_InContainer( &oElements, &iComponents.mGlobal );
+    }
+}
+};
+
 template<typename SequenceClass>
 //static
 UMovieSceneSubSection*
@@ -437,13 +478,13 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     FString sequence_path;
     FString sequence_name;
     FString sequence_pathname;
-    NamingConvention::FBoardComponents board_components;
-    NamingConvention::FShotComponents shot_components;
+    NamingConvention::FBoardNameComponents board_name_components;
+    NamingConvention::FShotNameComponents shot_name_components;
 
     if( SequenceClass::StaticClass() == UBoardSequence::StaticClass() )
-        sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, board_components );
+        sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, board_name_components );
     else
-        sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_components );
+        sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_name_components );
 
     //---
 
@@ -455,17 +496,13 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     {
         UBoardSequence* board_sequence = CastChecked<UBoardSequence>( new_section->GetSequence() );
 
-        FBoardNamingElements& board_elements = board_sequence->GetNamingElements();
-
-        board_components.ToBoardElements( board_elements );
+        FromComponentsToElements( board_name_components, board_sequence->NameElements );
     }
     else
     {
         UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
 
-        FShotNamingElements& shot_elements = shot_sequence->GetNamingElements();
-
-        shot_components.ToShotElements( shot_elements );
+        FromComponentsToElements( shot_name_components, shot_sequence->NameElements );
     }
 
     //---
@@ -582,8 +619,8 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 
     FString sequence_path;
     FString sequence_name;
-    NamingConvention::FShotComponents shot_components;
-    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_components );
+    NamingConvention::FShotNameComponents shot_name_components;
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_name_components );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, TOptional<int32>(), iSection );
@@ -595,9 +632,7 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     {
         UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
 
-        FShotNamingElements& shot_elements = shot_sequence->GetNamingElements();
-
-        shot_components.ToShotElements( shot_elements );
+        FromComponentsToElements( shot_name_components, shot_sequence->NameElements );
     }
 
     //---

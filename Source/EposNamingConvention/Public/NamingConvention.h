@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "Settings/NamingConventionSettings.h"
+
 class ACineCameraActor;
 class APlaneActor;
 class IMovieScenePlayer;
@@ -32,34 +34,22 @@ public:
     static FString GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FString& oPath, FString& oName );
 
 public:
-    struct EPOSNAMINGCONVENTION_API FBoardComponents
+    struct EPOSNAMINGCONVENTION_API FBoardNameComponents
     {
         int32 mNextIndex;
 
-        FString mStudioName;
-        FString mStudioAccronym;
-        FString mProductionName;
-        FString mProductionAccronym;
-        FString mInitials;
-
-        void ToBoardElements( FBoardNamingElements& oElements );
+        FNamingConventionGlobal mGlobal;
     };
-    static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardComponents& oComponents );
+    static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardNameComponents& oComponents );
 
-    struct EPOSNAMINGCONVENTION_API FShotComponents
+    struct EPOSNAMINGCONVENTION_API FShotNameComponents
     {
         int32 mNextIndex;
         int32 mNextTake;
 
-        FString mStudioName;
-        FString mStudioAccronym;
-        FString mProductionName;
-        FString mProductionAccronym;
-        FString mInitials;
-
-        void ToShotElements( FShotNamingElements& oElements );
+        FNamingConventionGlobal mGlobal;
     };
-    static FString GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotComponents& oComponents );
+    static FString GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotNameComponents& oComponents );
 
 private:
     static FString GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence );

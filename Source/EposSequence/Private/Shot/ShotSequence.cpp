@@ -380,30 +380,6 @@ void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMe
 //---
 
 bool
-FShotNamingElements::IsValid() const
-{
-    return Index > INDEX_NONE && TakeIndex > INDEX_NONE;
-}
-
-#if WITH_EDITOR
-
-FShotNamingElements&
-UShotSequence::GetNamingElements()
-{
-    return NamingElements;
-}
-
-const FShotNamingElements&
-UShotSequence::GetNamingElements() const
-{
-    return NamingElements;
-}
-
-#endif
-
-//---
-
-bool
 UShotSequence::IsResizable() const //override
 {
     return true;

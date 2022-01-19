@@ -154,22 +154,50 @@ public:
     /** The studio name. */
     UPROPERTY( config, EditAnywhere, Category=Global )
     FString StudioName { TEXT( "MyStudio" ) };
-
     /** The studio accronym. */
     UPROPERTY( config, EditAnywhere, Category=Global )
     FString StudioAccronym { TEXT( "MS" ) };
 
-    /** The title of the production. */
+    /** The license name. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString LicenseName;
+    /** The license accronym. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString LicenseAccronym;
+
+    /** The production title. */
     UPROPERTY( config, EditAnywhere, Category=Global )
     FString ProductionName { TEXT( "MyProductionTitle" ) };
-
-    /** The accronym of the production. */
+    /** The production accronym. */
     UPROPERTY( config, EditAnywhere, Category=Global )
     FString ProductionAccronym { TEXT( "MPT" ) };
 
+    /** Is it a serie?. */
+    UPROPERTY( config, EditAnywhere, Category=Global, meta=(InlineEditConditionToggle) )
+    bool IsSerie { false };
+
+    /** The season number. */
+    UPROPERTY( config, EditAnywhere, Category=Global, meta=(EditCondition="IsSerie") )
+    int32 Season { INDEX_NONE };
+
+    /** The episode number. */
+    UPROPERTY( config, EditAnywhere, Category=Global, meta=(EditCondition="IsSerie") )
+    int32 Episode { INDEX_NONE };
+
+    /** The part of the production. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString Part;
+
+    /** The department name. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString DepartmentName;
+    /** The department accronym. */
+    UPROPERTY( config, EditAnywhere, Category=Global )
+    FString DepartmentAccronym;
+
     /** The initials of the user. */
     UPROPERTY( config, EditAnywhere, Category=Global )
-    FString Initials { TEXT( "MI" ) };
+    FString Initials;
 };
 
 //---
