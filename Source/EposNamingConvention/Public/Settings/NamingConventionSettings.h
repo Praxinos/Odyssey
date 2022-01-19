@@ -51,7 +51,7 @@ public:
 
 public:
     /** The plane pattern. */
-    UPROPERTY(config, EditAnywhere, Category=Plane)
+    UPROPERTY(config, EditAnywhere, Category="Plane")
     FString Pattern { TEXT("plane_{plane-index}") };
 
     /** List of all keywords.
@@ -62,7 +62,7 @@ public:
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The plane number format. */
-    UPROPERTY(config, EditAnywhere, Category=Plane, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
@@ -76,7 +76,7 @@ public:
 
 public:
     /** The camera pattern. */
-    UPROPERTY( config, EditAnywhere, Category=Camera )
+    UPROPERTY( config, EditAnywhere, Category="Camera" )
     FString Pattern { TEXT( "camera_{camera-index}" ) };
 
     /** List of all keywords.
@@ -87,7 +87,7 @@ public:
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The camera number format. */
-    UPROPERTY(config, EditAnywhere, Category=Camera, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category="Camera", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
@@ -101,7 +101,7 @@ public:
 
 public:
     /** The shot pattern. */
-    UPROPERTY( config, EditAnywhere, Category=Shot )
+    UPROPERTY( config, EditAnywhere, Category="Shot" )
     FString Pattern { TEXT( "shot_{shot-index}" ) };
 
     /** List of all keywords.
@@ -112,11 +112,11 @@ public:
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */
-    UPROPERTY(config, EditAnywhere, Category=Shot, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 
     /** The take number format. */
-    UPROPERTY(config, EditAnywhere, Category=Shot, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category="Shot", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat TakeFormat { 1, 1, 2 };
 };
 
@@ -130,7 +130,7 @@ public:
 
 public:
     /** The camera pattern. */
-    UPROPERTY( config, EditAnywhere, Category=Board )
+    UPROPERTY( config, EditAnywhere, Category="Board" )
     FString Pattern { TEXT( "board_{board-index}" ) };
 
     /** List of all keywords.
@@ -141,7 +141,7 @@ public:
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */
-    UPROPERTY(config, EditAnywhere, Category=Board, meta=(ShowOnlyInnerProperties))
+    UPROPERTY(config, EditAnywhere, Category="Board", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
@@ -152,51 +152,57 @@ struct FNamingConventionGlobal
 
 public:
     /** The studio name. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString StudioName { TEXT( "MyStudio" ) };
     /** The studio accronym. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString StudioAccronym { TEXT( "MS" ) };
 
     /** The license name. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString LicenseName;
     /** The license accronym. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString LicenseAccronym;
 
     /** The production title. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString ProductionName { TEXT( "MyProductionTitle" ) };
     /** The production accronym. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString ProductionAccronym { TEXT( "MPT" ) };
 
     /** Is it a serie?. */
-    UPROPERTY( config, EditAnywhere, Category=Global, meta=(InlineEditConditionToggle) )
+    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(InlineEditConditionToggle) )
     bool IsSerie { false };
 
     /** The season number. */
-    UPROPERTY( config, EditAnywhere, Category=Global, meta=(EditCondition="IsSerie") )
+    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie") )
     int32 Season { INDEX_NONE };
+    /** The number of digits of season. */
+    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
+    uint32 SeasonNumDigits { 2 };
 
     /** The episode number. */
-    UPROPERTY( config, EditAnywhere, Category=Global, meta=(EditCondition="IsSerie") )
+    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie") )
     int32 Episode { INDEX_NONE };
+    /** The number of digits of episode. */
+    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
+    uint32 EpisodeNumDigits { 2 };
 
     /** The part of the production. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString Part;
 
     /** The department name. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString DepartmentName;
     /** The department accronym. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString DepartmentAccronym;
 
     /** The initials of the user. */
-    UPROPERTY( config, EditAnywhere, Category=Global )
+    UPROPERTY( config, EditAnywhere, Category="Global" )
     FString Initials;
 };
 
@@ -216,22 +222,22 @@ public:
 
 public:
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category=GlobalNamingConvention, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, Category="GlobalNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionGlobal GlobalNaming;
 
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category=BoardNamingConvention, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, Category="BoardNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionBoard BoardNaming;
 
     /** The naming convention for boards. */
-    UPROPERTY(config, EditAnywhere, Category=ShotNamingConvention, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, Category="ShotNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionShot ShotNaming;
 
     /** The naming convention for planes. */
-    UPROPERTY(config, EditAnywhere, Category=PlaneNamingConvention, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, Category="PlaneNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionPlane PlaneNaming;
 
     /** The naming convention for cameras. */
-    UPROPERTY(config, EditAnywhere, Category=CameraNamingConvention, meta=(ShowOnlyInnerProperties) )
+    UPROPERTY(config, EditAnywhere, Category="CameraNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionCamera CameraNaming;
 };

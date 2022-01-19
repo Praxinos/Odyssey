@@ -16,6 +16,7 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
     UBoardSequence* board_sequence = const_cast<UBoardSequence*>( const_board_sequence );
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionGlobal global_settings = settings->GlobalNaming;
     FNamingConventionBoard board_settings = settings->BoardNaming;
 
     const FBoardNameElements& name_elements = board_sequence->NameElements;
@@ -30,8 +31,8 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
                                                .Replace( TEXT( "{license-accronym}" ),      *name_elements.LicenseAccronym )
                                                .Replace( TEXT( "{production-name}" ),       *name_elements.ProductionName )
                                                .Replace( TEXT( "{production-accronym}" ),   *name_elements.ProductionAccronym )
-                                               .Replace( TEXT( "{season}" ),                name_elements.IsSerie ? *FString::FromInt( name_elements.Season ) : TEXT("") )
-                                               .Replace( TEXT( "{episode}" ),               name_elements.IsSerie ? *FString::FromInt( name_elements.Episode ) : TEXT( "" ) )
+                                               .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.SeasonNumDigits, name_elements.Season ) : TEXT("") )
+                                               .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.EpisodeNumDigits, name_elements.Episode ) : TEXT( "" ) )
                                                .Replace( TEXT( "{part}" ),                  *name_elements.Part )
                                                .Replace( TEXT( "{department-name}" ),       *name_elements.DepartmentName )
                                                .Replace( TEXT( "{department-accronym}" ),   *name_elements.DepartmentAccronym )
@@ -49,6 +50,7 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
     const UShotSequence* shot_sequence = Cast<UShotSequence>( iContext );
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionGlobal global_settings = settings->GlobalNaming;
     FNamingConventionShot shot_settings = settings->ShotNaming;
 
     const FShotNameElements& name_elements = shot_sequence->NameElements;
@@ -64,8 +66,8 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
                                               .Replace( TEXT( "{license-accronym}" ),       *name_elements.LicenseAccronym )
                                               .Replace( TEXT( "{production-name}" ),        *name_elements.ProductionName )
                                               .Replace( TEXT( "{production-accronym}" ),    *name_elements.ProductionAccronym )
-                                              .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::FromInt( name_elements.Season ) : TEXT("") )
-                                              .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::FromInt( name_elements.Episode ) : TEXT( "" ) )
+                                              .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.SeasonNumDigits, name_elements.Season ) : TEXT("") )
+                                              .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.EpisodeNumDigits, name_elements.Episode ) : TEXT( "" ) )
                                               .Replace( TEXT( "{part}" ),                   *name_elements.Part )
                                               .Replace( TEXT( "{department-name}" ),        *name_elements.DepartmentName )
                                               .Replace( TEXT( "{department-accronym}" ),    *name_elements.DepartmentAccronym )

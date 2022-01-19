@@ -443,6 +443,10 @@ FromComponentsToElements( const NamingConvention::FShotNameComponents& iComponen
         FProperty* settings_global_property = *settings_global_property_iterator;
 
         FProperty* shot_global_property = StaticStruct<FShotNameElements>()->FindPropertyByName( settings_global_property->GetFName() );
+
+        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
+            continue;
+
         check( shot_global_property );
 
         shot_global_property->CopyCompleteValue_InContainer( &oElements, &iComponents.mGlobal );
@@ -461,6 +465,9 @@ FromComponentsToElements( const NamingConvention::FBoardNameComponents& iCompone
         FProperty* settings_global_property = *settings_global_property_iterator;
 
         FProperty* board_global_property = StaticStruct<FBoardNameElements>()->FindPropertyByName( settings_global_property->GetFName() );
+        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
+            continue;
+
         check( board_global_property );
 
         board_global_property->CopyCompleteValue_InContainer( &oElements, &iComponents.mGlobal );
