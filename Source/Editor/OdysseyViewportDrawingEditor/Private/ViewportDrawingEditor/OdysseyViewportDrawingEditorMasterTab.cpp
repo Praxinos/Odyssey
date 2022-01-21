@@ -38,6 +38,8 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBased));
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased));
 
+    mThumbnailPool = MakeShareable( new FAssetThumbnailPool( 50 ) );
+
     return
         SNew( SScrollBox )
             .Orientation( Orient_Vertical )
@@ -90,8 +92,9 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                             .DisplayBrowse(true)
                             .EnableContentPicker(true)
                             .DisplayCompactSize(true)
-                            .DisplayThumbnail(true)
-                            .ThumbnailSizeOverride(FIntPoint(30, 30))
+                            //.DisplayThumbnail(true)
+                            //.ThumbnailSizeOverride(FIntPoint(30, 30))
+                            //.ThumbnailPool( mThumbnailPool )
                         ]
                     + SVerticalBox::Slot()
                     .Padding(2)
@@ -113,7 +116,8 @@ FOdysseyViewportDrawingEditorMasterTab::CreateWidget()
                                 .EnableContentPicker(true)
                                 .DisplayCompactSize(true)
                                 .DisplayThumbnail(true)
-                                .ThumbnailSizeOverride(FIntPoint(30, 30))
+                                .ThumbnailSizeOverride(FIntPoint(70, 70))
+                                .ThumbnailPool( mThumbnailPool )
                         ]
                     /* + SVerticalBox::Slot()
                         .Padding(2)

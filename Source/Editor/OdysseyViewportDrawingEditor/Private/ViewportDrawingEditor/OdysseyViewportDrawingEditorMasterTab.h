@@ -51,5 +51,7 @@ private:
     TSharedPtr<SVerticalBox> mMeshSelectorVerticalBox;
     TSharedPtr<SComboButton> mMeshSelectComboButton;
     TArray<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>> mOptions;
+
+    TSharedPtr<FAssetThumbnailPool> mThumbnailPool;
 };
 
