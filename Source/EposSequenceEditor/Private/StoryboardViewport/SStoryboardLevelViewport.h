@@ -158,6 +158,9 @@ private:
     float GetCameraFocalLength() const;
     void SetCameraFocalLength( float iFocalLength );
 
+    float GetViewportRotation() const; // in degrees
+    void SetViewportRotation( float iRotation ); // in degrees
+
 private:
 
     /** Widget where the scene viewport is drawn in */
@@ -200,6 +203,8 @@ private:
 
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardViewportClient> ViewportClient;
+
+    float mViewportRotation { 0.f };
 
     TSharedPtr<SSplitter> mNoteSplitter;
 

@@ -27,6 +27,7 @@
 #include "Editor.h"
 #include "Engine/Selection.h"
 #include "SEnumCombobox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -197,6 +198,11 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         .ConfigKey(LayoutName)
         .Realtime(true);
 
+    FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( mViewportRotation )/*, FVector2D( 0, 0 )*/ );
+    //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
+    ViewportWidget->SetRenderTransform( transform );
+    ViewportWidget->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
+
     ViewportClient->SetViewportWidget(ViewportWidget);
 
     // Automatically engage game-view to hide editor only sprites. This needs to be done
@@ -298,6 +304,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
                     [
                         SNew(SOverlay)
+                        .Clipping( EWidgetClipping::ClipToBoundsAlways )
 
                         + SOverlay::Slot()
                         [
@@ -535,6 +542,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
+    //HACK: ue4
+    TSharedPtr<SSpinBox<float>> viewportRotationSpinBox;
+
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
         .BorderImage(FEditorStyle::GetBrush("BlackBrush"))
         .ForegroundColor(Gray)
@@ -565,6 +575,24 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 .AutoWidth()
                 [
                     SNew( SNoteSettings )
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew( viewportRotationSpinBox, SSpinBox<float> )
+                    .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
+                    .MinDesiredWidth( 75 )
+                    .Justification( ETextJustify::Right )
+                    //.Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
+                    //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+                    .PreventThrottling( true ) // To refresh the viewport during value change
+                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                    .Delta( 1 )
+                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                    .SliderExponentNeutralValue( 100 )
+                    .OnValueCommitted_Lambda( [=] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
+                    .OnValueChanged_Lambda( [=] ( float Value) { SetViewportRotation(Value); } )
+                    .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
                 ]
             ]
 
@@ -616,6 +644,12 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 ]
             ]
         ];
+
+    //TODO: HACK:
+    // UE5: MaxFractionnal digits is set correctly in UE5.
+    // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
+    viewportRotationSpinBox->SetMinFractionalDigits( 2 );
+    viewportRotationSpinBox->SetMaxFractionalDigits( 2 );
 
     //---
 
@@ -771,6 +805,24 @@ FOptionalSize SStoryboardLevelViewport::GetDesiredViewportHeight() const
 }
 
 //---
+
+float
+SStoryboardLevelViewport::GetViewportRotation() const
+{
+    return mViewportRotation;
+}
+
+void
+SStoryboardLevelViewport::SetViewportRotation( float iRotation )
+{
+    mViewportRotation = iRotation;
+
+    float radian = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
+
+    FSlateRenderTransform rotation = FSlateRenderTransform( FQuat2D( radian )/*, FVector2D( 0, 0 )*/ );
+    //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
+    ViewportWidget->SetRenderTransform( rotation );
+}
 
 int32
 SStoryboardLevelViewport::GetScaleVisibleWidgetIndex() const
