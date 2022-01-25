@@ -701,86 +701,45 @@ namespace
 {
 static
 void
-FillNameElements( const UNamingConventionSettings* iSettings, int32 iIndex, FBoardNameElements& oElements )
+FillNameElements( const FNamingConventionGlobal& iGlobalSettings, FSequenceNameElements& oDstElements )
 {
-    oElements.Index = iIndex;
-
-    // Copy all 'global' members from settings global to board elements
-    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    // Copy all 'global' members from settings global to shot elements
+    for( TFieldIterator<FProperty> source_property_iterator( FNamingConventionGlobal::StaticStruct() ); source_property_iterator; ++source_property_iterator )
     {
-        FProperty* settings_global_property = *settings_global_property_iterator;
+        FProperty* source_property = *source_property_iterator;
 
-        FProperty* board_property = FBoardNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
-        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
+        FProperty* destination_property = FShotNameElements::StaticStruct()->FindPropertyByName( source_property->GetFName() );
+        if( source_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
             continue;
 
-        check( board_property );
+        check( destination_property );
 
         // It doesn't work if the 2 structs are not synchro with the same name of members
         // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
         //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
 
-        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iSettings->GlobalNaming );
-        uint8* DestinationAddr = board_property->ContainerPtrToValuePtr<uint8>( &oElements );
+        const uint8* SourceAddr = source_property->ContainerPtrToValuePtr<uint8>( &iGlobalSettings );
+        uint8* DestinationAddr = destination_property->ContainerPtrToValuePtr<uint8>( &oDstElements );
 
-        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
-    }
-
-    // Copy all 'user' members from settings user to board elements
-    for( TFieldIterator<FProperty> settings_user_property_iterator( FNamingConventionUser::StaticStruct() ); settings_user_property_iterator; ++settings_user_property_iterator )
-    {
-        FProperty* settings_user_property = *settings_user_property_iterator;
-
-        FProperty* board_property = FBoardNameElements::StaticStruct()->FindPropertyByName( settings_user_property->GetFName() );
-        check( board_property );
-
-        const uint8* SourceAddr = settings_user_property->ContainerPtrToValuePtr<uint8>( &iSettings->UserNaming );
-        uint8* DestinationAddr = board_property->ContainerPtrToValuePtr<uint8>( &oElements );
-
-        settings_user_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+        source_property->CopyCompleteValue( DestinationAddr, SourceAddr );
     }
 }
-
 static
 void
-FillNameElements( const UNamingConventionSettings* iSettings, int32 iIndex, int32 iTakeIndex, FShotNameElements& oElements )
+FillNameElements( const FNamingConventionUser& iUserSettings, FSequenceNameElements& oDstElements )
 {
-    oElements.Index = iIndex;
-    oElements.TakeIndex = iTakeIndex;
-
-    // Copy all 'global' members from settings global to shot elements
-    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
-    {
-        FProperty* settings_global_property = *settings_global_property_iterator;
-
-        FProperty* shot_property = FShotNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
-        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
-            continue;
-
-        check( shot_property );
-
-        // It doesn't work if the 2 structs are not synchro with the same name of members
-        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
-        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
-
-        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iSettings->GlobalNaming );
-        uint8* DestinationAddr = shot_property->ContainerPtrToValuePtr<uint8>( &oElements );
-
-        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
-    }
-
     // Copy all 'user' members from settings user to shot elements
-    for( TFieldIterator<FProperty> settings_user_property_iterator( FNamingConventionUser::StaticStruct() ); settings_user_property_iterator; ++settings_user_property_iterator )
+    for( TFieldIterator<FProperty> source_property_iterator( FNamingConventionUser::StaticStruct() ); source_property_iterator; ++source_property_iterator )
     {
-        FProperty* settings_user_property = *settings_user_property_iterator;
+        FProperty* source_property = *source_property_iterator;
 
-        FProperty* shot_property = FShotNameElements::StaticStruct()->FindPropertyByName( settings_user_property->GetFName() );
-        check( shot_property );
+        FProperty* destination_property = FShotNameElements::StaticStruct()->FindPropertyByName( source_property->GetFName() );
+        check( destination_property );
 
-        const uint8* SourceAddr = settings_user_property->ContainerPtrToValuePtr<uint8>( &iSettings->UserNaming );
-        uint8* DestinationAddr = shot_property->ContainerPtrToValuePtr<uint8>( &oElements );
+        const uint8* SourceAddr = source_property->ContainerPtrToValuePtr<uint8>( &iUserSettings );
+        uint8* DestinationAddr = destination_property->ContainerPtrToValuePtr<uint8>( &oDstElements );
 
-        settings_user_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+        source_property->CopyCompleteValue( DestinationAddr, SourceAddr );
     }
 }
 };
@@ -836,6 +795,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
     const FNamingConventionGlobal& global_settings = settings->GlobalNaming;
+    const FNamingConventionUser& user_settings = settings->UserNaming;
     const FNamingConventionBoard& board_settings = settings->BoardNaming;
 
     int32 max_board_index = INDEX_NONE;
@@ -857,7 +817,22 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     //---
 
-    FillNameElements( settings, max_board_index, oElements );
+    oElements.Index = max_board_index;
+
+    const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
+    const FSequenceNameElements* source_elements = &root_board_sequence->NameElements;
+    FSequenceNameElements* destination_elements = &oElements;
+
+    // Initialize new sequence elements from the root sequence elements
+    *destination_elements = *source_elements;
+    //TODO: try to check each empty property ? to use global settings only for those ones ?
+    if( oElements.StudioName.IsEmpty() )
+        FillNameElements( global_settings, oElements );
+
+    // User settings always override new sequence elements
+    FillNameElements( user_settings, oElements );
+
+    //---
 
     oName = TEXT( "BS_" ) + FGuid::NewGuid().ToString();
     oPath = sequence_path;
@@ -916,6 +891,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
     const FNamingConventionGlobal& global_settings = settings->GlobalNaming;
+    const FNamingConventionUser& user_settings = settings->UserNaming;
     const FNamingConventionShot& shot_settings = settings->ShotNaming;
 
     int32 max_shot_index = INDEX_NONE;
@@ -937,7 +913,23 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     //---
 
-    FillNameElements( settings, max_shot_index, shot_settings.TakeFormat.StartNumber, oElements );
+    oElements.Index = max_shot_index;
+    oElements.TakeIndex = shot_settings.TakeFormat.StartNumber;
+
+    const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
+    const FSequenceNameElements* source_elements = &root_board_sequence->NameElements;
+    FSequenceNameElements* destination_elements = &oElements;
+
+    // Initialize new sequence elements from the root sequence elements
+    *destination_elements = *source_elements;
+    //TODO: try to check each empty property ? to use global settings only for those ones ?
+    if( oElements.StudioName.IsEmpty() )
+        FillNameElements( global_settings, oElements );
+
+    // User settings always override new sequence elements
+    FillNameElements( user_settings, oElements );
+
+    //---
 
     oName = TEXT( "SS_" ) + FGuid::NewGuid().ToString();
     oPath = sequence_path;
