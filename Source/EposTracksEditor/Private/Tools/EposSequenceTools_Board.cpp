@@ -438,18 +438,24 @@ FromComponentsToElements( const NamingConvention::FShotNameComponents& iComponen
     oElements.TakeIndex = iComponents.mNextTake;
 
     // Copy all 'global' members from settings global to shot elements
-    for( TFieldIterator<FProperty> settings_global_property_iterator( StaticStruct<FNamingConventionGlobal>() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
     {
         FProperty* settings_global_property = *settings_global_property_iterator;
 
-        FProperty* shot_global_property = StaticStruct<FShotNameElements>()->FindPropertyByName( settings_global_property->GetFName() );
-
+        FProperty* shot_global_property = FShotNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
         if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
             continue;
 
         check( shot_global_property );
 
-        shot_global_property->CopyCompleteValue_InContainer( &oElements, &iComponents.mGlobal );
+        // It doesn't work if the 2 structs are not synchro with the same name of members
+        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
+        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
+
+        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iComponents.mGlobal );
+        uint8* DestinationAddr = shot_global_property->ContainerPtrToValuePtr<uint8>( &oElements );
+
+        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
     }
 }
 
@@ -460,17 +466,24 @@ FromComponentsToElements( const NamingConvention::FBoardNameComponents& iCompone
     oElements.Index = iComponents.mNextIndex;
 
     // Copy all 'global' members from settings global to board elements
-    for( TFieldIterator<FProperty> settings_global_property_iterator( StaticStruct<FNamingConventionGlobal>() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
     {
         FProperty* settings_global_property = *settings_global_property_iterator;
 
-        FProperty* board_global_property = StaticStruct<FBoardNameElements>()->FindPropertyByName( settings_global_property->GetFName() );
+        FProperty* board_global_property = FBoardNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
         if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
             continue;
 
         check( board_global_property );
 
-        board_global_property->CopyCompleteValue_InContainer( &oElements, &iComponents.mGlobal );
+        // It doesn't work if the 2 structs are not synchro with the same name of members
+        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
+        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
+
+        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iComponents.mGlobal );
+        uint8* DestinationAddr = board_global_property->ContainerPtrToValuePtr<uint8>( &oElements );
+
+        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
     }
 }
 };
