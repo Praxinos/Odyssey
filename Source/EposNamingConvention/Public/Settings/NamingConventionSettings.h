@@ -173,36 +173,50 @@ public:
     FString ProductionAccronym { TEXT( "MPT" ) };
 
     /** Is it a serie?. */
-    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(InlineEditConditionToggle) )
+    UPROPERTY( config, EditAnywhere, Category="Global", meta=(InlineEditConditionToggle) )
     bool IsSerie { false };
 
     /** The season number. */
-    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie") )
+    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie") )
     int32 Season { INDEX_NONE };
     /** The number of digits of season. */
-    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
+    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
     uint32 SeasonNumDigits { 2 };
 
     /** The episode number. */
-    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie") )
+    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie") )
     int32 Episode { INDEX_NONE };
     /** The number of digits of episode. */
-    UPROPERTY( config, EditAnywhere, Category="Global|TVSerie", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
+    UPROPERTY( config, EditAnywhere, Category="Global", meta=(EditCondition="IsSerie", UIMin = "1", UIMax = "10") )
     uint32 EpisodeNumDigits { 2 };
 
     /** The part of the production. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
     FString Part;
 
-    /** The department name. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
-    FString DepartmentName;
-    /** The department accronym. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
-    FString DepartmentAccronym;
+    ///** The department name. */
+    //UPROPERTY( config, EditAnywhere, Category="Global" )
+    //FString DepartmentName;
+    ///** The department accronym. */
+    //UPROPERTY( config, EditAnywhere, Category="Global" )
+    //FString DepartmentAccronym;
+};
+
+USTRUCT()
+struct FNamingConventionUser
+{
+    GENERATED_BODY()
+
+public:
+    ///** The department name. */
+    //UPROPERTY( config, EditAnywhere, Category="User" )
+    //FString DepartmentName;
+    ///** The department accronym. */
+    //UPROPERTY( config, EditAnywhere, Category="User" )
+    //FString DepartmentAccronym;
 
     /** The initials of the user. */
-    UPROPERTY( config, EditAnywhere, Category="Global" )
+    UPROPERTY( config, EditAnywhere, Category="User" )
     FString Initials;
 };
 
@@ -210,7 +224,7 @@ public:
 
 // Settings for the naming convention
 UCLASS(config=EditorPerProjectUserSettings, meta=(DisplayName="Epos Naming Convention"))
-class /*EPOSNAMINGCONVENTION_API*/ UNamingConventionSettings
+class EPOSNAMINGCONVENTION_API UNamingConventionSettings
     : public UDeveloperSettings
 {
     GENERATED_BODY()
@@ -224,6 +238,10 @@ public:
     /** The naming convention for boards. */
     UPROPERTY(config, EditAnywhere, Category="GlobalNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionGlobal GlobalNaming;
+
+    /** The naming convention for boards. */
+    UPROPERTY(config, EditAnywhere, Category="UserNamingConvention", meta=(ShowOnlyInnerProperties) )
+    FNamingConventionUser UserNaming;
 
     /** The naming convention for boards. */
     UPROPERTY(config, EditAnywhere, Category="BoardNamingConvention", meta=(ShowOnlyInnerProperties) )

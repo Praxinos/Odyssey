@@ -697,9 +697,97 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
 
 //---
 
+namespace
+{
+static
+void
+FillNameElements( const UNamingConventionSettings* iSettings, int32 iIndex, FBoardNameElements& oElements )
+{
+    oElements.Index = iIndex;
+
+    // Copy all 'global' members from settings global to board elements
+    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    {
+        FProperty* settings_global_property = *settings_global_property_iterator;
+
+        FProperty* board_property = FBoardNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
+        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
+            continue;
+
+        check( board_property );
+
+        // It doesn't work if the 2 structs are not synchro with the same name of members
+        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
+        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
+
+        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iSettings->GlobalNaming );
+        uint8* DestinationAddr = board_property->ContainerPtrToValuePtr<uint8>( &oElements );
+
+        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+    }
+
+    // Copy all 'user' members from settings user to board elements
+    for( TFieldIterator<FProperty> settings_user_property_iterator( FNamingConventionUser::StaticStruct() ); settings_user_property_iterator; ++settings_user_property_iterator )
+    {
+        FProperty* settings_user_property = *settings_user_property_iterator;
+
+        FProperty* board_property = FBoardNameElements::StaticStruct()->FindPropertyByName( settings_user_property->GetFName() );
+        check( board_property );
+
+        const uint8* SourceAddr = settings_user_property->ContainerPtrToValuePtr<uint8>( &iSettings->UserNaming );
+        uint8* DestinationAddr = board_property->ContainerPtrToValuePtr<uint8>( &oElements );
+
+        settings_user_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+    }
+}
+
+static
+void
+FillNameElements( const UNamingConventionSettings* iSettings, int32 iIndex, int32 iTakeIndex, FShotNameElements& oElements )
+{
+    oElements.Index = iIndex;
+    oElements.TakeIndex = iTakeIndex;
+
+    // Copy all 'global' members from settings global to shot elements
+    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
+    {
+        FProperty* settings_global_property = *settings_global_property_iterator;
+
+        FProperty* shot_property = FShotNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
+        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
+            continue;
+
+        check( shot_property );
+
+        // It doesn't work if the 2 structs are not synchro with the same name of members
+        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
+        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
+
+        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iSettings->GlobalNaming );
+        uint8* DestinationAddr = shot_property->ContainerPtrToValuePtr<uint8>( &oElements );
+
+        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+    }
+
+    // Copy all 'user' members from settings user to shot elements
+    for( TFieldIterator<FProperty> settings_user_property_iterator( FNamingConventionUser::StaticStruct() ); settings_user_property_iterator; ++settings_user_property_iterator )
+    {
+        FProperty* settings_user_property = *settings_user_property_iterator;
+
+        FProperty* shot_property = FShotNameElements::StaticStruct()->FindPropertyByName( settings_user_property->GetFName() );
+        check( shot_property );
+
+        const uint8* SourceAddr = settings_user_property->ContainerPtrToValuePtr<uint8>( &iSettings->UserNaming );
+        uint8* DestinationAddr = shot_property->ContainerPtrToValuePtr<uint8>( &oElements );
+
+        settings_user_property->CopyCompleteValue( DestinationAddr, SourceAddr );
+    }
+}
+};
+
 //static
 FString
-NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardNameComponents& oComponents )
+NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -747,8 +835,8 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
     //--- Compute the next valid board index
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
-    FNamingConventionGlobal global_settings = settings->GlobalNaming;
-    FNamingConventionBoard board_settings = settings->BoardNaming;
+    const FNamingConventionGlobal& global_settings = settings->GlobalNaming;
+    const FNamingConventionBoard& board_settings = settings->BoardNaming;
 
     int32 max_board_index = INDEX_NONE;
 
@@ -769,8 +857,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     //---
 
-    oComponents.mNextIndex = max_board_index;
-    oComponents.mGlobal = global_settings;
+    FillNameElements( settings, max_board_index, oElements );
 
     oName = TEXT( "BS_" ) + FGuid::NewGuid().ToString();
     oPath = sequence_path;
@@ -780,7 +867,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
-NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotNameComponents& oComponents )
+NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -828,8 +915,8 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     //--- Compute the next valid shot index
 
     const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
-    FNamingConventionGlobal global_settings = settings->GlobalNaming;
-    FNamingConventionShot shot_settings = settings->ShotNaming;
+    const FNamingConventionGlobal& global_settings = settings->GlobalNaming;
+    const FNamingConventionShot& shot_settings = settings->ShotNaming;
 
     int32 max_shot_index = INDEX_NONE;
 
@@ -850,9 +937,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     //---
 
-    oComponents.mNextIndex = max_shot_index;
-    oComponents.mNextTake = shot_settings.TakeFormat.StartNumber;
-    oComponents.mGlobal = global_settings;
+    FillNameElements( settings, max_shot_index, shot_settings.TakeFormat.StartNumber, oElements );
 
     oName = TEXT( "SS_" ) + FGuid::NewGuid().ToString();
     oPath = sequence_path;

@@ -428,66 +428,6 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
     return newSection;
 }
 
-namespace
-{
-static
-void
-FromComponentsToElements( const NamingConvention::FShotNameComponents& iComponents, FShotNameElements& oElements )
-{
-    oElements.Index = iComponents.mNextIndex;
-    oElements.TakeIndex = iComponents.mNextTake;
-
-    // Copy all 'global' members from settings global to shot elements
-    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
-    {
-        FProperty* settings_global_property = *settings_global_property_iterator;
-
-        FProperty* shot_global_property = FShotNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
-        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
-            continue;
-
-        check( shot_global_property );
-
-        // It doesn't work if the 2 structs are not synchro with the same name of members
-        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
-        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
-
-        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iComponents.mGlobal );
-        uint8* DestinationAddr = shot_global_property->ContainerPtrToValuePtr<uint8>( &oElements );
-
-        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
-    }
-}
-
-static
-void
-FromComponentsToElements( const NamingConvention::FBoardNameComponents& iComponents, FBoardNameElements& oElements )
-{
-    oElements.Index = iComponents.mNextIndex;
-
-    // Copy all 'global' members from settings global to board elements
-    for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )
-    {
-        FProperty* settings_global_property = *settings_global_property_iterator;
-
-        FProperty* board_global_property = FBoardNameElements::StaticStruct()->FindPropertyByName( settings_global_property->GetFName() );
-        if( settings_global_property->GetName().EndsWith( TEXT( "NumDigits" ) ) )
-            continue;
-
-        check( board_global_property );
-
-        // It doesn't work if the 2 structs are not synchro with the same name of members
-        // and I don't know the difference with the (good) outside ContainerPtrToValuePtr<> form below
-        //settings_global_property->CopyCompleteValue_InContainer( &board_sequence->NameElements, &mNamingConventionSettings->GlobalNaming );
-
-        const uint8* SourceAddr = settings_global_property->ContainerPtrToValuePtr<uint8>( &iComponents.mGlobal );
-        uint8* DestinationAddr = board_global_property->ContainerPtrToValuePtr<uint8>( &oElements );
-
-        settings_global_property->CopyCompleteValue( DestinationAddr, SourceAddr );
-    }
-}
-};
-
 template<typename SequenceClass>
 //static
 UMovieSceneSubSection*
@@ -498,13 +438,13 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     FString sequence_path;
     FString sequence_name;
     FString sequence_pathname;
-    NamingConvention::FBoardNameComponents board_name_components;
-    NamingConvention::FShotNameComponents shot_name_components;
+    FShotNameElements shot_name_elements;
+    FBoardNameElements board_name_elements;
 
     if( SequenceClass::StaticClass() == UBoardSequence::StaticClass() )
-        sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, board_name_components );
+        sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, board_name_elements );
     else
-        sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_name_components );
+        sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_name_elements );
 
     //---
 
@@ -516,13 +456,13 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
     {
         UBoardSequence* board_sequence = CastChecked<UBoardSequence>( new_section->GetSequence() );
 
-        FromComponentsToElements( board_name_components, board_sequence->NameElements );
+        board_sequence->NameElements = board_name_elements;
     }
     else
     {
         UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
 
-        FromComponentsToElements( shot_name_components, shot_sequence->NameElements );
+        shot_sequence->NameElements = shot_name_elements;
     }
 
     //---
@@ -639,8 +579,8 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 
     FString sequence_path;
     FString sequence_name;
-    NamingConvention::FShotNameComponents shot_name_components;
-    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_name_components );
+    FShotNameElements shot_name_elements;
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), sequence_path, sequence_name, shot_name_elements );
 
     // Duplicate the board and put it on the next available row
     UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, TOptional<int32>(), iSection );
@@ -652,7 +592,7 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     {
         UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
 
-        FromComponentsToElements( shot_name_components, shot_sequence->NameElements );
+        shot_sequence->NameElements = shot_name_elements;
     }
 
     //---

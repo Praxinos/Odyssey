@@ -206,12 +206,72 @@ FCinematicBoardSection::GetSectionToolTip() const
     // Calculate the inner frame number of the end frame
     int32 InnerEndFrame = InnerStartFrame + InnerFrameLength;
 
-    return FText::Format( LOCTEXT( "ToolTipContentFormat", "{0} - {1} ({2} frames @ {3})" ),
+    FText range_text = FText::Format( LOCTEXT( "ToolTipContentFormat", "{0} - {1} ({2} frames @ {3})\n" ),
                           InnerStartFrame,
                           InnerEndFrame,
                           InnerFrameLength,
                           InnerMovieScene->GetDisplayRate().ToPrettyText()
     );
+
+    //---
+
+    TArray<FText> name_elements_texts;
+
+    {
+        const UBoardSequence* sequence = Cast<UBoardSequence>( InnerSequence );
+        if( sequence )
+        {
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Studio", "Studio: {0} | {1}" ), FText::FromString( sequence->NameElements.StudioName ), FText::FromString( sequence->NameElements.StudioAccronym ) ) );
+            if( !sequence->NameElements.LicenseName.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.License", "License: {0} | {1}" ), FText::FromString( sequence->NameElements.LicenseName ), FText::FromString( sequence->NameElements.LicenseAccronym ) ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Production", "Production: {0} | {1}" ), FText::FromString( sequence->NameElements.ProductionName ), FText::FromString( sequence->NameElements.ProductionAccronym ) ) );
+            if( sequence->NameElements.IsSerie )
+            {
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Season", "Season: {0}" ), sequence->NameElements.Season ) );
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Episode", "Episode: {0}" ), sequence->NameElements.Episode ) );
+            }
+            if( !sequence->NameElements.Part.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Part", "Part: {0}" ), FText::FromString( sequence->NameElements.Part ) ) );
+            if( !sequence->NameElements.DepartmentName.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
+            if( !sequence->NameElements.Initials.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Initials", "Initials: {0}" ), FText::FromString( sequence->NameElements.Initials ) ) );
+
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Index", "Index: {0}" ), sequence->NameElements.Index ) );
+        }
+    }
+
+    {
+        const UShotSequence* sequence = Cast<UShotSequence>( InnerSequence );
+        if( sequence )
+        {
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Studio", "Studio: {0} | {1}" ), FText::FromString( sequence->NameElements.StudioName ), FText::FromString( sequence->NameElements.StudioAccronym ) ) );
+            if( !sequence->NameElements.LicenseName.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.License", "License: {0} | {1}" ), FText::FromString( sequence->NameElements.LicenseName ), FText::FromString( sequence->NameElements.LicenseAccronym ) ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Production", "Production: {0} | {1}" ), FText::FromString( sequence->NameElements.ProductionName ), FText::FromString( sequence->NameElements.ProductionAccronym ) ) );
+            if( sequence->NameElements.IsSerie )
+            {
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Season", "Season: {0}" ), sequence->NameElements.Season ) );
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Episode", "Episode: {0}" ), sequence->NameElements.Episode ) );
+            }
+            if( !sequence->NameElements.Part.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Part", "Part: {0}" ), FText::FromString( sequence->NameElements.Part ) ) );
+            if( !sequence->NameElements.DepartmentName.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
+            if( !sequence->NameElements.Initials.IsEmpty() )
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Initials", "Initials: {0}" ), FText::FromString( sequence->NameElements.Initials ) ) );
+
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Index", "Index: {0}" ), sequence->NameElements.Index ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.TakeIndex", "TakeIndex: {0}" ), sequence->NameElements.TakeIndex ) );
+        }
+    }
+
+    //---
+
+    FText name_elements_text = FText::Join( FText::FromString( TEXT( "\n" ) ), name_elements_texts );
+    FText tooltip_text = FText::Join( FText::FromString( TEXT( "\n" ) ), range_text, name_elements_text );
+
+    return tooltip_text;
 }
 
 float

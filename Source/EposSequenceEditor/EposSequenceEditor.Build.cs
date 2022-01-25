@@ -68,6 +68,7 @@ public class EposSequenceEditor : ModuleRules
                 "EditorWidgets",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
+                "EposNamingConvention",
             }
             );
 
