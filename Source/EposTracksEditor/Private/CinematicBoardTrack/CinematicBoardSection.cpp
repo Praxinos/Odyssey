@@ -232,8 +232,8 @@ FCinematicBoardSection::GetSectionToolTip() const
             }
             if( !sequence->NameElements.Part.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Part", "Part: {0}" ), FText::FromString( sequence->NameElements.Part ) ) );
-            if( !sequence->NameElements.DepartmentName.IsEmpty() )
-                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
+            //if( !sequence->NameElements.DepartmentName.IsEmpty() )
+            //    name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
             if( !sequence->NameElements.Initials.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Initials", "Initials: {0}" ), FText::FromString( sequence->NameElements.Initials ) ) );
 
@@ -256,8 +256,8 @@ FCinematicBoardSection::GetSectionToolTip() const
             }
             if( !sequence->NameElements.Part.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Part", "Part: {0}" ), FText::FromString( sequence->NameElements.Part ) ) );
-            if( !sequence->NameElements.DepartmentName.IsEmpty() )
-                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
+            //if( !sequence->NameElements.DepartmentName.IsEmpty() )
+            //    name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
             if( !sequence->NameElements.Initials.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Initials", "Initials: {0}" ), FText::FromString( sequence->NameElements.Initials ) ) );
 

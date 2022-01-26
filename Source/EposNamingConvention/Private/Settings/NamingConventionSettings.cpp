@@ -44,8 +44,8 @@ FNamingConventionShot::FNamingConventionShot()
     ADD_PATTERN_KEYWORD( PatternKeywords, "season",                 "shot-pattern-keyword", "the season number" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "episode",                "shot-pattern-keyword", "the episode number" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "part",                   "shot-pattern-keyword", "the part (A, B, C, ...)" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "department-name",        "shot-pattern-keyword", "the full department name" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "department-accronym",    "shot-pattern-keyword", "the department name accronym" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-name",        "shot-pattern-keyword", "the full department name" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-accronym",    "shot-pattern-keyword", "the department name accronym" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "initials",               "shot-pattern-keyword", "some initials" );
 }
 
@@ -62,8 +62,8 @@ FNamingConventionBoard::FNamingConventionBoard()
     ADD_PATTERN_KEYWORD( PatternKeywords, "season",                 "board-pattern-keyword", "the season number" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "episode",                "board-pattern-keyword", "the episode number" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "part",                   "board-pattern-keyword", "the part (A, B, C, ...)" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "department-name",        "board-pattern-keyword", "the full department name" );
-    ADD_PATTERN_KEYWORD( PatternKeywords, "department-accronym",    "board-pattern-keyword", "the department name accronym" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-name",        "board-pattern-keyword", "the full department name" );
+    //ADD_PATTERN_KEYWORD( PatternKeywords, "department-accronym",    "board-pattern-keyword", "the department name accronym" );
     ADD_PATTERN_KEYWORD( PatternKeywords, "initials",               "board-pattern-keyword", "some initials" );
 }
 

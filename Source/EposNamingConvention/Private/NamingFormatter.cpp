@@ -34,8 +34,8 @@ UDefaultNamingFormatterBoard::FormatName( const UObject* iContext )
                                                .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.SeasonNumDigits, name_elements.Season ) : TEXT("") )
                                                .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.EpisodeNumDigits, name_elements.Episode ) : TEXT( "" ) )
                                                .Replace( TEXT( "{part}" ),                  *name_elements.Part )
-                                               .Replace( TEXT( "{department-name}" ),       *name_elements.DepartmentName )
-                                               .Replace( TEXT( "{department-accronym}" ),   *name_elements.DepartmentAccronym )
+                                               //.Replace( TEXT( "{department-name}" ),       *name_elements.DepartmentName )
+                                               //.Replace( TEXT( "{department-accronym}" ),   *name_elements.DepartmentAccronym )
                                                .Replace( TEXT( "{initials}" ),              *name_elements.Initials )
                                                ;
 
@@ -69,8 +69,8 @@ UDefaultNamingFormatterShot::FormatName( const UObject* iContext )
                                               .Replace( TEXT( "{season}" ),                 name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.SeasonNumDigits, name_elements.Season ) : TEXT("") )
                                               .Replace( TEXT( "{episode}" ),                name_elements.IsSerie ? *FString::Printf( TEXT( "%0*d" ), global_settings.EpisodeNumDigits, name_elements.Episode ) : TEXT( "" ) )
                                               .Replace( TEXT( "{part}" ),                   *name_elements.Part )
-                                              .Replace( TEXT( "{department-name}" ),        *name_elements.DepartmentName )
-                                              .Replace( TEXT( "{department-accronym}" ),    *name_elements.DepartmentAccronym )
+                                              //.Replace( TEXT( "{department-name}" ),        *name_elements.DepartmentName )
+                                              //.Replace( TEXT( "{department-accronym}" ),    *name_elements.DepartmentAccronym )
                                               .Replace( TEXT( "{initials}" ),               *name_elements.Initials )
                                               ;
 
