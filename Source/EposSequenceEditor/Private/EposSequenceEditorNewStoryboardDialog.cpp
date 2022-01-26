@@ -246,7 +246,7 @@ SNewStoryboardSettings::OnCreateStoryboard()
 
     //---
 
-    board_sequence->NameElements.Index = mNamingConventionSettings->BoardNaming.IndexFormat.StartNumber;
+    board_sequence->NameElements.Index = INDEX_NONE; // To use the real asset name in display
 
     // Copy all 'global' members from settings global to board elements
     for( TFieldIterator<FProperty> settings_global_property_iterator( FNamingConventionGlobal::StaticStruct() ); settings_global_property_iterator; ++settings_global_property_iterator )

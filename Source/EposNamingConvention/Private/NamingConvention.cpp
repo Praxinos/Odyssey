@@ -14,6 +14,7 @@
 #include "MovieSceneToolsProjectSettings.h"
 
 #include "Board/BoardSequence.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
 #include "IMovieScenePlayer.h"
 #include "MovieSceneSequence.h"
@@ -28,9 +29,45 @@
 
 //---
 
+typedef TMap<FString, int32> FRelevantPathMap;
+
 static
-TMap<FString, int32>
-FindSequencePaths( const IMovieScenePlayer& iPlayer )
+FRelevantPathMap
+FindSiblingSequencePaths( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iParentSequence )
+{
+    UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !boardTrack )
+        return FRelevantPathMap();
+
+    TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
+
+    FRelevantPathMap map_path_to_count;
+
+    for( auto section : sections )
+    {
+        UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( section );
+        UMovieSceneSequence* subsequence = subsection->GetSequence();
+        if( !subsequence )
+            continue;
+
+        FString sequence_pathname = subsequence->GetPackage()->GetName();
+        FString sequence_path = FPackageName::GetLongPackagePath( sequence_pathname );
+
+        int32* count = map_path_to_count.Find( sequence_path );
+        if( count )
+            *count = *count + 1;
+        else
+            map_path_to_count.Add( sequence_path, 1 );
+    }
+
+    map_path_to_count.ValueSort( TGreater<int32>() );
+
+    return map_path_to_count;
+}
+
+static
+FRelevantPathMap
+FindAllSequencePaths( const IMovieScenePlayer& iPlayer )
 {
     IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -48,12 +85,12 @@ FindSequencePaths( const IMovieScenePlayer& iPlayer )
 
     //---
 
-    TMap<FString, int32> map_path_to_count;
+    FRelevantPathMap map_path_to_count;
 
     for( auto pair : map_sequences )
     {
         UMovieSceneSequence* sequence = pair.Value;
-        FMovieSceneSequenceID sequence_id = pair.Key;
+        //FMovieSceneSequenceID sequence_id = pair.Key;
 
         FString sequence_pathname = sequence->GetPackage()->GetName();
         FString sequence_path = FPackageName::GetLongPackagePath( sequence_pathname );
@@ -71,8 +108,8 @@ FindSequencePaths( const IMovieScenePlayer& iPlayer )
 }
 
 static
-TMap<FString, int32>
-FindNotePaths( const IMovieScenePlayer& iPlayer )
+FRelevantPathMap
+FindAllNotePaths( const IMovieScenePlayer& iPlayer )
 {
     IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate()
 
@@ -89,7 +126,7 @@ FindNotePaths( const IMovieScenePlayer& iPlayer )
 
     //---
 
-    TMap<FString, int32> map_path_to_count;
+    FRelevantPathMap map_path_to_count;
 
     for( auto sequence : sequences )
     {
@@ -129,8 +166,8 @@ FindNotePaths( const IMovieScenePlayer& iPlayer )
     if( map_path_to_count.Num() )
         return map_path_to_count;
 
-    map_path_to_count = FindSequencePaths( player );
-    TMap<FString, int32> map_notepath_to_count;
+    map_path_to_count = FindAllSequencePaths( player );
+    FRelevantPathMap map_notepath_to_count;
     for( auto pair : map_path_to_count )
     {
         FString path = pair.Key;
@@ -145,8 +182,8 @@ FindNotePaths( const IMovieScenePlayer& iPlayer )
 }
 
 static
-TMap<FString, int32>
-FindMaterialPaths( const IMovieScenePlayer& iPlayer, TMap<FString, int32>& oParentPaths )
+FRelevantPathMap
+FindAllMaterialPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oParentPaths )
 {
     IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -163,7 +200,7 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer, TMap<FString, int32>& oPare
 
     //---
 
-    TMap<FString, int32> map_path_to_count;
+    FRelevantPathMap map_path_to_count;
     oParentPaths.Empty();
 
     for( auto pair : map_sequences )
@@ -224,11 +261,11 @@ FindMaterialPaths( const IMovieScenePlayer& iPlayer, TMap<FString, int32>& oPare
 }
 
 static
-TMap<FString, int32>
-FindMaterialPaths( const IMovieScenePlayer& iPlayer )
+FRelevantPathMap
+FindAllMaterialPaths( const IMovieScenePlayer& iPlayer )
 {
-    TMap<FString, int32> map_parent_material_paths;
-    return FindMaterialPaths( iPlayer, map_parent_material_paths );
+    FRelevantPathMap map_parent_material_paths;
+    return FindAllMaterialPaths( iPlayer, map_parent_material_paths );
 }
 
 //---
@@ -240,7 +277,7 @@ NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSce
     FString root_path;
 
     // Try to find the better path from all existing subsequences
-    TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+    FRelevantPathMap map_sequence_paths = FindAllSequencePaths( iPlayer );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
@@ -252,7 +289,7 @@ NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSce
     if( root_path.IsEmpty() )
     {
         // Try to find the better path from all existing materials
-        TMap<FString, int32> map_material_paths = FindMaterialPaths( iPlayer );
+        FRelevantPathMap map_material_paths = FindAllMaterialPaths( iPlayer );
         if( map_material_paths.Num() )
         {
             TArray<FString> keys;
@@ -278,8 +315,8 @@ NamingConvention::GetMasterPath( const IMovieScenePlayer& iPlayer, const UMovieS
     FString master_path;
 
     // Try to find the better path from all existing materials
-    TMap<FString, int32> map_parent_material_paths;
-    TMap<FString, int32> map_material_paths = FindMaterialPaths( iPlayer, map_parent_material_paths );
+    FRelevantPathMap map_parent_material_paths;
+    FRelevantPathMap map_material_paths = FindAllMaterialPaths( iPlayer, map_parent_material_paths );
     if( map_parent_material_paths.Num() )
     {
         TArray<FString> keys;
@@ -582,7 +619,7 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     FString note_path;
 
     // Try to find the better path from all existing notes
-    TMap<FString, int32> map_note_paths = FindNotePaths( iPlayer );
+    FRelevantPathMap map_note_paths = FindAllNotePaths( iPlayer );
     if( map_note_paths.Num() )
     {
         TArray<FString> keys;
@@ -594,7 +631,7 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     if( note_path.IsEmpty() )
     {
         // Try to find the better path from all existing subsequences
-        TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+        FRelevantPathMap map_sequence_paths = FindAllSequencePaths( iPlayer );
         if( map_sequence_paths.Num() )
         {
             TArray<FString> keys;
@@ -632,7 +669,7 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
     FString material_path;
 
     // Try to find the better path from all existing materials
-    TMap<FString, int32> map_material_paths = FindMaterialPaths( iPlayer );
+    FRelevantPathMap map_material_paths = FindAllMaterialPaths( iPlayer );
     if( map_material_paths.Num() )
     {
         TArray<FString> keys;
@@ -644,7 +681,7 @@ NamingConvention::GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlaye
     if( material_path.IsEmpty() )
     {
         // Try to find the better path from all existing subsequences
-        TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+        FRelevantPathMap map_sequence_paths = FindAllSequencePaths( iPlayer );
         if( map_sequence_paths.Num() )
         {
             TArray<FString> keys;
@@ -742,11 +779,43 @@ FillNameElements( const FNamingConventionUser& iUserSettings, FSequenceNameEleme
         source_property->CopyCompleteValue( DestinationAddr, SourceAddr );
     }
 }
+
+static
+TOptional<FSequenceNameElements>
+FindNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber )
+{
+    UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
+    if( !boardTrack )
+        return TOptional<FSequenceNameElements>();
+
+    TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
+    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( sections, iFrameNumber );
+    if( !section )
+        section = MovieSceneHelpers::FindNearestSectionAtTime( sections, iFrameNumber );
+    if( !section )
+        return TOptional<FSequenceNameElements>();
+
+    UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( section );
+    if( !subsection->GetSequence() )
+        return TOptional<FSequenceNameElements>();
+
+    UBoardSequence* board_sequence = Cast<UBoardSequence>( subsection->GetSequence() );
+    if( board_sequence )
+        return board_sequence->NameElements;
+
+    UShotSequence* shot_sequence = Cast<UShotSequence>( subsection->GetSequence() );
+    if( shot_sequence )
+        return shot_sequence->NameElements;
+
+    checkNoEntry();
+
+    return TOptional<FSequenceNameElements>();
+}
 };
 
 //static
 FString
-NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FBoardNameElements& oElements )
+NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -754,14 +823,27 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     FString sequence_path;
 
-    // Try to find the better path from all existing sequences
-    TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+    // Try to find the better path from existing sibling sequences
+    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iSequence );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
         map_sequence_paths.GetKeys( keys );
 
         sequence_path = keys[0];
+    }
+
+    // Try to find the better path from all existing sequences
+    if( sequence_path.IsEmpty() )
+    {
+        map_sequence_paths = FindAllSequencePaths( iPlayer );
+        if( map_sequence_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_sequence_paths.GetKeys( keys );
+
+            sequence_path = keys[0];
+        }
     }
 
     if( sequence_path.IsEmpty() )
@@ -819,15 +901,38 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     oElements.Index = max_board_index;
 
-    const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
-    const FSequenceNameElements* source_elements = &root_board_sequence->NameElements;
-    FSequenceNameElements* destination_elements = &oElements;
+    TOptional<FSequenceNameElements> source_elements;
 
-    // Initialize new sequence elements from the root sequence elements
-    *destination_elements = *source_elements;
-    //TODO: try to check each empty property ? to use global settings only for those ones ?
-    if( oElements.StudioName.IsEmpty() )
+    // Try to get the most relevant name elements
+    if( !source_elements )
+    {
+        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iSequence, iFrameNumber );
+
+        if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get the root name elements
+    if( !source_elements )
+    {
+        const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
+        FSequenceNameElements reference_elements = root_board_sequence->NameElements;
+
+        if( !reference_elements.StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Get the source elements values
+    if( source_elements )
+    {
+        FSequenceNameElements* destination_elements = &oElements;
+        *destination_elements = source_elements.GetValue();
+    }
+    // Otherwise, get the settings values
+    else
+    {
         FillNameElements( global_settings, oElements );
+    }
 
     // User settings always override new sequence elements
     FillNameElements( user_settings, oElements );
@@ -842,7 +947,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
-NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, FString& oPath, FString& oName, FShotNameElements& oElements )
+NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FShotNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -850,14 +955,27 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
 
     FString sequence_path;
 
-    // Try to find the better path from all existing sequences
-    TMap<FString, int32> map_sequence_paths = FindSequencePaths( iPlayer );
+    // Try to find the better path from existing sibling sequences
+    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iSequence );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
         map_sequence_paths.GetKeys( keys );
 
         sequence_path = keys[0];
+    }
+
+    // Try to find the better path from all existing sequences
+    if( sequence_path.IsEmpty() )
+    {
+        map_sequence_paths = FindAllSequencePaths( iPlayer );
+        if( map_sequence_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_sequence_paths.GetKeys( keys );
+
+            sequence_path = keys[0];
+        }
     }
 
     if( sequence_path.IsEmpty() )
@@ -916,15 +1034,38 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     oElements.Index = max_shot_index;
     oElements.TakeIndex = shot_settings.TakeFormat.StartNumber;
 
-    const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
-    const FSequenceNameElements* source_elements = &root_board_sequence->NameElements;
-    FSequenceNameElements* destination_elements = &oElements;
+    TOptional<FSequenceNameElements> source_elements;
 
-    // Initialize new sequence elements from the root sequence elements
-    *destination_elements = *source_elements;
-    //TODO: try to check each empty property ? to use global settings only for those ones ?
-    if( oElements.StudioName.IsEmpty() )
+    // Try to get the most relevant name elements
+    if( !source_elements )
+    {
+        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iSequence, iFrameNumber );
+
+        if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get the root name elements
+    if( !source_elements )
+    {
+        const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
+        FSequenceNameElements reference_elements = root_board_sequence->NameElements;
+
+        if( !reference_elements.StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Get the source elements values
+    if( source_elements )
+    {
+        FSequenceNameElements* destination_elements = &oElements;
+        *destination_elements = source_elements.GetValue();
+    }
+    // Otherwise, get the settings values
+    else
+    {
         FillNameElements( global_settings, oElements );
+    }
 
     // User settings always override new sequence elements
     FillNameElements( user_settings, oElements );

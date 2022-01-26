@@ -50,12 +50,12 @@ public:
     UPROPERTY( EditAnywhere )
     FString Part;
 
-    /** The department name. */
-    UPROPERTY( EditAnywhere )
-    FString DepartmentName;
-    /** The department accronym. */
-    UPROPERTY( EditAnywhere )
-    FString DepartmentAccronym;
+    ///** The department name. */
+    //UPROPERTY( EditAnywhere )
+    //FString DepartmentName;
+    ///** The department accronym. */
+    //UPROPERTY( EditAnywhere )
+    //FString DepartmentAccronym;
 
     /** The initials of the user. */
     UPROPERTY( EditAnywhere )
