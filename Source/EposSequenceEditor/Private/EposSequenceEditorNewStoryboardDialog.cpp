@@ -13,6 +13,7 @@
 #include "IDetailsView.h"
 #include "IStructureDetailsView.h"
 #include "PropertyEditorModule.h"
+#include "SequencerSettings.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
@@ -50,9 +51,10 @@ private:
     FReply OnCreateStoryboard();
 
 private:
-    TSharedPtr<IStructureDetailsView> mDetailsViewStoryboard;
-    TSharedPtr<IStructureDetailsView> mDetailsViewGlobalNaming;
-    TSharedPtr<IStructureDetailsView> mDetailsViewUserNaming;
+    TSharedPtr<IStructureDetailsView>   mDetailsViewStoryboard;
+    TSharedPtr<IDetailsView>            mDetailsViewSequencer;
+    TSharedPtr<IStructureDetailsView>   mDetailsViewGlobalNaming;
+    TSharedPtr<IStructureDetailsView>   mDetailsViewUserNaming;
 
     TSharedPtr<STextBlock> mErrorTextWidget;
 
@@ -76,13 +78,28 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
     DetailsViewArgs.bShowOptions = false;
     DetailsViewArgs.bAllowFavoriteSystem = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-    DetailsViewArgs.ViewIdentifier = "NewStoryboardSettings";
+    //DetailsViewArgs.ViewIdentifier = "NewStoryboardSettings";
 
     FStructureDetailsViewArgs StructureDetailsViewArgs;
 
     TSharedPtr<FStructOnScope> StructOnScopeStoryboard = MakeShared<FStructOnScope>( FStoryboardSettings::StaticStruct(), (uint8*)&mStoryboardSettings );
 
     mDetailsViewStoryboard = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScopeStoryboard );
+
+    //---
+
+    USequencerSettings* sequencer_settings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequencerEditor" ) );
+
+    mDetailsViewSequencer = PropertyEditor.CreateDetailView( DetailsViewArgs );
+    auto IsPropertyVisible = []( const FPropertyAndParent& iPropertyAndParent ) -> bool
+    {
+        if( iPropertyAndParent.Property.GetName() == TEXT( "FrameNumberDisplayFormat" ) ) // GET_MEMBER_NAME_CHECKED() can't access private members
+            return true;
+
+        return false;
+    };
+    mDetailsViewSequencer->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( IsPropertyVisible ) );
+    mDetailsViewSequencer->SetObject( sequencer_settings );
 
     //---
 
@@ -103,40 +120,53 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         SNew(SVerticalBox)
 
         + SVerticalBox::Slot()
-        .AutoHeight()
-        .Padding(4, 4, 4, 4)
+        .FillHeight( 1.0f )
         [
-            SNew(SScrollBox)
-            +SScrollBox::Slot()
+            SNew( SScrollBox )
+            + SScrollBox::Slot()
             [
-                mDetailsViewStoryboard->GetWidget().ToSharedRef()
+                SNew( SVerticalBox )
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(4, 4, 4, 4)
+                [
+                    SNew(SScrollBox)
+                    +SScrollBox::Slot()
+                    [
+                        mDetailsViewStoryboard->GetWidget().ToSharedRef()
+                    ]
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(4, 4, 4, 4)
+                [
+                    mDetailsViewSequencer.ToSharedRef()
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(4, 4, 4, 4)
+                [
+                    SNew(SScrollBox)
+                    +SScrollBox::Slot()
+                    [
+                        mDetailsViewGlobalNaming->GetWidget().ToSharedRef()
+                    ]
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(4, 4, 4, 4)
+                [
+                    mDetailsViewUserNaming->GetWidget().ToSharedRef()
+                ]
             ]
         ]
 
         + SVerticalBox::Slot()
         .AutoHeight()
-        .Padding(4, 4, 4, 4)
-        [
-            SNew(SScrollBox)
-            +SScrollBox::Slot()
-            [
-                mDetailsViewGlobalNaming->GetWidget().ToSharedRef()
-            ]
-        ]
-
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        .Padding(4, 4, 4, 4)
-        [
-            SNew(SScrollBox)
-            +SScrollBox::Slot()
-            [
-                mDetailsViewUserNaming->GetWidget().ToSharedRef()
-            ]
-        ]
-
-        + SVerticalBox::Slot()
-        .FillHeight(1.0f)
         .HAlign( HAlign_Right )
         .VAlign( VAlign_Bottom )
         .Padding(10.f)
@@ -310,7 +340,7 @@ void NewStoryboardDialog::OpenDialog(const TSharedRef<FTabManager>& TabManager)
             .HasCloseButton(true)
             .SupportsMaximize(false)
             .SupportsMinimize(false)
-            .ClientSize(FVector2D(600, 600));
+            .ClientSize(FVector2D(600, 700));
 
         TSharedPtr<SDockTab> OwnerTab = TabManager->GetOwnerTab();
         TSharedPtr<SWindow> RootWindow = OwnerTab.IsValid() ? OwnerTab->GetParentWindow() : TSharedPtr<SWindow>();

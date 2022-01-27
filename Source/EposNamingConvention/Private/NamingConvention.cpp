@@ -815,7 +815,7 @@ FindNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* i
 
 //static
 FString
-NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements )
+NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -824,7 +824,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
     FString sequence_path;
 
     // Try to find the better path from existing sibling sequences
-    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iSequence );
+    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iParentSequence );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
@@ -906,9 +906,19 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
     // Try to get the most relevant name elements
     if( !source_elements )
     {
-        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iSequence, iFrameNumber );
+        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iParentSequence, iFrameNumber );
 
         if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get the parent name elements
+    if( !source_elements )
+    {
+        const UBoardSequence* parent_board_sequence = CastChecked<UBoardSequence>( iParentSequence ); // To parent is always a board ... to check ...
+        FSequenceNameElements reference_elements = parent_board_sequence->NameElements;
+
+        if( !reference_elements.StudioName.IsEmpty() )
             source_elements = reference_elements;
     }
 
@@ -947,7 +957,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
-NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FShotNameElements& oElements )
+NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FShotNameElements& oElements )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -956,7 +966,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     FString sequence_path;
 
     // Try to find the better path from existing sibling sequences
-    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iSequence );
+    FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iParentSequence );
     if( map_sequence_paths.Num() )
     {
         TArray<FString> keys;
@@ -1039,9 +1049,19 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     // Try to get the most relevant name elements
     if( !source_elements )
     {
-        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iSequence, iFrameNumber );
+        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iParentSequence, iFrameNumber );
 
         if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get the parent name elements
+    if( !source_elements )
+    {
+        const UBoardSequence* parent_board_sequence = CastChecked<UBoardSequence>( iParentSequence ); // To parent is always a board ... to check ...
+        FSequenceNameElements reference_elements = parent_board_sequence->NameElements;
+
+        if( !reference_elements.StudioName.IsEmpty() )
             source_elements = reference_elements;
     }
 
