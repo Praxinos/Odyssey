@@ -161,6 +161,10 @@ private:
     float GetViewportRotation() const; // in degrees
     void SetViewportRotation( float iRotation ); // in degrees
 
+    void AddViewportRotation( float iDeltaRotation ); // in degrees
+
+    bool IsViewportRotationChecked( float iRotation ); // in degrees
+
 private:
 
     /** Widget where the scene viewport is drawn in */

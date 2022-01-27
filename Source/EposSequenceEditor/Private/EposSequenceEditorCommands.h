@@ -22,6 +22,12 @@ public:
 
     //---
 
+    TSharedPtr<FUICommandInfo> StoryboardViewportAdd10Rotate;
+    TSharedPtr<FUICommandInfo> StoryboardViewportSubstract10Rotate;
+    TMap<int32, TSharedPtr<FUICommandInfo>> StoryboardViewportSetRotationX;
+
+    //---
+
     TSharedPtr<FUICommandInfo> CreateCameraAtCurrentTime;
     TSharedPtr<FUICommandInfo> SnapCameraToViewportAtCurrentTime;
     TSharedPtr<FUICommandInfo> PilotCameraAtCurrentTime;
