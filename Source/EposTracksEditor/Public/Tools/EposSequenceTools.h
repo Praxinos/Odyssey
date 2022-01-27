@@ -108,16 +108,6 @@ private:
      */
     template<typename SequenceClass>
     static UMovieSceneSubSection* CreateSequenceInternal( ISequencer* iSequencer, const FString& iNewSequencePath, const FString& iNewSequenceName, FFrameNumber iNewSectionStartTime, TOptional<int32> iDuration = TOptional<int32>(), UMovieSceneCinematicBoardSection* iSectionToDuplicate = nullptr );
-
-    /*
-     * Insert Board.
-     *
-     * @param iSequencer The sequencer
-     * @param iFrameNumber The start frame of the new section/board
-     * @param iDuration The (optional) duration of the new section/board
-     */
-    template<typename SequenceClass>
-    static UMovieSceneSubSection* InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration = TOptional<int32>() );
 };
 
 //---

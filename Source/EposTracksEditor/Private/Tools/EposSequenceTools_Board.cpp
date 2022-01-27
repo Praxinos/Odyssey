@@ -428,41 +428,25 @@ CinematicBoardTrackTools::CreateSequenceInternal( ISequencer* iSequencer, const 
     return newSection;
 }
 
-template<typename SequenceClass>
+//---
+
 //static
 UMovieSceneSubSection*
-CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
+CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
-    static_assert( TIsSame<SequenceClass, UBoardSequence>::Value || TIsSame<SequenceClass, UShotSequence>::Value, "Wrong sequence type" );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.insert-board", "Insert Board" ) );
 
     FString sequence_path;
     FString sequence_name;
-    FString sequence_pathname;
-    FShotNameElements shot_name_elements;
     FBoardNameElements board_name_elements;
+    FString sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, board_name_elements );
 
-    if( SequenceClass::StaticClass() == UBoardSequence::StaticClass() )
-        sequence_pathname = NamingConvention::GenerateBoardAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, board_name_elements );
-    else
-        sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, shot_name_elements );
+    UMovieSceneSubSection* new_section = CreateSequenceInternal<UBoardSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
 
-    //---
-
-    UMovieSceneSubSection* new_section = CreateSequenceInternal<SequenceClass>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
-
-    //---
-
-    if( new_section && new_section->GetSequence() && new_section->GetSequence()->IsA<UBoardSequence>() )
+    if( new_section && new_section->GetSequence() )
     {
         UBoardSequence* board_sequence = CastChecked<UBoardSequence>( new_section->GetSequence() );
-
         board_sequence->NameElements = board_name_elements;
-    }
-    else
-    {
-        UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
-
-        shot_sequence->NameElements = shot_name_elements;
     }
 
     //---
@@ -475,24 +459,38 @@ CinematicBoardTrackTools::InsertSequence( ISequencer* iSequencer, FFrameNumber i
 
     return new_section;
 }
-
-//---
-
-//static
-UMovieSceneSubSection*
-CinematicBoardTrackTools::InsertBoard( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
-{
-    const FScopedTransaction transaction( LOCTEXT( "transaction.insert-board", "Insert Board" ) );
-
-    return InsertSequence<UBoardSequence>( iSequencer, iFrameNumber, iDuration );
-}
 //static
 UMovieSceneSubSection*
 CinematicBoardTrackTools::InsertShot( ISequencer* iSequencer, FFrameNumber iFrameNumber, TOptional<int32> iDuration )
 {
     const FScopedTransaction transaction( LOCTEXT( "transaction.insert-shot", "Insert Shot" ) );
 
-    return InsertSequence<UShotSequence>( iSequencer, iFrameNumber, iDuration );
+    FString sequence_path;
+    FString sequence_name;
+    FShotNameElements shot_name_elements;
+    FString sequence_pathname = NamingConvention::GenerateShotAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), iFrameNumber, sequence_path, sequence_name, shot_name_elements );
+
+    //---
+
+    UMovieSceneSubSection* new_section = CreateSequenceInternal<UShotSequence>( iSequencer, sequence_path, sequence_name, iFrameNumber, iDuration );
+
+    //---
+
+    if( new_section && new_section->GetSequence() )
+    {
+        UShotSequence* shot_sequence = CastChecked<UShotSequence>( new_section->GetSequence() );
+        shot_sequence->NameElements = shot_name_elements;
+    }
+
+    //---
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    BoardSequenceTools::UpdateViewRange( iSequencer, new_section ? new_section->GetTrueRange() : TRange<FFrameNumber>::Empty() );
+    iSequencer->EmptySelection();
+    iSequencer->SelectSection( new_section );
+    iSequencer->ThrobSectionSelection();
+
+    return new_section;
 }
 
 ////static
