@@ -523,28 +523,24 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
 {
     if( !state.target_temp_buffer )
         return;
-        
+
     if( !Sample.IsValid() )
         return;
 
     TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = Sample.GetBlock();
-    FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );    //PATCH: until ::ulis3::FRectF
-    //::ULIS::FRectI invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
+    FRectF invalidRect = ComputeRectWithPivot( block, Pivot, X, Y );
     ::ULIS::eFormat block_format = block->Format();
     ::ULIS::eFormat target_format = state.target_temp_buffer->Format();
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(target_format);
-    const bool bEnableMTPolicy = true; //block->Height() > 256;
-    ::ULIS::FSchedulePolicy policy = bEnableMTPolicy ? ::ULIS::FSchedulePolicy::AsyncCacheEfficient : ::ULIS::FSchedulePolicy::MonoScanlines;
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( target_format );
+    const bool bEnableMTPolicy = true;
+    ::ULIS::FSchedulePolicy policy = bEnableMTPolicy ? ::ULIS::FSchedulePolicy::MultiScanlines : ::ULIS::FSchedulePolicy::MonoScanlines;
 
-    //should wait on that before anything
-    ::ULIS::FEvent stateEvent = state.event;
-    ::ULIS::FEvent eventInputs[] = { stateEvent, Sample.GetEvent() };
-
+    // Critical event dependency, potential other blend + all events leading to stamp being ready for current blend
+    ::ULIS::FEvent eventInputs[] = { state.event, Sample.GetEvent() };
     ::ULIS::FBlock* src = block.Get();
-
     ::ULIS::FEvent eventConv;
-    if( block_format == target_format )
+    if( block_format != target_format )
     {
         src = new ::ULIS::FBlock(block->Width(), block->Height(), target_format);
         ctx.ConvertFormat( *block, *src, ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), policy, 2, eventInputs, &eventConv );
