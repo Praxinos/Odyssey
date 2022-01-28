@@ -22,6 +22,7 @@
 #include "Widgets/Text/STextBlock.h"
 
 #include "Board/BoardSequence.h"
+#include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/NamingConventionSettings.h"
 
 /* LevelSequenceEditorHelpers
@@ -47,25 +48,28 @@ class SNewStoryboardSettings
 private:
     FText GetFullPath() const;
     FText GetErrorText() const;
+    FText GetWarningText() const;
     bool CanCreateStoryboard() const;
     FReply OnCreateStoryboard();
 
 private:
     TSharedPtr<IStructureDetailsView>   mDetailsViewStoryboard;
     TSharedPtr<IDetailsView>            mDetailsViewSequencer;
+    TSharedPtr<IStructureDetailsView>   mDetailsViewBoardSettings;
+    TSharedPtr<IStructureDetailsView>   mDetailsViewShotSettings;
     TSharedPtr<IStructureDetailsView>   mDetailsViewGlobalNaming;
     TSharedPtr<IStructureDetailsView>   mDetailsViewUserNaming;
 
-    TSharedPtr<STextBlock> mErrorTextWidget;
-
     FStoryboardSettings mStoryboardSettings;
     UNamingConventionSettings* mNamingConventionSettings;
+    UEposSequenceEditorSettings* mSequenceEditorSettings;
 };
 
 void
 SNewStoryboardSettings::Construct(const FArguments& InArgs)
 {
     mNamingConventionSettings = GetMutableDefault<UNamingConventionSettings>();
+    mSequenceEditorSettings = GetMutableDefault<UEposSequenceEditorSettings>();
 
     FPropertyEditorModule& PropertyEditor = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -82,9 +86,10 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
 
     FStructureDetailsViewArgs StructureDetailsViewArgs;
 
-    TSharedPtr<FStructOnScope> StructOnScopeStoryboard = MakeShared<FStructOnScope>( FStoryboardSettings::StaticStruct(), (uint8*)&mStoryboardSettings );
-
-    mDetailsViewStoryboard = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScopeStoryboard );
+    {
+        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FStoryboardSettings::StaticStruct(), (uint8*)&mStoryboardSettings );
+        mDetailsViewStoryboard = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
+    }
 
     //---
 
@@ -103,21 +108,38 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
 
     //---
 
-    TSharedPtr<FStructOnScope> StructOnScopeGlobalNaming = MakeShared<FStructOnScope>( FNamingConventionGlobal::StaticStruct(), (uint8*)&mNamingConventionSettings->GlobalNaming );
+    {
+        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FBoardSettings::StaticStruct(), (uint8*)&mSequenceEditorSettings->BoardSettings );
+        mDetailsViewBoardSettings = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
+    }
 
-    mDetailsViewGlobalNaming = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScopeGlobalNaming );
+    {
+        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FShotSettings::StaticStruct(), (uint8*)&mSequenceEditorSettings->ShotSettings );
+        mDetailsViewShotSettings = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
+    }
 
-    //---
+    {
+        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FNamingConventionGlobal::StaticStruct(), (uint8*)&mNamingConventionSettings->GlobalNaming );
+        mDetailsViewGlobalNaming = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
+    }
 
-    TSharedPtr<FStructOnScope> StructOnScopeUserNaming = MakeShared<FStructOnScope>( FNamingConventionUser::StaticStruct(), (uint8*)&mNamingConventionSettings->UserNaming );
-
-    mDetailsViewUserNaming = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScopeUserNaming );
+    {
+        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FNamingConventionUser::StaticStruct(), (uint8*)&mNamingConventionSettings->UserNaming );
+        mDetailsViewUserNaming = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
+    }
 
     //---
 
     ChildSlot
     [
         SNew(SVerticalBox)
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding( 4, 4, 4, 4 )
+        [
+            mDetailsViewStoryboard->GetWidget().ToSharedRef()
+        ]
 
         + SVerticalBox::Slot()
         .FillHeight( 1.0f )
@@ -131,17 +153,6 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
                 .AutoHeight()
                 .Padding(4, 4, 4, 4)
                 [
-                    SNew(SScrollBox)
-                    +SScrollBox::Slot()
-                    [
-                        mDetailsViewStoryboard->GetWidget().ToSharedRef()
-                    ]
-                ]
-
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(4, 4, 4, 4)
-                [
                     mDetailsViewSequencer.ToSharedRef()
                 ]
 
@@ -149,11 +160,21 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
                 .AutoHeight()
                 .Padding(4, 4, 4, 4)
                 [
-                    SNew(SScrollBox)
-                    +SScrollBox::Slot()
-                    [
-                        mDetailsViewGlobalNaming->GetWidget().ToSharedRef()
-                    ]
+                    mDetailsViewBoardSettings->GetWidget().ToSharedRef()
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(4, 4, 4, 4)
+                [
+                    mDetailsViewShotSettings->GetWidget().ToSharedRef()
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(4, 4, 4, 4)
+                [
+                    mDetailsViewGlobalNaming->GetWidget().ToSharedRef()
                 ]
 
                 + SVerticalBox::Slot()
@@ -169,7 +190,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         .AutoHeight()
         .HAlign( HAlign_Right )
         .VAlign( VAlign_Bottom )
-        .Padding(10.f)
+        .Padding( 10.f )
         [
             SNew(STextBlock)
             .Text( this, &SNewStoryboardSettings::GetFullPath )
@@ -178,10 +199,20 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         + SVerticalBox::Slot()
         .AutoHeight()
         .HAlign( HAlign_Right )
-        .Padding( 5.f )
+        .Padding( 2.f )
         [
-            SAssignNew(mErrorTextWidget, STextBlock)
+            SNew(STextBlock)
             .Text(this, &SNewStoryboardSettings::GetErrorText)
+            .TextStyle( FEditorStyle::Get(), TEXT("Log.Error") )
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign( HAlign_Right )
+        .Padding( 2.f )
+        [
+            SNew( STextBlock )
+            .Text(this, &SNewStoryboardSettings::GetWarningText)
             .TextStyle( FEditorStyle::Get(), TEXT("Log.Warning") )
         ]
 
@@ -203,6 +234,7 @@ void
 SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) //override
 {
     Collector.AddReferencedObject( mNamingConventionSettings );
+    Collector.AddReferencedObject( mSequenceEditorSettings );
 }
 
 
@@ -226,19 +258,29 @@ SNewStoryboardSettings::GetErrorText() const
 
     FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath( FName(*FullPath) );
     if (AssetData.IsValid())
-        return LOCTEXT("StoryboardExists", "Warning: Storyboard Exists");
+        return LOCTEXT("StoryboardExists", "Error: Storyboard Exists");
 
     if( mStoryboardSettings.StoryboardName.IsEmpty() )
-        return LOCTEXT( "StoryboardEmptyName", "Warning: Empty Storyboard Name" );
+        return LOCTEXT( "StoryboardEmptyName", "Error: Empty Storyboard Name" );
 
     if( mStoryboardSettings.StoryboardPath.Path.IsEmpty() )
-        return LOCTEXT( "StoryboardEmptyPath", "Warning: Empty Storyboard Path" );
+        return LOCTEXT( "StoryboardEmptyPath", "Error: Empty Storyboard Path" );
 
     if( mNamingConventionSettings->GlobalNaming.StudioName.IsEmpty() || mNamingConventionSettings->GlobalNaming.StudioAccronym.IsEmpty() )
-        return LOCTEXT( "StoryboardEmptyStudioName", "Warning: Empty Studio Name or Accronym" );
+        return LOCTEXT( "StoryboardEmptyStudioName", "Error: Empty Studio Name or Accronym" );
 
     if( mNamingConventionSettings->GlobalNaming.ProductionName.IsEmpty() || mNamingConventionSettings->GlobalNaming.ProductionAccronym.IsEmpty() )
-        return LOCTEXT( "StoryboardEmptyProductionName", "Warning: Empty Production Name or Accronym" );
+        return LOCTEXT( "StoryboardEmptyProductionName", "Error: Empty Production Name or Accronym" );
+
+    return FText::GetEmpty();
+}
+
+FText
+SNewStoryboardSettings::GetWarningText() const
+{
+    if( mSequenceEditorSettings->BoardSettings.DefaultTickFrameRate.AsDecimal() < 1000.f
+        || mSequenceEditorSettings->ShotSettings.DefaultTickFrameRate.AsDecimal() < 1000.f )
+        return LOCTEXT( "SequenceTickFramerateTooLow", "Warning: 'Default Tick Framerate' seems to be too low.\n'Default Tick Framerate' should be 'Default Display Framerate' * 1000\ne.g. 'Default Display Framerate' = 12fps -> 'Default Tick Framerate' = 12000fps" );
 
     return FText::GetEmpty();
 }
