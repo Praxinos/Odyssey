@@ -542,27 +542,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
-    CommandList = MakeShareable( new FUICommandList );
-    //CommandList = ViewportWidget->GetCommandList();
-
-    // create zoom menu
-    FMenuBuilder ViewportRotationMenuBuilder( true, CommandList );
-    {
-        TNumericUnitTypeInterface<int> degrees( EUnit::Degrees );
-
-        ViewportRotationMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-add-rotation-section", "Add Viewport Rotation" ) );
-            ViewportRotationMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Rotate, NAME_None, FText::FromString( TEXT("+") + degrees.ToString( 10 ) ) );
-            ViewportRotationMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Rotate, NAME_None, FText::FromString( degrees.ToString( -10 ) ) );
-        ViewportRotationMenuBuilder.EndSection();
-
-        ViewportRotationMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-set-rotation-section", "Set Viewport Rotation" ) );
-            for( auto command : FEposSequenceEditorCommands::Get().StoryboardViewportSetRotationX )
-            {
-                ViewportRotationMenuBuilder.AddMenuEntry( command.Value, NAME_None, FText::FromString( degrees.ToString( command.Key ) ) );
-            }
-        ViewportRotationMenuBuilder.EndSection();
-    }
-
     //HACK: ue4
     TSharedPtr<SSpinBox<float>> viewportRotationSpinBox;
 
@@ -621,10 +600,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 [
                     SNew( SComboButton )
                     .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
-                    .MenuContent()
-                    [
-                        ViewportRotationMenuBuilder.MakeWidget()
-                    ]
+                    .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
                 ]
             ]
 
@@ -711,6 +687,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     });
 
     //---
+
+    CommandList = MakeShareable( new FUICommandList );
+    //CommandList = ViewportWidget->GetCommandList();
 
     CommandList->MapAction(
         FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Rotate,
@@ -895,6 +874,30 @@ bool
 SStoryboardLevelViewport::IsViewportRotationChecked( float iRotation )
 {
     return FMath::IsNearlyEqual( mViewportRotation, iRotation );
+}
+
+TSharedRef<SWidget>
+SStoryboardLevelViewport::OnGetViewportRotationMenuContent() const
+{
+    // create zoom menu
+    FMenuBuilder ViewportRotationMenuBuilder( true, CommandList );
+    {
+        TNumericUnitTypeInterface<int> degrees( EUnit::Degrees );
+
+        ViewportRotationMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-add-rotation-section", "Add Viewport Rotation" ) );
+        ViewportRotationMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Rotate, NAME_None, FText::FromString( TEXT( "+" ) + degrees.ToString( 10 ) ) );
+        ViewportRotationMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Rotate, NAME_None, FText::FromString( degrees.ToString( -10 ) ) );
+        ViewportRotationMenuBuilder.EndSection();
+
+        ViewportRotationMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-set-rotation-section", "Set Viewport Rotation" ) );
+        for( auto command : FEposSequenceEditorCommands::Get().StoryboardViewportSetRotationX )
+        {
+            ViewportRotationMenuBuilder.AddMenuEntry( command.Value, NAME_None, FText::FromString( degrees.ToString( command.Key ) ) );
+        }
+        ViewportRotationMenuBuilder.EndSection();
+    }
+
+    return ViewportRotationMenuBuilder.MakeWidget();
 }
 
 int32

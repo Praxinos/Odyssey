@@ -164,6 +164,7 @@ private:
     void AddViewportRotation( float iDeltaRotation ); // in degrees
 
     bool IsViewportRotationChecked( float iRotation ); // in degrees
+    TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
 private:
 
