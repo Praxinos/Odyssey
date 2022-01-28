@@ -10,9 +10,15 @@
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorCommands"
 
+namespace
+{
+const FName ViewportRotationBundleName = "ViewportRotation";
+}
+
 FEposSequenceEditorCommands::FEposSequenceEditorCommands()
     : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor"), NAME_None, FEposSequenceEditorStyle::Get()->GetStyleSetName() )
 {
+    AddBundle( ViewportRotationBundleName, LOCTEXT( "CommandsCategory.ViewportRotation", "Viewport Rotation" ) );
 }
 
 void
@@ -20,6 +26,29 @@ FEposSequenceEditorCommands::RegisterCommands()
 {
     UI_COMMAND( NewStoryboardWithSettings,          "New Storyboard", "Create a new storyboard with settings", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( ToggleStoryboardViewportCommand,    "Storyboard Viewport", "A viewport layout tailored to storyboard preview", EUserInterfaceActionType::RadioButton, FInputChord() );
+
+    //---
+
+    UI_COMMAND( StoryboardViewportAdd10Rotate,      "Storyboard Viewport +10°", "+10° to the viewport rotation", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( StoryboardViewportSubstract10Rotate,"Storyboard Viewport -10°", "-10° to the viewport rotation", EUserInterfaceActionType::Button, FInputChord() );
+
+    FTextFormat rotation_label_format( LOCTEXT( "storyboard-viewport-rotation-label", "Set Storyboard Viewport to {0}°" ) );
+    FTextFormat rotation_tooltip_format( LOCTEXT( "storyboard-viewport-rotation-tooltip", "Set the viewport rotation to {0}°" ) );
+
+    TArray<int32> angles = { -135, -90, -45, 0, 45, 90, 135, 180 };
+    for( auto angle : angles )
+    {
+        StoryboardViewportSetRotationX.Add( angle,
+                                            FUICommandInfoDecl(
+                                                this->AsShared(),
+                                                FName( *FString::Printf( TEXT( "StoryboardViewportRotate-%d" ), angle ) ),
+                                                FText::Format( rotation_label_format, angle ),
+                                                FText::Format( rotation_tooltip_format, angle ),
+                                                ViewportRotationBundleName )
+                                            .UserInterfaceType( EUserInterfaceActionType::Check )
+                                            .DefaultChord( FInputChord() )
+        );
+    }
 
     //---
 

@@ -27,10 +27,11 @@
 #include "Editor.h"
 #include "Engine/Selection.h"
 #include "SEnumCombobox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
-//#include "EposSequenceEditorCommands.h"
+#include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceHelpers.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
@@ -197,6 +198,11 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         .ConfigKey(LayoutName)
         .Realtime(true);
 
+    FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( mViewportRotation )/*, FVector2D( 0, 0 )*/ );
+    //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
+    ViewportWidget->SetRenderTransform( transform );
+    ViewportWidget->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
+
     ViewportClient->SetViewportWidget(ViewportWidget);
 
     // Automatically engage game-view to hide editor only sprites. This needs to be done
@@ -298,6 +304,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
                     [
                         SNew(SOverlay)
+                        .Clipping( EWidgetClipping::ClipToBoundsAlways )
 
                         + SOverlay::Slot()
                         [
@@ -535,6 +542,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
+    //HACK: ue4
+    TSharedPtr<SSpinBox<float>> viewportRotationSpinBox;
+
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
         .BorderImage(FEditorStyle::GetBrush("BlackBrush"))
         .ForegroundColor(Gray)
@@ -565,6 +575,32 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                 .AutoWidth()
                 [
                     SNew( SNoteSettings )
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign( VAlign_Center )
+                [
+                    SAssignNew( viewportRotationSpinBox, SSpinBox<float> )
+                    .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Degrees ) ) )
+                    .MinDesiredWidth( 65 )
+                    .Justification( ETextJustify::Right )
+                    .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
+                    .PreventThrottling( true ) // To refresh the viewport during value change
+                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+                    .Delta( 1 )
+                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+                    .SliderExponentNeutralValue( 100 )
+                    .OnValueCommitted_Lambda( [=] ( float Value, ETextCommit::Type) { SetViewportRotation(Value); } )
+                    .OnValueChanged_Lambda( [=] ( float Value) { SetViewportRotation(Value); } )
+                    .Value( this, &SStoryboardLevelViewport::GetViewportRotation )
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign( VAlign_Center )
+                [
+                    SNew( SComboButton )
+                    .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
+                    .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
                 ]
             ]
 
@@ -617,6 +653,12 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             ]
         ];
 
+    //TODO: HACK:
+    // UE5: MaxFractionnal digits is set correctly in UE5.
+    // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
+    viewportRotationSpinBox->SetMinFractionalDigits( 2 );
+    viewportRotationSpinBox->SetMaxFractionalDigits( 2 );
+
     //---
 
     ChildSlot
@@ -644,7 +686,33 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         return false;
     });
 
+    //---
+
     CommandList = MakeShareable( new FUICommandList );
+    //CommandList = ViewportWidget->GetCommandList();
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Rotate,
+        FUIAction(
+            FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportRotation, 10.f ) )
+    );
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Rotate,
+        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportRotation, -10.f ) )
+    );
+
+    for( auto command : FEposSequenceEditorCommands::Get().StoryboardViewportSetRotationX )
+    {
+        CommandList->MapAction(
+            command.Value,
+            FUIAction(
+                FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::SetViewportRotation, float( command.Key ) ),
+                FCanExecuteAction(),
+                FIsActionChecked::CreateSP( this, &SStoryboardLevelViewport::IsViewportRotationChecked, float( command.Key ) )
+            )
+        );
+    }
+
     // Ensure the commands are registered
     //FLevelSequenceEditorCommands::Register(); //TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
@@ -771,6 +839,66 @@ FOptionalSize SStoryboardLevelViewport::GetDesiredViewportHeight() const
 }
 
 //---
+
+float
+SStoryboardLevelViewport::GetViewportRotation() const
+{
+    return mViewportRotation;
+}
+
+void
+SStoryboardLevelViewport::SetViewportRotation( float iRotation )
+{
+    mViewportRotation = iRotation;
+
+    float radian = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
+
+    FSlateRenderTransform rotation = FSlateRenderTransform( FQuat2D( radian )/*, FVector2D( 0, 0 )*/ );
+    //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
+    ViewportWidget->SetRenderTransform( rotation );
+}
+
+void
+SStoryboardLevelViewport::AddViewportRotation( float iDeltaRotation )
+{
+    mViewportRotation += iDeltaRotation;
+
+    float radian = FUnitConversion::Convert( mViewportRotation, EUnit::Degrees, EUnit::Radians );
+
+    FSlateRenderTransform rotation = FSlateRenderTransform( FQuat2D( radian )/*, FVector2D( 0, 0 )*/ );
+    //transform = transform.Concatenate( FSlateRenderTransform( .5f ) ); // No need to scale as its parent will clip this widget
+    ViewportWidget->SetRenderTransform( rotation );
+}
+
+bool
+SStoryboardLevelViewport::IsViewportRotationChecked( float iRotation )
+{
+    return FMath::IsNearlyEqual( mViewportRotation, iRotation );
+}
+
+TSharedRef<SWidget>
+SStoryboardLevelViewport::OnGetViewportRotationMenuContent() const
+{
+    // create zoom menu
+    FMenuBuilder ViewportRotationMenuBuilder( true, CommandList );
+    {
+        TNumericUnitTypeInterface<int> degrees( EUnit::Degrees );
+
+        ViewportRotationMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-add-rotation-section", "Add Viewport Rotation" ) );
+        ViewportRotationMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportAdd10Rotate, NAME_None, FText::FromString( TEXT( "+" ) + degrees.ToString( 10 ) ) );
+        ViewportRotationMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Rotate, NAME_None, FText::FromString( degrees.ToString( -10 ) ) );
+        ViewportRotationMenuBuilder.EndSection();
+
+        ViewportRotationMenuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-set-rotation-section", "Set Viewport Rotation" ) );
+        for( auto command : FEposSequenceEditorCommands::Get().StoryboardViewportSetRotationX )
+        {
+            ViewportRotationMenuBuilder.AddMenuEntry( command.Value, NAME_None, FText::FromString( degrees.ToString( command.Key ) ) );
+        }
+        ViewportRotationMenuBuilder.EndSection();
+    }
+
+    return ViewportRotationMenuBuilder.MakeWidget();
+}
 
 int32
 SStoryboardLevelViewport::GetScaleVisibleWidgetIndex() const
