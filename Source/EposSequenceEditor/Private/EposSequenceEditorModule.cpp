@@ -14,6 +14,7 @@
 #include "Board/BoardSequenceActions.h"
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
+#include "EposSequenceEditorNewStoryboardDialog.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceActions.h"
@@ -118,25 +119,8 @@ FEposSequenceEditorModule::UnregisterAssetTools()
 void
 FEposSequenceEditorModule::OnCreateNewAssetWithSettings( UClass* iClass )
 {
-    // Create a new level sequence
-    IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
-
-    UObject* NewAsset = nullptr;
-
-    // Attempt to create a new asset
-    for( auto factory : AssetTools.GetNewAssetFactories() )
-    {
-        if( factory->CanCreateNew() && factory->ImportPriority >= 0 && factory->SupportedClass == iClass )
-        {
-            NewAsset = AssetTools.CreateAssetWithDialog( iClass, factory );
-            break;
-        }
-    }
-
-    if( !NewAsset )
-        return;
-
-    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset( NewAsset );
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+    NewStoryboardDialog::OpenDialog( LevelEditorModule.GetLevelEditorTabManager().ToSharedRef() );
 }
 
 void

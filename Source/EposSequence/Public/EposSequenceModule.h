@@ -6,11 +6,24 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FEposSequenceModule : public IModuleInterface
+class UNamingFormatter;
+
+class FEposSequenceModule
+    : public IModuleInterface
 {
 public:
-
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
+
+public:
+    EPOSSEQUENCE_API void RegisterNamingFormatter( UNamingFormatter* iFormatter );
+    EPOSSEQUENCE_API void UnregisterNamingFormatter( UNamingFormatter* iFormatter );
+
+public:
+    template<typename Formatter>
+    UNamingFormatter* GetNamingFormatter();
+
+private:
+    TArray<UNamingFormatter*> mNamingFormatters;
 };

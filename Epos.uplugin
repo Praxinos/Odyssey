@@ -47,6 +47,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "EposNamingConvention",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "EposSequenceEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"

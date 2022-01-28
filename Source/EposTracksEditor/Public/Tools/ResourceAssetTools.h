@@ -7,6 +7,7 @@
 
 class ACineCameraActor;
 class FString;
+class ISequencer;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieSceneSequence;
@@ -29,35 +30,35 @@ enum class EGridType
 class EPOSTRACKSEDITOR_API MasterAssetTools
 {
 public:
-    static UTexture2D* GetMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UTexture2D* GetMasterTexture2D( UMovieSceneSequence* iRootSequence );
+    static UTexture2D* GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
+    static UTexture2D* GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
 
-    static UMaterialInstanceConstant* GetMasterMaterial( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UMaterialInstanceConstant* GetMasterMaterial( UMovieSceneSequence* iRootSequence );
+    static UMaterialInstanceConstant* GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
+    static UMaterialInstanceConstant* GetMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
 
 private:
-    static UTexture2D* CreateMasterTexture2D( UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UMaterialInstanceConstant* CreateMasterMaterial( UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName );
+    static UTexture2D* CreateMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
+    static UMaterialInstanceConstant* CreateMasterMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UTexture2D* iDefaultTexture, FString& oPackageName, FString& oAssetName );
 
     friend class ProjectAssetTools;
 
 public:
-    static bool         GetBackgroundVisibility( UMovieSceneSequence* iRootSequence );
-    static void         SetBackgroundVisilibity( UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility );
-    static void         ToggleBackgroundVisibility( UMovieSceneSequence* iRootSequence );
+    static bool         GetBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetBackgroundVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, bool iBackgroundVisibility );
+    static void         ToggleBackgroundVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
 
-    static FLinearColor GetBackgroundColor( UMovieSceneSequence* iRootSequence );
-    static void         SetBackgroundColor( UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor );
+    static FLinearColor GetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetBackgroundColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iBackgroundColor );
 
-    static bool         GetGridVisibility( UMovieSceneSequence* iRootSequence );
-    static void         SetGridVisilibity( UMovieSceneSequence* iRootSequence, bool iGridVisibility );
-    static void         ToggleGridVisibility( UMovieSceneSequence* iRootSequence );
+    static bool         GetGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetGridVisilibity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, bool iGridVisibility );
+    static void         ToggleGridVisibility( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
 
-    static FLinearColor GetGridColor( UMovieSceneSequence* iRootSequence );
-    static void         SetGridColor( UMovieSceneSequence* iRootSequence, FLinearColor iGridColor );
+    static FLinearColor GetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetGridColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iGridColor );
 
-    static EGridType    GetGridType( UMovieSceneSequence* iRootSequence );
-    static void         SetGridType( UMovieSceneSequence* iRootSequence, EGridType iGridType );
+    static EGridType    GetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, EGridType iGridType );
 };
 
 /*
@@ -66,20 +67,20 @@ public:
 class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
-    static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, ACineCameraActor* iCamera, UMovieSceneSequence* iRootSequence );
-    static UMaterialInstanceConstant* CreateMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate, UMovieSceneSequence* iRootSequence );
-    static UMaterialInstanceConstant* CloneMaterialAndTexture( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, UMovieSceneSequence* iRootSequence );
+    static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, ACineCameraActor* iCamera );
+    static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate );
+    static UMaterialInstanceConstant* CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone );
 
     static UTexture2D* GetTexture2D( UMovieSceneSequence* iSequence, UMaterialInstance* iMaterial );
 
-    static UStoryNote* CreateNote( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence );
-    static UStoryNote* CloneNote( UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone, UMovieSceneSequence* iRootSequence );
+    static UStoryNote* CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence );
+    static UStoryNote* CloneNote( ISequencer& iSequencer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UStoryNote* iNoteToClone );
 
 private:
-    static UMaterialInstanceConstant* CreateMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName );
-    static UMaterialInstanceConstant* CloneMaterial( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName );
-    static UTexture2D* CreateTexture2D( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName );
-    static UTexture*   CloneTexture( UMovieSceneSequence* iSequence, UMovieSceneSequence* iRootSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName );
+    static UMaterialInstanceConstant* CreateMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, FString& oPackageName, FString& oAssetName );
+    static UMaterialInstanceConstant* CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName );
+    static UTexture2D* CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName );
+    static UTexture*   CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName );
 
     static FIntPoint ComputeTextureSize( ACineCameraActor* iCamera );
 };

@@ -8,7 +8,11 @@
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "SequenceNameElements.h"
+
 #include "BoardSequence.generated.h"
+
+class UNamingFormatter;
 
 /*
  * Movie scene animation that represents the hierarchical levels of the storyboard.
@@ -37,8 +41,8 @@ public:
 
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
-//    virtual FText GetDisplayName() const override;
-//
+    virtual FText GetDisplayName() const override;
+
 //    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
 //    virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
 #endif
@@ -58,4 +62,10 @@ public:
     // Only one entry should have an invalid guid
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+
+    UPROPERTY(EditAnywhere, Category=NamingConvention)
+    FBoardNameElements NameElements;
+
+private:
+    UNamingFormatter* mNamingFormatter;
 };

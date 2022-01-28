@@ -316,7 +316,8 @@ UMovieSceneCinematicBoardSection::GetBoardDisplayName() const
 {
     if( mBoardDisplayName.IsEmpty() && GetSequence() )
     {
-        return GetSequence()->GetName();
+        return GetSequence()->GetDisplayName().ToString();
+        //return GetSequence()->GetName();
     }
 
     return mBoardDisplayName;

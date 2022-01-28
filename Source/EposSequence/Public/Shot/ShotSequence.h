@@ -8,9 +8,13 @@
 #include "MovieScene.h"
 #include "UObject/SoftObjectPtr.h"
 
+#include "SequenceNameElements.h"
+
 #include "ShotSequence.generated.h"
 
-/*
+class UNamingFormatter;
+
+/**
  * Movie scene animation that represents the last level of the storyboard.
  */
 UCLASS( BlueprintType )
@@ -37,7 +41,7 @@ public:
 
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
-//    virtual FText GetDisplayName() const override;
+    virtual FText GetDisplayName() const override;
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
     virtual void GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const override;
@@ -66,4 +70,10 @@ public:
     // The map will contain multiple actors and all their multiple components
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences;
+
+    UPROPERTY(EditAnywhere, Category=NamingConvention)
+    FShotNameElements NameElements;
+
+private:
+    UNamingFormatter* mNamingFormatter;
 };

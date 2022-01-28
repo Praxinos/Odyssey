@@ -18,6 +18,8 @@
 #include "Tracks/MovieSceneAudioTrack.h"
 
 #include "Board/BoardHelpers.h"
+#include "EposSequenceModule.h"
+#include "INamingFormatter.h"
 #include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
@@ -29,6 +31,9 @@ UShotSequence::UShotSequence( const FObjectInitializer& ObjectInitializer )
     , MovieScene( nullptr )
 {
     bParentContextsAreSignificant = true;
+
+    FEposSequenceModule& module = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+    mNamingFormatter = module.GetNamingFormatter<UNamingFormatterShot>();
 }
 
 void UShotSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
@@ -256,10 +261,14 @@ UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClas
     //return Super::IsTrackSupported( InTrackClass );
 }
 
-//FText UShotSequence::GetDisplayName() const
-//{
-//  return UMovieSceneSequence::GetDisplayName();
-//}
+FText UShotSequence::GetDisplayName() const
+{
+    //return UMovieSceneSequence::GetDisplayName();
+
+    FString name = mNamingFormatter->FormatName( this );
+
+    return FText::FromString( name );
+}
 
 void UShotSequence::GetAssetRegistryTags( TArray<FAssetRegistryTag>& OutTags ) const
 {
