@@ -782,7 +782,7 @@ FillNameElements( const FNamingConventionUser& iUserSettings, FSequenceNameEleme
 
 static
 TOptional<FSequenceNameElements>
-FindNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber )
+FindSiblingNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber )
 {
     UMovieSceneCinematicBoardTrack* boardTrack = iParentSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
     if( !boardTrack )
@@ -810,6 +810,87 @@ FindNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* i
     checkNoEntry();
 
     return TOptional<FSequenceNameElements>();
+}
+static
+TOptional<FSequenceNameElements>
+FindOneNameElements( const IMovieScenePlayer& iPlayer, FFrameNumber iFrameNumber )
+{
+    IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_sequences;
+    map_sequences.Add( MovieSceneSequenceID::Root, player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
+        for( auto pair : subsequences )
+            map_sequences.Add( pair.Key, pair.Value.GetSequence() );
+    }
+
+    //---
+
+    for( auto pair : map_sequences )
+    {
+        UMovieSceneSequence* sequence = pair.Value;
+
+        UBoardSequence* board_sequence = Cast<UBoardSequence>( sequence );
+        if( board_sequence && !board_sequence->NameElements.StudioName.IsEmpty() )
+            return board_sequence->NameElements;
+
+        UShotSequence* shot_sequence = Cast<UShotSequence>( sequence );
+        if( shot_sequence && !shot_sequence->NameElements.StudioName.IsEmpty() )
+            return shot_sequence->NameElements;
+    }
+
+    return TOptional<FSequenceNameElements>();
+}
+
+static
+TOptional<FSequenceNameElements>
+FindNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber )
+{
+    TOptional<FSequenceNameElements> source_elements;
+
+    // Try to get the most relevant name elements
+    if( !source_elements )
+    {
+        TOptional<FSequenceNameElements> reference_elements = FindSiblingNameElements( iPlayer, iParentSequence, iFrameNumber );
+
+        if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get the parent name elements
+    if( !source_elements )
+    {
+        const UBoardSequence* parent_board_sequence = CastChecked<UBoardSequence>( iParentSequence ); // To parent is always a board ... to check ...
+        FSequenceNameElements reference_elements = parent_board_sequence->NameElements;
+
+        if( !reference_elements.StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get the root name elements
+    if( !source_elements )
+    {
+        const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
+        FSequenceNameElements reference_elements = root_board_sequence->NameElements;
+
+        if( !reference_elements.StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    // Try to get one valid name elements in the whole hierarchy
+    if( !source_elements )
+    {
+        TOptional<FSequenceNameElements> reference_elements = FindOneNameElements( iPlayer, iFrameNumber );
+
+        if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
+            source_elements = reference_elements;
+    }
+
+    return source_elements;
 }
 };
 
@@ -901,36 +982,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     oElements.Index = max_board_index;
 
-    TOptional<FSequenceNameElements> source_elements;
-
-    // Try to get the most relevant name elements
-    if( !source_elements )
-    {
-        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iParentSequence, iFrameNumber );
-
-        if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
-            source_elements = reference_elements;
-    }
-
-    // Try to get the parent name elements
-    if( !source_elements )
-    {
-        const UBoardSequence* parent_board_sequence = CastChecked<UBoardSequence>( iParentSequence ); // To parent is always a board ... to check ...
-        FSequenceNameElements reference_elements = parent_board_sequence->NameElements;
-
-        if( !reference_elements.StudioName.IsEmpty() )
-            source_elements = reference_elements;
-    }
-
-    // Try to get the root name elements
-    if( !source_elements )
-    {
-        const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
-        FSequenceNameElements reference_elements = root_board_sequence->NameElements;
-
-        if( !reference_elements.StudioName.IsEmpty() )
-            source_elements = reference_elements;
-    }
+    TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, iRootSequence, iParentSequence, iFrameNumber );
 
     // Get the source elements values
     if( source_elements )
@@ -1044,36 +1096,7 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     oElements.Index = max_shot_index;
     oElements.TakeIndex = shot_settings.TakeFormat.StartNumber;
 
-    TOptional<FSequenceNameElements> source_elements;
-
-    // Try to get the most relevant name elements
-    if( !source_elements )
-    {
-        TOptional<FSequenceNameElements> reference_elements = FindNameElements( iPlayer, iParentSequence, iFrameNumber );
-
-        if( reference_elements && !reference_elements.GetValue().StudioName.IsEmpty() )
-            source_elements = reference_elements;
-    }
-
-    // Try to get the parent name elements
-    if( !source_elements )
-    {
-        const UBoardSequence* parent_board_sequence = CastChecked<UBoardSequence>( iParentSequence ); // To parent is always a board ... to check ...
-        FSequenceNameElements reference_elements = parent_board_sequence->NameElements;
-
-        if( !reference_elements.StudioName.IsEmpty() )
-            source_elements = reference_elements;
-    }
-
-    // Try to get the root name elements
-    if( !source_elements )
-    {
-        const UBoardSequence* root_board_sequence = CastChecked<UBoardSequence>( iRootSequence ); // If we go here, the root is "necessarily" a board ... to check ...
-        FSequenceNameElements reference_elements = root_board_sequence->NameElements;
-
-        if( !reference_elements.StudioName.IsEmpty() )
-            source_elements = reference_elements;
-    }
+    TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, iRootSequence, iParentSequence, iFrameNumber );
 
     // Get the source elements values
     if( source_elements )
