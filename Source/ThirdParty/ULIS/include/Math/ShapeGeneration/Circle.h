@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Circle.h
 * @author       Thomas Schmitt
 * @brief        This file provides the Circle points generation methods
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -50,7 +49,7 @@ static inline void GenerateCirclePoints(
         }
     }
     
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 2 ------
     x = 0;
@@ -80,7 +79,7 @@ static inline void GenerateCirclePoints(
         }
     }
 
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 3 ------
     x = 0;
@@ -110,7 +109,7 @@ static inline void GenerateCirclePoints(
         }
     }
 
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 4 ------
     x = 0;
@@ -140,7 +139,7 @@ static inline void GenerateCirclePoints(
         }
     }
 
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 5 ------
     x = 0;
@@ -170,7 +169,7 @@ static inline void GenerateCirclePoints(
         }
     }
 
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 6 ------
     x = 0;
@@ -200,7 +199,7 @@ static inline void GenerateCirclePoints(
         }
     }
 
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 7 ------
     x = 0;
@@ -230,7 +229,7 @@ static inline void GenerateCirclePoints(
         }
     }
 
-    octantStartingIndex = ioCirclePoints.Size();
+    octantStartingIndex = static_cast< int >( ioCirclePoints.Size() );
 
     //Octant 8 ------
     x = 0;

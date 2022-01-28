@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Context.h
 * @author       Clement Berthaud
 * @brief        This file provides the declaration for the FContext class.
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -16,6 +15,7 @@
 #include "Image/Sample.h"
 #include "Image/Block.h"
 #include "Image/Gradient.h"
+#include "Layer/Layer/LayerTypedefs.h"
 #include "Math/Geometry/Rectangle.h"
 #include "Math/Geometry/Vector.h"
 #include "Scheduling/SchedulePolicy.h"
@@ -119,34 +119,32 @@ public:
 
 /////////////////////////////////////////////////////
 // Layers
-    /*!
-        Perform a flattened blend of the whole layer stack
-    */
-    /*
-    ulError
-    Flatten(
-          FLayerStack& iStack
-        , FBlock& iDestination
-        , const FRectI& iSourceRect = FRectI::Auto
-        , const FVec2I& iPosition = FVec2I( 0 )
-        , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
-        , uint32 iNumWait = 0
-        , const FEvent* iWaitList = nullptr
-        , FEvent* iEvent = nullptr
-    );
-
-    ulError
-    RenderLayerFolder(
-          FLayerFolder& iFolder
-        , FEvent* iEvent = nullptr
-    );
-
-    ulError
-    RenderLayerText(
-          FLayerText& iText
-        , FEvent* iEvent = nullptr
-    );
-    */
+    ///*!
+    //    Perform a flattened blend of the whole layer stack
+    //*/
+    //ulError
+    //Flatten(
+    //      FLayerStack& iStack
+    //    , FBlock& iDestination
+    //    , const FRectI& iSourceRect = FRectI::Auto
+    //    , const FVec2I& iPosition = FVec2I( 0 )
+    //    , const FSchedulePolicy& iPolicy = FSchedulePolicy::MultiScanlines
+    //    , uint32 iNumWait = 0
+    //    , const FEvent* iWaitList = nullptr
+    //    , FEvent* iEvent = nullptr
+    //);
+    //
+    //ulError
+    //RenderLayerFolder(
+    //      FLayerFolder& iFolder
+    //    , FEvent* iEvent = nullptr
+    //);
+    //
+    //ulError
+    //RenderLayerText(
+    //      FLayerText& iText
+    //    , FEvent* iEvent = nullptr
+    //);
 
     /*!
         Collect metrics before a XLoadPSDFromDisk call
@@ -162,7 +160,6 @@ public:
     /*!
         Perform a load of a PSD file in a layer stack
     */
-    /*
     ulError
     XLoadPSDFromDisk(
           FLayerStack& iStack
@@ -174,7 +171,6 @@ public:
         , const FEvent* iWaitList = nullptr
         , FEvent* iEvent = nullptr
     );
-    */
 /////////////////////////////////////////////////////
 // Gradient
     /*!
@@ -584,7 +580,7 @@ public:
     ulError
     RasterText(
           FBlock& iBlock
-        , const std::wstring& iText
+        , const FWString& iText
         , const FFont& iFont
         , uint32 iFontSize = 12
         , const FMat3F& iTransform = FMat3F()
@@ -619,7 +615,7 @@ public:
     ulError
     RasterTextAA(
           FBlock& iBlock
-        , const std::wstring& iText
+        , const FWString& iText
         , const FFont& iFont
         , uint32 iFontSize = 12
         , const FMat3F& iTransform = FMat3F()
@@ -642,7 +638,7 @@ public:
     static
     FRectI
     TextMetrics(
-          const std::wstring& iText
+          const FWString& iText
         , const FFont& iFont
         , uint32 iFontSize = 12
         , const FMat3F& iTransform = FMat3F()

@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Rectangle.h
 * @author       Thomas Schmitt
 * @brief        This file provides the Rectangle points generation methods
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once

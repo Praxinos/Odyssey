@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Tree.h
 * @author       Clement Berthaud
 * @brief        This file provides the definition for a basic Tree.
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -75,6 +74,10 @@ public:
         return  Self();
     }
 
+    tParent* Parent() {
+        return  const_cast< tParent* >( mParent );
+    }
+
     const tParent* Parent() const {
         return  mParent;
     }
@@ -95,6 +98,7 @@ public:
     }
 
     void NotifyChange() const {
+        OnChangeNotifiedInternal();
         TOnSelfChanged< Type >::Invoke( this );
         if( mParent )
             mParent->NotifyChange();
@@ -119,7 +123,7 @@ protected:
     }
 
 private:
-    virtual void OnChangeNotifiedInternal() {
+    virtual void OnChangeNotifiedInternal() const {
     }
 
 private:

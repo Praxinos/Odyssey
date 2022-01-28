@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Line.h
 * @author       Thomas Schmitt
 * @brief        This file provides the line points generation methods
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 
@@ -25,7 +24,7 @@ static inline void GenerateLinePoints(
     FVec2I p0 = iP0;
     FVec2I p1 = iP1;
 
-    int startArray = iCustomIndex != -1 ? iCustomIndex : ioLinePoints.Size(); 
+    int startArray = iCustomIndex != -1 ? iCustomIndex : static_cast< int >( ioLinePoints.Size() ); 
 
     bool pushArray = true; //While inserting the points into the array, if true, we push back, else, we insert at front
 

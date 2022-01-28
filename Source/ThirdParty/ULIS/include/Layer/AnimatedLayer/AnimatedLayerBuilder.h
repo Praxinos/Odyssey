@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,17 +6,17 @@
 * @file         AnimatedLayerBuilder.h
 * @author       Clement Berthaud
 * @brief        This file provides the declaration for the TAnimatedLayerBuilder class.
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
 #include "Core/Core.h"
+#include "Layer/AnimatedLayer/AnimatedLayerTypedefs.h"
 #include <functional>
 
 ULIS_NAMESPACE_BEGIN
 /////////////////////////////////////////////////////
 /// @class      TAnimatedLayerBuilder
-/// @brief      The TAnimatedLayerBuilder class provides a tool for building layerstacks
+/// @brief      The TAnimatedLayerBuilder class provides a tool for building AnimatedLayerStacks
 ///             from code.
 template< typename T >
 class TAnimatedLayerBuilder {
@@ -61,9 +61,23 @@ public:
         return  *this;
     }
 
+    template< typename W, class ... Args >
+    TAnimatedLayerBuilder< T >& operator()( W w, Args&& ... args ) {
+        (m->*w)( args ... );
+        return  *this;
+    }
+
 public:
     T* m;
 };
+
+#define ULAAssociateStack( _Elem_ )              TAnimatedLayerBuilder< FAnimatedLayerStack >( _Elem_ )
+#define ULAAssignStack( _Elem_, ... )            TAnimatedLayerBuilder< FAnimatedLayerStack >::Assign( & _Elem_, __VA_ARGS__ )
+#define ULACreateChild( _Class_, ... )           TAnimatedLayerBuilder< _Class_ >::Create( __VA_ARGS__ )
+#define ULAAssignChild( _Class_, _Elem_, ... )   TAnimatedLayerBuilder< _Class_ >::Assign( & _Elem_, __VA_ARGS__ )
+#define ULAAddLayer( _Elem_ )                    .AddChild( _Elem_ )
+#define ULADef( ... )                            .Def( [&]( auto i ){ i-> __VA_ARGS__ ; } )
+#define ULAPayload( ... )                        ULDef( Payload( __VA_ARGS__ ) )
 
 ULIS_NAMESPACE_END
 

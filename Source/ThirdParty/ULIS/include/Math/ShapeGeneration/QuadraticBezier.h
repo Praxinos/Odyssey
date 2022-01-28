@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         QuadraticBezier.h
 * @author       Thomas Schmitt
 * @brief        This file provides the Quadratic Bezier points generation methods
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -31,7 +30,7 @@ static inline void InternalGenerateQuadraticBezierSegPoints(
     double dx = x0-x2,dy = y0-y2,xx = x0-x1,yy = y0-y1;
     double xy = xx*sy+yy*sx,cur = xx*sy-yy*sx,err;
     bool pushBack = true;
-    int indexEndArray = ioQuadraticBezierPoints.Size();
+    int indexEndArray = static_cast< int >( ioQuadraticBezierPoints.Size() );
 
     if(xx*sx > 0.0 || yy*sy > 0.0)
     {

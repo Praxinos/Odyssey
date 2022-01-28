@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         RotatedEllipse.h
 * @author       Thomas Schmitt
 * @brief        This file provides the Rotated Ellipse points generation methods
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -67,10 +66,10 @@ static inline void GenerateRotatedEllipsePoints(
     dx = std::floor(dx * w + 0.5f);
     dy = std::floor(dy * w + 0.5f);
 
-    InternalGenerateQuadraticBezierSegPoints(x1, int(y1 - dy), x1, y0, int(x0 + dx), y0, w, ioRotatedEllipsePoints, true, ioRotatedEllipsePoints.Size()); //1st quadrant
-    InternalGenerateQuadraticBezierSegPoints(x1, int(y1 - dy), x1, y1, int(x1 - dx), y1, 1.f - w, ioRotatedEllipsePoints, false, ioRotatedEllipsePoints.Size() ); //2nd quadrant
-    InternalGenerateQuadraticBezierSegPoints(x0, int(y0 + dy), x0, y1, int(x1 - dx), y1, w, ioRotatedEllipsePoints, true, ioRotatedEllipsePoints.Size()); // 3rd quadrant
-    InternalGenerateQuadraticBezierSegPoints(x0, int(y0 + dy), x0, y0, int(x0 + dx), y0, 1.f - w, ioRotatedEllipsePoints, false, ioRotatedEllipsePoints.Size()); // 4th quadrant
+    InternalGenerateQuadraticBezierSegPoints(x1, int(y1 - dy), x1, y0, int(x0 + dx), y0, w, ioRotatedEllipsePoints, true, static_cast< int >( ioRotatedEllipsePoints.Size() )); //1st quadrant
+    InternalGenerateQuadraticBezierSegPoints(x1, int(y1 - dy), x1, y1, int(x1 - dx), y1, 1.f - w, ioRotatedEllipsePoints, false, static_cast< int >( ioRotatedEllipsePoints.Size() ) ); //2nd quadrant
+    InternalGenerateQuadraticBezierSegPoints(x0, int(y0 + dy), x0, y1, int(x1 - dx), y1, w, ioRotatedEllipsePoints, true, static_cast< int >( ioRotatedEllipsePoints.Size() )); // 3rd quadrant
+    InternalGenerateQuadraticBezierSegPoints(x0, int(y0 + dy), x0, y0, int(x0 + dx), y0, 1.f - w, ioRotatedEllipsePoints, false, static_cast< int >( ioRotatedEllipsePoints.Size() )); // 4th quadrant
 }
 
 ULIS_NAMESPACE_END

@@ -1,4 +1,4 @@
-﻿// IDDN FR.001.250001.005.S.P.2019.000.00000
+﻿// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Arc.h
 * @author       Thomas Schmitt
 * @brief        This file provides the Arc points generation methods
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -139,7 +138,7 @@ static inline void GenerateArcPoints(
 
 
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 2 ------
         x = 0;
@@ -199,7 +198,7 @@ static inline void GenerateArcPoints(
             }
         }
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 3 ------
         x = 0;
@@ -259,7 +258,7 @@ static inline void GenerateArcPoints(
             }
         }
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 4 ------
         x = 0;
@@ -319,7 +318,7 @@ static inline void GenerateArcPoints(
             }
         }
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 5 ------
         x = 0;
@@ -379,7 +378,7 @@ static inline void GenerateArcPoints(
             }
         }
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 6 ------
         x = 0;
@@ -439,7 +438,7 @@ static inline void GenerateArcPoints(
             }
         }
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 7 ------
         x = 0;
@@ -499,7 +498,7 @@ static inline void GenerateArcPoints(
             }
         }
 
-        octantStartingIndex = ioArcPoints.Size();
+        octantStartingIndex = static_cast< int >( ioArcPoints.Size() );
 
         //Octant 8 ------
         x = 0;

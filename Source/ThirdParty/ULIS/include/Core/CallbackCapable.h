@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         CallbackCapable.h
 * @author       Clement Berthaud
 * @brief        This file provides the declaration for the TCallbackCapable class.
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -75,8 +74,8 @@ public:
     {}
 
     template< typename ... Args >
-    ULIS_FORCEINLINE void Invoke( Args ... args ) const {
-        mDelegate.ExecuteIfBound( args ... );
+    ULIS_FORCEINLINE void Invoke( Args&& ... args ) const {
+        mDelegate.ExecuteIfBound( std::forward< Args >(args)... );
     }
 
     void SetDelegate( const DelegateType& iDelegate ) {

@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         ULIS.h
 * @author       Clement Berthaud && Eric Scholl
 * @brief        This file provides a unique way to include all the necessary library files.
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -23,12 +22,8 @@
 #include "Image/Kernel.h"
 #include "Image/StructuringElement.h"
 // Layer
-#include "Layer/Layer/Layer.h"
-#include "Layer/Layer/LayerFolder.h"
-#include "Layer/Layer/LayerImage.h"
-#include "Layer/Layer/LayerStack.h"
-#include "Layer/Layer/LayerTypedefs.h"
 #include "Layer/Layer/LayerBuilder.h"
+#include "Layer/Layer/LayerTypedefs.h"
 // Font
 #include "Font/Font.h"
 #include "Font/FontEngine.h"

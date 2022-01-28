@@ -1,4 +1,4 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ULIS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 /*
 *   ULIS
@@ -6,7 +6,6 @@
 * @file         Layer.h
 * @author       Clement Berthaud
 * @brief        This file provides the declaration for the ILayer class.
-* @copyright    Copyright 2018-2021 Praxinos, Inc. All Rights Reserved.
 * @license      Please refer to LICENSE.md
 */
 #pragma once
@@ -33,9 +32,13 @@ template class ULIS_API TCallbackCapable< TLambdaCallback< void, const TRoot< IL
 template class ULIS_API TCallbackCapable< TLambdaCallback< void, const TRoot< ILayer >*, const TNode< ILayer >*, bool >, 1 >;
 template class ULIS_API TCallbackCapable< TLambdaCallback< void, const TNode< ILayer >*, const TRoot< ILayer >* >, 2 >;
 template class ULIS_API TCallbackCapable< TLambdaCallback< void, const TNode< ILayer >* >, 3 >;
-//template class ULIS_API TNode< ILayer >;
-//template class ULIS_API TArray< TNode< ILayer >* >;
-//template class ULIS_API TRoot< ILayer >;
+
+#ifdef ULIS_WIN
+template class ULIS_API TNode< ILayer >;
+template class ULIS_API TArray< TNode< ILayer >* >;
+template class ULIS_API TRoot< ILayer >;
+#endif
+
 typedef FOn_bool_Changed FOnBoolChanged;
 typedef TOnParentChanged< ILayer > FOnParentChanged;
 typedef TOnSelfChanged< ILayer > FOnSelfChanged;
