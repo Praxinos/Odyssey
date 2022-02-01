@@ -4,10 +4,13 @@
 #include "Board/BoardSequenceCustomization.h"
 
 #include "CineCameraActor.h"
+#include "Compilation/MovieSceneCompiledDataManager.h"
 #include "Engine/Selection.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "MovieSceneTimeHelpers.h"
+#include "Sections/MovieSceneSubSection.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "Board/BoardSequence.h"
@@ -16,6 +19,7 @@
 #include "EposSequenceToolbarHelpers.h"
 #include "EposTracksModule.h"
 #include "PlaneActor.h"
+#include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
@@ -231,38 +235,192 @@ FBoardSequenceCustomization::ProcessCommands( TSharedPtr<FUICommandList> Command
 FText
 FBoardSequenceCustomization::CreateInfoText() const
 {
-    UMovieSceneCinematicBoardTrack* board_track = mBoardSequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>();
-    int number_of_sections = board_track ? board_track->GetAllSections().Num() : 0;
-
-    //---
-
     TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
 
-    TRange<FFrameNumber> playback_range = mBoardSequence->GetMovieScene()->GetPlaybackRange();
-    int32 duration_in_tick = UE::MovieScene::DiscreteSize( playback_range );
-    FString duration = type_interface->ToString( duration_in_tick ); //TOCHECK: convert duration like time, correct ?
+    const UBoardSequence* root_board = CastChecked<UBoardSequence>( mSequencer->GetRootMovieSceneSequence() );
+    const UMovieScene* root_moviescene = root_board ? root_board->GetMovieScene() : nullptr;
+
+    const UBoardSequence* current_board = CastChecked<UBoardSequence>( mSequencer->GetFocusedMovieSceneSequence() );
+    check( current_board == mBoardSequence );
+    const UMovieScene* current_moviescene = current_board ? current_board->GetMovieScene() : nullptr;
+
+    UMovieSceneCinematicBoardTrack* board_track = current_moviescene ? current_moviescene->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+    UMovieSceneSection* board_section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), mSequencer->GetLocalTime().Time.FrameNumber ) : nullptr;
+    UMovieSceneSubSection* board_subsection = Cast<UMovieSceneSubSection>( board_section );
+
+    const UMovieSceneSequence* current_subsequence = board_subsection ? board_subsection->GetSequence() : nullptr;
+    const UBoardSequence* current_subboard = Cast<UBoardSequence>( current_subsequence );
+    const UShotSequence* current_subshot = Cast<UShotSequence>( current_subsequence );
+    const UMovieScene* current_submoviescene = current_subsequence ? current_subsequence->GetMovieScene() : nullptr;
+
+    TRange<FFrameNumber> root_playback_range = root_moviescene ? root_moviescene->GetPlaybackRange() : TRange<FFrameNumber>::Empty();
+    TRange<FFrameNumber> sequence_playback_range = current_moviescene ? current_moviescene->GetPlaybackRange() : TRange<FFrameNumber>::Empty();
+    TRange<FFrameNumber> subsequence_playback_range = current_submoviescene ? current_submoviescene->GetPlaybackRange() : TRange<FFrameNumber>::Empty();
+
+    FFrameRate root_tick_resolution = root_moviescene->GetTickResolution();
+    FFrameRate root_display_rate = root_moviescene->GetDisplayRate();
+    FFrameRate sequence_tick_resolution = mSequencer->GetFocusedTickResolution();
+    FFrameRate sequence_display_rate = mSequencer->GetFocusedDisplayRate();
+
+    //-
+
+    const UEposSequenceEditorSettings* settings = GetDefault<UEposSequenceEditorSettings>();
+    const FInfoBarSettings& infobar_settings = settings->InfoBarSettings;
+
+    FString parsed_string = infobar_settings.Pattern;
+
+    auto ReplaceKeywordInt        = [&]( EInfoBarPatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *FString::FromInt( iValue ) ); };
+    auto ReplaceKeywordIntAsFrame = [&]( EInfoBarPatternKeyword iKeywordId, int iValue )          -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue ) ); };
+    auto ReplaceKeywordFrame      = [&]( EInfoBarPatternKeyword iKeywordId, FFrameNumber iValue ) -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *type_interface->ToString( iValue.Value ) ); };
+    auto ReplaceKeywordString     = [&]( EInfoBarPatternKeyword iKeywordId, FString iValue )      -> FString  { return parsed_string.Replace( *infobar_settings.PatternKeywords[iKeywordId].mKeywordWithBraces, *iValue ); };
+
+    //--- CurrentFrame_InStoryboard
+    //--- CurrentFrame_InSequence
+    //--- CurrentFrame_InSubsequence
+    {
+        FFrameNumber current_frame_in_storyboard = mSequencer->GetGlobalTime().Time.GetFrame();
+        FFrameNumber current_frame_in_sequence = mSequencer->GetLocalTime().Time.GetFrame();
+        FFrameNumber current_frame_in_subsequence = board_subsection ? current_frame_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::CurrentFrame_InStoryboard, current_frame_in_storyboard );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::CurrentFrame_InSequence, current_frame_in_sequence );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::CurrentFrame_InSubsequence, current_frame_in_subsequence );
+    }
+
+    //--- StartFrameOfStoryboard_InStoryboard
+    //--- StopFrameOfStoryboard_InStoryboard
+    {
+        FFrameNumber start_storyboard_in_storyboard = UE::MovieScene::DiscreteInclusiveLower( root_playback_range );
+        FFrameNumber stop_storyboard_in_storyboard = UE::MovieScene::DiscreteExclusiveUpper( root_playback_range );
+        // convert to display rate -> substract 1 to get the (inclusive) last frame -> convert back to tick resolution
+        stop_storyboard_in_storyboard = FFrameRate::TransformTime( FFrameRate::TransformTime( stop_storyboard_in_storyboard, root_tick_resolution, root_display_rate ).FloorToFrame() - 1, root_display_rate, root_tick_resolution ).FloorToFrame();
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfStoryboard_InStoryboard, start_storyboard_in_storyboard );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfStoryboard_InStoryboard, stop_storyboard_in_storyboard );
+    }
+
+    //--- StartFrameOfSequence_InStoryboard
+    //--- StartFrameOfSequence_InSequence
+    //--- StopFrameOfSequence_InStoryboard
+    //--- StopFrameOfSequence_InSequence
+    {
+        FFrameNumber start_sequence_in_sequence = UE::MovieScene::DiscreteInclusiveLower( sequence_playback_range );
+        FFrameNumber stop_sequence_in_sequence = UE::MovieScene::DiscreteExclusiveUpper( sequence_playback_range );
+        // convert to display rate -> substract 1 to get the (inclusive) last frame -> convert back to tick resolution
+        stop_sequence_in_sequence = FFrameRate::TransformTime( FFrameRate::TransformTime( stop_sequence_in_sequence, sequence_tick_resolution, sequence_display_rate ).FloorToFrame() - 1, sequence_display_rate, sequence_tick_resolution ).FloorToFrame();
+
+        FFrameNumber start_sequence_in_storyboard = ( start_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
+        FFrameNumber stop_sequence_in_storyboard = ( stop_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, start_sequence_in_storyboard );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, stop_sequence_in_storyboard );
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InSequence, start_sequence_in_sequence );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InSequence, stop_sequence_in_sequence );
+    }
+
+    //--- StartFrameOfSubsequence_InStoryboard
+    //--- StartFrameOfSubsequence_InSequence
+    //--- StartFrameOfSubsequence_InSubSequence
+    //--- StopFrameOfSubsequence_InStoryboard
+    //--- StopFrameOfSubsequence_InSequence
+    //--- StopFrameOfSubsequence_InSubSequence
+    {
+        FFrameNumber start_subsequence_in_sequence = board_subsection ? board_subsection->GetInclusiveStartFrame() : FFrameNumber();
+        FFrameNumber stop_subsequence_in_sequence = board_subsection ? board_subsection->GetExclusiveEndFrame() : FFrameNumber();
+        stop_subsequence_in_sequence = FFrameRate::TransformTime( FFrameRate::TransformTime( stop_subsequence_in_sequence, sequence_tick_resolution, sequence_display_rate ).FloorToFrame() - 1, sequence_display_rate, sequence_tick_resolution ).FloorToFrame();
+
+        FFrameNumber start_subsequence_in_subsequence = board_subsection ? start_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
+        FFrameNumber stop_subsequence_in_subsequence = board_subsection ? stop_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
+
+        FFrameNumber start_subsequence_in_storyboard = ( start_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
+        FFrameNumber stop_subsequence_in_storyboard = ( stop_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseLinearOnly() ).GetFrame();
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, start_subsequence_in_storyboard );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, stop_subsequence_in_storyboard );
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InSequence, start_subsequence_in_sequence );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InSequence, stop_subsequence_in_sequence );
+
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InSubSequence, start_subsequence_in_subsequence );
+        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InSubSequence, stop_subsequence_in_subsequence );
+    }
+
+    //--- Storyboard_Duration
+    //--- Storyboard_TotalSequences
+    {
+        int32 storyboard_duration_in_tick = UE::MovieScene::DiscreteSize( root_playback_range );
+
+        const FMovieSceneSequenceHierarchy* hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
+        int32 storyboard_total_sequences = hierarchy ? hierarchy->AllSubSequenceData().Num() : 0;
+
+        parsed_string = ReplaceKeywordIntAsFrame( EInfoBarPatternKeyword::Storyboard_Duration, storyboard_duration_in_tick );
+        parsed_string = ReplaceKeywordInt( EInfoBarPatternKeyword::Storyboard_TotalSequences, storyboard_total_sequences );
+    }
+
+    //--- Sequence_Duration
+    //--- Sequence_NumberOfSubsequences
+    //--- Sequence_Index
+    //--- Sequence_Name
+    {
+        int32 sequence_duration_in_tick = UE::MovieScene::DiscreteSize( sequence_playback_range );
+        int32 sequence_number_of_sections = board_track ? board_track->GetAllSections().Num() : 0;
+        int32 sequence_index = current_board->NameElements.Index;
+        FText sequence_name = current_board->GetDisplayName();
+
+        parsed_string = ReplaceKeywordIntAsFrame( EInfoBarPatternKeyword::Sequence_Duration, sequence_duration_in_tick ); //TOCHECK: convert duration like time, correct ?
+        parsed_string = ReplaceKeywordInt( EInfoBarPatternKeyword::Sequence_NumberOfSubsequences, sequence_number_of_sections );
+        parsed_string = ReplaceKeywordInt( EInfoBarPatternKeyword::Sequence_Index, sequence_index );
+        parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::Sequence_Name, sequence_name.ToString() );
+    }
+
+    //--- Subsequence_Duration
+    //--- Subsequence_Index
+    //--- Subsequence_Name
+    {
+        int32 subsequence_duration_in_tick = UE::MovieScene::DiscreteSize( subsequence_playback_range );
+
+        int32 subsequence_index = current_subboard ? current_subboard->NameElements.Index : INDEX_NONE;
+        if( subsequence_index == INDEX_NONE )
+            subsequence_index = current_subshot ? current_subshot->NameElements.Index : INDEX_NONE;
+
+        FText subsequence_name = current_subboard ? current_subboard->GetDisplayName() : FText::GetEmpty();
+        if( subsequence_name.IsEmpty() )
+            subsequence_name = current_subshot ? current_subshot->GetDisplayName() : FText::GetEmpty();
+
+        parsed_string = ReplaceKeywordIntAsFrame( EInfoBarPatternKeyword::Subsequence_Duration, subsequence_duration_in_tick );
+        parsed_string = ReplaceKeywordInt( EInfoBarPatternKeyword::Subsequence_Index, subsequence_index );
+        parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::Subsequence_Name, subsequence_name.ToString() );
+    }
 
     //---
 
-    USelection* SelectedActors = GEditor->GetSelectedSet( APlaneActor::StaticClass() );
-    TArray<APlaneActor*> selected_planes;
-    SelectedActors->GetSelectedObjects( selected_planes );
+    //USelection* SelectedActors = GEditor->GetSelectedSet( APlaneActor::StaticClass() );
+    //TArray<APlaneActor*> selected_planes;
+    //SelectedActors->GetSelectedObjects( selected_planes );
 
-    TArray<FString> planes;
-    for( auto selected_plane : selected_planes )
-        planes.Add( selected_plane->GetName() );
-    FString planes_list = FString::Join( planes, TEXT( ", " ) );
+    //TArray<FString> planes;
+    //for( auto selected_plane : selected_planes )
+    //    planes.Add( selected_plane->GetName() );
+    //FString planes_list = FString::Join( planes, TEXT( ", " ) );
 
     //---
 
-    FFormatOrderedArguments args;
-    args.Add( FText::Format( LOCTEXT( "info-bar.duration", "Duration: {0}" ), FText::FromString( duration ) ) );
-    args.Add( FText::Format( LOCTEXT( "info-bar.board-section-count", "Board Sections: {0}" ), number_of_sections ) );
-    if( planes.Num() )
-        args.Add( FText::Format( LOCTEXT( "info-bar.selected-planes", "Selected Planes: {0}" ), FText::FromString( planes_list ) ) );
+    TArray<FString> lines;
+    parsed_string.ParseIntoArrayLines( lines );
 
-    return FText::Join( FText::FromString( TEXT( " - " ) ), args );
-    //return FText::Format( LOCTEXT( "info-bar", "Duration: {0} - Board Sections: {1} - Selected Planes: [{2}]" ), FText::FromString( duration ), number_of_sections, FText::FromString( planes_list ) );
+    FString parsed_string_with_sep = FString::Join( lines, *infobar_settings.Separator );
+
+    return FText::FromString( parsed_string_with_sep );
+
+    //FFormatOrderedArguments args;
+    //args.Add( FText::Format( LOCTEXT( "info-bar.duration", "Duration: {0}" ), FText::FromString( duration ) ) );
+    //args.Add( FText::Format( LOCTEXT( "info-bar.board-section-count", "Board Sections: {0}" ), number_of_sections ) );
+    //if( planes.Num() )
+    //    args.Add( FText::Format( LOCTEXT( "info-bar.selected-planes", "Selected Planes: {0}" ), FText::FromString( planes_list ) ) );
+
+    //return FText::Join( FText::FromString( TEXT( " - " ) ), args );
+    ////return FText::Format( LOCTEXT( "info-bar", "Duration: {0} - Board Sections: {1} - Selected Planes: [{2}]" ), FText::FromString( duration ), number_of_sections, FText::FromString( planes_list ) );
 }
 
 void

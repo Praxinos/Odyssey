@@ -58,6 +58,81 @@ public:
 
 //---
 
+UENUM()
+enum class EInfoBarPatternKeyword : uint8
+{
+    CurrentFrame_InStoryboard,
+    CurrentFrame_InSequence,
+    CurrentFrame_InSubsequence,
+
+    StartFrameOfStoryboard_InStoryboard,
+    StopFrameOfStoryboard_InStoryboard,
+
+    StartFrameOfSequence_InStoryboard,
+    StartFrameOfSequence_InSequence,
+
+    StopFrameOfSequence_InStoryboard,
+    StopFrameOfSequence_InSequence,
+
+    StartFrameOfSubsequence_InStoryboard,
+    StartFrameOfSubsequence_InSequence,
+    StartFrameOfSubsequence_InSubSequence,
+
+    StopFrameOfSubsequence_InStoryboard,
+    StopFrameOfSubsequence_InSequence,
+    StopFrameOfSubsequence_InSubSequence,
+
+    //---
+
+    Storyboard_Duration,
+    Storyboard_TotalSequences, // Total: recursive
+
+    Sequence_Duration,
+    Sequence_NumberOfSubsequences, // NumberOf: in the same level
+    Sequence_Index,
+    Sequence_Name,
+
+    Subsequence_Duration,
+    Subsequence_Index,
+    Subsequence_Name,
+};
+
+USTRUCT()
+struct FInfoBarPatternKeyword
+{
+    GENERATED_BODY()
+
+public:
+    EInfoBarPatternKeyword mKeywordId;
+    FString mKeywordWithBraces;
+    FText mHelp;
+};
+
+USTRUCT()
+struct FInfoBarSettings
+{
+    GENERATED_BODY()
+
+public:
+    FInfoBarSettings();
+
+public:
+    UPROPERTY(config, EditAnywhere, Category=InfoBar, meta=(MultiLine="true"))
+    FString Pattern;
+
+    /** List of all keywords.
+        This list is hidden in customization.
+        If UPROPERTY is empty, there is no access through IPropertyHandle in customization
+    */
+    UPROPERTY( VisibleAnywhere, Transient )
+    TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword> PatternKeywords;
+
+    UPROPERTY(config, EditAnywhere, Category=InfoBar)
+    FString Separator { TEXT( " - " ) };
+};
+
+//---
+
 /**
  * Epos Sequence Editor settings.
  */
@@ -88,4 +163,8 @@ public:
     /** Specifies Note stuff. */
     UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FNoteSettings NoteSettings;
+
+    /** Specifies Note stuff. */
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
+    FInfoBarSettings InfoBarSettings;
 };

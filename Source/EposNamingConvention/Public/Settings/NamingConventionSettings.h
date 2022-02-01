@@ -58,7 +58,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere )
+    UPROPERTY( VisibleAnywhere, Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The plane number format. */
@@ -83,7 +83,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere )
+    UPROPERTY( VisibleAnywhere, Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The camera number format. */
@@ -108,7 +108,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere )
+    UPROPERTY( VisibleAnywhere, Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */
@@ -137,7 +137,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere )
+    UPROPERTY( VisibleAnywhere, Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */

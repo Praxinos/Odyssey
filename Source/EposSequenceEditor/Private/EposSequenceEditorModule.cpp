@@ -16,6 +16,7 @@
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorNewStoryboardDialog.h"
 #include "Settings/EposSequenceEditorSettings.h"
+#include "Settings/EposSequenceEditorSettingsCustomization.h"
 #include "Shot/ShotSequence.h"
 #include "Shot/ShotSequenceActions.h"
 #include "Shot/ShotSequenceCustomization.h"
@@ -44,11 +45,13 @@ FEposSequenceEditorModule::StartupModule()
     RegisterLevelEditorExtensions();
     RegisterSettings();
     RegisterSequenceCustomizations();
+    RegisterPropertyCustomizations();
 }
 
 void
 FEposSequenceEditorModule::ShutdownModule()
 {
+    UnregisterPropertyCustomizations();
     UnregisterSequenceCustomizations();
     UnregisterSettings();
     UnregisterMenuExtensions();
@@ -232,6 +235,35 @@ FEposSequenceEditorModule::UnregisterSequenceCustomizations()
 
     sequencerModule.GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UBoardSequence::StaticClass() );
     sequencerModule.GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UShotSequence::StaticClass() );
+}
+
+void
+FEposSequenceEditorModule::RegisterPropertyCustomizations()
+{
+    // import the PropertyEditor module...
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+    // to register our custom property
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        // This is the name of the Struct
+        // this tells the property editor which is the struct property our customization will applied on.
+        FInfoBarSettings::StaticStruct()->GetFName(),
+        // this is where our MakeInstance() method is usefull
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FInfoBarCustomization::MakeInstance ) );
+
+    PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+void
+FEposSequenceEditorModule::UnregisterPropertyCustomizations()
+{
+    if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
+
+        PropertyModule.NotifyCustomizationModuleChanged();
+    }
 }
 
 //---

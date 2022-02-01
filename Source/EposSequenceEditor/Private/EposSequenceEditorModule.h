@@ -10,7 +10,8 @@ class FBoardSequenceActions;
 class FShotSequenceActions;
 class USequencerSettings;
 
-class FEposSequenceEditorModule : public IModuleInterface, public FGCObject
+class FEposSequenceEditorModule
+    : public IModuleInterface, public FGCObject
 {
 public:
     FEposSequenceEditorModule();
@@ -46,6 +47,9 @@ private:
 
     void RegisterSequenceCustomizations();
     void UnregisterSequenceCustomizations();
+
+    void RegisterPropertyCustomizations();
+    void UnregisterPropertyCustomizations();
 
 private:
     static EAssetTypeCategories::Type   mEposAssetCategory;
