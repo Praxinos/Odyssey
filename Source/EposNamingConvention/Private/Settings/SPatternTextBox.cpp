@@ -146,7 +146,7 @@ SPatternTextBox::OnPatternTextChanged( const FText& iNewText )
 bool
 SPatternTextBox::CheckPatternValidity( const FString& iPattern )
 {
-    FRegexPattern key_pattern = TEXT( "\\{[^}]*\\}" ); // Mandatory as FRegexMatcher() takes a const reference
+    FRegexPattern key_pattern( TEXT( "\\{[^}]*\\}" ) ); // Mandatory as FRegexMatcher() takes a const reference
     FRegexMatcher matcher( key_pattern, iPattern );
 
     // This loop is to validate all {...} patterns

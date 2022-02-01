@@ -5,13 +5,13 @@
 
 #define LOCTEXT_NAMESPACE "NamingConventionSettings"
 
-#define ADD_PATTERN_KEYWORD( ioMap, iKey, iTextKeyPrefix, iText )        \
+#define ADD_PATTERN_KEYWORD( ioMap, iKey, iTextKeyPrefix, iText )       \
 {                                                                       \
     FString key = TEXT( iKey );                                         \
                                                                         \
     FNamingConventionPatternKeyword value;                              \
     value.mKeywordWithBraces = FString::Printf( TEXT( "{%s}" ), *key ); \
-    value.mHelp = LOCTEXT( iTextKeyPrefix ## "." ## iKey, iText );      \
+    value.mHelp = LOCTEXT( iTextKeyPrefix "." iKey, iText );            \
     ioMap.Add( key, value );                                            \
 }
 
