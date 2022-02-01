@@ -18,6 +18,7 @@
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/STextBlock.h"
 
@@ -57,12 +58,13 @@ private:
     TSharedPtr<IDetailsView>            mDetailsViewSequencer;
     TSharedPtr<IStructureDetailsView>   mDetailsViewBoardSettings;
     TSharedPtr<IStructureDetailsView>   mDetailsViewShotSettings;
-    TSharedPtr<IStructureDetailsView>   mDetailsViewGlobalNaming;
-    TSharedPtr<IStructureDetailsView>   mDetailsViewUserNaming;
+    TSharedPtr<IDetailsView>            mDetailsViewNaming;
 
-    FStoryboardSettings mStoryboardSettings;
-    UNamingConventionSettings* mNamingConventionSettings;
-    UEposSequenceEditorSettings* mSequenceEditorSettings;
+    int32 mActiveTab { 0 };
+
+    FStoryboardSettings             mStoryboardSettings;
+    UNamingConventionSettings*      mNamingConventionSettings;
+    UEposSequenceEditorSettings*    mSequenceEditorSettings;
 };
 
 void
@@ -108,6 +110,12 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
 
     //---
 
+    mDetailsViewNaming = PropertyEditor.CreateDetailView( DetailsViewArgs );
+
+    mDetailsViewNaming->SetObject( mNamingConventionSettings );
+
+    //---
+
     {
         TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FBoardSettings::StaticStruct(), (uint8*)&mSequenceEditorSettings->BoardSettings );
         mDetailsViewBoardSettings = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
@@ -116,16 +124,6 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
     {
         TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FShotSettings::StaticStruct(), (uint8*)&mSequenceEditorSettings->ShotSettings );
         mDetailsViewShotSettings = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
-    }
-
-    {
-        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FNamingConventionGlobal::StaticStruct(), (uint8*)&mNamingConventionSettings->GlobalNaming );
-        mDetailsViewGlobalNaming = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
-    }
-
-    {
-        TSharedPtr<FStructOnScope> StructOnScope = MakeShared<FStructOnScope>( FNamingConventionUser::StaticStruct(), (uint8*)&mNamingConventionSettings->UserNaming );
-        mDetailsViewUserNaming = PropertyEditor.CreateStructureDetailView( DetailsViewArgs, StructureDetailsViewArgs, StructOnScope );
     }
 
     //---
@@ -142,46 +140,123 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         ]
 
         + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign( HAlign_Fill )
+        .Padding( 4, 4, 4, 4 )
+        [
+            SNew( SHorizontalBox )
+
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
+            ]
+
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Fill )
+            .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
+            [
+                SNew(SCheckBox)
+                .Style( FEditorStyle::Get(),  "ToolPalette.DockingTab" )
+                .Padding( 7.f )
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = 0; } )
+                .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == 0 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "new-storyboard.tabs.naming", "Naming Convention" ) )
+                ]
+            ]
+
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Fill )
+            .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
+            [
+                SNew(SCheckBox)
+                .Style( FEditorStyle::Get(),  "ToolPalette.DockingTab" )
+                .Padding( 7.f )
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = 1; } )
+                .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "new-storyboard.tabs.sequence", "Sequence" ) )
+                ]
+            ]
+
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Fill )
+            .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
+            [
+                SNew(SCheckBox)
+                .Style( FEditorStyle::Get(),  "ToolPalette.DockingTab" )
+                .Padding( 7.f )
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = 2; } )
+                .IsChecked_Lambda( [this] () -> ECheckBoxState { return mActiveTab == 2 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "new-storyboard.tabs.sequencer", "Sequencer" ) )
+                ]
+            ]
+
+            + SHorizontalBox::Slot()
+            .FillWidth( .5f )
+            [
+                SNew( SSpacer )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
         .FillHeight( 1.0f )
         [
             SNew( SScrollBox )
             + SScrollBox::Slot()
             [
-                SNew( SVerticalBox )
+                SNew( SWidgetSwitcher )
+                .WidgetIndex_Lambda( [this] () -> int32 { return FMath::Clamp( mActiveTab, 0, 2 ); } )
 
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(4, 4, 4, 4)
+                + SWidgetSwitcher::Slot()
                 [
-                    mDetailsViewSequencer.ToSharedRef()
+                    SNew( SVerticalBox )
+
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    .Padding(4, 4, 4, 4)
+                    [
+                        mDetailsViewNaming.ToSharedRef()
+                    ]
                 ]
 
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(4, 4, 4, 4)
+                + SWidgetSwitcher::Slot()
                 [
-                    mDetailsViewBoardSettings->GetWidget().ToSharedRef()
+                    SNew( SVerticalBox )
+
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    .Padding(4, 4, 4, 4)
+                    [
+                        mDetailsViewBoardSettings->GetWidget().ToSharedRef()
+                    ]
+
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    .Padding(4, 4, 4, 4)
+                    [
+                        mDetailsViewShotSettings->GetWidget().ToSharedRef()
+                    ]
                 ]
 
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(4, 4, 4, 4)
+                + SWidgetSwitcher::Slot()
                 [
-                    mDetailsViewShotSettings->GetWidget().ToSharedRef()
-                ]
+                    SNew( SVerticalBox )
 
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(4, 4, 4, 4)
-                [
-                    mDetailsViewGlobalNaming->GetWidget().ToSharedRef()
-                ]
-
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(4, 4, 4, 4)
-                [
-                    mDetailsViewUserNaming->GetWidget().ToSharedRef()
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
+                    .Padding(4, 4, 4, 4)
+                    [
+                        mDetailsViewSequencer.ToSharedRef()
+                    ]
                 ]
             ]
         ]
