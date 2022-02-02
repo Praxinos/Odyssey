@@ -91,6 +91,10 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 {
     ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
 
+    FString texture_transparent_path;
+    FString texture_transparent_name;
+    FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
+
     for( auto section : result.mSections )
     {
         TArrayView<FMovieSceneObjectPathChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
@@ -119,10 +123,6 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 
             if( use_lighttable >= .5f )
                 current_material->SetScalarParameterValueEditorOnly( TEXT( "UseLighttable" ), 0.f );
-
-            FString texture_transparent_path;
-            FString texture_transparent_name;
-            FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
 
             if( current_material_previous_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {

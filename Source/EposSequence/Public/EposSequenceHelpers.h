@@ -81,9 +81,11 @@ struct EPOSSEQUENCE_API FDrawing
 
     bool Exists();
 
-    UMaterialInstance* GetMaterial();
+    UMaterialInstance* GetMaterial() const;
 
     void SetMaterial( UMaterialInstance* iMaterial );
+
+    friend EPOSSEQUENCE_API bool operator==( const FDrawing& iLhs, const FDrawing& iRhs );
 };
 
 struct EPOSSEQUENCE_API FKeyOpacity

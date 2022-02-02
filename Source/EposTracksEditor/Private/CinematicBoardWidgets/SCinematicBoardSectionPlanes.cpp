@@ -193,6 +193,8 @@ private:
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
     FDelegateHandle mMovieSceneDataChangedHandle;
+
+    TArray<FDrawing> mCachedDrawings;
 };
 
 //---
@@ -213,7 +215,15 @@ SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged( EMovieSceneDataChangeTy
 
     //---
 
-    LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    TArray<FDrawing> cached_drawings = ShotSequenceHelpers::GetAllDrawings( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    // To not call for every ticks when the section is resizing
+    if( mCachedDrawings != cached_drawings )
+    {
+        mCachedDrawings = cached_drawings;
+
+        LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    }
 }
 
 //---

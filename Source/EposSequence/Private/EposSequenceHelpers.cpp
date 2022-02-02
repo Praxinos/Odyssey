@@ -421,7 +421,7 @@ FDrawing::Exists()
 }
 
 UMaterialInstance*
-FDrawing::GetMaterial()
+FDrawing::GetMaterial() const
 {
     if( !mChannel || mKeyHandle == FKeyHandle::Invalid() )
         return nullptr;
@@ -443,6 +443,16 @@ FDrawing::SetMaterial( UMaterialInstance* iMaterial )
 
     FMovieSceneObjectPathChannelKeyValue new_value( iMaterial );
     UE::MovieScene::AssignValue( mChannel, mKeyHandle, new_value );
+}
+
+//friend
+bool
+operator==( const FDrawing& iLhs, const FDrawing& iRhs )
+{
+    return iLhs.mChannel == iRhs.mChannel
+        && iLhs.mSection == iRhs.mSection
+        && iLhs.mKeyHandle == iRhs.mKeyHandle
+        && iLhs.GetMaterial() == iRhs.GetMaterial();
 }
 
 //static
@@ -484,7 +494,7 @@ ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( IMovieScenePlayer& iPl
     if( !plane )
         return result;
 
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    FGuid plane_component = iPlayer.FindCachedObjectId( *plane->GetRootComponent(), iSequenceID );
     if( !plane_component.IsValid() )
         return result;
 
@@ -612,7 +622,7 @@ ShotSequenceHelpers::GetAllDrawings( IMovieScenePlayer& iPlayer, UMovieSceneSequ
     if( !plane )
         return drawings;
 
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    FGuid plane_component = iPlayer.FindCachedObjectId( *plane->GetRootComponent(), iSequenceID );
     if( !plane_component.IsValid() )
         return drawings;
 
@@ -659,7 +669,7 @@ ShotSequenceHelpers::GetAllDrawingTimes( IMovieScenePlayer& iPlayer, UMovieScene
         APlaneActor* plane = planes[i];
         FGuid guid = guids[i];
 
-        FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+        FGuid plane_component = iPlayer.FindCachedObjectId( *plane->GetRootComponent(), iSequenceID );
         if( !plane_component.IsValid() )
             continue;
 
@@ -754,7 +764,7 @@ ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& i
     if( !plane )
         return result;
 
-    FGuid plane_component = iPlayer.FindObjectId( *plane->GetRootComponent(), iSequenceID );
+    FGuid plane_component = iPlayer.FindCachedObjectId( *plane->GetRootComponent(), iSequenceID );
     if( !plane_component.IsValid() )
         return result;
 
