@@ -14,7 +14,7 @@
     FInfoBarPatternKeyword value;                                       \
     value.mKeywordId = iId;                                             \
     value.mKeywordWithBraces = FString::Printf( TEXT( "{%s}" ), *key ); \
-    value.mHelp = LOCTEXT( iTextKeyPrefix ## "." ## iKey, iText );      \
+    value.mHelp = LOCTEXT( iTextKeyPrefix "." iKey, iText );      \
                                                                         \
     ioMap.Add( iId, value );                                            \
 }
