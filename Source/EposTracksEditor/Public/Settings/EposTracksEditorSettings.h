@@ -44,6 +44,26 @@ public:
 //---
 
 USTRUCT()
+struct FPlaneSettings
+{
+    GENERATED_BODY()
+
+    /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
+    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(UIMin = "0", ClampMin = "0", UIMax = "25", ClampMax = "25", Units=Percent))
+    float SafeMargin { 0.f };
+
+    /** This will rescale the original size of the plane
+      * The original size is the one viewed by the camera
+      * The scale is applied before safe margin
+      * The default value (which means no rescale) is (100%, 100%)
+      */
+    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(AllowPreserveRatio))
+    FVector2D RelatifScaling { 100.f, 100.f };
+};
+
+//---
+
+USTRUCT()
 struct FTextureSettings
 {
     GENERATED_BODY()
@@ -103,6 +123,9 @@ private:
 public:
     UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
+
+    UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
+    FPlaneSettings PlaneSettings;
 
     UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FTextureSettings TextureSettings;

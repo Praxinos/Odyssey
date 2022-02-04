@@ -118,11 +118,18 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
     UMovieScenePrimitiveMaterialSection* section = result.mSections[0].Get();
     FMovieSceneObjectPathChannel* channel = &section->MaterialChannel;
 
+    TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return;
+    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    if( !plane )
+        return;
+
     //---
 
     section->Modify();
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID ) );
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID ), plane );
     if( !new_material )
         return;
 

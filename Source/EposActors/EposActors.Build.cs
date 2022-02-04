@@ -39,6 +39,7 @@ public class EposActors : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
+                "CinematicCamera",
                 // [RUNTIME] custom plugin dependencies
 
                 // [EDITOR]

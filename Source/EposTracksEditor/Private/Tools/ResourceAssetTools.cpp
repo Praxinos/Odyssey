@@ -17,8 +17,10 @@
 #include "ObjectTools.h"
 
 #include "NamingConvention.h"
+#include "PlaneActor.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "StoryNote.h"
+#include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "ResourceAssetTools"
 
@@ -471,28 +473,9 @@ ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSe
 
 //---
 
-FIntPoint
-ProjectAssetTools::ComputeTextureSize( ACineCameraActor* iCamera )
-{
-    float camera_ratio = iCamera->GetCineCameraComponent()->AspectRatio;
-
-    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-    int32 height = settings->TextureSettings.Height;
-
-    int32 width = int32( height * camera_ratio );
-    if( width % 4 )
-        width += ( 4 - width % 4 ); // To always have a multiple of 4 (like the height)
-
-    width = FMath::Clamp( width, 16, 8192 );
-
-    return FIntPoint( width, height );
-}
-
-//---
-
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, ACineCameraActor* iCamera )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, const ACineCameraActor* iCamera, const APlaneActor* iPlane )
 {
     FString package_name;
     FString asset_name;
@@ -500,7 +483,9 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
     if( !new_material )
         return nullptr;
 
-    FIntPoint texture_size = ComputeTextureSize( iCamera );
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+
+    FIntPoint texture_size = iPlane->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
 
     UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, texture_size, package_name, asset_name );
     if( !new_texture )

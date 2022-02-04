@@ -10,6 +10,7 @@ class FMenuBuilder;
 class EPOSTRACKSEDITOR_API EposTracksToolbarHelpers
 {
 public:
+    static void MakePlaneSettingsEntries( FMenuBuilder& iMenuBuilder );
     static void MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder );
     static void MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder );
 };
