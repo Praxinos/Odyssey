@@ -915,7 +915,8 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
     }
     else if( textures.Num() == 1 )
     {
-        ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "texture-key-section-label", "Texture: {0}" ), FText::FromString( textures[0]->GetName() ) ) );
+        ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "texture-key-section-label", "Texture" ) );
+        //ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "texture-key-section-label", "Texture: {0}" ), FText::FromString( textures[0]->GetName() ) ) );
 
         ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-texture-key-label", "Edit..." ),
                                     LOCTEXT( "edit-texture-key-tooltip", "Edit the texture of the current key with its default editor\n(If it's not possible, the texture is already opened)" ),
@@ -926,7 +927,8 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
         ioMenuBuilder.EndSection();
     }
 
-    ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "material-key-section-label", "Material: {0}" ), FText::FromString( material_name ) ) );
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "material-key-section-label", "Material" ) );
+    //ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "material-key-section-label", "Material: {0}" ), FText::FromString( material_name ) ) );
 
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
@@ -1684,13 +1686,6 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     //---
 
-    auto CreatePlane = [this]()
-    {
-        ISequencer* sequencer = mSequencer.Pin().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
-    };
-
     auto CanCreatePlane = [this]() -> bool
     {
         ISequencer* sequencer = mSequencer.Pin().Get();
@@ -1702,28 +1697,16 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
-    MiddleToolbarBuilder.AddToolBarButton(
-        FUIAction(
-            FExecuteAction::CreateLambda( CreatePlane ),
-            FCanExecuteAction::CreateLambda( CanCreatePlane ),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( CanCreatePlane ) ),
-        NAME_None,
-        FText::GetEmpty(),
-        LOCTEXT( "CreatePlane", "Create a new plane" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
-        //FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreatePlane" ) );
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
             FIsActionButtonVisible::CreateLambda( CanCreatePlane ) ),
-        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeTextureMenu ),
-        LOCTEXT( "TextureOptions", "Options" ),
-        LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
-        TAttribute<FSlateIcon>(),
-        true );
+        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeCreatePlaneMenu ),
+        FText::GetEmpty(),
+        LOCTEXT( "create-plane-and-settings-tooltip", "Create a new plane" ),
+        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
     TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
     // To always keep the real space of the toolbar as hidden keeps space
@@ -1755,11 +1738,41 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 }
 
 TSharedRef<SWidget>
-SCinematicBoardSectionPlanes::MakeTextureMenu()
+SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer.Pin()->GetCommandBindings() );
 
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
+
+    //---
+
+    auto CreatePlane = [this]() -> FReply
+    {
+        ISequencer* sequencer = mSequencer.Pin().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
+
+        return FReply::Handled();
+    };
+
+    auto CanCreatePlane = [this]() -> bool
+    {
+        ISequencer* sequencer = mSequencer.Pin().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        return BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
+    };
+
+    MenuBuilder.AddWidget( SNew( SHorizontalBox )
+                           + SHorizontalBox::Slot()
+                           .HAlign( HAlign_Center )
+                           [
+                               SNew( SButton )
+                               .Text( LOCTEXT( "create-plane-label", "Create a new plane" ) )
+                               .ToolTipText( LOCTEXT( "create-plane-tooltip", "Create a new plane with those settings" ) )
+                               .OnClicked_Lambda( CreatePlane )
+                               .IsEnabled_Lambda( CanCreatePlane )
+                           ],
+                           FText::GetEmpty() );
 
     return MenuBuilder.MakeWidget();
 }

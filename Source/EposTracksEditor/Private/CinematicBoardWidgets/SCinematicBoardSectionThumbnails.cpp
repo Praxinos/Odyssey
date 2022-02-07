@@ -43,14 +43,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    //-
-
-    auto CreateCamera = [this]()
-    {
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
-    };
+    //---
 
     auto CanCreateCamera = [this]() -> bool
     {
@@ -63,17 +56,6 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
 
-    MiddleToolbarBuilder.AddToolBarButton(
-        FUIAction(
-            FExecuteAction::CreateLambda( CreateCamera ),
-            FCanExecuteAction::CreateLambda( CanCreateCamera ),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( CanCreateCamera )
-        ),
-        NAME_None,
-        FText::GetEmpty(),
-        LOCTEXT( "CameraToolTip", "Create a new Camera" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateCamera" ) );
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
@@ -81,13 +63,12 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             FGetActionCheckState(),
             FIsActionButtonVisible::CreateLambda( CanCreateCamera )
         ),
-        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCameraMenu ),
-        LOCTEXT( "CameraOptions", "Options" ),
-        LOCTEXT( "CameraOptionsToolTip", "Camera Options" ),
-        TAttribute<FSlateIcon>(),
-        true );
+        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCreateCameraMenu ),
+        FText::GetEmpty(),
+        LOCTEXT( "create-camera-and-settings-tooltip", "Create a new camera" ),
+        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    //-
+    //---
 
     FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
@@ -171,11 +152,42 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 }
 
 TSharedRef<SWidget>
-SCinematicBoardSectionThumbnails::MakeCameraMenu()
+SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 {
     FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
 
     EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
+    EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
+
+    //---
+
+    auto CreateCamera = [this]() -> FReply
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
+
+        return FReply::Handled();
+    };
+
+    auto CanCreateCamera = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
+    };
+
+    MenuBuilder.AddWidget( SNew( SHorizontalBox )
+                           + SHorizontalBox::Slot()
+                           .HAlign( HAlign_Center )
+                           [
+                               SNew( SButton )
+                               .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
+                               .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
+                               .OnClicked_Lambda( CreateCamera )
+                               .IsEnabled_Lambda( CanCreateCamera )
+                           ],
+                           FText::GetEmpty() );
 
     return MenuBuilder.MakeWidget();
 }
