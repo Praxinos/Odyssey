@@ -1317,7 +1317,7 @@ ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APla
         planes.Add( plane );
         current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), plane->GetActorLocation() ) );
         old_scales.Add( plane->GetActorScale3D() );
-        old_scales_camera100.Add( ComputePlaneScale( ioCamera, current_distances.Last() ) );
+        old_scales_camera100.Add( plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distances.Last() ) );
     }
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
@@ -1334,14 +1334,14 @@ ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APla
         {
             case EScalePlane::kFitToCamera:
             {
-                FVector scale = ComputePlaneScale( ioCamera, current_distance );
+                FVector scale = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
                 plane->SetActorScale3D( scale );
             }
             break;
 
             case EScalePlane::kRelativeScale:
             {
-                FVector new_scale_camera100 = ComputePlaneScale( ioCamera, current_distance );
+                FVector new_scale_camera100 = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 

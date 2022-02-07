@@ -1693,6 +1693,21 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         return BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
+    auto GetCreatePlaneTooltip = [this]() -> FText
+    {
+        const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+
+        return FText::Format( LOCTEXT( "CreatePlaneTooltip",
+R"(Create a new plane:
+
+- Rescale: {0} x {1}
+- Margin: {2}
+- Texture Height: {3}px)" ), FText::AsPercent( settings->PlaneSettings.RelatifScaling.X / 100.f )
+                           , FText::AsPercent( settings->PlaneSettings.RelatifScaling.Y / 100.f )
+                           , FText::AsPercent( settings->PlaneSettings.SafeMargin / 100.f )
+                           , FText::AsNumber( settings->TextureSettings.Height ) );
+    };
+
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
@@ -1742,6 +1757,7 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer.Pin()->GetCommandBindings() );
 
+    EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
@@ -1772,7 +1788,8 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
                                .OnClicked_Lambda( CreatePlane )
                                .IsEnabled_Lambda( CanCreatePlane )
                            ],
-                           FText::GetEmpty() );
+                           FText::GetEmpty(),
+                           true /* NoIndent */ );
 
     return MenuBuilder.MakeWidget();
 }

@@ -157,6 +157,7 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
     FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
 
     EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
+    EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
@@ -187,7 +188,8 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
                                .OnClicked_Lambda( CreateCamera )
                                .IsEnabled_Lambda( CanCreateCamera )
                            ],
-                           FText::GetEmpty() );
+                           FText::GetEmpty(),
+                           true /* NoIndent */ );
 
     return MenuBuilder.MakeWidget();
 }

@@ -719,8 +719,7 @@ private:
     static bool CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static void DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
-    static FVector ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance );
-    static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial );
+    static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera );
     static void SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber );
 
 // Inside EposSequenceTools_Drawing

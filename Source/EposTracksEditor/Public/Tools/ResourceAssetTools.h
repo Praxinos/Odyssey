@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 class ACineCameraActor;
+class APlaneActor;
 class FString;
 class ISequencer;
 class UMaterialInstanceConstant;
@@ -67,7 +68,7 @@ public:
 class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
-    static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, ACineCameraActor* iCamera );
+    static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, const ACineCameraActor* iCamera, const APlaneActor* iPlane );
     static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialTemplate );
     static UMaterialInstanceConstant* CloneMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone );
 
@@ -81,6 +82,4 @@ private:
     static UMaterialInstanceConstant* CloneMaterial( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInstance* iMaterialToClone, FString& oPackageName, FString& oAssetName );
     static UTexture2D* CreateTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, FIntPoint iTextureSize, FString& oPackageName, FString& oAssetName );
     static UTexture*   CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, UMaterialInterface* iMaterial, UTexture* iTextureToClone, FString& oPackageName, FString& oAssetName );
-
-    static FIntPoint ComputeTextureSize( ACineCameraActor* iCamera );
 };

@@ -8,6 +8,8 @@
 
 #include "PlaneActor.generated.h"
 
+class ACineCameraActor;
+
 UCLASS()
 class EPOSACTORS_API APlaneActor
     : public AStaticMeshActor
@@ -21,4 +23,29 @@ public:
     virtual void BeginPlay() override;
 
     virtual void Tick( float iDeltaSeconds ) override;
+
+public:
+    virtual FVector ComputePlaneScaleOfCameraView( const ACineCameraActor* iCamera, float iDistance ) const; // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
+    virtual FVector ComputePlaneScaleWithScaleAndMargin( const ACineCameraActor* iCamera, float iDistance ) const;
+
+    virtual FIntPoint ComputeTextureSize( const ACineCameraActor* iCamera, int32 iTextureHeight ) const;
+
+public:
+    /** Get the margin as percent (0.1 for 10%) */
+    virtual float GetSafeMargin() const;
+    /** Get the relatif scaling as percent (1. for 100%) */
+    virtual FVector2D GetRelatifScaling() const;
+
+public:
+    /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
+    UPROPERTY( EditAnywhere, meta=(UIMin = "0", ClampMin = "0", UIMax = "25", ClampMax = "25", Units=Percent) )
+    float SafeMargin { 0.f };
+
+    /** This will rescale the original size of the plane
+      * The original size is the one viewed by the camera
+      * The scale is applied before safe margin
+      * The default value (which means no rescale) is (100%, 100%)
+      */
+    UPROPERTY( EditAnywhere, meta=(AllowPreserveRatio) )
+    FVector2D RelatifScaling { 100.f, 100.f };
 };

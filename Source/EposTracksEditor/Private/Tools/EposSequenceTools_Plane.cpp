@@ -26,75 +26,10 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "PlaneActor.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Plane"
-
-//static
-FVector
-ShotSequenceTools::ComputePlaneScale( const ACineCameraActor* iCamera, float iDistance ) // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
-{
-    float FrustumAngle = iCamera->GetCineCameraComponent()->GetHorizontalFieldOfView();
-    float FrustumAspectRatio = iCamera->GetCineCameraComponent()->AspectRatio;
-    float FrustumEndDist = iDistance;
-
-    //---
-
-    FVector Direction( 1, 0, 0 );
-    FVector LeftVector( 0, 1, 0 );
-    FVector UpVector( 0, 0, 1 );
-
-    FVector Verts[8];
-
-    // FOVAngle controls the horizontal angle.
-    const float HozHalfAngleInRadians = FMath::DegreesToRadians( FrustumAngle * 0.5f );
-
-    float HozLength = 0.0f;
-    float VertLength = 0.0f;
-
-    //if( FrustumAngle > 0.0f )
-    //{
-    //    HozLength = FrustumStartDist * FMath::Tan( HozHalfAngleInRadians );
-    //    VertLength = HozLength / FrustumAspectRatio;
-    //}
-    //else
-    //{
-    //    const float OrthoWidth = ( FrustumAngle == 0.0f ) ? 1000.0f : -FrustumAngle;
-    //    HozLength = OrthoWidth * 0.5f;
-    //    VertLength = HozLength / FrustumAspectRatio;
-    //}
-
-    //// near plane verts
-    //Verts[0] = ( Direction * FrustumStartDist ) + ( UpVector * VertLength ) + ( LeftVector * HozLength );
-    //Verts[1] = ( Direction * FrustumStartDist ) + ( UpVector * VertLength ) - ( LeftVector * HozLength );
-    //Verts[2] = ( Direction * FrustumStartDist ) - ( UpVector * VertLength ) - ( LeftVector * HozLength );
-    //Verts[3] = ( Direction * FrustumStartDist ) - ( UpVector * VertLength ) + ( LeftVector * HozLength );
-
-    if( FrustumAngle > 0.0f )
-    {
-        HozLength = FrustumEndDist * FMath::Tan( HozHalfAngleInRadians );
-        VertLength = HozLength / FrustumAspectRatio;
-    }
-
-    // far plane verts
-    Verts[4] = ( Direction * FrustumEndDist ) + ( UpVector * VertLength ) + ( LeftVector * HozLength );
-    Verts[5] = ( Direction * FrustumEndDist ) + ( UpVector * VertLength ) - ( LeftVector * HozLength );
-    Verts[6] = ( Direction * FrustumEndDist ) - ( UpVector * VertLength ) - ( LeftVector * HozLength );
-    Verts[7] = ( Direction * FrustumEndDist ) - ( UpVector * VertLength ) + ( LeftVector * HozLength );
-
-    //for( int32 X = 0; X < 8; ++X )
-    //{
-    //    Verts[X] = GetLocalToWorld().TransformPosition( Verts[X] );
-    //}
-
-    float norm_x = FVector::Distance( Verts[4], Verts[5] );
-    float norm_y = FVector::Distance( Verts[4], Verts[7] );
-
-    //---
-
-    return FVector( norm_x, norm_y, 1.f );
-    //return FVector( 1.5f, 1.f, 1.f );
-}
 
 static
 FVector
@@ -131,8 +66,19 @@ FindNextFreePlaneLocation( UWorld* iWorld, FVector iPlaneLocation, FVector iCame
 
 //static
 APlaneActor*
-ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMaterialInstanceConstant* iMaterial )
+ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera )
 {
+    FActorSpawnParameters SpawnParams;
+    APlaneActor* plane = iWorld->SpawnActor<APlaneActor>( SpawnParams );
+    if( !plane )
+        return nullptr;
+
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+    plane->SafeMargin = settings->PlaneSettings.SafeMargin;
+    plane->RelatifScaling = settings->PlaneSettings.RelatifScaling;
+
+    //---
+
     FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
 
     FVector const CamLocation = camera_transform.GetLocation();
@@ -146,18 +92,11 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, UMater
     FVector plane_location = CamLocation + CamDir * FocusDistance;
     plane_location = FindNextFreePlaneLocation( iWorld, plane_location, CamLocation );
 
-    FVector plane_scale = ShotSequenceTools::ComputePlaneScale( iCamera, FocusDistance );
+    FVector plane_scale = plane->ComputePlaneScaleWithScaleAndMargin( iCamera, FocusDistance );
 
     FRotator plane_rotator = CamRot;
 
     //---
-
-    FActorSpawnParameters SpawnParams;
-    APlaneActor* plane = iWorld->SpawnActor<APlaneActor>( SpawnParams );
-    if( !plane )
-        return nullptr;
-
-    plane->GetStaticMeshComponent()->SetMaterial( 0, iMaterial );
 
     plane->SetActorScale3D( plane_scale );
     plane->SetActorLocation( plane_location );
@@ -176,19 +115,23 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     if( !GCurrentLevelEditingViewportClient )
         return;
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iCamera );
-    if( !new_material )
-        return;
-
     //---
 
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
 
     GEditor->SelectNone( true, true );
 
-    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera, new_material );
+    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera );
 
     //---
+
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iCamera, plane );
+    if( !new_material )
+        return;
+
+    plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
+
+    //-
 
     GEditor->ParentActors( iCamera, plane, NAME_None );
 
@@ -246,7 +189,7 @@ ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraAct
 
     float old_distance = FVector::Distance( iCamera->GetActorLocation(), ioPlane->GetActorLocation() );
     FVector old_scale = ioPlane->GetActorScale3D();
-    FVector old_scale_camera100 = ComputePlaneScale( iCamera, old_distance );
+    FVector old_scale_camera100 = ioPlane->ComputePlaneScaleWithScaleAndMargin( iCamera, old_distance );
 
     FVector new_plane_location = iCamera->GetActorLocation() + ( ioPlane->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
 
@@ -256,14 +199,14 @@ ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraAct
     {
         case EScalePlane::kFitToCamera:
             {
-                FVector scale = ComputePlaneScale( iCamera, iNewDistance );
+                FVector scale = ioPlane->ComputePlaneScaleWithScaleAndMargin( iCamera, iNewDistance );
                 ioPlane->SetActorScale3D( scale );
             }
             break;
 
         case EScalePlane::kRelativeScale:
             {
-                FVector new_scale_camera100 = ComputePlaneScale( iCamera, iNewDistance );
+                FVector new_scale_camera100 = ioPlane->ComputePlaneScaleWithScaleAndMargin( iCamera, iNewDistance );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 
