@@ -1788,7 +1788,8 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
                                .OnClicked_Lambda( CreatePlane )
                                .IsEnabled_Lambda( CanCreatePlane )
                            ],
-                           FText::GetEmpty() );
+                           FText::GetEmpty(),
+                           true /* NoIndent */ );
 
     return MenuBuilder.MakeWidget();
 }
