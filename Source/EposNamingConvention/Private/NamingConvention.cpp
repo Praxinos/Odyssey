@@ -173,7 +173,10 @@ FindAllNotePaths( const IMovieScenePlayer& iPlayer )
         FString path = pair.Key;
         int32 count = pair.Value;
 
-        path /= TEXT( "Notes" );
+        // Now this line commented, it's maybe no more necessary to keep this last part of code (this loop with FindAllSequencePaths())
+        // But this must be double check, because before there was a reason to keep this part here inside this function
+        // AND call this part again inside GenerateNoteAssetPathName()
+        //path /= TEXT( "Notes" );
 
         map_notepath_to_count.Add( path, count );
     }
@@ -639,7 +642,7 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
 
             note_path = keys[0];
 
-            note_path /= TEXT( "Notes" );
+            //note_path /= TEXT( "Notes" );
         }
     }
 
@@ -647,7 +650,7 @@ NamingConvention::GenerateNoteAssetPathName( const IMovieScenePlayer& iPlayer, c
     {
         // Default path name of the new note
         FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
-        note_path = root_path / TEXT( "Notes" );
+        note_path = root_path;// / TEXT( "Notes" );
     }
 
     //---
