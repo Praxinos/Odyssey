@@ -265,7 +265,7 @@ R"(Some examples:
     shot_20
     shot_30
     ...
-- {studio-accronym}_shot_{shot-index}_{initials} ->
+- {studio-acronym}_shot_{shot-index}_{initials} ->
     MS_shot_0010_xy
     MS_shot_0020_xy
     MS_shot_0030_xy
@@ -364,7 +364,7 @@ R"(Some examples:
     board_20
     board_30
     ...
-- {studio-accronym}_board_{board-index}_{initials} ->
+- {studio-acronym}_board_{board-index}_{initials} ->
     MS_board_0010_xy
     MS_board_0020_xy
     MS_board_0030_xy

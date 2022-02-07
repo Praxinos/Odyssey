@@ -341,11 +341,11 @@ SNewStoryboardSettings::GetErrorText() const
     if( mStoryboardSettings.StoryboardPath.Path.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyPath", "Error: Empty Storyboard Path" );
 
-    if( mNamingConventionSettings->GlobalNaming.StudioName.IsEmpty() || mNamingConventionSettings->GlobalNaming.StudioAccronym.IsEmpty() )
-        return LOCTEXT( "StoryboardEmptyStudioName", "Error: Empty Studio Name or Accronym" );
+    if( mNamingConventionSettings->GlobalNaming.StudioName.IsEmpty() || mNamingConventionSettings->GlobalNaming.StudioAcronym.IsEmpty() )
+        return LOCTEXT( "StoryboardEmptyStudioName", "Error: Empty Studio Name or Acronym" );
 
-    if( mNamingConventionSettings->GlobalNaming.ProductionName.IsEmpty() || mNamingConventionSettings->GlobalNaming.ProductionAccronym.IsEmpty() )
-        return LOCTEXT( "StoryboardEmptyProductionName", "Error: Empty Production Name or Accronym" );
+    if( mNamingConventionSettings->GlobalNaming.ProductionName.IsEmpty() || mNamingConventionSettings->GlobalNaming.ProductionAcronym.IsEmpty() )
+        return LOCTEXT( "StoryboardEmptyProductionName", "Error: Empty Production Name or Acronym" );
 
     return FText::GetEmpty();
 }

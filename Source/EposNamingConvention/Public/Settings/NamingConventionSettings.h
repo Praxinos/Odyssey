@@ -154,23 +154,23 @@ public:
     /** The studio name. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
     FString StudioName { TEXT( "MyStudio" ) };
-    /** The studio accronym. */
+    /** The studio acronym. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
-    FString StudioAccronym { TEXT( "MS" ) };
+    FString StudioAcronym { TEXT( "MS" ) };
 
     /** The license name. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
     FString LicenseName;
-    /** The license accronym. */
+    /** The license acronym. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
-    FString LicenseAccronym;
+    FString LicenseAcronym;
 
     /** The production title. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
     FString ProductionName { TEXT( "MyProductionTitle" ) };
-    /** The production accronym. */
+    /** The production acronym. */
     UPROPERTY( config, EditAnywhere, Category="Global" )
-    FString ProductionAccronym { TEXT( "MPT" ) };
+    FString ProductionAcronym { TEXT( "MPT" ) };
 
     /** Is it a serie?. */
     UPROPERTY( config, EditAnywhere, Category="Global", meta=(InlineEditConditionToggle) )
@@ -197,9 +197,9 @@ public:
     ///** The department name. */
     //UPROPERTY( config, EditAnywhere, Category="Global" )
     //FString DepartmentName;
-    ///** The department accronym. */
+    ///** The department acronym. */
     //UPROPERTY( config, EditAnywhere, Category="Global" )
-    //FString DepartmentAccronym;
+    //FString DepartmentAcronym;
 };
 
 USTRUCT()
@@ -211,9 +211,9 @@ public:
     ///** The department name. */
     //UPROPERTY( config, EditAnywhere, Category="User" )
     //FString DepartmentName;
-    ///** The department accronym. */
+    ///** The department acronym. */
     //UPROPERTY( config, EditAnywhere, Category="User" )
-    //FString DepartmentAccronym;
+    //FString DepartmentAcronym;
 
     /** The initials of the user. */
     UPROPERTY( config, EditAnywhere, Category="User" )

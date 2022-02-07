@@ -221,10 +221,10 @@ FCinematicBoardSection::GetSectionToolTip() const
         const UBoardSequence* sequence = Cast<UBoardSequence>( InnerSequence );
         if( sequence )
         {
-            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Studio", "Studio: {0} | {1}" ), FText::FromString( sequence->NameElements.StudioName ), FText::FromString( sequence->NameElements.StudioAccronym ) ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Studio", "Studio: {0} | {1}" ), FText::FromString( sequence->NameElements.StudioName ), FText::FromString( sequence->NameElements.StudioAcronym ) ) );
             if( !sequence->NameElements.LicenseName.IsEmpty() )
-                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.License", "License: {0} | {1}" ), FText::FromString( sequence->NameElements.LicenseName ), FText::FromString( sequence->NameElements.LicenseAccronym ) ) );
-            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Production", "Production: {0} | {1}" ), FText::FromString( sequence->NameElements.ProductionName ), FText::FromString( sequence->NameElements.ProductionAccronym ) ) );
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.License", "License: {0} | {1}" ), FText::FromString( sequence->NameElements.LicenseName ), FText::FromString( sequence->NameElements.LicenseAcronym ) ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Production", "Production: {0} | {1}" ), FText::FromString( sequence->NameElements.ProductionName ), FText::FromString( sequence->NameElements.ProductionAcronym ) ) );
             if( sequence->NameElements.IsSerie )
             {
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Season", "Season: {0}" ), sequence->NameElements.Season ) );
@@ -233,7 +233,7 @@ FCinematicBoardSection::GetSectionToolTip() const
             if( !sequence->NameElements.Part.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Part", "Part: {0}" ), FText::FromString( sequence->NameElements.Part ) ) );
             //if( !sequence->NameElements.DepartmentName.IsEmpty() )
-            //    name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
+            //    name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAcronym ) ) );
             if( !sequence->NameElements.Initials.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Initials", "Initials: {0}" ), FText::FromString( sequence->NameElements.Initials ) ) );
 
@@ -245,10 +245,10 @@ FCinematicBoardSection::GetSectionToolTip() const
         const UShotSequence* sequence = Cast<UShotSequence>( InnerSequence );
         if( sequence )
         {
-            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Studio", "Studio: {0} | {1}" ), FText::FromString( sequence->NameElements.StudioName ), FText::FromString( sequence->NameElements.StudioAccronym ) ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Studio", "Studio: {0} | {1}" ), FText::FromString( sequence->NameElements.StudioName ), FText::FromString( sequence->NameElements.StudioAcronym ) ) );
             if( !sequence->NameElements.LicenseName.IsEmpty() )
-                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.License", "License: {0} | {1}" ), FText::FromString( sequence->NameElements.LicenseName ), FText::FromString( sequence->NameElements.LicenseAccronym ) ) );
-            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Production", "Production: {0} | {1}" ), FText::FromString( sequence->NameElements.ProductionName ), FText::FromString( sequence->NameElements.ProductionAccronym ) ) );
+                name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.License", "License: {0} | {1}" ), FText::FromString( sequence->NameElements.LicenseName ), FText::FromString( sequence->NameElements.LicenseAcronym ) ) );
+            name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Production", "Production: {0} | {1}" ), FText::FromString( sequence->NameElements.ProductionName ), FText::FromString( sequence->NameElements.ProductionAcronym ) ) );
             if( sequence->NameElements.IsSerie )
             {
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Season", "Season: {0}" ), sequence->NameElements.Season ) );
@@ -257,7 +257,7 @@ FCinematicBoardSection::GetSectionToolTip() const
             if( !sequence->NameElements.Part.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Part", "Part: {0}" ), FText::FromString( sequence->NameElements.Part ) ) );
             //if( !sequence->NameElements.DepartmentName.IsEmpty() )
-            //    name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAccronym ) ) );
+            //    name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Department", "Department: {0} | {1}" ), FText::FromString( sequence->NameElements.DepartmentName ), FText::FromString( sequence->NameElements.DepartmentAcronym ) ) );
             if( !sequence->NameElements.Initials.IsEmpty() )
                 name_elements_texts.Add( FText::Format( LOCTEXT( "ToolTipContentNameElements.Initials", "Initials: {0}" ), FText::FromString( sequence->NameElements.Initials ) ) );
 

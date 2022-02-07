@@ -16,23 +16,23 @@ public:
     /** The studio name. */
     UPROPERTY( EditAnywhere )
     FString StudioName;
-    /** The studio accronym. */
+    /** The studio acronym. */
     UPROPERTY( EditAnywhere )
-    FString StudioAccronym;
+    FString StudioAcronym;
 
     /** The license name. */
     UPROPERTY( EditAnywhere )
     FString LicenseName;
-    /** The license accronym. */
+    /** The license acronym. */
     UPROPERTY( EditAnywhere )
-    FString LicenseAccronym;
+    FString LicenseAcronym;
 
     /** The title of the production. */
     UPROPERTY( EditAnywhere )
     FString ProductionName;
-    /** The accronym of the production. */
+    /** The acronym of the production. */
     UPROPERTY( EditAnywhere )
-    FString ProductionAccronym;
+    FString ProductionAcronym;
 
     /** Is it a serie?. */
     UPROPERTY( EditAnywhere, meta=(InlineEditConditionToggle) )
@@ -53,9 +53,9 @@ public:
     ///** The department name. */
     //UPROPERTY( EditAnywhere )
     //FString DepartmentName;
-    ///** The department accronym. */
+    ///** The department acronym. */
     //UPROPERTY( EditAnywhere )
-    //FString DepartmentAccronym;
+    //FString DepartmentAcronym;
 
     /** The initials of the user. */
     UPROPERTY( EditAnywhere )
