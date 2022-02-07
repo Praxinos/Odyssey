@@ -59,8 +59,8 @@ FWintabLibrary::Load()
     mRefCount++;
 
 #define GETPROCADDRESS(type, func) \
-		func = reinterpret_cast<type>( reinterpret_cast<void*>( GetProcAddress(HMODULE(DLLHandle), #func) ) ); \
-		if( !func ) { Unload(); return false; }
+        func = reinterpret_cast<type>( reinterpret_cast<void*>( GetProcAddress(HMODULE(DLLHandle), #func) ) ); \
+        if( !func ) { Unload(); return false; }
 
     // Associate all our function pointers to dll ones
     GETPROCADDRESS( WTOPENW, WTOpenW );
@@ -93,6 +93,9 @@ FWintabLibrary::Load()
 void
 FWintabLibrary::Unload()
 {
+    if( mRefCount == 0 )
+        return;
+
     mRefCount--;
     if( mRefCount > 0 )
         return;
