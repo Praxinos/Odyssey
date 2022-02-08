@@ -57,7 +57,7 @@ struct FPlaneSettings
       * The scale is applied before safe margin
       * The default value (which means no rescale) is (100%, 100%)
       */
-    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(AllowPreserveRatio))
+    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(AllowPreserveRatio, DisplayName="Relatif Scaling (%)"))
     FVector2D RelatifScaling { 100.f, 100.f };
 };
 
@@ -68,8 +68,8 @@ struct FTextureSettings
 {
     GENERATED_BODY()
 
-    /** Controls the height (a multiple of 4) of the texture (drawing). (Its width is computed from the camera ratio) */
-    UPROPERTY(config, EditAnywhere, Category="Texture", meta=(ClampMin="16", ClampMax="4096", Multiple="4"))
+    /** Controls the height (a multiple of 4) of the texture (drawing). (Its width is computed from the plane ratio) */
+    UPROPERTY(config, EditAnywhere, Category="Texture", meta=(ClampMin="16", ClampMax="4096", Multiple="4", DisplayName="Height (px)"))
     int32 Height { 1080 };
 };
 
