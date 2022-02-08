@@ -38,7 +38,7 @@ public:
 
 public:
     /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
-    UPROPERTY( EditAnywhere, meta=(UIMin = "0", ClampMin = "0", UIMax = "25", ClampMax = "25", Units=Percent) )
+    UPROPERTY( EditAnywhere, Category="Plane Actor", meta=(UIMin = "0", ClampMin = "0", UIMax = "25", ClampMax = "25", Units=Percent) )
     float SafeMargin { 0.f };
 
     /** This will rescale the original size of the plane
@@ -46,6 +46,6 @@ public:
       * The scale is applied before safe margin
       * The default value (which means no rescale) is (100%, 100%)
       */
-    UPROPERTY( EditAnywhere, meta=(AllowPreserveRatio) )
+    UPROPERTY( EditAnywhere, Category="Plane Actor", meta=(AllowPreserveRatio) )
     FVector2D RelatifScaling { 100.f, 100.f };
 };

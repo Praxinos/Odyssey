@@ -17,15 +17,15 @@ struct FNamingConventionNumberFormat
 
 public:
     /** The first number. */
-    UPROPERTY(config, EditAnywhere, meta=(UIMin = "1", UIMax = "100"))
+    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "100"))
     uint32 StartNumber { 10 };
 
     /** The default increment. */
-    UPROPERTY(config, EditAnywhere, meta=(UIMin = "1", UIMax = "100"))
+    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "100"))
     uint32 Increment { 10 };
 
     /** The number of digits. */
-    UPROPERTY(config, EditAnywhere, meta=(UIMin = "1", UIMax = "10"))
+    UPROPERTY(config, EditAnywhere, Category="Number Format", meta=(UIMin = "1", UIMax = "10"))
     uint32 NumDigits { 4 };
 };
 
@@ -58,7 +58,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere, Transient )
+    UPROPERTY(VisibleAnywhere, Category="Plane", Transient)
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The plane number format. */
@@ -83,7 +83,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere, Transient )
+    UPROPERTY( VisibleAnywhere, Category="Camera", Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The camera number format. */
@@ -108,7 +108,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere, Transient )
+    UPROPERTY( VisibleAnywhere, Category="Shot", Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */
@@ -137,7 +137,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere, Transient )
+    UPROPERTY( VisibleAnywhere, Category="Board", Transient )
     TMap<FString, FNamingConventionPatternKeyword> PatternKeywords;
 
     /** The shot number format. */

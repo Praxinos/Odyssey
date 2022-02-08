@@ -124,7 +124,7 @@ public:
         This list is hidden in customization.
         If UPROPERTY is empty, there is no access through IPropertyHandle in customization
     */
-    UPROPERTY( VisibleAnywhere, Transient )
+    UPROPERTY(VisibleAnywhere, Category=InfoBar, Transient)
     TMap<EInfoBarPatternKeyword, FInfoBarPatternKeyword> PatternKeywords;
 
     UPROPERTY(config, EditAnywhere, Category=InfoBar)

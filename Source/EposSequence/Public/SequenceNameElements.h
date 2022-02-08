@@ -14,51 +14,51 @@ struct EPOSSEQUENCE_API FSequenceNameElements
 
 public:
     /** The studio name. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString StudioName;
     /** The studio acronym. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString StudioAcronym;
 
     /** The license name. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString LicenseName;
     /** The license acronym. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString LicenseAcronym;
 
     /** The title of the production. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString ProductionName;
     /** The acronym of the production. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString ProductionAcronym;
 
     /** Is it a serie?. */
-    UPROPERTY( EditAnywhere, meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Name Elements", meta=(InlineEditConditionToggle) )
     bool IsSerie { false };
 
     /** The season number. */
-    UPROPERTY( EditAnywhere, meta=(EditCondition="IsSerie") )
+    UPROPERTY( EditAnywhere, Category="Name Elements", meta=(EditCondition="IsSerie") )
     int32 Season { INDEX_NONE };
 
     /** The episode number. */
-    UPROPERTY( EditAnywhere, meta=(EditCondition="IsSerie") )
+    UPROPERTY( EditAnywhere, Category="Name Elements", meta=(EditCondition="IsSerie") )
     int32 Episode { INDEX_NONE };
 
     /** The part of the production. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString Part;
 
     ///** The department name. */
-    //UPROPERTY( EditAnywhere )
+    //UPROPERTY( EditAnywhere, Category="Name Elements" )
     //FString DepartmentName;
     ///** The department acronym. */
-    //UPROPERTY( EditAnywhere )
+    //UPROPERTY( EditAnywhere, Category="Name Elements" )
     //FString DepartmentAcronym;
 
     /** The initials of the user. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     FString Initials;
  };
 
@@ -75,7 +75,7 @@ struct EPOSSEQUENCE_API FBoardNameElements
 
 public:
     /** The current index. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     int32 Index { INDEX_NONE };
  };
 
@@ -90,10 +90,10 @@ struct EPOSSEQUENCE_API FShotNameElements
 
 public:
     /** The current index. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     int32 Index { INDEX_NONE };
 
     /** The current take index. */
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Name Elements" )
     int32 TakeIndex { INDEX_NONE };
  };
