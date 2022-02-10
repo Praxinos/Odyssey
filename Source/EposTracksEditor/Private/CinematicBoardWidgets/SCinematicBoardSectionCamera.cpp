@@ -77,9 +77,8 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
 
     //---
 
-    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionTitleToolBar" );
 
     auto PilotEject = [this]()
     {
