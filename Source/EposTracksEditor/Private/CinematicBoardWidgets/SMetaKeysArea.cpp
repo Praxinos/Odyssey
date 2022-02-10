@@ -146,54 +146,35 @@ SMetaKeysArea::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& 
 FReply
 SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    check( !mDraggedKeys.IsValid() );
-
     mHoveredKeys = nullptr;
 
     if( mState == EState::kIdle )
     {
-        TSharedPtr<FMetaChannel> keys = CreateKeysUnderMouse( MouseEvent );
-
-        if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton
-            && keys.IsValid()
-            && keys->NumMetaKeys() )
+        if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
         {
-            mState = EState::kDragging;
+            TSharedPtr<FMetaChannel> keys = CreateKeysUnderMouse( MouseEvent );
+            if( keys.IsValid() && keys->NumMetaKeys() )
+            {
+                mState = EState::kDragging;
 
-            mDraggedKeys = keys; // Must be done before BeginTransaction
+                check( !mDraggedKeys.IsValid() );
+                mDraggedKeys = keys; // Must be done before BeginTransaction
 
-            BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
+                BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
 
-            return FReply::Handled().CaptureMouse( SharedThis( this ) );
+                return FReply::Handled().CaptureMouse( SharedThis( this ) );
+            }
         }
-        else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton
-                 && keys.IsValid()
-                 && keys->NumMetaKeys() )
-        {
-            FMenuBuilder menu_builder( true, nullptr );
-            bool is_menu = BuildKeyContextMenu( menu_builder, keys );
-            if( !is_menu )
-                return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
-
-            TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
-            FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
-            FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
-
-            return FReply::Handled();
-        }
-        else
-        {
-            return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
-        }
+    }
+    else if( mState == EState::kDragging )
+    {
     }
     else
     {
-        mState = EState::kIdle;
-
-        return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+        checkNoEntry();
     }
 
-    checkNoEntry();
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FReply
@@ -203,28 +184,48 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
 
     if( mState == EState::kDragging )
     {
-        check( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton );
-        check( HasMouseCapture() );
-        check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
+        if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+        {
+            check( HasMouseCapture() );
+            check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
 
-        //-
+            //-
 
-        mState = EState::kIdle;
+            mState = EState::kIdle;
 
-        EndTransaction();
+            EndTransaction();
 
-        mDraggedKeys = nullptr;
+            mDraggedKeys = nullptr;
 
-        return FReply::Handled().ReleaseMouseCapture();
+            return FReply::Handled().ReleaseMouseCapture();
+        }
+    }
+    else if( mState == EState::kIdle )
+    {
+        if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+        {
+            TSharedPtr<FMetaChannel> keys = CreateKeysUnderMouse( MouseEvent );
+            if( keys.IsValid() && keys->NumMetaKeys() )
+            {
+                FMenuBuilder menu_builder( true, nullptr );
+                bool is_menu = BuildKeyContextMenu( menu_builder, keys );
+                if( is_menu )
+                {
+                    TSharedPtr<SWidget> menu = menu_builder.MakeWidget();
+                    FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+                    FSlateApplication::Get().PushMenu( AsShared(), WidgetPath, menu.ToSharedRef(), MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect( FPopupTransitionEffect::ContextMenu ) );
+
+                    return FReply::Handled();
+                }
+            }
+        }
     }
     else
     {
-        mState = EState::kIdle;
-
-        return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+        checkNoEntry();
     }
 
-    checkNoEntry();
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
 FReply
@@ -292,16 +293,18 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
 
         return FReply::Handled();
     }
-    else
+    else if( mState == EState::kIdle )
     {
-        mState = EState::kIdle;
-
         mHoveredKeys = CreateKeysUnderMouse( MouseEvent );
 
         return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
     }
+    else
+    {
+        checkNoEntry();
+    }
 
-    checkNoEntry();
+    return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
 }
 
 void
