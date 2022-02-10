@@ -11,20 +11,10 @@
 #include "Layout/Margin.h"
 #include "Misc/Paths.h"
 #include "SequencerSectionPainter.h"
+#include "Styling/SlateStyleMacros.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Styling/StarshipCoreStyle.h"
 #include "Styling/ToolBarStyle.h"
-
-#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
-#define BORDER_BRUSH( RelativePath, ... ) FSlateBorderBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
-#define BOX_BRUSH( RelativePath, ... ) FSlateBoxBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
-
-#define CORE_IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( RootToCoreContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
-#define CORE_BOX_BRUSH( RelativePath, ... ) FSlateBoxBrush( RootToCoreContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
-
-#define IMAGE_BRUSH_SVG(RelativePath, ...)  FSlateVectorImageBrush(RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
-
-#define CORE_IMAGE_BRUSH_SVG(RelativePath, ...)  FSlateVectorImageBrush(RootToCoreContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
 
 namespace
 {
@@ -235,7 +225,3 @@ FEposTracksEditorStyle::Get()
 
     return *smSingleton;
 }
-
-//---
-
-#undef IMAGE_BRUSH

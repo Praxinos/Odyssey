@@ -603,6 +603,13 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                     .ToolTipText( LOCTEXT( "ViewportRotationTooltip", "Change the viewport rotation." ) )
                     .OnGetMenuContent( this, &SStoryboardLevelViewport::OnGetViewportRotationMenuContent )
                 ]
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew( SSpacer )
+                    .Size( FVector2D( 0, 55 ) )
+                ]
             ]
 
             // Viewport + options + notes

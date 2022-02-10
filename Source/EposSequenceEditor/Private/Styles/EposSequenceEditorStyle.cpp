@@ -11,12 +11,7 @@
 #include "Layout/Margin.h"
 #include "Misc/Paths.h"
 #include "Styling/SlateStyleRegistry.h"
-
-#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
-#define IMAGE_BRUSH_SVG(RelativePath, ...)  FSlateVectorImageBrush(RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
-#define BORDER_BRUSH(RelativePath, ...) FSlateBorderBrush(RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
-
-#define DEFAULT_FONT(...) FCoreStyle::GetDefaultFontStyle(__VA_ARGS__)
+#include "Styling/SlateStyleMacros.h"
 
 namespace
 {
@@ -234,5 +229,3 @@ FEposSequenceEditorStyle::Get()
 
     return *smSingleton;
 }
-
-#undef IMAGE_BRUSH

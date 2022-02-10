@@ -21,6 +21,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/STextBlock.h"
+#include "SPrimaryButton.h"
 
 #include "Board/BoardSequence.h"
 #include "Settings/EposSequenceEditorSettings.h"
@@ -298,8 +299,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         .HAlign( HAlign_Right )
         .Padding( 5.f )
         [
-            SNew(SButton)
-            .ContentPadding(FMargin(10, 5))
+            SNew( SPrimaryButton )
             .Text(LOCTEXT("CreateStoryboard", "Create Storyboard"))
             .IsEnabled( this, &SNewStoryboardSettings::CanCreateStoryboard )
             .OnClicked( this, &SNewStoryboardSettings::OnCreateStoryboard)
