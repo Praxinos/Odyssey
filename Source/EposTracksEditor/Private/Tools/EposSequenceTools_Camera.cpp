@@ -956,9 +956,9 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
         FVector KeyVector = CurrentTransform.Translation;
         //FVector KeyVector = RecomposedTransform.Translation;
 
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 0, KeyVector.X, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 1, KeyVector.Y, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 2, KeyVector.Z, bKeyZ ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 0, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 1, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 2, KeyVector.Z, bKeyZ ) );
     }
 
     // Set rotation keys/defaults
@@ -997,9 +997,9 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
 
         // Do we need to unwind re-composed rotations?
         //KeyRotator = UnwindRotator( CurrentTransform.Rotation, RecomposedTransform.Rotation );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 3, KeyRotator.Roll, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 4, KeyRotator.Pitch, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 3, KeyRotator.Roll, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 4, KeyRotator.Pitch, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
 
     }
 
@@ -1036,9 +1036,9 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
 
         FVector KeyVector = CurrentTransform.Scale;
         //FVector KeyVector = RecomposedTransform.Scale;
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 6, KeyVector.X, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 7, KeyVector.Y, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 8, KeyVector.Z, bKeyZ ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 6, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 7, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 8, KeyVector.Z, bKeyZ ) );
     }
 }
 

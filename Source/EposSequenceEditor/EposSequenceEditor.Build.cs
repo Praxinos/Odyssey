@@ -44,7 +44,7 @@ public class EposSequenceEditor : ModuleRules
                 "MovieSceneTracks",
                 "Projects",
                 "CinematicCamera",
-                "AppFrameWork",
+                "AppFramework",
                 "DeveloperSettings",
                 "Settings", // Developer
                 "LevelSequence",

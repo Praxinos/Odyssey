@@ -308,6 +308,12 @@ FEposSequenceEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollecto
         iCollector.AddReferencedObject( mSequence );
 }
 
+FString
+FEposSequenceEditorToolkit::GetReferencerName() const //override
+{
+    return "FEposSequenceEditorToolkit";
+}
+
 //--- FAssetEditorToolkit interface
 
 void FEposSequenceEditorToolkit::OnClose()

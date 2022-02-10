@@ -157,7 +157,7 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
-    iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
+    iSection.SetWidgetHeight( MakeAttributeLambda( [this] () -> float { return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
     auto SequenceChanged = [this]( UMovieSceneSequence* iSequence )
     {
         mNeedRebuild = true;

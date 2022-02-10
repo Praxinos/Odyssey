@@ -75,6 +75,12 @@ FEposSequenceEditorModule::AddReferencedObjects( FReferenceCollector& Collector 
         Collector.AddReferencedObject( mSequencerSettings );
 }
 
+FString
+FEposSequenceEditorModule::GetReferencerName() const //override
+{
+    return "FEposSequenceEditorModule";
+}
+
 //---
 
 void

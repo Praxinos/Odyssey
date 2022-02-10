@@ -65,6 +65,7 @@ public:
 
     //~ FGCObject interface
     virtual void AddReferencedObjects( FReferenceCollector& iCollector ) override;
+    virtual FString GetReferencerName() const override;
 
     //~ FAssetEditorToolkit interface
     virtual void OnClose() override;

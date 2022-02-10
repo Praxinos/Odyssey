@@ -210,7 +210,7 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
-        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
         }
@@ -222,7 +222,7 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
-        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
         }
@@ -234,7 +234,7 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
     if( Reference )
     {
         UObject* ResolvedObject = Reference->Resolve( Context, NAME_None );
-        if( !ResolvedObject || ResolvedObject->IsPendingKill() )
+        if( !IsValid( ResolvedObject ) )
         {
             *Reference = FLevelSequenceBindingReference();
         }

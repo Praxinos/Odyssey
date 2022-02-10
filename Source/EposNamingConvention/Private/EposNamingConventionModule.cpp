@@ -37,6 +37,12 @@ FEposNamingConventionModule::AddReferencedObjects( FReferenceCollector& Collecto
         Collector.AddReferencedObject( mNamingFormatterShot );
 }
 
+FString
+FEposNamingConventionModule::GetReferencerName() const //override
+{
+    return "FEposNamingConventionModule";
+}
+
 //---
 
 void

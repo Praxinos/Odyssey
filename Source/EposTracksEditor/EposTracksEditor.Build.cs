@@ -45,7 +45,7 @@ public class EposTracksEditor : ModuleRules
                 "MovieSceneTracks",
                 "Projects",
                 "CinematicCamera",
-                "AppFrameWork",
+                "AppFramework",
                 "DeveloperSettings",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",

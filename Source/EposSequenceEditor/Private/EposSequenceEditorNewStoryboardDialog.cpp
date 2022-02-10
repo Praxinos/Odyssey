@@ -36,7 +36,8 @@ TWeakPtr<SWindow> NewStoryboardSettingsWindow;
 //---
 
 class SNewStoryboardSettings
-    : public SCompoundWidget, public FGCObject
+    : public SCompoundWidget
+    , public FGCObject
 {
     SLATE_BEGIN_ARGS( SNewStoryboardSettings )
         {}
@@ -45,6 +46,7 @@ class SNewStoryboardSettings
     void Construct( const FArguments& InArgs );
 
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+    virtual FString GetReferencerName() const override;
 
 private:
     FText GetFullPath() const;
@@ -312,6 +314,11 @@ SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) /
     Collector.AddReferencedObject( mSequenceEditorSettings );
 }
 
+FString
+SNewStoryboardSettings::GetReferencerName() const //override
+{
+    return "SNewStoryboardSettings";
+}
 
 FText
 SNewStoryboardSettings::GetFullPath() const
