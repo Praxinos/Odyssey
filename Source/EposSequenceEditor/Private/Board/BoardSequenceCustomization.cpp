@@ -459,6 +459,8 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddWidget( SNew( SInfoBar )
                               .Padding( FMargin( 10.f, 3.f ) ) // To simulate a space with the previous separator
                               .Text_Raw( this, &FBoardSequenceCustomization::CreateInfoText )
+                              .ToolTipText( LOCTEXT( "infobar-tooltip", "Double-click on the infobar to open its pattern settings" ) )
+                              .OnDoubleClicked( FPointerEventHandler::CreateLambda( []( const FGeometry&, const FPointerEvent& ) { FEposSequenceEditorActionCallbacks::OpenSequenceEditorSettings(); return FReply::Handled(); } ) )
                               );
 }
 

@@ -46,6 +46,7 @@ public:
 
     TSharedPtr<FUICommandInfo> OpenSequenceEditorSettings;
     TSharedPtr<FUICommandInfo> OpenTrackEditorSettings;
+    TSharedPtr<FUICommandInfo> OpenNamingConventionEditorSettings;
 
     TSharedPtr<FUICommandInfo> GotoPraxinos;
     TSharedPtr<FUICommandInfo> GotoForum;
@@ -61,6 +62,7 @@ class FEposSequenceEditorActionCallbacks
 public:
     static void OpenSequenceEditorSettings();
     static void OpenTrackEditorSettings();
+    static void OpenNamingConventionEditorSettings();
 
     static void GotoPraxinos();
     static void GotoForum();

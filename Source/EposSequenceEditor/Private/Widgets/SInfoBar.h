@@ -15,6 +15,7 @@ public:
         {}
         SLATE_ATTRIBUTE( FText, Text )
         SLATE_ATTRIBUTE( FMargin, Padding )
+        SLATE_EVENT( FPointerEventHandler, OnDoubleClicked )
     SLATE_END_ARGS()
 
     // Construct the widget

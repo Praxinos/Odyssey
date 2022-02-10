@@ -70,6 +70,7 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     UI_COMMAND( OpenSequenceEditorSettings,         "Sequence Settings...", "Open sequence settings", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( OpenTrackEditorSettings,            "Track Settings...", "Open track settings", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( OpenNamingConventionEditorSettings, "Naming Convention Settings...", "Open naming convention settings", EUserInterfaceActionType::Button, FInputChord() );
 
     UI_COMMAND( GotoPraxinos,                       "Praxinos website...", "Go to Praxinos website", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoForum,                          "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
@@ -93,6 +94,13 @@ void
 FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings()
 {
     FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "EposTracksEditorSettings" );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::OpenNamingConventionEditorSettings()
+{
+    FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "NamingConventionSettings" );
 }
 
 //static

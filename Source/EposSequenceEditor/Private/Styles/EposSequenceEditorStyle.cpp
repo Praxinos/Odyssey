@@ -80,6 +80,8 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
     Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH( "epos-settings-24x", Icon24x24 ) );
 
     Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );

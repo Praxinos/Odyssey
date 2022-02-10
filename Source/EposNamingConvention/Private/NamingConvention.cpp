@@ -397,7 +397,7 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
     //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
     const FString camera_pattern_regex = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "([0-9]+)" ) );
     const FString camera_pattern_display = camera_settings.Pattern.Replace( TEXT( "{camera-index}" ), TEXT( "{camera_index_formated}" ) );
-    FRegexPattern camera_pattern = camera_pattern_regex; // Mandatory as FRegexMatcher() takes a const reference
+    FRegexPattern camera_pattern( camera_pattern_regex );
 
     TArray<int32> list_of_camera_index;
 
@@ -516,7 +516,7 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
     //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
     const FString plane_pattern_regex = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "([0-9]+)" ) );
     const FString plane_pattern_display = plane_settings.Pattern.Replace( TEXT( "{plane-index}" ), TEXT( "{plane_index_formated}" ) );
-    FRegexPattern plane_pattern = plane_pattern_regex; // Mandatory as FRegexMatcher() takes a const reference
+    FRegexPattern plane_pattern( plane_pattern_regex );
 
     // https://stackoverflow.com/questions/3075130/what-is-the-difference-between-and-regular-expressions
     // https://www.regular-expressions.info/refadv.html

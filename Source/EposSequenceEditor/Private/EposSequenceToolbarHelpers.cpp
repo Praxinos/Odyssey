@@ -202,6 +202,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
 
     iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
     iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings );
 
     iMenuBuilder.EndSection();
 }

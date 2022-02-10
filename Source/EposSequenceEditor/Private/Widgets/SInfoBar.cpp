@@ -12,10 +12,10 @@
 //---
 
 void
-SInfoBar::Construct( const FArguments& InArgs )
+SInfoBar::Construct( const FArguments& iArgs )
 {
     ChildSlot
-    .Padding( InArgs._Padding )
+    .Padding( iArgs._Padding )
     [
         SNew( SBorder )
         .VAlign( VAlign_Center )
@@ -23,8 +23,9 @@ SInfoBar::Construct( const FArguments& InArgs )
         .BorderImage( FEditorStyle::GetNoBrush() )
         [
             SNew( STextBlock )
-            .Text( InArgs._Text )
+            .Text( iArgs._Text )
             .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "EposSequenceEditor.ToolBar.Heading" ) )
+            .OnDoubleClicked( iArgs._OnDoubleClicked )
         ]
     ];
 }

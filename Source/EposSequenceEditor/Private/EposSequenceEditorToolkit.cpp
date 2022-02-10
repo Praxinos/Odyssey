@@ -284,6 +284,11 @@ FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList
         FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenTrackEditorSettings )
     );
 
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::OpenNamingConventionEditorSettings )
+    );
+
     TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
     levelEditor->AppendCommands( CommandList.ToSharedRef() );
 }
