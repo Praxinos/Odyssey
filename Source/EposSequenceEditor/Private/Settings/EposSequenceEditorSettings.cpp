@@ -58,9 +58,9 @@ FInfoBarSettings::FInfoBarSettings()
                                                , *PatternKeywords[EInfoBarPatternKeyword::CurrentFrame_InSequence].mKeywordWithBraces );
     Pattern += TEXT( "\n" );
     Pattern += FString::Printf( TEXT( "%s (%s) [%s-%s]" ), *PatternKeywords[EInfoBarPatternKeyword::Subsequence_Name].mKeywordWithBraces
-                                                       , *PatternKeywords[EInfoBarPatternKeyword::CurrentFrame_InSubsequence].mKeywordWithBraces
-                                                       , *PatternKeywords[EInfoBarPatternKeyword::StartFrameOfSubsequence_InSequence].mKeywordWithBraces
-                                                       , *PatternKeywords[EInfoBarPatternKeyword::StopFrameOfSubsequence_InSequence].mKeywordWithBraces );
+                                                         , *PatternKeywords[EInfoBarPatternKeyword::CurrentFrame_InSubsequence].mKeywordWithBraces
+                                                         , *PatternKeywords[EInfoBarPatternKeyword::StartFrameOfSubsequence_InSequence].mKeywordWithBraces
+                                                         , *PatternKeywords[EInfoBarPatternKeyword::StopFrameOfSubsequence_InSequence].mKeywordWithBraces );
 }
 
 //---

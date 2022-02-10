@@ -33,8 +33,8 @@ public:
 public:
     /** Get the margin as percent (0.1 for 10%) */
     virtual float GetSafeMargin() const;
-    /** Get the relatif scaling as percent (1. for 100%) */
-    virtual FVector2D GetRelatifScaling() const;
+    /** Get the relative scaling as percent (1. for 100%) */
+    virtual FVector2D GetRelativeScaling() const;
 
 public:
     /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
@@ -47,5 +47,5 @@ public:
       * The default value (which means no rescale) is (100%, 100%)
       */
     UPROPERTY( EditAnywhere, Category="Plane Actor", meta=(AllowPreserveRatio) )
-    FVector2D RelatifScaling { 100.f, 100.f };
+    FVector2D RelativeScaling { 100.f, 100.f };
 };

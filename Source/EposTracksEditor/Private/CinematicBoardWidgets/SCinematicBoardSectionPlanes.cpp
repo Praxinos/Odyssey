@@ -1702,8 +1702,8 @@ R"(Create a new plane:
 
 - Rescale: {0} x {1}
 - Margin: {2}
-- Texture Height: {3}px)" ), FText::AsPercent( settings->PlaneSettings.RelatifScaling.X / 100.f )
-                           , FText::AsPercent( settings->PlaneSettings.RelatifScaling.Y / 100.f )
+- Texture Height: {3}px)" ), FText::AsPercent( settings->PlaneSettings.RelativeScaling.X / 100.f )
+                           , FText::AsPercent( settings->PlaneSettings.RelativeScaling.Y / 100.f )
                            , FText::AsPercent( settings->PlaneSettings.SafeMargin / 100.f )
                            , FText::AsNumber( settings->TextureSettings.Height ) );
     };

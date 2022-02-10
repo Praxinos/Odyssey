@@ -57,8 +57,8 @@ struct FPlaneSettings
       * The scale is applied before safe margin
       * The default value (which means no rescale) is (100%, 100%)
       */
-    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(AllowPreserveRatio, DisplayName="Relatif Scaling (%)"))
-    FVector2D RelatifScaling { 100.f, 100.f };
+    UPROPERTY(config, EditAnywhere, Category="Plane", meta=(AllowPreserveRatio, DisplayName="Relative Scaling (%)"))
+    FVector2D RelativeScaling { 100.f, 100.f };
 };
 
 //---

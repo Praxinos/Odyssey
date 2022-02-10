@@ -108,7 +108,7 @@ APlaneActor::ComputePlaneScaleWithScaleAndMargin( const ACineCameraActor* iCamer
 {
     FVector size_100 = ComputePlaneScaleOfCameraView( iCamera, iDistance );
 
-    FVector size_scaled = size_100 * FVector( GetRelatifScaling(), 1.f );
+    FVector size_scaled = size_100 * FVector( GetRelativeScaling(), 1.f );
 
     check( FMath::IsWithinInclusive( GetSafeMargin(), 0.f, 1.f ) );
     FVector size_with_marging = size_scaled * ( 1.f + GetSafeMargin() );
@@ -143,9 +143,9 @@ APlaneActor::GetSafeMargin() const
 }
 
 FVector2D
-APlaneActor::GetRelatifScaling() const
+APlaneActor::GetRelativeScaling() const
 {
-    return RelatifScaling / 100.f;
+    return RelativeScaling / 100.f;
 }
 
 //---

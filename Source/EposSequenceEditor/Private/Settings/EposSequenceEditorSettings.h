@@ -148,10 +148,6 @@ class UEposSequenceEditorSettings
     //~
 
 public:
-    //TODO: add everything inside UMovieSceneToolsProjectSettings here ? or inherit from it ?
-    // it is used inside:
-    // ./Source/EposTracksEditor/Private/EposTracksEditorHelpers.cpp
-
     /** Specifies Board stuff. */
     UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FBoardSettings BoardSettings;
@@ -164,7 +160,7 @@ public:
     UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FNoteSettings NoteSettings;
 
-    /** Specifies Note stuff. */
+    /** Specifies InfoBar stuff. */
     UPROPERTY(config, EditAnywhere, Category=Settings, meta=(ShowOnlyInnerProperties))
     FInfoBarSettings InfoBarSettings;
 };

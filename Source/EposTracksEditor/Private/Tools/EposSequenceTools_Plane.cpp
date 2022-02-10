@@ -75,7 +75,7 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera )
 
     const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
     plane->SafeMargin = settings->PlaneSettings.SafeMargin;
-    plane->RelatifScaling = settings->PlaneSettings.RelatifScaling;
+    plane->RelativeScaling = settings->PlaneSettings.RelativeScaling;
 
     //---
 
