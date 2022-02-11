@@ -121,21 +121,22 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
                 [
                     MiddleToolbarBuilder.MakeWidget()
                 ]
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                [
-                    SNew( STextBlock )
-                    .Text( LOCTEXT( "CreateCameraInfo", "Don't forget to setup\nyour camera settings" ) )
-                    .ColorAndOpacity( FLinearColor( .5f, .5f, .0f ) )
-                    .ShadowColorAndOpacity( FLinearColor::Black )
-                    .ShadowOffset( FVector2D( 1.f, 1.f ) )
-                    .Visibility_Lambda( [this]()
-                                        {
-                                            return BoardSequenceTools::CanCreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() )
-                                                && mOptionalWidgetsVisibility.Get() == EVisibility::Visible
-                                                ? EVisibility::Visible : EVisibility::Collapsed;
-                                        } )
-                ]
+                // No more needed as the creation button of camera is inside the popup
+                //+ SVerticalBox::Slot()
+                //.AutoHeight()
+                //[
+                //    SNew( STextBlock )
+                //    .Text( LOCTEXT( "CreateCameraInfo", "Don't forget to setup\nyour camera settings" ) )
+                //    .ColorAndOpacity( FLinearColor( .5f, .5f, .0f ) )
+                //    .ShadowColorAndOpacity( FLinearColor::Black )
+                //    .ShadowOffset( FVector2D( 1.f, 1.f ) )
+                //    .Visibility_Lambda( [this]()
+                //                        {
+                //                            return BoardSequenceTools::CanCreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() )
+                //                                && mOptionalWidgetsVisibility.Get() == EVisibility::Visible
+                //                                ? EVisibility::Visible : EVisibility::Collapsed;
+                //                        } )
+                //]
             ]
             + SHorizontalBox::Slot()
             [
@@ -164,6 +165,9 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 
     auto CreateCamera = [this]() -> FReply
     {
+        if( !mBoardSection.IsValid() )
+            return FReply::Unhandled();
+
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
@@ -173,6 +177,9 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 
     auto CanCreateCamera = [this]() -> bool
     {
+        if( !mBoardSection.IsValid() )
+            return false;
+
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );

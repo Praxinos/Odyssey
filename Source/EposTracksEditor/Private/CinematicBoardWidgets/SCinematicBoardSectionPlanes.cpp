@@ -1693,21 +1693,6 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         return BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
-    auto GetCreatePlaneTooltip = [this]() -> FText
-    {
-        const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-
-        return FText::Format( LOCTEXT( "CreatePlaneTooltip",
-R"(Create a new plane:
-
-- Rescale: {0} x {1}
-- Margin: {2}
-- Texture Height: {3}px)" ), FText::AsPercent( settings->PlaneSettings.RelativeScaling.X / 100.f )
-                           , FText::AsPercent( settings->PlaneSettings.RelativeScaling.Y / 100.f )
-                           , FText::AsPercent( settings->PlaneSettings.SafeMargin / 100.f )
-                           , FText::AsNumber( settings->TextureSettings.Height ) );
-    };
-
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
@@ -1764,6 +1749,9 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 
     auto CreatePlane = [this]() -> FReply
     {
+        if( !mBoardSection.IsValid() )
+            return FReply::Unhandled();
+
         ISequencer* sequencer = mSequencer.Pin().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
@@ -1773,6 +1761,9 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 
     auto CanCreatePlane = [this]() -> bool
     {
+        if( !mBoardSection.IsValid() )
+            return false;
+
         ISequencer* sequencer = mSequencer.Pin().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         return BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
