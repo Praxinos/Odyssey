@@ -35,13 +35,15 @@ UMovieSceneSingleCameraCutSection::UMovieSceneSingleCameraCutSection(const FObje
     //bSupportsInfiniteRange = true;
 }
 
-void UMovieSceneSingleCameraCutSection::OnBindingsUpdated(const TMap<FGuid, FGuid>& OldGuidToNewGuidMap)
+void UMovieSceneSingleCameraCutSection::OnBindingIDsUpdated( const TMap<UE::MovieScene::FFixedObjectBindingID, UE::MovieScene::FFixedObjectBindingID>& OldFixedToNewFixedMap, FMovieSceneSequenceID LocalSequenceID, const FMovieSceneSequenceHierarchy* Hierarchy, IMovieScenePlayer& Player )
 {
-    if (OldGuidToNewGuidMap.Contains(CameraBindingID.GetGuid()))
+    UE::MovieScene::FFixedObjectBindingID FixedBindingID = CameraBindingID.ResolveToFixed( LocalSequenceID, Player );
+
+    if( OldFixedToNewFixedMap.Contains( FixedBindingID ) )
     {
         Modify();
 
-        CameraBindingID.SetGuid(OldGuidToNewGuidMap[CameraBindingID.GetGuid()]);
+        CameraBindingID = OldFixedToNewFixedMap[FixedBindingID].ConvertToRelative( LocalSequenceID, Hierarchy );
     }
 }
 

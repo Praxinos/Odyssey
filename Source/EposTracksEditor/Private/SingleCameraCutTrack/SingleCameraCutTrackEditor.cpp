@@ -211,17 +211,19 @@ TSharedPtr<SWidget> FSingleCameraCutTrackEditor::BuildOutlinerEditWidget(const F
     .Padding(4, 0, 0, 0)
     [
         SNew(SCheckBox)
-        .IsFocusable(false)
-        .IsChecked(this, &FSingleCameraCutTrackEditor::IsCameraLocked)
-        .OnCheckStateChanged(this, &FSingleCameraCutTrackEditor::OnLockCameraClicked)
-        .ToolTipText(this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip)
-        .ForegroundColor(FLinearColor::White)
-        .CheckedImage(FEditorStyle::GetBrush("Sequencer.LockCamera"))
-        .CheckedHoveredImage(FEditorStyle::GetBrush("Sequencer.LockCamera"))
-        .CheckedPressedImage(FEditorStyle::GetBrush("Sequencer.LockCamera"))
-        .UncheckedImage(FEditorStyle::GetBrush("Sequencer.UnlockCamera"))
-        .UncheckedHoveredImage(FEditorStyle::GetBrush("Sequencer.UnlockCamera"))
-        .UncheckedPressedImage(FEditorStyle::GetBrush("Sequencer.UnlockCamera"))
+        .Style( &FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "ToggleButtonCheckBoxAlt" ) )
+        .Type( ESlateCheckBoxType::CheckBox )
+        .Padding( FMargin( 0.f ) )
+        .IsFocusable( false )
+        .IsChecked( this, &FSingleCameraCutTrackEditor::IsCameraLocked )
+        .OnCheckStateChanged( this, &FSingleCameraCutTrackEditor::OnLockCameraClicked )
+        .ToolTipText( this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip )
+        .CheckedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
+        .CheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
+        .CheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
+        .UncheckedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+        .UncheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+        .UncheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
     ];
 }
 
@@ -281,7 +283,7 @@ const FSlateBrush* FSingleCameraCutTrackEditor::GetIconBrush() const
 
 bool FSingleCameraCutTrackEditor::OnAllowDrop(const FDragDropEvent& DragDropEvent, FSequencerDragDropParams& DragDropParams )
 {
-    if (!DragDropParams.Track->IsA(UMovieSceneSingleCameraCutTrack::StaticClass()))
+    if (!DragDropParams.Track.IsValid() || !DragDropParams.Track.Get()->IsA( UMovieSceneSingleCameraCutTrack::StaticClass()))
     {
         return false;
     }
@@ -319,7 +321,7 @@ bool FSingleCameraCutTrackEditor::OnAllowDrop(const FDragDropEvent& DragDropEven
 
 FReply FSingleCameraCutTrackEditor::OnDrop(const FDragDropEvent& DragDropEvent, const FSequencerDragDropParams& DragDropParams)
 {
-    if (!DragDropParams.Track->IsA(UMovieSceneSingleCameraCutTrack::StaticClass()))
+    if( !DragDropParams.Track.IsValid() || !DragDropParams.Track.Get()->IsA( UMovieSceneSingleCameraCutTrack::StaticClass() ) )
     {
         return FReply::Unhandled();
     }
@@ -604,9 +606,17 @@ void FSingleCameraCutTrackEditor::ToggleLockCamera()
 
 FText FSingleCameraCutTrackEditor::GetLockCameraToolTip() const
 {
-    return IsCameraLocked() == ECheckBoxState::Checked ?
+    const TSharedRef<const FInputChord> FirstActiveChord = FSingleCameraCutTrackCommands::Get().ToggleLockCamera->GetFirstValidChord();
+
+    FText Tooltip = IsCameraLocked() == ECheckBoxState::Checked ?
         LOCTEXT("UnlockCamera", "Unlock Viewport from Camera Cuts") :
         LOCTEXT("LockCamera", "Lock Viewport to Camera Cuts");
+
+    if( FirstActiveChord->IsValidChord() )
+    {
+        return FText::Join( FText::FromString( TEXT( " " ) ), Tooltip, FirstActiveChord->GetInputText() );
+    }
+    return Tooltip;
 }
 
 #undef LOCTEXT_NAMESPACE

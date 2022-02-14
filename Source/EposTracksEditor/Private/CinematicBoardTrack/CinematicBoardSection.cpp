@@ -893,7 +893,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                     return;
 
                 FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-                PropertyEditorModule.CreatePropertyEditorToolkit( EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), objects );
+                PropertyEditorModule.CreatePropertyEditorToolkit( TSharedPtr<IToolkitHost>(), objects );
             };
 
             auto CanBulkEditSubSequence = [=]()
