@@ -177,6 +177,8 @@ FEposSequenceEditorStyle::InitViewport()
     Set( "Notes.Overlay.Text", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
                                                 .SetShadowOffset( FVector2D( 1.0f, 1.0f ) )
                                                 .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
+    Set( "Notes.Overlay.ListView", FTableViewStyle( FEditorStyle::GetWidgetStyle<FTableViewStyle>( "ListView" ) )
+                                   .SetBackgroundBrush( FSlateNoResource() ) );
     Set( "Notes.Overlay.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
                                         .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 96 ) ) ) )
                                         .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) )
@@ -185,6 +187,8 @@ FEposSequenceEditorStyle::InitViewport()
 
     //-
 
+    Set( "Notes.Viewport.ListView", FTableViewStyle( FEditorStyle::GetWidgetStyle<FTableViewStyle>( "ListView" ) )
+                                    .SetBackgroundBrush( FSlateNoResource() ) );
     Set( "Notes.Viewport.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
                                          .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) )
                                          .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 15, 15, 15 ) ) ) )
