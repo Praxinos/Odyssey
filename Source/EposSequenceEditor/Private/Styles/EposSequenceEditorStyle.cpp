@@ -179,7 +179,11 @@ FEposSequenceEditorStyle::InitViewport()
     Set( "EposSequenceEditor.OverlayNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
                                             .SetShadowOffset( FVector2D( 1.0f, 1.0f ) )
                                             .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
-    Set( "EposSequenceEditor.OverlayNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) );
+    Set( "EposSequenceEditor.OverlayNotes.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
+                                                                     .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 96 ) ) ) )
+                                                                     .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) )
+                                                                     .SetActiveBrush( FSlateNoResource() )
+                                                                     .SetInactiveBrush( FSlateNoResource() ) );
 
     Set( "EposSequenceEditor.StoryboardViewportNotes.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
                                                                      .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) )

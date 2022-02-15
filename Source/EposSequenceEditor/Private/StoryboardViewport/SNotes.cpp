@@ -107,21 +107,16 @@ SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef
 {
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
-        .Padding( FMargin( 5, 2 ) )
+        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposSequenceEditor.OverlayNotes.TableView.Row" ) )
+        .Padding( FMargin( 10, 5 ) )
         [
-            //SNew( SBox )
-            SNew( SBorder )
-            .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.OverlayNoteBackground" ) )
-            .Padding( FMargin( 3 ) )
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
             [
-                SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
-                .HAlign( HAlign_Center )
-                [
-                    SNew( STextBlock )
-                    .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.OverlayNotes" )
-                    .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
-                ]
+                SNew( STextBlock )
+                .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.OverlayNotes" )
+                .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
             ]
         ];
 }
