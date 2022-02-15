@@ -8,6 +8,7 @@
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "NoteTrack/MovieSceneNoteTrack.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "StoryNote.h"
@@ -279,7 +280,13 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     //---
 
-    static const FSlateColorBrush background = FSlateColorBrush( FSequencerSectionPainter::BlendColor( FColor( 90, 90, 150 ) ) ); // Same as the UMovieSceneNoteTrack
+    FLinearColor original_color( FSequencerSectionPainter::BlendColor( FColor( 90, 90, 150 ) ) ); // Same as the default one in UMovieSceneNoteTrack
+
+    mTableRowStyle = FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposNotes.TableView.Row" );
+    mTableRowStyle.SetEvenRowBackgroundBrush( FSlateColorBrush( original_color ) );
+    mTableRowStyle.SetOddRowBackgroundBrush( FSlateColorBrush( original_color * 1.33 ) ); // a little brighter
+
+    static const FSlateColorBrush background = FSlateColorBrush( original_color );
 
     // It's needed for notes (unlike for planes) as there is a SBorder widget as parent with a colored background
     // It's not wished for board section as everything available for board should be done directly on it)
@@ -324,31 +331,8 @@ class STableRowNote
     : public STableRow<TWeakObjectPtr<UMovieSceneNoteSection>>
 {
 public:
-    // Construct the widget
-    virtual void ConstructChildren( ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent ) override;
-
-public:
     virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
-
-private:
-    FTableRowStyle mTableRowStyle;
 };
-
-void
-STableRowNote::ConstructChildren( ETableViewMode::Type InOwnerTableMode, const TAttribute<FMargin>& InPadding, const TSharedRef<SWidget>& InContent ) //override
-{
-    STableRow<TWeakObjectPtr<UMovieSceneNoteSection>>::ConstructChildren( InOwnerTableMode, InPadding, InContent );
-
-    //---
-
-    FLinearColor original_color( FSequencerSectionPainter::BlendColor( FColor( 90, 90, 150 ) ) ); // Same as the UMovieSceneNoteTrack
-
-    mTableRowStyle = FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposNotes.TableView.Row" );
-    mTableRowStyle.SetEvenRowBackgroundBrush( FSlateColorBrush( original_color ) );
-    mTableRowStyle.SetOddRowBackgroundBrush( FSlateColorBrush( original_color * 1.33 ) ); // a little brighter
-
-    Style = &mTableRowStyle;
-}
 
 FReply
 STableRowNote::OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) //override
@@ -366,6 +350,7 @@ SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UMovieSceneNoteSection>
 
     return
         SNew( STableRowNote, iOwnerTable )
+        .Style( &mTableRowStyle )
         [
             SNew( SCinematicBoardSectionNote, mBoardSection.Pin().ToSharedRef() )
             .NoteSection( iItem )

@@ -86,6 +86,7 @@ SCinematicBoardSectionTitle::HandleTitleText() const
     UMovieSceneSequence*    subsequence = board_section->GetSubSectionObject().GetSequence();
 
     FText section_text = board_section->HandleThumbnailTextBlockText();
+    // The text is always filled as HandleThumbnailTextBlockText() manages the empty name by returning the asset name
     if( !section_text.IsEmpty() )
         return section_text;
 
@@ -105,10 +106,11 @@ SCinematicBoardSectionTitle::HandleTitleTextColor() const
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
 
     FText section_text = board_section->HandleThumbnailTextBlockText();
+    // The text is always filled as HandleThumbnailTextBlockText() manages the empty name by returning the asset name
     if( !section_text.IsEmpty() )
-        return FLinearColor( .75f, .75f, .75f );
+        return FSlateColor::UseForeground();
 
-    return FLinearColor( .25f, .25f, .25f );
+    return FSlateColor::UseSubduedForeground();
 }
 
 //---
