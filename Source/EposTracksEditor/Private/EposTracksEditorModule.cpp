@@ -11,6 +11,7 @@
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 #include "NoteTrack/NoteTrackEditor.h"
 #include "Settings/EposTracksSettings.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FEposTracksEditorModule"
 
@@ -19,6 +20,7 @@
 void
 FEposTracksEditorModule::StartupModule()
 {
+    FEposTracksEditorStyle::Register(); // Must be done before Commands(), as it uses style
     RegisterCommands();
     RegisterTrackEditors();
 }
@@ -28,6 +30,7 @@ FEposTracksEditorModule::ShutdownModule()
 {
     UnregisterTrackEditors();
     UnregisterCommands();
+    FEposTracksEditorStyle::Unregister();
 }
 
 //---

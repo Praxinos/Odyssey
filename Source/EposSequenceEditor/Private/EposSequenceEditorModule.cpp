@@ -39,6 +39,7 @@ FEposSequenceEditorModule::FEposSequenceEditorModule()
 void
 FEposSequenceEditorModule::StartupModule()
 {
+    FEposSequenceEditorStyle::Register(); // Must be done before Commands(), as it uses style
     RegisterCommands();
     RegisterAssetTools();
     RegisterMenuExtensions();
@@ -58,6 +59,7 @@ FEposSequenceEditorModule::ShutdownModule()
     UnregisterLevelEditorExtensions();
     UnregisterAssetTools();
     UnregisterCommands();
+    FEposSequenceEditorStyle::Unregister();
 }
 
 //--- FGCObject interface

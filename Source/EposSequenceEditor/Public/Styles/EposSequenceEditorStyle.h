@@ -13,11 +13,18 @@ class EPOSSEQUENCEEDITOR_API FEposSequenceEditorStyle
     : public FSlateStyleSet
 {
 public:
+    static void Register();
+    static void Unregister();
+
     static TSharedRef<FEposSequenceEditorStyle> Get();
 
-public:
+private:
     FEposSequenceEditorStyle();
-    virtual ~FEposSequenceEditorStyle();
+
+    void InitSequencer();
+    void InitCommands();
+    void InitAbout();
+    void InitViewport();
 
 private:
     static TSharedPtr<FEposSequenceEditorStyle> smSingleton;

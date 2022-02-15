@@ -17,23 +17,51 @@
 
 #define DEFAULT_FONT(...) FCoreStyle::GetDefaultFontStyle(__VA_ARGS__)
 
+namespace
+{
+static const FVector2D Icon8x8( 8.0f, 8.0f );
+static const FVector2D Icon14x14( 14.0f, 14.0f );
+static const FVector2D Icon16x16( 16.0f, 16.0f );
+static const FVector2D Icon24x24( 24.0f, 24.0f );
+static const FVector2D Icon48x48( 48.0f, 48.0f );
+static const FVector2D Icon64x64( 64.0f, 64.0f );
+}
+
 //---
 
 TSharedPtr<FEposSequenceEditorStyle> FEposSequenceEditorStyle::smSingleton;
 
 //---
 
+//static
+void
+FEposSequenceEditorStyle::Register()
+{
+    FSlateStyleRegistry::RegisterSlateStyle( *Get() );
+}
+
+//static
+void
+FEposSequenceEditorStyle::Unregister()
+{
+    FSlateStyleRegistry::UnRegisterSlateStyle( *Get() );
+}
+
+//---
+
 FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     : FSlateStyleSet( "EposSequenceEditorStyle" )
 {
-    const FVector2D Icon16x16( 16.0f, 16.0f );
-    const FVector2D Icon24x24( 24.0f, 24.0f );
-    const FVector2D Icon48x48( 48.0f, 48.0f );
-    const FVector2D Icon64x64( 64.0f, 64.0f );
+    InitSequencer();
+    InitCommands();
+    InitAbout();
+    InitViewport();
+}
 
-    TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
-    check( epos_plugin.IsValid() );
-    SetContentRoot( epos_plugin->GetBaseDir() / TEXT( "Resources" ) );
+void
+FEposSequenceEditorStyle::InitSequencer()
+{
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -45,6 +73,26 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH( "sequence-board-64x", Icon64x64 ) );
     Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH( "sequence-shot-16x", Icon16x16 ) );
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH( "sequence-shot-64x", Icon64x64 ) );
+
+    //---
+
+    Set( "EposSequenceEditor.ToolBar.Heading",
+         FTextBlockStyle( FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
+         .SetFont( DEFAULT_FONT( "Regular", 10 ) )
+         .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
+         );
+
+    Set( "EposSequenceEditor.Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );
+
+    Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
+    Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "epos-help-24x", FVector2D( 20.f, 20.f ) ) );
+}
+
+void
+FEposSequenceEditorStyle::InitCommands()
+{
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -86,19 +134,12 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
     Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
 
-    //---
+}
 
-    Set( "EposSequenceEditor.ToolBar.Heading",
-         FTextBlockStyle( FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
-         .SetFont( DEFAULT_FONT( "Regular", 10 ) )
-         .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
-         );
-
-    Set( "EposSequenceEditor.Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );
-
-    Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "epos-help-24x", FVector2D( 20.f, 20.f ) ) );
+void
+FEposSequenceEditorStyle::InitAbout()
+{
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -122,6 +163,13 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
                           .SetFontSize( 15 )
                           .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
 
+}
+
+void
+FEposSequenceEditorStyle::InitViewport()
+{
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+
     //---
 
     Set( "EposSequenceEditor.NoteDisplaySettings", new IMAGE_BRUSH( "note-24x", FVector2D( 24, 24 ) ) );
@@ -133,42 +181,35 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
                                             .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
     Set( "EposSequenceEditor.OverlayNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) );
 
-    //-
+    //---
 
     SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );
+    {
+        Set( "EposSequenceEditor.CinematicViewportPlayMarker", new IMAGE_BRUSH( "CinematicViewportPlayMarker", FVector2D( 11, 6 ) ) );
+        Set( "EposSequenceEditor.CinematicViewportRangeStart", new BORDER_BRUSH( "CinematicViewportRangeStart", FMargin( 1.f, .3f, 0.f, .6f ) ) );
+        Set( "EposSequenceEditor.CinematicViewportRangeEnd", new BORDER_BRUSH( "CinematicViewportRangeEnd", FMargin( 0.f, .3f, 1.f, .6f ) ) );
 
-    Set( "EposSequenceEditor.CinematicViewportPlayMarker", new IMAGE_BRUSH( "CinematicViewportPlayMarker", FVector2D( 11, 6 ) ) );
-    Set( "EposSequenceEditor.CinematicViewportRangeStart", new BORDER_BRUSH( "CinematicViewportRangeStart", FMargin( 1.f, .3f, 0.f, .6f ) ) );
-    Set( "EposSequenceEditor.CinematicViewportRangeEnd", new BORDER_BRUSH( "CinematicViewportRangeEnd", FMargin( 0.f, .3f, 1.f, .6f ) ) );
+        Set( "EposSequenceEditor.CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
 
-    Set( "EposSequenceEditor.CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
+        Set( "EposSequenceEditor.StoryboardViewportNotesBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0 ) ) ) );
+        Set( "EposSequenceEditor.StoryboardViewportNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
 
-    Set( "EposSequenceEditor.StoryboardViewportNotesBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0 ) ) ) );
-    Set( "EposSequenceEditor.StoryboardViewportNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
+        Set( "EposSequenceEditor.StoryboardViewportNoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+                                                             .SetFont( DEFAULT_FONT( "Italic", 10 ) )
+                                                             .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
 
-    Set( "EposSequenceEditor.StoryboardViewportNoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-                                                         .SetFont( DEFAULT_FONT( "Italic", 10 ) )
-                                                         .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
+        //---
 
-    //---
+        Set( "FilmOverlay.DefaultThumbnail", new IMAGE_BRUSH( "DefaultFilmOverlayThumbnail", FVector2D( 36, 24 ) ) );
 
-    Set( "FilmOverlay.DefaultThumbnail", new IMAGE_BRUSH( "DefaultFilmOverlayThumbnail", FVector2D( 36, 24 ) ) );
-
-    Set( "FilmOverlay.Disabled", new IMAGE_BRUSH( "FilmOverlay.Disabled", FVector2D( 36, 24 ) ) );
-    Set( "FilmOverlay.2x2Grid", new IMAGE_BRUSH( "FilmOverlay.2x2Grid", FVector2D( 36, 24 ) ) );
-    Set( "FilmOverlay.3x3Grid", new IMAGE_BRUSH( "FilmOverlay.3x3Grid", FVector2D( 36, 24 ) ) );
-    Set( "FilmOverlay.Crosshair", new IMAGE_BRUSH( "FilmOverlay.Crosshair", FVector2D( 36, 24 ) ) );
-    Set( "FilmOverlay.Rabatment", new IMAGE_BRUSH( "FilmOverlay.Rabatment", FVector2D( 36, 24 ) ) );
-
-    //---
-
-    FSlateStyleRegistry::RegisterSlateStyle( *this );
+        Set( "FilmOverlay.Disabled", new IMAGE_BRUSH( "FilmOverlay.Disabled", FVector2D( 36, 24 ) ) );
+        Set( "FilmOverlay.2x2Grid", new IMAGE_BRUSH( "FilmOverlay.2x2Grid", FVector2D( 36, 24 ) ) );
+        Set( "FilmOverlay.3x3Grid", new IMAGE_BRUSH( "FilmOverlay.3x3Grid", FVector2D( 36, 24 ) ) );
+        Set( "FilmOverlay.Crosshair", new IMAGE_BRUSH( "FilmOverlay.Crosshair", FVector2D( 36, 24 ) ) );
+        Set( "FilmOverlay.Rabatment", new IMAGE_BRUSH( "FilmOverlay.Rabatment", FVector2D( 36, 24 ) ) );
+    }
 }
 
-FEposSequenceEditorStyle::~FEposSequenceEditorStyle()
-{
-    FSlateStyleRegistry::UnRegisterSlateStyle( *this );
-}
 
 //---
 

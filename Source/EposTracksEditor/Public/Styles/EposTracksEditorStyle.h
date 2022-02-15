@@ -13,11 +13,20 @@ class EPOSTRACKSEDITOR_API FEposTracksEditorStyle
     : public FSlateStyleSet
 {
 public:
+    static void Register();
+    static void Unregister();
+
     static TSharedRef<FEposTracksEditorStyle> Get();
 
-public:
+private:
     FEposTracksEditorStyle();
-    virtual ~FEposTracksEditorStyle();
+
+    void InitSequencer();
+    void InitTracks();
+    void InitCommands();
+    void InitToolbar();
+    void InitMenu(); // Popup
+    void InitNotes();
 
 private:
     static TSharedPtr<FEposTracksEditorStyle> smSingleton;
