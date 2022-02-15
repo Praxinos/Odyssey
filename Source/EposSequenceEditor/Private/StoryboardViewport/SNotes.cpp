@@ -37,15 +37,12 @@ SNotesInViewport::Construct(const FArguments& InArgs)
             + SVerticalBox::Slot()
             .FillHeight( 1 )
             .HAlign( HAlign_Fill )
+            .Padding( 0.f, 2.f )
             [
-                SNew( SBorder )
-                .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.StoryboardViewportNotesBackground" ) )
-                [
-                    SAssignNew( mWidgetList, SListView<TWeakObjectPtr<UStoryNote>> )
-                    .ListItemsSource( InArgs._ListItemsSource )
-                    .OnGenerateRow( this, &SNotesInViewport::MakeNoteRow )
-                    .SelectionMode( ESelectionMode::None )
-                ]
+                SAssignNew( mWidgetList, SListView<TWeakObjectPtr<UStoryNote>> )
+                .ListItemsSource( InArgs._ListItemsSource )
+                .OnGenerateRow( this, &SNotesInViewport::MakeNoteRow )
+                .SelectionMode( ESelectionMode::None )
             ]
         ]
         + SWidgetSwitcher::Slot()
@@ -64,19 +61,15 @@ SNotesInViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRe
 {
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
-        .Padding( FMargin( 5, 2 ) )
+        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposSequenceEditor.StoryboardViewportNotes.TableView.Row" ) )
+        .Padding( FMargin( 10, 5 ) )
         [
-            SNew( SBorder )
-            .BorderImage( FEposSequenceEditorStyle::Get()->GetBrush( "EposSequenceEditor.StoryboardViewportNoteBackground" ) )
-            .Padding( FMargin( 3 ) )
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
             [
-                SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
-                .HAlign( HAlign_Center )
-                [
-                    SNew( STextBlock )
-                    .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
-                ]
+                SNew( STextBlock )
+                .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
             ]
         ];
 }

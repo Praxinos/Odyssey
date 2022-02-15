@@ -181,6 +181,12 @@ FEposSequenceEditorStyle::InitViewport()
                                             .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
     Set( "EposSequenceEditor.OverlayNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) );
 
+    Set( "EposSequenceEditor.StoryboardViewportNotes.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
+                                                                     .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) )
+                                                                     .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 15, 15, 15 ) ) ) )
+                                                                     .SetActiveBrush( FSlateNoResource() )
+                                                                     .SetInactiveBrush( FSlateNoResource() ) );
+
     //---
 
     SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );
@@ -190,9 +196,6 @@ FEposSequenceEditorStyle::InitViewport()
         Set( "EposSequenceEditor.CinematicViewportRangeEnd", new BORDER_BRUSH( "CinematicViewportRangeEnd", FMargin( 0.f, .3f, 1.f, .6f ) ) );
 
         Set( "EposSequenceEditor.CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
-
-        Set( "EposSequenceEditor.StoryboardViewportNotesBackground", new FSlateColorBrush( FLinearColor( FColor( 0, 0, 0 ) ) ) );
-        Set( "EposSequenceEditor.StoryboardViewportNoteBackground", new FSlateColorBrush( FLinearColor( FColor( 40, 40, 40 ) ) ) );
 
         Set( "EposSequenceEditor.StoryboardViewportNoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
                                                              .SetFont( DEFAULT_FONT( "Italic", 10 ) )
