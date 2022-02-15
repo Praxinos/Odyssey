@@ -9,6 +9,7 @@
 #include "KeyDrawParams.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "SequencerSettings.h"
+#include "Styling/StyleColors.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
@@ -316,9 +317,9 @@ SCinematicBoardSectionCameraTitle::GetBackgroundTint() const
 
     // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
     if( camera && camera->IsSelected() )
-        return FEditorStyle::GetSlateColor( "SelectionColor_Pressed" );
+        return FStyleColors::Select;
 
-    return FSlateColor( FLinearColor( FColor( 48, 48, 48, 255 ) ) );
+    return FStyleColors::Header;
 }
 
 //---

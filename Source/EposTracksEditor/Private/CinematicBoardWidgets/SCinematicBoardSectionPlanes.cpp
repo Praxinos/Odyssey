@@ -11,6 +11,7 @@
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "SequencerSettings.h"
+#include "Styling/StyleColors.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
@@ -643,9 +644,9 @@ SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
     };
     // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
     if( Algo::AnyOf( objects, is_selected ) )
-        return FEditorStyle::GetSlateColor( "SelectionColor_Pressed" );
+        return FStyleColors::Select;
 
-    return FSlateColor( FLinearColor( FColor( 48, 48, 48, 255 ) ) );
+    return FStyleColors::Header;
 }
 
 //---
