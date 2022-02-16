@@ -5,7 +5,7 @@ ULIS is a rendering library written in C++. It is aimed at software rasterizatio
 - [Documentation](https://praxinos.coop/Documentation/ULIS/Developer/version/dev/html/)
 
 ## Compatible Commit:
-ULIS4.0.26
-tag: release-4.0.26
+ULIS4.0.28
+tag: release-4.0.28
 branch: release
-commit: 1f4bf0cd8c8c353e05c3e1fe57fce5a82fa4c994
+commit: 71a2f7cecac05a6fe94361a5c995f8e9d38a73db
