@@ -10,6 +10,7 @@
 */
 #pragma once
 #include "Core/Core.h"
+#include "Math/ShapeGeneration/Line.h"
 
 ULIS_NAMESPACE_BEGIN
 

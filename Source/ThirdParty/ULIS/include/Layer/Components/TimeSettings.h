@@ -17,7 +17,7 @@ ULIS_NAMESPACE_BEGIN
 /// @brief      Simple TimeSettings class.
 struct ULIS_API FTimeSettings
 {
-    uint16 fps;
+    ufloat fps;
     int64 beginFrame;
     int64 endFrame;
     int64 currentFrame;

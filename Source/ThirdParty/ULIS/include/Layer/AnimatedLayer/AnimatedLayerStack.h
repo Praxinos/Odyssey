@@ -22,7 +22,7 @@ ULIS_NAMESPACE_BEGIN
 /// @class      FAnimatedLayerStack
 /// @brief      The FAnimatedLayerStack class provides a class to store a layer stack
 ///             for painting applications.
-class FAnimatedLayerStack final
+class ULIS_API FAnimatedLayerStack final
 
     : public IAnimatedLayer
     , public TRoot< IAnimatedLayer >
@@ -81,6 +81,10 @@ public:
 
     // ITypeIdentifiable Interface
     ULIS_OVERRIDE_TYPEID_INTERFACE( "AnimatedStack" );
+
+public:
+    // IAnimatedLayer interface
+    uint64 GetNumFrames() const override;
 
     // TRoot Overload Shadow Interface
     // TSearchable Overload Shadow Interface

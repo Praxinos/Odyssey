@@ -10,24 +10,56 @@
 */
 #pragma once
 #include "Core/Core.h"
+#include "Image/Block.h"
 #include "Image/ColorSpace.h"
 #include "Image/Format.h"
 #include "Image/Size2D.h"
 #include "Layer/AnimatedLayer/AnimatedLayer.h"
+#include "Layer/AnimatedLayer/Sequence.h"
 #include "Layer/Components/HasBlendInfo.h"
 
 ULIS_NAMESPACE_BEGIN
+struct ULIS_API FCelBlockFactory
+    : public IHasSize2D
+    , public IHasFormat
+    , public IHasColorSpace
+{
+    ~FCelBlockFactory() {};
+
+    FCelBlockFactory(
+          uint16 iWidth = 0
+        , uint16 iHeight = 0
+        , eFormat iFormat = Format_RGBA8
+        , const FColorSpace* iColorSpace = nullptr
+    )
+    : IHasSize2D( FVec2UI16( iWidth, iHeight ) )
+    , IHasFormat( iFormat )
+    , IHasColorSpace( iColorSpace )
+    {}
+
+    TCel< FBlock >* MakeBlank( uint32 iExposure = 0 ) {
+        return  new TCel< FBlock >( nullptr, iExposure );
+    }
+
+    TCel< FBlock >* MakeNew( uint32 iExposure = 0 ) {
+        return  new TCel< FBlock >( std::make_shared< FBlock >( Width(), Height(), Format(), ColorSpace() ), iExposure );
+    }
+
+    TCel< FBlock >* MakeSharedFrom( TCel< FBlock >* iRefCel, uint32 iExposure = 0 ) {
+        ULIS_ASSERT( iRefCel, "Bad input" );
+        return  new TCel< FBlock >( iRefCel->Data(), iExposure );
+    }
+};
+
 /////////////////////////////////////////////////////
 /// @class      FAnimatedLayerImage
 /// @brief      The FAnimatedLayerImage class provides a class to store an image in a
 ///             layer stack for painting applications.
 class ULIS_API FAnimatedLayerImage final
     : public IAnimatedLayer
-    , public IHasSize2D
-    , public IHasFormat
-    , public IHasColorSpace
     , public IHasBlendInfo
     , public IHasPaintLock
+    , public TSequence< FBlock, FCelBlockFactory >
 {
     typedef TRoot< IAnimatedLayer > tParent;
 
@@ -78,6 +110,10 @@ public:
 private:
     // TNode< IAnimatedLayer > Interface
     void InitFromParent( const TRoot< IAnimatedLayer >* iParent ) override;
+
+public:
+    // IAnimatedLayer interface
+    uint64 GetNumFrames() const override;
 };
 
 ULIS_NAMESPACE_END

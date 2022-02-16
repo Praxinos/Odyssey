@@ -12,10 +12,33 @@
 #include "Core/Core.h"
 #include "Font/Font.h"
 #include "Layer/AnimatedLayer/AnimatedLayer.h"
+#include "Layer/AnimatedLayer/Sequence.h"
+#include "Layer/Components/HasText.h"
 #include "Layer/Components/HasBlendInfo.h"
 #include "String/WString.h"
 
 ULIS_NAMESPACE_BEGIN
+struct ULIS_API FCelTextFactory
+{
+    ~FCelTextFactory() {};
+
+    FCelTextFactory()
+    {}
+
+    TCel< FWString >* MakeBlank( uint32 iExposure = 0 ) {
+        return  new TCel< FWString >( nullptr, iExposure );
+    }
+
+    TCel< FWString >* MakeNew( uint32 iExposure = 0 ) {
+        return  new TCel< FWString >( std::make_shared< FWString >( L"Lorem ipsum dolor sit amet..." ), iExposure );
+    }
+
+    TCel< FWString >* MakeSharedFrom( TCel< FWString >* iRefCel, uint32 iExposure = 0 ) {
+        ULIS_ASSERT( iRefCel, "Bad input" );
+        return  new TCel< FWString >( iRefCel->Data(), iExposure );
+    }
+};
+
 /////////////////////////////////////////////////////
 /// @class      FAnimatedLayerText
 /// @brief      The FAnimatedLayerText class provides a class to store text in a layer
@@ -23,6 +46,7 @@ ULIS_NAMESPACE_BEGIN
 class ULIS_API FAnimatedLayerText final
     : public IAnimatedLayer
     , public IHasBlendInfo
+    , public TSequence< FWString, FCelTextFactory >
 {
     typedef TRoot< IAnimatedLayer > tParent;
 
@@ -63,6 +87,10 @@ public:
 public:
     // ITypeIdentifiable Interface
     ULIS_OVERRIDE_TYPEID_INTERFACE( "AnimatedText" );
+
+public:
+    // IAnimatedLayer interface
+    uint64 GetNumFrames() const override;
 };
 
 ULIS_NAMESPACE_END

@@ -36,7 +36,7 @@ CLASS::THasBlock(
 {
     if( iWidth && iHeight )
         mBlock = BlockAllocatorType::New( iWidth, iHeight, iFormat, iColorSpace );
-    Invoke( mBlock );
+    this->Invoke( mBlock );
     ULIS_DEBUG_PRINTF( "THasBlock Created" )
 }
 
@@ -48,7 +48,7 @@ CLASS::THasBlock(
     : TOnBlockChanged< BlockType >( iDelegate )
     , mBlock( iBlock )
 {
-    Invoke( mBlock );
+    this->Invoke( mBlock );
     ULIS_DEBUG_PRINTF( "THasBlock Created" )
 }
 
@@ -77,7 +77,7 @@ CLASS::Realloc(
     if( mBlock )
         BlockAllocatorType::Delete( mBlock );
     mBlock = BlockAllocatorType::New( iWidth, iHeight, iFormat, iColorSpace );
-    Invoke( mBlock );
+    this->Invoke( mBlock );
 }
 
 TEMPLATE
@@ -87,7 +87,7 @@ CLASS::Replace( BlockType* iValue )
     if( mBlock )
         BlockAllocatorType::Delete( mBlock );
     mBlock = iValue;
-    Invoke( mBlock );
+    this->Invoke( mBlock );
 }
 
 ULIS_NAMESPACE_END

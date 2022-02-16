@@ -29,6 +29,12 @@ public:
         constexpr static const uint32 StaticTypeID() { return  crc32b( __ID__ ); }  \
         virtual const FString Type() const override { return  StaticType(); }       \
         virtual const uint32 TypeID() const override { return  StaticTypeID(); }
+
+    #define ULIS_OVERRIDE_TYPEID_INTERFACE_EXT( __ID__ )                                            \
+        constexpr static const char* StaticType() { return  __ID__ ; }                              \
+        constexpr static const ::ULIS::uint32 StaticTypeID() { return  ::ULIS::crc32b( __ID__ ); }  \
+        virtual const ::ULIS::FString Type() const override { return  StaticType(); }               \
+        virtual const ::ULIS::uint32 TypeID() const override { return  StaticTypeID(); }
 };
 
 ULIS_NAMESPACE_END

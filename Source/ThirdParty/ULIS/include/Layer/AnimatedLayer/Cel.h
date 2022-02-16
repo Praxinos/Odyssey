@@ -10,135 +10,64 @@
 */
 #pragma once
 #include "Core/Core.h"
+#include "Layer/Components/HasName.h"
+#include "Layer/Components/HasPrettyColor.h"
+#include "Layer/Components/HasExposure.h"
+#include <memory>
 
 ULIS_NAMESPACE_BEGIN
-enum eCelExtensionBehaviour {
-      CelExtensionBehaviour_None
-    , CelExtensionBehaviour_Hold
-    , CelExtensionBehaviour_FauxFixe
-};
-
-enum eCelFauxFixeMode {
-      CelFauxFixeMode_Repeat
-    , CelFauxFixeMode_PingPong
-    , CelFauxFixeMode_Random
-};
-
-enum eCelExtensionExposureType {
-      CelExtensionExposureType_Frames
-    , CelExtensionExposureType_Instances
-};
-
-/////////////////////////////////////////////////////
-/// @class      FCelFauxFixe
-/// @brief      Faux fixe behaviour for Cel extension
-class ULIS_API FCelFauxFixe {
-public:
-    FCelFauxFixe(
-          eCelFauxFixeMode iMode = CelFauxFixeMode_Repeat
-        , uint32 iExposure = ULIS_UINT32_MAX
-        , eCelExtensionExposureType iType = CelExtensionExposureType_Frames
-    );
-
-public:
-    bool operator==( const FCelFauxFixe& iOther ) const;
-    eCelFauxFixeMode Mode() const;
-    uint32 Exposure() const;
-    eCelExtensionExposureType Type() const;
-    void SetMode( eCelFauxFixeMode iValue );
-    void SetExposure( uint32 iValue );
-    void SetType( eCelExtensionExposureType iValue );
-
-private:
-    eCelFauxFixeMode mMode;
-    uint32 mExposure;
-    eCelExtensionExposureType mType;
-};
-
-/////////////////////////////////////////////////////
-/// @class      FCelExtension
-/// @brief      Extension behaviour for Cel Info
-class ULIS_API FCelExtension {
-public:
-    FCelExtension(
-          eCelExtensionBehaviour iBehaviour = CelExtensionBehaviour_None
-        , const FCelFauxFixe& iFauxFixe = FCelFauxFixe()
-    );
-
-public:
-    bool operator==( const FCelExtension& iOther ) const;
-    eCelExtensionBehaviour Behaviour() const;
-    const FCelFauxFixe& FauxFixe() const;
-    void SetBehaviour( eCelExtensionBehaviour iValue );
-    void SetFauxFixe( const FCelFauxFixe& iValue );
-
-private:
-    eCelExtensionBehaviour mBehaviour;
-    FCelFauxFixe mFauxFixe;
-};
-
-/////////////////////////////////////////////////////
-/// @class      FCelInfo
-/// @brief      Basic Animation Cel Info
-class ULIS_API FCelInfo {
-public:
-    FCelInfo(
-          uint32 iExposure = 1
-        , const FCelExtension& iPreBehaviour = FCelExtension()
-        , const FCelExtension& iPostBehaviour = FCelExtension()
-    );
-
-    bool operator==( const FCelInfo& iOther ) const;
-    uint32 Exposure() const;
-    FCelExtension& PreBehaviour();
-    const FCelExtension& PreBehaviour() const;
-    FCelExtension& PostBehaviour();
-    const FCelExtension& PostBehaviour() const;
-
-private:
-    uint32 mExposure;
-    FCelExtension mPreBehaviour;
-    FCelExtension mPostBehaviour;
-};
+template< class T, class TFactory >
+class TSequence;
 
 /////////////////////////////////////////////////////
 /// @class      TCel
 /// @brief      Basic Animation Cel
-template< class Type >
-class TCel {
-
+template< class T >
+class TCel
+    : public IHasExposure
+    , public IHasName
+    , public IHasPrettyColor
+{
 public:
     virtual ~TCel() {
-        delete  mData;
     }
 
-    template< class ... Args >
-    TCel( const FCelInfo& iInfo = FCelInfo(), Args&& ... args )
-        : mInfo( iInfo )
-        , mData( new Type( std::forward< Args >( args ) ... ) )
+    TCel(
+          std::shared_ptr< T > iData
+        , uint32 iExposure = 0
+        , const FString& iName = ""
+        , const FColor& iPrettyColor = FColor::Transparent
+
+        , const FOn_uint32_Changed& iOnExposureChanged = FOn_uint32_Changed()
+        , const FOnNameChanged& iOnNameChanged = FOnNameChanged()
+        , const FOnColorChanged& iOnColorChanged = FOnColorChanged()
+    )
+        : IHasExposure( iExposure, iOnExposureChanged )
+        , IHasName( iName, iOnNameChanged )
+        , IHasPrettyColor( iPrettyColor, iOnColorChanged )
+        , mData( iData )
     {}
 
-    bool operator==( const TCel< Type >& iOther ) const {
-        return  mInfo == iOther.mInfo && mData == iOther.mData;
+    std::shared_ptr< T > Data() {
+        return  mData;
     }
 
-    Type& Data() {
-        return  *mData;
+    const std::shared_ptr< T > Data() const {
+        return  mData;
     }
 
-    const Type& Data() const {
-        return  *mData;
+    bool IsCelResourceShared() const {
+        return  mData.use_count() > 1;
+    }
+
+    bool IsBlank() const {
+        return  mData.get() == nullptr;
     }
 
 private:
-    FCelInfo mInfo;
-    Type* mData;
+    std::shared_ptr< T > mData;
+    // Exposure stored in IHasExposure can be zero but results in a 1-frame exposition anyway.
 };
-
-#define ULIS_EXPORT_CEL_CLASSES( CLASS )                \
-    template class ULIS_API TCel< CLASS >;              \
-    template class ULIS_API TArray< TCel< CLASS >* >;   \
-    template class ULIS_API TSequence< CLASS >;
 
 ULIS_NAMESPACE_END
 

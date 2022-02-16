@@ -9,6 +9,14 @@
 * @license      Please refer to LICENSE.md
 */
 #pragma once
+// Animation
+#include "Animation/AnimatedProperty.h"
+#include "Animation/BoundedAnimatedProperty.h"
+#include "Animation/HasKeys.h"
+#include "Animation/Interpolation/AbstractInterpolation.h"
+#include "Animation/Interpolation/BezierInterpolation.h"
+#include "Animation/Interpolation/HoldInterpolation.h"
+#include "Animation/Interpolation/LinearInterpolation.h"
 // Context
 #include "Context/Context.h"
 // Image
@@ -24,6 +32,8 @@
 // Layer
 #include "Layer/Layer/LayerBuilder.h"
 #include "Layer/Layer/LayerTypedefs.h"
+#include "Layer/AnimatedLayer/AnimatedLayerBuilder.h"
+#include "Layer/AnimatedLayer/AnimatedLayerTypedefs.h"
 // Font
 #include "Font/Font.h"
 #include "Font/FontEngine.h"
@@ -37,6 +47,7 @@
 #include "Math/Interpolation/Spline.h"
 #include "Math/ShapeGeneration/Arc.h"
 #include "Math/ShapeGeneration/Circle.h"
+#include "Math/ShapeGeneration/CircleInscribedRectangle.h"
 #include "Math/ShapeGeneration/Ellipse.h"
 #include "Math/ShapeGeneration/Line.h"
 #include "Math/ShapeGeneration/Polygon.h"

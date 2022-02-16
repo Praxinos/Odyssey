@@ -60,7 +60,7 @@ class ULIS_API IAnimatedLayer
     , public IHasVisibility
     , public IHasPrettyColor
 {
-    public:
+public:
     // DTor
     virtual ~IAnimatedLayer() override = 0;
 
@@ -84,6 +84,9 @@ class ULIS_API IAnimatedLayer
         , const FOnAnimatedParentChanged& iOnParentChanged = FOnAnimatedParentChanged()
         , const FOnAnimatedSelfChanged& iOnSelfChanged = FOnAnimatedSelfChanged()
     );
+
+public:
+    virtual uint64 GetNumFrames() const = 0;
 };
 
 ULIS_NAMESPACE_END
