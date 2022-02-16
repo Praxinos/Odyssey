@@ -47,7 +47,6 @@ private:
 private:
     TArray<TWeakObjectPtr<UMovieSceneNoteSection>>                  mNotes;
     TSharedPtr<SListView<TWeakObjectPtr<UMovieSceneNoteSection>>>   mWidgetNoteList;
-    FTableRowStyle mTableRowStyle;
 
     bool mNeedRebuildNoteList { true };
 

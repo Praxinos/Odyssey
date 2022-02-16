@@ -21,7 +21,7 @@ UMovieSceneNoteTrack::UMovieSceneNoteTrack( const FObjectInitializer& ObjectInit
 {
     SupportedBlendTypes.Add( EMovieSceneBlendType::Absolute );
 #if WITH_EDITORONLY_DATA
-    TrackTint = FColor( 90, 90, 150 ); // Also used inside SCinematicBoardSectionNotes
+    TrackTint = FColor( 90, 90, 150 ); // Also used inside style
     RowHeight = 50;
 #endif
 }

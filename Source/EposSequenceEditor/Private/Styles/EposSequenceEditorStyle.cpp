@@ -76,17 +76,17 @@ FEposSequenceEditorStyle::InitSequencer()
 
     //---
 
-    Set( "EposSequenceEditor.ToolBar.Heading",
+    Set( "Sequencer.InfoBar",
          FTextBlockStyle( FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
          .SetFont( DEFAULT_FONT( "Regular", 10 ) )
          .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
          );
 
-    Set( "EposSequenceEditor.Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );
+    Set( "Settings", new IMAGE_BRUSH( "epos-settings-24x", Icon48x48 ) );
+    Set( "Settings.Small", new IMAGE_BRUSH( "epos-settings-24x", FVector2D( 20.f, 20.f ) ) );
 
-    Set( "EposSequenceEditor.Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
-    Set( "EposSequenceEditor.Help.Small", new IMAGE_BRUSH( "epos-help-24x", FVector2D( 20.f, 20.f ) ) );
+    Set( "Help", new IMAGE_BRUSH( "epos-help-24x", Icon48x48 ) );
+    Set( "Help.Small", new IMAGE_BRUSH( "epos-help-24x", FVector2D( 20.f, 20.f ) ) );
 }
 
 void
@@ -133,7 +133,6 @@ FEposSequenceEditorStyle::InitCommands()
 
     Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH( "epos-about-24x", Icon48x48 ) );
     Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH( "epos-about-24x", Icon24x24 ) );
-
 }
 
 void
@@ -143,16 +142,19 @@ FEposSequenceEditorStyle::InitAbout()
 
     //---
 
-    Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", FVector2D( 30, 30 ) ) );
-    Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", FVector2D( 30, 30 ) ) );
-    Set( "About.Youtube", new IMAGE_BRUSH( "About/youtube", FVector2D( 30, 30 ) ) );
-    Set( "About.Twitter", new IMAGE_BRUSH( "About/twitter", FVector2D( 30, 30 ) ) );
-    Set( "About.Instagram", new IMAGE_BRUSH( "About/instagram", FVector2D( 30, 30 ) ) );
-    Set( "About.Discord", new IMAGE_BRUSH( "About/discord", FVector2D( 30, 30 ) ) );
-    Set( "About.UserDoc", new IMAGE_BRUSH( "About/user-doc", FVector2D( 30, 30 ) ) );
-    Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
-    Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
-    Set( "About.Epos", new IMAGE_BRUSH( "About/epos", FVector2D( 128, 128 ) ) );
+    static const FVector2D Icon30x30( 30.0f, 30.0f );
+    static const FVector2D Icon128x128( 128.0f, 128.0f );
+
+    Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", Icon30x30 ) );
+    Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", Icon30x30 ) );
+    Set( "About.Youtube", new IMAGE_BRUSH( "About/youtube", Icon30x30 ) );
+    Set( "About.Twitter", new IMAGE_BRUSH( "About/twitter", Icon30x30 ) );
+    Set( "About.Instagram", new IMAGE_BRUSH( "About/instagram", Icon30x30 ) );
+    Set( "About.Discord", new IMAGE_BRUSH( "About/discord", Icon30x30 ) );
+    Set( "About.UserDoc", new IMAGE_BRUSH( "About/user-doc", Icon30x30 ) );
+    Set( "About.Git", new IMAGE_BRUSH( "About/git", Icon30x30 ) );
+    Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", Icon128x128 ) );
+    Set( "About.Epos", new IMAGE_BRUSH( "About/epos", Icon128x128 ) );
 
     Set( "About.UnderlineText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
                                 .SetFontSize( 10 )
@@ -172,38 +174,40 @@ FEposSequenceEditorStyle::InitViewport()
 
     //---
 
-    Set( "EposSequenceEditor.NoteDisplaySettings", new IMAGE_BRUSH( "note-24x", FVector2D( 24, 24 ) ) );
+    Set( "Notes.Viewport.Settings", new IMAGE_BRUSH( "note-24x", Icon24x24 ) );
 
     //-
 
-    Set( "EposSequenceEditor.OverlayNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-                                            .SetShadowOffset( FVector2D( 1.0f, 1.0f ) )
-                                            .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
-    Set( "EposSequenceEditor.OverlayNotes.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
-                                                                     .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 96 ) ) ) )
-                                                                     .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) )
-                                                                     .SetActiveBrush( FSlateNoResource() )
-                                                                     .SetInactiveBrush( FSlateNoResource() ) );
+    Set( "Notes.Overlay.Text", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+                                                .SetShadowOffset( FVector2D( 1.0f, 1.0f ) )
+                                                .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
+    Set( "Notes.Overlay.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
+                                        .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 96 ) ) ) )
+                                        .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) )
+                                        .SetActiveBrush( FSlateNoResource() )
+                                        .SetInactiveBrush( FSlateNoResource() ) );
 
-    Set( "EposSequenceEditor.StoryboardViewportNotes.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
-                                                                     .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) )
-                                                                     .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 15, 15, 15 ) ) ) )
-                                                                     .SetActiveBrush( FSlateNoResource() )
-                                                                     .SetInactiveBrush( FSlateNoResource() ) );
+    //-
+
+    Set( "Notes.Viewport.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
+                                         .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) )
+                                         .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 15, 15, 15 ) ) ) )
+                                         .SetActiveBrush( FSlateNoResource() )
+                                         .SetInactiveBrush( FSlateNoResource() ) );
+
+    Set( "Notes.Viewport.Text.NoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+                                        .SetFont( DEFAULT_FONT( "Italic", 10 ) )
+                                        .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
 
     //---
 
     SetContentRoot( FPaths::EnginePluginsDir() / TEXT( "MovieScene/LevelSequenceEditor/Content" ) );
     {
-        Set( "EposSequenceEditor.CinematicViewportPlayMarker", new IMAGE_BRUSH( "CinematicViewportPlayMarker", FVector2D( 11, 6 ) ) );
-        Set( "EposSequenceEditor.CinematicViewportRangeStart", new BORDER_BRUSH( "CinematicViewportRangeStart", FMargin( 1.f, .3f, 0.f, .6f ) ) );
-        Set( "EposSequenceEditor.CinematicViewportRangeEnd", new BORDER_BRUSH( "CinematicViewportRangeEnd", FMargin( 0.f, .3f, 1.f, .6f ) ) );
+        Set( "CinematicViewportPlayMarker", new IMAGE_BRUSH( "CinematicViewportPlayMarker", FVector2D( 11, 6 ) ) );
+        Set( "CinematicViewportRangeStart", new BORDER_BRUSH( "CinematicViewportRangeStart", FMargin( 1.f, .3f, 0.f, .6f ) ) );
+        Set( "CinematicViewportRangeEnd", new BORDER_BRUSH( "CinematicViewportRangeEnd", FMargin( 0.f, .3f, 1.f, .6f ) ) );
 
-        Set( "EposSequenceEditor.CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
-
-        Set( "EposSequenceEditor.StoryboardViewportNoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-                                                             .SetFont( DEFAULT_FONT( "Italic", 10 ) )
-                                                             .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
+        Set( "CinematicViewportTransportRangeKey", new IMAGE_BRUSH( "CinematicViewportTransportRangeKey", FVector2D( 7.f, 7.f ) ) );
 
         //---
 

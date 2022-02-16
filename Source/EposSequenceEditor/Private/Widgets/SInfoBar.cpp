@@ -24,7 +24,7 @@ SInfoBar::Construct( const FArguments& iArgs )
         [
             SNew( STextBlock )
             .Text( iArgs._Text )
-            .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "EposSequenceEditor.ToolBar.Heading" ) )
+            .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "Sequencer.InfoBar" ) )
             .OnDoubleClicked( iArgs._OnDoubleClicked )
         ]
     ];

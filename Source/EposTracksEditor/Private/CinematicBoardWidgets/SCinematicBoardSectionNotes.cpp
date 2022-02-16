@@ -259,7 +259,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
@@ -271,7 +271,6 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
         FText::GetEmpty(),
         LOCTEXT( "CreateNote", "Create a new Note" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
-        //FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EposTracksEditor.CreateNote" ) );
 
     TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
     // To always keep the real space of the toolbar as hidden keeps space
@@ -279,14 +278,6 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
     middle_widget->SetVisibility( MakeAttributeLambda( [this]() { return mOptionalWidgetsVisibility.Get() == EVisibility::Visible ? EVisibility::Visible : EVisibility::Hidden; } ) );
 
     //---
-
-    FLinearColor original_color( FSequencerSectionPainter::BlendColor( FColor( 90, 90, 150 ) ) ); // Same as the default one in UMovieSceneNoteTrack
-
-    mTableRowStyle = FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposNotes.TableView.Row" );
-    mTableRowStyle.SetEvenRowBackgroundBrush( FSlateColorBrush( original_color ) );
-    mTableRowStyle.SetOddRowBackgroundBrush( FSlateColorBrush( original_color * 1.33 ) ); // a little brighter
-
-    static const FSlateColorBrush background = FSlateColorBrush( original_color );
 
     // It's needed for notes (unlike for planes) as there is a SBorder widget as parent with a colored background
     // It's not wished for board section as everything available for board should be done directly on it)
@@ -301,7 +292,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
     ChildSlot
     [
         SNew( SBorder )
-        .BorderImage( &background )
+        .BorderImage( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.TableView.Row" ).EvenRowBackgroundBrush )
         .Visibility_Lambda( IsNotesVisible )
         [
             SNew( SVerticalBox )
@@ -350,7 +341,7 @@ SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UMovieSceneNoteSection>
 
     return
         SNew( STableRowNote, iOwnerTable )
-        .Style( &mTableRowStyle )
+        .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.TableView.Row" ) )
         [
             SNew( SCinematicBoardSectionNote, mBoardSection.Pin().ToSharedRef() )
             .NoteSection( iItem )

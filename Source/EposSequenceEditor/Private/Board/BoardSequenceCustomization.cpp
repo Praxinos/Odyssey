@@ -443,7 +443,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeSettingsMenu ),
         LOCTEXT( "Settings", "Settings" ),
         LOCTEXT( "SettingsToolTip", "Set settings" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Settings" ) );
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "Settings" ) );
 
     ToolbarBuilder.AddSeparator();
 
@@ -452,7 +452,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeHelpMenu ),
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "EposSequenceEditor.Help" )  );
+        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "Help" )  );
 
     ToolbarBuilder.AddSeparator();
 

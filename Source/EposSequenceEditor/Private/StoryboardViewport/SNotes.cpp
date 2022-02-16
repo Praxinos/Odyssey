@@ -51,7 +51,7 @@ SNotesInViewport::Construct(const FArguments& InArgs)
         [
             SNew( STextBlock )
             .Text( LOCTEXT("notes-in-viewport.no-notes", "No Notes") )
-            .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.StoryboardViewportNoNotes" )
+            .TextStyle( FEposSequenceEditorStyle::Get(), "Notes.Viewport.Text.NoNotes" )
         ]
     ];
 }
@@ -61,7 +61,7 @@ SNotesInViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRe
 {
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
-        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposSequenceEditor.StoryboardViewportNotes.TableView.Row" ) )
+        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.Viewport.TableView.Row" ) )
         .Padding( FMargin( 10, 5 ) )
         [
             SNew( SHorizontalBox )
@@ -107,7 +107,7 @@ SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef
 {
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
-        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "EposSequenceEditor.OverlayNotes.TableView.Row" ) )
+        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.Overlay.TableView.Row" ) )
         .Padding( FMargin( 10, 5 ) )
         [
             SNew( SHorizontalBox )
@@ -115,7 +115,7 @@ SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef
             .HAlign( HAlign_Center )
             [
                 SNew( STextBlock )
-                .TextStyle( FEposSequenceEditorStyle::Get(), "EposSequenceEditor.OverlayNotes" )
+                .TextStyle( FEposSequenceEditorStyle::Get(), "Notes.Overlay.Text" )
                 .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
             ]
         ];

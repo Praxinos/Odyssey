@@ -29,7 +29,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     LeftToolbarBuilder.AddComboButton(
         FUIAction(
@@ -54,7 +54,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(
@@ -72,7 +72,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    RightToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "EposSection.ToolBar" );
+    RightToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     RightToolbarBuilder.AddComboButton(
         FUIAction(
@@ -502,11 +502,10 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<int32> )
-            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
-            //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "HyperlinkSpinBox" ) )
             .OnValueCommitted_Lambda( [=] (int32 Value, ETextCommit::Type) { OnNumberOfNewSequenceChanged(Value); } )
             .OnValueChanged_Lambda( [=] (int32 Value) { OnNumberOfNewSequenceChanged(Value); } )
             .MinValue( 1 )
@@ -527,12 +526,11 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<double> )
             .TypeInterface( sequencer->GetNumericTypeInterface() )
-            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
-            //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "HyperlinkSpinBox" ) )
             .OnValueCommitted_Lambda( [=] (double Value, ETextCommit::Type) { OnDurationChanged(Value); } )
             .OnValueChanged_Lambda( [=] (double Value) { OnDurationChanged(Value); } )
             .MinValue( FFrameRate::TransformTime( 1, display_rate, tick_resolution ).GetFrame().Value ) // Convert 1 frame in display rate (24fps) to 1000 frames in tick resolution (24000fps)
@@ -582,11 +580,10 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<int32> )
-            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "EposTracksEditor.HyperlinkSpinBox" ) )
-            //.Style( &FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+            .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FSpinBoxStyle>( "HyperlinkSpinBox" ) )
             .OnValueCommitted_Lambda( [=] (int32 Value, ETextCommit::Type) { OnNumberOfNewSequenceChanged(Value); } )
             .OnValueChanged_Lambda( [=] (int32 Value) { OnNumberOfNewSequenceChanged(Value); } )
             .MinValue( 1 )
@@ -607,7 +604,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "EposSection.ToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get()->GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( STextBlock )
             .TextStyle( &FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "NormalText.Subdued" ) )
