@@ -44,7 +44,7 @@ public:
         "SingleCameraCutTrack",
         NSLOCTEXT("Contexts", "SingleCameraCutTrack", "SingleCameraCutTrack"),
         NAME_None, // "MainFrame" // @todo Fix this crash
-        FEditorStyle::GetStyleSetName() // Icon Style Set
+        FAppStyle::Get().GetStyleSetName() // Icon Style Set
     )
         , BindingCount(0)
     { }
@@ -218,12 +218,12 @@ TSharedPtr<SWidget> FSingleCameraCutTrackEditor::BuildOutlinerEditWidget(const F
         .IsChecked( this, &FSingleCameraCutTrackEditor::IsCameraLocked )
         .OnCheckStateChanged( this, &FSingleCameraCutTrackEditor::OnLockCameraClicked )
         .ToolTipText( this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip )
-        .CheckedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-        .CheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-        .CheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-        .UncheckedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-        .UncheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-        .UncheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+        .CheckedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+        .CheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+        .CheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+        .UncheckedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+        .UncheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+        .UncheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
     ];
 }
 

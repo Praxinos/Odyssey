@@ -222,7 +222,7 @@ SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-note-label", "Delete" ),
                                 LOCTEXT( "delete-note-tooltip", "Delete the note" ),
-                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteNote ) ) );
 
     ioMenuBuilder.EndSection();
@@ -331,7 +331,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "CreateNote", "Create a new Note" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
     middle_toolbar->SetVisibility( mOptionalWidgetsVisibility );

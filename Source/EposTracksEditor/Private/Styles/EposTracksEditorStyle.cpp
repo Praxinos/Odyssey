@@ -70,7 +70,7 @@ FEposTracksEditorStyle::InitSequencer()
     //---
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
-    Set( "Sequencer.Tracks.SingleCameraCut", new PARENT_IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FEditorStyle::GetBrush( "Sequencer.Tracks.CameraCut" ) );
+    Set( "Sequencer.Tracks.SingleCameraCut", new PARENT_IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FAppStyle::Get().GetBrush( "Sequencer.Tracks.CameraCut" ) );
     Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
 }
 
@@ -99,7 +99,7 @@ FEposTracksEditorStyle::InitTracks()
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
     {
-        Set( "HyperlinkSpinBox", FSpinBoxStyle( FEditorStyle::GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
+        Set( "HyperlinkSpinBox", FSpinBoxStyle( FAppStyle::Get().GetWidgetStyle<FSpinBoxStyle>( "Sequencer.HyperlinkSpinBox" ) )
              .SetBackgroundBrush( BORDER_BRUSH( "Old/HyperlinkDotted", FMargin( 0, 0, 0, 3 / 16.0f ), FSlateColor::UseForeground() ) )
              .SetForegroundColor( FSlateColor::UseForeground() )
         );
@@ -161,7 +161,7 @@ FEposTracksEditorStyle::InitNotes()
 
     FLinearColor color( FSequencerSectionPainter::BlendColor( FColor( 90, 90, 150 ) ) ); // Same as the default one in UMovieSceneNoteTrack
 
-    Set( "Notes.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.Row" ) )
+    Set( "Notes.TableView.Row", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "TableView.Row" ) )
                                 .SetEvenRowBackgroundBrush( FSlateColorBrush( color ) )
                                 .SetOddRowBackgroundBrush( FSlateColorBrush( color * 1.33 ) ) ); // a little brighter
 }

@@ -271,7 +271,7 @@ SAboutWindow::NewButtonImage( ELogo iLogo )
     FText tooltip_with_url = FText::Format( LOCTEXT( "tooltip-url", "{0} | {1}" ), logo.mTooltip, logo.mUrl );
 
     TSharedRef<SButton> button = SNew( SButton )
-        .ButtonStyle( FEditorStyle::Get(), "NoBorder" )
+        .ButtonStyle( FAppStyle::Get(), "NoBorder" )
         .IsEnabled( iLogo != ELogo::kEposUserDoc ) // Remove this line once everything's ok
         .Cursor( EMouseCursor::Hand )
         .ToolTipText( tooltip_with_url )

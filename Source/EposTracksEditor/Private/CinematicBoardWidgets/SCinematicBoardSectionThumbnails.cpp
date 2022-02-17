@@ -37,7 +37,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent ),
         FText::GetEmpty(),
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
     left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
@@ -87,7 +87,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCreateCameraMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-camera-and-settings-tooltip", "Create a new camera" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     auto IsToolBarVisible = [this]() -> EVisibility
     {
@@ -109,7 +109,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent ),
         FText::GetEmpty(),
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
     right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
@@ -291,7 +291,7 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
         MenuBuilder.AddMenuEntry(
             take_sequence->GetDisplayName(),
             FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( take_sequence->GetPathName() ) ),
-            take_sequence->GetPathName() == board_section->GetSequence()->GetPathName() ? FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Empty" ),
+            take_sequence->GetPathName() == board_section->GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
             FUIAction( FExecuteAction::CreateLambda( [this, sequencer, board_section, take]()
                                                      {
                                                          BoardSequenceTools::SwitchTake( sequencer.Get(), *board_section, board_section->FindTake( take ) );
@@ -720,7 +720,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( STextBlock )
-            .TextStyle( &FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "NormalText.Subdued" ) )
+            .TextStyle( FAppStyle::Get(), "NormalText.Subdued" )
             .Text( FText::FromString( GetDuration() ) )
         ];
 }
@@ -816,7 +816,7 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     //---
 
-    static const FSlateBrush* filmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
+    static const FSlateBrush* filmBorder = FAppStyle::Get().GetBrush( "Sequencer.Section.FilmBorder" );
 
     FVector2D localSectionSize = painter.SectionGeometry.GetLocalSize();
 

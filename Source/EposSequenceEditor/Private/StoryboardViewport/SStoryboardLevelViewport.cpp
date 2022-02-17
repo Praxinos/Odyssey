@@ -236,12 +236,12 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             SNew(SBorder)
             .Padding(0)
             .BorderImage(nullptr)
-            .ForegroundColor(FEditorStyle::GetSlateColor("SelectionColor").GetColor(FWidgetStyle()))
+            .ForegroundColor(FAppStyle::Get().GetSlateColor("SelectionColor").GetColor(FWidgetStyle()))
             [
                 SNew(SNonThrottledSpinBox<double>)
                 .TypeInterface(TypeInterfaceProxy)
-                .Style(FEditorStyle::Get(), "Sequencer.HyperlinkSpinBox")
-                .Font(FEditorStyle::GetFontStyle("Sequencer.FixedFont"))
+                .Style(FAppStyle::Get(), "Sequencer.HyperlinkSpinBox")
+                .Font(FAppStyle::Get().GetFontStyle("Sequencer.FixedFont"))
                 .OnValueCommitted(this, &SStoryboardLevelViewport::OnTimeCommitted)
                 .OnValueChanged(this, &SStoryboardLevelViewport::SetTime)
                 .MinValue(TOptional<double>())
@@ -281,7 +281,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     mNoteSplitter = SNew( SSplitter )
         .Orientation( Orient_Vertical )
-        .Style( FEditorStyle::Get(), "SplitterDark" )
+        .Style( FAppStyle::Get(), "SplitterDark" )
         .PhysicalSplitterHandleSize( 2.0f )
         .MinimumSlotHeight( 3 * 16.f ) // Roughly 3 lines (this is also used for the first (3D scene) part)
         + SSplitter::Slot()
@@ -394,7 +394,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                             .HAlign(HAlign_Right)
                             [
                                 SNew(STextBlock)
-                                .Font(FEditorStyle::GetFontStyle("Sequencer.FixedFont"))
+                                .Font(FAppStyle::Get().GetFontStyle("Sequencer.FixedFont"))
                                 .ColorAndOpacity(Gray)
                                 .Text_Lambda([=] { return UIData.LocalPlaybackTime; })
                                 .ToolTipText(LOCTEXT("LocalPlaybackTime", "The current playback time relative to the currently evaluated sequence."))
@@ -454,9 +454,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew( SEnumComboBox, scalePlaneEnum )
                                     .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
-                                    //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
+                                    //.ButtonStyle( FAppStyle::Get(), "FlatButton.Light" )
                                     //.ContentPadding( FMargin( 2, 0 ) )
-                                    //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
+                                    //.Font( FAppStyle::Get().GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
                                     .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
                                     .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
                                 ]
@@ -507,9 +507,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew( SEnumComboBox, scalePlaneEnum )
                                     .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
-                                    //.ButtonStyle( FEditorStyle::Get(), "FlatButton.Light" )
+                                    //.ButtonStyle( FAppStyle::Get(), "FlatButton.Light" )
                                     //.ContentPadding( FMargin( 2, 0 ) )
-                                    //.Font( FEditorStyle::GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
+                                    //.Font( FAppStyle::Get().GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
                                     .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
                                     .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
                                 ]
@@ -547,7 +547,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     TSharedPtr<SSpinBox<float>> viewportRotationSpinBox;
 
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
-        .BorderImage(FEditorStyle::GetBrush("BlackBrush"))
+        .BorderImage(FAppStyle::Get().GetBrush("BlackBrush"))
         .ForegroundColor(Gray)
         .Padding(0)
         [
@@ -807,7 +807,7 @@ float SStoryboardLevelViewport::GetPlayTimeMinDesiredWidth() const
         FString LowerBoundStr = Sequencer->GetNumericTypeInterface()->ToString(ViewRange.GetLowerBoundValue());
         FString UpperBoundStr = Sequencer->GetNumericTypeInterface()->ToString(ViewRange.GetUpperBoundValue());
 
-        const FSlateFontInfo PlayTimeFont = FEditorStyle::GetFontStyle("Sequencer.FixedFont");
+        const FSlateFontInfo PlayTimeFont = FAppStyle::Get().GetFontStyle("Sequencer.FixedFont");
 
         const TSharedRef< FSlateFontMeasure > FontMeasureService = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 

@@ -17,10 +17,9 @@ SInfoBar::Construct( const FArguments& iArgs )
     ChildSlot
     .Padding( iArgs._Padding )
     [
-        SNew( SBorder )
+        SNew( SBox )
         .VAlign( VAlign_Center )
         .Padding( FMargin( 5.f, 2.f ) )
-        .BorderImage( FEditorStyle::GetNoBrush() )
         [
             SNew( STextBlock )
             .Text( iArgs._Text )

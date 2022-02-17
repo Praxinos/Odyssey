@@ -195,7 +195,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
     .HAlign( HAlign_Fill )
     [
         SNew( SBorder )
-        .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
+        .BorderImage( FAppStyle::Get().GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
         .BorderBackgroundColor( this, &SCinematicBoardSectionCameraTitle::GetBackgroundTint )
         [
             SNew( SHorizontalBox )
@@ -447,7 +447,7 @@ SCinematicBoardSectionCameraTransform::BuildKeyContextMenu( FMenuBuilder& ioMenu
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-camera-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for the 9 (maybe more or less) channels
                                 LOCTEXT( "delete-camera-key-tooltip", "Delete the current key" ),
-                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
                                            FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 

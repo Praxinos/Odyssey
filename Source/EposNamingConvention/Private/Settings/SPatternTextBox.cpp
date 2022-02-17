@@ -52,7 +52,7 @@ SPatternTextBox::Construct( const FArguments& iArgs, TSharedPtr<IPropertyHandle>
             [
                 SAssignNew( mTextBoxWidget, SEditableTextBox )
                 .Text( this, &SPatternTextBox::GetPatternText )
-                .Font( FEditorStyle::GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
+                .Font( FAppStyle::Get().GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
                 .SelectAllTextWhenFocused( true )
                 .ClearKeyboardFocusOnCommit( false )
                 .OnTextCommitted( this, &SPatternTextBox::OnPatternTextCommited )
@@ -139,7 +139,7 @@ SPatternTextBox::OnPatternTextChanged( const FText& iNewText )
     else
     {
         mTextBoxWidget->SetTextBoxBackgroundColor( FLinearColor( 1, 0, 0, 0.35f ) );
-        //mTextBoxWidget->SetTextBoxBackgroundColor( FEditorStyle::GetColor( TEXT( "ErrorReporting.BackgroundColor" ) ) );
+        //mTextBoxWidget->SetTextBoxBackgroundColor( FAppStyle::Get().GetColor( TEXT( "ErrorReporting.BackgroundColor" ) ) );
     }
 }
 

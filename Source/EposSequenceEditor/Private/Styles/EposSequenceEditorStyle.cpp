@@ -73,7 +73,7 @@ FEposSequenceEditorStyle::InitSequencer()
     //---
 
     Set( "Sequencer.InfoBar",
-         FTextBlockStyle( FEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
+         FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "Sequencer.ToolBar.Heading" ) )
          .SetFont( DEFAULT_FONT( "Regular", 10 ) )
          .SetColorAndOpacity( FLinearColor( 0.4f, 0.4, 0.4f, 1.0f ) )
     );
@@ -152,12 +152,12 @@ FEposSequenceEditorStyle::InitAbout()
     Set( "About.Praxinos", new IMAGE_BRUSH_SVG( "About/praxinos", Icon128x128 ) );
     Set( "About.Epos", new IMAGE_BRUSH_SVG( "About/epos", Icon128x128 ) );
 
-    Set( "About.UnderlineText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
+    Set( "About.UnderlineText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
                                 .SetFontSize( 10 )
                                 .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
-    Set( "About.SmallText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
+    Set( "About.SmallText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
                             .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
-    Set( "About.BigText", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+    Set( "About.BigText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
                           .SetFontSize( 15 )
                           .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) ) );
 
@@ -174,12 +174,12 @@ FEposSequenceEditorStyle::InitViewport()
 
     //-
 
-    Set( "Notes.Overlay.Text", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+    Set( "Notes.Overlay.Text", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
                                                 .SetShadowOffset( FVector2D( 1.0f, 1.0f ) )
                                                 .SetShadowColorAndOpacity( FLinearColor( 0.0f, 0.0f, 0.0f ) ) );
-    Set( "Notes.Overlay.ListView", FTableViewStyle( FEditorStyle::GetWidgetStyle<FTableViewStyle>( "ListView" ) )
+    Set( "Notes.Overlay.ListView", FTableViewStyle( FAppStyle::Get().GetWidgetStyle<FTableViewStyle>( "ListView" ) )
                                    .SetBackgroundBrush( FSlateNoResource() ) );
-    Set( "Notes.Overlay.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
+    Set( "Notes.Overlay.TableView.Row", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
                                         .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 96 ) ) ) )
                                         .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 0, 0, 0, 64 ) ) ) )
                                         .SetActiveBrush( FSlateNoResource() )
@@ -187,15 +187,15 @@ FEposSequenceEditorStyle::InitViewport()
 
     //-
 
-    Set( "Notes.Viewport.ListView", FTableViewStyle( FEditorStyle::GetWidgetStyle<FTableViewStyle>( "ListView" ) )
+    Set( "Notes.Viewport.ListView", FTableViewStyle( FAppStyle::Get().GetWidgetStyle<FTableViewStyle>( "ListView" ) )
                                     .SetBackgroundBrush( FSlateNoResource() ) );
-    Set( "Notes.Viewport.TableView.Row", FTableRowStyle( FEditorStyle::GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
+    Set( "Notes.Viewport.TableView.Row", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "TableView.NoHoverTableRow" ) )
                                          .SetEvenRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 20, 20, 20 ) ) ) )
                                          .SetOddRowBackgroundBrush( FSlateColorBrush( FLinearColor( FColor( 15, 15, 15 ) ) ) )
                                          .SetActiveBrush( FSlateNoResource() )
                                          .SetInactiveBrush( FSlateNoResource() ) );
 
-    Set( "Notes.Viewport.Text.NoNotes", FTextBlockStyle( FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+    Set( "Notes.Viewport.Text.NoNotes", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
                                         .SetFont( DEFAULT_FONT( "Italic", 10 ) )
                                         .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
 

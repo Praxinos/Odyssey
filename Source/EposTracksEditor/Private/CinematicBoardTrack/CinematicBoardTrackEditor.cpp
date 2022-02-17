@@ -204,12 +204,12 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
             .IsChecked( this, &FCinematicBoardTrackEditor::AreBoardsLocked )
             .OnCheckStateChanged( this, &FCinematicBoardTrackEditor::OnLockBoardsClicked )
             .ToolTipText( this, &FCinematicBoardTrackEditor::GetLockBoardsToolTip )
-            .CheckedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-            .CheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-            .CheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-            .UncheckedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-            .UncheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-            .UncheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+            .CheckedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+            .CheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+            .CheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+            .UncheckedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+            .UncheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+            .UncheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
         ];
 }
 

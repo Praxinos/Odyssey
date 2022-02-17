@@ -145,7 +145,7 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
             OutDrawElements,
             LayerId,
             AllottedGeometry.ToPaintGeometry( KeyMarkSize, FSlateLayoutTransform( FVector2D( key_position - FMath::CeilToFloat( KeyMarkSize.X / 2.f ), offset_top_y ) ) ),
-            FEditorStyle::GetBrush( "Sequencer.KeyMark" ),
+            FAppStyle::Get().GetBrush( "Sequencer.KeyMark" ),
             ESlateDrawEffect::None,
             FLinearColor( 1.f, 1.f, 1.f, 1.f )
         );
@@ -320,9 +320,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     {
         UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
         if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
-            return FSlateIcon( FEditorStyle::GetStyleSetName(), "TreeArrow_Expanded" );
+            return FSlateIcon( FAppStyle::Get().GetStyleSetName(), "TreeArrow_Expanded" );
         else
-            return FSlateIcon( FEditorStyle::GetStyleSetName(), "TreeArrow_Collapsed" );
+            return FSlateIcon( FAppStyle::Get().GetStyleSetName(), "TreeArrow_Collapsed" );
     };
 
     LeftToolbarBuilder.AddToolBarButton(
@@ -347,9 +347,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     auto GetPlaneActorVisibilityIcon = [this]() -> FSlateIcon
     {
         if( IsPlaneVisible() )
-            return FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.VisibleIcon16x" );
+            return FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Level.VisibleIcon16x" );
         else
-            return FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
+            return FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
     };
 
     LeftToolbarBuilder.AddToolBarButton(
@@ -510,7 +510,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetWarningTooltip ),
-        FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Icons.Warning" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ) );
 
     TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
     right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
@@ -520,7 +520,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     ChildSlot
     [
         SNew( SBorder )
-        .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
+        .BorderImage( FAppStyle::Get().GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
         .BorderBackgroundColor( this, &SCinematicBoardSectionPlaneTitle::GetBackgroundTint )
         [
             SNew( SVerticalBox )
@@ -1114,13 +1114,13 @@ SCinematicBoardSectionPlaneMaterialKeys::BuildKeyContextMenu( FMenuBuilder& ioMe
 
     ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
                                 LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
-                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Duplicate" ),
+                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Duplicate" ),
                                 FUIAction( FExecuteAction::CreateLambda( CloneKey, iKeys ),
                                            FCanExecuteAction::CreateLambda( CanCloneKey, iKeys ) ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for all the channels -> see camera key delete
                                 LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
-                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
                                            FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 
@@ -1429,7 +1429,7 @@ SCinematicBoardSectionPlaneOpacityKeys::BuildKeyContextMenu( FMenuBuilder& ioMen
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-plane-opacity-key-label", "Delete" ),
                                 LOCTEXT( "delete-plane-opacity-key-tooltip", "Delete the current key" ),
-                                FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
                                 FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
                                            FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 
@@ -1676,7 +1676,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     bool is_plane_visible = BoardSequenceTools::IsPlaneVisible( sequencer, *board_section_object, mBinding.GetGuid() );
     FText label_text   = is_plane_visible ? LOCTEXT( "hide-plane-actor-label", "Hide" )                                 : LOCTEXT( "show-plane-actor-label", "Show" );
     FText tooltip_text = is_plane_visible ? LOCTEXT( "hide-plane-actor-tooltip", "Hide plane actor" )                   : LOCTEXT( "show-plane-actor-tooltip", "Show plane actor" );
-    FSlateIcon icon    = is_plane_visible ? FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.VisibleIcon16x" ) : FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
+    FSlateIcon icon    = is_plane_visible ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Level.VisibleIcon16x" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
 
     ioMenuBuilder.AddMenuEntry(
         label_text,
@@ -1738,7 +1738,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddMenuEntry(
         FText::Format( LOCTEXT( "delete-plane-label", "Delete {0}" ), plane_track_text ),
         LOCTEXT( "delete-plane-tooltip", "Delete the plane and its corresponding actor" ),
-        FSlateIcon( FCoreStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
         FUIAction( FExecuteAction::CreateLambda( DeletePlane ) ) );
 
     ioMenuBuilder.EndSection();
@@ -1895,7 +1895,7 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeCreatePlaneMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-plane-and-settings-tooltip", "Create a new plane" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     auto IsToolBarVisible = [this]() -> EVisibility
     {

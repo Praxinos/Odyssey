@@ -50,7 +50,7 @@ namespace WidgetHelpers
         return SNew(SComboButton)
             .ContentPadding(0)
             .HasDownArrow(false)
-            .ButtonStyle(FEditorStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip")
+            .ButtonStyle(FAppStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip")
             .OnGetMenuContent_Lambda(OnGetMenuContent)
             .CollapseMenuOnParentFocus(true)
             .ButtonContent()
@@ -351,7 +351,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
 
     void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const
     {
-        const FSlateBrush* Brush = FEditorStyle::GetBrush("WhiteBrush");
+        const FSlateBrush* Brush = FAppStyle::Get().GetBrush("WhiteBrush");
 
         const float DesiredRatio = Ratio1 / Ratio2;
         const float CurrentRatio = AllottedGeometry.GetLocalSize().X / AllottedGeometry.GetLocalSize().Y;
@@ -485,8 +485,8 @@ void SFilmOverlayOptions::Construct(const FArguments& InArgs)
     ChildSlot
     [
         SNew(SComboButton)
-        .ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
-        .ForegroundColor(FEditorStyle::GetColor("InvertedForeground"))
+        .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
+        .ForegroundColor(FAppStyle::Get().GetColor("InvertedForeground"))
         .OnGetMenuContent(this, &SFilmOverlayOptions::GetMenuContent)
         .ButtonContent()
         [
@@ -601,7 +601,7 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructMasterOverlaysMenu()
         OverlaysPanel->AddSlot(ColumnIndex, RowIndex)
         [
             SNew(SButton)
-            .ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
+            .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
             .OnClicked(this, &SFilmOverlayOptions::SetMasterFilmOverlay, OverlayNames[OverlayIndex])
             [
                 SNew(SVerticalBox)
@@ -626,7 +626,7 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructMasterOverlaysMenu()
                 .Padding(0.f, 0.f, 0.f, 4.f)
                 [
                     SNew(STextBlock)
-                    .ColorAndOpacity(FEditorStyle::GetColor("DefaultForeground"))
+                    .ColorAndOpacity(FAppStyle::Get().GetColor("DefaultForeground"))
                     .Text(Overlay.GetDisplayName())
                 ]
             ]
