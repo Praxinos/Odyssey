@@ -84,7 +84,7 @@ struct FFilmOverlay_None : IFilmOverlay
 {
     FText GetDisplayName() const { return LOCTEXT("OverlayDisabled", "Disabled"); }
 
-    const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get()->GetBrush("FilmOverlay.Disabled"); }
+    const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.Disabled"); }
 
     void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const
     {
@@ -111,7 +111,7 @@ struct FFilmOverlay_Grid : IFilmOverlay
 
     const FSlateBrush* GetThumbnail() const
     {
-        return FEposSequenceEditorStyle::Get()->GetBrush(BrushName);
+        return FEposSequenceEditorStyle::Get().GetBrush(BrushName);
     }
 
     void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const
@@ -165,7 +165,7 @@ struct FFilmOverlay_Rabatment : IFilmOverlay
 {
     FText GetDisplayName() const { return LOCTEXT("RabatmentName", "Rabatment"); }
 
-    const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get()->GetBrush("FilmOverlay.Rabatment"); }
+    const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.Rabatment"); }
 
     void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const
     {
@@ -205,7 +205,7 @@ struct FFilmOverlay_Rabatment : IFilmOverlay
 struct FFilmOverlay_Crosshair : IFilmOverlay
 {
     FText GetDisplayName() const { return LOCTEXT("CrosshairName", "Crosshair"); }
-    const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get()->GetBrush("FilmOverlay.Crosshair"); }
+    const FSlateBrush* GetThumbnail() const { return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.Crosshair"); }
     void Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId) const
     {
         FVector2D Position(AllottedGeometry.Size.X / 2, AllottedGeometry.Size.Y / 2);
@@ -738,7 +738,7 @@ const FSlateBrush* SFilmOverlayOptions::GetCurrentThumbnail() const
         return MasterFilmOverlays[CurrentMasterOverlay]->GetThumbnail();
     }
 
-    return FEposSequenceEditorStyle::Get()->GetBrush("FilmOverlay.DefaultThumbnail");
+    return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.DefaultThumbnail");
 }
 
 IFilmOverlay* SFilmOverlayOptions::GetMasterFilmOverlay() const

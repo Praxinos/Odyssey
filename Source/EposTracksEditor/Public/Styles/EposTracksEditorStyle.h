@@ -16,7 +16,7 @@ public:
     static void Register();
     static void Unregister();
 
-    static TSharedRef<FEposTracksEditorStyle> Get();
+    static const FEposTracksEditorStyle& Get();
 
 private:
     FEposTracksEditorStyle();

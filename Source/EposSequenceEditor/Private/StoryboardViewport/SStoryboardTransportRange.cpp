@@ -131,7 +131,7 @@ void SStoryboardTransportRange::DrawKeys(const FGeometry& AllottedGeometry, FSla
     static const float BrushHeight = 7.f;
 
     const float BrushOffsetY = TrackOffsetY + TrackHeight * .5f - BrushHeight * .5f;
-    const FSlateBrush* KeyBrush = FEposSequenceEditorStyle::Get()->GetBrush("CinematicViewportTransportRangeKey");
+    const FSlateBrush* KeyBrush = FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportTransportRangeKey");
     const FQualifiedFrameTime CurrentTime = Sequencer->GetLocalTime();
 
     FLinearColor KeyColor = KeyColors.Num() ? KeyColors[0] : FEditorStyle::GetSlateColor("SelectionColor").GetColor(FWidgetStyle());
@@ -297,7 +297,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
             OutDrawElements,
             ++LayerId,
             AllottedGeometry.ToPaintGeometry(FVector2D(PositionX - FMath::CeilToFloat(BrushWidth/2), 0.f), FVector2D(BrushWidth, BrushHeight)),
-            FEposSequenceEditorStyle::Get()->GetBrush("CinematicViewportPlayMarker"),
+            FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportPlayMarker"),
             DrawEffects,
             bPlayMarkerOnKey ? KeyframeColor : LightGray
         );
@@ -328,7 +328,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
             OutDrawElements,
             LayerId+1,
             AllottedGeometry.ToPaintGeometry(FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY), FVector2D(BrushWidth, TrackHeight)),
-            FEposSequenceEditorStyle::Get()->GetBrush("CinematicViewportRangeStart"),
+            FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeStart"),
             DrawEffects,
             FColor(32, 128, 32) // 120, 75, 50 (HSV)
         );
@@ -337,7 +337,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
             OutDrawElements,
             LayerId+1,
             AllottedGeometry.ToPaintGeometry(FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackEndLerp - BrushWidth, TrackOffsetY), FVector2D(BrushWidth, TrackHeight)),
-            FEposSequenceEditorStyle::Get()->GetBrush("CinematicViewportRangeEnd"),
+            FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeEnd"),
             DrawEffects,
             FColor(128, 32, 32) // 0, 75, 50 (HSV)
         );

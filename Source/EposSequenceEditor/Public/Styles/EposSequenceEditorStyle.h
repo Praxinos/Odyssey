@@ -16,7 +16,7 @@ public:
     static void Register();
     static void Unregister();
 
-    static TSharedRef<FEposSequenceEditorStyle> Get();
+    static const FEposSequenceEditorStyle& Get();
 
 private:
     FEposSequenceEditorStyle();

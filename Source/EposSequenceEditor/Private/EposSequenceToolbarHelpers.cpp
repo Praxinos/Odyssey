@@ -178,7 +178,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
                                        .AutoWidth()
                                        [
                                            SNew( SImage )
-                                           .Image( FEposSequenceEditorStyle::Get()->GetBrush( iBrushName ) )
+                                           .Image( FEposSequenceEditorStyle::Get().GetBrush( iBrushName ) )
                                        ],
                                        NAME_None,
                                        iToolTip,

@@ -143,7 +143,7 @@ FCinematicBoardTrackEditor::BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) //o
     ioMenuBuilder.AddMenuEntry(
         LOCTEXT( "AddCinematicBoardTrack", "Board Track" ),
         LOCTEXT( "AddCinematicBoardTooltip", "Adds a board track." ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "Sequencer.Tracks.CinematicBoard" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Sequencer.Tracks.CinematicBoard" ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryExecute ),
             FCanExecuteAction::CreateRaw( this, &FCinematicBoardTrackEditor::HandleAddCinematicBoardTrackMenuEntryCanExecute )
@@ -433,7 +433,7 @@ FCinematicBoardTrackEditor::IsArrangeSections( EArrangeSections iArrangeSections
 const FSlateBrush*
 FCinematicBoardTrackEditor::GetIconBrush() const //override
 {
-    return FEposTracksEditorStyle::Get()->GetBrush( "Sequencer.Tracks.CinematicBoard" );
+    return FEposTracksEditorStyle::Get().GetBrush( "Sequencer.Tracks.CinematicBoard" );
 }
 
 bool

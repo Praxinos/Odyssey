@@ -243,7 +243,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
 
     //-
 
@@ -310,7 +310,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "DetachPlane", "Detach the plane" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "DetachPlane" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "DetachPlane" ) );
 
     //-
 
@@ -340,7 +340,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "create-drawing", "Create a drawing (set the current frame where to create the drawing keyframe)" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "CreateDrawing" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateDrawing" ) );
 
     //-
 
@@ -355,9 +355,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     auto GetLighttableIcon = [this]() -> FSlateIcon
     {
         if( IsLighttableOn() )
-            return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "LighttableOn" );
+            return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
         else
-            return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "LighttableOff" );
+            return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
     };
 
     LeftToolbarBuilder.AddToolBarButton(
@@ -1484,7 +1484,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddMenuEntry(
         FText::Format( LOCTEXT( "detach-plane-label", "Detach {0}" ), plane_track_text ),
         LOCTEXT( "detach-plane-tooltip", "Detach the plane" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "DetachPlane" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "DetachPlane" ),
         FUIAction(
             FExecuteAction::CreateLambda( DetachPlane ),
             FCanExecuteAction::CreateLambda( CanDetachPlane )
@@ -1565,7 +1565,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddMenuEntry(
         FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame_text ),
         LOCTEXT( "create-drawing-tooltip", "Create a drawing\n(set the current frame where to create the drawing keyframe)" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "CreateDrawing" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateDrawing" ),
         FUIAction(
             FExecuteAction::CreateLambda( CreateDrawing ),
             FCanExecuteAction::CreateLambda( CanCreateDrawing )
@@ -1695,7 +1695,7 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(

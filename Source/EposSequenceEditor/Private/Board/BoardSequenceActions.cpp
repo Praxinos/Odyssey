@@ -16,14 +16,6 @@
 #define LOCTEXT_NAMESPACE "BoardAssetTypeActions"
 
 
-/* FBoardSequenceActions constructors
- *****************************************************************************/
-
-FBoardSequenceActions::FBoardSequenceActions( const TSharedRef<ISlateStyle>& iStyle )
-    : mStyle( iStyle )
-{
-}
-
 /* IAssetTypeActions interface
  *****************************************************************************/
 
@@ -92,7 +84,7 @@ FBoardSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShare
         }
         else
         {
-            TSharedRef<FEposSequenceEditorToolkit> new_toolkit = MakeShareable( new FEposSequenceEditorToolkit( mStyle ) );
+            TSharedRef<FEposSequenceEditorToolkit> new_toolkit = MakeShareable( new FEposSequenceEditorToolkit() );
             new_toolkit->Initialize( Mode, iEditWithinLevelEditor, board_sequences );
         }
     }

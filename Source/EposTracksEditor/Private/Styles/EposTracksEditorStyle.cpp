@@ -40,14 +40,14 @@ TSharedPtr<FEposTracksEditorStyle> FEposTracksEditorStyle::smSingleton;
 void
 FEposTracksEditorStyle::Register()
 {
-    FSlateStyleRegistry::RegisterSlateStyle( *Get() );
+    FSlateStyleRegistry::RegisterSlateStyle( Get() );
 }
 
 //static
 void
 FEposTracksEditorStyle::Unregister()
 {
-    FSlateStyleRegistry::UnRegisterSlateStyle( *Get() );
+    FSlateStyleRegistry::UnRegisterSlateStyle( Get() );
 }
 
 //---
@@ -71,6 +71,9 @@ FEposTracksEditorStyle::InitSequencer()
     //---
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
+    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
+    Set( "Sequencer.Tracks.SingleCameraCut", new IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FEditorStyle::GetBrush( "Sequencer.Tracks.CameraCut" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
     Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
 }
 
@@ -253,13 +256,13 @@ FEposTracksEditorStyle::InitNotes()
 //---
 
 //static
-TSharedRef<FEposTracksEditorStyle>
+const FEposTracksEditorStyle&
 FEposTracksEditorStyle::Get()
 {
     if( !smSingleton.IsValid() )
         smSingleton = MakeShareable( new FEposTracksEditorStyle );
 
-    return smSingleton.ToSharedRef();
+    return *smSingleton;
 }
 
 //---

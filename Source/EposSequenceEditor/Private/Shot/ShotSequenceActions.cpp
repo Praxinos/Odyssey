@@ -16,14 +16,6 @@
 #define LOCTEXT_NAMESPACE "ShotAssetTypeActions"
 
 
-/* FShotSequenceActions constructors
- *****************************************************************************/
-
-FShotSequenceActions::FShotSequenceActions( const TSharedRef<ISlateStyle>& iStyle )
-    : mStyle( iStyle )
-{
-}
-
 /* IAssetTypeActions interface
  *****************************************************************************/
 
@@ -92,7 +84,7 @@ FShotSequenceActions::OpenAssetEditor( const TArray<UObject*>& iObjects, TShared
         }
         else
         {
-            TSharedRef<FEposSequenceEditorToolkit> new_toolkit = MakeShareable( new FEposSequenceEditorToolkit( mStyle ) );
+            TSharedRef<FEposSequenceEditorToolkit> new_toolkit = MakeShareable( new FEposSequenceEditorToolkit() );
             new_toolkit->Initialize( Mode, iEditWithinLevelEditor, shot_sequences );
         }
     }

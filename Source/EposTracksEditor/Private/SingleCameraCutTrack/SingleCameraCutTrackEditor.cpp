@@ -27,6 +27,7 @@
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/SingleCameraCutSection.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "FSingleCameraCutTrackEditor"
 
@@ -112,8 +113,7 @@ void FSingleCameraCutTrackEditor::BuildAddTrackMenu(FMenuBuilder& MenuBuilder)
     MenuBuilder.AddMenuEntry(
         LOCTEXT("AddSingleCameraCutTrack", "Single Camera Cut Track"),
         LOCTEXT("AddSingleCameraCutTooltip", "Adds a single camera cut track, as well as a new camera cut at the current scrubber location if a camera is selected."),
-        FSlateIcon(FEditorStyle::GetStyleSetName(), "Sequencer.Tracks.CameraCut"),
-        //FSlateIcon(FEditorStyle::GetStyleSetName(), "Sequencer.Tracks.SingleCameraCut"),
+        FSlateIcon(FEposTracksEditorStyle::Get().GetStyleSetName(), "Sequencer.Tracks.SingleCameraCut"),
         FUIAction(
             FExecuteAction::CreateRaw(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryExecute),
             FCanExecuteAction::CreateRaw(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutTrackMenuEntryCanExecute),
@@ -274,8 +274,7 @@ void FSingleCameraCutTrackEditor::Tick(float DeltaTime)
 
 const FSlateBrush* FSingleCameraCutTrackEditor::GetIconBrush() const
 {
-    return FEditorStyle::GetBrush("Sequencer.Tracks.CameraCut");
-    //return FEditorStyle::GetBrush("Sequencer.Tracks.SingleCameraCut");
+    return FEposTracksEditorStyle::Get().GetBrush("Sequencer.Tracks.SingleCameraCut");
 }
 
 

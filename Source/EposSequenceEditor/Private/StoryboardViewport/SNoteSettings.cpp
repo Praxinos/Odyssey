@@ -37,7 +37,7 @@ SNoteSettings::Construct(const FArguments& InArgs)
             .ToolTipText(LOCTEXT("note-settings-tooltip", "Notes Settings."))
             [
                 SNew(SImage)
-                .Image( FEposSequenceEditorStyle::Get()->GetBrush( "Notes.Viewport.Settings" ) )
+                .Image( FEposSequenceEditorStyle::Get().GetBrush( "Notes.Viewport.Settings" ) )
             ]
         ]
     ];

@@ -16,7 +16,7 @@ const FName ViewportRotationBundleName = "ViewportRotation";
 }
 
 FEposSequenceEditorCommands::FEposSequenceEditorCommands()
-    : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor"), NAME_None, FEposSequenceEditorStyle::Get()->GetStyleSetName() )
+    : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor"), NAME_None, FEposSequenceEditorStyle::Get().GetStyleSetName() )
 {
     AddBundle( ViewportRotationBundleName, LOCTEXT( "CommandsCategory.ViewportRotation", "Viewport Rotation" ) );
 }

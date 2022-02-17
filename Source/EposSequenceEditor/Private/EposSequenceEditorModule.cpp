@@ -101,10 +101,10 @@ FEposSequenceEditorModule::RegisterAssetTools()
 
     mEposAssetCategory = AssetTools.RegisterAdvancedAssetCategory( FName( TEXT( "EPOS" ) ), LOCTEXT( "EposAssetsCategory", "EPOS" ) );
 
-    mBoardSequenceTypeActions = MakeShared<FBoardSequenceActions>( FEposSequenceEditorStyle::Get() );
+    mBoardSequenceTypeActions = MakeShared<FBoardSequenceActions>();
     AssetTools.RegisterAssetTypeActions( mBoardSequenceTypeActions.ToSharedRef() );
 
-    mShotSequenceTypeActions = MakeShared<FShotSequenceActions>( FEposSequenceEditorStyle::Get() );
+    mShotSequenceTypeActions = MakeShared<FShotSequenceActions>();
     AssetTools.RegisterAssetTypeActions( mShotSequenceTypeActions.ToSharedRef() );
 }
 

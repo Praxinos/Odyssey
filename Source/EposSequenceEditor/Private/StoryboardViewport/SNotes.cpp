@@ -61,7 +61,7 @@ SNotesInViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRe
 {
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
-        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.Viewport.TableView.Row" ) )
+        .Style( FEposSequenceEditorStyle::Get(), "Notes.Viewport.TableView.Row" )
         .Padding( FMargin( 10, 5 ) )
         [
             SNew( SHorizontalBox )
@@ -107,7 +107,7 @@ SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef
 {
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
-        .Style( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.Overlay.TableView.Row" ) )
+        .Style( FEposSequenceEditorStyle::Get(), "Notes.Overlay.TableView.Row" )
         .Padding( FMargin( 10, 5 ) )
         [
             SNew( SHorizontalBox )

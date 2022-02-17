@@ -77,9 +77,8 @@ FEposSequenceEditorToolkit::OnClosed()
 
 //---
 
-FEposSequenceEditorToolkit::FEposSequenceEditorToolkit( const TSharedRef<ISlateStyle>& iStyle )
+FEposSequenceEditorToolkit::FEposSequenceEditorToolkit()
     : mSequence( nullptr )
-    , mStyle( iStyle )
 {
     // register sequencer menu extenders
     ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );

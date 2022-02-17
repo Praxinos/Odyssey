@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Styling/ISlateStyle.h"
 #include "Toolkits/IToolkitHost.h"
 #include "AssetTypeActions_Base.h"
 
@@ -17,15 +16,6 @@ class FBoardSequenceActions
 {
 public:
 
-    /**
-     * Creates and initializes a new instance.
-     *
-     * @param InStyle The style set to use for asset editor toolkits.
-     */
-    FBoardSequenceActions( const TSharedRef<ISlateStyle>& iStyle );
-
-public:
-
     // IAssetTypeActions interface
     virtual uint32 GetCategories() override;
     virtual FText GetName() const override;
@@ -36,9 +26,4 @@ public:
     virtual bool CanLocalize() const override;
     virtual bool HasActions( const TArray<UObject*>& iObjects ) const override;
     virtual void GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder ) override;
-
-private:
-
-    /** Pointer to the style set to use for toolkits. */
-    TSharedRef<ISlateStyle> mStyle;
 };

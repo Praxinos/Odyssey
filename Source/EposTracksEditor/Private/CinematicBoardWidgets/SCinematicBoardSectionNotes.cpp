@@ -259,7 +259,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
@@ -292,7 +292,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
     ChildSlot
     [
         SNew( SBorder )
-        .BorderImage( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.TableView.Row" ).EvenRowBackgroundBrush )
+        .BorderImage( &FEposTracksEditorStyle::Get().GetWidgetStyle<FTableRowStyle>( "Notes.TableView.Row" ).EvenRowBackgroundBrush )
         .Visibility_Lambda( IsNotesVisible )
         [
             SNew( SVerticalBox )
@@ -341,7 +341,7 @@ SCinematicBoardSectionNotes::MakeNoteRow( TWeakObjectPtr<UMovieSceneNoteSection>
 
     return
         SNew( STableRowNote, iOwnerTable )
-        .Style( &FEposTracksEditorStyle::Get()->GetWidgetStyle<FTableRowStyle>( "Notes.TableView.Row" ) )
+        .Style( FEposTracksEditorStyle::Get(), "Notes.TableView.Row" )
         [
             SNew( SCinematicBoardSectionNote, mBoardSection.Pin().ToSharedRef() )
             .NoteSection( iItem )

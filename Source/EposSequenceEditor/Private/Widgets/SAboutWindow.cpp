@@ -136,7 +136,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 [
                     SNew( STextBlock )
                     .Text( LOCTEXT( "copyright.epos", "EPOS" ) )
-                    .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "About.BigText" ) )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.BigText" )
                 ]
                 +SVerticalBox::Slot()
                 .AutoHeight()
@@ -144,7 +144,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 [
                     SNew( STextBlock )
                     .Text( LOCTEXT( "copyright.copyright", "EPOS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
-                    .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "About.SmallText" ) )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
                 ]
                 +SVerticalBox::Slot()
                 .AutoHeight()
@@ -152,7 +152,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 [
                     SNew( STextBlock )
                     .Text( LOCTEXT( "copyright.iddn", "IDDN.FR.001.220036.000.S.P.2021.000.00000" ) )
-                    .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "About.SmallText" ) )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
                 ]
                 + SVerticalBox::Slot()
                 .AutoHeight()
@@ -161,7 +161,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                     SNew( STextBlock )
                     .Text( LOCTEXT( "copyright.team-label", "Praxinos Team: " ) )
                     .Justification( ETextJustify::Center )
-                    .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "About.UnderlineText" ) )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.UnderlineText" )
                 ]
                 + SVerticalBox::Slot()
                 .AutoHeight()
@@ -170,7 +170,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                     SNew( STextBlock )
                     .Text( LOCTEXT( "copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Clément Berthaud, " ) )
                     .Justification( ETextJustify::Center )
-                    .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "About.SmallText" ) )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
                 ]
                 + SVerticalBox::Slot()
                 .AutoHeight()
@@ -179,7 +179,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                     SNew( STextBlock )
                     .Text( LOCTEXT( "copyright.team-names-2", "Naomiki Sato, Antoine Antin, Eric Scholl, Michael Schreiner" ) )
                     .Justification( ETextJustify::Center )
-                    .TextStyle( &FEposSequenceEditorStyle::Get()->GetWidgetStyle<FTextBlockStyle>( "About.SmallText" ) )
+                    .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
                 ]
             ]
             +SVerticalBox::Slot()
@@ -278,7 +278,7 @@ SAboutWindow::NewButtonImage( ELogo iLogo )
         .OnClicked_Lambda( [&]() { FPlatformProcess::LaunchURL( *logo.mUrl.ToString(), nullptr, nullptr ); return FReply::Handled(); } )
         [
             SNew( SImage )
-            .Image( FEposSequenceEditorStyle::Get()->GetBrush( logo.mBrushName ) )
+            .Image( FEposSequenceEditorStyle::Get().GetBrush( logo.mBrushName ) )
         ];
 
     // There should be something more easier ?!

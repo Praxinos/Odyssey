@@ -282,7 +282,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeSettingsMenu ),
         LOCTEXT( "Settings", "Settings" ),
         LOCTEXT( "SettingsToolTip", "Set sequence settings" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "Settings" ) );
+        FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Settings" ) );
 
     ToolbarBuilder.AddSeparator();
 
@@ -291,7 +291,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeHelpMenu ),
         LOCTEXT( "Help", "Help" ),
         LOCTEXT( "HelpToolTip", "Help" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get()->GetStyleSetName(), "Help" ) );
+        FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Help" ) );
 }
 
 TSharedRef<SWidget>

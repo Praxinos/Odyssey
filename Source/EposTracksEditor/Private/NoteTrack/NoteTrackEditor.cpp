@@ -84,7 +84,7 @@ FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder ) //override
     MenuBuilder.AddMenuEntry(
         LOCTEXT( "AddTrack", "Note Track" ),
         LOCTEXT( "AddTooltip", "Adds a new master note track that can play sounds." ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "Sequencer.Tracks.Note" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Sequencer.Tracks.Note" ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute )
         )
@@ -126,7 +126,7 @@ FNoteTrackEditor::BuildTrackContextMenu( FMenuBuilder& MenuBuilder, UMovieSceneT
 const FSlateBrush*
 FNoteTrackEditor::GetIconBrush() const //override
 {
-    return FEposTracksEditorStyle::Get()->GetBrush( "Sequencer.Tracks.Note" );
+    return FEposTracksEditorStyle::Get().GetBrush( "Sequencer.Tracks.Note" );
 }
 
 bool

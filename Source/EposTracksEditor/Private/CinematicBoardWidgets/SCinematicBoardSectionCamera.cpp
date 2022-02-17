@@ -79,7 +79,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
 
     FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &*FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
 
     auto PilotEject = [this]()
     {
@@ -140,9 +140,9 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
             FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
 
             if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
-                return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "EjectCamera" );
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "EjectCamera" );
             else
-                return FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "PilotCamera" );
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "PilotCamera" );
         } );
 
     LeftToolbarBuilder.AddToolBarButton(
@@ -193,7 +193,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "snap-camera-to-viewport-tooltip", "Snap the existing camera to the viewport (create a camera and set the current frame where to create the camera keyframe)" ),
-        FSlateIcon( FEposTracksEditorStyle::Get()->GetStyleSetName(), "SnapCameraToViewport" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "SnapCameraToViewport" ) );
 
     //---
 

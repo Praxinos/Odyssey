@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/GCObject.h"
-#include "Styling/ISlateStyle.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
 #include "IEposSequenceEditorToolkit.h"
@@ -29,12 +28,8 @@ class FEposSequenceEditorToolkit
 {
 public:
 
-    /**
-     * Creates and initializes a new instance.
-     *
-     * @param InStyle The style set to use.
-     */
-    FEposSequenceEditorToolkit( const TSharedRef<ISlateStyle>& iStyle );
+    /** Creates and initializes a new instance. */
+    FEposSequenceEditorToolkit();
 
     /** Virtual destructor */
     virtual ~FEposSequenceEditorToolkit();
@@ -118,9 +113,6 @@ private:
 
     /** Event that is cast when this toolkit is closed */
     FEposSequenceEditorToolkitClosed mOnClosedEvent;
-
-    /** Pointer to the style set to use for toolkits. */
-    TSharedRef<ISlateStyle> mStyle;
 
     /** Handle to the sequencer properties menu extender. */
     FDelegateHandle mSequencerExtenderHandle;

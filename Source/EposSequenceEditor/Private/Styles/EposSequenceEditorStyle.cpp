@@ -37,14 +37,14 @@ TSharedPtr<FEposSequenceEditorStyle> FEposSequenceEditorStyle::smSingleton;
 void
 FEposSequenceEditorStyle::Register()
 {
-    FSlateStyleRegistry::RegisterSlateStyle( *Get() );
+    FSlateStyleRegistry::RegisterSlateStyle( Get() );
 }
 
 //static
 void
 FEposSequenceEditorStyle::Unregister()
 {
-    FSlateStyleRegistry::UnRegisterSlateStyle( *Get() );
+    FSlateStyleRegistry::UnRegisterSlateStyle( Get() );
 }
 
 //---
@@ -225,13 +225,13 @@ FEposSequenceEditorStyle::InitViewport()
 //---
 
 //static
-TSharedRef<FEposSequenceEditorStyle>
+const FEposSequenceEditorStyle&
 FEposSequenceEditorStyle::Get()
 {
     if( !smSingleton.IsValid() )
         smSingleton = MakeShareable( new FEposSequenceEditorStyle );
 
-    return smSingleton.ToSharedRef();
+    return *smSingleton;
 }
 
 #undef IMAGE_BRUSH
