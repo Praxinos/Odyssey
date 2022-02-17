@@ -16,6 +16,8 @@
 #include "Styling/StarshipCoreStyle.h"
 #include "Styling/ToolBarStyle.h"
 
+#define PARENT_IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( GetParentStyle()->GetContentRootDir() / RelativePath + TEXT(".png"), __VA_ARGS__ )
+
 namespace
 {
 static const FVector2D Icon8x8( 8.0f, 8.0f );
@@ -51,11 +53,12 @@ FEposTracksEditorStyle::Unregister()
 FEposTracksEditorStyle::FEposTracksEditorStyle()
     : FSlateStyleSet( "EposTracksEditorStyle" )
 {
+    SetParentStyleName( FAppStyle::Get().GetStyleSetName() ); // Mainly to not have to duplicate all "Menu.*"
+
     InitSequencer();
     InitTracks();
     InitCommands();
     InitToolbar();
-    InitMenu();
     InitNotes();
 }
 
@@ -67,9 +70,7 @@ FEposTracksEditorStyle::InitSequencer()
     //---
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
-    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
-    Set( "Sequencer.Tracks.SingleCameraCut", new IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FEditorStyle::GetBrush( "Sequencer.Tracks.CameraCut" ) );
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    Set( "Sequencer.Tracks.SingleCameraCut", new PARENT_IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FEditorStyle::GetBrush( "Sequencer.Tracks.CameraCut" ) );
     Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
 }
 
@@ -148,54 +149,6 @@ FEposTracksEditorStyle::InitToolbar()
         SectionTitleToolBarStyle.SetSettingsComboButtonStyle( SectionTitleToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
         SectionTitleToolBarStyle.SetShowLabels( false );
         Set( "SectionTitleToolBar", SectionTitleToolBarStyle );
-    }
-}
-
-void
-FEposTracksEditorStyle::InitMenu()
-{
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
-
-    //---
-
-    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
-    {
-        Set( "Menu.Background", new BOX_BRUSH( "Old/Menu_Background", FMargin( 8.0f / 64.0f ) ) );
-        Set( "Menu.Icon", new IMAGE_BRUSH( "Icons/icon_tab_toolbar_16px", Icon16x16 ) );
-        Set( "Menu.Expand", new IMAGE_BRUSH( "Icons/toolbar_expand_16x", Icon16x16 ) );
-        Set( "Menu.SubMenuIndicator", new IMAGE_BRUSH( "Common/SubmenuArrow", Icon8x8 ) );
-        Set( "Menu.SToolBarComboButtonBlock.Padding", FEditorStyle::GetMargin( "Menu.SToolBarComboButtonBlock.Padding" ) );
-        Set( "Menu.SToolBarButtonBlock.Padding", FEditorStyle::GetMargin( "Menu.SToolBarButtonBlock.Padding" ) );
-        Set( "Menu.SToolBarCheckComboButtonBlock.Padding", FEditorStyle::GetMargin( "Menu.SToolBarCheckComboButtonBlock.Padding" ) );
-        Set( "Menu.SToolBarButtonBlock.CheckBox.Padding", FEditorStyle::GetMargin( "Menu.SToolBarButtonBlock.CheckBox.Padding" ) );
-        Set( "Menu.SToolBarComboButtonBlock.ComboButton.Color", FEditorStyle::GetSlateColor( "Menu.SToolBarComboButtonBlock.ComboButton.Color" ) );
-
-        Set( "Menu.Block.IndentedPadding", FEditorStyle::GetMargin( "Menu.Block.IndentedPadding" ) );
-        Set( "Menu.Block.Padding", FEditorStyle::GetMargin( "Menu.Block.Padding" ) );
-
-        Set( "Menu.Separator", new BOX_BRUSH( "Old/Button", 4.0f / 32.0f ) );
-        Set( "Menu.Separator.Padding", FEditorStyle::GetMargin( "Menu.Separator.Padding" ) );
-
-        Set( "Menu.Label", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Menu.Label" ) );
-        Set( "Menu.Label.Padding", FEditorStyle::GetMargin( "Menu.Label.Padding" ) );
-        Set( "Menu.Label.ContentPadding", FEditorStyle::GetMargin( "Menu.Label.ContentPadding" ) );
-        Set( "Menu.EditableText", FEditorStyle::GetWidgetStyle<FEditableTextBoxStyle>( "Menu.EditableText" ) );
-        Set( "Menu.Keybinding", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Menu.Keybinding" ) );
-
-        Set( "Menu.Heading", FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "Menu.Heading" ) );
-
-        Set( "Menu.CheckBox", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Menu.CheckBox" ) );
-        Set( "Menu.Check", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Menu.Check" ) );
-        Set( "Menu.RadioButton", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Menu.RadioButton" ) );
-        Set( "Menu.ToggleButton", FEditorStyle::GetWidgetStyle<FCheckBoxStyle>( "Menu.ToggleButton" ) );
-        Set( "Menu.Button", FEditorStyle::GetWidgetStyle<FButtonStyle>( "Menu.Button" ) );
-
-        Set( "Menu.Button.Checked", new BOX_BRUSH( "Common/RoundedSelection_16x", 4.0f / 16.0f, FEditorStyle::GetSlateColor( "SelectionColor_Pressed" ) ) );
-        Set( "Menu.Button.Checked_Hovered", new BOX_BRUSH( "Common/RoundedSelection_16x", 4.0f / 16.0f, FEditorStyle::GetSlateColor( "SelectionColor_Pressed" ) ) );
-        Set( "Menu.Button.Checked_Pressed", new BOX_BRUSH( "Common/RoundedSelection_16x", 4.0f / 16.0f, FEditorStyle::GetSlateColor( "SelectionColor" ) ) );
-
-        /* The style of a menu bar button when it has a sub menu open */
-        Set( "Menu.Button.SubMenuOpen", new BORDER_BRUSH( "Common/Selection", FMargin( 4.f / 16.f ), FLinearColor( 0.10f, 0.10f, 0.10f ) ) );
     }
 }
 

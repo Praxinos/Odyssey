@@ -25,7 +25,6 @@ private:
     void InitTracks();
     void InitCommands();
     void InitToolbar();
-    void InitMenu(); // Popup
     void InitNotes();
 
 private:
