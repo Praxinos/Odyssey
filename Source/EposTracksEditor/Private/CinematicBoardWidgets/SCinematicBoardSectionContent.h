@@ -48,7 +48,7 @@ private:
 
     TSharedPtr<SCinematicBoardSectionTitle> mWidgetTitle;
 
-    EVisibility mOptionalWidgetsVisibility = EVisibility::Collapsed;
+    EVisibility mOptionalWidgetsVisibility { EVisibility::Hidden };
 
     //FOnDrop mOnDrop;
     //FOnDragEnter mOnDragEnter;

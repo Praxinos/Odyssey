@@ -112,13 +112,6 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         return BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object );
     };
 
-    auto IsPilotEjectVisible = [this]() -> bool
-    {
-        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
-            && mBoardSection.Pin()->GetSubSectionObject().GetSequence()
-            && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
-    };
-
     TAttribute<FText> GetTooltip = MakeAttributeLambda(
         [this]() -> FText
         {
@@ -149,8 +142,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         FUIAction(
             FExecuteAction::CreateLambda( PilotEject ),
             FCanExecuteAction::CreateLambda( CanPilotEject ),
-            FIsActionChecked::CreateLambda( IsPilotChecked ),
-            FIsActionButtonVisible::CreateLambda( IsPilotEjectVisible )
+            FIsActionChecked::CreateLambda( IsPilotChecked )
         ),
         NAME_None,
         FText::GetEmpty(),
@@ -176,24 +168,26 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         return BoardSequenceTools::CanSnapCameraToViewport( sequencer, subsection_object, local_frame );
     };
 
-    auto IsSnapVisible = [this]() -> bool
-    {
-        return mOptionalWidgetsVisibility.Get() == EVisibility::Visible
-                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()
-                && mBoardSection.Pin()->GetSubSectionObject().GetSequence()->IsA<UShotSequence>();
-    };
-
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( Snap ),
-            FCanExecuteAction::CreateLambda( CanSnap ),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( IsSnapVisible )
+            FCanExecuteAction::CreateLambda( CanSnap )
         ),
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "snap-camera-to-viewport-tooltip", "Snap the existing camera to the viewport (create a camera and set the current frame where to create the camera keyframe)" ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "SnapCameraToViewport" ) );
+
+    auto IsToolBarVisible = [this]() -> EVisibility
+    {
+        bool is_visible = mOptionalWidgetsVisibility.Get().IsVisible();
+        is_visible &= !!Cast<UShotSequence>( mBoardSection.Pin()->GetSubSectionObject().GetSequence() );
+
+        return is_visible ? EVisibility::Visible : EVisibility::Hidden;
+    };
+
+    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
+    left_toolbar->SetVisibility( MakeAttributeLambda( IsToolBarVisible ) );
 
     //---
 
@@ -208,7 +202,7 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
             + SHorizontalBox::Slot()
             .FillWidth( .5f )
             [
-                LeftToolbarBuilder.MakeWidget()
+                left_toolbar
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()

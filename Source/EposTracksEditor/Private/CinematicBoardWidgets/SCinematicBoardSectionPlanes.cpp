@@ -273,11 +273,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
-            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility ),
-            FCanExecuteAction(),
-            FIsActionChecked(),
-            //FIsActionChecked::CreateLambda( IsKeysAreaVisible ),
-            FIsActionButtonVisible::CreateLambda( [=](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility )
         ),
         NAME_None,
         FText::GetEmpty(),
@@ -305,7 +301,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
             FExecuteAction::CreateLambda( DetachPlane ),
             FCanExecuteAction::CreateLambda( CanDetachPlane ),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [=](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible && CanDetachPlane(); } )
+            FIsActionButtonVisible::CreateLambda( [=](){ return CanDetachPlane(); } )
         ),
         NAME_None,
         FText::GetEmpty(),
@@ -333,9 +329,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreateDrawing ),
-            FCanExecuteAction::CreateLambda( CanCreateDrawing ),
-            FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+            FCanExecuteAction::CreateLambda( CanCreateDrawing )
         ),
         NAME_None,
         FText::GetEmpty(),
@@ -362,15 +356,15 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
-            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::ToggleLighttable ),
-            FCanExecuteAction(),
-            FIsActionChecked(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
+            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::ToggleLighttable )
         ),
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetLighttableTooltip ),
         MakeAttributeLambda( GetLighttableIcon ) );
+
+    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
+    left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 
     //---
 
@@ -389,7 +383,7 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
                 + SHorizontalBox::Slot()
                 .FillWidth( .5f )
                 [
-                    LeftToolbarBuilder.MakeWidget()
+                    left_toolbar
                 ]
                 + SHorizontalBox::Slot()
                 .AutoWidth()
@@ -1686,32 +1680,30 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
 
     //---
 
-    auto CanCreatePlane = [this]() -> bool
-    {
-        ISequencer* sequencer = mSequencer.Pin().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        return BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
-    };
-
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( CanCreatePlane ) ),
+        FUIAction(),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionPlanes::MakeCreatePlaneMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-plane-and-settings-tooltip", "Create a new plane" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
-    // To always keep the real space of the toolbar as hidden keeps space
-    // Otherwise the verticalbox is (a little) smaller when the toolbar is collapsed
-    middle_widget->SetVisibility( MakeAttributeLambda( [this]() { return mOptionalWidgetsVisibility.Get() == EVisibility::Visible ? EVisibility::Visible : EVisibility::Hidden; } ) );
+    auto IsToolBarVisible = [this]() -> EVisibility
+    {
+        ISequencer* sequencer = mSequencer.Pin().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+
+        bool is_visible = mOptionalWidgetsVisibility.Get().IsVisible();
+        is_visible &= BoardSequenceTools::CanCreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
+
+        return is_visible ? EVisibility::Visible : EVisibility::Hidden;
+    };
+
+    TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
+    middle_toolbar->SetVisibility( MakeAttributeLambda( IsToolBarVisible ) );
 
     //---
 
@@ -1730,7 +1722,7 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
         .HAlign( HAlign_Center )
         .AutoHeight()
         [
-            middle_widget
+            middle_toolbar
         ]
     ];
 

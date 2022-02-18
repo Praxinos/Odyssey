@@ -264,18 +264,14 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
     MiddleToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreateNote ),
-            FCanExecuteAction::CreateLambda( CanCreateNote ),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( CanCreateNote ) ),
+            FCanExecuteAction::CreateLambda( CanCreateNote ) ),
         NAME_None,
         FText::GetEmpty(),
         LOCTEXT( "CreateNote", "Create a new Note" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    TSharedRef< SWidget > middle_widget = MiddleToolbarBuilder.MakeWidget();
-    // To always keep the real space of the toolbar as hidden keeps space
-    // Otherwise the verticalbox is (a little) smaller when the toolbar is collapsed
-    middle_widget->SetVisibility( MakeAttributeLambda( [this]() { return mOptionalWidgetsVisibility.Get() == EVisibility::Visible ? EVisibility::Visible : EVisibility::Hidden; } ) );
+    TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
+    middle_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 
     //---
 
@@ -308,7 +304,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
             .HAlign( HAlign_Center )
             .AutoHeight()
             [
-                middle_widget
+                middle_toolbar
             ]
         ]
     ];

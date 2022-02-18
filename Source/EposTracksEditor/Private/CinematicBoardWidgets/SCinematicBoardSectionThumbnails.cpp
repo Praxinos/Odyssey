@@ -32,41 +32,37 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     LeftToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
-        ),
+        FUIAction(),
         FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent ),
         FText::GetEmpty(),
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
 
-    //---
+    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
+    left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 
-    auto CanCreateCamera = [this]() -> bool
-    {
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
-    };
+    //---
 
     FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( CanCreateCamera )
-        ),
+        FUIAction(),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCreateCameraMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-camera-and-settings-tooltip", "Create a new camera" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+
+    auto IsToolBarVisible = [this]() -> EVisibility
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() ) ? EVisibility::Visible : EVisibility::Hidden;
+    };
+
+    TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
+    middle_toolbar->SetVisibility( MakeAttributeLambda( IsToolBarVisible ) );
 
     //---
 
@@ -75,16 +71,14 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
     RightToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return mOptionalWidgetsVisibility.Get() == EVisibility::Visible; } )
-        ),
+        FUIAction(),
         FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent ),
         FText::GetEmpty(),
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
         FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+
+    TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
+    right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 
     //---
 
@@ -104,7 +98,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             .AutoWidth()
             .VAlign( VAlign_Center )
             [
-                LeftToolbarBuilder.MakeWidget()
+                left_toolbar
             ]
             + SHorizontalBox::Slot()
             [
@@ -119,7 +113,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
                 .AutoHeight()
                 .HAlign( HAlign_Center )
                 [
-                    MiddleToolbarBuilder.MakeWidget()
+                    middle_toolbar
                 ]
                 // No more needed as the creation button of camera is inside the popup
                 //+ SVerticalBox::Slot()
@@ -146,7 +140,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             .AutoWidth()
             .VAlign( VAlign_Center )
             [
-                RightToolbarBuilder.MakeWidget()
+                right_toolbar
             ]
         ]
     ];
