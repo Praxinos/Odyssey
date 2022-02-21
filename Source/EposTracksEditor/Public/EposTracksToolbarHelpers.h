@@ -13,4 +13,7 @@ public:
     static void MakePlaneSettingsEntries( FMenuBuilder& iMenuBuilder );
     static void MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder );
     static void MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder );
+
+    static void MakeCameraEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioCameraName );
+    static void MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName );
 };

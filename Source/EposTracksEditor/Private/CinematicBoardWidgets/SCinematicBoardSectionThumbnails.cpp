@@ -10,6 +10,7 @@
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "EposTracksToolbarHelpers.h"
+#include "NamingConvention.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
@@ -151,20 +152,44 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 {
     FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
 
+    //---
+
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    FString camera_path;
+    TSharedRef<FString> camera_name = MakeShared<FString>();
+    NamingConvention::GenerateCameraActorPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), result.mInnerSequence, camera_path, *camera_name );
+
+    FString plane_path;
+    TSharedRef<FString> plane_name = MakeShared<FString>();
+    NamingConvention::GeneratePlaneActorPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), result.mInnerSequence, plane_path, *plane_name );
+
+    //---
+
+    EposTracksToolbarHelpers::MakeCameraEntries( MenuBuilder, camera_name );
     EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
+
+    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name );
     EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
 
-    auto CreateCamera = [this]() -> FReply
+    auto CreateCamera = [this, camera_name, plane_name]() -> FReply
     {
         if( !mBoardSection.IsValid() )
             return FReply::Unhandled();
 
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
+        FCameraArgs camera_args;
+        camera_args.mName = *camera_name;
+        FPlaneArgs plane_args;
+        plane_args.mName = *plane_name;
+        BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
 
         return FReply::Handled();
     };

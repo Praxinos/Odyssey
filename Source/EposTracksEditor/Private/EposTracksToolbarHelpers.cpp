@@ -104,4 +104,78 @@ EposTracksToolbarHelpers::MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder 
 
 }
 
+//static
+void
+EposTracksToolbarHelpers::MakeCameraEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioCameraName )
+{
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "camera-options.section-title", "Camera" ) );
+    {
+        auto TextCommited = [=]( const FText& iNewText, ETextCommit::Type iType )
+        {
+            if( !iType == ETextCommit::OnEnter )
+                return;
+
+            *ioCameraName = iNewText.ToString();
+        };
+
+        //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
+
+        iMenuBuilder.AddWidget( SNew( SHorizontalBox )
+                               + SHorizontalBox::Slot()
+                               .FillWidth( 1.f )
+                               [
+                                   SNew( STextBlock )
+                                   .Text( LOCTEXT( "camera-set-name-label", "Name" ) )
+                                   .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
+                               ]
+                               + SHorizontalBox::Slot()
+                               .FillWidth( 5.f )
+                               [
+                                   SNew( SEditableTextBox )
+                                   .Text( FText::FromString( *ioCameraName ) )
+                                   .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
+                                   .OnTextCommitted( FOnTextCommitted::CreateLambda( TextCommited ) )
+                               ],
+                               FText::GetEmpty() );
+    }
+    iMenuBuilder.EndSection();
+}
+
+//static
+void
+EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName )
+{
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "plane-options.section-title", "Plane" ) );
+    {
+        auto TextCommited = [=]( const FText& iNewText, ETextCommit::Type iType )
+        {
+            if( !iType == ETextCommit::OnEnter )
+                return;
+
+            *ioPlaneName = iNewText.ToString();
+        };
+
+        //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
+
+        iMenuBuilder.AddWidget( SNew( SHorizontalBox )
+                               + SHorizontalBox::Slot()
+                               .FillWidth( 1.f )
+                               [
+                                   SNew( STextBlock )
+                                   .Text( LOCTEXT( "plane-set-name-label", "Name" ) )
+                                   .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
+                               ]
+                               + SHorizontalBox::Slot()
+                               .FillWidth( 5.f )
+                               [
+                                   SNew( SEditableTextBox )
+                                   .Text( FText::FromString( *ioPlaneName ) )
+                                   .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
+                                   .OnTextCommitted( FOnTextCommitted::CreateLambda( TextCommited ) )
+                               ],
+                               FText::GetEmpty() );
+    }
+    iMenuBuilder.EndSection();
+}
+
 #undef LOCTEXT_NAMESPACE

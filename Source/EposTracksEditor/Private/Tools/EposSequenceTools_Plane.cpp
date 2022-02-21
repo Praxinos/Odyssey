@@ -110,7 +110,7 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera )
 
 //static
 void
-ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber )
+ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
 {
     if( !GCurrentLevelEditingViewportClient )
         return;
@@ -138,6 +138,9 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     FString plane_path;
     FString plane_name;
     NamingConvention::GeneratePlaneActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, plane_path, plane_name );
+
+    if( !iPlaneArgs.mName.IsEmpty() )
+        plane_name = iPlaneArgs.mName;
 
     plane->SetFolderPath( *plane_path );
     FActorLabelUtilities::RenameExistingActor( plane, plane_name, false ); // The shot name is displayed in another column in the world outliner
@@ -228,13 +231,13 @@ ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraAct
 
 //static
 void
-BoardSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
+    ShotSequenceTools::CreatePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneArgs );
 }
 
 //static
@@ -257,9 +260,9 @@ BoardSequenceTools::CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameN
 
 //static
 void
-ShotSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+ShotSequenceTools::CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
 {
-    CreatePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    CreatePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneArgs );
 }
 
 //static
@@ -280,7 +283,7 @@ ShotSequenceTools::CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNu
 
 //static
 void
-ShotSequenceTools::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
+ShotSequenceTools::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
 {
     FGuid camera_guid;
     ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
@@ -296,7 +299,7 @@ ShotSequenceTools::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     //---
 
-    ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iFrameNumber );
+    ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, camera_guid, camera, iFrameNumber, iPlaneArgs );
 
     //---
 

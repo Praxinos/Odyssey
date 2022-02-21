@@ -66,13 +66,13 @@ ShotSequenceTools::GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding )
 
 //static
 void
-BoardSequenceTools::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber )
+BoardSequenceTools::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, iPlaneArgs );
 }
 
 //static
@@ -95,9 +95,9 @@ BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrame
 
 //static
 void
-ShotSequenceTools::CreateCamera( ISequencer* iSequencer )
+ShotSequenceTools::CreateCamera( ISequencer* iSequencer, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
 {
-    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iCameraArgs, iPlaneArgs );
 }
 
 //static
@@ -118,7 +118,7 @@ ShotSequenceTools::CanCreateCamera( ISequencer* iSequencer )
 
 //static
 void
-ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
@@ -143,11 +143,11 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
     //---
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, &camera_guid );
+    ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, iCameraArgs, iPlaneArgs, &camera_guid );
     if( !camera )
         return;
 
-    ShotSequenceTools::CameraAdded( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame() );
+    ShotSequenceTools::CameraAdded( iSequencer, iSequence, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame(), iPlaneArgs );
 
     //---
 
@@ -200,7 +200,7 @@ ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 
 //static
 ACineCameraActor*
-ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid* oGuid ) // From FSequencer::CreateCamera()
+ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs, FGuid* oGuid ) // From FSequencer::CreateCamera()
 {
     if( !GCurrentLevelEditingViewportClient )
         return nullptr;
@@ -215,6 +215,9 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
     FString camera_path;
     FString camera_name;
     NamingConvention::GenerateCameraActorPathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, camera_path, camera_name );
+
+    if( !iCameraArgs.mName.IsEmpty() )
+        camera_name = iCameraArgs.mName;
 
     camera->SetFolderPath( *camera_path );
     FActorLabelUtilities::RenameExistingActor( camera, camera_name, false ); // The shot name is displayed in another column in the world outliner
@@ -237,11 +240,11 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
 //static
 void
-ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber)
+ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs& iPlaneArgs )
 {
     CreateCameraCut( iSequencer, iSequence, CameraGuid, FrameNumber );
 
-    SpawnAndBindPlane( iSequencer, iSequence, CameraGuid, iCamera, FrameNumber );
+    SpawnAndBindPlane( iSequencer, iSequence, CameraGuid, iCamera, FrameNumber, iPlaneArgs );
 }
 
 //static

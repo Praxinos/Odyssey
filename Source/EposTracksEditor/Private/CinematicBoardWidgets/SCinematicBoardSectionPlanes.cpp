@@ -19,6 +19,7 @@
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardWidgets/SMetaKeysArea.h"
+#include "NamingConvention.h"
 #include "Tools/LighttableTools.h"
 #include "Tools/ResourceAssetTools.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -1734,19 +1735,35 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer.Pin()->GetCommandBindings() );
 
+    //---
+
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
+
+    FString plane_path;
+    TSharedRef<FString> plane_name = MakeShared<FString>();
+    NamingConvention::GeneratePlaneActorPathName( *sequencer, sequencer->GetRootMovieSceneSequence(), result.mInnerSequence, plane_path, *plane_name );
+
+    //---
+
+    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name );
     EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
 
-    auto CreatePlane = [this]() -> FReply
+    auto CreatePlane = [this, plane_name]() -> FReply
     {
         if( !mBoardSection.IsValid() )
             return FReply::Unhandled();
 
         ISequencer* sequencer = mSequencer.Pin().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame() );
+        FPlaneArgs plane_args;
+        plane_args.mName = *plane_name;
+        BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame(), plane_args );
 
         return FReply::Handled();
     };
