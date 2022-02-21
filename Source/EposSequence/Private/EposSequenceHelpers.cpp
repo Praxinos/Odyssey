@@ -18,11 +18,13 @@
 #include "MovieSceneSequence.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Sections/MovieScene3DTransformSection.h"
+#include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieSceneParameterSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneMaterialTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
+#include "Tracks/MovieSceneVisibilityTrack.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -411,6 +413,51 @@ EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* 
     }
 
     return note_sections;
+}
+
+
+//static
+ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult
+ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreatePlaneVisibilityResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    FMovieSceneBinding* binding = moviescene->FindBinding( iPlaneBinding );
+
+    const TArray<UMovieSceneTrack*>& tracks = binding->GetTracks();
+    for( auto track : tracks )
+    {
+        result.mTrack = Cast<UMovieSceneVisibilityTrack>( track );
+        if( result.mTrack.IsValid() )
+            break;
+    }
+
+    if( !result.mTrack.IsValid() )
+        return result;
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
+    }
+
+    return result;
 }
 
 

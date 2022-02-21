@@ -14,6 +14,7 @@ class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
 class UMovieScene3DTransformSection;
+class UMovieSceneBoolSection;
 class UMovieSceneComponentMaterialTrack;
 class UMovieSceneNoteSection;
 class UMovieSceneParameterSection;
@@ -23,6 +24,7 @@ class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
+class UMovieSceneVisibilityTrack;
 class UStoryNote;
 class UWorld;
 class IMovieScenePlayer;
@@ -110,6 +112,17 @@ public:
 
     static int32 GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
     static int32 GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
+
+public:
+    struct FFindOrCreatePlaneVisibilityResult
+    {
+        TWeakObjectPtr<UMovieSceneVisibilityTrack>      mTrack;
+        bool mTrackCreated { false };
+        TArray<TWeakObjectPtr<UMovieSceneBoolSection>>  mSections;
+        bool mSectionsCreated { false };
+    };
+    static FFindOrCreatePlaneVisibilityResult           FindPlaneVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+    //static FFindOrCreatePlaneVisibilityResult         FindOrCreatePlaneVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
 public:
     struct FFindOrCreateMaterialDrawingResult

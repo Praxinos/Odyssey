@@ -8,9 +8,11 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Sections/MovieScene3DTransformSection.h"
+#include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "SequencerSettings.h"
 #include "Subsystems/AssetEditorSubsystem.h"
+#include "Tracks/MovieSceneVisibilityTrack.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "EposSequenceHelpers.h"
@@ -225,6 +227,18 @@ SCinematicBoardSectionPlaneTitle::MovieSceneDataChanged( EMovieSceneDataChangeTy
 
         LighttableTools::Update( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
     }
+
+    //---
+
+    ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult plane_visibility_result = ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    if( plane_visibility_result.mTrack.IsValid() && plane_visibility_result.mSections.Num() == 1 )
+    {
+        if( plane_visibility_result.mSections[0]->GetTrueRange() != result.mInnerMovieScene->GetPlaybackRange() )
+        {
+            plane_visibility_result.mSections[0]->SetRange( result.mInnerMovieScene->GetPlaybackRange() );
+        }
+    }
 }
 
 //---
@@ -369,6 +383,59 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
+    FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+
+    //-
+
+    auto IsWarning = [this]() -> bool
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+        //-
+
+        ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult plane_visibility_result = ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+        if( !plane_visibility_result.mTrack.IsValid() )
+            return false;
+
+        if( plane_visibility_result.mSections.Num() == 0 )
+            return false;
+
+        TRange<FFrameNumber> full_range( TRange<FFrameNumber>::Empty() );
+        for( auto section : plane_visibility_result.mSections )
+            full_range = TRange<FFrameNumber>::Hull( full_range, section->GetTrueRange() );
+
+        return full_range != result.mInnerMovieScene->GetPlaybackRange();
+    };
+
+    auto GetWarningTooltip = [this]() -> FText
+    {
+        return LOCTEXT( "warning-tooltip", "Warning: the plane visibility track doesn't match the shot length, set it maually" );
+    };
+
+    RightToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( IsWarning )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetWarningTooltip ),
+        FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Icons.Warning" ) );
+
+    TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
+    right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+
+    //---
+
     ChildSlot
     [
         SNew( SBorder )
@@ -397,8 +464,9 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
                 ]
                 + SHorizontalBox::Slot()
                 .FillWidth( .5f )
+                .HAlign( HAlign_Right )
                 [
-                    SNew( SSpacer )
+                    right_toolbar
                 ]
             ]
         ]
