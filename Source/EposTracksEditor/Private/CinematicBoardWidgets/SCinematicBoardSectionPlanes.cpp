@@ -1850,6 +1850,19 @@ SCinematicBoardSectionPlanes::Construct( const FArguments& InArgs, TSharedRef<FC
     RebuildPlaneList();
 }
 
+void
+SCinematicBoardSectionPlanes::CreatePlane( TSharedRef<FString> iPlaneName )
+{
+    if( !mBoardSection.IsValid() )
+        return;
+
+    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+    UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+    FPlaneArgs plane_args;
+    plane_args.mName = *iPlaneName;
+    BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame(), plane_args );
+}
+
 TSharedRef<SWidget>
 SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 {
@@ -1868,22 +1881,18 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
 
     //---
 
-    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name );
+    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionPlanes::CreatePlane, plane_name ) );
     EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
 
-    auto CreatePlane = [this, plane_name]() -> FReply
+    auto CreatePlaneOnClick = [this, plane_name]() -> FReply
     {
         if( !mBoardSection.IsValid() )
             return FReply::Unhandled();
 
-        ISequencer* sequencer = mSequencer.Pin().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        FPlaneArgs plane_args;
-        plane_args.mName = *plane_name;
-        BoardSequenceTools::CreatePlane( sequencer, section_object->GetInclusiveStartFrame(), plane_args );
+        CreatePlane( plane_name );
 
         return FReply::Handled();
     };
@@ -1905,7 +1914,7 @@ SCinematicBoardSectionPlanes::MakeCreatePlaneMenu()
                                SNew( SButton )
                                .Text( LOCTEXT( "create-plane-label", "Create a new plane" ) )
                                .ToolTipText( LOCTEXT( "create-plane-tooltip", "Create a new plane with those settings" ) )
-                               .OnClicked_Lambda( CreatePlane )
+                               .OnClicked_Lambda( CreatePlaneOnClick )
                                .IsEnabled_Lambda( CanCreatePlane )
                            ],
                            FText::GetEmpty(),

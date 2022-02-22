@@ -31,6 +31,7 @@ private:
     TSharedRef<SWidget> CreatePopupEntryNewSectionWithDurationText( FText iLabel, TSharedRef<int32> iNumberOfNewSequence );
 
     TSharedRef<SWidget> MakeCreateCameraMenu();
+    void CreateCamera( TSharedRef<FString> iCameraName, TSharedRef<FString> iPlaneName );
 
 protected:
     // SWidget overrides.

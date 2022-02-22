@@ -104,21 +104,31 @@ EposTracksToolbarHelpers::MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder 
 
 }
 
+namespace
+{
+static
+void
+TextCommited( const FText& iNewText, ETextCommit::Type iType, TSharedRef<FString> ioCameraName, FSimpleDelegate iOnTextCommit )
+{
+    if( iType == ETextCommit::OnCleared )
+        return;
+
+    *ioCameraName = iNewText.ToString();
+
+    if( iType == ETextCommit::OnEnter )
+        iOnTextCommit.Execute();
+}
+}
+
 //static
 void
-EposTracksToolbarHelpers::MakeCameraEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioCameraName )
+EposTracksToolbarHelpers::MakeCameraEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioCameraName, FSimpleDelegate iOnTextCommit, bool iFocus )
 {
+    TSharedPtr<SEditableTextBox> text_widget;
+
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "camera-options.section-title", "Camera" ) );
     {
-        auto TextCommited = [=]( const FText& iNewText, ETextCommit::Type iType )
-        {
-            if( !iType == ETextCommit::OnEnter )
-                return;
-
-            *ioCameraName = iNewText.ToString();
-        };
-
-        //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
+        //iMenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
 
         iMenuBuilder.AddWidget( SNew( SHorizontalBox )
                                + SHorizontalBox::Slot()
@@ -131,30 +141,44 @@ EposTracksToolbarHelpers::MakeCameraEntries( FMenuBuilder& iMenuBuilder, TShared
                                + SHorizontalBox::Slot()
                                .FillWidth( 5.f )
                                [
-                                   SNew( SEditableTextBox )
+                                   SAssignNew( text_widget, SEditableTextBox )
                                    .Text( FText::FromString( *ioCameraName ) )
                                    .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
-                                   .OnTextCommitted( FOnTextCommitted::CreateLambda( TextCommited ) )
+                                   .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioCameraName, iOnTextCommit ) )
+                                   .SelectAllTextWhenFocused( true )
                                ],
                                FText::GetEmpty() );
     }
     iMenuBuilder.EndSection();
+
+    if( iFocus )
+    {
+        // Same as in D:\Epic Games\UE_4.27\Engine\Source\Editor\ContentBrowser\Private\SAssetPicker.cpp
+        text_widget->RegisterActiveTimer( 0.f, FWidgetActiveTimerDelegate::CreateLambda( [=]( double InCurrentTime, float InDeltaTime ) -> EActiveTimerReturnType
+                                                                                         {
+                                                                                             if( text_widget.IsValid() )
+                                                                                             {
+                                                                                                 FWidgetPath WidgetToFocusPath;
+                                                                                                 FSlateApplication::Get().GeneratePathToWidgetUnchecked( text_widget.ToSharedRef(), WidgetToFocusPath );
+                                                                                                 FSlateApplication::Get().SetKeyboardFocus( WidgetToFocusPath, EFocusCause::SetDirectly );
+                                                                                                 WidgetToFocusPath.GetWindow()->SetWidgetToFocusOnActivate( text_widget );
+
+                                                                                                 return EActiveTimerReturnType::Stop;
+                                                                                             }
+
+                                                                                             return EActiveTimerReturnType::Continue;
+                                                                                         } ) );
+    }
 }
 
 //static
 void
-EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName )
+EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName, FSimpleDelegate iOnTextCommit, bool iFocus )
 {
+    TSharedPtr<SEditableTextBox> text_widget;
+
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "plane-options.section-title", "Plane" ) );
     {
-        auto TextCommited = [=]( const FText& iNewText, ETextCommit::Type iType )
-        {
-            if( !iType == ETextCommit::OnEnter )
-                return;
-
-            *ioPlaneName = iNewText.ToString();
-        };
-
         //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
 
         iMenuBuilder.AddWidget( SNew( SHorizontalBox )
@@ -168,14 +192,34 @@ EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedR
                                + SHorizontalBox::Slot()
                                .FillWidth( 5.f )
                                [
-                                   SNew( SEditableTextBox )
+                                   SAssignNew( text_widget, SEditableTextBox )
                                    .Text( FText::FromString( *ioPlaneName ) )
                                    .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
-                                   .OnTextCommitted( FOnTextCommitted::CreateLambda( TextCommited ) )
+                                   .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioPlaneName, iOnTextCommit ) )
+                                   .SelectAllTextWhenFocused( true )
                                ],
                                FText::GetEmpty() );
     }
     iMenuBuilder.EndSection();
+
+    if( iFocus )
+    {
+        // Same as in D:\Epic Games\UE_4.27\Engine\Source\Editor\ContentBrowser\Private\SAssetPicker.cpp
+        text_widget->RegisterActiveTimer( 0.f, FWidgetActiveTimerDelegate::CreateLambda( [=]( double InCurrentTime, float InDeltaTime ) -> EActiveTimerReturnType
+                                                                                         {
+                                                                                             if( text_widget.IsValid() )
+                                                                                             {
+                                                                                                 FWidgetPath WidgetToFocusPath;
+                                                                                                 FSlateApplication::Get().GeneratePathToWidgetUnchecked( text_widget.ToSharedRef(), WidgetToFocusPath );
+                                                                                                 FSlateApplication::Get().SetKeyboardFocus( WidgetToFocusPath, EFocusCause::SetDirectly );
+                                                                                                 WidgetToFocusPath.GetWindow()->SetWidgetToFocusOnActivate( text_widget );
+
+                                                                                                 return EActiveTimerReturnType::Stop;
+                                                                                             }
+
+                                                                                             return EActiveTimerReturnType::Continue;
+                                                                                         } ) );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

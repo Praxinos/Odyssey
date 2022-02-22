@@ -14,6 +14,6 @@ public:
     static void MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder );
     static void MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder );
 
-    static void MakeCameraEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioCameraName );
-    static void MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName );
+    static void MakeCameraEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioCameraName, FSimpleDelegate iOnTextCommit, bool iFocus = true );
+    static void MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName, FSimpleDelegate iOnTextCommit, bool iFocus = true );
 };

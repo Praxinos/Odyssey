@@ -147,6 +147,21 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     ];
 }
 
+void
+SCinematicBoardSectionThumbnails::CreateCamera( TSharedRef<FString> iCameraName, TSharedRef<FString> iPlaneName )
+{
+    if( !mBoardSection.IsValid() )
+        return;
+
+    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+    UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+    FCameraArgs camera_args;
+    camera_args.mName = *iCameraName;
+    FPlaneArgs plane_args;
+    plane_args.mName = *iPlaneName;
+    BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
+}
+
 TSharedRef<SWidget>
 SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 {
@@ -169,27 +184,21 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 
     //---
 
-    EposTracksToolbarHelpers::MakeCameraEntries( MenuBuilder, camera_name );
+    EposTracksToolbarHelpers::MakeCameraEntries( MenuBuilder, camera_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCamera, camera_name, plane_name ) );
     EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
 
-    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name );
+    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCamera, camera_name, plane_name ), false /* iFocus */ );
     EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
 
-    auto CreateCamera = [this, camera_name, plane_name]() -> FReply
+    auto CreateCameraOnClick = [this, camera_name, plane_name]() -> FReply
     {
         if( !mBoardSection.IsValid() )
             return FReply::Unhandled();
 
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        FCameraArgs camera_args;
-        camera_args.mName = *camera_name;
-        FPlaneArgs plane_args;
-        plane_args.mName = *plane_name;
-        BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
+        CreateCamera( camera_name, plane_name );
 
         return FReply::Handled();
     };
@@ -211,7 +220,7 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
                                SNew( SButton )
                                .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
                                .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
-                               .OnClicked_Lambda( CreateCamera )
+                               .OnClicked_Lambda( CreateCameraOnClick )
                                .IsEnabled_Lambda( CanCreateCamera )
                            ],
                            FText::GetEmpty(),
