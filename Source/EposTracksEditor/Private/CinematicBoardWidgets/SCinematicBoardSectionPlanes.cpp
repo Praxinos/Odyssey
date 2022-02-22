@@ -181,6 +181,9 @@ public:
 private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
+    void                TogglePlaneVisibility();
+    bool                IsPlaneVisible() const;
+
     void                ToggleLighttable();
     bool                IsLighttableOn() const;
 
@@ -294,6 +297,33 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         FText::GetEmpty(),
         MakeAttributeLambda( GetKeysAreaTooltip ),
         MakeAttributeLambda( GetKeysAreaIcon ) );
+
+    //-
+
+    auto GetPlaneActorVisibilityTooltip = [this]() -> FText
+    {
+        if( IsPlaneVisible() )
+            return LOCTEXT( "hide-plane-actor-tooltip", "Hide plane actor" );
+        else
+            return LOCTEXT( "show-plane-actor-tooltip", "Show plane actor" );
+    };
+
+    auto GetPlaneActorVisibilityIcon = [this]() -> FSlateIcon
+    {
+        if( IsPlaneVisible() )
+            return FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.VisibleIcon16x" );
+        else
+            return FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionPlaneTitle::TogglePlaneVisibility )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetPlaneActorVisibilityTooltip ),
+        MakeAttributeLambda( GetPlaneActorVisibilityIcon ) );
 
     //-
 
@@ -575,6 +605,28 @@ SCinematicBoardSectionPlaneTitle::GetBackgroundTint() const
         return FEditorStyle::GetSlateColor( "SelectionColor_Pressed" );
 
     return FSlateColor( FLinearColor( FColor( 48, 48, 48, 255 ) ) );
+}
+
+//---
+
+void
+SCinematicBoardSectionPlaneTitle::TogglePlaneVisibility()
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceTools::TogglePlaneVisibility( sequencer, *subsection_object, mBinding.GetGuid() );
+}
+
+bool
+SCinematicBoardSectionPlaneTitle::IsPlaneVisible() const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    return BoardSequenceTools::IsPlaneVisible( sequencer, *subsection_object, mBinding.GetGuid() );
 }
 
 //---

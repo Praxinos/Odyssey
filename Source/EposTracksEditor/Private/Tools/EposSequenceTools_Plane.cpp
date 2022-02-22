@@ -21,6 +21,7 @@
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
+#include "Sections/MovieSceneBoolSection.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
@@ -557,5 +558,116 @@ ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemRemoved );
 }
+
+//---
+
+//static
+bool
+BoardSequenceTools::IsPlaneVisible( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return false;
+
+    return ShotSequenceTools::IsPlaneVisible( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+bool
+BoardSequenceTools::IsPlaneVisible( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    return ShotSequenceTools::IsPlaneVisible( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+bool
+ShotSequenceTools::IsPlaneVisible( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    return ShotSequenceTools::IsPlaneVisible( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//static
+bool
+ShotSequenceTools::IsPlaneVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult plane_visibility_result = ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+
+    if( !plane_visibility_result.mTrack.IsValid() )
+        return false;
+
+    if( plane_visibility_result.mSections.Num() == 0 )
+        return false;
+
+    for( auto section : plane_visibility_result.mSections )
+        return section->GetChannel().GetDefault().Get( false );
+
+    return false;
+}
+
+//---
+
+//static
+void
+BoardSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+BoardSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, FGuid iPlaneBinding )
+{
+    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::TogglePlaneVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult plane_visibility_result = ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+
+    if( !plane_visibility_result.mTrack.IsValid() )
+        return;
+
+    if( plane_visibility_result.mSections.Num() == 0 )
+        return;
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "TogglePlaneVisibility", "Toggle Plane Visibility" ) );
+
+    //---
+
+    bool new_plane_visible = !IsPlaneVisible( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+    for( auto section : plane_visibility_result.mSections )
+    {
+        section->Modify();
+
+        section->GetChannel().SetDefault( new_plane_visible );
+    }
+
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+//---
 
 #undef LOCTEXT_NAMESPACE

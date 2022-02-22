@@ -422,6 +422,42 @@ public:
     static int32 GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
     /**
+    *  Get a plane visiblity of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a plane.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iPlaneBinding to get visibility.
+    */
+    static bool IsPlaneVisible( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
+    /**
+    *  Get a plane visiblity of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to detach a plane.
+    * @param UMovieSceneSubSection  iSubSection to detach a plane.
+    * @param FGuid                  iPlaneBinding to get visibility.
+    */
+    static bool IsPlaneVisible( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+
+    /**
+    *  Toggle a plane visiblity of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a plane.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iPlaneBinding to toggle visibility.
+    */
+    static void TogglePlaneVisibility( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+
+    /**
+    *  Toggle a plane visiblity of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to detach a plane.
+    * @param UMovieSceneSubSection  iSubSection to detach a plane.
+    * @param FGuid                  iPlaneBinding to toggle visibility.
+    */
+    static void TogglePlaneVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+
+    /**
     *  Delete a plane (with its actor) of the camera in the board section
     *
     * @param ISequencer     iSequencer to delete a plane.
@@ -718,6 +754,9 @@ public:
 
     static int32 GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
 
+    static bool IsPlaneVisible( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static void TogglePlaneVisibility( ISequencer* iSequencer, FGuid iPlaneBinding );
+
     static void DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding );
 
     static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType );
@@ -727,6 +766,8 @@ private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs );
     static void DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static bool CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+    static bool IsPlaneVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+    static void TogglePlaneVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static void DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
     static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera );
