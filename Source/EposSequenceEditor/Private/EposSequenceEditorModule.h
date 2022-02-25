@@ -51,6 +51,9 @@ private:
     void RegisterPropertyCustomizations();
     void UnregisterPropertyCustomizations();
 
+    void RegisterMovieRenderer();
+    void UnregisterMovieRenderer();
+
 private:
     static EAssetTypeCategories::Type   mEposAssetCategory;
     TSharedPtr<FBoardSequenceActions>   mBoardSequenceTypeActions;
@@ -60,4 +63,6 @@ private:
     TSharedPtr<FExtender>               mCinematicsMenuExtender;
 
     USequencerSettings*                 mSequencerSettings;
+
+    FDelegateHandle                     mMovieRendererDelegate;
 };
