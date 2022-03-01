@@ -89,6 +89,20 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 
 //---
 
+TArray<TWeakObjectPtr<UMovieSceneSequence>>
+UMovieSceneCinematicBoardSection::GetTakes() const
+{
+    return mTakes;
+}
+
+void
+UMovieSceneCinematicBoardSection::AddTake( TWeakObjectPtr<UMovieSceneSequence> iTake )
+{
+    mTakes.AddUnique( iTake );
+}
+
+//---
+
 void
 UMovieSceneCinematicBoardSection::ResizeLeadingEdge( FFrameNumber iNewFrame )
 {

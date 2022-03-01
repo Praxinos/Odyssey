@@ -25,6 +25,7 @@ class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
+class UShotSequence;
 class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
@@ -134,6 +135,14 @@ public:
 
     /** Stretch sequencer time range to view make the new range inside the view. */
     static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
+
+// Inside EposSequenceTools_Take
+public:
+    /** Create a new take (from the current subsequence) for the board section. */
+    static UShotSequence* CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection );
+
+    /** Switch the current take to the new one for the board section. */
+    static UShotSequence* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, UShotSequence* iTake );
 
 // Inside EposSequenceTools
 public:

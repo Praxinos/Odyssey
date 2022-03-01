@@ -20,10 +20,20 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
     /** Object constructor. */
     UMovieSceneCinematicBoardSection( const FObjectInitializer& ObjInitializer );
 
+public:
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     virtual void PreEditChange( FProperty* PropertyAboutToChange ) override;
 #endif
+
+public:
+    TArray<TWeakObjectPtr<UMovieSceneSequence>> GetTakes() const;
+
+    void AddTake( TWeakObjectPtr<UMovieSceneSequence> iTake );
+
+private:
+    UPROPERTY( VisibleAnywhere, Category = "Sequence|Section" )
+    TArray<TWeakObjectPtr<UMovieSceneSequence>> mTakes;
 
 public:
     /** @return The board display name. if empty, returns the sequence's name*/

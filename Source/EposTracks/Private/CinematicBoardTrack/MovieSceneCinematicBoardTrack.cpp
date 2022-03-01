@@ -60,6 +60,10 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     UMovieSceneSubSection* newSection = UMovieSceneSubTrack::AddSequenceOnRow( iSequence, shift_result.mNewRange.GetLowerBoundValue(), UE::MovieScene::DiscreteSize( shift_result.mNewRange ), iRowIndex );
 
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( newSection );
+    check( board_section );
+    board_section->AddTake( board_section->GetSequence() );
+
     // When a new sequence is added, sort all sequences to ensure they are in the correct order
     SortSections();
     // Once sequences are sorted fixup the surrounding sequences to fix any gaps
