@@ -95,7 +95,6 @@ FBoardSectionTake*
 BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &iSubSection );
-    //UShotSequence* old_sequence = Cast<UShotSequence>( board_section->GetSequence() );
     FBoardSectionTake* old_take = board_section->FindTake( board_section->GetSequence() );
 
     if( !iTake || !iTake->GetSequence().IsValid() )
@@ -128,11 +127,26 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
     //---
 
-    //iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    int32 new_duration = UE::MovieScene::DiscreteSize( iTake->GetSequence()->GetMovieScene()->GetPlaybackRange() );
+    TRange<FFrameNumber> new_range = UE::MovieScene::MakeDiscreteRangeFromLower( board_section->GetTrueRange().GetLowerBound(), new_duration );
+
+    board_section->StartResizing();
+    board_section->ResizeTrailingEdge( new_range.GetUpperBoundValue() );
+    if( board_section->IsResizingTrailing() )
+    {
+        board_section->Resizing(); // So OnSectionMoved() will go inside IsResizing()
+
+        UMovieSceneCinematicBoardTrack* track = board_section->GetTypedOuter<UMovieSceneCinematicBoardTrack>();
+        track->OnSectionMoved( *board_section, EPropertyChangeType::ValueSet ); // This will call StopResizing()
+    }
+    else
+    {
+        board_section->StopResizing();
+    }
+
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 
     return old_take;
-    //return old_sequence;
 }
 
 //---
