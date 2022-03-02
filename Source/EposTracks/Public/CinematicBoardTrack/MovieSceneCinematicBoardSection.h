@@ -28,7 +28,8 @@ public:
 
 private:
     UPROPERTY()
-    TWeakObjectPtr<UMovieSceneSequence> mSequence;
+    //UPROPERTY( VisibleAnywhere, Category="Take" )
+    TWeakObjectPtr<UMovieSceneSequence> Sequence;
 };
 
 
@@ -60,7 +61,8 @@ public:
 
 private:
     UPROPERTY()
-    TArray<FBoardSectionTake> mTakes;
+    //UPROPERTY( VisibleAnywhere, Category="Takes" )
+    TArray<FBoardSectionTake> Takes;
 
 public:
     /** @return The board display name. if empty, returns the sequence's name*/

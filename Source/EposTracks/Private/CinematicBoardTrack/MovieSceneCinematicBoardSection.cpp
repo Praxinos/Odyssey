@@ -87,27 +87,29 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
     }
 }
 
+#endif
+
 //---
 
 FBoardSectionTake::FBoardSectionTake()
-    : mSequence()
+    : Sequence()
 {
 }
 
 FBoardSectionTake::FBoardSectionTake( TWeakObjectPtr<UMovieSceneSequence> iSequence )
-    : mSequence( iSequence )
+    : Sequence( iSequence )
 {
 }
 
 TWeakObjectPtr<UMovieSceneSequence>
 FBoardSectionTake::GetSequence()
 {
-    return mSequence;
+    return Sequence;
 }
 TWeakObjectPtr<UMovieSceneSequence>
 FBoardSectionTake::GetSequence() const
 {
-    return mSequence;
+    return Sequence;
 }
 
 bool
@@ -116,10 +118,12 @@ operator==( const FBoardSectionTake& iA, const FBoardSectionTake& iB )
     return iA.GetSequence() == iB.GetSequence();
 }
 
+//-
+
 TArray<FBoardSectionTake>
 UMovieSceneCinematicBoardSection::GetTakes() const
 {
-    return mTakes;
+    return Takes;
 }
 
 void
@@ -128,22 +132,24 @@ UMovieSceneCinematicBoardSection::AddTake( const FBoardSectionTake& iTake )
     if( !iTake.GetSequence().IsValid() )
         return;
 
-    mTakes.AddUnique( iTake );
+    Takes.AddUnique( iTake );
 }
 
 FBoardSectionTake*
 UMovieSceneCinematicBoardSection::FindTake( const FBoardSectionTake& iTake )
 {
-    return mTakes.FindByPredicate( [iTake]( const FBoardSectionTake& iTakeEntry ) { return iTakeEntry == iTake; } );
+    return Takes.FindByPredicate( [iTake]( const FBoardSectionTake& iTakeEntry ) { return iTakeEntry == iTake; } );
 }
 
 FBoardSectionTake*
 UMovieSceneCinematicBoardSection::FindTake( const UMovieSceneSequence* iSequence )
 {
-    return mTakes.FindByPredicate( [iSequence]( const FBoardSectionTake& iTakeEntry ) { return iTakeEntry.GetSequence() == iSequence; } );
+    return Takes.FindByPredicate( [iSequence]( const FBoardSectionTake& iTakeEntry ) { return iTakeEntry.GetSequence() == iSequence; } );
 }
 
 //---
+
+#if WITH_EDITOR
 
 void
 UMovieSceneCinematicBoardSection::ResizeLeadingEdge( FFrameNumber iNewFrame )
