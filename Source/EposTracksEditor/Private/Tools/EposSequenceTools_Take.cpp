@@ -33,9 +33,59 @@
 UShotSequence*
 BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection )
 {
-    //TODO: add undo ............................................................................
+    UMovieSceneSequence* subsequence = iSubSection.GetSequence();
+    if( !subsequence )
+        return nullptr;
+    if( subsequence->IsA<UBoardSequence>() )
+        return nullptr;
 
-    return nullptr;
+    const FScopedTransaction transaction( LOCTEXT( "transaction.create-take", "Create Take" ) );
+
+    //---
+
+    FString sequence_path;
+    FString sequence_name;
+    FShotNameElements shot_name_elements;
+    FString sequence_pathname = NamingConvention::GenerateTakeAssetPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequencer->GetFocusedMovieSceneSequence(), &iSubSection, sequence_path, sequence_name, shot_name_elements );
+
+    IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+    UObject* newAsset = assetTools.DuplicateAsset( sequence_name, sequence_path, subsequence );
+    UShotSequence* shot_sequence = CastChecked<UShotSequence>( newAsset );
+
+    if( !shot_sequence )
+        return nullptr;
+
+    shot_sequence->NameElements = shot_name_elements;
+
+    //---
+
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &iSubSection );
+    board_section->AddTake( shot_sequence );
+
+    BoardSequenceTools::SwitchTake( iSequencer, iSubSection, shot_sequence );
+
+    //---
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+
+    ShotSequenceTools::CloneInnerContent( iSequencer, result.mInnerSequence, result.mInnerSequenceId, false );
+
+    //---
+
+    ////new_section->SetRange( iSection->GetRange() );
+    ////new_section->SetRowIndex( MovieSceneToolHelpers::FindAvailableRowIndex( boardTrack, new_section ) );
+    //new_section->Parameters.StartFrameOffset = iSection->Parameters.StartFrameOffset;
+    //new_section->Parameters.TimeScale = iSection->Parameters.TimeScale;
+    //new_section->SetPreRollFrames( iSection->GetPreRollFrames() );
+
+    //iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+    //BoardSequenceTools::UpdateViewRange( iSequencer, new_section ? new_section->GetTrueRange() : TRange<FFrameNumber>::Empty() );
+    iSequencer->EmptySelection();
+    iSequencer->SelectSection( &iSubSection );
+    iSequencer->ThrobSectionSelection();
+
+    return shot_sequence;
 }
 
 //static
@@ -50,7 +100,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "SwitchTake", "Switch Take" ) );
+    const FScopedTransaction transaction( LOCTEXT( "transaction.switch-take", "Switch Take" ) );
 
     //---
 
@@ -72,7 +122,8 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
     //---
 
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    //iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 
     return old_sequence;
 }

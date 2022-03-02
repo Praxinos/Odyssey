@@ -630,7 +630,7 @@ public:
     * @param ISequencer             iSequencer to clone the section.
     * @param UMovieSceneSubSection* iSection   the section to clone.
     */
-    static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSection* iSection, bool iEmptyDrawings );
+    static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings );
 
 private:
     static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );
