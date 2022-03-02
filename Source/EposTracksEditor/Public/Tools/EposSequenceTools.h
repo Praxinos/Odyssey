@@ -29,6 +29,7 @@ class UShotSequence;
 class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
+struct FBoardSectionTake;
 struct FMovieSceneChannelHandle;
 
 struct FCameraArgs
@@ -139,10 +140,10 @@ public:
 // Inside EposSequenceTools_Take
 public:
     /** Create a new take (from the current subsequence) for the board section. */
-    static UShotSequence* CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection );
+    static FBoardSectionTake* CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection );
 
     /** Switch the current take to the new one for the board section. */
-    static UShotSequence* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, UShotSequence* iTake );
+    static FBoardSectionTake* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake );
 
 // Inside EposSequenceTools
 public:

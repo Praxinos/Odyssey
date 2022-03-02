@@ -30,7 +30,7 @@
 //---
 
 //static
-UShotSequence*
+FBoardSectionTake*
 BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection )
 {
     UMovieSceneSequence* subsequence = iSubSection.GetSequence();
@@ -57,12 +57,14 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
 
     shot_sequence->NameElements = shot_name_elements;
 
+    FBoardSectionTake take( shot_sequence );
+
     //---
 
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &iSubSection );
-    board_section->AddTake( shot_sequence );
+    board_section->AddTake( take );
 
-    BoardSequenceTools::SwitchTake( iSequencer, iSubSection, shot_sequence );
+    BoardSequenceTools::SwitchTake( iSequencer, iSubSection, board_section->FindTake( take ) );
 
     //---
 
@@ -85,17 +87,21 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     iSequencer->SelectSection( &iSubSection );
     iSequencer->ThrobSectionSelection();
 
-    return shot_sequence;
+    return board_section->FindTake( take );
 }
 
 //static
-UShotSequence*
-BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, UShotSequence* iTake )
+FBoardSectionTake*
+BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &iSubSection );
-    UShotSequence* old_sequence = Cast<UShotSequence>( board_section->GetSequence() );
+    //UShotSequence* old_sequence = Cast<UShotSequence>( board_section->GetSequence() );
+    FBoardSectionTake* old_take = board_section->FindTake( board_section->GetSequence() );
 
-    if( !board_section->GetTakes().Contains( iTake ) )
+    if( !iTake || !iTake->GetSequence().IsValid() )
+        return nullptr;
+
+    if( !board_section->FindTake( *iTake ) )
         return nullptr;
 
     //---
@@ -111,7 +117,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     FProperty* ChangedProperty = FindFProperty<FProperty>( UMovieSceneCinematicBoardSection::StaticClass(), "SubSequence" );
     board_section->PreEditChange( ChangedProperty );
 
-    board_section->SetSequence( iTake );
+    board_section->SetSequence( iTake->GetSequence().Get() );
 
     FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
     //CameraComponent->PostEditChangeProperty( PropertyChangedEvent );
@@ -125,7 +131,8 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     //iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 
-    return old_sequence;
+    return old_take;
+    //return old_sequence;
 }
 
 //---

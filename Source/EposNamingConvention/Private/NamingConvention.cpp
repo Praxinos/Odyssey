@@ -1179,31 +1179,11 @@ NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, c
         UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
         for( auto take : board_section->GetTakes() )
         {
-            UShotSequence* shot_sequence = Cast<UShotSequence>( take );
+            UShotSequence* shot_sequence = Cast<UShotSequence>( take.GetSequence() );
             if( shot_sequence )
                 take_sequences.Add( shot_sequence );
         }
     }
-    /*
-    TArray<UShotSequence*> shot_sequences;
-
-    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
-    if( hierarchy )
-    {
-        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
-        for( auto pair : map )
-        {
-            UMovieSceneSequence* sequence = pair.Value.GetSequence();
-            FMovieSceneSequenceID sequence_id = pair.Key;
-
-            UShotSequence* shot_sequence = Cast<UShotSequence>( sequence );
-            if( !shot_sequence )
-                continue;
-
-            shot_sequences.AddUnique( shot_sequence );
-        }
-    }
-    */
 
     //--- Compute the next valid shot index
 

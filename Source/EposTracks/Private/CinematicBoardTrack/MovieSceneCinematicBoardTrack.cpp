@@ -62,7 +62,8 @@ UMovieSceneCinematicBoardTrack::AddSequenceOnRow( UMovieSceneSequence* iSequence
 
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( newSection );
     check( board_section );
-    board_section->AddTake( board_section->GetSequence() );
+    FBoardSectionTake take( board_section->GetSequence() );
+    board_section->AddTake( take );
 
     // When a new sequence is added, sort all sequences to ensure they are in the correct order
     SortSections();
