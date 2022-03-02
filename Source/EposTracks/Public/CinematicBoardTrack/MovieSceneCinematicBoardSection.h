@@ -51,6 +51,8 @@ public:
     virtual void PreEditChange( FProperty* PropertyAboutToChange ) override;
 #endif
 
+    virtual void PostLoad() override;
+
 public:
     TArray<FBoardSectionTake> GetTakes() const;
 

@@ -91,6 +91,30 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 
 //---
 
+void
+UMovieSceneCinematicBoardSection::PostLoad()
+{
+    UMovieSceneSequence* subsequence = GetSequence();
+
+    // compatibility for section created before adding takes, so add the current sequence as the first take
+    if( !GetTakes().Num() && subsequence )
+    {
+        FString class_name = subsequence->GetClass()->GetName();
+        // As it is for compatibility only, it's certainly ok to do like that
+        // (as EposTracks module doesn't depend/know the EposSequence module (only EposMovieScene module))
+        // But do NOT make the same elsewhere !
+        if( class_name == TEXT( "ShotSequence" ) )
+        {
+            FBoardSectionTake take( subsequence );
+            AddTake( take );
+        }
+    }
+
+    Super::PostLoad();
+}
+
+//---
+
 FBoardSectionTake::FBoardSectionTake()
     : Sequence()
 {

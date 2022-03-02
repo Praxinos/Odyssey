@@ -873,23 +873,24 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
     }
     ioMenuBuilder.EndSection();
 
-    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "TakeMenuText", "Take" ) );
+    if( Cast<UShotSequence>( sectionObject.GetSequence() ) )
     {
-        //---
+        ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "TakeMenuText", "Take" ) );
+        {
+            ioMenuBuilder.AddSubMenu(
+                LOCTEXT( "TakesMenu", "Takes" ),
+                LOCTEXT( "TakesMenuTooltip", "Shot takes" ),
+                FNewMenuDelegate::CreateSP( this, &FCinematicBoardSection::AddTakesMenu ) );
 
-        ioMenuBuilder.AddSubMenu(
-            LOCTEXT( "TakesMenu", "Takes" ),
-            LOCTEXT( "TakesMenuTooltip", "Shot takes" ),
-            FNewMenuDelegate::CreateLambda( [=]( FMenuBuilder& InMenuBuilder ) { AddTakesMenu( InMenuBuilder ); } ) );
-
-        ioMenuBuilder.AddMenuEntry(
-            LOCTEXT( "NewTake", "New Take" ),
-            FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
-            FSlateIcon(),
-            FUIAction( FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ) )
-        );
+            ioMenuBuilder.AddMenuEntry(
+                LOCTEXT( "NewTake", "New Take" ),
+                FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
+                FSlateIcon(),
+                FUIAction( FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ) )
+            );
+        }
+        ioMenuBuilder.EndSection();
     }
-    ioMenuBuilder.EndSection();
 }
 
 void
