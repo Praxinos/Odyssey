@@ -9,6 +9,7 @@
 #include "Widgets/Input/SSpinBox.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "EposTracksToolbarHelpers.h"
 #include "NamingConvention.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -41,6 +42,30 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
     left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+
+    //---
+
+    FToolBarBuilder TopToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    TopToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    TopToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+
+    TopToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeTakeMenu ),
+        FText::GetEmpty(),
+        LOCTEXT( "switch-take-tooltip", "Switch take" ),
+        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+
+    auto IsTopToolBarVisible = [this]() -> EVisibility
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section_object );
+        return ( board_section->GetTakes().Num() > 1 && mOptionalWidgetsVisibility.Get().IsVisible() ) ? EVisibility::Visible : EVisibility::Collapsed;
+    };
+
+    TSharedRef< SWidget > top_toolbar = TopToolbarBuilder.MakeWidget();
+    top_toolbar->SetVisibility( MakeAttributeLambda( IsTopToolBarVisible ) );
 
     //---
 
@@ -92,7 +117,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         ]
         + SOverlay::Slot()
         .HAlign( HAlign_Fill )
-        .VAlign( VAlign_Center )
+        .VAlign( VAlign_Fill )
         [
             SNew( SHorizontalBox )
             + SHorizontalBox::Slot()
@@ -107,12 +132,21 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()
-            .VAlign( VAlign_Center )
+            .VAlign( VAlign_Fill )
             [
                 SNew( SVerticalBox )
+
                 + SVerticalBox::Slot()
                 .AutoHeight()
                 .HAlign( HAlign_Center )
+                [
+                    top_toolbar
+                ]
+
+                + SVerticalBox::Slot()
+                .FillHeight( 1 )
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
                 [
                     middle_toolbar
                 ]
@@ -225,6 +259,37 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
                            ],
                            FText::GetEmpty(),
                            true /* NoIndent */ );
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+SCinematicBoardSectionThumbnails::MakeTakeMenu()
+{
+    FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
+
+    //---
+
+    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
+    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( &subsection );
+
+    for( auto take : board_section->GetTakes() )
+    {
+        TWeakObjectPtr<UMovieSceneSequence> take_sequence = take.GetSequence();
+        if( !take_sequence.IsValid() )
+            continue;
+
+        MenuBuilder.AddMenuEntry(
+            take_sequence->GetDisplayName(),
+            FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( take_sequence->GetPathName() ) ),
+            take_sequence->GetPathName() == board_section->GetSequence()->GetPathName() ? FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Empty" ),
+            FUIAction( FExecuteAction::CreateLambda( [this, sequencer, board_section, take]()
+                                                     {
+                                                         BoardSequenceTools::SwitchTake( sequencer.Get(), *board_section, board_section->FindTake( take ) );
+                                                     } ) )
+        );
+    }
 
     return MenuBuilder.MakeWidget();
 }
