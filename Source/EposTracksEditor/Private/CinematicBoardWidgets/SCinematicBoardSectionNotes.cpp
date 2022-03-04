@@ -39,6 +39,9 @@ public:
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
 
 private:
+    void EditNote();
+    bool CanEditNote();
+
     void CacheLines();
 
     void BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder );
@@ -61,6 +64,28 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
     mNoteSection = InArgs._NoteSection;
     mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
 
+    //---
+
+    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateSP( this, &SCinematicBoardSectionNote::EditNote ),
+            FCanExecuteAction::CreateSP( this, &SCinematicBoardSectionNote::CanEditNote )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "edit-note-tooltip", "Edit the note in its editor" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "NoteSettings" )
+    );
+
+    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
+    left_toolbar->SetVisibility( MakeAttributeLambda( [this]() { return mOptionalWidgetsVisibility.Get().IsVisible() ? EVisibility::Visible : EVisibility::Collapsed; } ) );
+
+    //---
+
     auto GetFirstLine = [=]() -> FText
     {
         CacheLines();
@@ -82,10 +107,49 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
         return FText::FromString( mNoteSection->GetNote()->Text );
     };
 
+    //---
+
+    auto GetFont = [this]() -> FSlateFontInfo
+    {
+        UStoryNote* note = mNoteSection.IsValid() ? mNoteSection->GetNote() : nullptr;
+
+        return note ? note->Font : FSlateFontInfo();
+    };
+
+    auto GetColor = [this]() -> FLinearColor
+    {
+        UStoryNote* note = mNoteSection.IsValid() ? mNoteSection->GetNote() : nullptr;
+
+        return note ? note->ColorAndOpacity : FLinearColor::White;
+    };
+
+    auto GetShadowColor = [this]() -> FLinearColor
+    {
+        UStoryNote* note = mNoteSection.IsValid() ? mNoteSection->GetNote() : nullptr;
+
+        return note ? note->ShadowColorAndOpacity : FLinearColor::Black;
+    };
+
+    auto GetShadowOffset = [this]() -> FVector2D
+    {
+        UStoryNote* note = mNoteSection.IsValid() ? mNoteSection->GetNote() : nullptr;
+
+        return note ? note->ShadowOffset : FVector2D::UnitVector;
+    };
+
+    //---
+
     ChildSlot
-    .Padding( FMargin( 5, 3 ) )
+    .Padding( FMargin( 2, 3 ) )
     [
         SNew( SHorizontalBox )
+
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            left_toolbar
+        ]
 
         +SHorizontalBox::Slot()
         .VAlign( VAlign_Center )
@@ -93,9 +157,26 @@ SCinematicBoardSectionNote::Construct( const FArguments& InArgs, TSharedRef<FCin
             SNew( STextBlock )
             .Text_Lambda( GetFirstLine )
             .ToolTipText_Lambda( GetTooltip )
-            .ShadowOffset( FVector2D( 1, 1 ) )
+            .Font_Lambda( GetFont )
+            .ColorAndOpacity_Lambda( GetColor )
+            .ShadowColorAndOpacity_Lambda( GetShadowColor )
+            .ShadowOffset_Lambda( GetShadowOffset )
         ]
     ];
+}
+
+void
+SCinematicBoardSectionNote::EditNote()
+{
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+    AssetEditorSubsystem->OpenEditorForAsset( mNoteSection->GetNote() );
+}
+
+bool
+SCinematicBoardSectionNote::CanEditNote()
+{
+    return mNoteSection.IsValid() && mNoteSection->GetNote();
 }
 
 void
@@ -114,21 +195,6 @@ SCinematicBoardSectionNote::CacheLines()
 void
 SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
 {
-    auto EditNote = [=]()
-    {
-        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        check( !AssetEditorSubsystem->FindEditorsForAsset( mNoteSection->GetNote() ).Num() );
-
-        AssetEditorSubsystem->OpenEditorForAsset( mNoteSection->GetNote() );
-    };
-
-    auto CanEditNote = [=]() -> bool
-    {
-        return mNoteSection.IsValid() && mNoteSection->GetNote();
-    };
-
-    //-
-
     auto DeleteNote = [=]()
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
@@ -152,8 +218,8 @@ SCinematicBoardSectionNote::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder )
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-note-label", "Edit..." ),
                                 LOCTEXT( "edit-note-tooltip", "Edit the note in its editor" ),
                                 FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( EditNote ),
-                                           FCanExecuteAction::CreateLambda( CanEditNote ) ) );
+                                FUIAction( FExecuteAction::CreateSP( this, &SCinematicBoardSectionNote::EditNote ),
+                                           FCanExecuteAction::CreateSP( this, &SCinematicBoardSectionNote::CanEditNote ) ) );
 
     ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-note-label", "Delete" ),
                                 LOCTEXT( "delete-note-tooltip", "Delete the note" ),
@@ -204,7 +270,6 @@ SCinematicBoardSectionNote::OnMouseButtonDoubleClick( const FGeometry& InMyGeome
             return FReply::Unhandled();
 
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        check( !AssetEditorSubsystem->FindEditorsForAsset( mNoteSection->GetNote() ).Num() );
 
         AssetEditorSubsystem->OpenEditorForAsset( mNoteSection->GetNote() );
 

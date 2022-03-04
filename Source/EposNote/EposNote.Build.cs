@@ -39,6 +39,7 @@ public class EposNote : ModuleRules
                 "Slate",
                 "SlateCore",
                 // [RUNTIME] custom engine dependencies
+                "UMG", // For UWidget::GetDefaultFontName() in UStoryNote
                 // [RUNTIME] custom plugin dependencies
             }
             );

@@ -50,10 +50,21 @@ FNoteSection::GetSectionTitle() const
 FText
 FNoteSection::GetSectionToolTip() const
 {
+    TArray<FText> lines;
+
+    lines.Add( FText::GetEmpty() );
+
     UMovieSceneNoteSection* NoteSection = Cast<UMovieSceneNoteSection>( &mSection );
     check( NoteSection );
 
-    return NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty();
+    lines.Add( NoteSection->GetNote() ? FText::FromString( NoteSection->GetNote()->Text ) : FText::GetEmpty() );
+
+    //---
+
+    lines.Add( FText::GetEmpty() );
+    lines.Add( LOCTEXT( "note-section-tooltip.edit-note", "([Ctrl] + Double-click) on the note section to open the note editor" ) );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), lines );
 }
 
 float

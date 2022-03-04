@@ -3,9 +3,14 @@
 
 #include "StoryNote.h"
 
+#include "Components/Widget.h"
+#include "Engine/Font.h"
+
 //---
 
 UStoryNote::UStoryNote( const FObjectInitializer& ObjectInitializer )
     : Super( ObjectInitializer )
 {
+    static ConstructorHelpers::FObjectFinder<UFont> RobotoFontObj( *UWidget::GetDefaultFontName() );
+    Font = FSlateFontInfo( RobotoFontObj.Object, 12, FName( "Regular" ) );
 }
