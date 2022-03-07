@@ -410,7 +410,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
                 if( bPred ) {
                     // TODO: This part can be optimized and multithreaded
                     for( int k = 0; k < len; k++ ) {
-                        checkf( false, TEXT( "Not implemented properly yet" ) );
+                        //checkf( false, TEXT( "Not implemented properly yet" ) );
                         ConvertULISFormatToTextureSourceFormat(
                               iData->PixelBits( ioSrcRects[i][j].x, ioSrcRects[i][j].y + k )
                             , tileImages[i][j][0].RawData.GetData() + rowSize * k
