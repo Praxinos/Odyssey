@@ -22,6 +22,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardWidgets/SMetaKeysArea.h"
 #include "NamingConvention.h"
+#include "PlaneActor.h"
 #include "Tools/LighttableTools.h"
 #include "Tools/ResourceAssetTools.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -533,23 +534,14 @@ SCinematicBoardSectionPlaneTitle::OnMouseButtonUp( const FGeometry& MyGeometry, 
     if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
         FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
         UMovieSceneSection* section_object = board_section->GetSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-        auto objects = sequencer->FindBoundObjects( mBinding.GetGuid(), result.mInnerSequenceId );
-
-        // To unselect section(s)
-        sequencer->EmptySelection();
-        // And then select the current one
-        sequencer->SelectSection( section_object );
-
-        // To unselect all actors
-        GEditor->SelectNone( true, true );
-        // And then select the current one
-        for( auto object : objects )
-            GEditor->SelectActor( Cast<AActor>( object ), true, true );
+        if( MouseEvent.IsControlDown() )
+            BoardSequenceTools::SelectMultiPlane( sequencer, subsection_object, mBinding.GetGuid() );
+        else
+            BoardSequenceTools::SelectSinglePlane( sequencer, subsection_object, mBinding.GetGuid() );
 
         return FReply::Handled();
     }
@@ -1566,12 +1558,34 @@ SCinematicBoardSectionPlane::GetKeysAreaVisibility() const
     return section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
+static
+void
+ToggleKeysAreaVisibility( UMovieSceneCinematicBoardSection* iBoardSection, TArray<FGuid> iPlaneBindings, FGuid iPlaneReference )
+{
+    // This is the current plane which is the reference state
+    bool is_reference_visible = iBoardSection->IsPlaneKeysAreaVisible( iPlaneReference );
+
+    for( auto plane_binding : iPlaneBindings )
+    {
+        if( is_reference_visible )
+        {
+            if( iBoardSection->IsPlaneKeysAreaVisible( plane_binding ) )
+                iBoardSection->TogglePlaneKeysAreaVisibility( plane_binding ); // If the master is expanded, collapse all expanded planes
+        }
+        else
+        {
+            if( !iBoardSection->IsPlaneKeysAreaVisible( plane_binding ) )
+                iBoardSection->TogglePlaneKeysAreaVisibility( plane_binding ); // If the master is collapsed, expand all collpased planes
+        }
+    }
+};
+
 void
 SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 {
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
-    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieSceneCinematicBoardSection* board_section_object = Cast<UMovieSceneCinematicBoardSection>( board_section->GetSectionObject() );
+    UMovieSceneSequence* inner_sequence = board_section_object->GetSequence();
     UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
@@ -1580,20 +1594,59 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     //---
 
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *board_section_object, sequencer->GetFocusedTemplateID() );
+    TArray<FGuid> plane_bindings;
+    ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
+
+    if( !plane_bindings.Contains( mBinding.GetGuid() ) )
+    {
+        BoardSequenceTools::SelectSinglePlane( sequencer, board_section_object, mBinding.GetGuid() );
+
+        plane_bindings = { mBinding.GetGuid() };
+    }
+
+    if( plane_bindings.Num() > 1 )
+        plane_track_text = LOCTEXT( "planes-selected", "(selected)" );
+
+    //---
+
     ioMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "plane-section-label", "Plane: {0}" ), plane_track_text ) );
 
-    auto DetachPlane = [this]()
+    auto TogglePlaneVisibility = [this, plane_bindings]()
     {
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
-        BoardSequenceTools::DetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+        BoardSequenceTools::TogglePlaneVisibility( sequencer, subsection_object, plane_bindings, mBinding.GetGuid() );
     };
 
-    auto CanDetachPlane = [this]() -> bool
+    bool is_plane_visible = BoardSequenceTools::IsPlaneVisible( sequencer, *board_section_object, mBinding.GetGuid() );
+    FText label_text   = is_plane_visible ? LOCTEXT( "hide-plane-actor-label", "Hide" )                                 : LOCTEXT( "show-plane-actor-label", "Show" );
+    FText tooltip_text = is_plane_visible ? LOCTEXT( "hide-plane-actor-tooltip", "Hide plane actor" )                   : LOCTEXT( "show-plane-actor-tooltip", "Show plane actor" );
+    FSlateIcon icon    = is_plane_visible ? FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.VisibleIcon16x" ) : FSlateIcon( FEditorStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
+
+    ioMenuBuilder.AddMenuEntry(
+        label_text,
+        tooltip_text,
+        icon,
+        FUIAction(
+            FExecuteAction::CreateLambda( TogglePlaneVisibility )
+        ) );
+
+    //-
+
+    auto DetachPlane = [this, plane_bindings]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
-        return BoardSequenceTools::CanDetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+        BoardSequenceTools::DetachPlane( sequencer, subsection_object, plane_bindings );
+    };
+
+    auto CanDetachPlane = [this, plane_bindings]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        return BoardSequenceTools::CanDetachPlane( sequencer, subsection_object, plane_bindings );
     };
 
     ioMenuBuilder.AddMenuEntry(
@@ -1607,46 +1660,26 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     //-
 
-    auto ToggleKeysAreaVisibility = [this]()
-    {
-        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
-        section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
-    };
-
-    auto GetKeysAreaLabel = [this]() -> FText
-    {
-        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
-        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
-            return LOCTEXT( "hide-plane-keys-area-tooltip", "Collapse" );
-        else
-            return LOCTEXT( "show-plane-keys-area-tooltip", "Expand" );
-    };
-
-    auto GetKeysAreaTooltip = [this]() -> FText
-    {
-        UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
-        if( section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) )
-            return LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" );
-        else
-            return LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
-    };
+    bool is_keys_area_visible = board_section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() );
+    label_text   = is_keys_area_visible ? LOCTEXT( "hide-plane-keys-area-tooltip", "Collapse" )         : LOCTEXT( "show-plane-keys-area-tooltip", "Expand" );
+    tooltip_text = is_keys_area_visible ? LOCTEXT( "hide-plane-keys-area-tooltip", "Hide keys area" )   : LOCTEXT( "show-plane-keys-area-tooltip", "Show keys area" );
 
     ioMenuBuilder.AddMenuEntry(
-        MakeAttributeLambda( GetKeysAreaLabel ),
-        MakeAttributeLambda( GetKeysAreaTooltip ),
+        label_text,
+        tooltip_text,
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateLambda( ToggleKeysAreaVisibility )
+            FExecuteAction::CreateStatic( ToggleKeysAreaVisibility, board_section_object, plane_bindings, mBinding.GetGuid() )
         ) );
 
     //-
 
-    auto DeletePlane = [this]()
+    auto DeletePlane = [this, plane_bindings]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        BoardSequenceTools::DeletePlane( sequencer, subsection_object, mBinding.GetGuid() );
+        BoardSequenceTools::DeletePlane( sequencer, subsection_object, plane_bindings );
     };
 
     ioMenuBuilder.AddMenuEntry(
@@ -1661,24 +1694,24 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "drawing-section-label", "Drawing" ) );
 
-    auto CreateDrawing = [this]()
+    auto CreateDrawing = [this, plane_bindings]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, plane_bindings );
     };
 
-    auto CanCreateDrawing = [this]() -> bool
+    auto CanCreateDrawing = [this, plane_bindings]() -> bool
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        return BoardSequenceTools::CanCreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+        return BoardSequenceTools::CanCreateDrawing( sequencer, subsection_object, local_frame, plane_bindings );
     };
 
     ioMenuBuilder.AddMenuEntry(
-        FText::Format( LOCTEXT( "create-drawing-label", "Create a drawing at {0}" ), current_frame_text ),
+        FText::Format( LOCTEXT( "create-drawing-label", "Create {0}|plural(one=drawing,other=drawings) at {1}" ), plane_bindings.Num(), current_frame_text ),
         LOCTEXT( "create-drawing-tooltip", "Create a drawing\n(set the current frame where to create the drawing keyframe)" ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateDrawing" ),
         FUIAction(
@@ -1688,20 +1721,20 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
 
     //-
 
-    auto CreateOpacity = [this]( float iOpacity )
+    auto CreateOpacity = [this, plane_bindings]( float iOpacity )
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        BoardSequenceTools::CreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid(), iOpacity );
+        BoardSequenceTools::CreateOpacity( sequencer, subsection_object, local_frame, plane_bindings, iOpacity );
     };
 
-    auto CanCreateOpacity = [this]() -> bool
+    auto CanCreateOpacity = [this, plane_bindings]() -> bool
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        return BoardSequenceTools::CanCreateOpacity( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+        return BoardSequenceTools::CanCreateOpacity( sequencer, subsection_object, local_frame, plane_bindings );
     };
 
     auto CreateOpacitySubMenu = [=]( FMenuBuilder& ioMenuBuilder )
@@ -1735,7 +1768,7 @@ SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     };
 
     ioMenuBuilder.AddSubMenu(
-        FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create Opacity at {0}" ), current_frame_text ),
+        FText::Format( LOCTEXT( "create-drawing-opacity-label", "Create {0}|plural(one=opacity,other=opacities) at {1}" ), plane_bindings.Num(), current_frame_text ),
         LOCTEXT( "create-drawing-opacity-tooltip", "Create the drawing opacity\n(set the current frame where to set the opacity)" ),
         FNewMenuDelegate::CreateLambda( CreateOpacitySubMenu ),
         FUIAction( FExecuteAction(),
