@@ -54,7 +54,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeTakeMenu ),
         FText::GetEmpty(),
         LOCTEXT( "switch-take-tooltip", "Switch take" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ) );
 
     auto IsTopToolBarVisible = [this]() -> EVisibility
     {
@@ -290,6 +290,18 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
                                                      } ) )
         );
     }
+
+    MenuBuilder.AddSeparator();
+
+    MenuBuilder.AddMenuEntry(
+        LOCTEXT( "NewTake", "New Take" ),
+        FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( board_section->GetBoardDisplayName() ) ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
+        FUIAction( FExecuteAction::CreateLambda( [this, sequencer, board_section]()
+                                                 {
+                                                     BoardSequenceTools::CreateTake( sequencer.Get(), *board_section );
+                                                 } ) )
+    );
 
     return MenuBuilder.MakeWidget();
 }

@@ -39,6 +39,7 @@
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionContent.h"
 
@@ -885,7 +886,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
             ioMenuBuilder.AddMenuEntry(
                 LOCTEXT( "NewTake", "New Take" ),
                 FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
-                FSlateIcon(),
+                FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
                 FUIAction( FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ) )
             );
         }

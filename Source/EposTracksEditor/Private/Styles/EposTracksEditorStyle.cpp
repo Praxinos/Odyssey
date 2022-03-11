@@ -94,6 +94,8 @@ FEposTracksEditorStyle::InitTracks()
     Set( "LighttableOff", new IMAGE_BRUSH( "lighttable-off-16x", Icon16x16 ) );
     Set( "LighttableOn", new IMAGE_BRUSH( "lighttable-on-16x", Icon16x16 ) );
 
+    Set( "Take", new IMAGE_BRUSH( "take-16x", Icon16x16 ) );
+
     //---
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );
