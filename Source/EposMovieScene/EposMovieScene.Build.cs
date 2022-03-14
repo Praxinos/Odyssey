@@ -41,6 +41,7 @@ public class EposMovieScene : ModuleRules
                 // [RUNTIME] custom engine dependencies
                 "MovieScene",
                 "MovieSceneTracks",
+                "LevelSequence",
             }
             );
 

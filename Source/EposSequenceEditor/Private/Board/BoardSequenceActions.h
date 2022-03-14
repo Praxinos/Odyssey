@@ -24,6 +24,6 @@ public:
     virtual void OpenAssetEditor( const TArray<UObject*>& iObjects, TSharedPtr<class IToolkitHost> iEditWithinLevelEditor = TSharedPtr<IToolkitHost>() ) override;
     virtual bool ShouldForceWorldCentric() override;
     virtual bool CanLocalize() const override;
-    virtual bool HasActions( const TArray<UObject*>& iObjects ) const override;
-    virtual void GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder ) override;
+    //virtual bool HasActions( const TArray<UObject*>& iObjects ) const override;
+    //virtual void GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& MenuBuilder ) override;
 };

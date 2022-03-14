@@ -15,6 +15,7 @@
 #include "Board/BoardSequenceCustomization.h"
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorNewStoryboardDialog.h"
+#include "Render/EposSequencePipelineRenderer.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Settings/EposSequenceEditorSettingsCustomization.h"
 #include "Shot/ShotSequence.h"
@@ -47,11 +48,13 @@ FEposSequenceEditorModule::StartupModule()
     RegisterSettings();
     RegisterSequenceCustomizations();
     RegisterPropertyCustomizations();
+    RegisterMovieRenderer();
 }
 
 void
 FEposSequenceEditorModule::ShutdownModule()
 {
+    UnregisterMovieRenderer();
     UnregisterPropertyCustomizations();
     UnregisterSequenceCustomizations();
     UnregisterSettings();
@@ -265,6 +268,26 @@ FEposSequenceEditorModule::UnregisterPropertyCustomizations()
         PropertyModule.UnregisterCustomPropertyTypeLayout( FInfoBarSettings::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
+    }
+}
+
+//---
+
+void
+FEposSequenceEditorModule::RegisterMovieRenderer()
+{
+    ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
+
+    mMovieRendererDelegate = SequencerModule.RegisterMovieRenderer( TUniquePtr<IMovieRendererInterface>( new FEposSequencePipelineRenderer ) );
+}
+
+void
+FEposSequenceEditorModule::UnregisterMovieRenderer()
+{
+    ISequencerModule* SequencerModule = FModuleManager::GetModulePtr<ISequencerModule>( "Sequencer" );
+    if( SequencerModule )
+    {
+        SequencerModule->UnregisterMovieRenderer( mMovieRendererDelegate );
     }
 }
 

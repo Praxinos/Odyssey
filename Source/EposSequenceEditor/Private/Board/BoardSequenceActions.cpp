@@ -3,15 +3,18 @@
 
 #include "Board/BoardSequenceActions.h"
 
+//#include "ContentBrowserModule.h"
+//#include "IContentBrowserSingleton.h"
 #include "EngineGlobals.h"
 #include "Engine/Engine.h"
+//#include "MoviePipelineMasterConfig.h"
 #include "Toolkits/ToolkitManager.h"
 
 #include "Board/BoardHelpers.h"
 #include "Board/BoardSequence.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceEditorModule.h"
-#include "EposSequenceRenderHelpers.h"
+//#include "Render/EposSequenceRenderHelpers.h"
 
 #define LOCTEXT_NAMESPACE "BoardAssetTypeActions"
 
@@ -103,29 +106,81 @@ FBoardSequenceActions::CanLocalize() const
     return false;
 }
 
-bool
-FBoardSequenceActions::HasActions( const TArray<UObject*>& iObjects ) const
-{
-    return true;
-}
-
-void
-FBoardSequenceActions::GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& ioMenuBuilder )
-{
-    TArray<UEposMovieSceneSequence*> objects;
-    for( int i = 0; i < InObjects.Num(); i++ )
-    {
-        UEposMovieSceneSequence* sequence = Cast<UEposMovieSceneSequence>( InObjects[i] );
-        if( sequence )
-            objects.Add( sequence );
-    }
-
-    ioMenuBuilder.AddMenuEntry(
-        LOCTEXT( "CB_Extension_BoardSequence_EposActions_RenderSequence", "Render Movie" ),
-        LOCTEXT( "CB_Extension_BoardSequence_EposActions_RenderSequence_ToolTip", "Render a Movie for each selected Board Asset" ),
-        FSlateIcon( "EditorStyle", "Sequencer.RenderMovie.Small" ),
-        FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::RenderMovie, objects ) )
-    );
-}
+//bool
+//FBoardSequenceActions::HasActions( const TArray<UObject*>& iObjects ) const
+//{
+//    return true;
+//}
+//
+//namespace
+//{
+//static
+//void
+//OnMasterConfigSelected( const FAssetData& iAssetData, TArray<UEposMovieSceneSequence*> iSequences )
+//{
+//    EposSequenceRenderHelpers::RenderMovie( iSequences, CastChecked<UMoviePipelineMasterConfig>( iAssetData.GetAsset() ) );
+//}
+//
+//static
+//void
+//MakeRenderMovieSubMenu( FMenuBuilder& ioMenuBuilder, TArray<UEposMovieSceneSequence*> iSequences )
+//{
+//    FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
+//
+//    // Configure filter for asset picker
+//    // Same as in Engine\Plugins\MovieScene\MovieRenderPipeline\Source\MovieRenderPipelineEditor\Private\Widgets\SMoviePipelineQueueEditor.cpp # 313
+//    FAssetPickerConfig AssetPickerConfig;
+//    {
+//        AssetPickerConfig.SelectionMode = ESelectionMode::Single;
+//        AssetPickerConfig.InitialAssetViewType = EAssetViewType::List;
+//        AssetPickerConfig.bFocusSearchBoxWhenOpened = true;
+//        AssetPickerConfig.bAllowNullSelection = false;
+//        AssetPickerConfig.bShowBottomToolbar = true;
+//        AssetPickerConfig.bAutohideSearchBar = false;
+//        AssetPickerConfig.bAllowDragging = false;
+//        AssetPickerConfig.bCanShowClasses = false;
+//        AssetPickerConfig.bShowPathInColumnView = true;
+//        AssetPickerConfig.bShowTypeInColumnView = false;
+//        AssetPickerConfig.bSortByPathInColumnView = false;
+//        AssetPickerConfig.ThumbnailScale = 0.1f;
+//        AssetPickerConfig.SaveSettingsName = TEXT( "MoviePipelineConfigAsset" ); // Use the same as in MovieRenderQueue menu
+//
+//        AssetPickerConfig.AssetShowWarningText = LOCTEXT( "NoConfigs_Warning", "No Master Configurations Found" );
+//        AssetPickerConfig.Filter.ClassNames.Add( UMoviePipelineMasterConfig::StaticClass()->GetFName() );
+//        AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateStatic( &OnMasterConfigSelected, iSequences );
+//    }
+//
+//    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "section-render.browse-label", "Browse" ) );
+//    {
+//        ioMenuBuilder.AddWidget( SNew( SBox )
+//                                 .WidthOverride( 300.f )
+//                                 .HeightOverride( 300.f )
+//                                 [
+//                                     ContentBrowserModule.Get().CreateAssetPicker( AssetPickerConfig )
+//                                 ],
+//                                 FText::GetEmpty(),
+//                                 true,
+//                                 false );
+//    }
+//    ioMenuBuilder.EndSection();
+//}
+//}
+//
+//void
+//FBoardSequenceActions::GetActions( const TArray<UObject*>& InObjects, FMenuBuilder& ioMenuBuilder )
+//{
+//    TArray<UEposMovieSceneSequence*> objects;
+//    for( int i = 0; i < InObjects.Num(); i++ )
+//    {
+//        UEposMovieSceneSequence* sequence = Cast<UEposMovieSceneSequence>( InObjects[i] );
+//        if( sequence )
+//            objects.Add( sequence );
+//    }
+//
+//    ioMenuBuilder.AddSubMenu(
+//        LOCTEXT( "CB_Extension_BoardSequence_EposActions_RenderSequence", "Render Movie..." ),
+//        LOCTEXT( "CB_Extension_BoardSequence_EposActions_RenderSequence_ToolTip", "Render a Movie for each selected Board Asset" ),
+//        FNewMenuDelegate::CreateStatic( &MakeRenderMovieSubMenu, objects ) );
+//}
 
 #undef LOCTEXT_NAMESPACE

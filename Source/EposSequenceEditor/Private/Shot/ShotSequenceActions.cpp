@@ -11,7 +11,7 @@
 #include "Shot/ShotSequence.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceEditorModule.h"
-#include "EposSequenceRenderHelpers.h"
+//#include "Render/EposSequenceRenderHelpers.h"
 
 #define LOCTEXT_NAMESPACE "ShotAssetTypeActions"
 
@@ -103,29 +103,29 @@ FShotSequenceActions::CanLocalize() const
     return false;
 }
 
-bool
-FShotSequenceActions::HasActions(const TArray<UObject*>& iObjects) const
-{
-    return true;
-}
-
-void
-FShotSequenceActions::GetActions(const TArray<UObject*>& InObjects, FMenuBuilder& ioMenuBuilder)
-{
-    TArray<UEposMovieSceneSequence*> objects;
-    for( int i = 0; i < InObjects.Num(); i++ )
-    {
-        UEposMovieSceneSequence* sequence = Cast<UEposMovieSceneSequence>( InObjects[i] );
-        if( sequence )
-            objects.Add( sequence );
-    }
-
-    ioMenuBuilder.AddMenuEntry(
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions_RenderSequence", "Render Movie" ),
-        LOCTEXT( "CB_Extension_ShotSequence_EposActions_RenderSequence_ToolTip", "Render a Movie for each selected Shot Asset" ),
-        FSlateIcon( "EditorStyle", "Sequencer.RenderMovie.Small" ),
-        FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::RenderMovie, objects ) )
-    );
-}
+//bool
+//FShotSequenceActions::HasActions(const TArray<UObject*>& iObjects) const
+//{
+//    return true;
+//}
+//
+//void
+//FShotSequenceActions::GetActions(const TArray<UObject*>& InObjects, FMenuBuilder& ioMenuBuilder)
+//{
+//    TArray<UEposMovieSceneSequence*> objects;
+//    for( int i = 0; i < InObjects.Num(); i++ )
+//    {
+//        UEposMovieSceneSequence* sequence = Cast<UEposMovieSceneSequence>( InObjects[i] );
+//        if( sequence )
+//            objects.Add( sequence );
+//    }
+//
+//    ioMenuBuilder.AddMenuEntry(
+//        LOCTEXT( "CB_Extension_ShotSequence_EposActions_RenderSequence", "Render Movie" ),
+//        LOCTEXT( "CB_Extension_ShotSequence_EposActions_RenderSequence_ToolTip", "Render a Movie for each selected Shot Asset" ),
+//        FSlateIcon( "EditorStyle", "Sequencer.RenderMovie.Small" ),
+//        FUIAction( FExecuteAction::CreateStatic( &EposSequenceRenderHelpers::RenderMovie, objects ) )
+//    );
+//}
 
 #undef LOCTEXT_NAMESPACE

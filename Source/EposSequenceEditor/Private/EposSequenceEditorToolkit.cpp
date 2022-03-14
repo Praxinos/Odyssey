@@ -34,6 +34,7 @@
 #include "EposSequenceEditorCommands.h"
 #include "ToolkitHelpers.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
+#include "Render/EposSequencePipelineRenderer.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorToolkit"
 
@@ -146,7 +147,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         sequencerInitParams.HostCapabilities.bSupportsCurveEditor = true;
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
         //sequencerInitParams.HostCapabilities.bSupportsRecording = true;
-        //sequencerInitParams.HostCapabilities.bSupportsRenderMovie = true;
+        sequencerInitParams.HostCapabilities.bSupportsRenderMovie = true;
 
         //sequencerInitParams.EventContexts.Bind( PlaybackContext.ToSharedRef(), &FLevelSequencePlaybackContext::GetEventContexts );
         sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackContextAsObject );
@@ -164,6 +165,10 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     mSequencer->OnActorAddedToSequencer().AddSP( this, &FEposSequenceEditorToolkit::HandleActorAddedToSequencer );
     mSequencer->OnActivateSequence().AddSP( this, &FEposSequenceEditorToolkit::HandleOnActivateSequence );
     mSequencer->GetSelectionChangedSections().AddSP( this, &FEposSequenceEditorToolkit::HandleOnSelectionChangedSections );
+
+    // Force the epos renderer when opening a board asset
+    // And there is a bug in the render movie popup display, all renderers are checked, but it's only ui
+    mSequencer->GetSequencerSettings()->SetMovieRendererName( FEposSequencePipelineRenderer::MoviePipelineQueueTabLabel.ToString() );
 
     //if( ToolkitParams.InitialBindingClass != nullptr )
     //{
