@@ -59,6 +59,26 @@ SNotesInViewport::Construct(const FArguments& InArgs)
 TSharedRef<ITableRow>
 SNotesInViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
+    auto GetFont = [iItem]() -> FSlateFontInfo
+    {
+        return iItem.IsValid() ? iItem->Font : FSlateFontInfo();
+    };
+
+    auto GetColor = [iItem]() -> FLinearColor
+    {
+        return iItem.IsValid() ? iItem->ColorAndOpacity : FLinearColor::White;
+    };
+
+    auto GetShadowColor = [iItem]() -> FLinearColor
+    {
+        return iItem.IsValid() ? iItem->ShadowColorAndOpacity : FLinearColor::Black;
+    };
+
+    auto GetShadowOffset = [iItem]() -> FVector2D
+    {
+        return iItem.IsValid() ? iItem->ShadowOffset : FVector2D::UnitVector;
+    };
+
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
         .Style( FEposSequenceEditorStyle::Get(), "Notes.Viewport.TableView.Row" )
@@ -70,6 +90,10 @@ SNotesInViewport::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRe
             [
                 SNew( STextBlock )
                 .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
+                .Font_Lambda( GetFont )
+                .ColorAndOpacity_Lambda( GetColor )
+                .ShadowColorAndOpacity_Lambda( GetShadowColor )
+                .ShadowOffset_Lambda( GetShadowOffset )
             ]
         ];
 }
@@ -105,6 +129,26 @@ SNotesAsOverlay::Construct(const FArguments& InArgs)
 TSharedRef<ITableRow>
 SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
+    auto GetFont = [iItem]() -> FSlateFontInfo
+    {
+        return iItem.IsValid() ? iItem->Font : FSlateFontInfo();
+    };
+
+    auto GetColor = [iItem]() -> FLinearColor
+    {
+        return iItem.IsValid() ? iItem->ColorAndOpacity : FLinearColor::White;
+    };
+
+    auto GetShadowColor = [iItem]() -> FLinearColor
+    {
+        return iItem.IsValid() ? iItem->ShadowColorAndOpacity : FLinearColor::Black;
+    };
+
+    auto GetShadowOffset = [iItem]() -> FVector2D
+    {
+        return iItem.IsValid() ? iItem->ShadowOffset : FVector2D::UnitVector;
+    };
+
     return
         SNew( STableRow<TWeakObjectPtr<UStoryNote>>, iOwnerTable )
         .Style( FEposSequenceEditorStyle::Get(), "Notes.Overlay.TableView.Row" )
@@ -117,6 +161,10 @@ SNotesAsOverlay::MakeNoteRow( TWeakObjectPtr<UStoryNote> iItem, const TSharedRef
                 SNew( STextBlock )
                 .TextStyle( FEposSequenceEditorStyle::Get(), "Notes.Overlay.Text" )
                 .Text_Lambda( [=]() { return FText::FromString( iItem->Text ); } )
+                .Font_Lambda( GetFont )
+                .ColorAndOpacity_Lambda( GetColor )
+                .ShadowColorAndOpacity_Lambda( GetShadowColor )
+                .ShadowOffset_Lambda( GetShadowOffset )
             ]
         ];
 }

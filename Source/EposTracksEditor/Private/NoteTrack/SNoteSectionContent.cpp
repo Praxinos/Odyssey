@@ -9,6 +9,7 @@
 #include "NoteTrack/NoteSection.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "StoryNote.h"
+#include "Styles/EposTracksEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "SNoteSectionContent"
 
@@ -19,24 +20,111 @@ SNoteSectionContent::Construct( const FArguments& InArgs, TSharedRef<FNoteSectio
 {
     mNoteSection = iNoteSection;
 
+    //---
+
+    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+
+    auto EditNote = [this]()
+    {
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+        UMovieSceneNoteSection* note_section_object = mNoteSection.IsValid() ? Cast<UMovieSceneNoteSection>( mNoteSection.Pin()->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+
+        if( note )
+            AssetEditorSubsystem->OpenEditorForAsset( note );
+    };
+
+    auto CanEditNote = [this]() -> bool
+    {
+        UMovieSceneNoteSection* note_section_object = mNoteSection.IsValid() ? Cast<UMovieSceneNoteSection>( mNoteSection.Pin()->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+
+        return !!note;
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( EditNote ),
+            FCanExecuteAction::CreateLambda( CanEditNote )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "edit-note-tooltip", "Edit the note in its editor" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "NoteSettings" )
+    );
+
+    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
+    left_toolbar->SetVisibility( MakeAttributeSP( this, &SNoteSectionContent::OptionalWidgetsVisibility ) );
+
+    //---
+
+    auto GetFont = [this]() -> FSlateFontInfo
+    {
+        UMovieSceneNoteSection* note_section_object = mNoteSection.IsValid() ? Cast<UMovieSceneNoteSection>( mNoteSection.Pin()->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+
+        return note ? note->Font : FSlateFontInfo();
+    };
+
+    auto GetColor = [this]() -> FLinearColor
+    {
+        UMovieSceneNoteSection* note_section_object = mNoteSection.IsValid() ? Cast<UMovieSceneNoteSection>( mNoteSection.Pin()->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+
+        return note ? note->ColorAndOpacity : FLinearColor::White;
+    };
+
+    auto GetShadowColor = [this]() -> FLinearColor
+    {
+        UMovieSceneNoteSection* note_section_object = mNoteSection.IsValid() ? Cast<UMovieSceneNoteSection>( mNoteSection.Pin()->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+
+        return note ? note->ShadowColorAndOpacity : FLinearColor::Black;
+    };
+
+    auto GetShadowOffset = [this]() -> FVector2D
+    {
+        UMovieSceneNoteSection* note_section_object = mNoteSection.IsValid() ? Cast<UMovieSceneNoteSection>( mNoteSection.Pin()->GetSectionObject() ) : nullptr;
+        UStoryNote* note = note_section_object ? note_section_object->GetNote() : nullptr;
+
+        return note ? note->ShadowOffset : FVector2D::UnitVector;
+    };
+
+    //---
+
     ChildSlot
     // Because in ...\Sequencer\Private\DisplayNodes\SequencerTrackNode.cpp - FSequencerTrackNode::GetNodeHeight(), there is an additional padding 2 * SequencerNodeConstants::CommonPadding for the 'mother' section
     // and VAlign can't be used, because f.e., one shot section with planes and one board section without, the content of the board section won't be at the same level as in shot section
     //.Padding( 0.f, 4.f )
     [
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .Padding( 5 )
-        .FillHeight( 1 )
-        [
-            SAssignNew( mNoteTextWidget, SInlineEditableTextBlock )
-            .Text( this, &SNoteSectionContent::GetNoteText )
-            .MultiLine( true )
-            .ModiferKeyForNewLine( EModifierKey::Shift )
-            .ShadowOffset( FVector2D( 1, 1 ) )
-            .OnTextCommitted( this, &SNoteSectionContent::OnNoteTextCommited )
+        SNew( SHorizontalBox )
 
-            //.OptionalWidgetsVisibility( this, &SNoteSectionContent::OptionalWidgetsVisibility )
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            left_toolbar
+        ]
+
+        + SHorizontalBox::Slot()
+        [
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .Padding( 5 )
+            [
+                SAssignNew( mNoteTextWidget, SInlineEditableTextBlock )
+                .Text( this, &SNoteSectionContent::GetNoteText )
+                .MultiLine( true )
+                .ModiferKeyForNewLine( EModifierKey::Shift )
+                .Font_Lambda( GetFont )
+                .ColorAndOpacity_Lambda( GetColor )
+                .ShadowColorAndOpacity_Lambda( GetShadowColor )
+                .ShadowOffset_Lambda( GetShadowOffset )
+                .OnTextCommitted( this, &SNoteSectionContent::OnNoteTextCommited )
+            ]
         ]
     ];
 }
@@ -105,22 +193,22 @@ SNoteSectionContent::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedG
     return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }
 
-//EVisibility
-//SNoteSectionContent::OptionalWidgetsVisibility() const
-//{
-//    return mOptionalWidgetsVisibility;
-//}
+EVisibility
+SNoteSectionContent::OptionalWidgetsVisibility() const
+{
+    return mOptionalWidgetsVisibility;
+}
 
-//void
-//SNoteSectionContent::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
-//{
-//    mOptionalWidgetsVisibility = EVisibility::Visible;
-//}
-//
-//void
-//SNoteSectionContent::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
-//{
-//    mOptionalWidgetsVisibility = EVisibility::Collapsed;
-//}
+void
+SNoteSectionContent::OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    mOptionalWidgetsVisibility = EVisibility::Visible;
+}
+
+void
+SNoteSectionContent::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
+{
+    mOptionalWidgetsVisibility = EVisibility::Collapsed;
+}
 
 #undef LOCTEXT_NAMESPACE

@@ -20,6 +20,15 @@ public:
     UStoryNote( const FObjectInitializer& ObjectInitializer );
 
 public:
-    UPROPERTY( BlueprintReadWrite, EditAnywhere, Category = "StoryNote", meta=(MultiLine="true") )
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote", meta=(MultiLine="true") )
     FString Text;
+
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
+    FSlateFontInfo Font;
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
+    FLinearColor ColorAndOpacity { FLinearColor::White };
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
+    FVector2D ShadowOffset { FVector2D::UnitVector };
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
+    FLinearColor ShadowColorAndOpacity { FLinearColor::Black };
 };

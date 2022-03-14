@@ -96,6 +96,8 @@ FEposTracksEditorStyle::InitTracks()
 
     Set( "Take", new IMAGE_BRUSH( "take-16x", Icon16x16 ) );
 
+    Set( "NoteSettings", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
+
     //---
 
     SetContentRoot( FPaths::EngineContentDir() / TEXT( "Editor/Slate" ) );

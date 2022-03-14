@@ -21,8 +21,8 @@ public:
     // Construct the widget
     void Construct(const FArguments& InArgs, TSharedRef<FNoteSection> iNoteSection);
 
-    //virtual void OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent );
-    //virtual void OnMouseLeave( const FPointerEvent& MouseEvent );
+    virtual void OnMouseEnter( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent );
+    virtual void OnMouseLeave( const FPointerEvent& MouseEvent );
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
 
     virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
@@ -32,12 +32,12 @@ protected:
     void            OnNoteTextCommited( const FText& iText, ETextCommit::Type CommitType );
 
 public:
-    //EVisibility OptionalWidgetsVisibility() const;
+    EVisibility OptionalWidgetsVisibility() const;
 
 private:
     TWeakPtr<FNoteSection> mNoteSection;
 
     TSharedPtr<SInlineEditableTextBlock> mNoteTextWidget;
 
-    //EVisibility mOptionalWidgetsVisibility = EVisibility::Collapsed;
+    EVisibility mOptionalWidgetsVisibility = EVisibility::Collapsed; // By default Collapsed, it's ok as we manage only 1 toolbar and that's we want
 };
