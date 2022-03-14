@@ -159,6 +159,32 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
 //---
 //---
 
+static
+void
+ToggleKeysAreaVisibility( UMovieSceneCinematicBoardSection* iBoardSection, TArray<FGuid> iPlaneBindings, FGuid iPlaneReference )
+{
+    // This is the current plane which is the reference state
+    bool is_reference_visible = iBoardSection->IsPlaneKeysAreaVisible( iPlaneReference );
+
+    for( auto plane_binding : iPlaneBindings )
+    {
+        if( is_reference_visible )
+        {
+            if( iBoardSection->IsPlaneKeysAreaVisible( plane_binding ) )
+                iBoardSection->TogglePlaneKeysAreaVisibility( plane_binding ); // If the master is expanded, collapse all expanded planes
+        }
+        else
+        {
+            if( !iBoardSection->IsPlaneKeysAreaVisible( plane_binding ) )
+                iBoardSection->TogglePlaneKeysAreaVisibility( plane_binding ); // If the master is collapsed, expand all collpased planes
+        }
+    }
+};
+
+//---
+//---
+//---
+
 class SCinematicBoardSectionPlaneTitle
     : public SCompoundWidget
 {
@@ -269,7 +295,16 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
     auto ToggleKeysAreaVisibility = [this]()
     {
         UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
-        section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *section_object, sequencer->GetFocusedTemplateID() );
+        TArray<FGuid> plane_bindings;
+        ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
+
+        if( plane_bindings.Contains( mBinding.GetGuid() ) )
+            ::ToggleKeysAreaVisibility( section_object, plane_bindings, mBinding.GetGuid() );
+        else
+            section_object->TogglePlaneKeysAreaVisibility( mBinding.GetGuid() );
     };
 
     auto GetKeysAreaTooltip = [this]() -> FText
@@ -330,9 +365,17 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
 
     auto DetachPlane = [this]()
     {
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
-        BoardSequenceTools::DetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection_object, sequencer->GetFocusedTemplateID() );
+        TArray<FGuid> plane_bindings;
+        ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
+
+        if( plane_bindings.Contains( mBinding.GetGuid() ) )
+            BoardSequenceTools::DetachPlane( sequencer, subsection_object, plane_bindings );
+        else
+            BoardSequenceTools::DetachPlane( sequencer, subsection_object, mBinding.GetGuid() );
     };
 
     auto CanDetachPlane = [this]() -> bool
@@ -361,7 +404,15 @@ SCinematicBoardSectionPlaneTitle::Construct( const FArguments& InArgs, TSharedRe
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection_object, sequencer->GetFocusedTemplateID() );
+        TArray<FGuid> plane_bindings;
+        ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
+
+        if( plane_bindings.Contains( mBinding.GetGuid() ) )
+            BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, plane_bindings );
+        else
+            BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
     };
 
     auto CanCreateDrawing = [this]() -> bool
@@ -608,7 +659,14 @@ SCinematicBoardSectionPlaneTitle::TogglePlaneVisibility()
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    BoardSequenceTools::TogglePlaneVisibility( sequencer, *subsection_object, mBinding.GetGuid() );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    TArray<FGuid> plane_bindings;
+    ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
+
+    if( plane_bindings.Contains( mBinding.GetGuid() ) )
+        BoardSequenceTools::TogglePlaneVisibility( sequencer, *subsection_object, plane_bindings, mBinding.GetGuid() );
+    else
+        BoardSequenceTools::TogglePlaneVisibility( sequencer, *subsection_object, mBinding.GetGuid() );
 }
 
 bool
@@ -631,11 +689,29 @@ SCinematicBoardSectionPlaneTitle::ToggleLighttable()
     ISequencer*                     sequencer = board_section->GetSequencer().Get();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    TArray<FGuid> plane_bindings;
+    ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
 
-    if( IsLighttableOn() )
-        LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    // This is the current plane which is the reference state
+    bool is_reference_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    if( plane_bindings.Contains( mBinding.GetGuid() ) )
+    {
+        for( auto plane_binding : plane_bindings )
+        {
+            if( is_reference_on )
+                LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, plane_binding );
+            else
+                LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, plane_binding );
+        }
+    }
     else
-        LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    {
+        if( is_reference_on )
+            LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+        else
+            LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    }
 }
 
 bool
@@ -1557,28 +1633,6 @@ SCinematicBoardSectionPlane::GetKeysAreaVisibility() const
 
     return section_object->IsPlaneKeysAreaVisible( mBinding.GetGuid() ) ? EVisibility::Visible : EVisibility::Collapsed;
 }
-
-static
-void
-ToggleKeysAreaVisibility( UMovieSceneCinematicBoardSection* iBoardSection, TArray<FGuid> iPlaneBindings, FGuid iPlaneReference )
-{
-    // This is the current plane which is the reference state
-    bool is_reference_visible = iBoardSection->IsPlaneKeysAreaVisible( iPlaneReference );
-
-    for( auto plane_binding : iPlaneBindings )
-    {
-        if( is_reference_visible )
-        {
-            if( iBoardSection->IsPlaneKeysAreaVisible( plane_binding ) )
-                iBoardSection->TogglePlaneKeysAreaVisibility( plane_binding ); // If the master is expanded, collapse all expanded planes
-        }
-        else
-        {
-            if( !iBoardSection->IsPlaneKeysAreaVisible( plane_binding ) )
-                iBoardSection->TogglePlaneKeysAreaVisibility( plane_binding ); // If the master is collapsed, expand all collpased planes
-        }
-    }
-};
 
 void
 SCinematicBoardSectionPlane::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
