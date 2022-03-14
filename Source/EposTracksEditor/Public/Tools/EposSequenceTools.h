@@ -25,9 +25,11 @@ class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
+class UShotSequence;
 class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
+struct FBoardSectionTake;
 struct FMovieSceneChannelHandle;
 
 struct FCameraArgs
@@ -134,6 +136,14 @@ public:
 
     /** Stretch sequencer time range to view make the new range inside the view. */
     static void UpdateViewRange( ISequencer* iSequencer, TRange<FFrameNumber> iNewRange );
+
+// Inside EposSequenceTools_Take
+public:
+    /** Create a new take (from the current subsequence) for the board section. */
+    static FBoardSectionTake* CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection );
+
+    /** Switch the current take to the new one for the board section. */
+    static FBoardSectionTake* SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& iSubSection, FBoardSectionTake* iTake );
 
 // Inside EposSequenceTools
 public:
@@ -621,7 +631,7 @@ public:
     * @param ISequencer             iSequencer to clone the section.
     * @param UMovieSceneSubSection* iSection   the section to clone.
     */
-    static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSection* iSection, bool iEmptyDrawings );
+    static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings );
 
 private:
     static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );

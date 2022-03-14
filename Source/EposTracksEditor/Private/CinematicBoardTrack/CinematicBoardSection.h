@@ -112,9 +112,8 @@ private:
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesOpacityMetaChannel;
 
 private:
-
     /** Add board takes menu */
-    //void AddTakesMenu( FMenuBuilder& ioMenuBuilder );
+    void AddTakesMenu( FMenuBuilder& ioMenuBuilder );
 
 private:
     UCameraComponent* FindCameraCutComponentRecursive( FFrameNumber iGlobalTime, FMovieSceneSequenceID InnerSequenceID, const FMovieSceneSequenceHierarchy& Hierarchy, IMovieScenePlayer& Player );
@@ -152,6 +151,8 @@ private:
 
     /** The board track editor that contains this section */
     TWeakPtr<FCinematicBoardTrackEditor> mCinematicBoardTrackEditor;
+
+    bool mNeedRebuild { false };
 
     struct FCinematicSectionCacheForThumbnail
     {

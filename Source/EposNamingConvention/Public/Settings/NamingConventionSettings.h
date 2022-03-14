@@ -223,7 +223,7 @@ public:
 //---
 
 // Settings for the naming convention
-UCLASS(config=EditorPerProjectUserSettings, meta=(DisplayName="Epos Naming Convention"))
+UCLASS(config=Epos, meta=(DisplayName="Epos Naming Convention"))
 class EPOSNAMINGCONVENTION_API UNamingConventionSettings
     : public UDeveloperSettings
 {

@@ -15,6 +15,7 @@
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "EposSequenceHelpers.h"
 #include "IMovieScenePlayer.h"
 #include "MovieSceneSequence.h"
@@ -1100,6 +1101,120 @@ NamingConvention::GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, c
     oElements.TakeIndex = shot_settings.TakeFormat.StartNumber;
 
     TOptional<FSequenceNameElements> source_elements = FindNameElements( iPlayer, iRootSequence, iParentSequence, iFrameNumber );
+
+    // Get the source elements values
+    if( source_elements )
+    {
+        FSequenceNameElements* destination_elements = &oElements;
+        *destination_elements = source_elements.GetValue();
+    }
+    // Otherwise, get the settings values
+    else
+    {
+        FillNameElements( global_settings, oElements );
+    }
+
+    // User settings always override new sequence elements
+    FillNameElements( user_settings, oElements );
+
+    //---
+
+    oName = TEXT( "SS_" ) + FGuid::NewGuid().ToString();
+    oPath = sequence_path;
+
+    return oPath / oName;
+}
+
+//static
+FString
+NamingConvention::GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, UMovieSceneSubSection* iSubSection, FString& oPath, FString& oName, FShotNameElements& oElements )
+{
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    //---
+
+    UShotSequence* subsequence = Cast<UShotSequence>( iSubSection->GetSequence() );
+    //check( subsequence );
+
+    FString sequence_pathname = subsequence ? subsequence->GetPackage()->GetName() : FString();
+    FString sequence_path = FPackageName::GetLongPackagePath( sequence_pathname );
+
+    // Try to find the better path from existing sibling sequences
+    if( sequence_path.IsEmpty() )
+    {
+        FRelevantPathMap map_sequence_paths = FindSiblingSequencePaths( iPlayer, iParentSequence );
+        if( map_sequence_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_sequence_paths.GetKeys( keys );
+
+            sequence_path = keys[0];
+        }
+    }
+
+    // Try to find the better path from all existing sequences
+    if( sequence_path.IsEmpty() )
+    {
+        FRelevantPathMap map_sequence_paths = FindAllSequencePaths( iPlayer );
+        if( map_sequence_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_sequence_paths.GetKeys( keys );
+
+            sequence_path = keys[0];
+        }
+    }
+
+    if( sequence_path.IsEmpty() )
+    {
+        FString root_path = GetRootPath( iPlayer, iRootSequence ); // ie. /Game/MyStoryboard2
+        sequence_path = root_path;
+    }
+
+    //--- Find all takes
+
+    TArray<UShotSequence*> take_sequences;
+    if( subsequence )
+    {
+        UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+        for( auto take : board_section->GetTakes() )
+        {
+            UShotSequence* shot_sequence = Cast<UShotSequence>( take.GetSequence() );
+            if( shot_sequence )
+                take_sequences.Add( shot_sequence );
+        }
+    }
+
+    //--- Compute the next valid shot index
+
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    const FNamingConventionGlobal& global_settings = settings->GlobalNaming;
+    const FNamingConventionUser& user_settings = settings->UserNaming;
+    const FNamingConventionShot& shot_settings = settings->ShotNaming;
+
+    int32 max_take_index = INDEX_NONE;
+
+    for( auto take_sequence : take_sequences )
+    {
+        const FShotNameElements& elements = take_sequence->NameElements;
+        if( !elements.IsValid() )
+            continue;
+
+        if( elements.Index > max_take_index )
+            max_take_index = elements.TakeIndex;
+    }
+
+    if( max_take_index != INDEX_NONE )
+        max_take_index += shot_settings.TakeFormat.Increment;
+    else
+        max_take_index = shot_settings.TakeFormat.StartNumber;
+
+    //---
+
+    oElements.Index = subsequence ? subsequence->NameElements.Index : shot_settings.IndexFormat.StartNumber;
+    oElements.TakeIndex = max_take_index;
+
+    TOptional<FSequenceNameElements> source_elements = subsequence ? subsequence->NameElements : FindNameElements( iPlayer, iRootSequence, iParentSequence, iSubSection->GetRange().GetLowerBoundValue() );
 
     // Get the source elements values
     if( source_elements )

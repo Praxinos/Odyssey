@@ -11,6 +11,7 @@ class ACineCameraActor;
 class APlaneActor;
 class IMovieScenePlayer;
 class UMovieSceneSequence;
+class UMovieSceneSubSection;
 struct FBoardNameElements;
 struct FShotNameElements;
 
@@ -37,6 +38,7 @@ public:
     static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements );
 
     static FString GenerateShotAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FShotNameElements& oElements );
+    static FString GenerateTakeAssetPathName( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence, const UMovieSceneSequence* iParentSequence, UMovieSceneSubSection* iSubSection, FString& oPath, FString& oName, FShotNameElements& oElements );
 
 private:
     static FString GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSceneSequence* iRootSequence );

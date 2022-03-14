@@ -427,6 +427,8 @@ ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( IMovieScenePlayer& iPl
         return result;
 
     FMovieSceneBinding* binding = moviescene->FindBinding( iPlaneBinding );
+    if( !binding )
+        return result;
 
     const TArray<UMovieSceneTrack*>& tracks = binding->GetTracks();
     for( auto track : tracks )

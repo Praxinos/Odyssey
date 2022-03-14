@@ -610,22 +610,22 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 
     //---
 
-    ShotSequenceTools::CloneInnerContent( iSequencer, new_section, iEmptyDrawings );
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, *new_section, iSequencer->GetFocusedTemplateID() );
+
+    ShotSequenceTools::CloneInnerContent( iSequencer, result.mInnerSequence, result.mInnerSequenceId, iEmptyDrawings );
 }
 
 //static
 void
-ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSection* iSection, bool iEmptyDrawings )
+ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, *iSection, iSequencer->GetFocusedTemplateID() );
-
-    result.mInnerSequence->Modify();
-    result.mInnerMovieScene->Modify();
+    iSequence->Modify();
+    iSequence->GetMovieScene()->Modify();
 
     //---
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
     if( !camera )
         return;
 
@@ -637,7 +637,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
 
     FString cloned_camera_path;
     FString cloned_camera_name;
-    NamingConvention::GenerateCameraActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), result.mInnerSequence, cloned_camera_path, cloned_camera_name );
+    NamingConvention::GenerateCameraActorPathName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera_path, cloned_camera_name );
     // We don't keep the same name as the original camera (like plane), to be able to increment the (global) index or to use the new shot name
 
     cloned_camera->SetFolderPath( *cloned_camera_path );
@@ -645,11 +645,11 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
 
     //-
 
-    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), result.mInnerSequence, cloned_camera );
+    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, cloned_camera );
 
-    result.mInnerSequence->UnbindPossessableObjects( camera_guid );
-    result.mInnerSequence->BindPossessableObject( camera_guid, *cloned_camera, iSequencer->GetPlaybackContext() );
-    result.mInnerMovieScene->FindPossessable( camera_guid )->SetName( cloned_camera_name );
+    iSequence->UnbindPossessableObjects( camera_guid );
+    iSequence->BindPossessableObject( camera_guid, *cloned_camera, iSequencer->GetPlaybackContext() );
+    iSequence->GetMovieScene()->FindPossessable( camera_guid )->SetName( cloned_camera_name );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 
@@ -657,7 +657,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, &planes, &plane_bindings );
+    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequence, iSequenceID, EGetPlane::kAll, &planes, &plane_bindings );
 
     for( int i = 0; i < plane_count; i++ )
     {
@@ -669,18 +669,18 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSubSect
             attachPlaneToCamera = ( ParentActor == camera );
         }
 
-        CloneInnerPlane( iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerMovieScene, iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
+        CloneInnerPlane( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
     }
 
     //---
 
-    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = EposSequenceHelpers::GetNotes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections = EposSequenceHelpers::GetNotes( *iSequencer, iSequence, iSequenceID );
 
     for( auto note_section : note_sections )
     {
         UStoryNote* original_note = note_section->GetNote();
 
-        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( *iSequencer, iSequencer->GetRootMovieSceneSequence(), result.mInnerSequence, original_note );
+        UStoryNote* duplicate_note = ProjectAssetTools::CloneNote( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iSequence, original_note );
 
         note_section->SetNote( duplicate_note );
     }

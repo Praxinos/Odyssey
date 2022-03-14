@@ -19,6 +19,8 @@ SectionsHelpersResize::GetValidRangeLeading( TArray<UMovieSceneSection*> iSectio
     FFrameNumber maxFrame = iSection->GetExclusiveEndFrame() - iThreshold;
     iNewFrame = FMath::Min( iNewFrame, maxFrame );
 
+    // This don't move leading edge further the previous section start
+    // Otherwise it can raise some problem, for example if we want to move the start of the last section to 0
     int32 previous_index = current_index - 1;
     if( iSections.IsValidIndex( previous_index ) )
     {
@@ -44,13 +46,15 @@ SectionsHelpersResize::GetValidRangeTrailing( TArray<UMovieSceneSection*> iSecti
     FFrameNumber minFrame = iSection->GetInclusiveStartFrame() + iThreshold;
     iNewFrame = FMath::Max( iNewFrame, minFrame );
 
-    int32 next_index = current_index + 1;
-    if( iSections.IsValidIndex( next_index ) )
-    {
-        UMovieSceneSection* next_section = iSections[next_index];
-        FFrameNumber maxFrame = next_section->GetExclusiveEndFrame() - iThreshold;
-        iNewFrame = FMath::Min( iNewFrame, maxFrame );
-    }
+    // This would be useful if we DON'T want to move trailing edge further the next section end
+    // But as all next sections will be pushed, it's not a problem to set a big new end frame
+    //int32 next_index = current_index + 1;
+    //if( iSections.IsValidIndex( next_index ) )
+    //{
+    //    UMovieSceneSection* next_section = iSections[next_index];
+    //    FFrameNumber maxFrame = next_section->GetExclusiveEndFrame() - iThreshold;
+    //    iNewFrame = FMath::Min( iNewFrame, maxFrame );
+    //}
 
     return TRange<FFrameNumber>( iSection->GetRange().GetLowerBound(), TRangeBound<FFrameNumber>::Exclusive( iNewFrame ) );
 }

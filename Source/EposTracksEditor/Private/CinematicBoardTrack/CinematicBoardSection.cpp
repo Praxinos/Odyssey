@@ -39,6 +39,8 @@
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "Styles/EposTracksEditorStyle.h"
+#include "Tools/EposSequenceTools.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionContent.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
@@ -156,6 +158,11 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
     iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
+    auto SequenceChanged = [this]( UMovieSceneSequence* iSequence )
+    {
+        mNeedRebuild = true;
+    };
+    iSection.OnSequenceChanged().BindLambda( SequenceChanged );
 
     BuildKeys();
 }
@@ -721,6 +728,12 @@ FCinematicBoardSection::Tick( const FGeometry& iAllottedGeometry, const FGeometr
         KeyThumbnailCache.SetSingleReferenceFrame( TOptional<double>() );
     }
 
+    if( mNeedRebuild )
+    {
+        mNeedRebuild = false;
+        RebuildChannelProxies();
+    }
+
     FKeyThumbnailSection::Tick( iAllottedGeometry, iClippedGeometry, iCurrentTime, iDeltaTime );
 }
 
@@ -755,7 +768,9 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
 {
     FKeyThumbnailSection::BuildSectionContextMenu( ioMenuBuilder, iObjectBinding );
 
-    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "GUIMenuText", "GUI" ) );
+    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "BoardMenuText", "Section" ) );
     {
         auto GetColor = [this]()
         {
@@ -812,34 +827,8 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 ]
             ],
             LOCTEXT( "SectionBackgroundColor", "Background Color" ) );
-    }
-    ioMenuBuilder.EndSection();
 
-    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
-
-    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "BoardMenuText", "Board" ) );
-    {
-        //ioMenuBuilder.AddSubMenu(
-        //    LOCTEXT( "TakesMenu", "Takes" ),
-        //    LOCTEXT( "TakesMenuTooltip", "Shot takes" ),
-        //    FNewMenuDelegate::CreateLambda( [=]( FMenuBuilder& InMenuBuilder )
-        //{
-        //    AddTakesMenu( InMenuBuilder );
-        //} ) );
-
-        //ioMenuBuilder.AddMenuEntry(
-        //    LOCTEXT( "NewTake", "New Take" ),
-        //    FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( SectionObject.GetShotDisplayName() ) ),
-        //    FSlateIcon(),
-        //    FUIAction( FExecuteAction::CreateSP( CinematicShotTrackEditor.Pin().ToSharedRef(), &FCinematicShotTrackEditor::NewTake, &SectionObject ) )
-        //);
-
-        //ioMenuBuilder.AddMenuEntry(
-        //    LOCTEXT( "InsertNewBoard", "Insert Board" ),
-        //    LOCTEXT( "InsertNewBoardTooltip", "Insert a new board at the current time" ),
-        //    FSlateIcon(),
-        //    FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::InsertBoard ) )
-        //);
+        //---
 
         //ioMenuBuilder.AddMenuEntry(
         //    LOCTEXT( "DuplicateBoard", "Duplicate Board" ),
@@ -847,13 +836,6 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
         //    FSlateIcon(),
         //    FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::DuplicateBoard, &sectionObject ),
         //               FCanExecuteAction::CreateLambda( []() { return false; } ) )
-        //);
-
-        //ioMenuBuilder.AddMenuEntry(
-        //    LOCTEXT( "CloneBoard", "Clone Board" ),
-        //    FText::Format( LOCTEXT( "CloneBoardTooltip", "Clone {0} to create a new board (with its own new actors and drawings)" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
-        //    FSlateIcon(),
-        //    FUIAction( FExecuteAction::CreateSP( mCinematicBoardTrackEditor.Pin().ToSharedRef(), &FCinematicBoardTrackEditor::CloneBoard, &sectionObject ) )
         //);
 
         //ioMenuBuilder.AddMenuEntry(
@@ -891,45 +873,46 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
         );
     }
     ioMenuBuilder.EndSection();
+
+    if( Cast<UShotSequence>( sectionObject.GetSequence() ) )
+    {
+        ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "TakeMenuText", "Take" ) );
+        {
+            ioMenuBuilder.AddSubMenu(
+                LOCTEXT( "TakesMenu", "Takes" ),
+                LOCTEXT( "TakesMenuTooltip", "Shot takes" ),
+                FNewMenuDelegate::CreateSP( this, &FCinematicBoardSection::AddTakesMenu ) );
+
+            ioMenuBuilder.AddMenuEntry(
+                LOCTEXT( "NewTake", "New Take" ),
+                FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) ),
+                FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
+                FUIAction( FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ) )
+            );
+        }
+        ioMenuBuilder.EndSection();
+    }
 }
 
-//void FCinematicShotSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
-//{
-//    TArray<FAssetData> AssetData;
-//    uint32 CurrentTakeNumber = INDEX_NONE;
-//    const UMovieSceneCinematicShotSection& SectionObject = GetSectionObjectAs<UMovieSceneCinematicShotSection>();
-//    MovieSceneToolHelpers::GatherTakes( &SectionObject, AssetData, CurrentTakeNumber );
-//
-//    AssetData.Sort( [&SectionObject]( const FAssetData &A, const FAssetData &B )
-//    {
-//        uint32 TakeNumberA = INDEX_NONE;
-//        uint32 TakeNumberB = INDEX_NONE;
-//        if( MovieSceneToolHelpers::GetTakeNumber( &SectionObject, A, TakeNumberA ) && MovieSceneToolHelpers::GetTakeNumber( &SectionObject, B, TakeNumberB ) )
-//        {
-//            return TakeNumberA < TakeNumberB;
-//        }
-//        return true;
-//    } );
-//
-//    for( auto ThisAssetData : AssetData )
-//    {
-//        uint32 TakeNumber = INDEX_NONE;
-//        if( MovieSceneToolHelpers::GetTakeNumber( &SectionObject, ThisAssetData, TakeNumber ) )
-//        {
-//            UObject* TakeObject = ThisAssetData.GetAsset();
-//
-//            if( TakeObject )
-//            {
-//                MenuBuilder.AddMenuEntry(
-//                    FText::Format( LOCTEXT( "TakeNumber", "Take {0}" ), FText::AsNumber( TakeNumber ) ),
-//                    FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( TakeObject->GetPathName() ) ),
-//                    TakeNumber == CurrentTakeNumber ? FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Empty" ),
-//                    FUIAction( FExecuteAction::CreateSP( CinematicShotTrackEditor.Pin().ToSharedRef(), &FCinematicShotTrackEditor::SwitchTake, TakeObject ) )
-//                );
-//            }
-//        }
-//    }
-//}
+void
+FCinematicBoardSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
+{
+    UMovieSceneCinematicBoardSection& sectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
+
+    for( auto take : sectionObject.GetTakes() )
+    {
+        TWeakObjectPtr<UMovieSceneSequence> take_sequence = take.GetSequence();
+        if( !take_sequence.IsValid() )
+            continue;
+
+        MenuBuilder.AddMenuEntry(
+            take_sequence->GetDisplayName(),
+            FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( take_sequence->GetPathName() ) ),
+            take_sequence->GetPathName() == sectionObject.GetSequence()->GetPathName() ? FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Empty" ),
+            FUIAction( FExecuteAction::CreateLambda( [this, &sectionObject, take]() { BoardSequenceTools::SwitchTake( GetSequencer().Get(), sectionObject, sectionObject.FindTake( take ) ); } ) )
+        );
+    }
+}
 
 /* FCinematicBoardSection callbacks
  *****************************************************************************/

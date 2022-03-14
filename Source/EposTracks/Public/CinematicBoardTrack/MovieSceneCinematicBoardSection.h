@@ -9,6 +9,31 @@
 #include "MovieSceneCinematicBoardSection.generated.h"
 
 /**
+ * Implements a take.
+ */
+USTRUCT()
+struct EPOSTRACKS_API FBoardSectionTake
+{
+    GENERATED_BODY()
+
+public:
+    FBoardSectionTake();
+    FBoardSectionTake( TWeakObjectPtr<UMovieSceneSequence> iSequence );
+
+    TWeakObjectPtr<UMovieSceneSequence> GetSequence();
+    TWeakObjectPtr<UMovieSceneSequence> GetSequence() const;
+
+public:
+    friend bool operator==( const FBoardSectionTake& iA, const FBoardSectionTake& iB );
+
+private:
+    UPROPERTY()
+    //UPROPERTY( VisibleAnywhere, Category="Take" )
+    TWeakObjectPtr<UMovieSceneSequence> Sequence;
+};
+
+
+/**
  * Implements a board section.
  */
 UCLASS( BlueprintType )
@@ -20,10 +45,26 @@ class EPOSTRACKS_API UMovieSceneCinematicBoardSection
     /** Object constructor. */
     UMovieSceneCinematicBoardSection( const FObjectInitializer& ObjInitializer );
 
+public:
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     virtual void PreEditChange( FProperty* PropertyAboutToChange ) override;
 #endif
+
+    virtual void PostLoad() override;
+
+public:
+    TArray<FBoardSectionTake> GetTakes() const;
+
+    void AddTake( const FBoardSectionTake& iTake );
+
+    FBoardSectionTake* FindTake( const FBoardSectionTake& iTake );
+    FBoardSectionTake* FindTake( const UMovieSceneSequence* iSequence );
+
+private:
+    UPROPERTY()
+    //UPROPERTY( VisibleAnywhere, Category="Takes" )
+    TArray<FBoardSectionTake> Takes;
 
 public:
     /** @return The board display name. if empty, returns the sequence's name*/

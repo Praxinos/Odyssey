@@ -87,7 +87,93 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
     }
 }
 
+#endif
+
 //---
+
+void
+UMovieSceneCinematicBoardSection::PostLoad()
+{
+    UMovieSceneSequence* subsequence = GetSequence();
+
+    // compatibility for section created before adding takes, so add the current sequence as the first take
+    if( !GetTakes().Num() && subsequence )
+    {
+        FString class_name = subsequence->GetClass()->GetName();
+        // As it is for compatibility only, it's certainly ok to do like that
+        // (as EposTracks module doesn't depend/know the EposSequence module (only EposMovieScene module))
+        // But do NOT make the same elsewhere !
+        if( class_name == TEXT( "ShotSequence" ) )
+        {
+            FBoardSectionTake take( subsequence );
+            AddTake( take );
+        }
+    }
+
+    Super::PostLoad();
+}
+
+//---
+
+FBoardSectionTake::FBoardSectionTake()
+    : Sequence()
+{
+}
+
+FBoardSectionTake::FBoardSectionTake( TWeakObjectPtr<UMovieSceneSequence> iSequence )
+    : Sequence( iSequence )
+{
+}
+
+TWeakObjectPtr<UMovieSceneSequence>
+FBoardSectionTake::GetSequence()
+{
+    return Sequence;
+}
+TWeakObjectPtr<UMovieSceneSequence>
+FBoardSectionTake::GetSequence() const
+{
+    return Sequence;
+}
+
+bool
+operator==( const FBoardSectionTake& iA, const FBoardSectionTake& iB )
+{
+    return iA.GetSequence() == iB.GetSequence();
+}
+
+//-
+
+TArray<FBoardSectionTake>
+UMovieSceneCinematicBoardSection::GetTakes() const
+{
+    return Takes;
+}
+
+void
+UMovieSceneCinematicBoardSection::AddTake( const FBoardSectionTake& iTake )
+{
+    if( !iTake.GetSequence().IsValid() )
+        return;
+
+    Takes.AddUnique( iTake );
+}
+
+FBoardSectionTake*
+UMovieSceneCinematicBoardSection::FindTake( const FBoardSectionTake& iTake )
+{
+    return Takes.FindByPredicate( [iTake]( const FBoardSectionTake& iTakeEntry ) { return iTakeEntry == iTake; } );
+}
+
+FBoardSectionTake*
+UMovieSceneCinematicBoardSection::FindTake( const UMovieSceneSequence* iSequence )
+{
+    return Takes.FindByPredicate( [iSequence]( const FBoardSectionTake& iTakeEntry ) { return iTakeEntry.GetSequence() == iSequence; } );
+}
+
+//---
+
+#if WITH_EDITOR
 
 void
 UMovieSceneCinematicBoardSection::ResizeLeadingEdge( FFrameNumber iNewFrame )
