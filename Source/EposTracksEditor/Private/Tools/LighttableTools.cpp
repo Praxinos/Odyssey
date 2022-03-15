@@ -34,11 +34,10 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
         for( int i = 0; i < values.Num(); i++ )
         {
-            UMaterialInstanceConstant* previous_material = nullptr;
             UTexture* previous_material_texture = nullptr;
             if( i > 0 )
             {
-                previous_material = Cast<UMaterialInstanceConstant>( values[i - 1].Get() );
+                UMaterialInstanceConstant* previous_material = Cast<UMaterialInstanceConstant>( values[i - 1].Get() );
                 previous_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), previous_material_texture );
             }
 
@@ -48,11 +47,10 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
             UTexture* current_material_next_texture = nullptr;
             current_material->GetTextureParameterValue( TEXT( "NextDrawingTexture" ), current_material_next_texture );
 
-            UMaterialInstanceConstant* next_material = nullptr;
             UTexture* next_material_texture = nullptr;
             if( i < values.Num() - 1 )
             {
-                next_material = Cast<UMaterialInstanceConstant>( values[i + 1].Get() );
+                UMaterialInstanceConstant* next_material = Cast<UMaterialInstanceConstant>( values[i + 1].Get() );
                 next_material->GetTextureParameterValue( TEXT( "DrawingTexture" ), next_material_texture );
             }
 
@@ -66,12 +64,16 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
 
             bool modified = false;
 
-            if( previous_material_texture && previous_material_texture->GetPathName() != current_material_previous_texture->GetPathName() )
+            if( previous_material_texture
+                && current_material_previous_texture
+                && previous_material_texture->GetPathName() != current_material_previous_texture->GetPathName() )
             {
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), previous_material_texture );
                 modified = true;
             }
-            if( next_material_texture && next_material_texture->GetPathName() != current_material_next_texture->GetPathName() )
+            if( next_material_texture
+                && current_material_next_texture
+                && next_material_texture->GetPathName() != current_material_next_texture->GetPathName() )
             {
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), next_material_texture );
                 modified = true;
@@ -124,14 +126,16 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
             if( use_lighttable >= .5f )
                 current_material->SetScalarParameterValueEditorOnly( TEXT( "UseLighttable" ), 0.f );
 
-            if( current_material_previous_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
+            if( current_material_previous_texture
+                && current_material_previous_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
                 UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), texture_transparent );
                 modified = true;
             }
-            if( current_material_next_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
+            if( current_material_next_texture
+                && current_material_next_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
             {
                 UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
 
