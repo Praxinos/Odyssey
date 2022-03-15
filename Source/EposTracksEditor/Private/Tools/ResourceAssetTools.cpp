@@ -196,6 +196,94 @@ MasterAssetTools::SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequ
 //---
 
 //static
+FLinearColor
+MasterAssetTools::GetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    FLinearColor previous_drawing_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "PreviousDrawingColor" );
+
+    return previous_drawing_color;
+}
+
+//static
+void
+MasterAssetTools::SetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iColor )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "PreviousDrawingColor", iColor.CopyWithNewOpacity( 1.f ) );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//static
+float
+MasterAssetTools::GetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    float previous_drawing_opacity = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "PreviousDrawingOpacity" );
+
+    return previous_drawing_opacity;
+}
+
+//static
+void
+MasterAssetTools::SetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, float iOpacity )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "PreviousDrawingOpacity", iOpacity );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//-
+
+//static
+FLinearColor
+MasterAssetTools::GetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    FLinearColor next_drawing_color = UMaterialEditingLibrary::GetMaterialInstanceVectorParameterValue( material, "NextDrawingColor" );
+
+    return next_drawing_color;
+}
+
+//static
+void
+MasterAssetTools::SetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iColor )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceVectorParameterValue( material, "NextDrawingColor", iColor.CopyWithNewOpacity( 1.f ) );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//static
+float
+MasterAssetTools::GetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    float next_drawing_opacity = UMaterialEditingLibrary::GetMaterialInstanceScalarParameterValue( material, "NextDrawingOpacity" );
+
+    return next_drawing_opacity;
+}
+
+//static
+void
+MasterAssetTools::SetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, float iOpacity )
+{
+    UMaterialInstanceConstant* material = MasterAssetTools::GetMasterMaterial( iPlayer, iRootSequence );
+
+    UMaterialEditingLibrary::SetMaterialInstanceScalarParameterValue( material, "NextDrawingOpacity", iOpacity );
+    UMaterialEditingLibrary::UpdateMaterialInstance( material );
+}
+
+//---
+
+//static
 UTexture2D*
 MasterAssetTools::GetMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FString& oPackageName, FString& oAssetName )
 {

@@ -465,38 +465,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 }
 
 TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeDrawingMenu()
-{
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
-
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
-    if( !plane_count )
-        return SNullWidget::NullWidget;
-
-    for( int i = 0; i < plane_count; i++ )
-    {
-        APlaneActor* plane = planes[i];
-        FGuid plane_binding = plane_bindings[i];
-
-        MenuBuilder.AddMenuEntry(
-            FText::FromString( plane->GetActorLabel() ),
-            FText::GetEmpty(),
-            FSlateIcon(),
-            FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding](){ BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
-                FCanExecuteAction::CreateLambda( [this, plane_binding](){ return BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } )
-            )/*,
-            NAME_None,
-            EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
-        );
-    }
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeSettingsMenu()
 {
     FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );

@@ -126,9 +126,9 @@ SColorPickerEntry::Construct( const FArguments& iArgs )
 void
 EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer )
 {
-    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.drawing-material.section-label", "Material" ) );
-
     UMovieSceneSequence* root_sequence = iSequencer->GetRootMovieSceneSequence();
+
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.drawing-material.section-label", "Material" ) );
 
     //-
 
@@ -146,7 +146,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
                                LOCTEXT( "settings.drawing-material.background-tooltip", "Display background and select its color for the drawing materials" ),
                                EUserInterfaceActionType::Check );
 
-    //---
+    //-
 
     iMenuBuilder.AddMenuEntry( FUIAction(
                                    FExecuteAction::CreateLambda( [iSequencer, root_sequence]() { MasterAssetTools::ToggleGridVisibility( *iSequencer, root_sequence ); } ),
@@ -162,7 +162,7 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
                                LOCTEXT( "settings.drawing-material.grid-tooltip", "Display grid and select its color for the drawing materials" ),
                                EUserInterfaceActionType::Check );
 
-    //---
+    //-
 
     auto grid_submenu = [iSequencer, root_sequence]( FMenuBuilder& iMenuBuilder )
     {
@@ -193,6 +193,58 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     };
 
     iMenuBuilder.AddSubMenu( LOCTEXT( "settings.drawing-material.grid-type-label", "Grid Type" ), LOCTEXT( "settings.drawing-material.grid-type-tooltip", "Select the inner grid type" ), FNewMenuDelegate::CreateLambda( grid_submenu ) );
+
+    iMenuBuilder.EndSection();
+
+    //---
+
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.lighttable.section-label", "Lighttable" ) );
+
+    auto OnGetPreviousColor = [iSequencer, root_sequence]() -> FLinearColor
+    {
+        FLinearColor color = MasterAssetTools::GetPreviousDrawingColor( *iSequencer, root_sequence );
+        color.A = MasterAssetTools::GetPreviousDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence() );
+
+        return color;
+    };
+
+    auto OnPreviousColorCommited = [iSequencer, root_sequence]( FLinearColor iColor )
+    {
+        MasterAssetTools::SetPreviousDrawingColor( *iSequencer, root_sequence, iColor );
+        MasterAssetTools::SetPreviousDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iColor.A );
+    };
+
+    iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
+                                .Text( LOCTEXT( "settings.lighttable.previous-drawing-color-label", "Previous Drawing Color" ) )
+                                .ToolTipText( LOCTEXT( "settings.lighttable.previous-drawing-color-tooltip", "Select the color of the previous drawing when the lighttable is enabled" ) )
+                                .Color( OnGetPreviousColor() )
+                                .UseAlpha( true )
+                                .OnColorCommitted_Lambda( OnPreviousColorCommited ),
+                            FText::GetEmpty() );
+
+    //-
+
+    auto OnGetNextColor = [iSequencer, root_sequence]() -> FLinearColor
+    {
+        FLinearColor color = MasterAssetTools::GetNextDrawingColor( *iSequencer, root_sequence );
+        color.A = MasterAssetTools::GetNextDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence() );
+
+        return color;
+    };
+
+    auto OnNextColorCommited = [iSequencer, root_sequence]( FLinearColor iColor )
+    {
+        MasterAssetTools::SetNextDrawingColor( *iSequencer, root_sequence, iColor );
+        MasterAssetTools::SetNextDrawingOpacity( *iSequencer, iSequencer->GetRootMovieSceneSequence(), iColor.A );
+    };
+
+    iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
+                                .Text( LOCTEXT( "settings.lighttable.next-drawing-color-label", "Next Drawing Color" ) )
+                                .ToolTipText( LOCTEXT( "settings.lighttable.next-drawing-color-tooltip", "Select the color of the next drawing when the lighttable is enabled" ) )
+                                .Color( OnGetNextColor() )
+                                .UseAlpha( true )
+                                .OnColorCommitted_Lambda( OnNextColorCommited ),
+                            FText::GetEmpty() );
 
     iMenuBuilder.EndSection();
 

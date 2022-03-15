@@ -9,6 +9,7 @@ class ACineCameraActor;
 class APlaneActor;
 class FString;
 class ISequencer;
+class IMovieScenePlayer;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieSceneSequence;
@@ -60,6 +61,19 @@ public:
 
     static EGridType    GetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
     static void         SetGridType( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, EGridType iGridType );
+
+public:
+    static FLinearColor GetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetPreviousDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iColor );
+
+    static float        GetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetPreviousDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, float iOpacity );
+
+    static FLinearColor GetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetNextDrawingColor( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, FLinearColor iColor );
+
+    static float        GetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence );
+    static void         SetNextDrawingOpacity( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, float iOpacity );
 };
 
 /*
