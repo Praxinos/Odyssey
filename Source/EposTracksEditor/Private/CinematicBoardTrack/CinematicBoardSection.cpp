@@ -871,8 +871,70 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
             FUIAction( FExecuteAction::CreateSP( mWidgetSectionContent.ToSharedRef(), &SCinematicBoardSectionContent::EnterRename ) )
             //FUIAction( FExecuteAction::CreateSP( mWidgetTitle.ToSharedRef(), &SCinematicBoardSectionTitle::EnterRename ) )
         );
+
+        auto SubMenuAdvanced = [=]( FMenuBuilder& ioMenuBuilder )
+        {
+            auto BulkEditSubSequence = [=]()
+            {
+                ISequencer* sequencer = mCinematicBoardTrackEditor.Pin()->GetSequencer().Get();
+
+                TArray<UMovieSceneSection*> sections;
+                sequencer->GetSelectedSections( sections );
+                TArray<UObject*> objects;
+                for( auto section : sections )
+                {
+                    UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+                    if( subsection && subsection->GetSequence() )
+                        objects.Add( subsection->GetSequence() );
+                }
+
+                // PropertyEditorModule.CreatePropertyEditorToolkit seems to dislike empty array ...
+                if( !objects.Num() )
+                    return;
+
+                FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+                PropertyEditorModule.CreatePropertyEditorToolkit( EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), objects );
+            };
+
+            auto CanBulkEditSubSequence = [=]()
+            {
+                ISequencer* sequencer = mCinematicBoardTrackEditor.Pin()->GetSequencer().Get();
+
+                TArray<UMovieSceneSection*> sections;
+                sequencer->GetSelectedSections( sections );
+                TArray<UObject*> objects;
+                for( auto section : sections )
+                {
+                    UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+                    if( subsection && subsection->GetSequence() )
+                        objects.Add( subsection->GetSequence() );
+                }
+
+                return !!objects.Num();
+            };
+
+            // As there is only a FNamingElements editable structure inside the subsequence class (aka UPROPERTY)
+            // for now, just name the option "Edit Naming Elements"
+            ioMenuBuilder.AddMenuEntry(
+                LOCTEXT( "BulkEditNamingElements", "Edit Naming Elements" ),
+                LOCTEXT( "BulkEditNamingElementsTooltip", "Edit naming elements of the selected sections" ),
+                FSlateIcon(),
+                FUIAction(
+                    FExecuteAction::CreateLambda( BulkEditSubSequence ),
+                    FCanExecuteAction::CreateLambda( CanBulkEditSubSequence )
+                )
+            );
+        };
+
+        ioMenuBuilder.AddSubMenu(
+            LOCTEXT( "AdvancedSectionOptions", "Advanced" ),
+            FText::GetEmpty(),
+            FNewMenuDelegate::CreateLambda( SubMenuAdvanced )
+        );
     }
     ioMenuBuilder.EndSection();
+
+    //---
 
     if( Cast<UShotSequence>( sectionObject.GetSequence() ) )
     {
