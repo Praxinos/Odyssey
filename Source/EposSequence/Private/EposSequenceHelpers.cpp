@@ -12,10 +12,15 @@
 #include "Evaluation/MovieSceneSequenceHierarchy.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "IMovieScenePlayer.h"
+#include "LevelSequence.h"
+#include "MoviePipeline.h"
+#include "MoviePipelineBlueprintLibrary.h"
+#include "MoviePipelineMasterConfig.h"
 #include "MovieScene.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
+#include "MovieSceneSequenceVisitor.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
@@ -360,6 +365,8 @@ EposSequenceHelpers::GetNotesRecursive( IMovieScenePlayer& iPlayer, UMovieSceneS
 TArray<TWeakObjectPtr<UMovieSceneNoteSection>>
 EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber )
 {
+    //TODO: certainly replace those 2 functions by the one with the sequencer visitor: UMoviePipelineStoryboardBlueprintLibrary::GetNotes()
+
     TArray<TWeakObjectPtr<UMovieSceneNoteSection>> note_sections;
 
     UMovieScene* movie_scene = iSequence->GetMovieScene();
@@ -1409,6 +1416,127 @@ ShotSequenceHelpers::BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer,
     }
 
     return maps;
+}
+
+//---
+
+//static
+TArray<UStoryNote*>
+UMoviePipelineStoryboardBlueprintLibrary::GetNotes( const UMoviePipeline* iMoviePipeline )
+{
+    TArray<UStoryNote*> notes;
+
+    ULevelSequence* level_sequence = iMoviePipeline->GetTargetSequence();
+
+    FFrameRate effective_framerate = iMoviePipeline->GetPipelineMasterConfig()->GetEffectiveFrameRate( iMoviePipeline->GetTargetSequence() );
+
+    //FTimecode master_timecode = UMoviePipelineBlueprintLibrary::GetMasterTimecode( iMoviePipeline );
+    FFrameNumber master_current_frame_in_levelsequence = UMoviePipelineBlueprintLibrary::GetMasterFrameNumber( iMoviePipeline );
+    FFrameNumber master_current_frame = FFrameRate::TransformTime( master_current_frame_in_levelsequence, effective_framerate, level_sequence->GetMovieScene()->GetTickResolution() ).GetFrame();
+
+    ////FTimecode shot_timecode = UMoviePipelineBlueprintLibrary::GetCurrentShotTimecode( iMoviePipeline );
+    //FFrameNumber shot_current_frame_in_levelsequence = UMoviePipelineBlueprintLibrary::GetCurrentShotFrameNumber( iMoviePipeline );
+    //FFrameNumber shot_current_frame = FFrameRate::TransformTime( master_current_frame_in_levelsequence, effective_framerate, level_sequence->GetMovieScene()->GetTickResolution() ).GetFrame();
+
+    //---
+
+    using FTrackAndSectionInfo = TTuple<UMovieSceneTrack*, UMovieSceneSection*>;
+    using FSequenceFrameInfo = TTuple<FMovieSceneSequenceID, TArray<FTrackAndSectionInfo>>;
+
+    struct FSequenceNoteVisitor
+        : UE::MovieScene::ISequenceVisitor
+    {
+        void SortInfo()
+        {
+            for( auto& info : mInfo )
+            {
+                TArrayView<FTrackAndSectionInfo> track_and_section_view( info.Get<1>() );
+
+                track_and_section_view.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
+                                                   {
+                                                       UMovieSceneSection* sectionA = iA.Get<1>();
+                                                       UMovieSceneSection* sectionB = iB.Get<1>();
+
+                                                       TRangeBound<FFrameNumber> LowerBoundA = sectionA->GetRange().GetLowerBound();
+                                                       return TRangeBound<FFrameNumber>::MinLower( LowerBoundA, sectionB->GetRange().GetLowerBound() ) == LowerBoundA;
+                                                   } );
+                track_and_section_view.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
+                                                   {
+                                                       UMovieSceneSection* sectionA = iA.Get<1>();
+                                                       UMovieSceneSection* sectionB = iB.Get<1>();
+
+                                                       return sectionA->GetRowIndex() < sectionB->GetRowIndex();
+                                                   } );
+
+#if WITH_EDITORONLY_DATA
+                track_and_section_view.StableSort( []( const FTrackAndSectionInfo& iA, const FTrackAndSectionInfo& iB )
+                                                   {
+                                                       UMovieSceneTrack* trackA = iA.Get<0>();
+                                                       UMovieSceneTrack* trackB = iB.Get<0>();
+
+                                                       return trackA->GetSortingOrder() < trackB->GetSortingOrder();
+                                                   } );
+#endif
+            }
+
+        }
+
+        virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace )
+        {
+            UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( iSection );
+            if( !note_section || !note_section->GetNote() )
+                return;
+
+            FFrameTime local_reference_time = mReferenceFrame * iLocalSpace.RootToSequenceTransform;
+            if( !iSection->IsTimeWithinSection( local_reference_time.GetFrame() ) )
+                return;
+
+            FMovieSceneSequenceID sequence_id_to_insert = iLocalSpace.SequenceID;
+            FSequenceFrameInfo* sequence_frame_info = mInfo.FindByPredicate( [sequence_id_to_insert]( const FSequenceFrameInfo& iInfo ) { return iInfo.Get<0>() == sequence_id_to_insert; } );
+            if( sequence_frame_info )
+            {
+                FTrackAndSectionInfo track_and_section( iTrack, iSection );
+                sequence_frame_info->Get<1>().Add( track_and_section );
+            }
+            else
+            {
+                FTrackAndSectionInfo track_and_section( iTrack, iSection );
+                FSequenceFrameInfo info( sequence_id_to_insert, TArray<FTrackAndSectionInfo>( { track_and_section } ) );
+                mInfo.Insert( info, 0 );
+            }
+
+            SortInfo();
+        }
+
+        FFrameNumber mReferenceFrame; // In tick resolution
+
+        TArray<FSequenceFrameInfo> mInfo;
+    };
+
+
+    UE::MovieScene::FSequenceVisitParams params;
+    params.bVisitSections = true;
+    params.bVisitMasterTracks = true;
+    params.bVisitSubSequences = true;
+
+    FSequenceNoteVisitor note_visitor;
+    note_visitor.mReferenceFrame = master_current_frame;
+
+    // Visit all notes
+    VisitSequence( level_sequence, params, note_visitor );
+
+    for( auto info : note_visitor.mInfo )
+    {
+        for( auto track_and_section : info.Get<1>() )
+        {
+            UMovieSceneNoteSection* note_section = Cast<UMovieSceneNoteSection>( track_and_section.Get<1>() );
+            check( note_section && note_section->GetNote() );
+
+            notes.Add( note_section->GetNote() );
+        }
+    }
+
+    return notes;
 }
 
 #undef LOCTEXT_NAMESPACE

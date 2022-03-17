@@ -50,6 +50,7 @@ public class EposSequenceEditor : ModuleRules
                 "LevelSequence",
                 "TimeManagement",
                 "MovieSceneCapture",
+                "MovieRenderPipelineCore",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
@@ -68,7 +69,6 @@ public class EposSequenceEditor : ModuleRules
                 "EditorWidgets",
                 "EditorScriptingUtilities",
                 "MovieRenderPipelineEditor",
-                "MovieRenderPipelineCore",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",
