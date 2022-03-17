@@ -22,7 +22,7 @@
 
 //static
 bool
-BoardSequenceTools::CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
     if( !result.mInnerSequence )
@@ -35,9 +35,22 @@ BoardSequenceTools::CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneS
         return false;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    FKeyOpacity opacity = ShotSequenceHelpers::GetOpacityKey( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding );
+    bool can_create = false;
+    for( auto plane_binding : iPlaneBindings )
+    {
+        FKeyOpacity opacity = ShotSequenceHelpers::GetOpacityKey( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), plane_binding );
 
-    return !opacity.Exists();
+        can_create |= ( !opacity.Exists() );
+    }
+
+    return can_create;
+}
+
+//static
+bool
+BoardSequenceTools::CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    return BoardSequenceTools::CanCreateOpacity( iSequencer, iSubSection, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
 }
 
 //static
@@ -69,7 +82,7 @@ ShotSequenceTools::CanCreateOpacity( ISequencer* iSequencer, FFrameNumber iFrame
 
 //static
 void
-BoardSequenceTools::CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity )
+BoardSequenceTools::CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
     if( !result.mInnerSequence )
@@ -82,50 +95,84 @@ BoardSequenceTools::CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubS
         return;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    ShotSequenceTools::CreateOpacity( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBinding, iOpacity );
+    ShotSequenceTools::CreateOpacity( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, inner_frame.GetFrame(), iPlaneBindings, iOpacity );
+}
+
+//static
+void
+BoardSequenceTools::CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity )
+{
+    BoardSequenceTools::CreateOpacity( iSequencer, iSubSection, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ), iOpacity );
+}
+
+//static
+void
+BoardSequenceTools::CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::CreateOpacity( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBindings, iOpacity );
 }
 
 //static
 void
 BoardSequenceTools::CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return;
+    BoardSequenceTools::CreateOpacity( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ), iOpacity );
+}
 
-    ShotSequenceTools::CreateOpacity( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame(), iPlaneBinding, iOpacity );
+//static
+void
+ShotSequenceTools::CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity )
+{
+    CreateOpacity( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBindings, iOpacity );
 }
 
 //static
 void
 ShotSequenceTools::CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity )
 {
-    CreateOpacity( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, iPlaneBinding, iOpacity );
+    ShotSequenceTools::CreateOpacity( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ), iOpacity );
 }
 
 //static
 void
-ShotSequenceTools::CreateOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity )
+ShotSequenceTools::CreateOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity )
 {
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-plane-opacity", "Create plane opacity" ) );
 
-    ShotSequenceHelpers::FFindOrCreateMaterialParameterResult result_track = ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
-    if( !result_track.mSections.Num() )
-        return;
+    bool is_creation = false;
 
-    ShotSequenceHelpers::FFindOrCreateParameterChannelResult result_channel = ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( iSequencer, iSequence, iSequenceID, iPlaneBinding, result_track.mSections[0] );
-    if( !result_channel.mChannel )
-        return;
+    for( auto plane_binding : iPlaneBindings )
+    {
+        FKeyOpacity opacity = ShotSequenceHelpers::GetOpacityKey( iSequencer, iSequence, iSequenceID, iFrameNumber, plane_binding );
+        if( opacity.Exists() )
+            continue;
+
+        ShotSequenceHelpers::FFindOrCreateMaterialParameterResult result_track = ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( iSequencer, iSequence, iSequenceID, plane_binding, iFrameNumber );
+        if( !result_track.mSections.Num() )
+            continue;
+
+        ShotSequenceHelpers::FFindOrCreateParameterChannelResult result_channel = ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( iSequencer, iSequence, iSequenceID, plane_binding, result_track.mSections[0] );
+        if( !result_channel.mChannel )
+            continue;
+
+        is_creation |= result_track.mTrackCreated;
+        is_creation |= result_track.mSectionsCreated;
+        is_creation |= result_channel.mChannelCreated;
+
+        //---
+
+        result_track.mSections[0]->Modify();
+
+        AddKeyToChannel( result_channel.mChannel, iFrameNumber, FMath::Clamp( iOpacity, 0.f, 1.f ), iSequencer.GetKeyInterpolation() );
+    }
 
     //---
 
-    result_track.mSections[0]->Modify();
-
-    AddKeyToChannel( result_channel.mChannel, iFrameNumber, FMath::Clamp( iOpacity, 0.f, 1.f ), iSequencer.GetKeyInterpolation() );
-
-    //---
-
-    if( result_track.mTrackCreated || result_track.mSectionsCreated || result_channel.mChannelCreated )
+    if( is_creation )
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     else
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );

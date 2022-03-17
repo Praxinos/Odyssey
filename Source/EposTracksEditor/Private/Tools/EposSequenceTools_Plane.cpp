@@ -22,6 +22,7 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "Sections/MovieSceneBoolSection.h"
+#include "Sections/MovieSceneSubSection.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
@@ -336,29 +337,39 @@ ShotSequenceTools::GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* o
 
 //static
 bool
-BoardSequenceTools::CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+BoardSequenceTools::CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
     if( !result.mInnerSequence )
         return false;
 
-    return ShotSequenceTools::CanDetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+    return ShotSequenceTools::CanDetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
+}
+
+//static
+bool
+BoardSequenceTools::CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
+{
+    return BoardSequenceTools::CanDetachPlane( iSequencer, iSubSection, TArray<FGuid>( { iPlaneBinding } ) );
 }
 
 //static
 bool
 ShotSequenceTools::CanDetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding )
 {
-    return ShotSequenceTools::CanDetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+    return ShotSequenceTools::CanDetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), TArray<FGuid>( { iPlaneBinding } ) );
 }
 
 //static
 bool
-ShotSequenceTools::CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+ShotSequenceTools::CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings )
 {
     TArray<APlaneActor*> planes;
-    for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID ) )
-        planes.Add( Cast<APlaneActor>( WeakObject.Get() ) );
+    for( auto plane_binding : iPlaneBindings )
+    {
+        for( auto object : iSequencer.FindBoundObjects( plane_binding, iSequenceID ) )
+            planes.Add( Cast<APlaneActor>( object ) );
+    }
 
     bool can_detach = false;
     for( auto plane : planes )
@@ -381,40 +392,65 @@ ShotSequenceTools::CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* 
 
 //static
 void
-BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
+}
+
+//static
+void
+BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceTools::DetachPlane( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
+}
+
+//static
+void
+BoardSequenceTools::DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
 }
 
 //static
 void
 BoardSequenceTools::DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-    if( !result.mInnerSequence )
-        return;
+    BoardSequenceTools::DetachPlane( iSequencer, iSubSection, TArray<FGuid>( { iPlaneBinding } ) );
+}
 
-    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+//static
+void
+ShotSequenceTools::DetachPlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings )
+{
+    DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBindings );
 }
 
 //static
 void
 ShotSequenceTools::DetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding )
 {
-    DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+    DetachPlane( iSequencer, TArray<FGuid>( { iPlaneBinding } ) );
 }
 
 //static
 void
-ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings )
 {
     TArray<APlaneActor*> planes;
-    for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID ) )
-        planes.Add( Cast<APlaneActor>( WeakObject.Get() ) );
+
+    for( auto plane_binding : iPlaneBindings )
+    {
+        for( auto object : iSequencer.FindBoundObjects( plane_binding, iSequenceID ) )
+            planes.Add( Cast<APlaneActor>( object ) );
+    }
 
     //---
 
@@ -423,8 +459,10 @@ ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
     //---
 
     GEditor->SelectNone( true, true );
+    // It's certainly safe to not check if CanDetachPlane() is ok (like CreateOpacity()/CreateDrawing)
+    // as DetachSelectedActors() does the check
     for( auto plane : planes )
-        GEditor->SelectActor( plane, true, true );
+        GEditor->SelectActor( plane, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 
     GEditor->DetachSelectedActors();
 
@@ -460,45 +498,60 @@ ShotSequenceTools::GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor
 
 //static
 void
-BoardSequenceTools::DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+BoardSequenceTools::DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::DeletePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+    ShotSequenceTools::DeletePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
+}
+
+//static
+void
+BoardSequenceTools::DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
+{
+    BoardSequenceTools::DeletePlane( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
+}
+
+//static
+void
+BoardSequenceTools::DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DeletePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
 }
 
 //static
 void
 BoardSequenceTools::DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-    if( !result.mInnerSequence )
-        return;
+    BoardSequenceTools::DeletePlane( iSequencer, iSubSection, TArray<FGuid>( { iPlaneBinding } ) );
+}
 
-    ShotSequenceTools::DeletePlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+//static
+void
+ShotSequenceTools::DeletePlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings )
+{
+    ShotSequenceTools::DeletePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBindings );
 }
 
 //static
 void
 ShotSequenceTools::DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding )
 {
-    ShotSequenceTools::DeletePlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+    ShotSequenceTools::DeletePlane( iSequencer, TArray<FGuid>( { iPlaneBinding } ) );
 }
 
-//static
-void
-ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+namespace
 {
-    TArray<APlaneActor*> planes;
-    for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID ) )
-        planes.Add( Cast<APlaneActor>( WeakObject.Get() ) );
-
-    UMovieScene* movieScene = iSequence->GetMovieScene();
-
-    //---
-
+static
+TArray<FGuid>
+GetSubBindings( UMovieScene* iMovieScene, FGuid iPlaneBinding )
+{
     // This will make a level traversal order: https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846#ce5c
     // And then, reverse this order to start by the children
     //
@@ -518,9 +571,9 @@ ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
         bindings.Add( binding );
 
         // Enqueue all the children of the current binding
-        for( int32 PossessableIndex = 0; PossessableIndex < movieScene->GetPossessableCount(); ++PossessableIndex )
+        for( int32 PossessableIndex = 0; PossessableIndex < iMovieScene->GetPossessableCount(); ++PossessableIndex )
         {
-            const FMovieScenePossessable& Possessable = movieScene->GetPossessable( PossessableIndex );
+            const FMovieScenePossessable& Possessable = iMovieScene->GetPossessable( PossessableIndex );
 
             if( Possessable.GetParent() == binding )
                 queue.Enqueue( Possessable.GetGuid() );
@@ -529,6 +582,31 @@ ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     Algo::Reverse( bindings ); // To start with children first
 
+    return bindings;
+}
+}
+
+//static
+void
+ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings )
+{
+    UMovieScene* movieScene = iSequence->GetMovieScene();
+
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> bindings;
+
+    for( auto plane_binding : iPlaneBindings )
+    {
+        for( auto object : iSequencer.FindBoundObjects( plane_binding, iSequenceID ) )
+            planes.Add( Cast<APlaneActor>( object ) );
+
+        bindings = GetSubBindings( movieScene, plane_binding );
+    }
+
+    //---
+
+    bindings = TSet<FGuid>( bindings ).Array(); // To make them unique
+
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "DeletePlane", "Delete Plane" ) );
@@ -536,7 +614,7 @@ ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
     movieScene->Modify();
     iSequence->Modify();
 
-    //---
+    //--- Delete bindings
 
     for( auto binding : bindings )
     {
@@ -546,11 +624,11 @@ ShotSequenceTools::DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     iSequencer.RestorePreAnimatedState();
 
-    //---
+    //--- Delete actors
 
     GEditor->SelectNone( true, true );
     for( auto plane : planes )
-        GEditor->SelectActor( plane, true, true );
+        GEditor->SelectActor( plane, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 
     FLevelEditorActionCallbacks::ExecuteExecCommand( FString( TEXT( "DELETE" ) ) ); // In LevelEditor.cpp
 
@@ -618,54 +696,168 @@ BoardSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, FFrameNumber 
     if( !result.mInnerSequence )
         return;
 
-    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, TArray<FGuid>( { iPlaneBinding } ) );
+}
+
+//static
+void
+BoardSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings, TOptional<FGuid> iPlaneReference )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings, iPlaneReference );
 }
 
 //static
 void
 BoardSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-    if( !result.mInnerSequence )
-        return;
+    BoardSequenceTools::TogglePlaneVisibility( iSequencer, iSubSection, TArray<FGuid>( { iPlaneBinding } ) );
+}
 
-    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+//static
+void
+ShotSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings, TOptional<FGuid> iPlaneReference )
+{
+    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBindings, iPlaneReference );
 }
 
 //static
 void
 ShotSequenceTools::TogglePlaneVisibility( ISequencer* iSequencer, FGuid iPlaneBinding )
 {
-    ShotSequenceTools::TogglePlaneVisibility( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+    ShotSequenceTools::TogglePlaneVisibility( iSequencer, TArray<FGuid>( { iPlaneBinding } ) );
 }
 
 //static
 void
-ShotSequenceTools::TogglePlaneVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+ShotSequenceTools::TogglePlaneVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings, TOptional<FGuid> iPlaneReference )
 {
-    ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult plane_visibility_result = ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
-
-    if( !plane_visibility_result.mTrack.IsValid() )
-        return;
-
-    if( plane_visibility_result.mSections.Num() == 0 )
-        return;
-
-    //---
-
     const FScopedTransaction transaction( LOCTEXT( "TogglePlaneVisibility", "Toggle Plane Visibility" ) );
 
     //---
 
-    bool new_plane_visible = !IsPlaneVisible( iSequencer, iSequence, iSequenceID, iPlaneBinding );
-    for( auto section : plane_visibility_result.mSections )
-    {
-        section->Modify();
+    bool reference_plane_visibility = false;
+    if( iPlaneReference.IsSet() )
+        reference_plane_visibility = IsPlaneVisible( iSequencer, iSequence, iSequenceID, iPlaneReference.GetValue() );
 
-        section->GetChannel().SetDefault( new_plane_visible );
+    for( auto plane_binding : iPlaneBindings )
+    {
+        ShotSequenceHelpers::FFindOrCreatePlaneVisibilityResult plane_visibility_result = ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, plane_binding );
+
+        if( !plane_visibility_result.mTrack.IsValid() )
+            continue;
+
+        if( plane_visibility_result.mSections.Num() == 0 )
+            continue;
+
+        //---
+
+        // Invert the visibility of the plane
+        bool new_plane_visibility = !IsPlaneVisible( iSequencer, iSequence, iSequenceID, plane_binding );
+        // But if there is a reference plane, invert it and use it for all planes
+        if( iPlaneReference.IsSet() )
+            new_plane_visibility = !reference_plane_visibility;
+
+        for( auto section : plane_visibility_result.mSections )
+        {
+            section->Modify();
+
+            section->GetChannel().SetDefault( new_plane_visibility );
+        }
     }
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
+}
+
+//---
+
+//static
+void
+BoardSequenceTools::SelectSinglePlane( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, *iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::SelectSinglePlane( *iSequencer, iSubSection, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::SelectSinglePlane( ISequencer& iSequencer, UMovieSceneSubSection* iParentSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    auto objects = iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID );
+
+    // Get the plane(s) corresponding to the one(s) on the current clicked row
+    // It's an array, but generally it should always be only 1 entry
+    TArray<APlaneActor*> planes;
+    for( auto object : objects )
+        planes.Add( Cast<APlaneActor>( object ) );
+
+    // To unselect section(s)
+    iSequencer.EmptySelection();
+    // And then select the current one
+    iSequencer.SelectSection( iParentSection );
+
+    // To unselect all actors
+    GEditor->SelectNone( true, true );
+    // And then select the current one(s)
+    for( auto plane : planes )
+        GEditor->SelectActor( plane, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
+}
+
+//---
+
+//static
+void
+BoardSequenceTools::SelectMultiPlane( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iPlaneBinding )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, *iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::SelectMultiPlane( *iSequencer, iSubSection, result.mInnerSequence, result.mInnerSequenceId, iPlaneBinding );
+}
+
+//static
+void
+ShotSequenceTools::SelectMultiPlane( ISequencer& iSequencer, UMovieSceneSubSection* iParentSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
+{
+    auto objects = iSequencer.FindBoundObjects( iPlaneBinding, iSequenceID );
+
+    // Get the plane(s) corresponding to the one(s) on the current clicked row
+    // It's an array, but generally it should always be only 1 entry
+    TArray<APlaneActor*> planes_self;
+    for( auto object : objects )
+        planes_self.Add( Cast<APlaneActor>( object ) );
+
+    // Get all the currently selected planes inside the whole current shot
+    TArray<APlaneActor*> planes_selected;
+    ShotSequenceHelpers::GetAllPlanes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOnly, &planes_selected, nullptr );
+
+    // Add the self plane to the selection
+    // or remove it from the selection if it was already selected
+    for( auto plane_self : planes_self )
+    {
+        if( planes_selected.Contains( plane_self ) )
+            planes_selected.Remove( plane_self );
+        else
+            planes_selected.Add( plane_self );
+    }
+
+    // To unselect section(s)
+    iSequencer.EmptySelection();
+    // And then select the current one
+    iSequencer.SelectSection( iParentSection );
+
+    // To unselect all actors
+    GEditor->SelectNone( true, true );
+    // And then select the current one(s)
+    for( auto plane_selected : planes_selected )
+        GEditor->SelectActor( plane_selected, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 }
 
 //---
