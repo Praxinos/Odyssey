@@ -127,7 +127,10 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     //---
 
-    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, iCamera, plane );
+    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+    FIntPoint texture_size = plane->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
+
+    UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, texture_size );
     if( !new_material )
         return;
 

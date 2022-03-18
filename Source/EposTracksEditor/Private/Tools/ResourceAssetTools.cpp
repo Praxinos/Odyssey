@@ -18,7 +18,6 @@
 
 #include "NamingConvention.h"
 #include "PlaneActor.h"
-#include "Settings/EposTracksEditorSettings.h"
 #include "StoryNote.h"
 #include "Tools/EposSequenceTools.h"
 
@@ -563,7 +562,7 @@ ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSe
 
 //static
 UMaterialInstanceConstant*
-ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, const ACineCameraActor* iCamera, const APlaneActor* iPlane )
+ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iRootSequence, UMovieSceneSequence* iSequence, FIntPoint iTextureSize )
 {
     FString package_name;
     FString asset_name;
@@ -571,11 +570,7 @@ ProjectAssetTools::CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, U
     if( !new_material )
         return nullptr;
 
-    const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-
-    FIntPoint texture_size = iPlane->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
-
-    UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, texture_size, package_name, asset_name );
+    UTexture2D* new_texture = CreateTexture2D( iPlayer, iRootSequence, iSequence, new_material, iTextureSize, package_name, asset_name );
     if( !new_texture )
     {
         UEditorAssetLibrary::DeleteLoadedAsset( new_material );

@@ -18,6 +18,8 @@
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
+#include "PlaneActor.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Drawing"
@@ -173,9 +175,27 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
         //---
 
+        const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+        FIntPoint texture_size = plane->ComputeTextureSize( camera, settings->TextureSettings.Height );
+
+        if( channel->GetNumKeys() )
+        {
+            FDrawing first_drawing;
+            first_drawing.mSection = result.mSections[0];
+            first_drawing.mChannel = channel;
+            first_drawing.mKeyHandle = channel->GetData().GetHandle( 0 );
+
+            UMaterialInstance* material = first_drawing.GetMaterial();
+            UTexture2D* first_texture = ProjectAssetTools::GetTexture2D( iSequence, material );
+            if( first_texture )
+                texture_size = plane->ComputeTextureSize( camera, first_texture->GetSurfaceHeight() );
+        }
+
+        //---
+
         section->Modify();
 
-        UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, camera, plane );
+        UMaterialInstanceConstant* new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequencer.GetRootMovieSceneSequence(), iSequence, texture_size );
         if( !new_material )
             continue;
 
