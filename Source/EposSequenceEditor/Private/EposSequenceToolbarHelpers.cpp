@@ -41,7 +41,7 @@ public:
         {}
         SLATE_ARGUMENT( FLinearColor, Color )
         SLATE_ARGUMENT( bool, UseAlpha )
-        SLATE_ATTRIBUTE( FText, Text )
+        SLATE_ARGUMENT( FText, Text )
         /** The event called when the color is committed */
         SLATE_EVENT( FOnLinearColorValueChanged, OnColorCommitted )
     SLATE_END_ARGS()
@@ -51,8 +51,7 @@ public:
 
 private:
     FLinearColor mColor;
-    bool mUseAlpha;
-    TAttribute<FText> mText;
+    bool         mUseAlpha;
 
     /** Invoked when a new value is selected on the color wheel */
     FOnLinearColorValueChanged mOnColorCommitted;
@@ -62,7 +61,6 @@ void
 SColorPickerEntry::Construct( const FArguments& iArgs )
 {
     mColor = iArgs._Color;
-    mText = iArgs._Text;
     mUseAlpha = iArgs._UseAlpha;
     mOnColorCommitted = iArgs._OnColorCommitted;
 
@@ -96,7 +94,12 @@ SColorPickerEntry::Construct( const FArguments& iArgs )
             +SHorizontalBox::Slot()
             [
                 SNew( STextBlock )
-                .Text( mText )
+                .Visibility( iArgs._Text.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible )
+                .Text( iArgs._Text )
+            ]
+            +SHorizontalBox::Slot()
+            [
+                SNew( SSpacer )
             ]
             +SHorizontalBox::Slot()
             .AutoWidth()
@@ -215,12 +218,11 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     };
 
     iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
-                                .Text( LOCTEXT( "settings.lighttable.previous-drawing-color-label", "Previous Drawing Color" ) )
                                 .ToolTipText( LOCTEXT( "settings.lighttable.previous-drawing-color-tooltip", "Select the color of the previous drawing when the lighttable is enabled" ) )
                                 .Color( OnGetPreviousColor() )
                                 .UseAlpha( true )
                                 .OnColorCommitted_Lambda( OnPreviousColorCommited ),
-                            FText::GetEmpty() );
+                            LOCTEXT( "settings.lighttable.previous-drawing-color-label", "Previous Drawing Color" ) );
 
     //-
 
@@ -239,12 +241,11 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     };
 
     iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
-                                .Text( LOCTEXT( "settings.lighttable.next-drawing-color-label", "Next Drawing Color" ) )
                                 .ToolTipText( LOCTEXT( "settings.lighttable.next-drawing-color-tooltip", "Select the color of the next drawing when the lighttable is enabled" ) )
                                 .Color( OnGetNextColor() )
                                 .UseAlpha( true )
                                 .OnColorCommitted_Lambda( OnNextColorCommited ),
-                            FText::GetEmpty() );
+                            LOCTEXT( "settings.lighttable.next-drawing-color-label", "Next Drawing Color" ) );
 
     iMenuBuilder.EndSection();
 
