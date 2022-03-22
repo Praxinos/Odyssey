@@ -49,11 +49,23 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     TopToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
     TopToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
 
+    auto GetSwitchTakeTooltip = [this]() -> FText
+    {
+        FText take_tooltip = LOCTEXT( "switch-take-tooltip", "Switch take" );
+        if( BoardSequenceTools::IsDrawingInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
+            take_tooltip = LOCTEXT( "switch-take-with-warning-tooltip", "Switch take\n\nDrawing(s) must not be in edition mode" );
+
+        return take_tooltip;
+    };
+
     TopToolbarBuilder.AddComboButton(
-        FUIAction(),
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction::CreateLambda( [this]() { return !BoardSequenceTools::IsDrawingInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ); } )
+        ),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeTakeMenu ),
         FText::GetEmpty(),
-        LOCTEXT( "switch-take-tooltip", "Switch take" ),
+        MakeAttributeLambda( GetSwitchTakeTooltip ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ) );
 
     auto IsTopToolBarVisible = [this]() -> EVisibility

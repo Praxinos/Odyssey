@@ -39,6 +39,9 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     if( subsequence->IsA<UBoardSequence>() )
         return nullptr;
 
+    if( BoardSequenceTools::IsDrawingInEditionMode( iSequencer, iSubSection ) )
+        return nullptr;
+
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-take", "Create Take" ) );
 
     //---
@@ -101,6 +104,9 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
         return nullptr;
 
     if( !board_section->FindTake( *iTake ) )
+        return nullptr;
+
+    if( BoardSequenceTools::IsDrawingInEditionMode( iSequencer, iSubSection ) )
         return nullptr;
 
     //---

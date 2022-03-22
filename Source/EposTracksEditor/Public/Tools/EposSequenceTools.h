@@ -30,6 +30,7 @@ class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
 struct FBoardSectionTake;
+struct FDrawing; // but only as private functions
 struct FMovieSceneChannelHandle;
 
 struct FCameraArgs
@@ -554,6 +555,8 @@ public:
     static bool CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
     static bool CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
+    static bool IsDrawingInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
+
     static void CloneDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber );
 
     static bool CanCloneDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
@@ -838,6 +841,8 @@ public:
 
 private:
     static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
+    // FDrawing is used as parameter but only because the function is private, otherwise it should be UMovieSceneSection/FMovieSceneChannelHandle/FKeyHandle
+    static bool IsDrawingInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FDrawing& iDrawing );
     static void CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber );
     static void DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
 

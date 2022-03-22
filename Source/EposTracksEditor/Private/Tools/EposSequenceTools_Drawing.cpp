@@ -216,6 +216,57 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
 
 //static
 bool
+BoardSequenceTools::IsDrawingInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    //---
+
+    bool is_edited = false;
+
+    TArray<FGuid> plane_bindings;
+    ShotSequenceHelpers::GetAllPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );
+
+    for( auto plane_binding : plane_bindings )
+    {
+        TArray<FDrawing> drawings = ShotSequenceHelpers::GetAllDrawings( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, plane_binding );
+        for( auto drawing : drawings )
+        {
+            is_edited |= ShotSequenceTools::IsDrawingInEditionMode( iSequencer, result.mInnerSequence, result.mInnerSequenceId, drawing );
+        }
+    }
+
+    return is_edited;
+}
+
+//static
+bool
+ShotSequenceTools::IsDrawingInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FDrawing& iDrawing )
+{
+    UMaterialInstance* material = iDrawing.GetMaterial();
+    UTexture2D* texture = ProjectAssetTools::GetTexture2D( iSequence, material );
+    if( !texture )
+        return false;
+
+    //---
+
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+    TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( texture );
+    //FName name = opened_editors.Num() ? opened_editors[0]->GetEditorName() : NAME_None;
+
+    return !!opened_editors.Num();
+}
+
+//---
+
+//static
+bool
 BoardSequenceTools::CanCloneDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
 {
     return CanCreateDrawing( iSequencer, iSubSection, iFrameNumber, iPlaneBinding );
