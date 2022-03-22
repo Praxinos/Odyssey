@@ -26,7 +26,7 @@ SRenderOptions::Construct( const FArguments& iArgs )
     FString epos_root_path = IPluginManager::Get().FindPlugin( "Epos" )->GetMountedAssetPath();
     epos_root_path.RemoveFromEnd( TEXT( "/" ) ); // Remove the last '/' otherwise the asset picker won't get the asset directly inside the root
     filter.PackagePaths.Add( FName( epos_root_path ) );
-    filter.PackagePaths.Add( FName( FPaths::GetPath( iArgs._Sequence->GetPathName() ) ) );
+    filter.PackagePaths.Add( FName( TEXT( "/Game" ) ) );
 
     // Configure filter for asset picker
     // Same as in Engine\Plugins\MovieScene\MovieRenderPipeline\Source\MovieRenderPipelineEditor\Private\Widgets\SMoviePipelineQueueEditor.cpp # 313
