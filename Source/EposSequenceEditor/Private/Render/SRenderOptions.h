@@ -33,13 +33,16 @@ public:
 //    FReply  OnCancel();
 
 private:
-    //void OnMasterConfigSelected( const FAssetData& iAssetData );
+    void OnMasterConfigSelected( const FAssetData& iAssetData );
     void OnMasterConfigDoubleClicked( const FAssetData& iAssetData );
     void OnMasterConfigEnterPressed( const TArray<FAssetData>& iAssetData );
 
+    EVisibility EncoderSettingsVisibility() const;
+
 private:
-    TWeakPtr< SWindow >             mParentWindow;
-    bool                            mUserDlgResponse { false }; // == Cancel
+    TWeakPtr< SWindow >         mParentWindow;
+    bool                        mUserDlgResponse { false }; // == Cancel
 
     UMoviePipelineMasterConfig* mMasterConfig { nullptr };
+    bool                        mIsExecutablePathValid { false };
 };
