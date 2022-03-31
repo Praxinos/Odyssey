@@ -6,9 +6,19 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+#include "SRenderOptions.generated.h"
+
 class UMoviePipelineMasterConfig;
 class UMovieSceneSequence;
 struct FAssetData;
+
+UENUM()
+enum class ECodecPresets : int32
+{
+    kSelect UMETA( DisplayName = "Select..." ),
+    kMP4    UMETA( DisplayName = "MP4" ),
+    kMOV    UMETA( DisplayName = "MOV" ),
+};
 
 class SRenderOptions
     : public SCompoundWidget
