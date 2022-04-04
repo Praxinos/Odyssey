@@ -43,6 +43,7 @@ public class EposSequence : ModuleRules
                 "MovieSceneTracks",
                 "LevelSequence",
                 "CinematicCamera",
+                "MovieRenderPipelineCore",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposTracks",

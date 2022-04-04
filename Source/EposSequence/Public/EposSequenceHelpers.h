@@ -4,9 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Misc/FrameNumber.h"
 #include "Misc/Guid.h"
 #include "MovieSceneSequenceID.h"
+
+#include "EposSequenceHelpers.generated.h"
 
 class ACineCameraActor;
 class APlaneActor;
@@ -32,6 +35,23 @@ struct FMovieSceneChannelHandle;
 struct FMovieSceneChannelProxy;
 struct FMovieSceneFloatChannel;
 struct FMovieSceneObjectPathChannel;
+
+
+class UMoviePipeline;
+
+UCLASS()
+class EPOSSEQUENCE_API UMoviePipelineStoryboardBlueprintLibrary
+    : public UBlueprintFunctionLibrary
+{
+    GENERATED_BODY()
+
+public:
+    /** Get all notes at the current frame. */
+    UFUNCTION( BlueprintPure, Category = "Movie Render Pipeline Storyboard" )
+    static TArray<UStoryNote*> GetNotes( const UMoviePipeline* MoviePipeline );
+};
+
+
 
 typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelProxy>> FChannelProxyBySectionMap;
 
