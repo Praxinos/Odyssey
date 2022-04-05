@@ -34,10 +34,10 @@ public:
     FEncoderSettingsDetailsCustomization( bool* ioIsExecutablePathValid );
 
     /** IDetailCustomization interface */
-    virtual void CustomizeDetails( IDetailLayoutBuilder& DetailBuilder );
+    virtual void CustomizeDetails( IDetailLayoutBuilder& ioDetailBuilder );
 
 private:
-    void ExecutablePathChanged( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings );
+    void ExecutablePathChanged();
 
     void OnVideoCodecChanged( TSharedPtr<FString> iEntry, ESelectInfo::Type iType );
     void OnAudioCodecChanged( TSharedPtr<FString> iEntry, ESelectInfo::Type iType );
@@ -49,16 +49,18 @@ private:
     void OnCodecPresetChanged( int32 iCodecPreset, ESelectInfo::Type iType );
 
 private:
-    bool IsExecutablePathValid( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings ) const;
-    bool IsVideoCodecValid( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings ) const;
-    bool IsAudioCodecValid( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings ) const;
+    bool IsExecutablePathValid() const;
+    bool IsVideoCodecValid() const;
+    bool IsAudioCodecValid() const;
 
-    void UpdateCodecs( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings );
+    void UpdateCodecs();
 
-    void CleanArguments( UMoviePipelineCommandLineEncoderSettings* iEncoderSettings );
+    void CleanArguments();
 
 private:
     bool* mIsExecutablePathValid { nullptr };
+
+    TWeakObjectPtr<UMoviePipelineCommandLineEncoderSettings> mEncoderSettings;
 
     TSharedPtr<IPropertyHandle> mVideoCodecPropertyHandle;
     TSharedPtr<IPropertyHandle> mAudioCodecPropertyHandle;
@@ -91,11 +93,11 @@ FEncoderSettingsDetailsCustomization::FEncoderSettingsDetailsCustomization( bool
 //---
 
 void
-FEncoderSettingsDetailsCustomization::ExecutablePathChanged( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings )
+FEncoderSettingsDetailsCustomization::ExecutablePathChanged()
 {
-    *mIsExecutablePathValid = IsExecutablePathValid( iEncoderSettings );
+    *mIsExecutablePathValid = IsExecutablePathValid();
 
-    UpdateCodecs( iEncoderSettings );
+    UpdateCodecs();
 }
 
 void
@@ -121,6 +123,7 @@ FEncoderSettingsDetailsCustomization::OnGenerateVideoCodecEntryWidget( TSharedPt
 {
     check( mVideoCodecs.Num() == mVideoCodecTooltips.Num() );
 
+    // Get the tooltip corresponding to the current entry
     FString codec = *iEntry;
     FString tooltip;
     int32 codec_index = mVideoCodecs.IndexOfByPredicate( [codec]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == codec; } );
@@ -143,6 +146,7 @@ FEncoderSettingsDetailsCustomization::OnGenerateAudioCodecEntryWidget( TSharedPt
 {
     check( mAudioCodecs.Num() == mAudioCodecTooltips.Num() );
 
+    // Get the tooltip corresponding to the current entry
     FString codec = *iEntry;
     FString tooltip;
     int32 codec_index = mAudioCodecs.IndexOfByPredicate( [codec]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == codec; } );
@@ -179,6 +183,7 @@ FEncoderSettingsDetailsCustomization::OnCodecPresetChanged( int32 iCodecPreset, 
     {
         case ECodecPresets::kMP4:
             video_codec = TEXT( "libx264" );
+            // This condition is certainly due to lgpl license
             if( !mVideoCodecs.ContainsByPredicate( [video_codec]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == video_codec; } ) )
                 video_codec = TEXT( "libopenh264" );
             audio_codec = TEXT( "flac" );
@@ -199,34 +204,36 @@ FEncoderSettingsDetailsCustomization::OnCodecPresetChanged( int32 iCodecPreset, 
 //---
 
 bool
-FEncoderSettingsDetailsCustomization::IsExecutablePathValid( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings ) const
+FEncoderSettingsDetailsCustomization::IsExecutablePathValid() const
 {
-    if( iEncoderSettings->ExecutablePath.Len() == 0 )
+    if( mEncoderSettings->ExecutablePath.Len() == 0 )
         return false;
 
     int32 error_code;
     FString stdout_string;
     FString error_string;
-    bool success = FPlatformProcess::ExecProcess( *iEncoderSettings->ExecutablePath, TEXT( "" ), &error_code, &stdout_string, &error_string );
-    if( !success /*|| error_code != 0*/ ) // error_code == 2 when error and error_code == 1 when succeded
+    bool success = FPlatformProcess::ExecProcess( *mEncoderSettings->ExecutablePath, TEXT( "" ), &error_code, &stdout_string, &error_string );
+    if( !success /*|| error_code != 0*/ ) // error_code == 2 when error but error_code == 1 when succeded
         return false;
 
     return true;
 }
 
 void
-FEncoderSettingsDetailsCustomization::UpdateCodecs( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings )
+FEncoderSettingsDetailsCustomization::UpdateCodecs()
 {
     mVideoCodecs.Empty();
     mVideoCodecTooltips.Empty();
     mAudioCodecs.Empty();
     mAudioCodecTooltips.Empty();
 
+    // Greatly inspired by MoviePipelineCommandLineEncoderSettings.cpp:PrintAvailableCodecs()
+
     FString command_line = TEXT( "-encoders" );
     int32 error_code;
     FString stdout_string;
     FString error_string;
-    bool success = FPlatformProcess::ExecProcess( *iEncoderSettings->ExecutablePath, *command_line, &error_code, &stdout_string, &error_string );
+    bool success = FPlatformProcess::ExecProcess( *mEncoderSettings->ExecutablePath, *command_line, &error_code, &stdout_string, &error_string );
     if( !success )
         return;
 
@@ -275,60 +282,65 @@ FEncoderSettingsDetailsCustomization::UpdateCodecs( const UMoviePipelineCommandL
 }
 
 bool
-FEncoderSettingsDetailsCustomization::IsVideoCodecValid( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings ) const
+FEncoderSettingsDetailsCustomization::IsVideoCodecValid() const
 {
-    return mVideoCodecs.ContainsByPredicate( [iEncoderSettings]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == iEncoderSettings->VideoCodec; } );
+    return mVideoCodecs.ContainsByPredicate( [this]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == mEncoderSettings->VideoCodec; } );
 }
 
 bool
-FEncoderSettingsDetailsCustomization::IsAudioCodecValid( const UMoviePipelineCommandLineEncoderSettings* iEncoderSettings ) const
+FEncoderSettingsDetailsCustomization::IsAudioCodecValid() const
 {
-    return mAudioCodecs.ContainsByPredicate( [iEncoderSettings]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == iEncoderSettings->AudioCodec; } );
+    return mAudioCodecs.ContainsByPredicate( [this]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == mEncoderSettings->AudioCodec; } );
 }
 
 void
-FEncoderSettingsDetailsCustomization::CleanArguments( UMoviePipelineCommandLineEncoderSettings* iEncoderSettings )
+FEncoderSettingsDetailsCustomization::CleanArguments()
 {
-    if( !iEncoderSettings->CommandLineFormat.Contains( TEXT( "\"{OutputPath}\"" ) ) )
-        iEncoderSettings->CommandLineFormat.ReplaceInline( TEXT( "{OutputPath}" ), TEXT( "\"{OutputPath}\"" ) );
+    // Add quotes around InputFile (if missing)
+    if( !mEncoderSettings->CommandLineFormat.Contains( TEXT( "\"{OutputPath}\"" ) ) )
+        mEncoderSettings->CommandLineFormat.ReplaceInline( TEXT( "{OutputPath}" ), TEXT( "\"{OutputPath}\"" ) );
 
-    if( !iEncoderSettings->VideoInputStringFormat.Contains( TEXT( "\"{InputFile}\"" ) ) )
-        iEncoderSettings->VideoInputStringFormat.ReplaceInline( TEXT( "{InputFile}" ), TEXT( "\"{InputFile}\"" ) );
+    // Add quotes around InputFile (if missing)
+    if( !mEncoderSettings->VideoInputStringFormat.Contains( TEXT( "\"{InputFile}\"" ) ) )
+        mEncoderSettings->VideoInputStringFormat.ReplaceInline( TEXT( "{InputFile}" ), TEXT( "\"{InputFile}\"" ) );
 
-    if( !iEncoderSettings->AudioInputStringFormat.Contains( TEXT( "\"{InputFile}\"" ) ) )
-        iEncoderSettings->AudioInputStringFormat.ReplaceInline( TEXT( "{InputFile}" ), TEXT( "\"{InputFile}\"" ) );
+    // Add quotes around InputFile (if missing)
+    if( !mEncoderSettings->AudioInputStringFormat.Contains( TEXT( "\"{InputFile}\"" ) ) )
+        mEncoderSettings->AudioInputStringFormat.ReplaceInline( TEXT( "{InputFile}" ), TEXT( "\"{InputFile}\"" ) );
 
-    int32 input_index = iEncoderSettings->VideoInputStringFormat.Contains( TEXT( "-i { InputFile }" ) );
-    int32 framerate_index = iEncoderSettings->VideoInputStringFormat.Contains( TEXT( "-r {FrameRate}" ) );
+    // Move FrameRate before InputFile (arguments order are important for ffmpeg)
+    int32 input_index = mEncoderSettings->VideoInputStringFormat.Contains( TEXT( "-i { InputFile }" ) );
+    int32 framerate_index = mEncoderSettings->VideoInputStringFormat.Contains( TEXT( "-r {FrameRate}" ) );
     if( input_index != INDEX_NONE
         && framerate_index != INDEX_NONE
         && input_index < framerate_index )
     {
-        iEncoderSettings->VideoInputStringFormat.ReplaceInline( TEXT( "-r {FrameRate}" ), TEXT( "" ) );
-        iEncoderSettings->VideoInputStringFormat.InsertAt( input_index, TEXT( "-r {FrameRate} " ) );
+        mEncoderSettings->VideoInputStringFormat.ReplaceInline( TEXT( "-r {FrameRate}" ), TEXT( "" ) );
+        mEncoderSettings->VideoInputStringFormat.TrimStartAndEndInline();
+        mEncoderSettings->VideoInputStringFormat.InsertAt( input_index, TEXT( "-r {FrameRate} " ) );
     }
 }
 
 void
-FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& DetailBuilder )
+FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& ioDetailBuilder )
 {
-    const TArray< TWeakObjectPtr<UObject> >& objects = DetailBuilder.GetSelectedObjects();
+    const TArray< TWeakObjectPtr<UObject> >& objects = ioDetailBuilder.GetSelectedObjects();
     check( objects.Num() == 1 && objects[0].IsValid() );
-    const UMoviePipelineCommandLineEncoderSettings* encoder_settings = Cast<UMoviePipelineCommandLineEncoderSettings>( objects[0].Get() );
+    mEncoderSettings = Cast<UMoviePipelineCommandLineEncoderSettings>( objects[0].Get() );
 
-    ExecutablePathChanged( encoder_settings );
+    ExecutablePathChanged();
 
-    CleanArguments( Cast<UMoviePipelineCommandLineEncoderSettings>( objects[0].Get() ) );
+    CleanArguments();
 
     //--- Customize properties inside "Command Line Encoder" category of UMoviePipelineCommandLineEncoderSettings
 
-    IDetailCategoryBuilder& encoderCategory = DetailBuilder.EditCategory( "Command Line Encoder" );
+    IDetailCategoryBuilder& encoderCategory = ioDetailBuilder.EditCategory( "Command Line Encoder" );
 
     //--- Customize the ExecutablePath property
 
-    TSharedPtr<IPropertyHandle> executablePathPropertyHandle = DetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, ExecutablePath ) );
+    TSharedPtr<IPropertyHandle> executablePathPropertyHandle = ioDetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, ExecutablePath ) );
 
-    executablePathPropertyHandle->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FEncoderSettingsDetailsCustomization::ExecutablePathChanged, encoder_settings ) );
+    executablePathPropertyHandle->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FEncoderSettingsDetailsCustomization::ExecutablePathChanged ) );
 
     IDetailPropertyRow& executable_path_row = encoderCategory.AddProperty( executablePathPropertyHandle );
 
@@ -365,7 +377,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& De
 
     //--- Remove the CodecHelpText property
 
-    TSharedPtr<IPropertyHandle> helpPropertyHandle = DetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, CodecHelpText ) );
+    TSharedPtr<IPropertyHandle> helpPropertyHandle = ioDetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, CodecHelpText ) );
     helpPropertyHandle->MarkHiddenByCustomization();
 
     //--- Add some presets codecs
@@ -387,11 +399,11 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& De
 
     //--- Customize the VideoCodec property
 
-    mVideoCodecPropertyHandle = DetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, VideoCodec ) );
+    mVideoCodecPropertyHandle = ioDetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, VideoCodec ) );
 
     IDetailPropertyRow& video_codec_row = encoderCategory.AddProperty( mVideoCodecPropertyHandle );
 
-    TSharedPtr<FString>* selected_video_codec_ptr = mVideoCodecs.FindByPredicate( [encoder_settings]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == encoder_settings->VideoCodec; } );
+    TSharedPtr<FString>* selected_video_codec_ptr = mVideoCodecs.FindByPredicate( [this]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == mEncoderSettings->VideoCodec; } );
     TSharedPtr<FString> selected_video_codec = selected_video_codec_ptr ? *selected_video_codec_ptr : nullptr;
 
     video_codec_row.CustomWidget()
@@ -416,7 +428,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& De
             [
                 SNew( SImage )
                 .Image( FEditorStyle::GetBrush( "Icons.Warning" ) )
-                .Visibility_Lambda( [this, encoder_settings]() { return IsVideoCodecValid( encoder_settings ) ? EVisibility::Hidden : EVisibility::Visible; } )
+                .Visibility_Lambda( [this]() { return IsVideoCodecValid() ? EVisibility::Hidden : EVisibility::Visible; } )
             ]
 
             + SHorizontalBox::Slot()
@@ -442,11 +454,11 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& De
 
     //--- Customize the AudioCodec property
 
-    mAudioCodecPropertyHandle = DetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, AudioCodec ) );
+    mAudioCodecPropertyHandle = ioDetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, AudioCodec ) );
 
     IDetailPropertyRow& audio_codec_row = encoderCategory.AddProperty( mAudioCodecPropertyHandle );
 
-    TSharedPtr<FString>* selected_audio_codec_ptr = mAudioCodecs.FindByPredicate( [encoder_settings]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == encoder_settings->AudioCodec; } );
+    TSharedPtr<FString>* selected_audio_codec_ptr = mAudioCodecs.FindByPredicate( [this]( TSharedPtr<FString> iEntry ) { return *iEntry.Get() == mEncoderSettings->AudioCodec; } );
     TSharedPtr<FString> selected_audio_codec = selected_audio_codec_ptr ? *selected_audio_codec_ptr : nullptr;
 
     audio_codec_row.CustomWidget()
@@ -471,7 +483,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& De
             [
                 SNew( SImage )
                 .Image( FEditorStyle::GetBrush( "Icons.Warning" ) )
-                .Visibility_Lambda( [this, encoder_settings]() { return IsAudioCodecValid( encoder_settings ) ? EVisibility::Hidden : EVisibility::Visible; } )
+                .Visibility_Lambda( [this]() { return IsAudioCodecValid() ? EVisibility::Hidden : EVisibility::Visible; } )
             ]
 
             + SHorizontalBox::Slot()
@@ -497,7 +509,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& De
 
     //---
 
-    mExtensionPropertyHandle = DetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, OutputFileExtension ) );
+    mExtensionPropertyHandle = ioDetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, OutputFileExtension ) );
 }
 
 //---
