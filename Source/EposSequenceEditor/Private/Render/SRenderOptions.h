@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/NotifyHook.h"
 #include "Widgets/SCompoundWidget.h"
 
 #include "SRenderOptions.generated.h"
@@ -22,6 +23,7 @@ enum class ECodecPresets : int32
 
 class SRenderOptions
     : public SCompoundWidget
+    , public FNotifyHook
 {
 public:
     SLATE_BEGIN_ARGS( SRenderOptions )
@@ -31,6 +33,10 @@ public:
     SLATE_END_ARGS()
 
     void Construct( const FArguments& iArgs );
+
+    // FNotifyHook interface
+    virtual void NotifyPostChange( const FPropertyChangedEvent& iPropertyChangedEvent, FEditPropertyChain* iPropertyThatChanged ) override;
+    //
 
     bool IsOk();
     bool IsCanceled();

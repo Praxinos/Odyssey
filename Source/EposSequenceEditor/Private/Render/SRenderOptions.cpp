@@ -568,6 +568,7 @@ SRenderOptions::Construct( const FArguments& iArgs )
     DetailsViewArgs.bAllowFavoriteSystem = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
     //DetailsViewArgs.ViewIdentifier = "NewStoryboardSettings";
+    DetailsViewArgs.NotifyHook = this;
 
     TSharedPtr<IDetailsView> detailsViewCLIEncoderSettings = PropertyEditor.CreateDetailView( DetailsViewArgs );
     detailsViewCLIEncoderSettings->RegisterInstancedCustomPropertyLayout( UMoviePipelineCommandLineEncoderSettings::StaticClass(), FOnGetDetailCustomizationInstance::CreateStatic( &FEncoderSettingsDetailsCustomization::MakeInstance, &mIsExecutablePathValid ) );
@@ -630,6 +631,31 @@ SRenderOptions::Construct( const FArguments& iArgs )
         //    ]
         //]
     ];
+}
+
+// Inspired by ...\Engine\Source\Developer\SettingsEditor\Private\Widgets\SSettingsEditor.cpp#157 -> SSettingsEditor::NotifyPostChange()
+void
+SRenderOptions::NotifyPostChange( const FPropertyChangedEvent& iPropertyChangedEvent, FEditPropertyChain* iPropertyThatChanged )
+{
+    if( iPropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive )
+        return;
+
+    // Note while there could be multiple objects in the details panel, only one is ever edited at once.
+    // There could be zero objects being edited in the FStructOnScope case.
+    if( iPropertyChangedEvent.GetNumObjectsBeingEdited() == 0 )
+        return;
+
+    UObject* objectBeingEdited = (UObject*)iPropertyChangedEvent.GetObjectBeingEdited( 0 );
+
+    check( objectBeingEdited->GetClass()->HasAnyClassFlags( CLASS_DefaultConfig ) );
+    // At this time, there are only string properties in UMoviePipelineCommandLineEncoderSettings
+    check( iPropertyThatChanged->GetActiveMemberNode()->GetValue()->IsA( FStrProperty::StaticClass() ) );
+
+    //TODO: find a way to get the section
+    //if( Section->NotifySectionOnPropertyModified() )
+    {
+        objectBeingEdited->UpdateSinglePropertyInConfigFile( iPropertyThatChanged->GetActiveMemberNode()->GetValue(), objectBeingEdited->GetDefaultConfigFilename() );
+    }
 }
 
 bool
