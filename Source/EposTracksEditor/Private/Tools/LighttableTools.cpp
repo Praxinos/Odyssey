@@ -5,6 +5,7 @@
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
+#include "EditorSupportDelegates.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
@@ -24,6 +25,8 @@ void
 LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding )
 {
     ShotSequenceHelpers::FFindOrCreateMaterialDrawingResult result = ShotSequenceHelpers::FindMaterialDrawingTrackAndSections( iSequencer, iSequence, iSequenceID, iPlaneBinding );
+
+    bool modified = false;
 
     for( auto section : result.mSections )
     {
@@ -62,28 +65,41 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
             if( use_lighttable < .5f )
                 current_material->SetScalarParameterValueEditorOnly( TEXT( "UseLighttable" ), 1.f );
 
-            bool modified = false;
-
             if( previous_material_texture
                 && current_material_previous_texture
                 && previous_material_texture->GetPathName() != current_material_previous_texture->GetPathName() )
             {
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), previous_material_texture );
-                modified = true;
+                modified |= true;
             }
             if( next_material_texture
                 && current_material_next_texture
                 && next_material_texture->GetPathName() != current_material_next_texture->GetPathName() )
             {
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), next_material_texture );
-                modified = true;
+                modified |= true;
             }
 
             if( modified )
             {
-                UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
+                //UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
+                current_material->MarkPackageDirty();
+                current_material->PreEditChange( nullptr );
+                current_material->PostEditChange();
+
+                // This is commented because it is slow, and certainly not needed in our case, because no static switch inside and only values are changed above
+                //current_material->UpdateStaticPermutation();
+                //current_material->UpdateParameterNames(); // protected
             }
         }
+    }
+
+    if( modified )
+    {
+        // This is used inside UMaterialEditingLibrary::UpdateMaterialInstance();
+        // but as it is not material related, do it outside the loop
+        FEditorDelegates::RefreshEditor.Broadcast();
+        FEditorSupportDelegates::RedrawAllViewports.Broadcast();
     }
 }
 
@@ -96,6 +112,8 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
     FString texture_transparent_path;
     FString texture_transparent_name;
     FString texture_transparent_pathname = NamingConvention::GetMasterTexturePathName( iSequencer, iSequencer.GetRootMovieSceneSequence(), texture_transparent_path, texture_transparent_name );
+
+    bool modified = false;
 
     for( auto section : result.mSections )
     {
@@ -121,8 +139,6 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
 
             //---
 
-            bool modified = false;
-
             if( use_lighttable >= .5f )
                 current_material->SetScalarParameterValueEditorOnly( TEXT( "UseLighttable" ), 0.f );
 
@@ -132,7 +148,7 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
                 UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "PreviousDrawingTexture" ), texture_transparent );
-                modified = true;
+                modified |= true;
             }
             if( current_material_next_texture
                 && current_material_next_texture->GetPackage()->GetPathName() != texture_transparent_pathname )
@@ -140,14 +156,29 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
                 UTexture2D* texture_transparent = MasterAssetTools::GetMasterTexture2D( iSequencer, iSequencer.GetRootMovieSceneSequence() ); // Slow operation
 
                 current_material->SetTextureParameterValueEditorOnly( TEXT( "NextDrawingTexture" ), texture_transparent );
-                modified = true;
+                modified |= true;
             }
 
             if( modified )
             {
-                UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
+                //UMaterialEditingLibrary::UpdateMaterialInstance( current_material );
+                current_material->MarkPackageDirty();
+                current_material->PreEditChange( nullptr );
+                current_material->PostEditChange();
+
+                // This is commented because it is slow, and certainly not needed in our case, because no static switch inside and only values are changed above
+                //current_material->UpdateStaticPermutation();
+                //current_material->UpdateParameterNames(); // protected
             }
         }
+    }
+
+    if( modified )
+    {
+        // This is used inside UMaterialEditingLibrary::UpdateMaterialInstance();
+        // but as it is not material related, do it outside the loop
+        FEditorDelegates::RefreshEditor.Broadcast();
+        FEditorSupportDelegates::RedrawAllViewports.Broadcast();
     }
 }
 
