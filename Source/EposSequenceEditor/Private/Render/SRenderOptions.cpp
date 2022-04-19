@@ -510,6 +510,8 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& io
     //---
 
     mExtensionPropertyHandle = ioDetailBuilder.GetProperty( GET_MEMBER_NAME_CHECKED( UMoviePipelineCommandLineEncoderSettings, OutputFileExtension ) );
+
+    encoderCategory.AddProperty( mExtensionPropertyHandle );
 }
 
 //---
@@ -522,13 +524,6 @@ SRenderOptions::Construct( const FArguments& iArgs )
     mParentWindow = iArgs._ParentWindow;
 
     FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
-
-    FARFilter filter;
-    filter.bRecursivePaths = true;
-    FString epos_root_path = IPluginManager::Get().FindPlugin( "Epos" )->GetMountedAssetPath();
-    epos_root_path.RemoveFromEnd( TEXT( "/" ) ); // Remove the last '/' otherwise the asset picker won't get the asset directly inside the root
-    filter.PackagePaths.Add( FName( epos_root_path ) );
-    filter.PackagePaths.Add( FName( TEXT( "/Game" ) ) );
 
     // Configure filter for asset picker
     // Same as in Engine\Plugins\MovieScene\MovieRenderPipeline\Source\MovieRenderPipelineEditor\Private\Widgets\SMoviePipelineQueueEditor.cpp # 313
@@ -547,7 +542,6 @@ SRenderOptions::Construct( const FArguments& iArgs )
         AssetPickerConfig.bSortByPathInColumnView = false;
         AssetPickerConfig.ThumbnailScale = 0.25f;
         //AssetPickerConfig.SaveSettingsName = TEXT( "MoviePipelineConfigAsset" ); // Use the same as in MovieRenderQueue menu ... no ... to not share the same ThumbnailScale value
-        AssetPickerConfig.Filter = filter;
 
         AssetPickerConfig.AssetShowWarningText = LOCTEXT( "NoConfigs_Warning", "No Master Configurations Found" );
         AssetPickerConfig.Filter.ClassNames.Add( UMoviePipelineMasterConfig::StaticClass()->GetFName() );
