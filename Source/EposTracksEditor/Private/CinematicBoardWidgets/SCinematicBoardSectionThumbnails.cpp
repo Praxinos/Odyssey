@@ -250,21 +250,42 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
         if( !mBoardSection.IsValid() )
             return false;
 
+        //PATCH
+        if( !GCurrentLevelEditingViewportClient )
+            return false;
+        //PATCH
+
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
-    MenuBuilder.AddWidget( SNew( SHorizontalBox )
-                           + SHorizontalBox::Slot()
+    MenuBuilder.AddWidget( SNew( SVerticalBox )
+                           + SVerticalBox::Slot()
+                           .AutoHeight()
+                           [
+                               SNew( SHorizontalBox )
+                               + SHorizontalBox::Slot()
+                               .HAlign( HAlign_Center )
+                               [
+                                   SNew( SButton )
+                                   .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
+                                   .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
+                                   .OnClicked_Lambda( CreateCameraOnClick )
+                                   .IsEnabled_Lambda( CanCreateCamera )
+                               ]
+                           ]
+                           //PATCH
+                           + SVerticalBox::Slot()
+                           .AutoHeight()
                            .HAlign( HAlign_Center )
                            [
-                               SNew( SButton )
-                               .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
-                               .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
-                               .OnClicked_Lambda( CreateCameraOnClick )
-                               .IsEnabled_Lambda( CanCreateCamera )
+                                SNew( STextBlock )
+                                .Text( FText::FromString( TEXT( "/!\\ Select an actor in the viewport first /!\\" ) ) )
+                                .ColorAndOpacity( FLinearColor::Yellow )
+                                .Visibility_Lambda( []() -> EVisibility { return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed; } )
                            ],
+                           //PATCH
                            FText::GetEmpty(),
                            true /* NoIndent */ );
 
