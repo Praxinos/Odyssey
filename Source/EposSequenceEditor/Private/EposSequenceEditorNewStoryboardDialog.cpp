@@ -21,6 +21,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/STextBlock.h"
+#include "SPrimaryButton.h"
 
 #include "Board/BoardSequence.h"
 #include "Settings/EposSequenceEditorSettings.h"
@@ -36,7 +37,8 @@ TWeakPtr<SWindow> NewStoryboardSettingsWindow;
 //---
 
 class SNewStoryboardSettings
-    : public SCompoundWidget, public FGCObject
+    : public SCompoundWidget
+    , public FGCObject
 {
     SLATE_BEGIN_ARGS( SNewStoryboardSettings )
         {}
@@ -45,6 +47,7 @@ class SNewStoryboardSettings
     void Construct( const FArguments& InArgs );
 
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+    virtual FString GetReferencerName() const override;
 
 private:
     FText GetFullPath() const;
@@ -157,7 +160,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
             .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
             [
                 SNew(SCheckBox)
-                .Style( FEditorStyle::Get(),  "ToolPalette.DockingTab" )
+                .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
                 .Padding( 7.f )
                 .HAlign( HAlign_Center )
                 .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = 0; } )
@@ -173,7 +176,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
             .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
             [
                 SNew(SCheckBox)
-                .Style( FEditorStyle::Get(),  "ToolPalette.DockingTab" )
+                .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
                 .Padding( 7.f )
                 .HAlign( HAlign_Center )
                 .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = 1; } )
@@ -189,7 +192,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
             .Padding( FMargin( 0.f, 1.0f, 1.0f, 0.0f ) )
             [
                 SNew(SCheckBox)
-                .Style( FEditorStyle::Get(),  "ToolPalette.DockingTab" )
+                .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
                 .Padding( 7.f )
                 .HAlign( HAlign_Center )
                 .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = 2; } )
@@ -278,7 +281,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         [
             SNew(STextBlock)
             .Text(this, &SNewStoryboardSettings::GetErrorText)
-            .TextStyle( FEditorStyle::Get(), TEXT("Log.Error") )
+            .TextStyle( FAppStyle::Get(), TEXT("Log.Error") )
         ]
 
         + SVerticalBox::Slot()
@@ -288,7 +291,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         [
             SNew( STextBlock )
             .Text(this, &SNewStoryboardSettings::GetWarningText)
-            .TextStyle( FEditorStyle::Get(), TEXT("Log.Warning") )
+            .TextStyle( FAppStyle::Get(), TEXT("Log.Warning") )
         ]
 
         + SVerticalBox::Slot()
@@ -296,8 +299,7 @@ SNewStoryboardSettings::Construct(const FArguments& InArgs)
         .HAlign( HAlign_Right )
         .Padding( 5.f )
         [
-            SNew(SButton)
-            .ContentPadding(FMargin(10, 5))
+            SNew( SPrimaryButton )
             .Text(LOCTEXT("CreateStoryboard", "Create Storyboard"))
             .IsEnabled( this, &SNewStoryboardSettings::CanCreateStoryboard )
             .OnClicked( this, &SNewStoryboardSettings::OnCreateStoryboard)
@@ -312,6 +314,11 @@ SNewStoryboardSettings::AddReferencedObjects( FReferenceCollector& Collector ) /
     Collector.AddReferencedObject( mSequenceEditorSettings );
 }
 
+FString
+SNewStoryboardSettings::GetReferencerName() const //override
+{
+    return "SNewStoryboardSettings";
+}
 
 FText
 SNewStoryboardSettings::GetFullPath() const

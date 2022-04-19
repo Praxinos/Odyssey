@@ -44,7 +44,7 @@ public class EposSequenceEditor : ModuleRules
                 "MovieSceneTracks",
                 "Projects",
                 "CinematicCamera",
-                "AppFrameWork",
+                "AppFramework",
                 "DeveloperSettings",
                 "Settings", // Developer
                 "LevelSequence",
@@ -67,6 +67,8 @@ public class EposSequenceEditor : ModuleRules
                 "EditorStyle",
                 "MovieSceneCaptureDialog",
                 "EditorWidgets",
+                "EditorFramework",
+                "ToolWidgets",
                 "EditorScriptingUtilities",
                 "MovieRenderPipelineEditor",
                 // [EDITOR] custom plugin dependencies

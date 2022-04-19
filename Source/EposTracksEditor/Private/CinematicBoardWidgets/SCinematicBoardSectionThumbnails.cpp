@@ -29,25 +29,23 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     LeftToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent ),
         FText::GetEmpty(),
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
     left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 
     //---
 
-    FToolBarBuilder TopToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    TopToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    TopToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder TopToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    TopToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     auto GetSwitchTakeTooltip = [this]() -> FText
     {
@@ -81,16 +79,15 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    MiddleToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder MiddleToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    MiddleToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     MiddleToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeCreateCameraMenu ),
         FText::GetEmpty(),
         LOCTEXT( "create-camera-and-settings-tooltip", "Create a new camera" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     auto IsToolBarVisible = [this]() -> EVisibility
     {
@@ -104,16 +101,15 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
-    FToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    RightToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.FloatingToolBar" );
+    FSlimHorizontalToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionFloatingToolBar" );
 
     RightToolbarBuilder.AddComboButton(
         FUIAction(),
         FOnGetContent::CreateSP( this, &SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent ),
         FText::GetEmpty(),
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
-        FSlateIcon( FEditorStyle::GetStyleSetName(), "Plus" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
     TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
     right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
@@ -254,21 +250,42 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
         if( !mBoardSection.IsValid() )
             return false;
 
+        //PATCH
+        if( !GCurrentLevelEditingViewportClient )
+            return false;
+        //PATCH
+
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
-    MenuBuilder.AddWidget( SNew( SHorizontalBox )
-                           + SHorizontalBox::Slot()
+    MenuBuilder.AddWidget( SNew( SVerticalBox )
+                           + SVerticalBox::Slot()
+                           .AutoHeight()
+                           [
+                               SNew( SHorizontalBox )
+                               + SHorizontalBox::Slot()
+                               .HAlign( HAlign_Center )
+                               [
+                                   SNew( SButton )
+                                   .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
+                                   .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
+                                   .OnClicked_Lambda( CreateCameraOnClick )
+                                   .IsEnabled_Lambda( CanCreateCamera )
+                               ]
+                           ]
+                           //PATCH
+                           + SVerticalBox::Slot()
+                           .AutoHeight()
                            .HAlign( HAlign_Center )
                            [
-                               SNew( SButton )
-                               .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
-                               .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
-                               .OnClicked_Lambda( CreateCameraOnClick )
-                               .IsEnabled_Lambda( CanCreateCamera )
+                                SNew( STextBlock )
+                                .Text( FText::FromString( TEXT( "/!\\ Select an actor in the viewport first /!\\" ) ) )
+                                .ColorAndOpacity( FLinearColor::Yellow )
+                                .Visibility_Lambda( []() -> EVisibility { return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed; } )
                            ],
+                           //PATCH
                            FText::GetEmpty(),
                            true /* NoIndent */ );
 
@@ -295,7 +312,7 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
         MenuBuilder.AddMenuEntry(
             take_sequence->GetDisplayName(),
             FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( take_sequence->GetPathName() ) ),
-            take_sequence->GetPathName() == board_section->GetSequence()->GetPathName() ? FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Empty" ),
+            take_sequence->GetPathName() == board_section->GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
             FUIAction( FExecuteAction::CreateLambda( [this, sequencer, board_section, take]()
                                                      {
                                                          BoardSequenceTools::SwitchTake( sequencer.Get(), *board_section, board_section->FindTake( take ) );
@@ -619,7 +636,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<int32> )
             .Style( FEposTracksEditorStyle::Get(), "HyperlinkSpinBox" )
@@ -643,7 +660,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationWidget( 
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<double> )
             .TypeInterface( sequencer->GetNumericTypeInterface() )
@@ -697,7 +714,7 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
     return SNew( SHorizontalBox )
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( SSpinBox<int32> )
             .Style( FEposTracksEditorStyle::Get(), "HyperlinkSpinBox" )
@@ -721,10 +738,10 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding( FEposTracksEditorStyle::Get().GetMargin( "BoardSection.FloatingToolBar.Block.IndentedPadding" ) )
+        .Padding( FEposTracksEditorStyle::Get().GetMargin( "SectionFloatingToolBar.Block.IndentedPadding" ) )
         [
             SNew( STextBlock )
-            .TextStyle( &FEditorStyle::GetWidgetStyle<FTextBlockStyle>( "NormalText.Subdued" ) )
+            .TextStyle( FAppStyle::Get(), "NormalText.Subdued" )
             .Text( FText::FromString( GetDuration() ) )
         ];
 }
@@ -820,7 +837,7 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
 
     //---
 
-    static const FSlateBrush* filmBorder = FEditorStyle::GetBrush( "Sequencer.Section.FilmBorder" );
+    static const FSlateBrush* filmBorder = FAppStyle::Get().GetBrush( "Sequencer.Section.FilmBorder" );
 
     FVector2D localSectionSize = painter.SectionGeometry.GetLocalSize();
 

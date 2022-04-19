@@ -9,7 +9,7 @@
 /**
  * Implements the visual style of the epos editor.
  */
-class EPOSTRACKSEDITOR_API FEposTracksEditorStyle
+class EPOSTRACKSEDITOR_API FEposTracksEditorStyle final
     : public FSlateStyleSet
 {
 public:
@@ -25,7 +25,6 @@ private:
     void InitTracks();
     void InitCommands();
     void InitToolbar();
-    void InitMenu(); // Popup
     void InitNotes();
 
 private:

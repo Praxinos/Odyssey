@@ -47,8 +47,8 @@ SCinematicBoardSectionTitle::Construct( const FArguments& InArgs, TSharedRef<FCi
     [
         SNew( SBorder )
         // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
-        .BorderImage( FEditorStyle::GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
-        .BorderBackgroundColor( FLinearColor( FColor( 24, 24, 24, 255 ) ) ) // Half of normal value to differenciate shot title from camera title (juste below)
+        .BorderImage( FAppStyle::Get().GetBrush( "Sequencer.AnimationOutliner.TopLevelBorder_Expanded" ) )
+        .BorderBackgroundColor( FStyleColors::Title )
         [
             SNew( SHorizontalBox )
             + SHorizontalBox::Slot()

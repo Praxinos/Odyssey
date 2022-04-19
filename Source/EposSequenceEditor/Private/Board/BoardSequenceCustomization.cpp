@@ -604,7 +604,7 @@ FBoardSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr
 }
 
 ESequencerDropResult
-FBoardSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropGraphEdOp& iDragDropOp )
+FBoardSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp )
 {
     return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }

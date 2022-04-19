@@ -197,17 +197,19 @@ FCinematicBoardTrackEditor::BuildOutlinerEditWidget( const FGuid& iObjectBinding
         .Padding( 4, 0, 0, 0 )
         [
             SNew( SCheckBox )
+            .Style( &FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "ToggleButtonCheckBoxAlt" ) )
+            .Type( ESlateCheckBoxType::CheckBox )
+            .Padding( FMargin( 0.f ) )
             .IsFocusable( false )
             .IsChecked( this, &FCinematicBoardTrackEditor::AreBoardsLocked )
             .OnCheckStateChanged( this, &FCinematicBoardTrackEditor::OnLockBoardsClicked )
             .ToolTipText( this, &FCinematicBoardTrackEditor::GetLockBoardsToolTip )
-            .ForegroundColor( FLinearColor::White )
-            .CheckedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-            .CheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-            .CheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.LockCamera" ) )
-            .UncheckedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-            .UncheckedHoveredImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
-            .UncheckedPressedImage( FEditorStyle::GetBrush( "Sequencer.UnlockCamera" ) )
+            .CheckedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+            .CheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+            .CheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+            .UncheckedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+            .UncheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+            .UncheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
         ];
 }
 
@@ -439,7 +441,7 @@ FCinematicBoardTrackEditor::GetIconBrush() const //override
 bool
 FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, FSequencerDragDropParams& DragDropParams ) //override
 {
-    if( !DragDropParams.Track->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
+    if( !DragDropParams.Track.IsValid() || !DragDropParams.Track.Get()->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
     {
         return false;
     }
@@ -475,7 +477,7 @@ FCinematicBoardTrackEditor::OnAllowDrop( const FDragDropEvent& iDragDropEvent, F
 FReply
 FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const FSequencerDragDropParams& DragDropParams ) //override
 {
-    if( !DragDropParams.Track->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
+    if( !DragDropParams.Track.IsValid() || !DragDropParams.Track.Get()->IsA( UMovieSceneCinematicBoardTrack::StaticClass() ) )
     {
         return FReply::Unhandled();
     }

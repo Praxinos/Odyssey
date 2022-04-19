@@ -1018,7 +1018,7 @@ ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence )
 
     for( auto section : track->GetAllSections() )
     {
-        TArrayView<FMovieSceneFloatChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+        TArrayView<FMovieSceneDoubleChannel*> channels = section->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
         for( int i = 0; i < 9; i++ )
         {
             TArrayView<const FFrameNumber> times = channels[i]->GetTimes();
@@ -1176,24 +1176,24 @@ ShotSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlaye
     {
         FMovieSceneChannelProxyData ChannelIndirection;
 
-        const FMovieSceneChannelEntry* FloatChannelEntry = camera_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
-        if( FloatChannelEntry )
+        const FMovieSceneChannelEntry* DoubleChannelEntry = camera_transform_section->GetChannelProxy().FindEntry( FMovieSceneDoubleChannel::StaticStruct()->GetFName() );
+        if( DoubleChannelEntry )
         {
 #if WITH_EDITOR
-            TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
-            TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
-            TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
+            TArrayView<FMovieSceneChannel* const>              DoubleChannels = DoubleChannelEntry->GetChannels();
+            TArrayView<const FMovieSceneChannelMetaData>       MetaData = DoubleChannelEntry->GetMetaData();
+            TArrayView<const TMovieSceneExternalValue<double>> MetaDataExt = DoubleChannelEntry->GetAllExtendedEditorData<FMovieSceneDoubleChannel>();
 
-            for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+            for( int32 Index = 0; Index < DoubleChannels.Num(); ++Index )
             {
-                ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                ChannelIndirection.Add( *static_cast<FMovieSceneDoubleChannel*>( DoubleChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
             }
 #else
-            TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
+            TArrayView<FMovieSceneChannel* const>              DoubleChannels = DoubleChannelEntry->GetChannels();
 
-            for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+            for( int32 Index = 0; Index < DoubleChannels.Num(); ++Index )
             {
-                ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ) );
+                ChannelIndirection.Add( *static_cast<FMovieSceneDoubleChannel*>( DoubleChannels[Index] ) );
             }
 #endif
         }
@@ -1241,24 +1241,24 @@ ShotSequenceHelpers::BuildPlanesTransformChannelProxy( IMovieScenePlayer& iPlaye
         {
             FMovieSceneChannelProxyData ChannelIndirection;
 
-            const FMovieSceneChannelEntry* FloatChannelEntry = plane_transform_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
-            if( FloatChannelEntry )
+            const FMovieSceneChannelEntry* DoubleChannelEntry = plane_transform_section->GetChannelProxy().FindEntry( FMovieSceneDoubleChannel::StaticStruct()->GetFName() );
+            if( DoubleChannelEntry )
             {
 #if WITH_EDITOR
-                TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
-                TArrayView<const FMovieSceneChannelMetaData>      MetaData = FloatChannelEntry->GetMetaData();
-                TArrayView<const TMovieSceneExternalValue<float>> MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
+                TArrayView<FMovieSceneChannel* const>              DoubleChannels = DoubleChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>       MetaData = DoubleChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<double>> MetaDataExt = DoubleChannelEntry->GetAllExtendedEditorData<FMovieSceneDoubleChannel>();
 
-                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                for( int32 Index = 0; Index < DoubleChannels.Num(); ++Index )
                 {
-                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                    ChannelIndirection.Add( *static_cast<FMovieSceneDoubleChannel*>( DoubleChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
                 }
 #else
-                TArrayView<FMovieSceneChannel* const>             FloatChannels = FloatChannelEntry->GetChannels();
+                TArrayView<FMovieSceneChannel* const>              DoubleChannels = DoubleChannelEntry->GetChannels();
 
-                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                for( int32 Index = 0; Index < DoubleChannels.Num(); ++Index )
                 {
-                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ) );
+                    ChannelIndirection.Add( *static_cast<FMovieSceneDoubleChannel*>( DoubleChannels[Index] ) );
                 }
 #endif
             }

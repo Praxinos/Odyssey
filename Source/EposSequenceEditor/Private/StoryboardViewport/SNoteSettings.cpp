@@ -26,8 +26,8 @@ SNoteSettings::Construct(const FArguments& InArgs)
     ChildSlot
     [
         SNew(SComboButton)
-        .ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
-        .ForegroundColor(FEditorStyle::GetColor("InvertedForeground"))
+        .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
+        .ForegroundColor(FAppStyle::Get().GetColor("InvertedForeground"))
         .OnGetMenuContent(this, &SNoteSettings::GetMenuContent)
         .ButtonContent()
         [

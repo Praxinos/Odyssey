@@ -157,7 +157,7 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
 
-    iSection.SetWidgetHeight( MakeAttributeLambda( [this](){ return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
+    iSection.SetWidgetHeight( MakeAttributeLambda( [this] () -> float { return mWidgetSectionContent.IsValid() ? mWidgetSectionContent->GetDesiredSize().Y : 100.f; } ) );
     auto SequenceChanged = [this]( UMovieSceneSequence* iSequence )
     {
         mNeedRebuild = true;
@@ -814,7 +814,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 SNew( SComboButton )
                 .ContentPadding( 0 )
                 .HasDownArrow( false )
-                .ButtonStyle( FEditorStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip" )
+                .ButtonStyle( FAppStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip" )
                 .OnGetMenuContent_Lambda( OnGetMenuContent )
                 .CollapseMenuOnParentFocus( true )
                 .ToolTipText( LOCTEXT( "SectionBackgroundColorTooltip", "Change the background color of this section\n(set to 0 to use the default (settings) one)" ) )
@@ -893,7 +893,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                     return;
 
                 FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-                PropertyEditorModule.CreatePropertyEditorToolkit( EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), objects );
+                PropertyEditorModule.CreatePropertyEditorToolkit( TSharedPtr<IToolkitHost>(), objects );
             };
 
             auto CanBulkEditSubSequence = [=]()
@@ -983,7 +983,7 @@ FCinematicBoardSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
         MenuBuilder.AddMenuEntry(
             take_sequence->GetDisplayName(),
             FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( take_sequence->GetPathName() ) ),
-            take_sequence->GetPathName() == sectionObject.GetSequence()->GetPathName() ? FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FEditorStyle::GetStyleSetName(), "Sequencer.Empty" ),
+            take_sequence->GetPathName() == sectionObject.GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
             FUIAction(
                 FExecuteAction::CreateLambda( [this, &sectionObject, take]() { BoardSequenceTools::SwitchTake( GetSequencer().Get(), sectionObject, sectionObject.FindTake( take ) ); } ),
                 FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )

@@ -9,7 +9,7 @@
 /**
  * Implements the visual style of the epos editor.
  */
-class EPOSSEQUENCEEDITOR_API FEposSequenceEditorStyle
+class EPOSSEQUENCEEDITOR_API FEposSequenceEditorStyle final
     : public FSlateStyleSet
 {
 public:

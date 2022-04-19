@@ -211,7 +211,7 @@ FMetaChannel::BuildFlags()
             {
                 meta_key.mFlags = FMetaKey::EFlags::kPartial;
 
-                static const FSlateBrush* PartialKeyBrush = FEditorStyle::GetBrush( "Sequencer.PartialKey" );
+                static const FSlateBrush* PartialKeyBrush = FAppStyle::Get().GetBrush( "Sequencer.PartialKey" );
                 meta_key.mMetaKeyDrawParam.BorderBrush = PartialKeyBrush;
                 meta_key.mMetaKeyDrawParam.FillBrush = PartialKeyBrush;
                 meta_key.mMetaKeyDrawParam.FillOffset = FVector2D( 0.f, 0.f );

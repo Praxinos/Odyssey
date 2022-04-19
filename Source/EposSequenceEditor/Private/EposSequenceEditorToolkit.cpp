@@ -92,16 +92,19 @@ FEposSequenceEditorToolkit::FEposSequenceEditorToolkit()
 
 FEposSequenceEditorToolkit::~FEposSequenceEditorToolkit()
 {
-    FLevelEditorSequencerIntegration::Get().RemoveSequencer( mSequencer.ToSharedRef() );
-
-    mSequencer->Close();
-
-    // unregister delegates
     if( FModuleManager::Get().IsModuleLoaded( TEXT( "LevelEditor" ) ) )
     {
-        auto& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+        FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) );
+
+        // @todo remove when world-centric mode is added
+        levelEditorModule.AttachSequencer( SNullWidget::NullWidget, nullptr );
+        FLevelEditorSequencerIntegration::Get().RemoveSequencer( mSequencer.ToSharedRef() );
+
+        // unregister delegates
         levelEditorModule.OnMapChanged().RemoveAll( this );
     }
+
+    mSequencer->Close();
 
     // unregister sequencer menu extenders
     ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
@@ -186,8 +189,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
 
-    // Reopen the scene outliner so that is refreshed with the sequencer info column
-    if( mSequencer->GetSequencerSettings()->GetShowOutlinerInfoColumn() )
+    // Reopen the scene outliner so that is refreshed with the sequencer columns
     {
         TSharedPtr<FTabManager> levelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
         if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() ) // SceneOutliner == WorldOutliner ...
@@ -207,6 +209,9 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     {
         viewport->GetLevelViewportClient().SetViewportType(ELevelViewportType::LVT_Perspective); // Need to be called first
         viewport->SetViewportTypeWithinLayout("Storyboard"); // Same name as in EposSequenceEditorModule::RegisterLevelEditorExtensions()
+        //viewport->SetKeyboardFocusToThisViewport();
+        //FSlateApplication::Get().SetKeyboardFocus( viewport.ToSharedRef() );
+        //levelEditorModule.FocusViewport();
     }
 }
 
@@ -306,6 +311,12 @@ FEposSequenceEditorToolkit::AddReferencedObjects( FReferenceCollector& iCollecto
         iCollector.AddReferencedObject( mSequence );
 }
 
+FString
+FEposSequenceEditorToolkit::GetReferencerName() const //override
+{
+    return "FEposSequenceEditorToolkit";
+}
+
 //--- FAssetEditorToolkit interface
 
 void FEposSequenceEditorToolkit::OnClose()
@@ -344,27 +355,6 @@ FLinearColor FEposSequenceEditorToolkit::GetWorldCentricTabColorScale() const
     return FLinearColor( 0.7, 0.0f, 0.2f, 0.5f );
 }
 
-void FEposSequenceEditorToolkit::RegisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
-{
-    if( IsWorldCentricAssetEditor() )
-    {
-        return;
-    }
-
-    checkf( false, TEXT( "should never go here as it should always be world-centric" ) );
-}
-
-void FEposSequenceEditorToolkit::UnregisterTabSpawners( const TSharedRef<class FTabManager>& iTabManager )
-{
-    if( !IsWorldCentricAssetEditor() )
-    {
-        checkf( false, TEXT( "should never go here as it should always be world-centric" ) );
-    }
-
-    FLevelEditorModule& levelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
-    levelEditorModule.AttachSequencer( SNullWidget::NullWidget, nullptr );
-}
-
 //---
 
 TSharedRef<FExtender>
@@ -397,15 +387,25 @@ FEposSequenceEditorToolkit::HandleTrackMenuExtensionAddTrack( FMenuBuilder& AddT
 
     AddTrackMenuBuilder.BeginSection( "Components", LOCTEXT( "ComponentsSection", "Components" ) );
     {
+        TMap<FString, UActorComponent*> SortedComponents;
         for( UActorComponent* Component : Actor->GetComponents() )
         {
             if( Component )
             {
-                FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FEposSequenceEditorToolkit::HandleAddComponentActionExecute, Component ) );
-                FText AddComponentLabel = FText::FromString( Component->GetName() );
-                FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), FText::FromString( Component->GetName() ) );
-                AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
+                SortedComponents.Add( Component->GetName(), Component );
             }
+        }
+        SortedComponents.KeySort( []( const FString& A, const FString& B )
+                                  {
+                                      return A < B;
+                                  } );
+
+        for( const TPair<FString, UActorComponent*>& Component : SortedComponents )
+        {
+            FUIAction AddComponentAction( FExecuteAction::CreateSP( this, &FEposSequenceEditorToolkit::HandleAddComponentActionExecute, Component.Value ) );
+            FText AddComponentLabel = FText::FromString( Component.Key );
+            FText AddComponentToolTip = FText::Format( LOCTEXT( "ComponentToolTipFormat", "Add {0} component" ), AddComponentLabel );
+            AddTrackMenuBuilder.AddMenuEntry( AddComponentLabel, AddComponentToolTip, FSlateIcon(), AddComponentAction );
         }
     }
     AddTrackMenuBuilder.EndSection();

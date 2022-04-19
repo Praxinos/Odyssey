@@ -130,22 +130,26 @@ EposTracksToolbarHelpers::MakeCameraEntries( FMenuBuilder& iMenuBuilder, TShared
     {
         //iMenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
 
-        iMenuBuilder.AddWidget( SNew( SHorizontalBox )
-                               + SHorizontalBox::Slot()
-                               .FillWidth( 1.f )
-                               [
-                                   SNew( STextBlock )
-                                   .Text( LOCTEXT( "camera-set-name-label", "Name" ) )
-                                   .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
-                               ]
-                               + SHorizontalBox::Slot()
-                               .FillWidth( 5.f )
-                               [
-                                   SAssignNew( text_widget, SEditableTextBox )
-                                   .Text( FText::FromString( *ioCameraName ) )
-                                   .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
-                                   .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioCameraName, iOnTextCommit ) )
-                                   .SelectAllTextWhenFocused( true )
+        iMenuBuilder.AddWidget( SNew( SBox )
+                                .Padding( FAppStyle::Get().GetMargin( "Menu.Block.IndentedPadding" ) ) // If no label, the widget will be at the full menu width without margin
+                                [
+                                    SNew( SHorizontalBox )
+                                    + SHorizontalBox::Slot()
+                                    .FillWidth( 1.f )
+                                    [
+                                        SNew( STextBlock )
+                                        .Text( LOCTEXT( "camera-set-name-label", "Name" ) )
+                                        .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
+                                    ]
+                                    + SHorizontalBox::Slot()
+                                    .FillWidth( 5.f )
+                                    [
+                                        SAssignNew( text_widget, SEditableTextBox )
+                                        .Text( FText::FromString( *ioCameraName ) )
+                                        .ToolTipText( LOCTEXT( "camera-set-name-tooltip", "Set the camera name" ) )
+                                        .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioCameraName, iOnTextCommit ) )
+                                        .SelectAllTextWhenFocused( true )
+                                    ]
                                ],
                                FText::GetEmpty() );
     }
@@ -181,22 +185,26 @@ EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedR
     {
         //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
 
-        iMenuBuilder.AddWidget( SNew( SHorizontalBox )
-                               + SHorizontalBox::Slot()
-                               .FillWidth( 1.f )
-                               [
-                                   SNew( STextBlock )
-                                   .Text( LOCTEXT( "plane-set-name-label", "Name" ) )
-                                   .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
-                               ]
-                               + SHorizontalBox::Slot()
-                               .FillWidth( 5.f )
-                               [
-                                   SAssignNew( text_widget, SEditableTextBox )
-                                   .Text( FText::FromString( *ioPlaneName ) )
-                                   .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
-                                   .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioPlaneName, iOnTextCommit ) )
-                                   .SelectAllTextWhenFocused( true )
+        iMenuBuilder.AddWidget( SNew( SBox )
+                                .Padding( FAppStyle::Get().GetMargin( "Menu.Block.IndentedPadding" ) ) // If no label, the widget will be at the full menu width without margin
+                                [
+                                    SNew( SHorizontalBox )
+                                    + SHorizontalBox::Slot()
+                                    .FillWidth( 1.f )
+                                    [
+                                        SNew( STextBlock )
+                                        .Text( LOCTEXT( "plane-set-name-label", "Name" ) )
+                                        .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
+                                    ]
+                                    + SHorizontalBox::Slot()
+                                    .FillWidth( 5.f )
+                                    [
+                                        SAssignNew( text_widget, SEditableTextBox )
+                                        .Text( FText::FromString( *ioPlaneName ) )
+                                        .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
+                                        .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioPlaneName, iOnTextCommit ) )
+                                        .SelectAllTextWhenFocused( true )
+                                    ]
                                ],
                                FText::GetEmpty() );
     }

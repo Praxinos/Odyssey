@@ -16,10 +16,10 @@
 
 //---
 
-FStoryboardViewportLayoutEntity::FStoryboardViewportLayoutEntity( const FViewportConstructionArgs& iArgs )
+FStoryboardViewportLayoutEntity::FStoryboardViewportLayoutEntity( const FAssetEditorViewportConstructionArgs& iArgs, TSharedPtr<ILevelEditor> InLevelEditor )
     : Widget( SNew( SStoryboardLevelViewport )
               .ParentLayout( iArgs.ParentLayout )
-              .ParentLevelEditor( iArgs.ParentLevelEditor )
+              .ParentLevelEditor( InLevelEditor )
               .LayoutName( iArgs.ConfigKey )
               )
 {

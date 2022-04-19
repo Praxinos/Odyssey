@@ -22,9 +22,8 @@ SNoteSectionContent::Construct( const FArguments& InArgs, TSharedRef<FNoteSectio
 
     //---
 
-    FToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    LeftToolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
-    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "BoardSection.TitleToolBar" );
+    FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
+    LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionTitleToolBar" );
 
     auto EditNote = [this]()
     {

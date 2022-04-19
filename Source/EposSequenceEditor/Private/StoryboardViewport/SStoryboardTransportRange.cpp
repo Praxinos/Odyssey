@@ -134,7 +134,7 @@ void SStoryboardTransportRange::DrawKeys(const FGeometry& AllottedGeometry, FSla
     const FSlateBrush* KeyBrush = FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportTransportRangeKey");
     const FQualifiedFrameTime CurrentTime = Sequencer->GetLocalTime();
 
-    FLinearColor KeyColor = KeyColors.Num() ? KeyColors[0] : FEditorStyle::GetSlateColor("SelectionColor").GetColor(FWidgetStyle());
+    FLinearColor KeyColor = KeyColors.Num() ? KeyColors[0] : FAppStyle::Get().GetSlateColor("SelectionColor").GetColor(FWidgetStyle());
 
     int32 KeyIndex = 0;
     for (const FFrameNumber Time : Keys)
@@ -194,7 +194,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         OutDrawElements,
         LayerId,
         AllottedGeometry.ToPaintGeometry( FVector2D(0.f, TrackOffsetY),  FVector2D(AllottedGeometry.GetLocalSize().X, TrackHeight)),
-        FEditorStyle::GetBrush("WhiteBrush"),
+        FAppStyle::Get().GetBrush("WhiteBrush"),
         DrawEffects,
         FLinearColor(DarkGray)
     );
@@ -209,7 +209,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         OutDrawElements,
         ++LayerId,
         AllottedGeometry.ToPaintGeometry( FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY),  FVector2D(AllottedGeometry.GetLocalSize().X*(PlaybackEndLerp - PlaybackStartLerp), TrackHeight)),
-        FEditorStyle::GetBrush("WhiteBrush"),
+        FAppStyle::Get().GetBrush("WhiteBrush"),
         DrawEffects,
         FLinearColor(MidGray)
     );
@@ -225,7 +225,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
             OutDrawElements,
             ++LayerId,
             AllottedGeometry.ToPaintGeometry( FVector2D(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY), FVector2D(AllottedGeometry.GetLocalSize().X * (ClampedProgressLerp - PlaybackStartLerp), TrackHeight) ),
-            FEditorStyle::GetBrush("WhiteBrush"),
+            FAppStyle::Get().GetBrush("WhiteBrush"),
             DrawEffects,
             FLinearColor(LightGray)
         );
@@ -233,7 +233,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
 
     bool bPlayMarkerOnKey = false;
 
-    const FLinearColor KeyframeColor = FEditorStyle::GetSlateColor("SelectionColor").GetColor(FWidgetStyle());
+    const FLinearColor KeyframeColor = FAppStyle::Get().GetSlateColor("SelectionColor").GetColor(FWidgetStyle());
 
     // Draw the current key collection tick marks
     if (ActiveKeyCollection.IsValid())

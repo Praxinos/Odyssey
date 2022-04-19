@@ -464,39 +464,39 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 
     transform_section->Modify();
 
-    TArrayView<FMovieSceneFloatChannel*> FloatChannels = section->GetChannelProxy().GetChannels<FMovieSceneFloatChannel>();
+    TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = section->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
 
 //TODO: maybe use the same object as StopPilotingCamera() ???
 
-    AddKeyToChannel( FloatChannels[0], iFrameNumber, ioCamera->GetActorLocation().X, iInterpolation );
-    AddKeyToChannel( FloatChannels[1], iFrameNumber, ioCamera->GetActorLocation().Y, iInterpolation );
-    AddKeyToChannel( FloatChannels[2], iFrameNumber, ioCamera->GetActorLocation().Z, iInterpolation );
+    AddKeyToChannel( DoubleChannels[0], iFrameNumber, ioCamera->GetActorLocation().X, iInterpolation );
+    AddKeyToChannel( DoubleChannels[1], iFrameNumber, ioCamera->GetActorLocation().Y, iInterpolation );
+    AddKeyToChannel( DoubleChannels[2], iFrameNumber, ioCamera->GetActorLocation().Z, iInterpolation );
 
-    AddKeyToChannel( FloatChannels[3], iFrameNumber, ioCamera->GetActorRotation().Euler().X, iInterpolation );
-    AddKeyToChannel( FloatChannels[4], iFrameNumber, ioCamera->GetActorRotation().Euler().Y, iInterpolation );
-    AddKeyToChannel( FloatChannels[5], iFrameNumber, ioCamera->GetActorRotation().Euler().Z, iInterpolation );
+    AddKeyToChannel( DoubleChannels[3], iFrameNumber, ioCamera->GetActorRotation().Euler().X, iInterpolation );
+    AddKeyToChannel( DoubleChannels[4], iFrameNumber, ioCamera->GetActorRotation().Euler().Y, iInterpolation );
+    AddKeyToChannel( DoubleChannels[5], iFrameNumber, ioCamera->GetActorRotation().Euler().Z, iInterpolation );
 
-    //AddKeyToChannel( FloatChannels[6], iFrameNumber, Scale.X, iInterpolation );
-    //AddKeyToChannel( FloatChannels[7], iFrameNumber, Scale.Y, iInterpolation );
-    //AddKeyToChannel( FloatChannels[8], iFrameNumber, Scale.Z, iInterpolation );
+    //AddKeyToChannel( DoubleChannels[6], iFrameNumber, Scale.X, iInterpolation );
+    //AddKeyToChannel( DoubleChannels[7], iFrameNumber, Scale.Y, iInterpolation );
+    //AddKeyToChannel( DoubleChannels[8], iFrameNumber, Scale.Z, iInterpolation );
 
-    if( FloatChannels[0]->GetNumKeys() <= 1 )
-        FloatChannels[0]->SetDefault( ioCamera->GetActorLocation().X );
-    if( FloatChannels[1]->GetNumKeys() <= 1 )
-        FloatChannels[1]->SetDefault( ioCamera->GetActorLocation().Y );
-    if( FloatChannels[2]->GetNumKeys() <= 1 )
-        FloatChannels[2]->SetDefault( ioCamera->GetActorLocation().Z );
+    if( DoubleChannels[0]->GetNumKeys() <= 1 )
+        DoubleChannels[0]->SetDefault( ioCamera->GetActorLocation().X );
+    if( DoubleChannels[1]->GetNumKeys() <= 1 )
+        DoubleChannels[1]->SetDefault( ioCamera->GetActorLocation().Y );
+    if( DoubleChannels[2]->GetNumKeys() <= 1 )
+        DoubleChannels[2]->SetDefault( ioCamera->GetActorLocation().Z );
 
-    if( FloatChannels[3]->GetNumKeys() <= 1 )
-        FloatChannels[3]->SetDefault( ioCamera->GetActorRotation().Euler().X );
-    if( FloatChannels[4]->GetNumKeys() <= 1 )
-        FloatChannels[4]->SetDefault( ioCamera->GetActorRotation().Euler().Y );
-    if( FloatChannels[5]->GetNumKeys() <= 1 )
-        FloatChannels[5]->SetDefault( ioCamera->GetActorRotation().Euler().Z );
+    if( DoubleChannels[3]->GetNumKeys() <= 1 )
+        DoubleChannels[3]->SetDefault( ioCamera->GetActorRotation().Euler().X );
+    if( DoubleChannels[4]->GetNumKeys() <= 1 )
+        DoubleChannels[4]->SetDefault( ioCamera->GetActorRotation().Euler().Y );
+    if( DoubleChannels[5]->GetNumKeys() <= 1 )
+        DoubleChannels[5]->SetDefault( ioCamera->GetActorRotation().Euler().Z );
 
-    //FloatChannels[6]->SetDefault( Scale.X );
-    //FloatChannels[7]->SetDefault( Scale.Y );
-    //FloatChannels[8]->SetDefault( Scale.Z );
+    //DoubleChannels[6]->SetDefault( Scale.X );
+    //DoubleChannels[7]->SetDefault( Scale.Y );
+    //DoubleChannels[8]->SetDefault( Scale.Z );
 
 //TODO: set all (?) key planes ?
 
@@ -543,16 +543,16 @@ ShotSequenceTools::DeleteCameraKey( ISequencer& iSequencer, UMovieSceneSequence*
 
     for( int i = 0; i < iKeyHandles.Num(); i++ )
     {
-        TMovieSceneChannelHandle<FMovieSceneFloatChannel> channel_handle = iChannelHandles[i].Cast<FMovieSceneFloatChannel>();
-        FMovieSceneFloatChannel* float_channel = channel_handle.Get();
-        if( !float_channel )
+        TMovieSceneChannelHandle<FMovieSceneDoubleChannel> channel_handle = iChannelHandles[i].Cast<FMovieSceneDoubleChannel>();
+        FMovieSceneDoubleChannel* double_channel = channel_handle.Get();
+        if( !double_channel )
             return;
 
         //---
 
         iSections[i]->Modify();
 
-        float_channel->DeleteKeys( iKeyHandles.Slice( i, 1 ) );
+        double_channel->DeleteKeys( iKeyHandles.Slice( i, 1 ) );
     }
 
     //---
@@ -956,9 +956,9 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
         FVector KeyVector = CurrentTransform.Translation;
         //FVector KeyVector = RecomposedTransform.Translation;
 
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 0, KeyVector.X, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 1, KeyVector.Y, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 2, KeyVector.Z, bKeyZ ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 0, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 1, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 2, KeyVector.Z, bKeyZ ) );
     }
 
     // Set rotation keys/defaults
@@ -997,9 +997,9 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
 
         // Do we need to unwind re-composed rotations?
         //KeyRotator = UnwindRotator( CurrentTransform.Rotation, RecomposedTransform.Rotation );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 3, KeyRotator.Roll, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 4, KeyRotator.Pitch, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 3, KeyRotator.Roll, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 4, KeyRotator.Pitch, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
 
     }
 
@@ -1036,9 +1036,9 @@ GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastT
 
         FVector KeyVector = CurrentTransform.Scale;
         //FVector KeyVector = RecomposedTransform.Scale;
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 6, KeyVector.X, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 7, KeyVector.Y, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneFloatChannel>( 8, KeyVector.Z, bKeyZ ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 6, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 7, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 8, KeyVector.Z, bKeyZ ) );
     }
 }
 

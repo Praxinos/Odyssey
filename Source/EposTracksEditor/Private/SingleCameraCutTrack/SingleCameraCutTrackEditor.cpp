@@ -4,6 +4,7 @@
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 
 #include "Widgets/SBoxPanel.h"
+#include "ActorTreeItem.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Modules/ModuleManager.h"
 #include "Application/ThrottleManager.h"
@@ -43,7 +44,7 @@ public:
         "SingleCameraCutTrack",
         NSLOCTEXT("Contexts", "SingleCameraCutTrack", "SingleCameraCutTrack"),
         NAME_None, // "MainFrame" // @todo Fix this crash
-        FEditorStyle::GetStyleSetName() // Icon Style Set
+        FAppStyle::Get().GetStyleSetName() // Icon Style Set
     )
         , BindingCount(0)
     { }
@@ -210,17 +211,19 @@ TSharedPtr<SWidget> FSingleCameraCutTrackEditor::BuildOutlinerEditWidget(const F
     .Padding(4, 0, 0, 0)
     [
         SNew(SCheckBox)
-        .IsFocusable(false)
-        .IsChecked(this, &FSingleCameraCutTrackEditor::IsCameraLocked)
-        .OnCheckStateChanged(this, &FSingleCameraCutTrackEditor::OnLockCameraClicked)
-        .ToolTipText(this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip)
-        .ForegroundColor(FLinearColor::White)
-        .CheckedImage(FEditorStyle::GetBrush("Sequencer.LockCamera"))
-        .CheckedHoveredImage(FEditorStyle::GetBrush("Sequencer.LockCamera"))
-        .CheckedPressedImage(FEditorStyle::GetBrush("Sequencer.LockCamera"))
-        .UncheckedImage(FEditorStyle::GetBrush("Sequencer.UnlockCamera"))
-        .UncheckedHoveredImage(FEditorStyle::GetBrush("Sequencer.UnlockCamera"))
-        .UncheckedPressedImage(FEditorStyle::GetBrush("Sequencer.UnlockCamera"))
+        .Style( &FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>( "ToggleButtonCheckBoxAlt" ) )
+        .Type( ESlateCheckBoxType::CheckBox )
+        .Padding( FMargin( 0.f ) )
+        .IsFocusable( false )
+        .IsChecked( this, &FSingleCameraCutTrackEditor::IsCameraLocked )
+        .OnCheckStateChanged( this, &FSingleCameraCutTrackEditor::OnLockCameraClicked )
+        .ToolTipText( this, &FSingleCameraCutTrackEditor::GetLockCameraToolTip )
+        .CheckedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+        .CheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+        .CheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.LockCamera" ) )
+        .UncheckedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+        .UncheckedHoveredImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
+        .UncheckedPressedImage( FAppStyle::Get().GetBrush( "Sequencer.UnlockCamera" ) )
     ];
 }
 
@@ -280,7 +283,7 @@ const FSlateBrush* FSingleCameraCutTrackEditor::GetIconBrush() const
 
 bool FSingleCameraCutTrackEditor::OnAllowDrop(const FDragDropEvent& DragDropEvent, FSequencerDragDropParams& DragDropParams )
 {
-    if (!DragDropParams.Track->IsA(UMovieSceneSingleCameraCutTrack::StaticClass()))
+    if (!DragDropParams.Track.IsValid() || !DragDropParams.Track.Get()->IsA( UMovieSceneSingleCameraCutTrack::StaticClass()))
     {
         return false;
     }
@@ -318,7 +321,7 @@ bool FSingleCameraCutTrackEditor::OnAllowDrop(const FDragDropEvent& DragDropEven
 
 FReply FSingleCameraCutTrackEditor::OnDrop(const FDragDropEvent& DragDropEvent, const FSequencerDragDropParams& DragDropParams)
 {
-    if (!DragDropParams.Track->IsA(UMovieSceneSingleCameraCutTrack::StaticClass()))
+    if( !DragDropParams.Track.IsValid() || !DragDropParams.Track.Get()->IsA( UMovieSceneSingleCameraCutTrack::StaticClass() ) )
     {
         return FReply::Unhandled();
     }
@@ -437,7 +440,7 @@ bool FSingleCameraCutTrackEditor::IsCameraPickable(const AActor* const PickableA
     if (PickableActor->IsListedInSceneOutliner() &&
         !FActorEditorUtils::IsABuilderBrush(PickableActor) &&
         !PickableActor->IsA( AWorldSettings::StaticClass() ) &&
-        !PickableActor->IsPendingKill())
+         IsValid(PickableActor))
     {
         UCameraComponent* CameraComponent = MovieSceneHelpers::CameraComponentFromActor(PickableActor);
         if (CameraComponent)
@@ -455,36 +458,33 @@ TSharedRef<SWidget> FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboBu
     auto CreateNewCamera =
         [this](FMenuBuilder& SubMenuBuilder)
         {
-            using namespace SceneOutliner;
-
-            SceneOutliner::FInitializationOptions InitOptions;
+            FSceneOutlinerInitializationOptions InitOptions;
             {
-                InitOptions.Mode = ESceneOutlinerMode::ActorPicker;
                 InitOptions.bShowHeaderRow = false;
                 InitOptions.bFocusSearchBoxWhenOpened = true;
                 InitOptions.bShowTransient = true;
                 InitOptions.bShowCreateNewFolder = false;
                 // Only want the actor label column
-                InitOptions.ColumnMap.Add(FBuiltInColumnTypes::Label(), FColumnInfo(EColumnVisibility::Visible, 0));
+                InitOptions.ColumnMap.Add( FSceneOutlinerBuiltInColumnTypes::Label(), FSceneOutlinerColumnInfo( ESceneOutlinerColumnVisibility::Visible, 0 ) );
 
                 // Only display Actors that we can attach too
-                InitOptions.Filters->AddFilterPredicate( SceneOutliner::FActorFilterPredicate::CreateRaw(this, &FSingleCameraCutTrackEditor::IsCameraPickable) );
+                InitOptions.Filters->AddFilterPredicate<FActorTreeItem>( FActorTreeItem::FFilterPredicate::CreateRaw( this, &FSingleCameraCutTrackEditor::IsCameraPickable ) );
             }
 
             // Actor selector to allow the user to choose a parent actor
             FSceneOutlinerModule& SceneOutlinerModule = FModuleManager::LoadModuleChecked<FSceneOutlinerModule>( "SceneOutliner" );
 
             TSharedRef< SWidget > MenuWidget =
-                SNew(SHorizontalBox)
+                SNew( SHorizontalBox )
 
-                +SHorizontalBox::Slot()
+                + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
-                    SNew(SBox)
-                    .MaxDesiredHeight(400.0f)
-                    .WidthOverride(300.0f)
+                    SNew( SBox )
+                    .MaxDesiredHeight( 400.0f )
+                    .WidthOverride( 300.0f )
                     [
-                        SceneOutlinerModule.CreateSceneOutliner(
+                        SceneOutlinerModule.CreateActorPicker(
                             InitOptions,
                             FOnActorPicked::CreateSP(this, &FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboButtonMenuEntryExecute )
                             )
@@ -606,9 +606,17 @@ void FSingleCameraCutTrackEditor::ToggleLockCamera()
 
 FText FSingleCameraCutTrackEditor::GetLockCameraToolTip() const
 {
-    return IsCameraLocked() == ECheckBoxState::Checked ?
+    const TSharedRef<const FInputChord> FirstActiveChord = FSingleCameraCutTrackCommands::Get().ToggleLockCamera->GetFirstValidChord();
+
+    FText Tooltip = IsCameraLocked() == ECheckBoxState::Checked ?
         LOCTEXT("UnlockCamera", "Unlock Viewport from Camera Cuts") :
         LOCTEXT("LockCamera", "Lock Viewport to Camera Cuts");
+
+    if( FirstActiveChord->IsValidChord() )
+    {
+        return FText::Join( FText::FromString( TEXT( " " ) ), Tooltip, FirstActiveChord->GetInputText() );
+    }
+    return Tooltip;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -14,7 +14,7 @@
 #include "MoviePipelineCommandLineEncoderSettings.h"
 #include "MoviePipelineMasterConfig.h"
 #include "MovieSceneSequence.h"
-#include "SEnumCombobox.h"
+#include "SEnumCombo.h"
 //#include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/STextComboBox.h"
 
@@ -365,7 +365,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& io
             .Padding( 5, 0 )
             [
                 SNew( SImage )
-                .Image( FEditorStyle::GetBrush( "Icons.Warning" ) )
+                .Image( FAppStyle::Get().GetBrush( "Icons.Warning" ) )
                 .Visibility_Lambda( [this]() { return *mIsExecutablePathValid ? EVisibility::Hidden : EVisibility::Visible; } )
             ]
 
@@ -427,7 +427,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& io
             .Padding( 5, 0 )
             [
                 SNew( SImage )
-                .Image( FEditorStyle::GetBrush( "Icons.Warning" ) )
+                .Image( FAppStyle::Get().GetBrush( "Icons.Warning" ) )
                 .Visibility_Lambda( [this]() { return IsVideoCodecValid() ? EVisibility::Hidden : EVisibility::Visible; } )
             ]
 
@@ -482,7 +482,7 @@ FEncoderSettingsDetailsCustomization::CustomizeDetails( IDetailLayoutBuilder& io
             .Padding( 5, 0 )
             [
                 SNew( SImage )
-                .Image( FEditorStyle::GetBrush( "Icons.Warning" ) )
+                .Image( FAppStyle::Get().GetBrush( "Icons.Warning" ) )
                 .Visibility_Lambda( [this]() { return IsAudioCodecValid() ? EVisibility::Hidden : EVisibility::Visible; } )
             ]
 
@@ -601,15 +601,15 @@ SRenderOptions::Construct( const FArguments& iArgs )
         //.VAlign( VAlign_Center )
         //[
         //    SNew( SUniformGridPanel )
-        //    .MinDesiredSlotHeight( FCoreStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotHeight" ) )
-        //    .MinDesiredSlotWidth( FCoreStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotWidth" ) )
-        //    .SlotPadding( FCoreStyle::Get().GetMargin( "StandardDialog.SlotPadding" ) )
+        //    .MinDesiredSlotHeight( FAppStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotHeight" ) )
+        //    .MinDesiredSlotWidth( FAppStyle::Get().GetFloat( "StandardDialog.MinDesiredSlotWidth" ) )
+        //    .SlotPadding( FAppStyle::Get().GetMargin( "StandardDialog.SlotPadding" ) )
 
         //    + SUniformGridPanel::Slot( 0, 0 )
         //    [
         //        SNew(SButton)
         //        .Text(LOCTEXT("Ok", "Ok"))
-        //        .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
+        //        .ContentPadding( FAppStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
         //        .HAlign( HAlign_Center )
         //        .OnClicked( this, &SRenderOptions::OnAccept )
         //        .IsEnabled( this, &SRenderOptions::CanAccept )
@@ -619,7 +619,7 @@ SRenderOptions::Construct( const FArguments& iArgs )
         //        [
         //        SNew(SButton)
         //        .Text(LOCTEXT("Cancel", "Cancel"))
-        //        .ContentPadding( FCoreStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
+        //        .ContentPadding( FAppStyle::Get().GetMargin( "StandardDialog.ContentPadding" ) )
         //        .HAlign( HAlign_Center )
         //        .OnClicked( this, &SRenderOptions::OnCancel )
         //    ]
