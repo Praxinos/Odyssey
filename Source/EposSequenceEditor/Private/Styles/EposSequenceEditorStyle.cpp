@@ -170,7 +170,7 @@ FEposSequenceEditorStyle::InitViewport()
 
     //---
 
-    Set( "Notes.Viewport.Settings", new IMAGE_BRUSH( "note-24x", Icon24x24 ) );
+    Set( "Notes.Viewport.Settings", new IMAGE_BRUSH_SVG( "note", Icon24x24 ) );
 
     //-
 

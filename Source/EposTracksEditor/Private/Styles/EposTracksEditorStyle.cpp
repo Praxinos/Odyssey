@@ -71,7 +71,7 @@ FEposTracksEditorStyle::InitSequencer()
 
     Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH( "track-board-16x", Icon16x16 ) );
     Set( "Sequencer.Tracks.SingleCameraCut", new PARENT_IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FAppStyle::Get().GetBrush( "Sequencer.Tracks.CameraCut" ) );
-    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
+    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH_SVG( "note", Icon16x16 ) );
 }
 
 void
@@ -88,12 +88,12 @@ FEposTracksEditorStyle::InitTracks()
     Set( "DetachPlane", new IMAGE_BRUSH( "plane-detach-24x", Icon16x16 ) );
     Set( "CreateDrawing", new IMAGE_BRUSH( "drawing-create-24x", Icon16x16 ) );
 
-    Set( "LighttableOff", new IMAGE_BRUSH( "lighttable-off-16x", Icon16x16 ) );
-    Set( "LighttableOn", new IMAGE_BRUSH( "lighttable-on-16x", Icon16x16 ) );
+    Set( "LighttableOff", new IMAGE_BRUSH_SVG( "lighttable-off", Icon16x16 ) );
+    Set( "LighttableOn", new IMAGE_BRUSH_SVG( "lighttable-on", Icon16x16 ) );
 
-    Set( "Take", new IMAGE_BRUSH( "take-16x", Icon16x16 ) );
+    Set( "Take", new IMAGE_BRUSH_SVG( "take", Icon16x16 ) );
 
-    Set( "NoteSettings", new IMAGE_BRUSH( "note-16x", Icon16x16 ) );
+    Set( "NoteSettings", new IMAGE_BRUSH_SVG( "note", Icon16x16 ) );
 
     //---
 
