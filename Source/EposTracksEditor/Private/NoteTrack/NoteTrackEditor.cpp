@@ -156,7 +156,7 @@ FNoteTrackEditor::Resize( float NewSize, UMovieSceneTrack* InTrack ) //override
 bool
 FNoteTrackEditor::OnAllowDrop( const FDragDropEvent& DragDropEvent, FSequencerDragDropParams& DragDropParams ) //override
 {
-    if( !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
+    if( !DragDropParams.Track.IsValid() || !DragDropParams.Track->IsA( UMovieSceneNoteTrack::StaticClass() ) )
     {
         return false;
     }
