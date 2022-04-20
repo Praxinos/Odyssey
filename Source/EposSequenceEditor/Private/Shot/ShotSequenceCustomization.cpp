@@ -10,7 +10,9 @@
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
+#include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/LighttableTools.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceCustomization"
 
@@ -252,6 +254,70 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetIcon() );
 
+    auto GetLighttableTooltip = [this]() -> FText
+    {
+        TArray<FGuid> plane_bindings;
+        int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+        check( plane_count == 1 );
+        //if( plane_count != 1 )
+        //    return;
+
+        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
+            return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+        else
+            return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+    };
+
+    auto GetLighttableIcon = [this]() -> FSlateIcon
+    {
+        TArray<FGuid> plane_bindings;
+        int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+        check( plane_count == 1 );
+        //if( plane_count != 1 )
+        //    return;
+
+        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
+            return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
+        else
+            return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+    };
+
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 plane (or 0) available
+    // - the second button is displayed when there are more than 2 planes available
+    ToolbarBuilder.AddToolBarButton( FUIAction(
+                                         FExecuteAction::CreateLambda( [this]()
+                                                                       {
+                                                                           TArray<FGuid> plane_bindings;
+                                                                           int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+                                                                           if( plane_count != 1 )
+                                                                               return;
+
+                                                                           if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
+                                                                               LighttableTools::Deactivate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] );
+                                                                           else
+                                                                               LighttableTools::Activate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] );
+                                                                       } ),
+                                         FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) == 1; } ),
+                                         FIsActionChecked(),
+                                         FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) <= 1; } ) ),
+                                     NAME_None,
+                                     FText::GetEmpty(),
+                                     MakeAttributeLambda( GetLighttableTooltip ),
+                                     MakeAttributeLambda( GetLighttableIcon )
+                                     );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) > 1; } )
+        ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeLighttableMenu ),
+        FText::GetEmpty(),
+        LOCTEXT( "LighttableOptionsTooltip", "Activate/Deactivate lighttable on planes" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" ) );
+
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
 
@@ -326,6 +392,53 @@ FShotSequenceCustomization::MakePlaneMenu()
             FSlateIcon(),
             FUIAction(
                 FExecuteAction::CreateLambda( [this, plane_binding](){ ShotSequenceTools::DetachPlane( mSequencer, plane_binding ); } )
+            )
+        );
+    }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeLighttableMenu()
+{
+    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+
+    TArray<APlaneActor*> planes;
+    TArray<FGuid> plane_bindings;
+    int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, &planes, &plane_bindings );
+    if( !plane_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < plane_count; i++ )
+    {
+        APlaneActor* plane = planes[i];
+        FGuid plane_binding = plane_bindings[i];
+
+        FText tooltip;
+        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) )
+            tooltip = LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+        else
+            tooltip = LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+
+        FSlateIcon icon;
+        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) )
+            icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
+        else
+            icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( plane->GetActorLabel() ),
+            tooltip,
+            icon,
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, plane_binding]()
+                                              {
+                                                  if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) )
+                                                      LighttableTools::Deactivate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding );
+                                                  else
+                                                      LighttableTools::Activate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding );
+                                              } )
             )
         );
     }
