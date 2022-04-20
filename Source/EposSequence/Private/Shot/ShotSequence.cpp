@@ -11,8 +11,9 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 #include "MovieScene.h"
-#include "Sections/MovieSceneSubSection.h"
+#include "MovieSceneMediaTrack.h"
 #include "MovieSceneTimeHelpers.h"
+#include "Sections/MovieSceneSubSection.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
@@ -252,6 +253,7 @@ UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClas
         InTrackClass == UMovieSceneNoteTrack::StaticClass() ||
         InTrackClass == UMovieSceneAudioTrack::StaticClass() ||
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
+        InTrackClass == UMovieSceneMediaTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() )
     {
         return ETrackSupport::Supported;
