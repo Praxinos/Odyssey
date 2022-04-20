@@ -76,6 +76,7 @@ FEposSequenceEditorCommands::RegisterCommands()
     UI_COMMAND( GotoForum,                          "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoDiscord,                        "Praxinos discord...", "Go to Praxinos discord", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoUserDocumentation,              "Epos User Documentation...", "Go to User Documentation", EUserInterfaceActionType::Button, FInputChord() );
+    UI_COMMAND( GotoProjects,                       "Epos Samples...", "Download projects made by Epos", EUserInterfaceActionType::Button, FInputChord() );
 
     UI_COMMAND( OpenAboutWindow,                    "About Epos...", "Open the About window", EUserInterfaceActionType::Button, FInputChord() );
 }
@@ -128,7 +129,14 @@ FEposSequenceEditorActionCallbacks::GotoDiscord()
 void
 FEposSequenceEditorActionCallbacks::GotoUserDocumentation()
 {
-    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/Documentation/Epos/User/html/" ), nullptr, nullptr );
+    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/epos-user-doc" ), nullptr, nullptr );
+}
+
+//static
+void
+FEposSequenceEditorActionCallbacks::GotoProjects()
+{
+    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/epos-projects" ), nullptr, nullptr );
 }
 
 //static

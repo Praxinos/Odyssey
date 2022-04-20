@@ -271,6 +271,7 @@ EposSequenceToolbarHelpers::MakeHelpEntries( FMenuBuilder& iMenuBuilder )
     iMenuBuilder.AddSeparator();
 
     iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoProjects );
 
     iMenuBuilder.AddSeparator();
 

@@ -52,6 +52,7 @@ public:
     TSharedPtr<FUICommandInfo> GotoForum;
     TSharedPtr<FUICommandInfo> GotoDiscord;
     TSharedPtr<FUICommandInfo> GotoUserDocumentation;
+    TSharedPtr<FUICommandInfo> GotoProjects;
     TSharedPtr<FUICommandInfo> OpenAboutWindow;
 };
 
@@ -68,5 +69,6 @@ public:
     static void GotoForum();
     static void GotoDiscord();
     static void GotoUserDocumentation();
+    static void GotoProjects();
     static void OpenAboutWindow();
 };

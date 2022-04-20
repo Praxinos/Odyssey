@@ -272,8 +272,12 @@ FEposSequenceEditorToolkit::BindCommands( TSharedPtr<FUICommandList> CommandList
 
     CommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation ),
-        FCanExecuteAction::CreateLambda( [this](){ return false; } ) // Not available now
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoUserDocumentation )
+    );
+
+    CommandList->MapAction(
+        FEposSequenceEditorCommands::Get().GotoProjects,
+        FExecuteAction::CreateStatic( &FEposSequenceEditorActionCallbacks::GotoProjects )
     );
 
     CommandList->MapAction(
