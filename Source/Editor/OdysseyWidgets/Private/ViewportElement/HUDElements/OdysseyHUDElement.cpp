@@ -3,6 +3,15 @@
 
 #include "OdysseyHUDElement.h"
 
+void UOdysseyHUDElement::Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, bool iAreCoordinatesViewportBased)
+{
+    mName = iName;
+    mPaintEngineHUD = iPaintEngineHUD;
+    mIsInvalid = true;
+    mIsCaptured = false;
+    mAreCoordinatesViewportBased = true;
+}
+
 TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
 {
     mElementsWidget = SNew(SScrollBox);
@@ -48,21 +57,33 @@ void UOdysseyHUDElement::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
     }
 }
 
-FReply UOdysseyHUDElement::InputKey()
+FReply UOdysseyHUDElement::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it->Value->InputKey();
+        if (ioReply.IsEventHandled())
+            return ioReply;
+
+        it->Value->InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
     }
 
-    return FReply::Unhandled();
+    return ioReply;
 }
 
-void UOdysseyHUDElement::CapturedMouseMove()
+void UOdysseyHUDElement::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)
     {
-        it->Value->CapturedMouseMove();
+        if( it->Value->IsCaptured() )
+            it->Value->CapturedMouseMove(iViewport, iX, iY);
+    }
+}
+
+void UOdysseyHUDElement::Erase()
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it.Value()->Erase();
     }
 }
 
@@ -87,7 +108,7 @@ void UOdysseyHUDElement::AddElement(UOdysseyHUDElement* iElementToAdd)
     if( iElementToAdd != nullptr )
         mElements.Emplace( iElementToAdd->mName.ToString(), iElementToAdd );
 
-    Invalidate();
+    mIsInvalid = false;
 }
 
 bool UOdysseyHUDElement::IsInvalid()
@@ -96,14 +117,18 @@ bool UOdysseyHUDElement::IsInvalid()
     return mIsInvalid;
 }
 
+bool UOdysseyHUDElement::IsCaptured()
+{
+    bool isCaptured = mIsCaptured;
+
+    InternalIsCaptured(isCaptured);
+    return isCaptured;
+}
+
+
 UOdysseyHUDElement::FOnApplyHUDAction& UOdysseyHUDElement::OnApplyHUDAction()
 {
     return mOnApplyHUDAction;
-}
-
-void UOdysseyHUDElement::Invalidate()
-{
-    mIsInvalid = true;
 }
 
 void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
@@ -121,6 +146,25 @@ void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
         for (auto it = mElements.CreateConstIterator(); it; ++it)
         {
             it.Value()->InternalIsInvalid( ioIsInvalid );
+        }
+    }
+}
+
+void UOdysseyHUDElement::InternalIsCaptured(bool& ioIsCaptured)
+{
+    if (ioIsCaptured)
+        return;
+
+    ioIsCaptured = mIsCaptured;
+    if (ioIsCaptured)
+    {
+        return;
+    }
+    else
+    {
+        for (auto it = mElements.CreateConstIterator(); it; ++it)
+        {
+            it.Value()->InternalIsCaptured(ioIsCaptured);
         }
     }
 }

@@ -4,30 +4,26 @@
 #include "Handle/OdysseyHUDHandle.h"
 
 
-void UOdysseyHUDHandle::Init( FName iName, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD )
+void UOdysseyHUDHandle::Init( FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD )
 {
+    UOdysseyHUDElement::Init( iName, iPaintEngineHUD );
+    mParent = iParent;
     mHandleSize = 2;
-    mName = iName;
     mReferencePoint = iReferencePoint;
-    mPaintEngineHUD = iPaintEngineHUD;
-    Invalidate();
 }
 
 void UOdysseyHUDHandle::PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent)
 {
     UOdysseyHUDElement::PostEditChangeProperty( iPropertyChangedEvent );
     
-    Invalidate();
-    //Check: maybe we don't even need to say to the viewport to draw. We can just draw the HUD when its property changed here
+    mIsInvalid = true;
 }
 
 void UOdysseyHUDHandle::PreEditChange(FProperty* iPropertyAboutToChange)
 {
     UOdysseyHUDElement::PreEditChange( iPropertyAboutToChange );
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
-    ctx.Finish();
+    Erase();
 }
 
 TSharedPtr<SWidget> UOdysseyHUDHandle::CreateWidget()
@@ -42,9 +38,6 @@ void UOdysseyHUDHandle::Draw()
     //Draw the children of this HUDElement
     UOdysseyHUDElement::Draw();
 
-    if( !mPaintEngineHUD || !mReferencePoint )
-        return;
-
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
     ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8( 255, 0, 0, 255 ) );
     ctx.Finish();
@@ -52,8 +45,17 @@ void UOdysseyHUDHandle::Draw()
     mPaintEngineHUD->GetHUDBlock()->GetBlock()->Dirty();
 }
 
+void UOdysseyHUDHandle::Erase()
+{
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+    ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
+    ctx.Finish();
+}
+
 void UOdysseyHUDHandle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
+    UOdysseyHUDElement::MouseMove( iViewport, iX, iY );
+
     float distSquared = FVector2D::DistSquared(*mReferencePoint, FVector2D(iX, iY));
     if ( mHandleSize != 5 && distSquared < 25)
     {
@@ -73,12 +75,38 @@ void UOdysseyHUDHandle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
     }
 }
 
-FReply UOdysseyHUDHandle::InputKey()
+FReply UOdysseyHUDHandle::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply )
 {
-    return FReply::Unhandled();
+    UOdysseyHUDElement::InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+
+    if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Pressed)
+    {
+        float distSquared = FVector2D::DistSquared(*mReferencePoint, FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()));
+        if( distSquared < 25 )
+        { 
+            mIsCaptured = true;
+            ioReply = FReply::Handled();
+        }
+    }
+    else if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_Released && mIsCaptured)
+    {
+        UE_LOG(LogTemp, Display, TEXT("ReleaseCapture"));
+        mIsCaptured = false;
+        ioReply = FReply::Handled();
+    }
+
+    return ioReply;
 }
 
-void UOdysseyHUDHandle::CapturedMouseMove()
+void UOdysseyHUDHandle::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
+    UOdysseyHUDElement::CapturedMouseMove( iViewport, iX, iY );
 
+    if (mIsCaptured)
+    {
+        mParent->PreEditChange(nullptr);
+        mReferencePoint->Set(iX, iY);
+        mParent->PostEditChange();
+        mIsInvalid = true;
+    }
 }

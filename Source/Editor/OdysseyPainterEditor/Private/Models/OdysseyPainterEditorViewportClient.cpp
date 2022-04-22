@@ -206,7 +206,9 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     //TODO Only when HUD is invalid
     if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD() && mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsInvalid())
+    {
         mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
+    }
 
     IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
     UTexture* HUDTexture = nullptr;
@@ -217,7 +219,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw HUD Surface
     if( HUDTexture && HUDTexture->Resource )
     {
-        FCanvasTileItem tileItem(FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
+        FCanvasTileItem tileItem( FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
         result += ( 1 << 0 );
@@ -288,7 +290,6 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 
     if( iEvent == EInputEvent::IE_Pressed )
     {
-        ;
         if (!mKeysPressed.Contains(iKey))
             mKeysPressed.Add( iKey );
     }
@@ -306,6 +307,14 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton ) )
         return true;
 
+    if (mCurrentToolState == eState::kIdle)
+    {
+        FReply replyHUD = FReply::Unhandled();
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, replyHUD );
+        if( replyHUD.IsEventHandled() )
+            return true;
+    }
+
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
@@ -320,6 +329,13 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 
     if (mIsCapturedByStylus || delta < 500)
         return;
+
+
+    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsCaptured())
+    {
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->CapturedMouseMove(iViewport, iX, iY);
+        return;
+    }
 
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iX;
@@ -768,11 +784,6 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
 void
 FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    if (mCurrentToolState == eState::kIdle)
-    {
-        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->MouseMove( iViewport, iX, iY );
-    }
-
     //If we don't have a surface, then we don't interact with anything
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
     if (!surface)
@@ -797,7 +808,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
         auto paintengine = mOdysseyPainterEditor->PaintEngine();
         paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
 
-        
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->MouseMove(iViewport, iX, iY);
     }
 }
 

@@ -28,6 +28,7 @@ public:
 public:
     TSharedPtr<SWidget> CreateWidget() override;
     void Draw() override;
+    void Erase() override;
 
 public:
     UPROPERTY( EditAnywhere )

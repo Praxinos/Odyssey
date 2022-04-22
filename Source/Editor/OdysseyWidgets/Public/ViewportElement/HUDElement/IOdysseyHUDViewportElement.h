@@ -14,8 +14,9 @@ class ODYSSEYWIDGETS_API IOdysseyHUDViewportElement : public IOdysseyViewportEle
 public:
     virtual void Draw() = 0;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) = 0;
-    virtual FReply InputKey() = 0;
-    virtual void CapturedMouseMove() = 0;
+    virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) = 0;
+    virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) = 0;
+    virtual void Erase() = 0;
 
 //Getters/setters
 public:

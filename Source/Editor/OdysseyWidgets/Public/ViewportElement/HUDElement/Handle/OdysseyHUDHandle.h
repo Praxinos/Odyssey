@@ -17,7 +17,7 @@ class ODYSSEYWIDGETS_API UOdysseyHUDHandle : public UOdysseyHUDElement
     GENERATED_BODY()
 
 public:
-    void Init( FName iName, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD );
+    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD);
 
 //UObject overrides
 public:
@@ -29,10 +29,13 @@ public:
     TSharedPtr<SWidget> CreateWidget() override;
     void Draw() override;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
-    virtual FReply InputKey() override;
-    virtual void CapturedMouseMove() override;
+    virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
+    virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
+    void Erase() override;
 
 public:
+    UOdysseyHUDElement* mParent;
+
     FVector2D* mReferencePoint;
 
     UPROPERTY( EditAnywhere )
