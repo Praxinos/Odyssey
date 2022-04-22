@@ -5,33 +5,28 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyHUD.h"
-#include "IOdysseyHUDViewportElement.h"
+#include "OdysseyHUDElement.h"
 
 #include "OdysseyHUDLine.generated.h"
 
 /////////////////////////////////////////////////////
 // UOdysseyHUDLine
 UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUD, 
-                                           public IOdysseyHUDViewportElement
+class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUDElement
 {
     GENERATED_BODY()
 
 public:
-    void Init( FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD );
+    void Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD );
 
 //UObject overrides
 public:
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PreEditChange(FProperty* PropertyAboutToChange) override;
 
-//UOdysseyHUD overrides
+//UOdysseyHUDElement overrides
 public:
     TSharedPtr<SWidget> CreateWidget() override;
-
-//IOdysseyHUDViewportElement overrides
-public:
     void Draw() override;
 
 public:

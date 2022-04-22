@@ -4,12 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyHUD.generated.h"
+#include "OdysseyHUDSlateElement.generated.h"
 
 /////////////////////////////////////////////////////
 // UOdysseyHUD
 UCLASS( Abstract )
-class ODYSSEYWIDGETS_API UOdysseyHUD : public UObject
+class ODYSSEYWIDGETS_API UOdysseyHUDSlateElement : public UObject
 {
 public:
     GENERATED_BODY()

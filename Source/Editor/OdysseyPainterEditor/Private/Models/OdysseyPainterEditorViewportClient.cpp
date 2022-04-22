@@ -205,8 +205,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
 
     //TODO Only when HUD is invalid
-    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD())
+    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD() && mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsInvalid())
+    {
+        UE_LOG(LogTemp, Display, TEXT("------"));
         mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
+    }
 
     IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
     UTexture* HUDTexture = nullptr;

@@ -3,15 +3,19 @@
 
 #include "Line/OdysseyHUDLine.h"
 
-void UOdysseyHUDLine::Init(FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD)
+
+void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD)
 {
+    mName = iName;
     mStartPoint = iStartPoint;
     mFinishPoint = iFinishPoint;
     mPaintEngineHUD = iPaintEngineHUD;
+    Invalidate();
 }
 
 void UOdysseyHUDLine::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    Invalidate();
     //Check: maybe we don't even need to say to the viewport to draw. We can just draw the HUD when its property changed here
 }
 
@@ -25,6 +29,9 @@ void UOdysseyHUDLine::PreEditChange( FProperty* PropertyAboutToChange )
 
 TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
 {
+    UOdysseyHUDElement::CreateWidget();
+
+    //TODO: custom widget instead of property view. Will be cleaner.
     FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
     FDetailsViewArgs args;
@@ -32,11 +39,19 @@ TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
     mDetailsView = propertyModule.CreateDetailView(args);
     mDetailsView->SetObject(this);
 
-    return mDetailsView;
+    mElementsWidget->AddSlot()
+    [
+        mDetailsView->AsShared()
+    ];
+
+    return mElementsWidget;
 }
 
 void UOdysseyHUDLine::Draw()
 {
+    //Draw the children of this HUDElement
+    UOdysseyHUDElement::Draw();
+
     if( !mPaintEngineHUD )
         return;
 

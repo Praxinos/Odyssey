@@ -24,11 +24,11 @@ protected:
 
 public:
     // Public Getters
-    TSharedPtr<UOdysseyHUDLine> GetHUD();
+    TSharedPtr<UOdysseyHUDElement> GetHUD();
 
 private:
     FOdysseyPainterEditor* mEditor;
 
-    TSharedPtr<UOdysseyHUDLine> mHUD;
+    TSharedPtr<UOdysseyHUDElement> mHUD;
 };
 

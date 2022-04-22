@@ -12,7 +12,4 @@ class ODYSSEYWIDGETS_API IOdysseyPaintViewportElement : public IOdysseyViewportE
 {
 public:
     IOdysseyPaintViewportElement();
-
-public:
-    virtual void Draw( FOdysseyBlock* ioBlock ) = 0;
 };
