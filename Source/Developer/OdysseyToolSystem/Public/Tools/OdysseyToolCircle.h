@@ -13,7 +13,7 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyToolCircle();
 
-    FOdysseyToolCircle( FVector2D iStartPoint );
+    FOdysseyToolCircle( FVector2D iCenterPoint );
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
@@ -28,5 +28,5 @@ public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 
 private:
-    //UOdysseyHUDBezier* mBezier;
+    UOdysseyHUDCircle* mCircle;
 };

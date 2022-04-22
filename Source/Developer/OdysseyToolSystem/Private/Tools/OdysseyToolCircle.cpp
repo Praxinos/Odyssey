@@ -9,10 +9,10 @@ FOdysseyToolCircle::~FOdysseyToolCircle()
 {
 }
 
-FOdysseyToolCircle::FOdysseyToolCircle( FVector2D iStartPoint )
-//: mLine(NewObject<UOdysseyHUDLine>())
+FOdysseyToolCircle::FOdysseyToolCircle( FVector2D iCenterPoint )
+: mCircle(NewObject<UOdysseyHUDCircle>())
 {
-    //mLine->Init( FName("lineTool"), iStartPoint, iStartPoint );
+    mCircle->Init( FName("CircleTool"), iCenterPoint, iCenterPoint );
 }
 
 //--------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ FOdysseyToolCircle::FOdysseyToolCircle( FVector2D iStartPoint )
 
 void FOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
-    //mLine->Draw( ioBlock, iTransform );
+    mCircle->Draw( ioBlock, iTransform );
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,36 +28,40 @@ void FOdysseyToolCircle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 
 void FOdysseyToolCircle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    //     mLine->MouseMove(iViewport, iX, iY);
-    // 
-    //     if( !mIsReadyToBeApplied )
-    //         mLine->mFinishPoint.Set( iX, iY );
+    mCircle->MouseMove(iViewport, iX, iY);
+
+    if( !mIsReadyToBeApplied )
+    {
+        mCircle->mBorderPoint.Set( iX, iY );
+        mCircle->mRadius = (int)::ULIS::FMath::Dist( mCircle->mCenterPoint.X, mCircle->mCenterPoint.Y, mCircle->mBorderPoint.X, mCircle->mBorderPoint.Y );
+    }
 }
 
 FReply FOdysseyToolCircle::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
-    //     mLine->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
-    // 
-    //     if (iKey == EKeys::LeftMouseButton)
-    //     {
-    //         if( !mIsReadyToBeApplied )
-    //         {
-    //             mIsReadyToBeApplied = true;
-    //             ioReply = FReply::Handled();
-    //         }
-    //     }
+    mCircle->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+
+    if (iKey == EKeys::LeftMouseButton)
+    {
+        if( !mIsReadyToBeApplied )
+        {
+            mIsReadyToBeApplied = true;
+            ioReply = FReply::Handled();
+        }
+    }
 
     return ioReply;
 }
 
 void FOdysseyToolCircle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    //     mLine->CapturedMouseMove(iViewport, iX, iY);
-    // 
-    //     if ( !mIsReadyToBeApplied )
-    //     {
-    //         mLine->mFinishPoint.Set(iX, iY);
-    //     }
+    mCircle->CapturedMouseMove(iViewport, iX, iY);
+
+    if ( !mIsReadyToBeApplied )
+    {
+        mCircle->mBorderPoint.Set(iX, iY);
+        mCircle->mRadius = (int)::ULIS::FMath::Dist( mCircle->mCenterPoint.X, mCircle->mCenterPoint.Y, mCircle->mBorderPoint.X, mCircle->mBorderPoint.Y );
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -66,7 +70,7 @@ void FOdysseyToolCircle::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
 ::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolCircle::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-    //::ULIS::GenerateLinePoints( ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), pointsArray );
+    ::ULIS::GenerateCirclePoints( ::ULIS::FVec2I( mCircle->mCenterPoint.X, mCircle->mCenterPoint.Y), mCircle->mRadius, pointsArray );
 
     return pointsArray;
 }
