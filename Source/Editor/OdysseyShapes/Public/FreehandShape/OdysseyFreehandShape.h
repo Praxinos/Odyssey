@@ -4,13 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingOptions.h"
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
+#include "FreehandShape/Smoothing/OdysseySmoothingOptions.h"
+#include "FreehandShape/Smoothing/IOdysseySmoothing.h"
 
 #include "OdysseyFreehandShape.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyFreehandShape : public UObject
+class ODYSSEYSHAPES_API UOdysseyFreehandShape : public UObject
 {
     GENERATED_UCLASS_BODY()
 

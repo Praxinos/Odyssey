@@ -5,12 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "Input/OdysseyPoint.h"
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingOptions.h"
+#include "FreehandShape/Smoothing/OdysseySmoothingOptions.h"
 
 /**
  * Implements the smoothing for a Bezier 3 Points
  */
-class ODYSSEYPAINTEREDITOR_API IOdysseySmoothing
+class ODYSSEYSHAPES_API IOdysseySmoothing
 {
 public:
     virtual ~IOdysseySmoothing() = 0;

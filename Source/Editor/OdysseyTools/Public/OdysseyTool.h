@@ -25,10 +25,10 @@ public:
     virtual void Inactivate();
 
     //Mouse events
-    virtual void OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual void OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual void OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture);
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture);
+    virtual void OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture);
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual void OnKeyDown(const FKey& iKey);
     virtual void OnKeyUp(const FKey& iKey);
 
@@ -51,9 +51,10 @@ public:
     virtual ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() { return ::ULIS::TArray<::ULIS::FVec2I>(); }; */
 
 public:
-    //Getters
-    // bool IsReadyToBeApplied() const;
+    //Sets the transform in which the tool is working (transform of the 2D viewport)
+    virtual void SetTransform(const FTransform2D& iTransform);
 
 protected:
     // bool mIsReadyToBeApplied;
+    FTransform2D mTransform;
 };

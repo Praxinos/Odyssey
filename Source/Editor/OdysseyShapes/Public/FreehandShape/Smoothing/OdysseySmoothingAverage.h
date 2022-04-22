@@ -4,9 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
+#include "FreehandShape/Smoothing/IOdysseySmoothing.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseySmoothingAverage : public IOdysseySmoothing
+class ODYSSEYSHAPES_API FOdysseySmoothingAverage : public IOdysseySmoothing
 {
 public:
     // Construction / Destruction

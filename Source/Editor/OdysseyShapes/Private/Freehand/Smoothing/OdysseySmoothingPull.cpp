@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingPull.h"
+#include "FreehandShape/Smoothing/OdysseySmoothingPull.h"
 #include "Math/OdysseyMathUtils.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 

@@ -33,25 +33,25 @@ UOdysseyTool::Inactivate()
 //------------------------------------------------------------------------- Mouse events
 
 void
-UOdysseyTool::OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
 
 }
 
 void
-UOdysseyTool::OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
 
 }
 
 void
-UOdysseyTool::OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+UOdysseyTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
 
 }
 
 void
-UOdysseyTool::OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+UOdysseyTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
 
 }
@@ -105,3 +105,9 @@ bool UOdysseyTool::IsReadyToBeApplied() const
 {
     return mIsReadyToBeApplied;
 } */
+
+void
+UOdysseyTool::SetTransform(const FTransform2D& iTransform)
+{
+    mTransform = iTransform;
+}

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
+#include "FreehandShape/Smoothing/IOdysseySmoothing.h"
 
 #define LOCTEXT_NAMESPACE "IOdysseySmoothing"
 

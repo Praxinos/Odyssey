@@ -5,12 +5,11 @@
 
 #include "CoreMinimal.h"
 
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingTypes.h"
-#include "OdysseyBrushInterpolationTypes.h"
+#include "FreehandShape/Smoothing/OdysseySmoothingTypes.h"
 #include "OdysseySmoothingOptions.generated.h"
 
 USTRUCT(Blueprintable)
-struct ODYSSEYPAINTEREDITOR_API FOdysseySmoothingOptions
+struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
 {
     GENERATED_BODY()
 

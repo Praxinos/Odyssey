@@ -107,8 +107,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::StartPainting()
 
         currentStrokePoint.ComputeRelativeParameters(lastStrokePoint);
 
-        //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
-        mEditor->GetSelectedTool()->OnMouseDown(currentStrokePoint, currentStrokePoint, EKeys::LeftMouseButton);
+        mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
+        mEditor->GetSelectedTool()->OnMouseDown(currentStrokePoint, EKeys::LeftMouseButton);
     }
 
     //A simple copy is all we need for the texture based algorithm
@@ -138,7 +138,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
         mCurrentStrokeRay.mStrokePoint.x = coord.X * mEditor->Texture()->GetSurfaceWidth();
         mCurrentStrokeRay.mStrokePoint.y = coord.Y * mEditor->Texture()->GetSurfaceHeight();
         //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
-        mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mStrokePoint, mCurrentStrokeRay.mStrokePoint);
+        mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
+        mEditor->GetSelectedTool()->OnMouseDrag(mCurrentStrokeRay.mStrokePoint);
         //mEditor->StrokeEngine()->To(mCurrentStrokeRay.mStrokePoint);
     }
 
@@ -149,8 +150,8 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::Paint()
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
 {
-    //ES: That feels weird, as we don't have the "PointInViewport", we only have the "PointInTexture", and we don't know what mouse button is being pressed.
-    mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mStrokePoint, mCurrentStrokeRay.mStrokePoint, EKeys::LeftMouseButton);
+    mEditor->GetSelectedTool()->SetTransform(FTransform2D()); //Reset the transform as there is actually no transform to use
+    mEditor->GetSelectedTool()->OnMouseUp(mCurrentStrokeRay.mStrokePoint, EKeys::LeftMouseButton);
     //mEditor->StrokeEngine()->End();
 
     //A simple copy is all we need for the texture based algorithm

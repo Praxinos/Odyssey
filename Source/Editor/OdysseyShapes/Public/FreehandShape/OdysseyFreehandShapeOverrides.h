@@ -5,14 +5,14 @@
 
 #include "CoreMinimal.h"
 
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingTypes.h"
+#include "FreehandShape/Smoothing/OdysseySmoothingTypes.h"
 
 #include "OdysseyFreehandShapeOverrides.generated.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyFreehandShapeOverrides
 UCLASS(meta=(DisplayName="Freehand Shape"))
-class ODYSSEYPAINTEREDITOR_API UOdysseyFreehandShapeOverrides : public UObject
+class ODYSSEYSHAPES_API UOdysseyFreehandShapeOverrides : public UObject
 {
     GENERATED_BODY()
 

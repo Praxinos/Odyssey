@@ -10,9 +10,6 @@
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 #include "Tools/DrawingTool/OdysseyDrawingToolWorker.h"
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/IOdysseySmoothing.h"
-#include "Tools/DrawingTool/Shapes/Freehand/Smoothing/OdysseySmoothingOptions.h"
-#include "Tools/DrawingTool/Shapes/Freehand/OdysseyFreehandShape.h"
 
 #include "OdysseyDrawingTool.generated.h"
 
@@ -43,10 +40,10 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
 
-    virtual void OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
-    virtual void OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture) override;
-    virtual void OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnKeyDown(const FKey& iKey) override;
     virtual void OnKeyUp(const FKey& iKey) override;
 
@@ -161,7 +158,7 @@ private:
     UOdysseyBrush* Brush;
 
     UPROPERTY(VisibleInstanceOnly, Instanced)
-    UOdysseyFreehandShape* Shape;
+    class UOdysseyFreehandShape* Shape;
 
     UPROPERTY(EditInstanceOnly)
     FOdysseyBlendParameters BlendParameters;

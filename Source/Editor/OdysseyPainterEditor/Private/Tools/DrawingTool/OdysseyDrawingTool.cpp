@@ -5,6 +5,7 @@
 
 #include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
+#include "FreehandShape/OdysseyFreehandShape.h"
 #include "ObjectEditorUtils.h"
 
 //--------------------------------------------------------------------------------------
@@ -62,26 +63,26 @@ UOdysseyDrawingTool::Inactivate()
 }
 
 void
-UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     Begin( iPointInTexture );
 }
 
 void
-UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     End();
 }
 
 void
-UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     if (BrushInstance)
         BrushInstance->StrokeMoveTo(iPointInTexture);
 }
 
 void
-UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     To( iPointInTexture );
 }

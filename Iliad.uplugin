@@ -114,6 +114,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "OdysseyShapes",
+      "Type": "Editor",
+      "LoadingPhase": "PreDefault"
+    },
+    {
       "Name": "OdysseyStyle",
       "Type": "Editor",
       "LoadingPhase": "PreDefault"

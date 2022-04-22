@@ -23,6 +23,7 @@ FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPaint
                             FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
     , mEditor(iEditor)
     , mViewport(nullptr)
+    , mViewportClient(nullptr)
 {
 }
 
@@ -36,19 +37,18 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
         .Surface_Raw(this, &FOdysseyPainterEditorViewportTab::Surface);
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
-	TSharedPtr<FOdysseyPainterEditorViewportClient> viewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
+	mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
 	
     //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
-    viewportClient->OnPickColor().AddRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
-    
-    viewportClient->OnMouseDown().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
-    viewportClient->OnMouseUp().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseUp);
-    viewportClient->OnMouseHover().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseHover);
-    viewportClient->OnMouseDrag().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDrag);
-    viewportClient->OnKeyDown().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyDown);
-    viewportClient->OnKeyUp().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyUp);
+    mViewportClient->OnPickColor().AddRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
+    mViewportClient->OnMouseDown().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
+    mViewportClient->OnMouseUp().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseUp);
+    mViewportClient->OnMouseHover().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseHover);
+    mViewportClient->OnMouseDrag().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDrag);
+    mViewportClient->OnKeyDown().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyDown);
+    mViewportClient->OnKeyUp().AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyUp);
 
-	mViewport->SetViewportClient(viewportClient);
+	mViewport->SetViewportClient(mViewportClient);
     mViewport->GetViewport()->ViewportResizedEvent.AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportSizeChanged);
 
     return mViewport;
@@ -133,41 +133,46 @@ FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::
 }
 
 void
-FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    mEditor->GetSelectedTool()->OnMouseDown(iPointInViewport, iPointInTexture, iKey);
+    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    mEditor->GetSelectedTool()->OnMouseDown(iPointInTexture, iKey);
 }
 
 void
-FOdysseyPainterEditorViewportTab::OnViewportMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+FOdysseyPainterEditorViewportTab::OnViewportMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    mEditor->GetSelectedTool()->OnMouseUp(iPointInViewport, iPointInTexture, iKey);
+    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    mEditor->GetSelectedTool()->OnMouseUp(iPointInTexture, iKey);
 }
 
 void
-FOdysseyPainterEditorViewportTab::OnViewportMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+FOdysseyPainterEditorViewportTab::OnViewportMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    mEditor->GetSelectedTool()->OnMouseHover(iPointInViewport, iPointInTexture);
+    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    mEditor->GetSelectedTool()->OnMouseHover(iPointInTexture);
 }
 
 void
-FOdysseyPainterEditorViewportTab::OnViewportMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture)
+FOdysseyPainterEditorViewportTab::OnViewportMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    mEditor->GetSelectedTool()->OnMouseDrag(iPointInViewport, iPointInTexture);
+    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
+    mEditor->GetSelectedTool()->OnMouseDrag(iPointInTexture);
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnViewportKeyDown(const FKey& iKey)
 {
+    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
     mEditor->GetSelectedTool()->OnKeyDown(iKey);
 }
 
 void
 FOdysseyPainterEditorViewportTab::OnViewportKeyUp(const FKey& iKey)
 {
+    mEditor->GetSelectedTool()->SetTransform(mViewport->GetTransformToSourceTexture());
     mEditor->GetSelectedTool()->OnKeyUp(iKey);
 }
-
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Shortcuts

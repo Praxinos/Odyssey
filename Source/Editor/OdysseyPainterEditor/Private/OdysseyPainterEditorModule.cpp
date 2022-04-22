@@ -15,7 +15,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
-#include "Tools/DrawingTool/Shapes/Freehand/OdysseyFreehandShapeOverrides.h"
+#include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"

@@ -63,10 +63,10 @@ class FOdysseyPainterEditorViewportClient
 {
 public:
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
-    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnMouseDown, const FOdysseyPoint&, const FOdysseyPoint&, const FKey&)
-    DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnMouseUp, const FOdysseyPoint&, const FOdysseyPoint&, const FKey&)
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseHover, const FOdysseyPoint&, const FOdysseyPoint&)
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseDrag, const FOdysseyPoint&, const FOdysseyPoint&)
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseDown, const FOdysseyPoint&, const FKey&)
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseUp, const FOdysseyPoint&, const FKey&)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseHover, const FOdysseyPoint&)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDrag, const FOdysseyPoint&)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyDown, const FKey&)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyUp, const FKey&)
 
@@ -142,6 +142,8 @@ private:
 
     void        OnViewportPropertyWillChange();
     void        OnViewportPropertyChanged();
+
+    FTransform2D GetTransform() const;
 
 private:
     // Private Data Members

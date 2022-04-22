@@ -345,7 +345,7 @@ SOdysseySurfaceViewport::UpdateScrollBars()
     pos = pos.ClampAxes(0.f, 1.f) ;
 
     mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
-    mVerticalScrollBar->SetState(pos.Y * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+    mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
 }
 
 
@@ -421,7 +421,7 @@ SOdysseySurfaceViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetF
 
     FVector2D dist = maxPos - minPos;
 
-    FVector2D pos = FVector2D( 1.f - (InScrollOffsetFractionX / (ScrollbarSpaceRatio)), InScrollOffsetFractionY / (ScrollbarSpaceRatio));
+    FVector2D pos = FVector2D( 1.f - (InScrollOffsetFractionX / (ScrollbarSpaceRatio)), 1.f - (InScrollOffsetFractionY / (ScrollbarSpaceRatio)));
     pos *= dist;
     pos += minPos;
     pos -= GetViewportCenter();
@@ -576,8 +576,7 @@ SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
 {
     ZoomValue = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
 
-    FVector2D inverse(1.f, -1.f);
-    FVector2D translation = iZoomPosition * inverse;
+    FVector2D translation = iZoomPosition;
 
     mTransform = mTransform.Concatenate(FTransform2D(-translation));
     mTransform = mTransform.Concatenate(FTransform2D(ZoomValue / GetZoom()));
@@ -689,15 +688,15 @@ void SOdysseySurfaceViewport::SetRotation(double RotationValue, const FVector2D&
 
 void SOdysseySurfaceViewport::Rotate(double RotationValue, const FVector2D& iPivotPoint)
 {
-    mTransform = mTransform.Concatenate(FTransform2D(FVector2D(FVector2D(iPivotPoint.X, -iPivotPoint.Y))));
+    mTransform = mTransform.Concatenate(FTransform2D(FVector2D(iPivotPoint.X, iPivotPoint.Y)));
     mTransform = mTransform.Concatenate(FTransform2D(FQuat2D(RotationValue - GetRotation())));
-    mTransform = mTransform.Concatenate(FTransform2D(FVector2D(-FVector2D(iPivotPoint.X, -iPivotPoint.Y))));
+    mTransform = mTransform.Concatenate(FTransform2D(-FVector2D(iPivotPoint.X, iPivotPoint.Y)));
 }
 
 FVector2D SOdysseySurfaceViewport::GetPan() const
 {
     //ordinate inversion because the computer coordinate system is inverted
-    return FVector2D(mTransform.GetTranslation().X, -mTransform.GetTranslation().Y);
+    return FVector2D(mTransform.GetTranslation().X, mTransform.GetTranslation().Y);
 }
 
 FVector2D SOdysseySurfaceViewport::GetViewportCenter() const
@@ -708,7 +707,7 @@ FVector2D SOdysseySurfaceViewport::GetViewportCenter() const
 void SOdysseySurfaceViewport::AddPan( FVector2D iPanValue )
 {
     //ordinate inversion because the computer coordinate system is inverted
-    FVector2D panValue = mTransform.GetTranslation() + FVector2D(iPanValue.X, -iPanValue.Y);
+    FVector2D panValue = mTransform.GetTranslation() + FVector2D(iPanValue.X, iPanValue.Y);
     Pan(panValue);
     UpdateScrollBars();
     SetFitToViewport(false);
@@ -755,13 +754,88 @@ void SOdysseySurfaceViewport::ComputeTextureDisplayDimensions( uint32& Width, ui
     Height = texture->GetSurfaceHeight() * GetZoom();
 }
 
+FTransform2D
+SOdysseySurfaceViewport::GetTransformToDisplayedTexture()
+{   
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
+        return FTransform2D();
+
+    UTexture* texture = surface->Texture();
+    if (!texture)
+        return FTransform2D();
+
+    uint32 width = texture->GetSurfaceWidth();
+    uint32 height = texture->GetSurfaceHeight();
+
+    FVector2D translation = (FVector2D(width, height) / 2.0f);
+    FTransform2D transform(-translation);
+    transform = transform.Concatenate(mTransform);
+
+    translation = GetViewportCenter();
+    transform = transform.Concatenate(FTransform2D(translation));
+    //FTransform2D transform = transform.Concatenate(translation);
+    
+    return transform;
+    //return mTransform;
+}
+
+FTransform2D
+SOdysseySurfaceViewport::GetTransformToSourceTexture()
+{
+    IOdysseySurface* surface = GetSurface();
+    if (!surface)
+        return FTransform2D();
+
+    UTexture* texture = surface->Texture();
+    if (!texture)
+        return FTransform2D();
+
+    //Convert the position from the displayed texture size to the the position in the texture source size
+    uint32 textureFullWidth = texture->Source.GetSizeX();
+    uint32 textureFullHeight = texture->Source.GetSizeY();
+    switch (texture->PowerOfTwoMode)
+    {
+    case ETexturePowerOfTwoSetting::None:
+        break;
+
+    case ETexturePowerOfTwoSetting::PadToPowerOfTwo:
+        textureFullWidth = FMath::RoundUpToPowerOfTwo(textureFullWidth);
+        textureFullHeight = FMath::RoundUpToPowerOfTwo(textureFullHeight);
+        break;
+
+    case ETexturePowerOfTwoSetting::PadToSquarePowerOfTwo:
+        textureFullWidth = textureFullHeight = FMath::Max(FMath::RoundUpToPowerOfTwo(textureFullWidth), FMath::RoundUpToPowerOfTwo(textureFullHeight));
+        break;
+
+    default:
+        checkf(false, TEXT("Unknown entry in ETexturePowerOfTwoSetting::Type"));
+        break;
+    }
+
+
+    uint32 width = texture->GetSurfaceWidth();
+    uint32 height = texture->GetSurfaceHeight();
+
+    FVector2D translation = (FVector2D(width, height) / 2.0f);
+    
+    
+    FTransform2D transform(FScale2D(texture->GetSurfaceWidth() / textureFullWidth, texture->GetSurfaceHeight() / textureFullHeight));
+    transform = transform.Concatenate(FTransform2D(-translation));
+    transform = transform.Concatenate(mTransform);
+
+    translation = GetViewportCenter();
+    transform = transform.Concatenate(FTransform2D(translation));
+
+    return transform;
+}
+
 FVector2D
 SOdysseySurfaceViewport::ToLocal(const FVector2D& iPoint) const
 {
-    FVector2D inverse(1.f, -1.f);
     FVector2D center = GetViewportCenter();
-    FVector2D pos = (iPoint - center) * inverse;
-    FVector2D tpos = mTransform.Inverse().TransformPoint(pos) * inverse;
+    FVector2D pos = iPoint - center;
+    FVector2D tpos = mTransform.Inverse().TransformPoint(pos);
 
     return tpos;
 }
@@ -769,11 +843,8 @@ SOdysseySurfaceViewport::ToLocal(const FVector2D& iPoint) const
 FVector2D
 SOdysseySurfaceViewport::ToWorld(const FVector2D& iPoint) const
 {
-    FVector2D inverse(1.f, -1.f);
     FVector2D center = GetViewportCenter();
-    FVector2D pos = iPoint * inverse;
-    FVector2D tpos = (mTransform.TransformPoint(pos) * inverse) + center;
-
+    FVector2D tpos = mTransform.TransformPoint(iPoint) + center;
     return tpos;
 }
 

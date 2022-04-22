@@ -90,6 +90,12 @@ public:
     /* Returns the dimensions of the texture when displayed in the viewport (this is not a AABB) */
     void            ComputeTextureDisplayDimensions(uint32& Width, uint32& Height) const;
 
+    /* Retrieve the transform of the displayed texture in the viewport */
+    FTransform2D GetTransformToDisplayedTexture();
+
+    /* Retrieve the transform of the source texture in the viewport */
+    FTransform2D GetTransformToSourceTexture();
+
     /* Converts the given point from WorldCoodinates to LocalCoordinates (texture Coordinates, (0,0) being the center of the texture)*/
     FVector2D       ToLocal(const FVector2D& iPoint) const;
 

@@ -9,6 +9,7 @@
 class FOdysseyPainterEditor;
 class SOdysseySurfaceViewport;
 class IOdysseySurface;
+class FOdysseyPainterEditorViewportClient;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorViewportTab :
 	public FOdysseyEditorTab
@@ -35,10 +36,10 @@ protected:
     // Event Listeners
     virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
 
-    virtual void OnViewportMouseDown(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual void OnViewportMouseUp(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-    virtual void OnViewportMouseHover(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture);
-    virtual void OnViewportMouseDrag(const FOdysseyPoint& iPointInViewport, const FOdysseyPoint& iPointInTexture);
+    virtual void OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnViewportMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnViewportMouseHover(const FOdysseyPoint& iPointInTexture);
+    virtual void OnViewportMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual void OnViewportKeyDown(const FKey& iKey);
     virtual void OnViewportKeyUp(const FKey& iKey);
 
@@ -60,5 +61,6 @@ private:
     FOdysseyPainterEditor* mEditor;
 
     TSharedPtr<SOdysseySurfaceViewport> mViewport;
+    TSharedPtr<FOdysseyPainterEditorViewportClient> mViewportClient;
 };
 
