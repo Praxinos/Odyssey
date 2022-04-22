@@ -13,7 +13,7 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyToolEllipse();
 
-    FOdysseyToolEllipse( FVector2D iStartPoint );
+    FOdysseyToolEllipse( FVector2D iCenterPoint );
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
@@ -28,5 +28,6 @@ public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 
 private:
-    //UOdysseyHUDEllipse* mEllipse;
+    UOdysseyHUDEllipse* mEllipse;
+    FTransform2D mPreviousTransform;
 };

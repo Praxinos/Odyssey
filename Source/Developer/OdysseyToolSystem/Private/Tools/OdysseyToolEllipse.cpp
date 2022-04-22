@@ -9,10 +9,10 @@ FOdysseyToolEllipse::~FOdysseyToolEllipse()
 {
 }
 
-FOdysseyToolEllipse::FOdysseyToolEllipse( FVector2D iStartPoint )
-//: mLine(NewObject<UOdysseyHUDLine>())
+FOdysseyToolEllipse::FOdysseyToolEllipse( FVector2D iCenterPoint )
+: mEllipse(NewObject<UOdysseyHUDEllipse>())
 {
-    //mLine->Init( FName("lineTool"), iStartPoint, iStartPoint );
+    mEllipse->Init( FName("EllipseTool"), iCenterPoint, iCenterPoint, 0);
 }
 
 //--------------------------------------------------------------------------------------
@@ -20,7 +20,8 @@ FOdysseyToolEllipse::FOdysseyToolEllipse( FVector2D iStartPoint )
 
 void FOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
-    //mLine->Draw( ioBlock, iTransform );
+    mEllipse->Draw( ioBlock, iTransform );
+    mPreviousTransform = iTransform;
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,36 +29,45 @@ void FOdysseyToolEllipse::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
 
 void FOdysseyToolEllipse::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    //     mLine->MouseMove(iViewport, iX, iY);
-    // 
-    //     if( !mIsReadyToBeApplied )
-    //         mLine->mFinishPoint.Set( iX, iY );
+    mEllipse->MouseMove(iViewport, iX, iY);
+
+    if( !mIsReadyToBeApplied )
+    {
+        mEllipse->mEndPoint.Set( iX, iY );
+        mEllipse->mEllipseAaxis = (int)(mEllipse->mCenterPoint.X - mEllipse->mEndPoint.X);
+        mEllipse->mEllipseBaxis = (int)(mEllipse->mCenterPoint.Y - mEllipse->mEndPoint.Y);
+        mEllipse->mAngle = 0;
+        UE_LOG(LogTemp, Display, TEXT("%lf, %lf"), mEllipse->mEndPoint.X, mEllipse->mEndPoint.Y)
+    }
 }
 
 FReply FOdysseyToolEllipse::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
-    //     mLine->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
-    // 
-    //     if (iKey == EKeys::LeftMouseButton)
-    //     {
-    //         if( !mIsReadyToBeApplied )
-    //         {
-    //             mIsReadyToBeApplied = true;
-    //             ioReply = FReply::Handled();
-    //         }
-    //     }
+    mEllipse->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+
+    if (iKey == EKeys::LeftMouseButton)
+    {
+        if( !mIsReadyToBeApplied )
+        {
+            mIsReadyToBeApplied = true;
+            ioReply = FReply::Handled();
+        }
+    }
 
     return ioReply;
 }
 
 void FOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-    //     mLine->CapturedMouseMove(iViewport, iX, iY);
-    // 
-    //     if ( !mIsReadyToBeApplied )
-    //     {
-    //         mLine->mFinishPoint.Set(iX, iY);
-    //     }
+    mEllipse->CapturedMouseMove(iViewport, iX, iY);
+ 
+    if ( !mIsReadyToBeApplied )
+    {
+        mEllipse->mEndPoint.Set(iX, iY);
+        mEllipse->mEllipseAaxis = (int)(mEllipse->mCenterPoint.X - mEllipse->mEndPoint.X);
+        mEllipse->mEllipseBaxis = (int)(mEllipse->mCenterPoint.Y - mEllipse->mEndPoint.Y);
+        mEllipse->mAngle = 0;
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -66,7 +76,7 @@ void FOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
 ::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolEllipse::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-    //::ULIS::GenerateLinePoints( ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), pointsArray );
+    ::ULIS::GenerateRotatedEllipsePoints( ::ULIS::FVec2I( mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), FMath::Abs(mEllipse->mEllipseAaxis), FMath::Abs(mEllipse->mEllipseBaxis), ULIS::FMath::RadToDeg(mPreviousTransform.GetMatrix().GetRotationAngle()), pointsArray );
 
     return pointsArray;
 }
