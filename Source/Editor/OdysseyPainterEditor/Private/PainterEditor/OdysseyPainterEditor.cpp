@@ -129,7 +129,9 @@ FOdysseyPainterEditor::RefreshHUDSurface(FVector2D iSizeHUD)
     //not just the texture as it is right now
 
     if( mHUDSurface )
+    {
         delete mHUDSurface;
+    }
 
     PaintEngineHUD()->SetHUDBlock( new ::ULIS::FBlock(iSizeHUD.X, iSizeHUD.Y, ::ULIS::Format_BGRA8) );
 

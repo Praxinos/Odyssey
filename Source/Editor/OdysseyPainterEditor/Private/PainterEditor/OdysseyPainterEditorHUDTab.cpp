@@ -38,7 +38,6 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
 {    
 	if (!mHUD)
     {
-        FTransform2D const * transform2D = &(mEditor->GetGUI()->GetViewportTab()->GetViewport()->GetTransform());
         UOdysseyHUDElement* decoratedLine = NewObject<UOdysseyHUDElement>();
         decoratedLine->Init( FName("DecoratedLine"), mEditor->PaintEngineHUD() );
 
@@ -61,12 +60,12 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
             return FReply::Handled();
         } );
 
-        /*UOdysseyHUDHandle* handleStart = NewObject<UOdysseyHUDHandle>();
-        handleStart->Init( FName("HandleStart"), line, &(line->mStartPoint), mEditor->PaintEngineHUD(), transform2D);
+        UOdysseyHUDHandle* handleStart = NewObject<UOdysseyHUDHandle>();
+        handleStart->Init( FName("HandleStart"), line, &(line->mStartPoint), mEditor->PaintEngineHUD());
         UOdysseyHUDHandle* handleFinish = NewObject<UOdysseyHUDHandle>();
-        handleFinish->Init(FName("HandleFinish"), line, &(line->mFinishPoint), mEditor->PaintEngineHUD(), transform2D);
+        handleFinish->Init(FName("HandleFinish"), line, &(line->mFinishPoint), mEditor->PaintEngineHUD());
         line->AddElement( handleStart );
-        line->AddElement( handleFinish );*/
+        line->AddElement( handleFinish );
 
 
         /*UOdysseyHUDLine* line2 = NewObject<UOdysseyHUDLine>();

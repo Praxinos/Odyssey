@@ -24,15 +24,12 @@ IOdysseyHUDViewportElement::GetPaintEngineHUD()
     return mPaintEngineHUD;
 }
 
-FVector2D
-IOdysseyHUDViewportElement::ToViewport(const FVector2D& iPoint) const
+void IOdysseyHUDViewportElement::SetTransform( FTransform2D iTransform)
 {
-    FVector2D inverse(1.f, -1.f);
-    //FVector2D center = FVector2D(iViewport->GetSizeXY().X / 2.0f, iViewport->GetSizeXY().Y / 2.0f);
-    FVector2D pos = iPoint * inverse;
+    mTransform = iTransform;
+}
 
-    if (mTransform)
-        return (mTransform->TransformPoint(pos) * inverse);
-    else
-        return (pos * inverse);
+FTransform2D IOdysseyHUDViewportElement::GetTransform()
+{
+    return mTransform;
 }

@@ -26,13 +26,12 @@ public:
 public:
     void SetPaintEngineHUD( FOdysseyPaintEngineHUD* iPaintEngineHUD);
     FOdysseyPaintEngineHUD* GetPaintEngineHUD();
-
-public:
-    FVector2D ToViewport(const FVector2D& iPoint) const;
+    virtual void SetTransform( FTransform2D iTransform );
+    virtual FTransform2D GetTransform();
 
 protected:
     FOdysseyPaintEngineHUD* mPaintEngineHUD;
 
     /** The transform applied to the element if needed */
-    FTransform2D const* mTransform;
+    FTransform2D mTransform;
 };

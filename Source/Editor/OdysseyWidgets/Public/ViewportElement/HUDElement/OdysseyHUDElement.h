@@ -21,7 +21,7 @@ class ODYSSEYWIDGETS_API UOdysseyHUDElement : public UOdysseyHUDSlateElement,
     GENERATED_BODY()
 
 public:     
-    void Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform = nullptr);
+    void Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform = FTransform2D());
 
 //UOdysseyHUDSlateElement overrides
 public:
@@ -29,7 +29,7 @@ public:
 
 //IOdysseyHUDViewportElement overrides
 public:
-    virtual void Draw() override;
+    void Draw() override;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
     virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
@@ -45,6 +45,9 @@ public:
     bool IsInvalid();
     bool IsCaptured();
     FOnApplyHUDAction& OnApplyHUDAction();
+
+public:
+    virtual void SetTransform(FTransform2D iTransform) override;
 
 private:
     void InternalIsInvalid( bool &ioIsInvalid );

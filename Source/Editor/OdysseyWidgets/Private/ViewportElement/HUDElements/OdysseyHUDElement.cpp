@@ -3,7 +3,7 @@
 
 #include "OdysseyHUDElement.h"
 
-void UOdysseyHUDElement::Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform )
+void UOdysseyHUDElement::Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform /*= FTransform2D()*/ )
 {
     mName = iName;
     mPaintEngineHUD = iPaintEngineHUD;
@@ -129,6 +129,15 @@ bool UOdysseyHUDElement::IsCaptured()
 UOdysseyHUDElement::FOnApplyHUDAction& UOdysseyHUDElement::OnApplyHUDAction()
 {
     return mOnApplyHUDAction;
+}
+
+void UOdysseyHUDElement::SetTransform(FTransform2D iTransform)
+{
+    for (auto it = mElements.CreateIterator(); it; ++it)
+    {
+        it.Value()->mTransform = iTransform;
+        it.Value()->SetTransform(iTransform);
+    }
 }
 
 void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )

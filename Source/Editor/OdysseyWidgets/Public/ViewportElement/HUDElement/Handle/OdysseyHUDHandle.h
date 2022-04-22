@@ -17,7 +17,7 @@ class ODYSSEYWIDGETS_API UOdysseyHUDHandle : public UOdysseyHUDElement
     GENERATED_BODY()
 
 public:
-    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform = nullptr);
+    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D iTransform = FTransform2D());
 
 //UObject overrides
 public:
@@ -33,11 +33,12 @@ public:
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
     void Erase() override;
 
-public:
+private:
     UOdysseyHUDElement* mParent;
 
     FVector2D* mReferencePoint;
 
+public:
     UPROPERTY( EditAnywhere )
     int mHandleSize;
 };
