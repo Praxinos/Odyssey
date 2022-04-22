@@ -112,7 +112,7 @@ public:
 
 private:
     // Private API
-    void        CreateTool( eGUISelectedTool iGUISelectedTool, FVector2D iPos );
+    //void        CreateTool( eGUISelectedTool iGUISelectedTool, FVector2D iPos );
     void        DestroyCheckerboardTexture();
     void        ZoomInInViewport( const FVector2D& iPositionInViewport );
     void        ZoomOutInViewport( const FVector2D& iPositionInViewport );

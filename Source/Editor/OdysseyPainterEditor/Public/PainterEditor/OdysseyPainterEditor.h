@@ -8,12 +8,12 @@
 #include <ULIS>
 
 class FOdysseyPaintEngine;
-class FOdysseyToolSystem;
 class FOdysseyHUDSystem;
 class FOdysseyUndoHistory;
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;
 class IOdysseySurfaceEditable;
+class IOdysseyTool;
 
 /**
  * Base class for a Painting Editor
@@ -41,20 +41,18 @@ public:
     virtual FOdysseyPainterEditorGUI*                   GetGUI() = 0;
 
     virtual FOdysseyPaintEngine*                        PaintEngine() const;
-    virtual FOdysseyToolSystem*                         ToolSystem() const;
     virtual FOdysseyHUDSystem*                          HUDSystem() const;
     virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
     virtual FOdysseyUndoHistory*                        UndoHistory() const;
     virtual bool                                        DrawBrushPreview() const;
     virtual ::ULIS::FColor                              PaintColor() const;
-    virtual eGUISelectedTool                            GetGUISelectedTool() const;
+    virtual IOdysseyTool*                               GetSelectedTool() const;
 
 public:
     // Setters
     void                         DrawBrushPreview(bool iDrawBrushPreview);
     void                         PaintColor(::ULIS::FColor iColor);
-    void                         SetGUISelectedTool( eGUISelectedTool iGUISelectedTool );
-
+    void                         SetSelectedTool( IOdysseyTool* iSelectedTool );
 public:
     // Interface
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
@@ -62,10 +60,9 @@ public:
 private:
     FOdysseyUndoHistory*        mUndoHistory;
     FOdysseyPaintEngine*        mPaintEngine; //TODO: no need for a pointer here
-    FOdysseyToolSystem*         mToolSystem;
+    IOdysseyTool*               mSelectedTool;
     FOdysseyHUDSystem*          mHUDSystem;
     ::ULIS::FColor              mPaintColor;
 
     bool                        mDrawBrushPreview;
-    eGUISelectedTool            mGUISelectedTool;
 };

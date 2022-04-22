@@ -4,9 +4,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class OdysseyToolSystem : ModuleRules
+public class OdysseyTools : ModuleRules
 {
-    public OdysseyToolSystem(ReadOnlyTargetRules Target) : base(Target)
+    public OdysseyTools(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -30,7 +30,7 @@ public class OdysseyToolSystem : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "DrawingTools"),
             }
         );
 

@@ -24,14 +24,7 @@
 
 #include "IOdysseyStylusInputModule.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyToolSystem.h"
 #include "OdysseyHUDSystem.h"
-#include "OdysseyToolLine.h"
-#include "OdysseyToolPolygon.h"
-#include "OdysseyToolEllipse.h"
-#include "OdysseyToolBezier.h"
-#include "OdysseyToolCircle.h"
-#include "OdysseyToolRectangle.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
@@ -210,7 +203,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         // }
     }
 
-    IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDSystem()->GetHUDSurface();
+    //Tool system HUD drawing
+    /*IOdysseySurfaceEditable* HUDSurface = mOdysseyPainterEditor->HUDSystem()->GetHUDSurface();
     UTexture* HUDTexture = nullptr;
     if (HUDSurface)
     {
@@ -243,7 +237,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
         tileItem.PivotPoint = pivotPoint;
         ioCanvas->DrawItem( tileItem );
-    }
+    }*/
+    //---
 
     // Draw Cursor Preview
     if( mOdysseyPainterEditor->DrawBrushPreview() )
@@ -315,7 +310,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     mLastEvent = iEvent;
 
     //ToolSystem InputKey
-    if ( mCurrentToolState == eState::kIdle )
+    /*if (mCurrentToolState == eState::kIdle)
     {
         FReply replyHUD = FReply::Unhandled();
 
@@ -349,7 +344,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
         }
         if (replyHUD.IsEventHandled())
             return true;
-    }
+    }*/
     //---
 
     auto end_time = std::chrono::steady_clock::now();
@@ -371,7 +366,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
 
     //ToolSystem CapturedMouseMove
-    if (mCurrentToolState == eState::kIdle)
+    /*if (mCurrentToolState == eState::kIdle)
     {
         if (mIsReadyToCreateTool)
         {
@@ -389,7 +384,7 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
             mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->CapturedMouseMove(iViewport, posInTexture.X, posInTexture.Y);
             return;
         }
-    }
+    }*/
     //---
 
     if (mIsCapturedByStylus || delta < 500)
@@ -404,8 +399,8 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
-    if (mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush)
-        return;
+    /*if (mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush)
+        return;*/
         
     //If we don't have a surface, then we don't interact with anything
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
@@ -870,7 +865,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
         paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
 
         //ToolSystem MouseMove
-        if (mIsReadyToCreateTool)
+        /*if (mIsReadyToCreateTool)
         {
             mIsReadyToCreateTool = false;
             if( mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush )
@@ -882,7 +877,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
         {
             FVector2D posInTexture = GetLocalMousePosition(FVector2D(iX, iY));
             mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->MouseMove(iViewport, posInTexture.X, posInTexture.Y);
-        }
+        }*/
         //---
     }
 }
@@ -950,7 +945,7 @@ FOdysseyPainterEditorViewportClient::GetDisplayedResolution() const
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- Private API
 
-void
+/*void
 FOdysseyPainterEditorViewportClient::CreateTool(eGUISelectedTool iGUISelectedTool, FVector2D iPos )
 {
     switch (iGUISelectedTool)
@@ -974,7 +969,7 @@ FOdysseyPainterEditorViewportClient::CreateTool(eGUISelectedTool iGUISelectedToo
             mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolBezier( iPos ) );
         break;
     }
-}
+}*/
 
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()

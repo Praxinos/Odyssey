@@ -1,0 +1,37 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#include "OdysseyToolFreeHand.h"
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Drawing
+
+void UOdysseyToolFreeHand::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
+{
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------- Mouse events
+
+void UOdysseyToolFreeHand::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+{
+}
+
+FReply UOdysseyToolFreeHand::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
+{
+    return ioReply;
+}
+
+void UOdysseyToolFreeHand::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
+{
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Path generation
+
+::ULIS::TArray<::ULIS::FVec2I> UOdysseyToolFreeHand::GenerateToolPoints()
+{
+    ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
+
+    return pointsArray;
+}

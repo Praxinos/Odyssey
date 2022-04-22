@@ -7,7 +7,7 @@
 #include "OdysseyHUDLine.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLSYSTEM_API FOdysseyToolPolygon : public IOdysseyTool
+class ODYSSEYTOOLS_API FOdysseyToolPolygon : public IOdysseyTool
 {
 public:
     // Construction / Destruction

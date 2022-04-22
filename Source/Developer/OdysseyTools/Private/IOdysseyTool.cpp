@@ -3,14 +3,9 @@
 
 #include "IOdysseyTool.h"
 
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Construction / Destruction
-IOdysseyTool::~IOdysseyTool()
-{
-}
 
-IOdysseyTool::IOdysseyTool()
-: mIsReadyToBeApplied(false)
+UOdysseyTool::UOdysseyTool(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
 {
 }
 

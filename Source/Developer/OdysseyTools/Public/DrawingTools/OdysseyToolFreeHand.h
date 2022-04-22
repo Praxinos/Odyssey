@@ -4,16 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyHUDCircle.h"
+#include "OdysseyHUDBezier.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLSYSTEM_API FOdysseyToolCircle : public IOdysseyTool
-{
-public:
-    // Construction / Destruction
-    virtual ~FOdysseyToolCircle();
+#include "OdysseyToolFreeHand.Generated.h"
 
-    FOdysseyToolCircle( FVector2D iCenterPoint );
+UCLASS()
+class ODYSSEYTOOLS_API UOdysseyToolFreeHand : public UObject, 
+                                              public IOdysseyTool
+{
+    GENERATED_BODY()
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
@@ -26,7 +26,4 @@ public:
 
 public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
-
-private:
-    UOdysseyHUDCircle* mCircle;
 };

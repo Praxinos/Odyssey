@@ -7,7 +7,7 @@
 #include "OdysseyHUDBezier.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLSYSTEM_API FOdysseyToolBezier : public IOdysseyTool
+class ODYSSEYTOOLS_API FOdysseyToolBezier : public IOdysseyTool
 {
 public:
     // Construction / Destruction

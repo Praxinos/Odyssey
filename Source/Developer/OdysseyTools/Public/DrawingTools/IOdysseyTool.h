@@ -7,12 +7,17 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
-class ODYSSEYTOOLSYSTEM_API IOdysseyTool 
+#include "IOdysseyTool.Generated.h"
+
+UINTERFACE()
+class ODYSSEYTOOLS_API UOdysseyTool : public UInterface
 {
-public:
-    // Construction / Destruction
-    virtual ~IOdysseyTool();
-    IOdysseyTool();
+    GENERATED_UINTERFACE_BODY()
+};
+
+class ODYSSEYTOOLS_API IOdysseyTool
+{
+    GENERATED_IINTERFACE_BODY()
 
 public:
     //Drawing the HUD associated to the tool

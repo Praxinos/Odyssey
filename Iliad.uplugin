@@ -61,7 +61,7 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyToolSystem",
+      "Name": "OdysseyTools",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },

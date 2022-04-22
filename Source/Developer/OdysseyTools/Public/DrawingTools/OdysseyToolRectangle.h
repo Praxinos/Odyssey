@@ -4,16 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyHUDEllipse.h"
+#include "OdysseyHUDRectangle.h"
 #include "IOdysseyTool.h"
 
-class ODYSSEYTOOLSYSTEM_API FOdysseyToolEllipse : public IOdysseyTool
+class ODYSSEYTOOLS_API FOdysseyToolRectangle : public IOdysseyTool
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyToolEllipse();
+    virtual ~FOdysseyToolRectangle();
 
-    FOdysseyToolEllipse( FVector2D iCenterPoint );
+    FOdysseyToolRectangle( FVector2D iStartPoint );
 
 public:
     void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
@@ -28,6 +28,6 @@ public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 
 private:
-    UOdysseyHUDEllipse* mEllipse;
-    FTransform2D mPreviousTransform;
+    UOdysseyHUDRectangle* mRectangle;
+    FTransform2D mLastTransform; //TODO: should not be here
 };

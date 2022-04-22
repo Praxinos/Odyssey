@@ -8,17 +8,6 @@
 
 class FOdysseyPainterEditor;
 
-enum class eGUISelectedTool : char
-{
-    kBrush,
-    kLine,
-    kRectangle,
-    kPolygon,
-    kCircle,
-    kEllipse,
-    kBezier
-};
-
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :
     public FOdysseyEditorTab
 {
@@ -39,7 +28,7 @@ protected:
     virtual FReply OnClearUndo();
 
     /** Delegate for Tools checkBoxes button */
-    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eGUISelectedTool iTool);
+    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, UClass* iTool);
 
 protected:
     // Methods
