@@ -5,6 +5,7 @@
 
 #include "Components/Widget.h"
 #include "Engine/Font.h"
+#include "UObject/ConstructorHelpers.h"
 
 //---
 

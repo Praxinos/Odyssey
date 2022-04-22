@@ -30,6 +30,10 @@
     {
       "Enabled": true,
       "Name": "AvidDNxMedia"
+    },
+    {
+      "Enabled": true,
+      "Name": "MediaCompositing"
     }
   ],
   "Modules": [
