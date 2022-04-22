@@ -6,6 +6,7 @@
 #include "Tools/DrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/DrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "FreehandShape/OdysseyFreehandShape.h"
+#include "Tools/DrawingTool/Widgets/SOdysseyDrawingToolOptions.h"
 #include "ObjectEditorUtils.h"
 
 //--------------------------------------------------------------------------------------
@@ -14,23 +15,38 @@ UOdysseyDrawingTool::~UOdysseyDrawingTool()
 {
 }
 
-UOdysseyDrawingTool::UOdysseyDrawingTool(const FObjectInitializer& iObjectInitializer)
-    : Super(iObjectInitializer)
+UOdysseyDrawingTool::UOdysseyDrawingTool()
+    : Super()
     //Properties
     , Brush(nullptr)
-    , Shape(iObjectInitializer.CreateDefaultSubobject<UOdysseyFreehandShape>(GetTransientPackage(), "UOdysseyDrawingTool::Shape"))
+    , SelectedShape(EOdysseyShape::kFreehand)
+    , SelectedShapeInstance(nullptr)
     , BlendParameters()
     , BrushInstance(nullptr)
-    , BrushOptions(iObjectInitializer.CreateDefaultSubobject<UOdysseyBrushOptions>(GetTransientPackage(), "UOdysseyDrawingTool::BrushOptions"))
+    , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyDrawingTool::BrushOptions", true))
 
     //Internal
     , mPaintEngine(nullptr)
-    , mIsPainting(false)
 {
-    Shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathBegin);
-    Shape->OnPathToDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathTo);
-    Shape->OnPathEndDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathEnd);
-    Shape->OnResetDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapeReset);
+    mWidget = SNew(SOdysseyDrawingToolOptions).Tool(this);
+
+    AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyDrawingTool::FreehandShape"));
+    SelectedShapeInstance = AvailableShapes[SelectedShape];
+}
+
+template<class T>
+T*
+UOdysseyDrawingTool::CreateShape(FName iName)
+{
+    T* shape = CreateDefaultSubobject<T>(iName, true);
+
+    shape->OnPathBeginDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathBegin);
+    shape->OnPathToDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathTo);
+    shape->OnPathEndDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathEnd);
+    shape->OnPathAbortDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathAbort);
+    shape->OnPathResetDelegate().AddUObject(this, &UOdysseyDrawingTool::OnShapePathReset);
+
+    return shape;
 }
 
 //--------------------------------------------------------------------------------------
@@ -65,13 +81,13 @@ UOdysseyDrawingTool::Inactivate()
 void
 UOdysseyDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    Begin( iPointInTexture );
+    SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
 }
 
 void
 UOdysseyDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    End();
+    SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
 }
 
 void
@@ -79,28 +95,26 @@ UOdysseyDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     if (BrushInstance)
         BrushInstance->StrokeMoveTo(iPointInTexture);
+
+    SelectedShapeInstance->OnMouseHover(iPointInTexture);
 }
 
 void
 UOdysseyDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    To( iPointInTexture );
+    SelectedShapeInstance->OnMouseDrag(iPointInTexture);
 }
 
 void
 UOdysseyDrawingTool::OnKeyDown(const FKey& iKey)
-{
-    if (iKey == EKeys::Escape)
-    {
-        Abort();
-        return;
-    }
+{   
+    SelectedShapeInstance->OnKeyDown(iKey);
 }
 
 void
 UOdysseyDrawingTool::OnKeyUp(const FKey& iKey)
 {
-
+    SelectedShapeInstance->OnKeyUp(iKey);
 }
 
 void
@@ -120,7 +134,7 @@ UOdysseyDrawingTool::Tick(float iDeltaTime)
     });
 
     //Ticke the shape
-    Shape->Tick(iDeltaTime);
+    SelectedShapeInstance->Tick(iDeltaTime);
 
     //Update the paintEngine
     mWorker.ExecuteFor(1000/60); //60fps
@@ -143,6 +157,18 @@ UOdysseyDrawingTool::Commit()
 {
     if (mPaintEngine)
         mPaintEngine->Commit(BlendParameters);
+}
+
+void
+UOdysseyDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)
+{
+    Super::BindShortcuts(iToolkit);
+}
+
+void
+UOdysseyDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+    Super::ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------
@@ -224,12 +250,29 @@ UOdysseyDrawingTool::OnShapePathEnd( const FOdysseyPoint& iPoint )
         if (!BrushInstance->StrokeEnd())
             UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeTo() from StrokeEngine") );
     });
+
+    Flush();
+    Commit();
 }
 
 void
-UOdysseyDrawingTool::OnShapeReset()
+UOdysseyDrawingTool::OnShapePathAbort()
 {
+    if (!BrushInstance)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot draw whithout a brush instance") );
+        return;
+    }
 
+    BrushInstance->StrokeFlush();
+
+    //Update immediately the changes
+    mPaintEngine->Update(BlendParameters);
+}
+
+void
+UOdysseyDrawingTool::OnShapePathReset()
+{
     if (!BrushInstance)
     {
         UE_LOG(LogTemp, Warning, TEXT("Cannot draw whithout a brush instance") );
@@ -246,114 +289,11 @@ UOdysseyDrawingTool::OnShapeReset()
 }
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------- Stroke API
-
-bool
-UOdysseyDrawingTool::Begin( const FOdysseyPoint& iPoint )
-{
-    // Check if everything is alright
-    if (mIsPainting)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::Begin() while Painting") );
-        return false;
-    }
-
-    mIsPainting = true;
-
-    //Make the shape begin
-    if (!Shape->Begin(iPoint))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyFreehandShape::Begin() from StrokeEngine") );
-        return false;
-    }
-
-    return true;
-}
-
-bool
-UOdysseyDrawingTool::To( const FOdysseyPoint& iPoint )
-{
-    // Check if everything is alright
-    if (!mIsPainting)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::To() before UOdysseyDrawingTool::Begin()") );
-        return false;
-    }
-
-    //Make the shape begin
-    if (!Shape->To(iPoint))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyFreehandShape::To() from StrokeEngine") );
-        return false;
-    }
-
-    return true;
-}
-
-bool
-UOdysseyDrawingTool::End()
-{
-    // Check if everything is alright
-    if (!mIsPainting)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::End() before UOdysseyDrawingTool::Begin()") );
-        return false;
-    }
-    
-    //End the Stroke
-    if (!Shape->End())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyFreehandShape::End() from StrokeEngine") );
-        return false;
-    }
-
-    Flush();
-    Commit();
-
-    //Stop the painting
-    mIsPainting = false;
-
-    return true;
-}
-
-bool
-UOdysseyDrawingTool::Abort()
-{
-    // Check if everything is alright
-    if (!mIsPainting)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyDrawingTool::Abort() before UOdysseyDrawingTool::Begin()") );
-        return false;
-    }
-    
-    //End the Stroke
-    if (!Shape->Abort())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyFreehandShape::Abort() from StrokeEngine") );
-        return false;
-    }
-
-    BrushInstance->StrokeFlush();
-
-    //Update immediately the changes
-    mPaintEngine->Update(BlendParameters);
-
-    mIsPainting = false;
-    return true;
-}
-
-//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Setters
 
 void
 UOdysseyDrawingTool::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
 {
-    if (mIsPainting)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Can't change StrokeEngine PaintEngine while Painting") );
-        return;
-    }
-
     if (mPaintEngine)
         mPaintEngine->OnBlockChangedDelegate().RemoveAll(this);
 
@@ -410,6 +350,18 @@ UOdysseyBrushOptions*
 UOdysseyDrawingTool::GetBrushOptions()
 {
     return BrushOptions;
+}
+
+EOdysseyShape
+UOdysseyDrawingTool::GetSelectedShape() const
+{
+    return SelectedShape;
+}
+
+UOdysseyShape*
+UOdysseyDrawingTool::GetSelectedShapeInstance()
+{
+    return SelectedShapeInstance;
 }
 
 UOdysseyDrawingTool::FOnApplyOverrides&
@@ -481,7 +433,7 @@ UOdysseyDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
     if (brushOptionsOverrides)
         brushOptionsOverrides->Override(BrushOptions);
 
-    Shape->ApplyOverrides(iBrushInstance->Overrides);
+    SelectedShapeInstance->ApplyOverrides(iBrushInstance->Overrides);
 
     mOnApplyOverridesDelegate.Broadcast(iBrushInstance->Overrides);
 }
@@ -539,6 +491,9 @@ UOdysseyDrawingTool::PostEditChangeProperty(struct FPropertyChangedEvent & Prope
         return;
     }
 
+    if (propertyName == "SelectedShape")
+        OnPostShapeChanged();
+
     if (BrushInstance)
         BrushInstance->ExecuteStateChanged();
 }
@@ -565,4 +520,10 @@ UOdysseyDrawingTool::OnPostBrushChanged()
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
+}
+
+void
+UOdysseyDrawingTool::OnPostShapeChanged()
+{
+    FObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
 }

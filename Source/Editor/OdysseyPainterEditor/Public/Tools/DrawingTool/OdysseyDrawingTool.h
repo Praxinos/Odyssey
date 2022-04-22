@@ -9,6 +9,7 @@
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
+#include "OdysseyShape.h"
 #include "Tools/DrawingTool/OdysseyDrawingToolWorker.h"
 
 #include "OdysseyDrawingTool.generated.h"
@@ -20,7 +21,7 @@ class FOdysseyStrokeEngineBrushOptions;
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyDrawingTool : public UOdysseyTool
 {
-    GENERATED_UCLASS_BODY()
+    GENERATED_BODY()
 
 public:
     typedef TMap<FName, UObject*> tOverride;
@@ -30,10 +31,14 @@ public:
 public:
     // Destructor
     virtual ~UOdysseyDrawingTool();
+
+    //Constructor
+    UOdysseyDrawingTool();
     
 public:
     //TOOL
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
+    template<class T> T* CreateShape(FName iName);
 
 public:
     //OdysseyTool overrides
@@ -51,6 +56,9 @@ public:
 
     virtual void Flush() override;
     virtual void Commit() override;
+
+    virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
 
 private:
     // Paint Engine Stroke API
@@ -99,6 +107,12 @@ public:
     // Returns the OnApplyOverrides delegate
     FOnApplyOverrides& OnApplyOverridesDelegate();
 
+    // Returns the Selected Shape
+    EOdysseyShape GetSelectedShape() const;
+
+    // Retuns the instance of the selected Shape
+    UOdysseyShape* GetSelectedShapeInstance();
+
 public:
     //UObject overrides
 
@@ -138,6 +152,9 @@ private:
     // Fired when the Brush is compiled
     void OnPostBrushChanged();
 
+    // Fired when a Shape is selected
+    void OnPostShapeChanged();
+
 private:
     // Internal - Callbacks
 
@@ -147,23 +164,35 @@ private:
 
     void OnShapePathEnd(const FOdysseyPoint& iPoint);
 
-    void OnShapeReset();
+    void OnShapePathAbort();
+    
+    void OnShapePathReset();
 
     void OnPaintEngineBlockChanged();
 
 private:
-    //PROPERTIES
+    friend class FOdysseyDrawingToolDetailCustomization;
 
-    UPROPERTY(EditInstanceOnly)
+    //Visible properties
+
+    UPROPERTY(EditInstanceOnly, Category="Brush")
     UOdysseyBrush* Brush;
 
-    UPROPERTY(VisibleInstanceOnly, Instanced)
-    class UOdysseyFreehandShape* Shape;
+    UPROPERTY(EditInstanceOnly, Category="Shape")
+    EOdysseyShape SelectedShape;
 
-    UPROPERTY(EditInstanceOnly)
+    UPROPERTY(VisibleInstanceOnly, Transient)
+    class UOdysseyShape* SelectedShapeInstance;
+
+    UPROPERTY(EditInstanceOnly, Category="Brush", meta=(DisplayAfter="BrushInstance"))
     FOdysseyBlendParameters BlendParameters;
 
+
+    // Hidden properties
     UPROPERTY()
+    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
+
+    UPROPERTY(VisibleInstanceOnly, Transient)
     UOdysseyBrushAssetBase* BrushInstance;
 
     UPROPERTY()
@@ -182,4 +211,5 @@ protected:
     //Internal
     bool                                mIsPainting;
     FOnApplyOverrides                   mOnApplyOverridesDelegate;
+    TSharedPtr<SWidget>                 mOptionsWidget;
 };

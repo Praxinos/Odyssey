@@ -26,6 +26,53 @@ UOdysseyFreehandShape::UOdysseyFreehandShape(const FObjectInitializer& iObjectIn
 }
 
 //--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------- Mouse Events
+
+void
+UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    Begin(iPointInTexture);
+    UOdysseyShape::OnMouseDown(iPointInTexture, iKey);
+}
+
+void
+UOdysseyFreehandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    End();
+    UOdysseyShape::OnMouseUp(iPointInTexture, iKey);
+}
+
+void
+UOdysseyFreehandShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+    UOdysseyShape::OnMouseHover(iPointInTexture);
+}
+
+void
+UOdysseyFreehandShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+{
+    To(iPointInTexture);
+    UOdysseyShape::OnMouseDrag(iPointInTexture);
+}
+
+void
+UOdysseyFreehandShape::OnKeyDown(const FKey& iKey)
+{
+    if (iKey == EKeys::Escape)
+    {
+        Abort();
+        return;
+    }
+    UOdysseyShape::OnKeyDown(iKey);
+}
+
+void
+UOdysseyFreehandShape::OnKeyUp(const FKey& iKey)
+{
+    UOdysseyShape::OnKeyUp(iKey);
+}
+
+//--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------- Stroke API
 
 bool
@@ -74,8 +121,9 @@ bool
 UOdysseyFreehandShape::Abort()
 {
     mIsPainting = false;
-
-    mOnResetDelegate.Broadcast();
+    
+    mOnPathResetDelegate.Broadcast(); //just to be sure
+    mOnPathAbortDelegate.Broadcast();
     return true;
 }
 
@@ -156,7 +204,7 @@ UOdysseyFreehandShape::ApplySmoothing()
     // Clean up before apply the smoothing again
     //
 
-    mOnResetDelegate.Broadcast();
+    mOnPathResetDelegate.Broadcast();
 
     // Reset Smoother
     mSmoother->Reset();

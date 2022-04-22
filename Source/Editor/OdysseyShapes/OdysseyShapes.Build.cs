@@ -18,7 +18,8 @@ public class OdysseyShapes : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "OdysseyCore"
+                "OdysseyCore",
+                "OdysseyStyle"
             }
         );
 

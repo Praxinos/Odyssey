@@ -25,17 +25,20 @@ public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyToolOptions )
         {}
-        SLATE_ARGUMENT(UOdysseyTool*, Tool)
+        SLATE_ATTRIBUTE(UOdysseyTool*, Tool)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
+public:
+    // SWidget overrides
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime);
+
 private:
     // Private data members
-    UOdysseyTool*                       mTool;
-
-    TSharedPtr<IDetailsView>            DetailsView;
-    //TSharedPtr< IStructureDetailsView > DetailsView;
-    TSharedPtr< FStructOnScope >        StructToDisplay;
+    TAttribute<UOdysseyTool*>                mTool;
+    UOdysseyTool*                            mCurrentTool;
+    
+    TSharedPtr< SBorder >                    mToolSlot;
 };
 

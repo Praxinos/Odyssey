@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "FreehandShape/Smoothing/OdysseySmoothingTypes.h"
+#include "FreehandShape/OdysseyFreehandShape.h"
 
 #include "OdysseyFreehandShapeOverrides.generated.h"
 

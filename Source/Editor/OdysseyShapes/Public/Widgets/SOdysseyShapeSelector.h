@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 
+#include "OdysseyShape.h"
+
 /////////////////////////////////////////////////////
 // SOdysseyShapeSelector
+
 class ODYSSEYSHAPES_API SOdysseyShapeSelector
     : public SCompoundWidget
 {
@@ -14,20 +17,26 @@ class ODYSSEYSHAPES_API SOdysseyShapeSelector
     typedef SOdysseyShapeSelector   tSelf;
 
 public:
+    DECLARE_DELEGATE_OneParam(FOnShapeSelected, EOdysseyShape)
+
+public:
     // Construction / Destruction
     SLATE_BEGIN_ARGS( SOdysseyShapeSelector )
         {}
-        SLATE_ARGUMENT(UObject*, Tool)
+        SLATE_ATTRIBUTE(EOdysseyShape, SelectedShape)
+        SLATE_EVENT(FOnShapeSelected, OnShapeSelected)
     SLATE_END_ARGS()
 
     void  Construct( const  FArguments&  InArgs );
 
 private:
-    // Private data members
-    UObject*                       mTool;
+    void OnCheckStateChanged(ECheckBoxState iState, EOdysseyShape iShape);
+    ECheckBoxState IsChecked(EOdysseyShape iShape) const;
+    
 
-    TSharedPtr<IDetailsView>            DetailsView;
-    //TSharedPtr< IStructureDetailsView > DetailsView;
-    TSharedPtr< FStructOnScope >        StructToDisplay;
+private:
+    // Private data members
+    TAttribute<EOdysseyShape>           mSelectedShape;
+    FOnShapeSelected                    mOnShapeSelected;
 };
 

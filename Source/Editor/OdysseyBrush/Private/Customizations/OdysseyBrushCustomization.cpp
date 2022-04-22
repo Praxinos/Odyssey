@@ -39,6 +39,8 @@ FOdysseyBrushDetails::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
     if (!iBuilder.IsPropertyVisible(overridesHandle))
         return;
 
+    iBuilder.HideProperty("Overrides");
+
     for (auto overrideElement : brushInstance->Overrides)
     {
         UObject* overrideObject = overrideElement.Value;

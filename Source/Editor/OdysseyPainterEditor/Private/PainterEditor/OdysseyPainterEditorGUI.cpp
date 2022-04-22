@@ -44,6 +44,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     ODYSSEY_ADD_TAB(mToolsTab, FOdysseyPainterEditorToolsTab, mEditor);
     ODYSSEY_ADD_TAB(mTopTab, FOdysseyPainterEditorTopTab, mEditor);
     ODYSSEY_ADD_TAB(mStrokeOptionsTab, FOdysseyPainterEditorStrokeOptionsTab, mEditor);
+    ODYSSEY_ADD_TAB(mToolOptionsTab, FOdysseyPainterEditorToolOptionsTab, mEditor);
 }
 
 void
@@ -328,6 +329,12 @@ TSharedPtr<FOdysseyPainterEditorToolsTab>&
 FOdysseyPainterEditorGUI::GetToolsTab()
 {
     return mToolsTab;
+}
+
+TSharedPtr<FOdysseyPainterEditorToolOptionsTab>&
+FOdysseyPainterEditorGUI::GetToolOptionsTab()
+{
+    return mToolOptionsTab;
 }
 
 //--------------------------------------------------------------------------------------

@@ -4,8 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
+#include "Widgets/SWidget.h"
 
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -16,6 +17,9 @@ UCLASS(Abstract)
 class ODYSSEYTOOLS_API UOdysseyTool : public UObject
 {
     GENERATED_BODY()
+
+public:
+    UOdysseyTool();
 
 public:
     //Activates the tool
@@ -54,7 +58,15 @@ public:
     //Sets the transform in which the tool is working (transform of the 2D viewport)
     virtual void SetTransform(const FTransform2D& iTransform);
 
+public:
+    // Interface
+    virtual void BindShortcuts(class FBaseToolkit* iToolkit);
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+    virtual TSharedPtr<SWidget> GetWidget();
+
 protected:
     // bool mIsReadyToBeApplied;
     FTransform2D mTransform;
+
+    TSharedPtr<SWidget> mWidget;
 };

@@ -60,6 +60,11 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 
 	//---
 
+	//TODO: BindShortcuts from mTools instead of mSelectedTool
+	mSelectedTool->BindShortcuts(iToolkit);
+
+	//---
+
 	const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
@@ -70,6 +75,17 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.ClearUndo, ClearUndo )
 
 	#undef MAP_ACTION
+}
+
+void
+FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+	FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
+
+	//---
+
+	//TODO: ExtendMenu from mTools instead of mSelectedTool
+	mSelectedTool->ExtendMenu(iOwner, iMenuName);
 }
 
 //--------------------------------------------------------------------------------------

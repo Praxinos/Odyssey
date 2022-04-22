@@ -3,19 +3,11 @@
 
 #include "OdysseyTool.h"
 
-
-/* void
-UOdysseyTool::Init()
+UOdysseyTool::UOdysseyTool() :
+    mWidget(SNullWidget::NullWidget)
 {
 
 }
-
-void
-UOdysseyTool::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform)
-{
-
-} */
-
 
 void
 UOdysseyTool::Activate()
@@ -110,4 +102,22 @@ void
 UOdysseyTool::SetTransform(const FTransform2D& iTransform)
 {
     mTransform = iTransform;
+}
+
+void
+UOdysseyTool::BindShortcuts(FBaseToolkit* iToolkit)
+{
+
+}
+
+void
+UOdysseyTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+{
+
+}
+
+TSharedPtr<SWidget>
+UOdysseyTool::GetWidget()
+{
+    return mWidget;
 }

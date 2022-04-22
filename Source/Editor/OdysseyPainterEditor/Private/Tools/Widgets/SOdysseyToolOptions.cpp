@@ -17,30 +17,28 @@ void
 SOdysseyToolOptions::Construct( const FArguments& InArgs )
 {
     mTool = InArgs._Tool;
-
-    FDetailsViewArgs ViewArgs;
-    ViewArgs.bAllowSearch = false;
-    ViewArgs.bHideSelectionTip = true;
-    ViewArgs.bShowActorLabel = false;
-
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    DetailsView = PropertyEditorModule.CreateDetailView(ViewArgs);
-    DetailsView->SetObject(mTool);
-
+    mCurrentTool = nullptr;
     this->ChildSlot
     [
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-            .FillHeight(1.0f)
-            [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                    .FillWidth(1.0f)
-                    [
-                        DetailsView.ToSharedRef()
-                    ]
-            ]
+        SAssignNew(mToolSlot, SBorder)
+        [
+            SNullWidget::NullWidget
+        ]
     ];
+}
+
+//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------- SWidget overrides
+
+void
+SOdysseyToolOptions::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+    UOdysseyTool* tool = mTool.Get();
+    if (tool != mCurrentTool)
+    {
+        mCurrentTool = tool;
+        mToolSlot->SetContent(tool->GetWidget().ToSharedRef());
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -7,7 +7,6 @@
 #include "ObjectEditorUtils.h"
 #include "OdysseySurface.h"
 #include "Proxies/OdysseyBrushColor.h"
-#include "OdysseyBlendParameters.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 

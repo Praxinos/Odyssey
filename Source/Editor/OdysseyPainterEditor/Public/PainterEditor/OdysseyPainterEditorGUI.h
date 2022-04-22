@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditorStrokeOptionsTab.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
+#include "OdysseyPainterEditorToolOptionsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
 class FOdysseyPainterEditor;
@@ -61,6 +62,7 @@ public:
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>& GetStrokeOptionsTab();
     TSharedPtr<FOdysseyPainterEditorTopTab>& GetTopTab();
     TSharedPtr<FOdysseyPainterEditorToolsTab>& GetToolsTab();
+    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>& GetToolOptionsTab();
 
 protected:
     // Shortcuts
@@ -84,5 +86,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorStrokeOptionsTab>           mStrokeOptionsTab;
     TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
     TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
+    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab;
 };
 

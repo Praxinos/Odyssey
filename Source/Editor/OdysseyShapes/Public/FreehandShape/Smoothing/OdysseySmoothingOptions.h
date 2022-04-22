@@ -8,7 +8,7 @@
 #include "FreehandShape/Smoothing/OdysseySmoothingTypes.h"
 #include "OdysseySmoothingOptions.generated.h"
 
-USTRUCT(Blueprintable)
+USTRUCT(Blueprintable, meta=(DisplayName="Smoothing"))
 struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
 {
     GENERATED_BODY()
@@ -22,22 +22,22 @@ struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
     {}
 
     /** The method used for smoothing. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing" )
+    UPROPERTY( EditAnywhere )
     EOdysseySmoothingMethod SmoothingMethod;
 
     /** Distance for Smooting computation. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
+    UPROPERTY( EditAnywhere, meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1" ) )
     int32   SmoothingStrength;
 
     /** Should smoothing be enabled. */
-    UPROPERTY(EditAnywhere, Category = "Smoothing")
+    UPROPERTY(EditAnywhere)
     bool    SmoothingEnabled;
 
     /** Should smoothing be real-time, meaning the first input draws directly, even though the strength is not reached yet. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing" )
+    UPROPERTY( EditAnywhere )
     bool    SmoothingRealTime;
 
     /** Should smoothing catch-up to the cursor before releasing the stroke. */
-    UPROPERTY( EditAnywhere, Category = "Smoothing" )
+    UPROPERTY( EditAnywhere )
     bool    SmoothingCatchUp;
 };

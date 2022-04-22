@@ -7,6 +7,14 @@
 
 #include "OdysseyShape.generated.h"
 
+UENUM()
+enum class EOdysseyShape : uint8
+{
+    kNone           UMETA(DisplayName = "None"),
+    kFreehand       UMETA(DisplayName = "Freehand"),
+    kRectangle      UMETA(DisplayName = "Rectangle"),
+};
+
 UCLASS(Abstract)
 class ODYSSEYSHAPES_API UOdysseyShape : public UObject
 {
@@ -16,7 +24,8 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathBegin, const FOdysseyPoint&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathTo, const TArray<FOdysseyPoint>&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathEnd, const FOdysseyPoint&);
-    DECLARE_MULTICAST_DELEGATE(FOnReset);
+    DECLARE_MULTICAST_DELEGATE(FOnPathAbort);
+    DECLARE_MULTICAST_DELEGATE(FOnPathReset);
 
 public:
     // Destructor
@@ -42,7 +51,8 @@ public:
     FOnPathBegin& OnPathBeginDelegate() { return mOnPathBeginDelegate; }
     FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
     FOnPathEnd& OnPathEndDelegate() { return mOnPathEndDelegate; }
-    FOnReset& OnResetDelegate() { return mOnResetDelegate; }
+    FOnPathAbort& OnPathAbortDelegate() { return mOnPathAbortDelegate; }
+    FOnPathReset& OnPathResetDelegate() { return mOnPathResetDelegate; }
 
 public:
     //SHAPE PROPERTIES
@@ -58,5 +68,6 @@ protected:
     FOnPathBegin                        mOnPathBeginDelegate;
     FOnPathTo                           mOnPathToDelegate;
     FOnPathEnd                          mOnPathEndDelegate;
-    FOnReset                            mOnResetDelegate;
+    FOnPathAbort                        mOnPathAbortDelegate;
+    FOnPathReset                        mOnPathResetDelegate;
 };

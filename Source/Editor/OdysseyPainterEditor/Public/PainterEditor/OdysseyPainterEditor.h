@@ -56,6 +56,7 @@ public:
 public:
     // Interface
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
 
 protected:
     //Callbacks
@@ -72,6 +73,7 @@ protected:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine         mPaintEngine; //We declare a single PaintEngine which will be used for any brush we use
     UOdysseyTool*               mSelectedTool;
+    //TMap<EOdysseyTool, UOdysseyTool*> mTools;
     FOdysseyHUDSystem*          mHUDSystem;
     //UOdysseyStrokeEngine*       mStrokeEngine; //TODO: Should actually be a tool => FreeHandTool
     TArray<FOdysseyBrushContext*> mBrushContexts;

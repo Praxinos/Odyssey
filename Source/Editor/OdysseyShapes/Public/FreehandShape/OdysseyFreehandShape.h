@@ -6,11 +6,12 @@
 #include "CoreMinimal.h"
 #include "FreehandShape/Smoothing/OdysseySmoothingOptions.h"
 #include "FreehandShape/Smoothing/IOdysseySmoothing.h"
+#include "OdysseyShape.h"
 
 #include "OdysseyFreehandShape.generated.h"
 
-UCLASS()
-class ODYSSEYSHAPES_API UOdysseyFreehandShape : public UObject
+UCLASS(meta=(DisplayName="Freehand Shape"))
+class ODYSSEYSHAPES_API UOdysseyFreehandShape : public UOdysseyShape
 {
     GENERATED_UCLASS_BODY()
 
@@ -25,20 +26,13 @@ public:
     virtual ~UOdysseyFreehandShape();
 
 public:
-    // Paint Engine Stroke API
-
-    //Begins a stroke at iPoint
-    //Some value are computed from the last call to MoveTo(), like direction for example
-    bool Begin( const FOdysseyPoint& iPoint );
-
-    //Draws a Stroke from the last position to iPoint
-    bool To( const FOdysseyPoint& iPoint );
-
-    //Ends the stroke
-    bool End();
-
-    //Aborts the stroke
-    bool Abort();
+    //Mouse events
+    virtual void OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture);
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
+    virtual void OnKeyDown(const FKey& iKey);
+    virtual void OnKeyUp(const FKey& iKey);
 
 public:
     // Tick
@@ -56,6 +50,22 @@ public:
     FOnPathTo& OnPathToDelegate() { return mOnPathToDelegate; }
     FOnPathEnd& OnPathEndDelegate() { return mOnPathEndDelegate; }
     FOnReset& OnResetDelegate() { return mOnResetDelegate; }
+
+private:
+    // Paint Engine Stroke API
+
+    //Begins a stroke at iPoint
+    //Some value are computed from the last call to MoveTo(), like direction for example
+    bool Begin(const FOdysseyPoint& iPoint);
+
+    //Draws a Stroke from the last position to iPoint
+    bool To(const FOdysseyPoint& iPoint);
+
+    //Ends the stroke
+    bool End();
+
+    //Aborts the stroke
+    bool Abort();
 
 private:
     // Internal Stroke API
@@ -81,7 +91,8 @@ private:
 private:
     //PROPERTIES
     
-    UPROPERTY(EditInstanceOnly)
+    //The smoothing options
+    UPROPERTY( EditInstanceOnly )
     FOdysseySmoothingOptions SmoothingOptions;
 
 protected:
