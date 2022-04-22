@@ -226,7 +226,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
         if( mOdysseyPainterEditor->ToolSystem()->GetSelectedTool() )
             mOdysseyPainterEditor->ToolSystem()->GetSelectedTool()->Draw( HUDSurface->Block(), transform );
-
+        // mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw( HUDSurface->Block(), transform );
+        
         FCanvasTileItem tileItem( FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;

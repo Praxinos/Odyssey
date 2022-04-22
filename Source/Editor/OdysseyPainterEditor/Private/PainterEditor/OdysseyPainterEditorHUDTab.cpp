@@ -5,6 +5,7 @@
 
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDLine.h"
+#include "OdysseyHUDPolygon.h"
 #include "OdysseyHUDHandle.h"
 
 #include "ULIS/include/Math/ShapeGeneration/Line.h"
@@ -36,6 +37,42 @@ FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorHUDTab::CreateWidget()
 {    
+    /*
+    if (!mHUD)
+    {
+        UOdysseyHUDElement* decoratedPolygon = NewObject<UOdysseyHUDElement>();
+        decoratedPolygon->Init( FName("DecoratedPolygon") );
+
+        UOdysseyHUDPolygon* polygon = NewObject<UOdysseyHUDPolygon>();
+        TArray<FVector2D> vects;
+        vects.Add( FVector2D(0, 0) );
+        vects.Add( FVector2D(0, 500) );
+        vects.Add( FVector2D(500, 500) );
+        vects.Add( FVector2D(500, 0) );
+        polygon->Init( FName("Polygon1"), vects );
+        decoratedPolygon->AddElement(polygon);
+        
+        UOdysseyHUDHandle* handle1 = NewObject<UOdysseyHUDHandle>();
+        handle1->Init( FName("Handle1"), polygon, &(polygon->mPoints[0]) );
+        
+        UOdysseyHUDHandle* handle2 = NewObject<UOdysseyHUDHandle>();
+        handle2->Init( FName("Handle2"), polygon, &(polygon->mPoints[1]) );
+        
+        UOdysseyHUDHandle* handle3 = NewObject<UOdysseyHUDHandle>();
+        handle3->Init( FName("Handle3"), polygon, &(polygon->mPoints[2]) );
+        
+        UOdysseyHUDHandle* handle4 = NewObject<UOdysseyHUDHandle>();
+        handle4->Init( FName("Handle4"), polygon, &(polygon->mPoints[3]) );
+
+        polygon->AddElement( handle1 );
+        polygon->AddElement( handle2 );
+        polygon->AddElement( handle3 );
+        polygon->AddElement( handle4 );
+        
+        mHUD = MakeShareable(decoratedPolygon);
+    }
+    return mHUD->CreateWidget();
+    */
 /*
 	if (!mHUD)
     {
@@ -54,9 +91,9 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
         line->AddElement( handleFinish );
 
 
-        /*UOdysseyHUDLine* line2 = NewObject<UOdysseyHUDLine>();
-        line2->Init(FName("Line2"), FVector2D(58, 2), FVector2D(315, 251), mEditor->PaintEngineHUD(), transform2D);
-        decoratedLine->AddElement(line2);/*
+        // UOdysseyHUDLine* line2 = NewObject<UOdysseyHUDLine>();
+        // line2->Init(FName("Line2"), FVector2D(58, 2), FVector2D(315, 251), mEditor->PaintEngineHUD(), transform2D);
+        // decoratedLine->AddElement(line2);
 
         UOdysseyHUDLine* line3 = NewObject<UOdysseyHUDLine>();
         line3->Init(FName("Line3"), FVector2D(425, 352), FVector2D(220, 102), mEditor->PaintEngineHUD());
