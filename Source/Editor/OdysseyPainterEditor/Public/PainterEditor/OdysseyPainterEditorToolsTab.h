@@ -13,7 +13,8 @@ enum class eGUISelectedTool : char
     kBrush,
     kLine,
     kCircle,
-    kEllipse //...
+    kEllipse,
+    kPolygon //...
 };
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :

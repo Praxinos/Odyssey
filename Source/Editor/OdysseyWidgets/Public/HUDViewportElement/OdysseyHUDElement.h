@@ -28,7 +28,8 @@ public:
 
 //IOdysseyHUDViewportElement overrides
 public:
-    void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
+    virtual void Invalidate() override;
+    virtual void Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform = FTransform2D()) override;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
     virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
@@ -47,9 +48,6 @@ private:
 protected:
     TMap<FString, UOdysseyHUDElement*> mElements;
     TSharedPtr<SScrollBox> mElementsWidget;
-
-    /** If this element is invalid, then, we'll need to redraw all mElements*/
-    bool mIsInvalid;
 
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;

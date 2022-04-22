@@ -27,6 +27,7 @@
 #include "OdysseyToolSystem.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyToolLine.h"
+#include "OdysseyToolPolygon.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
@@ -309,12 +310,6 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     mLastKey = iKey;
     mLastEvent = iEvent;
 
-    auto end_time = std::chrono::steady_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-
-    if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton ) )
-        return true;
-
     //ToolSystem InputKey
     if ( mCurrentToolState == eState::kIdle )
     {
@@ -353,6 +348,12 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     }
     //---
 
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
+
+    if( (mIsCapturedByStylus || delta < 500) && ( iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton ) )
+        return true;
+
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iViewport->GetMouseX();
     point_in_viewport.y = iViewport->GetMouseY();
@@ -364,9 +365,6 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 {
     auto end_time = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-
-    if (mIsCapturedByStylus || delta < 500)
-        return;
 
     //ToolSystem CapturedMouseMove
     if (mCurrentToolState == eState::kIdle)
@@ -390,6 +388,9 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     }
     //---
 
+    if (mIsCapturedByStylus || delta < 500)
+        return;
+
     FOdysseyStrokePoint point_in_viewport( FOdysseyStrokePoint::DefaultPoint() );
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
@@ -399,6 +400,9 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
 void
 FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const FStylusState& iState, int32 iIndex )
 {
+    if (mOdysseyPainterEditor->GetGUISelectedTool() != eGUISelectedTool::kBrush)
+        return;
+        
     //If we don't have a surface, then we don't interact with anything
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
     if (!surface)
@@ -949,6 +953,10 @@ FOdysseyPainterEditorViewportClient::CreateTool(eGUISelectedTool iGUISelectedToo
     {
         case eGUISelectedTool::kLine:
             mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolLine( iPos ) );
+        break;
+        case eGUISelectedTool::kPolygon:
+            mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( new FOdysseyToolPolygon(iPos) );
+        break;
     }
 }
 

@@ -31,7 +31,10 @@ void FOdysseyToolPolygon::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform 
 void FOdysseyToolPolygon::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     for( UOdysseyHUDLine* line : mLines )
+    {
         line->MouseMove(iViewport, iX, iY);
+        line->Invalidate();
+    }
 
     if( !mIsReadyToBeApplied )
         mLines.Last()->mFinishPoint.Set( iX, iY );
@@ -42,13 +45,14 @@ FReply FOdysseyToolPolygon::InputKey(FViewport* iViewport, int32 iControllerId, 
     for( UOdysseyHUDLine* line : mLines )
         line->InputKey( iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
 
-    /*
-    if ( iKey == EKeys::Escape )
+    // Delete last line
+    if ( iKey == EKeys::LeftMouseButton && ( iViewport->KeyState( EKeys::LeftAlt ) || iViewport->KeyState( EKeys::RightAlt ) ) )
     {
-        if (mLines.Num() != 0);
-        mLines.Empty();
+        if (mLines.Num() >= 1)
+            mLines.Pop();
+
+        return FReply::Handled();
     }
-    */
 
     // Add new line
     if ( iKey == EKeys::LeftMouseButton )
@@ -56,15 +60,7 @@ FReply FOdysseyToolPolygon::InputKey(FViewport* iViewport, int32 iControllerId, 
         UOdysseyHUDLine* newLine = NewObject<UOdysseyHUDLine>();
         newLine->Init( FName("Line"), mLines.Last()->mFinishPoint, mLines.Last()->mFinishPoint );
         mLines.Add( newLine );
-    }
-
-    // Delete last line
-    if ( iKey == EKeys::LeftMouseButton && ( iViewport->KeyState( EKeys::LeftAlt ) || iViewport->KeyState( EKeys::RightAlt ) ) )
-    {
-        if (mLines.Num() >= 1)
-        {
-            mLines.Pop();
-        }
+        ioReply = FReply::Handled();
     }
 
     // Drawing the Polygon once everything is ok
@@ -83,7 +79,10 @@ FReply FOdysseyToolPolygon::InputKey(FViewport* iViewport, int32 iControllerId, 
 void FOdysseyToolPolygon::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     for( UOdysseyHUDLine* line : mLines )
+    {
         line->CapturedMouseMove(iViewport, iX, iY);
+        line->Invalidate();
+    }
 
     if ( !mIsReadyToBeApplied )
         mLines.Last()->mFinishPoint.Set( iX, iY );

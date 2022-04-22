@@ -25,6 +25,16 @@ TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
     return mElementsWidget;
 }
 
+void UOdysseyHUDElement::Invalidate()
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it.Value()->Invalidate();
+    }
+
+    mIsInvalid = true;
+}
+
 void UOdysseyHUDElement::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
     for (auto it = mElements.CreateConstIterator(); it; ++it)

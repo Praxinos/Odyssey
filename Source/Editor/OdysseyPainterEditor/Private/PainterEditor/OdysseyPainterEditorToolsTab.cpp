@@ -105,6 +105,20 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                         .Image(FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Ellipse32"))
                     ]
                 ]
+                +SWrapBox::Slot()
+                [
+                    SNew( SCheckBox )
+                    .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, eGUISelectedTool::kPolygon)
+                    .IsChecked_Lambda([&]() -> ECheckBoxState
+                    {
+                        return mEditor->GetGUISelectedTool() == eGUISelectedTool::kPolygon ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+                    })
+                    [
+                        SNew(SImage)
+                        .Image(FOdysseyStyle::GetBrush("TODO PainterEditor.ToolsTab.Polygon32"))
+                    ]
+                ]
             ]
         ]
         +SScrollBox::Slot()
