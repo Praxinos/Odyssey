@@ -3,11 +3,11 @@
 
 #include "Line/OdysseyHUDLine.h"
 
-UOdysseyHUDLine::UOdysseyHUDLine(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer)
+UOdysseyHUDLine::UOdysseyHUDLine( const FObjectInitializer& ObjectInitializer ):
+    Super( ObjectInitializer )
 {
-
 }
+
 
 TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
 {
@@ -23,5 +23,5 @@ TSharedPtr<SWidget> UOdysseyHUDLine::CreateWidget()
 
 void UOdysseyHUDLine::Draw(FViewport* iViewport, FCanvas* ioCanvas)
 {
-
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
 }

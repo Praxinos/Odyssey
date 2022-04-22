@@ -15,11 +15,13 @@
 FOdysseyTexture2DEditor::~FOdysseyTexture2DEditor()
 {
 	delete mTextureWrapper;
+	delete mHUDWrapper;
 }
 
 FOdysseyTexture2DEditor::FOdysseyTexture2DEditor() :
 	FOdysseyTextureEditor(),
 	mTextureWrapper(new FOdysseyTexture2DWrapper(nullptr)),
+    mHUDWrapper(new FOdysseyTexture2DWrapper(nullptr)),
 	mGUI(nullptr)
 {
 }
@@ -27,12 +29,19 @@ FOdysseyTexture2DEditor::FOdysseyTexture2DEditor() :
 FOdysseyTexture2DEditor::FOdysseyTexture2DEditor(UTexture2D* iTexture) :
 	FOdysseyTextureEditor(),
     mTextureWrapper( new FOdysseyTexture2DWrapper(iTexture) ),
+    mHUDWrapper(new FOdysseyTexture2DWrapper(nullptr)),
 	mGUI(nullptr)
 {
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
+
+FOdysseyTexture2DWrapper* 
+FOdysseyTexture2DEditor::HUDWrapper() const
+{
+	return mHUDWrapper;
+}
 
 FOdysseyTexture2DWrapper*
 FOdysseyTexture2DEditor::TextureWrapper() const

@@ -7,7 +7,8 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyTextureEditorDrawingState.h"
-
+#include "SOdysseySurfaceViewport.h"
+#include "FOdysseySceneViewport.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyTextureEditor"
 
@@ -96,22 +97,15 @@ FOdysseyTextureEditor::ClearUndo()
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-UTexture*
-FOdysseyTextureEditor::Texture() const
-{
-    return nullptr;
-}
-
-FOdysseyTextureWrapper*
-FOdysseyTextureEditor::TextureWrapper() const
-{
-    return nullptr;
-}
-
 IOdysseySurfaceEditable*
 FOdysseyTextureEditor::DisplaySurface() const
 {
 	return TextureWrapper()->Surface();
+}
+
+IOdysseySurfaceEditable* FOdysseyTextureEditor::HUDSurface() const
+{
+    return HUDWrapper()->Surface();
 }
 
 FOdysseyLayerStack*

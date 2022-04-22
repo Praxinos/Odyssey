@@ -13,6 +13,7 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorViewportTab::~FOdysseyPainterEditorViewportTab()
 {
+    mViewport->GetViewport()->ViewportResizedEvent.RemoveAll(this);
 }
 
 FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor)
@@ -37,6 +38,8 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
 	TSharedPtr<FOdysseyPainterEditorViewportClient> viewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetGUI()->GetMeshSelectorTab()->MeshSelector()->GetMeshSelectorPtr()));
 	viewportClient->OnPickColor().AddRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
 	mViewport->SetViewportClient(viewportClient);
+
+    mViewport->GetViewport()->ViewportResizedEvent.AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportSizeChanged);
 
     return mViewport;
 }
@@ -161,6 +164,11 @@ void
 FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 {
     mViewport->ZoomExponential(mViewport->GetZoom(), -0.1);
+}
+
+void FOdysseyPainterEditorViewportTab::OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused)
+{
+    UE_LOG(LogTemp, Display, TEXT("Resized to %d, %d"), iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y);
 }
 
 #undef LOCTEXT_NAMESPACE

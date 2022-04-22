@@ -19,7 +19,8 @@ class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUD,
     GENERATED_BODY()
 
 public:
-    UOdysseyHUDLine(const FObjectInitializer& ObjectInitializer);
+    UOdysseyHUDLine( const FObjectInitializer& ObjectInitializer );
+
 
 //UOdysseyHUD overrides
 public:

@@ -30,13 +30,15 @@ FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorHUDTab::CreateWidget()
 {
+    return SNullWidget::NullWidget;
+/*
 	if (!mHUD)
     {
         UOdysseyHUDLine* line = NewObject<UOdysseyHUDLine>(GetTransientPackage(), NAME_None, RF_Transient);
         mHUD = MakeShareable(line);
     }
 
-    return mHUD->CreateWidget();
+    return mHUD->CreateWidget();*/
 }
 
 void

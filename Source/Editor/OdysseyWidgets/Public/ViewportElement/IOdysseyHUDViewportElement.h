@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "IOdysseyViewportElement.h"
+#include "OdysseyPaintEngineHUD.h"
 
 /////////////////////////////////////////////////////
 // IOdysseyViewportElement

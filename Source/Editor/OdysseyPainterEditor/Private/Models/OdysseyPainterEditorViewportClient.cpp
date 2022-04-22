@@ -109,8 +109,13 @@ FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInp
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    for( int i = 0; i < mViewportElements.Num(); i++ )
-        mViewportElements[i]->Draw( iViewport, ioCanvas );
+    if( mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD() )
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw( iViewport, ioCanvas );
+
+    IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
+    UTexture* HUDTexture = nullptr;
+    if (HUDSurface)
+        HUDTexture = HUDSurface->Texture();
 
     // Send Tick to PaintEngine
     // TODO: Move the call of Tick in a FTickableEditorObject, the PaintEngine itself should be a FTickableEditorObject
@@ -204,6 +209,22 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         //     boxItem.SetColor( Settings.TextureBorderColor );
         //     Canvas->DrawItem( boxItem );
         // }
+    }
+
+    // Draw HUD Surface
+    if( HUDTexture && HUDTexture->Resource )
+    {
+        FCanvasTileItem tileItem(pan, HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
+        tileItem.BatchedElementParameters = batchedElementParameters;
+        uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
+        result += ( 1 << 0 );
+        result += ( 1 << 1 );
+        result += ( 1 << 2 );
+        result += ( 1 << 3 );
+        tileItem.BlendMode = (ESimpleElementBlendMode)result;
+        tileItem.PivotPoint = pivotPoint;
+        tileItem.Rotation.Add( 0, rotation, 0 );
+        ioCanvas->DrawItem( tileItem );
     }
 
     // Draw Cursor Preview

@@ -46,6 +46,9 @@ protected:
     virtual void OnZoomInExponential();
     virtual void OnZoomOutExponential();
 
+    //HUD
+    virtual void OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused);
+
 private:
     FOdysseyPainterEditor* mEditor;
 

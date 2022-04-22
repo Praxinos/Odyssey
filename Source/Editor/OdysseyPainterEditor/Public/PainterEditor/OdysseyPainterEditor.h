@@ -42,6 +42,7 @@ public:
     virtual FOdysseyPaintEngine*		                PaintEngine() const;
     virtual FOdysseyPaintEngineHUD*                     PaintEngineHUD() const;
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
+    virtual IOdysseySurfaceEditable*                    HUDSurface() const = 0;
 	virtual FOdysseyUndoHistory*		                UndoHistory() const;
 	virtual bool                                        DrawBrushPreview() const;
 	virtual ::ULIS::FColor                              PaintColor() const;

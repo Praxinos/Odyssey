@@ -35,8 +35,12 @@ public:
     // Getters
 	virtual UTexture*							Texture() const = 0;
     virtual FOdysseyTextureWrapper*             TextureWrapper() const = 0;
+
+    virtual FOdysseyTextureWrapper*             HUDWrapper() const = 0;
     
 	virtual IOdysseySurfaceEditable*            DisplaySurface() const override;
+    virtual IOdysseySurfaceEditable*            HUDSurface() const override;
+
     virtual FOdysseyLayerStack*					LayerStack() const;
     ::ULIS::eAlphaMode	                        SelectedAlphaMode() const;
 
