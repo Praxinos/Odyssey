@@ -7,7 +7,7 @@
 #include "Widgets/Layout/SExpandableArea.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyPainterEditor.h"
-#include "IOdysseyTool.h"
+#include "OdysseyTool.h"
 #include "OdysseyToolFreeHand.h"
 #include "OdysseyToolPolygon.h"
 #include "OdysseyToolCircle.h"
@@ -61,7 +61,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style( &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox") )
-                    .OnCheckStateChanged( this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolFreeHand>()) )
+                    .OnCheckStateChanged( this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_FreeHand )
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolFreeHand>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -75,7 +75,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
-                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolLine>()) )
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Line )
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolLine>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -89,7 +89,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
-                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolRectangle>() ))
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Rectangle)
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolRectangle>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -103,7 +103,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
-                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolPolygon>()))
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Polygon)
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolPolygon>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -117,7 +117,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
-                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolCircle>() ))
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Circle)
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolCircle>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -131,7 +131,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
-                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolEllipse>() ))
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Ellipse)
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolEllipse>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -145,7 +145,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                 [
                     SNew( SCheckBox )
                     .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.TransparentCheckBox"))
-                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, Cast<IOdysseyTool>(NewObject<UOdysseyToolBezier>()))
+                    .OnCheckStateChanged(this, &FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked, kTool_Bezier)
                     .IsChecked_Lambda([&]() -> ECheckBoxState
                     {
                         return Cast<UOdysseyToolBezier>(mEditor->GetSelectedTool()) != nullptr ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -261,9 +261,9 @@ FOdysseyPainterEditorToolsTab::OnClearUndo()
 }
 
 void 
-FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, IOdysseyTool* iTool)
+FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eToolType iToolType)
 {
-    mEditor->SetSelectedTool( iTool );
+    //mEditor->SetSelectedTool( iTool );
 }
 
 //--------------------------------------------------------------------------------------

@@ -7,7 +7,19 @@
 #include <ULIS>
 
 class FOdysseyPainterEditor;
-class IOdysseyTool;
+class UOdysseyTool;
+
+
+enum eToolType
+{
+    kTool_FreeHand,
+    kTool_Line,
+    kTool_Rectangle,
+    kTool_Polygon,
+    kTool_Circle,
+    kTool_Ellipse,
+    kTool_Bezier
+};
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :
     public FOdysseyEditorTab
@@ -29,7 +41,7 @@ protected:
     virtual FReply OnClearUndo();
 
     /** Delegate for Tools checkBoxes button */
-    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, IOdysseyTool* iTool);
+    void OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eToolType iToolType);
 
 protected:
     // Methods

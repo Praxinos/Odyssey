@@ -7,7 +7,7 @@
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
 #include "OdysseyHUDSystem.h"
-#include "IOdysseyTool.h"
+#include "OdysseyTool.h"
 #include "OdysseyToolFreeHand.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
@@ -23,7 +23,7 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 
 FOdysseyPainterEditor::FOdysseyPainterEditor()
     : mPaintEngine()
-	, mSelectedTool( NewObject<UOdysseyToolFreeHand>() )
+	, mSelectedTool(nullptr)
     , mHUDSystem(new FOdysseyHUDSystem())
 	, mStrokeEngine(nullptr)
 	, mBrushContexts()
@@ -39,6 +39,7 @@ void
 FOdysseyPainterEditor::InitData()
 {
 	mStrokeEngine = NewObject<UOdysseyStrokeEngine>();
+	mSelectedTool = NewObject<UOdysseyToolFreeHand>();
 
 	mStrokeEngine->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 
@@ -127,7 +128,7 @@ FOdysseyPainterEditor::PaintColor()
 	return mPaintColor;
 }
 
-IOdysseyTool*
+UOdysseyTool*
 FOdysseyPainterEditor::GetSelectedTool() const
 {
     return mSelectedTool;
@@ -143,7 +144,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor)
 }
 
 void
-FOdysseyPainterEditor::SetSelectedTool(IOdysseyTool* iSelectedTool)
+FOdysseyPainterEditor::SetSelectedTool(UOdysseyTool* iSelectedTool)
 {
     mSelectedTool = iSelectedTool;
 }

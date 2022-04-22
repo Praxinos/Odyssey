@@ -5,13 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyHUDEllipse.h"
-#include "IOdysseyTool.h"
+#include "OdysseyTool.h"
 
 #include "OdysseyToolEllipse.Generated.h"
 
 UCLASS()
-class ODYSSEYTOOLS_API UOdysseyToolEllipse : public UObject,
-                                             public IOdysseyTool
+class ODYSSEYTOOLS_API UOdysseyToolEllipse : public UOdysseyTool
 {
     GENERATED_BODY()
 

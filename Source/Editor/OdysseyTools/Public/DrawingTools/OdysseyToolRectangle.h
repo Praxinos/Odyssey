@@ -5,13 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyHUDRectangle.h"
-#include "IOdysseyTool.h"
+#include "OdysseyTool.h"
 
 #include "OdysseyToolRectangle.Generated.h"
 
 UCLASS()
-class ODYSSEYTOOLS_API UOdysseyToolRectangle : public UObject,
-                                               public IOdysseyTool
+class ODYSSEYTOOLS_API UOdysseyToolRectangle : public UOdysseyTool
 {
     GENERATED_BODY()
 

@@ -13,7 +13,7 @@ class FOdysseyHUDSystem;
 class UOdysseyStrokeEngine;
 class FOdysseyUndoHistory;
 class IOdysseySurfaceEditable;
-class IOdysseyTool;
+class UOdysseyTool;
 class FOdysseyBrushContext;
 
 /**
@@ -47,12 +47,12 @@ public:
 	virtual IOdysseySurfaceEditable*                    DisplaySurface() const = 0;
 	virtual FOdysseyUndoHistory*		                UndoHistory() const;
     virtual FOdysseyBrushColor&                         PaintColor();
-    virtual IOdysseyTool*                               GetSelectedTool() const;
+    virtual UOdysseyTool*                               GetSelectedTool() const;
 
 public:
     // Setters
     void                         PaintColor(const FOdysseyBrushColor& iColor);
-    void                         SetSelectedTool( IOdysseyTool* iSelectedTool );
+    void                         SetSelectedTool( UOdysseyTool* iSelectedTool );
 
 public:
     // Interface
@@ -72,7 +72,7 @@ protected:
 protected:
 	FOdysseyUndoHistory*		mUndoHistory;
     FOdysseyPaintEngine         mPaintEngine; //We declare a single PaintEngine which will be used for any brush we use
-    IOdysseyTool*               mSelectedTool;
+    UOdysseyTool*               mSelectedTool;
     FOdysseyHUDSystem*          mHUDSystem;
     UOdysseyStrokeEngine*       mStrokeEngine; //TODO: Should actually be a tool => FreeHandTool
     TArray<FOdysseyBrushContext*> mBrushContexts;

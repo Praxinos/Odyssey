@@ -5,13 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyHUDBezier.h"
-#include "IOdysseyTool.h"
+#include "OdysseyTool.h"
 
 #include "OdysseyToolBezier.Generated.h"
 
 UCLASS()
-class ODYSSEYTOOLS_API UOdysseyToolBezier : public UObject,
-                                            public IOdysseyTool
+class ODYSSEYTOOLS_API UOdysseyToolBezier : public UOdysseyTool
 {
     GENERATED_BODY()
 
