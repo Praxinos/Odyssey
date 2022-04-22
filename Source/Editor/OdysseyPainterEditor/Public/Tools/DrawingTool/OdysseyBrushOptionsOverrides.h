@@ -39,7 +39,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBrushOptionsOverrides : public UObject
 
     /** Enable Interpolation Type Override. */
     UPROPERTY( EditAnywhere, Category = "Interpolation", meta=(InlineEditConditionToggle) )
-    bool    bOverride_Type;
+    bool    bOverride_InterpolationType;
 
 
     /////////////////////////////////////////////////////
@@ -61,8 +61,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBrushOptionsOverrides : public UObject
     bool    SizeAdaptative;
 
     /** Interpolation Type Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_Type" ) )
-    EOdysseyBrushInterpolationType   Type;
+    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = ( editcondition = "bOverride_InterpolationType" ) )
+    EOdysseyBrushInterpolationType   InterpolationType;
 
 public:
     //Applies the Overrides to the given object

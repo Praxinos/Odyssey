@@ -8,12 +8,12 @@ UOdysseyBrushOptionsOverrides::UOdysseyBrushOptionsOverrides()
     , bOverride_Flow        ( false                                         )
     , bOverride_Step        ( false                                         )
     , bOverride_Adaptative  ( false                                         )
-    , bOverride_Type        ( false                                         )
+    , bOverride_InterpolationType ( false                                         )
     , Size                  ( 20                                            )
     , Flow                  ( 100                                           )
     , Step                  ( 20                                            )
     , SizeAdaptative        ( true                                          )
-    , Type                  ( EOdysseyBrushInterpolationType::kCatmullRom   )
+    , InterpolationType     ( EOdysseyBrushInterpolationType::kCatmullRom   )
 {}
 
 //Applies the Overrides to the given object
@@ -28,6 +28,6 @@ UOdysseyBrushOptionsOverrides::Override(UOdysseyBrushOptions* iBlendParameters) 
         FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Step", Step);
     if (bOverride_Adaptative)
         FObjectEditorUtils::SetPropertyValue(iBlendParameters, "SizeAdaptative", SizeAdaptative);
-    if (bOverride_Type)
-        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "Type", Type);
+    if (bOverride_InterpolationType)
+        FObjectEditorUtils::SetPropertyValue(iBlendParameters, "InterpolationType", InterpolationType);
 }
