@@ -10,9 +10,11 @@ FOdysseyToolBezier::~FOdysseyToolBezier()
 }
 
 FOdysseyToolBezier::FOdysseyToolBezier( FVector2D iStartPoint )
-    //: mLine(NewObject<UOdysseyHUDLine>())
+    : mBezier(NewObject<UOdysseyHUDBezier>())
+    , mIsEndPointSet( false )
+    , mIsVertexPointSet( false )
 {
-    //mLine->Init( FName("lineTool"), iStartPoint, iStartPoint );
+    mBezier->Init( FName("bezierTool"), iStartPoint, iStartPoint, iStartPoint );
 }
 
 //--------------------------------------------------------------------------------------
@@ -20,7 +22,7 @@ FOdysseyToolBezier::FOdysseyToolBezier( FVector2D iStartPoint )
 
 void FOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
-    //mLine->Draw( ioBlock, iTransform );
+    mBezier->Draw( ioBlock, iTransform );
 }
 
 //--------------------------------------------------------------------------------------
@@ -28,36 +30,57 @@ void FOdysseyToolBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 
 void FOdysseyToolBezier::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-//     mLine->MouseMove(iViewport, iX, iY);
-// 
-//     if( !mIsReadyToBeApplied )
-//         mLine->mFinishPoint.Set( iX, iY );
+    mBezier->MouseMove(iViewport, iX, iY);
+
+    if( !mIsReadyToBeApplied )
+    {
+        if ( !mIsEndPointSet )
+            mBezier->mEndPoint.Set( iX, iY );
+        else
+            mBezier->mVertexPoint.Set( iX, iY );
+    }
 }
 
 FReply FOdysseyToolBezier::InputKey(FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply)
 {
-//     mLine->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
-// 
-//     if (iKey == EKeys::LeftMouseButton)
-//     {
-//         if( !mIsReadyToBeApplied )
-//         {
-//             mIsReadyToBeApplied = true;
-//             ioReply = FReply::Handled();
-//         }
-//     }
+    mBezier->InputKey(iViewport, iControllerId, iKey, iEvent, iAmountDepressed, iGamepad, ioReply );
+
+    if (iKey == EKeys::LeftMouseButton)
+    {
+        if ( !mIsEndPointSet )
+        {
+            mIsEndPointSet = true;
+            ioReply = FReply::Handled();
+        }
+        else if ( !mIsVertexPointSet )
+        {
+            mIsVertexPointSet = true;
+            ioReply = FReply::Handled();
+        }
+        else
+        {
+            if( !mIsReadyToBeApplied )
+            {
+                mIsReadyToBeApplied = true;
+                ioReply = FReply::Handled();
+            }
+        }
+    }
 
     return ioReply;
 }
 
 void FOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
-//     mLine->CapturedMouseMove(iViewport, iX, iY);
-// 
-//     if ( !mIsReadyToBeApplied )
-//     {
-//         mLine->mFinishPoint.Set(iX, iY);
-//     }
+    mBezier->CapturedMouseMove(iViewport, iX, iY);
+
+    if ( !mIsReadyToBeApplied )
+    {
+        if ( !mIsEndPointSet )
+            mBezier->mEndPoint.Set( iX, iY );
+        else
+            mBezier->mVertexPoint.Set( iX, iY );
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -66,7 +89,13 @@ void FOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
 ::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolBezier::GenerateToolPoints()
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-    //::ULIS::GenerateLinePoints( ::ULIS::FVec2I( mLine->mStartPoint.X, mLine->mStartPoint.Y), ::ULIS::FVec2I( mLine->mFinishPoint.X, mLine->mFinishPoint.Y ), pointsArray );
+    ::ULIS::GenerateQuadraticBezierPoints(
+        ::ULIS::FVec2I( mBezier->mStartPoint.X, mBezier->mStartPoint.Y),
+        ::ULIS::FVec2I( mBezier->mVertexPoint.X, mBezier->mVertexPoint.Y ),
+        ::ULIS::FVec2I( mBezier->mEndPoint.X, mBezier->mEndPoint.Y ),
+        1.f,
+        pointsArray
+    );
 
     return pointsArray;
 }

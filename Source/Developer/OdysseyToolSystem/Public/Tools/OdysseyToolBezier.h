@@ -28,5 +28,7 @@ public:
     ::ULIS::TArray<::ULIS::FVec2I> GenerateToolPoints() override;
 
 private:
-    //UOdysseyHUDBezier* mBezier;
+    UOdysseyHUDBezier* mBezier;
+    bool mIsEndPointSet;
+    bool mIsVertexPointSet;
 };
