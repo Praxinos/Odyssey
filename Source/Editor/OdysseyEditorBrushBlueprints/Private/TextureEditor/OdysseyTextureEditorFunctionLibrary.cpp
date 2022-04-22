@@ -5,7 +5,7 @@
 
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyTextureEditorBrushContext.h"
+#include "BrushContext/OdysseyTextureEditorBrushContext.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 

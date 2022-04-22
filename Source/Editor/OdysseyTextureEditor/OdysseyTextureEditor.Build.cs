@@ -51,7 +51,6 @@ public class OdysseyTextureEditor : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Blueprint"),
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),

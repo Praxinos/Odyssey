@@ -326,6 +326,12 @@ UOdysseyStrokeEngine::SetPaintEngine(FOdysseyPaintEngine* iPaintEngine)
 }
 
 void
+UOdysseyStrokeEngine::SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts)
+{
+    mBrushContexts = iContexts;
+}
+
+void
 UOdysseyStrokeEngine::RefreshBrushInstance()
 {
     DestroyBrushInstance();
@@ -390,6 +396,11 @@ UOdysseyStrokeEngine::CreateBrushInstance(bool iApplyOverrides)
 	UOdysseyBrushAssetBase* brushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), Brush->GeneratedClass);
 	
     brushInstance->SetBrushOptions(BrushOptions); //Share BrushOptions between every selected brushes
+    //Set BrushContexts
+    for (int i = 0; i < mBrushContexts.Num(); i++)
+    {
+        brushInstance->AddContext(mBrushContexts[i]); //Set the brush context so that context nodes can be used
+    }
     brushInstance->SetBlock(mPaintEngine->PaintBlock());
 
 	//Apply Overrides before setting the brushInstance in the strokeEngine properties

@@ -1,7 +1,7 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
-#include "OdysseyPainterEditorBrushCustomization.h"
+#include "OdysseyBrushCustomization.h"
 
 #include "IDetailCustomization.h"
 #include "DetailLayoutBuilder.h"
@@ -9,15 +9,15 @@
 #include "IDetailGroup.h"
 #include "OdysseyBrushAssetBase.h"
 
-#define LOCTEXT_NAMESPACE "OdysseyPainterEditorBrushCustomization"
+#define LOCTEXT_NAMESPACE "OdysseyBrushCustomization"
 
-class FOdysseyPainterEditorBrushDetails : public IDetailCustomization
+class FOdysseyBrushDetails : public IDetailCustomization
 {
 public:
     /** Makes a new instance of this detail layout class for a specific detail view requesting it */
     static TSharedRef<IDetailCustomization> MakeInstance()
     {
-        return MakeShared<FOdysseyPainterEditorBrushDetails>();
+        return MakeShared<FOdysseyBrushDetails>();
     }
 
     // IDetailCustomization interface
@@ -26,7 +26,7 @@ public:
 };
 
 void
-FOdysseyPainterEditorBrushDetails::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
+FOdysseyBrushDetails::CustomizeDetails(IDetailLayoutBuilder& iBuilder)
 {
     IDetailCategoryBuilder& overridesCategory = iBuilder.EditCategory("Overrides", FText::FromString("Overrides"));
 
@@ -64,10 +64,10 @@ FOdysseyPainterEditorBrushDetails::CustomizeDetails(IDetailLayoutBuilder& iBuild
 }
 
 void
-FOdysseyPainterEditorBrushCustomization::Register()
+FOdysseyBrushCustomization::Register()
 {
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomClassLayout(UOdysseyBrushAssetBase::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyPainterEditorBrushDetails::MakeInstance));
+    PropertyModule.RegisterCustomClassLayout(UOdysseyBrushAssetBase::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyBrushDetails::MakeInstance));
 }
 
 #undef LOCTEXT_NAMESPACE

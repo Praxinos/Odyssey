@@ -18,7 +18,7 @@
 // FOdysseyBrushEditorModule
 void FOdysseyBrushEditorModule::StartupModule()
 {
-    check(GEditor);
+    //check(GEditor);
 
     /////////////////
     // Register the asset type

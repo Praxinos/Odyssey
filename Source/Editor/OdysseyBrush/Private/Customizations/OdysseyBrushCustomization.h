@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyPainterEditorBrushCustomization
+class FOdysseyBrushCustomization
 {
 public:
     static void Register();

@@ -39,7 +39,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyBrush",
                 "OdysseyEditor",
                 "OdysseyImaging",
-                "OdysseyPaintEngine",
                 "OdysseyTools",
                 "OdysseyHUDSystem",
                 "OdysseyStyle",
@@ -48,9 +47,16 @@ public class OdysseyPainterEditor : ModuleRules
             }
         );
 
+        PublicDependencyModuleNames.AddRange(
+             new string[] {
+                "OdysseyPaintEngine",
+                "ULIS",
+                "ULISLoader"
+             }
+        );
+
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Blueprint"),
                 Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
@@ -62,13 +68,6 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
             }
-        );
-
-        PublicDependencyModuleNames.AddRange(
-             new string[] {
-                "ULIS",
-                "ULISLoader"
-             }
         );
 
         DynamicallyLoadedModuleNames.AddRange(

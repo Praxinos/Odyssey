@@ -29,7 +29,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor()
 	, mBrushContexts()
 	, mPaintColor(::ULIS::FColor::Black)
 {
-	/* mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this)); */
+	mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
 
 //--------------------------------------------------------------------------------------
@@ -44,6 +44,7 @@ FOdysseyPainterEditor::InitData()
 	mStrokeEngine->OnApplyOverridesDelegate().AddRaw(this, &FOdysseyPainterEditor::OnApplyOverrides);
 
 	mStrokeEngine->Initialize(&mPaintEngine);
+	mStrokeEngine->SetBrushContexts(mBrushContexts);
 	mStrokeEngine->Activate();
     //---
 }

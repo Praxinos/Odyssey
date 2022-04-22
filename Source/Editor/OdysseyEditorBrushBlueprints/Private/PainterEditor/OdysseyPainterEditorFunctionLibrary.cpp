@@ -5,7 +5,7 @@
 
 #include "OdysseyBrushAssetBase.h"
 #include "StrokeEngine/OdysseyStrokeEngine.h"
-#include "OdysseyPainterEditorBrushContext.h"
+#include "BrushContext/OdysseyPainterEditorBrushContext.h"
 
 //---
 

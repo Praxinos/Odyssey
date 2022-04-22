@@ -21,6 +21,12 @@
   ],
   "Modules": [
     {
+      "Name": "OdysseyEditorBrushBlueprints",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default",
+      "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
+    },
+    {
       "Name": "OdysseyCore",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
@@ -33,12 +39,14 @@
     {
       "Name": "OdysseyMeshPaintRendering",
       "Type": "UncookedOnly",
-      "LoadingPhase": "PostConfigInit"
+      "LoadingPhase": "PostConfigInit",
+      "Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
     },
     {
       "Name": "OdysseyBrush",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default",
+      "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries"
     },
     {
       "Name": "OdysseyHUDSystem",
@@ -73,7 +81,7 @@
     {
       "Name": "OdysseyBrushEditor",
       "Type": "Editor",
-      "LoadingPhase": "PostEngineInit"
+      "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyContentBrowserExtensions",

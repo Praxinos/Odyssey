@@ -11,7 +11,7 @@
 
 class FOdysseyPainterEditor;
 
-class FOdysseyPainterEditorBrushContext
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorBrushContext
     : public FOdysseyBrushContext
 {
 public:

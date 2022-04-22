@@ -9,7 +9,7 @@
 /**
  * The Brush Asset module.
  */
-class FOdysseyBrushModule :
+class FOdysseyEditorBrushBlueprints :
 	public IModuleInterface
 {
 public:
@@ -17,9 +17,4 @@ public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
 	// End of IModuleInterface interface
-
-private:
-    //BrushOverrides Customizations
-	void RegisterBrushCustomizations();
-	void UnregisterBrushCustomizations();
 };

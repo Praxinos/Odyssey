@@ -7,7 +7,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBlendParameters.h"
-#include "OdysseyTextureEditorBrushContext.h"
+#include "BrushContext/OdysseyTextureEditorBrushContext.h"
 
 #include "ObjectEditorUtils.h"
 

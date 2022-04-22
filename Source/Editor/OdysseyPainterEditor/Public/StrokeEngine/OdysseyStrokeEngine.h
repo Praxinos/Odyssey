@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 #include "StrokeEngine/OdysseyStrokeEngineWorker.h"
@@ -68,6 +69,9 @@ public:
 
     // Sets the PaintEngine used to draw
     void SetPaintEngine(FOdysseyPaintEngine* iPaintEngine);
+
+    // Sets the BrushContexts to apply to brushInstance
+    void SetBrushContexts(TArray<FOdysseyBrushContext*> iContexts);
 
     // Recreates the brush instance
     void RefreshBrushInstance();
@@ -166,6 +170,7 @@ protected:
 
     //Resources
     FOdysseyPaintEngine*                mPaintEngine;
+    TArray<FOdysseyBrushContext*>       mBrushContexts;
     FOdysseyStrokeEngineWorker          mWorker;
 
     //---

@@ -16,7 +16,6 @@
 #include "StrokeEngine/OdysseyBrushOptionsOverrides.h"
 #include "StrokeEngine/OdysseyBlendParametersOverrides.h"
 #include "StrokeEngine/Shapes/OdysseyFreehandShapeOverrides.h"
-#include "OdysseyPainterEditorBrushCustomization.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorModule"
@@ -82,7 +81,6 @@ FOdysseyPainterEditorModule::UnregisterCommands()
 void
 FOdysseyPainterEditorModule::RegisterBrushOverrides()
 {
-    FOdysseyPainterEditorBrushCustomization::Register();
     FOdysseyBrushOverride::Register(UOdysseyBrushOptionsOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyBlendParametersOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyFreehandShapeOverrides::StaticClass());

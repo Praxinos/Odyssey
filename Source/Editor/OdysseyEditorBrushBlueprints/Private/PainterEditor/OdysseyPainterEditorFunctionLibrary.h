@@ -13,7 +13,7 @@ class UOdysseyBrushAssetBase;
 //---
 
 UCLASS(Blueprintable)
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorFunctionLibrary 
+class UOdysseyPainterEditorFunctionLibrary 
     : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
