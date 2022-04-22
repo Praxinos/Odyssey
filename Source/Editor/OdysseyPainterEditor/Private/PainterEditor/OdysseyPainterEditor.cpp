@@ -166,6 +166,9 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FOdysseyEditor::AddReferencedObjects(Collector);
 
+	if (mSelectedTool)
+		Collector.AddReferencedObject(mSelectedTool);
+
 	if (mStrokeEngine)
         Collector.AddReferencedObject(mStrokeEngine);
 }
