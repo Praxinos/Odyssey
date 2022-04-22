@@ -12,7 +12,7 @@ FOdysseyToolBezier::~FOdysseyToolBezier()
 FOdysseyToolBezier::FOdysseyToolBezier( FVector2D iStartPoint )
     : mBezier(NewObject<UOdysseyHUDBezier>())
     , mIsEndPointSet( false )
-    , mIsVertexPointSet( false )
+    , mIsControlPointSet( false )
 {
     mBezier->Init( FName("bezierTool"), iStartPoint, iStartPoint, iStartPoint );
 }
@@ -37,7 +37,7 @@ void FOdysseyToolBezier::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
         if ( !mIsEndPointSet )
             mBezier->mEndPoint.Set( iX, iY );
         else
-            mBezier->mVertexPoint.Set( iX, iY );
+            mBezier->mControlPoint.Set( iX, iY );
     }
 }
 
@@ -52,9 +52,9 @@ FReply FOdysseyToolBezier::InputKey(FViewport* iViewport, int32 iControllerId, F
             mIsEndPointSet = true;
             ioReply = FReply::Handled();
         }
-        else if ( !mIsVertexPointSet )
+        else if ( !mIsControlPointSet )
         {
-            mIsVertexPointSet = true;
+            mIsControlPointSet = true;
             ioReply = FReply::Handled();
         }
         else
@@ -79,7 +79,7 @@ void FOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
         if ( !mIsEndPointSet )
             mBezier->mEndPoint.Set( iX, iY );
         else
-            mBezier->mVertexPoint.Set( iX, iY );
+            mBezier->mControlPoint.Set( iX, iY );
     }
 }
 
@@ -91,7 +91,7 @@ void FOdysseyToolBezier::CapturedMouseMove(FViewport* iViewport, int32 iX, int32
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateQuadraticBezierPoints(
         ::ULIS::FVec2I( mBezier->mStartPoint.X, mBezier->mStartPoint.Y),
-        ::ULIS::FVec2I( mBezier->mVertexPoint.X, mBezier->mVertexPoint.Y ),
+        ::ULIS::FVec2I( mBezier->mControlPoint.X, mBezier->mControlPoint.Y ),
         ::ULIS::FVec2I( mBezier->mEndPoint.X, mBezier->mEndPoint.Y ),
         1.f,
         pointsArray

@@ -12,7 +12,7 @@ FOdysseyToolEllipse::~FOdysseyToolEllipse()
 FOdysseyToolEllipse::FOdysseyToolEllipse( FVector2D iCenterPoint )
 : mEllipse(NewObject<UOdysseyHUDEllipse>())
 {
-    mEllipse->Init( FName("EllipseTool"), iCenterPoint, iCenterPoint, 0);
+    mEllipse->Init( FName("EllipseTool"), iCenterPoint, iCenterPoint );
 }
 
 //--------------------------------------------------------------------------------------
@@ -33,11 +33,9 @@ void FOdysseyToolEllipse::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 
     if( !mIsReadyToBeApplied )
     {
-        mEllipse->mEndPoint.Set( iX, iY );
-        mEllipse->mEllipseAaxis = (int)(mEllipse->mCenterPoint.X - mEllipse->mEndPoint.X);
-        mEllipse->mEllipseBaxis = (int)(mEllipse->mCenterPoint.Y - mEllipse->mEndPoint.Y);
-        mEllipse->mAngle = 0;
-        UE_LOG(LogTemp, Display, TEXT("%lf, %lf"), mEllipse->mEndPoint.X, mEllipse->mEndPoint.Y)
+        mEllipse->mBorderPoint.Set( iX, iY );
+        mEllipse->mEllipseAaxis = FMath::Abs(mEllipse->mCenterPoint.X - mEllipse->mBorderPoint.X);
+        mEllipse->mEllipseBaxis = FMath::Abs(mEllipse->mCenterPoint.Y - mEllipse->mBorderPoint.Y);
     }
 }
 
@@ -63,10 +61,9 @@ void FOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
  
     if ( !mIsReadyToBeApplied )
     {
-        mEllipse->mEndPoint.Set(iX, iY);
-        mEllipse->mEllipseAaxis = (int)(mEllipse->mCenterPoint.X - mEllipse->mEndPoint.X);
-        mEllipse->mEllipseBaxis = (int)(mEllipse->mCenterPoint.Y - mEllipse->mEndPoint.Y);
-        mEllipse->mAngle = 0;
+        mEllipse->mBorderPoint.Set(iX, iY);
+        mEllipse->mEllipseAaxis = FMath::Abs(mEllipse->mCenterPoint.X - mEllipse->mBorderPoint.X);
+        mEllipse->mEllipseBaxis = FMath::Abs(mEllipse->mCenterPoint.Y - mEllipse->mBorderPoint.Y);
     }
 }
 
@@ -75,8 +72,19 @@ void FOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int3
 
 ::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolEllipse::GenerateToolPoints()
 {
+    FTransform2D rotation = FTransform2D(FQuat2D(-mPreviousTransform.GetMatrix().GetRotationAngle()));
+    FVector2D transformedBorderPoint = mEllipse->mBorderPoint - mEllipse->mCenterPoint;
+    transformedBorderPoint = rotation.TransformPoint(transformedBorderPoint);
+    transformedBorderPoint += mEllipse->mCenterPoint;
+
+    UE_LOG(LogTemp, Display, TEXT("normal: %lf, %lf"), mEllipse->mBorderPoint.X, mEllipse->mBorderPoint.Y)
+    UE_LOG(LogTemp, Display, TEXT("Transformed by %lf: %lf, %lf"), mPreviousTransform.GetMatrix().GetRotationAngle(), transformedBorderPoint.X, transformedBorderPoint.Y)
+
+
+    int transformedEllipseAaxis = FMath::Abs(mEllipse->mCenterPoint.X - transformedBorderPoint.X);
+    int transformedEllipseBaxis = FMath::Abs(mEllipse->mCenterPoint.Y - transformedBorderPoint.Y);
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-    ::ULIS::GenerateRotatedEllipsePoints( ::ULIS::FVec2I( mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), FMath::Abs(mEllipse->mEllipseAaxis), FMath::Abs(mEllipse->mEllipseBaxis), ULIS::FMath::RadToDeg(mPreviousTransform.GetMatrix().GetRotationAngle()), pointsArray );
+    ::ULIS::GenerateRotatedEllipsePoints( ::ULIS::FVec2I( mEllipse->mCenterPoint.X, mEllipse->mCenterPoint.Y), transformedEllipseAaxis, transformedEllipseBaxis, ULIS::FMath::RadToDeg(mPreviousTransform.GetMatrix().GetRotationAngle()), pointsArray );
 
     return pointsArray;
 }

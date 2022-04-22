@@ -30,5 +30,5 @@ public:
 private:
     UOdysseyHUDBezier* mBezier;
     bool mIsEndPointSet;
-    bool mIsVertexPointSet;
+    bool mIsControlPointSet;
 };

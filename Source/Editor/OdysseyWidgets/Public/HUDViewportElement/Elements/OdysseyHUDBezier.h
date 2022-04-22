@@ -17,7 +17,7 @@ class ODYSSEYWIDGETS_API UOdysseyHUDBezier : public UOdysseyHUDElement
     GENERATED_BODY()
 
 public:
-    void Init( FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iVertexPoint, FTransform2D iTransform = FTransform2D() );
+    void Init( FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform = FTransform2D() );
 
 //UOdysseyHUDElement overrides
 public:
@@ -33,12 +33,12 @@ public:
     FVector2D mEndPoint;
 
     UPROPERTY( EditAnywhere )
-    FVector2D mVertexPoint;
+    FVector2D mControlPoint;
 
 private:
     FVector2D mPreviousStartPoint;
     FVector2D mPreviousEndPoint;
-    FVector2D mPreviousVertexPoint;
+    FVector2D mPreviousControlPoint;
 
 private:
     /** The widget representation of the Bezier in Editor */

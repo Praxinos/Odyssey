@@ -4,12 +4,12 @@
 #include "OdysseyHUDBezier.h"
 
 
-void UOdysseyHUDBezier::Init( FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iVertexPoint, FTransform2D iTransform )
+void UOdysseyHUDBezier::Init( FName iName, FVector2D iStartPoint, FVector2D iEndPoint, FVector2D iControlPoint, FTransform2D iTransform )
 {
     UOdysseyHUDElement::Init( iName, iTransform );
     mStartPoint = mPreviousStartPoint = iStartPoint;
     mEndPoint = mPreviousEndPoint = iEndPoint;
-    mVertexPoint = mPreviousVertexPoint = iVertexPoint;
+    mControlPoint = mPreviousControlPoint = iControlPoint;
 }
 
 TSharedPtr<SWidget> UOdysseyHUDBezier::CreateWidget()
@@ -40,7 +40,7 @@ void UOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
     if ( mIsInvalid
         || mPreviousStartPoint != mStartPoint
         || mPreviousEndPoint != mEndPoint
-        || mPreviousVertexPoint != mVertexPoint
+        || mPreviousControlPoint != mControlPoint
         || mPreviousTransform != iTransform
     )
     {
@@ -57,28 +57,28 @@ void UOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
 
     FVector2D transformedStartPoint = iTransform.TransformPoint(mStartPoint);
     FVector2D transformedEndPoint = iTransform.TransformPoint(mEndPoint);
-    FVector2D transformedVertexPoint = iTransform.TransformPoint(mVertexPoint);
+    FVector2D transformedControlPoint = iTransform.TransformPoint(mControlPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
     ctx.DrawQuadraticBezier(
         *(ioBlock),
         ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
-        ::ULIS::FVec2I(transformedVertexPoint.X,transformedVertexPoint.Y),
+        ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
         ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
         1.f,
         ::ULIS::FColor::RGBA8(0, 255, 0, 255)
     );
-    if ( transformedStartPoint != transformedVertexPoint )
+    if ( transformedStartPoint != transformedControlPoint )
     {
         ctx.DrawLine(
             *(ioBlock),
             ::ULIS::FVec2I(transformedStartPoint.X,transformedStartPoint.Y),
-            ::ULIS::FVec2I(transformedVertexPoint.X,transformedVertexPoint.Y),
+            ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
             ::ULIS::FColor::RGBA8(0, 255, 0, 95)
         );
         ctx.DrawLine(
             *(ioBlock),
-            ::ULIS::FVec2I(transformedVertexPoint.X,transformedVertexPoint.Y),
+            ::ULIS::FVec2I(transformedControlPoint.X,transformedControlPoint.Y),
             ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
             ::ULIS::FColor::RGBA8(0, 255, 0, 95)
         );
@@ -87,7 +87,7 @@ void UOdysseyHUDBezier::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*
 
     mPreviousEndPoint = mEndPoint;
     mPreviousStartPoint = mStartPoint;
-    mPreviousVertexPoint = mVertexPoint;
+    mPreviousControlPoint = mControlPoint;
     mPreviousTransform = iTransform;
 
     ioBlock->Dirty();
@@ -103,28 +103,28 @@ void UOdysseyHUDBezier::Erase(::ULIS::FBlock* ioBlock, FTransform2D iTransform /
 
     FVector2D transformedStartPoint = mPreviousTransform.TransformPoint(mPreviousStartPoint);
     FVector2D transformedEndPoint = mPreviousTransform.TransformPoint(mPreviousEndPoint);
-    FVector2D transformedVertexPoint = mPreviousTransform.TransformPoint(mPreviousVertexPoint);
+    FVector2D transformedControlPoint = mPreviousTransform.TransformPoint(mPreviousControlPoint);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
     ctx.DrawQuadraticBezier(
         *(ioBlock),
         ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
-        ::ULIS::FVec2I(transformedVertexPoint.X, transformedVertexPoint.Y),
+        ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
         ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
         1.f,
         ::ULIS::FColor::RGBA8(0, 255, 0, 0)
     );
-    if ( transformedStartPoint != transformedVertexPoint )
+    if ( transformedStartPoint != transformedControlPoint )
     {
         ctx.DrawLine(
             *(ioBlock),
             ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y),
-            ::ULIS::FVec2I(transformedVertexPoint.X, transformedVertexPoint.Y),
+            ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
             ::ULIS::FColor::RGBA8(0, 255, 0, 0)
         );
         ctx.DrawLine(
             *(ioBlock),
-            ::ULIS::FVec2I(transformedVertexPoint.X, transformedVertexPoint.Y),
+            ::ULIS::FVec2I(transformedControlPoint.X, transformedControlPoint.Y),
             ::ULIS::FVec2I(transformedEndPoint.X, transformedEndPoint.Y),
             ::ULIS::FColor::RGBA8(0, 255, 0, 0)
         );
