@@ -27,6 +27,14 @@ public:
 //IOdysseyHUDViewportElement overrides
 public:
     void Draw() override;
+    virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
+    virtual FReply InputKey() override;
+    virtual void CapturedMouseMove() override;
+
+    //UObject overrides
+public:
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent) override;
+    virtual void PreEditChange(FProperty* iPropertyAboutToChange) override;
 
 public:
     void AddElement( UOdysseyHUDElement* iElementToAdd );

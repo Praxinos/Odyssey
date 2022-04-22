@@ -4,6 +4,8 @@
 #include "OdysseyPainterEditorHUDTab.h"
 
 #include "OdysseyPainterEditor.h"
+#include "Line/OdysseyHUDLine.h"
+#include "Handle/OdysseyHUDHandle.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorViewportTab"
 
@@ -55,6 +57,13 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
 
             return FReply::Handled();
         } );
+
+        UOdysseyHUDHandle* handleStart = NewObject<UOdysseyHUDHandle>();
+        handleStart->Init( FName("HandleStart"), &(line->mStartPoint), mEditor->PaintEngineHUD());
+        UOdysseyHUDHandle* handleFinish = NewObject<UOdysseyHUDHandle>();
+        handleFinish->Init(FName("HandleFinish"), &(line->mFinishPoint), mEditor->PaintEngineHUD());
+        line->AddElement( handleStart );
+        line->AddElement( handleFinish );
 
         mHUD = MakeShareable(decoratedLine);
     }

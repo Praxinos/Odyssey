@@ -40,6 +40,48 @@ void UOdysseyHUDElement::Draw()
     mIsInvalid = false;
 }
 
+void UOdysseyHUDElement::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->MouseMove(iViewport, iX, iY);
+    }
+}
+
+FReply UOdysseyHUDElement::InputKey()
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->InputKey();
+    }
+
+    return FReply::Unhandled();
+}
+
+void UOdysseyHUDElement::CapturedMouseMove()
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->CapturedMouseMove();
+    }
+}
+
+void UOdysseyHUDElement::PostEditChangeProperty(FPropertyChangedEvent& iPropertyChangedEvent)
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->PostEditChangeProperty( iPropertyChangedEvent );
+    }
+}
+
+void UOdysseyHUDElement::PreEditChange(FProperty* iPropertyAboutToChange)
+{
+    for (auto it = mElements.CreateConstIterator(); it; ++it)
+    {
+        it->Value->PreEditChange( iPropertyAboutToChange );
+    }
+}
+
 void UOdysseyHUDElement::AddElement(UOdysseyHUDElement* iElementToAdd)
 {
     if( iElementToAdd != nullptr )

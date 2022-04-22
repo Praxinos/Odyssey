@@ -5,7 +5,7 @@
 
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
-#include "Line/OdysseyHUDLine.h"
+#include "OdysseyHUDElement.h"
 
 class FOdysseyPainterEditor;
 

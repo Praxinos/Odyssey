@@ -13,6 +13,9 @@ class ODYSSEYWIDGETS_API IOdysseyHUDViewportElement : public IOdysseyViewportEle
 {
 public:
     virtual void Draw() = 0;
+    virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) = 0;
+    virtual FReply InputKey() = 0;
+    virtual void CapturedMouseMove() = 0;
 
 //Getters/setters
 public:

@@ -7,17 +7,17 @@
 
 #include "OdysseyHUDElement.h"
 
-#include "OdysseyHUDLine.generated.h"
+#include "OdysseyHUDHandle.generated.h"
 
 /////////////////////////////////////////////////////
-// UOdysseyHUDLine
+// UOdysseyHUDHandle
 UCLASS()
-class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUDElement
+class ODYSSEYWIDGETS_API UOdysseyHUDHandle : public UOdysseyHUDElement
 {
     GENERATED_BODY()
 
 public:
-    void Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD );
+    void Init( FName iName, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD );
 
 //UObject overrides
 public:
@@ -28,16 +28,13 @@ public:
 public:
     TSharedPtr<SWidget> CreateWidget() override;
     void Draw() override;
+    virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) override;
+    virtual FReply InputKey() override;
+    virtual void CapturedMouseMove() override;
 
 public:
-    UPROPERTY( EditAnywhere )
-    FVector2D mStartPoint;
+    FVector2D* mReferencePoint;
 
     UPROPERTY( EditAnywhere )
-    FVector2D mFinishPoint;
-
-private:
-    /** The widget representation of the line in Editor */
-    TSharedPtr<IDetailsView> mDetailsView;
-
+    int mHandleSize;
 };

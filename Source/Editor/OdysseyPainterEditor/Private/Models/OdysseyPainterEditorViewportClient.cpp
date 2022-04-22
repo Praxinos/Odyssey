@@ -206,10 +206,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     //TODO Only when HUD is invalid
     if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD() && mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsInvalid())
-    {
-        UE_LOG(LogTemp, Display, TEXT("------"));
         mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
-    }
 
     IOdysseySurface* HUDSurface = mOdysseyPainterEditor->HUDSurface();
     UTexture* HUDTexture = nullptr;
@@ -771,6 +768,11 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
 void
 FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
+    if (mCurrentToolState == eState::kIdle)
+    {
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->MouseMove( iViewport, iX, iY );
+    }
+
     //If we don't have a surface, then we don't interact with anything
     IOdysseySurface* surface = mOdysseyPainterEditorViewportPtr.Pin()->GetSurface();
     if (!surface)
@@ -794,6 +796,8 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
 
         auto paintengine = mOdysseyPainterEditor->PaintEngine();
         paintengine->SetCurrentStrokePoint(mCurrentPointInTexture);
+
+        
     }
 }
 
