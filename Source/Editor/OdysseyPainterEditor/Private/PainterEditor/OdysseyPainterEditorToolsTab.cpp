@@ -213,10 +213,7 @@ FOdysseyPainterEditorToolsTab::OnClearUndo()
 void 
 FOdysseyPainterEditorToolsTab::OnToolCheckBoxClicked(ECheckBoxState iCheckBoxState, eGUISelectedTool iTool)
 {
-    if( iCheckBoxState == ECheckBoxState::Unchecked )
-        mEditor->SetGUISelectedTool( eGUISelectedTool::kBrush );
-    else
-        mEditor->SetGUISelectedTool( iTool );
+    mEditor->SetGUISelectedTool( iTool );
 }
 
 //--------------------------------------------------------------------------------------

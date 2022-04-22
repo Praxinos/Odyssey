@@ -344,6 +344,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
                 mOdysseyPainterEditor->PaintEngine()->EndStroke();
             }
             mOdysseyPainterEditor->ToolSystem()->SetSelectedTool( nullptr );
+            //TODO: Need to change for the erasure of a single tool and its HUD, instead of refreshing the whole block
             mOdysseyPainterEditor->HUDSystem()->RefreshHUDSurface( FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ) );
         }
         if (replyHUD.IsEventHandled())

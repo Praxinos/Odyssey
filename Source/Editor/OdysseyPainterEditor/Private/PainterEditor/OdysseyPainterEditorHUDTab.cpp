@@ -36,6 +36,7 @@ FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorHUDTab::CreateWidget()
 {    
+/*
 	if (!mHUD)
     {
         UOdysseyHUDElement* decoratedLine = NewObject<UOdysseyHUDElement>();
@@ -75,12 +76,13 @@ FOdysseyPainterEditorHUDTab::CreateWidget()
 
         UOdysseyHUDLine* line7 = NewObject<UOdysseyHUDLine>();
         line7->Init(FName("Line7"), FVector2D(200, 200), FVector2D(300, 300), mEditor->PaintEngineHUD());
-        decoratedLine->AddElement(line7);*/
+        decoratedLine->AddElement(line7);
 
         mHUD = MakeShareable(decoratedLine);
     }
+    return mHUD->CreateWidget();*/
 
-    return mHUD->CreateWidget();
+    return SNullWidget::NullWidget;
 }
 
 void
