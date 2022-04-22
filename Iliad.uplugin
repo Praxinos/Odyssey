@@ -21,22 +21,7 @@
   ],
   "Modules": [
     {
-      "Name": "OdysseyBrush",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyCore",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyHUDSystem",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "OdysseyLayer",
       "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     },
@@ -46,28 +31,43 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "OdysseyPsdOperations",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "OdysseyMeshPaintRendering",
       "Type": "UncookedOnly",
       "LoadingPhase": "PostConfigInit"
     },
     {
+      "Name": "OdysseyBrush",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyHUDSystem",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyLayer",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "OdysseyPsdOperations",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "OdysseyPaintEngine",
-      "Type": "UncookedOnly",
+      "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
       "Name": "OdysseyTools",
-      "Type": "UncookedOnly",
+      "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
       "Name": "ULISLoader",
-      "Type": "UncookedOnly",
+      "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
