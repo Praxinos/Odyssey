@@ -175,7 +175,8 @@ UOdysseyBrushAssetBase::StrokeFlush()
     ctx.Finish();
 
     //Invalidate mEditedBlock
-    mEditedBlock->Dirty(mInvalidRects.GetData(), mInvalidRects.Num());
+    if (mEditedBlock)
+        mEditedBlock->Dirty(mInvalidRects.GetData(), mInvalidRects.Num());
     mInvalidRects.Empty();
 }
 

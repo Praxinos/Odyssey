@@ -14,7 +14,8 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorViewportTab::~FOdysseyPainterEditorViewportTab()
 {
-    mViewport->GetViewport()->ViewportResizedEvent.RemoveAll(this);
+    if (mViewport)
+        mViewport->GetViewport()->ViewportResizedEvent.RemoveAll(this);
 }
 
 FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor)
