@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Engine/Texture2D.h"
 #include "OdysseySurface.h"
+#include <ULIS>
 
 /////////////////////////////////////////////////////
 // FOdysseySurface

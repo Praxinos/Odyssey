@@ -131,10 +131,10 @@ FOdysseyPainterEditor::RefreshHUDSurface(FVector2D iSizeHUD)
     if( mHUDSurface )
         delete mHUDSurface;
 
-    PaintEngineHUD()->SetHUDBlock( new FOdysseyBlock(iSizeHUD.X, iSizeHUD.Y, ::ULIS::Format_BGRA8) );
+    PaintEngineHUD()->SetHUDBlock( new ::ULIS::FBlock(iSizeHUD.X, iSizeHUD.Y, ::ULIS::Format_BGRA8) );
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    ctx.Clear(*(PaintEngineHUD()->GetHUDBlock()->GetBlock()));
+    ctx.Clear(*(PaintEngineHUD()->GetHUDBlock()));
     ctx.Finish();
 
     mHUDSurface = new FOdysseySurfaceTexture2DEditable( PaintEngineHUD()->GetHUDBlock() );

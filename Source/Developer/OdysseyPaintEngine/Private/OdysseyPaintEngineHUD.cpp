@@ -32,7 +32,7 @@ FOdysseyPaintEngineHUD::FOdysseyPaintEngineHUD( FOdysseyUndoHistory* iUndoHistor
 //------------------------------------------------------------------------------ Setters
 
 void
-FOdysseyPaintEngineHUD::SetHUDBlock(FOdysseyBlock* iBlock)
+FOdysseyPaintEngineHUD::SetHUDBlock(::ULIS::FBlock* iBlock)
 {
     if (mHUDBlock == iBlock)
         return;
@@ -56,7 +56,7 @@ FOdysseyPaintEngineHUD::SetColor( const ::ULIS::FColor& iColor )
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-FOdysseyBlock*
+::ULIS::FBlock*
 FOdysseyPaintEngineHUD::GetHUDBlock()
 {
     return mHUDBlock;
@@ -220,8 +220,8 @@ FOdysseyPaintEngineHUD::MakeTileRect( int iTileX, int iTileY )
 {
     return { iTileX * TILE_SIZE,
              iTileY * TILE_SIZE,
-             mHUDBlock ? FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, mHUDBlock->Width() ) - iTileX * TILE_SIZE : 0,
-             mHUDBlock ? FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, mHUDBlock->Height() ) - iTileY * TILE_SIZE : 0 } ;
+             mHUDBlock ? FMath::Min( iTileX * TILE_SIZE + TILE_SIZE, int32(mHUDBlock->Width()) ) - iTileX * TILE_SIZE : 0,
+             mHUDBlock ? FMath::Min( iTileY * TILE_SIZE + TILE_SIZE, int32(mHUDBlock->Height()) ) - iTileY * TILE_SIZE : 0 } ;
 }
 
 //--------------------------------------------------------------------------------------

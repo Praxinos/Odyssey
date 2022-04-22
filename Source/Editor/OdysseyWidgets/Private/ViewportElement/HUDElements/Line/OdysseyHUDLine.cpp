@@ -63,17 +63,17 @@ void UOdysseyHUDLine::Draw()
 
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
         ctx.Finish();
     }
     else
     {
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
         ctx.Finish();
     }
 
-    mPaintEngineHUD->GetHUDBlock()->GetBlock()->Dirty();
+    mPaintEngineHUD->GetHUDBlock()->Dirty();
 }
 
 void UOdysseyHUDLine::Erase()
@@ -83,13 +83,13 @@ void UOdysseyHUDLine::Erase()
         FVector2D transformedStartPoint = ToViewport(mStartPoint);
         FVector2D transformedFinishPoint = ToViewport(mFinishPoint);
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
         ctx.Finish();
     }
     else
     {
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
         ctx.Finish();
     }
 }

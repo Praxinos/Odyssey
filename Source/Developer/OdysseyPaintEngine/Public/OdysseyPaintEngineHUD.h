@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyStrokeOptions.h"
 #include "OdysseySmoothingTypes.h"
@@ -35,12 +34,12 @@ public:
 
 public:
     // Setters
-    virtual void SetHUDBlock(FOdysseyBlock* iBlock);
+    virtual void SetHUDBlock(::ULIS::FBlock* iBlock);
     void SetColor( const ::ULIS::FColor& iColor );
 
 public:
     // Getters
-    FOdysseyBlock* GetHUDBlock();
+    ::ULIS::FBlock* GetHUDBlock();
     const ::ULIS::FColor& GetColor() const;
 
 public:
@@ -86,7 +85,7 @@ protected:
     virtual FString GetReferencerName() const override;
 
 protected:
-    FOdysseyBlock*                      mHUDBlock; // Holds the block in which we draw the HUD
+    ::ULIS::FBlock*                      mHUDBlock; // Holds the block in which we draw the HUD
 
     int                                 mWidth;
     int                                 mHeight;
