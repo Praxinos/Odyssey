@@ -29,4 +29,5 @@ public:
 
 private:
     UOdysseyHUDRectangle* mRectangle;
+    FTransform2D mLastTransform; //TODO: should not be here
 };

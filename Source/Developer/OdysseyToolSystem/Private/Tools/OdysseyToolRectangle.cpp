@@ -20,6 +20,7 @@ FOdysseyToolRectangle::FOdysseyToolRectangle( FVector2D iTopLeftPoint )
 
 void FOdysseyToolRectangle::Draw(::ULIS::FBlock* ioBlock, FTransform2D iTransform /*= FTransform2D()*/)
 {
+    mLastTransform = iTransform;
     mRectangle->Draw( ioBlock, iTransform );
 }
 
@@ -65,8 +66,9 @@ void FOdysseyToolRectangle::CapturedMouseMove(FViewport* iViewport, int32 iX, in
 
 ::ULIS::TArray<::ULIS::FVec2I> FOdysseyToolRectangle::GenerateToolPoints()
 {
+    float angle = 360 + ::ULIS::FMath::RadToDeg(mLastTransform.GetMatrix().GetRotationAngle()*2);
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
-    ::ULIS::GenerateRectanglePoints( ::ULIS::FVec2I( mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I( mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y ), pointsArray );
+    ::ULIS::GenerateCircleInscribedRectanglePoints( ::ULIS::FVec2I( mRectangle->mTopLeftPoint.X, mRectangle->mTopLeftPoint.Y), ::ULIS::FVec2I( mRectangle->mBottomRightPoint.X, mRectangle->mBottomRightPoint.Y ), angle, pointsArray );
 
     return pointsArray;
 }
