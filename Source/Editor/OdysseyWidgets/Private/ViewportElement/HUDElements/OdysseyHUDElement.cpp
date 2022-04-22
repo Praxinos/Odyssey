@@ -3,13 +3,13 @@
 
 #include "OdysseyHUDElement.h"
 
-void UOdysseyHUDElement::Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, bool iAreCoordinatesViewportBased)
+void UOdysseyHUDElement::Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform )
 {
     mName = iName;
     mPaintEngineHUD = iPaintEngineHUD;
     mIsInvalid = true;
     mIsCaptured = false;
-    mAreCoordinatesViewportBased = true;
+    mTransform = iTransform;
 }
 
 TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()

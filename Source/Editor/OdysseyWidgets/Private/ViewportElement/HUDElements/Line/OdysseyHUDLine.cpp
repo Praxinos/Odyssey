@@ -4,9 +4,9 @@
 #include "Line/OdysseyHUDLine.h"
 
 
-void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD)
+void UOdysseyHUDLine::Init( FName iName, FVector2D iStartPoint, FVector2D iFinishPoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform )
 {
-    UOdysseyHUDElement::Init( iName, iPaintEngineHUD );
+    UOdysseyHUDElement::Init( iName, iPaintEngineHUD, iTransform );
     mStartPoint = iStartPoint;
     mFinishPoint = iFinishPoint;
 }
@@ -53,16 +53,43 @@ void UOdysseyHUDLine::Draw()
     if( !mPaintEngineHUD )
         return;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine( *(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8( 0, 255, 0, 255 ) );
-    ctx.Finish();
+    if( mTransform )
+    {
+        FVector2D transformedStartPoint = ToViewport(mStartPoint);
+        FVector2D transformedFinishPoint = ToViewport(mFinishPoint);
+
+        /*UE_LOG(LogTemp, Display, TEXT("Start: %lf, %lf"), transformedStartPoint.X, transformedStartPoint.Y)
+        UE_LOG(LogTemp, Display, TEXT("Finish: %lf, %lf"), transformedFinishPoint.X, transformedFinishPoint.Y)*/
+
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+        ctx.Finish();
+    }
+    else
+    {
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 255));
+        ctx.Finish();
+    }
 
     mPaintEngineHUD->GetHUDBlock()->GetBlock()->Dirty();
 }
 
 void UOdysseyHUDLine::Erase()
 {
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
-    ctx.Finish();
+    if (mTransform)
+    {
+        FVector2D transformedStartPoint = ToViewport(mStartPoint);
+        FVector2D transformedFinishPoint = ToViewport(mFinishPoint);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(transformedStartPoint.X, transformedStartPoint.Y), ::ULIS::FVec2I(transformedFinishPoint.X, transformedFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+        ctx.Finish();
+    }
+    else
+    {
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawLine(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mStartPoint.X, mStartPoint.Y), ::ULIS::FVec2I(mFinishPoint.X, mFinishPoint.Y), ::ULIS::FColor::RGBA8(0, 255, 0, 0));
+        ctx.Finish();
+    }
 }

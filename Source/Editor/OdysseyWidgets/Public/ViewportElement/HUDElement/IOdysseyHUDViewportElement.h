@@ -12,6 +12,10 @@
 class ODYSSEYWIDGETS_API IOdysseyHUDViewportElement : public IOdysseyViewportElement
 {
 public:
+    IOdysseyHUDViewportElement();
+    virtual ~IOdysseyHUDViewportElement();
+
+public:
     virtual void Draw() = 0;
     virtual void MouseMove(FViewport* iViewport, int32 iX, int32 iY) = 0;
     virtual FReply InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad, FReply& ioReply ) = 0;
@@ -23,6 +27,12 @@ public:
     void SetPaintEngineHUD( FOdysseyPaintEngineHUD* iPaintEngineHUD);
     FOdysseyPaintEngineHUD* GetPaintEngineHUD();
 
+public:
+    FVector2D ToViewport(const FVector2D& iPoint) const;
+
 protected:
     FOdysseyPaintEngineHUD* mPaintEngineHUD;
+
+    /** The transform applied to the element if needed */
+    FTransform2D const* mTransform;
 };

@@ -21,7 +21,7 @@ class ODYSSEYWIDGETS_API UOdysseyHUDElement : public UOdysseyHUDSlateElement,
     GENERATED_BODY()
 
 public:     
-    void Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, bool iAreCoordinatesViewportBased = true);
+    void Init(FName iName, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform = nullptr);
 
 //UOdysseyHUDSlateElement overrides
 public:
@@ -64,7 +64,4 @@ protected:
 private:
     /** Action linked to the "Apply" button of the HUD in the interface. If not bound, the button won't show */
     FOnApplyHUDAction mOnApplyHUDAction;
-
-    /** Should we draw this HUD based on window coordinates or viewport coordinates ? */
-    bool mAreCoordinatesViewportBased;
 };

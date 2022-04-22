@@ -434,20 +434,28 @@ SOdysseySurfaceViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetF
 void
 SOdysseySurfaceViewport::HandleHorizontalScrollBarScrolled(float InScrollOffsetFraction)
 {
+    mSurfaceViewportPropertyWillChange.Broadcast();
+
     FVector2D translation = GetTranslationFromSlidersOffsets(InScrollOffsetFraction, mVerticalScrollBar->DistanceFromTop());
     mTransform.SetTranslation(FVector2D(translation.X, mTransform.GetTranslation().Y));
     mHorizontalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
     SetFitToViewport(false);
+
+    mSurfaceViewportPropertyChanged.Broadcast();
 }
 
 
 void
 SOdysseySurfaceViewport::HandleVerticalScrollBarScrolled( float InScrollOffsetFraction )
 {
+    mSurfaceViewportPropertyWillChange.Broadcast();
+
     FVector2D translation = GetTranslationFromSlidersOffsets(mHorizontalScrollBar->DistanceFromTop(), InScrollOffsetFraction);
     mTransform.SetTranslation(FVector2D(mTransform.GetTranslation().X, translation.Y));
     mVerticalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
     SetFitToViewport(false);
+
+    mSurfaceViewportPropertyChanged.Broadcast();
 }
 
 
@@ -574,6 +582,8 @@ SOdysseySurfaceViewport::SetZoom( double ZoomValue, const FVector2D& iZoomPositi
 void
 SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
 {
+    mSurfaceViewportPropertyWillChange.Broadcast();
+
     ZoomValue = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
 
     FVector2D inverse(1.f, -1.f);
@@ -582,6 +592,8 @@ SOdysseySurfaceViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
     mTransform = mTransform.Concatenate(FTransform2D(-translation));
     mTransform = mTransform.Concatenate(FTransform2D(ZoomValue / GetZoom()));
     mTransform = mTransform.Concatenate(FTransform2D(translation));
+
+    mSurfaceViewportPropertyChanged.Broadcast();
 }
 
 void
@@ -689,9 +701,11 @@ void SOdysseySurfaceViewport::SetRotation(double RotationValue, const FVector2D&
 
 void SOdysseySurfaceViewport::Rotate(double RotationValue, const FVector2D& iPivotPoint)
 {
+    mSurfaceViewportPropertyWillChange.Broadcast();
     mTransform = mTransform.Concatenate(FTransform2D(FVector2D(FVector2D(iPivotPoint.X, -iPivotPoint.Y))));
     mTransform = mTransform.Concatenate(FTransform2D(FQuat2D(RotationValue - GetRotation())));
     mTransform = mTransform.Concatenate(FTransform2D(FVector2D(-FVector2D(iPivotPoint.X, -iPivotPoint.Y))));
+    mSurfaceViewportPropertyChanged.Broadcast();
 }
 
 FVector2D SOdysseySurfaceViewport::GetPan() const
@@ -717,14 +731,18 @@ void SOdysseySurfaceViewport::AddPan( FVector2D iPanValue )
 void
 SOdysseySurfaceViewport::SOdysseySurfaceViewport::Pan(FVector2D iPanValue)
 {
+    mSurfaceViewportPropertyWillChange.Broadcast();
     mTransform.SetTranslation(iPanValue);
+    mSurfaceViewportPropertyChanged.Broadcast();
 }
 
 void SOdysseySurfaceViewport::ResetPan()
 {
+    mSurfaceViewportPropertyWillChange.Broadcast();
     mTransform.SetTranslation(FVector2D(0.0f, 0.0f));
     UpdateScrollBars();
     SetFitToViewport(false);
+    mSurfaceViewportPropertyChanged.Broadcast();
 }
 
 

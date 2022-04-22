@@ -4,9 +4,9 @@
 #include "Handle/OdysseyHUDHandle.h"
 
 
-void UOdysseyHUDHandle::Init( FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD )
+void UOdysseyHUDHandle::Init( FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform )
 {
-    UOdysseyHUDElement::Init( iName, iPaintEngineHUD );
+    UOdysseyHUDElement::Init( iName, iPaintEngineHUD, iTransform );
     mParent = iParent;
     mHandleSize = 2;
     mReferencePoint = iReferencePoint;
@@ -38,18 +38,38 @@ void UOdysseyHUDHandle::Draw()
     //Draw the children of this HUDElement
     UOdysseyHUDElement::Draw();
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8( 255, 0, 0, 255 ) );
-    ctx.Finish();
+    if (mTransform)
+    {
+        FVector2D transformedReferencePoint = ToViewport(*mReferencePoint);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 255));
+        ctx.Finish();
+    }
+    else
+    {
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 255));
+        ctx.Finish();
+    }
 
     mPaintEngineHUD->GetHUDBlock()->GetBlock()->Dirty();
 }
 
 void UOdysseyHUDHandle::Erase()
 {
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
-    ctx.Finish();
+    if (mTransform)
+    {
+        FVector2D transformedReferencePoint = ToViewport(*mReferencePoint);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(transformedReferencePoint.X - mHandleSize, transformedReferencePoint.Y - mHandleSize), ::ULIS::FVec2I(transformedReferencePoint.X + mHandleSize, transformedReferencePoint.Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
+        ctx.Finish();
+    }
+    else
+    {
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+        ctx.DrawRectangle(*(mPaintEngineHUD->GetHUDBlock()->GetBlock()), ::ULIS::FVec2I(mReferencePoint->X - mHandleSize, mReferencePoint->Y - mHandleSize), ::ULIS::FVec2I(mReferencePoint->X + mHandleSize, mReferencePoint->Y + mHandleSize), ::ULIS::FColor::RGBA8(255, 0, 0, 0));
+        ctx.Finish();
+    }
 }
 
 void UOdysseyHUDHandle::MouseMove(FViewport* iViewport, int32 iX, int32 iY)

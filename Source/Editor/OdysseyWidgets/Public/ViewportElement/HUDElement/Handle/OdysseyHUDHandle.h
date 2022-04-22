@@ -17,7 +17,7 @@ class ODYSSEYWIDGETS_API UOdysseyHUDHandle : public UOdysseyHUDElement
     GENERATED_BODY()
 
 public:
-    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD);
+    void Init(FName iName, UOdysseyHUDElement* iParent, FVector2D* iReferencePoint, FOdysseyPaintEngineHUD* iPaintEngineHUD, FTransform2D const * iTransform = nullptr);
 
 //UObject overrides
 public:

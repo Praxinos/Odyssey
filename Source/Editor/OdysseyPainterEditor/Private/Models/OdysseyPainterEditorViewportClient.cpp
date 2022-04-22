@@ -74,6 +74,9 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     InputSubsystem->AddMessageHandler( *this );
     InputSubsystem->OnStylusInputChanged().BindRaw( this, &FOdysseyPainterEditorViewportClient::OnStylusInputChanged );
 
+    mOdysseyPainterEditorViewportPtr.Pin()->OnSurfaceViewportPropertyWillChange().AddRaw( this, &FOdysseyPainterEditorViewportClient::OnViewportPropertyWillChange );
+    mOdysseyPainterEditorViewportPtr.Pin()->OnSurfaceViewportPropertyChanged().AddRaw( this, &FOdysseyPainterEditorViewportClient::OnViewportPropertyChanged );
+
     ENQUEUE_RENDER_COMMAND(InitOdysseyPainterEditorViewportClientTextures)(
         [&](FRHICommandListImmediate& RHICmdList)
         {
@@ -102,6 +105,22 @@ FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 void
 FOdysseyPainterEditorViewportClient::OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput )
 {
+}
+
+void FOdysseyPainterEditorViewportClient::OnViewportPropertyWillChange()
+{
+    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD())
+    {
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Erase();
+    }
+}
+
+void FOdysseyPainterEditorViewportClient::OnViewportPropertyChanged()
+{
+    if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD())
+    {
+        mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
+    }
 }
 
 //--------------------------------------------------------------------------------------
@@ -204,7 +223,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     }
 
 
-    //TODO Only when HUD is invalid
     if (mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD() && mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->IsInvalid())
     {
         mOdysseyPainterEditor->GetGUI()->GetHUDTab()->GetHUD()->Draw();
@@ -219,6 +237,12 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     // Draw HUD Surface
     if( HUDTexture && HUDTexture->Resource )
     {
+        FVector2D vect = GetLocalMousePosition( FVector2D( iViewport->GetMouseX(), iViewport->GetMouseY() ));
+        FVector2D vectTransformed = mOdysseyPainterEditorViewportPtr.Pin()->GetTransform().TransformPoint(FVector2D(iViewport->GetMouseX(), iViewport->GetMouseY()));
+        UE_LOG(LogTemp, Display, TEXT("Mouse: %d, %d"), iViewport->GetMouseX(), iViewport->GetMouseY());
+        UE_LOG(LogTemp, Display, TEXT("Local: %lf, %lf"), vect.X, vect.Y);
+        UE_LOG(LogTemp, Display, TEXT("Transformed: %lf, %lf"), vectTransformed.X, vectTransformed.Y);
+
         FCanvasTileItem tileItem( FVector2D(0,0), HUDTexture->Resource, FVector2D( iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y ), FLinearColor::White );
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
@@ -228,7 +252,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         result += ( 1 << 3 );
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
         tileItem.PivotPoint = pivotPoint;
-        tileItem.Rotation.Add( 0, rotation, 0 );
         ioCanvas->DrawItem( tileItem );
     }
 

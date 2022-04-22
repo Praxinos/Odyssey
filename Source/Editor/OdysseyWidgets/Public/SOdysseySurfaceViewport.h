@@ -21,6 +21,9 @@ class ODYSSEYWIDGETS_API SOdysseySurfaceViewport : public SCompoundWidget
 {
 public:
 
+    DECLARE_EVENT( SOdysseySurfaceViewport, FSurfaceViewportPropertyWillChange )
+    DECLARE_EVENT( SOdysseySurfaceViewport, FSurfaceViewportPropertyChanged )
+
     SLATE_BEGIN_ARGS(SOdysseySurfaceViewport)
         {}
         SLATE_ATTRIBUTE(IOdysseySurface*, Surface)
@@ -108,6 +111,11 @@ public:
     
     /* Rotate the canvas to the Right, the Pivot point for the Rotation being in the middle of the viewport */
     void            RotateRight();
+
+public:
+    //Events getters
+    FSurfaceViewportPropertyWillChange& OnSurfaceViewportPropertyWillChange() { return mSurfaceViewportPropertyWillChange; }
+    FSurfaceViewportPropertyChanged& OnSurfaceViewportPropertyChanged() { return mSurfaceViewportPropertyChanged; }
 
 private:
     // Private API
@@ -197,4 +205,9 @@ private:
     TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
+
+private:
+    //Events
+    FSurfaceViewportPropertyWillChange         mSurfaceViewportPropertyWillChange;
+    FSurfaceViewportPropertyChanged            mSurfaceViewportPropertyChanged;
 };

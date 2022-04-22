@@ -126,6 +126,9 @@ private:
 
     void        OnStylusInputChanged( TSharedPtr<IStylusInputInterfaceInternal> iStylusInput );
 
+    void        OnViewportPropertyWillChange();
+    void        OnViewportPropertyChanged();
+
 private:
     // Private Data Members
     UOdysseyStylusInputSubsystem*           InputSubsystem;
