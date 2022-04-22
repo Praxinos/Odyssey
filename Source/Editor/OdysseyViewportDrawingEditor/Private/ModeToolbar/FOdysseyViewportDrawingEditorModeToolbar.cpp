@@ -27,7 +27,7 @@ FOdysseyViewportDrawingEditorModeToolbar::FOdysseyViewportDrawingEditorModeToolb
 FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeToolbar()
 {
     TSharedPtr< SDockTab > tab = nullptr;
-    
+
     tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetLayerStackTab()->ID()));
     if (tab.IsValid())
         tab->RequestCloseTab();
@@ -68,6 +68,9 @@ FOdysseyViewportDrawingEditorModeToolbar::~FOdysseyViewportDrawingEditorModeTool
     if (tab.IsValid())
         tab->RequestCloseTab();
 
+    tab = mLevelEditorTabManager->FindExistingLiveTab(FTabId(mGUI->GetHUDTab()->ID()));
+    if (tab.IsValid())
+        tab->RequestCloseTab();
 }
 
 void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
@@ -143,6 +146,12 @@ void FOdysseyViewportDrawingEditorModeToolbar::SaveOpenedTabs()
         buffer << str;
     }
 
+    if (mLevelEditorTabManager->FindExistingLiveTab(mGUI->GetHUDTab()->ID()))
+    {
+        str = mGUI->GetHUDTab()->ID().ToString();
+        buffer << str;
+    }
+
     fileHandle->Seek(0);
     fileHandle->Write(buffer.GetData(), buffer.Num());
 
@@ -188,7 +197,6 @@ void FOdysseyViewportDrawingEditorModeToolbar::LoadOpenedTabs()
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------- Callbacks
-
 
 void FOdysseyViewportDrawingEditorModeToolbar::OpenLayerStackTab()
 {
@@ -268,6 +276,14 @@ void FOdysseyViewportDrawingEditorModeToolbar::OpenViewportTab()
         return;
 
     mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetViewportTab()->ID()));
+}
+
+void FOdysseyViewportDrawingEditorModeToolbar::OpenHUDTab()
+{
+    if (!mLevelEditorTabManager)
+        return;
+
+    mLevelEditorTabManager->TryInvokeTab(FTabId(mGUI->GetHUDTab()->ID()));
 }
 
 #undef LOCTEXT_NAMESPACE

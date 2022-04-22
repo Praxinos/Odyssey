@@ -4,14 +4,6 @@
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorBrushSelectorTab.h"
-#include "OdysseyPainterEditorColorSlidersTab.h"
-#include "OdysseyPainterEditorColorWheelTab.h"
-#include "OdysseyPainterEditorMeshSelectorTab.h"
-#include "OdysseyPainterEditorStrokeOptionsTab.h"
-#include "OdysseyPainterEditorTopTab.h"
-#include "OdysseyPainterEditorToolsTab.h"
-#include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyAssetEditorToolkit.h"
 #include "SOdysseyAboutScreen.h"
 #include "SOdysseyTabletAPISwitcher.h"
@@ -45,6 +37,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
 
     ODYSSEY_ADD_TAB(mMeshSelectorTab, FOdysseyPainterEditorMeshSelectorTab, mEditor)
     ODYSSEY_ADD_TAB(mViewportTab, FOdysseyPainterEditorViewportTab, mEditor);
+    ODYSSEY_ADD_TAB(mHUDTab, FOdysseyPainterEditorHUDTab, mEditor);
     ODYSSEY_ADD_TAB(mBrushSelectorTab, FOdysseyPainterEditorBrushSelectorTab, mEditor);
     ODYSSEY_ADD_TAB(mColorWheelTab, FOdysseyPainterEditorColorWheelTab, mEditor);
     ODYSSEY_ADD_TAB(mColorSlidersTab, FOdysseyPainterEditorColorSlidersTab, mEditor);
@@ -282,6 +275,12 @@ FOdysseyPainterEditorGUI::CreateMainSection()
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
+
+TSharedPtr<FOdysseyPainterEditorHUDTab>&
+FOdysseyPainterEditorGUI::GetHUDTab()
+{
+    return mHUDTab;
+}
 
 TSharedPtr<FOdysseyPainterEditorViewportTab>&
 FOdysseyPainterEditorGUI::GetViewportTab()

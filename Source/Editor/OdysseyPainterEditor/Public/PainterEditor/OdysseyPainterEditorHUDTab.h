@@ -1,0 +1,34 @@
+// IDDN FR.001.250001.004.S.X.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
+
+#pragma once
+
+#include "OdysseyEditorTab.h"
+#include "OdysseyEventState.h"
+#include "Line/OdysseyHUDLine.h"
+
+class FOdysseyPainterEditor;
+
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorHUDTab :
+	public FOdysseyEditorTab
+{
+public:
+    // Construction / Destruction
+    virtual ~FOdysseyPainterEditorHUDTab();
+    FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* iEditor);
+
+protected:
+    // FOdysseyEditorTab interface
+    virtual TSharedPtr<SWidget> CreateWidget() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+
+public:
+    // Public Getters
+    TSharedPtr<UOdysseyHUDLine> GetHUD();
+
+private:
+    FOdysseyPainterEditor* mEditor;
+
+    TSharedPtr<UOdysseyHUDLine> mHUD;
+};
+

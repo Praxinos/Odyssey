@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "OdysseyHUD.h"
-#include "IOdysseyViewportElement.h"
+#include "IOdysseyHUDViewportElement.h"
 
 #include "OdysseyHUDLine.generated.h"
 
@@ -14,18 +14,18 @@
 // UOdysseyHUDLine
 UCLASS()
 class ODYSSEYWIDGETS_API UOdysseyHUDLine : public UOdysseyHUD, 
-                                           public IOdysseyViewportElement
+                                           public IOdysseyHUDViewportElement
 {
-public:
     GENERATED_BODY()
 
+public:
     UOdysseyHUDLine(const FObjectInitializer& ObjectInitializer);
 
 //UOdysseyHUD overrides
 public:
     TSharedPtr<SWidget> CreateWidget() override;
 
-//IOdysseyViewportElement overrides
+//IOdysseyHUDViewportElement overrides
 public:
     void Draw(FViewport* iViewport, FCanvas* ioCanvas) override;
 
@@ -35,5 +35,9 @@ public:
 
     UPROPERTY( EditAnywhere )
     FVector2D mFinishPoint;
+
+private:
+    /** The widget representation of the line in Editor */
+    TSharedPtr<IDetailsView> mDetailsView;
 
 };

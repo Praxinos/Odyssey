@@ -32,6 +32,7 @@ public:
     void OpenToolsTab();
     void OpenTopTab();
     void OpenViewportTab();
+    void OpenHUDTab();
 
 private:
     TSharedPtr<FTabManager> mLevelEditorTabManager;
