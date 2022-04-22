@@ -37,12 +37,12 @@ FOdysseyHUDToolSystem::SetHUDBlock(::ULIS::FBlock* iBlock)
 //------------------------------------------------------------------------------ Getters
 
 ::ULIS::FBlock*
-FOdysseyHUDToolSystem::GetHUDBlock()
+FOdysseyHUDToolSystem::GetHUDBlock() const
 {
     return mHUDBlock;
 }
 
-FOdysseySurfaceTexture2DEditable* FOdysseyHUDToolSystem::GetHUDSurface()
+FOdysseySurfaceTexture2DEditable* FOdysseyHUDToolSystem::GetHUDSurface() const
 {
     return mHUDSurface;
 }

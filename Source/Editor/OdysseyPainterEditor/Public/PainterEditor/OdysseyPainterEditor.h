@@ -5,10 +5,10 @@
 
 #include "OdysseyEditor.h"
 #include "OdysseyPainterEditorGUI.h"
-#include "OdysseyPaintEngineHUD.h"
 #include <ULIS>
 
 class FOdysseyPaintEngine;
+class FOdysseyHUDToolSystem;
 class FOdysseyUndoHistory;
 class UOdysseyBrush;
 class UOdysseyBrushAssetBase;

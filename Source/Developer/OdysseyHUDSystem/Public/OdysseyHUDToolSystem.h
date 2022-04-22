@@ -16,7 +16,7 @@ public:
     FOdysseyHUDToolSystem();
 
 private:
-    // Setters
+    // Setters (private)
     void SetHUDBlock(::ULIS::FBlock* iBlock);
 
 public:

@@ -6,6 +6,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "SOdysseyPaintModifiers.h"
+#include "OdysseyHUDToolSystem.h"
 #include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////

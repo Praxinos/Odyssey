@@ -24,6 +24,7 @@
 
 #include "IOdysseyStylusInputModule.h"
 #include "OdysseyPaintEngine.h"
+#include "OdysseyHUDToolSystem.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
