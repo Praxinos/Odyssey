@@ -60,7 +60,7 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
                     })
                     [
                         SNew( SImage )
-                        .Image( FOdysseyStyle::GetBrush( "TODO Paint Brush Icon" ) )
+                        .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.FreeHand32" ) )
                     ]
                 ]
                 +SWrapBox::Slot()
