@@ -32,40 +32,34 @@ FOdysseyPainterEditorHUDTab::FOdysseyPainterEditorHUDTab(FOdysseyPainterEditor* 
 TSharedPtr<SWidget>
 FOdysseyPainterEditorHUDTab::CreateWidget()
 {    
-
 	if (!mHUD)
     {
         UOdysseyHUDElement* decoratedLine = NewObject<UOdysseyHUDElement>();
 
         UOdysseyHUDLine* line = NewObject<UOdysseyHUDLine>();
-        line->Init( FName("Line1"), FVector2D(0, 0), FVector2D(0, 0), mEditor->PaintEngineHUD());
+        line->Init( FName("Line1"), FVector2D(0, 0), FVector2D(500, 500), mEditor->PaintEngineHUD());
         decoratedLine->AddElement(line);
+       
+        FOdysseyPaintEngine* paintEngine = mEditor->PaintEngine();
+        line->OnApplyHUDAction().BindLambda( [line, paintEngine]() 
+        {
+            UE_LOG(LogTemp, Display, TEXT("Applied"));
 
-        UOdysseyHUDLine* subLine = NewObject<UOdysseyHUDLine>();
-        subLine->Init(FName("SubLine"), FVector2D(100, 100), FVector2D(100, 200), mEditor->PaintEngineHUD());
-        line->AddElement(subLine);
+            //::ULIS::TArray<::ULIS::FVec2I> points;
 
-        UOdysseyHUDLine* line2 = NewObject<UOdysseyHUDLine>();
-        line2->Init( FName("Line2"), FVector2D(500, 500), FVector2D(200, 200), mEditor->PaintEngineHUD());
-        decoratedLine->AddElement(line2);
+            /*GenerateLinePoints(::ULIS::FVec2I(line->mStartPoint.X, line->mStartPoint.Y), ::ULIS::FVec2I(line->mFinishPoint.X, line->mFinishPoint.Y), points);
+            for( int i = 0; i < points.Num(); i++ )
+            {
+                UE_LOG(LogTemp, Display, TEXT("%d, %d"), points[i].X, points[i].Y)
+            }*/
 
-        UOdysseyHUDLine* line3 = NewObject<UOdysseyHUDLine>();
-        line3->Init(FName("Line3"), FVector2D(500, 500), FVector2D(200, 200), mEditor->PaintEngineHUD());
-        decoratedLine->AddElement(line3);
-
-        UOdysseyHUDLine* line4 = NewObject<UOdysseyHUDLine>();
-        line4->Init(FName("line4"), FVector2D(500, 500), FVector2D(200, 200), mEditor->PaintEngineHUD());
-        decoratedLine->AddElement(line4);
-
-        UOdysseyHUDLine* line5 = NewObject<UOdysseyHUDLine>();
-        line5->Init(FName("line5"), FVector2D(500, 500), FVector2D(200, 200), mEditor->PaintEngineHUD());
-        decoratedLine->AddElement(line5);
+            return FReply::Handled();
+        } );
 
         mHUD = MakeShareable(decoratedLine);
     }
 
     return mHUD->CreateWidget();
-    return SNullWidget::NullWidget;
 }
 
 void

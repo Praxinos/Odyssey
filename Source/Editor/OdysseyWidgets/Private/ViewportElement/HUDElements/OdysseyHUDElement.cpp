@@ -14,6 +14,19 @@ TSharedPtr<SWidget> UOdysseyHUDElement::CreateWidget()
         ];
     }
 
+    if (mOnApplyHUDAction.IsBound())
+    { 
+        mElementsWidget->AddSlot()
+        [
+            SNew(SButton)
+            .OnClicked_Lambda([this]()->FReply{ return mOnApplyHUDAction.Execute(); })
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("Apply")))
+            ]
+        ];
+    }
+
     return mElementsWidget;
 }
 
@@ -41,7 +54,15 @@ bool UOdysseyHUDElement::IsInvalid()
     return mIsInvalid;
 }
 
+UOdysseyHUDElement::FOnApplyHUDAction& UOdysseyHUDElement::OnApplyHUDAction()
+{
+    return mOnApplyHUDAction;
+}
 
+void UOdysseyHUDElement::Invalidate()
+{
+    mIsInvalid = true;
+}
 
 void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
 {
@@ -60,9 +81,4 @@ void UOdysseyHUDElement::InternalIsInvalid( bool &ioIsInvalid )
             it.Value()->InternalIsInvalid( ioIsInvalid );
         }
     }
-}
-
-void UOdysseyHUDElement::Invalidate()
-{
-    mIsInvalid = true;
 }

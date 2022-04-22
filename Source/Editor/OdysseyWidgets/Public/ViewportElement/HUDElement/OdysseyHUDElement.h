@@ -17,6 +17,7 @@ UCLASS()
 class ODYSSEYWIDGETS_API UOdysseyHUDElement : public UOdysseyHUDSlateElement,
                                               public IOdysseyHUDViewportElement
 {
+    DECLARE_DELEGATE_RetVal(FReply, FOnApplyHUDAction);
     GENERATED_BODY()
 
 //UOdysseyHUDSlateElement overrides
@@ -30,17 +31,23 @@ public:
 public:
     void AddElement( UOdysseyHUDElement* iElementToAdd );
     bool IsInvalid();
+    FOnApplyHUDAction& OnApplyHUDAction();
+
+protected:
+    void Invalidate();
 
 private:
     void InternalIsInvalid( bool &ioIsInvalid );
 
-protected: 
-    void Invalidate();
 
 protected:
     TMap<FString, UOdysseyHUDElement*> mElements;
     TSharedPtr<SScrollBox> mElementsWidget;
 
 private:
+    /** If this element is invalid, then, we'll need to redraw all mElements*/
     bool mIsInvalid;
+
+    /** Action linked to the "Apply" button of the HUD in the interface. If not bound, the button won't show */
+    FOnApplyHUDAction mOnApplyHUDAction;
 };
